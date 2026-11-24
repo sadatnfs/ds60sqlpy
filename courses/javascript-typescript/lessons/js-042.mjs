@@ -4,19 +4,19 @@
 // ['--self-test']);` to `const result = runBundle(directory, ['--self-test!']);`. Before
 // running it, predict which check fails and which value it now sees; then run it and restore
 // the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.equal(result.status, 0, result.stderr)`. Restoring the original line brings back
-// the worked observation: three checks passed; actual Node version reported.
+// Expected: The changed run fails with an `AssertionError` at `assert.equal(result.status,
+// 0, result.stderr)`. Restoring `const result = runBundle(directory, ['--self-test']);`
+// brings back: three checks passed; actual Node version reported.
 
 // Exercise 2: Reject altered application bytes before execution: debug a regression
 // A regression changed one token in Example B, so one line now reads `await
 // appendFile(join(directory, 'app.mjs!'), '\n// controlled tamper fixture\n');`. Run Example
 // B with that line, use the failing check to locate the defect and repair it without
 // changing the check.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.rejects(verifyBundle(directory), /digest mismatch/u)`; after it the line reads
-// `await appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');` again
-// and digest verification fails.
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.rejects(verifyBundle(directory), /digest mismatch/u)`. Restoring `await
+// appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');` brings back:
+// digest verification fails.
 
 // Exercise 3: Reject a manifest path outside the allowlist
 // Replace one file entry with ../outside.txt.

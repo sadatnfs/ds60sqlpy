@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "track_id": "bayesian-computing",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "bayes-001",
+      "title": "Bayes rule on two hypotheses and the cost of double counting evidence",
+      "anchor": "reference",
+      "source_path": "courses/bayesian-computing/examples/bayes-001.py",
+      "source_sha256": "8c0410dedb242c03ff4eecfc647ff1dac78f4044fbc5ecb13006f34eb7008c5f",
+      "expected_output": ["bayes-001 complete", "\"posterior_odds\": 2.25"],
+      "steps": [
+        {
+          "lines": [10, 13],
+          "excerpt": "def posterior(prior, likelihood):\n    prior, likelihood = np.asarray(prior, float), np.asarray(likelihood, float)\n    if prior.shape != likelihood.shape or np.any(prior < 0) or not np.isclose(prior.sum(), 1):\n        raise ValueError(\"Use matching hypotheses and a normalized prior\")",
+          "title": "Validate the prior",
+          "explanation": "posterior takes a prior probability for each hypothesis and the likelihood of the observed evidence under each. The prior must match the likelihood in shape, be nonnegative and sum to 1, otherwise the result would not be a probability distribution.",
+          "observe": "A malformed prior raises ValueError."
+        },
+        {
+          "lines": [14, 19],
+          "excerpt": "    if (\n        not np.all(np.isfinite(likelihood))\n        or np.any(likelihood < 0)\n        or np.dot(prior, likelihood) <= 0\n    ):\n        raise ValueError(\"Evidence needs finite nonnegative likelihood and positive probability\")",
+          "title": "Validate the likelihood",
+          "explanation": "Likelihoods must be finite and nonnegative, and the evidence must have positive overall probability (prior dot likelihood above zero). If the evidence were impossible under every hypothesis there would be nothing to normalize.",
+          "observe": "Division by zero is prevented before it can happen."
+        },
+        {
+          "lines": [20, 21],
+          "excerpt": "    mass = prior * likelihood\n    return mass / mass.sum()",
+          "title": "Multiply and normalize",
+          "explanation": "Bayes rule: posterior is proportional to prior times likelihood. Dividing by the sum makes the numbers add up to 1.",
+          "observe": "The function returns an array of posterior probabilities."
+        },
+        {
+          "lines": [24, 30],
+          "excerpt": "def run_cases():\n    prior = np.array([0.8, 0.2])\n    likelihood = np.array([0.1, 0.9])\n    one = posterior(prior, likelihood)\n    independent_two = posterior(prior, likelihood**2)\n    assert np.isclose(one[1], 9 / 13)\n    assert np.isclose(independent_two[1], 81 / 85)",
+          "title": "One signal versus two independent signals",
+          "explanation": "The second hypothesis starts at 0.2 but explains the signal nine times better. One signal raises it to 9/13. Two independent signals multiply the likelihoods, squaring them, and raise it to 81/85.",
+          "observe": "Exact fractions are checked with np.isclose."
+        },
+        {
+          "lines": [31, 32],
+          "excerpt": "    correlated_repeat = one.copy()\n    assert correlated_repeat[1] < independent_two[1]",
+          "title": "A repeated report is not new evidence",
+          "explanation": "If the second report is just a copy of the first, it carries no new information, so the posterior stays at the one signal value. Treating it as independent would overstate certainty.",
+          "observe": "The repeated posterior is smaller than the two signal posterior."
+        },
+        {
+          "lines": [33, 34],
+          "excerpt": "    odds = (prior[1] / prior[0]) * (likelihood[1] / likelihood[0])\n    assert np.isclose(odds, one[1] / one[0])",
+          "title": "The odds form",
+          "explanation": "Posterior odds equal prior odds (0.25) times the likelihood ratio (9). This gives 2.25 and matches the ratio of the two posterior probabilities.",
+          "observe": "The odds check passes."
+        },
+        {
+          "lines": [35, 46],
+          "excerpt": "    return dict(\n        one_signal=one.tolist(),\n        two_independent_signals=independent_two.tolist(),\n        perfectly_repeated_signal=correlated_repeat.tolist(),\n        posterior_odds=float(odds),\n    )\n\n\nif __name__ == \"__main__\":\n    evidence = run_cases()\n    print(\"bayes-001 complete\")\n    print(json.dumps(evidence, sort_keys=True, allow_nan=False))",
+          "title": "Print the results",
+          "explanation": "The arrays are converted to lists for JSON and printed after a completion line.",
+          "observe": "posterior_odds is 2.25."
+        }
+      ]
+    },
+    {
+      "lesson_id": "bayes-009",
+      "title": "A PyMC linear regression with posterior predictive checks",
+      "anchor": "reference",
+      "source_path": "courses/bayesian-computing/examples/bayes-009.py",
+      "source_sha256": "0356ea7041dd6698207294afe0cf486357f1e4ebfc6e9970cad01dc5875f5be2",
+      "expected_output": ["bayes-009 complete", "\"predictive_shape\": [2, 120, 16]"],
+      "steps": [
+        {
+          "lines": [10, 23],
+          "excerpt": "def sample_model(model, seed):\n    import pymc as pm\n\n    with model:\n        return pm.sample(\n            draws=120,\n            tune=120,\n            chains=2,\n            cores=1,\n            random_seed=seed,\n            progressbar=False,\n            target_accept=0.9,\n            idata_kwargs={\"log_likelihood\": True},\n        )",
+          "title": "A small, reproducible sampler call",
+          "explanation": "pm.sample runs the NUTS sampler. Two chains of 120 tuning and 120 kept draws keep the lesson fast; cores=1 and a fixed random_seed make it repeatable. target_accept=0.9 uses smaller steps to reduce divergences, and log_likelihood is stored for later model comparison.",
+          "observe": "Short chains are for teaching; real analyses need more draws."
+        },
+        {
+          "lines": [26, 42],
+          "excerpt": "def diagnostics(trace, names):\n    import arviz as az\n\n    rhat = np.asarray(az.rhat(trace, var_names=names).to_dataarray(), float)\n    ess = np.asarray(az.ess(trace, var_names=names, method=\"bulk\").to_dataarray(), float)\n\n    def finite_extreme(values, maximum):\n        values = values[np.isfinite(values)]\n        return float(values.max() if maximum else values.min()) if len(values) else None\n\n    return dict(\n        rhat_max=finite_extreme(rhat, True),\n        bulk_ess_min=finite_extreme(ess, False),\n        divergences=int(trace.sample_stats[\"diverging\"].sum()),\n        chains=int(trace.posterior.sizes[\"chain\"]),\n        retained_per_chain=int(trace.posterior.sizes[\"draw\"]),\n    )",
+          "title": "Summarize convergence diagnostics",
+          "explanation": "rhat compares chains: values near 1 mean they agree. Bulk ESS estimates how many independent draws the correlated samples are worth. Divergences flag places the sampler could not follow the posterior. finite_extreme skips NaN values that can appear for degenerate quantities.",
+          "observe": "Watch rhat_max, bulk_ess_min and divergences together."
+        },
+        {
+          "lines": [45, 54],
+          "excerpt": "def run_cases():\n    import pymc as pm\n\n    x = np.linspace(-1, 1, 16)\n    y = 0.5 + 1.3 * x + 0.05 * np.sin(np.arange(16))\n    with pm.Model() as model:\n        a = pm.Normal(\"a\", 0, 1)\n        b = pm.Normal(\"b\", 0, 2)\n        sigma = pm.HalfNormal(\"sigma\", 0.5)\n        pm.Normal(\"obs\", a + b * x, sigma, observed=y)",
+          "title": "Data and model",
+          "explanation": "x and y come from a known line plus a small deterministic wiggle, so we know the right answer. Priors are placed on intercept a, slope b and noise sigma, and the likelihood ties the line to the observed y.",
+          "observe": "The true intercept is 0.5 and the true slope is 1.3."
+        },
+        {
+          "lines": [55, 59],
+          "excerpt": "    trace = sample_model(model, 6009)\n    with model:\n        predictive = pm.sample_posterior_predictive(\n            trace, var_names=[\"obs\"], random_seed=19, progressbar=False\n        )",
+          "title": "Sample, then simulate new data",
+          "explanation": "After sampling, sample_posterior_predictive draws simulated y values for each posterior draw. Comparing these to the real data checks whether the model can reproduce what was observed.",
+          "observe": "PyMC prints sampler progress and warnings to the log."
+        },
+        {
+          "lines": [60, 64],
+          "excerpt": "    slopes = np.asarray(trace.posterior[\"b\"])\n    intercepts = np.asarray(trace.posterior[\"a\"])\n    assert abs(slopes.mean() - 1.3) < 0.2 and abs(intercepts.mean() - 0.5) < 0.15\n    pred = np.asarray(predictive.posterior_predictive[\"obs\"])\n    assert pred.shape == (2, 120, 16) and np.all(np.isfinite(pred))",
+          "title": "Check recovery and shapes",
+          "explanation": "The posterior means should be near the true values. The predictive array has one simulated dataset per chain and draw: 2 by 120 by 16 points, all finite. The sampled numbers themselves vary with platform, so the lesson checks tolerances, not exact values.",
+          "observe": "pred.shape is (2, 120, 16)."
+        },
+        {
+          "lines": [65, 73],
+          "excerpt": "    return dict(\n        intercept_mean=float(intercepts.mean()),\n        slope_mean=float(slopes.mean()),\n        predictive_shape=list(pred.shape),\n        observed_mean=float(y.mean()),\n        predictive_mean=float(pred.mean()),\n        diagnostics=diagnostics(trace, [\"a\", \"b\", \"sigma\"]),\n        trace_a=intercepts.tolist(),\n    )",
+          "title": "Return the evidence",
+          "explanation": "Means, shapes, diagnostics and the intercept trace are collected for printing and plotting.",
+          "observe": "predictive_shape is stored as a list."
+        },
+        {
+          "lines": [76, 96],
+          "excerpt": "def render_figure(evidence):\n    import matplotlib.pyplot as plt\n\n    fig, ax = plt.subplots(figsize=(5, 3))\n    for chain, values in enumerate(evidence[\"trace_a\"]):\n        ax.plot(values, label=f\"Chain {chain + 1}\", alpha=0.75)\n    ax.set(\n        title=\"Short-chain trace: inspect diagnostics too\",\n        xlabel=\"Retained draw\",\n        ylabel=\"Intercept\",\n    )\n    ax.legend()\n    fig.tight_layout()\n    plt.show()\n\n\nif __name__ == \"__main__\":\n    evidence = run_cases()\n    print(\"bayes-009 complete\")\n    print(json.dumps(evidence, sort_keys=True, allow_nan=False))\n    render_figure(evidence)",
+          "title": "Plot the trace",
+          "explanation": "Each chain's intercept draws are plotted against draw number. Well mixed chains overlap like noise; a chain stuck elsewhere would stand apart. The title reminds you that a picture does not replace numeric diagnostics.",
+          "observe": "The JSON is printed before the figure is shown."
+        }
+      ]
+    },
+    {
+      "lesson_id": "bayes-017",
+      "title": "A normal mean model in Stan checked against the exact posterior",
+      "anchor": "reference",
+      "source_path": "courses/bayesian-computing/examples/bayes-017.stan",
+      "source_sha256": "807dc601746628a80dcab2945b6889198540748b4084cdf77ee006fa02672bab",
+      "expected_output": [
+        "Chain 1: 100 retained draws;",
+        "Stan sampling completed: 2 chains x 100 draws. Short chains demonstrate the workflow; review diagnostics before inference."
+      ],
+      "steps": [
+        {
+          "lines": [2, 8],
+          "excerpt": "transformed data {\n  int N = 5;\n  vector[N] y = [1.0, 1.5, 2.0, 2.5, 3.0]';\n  real prior_mean = 0;\n  real prior_sd = 2;\n  real observation_sd = 1;\n}",
+          "title": "Data inside the program",
+          "explanation": "transformed data runs once before sampling. Here it holds five observations and the prior and noise settings, which keeps the classroom model self contained. vector[N] declares a column vector, and the trailing apostrophe transposes the row literal into one.",
+          "observe": "These values never change during sampling."
+        },
+        {
+          "lines": [9, 11],
+          "excerpt": "parameters {\n  real mu;\n}",
+          "title": "The unknown",
+          "explanation": "parameters lists what Stan samples. mu is the single unknown mean, an unconstrained real number.",
+          "observe": "Each draw gives one value of mu."
+        },
+        {
+          "lines": [12, 15],
+          "excerpt": "model {\n  mu ~ normal(prior_mean, prior_sd);\n  y ~ normal(mu, observation_sd);\n}",
+          "title": "Prior and likelihood",
+          "explanation": "The tilde statements add log densities: a normal prior on mu centred at 0 with sd 2, and every observation normal around mu with sd 1. The vectorized y statement covers all five observations at once.",
+          "observe": "Stan's NUTS sampler explores this posterior."
+        },
+        {
+          "lines": [16, 17],
+          "excerpt": "generated quantities {\n  real y_rep = normal_rng(mu, observation_sd);",
+          "title": "Posterior predictive draws",
+          "explanation": "generated quantities runs once per kept draw. normal_rng simulates a new observation from the current mu, which can be compared with the real data.",
+          "observe": "y_rep varies from draw to draw."
+        },
+        {
+          "lines": [18, 20],
+          "excerpt": "  real posterior_variance = inv(inv_square(prior_sd) + N / square(observation_sd));\n  real posterior_mean = posterior_variance\n                        * (prior_mean / square(prior_sd) + sum(y) / square(observation_sd));",
+          "title": "The exact answer for comparison",
+          "explanation": "Because a normal prior with a normal likelihood is conjugate, the posterior mean and variance have closed forms: precisions add, and the mean is a precision weighted average. Computing them here lets you check the sampler against the truth.",
+          "observe": "posterior_mean is constant across draws, close to 1.9."
+        },
+        {
+          "lines": [21, 23],
+          "excerpt": "  vector[N] log_lik;\n  for (n in 1 : N)\n    log_lik[n] = normal_lpdf(y[n] | mu, observation_sd);",
+          "title": "Pointwise log likelihood",
+          "explanation": "log_lik stores the log density of each observation under each draw. Tools such as LOO cross validation use it to compare models.",
+          "observe": "One value per observation per draw."
+        }
+      ]
+    }
+  ]
+}

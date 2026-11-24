@@ -198,9 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-011</code>, <code>cuda-033</code>, <code>cuda-036</code>, <code>cuda-056</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Inspect generated PTX and SASS to explain a selected instruction sequence and validate any change with existing tests.</p>
 <p>Work through <em>PTX, SASS, JIT and inspecting generated code</em> with the concrete cases below. Finish with this evidence: explain a selected instruction sequence and validate any optimization with the existing tests. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>PTX is a virtual instruction language, while SASS describes machine instructions for a particular GPU architecture. The driver or toolchain can translate PTX differently across targets and versions. A fat binary can contain native device images and PTX fallback according to a deliberate policy. JIT can introduce cold-start cost and compatibility constraints. Inspect compiler resource reports and generated code to test a hypothesis, such as unexpected local-memory traffic, before attempting inline assembly. Counting PTX instructions does not directly count executed hardware operations or predict runtime.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>PTX:</strong> The virtual instruction set that <code>nvcc</code> emits before architecture-specific assembly.</li>
+<li><strong>SASS:</strong> The native machine instructions that a specific GPU architecture actually executes.</li>
+<li><strong>cuobjdump:</strong> A tool that extracts embedded PTX and SASS from compiled binaries.</li>
+<li><strong>Resource usage report:</strong> Compiler output from <code>-Xptxas -v</code> that lists registers, shared memory and spill bytes per kernel.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-059_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-059_cpu.py</code></pre>

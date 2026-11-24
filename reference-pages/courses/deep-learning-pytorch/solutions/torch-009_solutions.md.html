@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="torch-009-explanatory-solutions">torch-009: explanatory solutions<a class="heading-anchor" href="#torch-009-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers only after attempting Batches, zero_grad and repeated updates yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Count batches and updates, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Epoch, Batch, Gradient reset. After a pass, choose a new input for exercise 6, Aggregate unequal batch means, without looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. These counts differ. Six records with batch size 2 produce three updates per epoch, while batch size 1 produces six. Later batches see weights changed by earlier updates, so equal epochs do not imply equal trajectories. PyTorch also accumulates gradients unless they are cleared, which can accidentally turn a minibatch loop into an unplanned accumulation scheme.</p>
 <p>Record IDs should travel with features and targets. A final short batch is retained unless drop_last is explicitly chosen. Its mean loss uses its own number of examples. To report an epoch mean from unequal batches, accumulate loss sums and counts rather than averaging batch means equally. This lesson makes the loop explicit before introducing DataLoader configuration.</p>
@@ -303,7 +303,7 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <p><strong>Expected:</strong> epoch mean 4, not 5.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>(2 * 2 + 8 * 1) / 3 == 4</code> and <code>(2 + 8) / 2 == 5</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Repeat exercise 4, Expose accidental accumulation, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Shuffle paired records together, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
   </main>
 </body>
 </html>

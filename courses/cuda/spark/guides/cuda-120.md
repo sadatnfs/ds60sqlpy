@@ -14,6 +14,13 @@ A spill moves data to a slower tier to preserve progress under pressure. It is a
 
 
 
+### Key terms
+
+- **Device memory pool:** A pooled GPU allocator, such as the RAPIDS Memory Manager, that serves columnar batches and workspaces.
+- **Spill:** Moving data to a slower tier such as host memory or disk to preserve progress under memory pressure.
+- **JVM heap:** Executor memory managed by Java, which is separate from GPU device memory.
+- **Batch size target:** The configured columnar batch size, which trades per-batch overhead against peak device memory.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,33 +46,54 @@ print("CPU memory budget:", safe, "safe task counts in the model")
 
 **Expected observation:** One through three tasks fit the simplified budget; four do not.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `per_task` | `2` |
+| `shared` | `1` |
+| `capacity` | `8` |
+| `safe` | `[1, 2, 3]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Compute concurrent live memory
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute concurrent live memory** in the examples above.
+**Trap to avoid:** Counting the shared workspace once per task gives 10 GiB for three tasks and wrongly rejects a configuration that fits.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Lower concurrency
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **lower concurrency** in the examples above.
+**Trap to avoid:** Raising batch size to finish faster increases per-task memory and makes the overflow worse. It may also push the job into heavier spilling, which slows the stage more than the larger batches speed it up.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate JVM and device pools
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **separate JVM and device pools** in the examples above.
+**Trap to avoid:** Raising `spark.executor.memory` after a GPU memory error adds host memory and leaves the device budget unchanged.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Budget spill disk
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **budget spill disk** in the examples above.
+**Trap to avoid:** Leaving spill on the default temporary directory of a small root volume risks filling it and affecting other processes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design safe batch changes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design safe batch changes** in the examples above.
+**Trap to avoid:** Doubling the batch size without a memory budget can turn a working job into an out-of-memory failure. The failure may appear only on the largest partitions, so small test inputs can pass while production data fails.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Interpret successful but spilling execution
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **interpret successful but spilling execution** in the examples above.
+**Trap to avoid:** Comparing only kernel times between a spilling run and a non-spilling run misses the end-to-end slowdown.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

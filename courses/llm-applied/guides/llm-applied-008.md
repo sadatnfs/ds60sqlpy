@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-007`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-007` (Embedding retrieval, similarity and representation limits). They introduce the notation this lesson needs for hybrid retrieval and rrf.
 
 ## Learning objectives
 
@@ -78,9 +78,11 @@ Use a reranker when good evidence is present among candidates but ordered poorly
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-008/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-008.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-008.py` in the declared `python-core` profile. *Fuse two rankings*, *Inspect one exact contribution* and *Prevent duplicate votes* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-008/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Inspect one exact contribution* and *Prevent duplicate votes* reuse the helper and fixture introduced in *Fuse two rankings*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: B ranks first, a second. Example B should give: Computed b score equals that sum within 1e-12. Example C should give: Fusion result unchanged. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -88,7 +90,7 @@ Use one-based ranks and a positive fusion constant. Deduplicate each input ranki
 
 ## Calculate the fused ordering and its limits
 
-For constant c and one-based rank r, this fixture contributes \(\frac{1}{c+r}\) from each list containing the document. Missing documents contribute zero. With lists[a, b, c] and[b, d, a] at constant 60, the scores are:
+For constant c and one-based rank r, this fixture contributes \(\frac{1}{c+r}\) from each list containing the document. Missing documents contribute zero. With lists `[a, b, c]` and `[b, d, a]` at constant 60, the scores are:
 
 | Document | Contributions | Fused score |
 | --- | --- | --- |
@@ -103,7 +105,7 @@ The constant changes how strongly rank gaps matter. With a large constant relati
 
 RRF discards raw score gaps. A system giving its first document a tiny lead and another giving an overwhelming lead produce the same rank contribution. This makes fusion insensitive to raw score units, but it also discards potentially useful confidence information. A calibrated score-combination approach is a different design that needs validation of both scales and their transfer across query families.
 
-Within one ranking, duplicate IDs are removed before ranks are assigned. Thus[a, b, b, c] becomes[a, b, c], preserving c's third position instead of penalizing it for a duplicate emission. Across lists, the same ID deliberately receives another contribution. If two lists are exact copies of the same retrieval run, that extra vote is not independent evidence. The method does not estimate correlation between retrievers; duplication at the system level can overweight one behavior.
+Within one ranking, duplicate IDs are removed before ranks are assigned. Thus[a, b, b, c] becomes `[a, b, c]`, preserving c's third position instead of penalizing it for a duplicate emission. Across lists, the same ID deliberately receives another contribution. If two lists are exact copies of the same retrieval run, that extra vote is not independent evidence. The method does not estimate correlation between retrievers; duplication at the system level can overweight one behavior.
 
 Let R be the authored relevant set and C the admitted candidate set. Candidate recall is|R intersect C|/|R| when R is nonempty. Any reranker returning only items from C cannot exceed that evidence coverage, even if its ordering is perfect. A final top-k or token-budget selection can reduce coverage further. For R={a, d} and C={a, b, c}, candidate recall is one-half; no rearrangement can supply d. If both facts are necessary for the answer, the context may still be insufficient despite retrieving one relevant item.
 
@@ -121,7 +123,7 @@ The example reranker sorts authored features 0, 2, 1. It is neither a trained cr
 
 ### Example A: Fuse two rankings
 
-Documentb receives ranks 2 and 1, whilea receives 1 and 3. The difference comes from rank evidence rather than incompatible raw score scales.
+Document b receives ranks 2 and 1, while a receives 1 and 3. The difference comes from rank evidence rather than incompatible raw score scales.
 
 ```python
 from collections import defaultdict
@@ -174,27 +176,30 @@ assert rrf([["a", "b", "b", "c"]], 60) == rrf([["a", "b", "c"]], 60)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: b ranks first, a second. ValueError for nonpositive constant; TypeError for non-string ID. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Inspect one exact contribution*, predict its result from the prompt alone: Calculate the fused score of b as \(\frac{1}{62}+\frac{1}{61}\). Write the guess beside the stated outcome (computed b score equals that sum within 1e-12). Then predict how the decisive case, *Reject invalid fusion policy*, should end: Use constant 0 or a repeated non-string identifier and apply the declared validation. For hybrid retrieval, reciprocal-rank fusion and reranking, the finish condition is: B ranks first, a second. ValueError for nonpositive constant; TypeError for non-string ID.
 
 ## Exercises
 
-1. **Fuse two rankings.** Fuse lexical[a, b, c] and dense[b, d, a] with constant 60.
+1. **Fuse two rankings.** Fuse lexical `[a, b, c]` and dense `[b, d, a]` with constant 60.
    **Expected:** b ranks first, a second.
    **Verify:** Save the assertion results for exercise 1, including b ranks first, a second.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-2. **Inspect one exact contribution.** Calculate the fused score ofb as \(\frac{1}{62}+\frac{1}{61}\).
+2. **Inspect one exact contribution.** Calculate the fused score of b as \(\frac{1}{62}+\frac{1}{61}\).
    **Expected:** computed b score equals that sum within 1e-12.
    **Verify:** Save the assertion results for exercise 2, including computed b score equals that sum within 1e-12.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Prevent duplicate votes.** Repeatb inside one ranking and compare with its deduplicated form.
    **Expected:** fusion result unchanged.
    **Verify:** Save the assertion results for exercise 3, including fusion result unchanged.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-4. **Rerank a bounded candidate set.** Use candidatesa, b, c with authored relevance features 0, 2, 1 and sort descending feature then ID.
+4. **Rerank a bounded candidate set.** Use candidates a, b, c with authored relevance features 0, 2, 1 and sort descending feature then ID.
    **Expected:** orderb, c, a.
    **Verify:** Save the assertion results for exercise 4, including orderb, c, a.
 
-5. **Expose a candidate-recall ceiling.** Declare relevant documentd but supply only candidatesa, b, c.
+5. **Expose a candidate-recall ceiling.** Declare relevant documentd but supply only candidates a, b, c.
    **Expected:** candidate recall 0 and reranker cannot return d.
    **Verify:** Save the assertion results for exercise 5, including candidate recall 0 and reranker cannot return d.
 
@@ -210,19 +215,21 @@ If the reranker fails a question, first verify that the required evidence was in
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate hybrid retrieval and rrf for the fixture in *Fuse two rankings*. Hint 2: change one literal in *Inspect one exact contribution* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Rerank a bounded candidate set*, with its stated result (orderb, c, a). If *Reject invalid fusion policy* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Hybrid retrieval, RRF, Reranker using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain hybrid retrieval, rrf and reranker using *Fuse two rankings*. Recompute its result (b ranks first, a second) from the inputs. Change one input in *Prevent duplicate votes* and predict whether the stated result (fusion result unchanged) still holds. Say which part of hybrid retrieval, reciprocal-rank fusion and reranking the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-007` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Fuse two rankings* cannot be reconstructed without the solution, revisit `llm-applied-007` (Embedding retrieval, similarity and representation limits). Otherwise keep the six observations from hybrid retrieval, reciprocal-rank fusion and reranking and continue to `llm-applied-009` (Metadata filtering and access-controlled retrieval).
 
 ## Sources and verification status
 
-API and mechanism reference: [Reciprocal Rank Fusion](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for hybrid retrieval: [Reciprocal Rank Fusion](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf), reviewed 2026-10-22. The fixtures for *Fuse two rankings*, *Inspect one exact contribution* and *Prevent duplicate votes* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

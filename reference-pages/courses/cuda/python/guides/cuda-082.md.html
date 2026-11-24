@@ -205,6 +205,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An event is a marker in an ordered stream. Recording E after the transform means E becomes complete after earlier work in that stream. A wait for E in another stream places later consumer operations after that completion. This is different from waiting on the host: a host wait delays Python submission, while a stream wait can preserve useful overlap elsewhere. The resulting partial order is more precise than placing a device-wide synchronize after every statement.</p>
 <p>The host can also accidentally serialize the graph. Calling <code>.item()</code>, <code>.get()</code> or <code>.numpy()</code> on a device result can require it to be ready on the host. Logging every intermediate scalar may insert repeated waits between kernels. This is not inherently wrong, but it changes the benchmark and can remove the overlap the program was supposed to measure. Aggregate bounded diagnostics where the application permits and preserve one explicit final output boundary.</p>
 <p>Allocator reuse is the subtle companion to stream ordering. A library may know the allocation was used on its own stream but not that an external consumer still reads it. Use that library&#x27;s documented external-stream or allocation-recording protocol. Do not solve this by keeping arbitrary global references forever: that trades a race for a memory leak. The acceptance test uses two non-default streams, repeated bounded inputs with distinct values, explicit producer/consumer ordering and a final comparison against the CPU oracle.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Stream:</strong> An ordered queue of device work; operations in one stream run in issue order.</li>
+<li><strong>CUDA event:</strong> A marker recorded in a stream that other streams or the host can wait on.</li>
+<li><strong>Stream wait:</strong> A device-side dependency that makes one stream wait for an event without blocking the host.</li>
+<li><strong>Host synchronization:</strong> A CPU wait for device work to finish, which blocks Python and removes overlap.</li>
+<li><strong>Cross-stream storage reuse:</strong> Reuse of a freed block by the caching allocator while another stream may still use it, which is unsafe unless the block is recorded with that stream.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Upload precedes transform, which precedes download. Independent preprocessing for the next batch may overlap only when it does not overwrite buffers still in use.</p>
@@ -220,20 +228,48 @@ bad <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</s
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>bad<span class="syntax-operator">.</span>index<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> bad<span class="syntax-operator">.</span>index<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> edges<span class="syntax-punctuation">)</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU dependency model: ordered pipeline accepted; premature download rejected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Valid dependency order accepted; premature download rejected.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>edges</code></td>
+<td><code>[(&#x27;upload&#x27;, &#x27;transform&#x27;), (&#x27;transform&#x27;, &#x27;download&#x27;)]</code></td>
+</tr>
+<tr>
+<td><code>order</code></td>
+<td><code>[&#x27;upload&#x27;, &#x27;transform&#x27;, &#x27;download&#x27;]</code></td>
+</tr>
+<tr>
+<td><code>positions</code></td>
+<td><code>{&#x27;upload&#x27;: 0, &#x27;transform&#x27;: 1, &#x27;download&#x27;: 2}</code></td>
+</tr>
+<tr>
+<td><code>bad</code></td>
+<td><code>[&#x27;download&#x27;, &#x27;upload&#x27;, &#x27;transform&#x27;]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-draw-the-dependency-graph">Exercise 1: Draw the dependency graph<a class="heading-anchor" href="#exercise-1-draw-the-dependency-graph" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>draw the dependency graph</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Drawing edges from code order instead of data flow invents dependencies between unrelated work and hides real ones crossing library calls.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-locate-a-missing-wait">Exercise 2: Locate a missing wait<a class="heading-anchor" href="#exercise-2-locate-a-missing-wait" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>locate a missing wait</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming the host Python call to A finishing means A&#x27;s kernel finished confuses queuing with completion.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-separate-host-wait-and-stream-wait">Exercise 3: Separate host wait and stream wait<a class="heading-anchor" href="#exercise-3-separate-host-wait-and-stream-wait" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>separate host wait and stream wait</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using a host synchronize everywhere fixes correctness but serializes host and device.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-trace-storage-reuse">Exercise 4: Trace storage reuse<a class="heading-anchor" href="#exercise-4-trace-storage-reuse" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>trace storage reuse</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Freeing a buffer as soon as the host is done with its Python object assumes device work is done too.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-non-default-stream-test">Exercise 5: Design non-default stream test<a class="heading-anchor" href="#exercise-5-design-non-default-stream-test" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design non-default stream test</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Testing only on the default stream passes even with the wait removed.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-why-global-synchronization-can-mask-bugs">Exercise 6: Explain why global synchronization can mask bugs<a class="heading-anchor" href="#exercise-6-explain-why-global-synchronization-can-mask-bugs" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>explain why global synchronization can mask bugs</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating a correct result with global waits as proof that dependencies are complete hides the missing event.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -9,11 +9,15 @@ The executable reference contains the two complete worked cases with assertions.
 
 The service project also validates feature order, finite coefficients and positive scales. Broader model acceptance still needs its evaluation and operational evidence.
 
+activate() computes sha256 of the written candidate and compares it with expected_hash before writing current.pending. In example_one the hash "0" * 64 cannot match {"weight": 99.0}, so ValueError fires and current.json stays byte-identical to the v1 pointer. Writing the pointer first and validating afterwards would expose consumers to v2 during the gap.
+
 **Expected:** They include artifact identity and compatible structure.
 
 ## 2. Retain failed evidence
 
 Do not overwrite the previous accepted version or erase the failure merely to simplify directory contents. Apply an explicit retention policy later.
+
+Note that the fixture leaves v2.json on disk after the hash mismatch, because the candidate is written before it is checked. That file is the evidence: record its hash and the ValueError message beside it so a reviewer can see why it was rejected.
 
 **Expected:** The failure remains explainable.
 
@@ -21,11 +25,15 @@ Do not overwrite the previous accepted version or erase the failure merely to si
 
 Use the intended version/hash to reconcile actual state. Blindly repeating activation can create misleading audit history in a larger system.
 
+Read current.json and compare its version and sha256 with the intended values. If they already match, the activation completed and the client's timeout lost only the response. Repeating activate() would rewrite the same pointer and add a second audit entry for one change.
+
 **Expected:** The next action reads the pointer before retrying.
 
 ## 4. Check bundle compatibility
 
 Restore a compatible model and feature transformation bundle. A file-level rollback can be technically successful while predictions are semantically wrong.
+
+In this fixture the model is a single weight, so the pointer is the whole story. A real bundle also fixes feature order and scaling; restoring v1 coefficients beside a v2 scaler would load cleanly and produce wrong scores.
 
 **Expected:** The feature/preprocessing contract must also match.
 
@@ -33,11 +41,15 @@ Restore a compatible model and feature transformation bundle. A file-level rollb
 
 Use suitable synchronization, persistence and recovery mechanisms for the deployed environment, and test partial failures explicitly.
 
+temporary.replace() maps to os.replace, which is atomic for readers on one local filesystem. It does not fsync the directory, so a power loss could still lose the new pointer, and it coordinates nothing between replicas reading different disks.
+
 **Expected:** It does not prove multi-replica consensus or power-loss durability.
 
 ## 6. Exercise the real project
 
 Retain its ownership marker and state. The checker verifies real HTTP, model integrity and replacement without retraining, while leaving external production claims out of scope.
+
+Example_two runs v1, v2, v1 and confirms current.json says v1 with no current.pending left. For the real project, check that HTTP responses report the version and that the v1 hash after rollback equals the original v1 hash.
 
 **Expected:** Actual HTTP predictions identify the selected version and restore exactly.
 

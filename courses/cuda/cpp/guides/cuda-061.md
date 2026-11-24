@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Build a CMake CUDA project cleanly from source and pass its runtime tests on a declared target architecture.
+
 Work through *From one pad to a maintainable CUDA project* with the concrete cases below. Finish with this evidence:
 a clean reproducible build and actual runtime tests on a declared target. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A maintainable CUDA project separates interfaces, host orchestration and device implementation without hiding ownership. Host .cpp files compile as ordinary C++; .cu files contain CUDA compilation units; headers declare shared interfaces. Calls across device translation units can require separable compilation and device linking. CMake targets should state languages, dependencies and architecture policy explicitly. A project directory cannot be pasted into a single-source coding pad. Keep external project commands in an owned scratch directory with clear source and build paths, and validate both a clean build and actual execution on supported hardware.
+
+### Key terms
+
+- **CMake target:** A named library or executable with its own sources, properties and dependencies.
+- **CUDA_ARCHITECTURES:** A CMake property that lists the GPU architectures to generate device code for.
+- **Separable compilation:** Compiling device code in separate translation units so kernels can call device functions defined elsewhere.
+- **Device linking:** A link step that resolves device symbols across separately compiled objects.
 
 ## How to run and study this lesson
 

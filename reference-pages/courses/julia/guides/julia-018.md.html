@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use calendar arithmetic deliberately and reconstruct features using both event and availability time.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-018</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (month arithmetic and clamping) and worked case B (choose an available historical value) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-018: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Calendar period:</strong> A unit such as <code>Month(1)</code> whose length in days depends on the date it is added to, unlike <code>Day(30)</code>.</li>
+<li><strong>Month clamping:</strong> Adding one month to January 31 yields the last valid day of February instead of spilling into March.</li>
+<li><strong>Duration:</strong> Elapsed time in fixed units, such as the milliseconds produced by subtracting one <code>DateTime</code> from another.</li>
+<li><strong>Point-in-time correctness:</strong> Using only records whose availability time is at or before the decision time, rather than filtering by event time alone.</li>
+<li><strong>Tie rule:</strong> An explicit decision about whether a record available exactly at the cutoff counts as known, encoded and tested.</li>
+</ul>
 <h3 id="calendar-time-is-not-one-uniform-integer">Calendar time is not one uniform integer<a class="heading-anchor" href="#calendar-time-is-not-one-uniform-integer" aria-label="Link to this section">#</a></h3>
 <p>A date identifies a calendar day, while a datetime adds a clock value. A calendar month does not have a fixed number of days. Adding a month and adding thirty days can therefore produce different results. The difference is meaningful for billing periods, cohorts and scientific observation windows.</p>
 <p>Julia&#x27;s standard Dates types do not automatically attach an IANA time zone or resolve daylight-saving ambiguity. The fixture datetimes in this unit are explicitly interpreted as UTC by the application contract. They are not a demonstration of timezone conversion. A real local-time workflow needs a separately prepared timezone-aware approach and a policy for ambiguous or nonexistent local times.</p>

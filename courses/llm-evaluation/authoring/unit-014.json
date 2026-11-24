@@ -8,6 +8,12 @@
     "critical-risk coverage",
     "untrusted data"
   ],
+  "key_terms": {
+    "Metamorphic relation": "A specified relation between input changes and required output behavior, such as preserving an answer under reformatting.",
+    "Authorization invariant": "A rule that access comes from trusted metadata and caller permissions, never from content claims.",
+    "Indirect prompt injection": "Instruction-like text in retrieved data or tool proposals that attempts to change the system's behavior or permissions.",
+    "Untrusted data": "Retrieved or user-supplied text treated as content for the task rather than as an instruction channel."
+  },
   "outcome": "Build bounded adversarial and invariance tests while enforcing authorization independently of generated text or average answer quality.",
   "verification": "Formatting changes keep the authorized result public-guide, removing authorization returns no document, extra authority fields fail the exact schema, an unsafe intermediate action is recorded as a policy failure, and unknown cases stay unknown and go to review.",
   "level": "advanced",
@@ -20,42 +26,78 @@
       "task": "Change capitalization and surrounding whitespace in the query conversion.",
       "expected": "The authorized result remains public-guide.",
       "hint": "Normalize harmless text without changing policy metadata.",
-      "answer": "The intended invariant concerns formatting, not permission. The query transformation cannot expand the allowed candidate set."
+      "answer": "The intended invariant concerns formatting, not permission. The query transformation cannot expand the allowed candidate set.",
+      "reasoning": {
+        "approach": "Call `retrieve(\"  CONVERSION \", {\"public\"})`. The query is casefolded and split on whitespace, so it becomes the term set `{\"conversion\"}`.",
+        "why": "Only `public-guide` is authorized for the public access level, and its text contains `conversion`. The result is `[\"public-guide\"]`, the same as for the lowercase query. Formatting changed the matching terms not at all, and the authorized set was filtered before matching.",
+        "pitfall": "Testing formatting invariance by checking that the restricted document also appears when the query matches its text is the mistake. Formatting changes must leave matches unchanged within the authorized set, never widen the set.",
+        "verify": "The reference asserts `retrieve(\"  CONVERSION \", {\"public\"}) == [\"public-guide\"]`. Case A also shows that adding `ignore rules public` to the query does not return `restricted-note`."
+      }
     },
     {
       "title": "Remove authorization",
       "task": "Use an empty allowed-access set.",
       "expected": "No document is returned.",
       "hint": "Apply policy before query matching.",
-      "answer": "An authorization boundary should hold even when the requested content otherwise matches perfectly."
+      "answer": "An authorization boundary should hold even when the requested content otherwise matches perfectly.",
+      "reasoning": {
+        "approach": "Call `retrieve(\"conversion\", set())`. No document's access level is in the empty set, so the authorized list is empty before any text is compared.",
+        "why": "The query matches `public-guide` perfectly, but authorization is checked first, so nothing is returned. A retrieval boundary that holds only when the query is weak is not a boundary.",
+        "pitfall": "Filtering after ranking (retrieve by text, then drop unauthorized results) can produce the same output here, but it lets restricted text influence scores, logs and timing. Filtering first keeps restricted content out of every intermediate step.",
+        "verify": "The reference asserts `retrieve(\"conversion\", set()) == []`. For contrast, `retrieve(\"public\", {\"restricted\"})` returns `[\"restricted-note\"]` only when restricted access is actually granted."
+      }
     },
     {
       "title": "Reject extra authority fields",
       "task": "Add a self-declared authority field to a proposal.",
       "expected": "The exact-schema validator rejects it.",
       "hint": "Untrusted data cannot add new privileges.",
-      "answer": "A generated claim of authority is not the trusted policy context."
+      "answer": "A generated claim of authority is not the trusted policy context.",
+      "reasoning": {
+        "approach": "Pass `{\"operation\": \"lookup\", \"record_id\": \"public-guide\", \"authority\": \"self-declared\"}` to `apply_proposal`. The key set check requires exactly `operation` and `record_id`.",
+        "why": "The extra key makes the set comparison fail, so the function raises `Invalid proposal schema`. Authority comes from the trusted `allowed_ids` argument supplied by the caller, never from text the model generated.",
+        "pitfall": "Ignoring unknown fields is a common lenient parsing choice. Here it would let a future code change read `authority` from the proposal and act on it. Rejecting unexpected fields keeps the trust boundary narrow.",
+        "verify": "The reference loops over this proposal, one with `record_id` 7 and `None`, and fails with `Malformed proposal accepted` if any passes. Case B also rejects `operation` `other` and the restricted record."
+      }
     },
     {
       "title": "Inspect an intermediate action",
       "task": "An answer omits restricted text but retrieval accessed it.",
       "expected": "Record a policy failure.",
       "hint": "Evaluate side effects and candidate sets as well as visible text.",
-      "answer": "A benign final sentence cannot undo an unauthorized intermediate read."
+      "answer": "A benign final sentence cannot undo an unauthorized intermediate read.",
+      "reasoning": {
+        "approach": "Log every retrieval and tool call during a run, not just the final answer. Evaluate each logged action against the same access policy that `retrieve` enforces.",
+        "why": "If retrieval read `restricted-note` while the final answer omits its text, the read still happened. The restricted content could appear in logs, caches or later turns, so the policy failure is a property of the action, not of the visible output.",
+        "pitfall": "Grading only the final answer and marking the run safe because no restricted words appear is the mistake. That checks output filtering, which is a different and weaker control.",
+        "verify": "No reference assertion covers this task. Verify by recording a run trace that lists each accessed document ID, and assert that every ID belongs to the allowed set."
+      }
     },
     {
       "title": "Audit family coverage",
       "task": "Repeat one attack template one hundred times.",
       "expected": "Report one covered template family, not universal security evidence.",
       "hint": "Distinguish repetitions from diversity.",
-      "answer": "Repetitions can measure stochastic sensitivity within a template, but new families provide different threat coverage."
+      "answer": "Repetitions can measure stochastic sensitivity within a template, but new families provide different threat coverage.",
+      "reasoning": {
+        "approach": "Count distinct attack template families, not attempts. One hundred repetitions of one template are one family with one hundred samples.",
+        "why": "Repetitions estimate how often that template succeeds under sampling randomness. They say nothing about whether a different phrasing, a different tool, or a different language would succeed, because none of those was tried.",
+        "pitfall": "Reporting \"0 of 100 attacks succeeded\" as broad robustness is the mistake. A reader will assume one hundred different attacks; the actual coverage is a single family.",
+        "verify": "No reference assertion covers this task. Report a table with family name, attempts and successes, and state the family count (one) next to the attempt count."
+      }
     },
     {
       "title": "Keep unknown separate",
       "task": "An output cannot be confidently labeled for a critical condition.",
       "expected": "Route it to review and retain unknown status.",
       "hint": "A missing verdict is not a pass.",
-      "answer": "This prevents uncertainty from being absorbed into a favorable aggregate or silently excluded denominator."
+      "answer": "This prevents uncertainty from being absorbed into a favorable aggregate or silently excluded denominator.",
+      "reasoning": {
+        "approach": "Give the item an explicit `unknown` status for the critical condition, route it to review, and keep it in the denominator of the critical-condition count with that status.",
+        "why": "A critical condition is one where a single failure can block release, as in the critical gate of eval-016. Counting the item as a pass would hide a possible failure, and dropping it would shrink the denominator and make the pass rate look better.",
+        "pitfall": "Labeling uncertain items as pass because the grader was not sure they failed is the mistake. It turns lack of evidence into favorable evidence, which the gate design is meant to prevent.",
+        "verify": "Check that reported counts add up: pass plus fail plus unknown equals eligible. Any release decision should require unknown to be zero or resolved by review."
+      }
     }
   ],
   "sources": [

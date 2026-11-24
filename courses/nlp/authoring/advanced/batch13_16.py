@@ -98,7 +98,7 @@ Do not use estimated topic weights as error-free measurements in later causal or
         (
             "Fit and inspect LSA",
             "Fit two-component TruncatedSVD on TF-IDF and reconstruct the matrix.",
-            "Document coordinates shape(4,2); reconstruction error below the zero-matrix baseline.",
+            "Document coordinates shape (4, 2); reconstruction error below the zero-matrix baseline.",
             "Use transform output times components_ without claiming probability meaning.",
             "The low-rank representation preserves some large-scale variation while discarding other directions. A lower reconstruction error than the zero baseline verifies useful matrix approximation on the fixture. It does not establish coherent human topics or a good downstream classifier.",
         ),
@@ -119,7 +119,7 @@ Do not use estimated topic weights as error-free measurements in later causal or
         (
             "Align topic identities",
             "Compare H with its reversed row order using cosine and assignment.",
-            "Permutation[1,0] and matched similarities[1,1].",
+            "Permutation [1, 0] and matched similarities [1, 1].",
             "Match across the shared vocabulary before comparing numeric topic IDs.",
             "The deliberate permutation is a known-answer test for the alignment step. Raw row equality would fail despite identical components. Real stability analysis should also resample documents or vary seeds and inspect imperfect matches, not only this artificial exact case.",
         ),
@@ -276,14 +276,14 @@ A real pretrained sentence model adds learned parameters, its exact tokenizer, p
         ),
         (
             "Derive contrastive loss",
-            "Compute row-wise loss for scores[[3,1],[1,3]] at temperature1.",
+            "Compute row-wise loss for scores [[3, 1], [1, 3]] at temperature 1.",
             "Average log(1+exp(-2)), approximately .126928.",
             "Subtract the positive score from each row logsumexp.",
             "Each row has the same two-score gap, so both losses agree. The stable expression avoids unnecessary exponent overflow. This is one objective calculation, not a training run or a calibration guarantee for relevance probabilities.",
         ),
         (
             "Change temperature and candidate semantics",
-            "Repeat at temperature.5 and explain a false-negative document case.",
+            "Repeat at temperature .5 and explain a false-negative document case.",
             "Lower numeric loss on the fixed correctly ordered fixture; written warning that a valid alternative labeled negative changes the learning target.",
             "Scale the whole score row before normalization.",
             "A smaller temperature sharpens differences and lowers this fixture's loss because the positives already win. It can worsen other training dynamics or emphasize mislabeled negatives. The candidate set and label quality therefore matter as much as the algebra.",
@@ -444,13 +444,13 @@ A meaningful encoder comparison would hold out document families, use the exact 
         (
             "Train the document head",
             "Fit the tiny logistic head on four pooled contextual fixtures.",
-            "Loss decreases from log2 to below.1 and training predictions [0,1,0,1].",
+            "Loss decreases from log 2 to below .1 and training predictions [0, 1, 0, 1].",
             "Use the cross-entropy gradient X_transpose*(p-y)/n and keep the encoder fixed.",
             "This performs actual parameter updates and verifies the objective numerically. The constructed features make the problem easy, so the result is explicitly a training receipt. It does not replace a held-out natural-language evaluation or demonstrate that the fixed encoder parameters were learned.",
         ),
         (
             "Mask subword supervision",
-            "Compute tagging cross-entropy with labels[0,-100,1,-100].",
+            "Compute tagging cross-entropy with labels [0, -100, 1, -100].",
             "Loss log(1+exp(-2)); changing ignored logits does not alter it.",
             "Select valid positions before using labels as column indices.",
             "The ignored sentinel is not a class ID. Filtering it first prevents invalid indexing and makes the loss denominator equal the number of supervised positions. A real tokenizer alignment record must explain why each piece is supervised or ignored.",
@@ -573,7 +573,7 @@ The simple example uses one decoder query [1,0], two source keys [1,0] and [0,1]
         ),
         (
             "Teacher forcing and output alignment",
-            """For raw target [repair], the decoder input is [BOS,repair] and the prediction targets are [repair,EOS]. At the first position the model sees BOS and predicts repair; at the second it sees the correct prefix repair and predicts ending. Feeding the unshifted target at the same position leaks the answer into its own input.
+            """For raw target [repair], the decoder input is [BOS, repair] and the prediction targets are [repair, EOS]. At the first position the model sees BOS and predicts repair; at the second it sees the correct prefix repair and predicts ending. Feeding the unshifted target at the same position leaks the answer into its own input.
 
 For a masked-attention decoder such as a Transformer, teacher forcing lets target positions be computed in parallel during training because the correct shifted target sequence is available and the causal mask enforces prefix-only access. Teacher forcing does not remove the sequential hidden-state dependency of a recurrent decoder. At inference those correct prefixes do not exist yet. A wrong first token changes later conditioning and can lead to compounding errors. This is one reason low teacher-forced loss and good autoregressive task performance need separate evaluation.
 
@@ -599,7 +599,7 @@ Preserve source identity, offsets and the selection/generation configuration. A 
     [
         (
             "Shift one target correctly",
-            """Raw target [repair] becomes decoder input [BOS,repair] and targets [repair,EOS]. The two arrays have equal lengths but different content at every aligned prediction position. Empty raw output becomes one BOS input and one EOS target. These small checks catch a leakage bug before training any large model.""",
+            """Raw target [repair] becomes decoder input [BOS, repair] and targets [repair, EOS]. The two arrays have equal lengths but different content at every aligned prediction position. Empty raw output becomes one BOS input and one EOS target. These small checks catch a leakage bug before training any large model.""",
         ),
         (
             "Calculate cross-attention",
@@ -607,42 +607,42 @@ Preserve source identity, offsets and the selection/generation configuration. A 
         ),
         (
             "Compare search and a grounded baseline",
-            """Greedy search returns tea,EOS with probability .3, while beam width two returns coffee,EOS with .4. Separately, the extractive baseline answers query service with the exact source sentence The service is unavailable. It does not turn a scheduled repair into a claim that the service has recovered. The search and extraction examples establish different mechanisms.""",
+            """Greedy search returns tea, EOS with probability .3, while beam width two returns coffee, EOS with .4. Separately, the extractive baseline answers query service with the exact source sentence The service is unavailable. It does not turn a scheduled repair into a claim that the service has recovered. The search and extraction examples establish different mechanisms.""",
         ),
     ],
     [
         (
             "Build teacher-forced inputs",
             "Implement target shifting for [repair] and empty raw output.",
-            "[BOS,repair] versus[repair,EOS]; empty becomes[BOS] versus[EOS].",
+            "[BOS, repair] versus [repair, EOS]; empty becomes [BOS] versus [EOS].",
             "Current target must not appear at the same decoder-input position.",
-            "The shift ensures each prediction conditions only on previous target tokens. EOS remains a prediction event, making stopping part of the learned sequence contract. Reject raw reserved markers so the helper cannot accidentally create duplicated or ambiguous boundary tokens.",
+            "The shift ensures each prediction conditions only on previous target tokens. EOS remains a prediction event, making stopping part of the learned sequence contract. Reject raw reserved markers so the helper cannot accidentally create duplicated or ambiguous boundary tokens. A tempting shortcut feeds the same list as both input and target; then the decoder sees repair while predicting repair and the loss collapses toward zero without learning anything. Check that input and target differ by exactly one position and that the empty case yields [BOS] against [EOS].",
         ),
         (
             "Trace cross-attention dimensions",
             "Compute the one-query, two-source weighted output.",
-            "Weights sum to one; output[10p,20(1-p)] with p=sigmoid(1/sqrt2).",
+            "Weights sum to one; output [10p, 20(1-p)] with p=sigmoid(1/sqrt2).",
             "Queries choose compatibility; values supply the mixed representation.",
             "The score matrix has one target row and two source columns. Stable softmax normalizes over source positions. Multiplying by values produces the stated two-dimensional output. This exact fixture detects wrong-axis normalization and confusing key/value roles.",
         ),
         (
             "Mask source padding",
             "Mark the second source invalid and repeat the calculation.",
-            "Output exactly[10,0]; an all-invalid source raises.",
+            "Output exactly [10, 0]; an all-invalid source raises.",
             "Apply the mask to scores before softmax.",
-            "The masked source must contribute zero weight even if its value is large or relevant-looking. An all-invalid source cannot supply a meaningful normalized context and is rejected rather than producing NaNs or an invented average.",
+            "The masked source must contribute zero weight even if its value is large or relevant-looking. An all-invalid source cannot supply a meaningful normalized context and is rejected rather than producing NaNs or an invented average. Setting the padded score to a large negative number after softmax, instead of before, leaves the weights summing to less than one and the output no longer equals [10, 0]. Assert the exact output and that the all-invalid call raises.",
         ),
         (
             "Expose greedy search failure",
             "Run width-one and width-two bounded search on the authored table.",
-            "Greedy tea,EOS probability.3; beam coffee,EOS probability.4.",
+            "Greedy tea, EOS probability .3; beam coffee, EOS probability .4.",
             "Compare complete sequence probability, not only the first-token choice.",
-            "The locally best first token has a weaker continuation. Retaining the alternative lets beam search find the larger joint probability. The result depends on the fixed score and stopping conventions and does not imply that wider beams always improve task quality.",
+            "The locally best first token has a weaker continuation. Retaining the alternative lets beam search find the larger joint probability. The result depends on the fixed score and stopping conventions and does not imply that wider beams always improve task quality. Compare joint probabilities, not first-step scores: greedy commits to tea and ends at .3, while beam keeps coffee and reaches .4.",
         ),
         (
             "Preserve extractive provenance",
             "Select a sentence for service and test an unsupported refund query.",
-            "Return index0 and the unchanged unavailable sentence; refund returns None.",
+            "Return index 0 and the unchanged unavailable sentence; refund returns None.",
             "Keep the source list and tie rule explicit.",
             "The baseline returns source text rather than generating a new claim. Its abstention marks no lexical support under its scoring rule, not proof that the corpus contains no semantic answer. Evaluate coverage and semantic relevance separately before using it as a real summarizer.",
         ),

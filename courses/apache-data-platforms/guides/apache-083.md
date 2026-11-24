@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-032`, `apache-050`, `apache-081`.
 
+## Key terms
+
+- **Logical interval:** The Airflow data interval a run is responsible for, distinct from the task's wall-clock start time.
+- **Event-time clock:** The timestamps and watermarks a stream processor uses to decide which records belong to a window.
+- **Output ownership:** The rule naming which writer, backfill or live stream, owns each published partition, so one cannot silently overwrite the other.
+- **Cutover policy:** The explicit boundary at which responsibility for a date range passes from the batch backfill to the live stream.
+
 ## Orchestration intervals and event time describe different clocks
 
 Airflow schedules and tracks workflow runs over defined logical intervals. A
@@ -72,6 +79,35 @@ from yesterday?** It can use different bounded inputs, publication rules and
 business correction semantics, while the live stream retains independent state.
 These cases correct one historical partition and keep continuous processing
 separate until an explicit reconciled cutover joins their outputs.
+
+## Worked examples
+
+### Map an interval to the partition it rewrites
+
+```python
+from datetime import datetime, timedelta, timezone
+
+start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+end = start + timedelta(days=1)
+partition = start.date().isoformat()
+print(partition, start.isoformat(), end.isoformat())
+```
+
+```text
+2026-01-01 2026-01-01T00:00:00+00:00 2026-01-02T00:00:00+00:00
+```
+
+Airflow passes data_interval_start and data_interval_end to a run; the job should derive the partition from those, not from the wall clock. Then rerunning the 2026-01-01 interval next week still rewrites only that day. Event time inside the rows is a third clock: late events from that day can arrive after the interval ran, which is why correction runs exist at all.
+
+### Rerun one historical interval
+
+```bash
+cd work/airflow
+bash run.sh backfill-check
+bash run.sh readback
+```
+
+The backfill route triggers runs for explicit past intervals and the readback shows which outputs each produced. Publish the corrected partition as a candidate, validate it against an independent count, and only then swap it in. The live streaming path keeps writing current data meanwhile, so the backfill must never touch today's partition or it will race the stream.
 
 ## Complete worked source
 

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement checked device allocation and transfers that preserve guard values and clean up after an injected failure.
+
 Work through *Explicit device allocation and transfer* with the concrete cases below. Finish with this evidence:
 unchanged guard values, correct output, checked statuses and cleanup after an injected host-side failure. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 cudaMalloc requests a number of bytes and returns a device allocation handle through a pointer argument. For n float elements, calculate n*sizeof(float), checking multiplication bounds for externally supplied sizes. cudaMemcpy also takes bytes and an explicit direction in the simple runtime API. The input owner must remain alive until the transfer finishes, and the device output must remain allocated until its final consumer completes. Host-to-device transfer supplies input; device-to-host transfer produces an observable result. A pointer is not a container with a length field, so the surrounding program must preserve size and lifetime metadata.
+
+### Key terms
+
+- **cudaMalloc:** The runtime call that reserves a number of bytes in device global memory and returns a device pointer.
+- **cudaMemcpy:** A runtime copy between host and device memory that takes a byte count and an explicit direction.
+- **Device pointer:** An address that is valid for device access and that ordinary host code must not dereference.
+- **Guard value:** A known sentinel placed beyond the valid range so that an out-of-bounds write becomes detectable.
 
 ## How to run and study this lesson
 
@@ -49,7 +58,7 @@ storage = [-99, 1, 2, 3, -99]
 for i in range(1, 4):
     storage[i] *= 2
 assert storage == [-99, 2, 4, 6, -99]
-assert 4 * 4 == 16 and 33 * 8 == 264
+assert 4 * 4 == 16
 print({"guarded_output": storage, "four_float32_bytes": 16})
 ```
 

@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tokenization affects sequence length, context limits, embedding lookups, training targets and evaluation units. It can change how much of a document fits into a prompt, how rare names are represented and how much compute a particular language requires. It is therefore part of the model contract. Replacing a tokenizer without matching the model&#x27;s vocabulary and embeddings is not an interchangeable text-cleaning operation.</p>
 <p>Distinguish <strong>segmentation</strong>, which decides boundaries in a text, from <strong>vocabulary encoding</strong>, which assigns model IDs to the resulting pieces. A <strong>special token</strong> represents a structural role such as sequence termination or a chat boundary. A <strong>subword vocabulary</strong> represents many words using reusable smaller units. <strong>Out-of-vocabulary behavior</strong> specifies what happens when an input cannot be represented by the known inventory.</p>
 <p>A tokenizer does not prove linguistic correctness. Different tasks benefit from different boundaries. Splitting a contraction may be acceptable for one statistical representation and inconvenient for a rule that needs the original word. A legal citation, product code, emoji sequence and ordinary sentence can each expose different weaknesses. Preserve raw text and specify the transformations that happened before tokenization.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Segmentation:</strong> Deciding where boundaries fall in a text, which is a separate decision from assigning model IDs to the pieces.</li>
+<li><strong>Vocabulary encoding:</strong> Mapping each token to an integer ID in a fixed vocabulary. The ID is an index into an embedding matrix, not an ordinal measure of meaning.</li>
+<li><strong>Special token:</strong> A token that represents a structural role, such as end of sequence, padding or a chat boundary, rather than ordinary text.</li>
+<li><strong>Byte-pair encoding:</strong> A subword procedure that repeatedly merges the most frequent adjacent symbol pair and then applies the frozen merge list in order when encoding.</li>
+<li><strong>End-of-word marker:</strong> The <code>&lt;/w&gt;</code> symbol in this teaching BPE that marks where a word ends, so word-final pieces stay distinct and decoding removes exactly one marker.</li>
+</ul>
 <h3 id="worked-example-three-plausible-policies">Worked example: three plausible policies<a class="heading-anchor" href="#worked-example-three-plausible-policies" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
 

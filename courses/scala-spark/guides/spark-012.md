@@ -8,7 +8,7 @@ Beginner; approximately 90 minutes. Direct prerequisites: `spark-001`. The prepa
 
 ## How to run this lesson
 
-Open `spark-012` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-012` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-012.scala) and [PySpark learner](../lessons/spark-012.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-012_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-012_solution.scala) and [PySpark reference](../solutions/spark-012_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -30,7 +30,7 @@ The [Scala learner](../lessons/spark-012.scala) and [PySpark learner](../lessons
 
 Readiness for this lesson has two routes: complete the Scala foundation through spark-010, or complete the Python bridge spark-011 after the existing Python testing prerequisite. The plan's structural prerequisite lists spark-001 because the framework currently expresses AND prerequisites rather than this OR gate. The learner should demonstrate one route's language skills before treating both APIs as familiar.
 
-SparkSession creates access to the engine and owns session-local views and configuration. The complete source runs in a fresh prepared worker process, requests local[2], disables the UI, binds driver communication to loopback and sets UTC. It reads back the actual master and version rather than assuming the builder text was accepted. The finally block stops the session even when an assertion fails. This is an owned local demonstration, not a request to reuse or stop an unrelated notebook session.
+SparkSession creates access to the engine and owns session-local views and configuration. The complete source runs in a fresh prepared worker process, requests `local[2]`, disables the UI, binds driver communication to loopback and sets UTC. It reads back the actual master and version rather than assuming the builder text was accepted. The finally block stops the session even when an assertion fails. This is an owned local demonstration, not a request to reuse or stop an unrelated notebook session.
 
 The schema names event_id, team and amount_cents. event_id is Long and nonnullable; team is nullable String; amount_cents is nullable Long. SQL's simpleString representation for Long is bigint. A field's nullable flag describes its contract, not whether the current four-row sample happens to contain NULL. Exact integer cents are preserved rather than inferred as floating point because one amount is missing.
 
@@ -47,7 +47,7 @@ The final settings report distinguishes an actual Spark version from a target de
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -63,20 +63,8 @@ val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 schema = StructType(
     [
@@ -138,7 +126,7 @@ The filter expression defines the selected relation; count and the bounded fixtu
 
 ### Exercise 1: Inspect the complete schema contract
 
-Return ordered field triples(name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.
+Return ordered field triples (name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.
 
 **Expected result/shape:** The triples are (event_id, bigint, false), (team, string, true), (amount_cents, bigint, true).
 
@@ -178,9 +166,9 @@ Return rows with nonnull amount_cents, keeping all columns and identities. Do no
 
 ### Exercise 5: Canonicalize content across physical repartitioning
 
-Return ordered triples(event_id, optional team, optional amount) for this bounded fixture. Compare raw, repartition(1) and repartition(3) against the same literal content, not raw collect order.
+Return ordered triples (event_id, optional team, optional amount) for this bounded fixture. Compare raw, repartition(1) and repartition(3) against the same literal content, not raw collect order.
 
-**Expected result/shape:** Every version yields (1, A,0),(2, B, NULL),(3, A,25),(4, B,40). Physical placement does not change identity, NULL state or value.
+**Expected result/shape:** Every version yields `(1, A, 0)`, `(2, B, NULL)`, `(3, A, 25)`, `(4, B, 40)`. Physical placement does not change identity, NULL state or value.
 
 **Verify:** Assert all three canonical outputs and keep the final event_id ordering explicit.
 
@@ -190,7 +178,7 @@ Return ordered triples(event_id, optional team, optional amount) for this bounde
 
 Return master, timezone, shuffle-partition, ANSI, AQE, UI, driver-binding and Spark-version settings from the active session. Compare them with this prepared profile and rely on finally for owned stop. Do not substitute a hardcoded target string for version readback.
 
-**Expected result/shape:** Master local[2], UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.
+**Expected result/shape:** Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.
 
 **Verify:** Assert the complete settings map; record actual version output and distinguish it from worker cleanup evidence.
 
@@ -202,7 +190,7 @@ If a schema assertion fails, compare names, types and nullability separately rat
 
 ## Self-check
 
-Explain the contract of `schemaFields` / `schema_fields` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `schemaFields` / `schema_fields` without reading its solution. Then, from memory, state what Exercise 6 (Read back the actual local session contract) must produce: Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

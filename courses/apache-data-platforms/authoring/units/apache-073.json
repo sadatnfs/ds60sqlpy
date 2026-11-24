@@ -5,6 +5,42 @@
   "minutes": 75,
   "prerequisites": ["apache-072", "apache-069"],
   "concepts": ["authentication", "authorization", "policy enforcement", "governance"],
+  "key_terms": [
+    [
+      "Authentication",
+      "Establishing who the caller is, for example with fixture credentials kept in an untracked environment file."
+    ],
+    [
+      "Authorization",
+      "Deciding which metadata operations an authenticated caller may perform. A failed login yields 401, while a permitted login without the needed permission yields 403."
+    ],
+    [
+      "Policy decision point",
+      "The component that evaluates a policy and decides whether an operation is allowed."
+    ],
+    [
+      "Policy enforcement point",
+      "The component that blocks or permits the protected operation. Permission to classify an asset is not permission to modify its data."
+    ],
+    [
+      "Governance workflow",
+      "A recorded process of ownership, classification review and approval decisions, which does not by itself control storage or query access."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "An invalid credential must be rejected",
+      "language": "bash",
+      "code": "curl -s -o /dev/null -w \"%{http_code}\\n\" -u \"invalid:fixture\" \\\n  \"$DS60_ATLAS_ENDPOINT/api/atlas/v2/types/typedef/name/ds60_<owner>_dataset\"",
+      "interpretation": "The expected code is 401 or 403; the check route fails if anything else comes back. A 200 here would mean authentication is disabled, which turns every metadata claim in the catalog into something anyone could have written. A redirect to a login page is also suspicious for an API client, which is why client.py refuses redirects before it forwards credentials. Note that this proves only that Atlas guards its own API, nothing about who can query the underlying tables."
+    },
+    {
+      "title": "Label review versus data access",
+      "language": "sql",
+      "code": "SELECT\n  region,\n  SUM(amount)\nFROM\n  ds60.orders\nGROUP BY\n  region;",
+      "interpretation": "Imagine the orders table carries a PII classification in Atlas. Whether this query succeeds depends on the engine and its authorizer, for example a Ranger tag policy that reads Atlas classifications, not on Atlas itself. To claim enforcement you need a recorded denial from the engine for a principal that lacks access, alongside a success for one that has it. Without that pair, the classification documents a decision but does not prove it is applied."
+    }
+  ],
   "evidence": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution.",
   "sources": [
     ["Atlas REST types/entities/lineage API", "https://atlas.apache.org/api/v2/index.html"],

@@ -117,7 +117,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Accumulate a total) before changing anything, and confirm its observation: The total is 12 and the empty total is zero.
 2. Compare Example B (Stop at the first match) with Example A and name the first line whose behavior differs. Its observation is: The first 8 appears at offset 1 and 9 is absent.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An enumerated offset is not universally a collection index.
+3. Before opening the explanation, check your task 3 attempt (Implement a first-match search with an optional result) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

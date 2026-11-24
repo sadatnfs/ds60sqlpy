@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-order-the-evidence-phases">Exercise 1: Order the evidence phases<a class="heading-anchor" href="#exercise-1-order-the-evidence-phases" aria-label="Link to this section">#</a></h3>
 <p>The sequence prevents searching application logs before a container was configured or treating a Service response as guaranteed by object creation. Real timestamps can overlap across controllers, but the evidence dependencies remain useful.</p>
 <p><strong>Expected:</strong> A trace identifies the first missing or failed boundary for each case.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Lay out the five boundaries as a dependency chain and, for each case, stop at the first boundary with no supporting evidence.</li>
+<li><strong>Why it is correct:</strong> Each stage needs the previous one: a container cannot start before the Pod is scheduled, and a client response needs a Ready endpoint first.</li>
+<li><strong>Plausible wrong approach:</strong> Opening application logs first for every case fails for case A, where the container was never created and there are no logs to read.</li>
+<li><strong>How to verify:</strong> Each case has one first failed boundary and every later boundary is marked not reached.</li>
+</ul>
 <h3 id="exercise-2-diagnose-missing-configuration">Exercise 2: Diagnose missing configuration<a class="heading-anchor" href="#exercise-2-diagnose-missing-configuration" aria-label="Link to this section">#</a></h3>
 <p>The general Kubernetes failure occurs during container configuration. The current broker catches some inconsistent references earlier, so a browser refusal must be labeled as a different phase. The host fixture is required to observe the kubelet condition.</p>
 <p><strong>Expected:</strong> Inspect referenced ConfigMap name/key and availability; do not claim the process crashed.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the configMapKeyRef in the Pod spec and check that the named ConfigMap and key exist in the same namespace.</li>
+<li><strong>Why it is correct:</strong> A missing ConfigMap or key stops the kubelet at container configuration with CreateContainerConfigError, before any process runs.</li>
+<li><strong>Plausible wrong approach:</strong> Calling case A a crash and raising restart tolerance changes nothing, because restartCount stays 0 and no process ever exited.</li>
+<li><strong>How to verify:</strong> The check quotes the ConfigMap name and key exactly as the spec does and needs no application log.</li>
+</ul>
 <h3 id="exercise-3-diagnose-the-probe-path">Exercise 3: Diagnose the probe path<a class="heading-anchor" href="#exercise-3-diagnose-the-probe-path" aria-label="Link to this section">#</a></h3>
 <p>The application can be running while the readiness URL is wrong. Changing unrelated selectors or resource limits does not explain the observed 404. A new bounded run should preserve its own source and identity receipt.</p>
 <p><strong>Expected:</strong> Change /missing to the admitted /ready path; then require new Ready and client evidence.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Change only readinessProbe.httpGet.path from /missing to /ready and predict the two confirming observations.</li>
+<li><strong>Why it is correct:</strong> The fixture serves 200 on /ready and 404 on /missing, so the process runs normally but stays unready until the probe path is fixed.</li>
+<li><strong>Plausible wrong approach:</strong> Editing the Service selector or resource limits leaves the 404 untouched, so the Pod remains NotReady and the client still gets no endpoint.</li>
+<li><strong>How to verify:</strong> A new Run shows the Ready condition True and a successful client response, with one field changed.</li>
+</ul>
 <h3 id="exercise-4-diagnose-finite-work">Exercise 4: Diagnose finite work<a class="heading-anchor" href="#exercise-4-diagnose-finite-work" aria-label="Link to this section">#</a></h3>
 <p>The fixed task can start successfully and still fail its own contract. Increasing an unrelated Deployment count would not repair it. A retry policy also cannot turn a deterministic injected failure into a correct result without changing the intended input.</p>
 <p><strong>Expected:</strong> Task exit 2 and terminal Failed condition identify the injected application outcome.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the Job&#x27;s terminal condition together with the task container&#x27;s terminated exit code.</li>
+<li><strong>Why it is correct:</strong> Exit code 2 from a started container with condition Failed means the task itself reported failure, not the controller or the image.</li>
+<li><strong>Plausible wrong approach:</strong> Raising backoffLimit retries the same deterministic input, so every attempt exits 2 and the Job still fails, only later.</li>
+<li><strong>How to verify:</strong> The record cites Failed and exit 2 together, and shows neither DeadlineExceeded nor an image waiting reason.</li>
+</ul>
 <h3 id="exercise-5-write-a-minimal-incident-timeline">Exercise 5: Write a minimal incident timeline<a class="heading-anchor" href="#exercise-5-write-a-minimal-incident-timeline" aria-label="Link to this section">#</a></h3>
 <p>A reviewable timeline separates what was seen from what was inferred and what was actually changed. It should make a failed hypothesis useful evidence rather than erase it after a later successful attempt.</p>
 <p><strong>Expected:</strong> Each claim cites a bounded field/line and object identity; synthetic facts are labeled.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write four rows for one case: what you observed, what you inferred, the one change you made and the condition that would accept it.</li>
+<li><strong>Why it is correct:</strong> Separating observation from hypothesis lets a reviewer see which field or log line supported each step and which belief was later disproved.</li>
+<li><strong>Plausible wrong approach:</strong> Rewriting the timeline after the fix to show only the successful step erases the failed hypothesis that ruled out a cause.</li>
+<li><strong>How to verify:</strong> Every row cites an object UID and a bounded field or line, and synthetic rows are labeled.</li>
+</ul>
 <h3 id="exercise-6-verify-recovery-and-cleanup">Exercise 6: Verify recovery and cleanup<a class="heading-anchor" href="#exercise-6-verify-recovery-and-cleanup" aria-label="Link to this section">#</a></h3>
 <p>Recovery needs evidence at the failed layer plus the intended application result. Cleanup has its own identity and deadline contract, especially after timeout or cancellation. A same-name replacement must remain untouched.</p>
 <p><strong>Expected:</strong> Relevant controller/application checks pass and only recorded owned UIDs are removed.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List the check that failed originally plus the end-to-end client result, then the UIDs you created and nothing else.</li>
+<li><strong>Why it is correct:</strong> Recovery is proven at the layer that broke, and cleanup is safe only against identities you recorded at creation.</li>
+<li><strong>Plausible wrong approach:</strong> Deleting every object labeled app=hello would remove same-name replacements or another learner&#x27;s objects the run never created.</li>
+<li><strong>How to verify:</strong> Post-repair checks pass, and the delete list matches the creation record UID for UID.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A large dump of every namespace, log and Secret is not a better diagnosis and exceeds the course scope. Start from the owned source, identity and first discriminating condition. Do not turn a source-admission refusal into a fabricated cluster event or copy synthetic fixture timestamps into a live incident report.</p>
 <p>The offline reference classifies supplied facts only. It does not discover a real incident or establish that a proposed repair was applied. Keep predicted outcomes, actual observations and confirmed recovery as separate entries.</p></article>

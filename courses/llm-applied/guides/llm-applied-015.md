@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-014`, `llm-028`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-014` (Supervised fine-tuning data and answer-target masks) and `llm-028` (llm-028). They introduce the notation this lesson needs for full sft and answer-only objective.
 
 ## Learning objectives
 
@@ -18,13 +18,13 @@ This chapter performs real CPU gradient updates on the course's small causal dec
 
 The Methods Desk dataset now defines a behavior worth testing. Before using a pretrained model, the course reduces the machinery to a small causal decoder with literal token IDs. The reduction keeps the computation real: embeddings, attention, normalization, a feed-forward block, logits, loss, backward propagation and optimizer updates all execute. It removes the temptation to explain a successful run as natural-language understanding when the visible task can be examined directly.
 
-Let theta_t denote the model state after t optimizer updates. A training iteration first evaluates the objective at theta_t, computes its gradient and then constructs theta_(t+1). The recorded loss belongs to the state at which it was evaluated. This is why the last value in a20-iteration pre-update curve describes theta_19, while a final post-training evaluation describes theta_20.
+Let theta_t denote the model state after t optimizer updates. A training iteration first evaluates the objective at theta_t, computes its gradient and then constructs theta_(t+1). The recorded loss belongs to the state at which it was evaluated. This is why the last value in a 20-iteration pre-update curve describes theta_19, while a final post-training evaluation describes theta_20.
 
 The qualified reference preserves that distinction. It recomputes final training loss from the frozen final state, alongside held-out loss. A report should identify which state produced each number. Otherwise a seemingly minor logging label can make two candidates or two datasets appear to have been evaluated at the same checkpoint when they were not.
 
 ## Follow the supervised signal through the decoder
 
-The two training rows contain prompt and answer symbols. After shifting, the model receives three input positions per row and predicts a 16-way vocabulary distribution at each position. Only four target positions contribute to the answer objective. The shape ledger later in the chapter shows how a[2,3] token matrix becomes[2,3,32] hidden states, two attention heads and finally[2,3,16] logits.
+The two training rows contain prompt and answer symbols. After shifting, the model receives three input positions per row and predicts a 16-way vocabulary distribution at each position. Only four target positions contribute to the answer objective. The shape ledger later in the chapter shows how a[2,3] token matrix becomes `[2, 3, 32]` hidden states, two attention heads and finally `[2, 3, 16]` logits.
 
 At an active target position, cross entropy encourages the target logit relative to the other vocabulary logits. Its derivative contains the predicted class probabilities minus the target indicator, scaled by the active-event denominator. This local derivative then flows through the output projection, feed-forward and attention paths into earlier parameters. The independent zero-logit probe isolates that first step without relying on the randomly initialized decoder's output.
 
@@ -76,9 +76,11 @@ Keep retention tasks and multiple independent answer families when evaluating re
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-015/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `llm-torch-cpu` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-015.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-015.py` in the declared `llm-torch-cpu` profile. *Build an explicit SFT batch*, *Measure the initial state* and *Perform actual full fine-tuning* need only PyTorch and NumPy and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-015/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Measure the initial state* and *Perform actual full fine-tuning* reuse the helper and fixture introduced in *Build an explicit SFT batch*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Inputs shape `(2, 3)`; labels `[[-100, 5, 3], [-100, 6, 3]]`; 4 active targets. Example B should give: Both losses finite; all model parameters trainable; count below 50000. Example C should give: 20 finite losses; training loss decreases; an embedding parameter changes. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -86,7 +88,7 @@ Construct shifted inputs and answer-only labels, using-100 for the prompt-predic
 
 ## Trace the full-SFT state and objective
 
-The model uses vocabulary 16, width 32, two attention heads and context capacity 32. For a training batch with \(B=2\), \(T=3\), token and position embeddings combine into[2, 3, 32]. The QKV projection produces[2, 3, 96], then each component becomes[2, 2, 3, 16] after splitting into two heads. Attention scores have shape[2, 2, 3, 3], with a causal allowed-position relation. The output logits return to[2, 3, 16].
+The model uses vocabulary 16, width 32, two attention heads and context capacity 32. For a training batch with \(B=2\), \(T=3\), token and position embeddings combine into `[2, 3, 32]`. The QKV projection produces `[2, 3, 96]`, then each component becomes `[2, 2, 3, 16]` after splitting into two heads. Attention scores have shape `[2, 2, 3, 3]`, with a causal allowed-position relation. The output logits return to `[2, 3, 16]`.
 
 The trainable parameter ledger is explicit:
 
@@ -103,13 +105,13 @@ The trainable parameter ledger is explicit:
 
 No weights are tied in this decoder. Parameter count does not equal total training memory: gradients, Adam moment state, activations and temporary attention tensors contribute separately. The CPU example does not measure GPU peak allocation or optimizer sharding.
 
-The two sequences yield four active targets:5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability \(\frac{1}{16}\) and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is(\(\frac{1}{16}\)-1)/4=-15/64, and every other class gradient is \(\frac{1}{64}\). The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
+The two sequences yield four active targets: 5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability \(\frac{1}{16}\) and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is (\(\frac{1}{16}\)-1)/4=-15/64, and every other class gradient is \(\frac{1}{64}\). The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
 
 Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a 20-entry curve records states before updates 1 through 20: its final element describes the model after 19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.
 
 The objective is teacher-forced next-token cross entropy. It conditions each position on the supplied prefix, including previous true answer tokens. Autoregressive generation instead conditions later positions on its own earlier outputs. A lower teacher-forced loss does not guarantee exact generated answers or correct stopping behavior. The lesson deliberately evaluates token loss and parameter changes; it does not silently substitute them for a generation-quality test.
 
-The held-out sequence[7, 2, 5, 3] changes the first prompt token while preserving the second prompt token 2 and the answer[5, 3]. A model could succeed by learning a shortcut from token 2 to 5 and then to 3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.
+The held-out sequence `[7, 2, 5, 3]` changes the first prompt token while preserving the second prompt token 2 and the answer `[5, 3]`. A model could succeed by learning a shortcut from token 2 to 5 and then to 3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.
 
 The decoder returns a detached key/value cache, but this training objective discards it and uses full uncached sequences. Reusing that detached cache across training segments would change the gradient boundary. Treat it as an inference facility unless a separate truncated-training objective is explicitly designed and tested.
 
@@ -195,7 +197,7 @@ assert (
 )
 ```
 
-**Expected:** inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.
+**Expected:** inputs shape `(2, 3)`; labels `[[-100, 5, 3], [-100, 6, 3]]`; 4 active targets.
 
 ### Example B: Measure the initial state
 
@@ -240,21 +242,24 @@ assert not torch.equal(before, model.token.weight.detach())
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says 20 updates, 4 active training targets and no natural-language competence claim. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Measure the initial state*, predict its result from the prompt alone: Calculate initial training loss and a held-out prompt loss before any update; count trainable parameters. Write the guess beside the stated outcome (both losses finite; all model parameters trainable; count below 50000). Then predict how the decisive case, *Write an honest adaptation receipt*, should end: Record update count, active training targets, train/heldout losses and the literal-token limitation. For full supervised fine-tuning of a tiny causal decoder, the finish condition is: Inputs shape `(2, 3)`; labels `[[-100, 5, 3], [-100, 6, 3]]`; 4 active targets. Receipt says 20 updates, 4 active training targets and no natural-language competence claim.
 
 ## Exercises
 
-1. **Build an explicit SFT batch.** Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.
-   **Expected:** inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.
-   **Verify:** Save the assertion results for exercise 1, including inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.
+1. **Build an explicit SFT batch.** Use sequences `[1, 2, 5, 3]` and `[1, 4, 6, 3]`, masking the first shifted target.
+   **Expected:** inputs shape `(2, 3)`; labels `[[-100, 5, 3], [-100, 6, 3]]`; 4 active targets.
+   **Verify:** Save the assertion results for exercise 1, including inputs shape `(2, 3)`; labels `[[-100, 5, 3], [-100, 6, 3]]`; 4 active targets.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Measure the initial state.** Calculate initial training loss and a held-out prompt loss before any update; count trainable parameters.
    **Expected:** both losses finite; all model parameters trainable; count below 50000.
    **Verify:** Save the assertion results for exercise 2, including both losses finite; all model parameters trainable; count below 50000.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Perform actual full fine-tuning.** Run 20 Adam updates at learning rate 0.01, clearing gradients each time.
    **Expected:** 20 finite losses; training loss decreases; an embedding parameter changes.
    **Verify:** Save the assertion results for exercise 3, including 20 finite losses; training loss decreases; an embedding parameter changes.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Inspect the mask derivative.** Differentiate cross entropy with respect to fresh zero logits under the same labels.
    **Expected:** ignored prompt positions have zero gradient; answer positions do not.
@@ -276,19 +281,21 @@ If held-out success disappears after changing the second prompt token, investiga
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate full sft and answer-only objective for the fixture in *Build an explicit SFT batch*. Hint 2: change one literal in *Measure the initial state* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Inspect the mask derivative*, with its stated result (ignored prompt positions have zero gradient; answer positions do not). If *Write an honest adaptation receipt* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Full SFT, Answer-only objective, Forgetting using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain full sft, answer-only objective and forgetting using *Build an explicit SFT batch*. Recompute its result (inputs shape `(2, 3)`; labels `[[-100, 5, 3], [-100, 6, 3]]`; 4 active targets) from the inputs. Change one input in *Perform actual full fine-tuning* and predict whether the stated result (20 finite losses; training loss decreases; an embedding parameter changes) still holds. Say which part of full supervised fine-tuning of a tiny causal decoder the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-014`, `llm-028` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Build an explicit SFT batch* cannot be reconstructed without the solution, revisit `llm-applied-014` (Supervised fine-tuning data and answer-target masks) and `llm-028` (llm-028). Otherwise keep the six observations from full supervised fine-tuning of a tiny causal decoder and continue to `llm-applied-016` (Low-rank adaptation: dimensions, gradients and a real update).
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch training mechanics](https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for full sft: [PyTorch training mechanics](https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html), reviewed 2026-10-22. The fixtures for *Build an explicit SFT batch*, *Measure the initial state* and *Perform actual full fine-tuning* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

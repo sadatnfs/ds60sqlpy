@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A cookie is a small value the browser stores and sends according to its scope and attributes. A common session design stores an unpredictable session identifier in a cookie and keeps application state on the server. The identifier is a bearer credential: possession may allow the server to associate a request with that session. Do not put sensitive application state into an unsigned client value and treat it as trusted.</p>
 <p>Session lifetime involves creation, authentication transitions, inactivity, absolute expiry and logout. Regenerating the identifier after privilege changes helps address fixation, but safe concurrency and invalidation policies still matter. HttpOnly limits script access to a cookie, Secure restricts transport to HTTPS, and SameSite controls some cross-site sending behavior. These attributes support different defenses and do not replace authorization.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Cookie:</strong> A small name and value pair that a server sets with <code>Set-Cookie</code> and the browser returns on later matching requests.</li>
+<li><strong>Session identifier:</strong> A random, unguessable value stored in a cookie that links a browser&#x27;s requests to state kept on the server.</li>
+<li><strong>Session fixation:</strong> An attack in which the attacker plants a known session identifier; regenerating the identifier at login defeats it.</li>
+<li><strong>Cookie attributes:</strong> Settings such as <code>HttpOnly</code>, which hides a cookie from scripts, <code>Secure</code>, which limits it to HTTPS, and <code>SameSite</code>.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Configure session behavior before session_start and before output. Prefer cookie-only identifiers and strict session handling. Real session storage can lock during a request, so write-close when the required state update is complete in applications that support concurrent requests. The CLI reference uses a pure state transition to demonstrate expiry; it does not claim to create or test a browser session.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -215,6 +222,15 @@ ini_set(&#x27;session.use_strict_mode&#x27;, &#x27;1&#x27;);</code></pre>
 <p>Time is supplied so the transition is testable.</p>
 <pre class="highlighted-code"><code class="language-php">$expired = $now - $session[&#x27;last_seen&#x27;] &gt; 1800;</code></pre>
 <p><strong>Expected observation:</strong> The inactivity policy is visible instead of relying on an unspecified browser lifetime.</p>
+<h3 id="contrast-case-identity-read-from-a-plain-cookie">Contrast case: identity read from a plain cookie<a class="heading-anchor" href="#contrast-case-identity-read-from-a-plain-cookie" aria-label="Link to this section">#</a></h3>
+<p>The first version trusts a cookie the browser sends. The second reads the identity from server-side session storage.</p>
+<pre class="highlighted-code"><code class="language-php">// trusts the client
+$userId = (int) ($_COOKIE[&#x27;user_id&#x27;] ?? 0);
+
+// trusts server storage keyed by a session identifier
+session_start();
+$userId = $_SESSION[&#x27;user_id&#x27;] ?? null;</code></pre>
+<p>A cookie value is whatever the client chooses to send. A request carrying <code>Cookie: user_id=1</code> makes the first version act as user 1, with no password and no server check. In the second version the cookie carries only a random session identifier, and <code>user_id</code> is stored on the server, set after a verified login. Guessing someone&#x27;s identifier is impractical when it is long and random. The CLI reference does not run this code; it models the expiry rule on an array.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-which-data-is-in-the-browser-and-which-is-on-the-server">Exercise 1: Explain which data is in the browser and which is on the server.<a class="heading-anchor" href="#exercise-1-explain-which-data-is-in-the-browser-and-which-is-on-the-server" aria-label="Link to this section">#</a></h4>

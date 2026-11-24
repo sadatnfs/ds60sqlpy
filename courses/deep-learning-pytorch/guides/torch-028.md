@@ -69,7 +69,7 @@ Adam maintains \(m_t=\beta_1m_{t-1}+(1-\beta_1)g_t\) and \(v_t=\beta_2v_{t-1}+(1
 
 The weights-only negative control is deliberately given the same next noise tensor as the uninterrupted run. Its different result therefore isolates missing optimizer history rather than simultaneously changing the batch and the optimizer. It is a stronger experiment than comparing two restarted jobs whose data order and RNG streams are also unknown. The paired TensorFlow chapter tests the same reconstruction principle, although its scalar objective and optimizer rate differ from this PyTorch fixture; their literal weights are not a cross-framework equality oracle.
 
-The RNG timeline has an easily missed construction step. torch.manual_seed(7) sets an initial stream. Creating nn.Linear consumes initialization randomness even though the code subsequently overwrites its weight with zero. The two initial updates use zero noise and no further random draws. The saved RNG state therefore represents a particular position after construction, not simply the number 7. The uninterrupted path next draws a three-value probe, then a2×1 noise tensor, and then updates.
+The RNG timeline has an easily missed construction step. torch.manual_seed(7) sets an initial stream. Creating nn.Linear consumes initialization randomness even though the code subsequently overwrites its weight with zero. The two initial updates use zero noise and no further random draws. The saved RNG state therefore represents a particular position after construction, not simply the number 7. The uninterrupted path next draws a three-value probe, then a 2×1 noise tensor, and then updates.
 
 The child reconstructs the model and optimizer, loads their saved state, and only then restores torch RNG state. Restoring before constructing Linear would let initialization consume a draw from the restored stream. Setting the seed again would return to the stream's beginning instead of its saved position. Matching the three-value probe checks this ordering directly before the weight comparison tests the next noisy update. [PyTorch 2.9 reproducibility guidance](https://docs.pytorch.org/docs/2.9/notes/randomness.html).
 
@@ -163,7 +163,7 @@ assert (
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The checkpoint holds Adam step 2 and data position 2, the fresh-process continuation reproduces the random probe and the next weight within 1e-6, a weights-only restart diverges, and the owned directory is removed. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Create nontrivial training state. Predict exercise 6, Verify cleanup and bounded claims, from its prompt alone: Remove the owned checkpoint directory and report that the literal CPU batch contract was tested. Then explain why this finish condition holds: The checkpoint holds Adam step 2 and data position 2, the fresh-process continuation reproduces the random probe and the next weight within 1e-6, a weights-only restart diverges, and the owned directory is removed. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -199,15 +199,15 @@ If a supposed saved snapshot changes in memory, check state_dict aliasing. If th
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Save the complete local contract) alters one assumption of Example A (Create nontrivial training state). Hint 2: exercise 4, Restore in a fresh interpreter, should end at probe matches and next weight agrees within 1e-6; position 3. Work backward from it. Hint 3: exercise 5, Expose a weights-only restart, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Training checkpoint, RNG state, Data position using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Record uninterrupted continuation, from its inputs alone. Predict whether exercise 3, Replay a saved random state, survives one changed input. Then explain Training checkpoint, RNG state, Data position in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-027` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Create nontrivial training state) cannot be rebuilt without help, revisit `torch-027` first. Otherwise keep your exercise 2 attempt, Inspect the new optimizer state, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

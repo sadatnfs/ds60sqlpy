@@ -10,6 +10,14 @@ Process text without confusing byte positions, Unicode characters and visible gr
 
 Open `julia-003` in `/classroom` with its prepared `julia` runtime. Worked case A (UTF-8 character starts) and worked case B (canonical normalization) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-003: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Code unit:** One byte of a UTF-8 `String`; `ncodeunits` counts them, and string indices are positions in this byte sequence.
+- **Code point:** One Unicode scalar value, stored in a `Char`, that can occupy between one and four UTF-8 code units.
+- **StringIndexError:** The error raised when an index falls inside a multibyte character, which is why code steps with `nextind` or `eachindex`.
+- **Grapheme:** A user-perceived character, such as a letter plus a combining accent, that can span several code points.
+- **Normalization:** Rewriting text to a canonical form such as NFC with `Unicode.normalize`, so composed and decomposed spellings compare equal.
+
 ## Text has several useful lengths
 
 Julia strings use UTF-8. A byte is a storage unit, a Unicode scalar value is represented by a `Char`, and a visible grapheme may contain several scalar values. These notions coincide for simple ASCII text but diverge for accented characters and many other writing systems.
@@ -69,6 +77,8 @@ For bounded text processing, state whether offsets refer to bytes, characters or
 ## Diagnose boundary errors
 
 An ASCII-only fixture can hide indexing mistakes. Add multibyte and combining examples, empty strings and invalid positions. Use the exception to identify the failed assumption, not to catch every indexing error and silently skip text. An empty input also needs a defined policy before taking a first character.
+
+A short diagnostic routine helps here. For a failing string, print `length`, `ncodeunits` and `collect(eachindex(s))` side by side. If the failing index is missing from that list, the code computed a byte position by arithmetic instead of asking the string where the next character starts.
 
 Text length should not be treated as a language-independent measure of information or effort. A byte budget is useful for storage and transport. A grapheme count may be useful for a user interface. A model tokenizer provides another representation with its own boundaries. These counts should not be substituted for one another without an explicit purpose.
 

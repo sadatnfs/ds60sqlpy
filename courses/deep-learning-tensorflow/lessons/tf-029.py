@@ -13,7 +13,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: loss \(\log(1+e^{-1})\) within 1e-6.
 
 # Exercise 3: Check shift invariance
-# Compare softmax[1000,999] with softmax[0, -1].
+# Compare `softmax([1000, 999])` with `softmax([0, -1])`.
 # Expected: probabilities agree within 1e-6.
 
 # Exercise 4: Inspect gradients

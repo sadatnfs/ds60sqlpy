@@ -31,7 +31,7 @@ assert.equal(Number(process.versions.node.split('.')[0]), 24);
 assert.equal(process.release.name, 'node');
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(Number(process.versions.node.split('.')[0]), 24)`. Restoring the original line brings back the worked observation: major version 24; process.release.name is node.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(Number(process.versions.node.split('.')[1]), 24);`. Restoring `assert.equal(Number(process.versions.node.split('.')[0]), 24);` brings back: major version 24; process.release.name is node.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Number(process.versions.node.split('.')[0]), 24)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -48,7 +48,7 @@ assert.equal(typeof document, 'undefined');
 assert.equal(typeof window, 'undefined');
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(typeof window, 'undefined')`; after it the line reads `assert.equal(typeof window, 'undefined');` again and both undefined.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(typeof window, 'undefined!');`. Restoring `assert.equal(typeof window, 'undefined');` brings back: both undefined.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(typeof window, 'undefined')` accepts.
 

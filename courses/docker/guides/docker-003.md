@@ -16,6 +16,13 @@ The layer belongs to that container. A restart of the same container generally r
 
 A path is meaningful inside a filesystem namespace. `/app/server.py` inside a container need not exist at that path on your laptop. A bind mount can deliberately map a host directory into a container; it also creates a path by which container processes can change host files. Later lessons treat that relationship explicitly rather than assuming all paths are interchangeable.
 
+### Key terms
+
+- **Image layers:** The read-only filesystem layers an image supplies, shared unchanged by every container created from it.
+- **Merged view:** The single filesystem a container sees, combining the image layers with its own writable changes.
+- **Container lifetime:** The span from creation to removal; a restart keeps the writable layer, while removal and recreation discard it.
+- **Read-only root filesystem:** A runtime setting that refuses writes to packaged paths, so only explicit mounts remain writable.
+
 ## Anatomy and a trace you can follow
 
 The fixture Dockerfile sets `WORKDIR /app` and copies `server.py` there. `docker run IMAGE python -c ...` starts in that image’s configured directory unless overridden. `--read-only` makes the container root filesystem read-only, but a separately mounted temporary filesystem or volume can still be writable. This is a property of each mount, not a promise that the process has no state.
@@ -86,11 +93,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Writing important data to the container's writable layer and losing it when Compose recreates the service. Expecting a file created in one container to appear in another without a shared mount. Removing `read_only` instead of adding a tmpfs for scratch files.
 
-Exercise 4 is this chapter's boundary case: Diagnose a missing file after compose up recreates a service. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a missing file after compose up recreates a service. Record the container ID from `docker compose ps -q app` before and after `up`, then note which path the missing file was written to, so the evidence separates recreation from a bad write. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using image layers, writable layer, container lifetime and read-only root filesystem. Reconstruct worked example 2 (Try a write on a read-only root) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Predict whether a file written to `/tmp` in the container survives `restart`, `up --force-recreate` and an image rebuild. Then reconstruct worked example 2 (Try a write on a read-only root) with one different value, predict what changes, and name which of image layers, writable layer, container lifetime and read-only root filesystem the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

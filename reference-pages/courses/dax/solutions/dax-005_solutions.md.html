@@ -237,23 +237,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Repair EVALUATE SUM(Sales[NetAmount]).</p>
 <p>Wrap the scalar: EVALUATE ROW(&quot;Revenue&quot;,SUM(Sales[NetAmount])).</p>
+<p><strong>Why it fits this model:</strong> EVALUATE accepts a table expression, while SUM returns a scalar. ROW builds a one-row table with a named column, so the corrected query returns Revenue = 187.</p>
+<p><strong>Tempting mistake:</strong> Wrapping the scalar in CALCULATE instead, as in EVALUATE CALCULATE ( SUM ( Sales[NetAmount] ) ). The expression is still a scalar, so the query fails the same way.</p>
+<p><strong>How to confirm:</strong> The repaired result has exactly one row and one column, Revenue, with the value 187.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the projection to include Quantity.</p>
 <p>The first two rows have quantities 2 and 1; keep Amount rather than replacing it silently.</p>
+<p><strong>Why it fits this model:</strong> SELECTCOLUMNS takes name and expression pairs, so adding &quot;Quantity&quot;, Sales[Quantity] extends the projection without changing which two rows TOPN selected.</p>
+<p><strong>Tempting mistake:</strong> Replacing the Amount pair with Quantity, or writing &quot;Amount&quot;, Sales[Quantity]. The second form keeps a revenue label on a unit column.</p>
+<p><strong>How to confirm:</strong> The result should show three columns: S1 with 20 and 2, then S2 with 4 and 1.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a query returning three rows in descending SaleID order.</p>
 <p>TOPN(3,Sales,Sales[SaleID],DESC) chooses S8, S7, S6; an outer ORDER BY makes that display order explicit.</p>
+<p><strong>Why it fits this model:</strong> TOPN with DESC chooses the set S8, S7 and S6, but TOPN does not promise an output order. The outer ORDER BY [Line] DESC states the display order explicitly.</p>
+<p><strong>Tempting mistake:</strong> Keeping TOPN on ASC and only changing ORDER BY to DESC. That shows S3, S2 and S1 in descending order, which is the wrong set displayed backward.</p>
+<p><strong>How to confirm:</strong> The rows should read S8 with 36, S7 with 20 and S6 with 20, in that order.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose the name RevenueUSD being used as a measure in a later separate query.</p>
 <p>Define a measure or reconstruct the query. An alias in one returned table does not install model metadata.</p>
+<p><strong>Why it fits this model:</strong> The name RevenueUSD lives only in that one result table. A later query sees only the model&#x27;s measures, so it must define its own measure or reuse [NetRevenue].</p>
+<p><strong>Tempting mistake:</strong> Referencing [RevenueUSD] in a second EVALUATE as if it were a measure. The query fails because no model object has that name.</p>
+<p><strong>How to confirm:</strong> Starting the second query with DEFINE MEASURE Sales[RevenueUSD] = [NetRevenue] and evaluating ROW ( &quot;RevenueUSD&quot;, [RevenueUSD] ) returns 187.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Predict what changes if TOPN orders only by a tied amount.</p>
 <p>More than N rows can be returned at a tie; add a unique key if an exact-sized selection is the intended contract.</p>
+<p><strong>Why it fits this model:</strong> TOPN keeps every row tied with the last value it accepts. Ranked by NetAmount, the top values are 40, 36 and 27, and then four lines (S1, S5, S6 and S7) all share 20.</p>
+<p><strong>Tempting mistake:</strong> Expecting TOPN ( 4, Sales, Sales[NetAmount], DESC ) to return four rows. It returns seven because all four tied lines at 20 enter together.</p>
+<p><strong>How to confirm:</strong> COUNTROWS on that TOPN returns 7; adding Sales[SaleID], ASC as a second ordering key returns exactly S3, S8, S4 and S1.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain how a query differs from a calculated table.</p>
 <p>A query returns a requested table now; a calculated table is model content computed during processing and used later.</p>
+<p><strong>Why it fits this model:</strong> A query is evaluated when it is submitted, under the filters it states. A calculated table is computed during model refresh and stored, so its values do not respond to report filters.</p>
+<p><strong>Tempting mistake:</strong> Building a calculated table of category revenue to feed a region slicer. Its stored Paper 91 and Home 96 stay fixed when North is chosen.</p>
+<p><strong>How to confirm:</strong> The query evaluated with Customer[Region] = &quot;North&quot; returns Paper 71 and Home 36, while the stored calculated table still shows 91 and 96.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

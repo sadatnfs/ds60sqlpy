@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-038.md</code>.</p>
 <h3 id="exercise-1-explain-why-valid-json-can-still-be-invalid-application-input">Exercise 1: Explain why valid JSON can still be invalid application input.<a class="heading-anchor" href="#exercise-1-explain-why-valid-json-can-still-be-invalid-application-input" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It may contain the wrong structure, types, ranges or required fields.</p>
+<p><strong>Approach:</strong> Separate syntax from meaning: decoding proves the text is JSON, while field checks prove it has the required keys, types and ranges.</p>
 <p><strong>Why:</strong> json_decode only checks syntax, so types, ranges and required fields still need validation.</p>
+<p><strong>Plausible wrong approach:</strong> Accepting any successfully decoded value fails because {&quot;minutes&quot;:&quot;thirty&quot;} is valid JSON with the wrong field type.</p>
+<p><strong>How to verify:</strong> That input decodes without error but is rejected by the <code>is_int</code> field check with a clear message. A record with <code>minutes</code> set to 30 passes the same check and continues to the next step.</p>
 <h3 id="exercise-2-add-a-bounded-decoding-depth-and-explicit-parse-errors">Exercise 2: Add a bounded decoding depth and explicit parse errors.<a class="heading-anchor" href="#exercise-2-add-a-bounded-decoding-depth-and-explicit-parse-errors" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Malformed or too-deep input produces an intentional failure.</p>
+<p><strong>Approach:</strong> Pass a depth of 32 and <code>JSON_THROW_ON_ERROR</code>, and catch <code>JsonException</code> where the input arrives.</p>
 <p><strong>Why:</strong> The depth limit bounds nesting, and the flag turns malformed input into a JsonException.</p>
+<p><strong>Plausible wrong approach:</strong> Using the default depth with no flag fails because malformed input returns null, which looks the same as valid null.</p>
+<p><strong>How to verify:</strong> Malformed text and an input nested deeper than the limit both reach the catch block with messages.</p>
 <h3 id="exercise-3-parse-a-small-study-record-and-round-trip-it-through-a-temporary-stream">Exercise 3: Parse a small study record and round-trip it through a temporary stream.<a class="heading-anchor" href="#exercise-3-parse-a-small-study-record-and-round-trip-it-through-a-temporary-stream" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The field contract passes and the returned bytes match the encoded value.</p>
+<p><strong>Approach:</strong> Decode, validate the record, encode it again, write it to <code>php://temp</code>, rewind, read it back and compare the strings.</p>
 <p><strong>Why:</strong> A temporary stream behaves like a file in memory, so the round trip shows that the written bytes equal the encoded value.</p>
+<p><strong>Plausible wrong approach:</strong> Reading immediately after <code>fwrite</code> fails because the stream cursor sits at the end, so the read returns an empty string.</p>
+<p><strong>How to verify:</strong> The value read after <code>rewind</code> is identical to the encoded string, and the field contract still passes.</p>
 <h3 id="exercise-4-diagnose-an-empty-read-caused-by-the-stream-cursor-position">Exercise 4: Diagnose an empty read caused by the stream cursor position.<a class="heading-anchor" href="#exercise-4-diagnose-an-empty-read-caused-by-the-stream-cursor-position" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Rewind before reading from the beginning.</p>
+<p><strong>Approach:</strong> Check where the cursor is with <code>ftell</code> after writing, then call <code>rewind</code> before reading from the start.</p>
 <p><strong>Why:</strong> After writing, the cursor sits at the end of the stream, so a read returns nothing until rewind moves it back.</p>
+<p><strong>Plausible wrong approach:</strong> Reopening <code>php://temp</code> to read fails because each open creates a new empty stream, not the one you wrote.</p>
+<p><strong>How to verify:</strong> <code>ftell</code> reports 5 after writing notes and 0 after <code>rewind</code>, and the read returns notes.</p>
 <h3 id="exercise-5-reject-an-unexpected-field-type-and-an-oversized-input-string">Exercise 5: Reject an unexpected field type and an oversized input string.<a class="heading-anchor" href="#exercise-5-reject-an-unexpected-field-type-and-an-oversized-input-string" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The program checks both byte budget and data contract before use.</p>
+<p><strong>Approach:</strong> Check <code>strlen($input)</code> against a byte limit before decoding, then check the decoded field type with <code>is_int</code>.</p>
 <p><strong>Why:</strong> A byte budget limits work before parsing, and the field check rejects data that parses but breaks the contract.</p>
+<p><strong>Plausible wrong approach:</strong> Decoding first and measuring later fails because the oversized input has already used memory and processing time.</p>
+<p><strong>How to verify:</strong> An input over the limit is rejected before <code>json_decode</code> runs, and a string <code>minutes</code> value is rejected after.</p>
 <h3 id="exercise-6-explain-why-user-controlled-paths-need-an-ownership-policy">Exercise 6: Explain why user-controlled paths need an ownership policy.<a class="heading-anchor" href="#exercise-6-explain-why-user-controlled-paths-need-an-ownership-policy" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A path can escape the intended data area or expose unrelated files; identifiers should map through a reviewed boundary.</p>
+<p><strong>Approach:</strong> Map a short identifier through a reviewed allowlist to a file inside one data directory, never using the raw input as a path.</p>
 <p><strong>Why:</strong> Paths from users can traverse outside the data area, so the program should map identifiers to files it owns.</p>
+<p><strong>Plausible wrong approach:</strong> Joining user text onto a base directory fails because ../ segments can reach files outside the intended folder.</p>
+<p><strong>How to verify:</strong> An identifier of ../secrets is rejected, while a listed identifier resolves to a file inside the data directory. Logging the resolved path with <code>realpath</code> shows it still begins with the data directory.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-038_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

@@ -14,6 +14,13 @@ Activation checkpointing saves selected intermediates and recomputes others duri
 
 
 
+### Key terms
+
+- **Gradient accumulation:** Summing gradients over several microbatches before one optimizer step to emulate a larger batch.
+- **Microbatch weighting:** Scaling each microbatch loss so the accumulated gradient equals the average over the full batch.
+- **Activation checkpointing:** Discarding selected activations in forward and recomputing them in backward to trade compute for memory.
+- **Frozen weights:** Parameters with gradient tracking disabled, which need no gradient or optimizer-state memory.
+
 ## Worked examples
 
 ### Worked example 1
@@ -37,6 +44,15 @@ print("CPU accumulation oracle:", weighted, wrong)
 ```
 
 **Expected observation:** Correct weighted gradient 3.5 versus incorrect 5.
+
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `sizes` | `[3, 1]` |
+| `means` | `[2.0, 8.0]` |
+| `weighted` | `3.5` |
+| `wrong` | `5.0` |
 
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
@@ -62,27 +78,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: Compute weighted accumulation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute weighted accumulation** in the examples above.
+**Trap to avoid:** Averaging the two means, `(2 + 8)/2 = 5`, gives the single example in the second microbatch the same weight as the three in the first, so it counts three times as much as it should.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Find unequal-batch normalization error
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **find unequal-batch normalization error** in the examples above.
+**Trap to avoid:** Trusting that the loop is right because it matches the full-batch gradient on evenly divisible data hides the error, which only appears for an uneven final microbatch.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Place optimizer steps
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **place optimizer steps** in the examples above.
+**Trap to avoid:** Calling `zero_grad()` inside the microbatch loop discards earlier contributions, so only the last microbatch affects the update.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain checkpoint recomputation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain checkpoint recomputation** in the examples above.
+**Trap to avoid:** Checkpointing every layer when memory is not the constraint adds recomputation with no benefit.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Account for frozen weights
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **account for frozen weights** in the examples above.
+**Trap to avoid:** Assuming a frozen model costs nothing in memory leads to under-budgeting by the full parameter size.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design equal-update tests
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design equal-update tests** in the examples above.
+**Trap to avoid:** Running the comparison with dropout enabled and different seeds produces differences that hide or mimic accumulation bugs.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

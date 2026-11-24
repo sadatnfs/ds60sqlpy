@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-trace-stable-sorting">Exercise 1: Trace stable sorting<a class="heading-anchor" href="#exercise-1-trace-stable-sorting" aria-label="Link to this section">#</a></h3>
 <p>Equal-key records preserve input order.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>trace stable sorting</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Trace a stable sort of <code>[(2, A), (1, B), (2, C)]</code> by key: B moves first, then A and C keep their input order, giving <code>[(1, B), (2, A), (2, C)]</code>.</p>
+<p><strong>Why it is correct here.</strong> A stable sort guarantees that records with equal keys appear in the same relative order as in the input. A came before C, so it stays before C.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming every GPU sort is stable lets downstream code rely on an order an unstable sort may legally change, which then varies between runs or releases.</p>
+<p><strong>How to verify.</strong> The reference uses Python&#x27;s stable <code>sorted</code> and asserts the order. For a GPU library, call the documented stable variant and compare with this result on many duplicate keys.</p>
 <h3 id="exercise-2-specify-duplicate-semantics">Exercise 2: Specify duplicate semantics<a class="heading-anchor" href="#exercise-2-specify-duplicate-semantics" aria-label="Link to this section">#</a></h3>
 <p>State whether order is guaranteed.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>specify duplicate semantics</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Specify duplicate semantics in the contract: state whether equal keys keep input order, and if not, require downstream code to break ties with a secondary key.</p>
+<p><strong>Why it is correct here.</strong> When order among duplicates is unspecified, any consumer depending on it is relying on an accident. Stating the rule makes the dependence visible.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving the rule unstated passes tests on small inputs where an unstable algorithm happens to preserve order, then fails on larger inputs that use a different internal path.</p>
+<p><strong>How to verify.</strong> Test with many equal keys and shuffled payloads, checking either preserved order or tie-breaker order as documented.</p>
 <h3 id="exercise-3-calculate-output-shape">Exercise 3: Calculate output shape<a class="heading-anchor" href="#exercise-3-calculate-output-shape" aria-label="Link to this section">#</a></h3>
 <p>Outer dimensions become output.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate output shape</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Calculate the matrix-multiply output shape: a 2 by 3 matrix times a 3 by 4 matrix contracts the shared dimension 3 and gives 2 by 4.</p>
+<p><strong>Why it is correct here.</strong> The inner dimensions must match and disappear, while the outer dimensions form the result. The reference asserts <code>a[1] == b[0]</code> and reports <code>(a[0], b[1])</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Taking the output as 3 by 3 or 2 by 3 confuses contracted and kept dimensions, and allocating the wrong output buffer causes a library error or an out-of-bounds write.</p>
+<p><strong>How to verify.</strong> Compare with <code>numpy.matmul</code> on random arrays of those shapes and check the result shape and values.</p>
 <h3 id="exercise-4-account-for-temporary-storage">Exercise 4: Account for temporary storage<a class="heading-anchor" href="#exercise-4-account-for-temporary-storage" aria-label="Link to this section">#</a></h3>
 <p>Workspace can affect peak live memory.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>account for temporary storage</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Account for temporary storage: sorting and some matrix algorithms request a workspace buffer, so peak memory is inputs plus outputs plus workspace.</p>
+<p><strong>Why it is correct here.</strong> Workspace can be comparable to the input size for sorts, so it affects whether a large operation fits in memory alongside other live tensors.</p>
+<p><strong>A plausible wrong approach.</strong> Budgeting only inputs and outputs leads to out-of-memory errors that appear only on large arrays.</p>
+<p><strong>How to verify.</strong> Query the library&#x27;s workspace size for the shape, or measure peak memory during the call, and compare with the budget.</p>
 <h3 id="exercise-5-separate-plan-creation">Exercise 5: Separate plan creation<a class="heading-anchor" href="#exercise-5-separate-plan-creation" aria-label="Link to this section">#</a></h3>
 <p>Measure cold setup and steady execution.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate plan creation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate plan creation from execution: libraries such as FFT create a plan for a given shape and dtype, so measure cold setup once and steady execution over repeated calls.</p>
+<p><strong>Why it is correct here.</strong> Plan creation selects algorithms and allocates resources, and its cost is paid once per configuration. Including it in every timing misrepresents steady throughput.</p>
+<p><strong>A plausible wrong approach.</strong> Reusing a plan prepared for a different shape or dtype gives wrong results or errors, so caching must be keyed by both.</p>
+<p><strong>How to verify.</strong> Time the first call and the median of later calls separately, then call with a new shape and confirm a new plan is created.</p>
 <h3 id="exercise-6-choose-a-release-specific-contract">Exercise 6: Choose a release-specific contract<a class="heading-anchor" href="#exercise-6-choose-a-release-specific-contract" aria-label="Link to this section">#</a></h3>
 <p>Use the documentation matching the prepared package.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose a release-specific contract</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Choose a release-specific contract: read the documentation version matching the library release installed, since stability guarantees and supported dtypes can change.</p>
+<p><strong>Why it is correct here.</strong> Function behavior, defaults and supported types differ between releases. Citing the matching documentation ties the contract to the tested code.</p>
+<p><strong>A plausible wrong approach.</strong> Relying on the latest online docs while running an older release can promise features or guarantees the installed version does not have.</p>
+<p><strong>How to verify.</strong> Record the installed version at runtime and link the documentation page for that version in the notes.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Stable duplicate order and matrix output shape (2,4).</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-107_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

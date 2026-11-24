@@ -197,6 +197,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-045</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Middleware wraps the view with behavior that can inspect requests and responses. Ordering determines which component sees an input first and which sees the response last. This chapter records the real Django middleware sequence for a successful view and for a view that raises an exception.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Middleware:</strong> A Django component built from <code>get_response</code> that can act on the request before the view and on the response after it.</li>
+<li><strong>get_response:</strong> The callable a middleware receives that invokes the next middleware or, at the innermost layer, the view.</li>
+<li><strong>Middleware order:</strong> The MIDDLEWARE list order: requests pass from outer to inner components, and responses return from inner to outer.</li>
+<li><strong>Exception conversion:</strong> Django turning a view exception into an HTTP response, here 500, before outer middleware sees the response.</li>
+</ul>
 <h3 id="mechanism-nested-wrappers-form-a-request-pipeline">Mechanism: nested wrappers form a request pipeline<a class="heading-anchor" href="#mechanism-nested-wrappers-form-a-request-pipeline" aria-label="Link to this section">#</a></h3>
 <p>A middleware factory receives get_response and returns a callable. That callable performs work before invoking the next component, then can inspect or modify the response afterward. With an outer and inner middleware, the request travels outer-to-inner-to-view; the response returns view-to-inner-to-outer.</p>
 <p>This nesting is why middleware ordering is part of application behavior. Session middleware must prepare session state before components that use it. Authentication middleware relies on session handling in a standard session-auth configuration. Security headers, compression and caching can also interact according to their positions.</p>
@@ -209,6 +216,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The second view raises an exception containing private diagnostic text. The client is configured to observe the resulting HTTP response rather than reraising the exception to the test. It receives 500, and both middleware after markers still appear in the expected reverse order.</p>
 <p>The public response does not contain the private diagnostic phrase. That assertion distinguishes safe public handling from internal error visibility. Production logs can retain a controlled traceback and request identity without exposing those details to the caller.</p>
 <p>A middleware that needs cleanup regardless of all possible errors should still use appropriate finally/context-manager ownership. The observed view-exception conversion does not justify assuming that every failure inside middleware initialization, streaming iteration or external cleanup will behave identically.</p>
+<h3 id="worked-example-a-short-circuit-changes-with-middleware-order">Worked example: a short circuit changes with middleware order<a class="heading-anchor" href="#worked-example-a-short-circuit-changes-with-middleware-order" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python">trace <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">maintenance</span><span class="syntax-punctuation">(</span>get_response<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">middleware</span><span class="syntax-punctuation">(</span>request<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> request<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">path</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/admin/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            trace<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">maintenance:short-circuit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+            <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">503</span><span class="syntax-punctuation">}</span>
+        <span class="syntax-keyword">return</span> get_response<span class="syntax-punctuation">(</span>request<span class="syntax-punctuation">)</span>
+
+    <span class="syntax-keyword">return</span> middleware
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">timing</span><span class="syntax-punctuation">(</span>get_response<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">middleware</span><span class="syntax-punctuation">(</span>request<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        trace<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">timing:before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        response <span class="syntax-operator">=</span> get_response<span class="syntax-punctuation">(</span>request<span class="syntax-punctuation">)</span>
+        trace<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">timing:after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> response
+
+    <span class="syntax-keyword">return</span> middleware
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">view</span><span class="syntax-punctuation">(</span>request<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    trace<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">view</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">200</span><span class="syntax-punctuation">}</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">build</span><span class="syntax-punctuation">(</span>chain<span class="syntax-punctuation">,</span> view<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    handler <span class="syntax-operator">=</span> view
+    <span class="syntax-keyword">for</span> factory <span class="syntax-operator">in</span> <span class="syntax-builtin">reversed</span><span class="syntax-punctuation">(</span>chain<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        handler <span class="syntax-operator">=</span> factory<span class="syntax-punctuation">(</span>handler<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> handler
+
+
+<span class="syntax-keyword">for</span> order <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>maintenance<span class="syntax-punctuation">,</span> timing<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>timing<span class="syntax-punctuation">,</span> maintenance<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    trace<span class="syntax-operator">.</span>clear<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    response <span class="syntax-operator">=</span> build<span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">,</span> view<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">path</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">/admin/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>f<span class="syntax-operator">.</span>__name__ <span class="syntax-keyword">for</span> f <span class="syntax-operator">in</span> order<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> response<span class="syntax-punctuation">,</span> trace<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">[&#x27;maintenance&#x27;, &#x27;timing&#x27;] {&#x27;status&#x27;: 503} [&#x27;maintenance:short-circuit&#x27;]
+[&#x27;timing&#x27;, &#x27;maintenance&#x27;] {&#x27;status&#x27;: 503} [&#x27;timing:before&#x27;, &#x27;maintenance:short-circuit&#x27;, &#x27;timing:after&#x27;]</code></pre>
+<p>The <code>build</code> function copies how Django assembles the <code>MIDDLEWARE</code> setting: it starts from the view and wraps factories from the last entry to the first, so the first entry ends up outermost. Both orders return 503 for an admin path, and in both the view never runs, because the maintenance middleware returned a response instead of calling <code>get_response</code>. What changes is who sees the request. With maintenance first, the timing middleware is skipped entirely, so blocked requests vanish from latency metrics. With timing first, it measures the refusal too. The same reasoning explains why Django lists <code>SecurityMiddleware</code> near the top and places authentication before anything that reads <code>request.user</code>. When you add a middleware that can answer early, decide which outer layers must still observe that answer and place it beneath them.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why did adding middleware change authentication behavior?</strong> Its position may alter when session or user state exists. Read the required ordering of each component and test the actual chain.</p>
 <p><strong>Why might an after hook see 500 instead of catching the original exception?</strong> Django may have converted the downstream exception to a response. Use the framework&#x27;s documented exception hooks or logging behavior for the diagnostic you need.</p>

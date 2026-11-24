@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-005`, `apache-004`.
 
+## Key terms
+
+- **Topic partition:** An ordered, append-only Kafka log within a topic. Offsets identify positions only inside one partition, so a topic has no global order across partitions.
+- **Offset:** The sequential position of a record within one partition. A consumer reads by offset without removing the record from the log.
+- **Record key:** The optional part of a record that the producer's partitioner commonly uses to send related events to the same partition.
+- **Consumer group:** A set of consumers that share a topic's partitions and store their progress under one group identifier, independently of other groups that replay the same topic.
+- **KRaft:** Kafka's built-in metadata quorum mode, used here as one combined broker and controller process with replication factor one.
+
 ## A log retains records independently from a reader
 
 Kafka stores records in topic partitions. A partition is an ordered append-only
@@ -99,7 +107,7 @@ cluster is involved. All operations stay inside the copied owned local workshop.
 Check bootstrap connectivity, advertised listeners, topic existence, partition
 metadata and consumer positions separately. A successful bootstrap connection is
 not enough if the broker advertises an unreachable address for later requests.
-The workshop uses kafka:9092 inside its private Compose network and publishes no
+The workshop uses `kafka:9092` inside its private Compose network and publishes no
 host listener.
 
 **Interview discussion: how does Kafka differ from a destructive queue?** Reading

@@ -514,17 +514,21 @@ def solution(spec):
     content += ["## Explained practice answers", ""]
     for i, item in enumerate(spec["practice"], 1):
         content += [f"### Exercise {i}", "", item["question"], "", item["answer"], ""]
+        if "why" in item:
+            content += [
+                f"**Why it fits this model:** {item['why']}",
+                "",
+                f"**Tempting mistake:** {item['wrong']}",
+                "",
+                f"**How to confirm:** {item['check']}",
+                "",
+            ]
     content += [
         "## Review the boundary",
         "",
         (
-            "A sound answer can use a different readable expression if "
-            "its population, context and units agree. Compare "
-            "counterexamples as well as ordinary rows. Where an "
-            "engine, model role or newer feature is assumed, record "
-            "that assumption separately from the offline calculation. "
-            "Never reuse a supplied table as evidence that an edited "
-            "formula ran."
+            "Another readable expression is sound when its population, context "
+            "and units match; record any assumed engine separately."
         ),
         "",
     ]

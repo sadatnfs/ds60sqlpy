@@ -53,7 +53,7 @@ assert.equal(attempts, 3);
 assert.deepEqual(waits, [50, 100]);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(waits, [50, 100])`. Restoring the original line brings back the worked observation: three attempts; delays 50 and 100; result ready.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(waits, [50, 100])`. Restoring `let attempts = 0;` brings back: three attempts; delays 50 and 100; result ready.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(waits, [50, 100])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -89,7 +89,7 @@ await assert.rejects(
 assert.equal(transient, 3);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(transient, 3)`; after it the line reads `async () => { transient += 1` again and permanent attempted once; transient attempted three times and still rejects.
+**Expected:** Before the repair the run fails with an `AssertionError` at `async () => { transient -= 1`. Restoring `async () => { transient += 1` brings back: permanent attempted once; transient attempted three times and still rejects.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(transient, 3)` accepts.
 

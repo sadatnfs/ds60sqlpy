@@ -198,6 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-reorder-incoming-fields">1. Reorder incoming fields<a class="heading-anchor" href="#1-reorder-incoming-fields" aria-label="Link to this section">#</a></h3>
 <p>Use explicit named selections or validate a positional interface carefully. A raw array without a recorded order is easy to misuse.</p>
+<p>Build the request as {&quot;region&quot;: &quot;south&quot;, &quot;tickets&quot;: 2, &quot;usage&quot;: 40.0}. pd.DataFrame([r]) keeps column names and ColumnTransformer selects usage and tickets by name, so the probability equals the one from the original order. Passing list(r.values()) as a NumPy row would feed &quot;south&quot; to the usage imputer and fail, or silently swap two numeric fields if both were numbers.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Uses pd, dataset() and fit_pipeline() from main.py.</span>
 frame <span class="syntax-operator">=</span> dataset<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 model <span class="syntax-operator">=</span> fit_pipeline<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">[</span>frame<span class="syntax-operator">.</span>label_available_at <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">180</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
@@ -213,9 +214,11 @@ second <span class="syntax-operator">=</span> model<span class="syntax-operator"
 <p><strong>Expected:</strong> The same training-derived policy is used in batch and serving.</p>
 <h3 id="3-change-a-category">3. Change a category<a class="heading-anchor" href="#3-change-a-category" aria-label="Link to this section">#</a></h3>
 <p>Decide whether to reject, map or encode unknown values. Document and test the same policy at training and serving boundaries.</p>
+<p>The encoder uses handle_unknown=&quot;ignore&quot;, so region &quot;east&quot; becomes all zeros and a probability is still returned with no error. That is a policy, not a neutral default. Verify it by scoring the same row as &quot;east&quot; and as an all-zero baseline and seeing equal probabilities.</p>
 <p><strong>Expected:</strong> Behavior matches the chosen encoder/API contract.</p>
 <h3 id="4-inspect-fitted-state">4. Inspect fitted state<a class="heading-anchor" href="#4-inspect-fitted-state" aria-label="Link to this section">#</a></h3>
 <p>Record the relevant pipeline/version with the model artifact. Recomputing those values from a later dataset changes the model.</p>
+<p>train holds the 77 rows with label_available_at &lt;= 180. Read model.named_steps[&quot;features&quot;].named_transformers_[&quot;numeric&quot;].named_steps[&quot;scale&quot;].mean_ and compare it with train[[&quot;usage&quot;, &quot;tickets&quot;]].mean(); they agree, and differ from the mean over all 120 rows. In example_two the same idea is visible in miniature: fitting on [0, 2] gives 99 for 100, while fitting on [0, 2, 100] gives about 1.41.</p>
 <p><strong>Expected:</strong> They come only from training rows.</p>
 <h3 id="5-design-a-parity-fixture">5. Design a parity fixture<a class="heading-anchor" href="#5-design-a-parity-fixture" aria-label="Link to this section">#</a></h3>
 <p>Use normal, boundary and rejected cases. Compare errors as well as successful probabilities.</p>

@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-056-repair-backup-and-operations">apache-056: Repair, backup and operations<a class="heading-anchor" href="#apache-056-repair-backup-and-operations" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-055</code>, <code>apache-051</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Snapshot:</strong> A point-in-time set of hard links to a table&#x27;s SSTables created by nodetool snapshot. It lives on the same disk and is not an off-site backup.</li>
+<li><strong>SSTable import:</strong> Loading SSTable files from a snapshot into a table with a compatible schema, as the project does in an owned restore target.</li>
+<li><strong>Hinted handoff:</strong> Writes a coordinator stores for a temporarily unavailable replica and replays when it returns. It does not cover indefinite outages.</li>
+<li><strong>Retained volume:</strong> A persistent container volume that keeps a node&#x27;s state across process replacement but shares the failure domain of its host disk.</li>
+<li><strong>Restore verification:</strong> Independently checking the schema, version and exact rows after a restore, since a backup is unproven until its restore has been exercised.</li>
+</ul>
 <h3 id="recovery-needs-data-schema-and-an-operational-boundary">Recovery needs data, schema and an operational boundary<a class="heading-anchor" href="#recovery-needs-data-schema-and-an-operational-boundary" aria-label="Link to this section">#</a></h3>
 <p>A persistent container volume can retain a node&#x27;s state across process replacement, but it is not automatically a backup on another failure domain. A snapshot can retain SSTable hardlinks at a point in time, but restoring useful data also needs the compatible schema, version, permissions and topology assumptions. A backup policy is incomplete until its chosen restore procedure has been exercised and its result independently checked.</p>
 <p>Repair reconciles replicas; it is not a substitute for an external backup. Compaction reorganizes local storage; it is not a backup either. Hints can help with some temporary replica unavailability, but do not cover every failure or indefinite outage. Keeping these mechanisms separate makes a recovery plan easier to evaluate when the system is under pressure.</p>

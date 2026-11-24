@@ -12,8 +12,126 @@ BASE = Path(__file__).resolve().parents[1]
 ROOT = BASE.parents[1]
 
 
+def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    data: dict[str, object] = {}
+    for name, value in pairs:
+        if name in data:
+            raise ValueError("Duplicate JSON key in units.json: " + name)
+        data[name] = value
+    return data
+
+
+def key_terms_section(unit: dict) -> str:
+    """Render the lesson's 3 to 5 authored key terms as a guide section."""
+    key = unit["id"]
+    terms = unit.get("key_terms")
+    if not isinstance(terms, dict) or not 3 <= len(terms) <= 5:
+        raise ValueError(key + " needs 3 to 5 lesson-specific key_terms")
+    folded = [name.casefold() for name in terms]
+    if len(set(folded)) != len(folded):
+        raise ValueError(key + " repeats a key term")
+    for name, definition in terms.items():
+        if not isinstance(definition, str) or not name.strip() or not definition.strip():
+            raise ValueError(key + " needs a nonempty term and definition")
+        if name != name.strip() or definition != definition.strip() or ":" in name:
+            raise ValueError(key + " key term " + repr(name) + " is not a clean label")
+        if not definition.endswith("."):
+            raise ValueError(key + " key term " + repr(name) + " needs a complete sentence")
+        if "\u2014" in name + definition or "\u2013" in name + definition:
+            raise ValueError("Use professional prose without em or en dashes")
+    items = "\n".join(f"- **{name}:** {definition}" for name, definition in terms.items())
+    return "## Key terms\n\n" + items
+
+
+def with_key_terms(key: str, prose: str, section: str) -> str:
+    """Place the key terms after the opening section, before the mechanism."""
+    lines = prose.split("\n")
+    fenced = False
+    headings = []
+    for index, line in enumerate(lines):
+        if line.startswith(("```", "~~~")):
+            fenced = not fenced
+        elif not fenced and line.startswith("## "):
+            headings.append(index)
+    if len(headings) < 2:
+        raise ValueError(key + " needs an opening section before its mechanism")
+    split = headings[1]
+    before = "\n".join(lines[:split]).rstrip()
+    return before + "\n\n" + section + "\n\n" + "\n".join(lines[split:])
+
+
+def worked_examples_section(unit: dict, seen_code: dict[str, str]) -> str:
+    """Render the lesson's focused worked examples with their interpretation."""
+    key = unit["id"]
+    examples = unit.get("worked_examples")
+    if not isinstance(examples, list) or not examples:
+        raise ValueError(key + " needs at least one worked example")
+    titles = set()
+    blocks = []
+    for example in examples:
+        if not isinstance(example, dict) or set(example) - {
+            "title",
+            "code",
+            "output",
+            "interpretation",
+        }:
+            raise ValueError(key + " has a malformed worked example")
+        title = example.get("title", "")
+        code = example.get("code", [])
+        output = example.get("output", [])
+        interpretation = example.get("interpretation", "")
+        if not isinstance(title, str) or not title.strip() or title != title.strip():
+            raise ValueError(key + " needs a clean worked example title")
+        if title.casefold() in titles:
+            raise ValueError(key + " repeats worked example title " + repr(title))
+        titles.add(title.casefold())
+        if not isinstance(code, list) or not code or not all(isinstance(x, str) for x in code):
+            raise ValueError(key + " worked example " + repr(title) + " needs code lines")
+        if not isinstance(output, list) or not all(isinstance(x, str) for x in output):
+            raise ValueError(key + " worked example " + repr(title) + " has malformed output")
+        if not isinstance(interpretation, str) or len(interpretation.split()) < 40:
+            raise ValueError(key + " worked example " + repr(title) + " needs an interpretation")
+        source = "\n".join(code)
+        ast.parse(source, filename=key + " worked example")
+        if source in seen_code:
+            raise ValueError(key + " repeats the worked example code of " + seen_code[source])
+        seen_code[source] = key
+        text = "\n".join([title, source, *output, interpretation])
+        if "\u2014" in text or "\u2013" in text or "```" in text:
+            raise ValueError(key + " worked example " + repr(title) + " has a dash or fence")
+        block = f"## Worked example: {title}\n\n```python\n{source}\n```\n\n"
+        if output:
+            block += "Expected output:\n\n```text\n" + "\n".join(output) + "\n```\n\n"
+        blocks.append(block + interpretation.strip())
+    return "\n\n".join(blocks)
+
+
+def with_worked_examples(key: str, prose: str, section: str) -> str:
+    """Place worked examples after the last worked case section."""
+    lines = prose.split("\n")
+    fenced = False
+    headings = []
+    for index, line in enumerate(lines):
+        if line.startswith(("```", "~~~")):
+            fenced = not fenced
+        elif not fenced and line.startswith("## "):
+            headings.append(index)
+    cases = [i for i in headings if lines[i].startswith("## Worked case")]
+    if not cases:
+        raise ValueError(key + " needs a worked case before its worked examples")
+    later = [i for i in headings if i > cases[-1]]
+    if not later:
+        return prose.rstrip() + "\n\n" + section
+    split = later[0]
+    before = "\n".join(lines[:split]).rstrip()
+    return before + "\n\n" + section + "\n\n" + "\n".join(lines[split:])
+
+
 def outputs() -> dict[Path, str]:
-    units = json.loads((BASE / "authoring/units.json").read_text("utf-8"))
+    units = json.loads(
+        (BASE / "authoring/units.json").read_text("utf-8"),
+        object_pairs_hook=_reject_duplicate_keys,
+    )
     if [u["id"] for u in units] != [f"pyweb-{i:03}" for i in range(1, 73)]:
         raise ValueError("Keep all 72 stable tutorial identities in order")
     if len({u["id"] for u in units}) != len(units):
@@ -21,6 +139,8 @@ def outputs() -> dict[Path, str]:
     result: dict[Path, str] = {}
     rows = []
     lessons = []
+    term_sets: dict[frozenset[str], str] = {}
+    seen_code: dict[str, str] = {}
     for unit in units:
         key = unit["id"]
         prose = (BASE / "authoring/chapters" / (key + ".md")).read_text("utf-8").strip()
@@ -33,6 +153,13 @@ def outputs() -> dict[Path, str]:
             raise ValueError(key + " needs developed, distinct worked treatments")
         if "\u2014" in prose:
             raise ValueError("Use professional prose without em dashes")
+        section = key_terms_section(unit)
+        term_set = frozenset(name.casefold() for name in unit["key_terms"])
+        if term_set in term_sets:
+            raise ValueError(key + " repeats the key terms of " + term_sets[term_set])
+        term_sets[term_set] = key
+        prose = with_key_terms(key, prose, section)
+        prose = with_worked_examples(key, prose, worked_examples_section(unit, seen_code))
         prefix = f"courses/{BASE.name}"
         guide = f"{prefix}/guides/{key}.md"
         source = f"{prefix}/examples/{key}{unit['suffix']}"

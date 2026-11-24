@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Trace quotient and remainder on several counts",
+      "body": "The grouping rule in Example 2 is easiest to trust when you check that quotient and remainder rebuild the original count. The last column applies `q * size + r` by hand.\n\n```text\nitems  size  items %/% size  items %% size  q * size + r\n17     5     3               2              15 + 2 = 17\n19     5     3               4              15 + 4 = 19\n20     5     4               0              20 + 0 = 20\n-7     5     -2              3              -10 + 3 = -7\n```\n\nThe first three rows match counting objects into boxes of five. The last row is a boundary worth seeing once: R's `%/%` rounds toward negative infinity, so -7 %/% 5 is -2 and the remainder is a positive 3, which still satisfies the rebuild identity. A stock count should never be negative, so a negative input is a signal to validate the data before grouping rather than to interpret -2 boxes. Compare that with `19 / 5`, which prints 3.8, a ratio that is meaningful for an average but is not a count of full groups."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Combine the two values and inspect the result with `typeof()`. The reference asserts `typeof(c(1L, 2.5)) == \"double\"`.",
+      "why": "An atomic vector holds one type. 2.5 cannot be stored as an integer, so R promotes the integer 1L to double; the value 1 is unchanged, only its storage widens. Printing the vector shows `[1] 1.0 2.5` because both entries share one numeric format.",
+      "wrong": "Predicting \"integer\" because the first element was written with the L suffix, or expecting each element to keep its own type. That would be true of a list, not of `c()`.",
+      "verify": "`typeof(c(1L, 2.5))` prints \"double\" and `is.integer(c(1L, 2.5))` is FALSE."
+    },
+    {
+      "approach": "Keep the starter's identifier as the character string \"0017\". The reference asserts `is.character(identifier)` and `nchar(identifier) == 4`.",
+      "why": "An identifier labels a record; nobody adds or averages identifiers, and its leading zeros are part of the label. Character storage preserves all four characters exactly as written.",
+      "wrong": "Converting with `as.numeric(\"0017\")` yields 17, and `as.character()` on that gives \"17\", only two characters. Two different codes such as \"017\" and \"0017\" would also collapse into the same number 17.",
+      "verify": "`print(identifier)` shows \"0017\" with quotes, and `nchar(identifier)` returns 4. Running `nchar(as.character(as.numeric(identifier)))` returns 2, which shows the loss."
+    },
+    {
+      "approach": "Compute the number of full groups with `19 %/% 5` and the leftover items with `19 %% 5` as two separate results. The reference asserts 3 and 4.",
+      "why": "The starter supplies 19 items and a group size of 5. Three groups use 15 items and 4 remain, and 3 * 5 + 4 rebuilds 19, so the pair accounts for every item.",
+      "wrong": "Using `round(19 / 5)` gives 4, claiming a fourth full group that would need 20 items. Using `ceiling()` answers a different question, the number of boxes needed, which may be valid elsewhere but is not this task.",
+      "verify": "`stopifnot(19 %/% 5 * 5 + 19 %% 5 == 19)` passes, and printing both results shows 3 and 4."
+    },
+    {
+      "approach": "Inspect each side with `typeof()` and compare the two kinds of test: `2L == 2` asks about value after coercion, while `identical(2L, 2)` also compares storage type.",
+      "why": "2L is an integer and 2 is a double, so identity fails even though numeric equality holds. The reference asserts both `!identical(2L, 2)` and `2L == 2` to keep the two claims separate.",
+      "wrong": "Concluding that 2L and 2 are different numbers, or writing `identical(length(x), 3)` as a test. `length()` returns an integer, so that check is FALSE for a three-element vector; `identical(length(x), 3L)` is the matching form.",
+      "verify": "`typeof(2L)` prints \"integer\", `typeof(2)` prints \"double\", and `2L == 2` prints TRUE."
+    },
+    {
+      "approach": "Wrap the comparison as `isTRUE(all.equal(0.1 + 0.2, 0.3, tolerance = 1e-12))` so the check produces one logical value.",
+      "why": "The representation error here is about 5.55e-17, many orders of magnitude below 1e-12, so the tolerance accepts rounding noise while still rejecting a real change in amount.",
+      "wrong": "Writing `0.1 + 0.2 == 0.3` gives FALSE. Using `all.equal()` alone inside `if` or `stopifnot` is also risky: when values differ it returns a text description such as a mean relative difference, not FALSE, so the condition is not a clean logical.",
+      "verify": "The reference also asserts `!isTRUE(all.equal(0.31, 0.3, tolerance = 1e-12))`, so the check still rejects a 0.01 change."
+    },
+    {
+      "approach": "Choose the tolerance from the units and the decision, then test that it rejects a defect you care about. Here 1e-12 covers double rounding for values near 0.3.",
+      "why": "all.equal measures relative difference. For 0.31 against 0.3 that is about 0.03, so 1e-12 correctly rejects it, which is the second check in the reference.",
+      "wrong": "Setting `tolerance = 0.1` so a stubborn check passes. `all.equal(0.31, 0.3, tolerance = 0.1)` returns TRUE, silently accepting a 3 percent error in an amount that should have been exact to the cent.",
+      "verify": "Run both tolerances on 0.31 versus 0.3: 1e-12 gives a difference message, while 0.1 gives TRUE. That contrast is the evidence that a loose tolerance can hide a defect."
+    }
+  ]
+}

@@ -5,6 +5,44 @@
   "minutes": 80,
   "prerequisites": ["apache-061", "apache-057"],
   "concepts": ["Operations, recovery and data verification"],
+  "key_terms": [
+    [
+      "Deep store",
+      "The durable storage where Pinot keeps copies of completed segments, separate from servers' local copies."
+    ],
+    [
+      "Health endpoint",
+      "A narrow liveness check for one component. It does not prove that the expected schema, segments and rows are present."
+    ],
+    [
+      "Segment identity",
+      "The names and metadata of the segments a table should serve, which a recovery check compares after restart."
+    ],
+    [
+      "Read-only verification",
+      "A recovery check that queries the existing table and compares results with known source event identities without recreating or reingesting data."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Identity before and after a stop",
+      "language": "bash",
+      "code": "cd work/pinot\nbash run.sh identity\nbash run.sh stop\nbash run.sh resume\nbash run.sh identity",
+      "interpretation": "Both identity reports should show the same container IDs, image IDs, segment names and exact order rows, because stop and resume keep the containers and their volumes. Identity is read-only, so it is safe to run as often as needed. If the second report has new container IDs, something replaced the containers; if the segment list is empty, the controller lost its ZooKeeper metadata and the next step is reading logs, not running initialize."
+    },
+    {
+      "title": "Replace containers over retained volumes",
+      "language": "bash",
+      "code": "cd work/pinot\nbash run.sh identity\nbash run.sh down\nbash run.sh start\nbash run.sh identity",
+      "interpretation": "Here the container IDs are expected to change while segment metadata and order rows stay the same, because down removes containers but keeps named volumes. That makes this the closer rehearsal for a host replacement. A segment that is listed but returns no rows usually means the server has not finished loading it from deep storage yet, so wait and query again before deciding data was lost. Running initialize here would push a fresh segment and hide exactly the retention failure this test is meant to detect."
+    },
+    {
+      "title": "Compare broker results across the restart",
+      "language": "sql",
+      "code": "SELECT\n  id,\n  region,\n  amount\nFROM\n  ds60_orders\nORDER BY\n  id\nLIMIT 10",
+      "interpretation": "Save the full row list before stopping and compare it after resume and after replacement; all three should be (1, east, 4), (2, west, 9), (3, east, 7). A matching aggregate is weaker evidence than matching rows, since a lost row and a duplicated row can cancel out in a sum. Also compare the totalDocs field in the response; a doubled count with correct distinct IDs points to a segment that was pushed twice under different names."
+    }
+  ],
   "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
   "sources": [
     [

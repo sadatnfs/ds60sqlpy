@@ -8,7 +8,7 @@ Choose and evaluate an abstention policy with explicit costs, coverage and held-
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-010`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-010` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for abstention, coverage and decision costs in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about selective prediction and risk coverage: Answering everything gives coverage 1, accuracy 0.5 and cost 2.5; abstaining on everything gives coverage 0, missing accuracy and cost 0.4; the calibrated-probability cutoff is 0.92; subgroup counts, coverage and cost are reported separately. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## A selective system changes which questions it answers
 
@@ -17,6 +17,14 @@ An assistant can answer, abstain or route a request to a reviewer. These actions
 For an answer indicator \(A_i(t)\) under threshold \(t\), coverage is \(\mathbb{E}[A_i(t)]\) and selective risk is \(\mathbb{E}[L_i\mid A_i(t)=1]\). The latter is undefined when nothing is answered. Keep that condition explicit. A risk-coverage curve shows several policies, but choosing the best-looking point and reporting its same-data performance introduces selection bias.
 
 If a score is a calibrated probability of correctness \(p\), a simple two-action cost rule compares expected answer cost \(c_w(1-p)\) to abstention cost \(c_a\). With zero cost for a correct answer, answering is preferred when \(p\geq1-c_a/c_w\). Different loss structures, reviewer capacity or consequential subgroups require a different rule. A confidence-like number is not automatically a calibrated probability.
+
+## Key terms
+
+- **Coverage:** The fraction of requests a selective system answers instead of abstaining or routing to review.
+- **Selective risk:** The expected loss among answered requests, undefined when nothing is answered.
+- **Risk-coverage curve:** A plot of selective risk against coverage across thresholds.
+- **Abstention threshold:** The score cutoff below which the system abstains, ideally chosen on development data rather than reported on it.
+- **Calibrated probability:** A score whose stated probability of correctness matches observed accuracy, which a confidence-like number need not do.
 
 ## Worked case A: an empirical policy choice
 
@@ -183,7 +191,7 @@ The held-out case exposes a bad threshold. What follows?
 
 ## Interactive figure variant
 
-Select **Interactive Plotly** in the lesson variant control. Its complete program uses the same authored inputs to draw the corresponding risk, calibration or policy curve. The captured figure retains a description and exact data table, and its JSON can be downloaded. Hovering a point does not create new statistical evidence. The default numerical reference remains separately saved.
+The selective prediction and risk coverage curve for abstention, coverage and decision costs is drawn from the same authored inputs when you pick **Interactive Plotly** in the variant control. Hover values add nothing beyond the *Answer everything* numbers; the saved figure keeps a description, its exact data table and downloadable JSON, beside the separately saved numerical reference.
 
 ## Ask an AI tutor about this lesson
 

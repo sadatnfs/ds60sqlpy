@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-009`.
 
 Hard-coded URLs become fragile when route patterns change. Framework URL builders connect a stable endpoint name to its current path. Redirects then ask a client to make another request to a selected target. This chapter generates a resource URL and implements a bounded post-redirect-get flow.
 
+## Key terms
+
+- **Endpoint name:** The identifier Flask registers for a route, normally the view function's name, used to look up the route instead of hard-coding its path.
+- **url_for:** Flask's URL builder, which fills path parameters from keyword arguments and places the remaining arguments in the query string.
+- **Location header:** The response header that names the URL the client should request next after a redirect.
+- **303 See Other:** A redirect status telling the client to retrieve the Location target with GET, commonly sent after a successful form POST.
+- **Post/redirect/get:** A pattern in which a state-changing POST answers with a redirect, so a browser refresh repeats a harmless GET instead of the submission.
+
 ## Mechanism: route identity and destination policy
 
 Flask normally uses the view function's name as an endpoint identity. `url_for("item", item_id=7, language="en")` fills the path parameter and places the remaining option in the query string. This keeps path construction aligned with the registered route instead of duplicating formatting logic across templates and handlers.
@@ -25,6 +33,41 @@ A URL builder does not prove that the resource exists or that the caller can acc
 The client posts destination `dashboard`. The response is 303 with Location `/dashboard`. The client then requests that target and receives the dashboard representation. This is a complete application-level redirect trace.
 
 Posting an external URL as the destination fails with 400 because it is not an allowlisted endpoint name. The program never attempts to validate or fetch that external host. If an application genuinely needs arbitrary return URLs, its contract needs careful scheme, host and normalization checks, including browser interpretation. A narrow named-destination API avoids that additional complexity when it is not a product requirement.
+
+## Worked example: url_for options and redirect statuses
+
+```python
+from flask import Flask, redirect, url_for
+
+app = Flask(__name__)
+
+
+@app.get("/items/<int:item_id>")
+def item(item_id):
+    return {"id": item_id}
+
+
+with app.test_request_context(base_url="https://shop.example"):
+    print(url_for("item", item_id=7))
+    print(url_for("item", item_id=7, _external=True))
+    print(url_for("item", item_id=7, _anchor="reviews", sort="new"))
+    for code in (302, 303, 307):
+        response = redirect(url_for("item", item_id=7), code=code)
+        print(code, response.headers["Location"])
+```
+
+Expected output:
+
+```text
+/items/7
+https://shop.example/items/7
+/items/7?sort=new#reviews
+302 /items/7
+303 /items/7
+307 /items/7
+```
+
+`url_for` builds paths from the endpoint name `item`, not from a hand-typed string, so renaming the URL rule later keeps every generated link correct. An unknown keyword such as `sort` became a query parameter, `_anchor` added a fragment, and `_external=True` used the request's scheme and host to produce an absolute URL. All three redirects share the same `Location`; the difference is what the client does next. After a form POST, 303 tells the browser to follow with GET, which is why the lesson uses it, while 307 would repeat the POST with its body. A misspelled endpoint such as `url_for("items")` raises `BuildError` at link-building time instead of producing a broken link.
 
 ## Failure diagnosis
 

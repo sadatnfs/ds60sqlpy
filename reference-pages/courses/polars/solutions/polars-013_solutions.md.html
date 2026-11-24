@@ -206,9 +206,15 @@ counts <span class="syntax-operator">=</span> frame<span class="syntax-operator"
     pl<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>is_null<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">null_lists</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> counts<span class="syntax-operator">.</span>row<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Why it holds here:</strong> Order 2 has an empty list, so list.len() returns 0; order 3 has a null list, so its length is null and only is_null catches it. Each test counts one order.</p>
+<p><strong>Plausible wrong approach:</strong> Using list.len() == 0 alone and treating its null result as 0 merges order 3 into the empty bucket and reports two empty orders and no unknown ones.</p>
+<p><strong>How to verify:</strong> Run the answer code and assert counts.row(0) == (1, 1); example_one also shows the lengths as [2, 0, None].</p>
 <p><strong>Expected:</strong> There is one of each.</p>
 <h3 id="2-change-the-grain">2. Change the grain<a class="heading-anchor" href="#2-change-the-grain" aria-label="Link to this section">#</a></h3>
 <p>Add a stable item position or item identifier when the source contract supports it. A repeated label is not necessarily a duplicate item.</p>
+<p><strong>Why it holds here:</strong> After explode, order 1 produces two rows, a and b, so order alone repeats. A position within the list, added with int_ranges or a with_row_index per order, makes (order, position) unique.</p>
+<p><strong>Plausible wrong approach:</strong> Using (order, item) as the key fails as soon as one order lists the same item twice, since two real purchases then look like a duplicate.</p>
+<p><strong>How to verify:</strong> Explode the fixture with a position column and assert select(&#x27;order&#x27;, &#x27;position&#x27;).is_unique().all(), while order alone is not unique.</p>
 <p><strong>Expected:</strong> An order_id alone is no longer sufficient.</p>
 <h3 id="3-keep-order-level-metrics">3. Keep order-level metrics<a class="heading-anchor" href="#3-keep-order-level-metrics" aria-label="Link to this section">#</a></h3>
 <p>Item counts and order counts answer different questions. Retain an order-level table for denominators and join it carefully when summarizing items.</p>
@@ -220,15 +226,27 @@ exploded <span class="syntax-operator">=</span> frame<span class="syntax-operato
 <span class="syntax-keyword">assert</span> orders_before <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
 <span class="syntax-comment"># On polars 2.1.0 explode drops the empty-list order and keeps the null list as one null row.</span>
 <span class="syntax-keyword">assert</span> exploded<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">order</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>to_list<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Why it holds here:</strong> Counting orders before explode gives 3 because each input row is one order. Afterwards the order column reads [1, 1, 3]: order 2 disappeared and order 1 appears twice.</p>
+<p><strong>Plausible wrong approach:</strong> Counting rows of the exploded table as orders gives 3 by coincidence here, yet it includes order 1 twice and omits order 2, so the right number arrives for the wrong reason.</p>
+<p><strong>How to verify:</strong> Run the answer code: orders_before is 3 and exploded[&#x27;order&#x27;] is [1, 1, 3], then add a third item to order 1 and watch the exploded count drift to 4.</p>
 <p><strong>Expected:</strong> The count remains 3.</p>
 <h3 id="4-add-a-struct-field">4. Add a struct field<a class="heading-anchor" href="#4-add-a-struct-field" aria-label="Link to this section">#</a></h3>
 <p>A schema version should explain the added field and its units. Positional unpacking can silently change meaning when fields are reordered.</p>
+<p><strong>Why it holds here:</strong> Fields in a struct are addressed by name, so adding z next to x and y and extracting struct.field(&#x27;x&#x27;), &#x27;y&#x27; and &#x27;z&#x27; restores the original three columns.</p>
+<p><strong>Plausible wrong approach:</strong> Unpacking struct values by position, for example from to_dicts to a tuple, silently swaps meanings if the next version stores z first.</p>
+<p><strong>How to verify:</strong> Pack x, y and z with pl.struct, extract all three by name, and assert the result equals the input frame, as example_two does for two fields.</p>
 <p><strong>Expected:</strong> All values and field names are preserved.</p>
 <h3 id="5-transform-a-nested-value">5. Transform a nested value<a class="heading-anchor" href="#5-transform-a-nested-value" aria-label="Link to this section">#</a></h3>
 <p>pl.element()*pl.element() expresses the operation within each list. It preserves the list boundaries while changing the values.</p>
+<p><strong>Why it holds here:</strong> list.eval applies pl.element() * pl.element() inside each list, so [1, 2] becomes [1, 4] and [3] becomes [9] while each row keeps its own list.</p>
+<p><strong>Plausible wrong approach:</strong> Exploding, squaring and grouping back works but needs a row key and can reorder or drop empty lists; a map_elements loop hides the operation in Python.</p>
+<p><strong>How to verify:</strong> Run pl.DataFrame({&#x27;values&#x27;: [[1, 2], [3]]}).select(pl.col(&#x27;values&#x27;).list.eval(pl.element() * pl.element())) and assert the lists are [[1, 4], [9]].</p>
 <p><strong>Expected:</strong> The lists become [[1, 4],[9]].</p>
 <h3 id="6-test-null-nested-elements">6. Test null nested elements<a class="heading-anchor" href="#6-test-null-nested-elements" aria-label="Link to this section">#</a></h3>
 <p>Decide whether the collection is partially observed, invalid or imputable. Do not erase the distinction merely to simplify a numeric aggregation.</p>
+<p><strong>Why it holds here:</strong> A list like [1, None] says the collection exists but one member is unknown, which differs from both an empty list and a null list.</p>
+<p><strong>Plausible wrong approach:</strong> Applying drop_nulls inside the list before aggregating turns it into [1] and reports a complete basket of one.</p>
+<p><strong>How to verify:</strong> Count null elements with list.eval(pl.element().is_null()).list.sum() before aggregating, and check what list.sum returns for [1, None] on your installed version instead of assuming it.</p>
 <p><strong>Expected:</strong> The null remains visible unless explicitly handled.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;polars-013: complete bounded Polars investigation.&quot;&quot;&quot;</span>

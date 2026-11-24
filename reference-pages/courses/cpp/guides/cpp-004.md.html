@@ -201,6 +201,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Write a bounded loop with an explicit invariant.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A branch chooses one path using a Boolean condition. A loop repeats a body while its condition holds. An invariant is a fact that remains true before and after each iteration. A boundary is an input where a decision changes, such as zero for a nonnegative reading. Tracing the index, current value and running total makes hidden state visible.</p>
+<ul>
+<li><strong>branch:</strong> a statement such as <code>if</code> that selects one path using a Boolean condition.</li>
+<li><strong>loop invariant:</strong> a fact about the carried state that holds before and after every iteration, such as the total equaling the sum of the nonnegative values visited so far.</li>
+<li><strong>boundary input:</strong> a value where a decision changes, such as zero for a nonnegative reading.</li>
+<li><strong>range-for loop:</strong> a loop that visits each element once; a by-value loop variable is a copy, so changing it leaves the vector unchanged.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>In <code>for (int value : readings)</code>, the colon means visit each element by value. <code>if (value &gt;= 0)</code> includes zero. The accumulator must start at zero before the loop, otherwise it is either uninitialized or reset on every iteration.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

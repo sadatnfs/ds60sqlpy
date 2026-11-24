@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Predict the summary of values c(2,NA,6) with three unique IDs.</p>
 <p>Rows 3, observed 2, missing 1, mean 4, with the declared unit.</p>
 <p><strong>Expected evidence:</strong> A complete denominator ledger.</p>
+<p><strong>Approach:</strong> Count all rows, then the non-missing values, then average only the observed ones: 3 rows, 2 observed, 1 missing, mean of 2 and 6.</p>
+<p><strong>Why it holds here:</strong> summary.metric_batch uses <code>!is.na(x$values)</code> as its denominator, so the mean is 8 divided by 2, which is 4, and the missing value stays visible in its own count with unit ms.</p>
+<p><strong>Tempting mistake:</strong> Dividing the observed sum by all 3 rows, giving 8/3. The NA is silently treated as zero and the average drops by a third.</p>
+<p><strong>Verify:</strong> <code>identical(s, list(rows = 3L, observed = 2L, missing = 1L, mean = 4, unit = &quot;ms&quot;))</code> returns TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add one new eight-millisecond record and recompute the summary.</p>
 <p>The combined batch has four rows, three observed values, one missing value and mean 16/3 ms.</p>
 <p><strong>Expected evidence:</strong> Known arithmetic 16/3.</p>
+<p><strong>Approach:</strong> Build <code>metric_batch(&quot;d&quot;, 8, &quot;ms&quot;)</code>, combine it with a, and summarize the new batch.</p>
+<p><strong>Why it holds here:</strong> combine_batches concatenates ids and values, so the observed values are 2, 6 and 8 with sum 16 over 3 observed, about 5.33 ms. The row count is 4 and one value is still missing.</p>
+<p><strong>Tempting mistake:</strong> Averaging the two batch means, 4 and 8, to get 6. That gives the one value batch the same weight as the two observed values in a.</p>
+<p><strong>Verify:</strong> <code>isTRUE(all.equal(summary(b)$mean, 16 / 3))</code> returns TRUE, and <code>summary(b)$rows</code> returns 4L.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Independently implement and test the duplicate-ID and equal-length constructor rules.</p>
 <p>Duplicate IDs and vectors of unequal length each raise their specific contract error.</p>
 <p><strong>Expected evidence:</strong> Two distinct rejected input shapes.</p>
+<p><strong>Approach:</strong> Check ids for type, NA, empty strings and duplicates, then check equal lengths, all before <code>structure()</code> attaches the class.</p>
+<p><strong>Why it holds here:</strong> <code>c(&quot;a&quot;, &quot;a&quot;)</code> fails the uniqueness rule, and <code>c(&quot;a&quot;, &quot;b&quot;)</code> with a single value fails the length rule. Each shape reaches its own message, so neither produces a labeled object.</p>
+<p><strong>Tempting mistake:</strong> Skipping the length check. A batch with two ids and one value would report rows 2, observed 1 and missing 0, a ledger whose parts do not add up.</p>
+<p><strong>Verify:</strong> assert_error matches &quot;unique nonempty&quot; for the duplicates and &quot;equal length&quot; for the short vector.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose returning zero for an all-missing batch.</p>
 <p>Return mean NA_real_ and observed 0 while retaining the missing count and unit. Zero is a measured value, not absence of information.</p>
 <p><strong>Expected evidence:</strong> Explicit all-missing behavior.</p>
+<p><strong>Approach:</strong> Return mean <code>NA_real_</code> with observed 0, keeping the missing count and the unit.</p>
+<p><strong>Why it holds here:</strong> With values NA and NA, nothing was measured, so no mean exists. The <code>if (any(observed))</code> guard also avoids <code>mean(numeric(0))</code>, which returns NaN, and the empty batch gets rows 0 and mean NA the same way.</p>
+<p><strong>Tempting mistake:</strong> Returning 0. A reader sees a measured latency of 0 ms, and averaging it with other batches pulls their result down.</p>
+<p><strong>Verify:</strong> <code>is.na(summary(all_missing)$mean)</code> returns TRUE, and <code>summary(all_missing)$missing</code> returns 2L.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Test a forged class object and incompatible-unit combination.</p>
 <p>A forged Inf value fails finite-or-NA validation; a valid seconds batch cannot combine with milliseconds without an explicit conversion. Original inputs remain unchanged.</p>
 <p><strong>Expected evidence:</strong> Rejected boundaries without mutation.</p>
+<p><strong>Approach:</strong> Revalidate inside every public function, then compare units with identical() and stop on a mismatch.</p>
+<p><strong>Why it holds here:</strong> The forged object skips the constructor, but summary calls validate_batch, which reruns it and rejects Inf. A seconds batch fails the unit check, and a&#x27;s id &quot;a&quot; repeated in another batch fails uniqueness.</p>
+<p><strong>Tempting mistake:</strong> Checking only <code>inherits(x, &quot;metric_batch&quot;)</code>. The forged batch would report mean Inf, and concatenating 1 s with values in ms would mix scales a thousand times apart.</p>
+<p><strong>Verify:</strong> assert_error matches &quot;incompatible batch units&quot;, and <code>identical(a, before)</code> returns TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Write the package interface and state the inferential limit of a passing reference.</p>
 <p>Export metric_batch and combine_batches; register S3method(summary,metric_batch); keep helpers internal. Run package checks in a separate multi-file project. These descriptive checks do not establish representativeness or causal effects.</p>
 <p><strong>Expected evidence:</strong> A concrete continuation and bounded scientific claim.</p>
+<p><strong>Approach:</strong> Export metric_batch and combine_batches, register <code>S3method(summary,metric_batch)</code>, and keep validate_batch internal. State that passing checks describe these fixtures only.</p>
+<p><strong>Why it holds here:</strong> Registration lets <code>summary()</code> dispatch to the method without exporting it. validate_batch is a helper, so leaving it out keeps the interface small.</p>
+<p><strong>Tempting mistake:</strong> Using an exportPattern that matches every name, which publishes validate_batch too, or saying the passing checks show latency improved.</p>
+<p><strong>Verify:</strong> <code>grepl(&quot;validate_batch&quot;, namespace, fixed = TRUE)</code> returns FALSE for all three lines.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 8 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

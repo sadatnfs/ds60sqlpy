@@ -1,6 +1,6 @@
 # c-041: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-041_solution.c`, implements all six cases, from the "parse a valid list" case to the "transfer exact grammar boundaries" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -21,13 +21,13 @@ CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 &&
       out[1] == 20 && out[2] == 3);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 && out[1] == 20 && out[2] == 3`. Restoring the original line brings back the worked observation: three values are returned in order.
+**Expected:** With `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[1] == 1 &&` the run stops with `Check failed` at the CHECK on `parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 && out[1] == 20 && out[2] == 3`, because the "parse a valid list" case no longer shows that three values are returned in order. Restoring `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 &&` brings that observation back.
 
 The parser validates the entire grammar before publishing output.
 
 ## Exercise 2: Reject an empty field: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `unsigned out[3] = {10, 9, 9};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "reject an empty field" case, so one line now reads `unsigned out[3] = {10, 9, 9};`. Run the example with that line, use the failing CHECK to find why the parse fails and prior output is unchanged no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -37,7 +37,7 @@ size_t count = 7;
 CHECK(!parse_list("1,,3", out, 3, &count) && out[0] == 9 && count == 7);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!parse_list("1,,3", out, 3, &count) && out[0] == 9 && count == 7`; after it the line reads `unsigned out[3] = {9, 9, 9};` again and the parse fails and prior output is unchanged.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!parse_list("1,,3", out, 3, &count) && out[0] == 9 && count == 7`. Once the line reads `unsigned out[3] = {9, 9, 9};` again, the "reject an empty field" case again shows that the parse fails and prior output is unchanged.
 
 Two separators in a row violate the required-digit state.
 
@@ -100,4 +100,4 @@ Whitespace handling is a deliberate grammar choice. A higher-level input layer c
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer exact grammar boundaries" case to your own c-041 source. Explain why every access in `parse_list` stays within a live object and each owned resource is released. An expected grammar failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "reject an empty field" case apart from ordinary output: the fixture proves its stated grammar, parser state and staged output assumptions, not universal safety.

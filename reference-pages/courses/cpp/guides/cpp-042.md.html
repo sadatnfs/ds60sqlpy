@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Deliver a correct concurrent analyzer and defend its lifetime, failure and performance decisions.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>The bounded parallel analyzer combines parsing, ownership, concurrency and evidence. A serial oracle establishes the intended result independently of scheduling. A task budget controls worker count and input size. Failure accounting names rejected input and cancelled work rather than hiding them inside an apparently successful total.</p>
+<ul>
+<li><strong>serial oracle:</strong> a single-threaded computation that establishes the expected result independently of scheduling.</li>
+<li><strong>task budget:</strong> a limit on worker count and input size.</li>
+<li><strong>conservation of work:</strong> the rule that every accepted task ends as completed, canceled or failed before the outcome is reported.</li>
+<li><strong>failure accounting:</strong> naming rejected input and canceled work instead of hiding them inside an apparently successful total.</li>
+<li><strong>disjoint partition:</strong> input slices that do not overlap, so each worker writes only its own subtotal.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Partition a fixed input by indices, give each worker an independent subtotal, join, then combine. Shared input is const and remains alive through join. The two-worker example avoids concurrent writes to the same result slot. The full host capstone adds strict input parsing, bounded admission, cancellation and a reproducible release packet.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

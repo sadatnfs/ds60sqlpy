@@ -231,7 +231,7 @@ assert.equal(result, 'bad value 8');""",
         ex(
             "Preserve input order in Promise.all",
             "Resolve the second deferred Promise first, then the first.",
-            "result remains first,second.",
+            "result remains `['first', 'second']`.",
             r"""let resolveFirst;
 let resolveSecond;
 const first = new Promise(resolve => { resolveFirst = resolve; });
@@ -269,7 +269,7 @@ assert.deepEqual(trace, ['late']);""",
         ex(
             "Observe FIFO microtasks before an awaited timer",
             "Queue one Promise reaction and one queueMicrotask callback, then await a timer.",
-            "sync,promise,microtask,timer.",
+            "trace `sync`, `promise`, `microtask`, `timer` in that order.",
             r"""const trace = [];
 Promise.resolve().then(() => trace.push('promise'));
 queueMicrotask(() => trace.push('microtask'));
@@ -331,7 +331,7 @@ assert.deepEqual(trace, []);""",
         ex(
             "Complete normally and clean up once",
             "Run the custom operation without aborting, then abort its signal after completion.",
-            "value 7; started,completed,cleaned exactly once.",
+            "value 7; trace `started`, `completed`, `cleaned`, with cleanup exactly once.",
             r"""const controller = new AbortController();
 const trace = [];
 assert.equal(await cancellableValue(7, controller.signal, trace), 7);
@@ -342,7 +342,7 @@ assert.deepEqual(trace, ['started', 'completed', 'cleaned']);""",
         ex(
             "Cancel custom work and release its timer",
             "Start the custom operation and immediately abort.",
-            "rejected reason; started,aborted,cleaned.",
+            "rejected reason; trace `started`, `aborted`, `cleaned`.",
             r"""const controller = new AbortController();
 const trace = [];
 const reason = new Error('stop');

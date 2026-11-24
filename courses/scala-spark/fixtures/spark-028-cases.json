@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Roll back execution policy without rolling back data quality",
       "input_contract": "Choose baseline or broadcast using an explicit Boolean switch over the same accepted facts and reviewed dimension. Switch back to baseline and revalidate the complete product.",
-      "expected": "Both switch positions satisfy the same metric map and bag contract. The disabled position has noBroadcastHashJoin under the controlled configuration.",
+      "expected": "Both switch positions satisfy the same metric map and bag contract. The disabled position has no BroadcastHashJoin under the controlled configuration.",
       "verification": "Assert golden metrics and bag equality after rollback, and inspect the restored baseline plan."
     }
   ],

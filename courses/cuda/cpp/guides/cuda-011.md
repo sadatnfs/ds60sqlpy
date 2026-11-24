@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Compile one `main.cu` with a reviewed `nvcc` command and draw its source-to-executable artifact diagram.
+
 Work through *The `.cu` file, compiler driver and executable* with the concrete cases below. Finish with this evidence:
 preserved compiler output plus a source-to-executable diagram. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A .cu translation unit can contain ordinary host functions and CUDA device functions. nvcc coordinates separate compilation paths, invokes a supported host compiler and links the CUDA runtime. PTX is a virtual instruction representation; a cubin holds device machine code for a target architecture. An executable can package several device images in a fat binary. Loading may select a compatible image or invoke supported JIT compilation of PTX. This explains why source compilation, host linking, device loading and kernel execution can fail at different times. Header suffix .cuh is a convention, not an instruction that executes anything.
+
+### Key terms
+
+- **nvcc:** The CUDA compiler driver that separates host and device code, calls a host compiler and links the CUDA runtime.
+- **PTX:** A virtual GPU instruction set that the driver can just-in-time compile for a compatible architecture.
+- **cubin:** A binary that holds native device machine code for one specific GPU architecture.
+- **Fat binary:** An embedded bundle of several device images, such as cubins for multiple architectures plus PTX.
+- **JIT compilation:** Just-in-time translation of PTX into machine code when a module is loaded on a device.
 
 ## How to run and study this lesson
 

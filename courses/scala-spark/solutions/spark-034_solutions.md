@@ -144,9 +144,9 @@ The independent recovery namespaces prevent one comparison query from consuming 
 
 ### Exercise 4: Distinguish immediate matches from pending unmatched impressions
 
-Read either owned output as ordered(impression_id, click_id) pairs. After phase 1, compare inner and outer sinks with the two-pair literal oracle.
+Read either owned output as ordered (impression_id, click_id) pairs. After phase 1, compare inner and outer sinks with the two-pair literal oracle.
 
-**Expected:** Both sinks contain(i1, c1), (i3, c2). i2/NULL is absent because its possible match interval is not yet finalized. c3 and c4 produce no pair.
+**Expected:** Both sinks contain `(i1, c1)`, `(i3, c2)`. i2/NULL is absent because its possible match interval is not yet finalized. c3 and c4 produce no pair.
 
 ```scala
 def pairs(spark: SparkSession, root: Path, kind: String): Seq[(String, Option[String])] = {
@@ -180,7 +180,7 @@ The exact identities expose both the key condition and the half-open temporal ed
 
 Publish distinct-key 00:30 advancers to both sources, rerun both compatible queries and extract actual watermark/state-removal evidence.
 
-**Expected:** Inner remains two pairs. Outer becomes(i1, c1), (i2, NULL), (i3, c2). Actual watermark reaches at least 00:25 and state removal is positive; the new advancer impression remains pending.
+**Expected:** Inner remains two pairs. Outer becomes `(i1, c1)`, `(i2, NULL)`, `(i3, c2)`. Actual watermark reaches at least 00:25 and state removal is positive; the new advancer impression remains pending.
 
 ```scala
 def progressEvidence(progress: Seq[StreamingQueryProgress]): (Long, Seq[String], Long) = {
@@ -276,4 +276,6 @@ The negative control distinguishes an event-time retention declaration from an a
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Declare both streaming schemas and watermark policies) is built inside the program, so opening the lesson fetches nothing; it expects: Both relations are streaming; the minimum multiple-watermark policy is explicit and no query runs merely from construction. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

@@ -51,7 +51,7 @@ object Main {
       .start(output.toString)
     ownedQueries += query
     try {
-      require(query.awaitTermination(45000L), "Finite query exceeded45-second deadline")
+      require(query.awaitTermination(45000L), "Finite query exceeded 45-second deadline")
       require(query.exception.isEmpty, "Finite query failed")
       RunReceipt(
         query.id.toString,
@@ -180,7 +180,7 @@ object Main {
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+      require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
       spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
       ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-041-")
       val input = ownedRoot.resolve("input");

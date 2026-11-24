@@ -37,7 +37,7 @@ assert.equal(present.value, 7);
 assert.deepEqual(await lookup('missing'), { ok: false, error: 'not_found' });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(await lookup('missing'), { ok: false, error: 'not_found' })`. Restoring the original line brings back the worked observation: known value 7; absent error not_found.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(await lookup('missing'), { ok: true, error: 'not_found' });`. Restoring `assert.deepEqual(await lookup('missing'), { ok: false, error: 'not_found' });` brings back: known value 7; absent error not_found.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.deepEqual(await lookup('missing'), { ok: false, error: 'not_found' })` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -59,7 +59,7 @@ assert.equal(caught, 0);
 assert.deepEqual(result, { ok: false, error: 'not_found' });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(caught, 0)`; after it the line reads `let caught = 0;` again and catch count 0; result still not_found.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(caught, 0)`. Restoring `let caught = 0;` brings back: catch count 0; result still not_found.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(caught, 0)` for this input.
 
@@ -120,7 +120,7 @@ const summaries = outcomes.map((outcome) => {
 assert.deepEqual(summaries, ['value:2', 'error:offline']);
 ```
 
-**Expected:** value:2 and error:offline.
+**Expected:** `value:2` and `error:offline`.
 
 **Verify:** Keep a check equivalent to `assert.deepEqual(summaries, ['value:2', 'error:offline'])`. As a control, change `Promise.resolve(2),` to `Promise.resolve(3),`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 

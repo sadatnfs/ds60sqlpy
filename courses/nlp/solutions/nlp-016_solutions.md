@@ -4,33 +4,33 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 ## Exercise 1: Build teacher-forced inputs
 
-The shift ensures each prediction conditions only on previous target tokens. EOS remains a prediction event, making stopping part of the learned sequence contract. Reject raw reserved markers so the helper cannot accidentally create duplicated or ambiguous boundary tokens.
+The shift ensures each prediction conditions only on previous target tokens. EOS remains a prediction event, making stopping part of the learned sequence contract. Reject raw reserved markers so the helper cannot accidentally create duplicated or ambiguous boundary tokens. A tempting shortcut feeds the same list as both input and target; then the decoder sees repair while predicting repair and the loss collapses toward zero without learning anything. Check that input and target differ by exactly one position and that the empty case yields [BOS] against [EOS].
 
-**Expected:** [BOS,repair] versus[repair,EOS]; empty becomes[BOS] versus[EOS].
+**Expected:** [BOS, repair] versus [repair, EOS]; empty becomes [BOS] versus [EOS].
 
 ## Exercise 2: Trace cross-attention dimensions
 
 The score matrix has one target row and two source columns. Stable softmax normalizes over source positions. Multiplying by values produces the stated two-dimensional output. This exact fixture detects wrong-axis normalization and confusing key/value roles.
 
-**Expected:** Weights sum to one; output[10p,20(1-p)] with \(p=\operatorname{sigmoid}\!\left(\frac1{\sqrt2}\right)\).
+**Expected:** Weights sum to one; output [10p, 20(1-p)] with \(p=\operatorname{sigmoid}\!\left(\frac1{\sqrt2}\right)\).
 
 ## Exercise 3: Mask source padding
 
-The masked source must contribute zero weight even if its value is large or relevant-looking. An all-invalid source cannot supply a meaningful normalized context and is rejected rather than producing NaNs or an invented average.
+The masked source must contribute zero weight even if its value is large or relevant-looking. An all-invalid source cannot supply a meaningful normalized context and is rejected rather than producing NaNs or an invented average. Setting the padded score to a large negative number after softmax, instead of before, leaves the weights summing to less than one and the output no longer equals [10, 0]. Assert the exact output and that the all-invalid call raises.
 
-**Expected:** Output exactly[10,0]; an all-invalid source raises.
+**Expected:** Output exactly [10, 0]; an all-invalid source raises.
 
 ## Exercise 4: Expose greedy search failure
 
-The locally best first token has a weaker continuation. Retaining the alternative lets beam search find the larger joint probability. The result depends on the fixed score and stopping conventions and does not imply that wider beams always improve task quality.
+The locally best first token has a weaker continuation. Retaining the alternative lets beam search find the larger joint probability. The result depends on the fixed score and stopping conventions and does not imply that wider beams always improve task quality. Compare joint probabilities, not first-step scores: greedy commits to tea and ends at .3, while beam keeps coffee and reaches .4.
 
-**Expected:** Greedy tea,EOS probability.3; beam coffee,EOS probability.4.
+**Expected:** Greedy tea, EOS probability .3; beam coffee, EOS probability .4.
 
 ## Exercise 5: Preserve extractive provenance
 
 The baseline returns source text rather than generating a new claim. Its abstention marks no lexical support under its scoring rule, not proof that the corpus contains no semantic answer. Evaluate coverage and semantic relevance separately before using it as a real summarizer.
 
-**Expected:** Return index0 and the unchanged unavailable sentence; refund returns None.
+**Expected:** Return index 0 and the unchanged unavailable sentence; refund returns None.
 
 ## Exercise 6: Explain generation error propagation
 

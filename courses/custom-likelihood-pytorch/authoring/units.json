@@ -9,6 +9,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["observation unit", "Bernoulli likelihood", "latent dependence"],
+    "key_terms": {
+      "Likelihood": "The probability of the recorded observations viewed as a function of unknown parameters; it is not a distribution over those parameters.",
+      "Negative log-likelihood": "The NLL, minus the log likelihood, minimized because logarithms turn products into sums and preserve the ordering of parameter values.",
+      "Observation unit": "The thing that was sampled and measured, which determines which rows may be treated as independent.",
+      "Latent dependence": "Shared unobserved randomness, such as one subject's propensity, that prevents multiplying row probabilities as independent factors."
+    },
+    "worked_examples": [
+      {
+        "title": "Bernoulli score, information and standard error in NumPy",
+        "language": "python",
+        "code": "import numpy as np\n\ny = np.array([1, 0, 1, 1, 0, 1, 1, 1, 0, 1])\n\n\ndef score(p):\n    return np.sum(y / p - (1 - y) / (1 - p))\n\n\nfor p in (0.5, 0.7, 0.9):\n    print(\n        f\"p={p}: log likelihood {np.sum(y * np.log(p) + (1 - y) * np.log1p(-p)):.4f}, score {score(p):.4f}\"\n    )\np_hat = y.mean()\ninfo = len(y) / (p_hat * (1 - p_hat))\nprint(f\"MLE {p_hat}, Fisher information {info:.2f}, standard error {1 / np.sqrt(info):.4f}\")\n",
+        "output": "p=0.5: log likelihood -6.9315, score 8.0000\np=0.7: log likelihood -6.1086, score 0.0000\np=0.9: log likelihood -7.6453, score -22.2222\nMLE 0.7, Fisher information 47.62, standard error 0.1449\n",
+        "interpretation": "These ten trials are treated as independent, so the log likelihood is a sum and the score is \\(\\sum_i y_i/p-(1-y_i)/(1-p)\\). With seven successes, the score at \\(p=0.5\\) is \\(7/0.5-3/0.5=8\\), a positive value saying the likelihood still rises toward larger \\(p\\). At 0.9 it is \\(7/0.9-3/0.1=-22.22\\), a steep fall, because three failures are very unlikely at that rate. The score is exactly zero at 0.7, the sample proportion, which is where the log likelihood peaks at \\(-6.1086\\). The curvature there gives Fisher information \\(10/(0.7\\times0.3)=47.62\\) and a standard error of 0.1449, so with ten trials the proportion is uncertain by roughly 0.15. This calculation is the reference a PyTorch implementation should reproduce: autograd on the summed Bernoulli log likelihood must return 8.0 at 0.5. If repeated rows came from the same subject, the sum would no longer be the joint log likelihood, and 0.1449 would understate the uncertainty."
+      }
+    ],
     "outcome": "Derive a Bernoulli score and explain why repeated-subject observations do not factor marginally.",
     "lab": "Compute the Bernoulli negative log likelihood and its probability gradient for three independent trials, then compare one repeated subject's probability of two successes.",
     "verification": "The loss matches the torch distribution and the gradient equals -2/0.4 + 1/0.6; the same-subject probability of two successes is 0.34, larger than the independent marginal product.",
@@ -29,6 +44,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["weighted likelihood", "global denominator", "partition invariance"],
+    "key_terms": {
+      "Reduction contract": "The explicit statement of which numerator and denominator turn row losses into the objective being optimized.",
+      "Global denominator": "The total count or weight mass across all partitions, used once instead of averaging per-worker means.",
+      "Frequency weight": "A weight that represents replicated observations, unlike reliability or sampling weights.",
+      "Partition invariance": "The property that splitting the same rows across workers leaves the total objective and its gradient unchanged."
+    },
+    "worked_examples": [
+      {
+        "title": "Mean of partition means versus the declared global mean",
+        "language": "python",
+        "code": "import numpy as np\n\nparts = {\"A\": np.array([1.0, 2.0, 3.0]), \"B\": np.array([10.0])}\nmeans = {k: v.mean() for k, v in parts.items()}\nprint(\"partition means\", means)\nprint(\"mean of partition means\", np.mean(list(means.values())))\nnum = sum(v.sum() for v in parts.values())\nmass = sum(v.size for v in parts.values())\nprint(f\"sum of numerators {num} / sum of masses {mass} = {num / mass}\")\ngrad_mean = {k: 1 / v.size for k, v in parts.items()}  # d(local mean)/d(row loss)\nprint(\n    \"implied weight per row if partition means are averaged:\",\n    {k: g / 2 for k, g in grad_mean.items()},\n)\nprint(\"declared weight per row:\", 1 / mass)\n",
+        "output": "partition means {'A': np.float64(2.0), 'B': np.float64(10.0)}\nmean of partition means 6.0\nsum of numerators 16.0 / sum of masses 4 = 4.0\nimplied weight per row if partition means are averaged: {'A': 0.16666666666666666, 'B': 0.5}\ndeclared weight per row: 0.25\n",
+        "interpretation": "Partition A holds three rows with losses 1, 2 and 3, and partition B holds a single row with loss 10. The declared objective is the global mean, \\(16/4=4.0\\), which gives every row weight 0.25. Averaging the two partition means instead gives \\((2+10)/2=6.0\\), a different number for the same data. The weights explain the gap: averaging means gives each row of A weight \\(1/6\\approx0.167\\) and the lone row of B weight 0.5, so B's single row counts three times as much as any row of A. Gradients inherit the same weights, so an optimizer would be pulled toward fitting B. The fix is to carry numerators and masses separately, sum each across partitions and divide once. The same contract applies to weighted losses, where the mass is the sum of weights instead of a row count. A test with unequal partition sizes, like this one, detects the error immediately, while equal partitions would hide it."
+      }
+    ],
     "outcome": "Recover the declared weighted objective from unequal partition numerators and masses.",
     "lab": "Combine unequal partition numerators and weight masses into the declared weighted mean, then replicate the weighting measure.",
     "verification": "Weighted sum 92 over mass 8 gives mean 11.5 (an equal-partition average gives 8.5) with global gradient -3; multiplying every weight by 7 leaves the mean unchanged.",
@@ -49,6 +79,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["reverse automatic differentiation", "finite differences", "gradient oracle"],
+    "key_terms": {
+      "Reverse-mode automatic differentiation": "Propagating sensitivities backward through the recorded operations to get the gradient of a scalar objective with respect to many parameters.",
+      "Finite difference": "A numerical derivative from objective values at nearby perturbed parameters, here in float64 to limit cancellation error.",
+      "Score": "The gradient of the log likelihood with respect to the parameters, such as the Gaussian location score.",
+      "Gradient oracle": "An independently derived gradient, analytic or numerical, used to test what automatic differentiation computed."
+    },
+    "worked_examples": [
+      {
+        "title": "Forward and central difference error across step sizes",
+        "language": "python",
+        "code": "import numpy as np\n\nt = np.array([0.4, 1.3, 0.7, 2.2, 0.9])\n\n\ndef loglik(rate):\n    return len(t) * np.log(rate) - rate * t.sum()\n\n\nrate = 1.5\nexact = len(t) / rate - t.sum()\nfor h in (1e-1, 1e-3, 1e-5, 1e-8, 1e-11):\n    fwd = (loglik(rate + h) - loglik(rate)) / h\n    cen = (loglik(rate + h) - loglik(rate - h)) / (2 * h)\n    print(f\"h={h:.0e}: forward error {abs(fwd - exact):.2e}, central error {abs(cen - exact):.2e}\")\n",
+        "output": "h=1e-01: forward error 1.06e-01, central error 4.95e-03\nh=1e-03: forward error 1.11e-03, central error 4.94e-07\nh=1e-05: forward error 1.11e-05, central error 5.24e-11\nh=1e-08: forward error 1.64e-09, central error 4.60e-08\nh=1e-11: forward error 4.42e-05, central error 4.46e-05\n",
+        "interpretation": "The exponential log likelihood \\(5\\log\\lambda-\\lambda\\sum t\\) has exact derivative \\(5/1.5-5.5=-2.1667\\) at \\(\\lambda=1.5\\), so each finite difference can be scored exactly. The forward difference has truncation error proportional to \\(h\\): 0.106 at \\(h=0.1\\), 0.00111 at \\(10^{-3}\\) and \\(1.11\\times10^{-5}\\) at \\(10^{-5}\\), shrinking a hundredfold for each hundredfold smaller step. The central difference cancels the first-order term, so its error falls like \\(h^2\\): \\(4.95\\times10^{-3}\\), then \\(4.94\\times10^{-7}\\), then \\(5.24\\times10^{-11}\\). Below that, rounding takes over. At \\(h=10^{-8}\\) the central error has risen to \\(4.6\\times10^{-8}\\), and at \\(10^{-11}\\) both methods are wrong by about \\(4.4\\times10^{-5}\\), because the two function values agree in almost every digit and their difference is mostly rounding noise divided by a tiny \\(h\\). A gradient check should therefore use a central difference with a moderate step, around \\(10^{-5}\\) in float64, and a tolerance chosen with this error curve in mind."
+      }
+    ],
     "outcome": "Compare independent analytic, finite-difference and automatic derivatives for normal and decay models.",
     "lab": "Compare analytic, central finite-difference and autograd derivatives for a Gaussian location score and a nonlinear decay model.",
     "verification": "Autograd matches the analytic Gaussian and decay gradients within 1e-12, and the best finite-difference error is below 1e-8 in float64.",
@@ -73,6 +118,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["parameter coordinates", "density Jacobian", "positive scales"],
+    "key_terms": {
+      "Optimizer coordinate": "An unconstrained parameter, such as s with sigma = exp(s), that changes how the same likelihood is searched but needs no Jacobian term.",
+      "Change-of-variable formula": "The density rule for a transformed observed random variable, which includes the absolute derivative of the transformation.",
+      "Lognormal density": "The density of positive X when log X is normal, with log p_X(x) = log p_Z(log x) - log x.",
+      "Positive scale": "A standard deviation or rate that must stay above zero, usually enforced through a log coordinate."
+    },
+    "worked_examples": [
+      {
+        "title": "Wald intervals on the rate scale and the log scale",
+        "language": "python",
+        "code": "import numpy as np\n\ntimes = np.array([0.3, 1.1, 0.6])  # three exponential waiting times\nn, total = len(times), times.sum()\nrate = n / total\nse_rate = rate / np.sqrt(n)  # from information n / rate^2\nlo, hi = rate - 1.96 * se_rate, rate + 1.96 * se_rate\nprint(f\"MLE rate {rate:.3f}, rate-scale interval [{lo:.3f}, {hi:.3f}]\")\nse_log = 1 / np.sqrt(n)  # information for log rate is n\nllo, lhi = np.exp(np.log(rate) - 1.96 * se_log), np.exp(np.log(rate) + 1.96 * se_log)\nprint(f\"log-scale interval mapped back [{llo:.3f}, {lhi:.3f}]\")\n",
+        "output": "MLE rate 1.500, rate-scale interval [-0.197, 3.197]\nlog-scale interval mapped back [0.484, 4.651]\n",
+        "interpretation": "Three waiting times summing to 2.0 give a rate MLE of 1.5. On the rate scale the information is \\(n/\\lambda^2\\), so the standard error is \\(1.5/\\sqrt3=0.866\\), and the Wald interval \\(1.5\\pm1.96\\times0.866\\) runs from \\(-0.197\\) to 3.197. A negative rate is impossible, so the interval is not just wide but invalid. Working with \\(\\log\\lambda\\) changes the geometry: the information for the log rate is exactly \\(n=3\\), independent of the rate, and the interval \\(\\log1.5\\pm1.96/\\sqrt3\\) maps back to 0.484 through 4.651. That interval is positive and asymmetric, extending further above the estimate than below, which matches the skew of the likelihood for a rate from only three events. The MLE itself did not change, since maximum likelihood is invariant to reparameterization; only the quadratic approximation used for the interval did. An unconstrained optimizer working on the log rate inherits the same benefit: steps can never cross zero."
+      }
+    ],
     "outcome": "Distinguish parameter reparameterization from observation and prior density transformations.",
     "lab": "Fit a positive scale through a log parameterization, then build a lognormal observation density with its Jacobian.",
     "verification": "The scale gradient is 0 at the MLE while a spurious parameter Jacobian gives -1; the lognormal density integrates to 1 within 1e-5, and the transformed correlation has derivative 1 - rho^2.",
@@ -97,6 +157,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Gaussian likelihood", "least squares", "variance estimation"],
+    "key_terms": {
+      "Gaussian likelihood": "The normal-density model Y ~ N(X beta, sigma^2 I), whose NLL in beta is a scaled residual sum of squares plus constants.",
+      "Least squares": "The coefficient estimate that minimizes the residual sum of squares and also solves the Gaussian score equation.",
+      "MLE variance estimator": "RSS/n, the maximizer of the Gaussian likelihood in sigma^2.",
+      "Unbiased variance estimator": "RSS/(n - p), which has finite-sample unbiasedness but is not the maximum-likelihood estimate."
+    },
+    "worked_examples": [
+      {
+        "title": "Maximum-likelihood variance divides by n, not n minus p",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(5)\nn, p, sigma = 8, 3, 2.0\nX = np.column_stack([np.ones(n), rng.normal(size=(n, p - 1))])\nmle, unbiased = [], []\nfor _ in range(20000):\n    y = X @ np.array([1.0, -0.5, 2.0]) + rng.normal(0, sigma, n)\n    rss = np.sum((y - X @ np.linalg.lstsq(X, y, rcond=None)[0]) ** 2)\n    mle.append(rss / n)\n    unbiased.append(rss / (n - p))\nprint(\n    f\"true variance {sigma**2}; average MLE {np.mean(mle):.3f}; average RSS/(n-p) {np.mean(unbiased):.3f}\"\n)\nprint(f\"expected MLE ratio (n-p)/n = {(n - p) / n:.3f}; observed {np.mean(mle) / sigma**2:.3f}\")\n",
+        "output": "true variance 4.0; average MLE 2.501; average RSS/(n-p) 4.002\nexpected MLE ratio (n-p)/n = 0.625; observed 0.625\n",
+        "interpretation": "Each of 20,000 simulated data sets has eight rows and three coefficients with true error variance 4.0. The maximum-likelihood variance divides the residual sum of squares by \\(n=8\\), and its average is 2.501, while dividing by \\(n-p=5\\) averages 4.002. The ratio 0.625 is exactly \\((n-p)/n=5/8\\): fitting three coefficients uses up three dimensions of the residual vector, so residuals are systematically smaller than the true errors. This is not a bug in the likelihood. The MLE is consistent and its bias vanishes as \\(n\\) grows, but with eight rows it understates the noise variance by 37.5 percent. When a hand-written Gaussian likelihood in PyTorch is checked against an ordinary least-squares oracle, the comparison must use RSS divided by \\(n\\); comparing with a statistics package's residual variance, which usually divides by \\(n-p\\), would report a false failure of 60 percent."
+      }
+    ],
     "outcome": "Recover Gaussian coefficients and maximum-likelihood scale from an independent least-squares oracle.",
     "lab": "Jointly fit Gaussian coefficients and log scale by maximum likelihood, then recenter the predictor and compare fitted values.",
     "verification": "Coefficients match the least-squares closed form within 2e-6, the fitted scale equals the MLE sigma rather than the unbiased root, recentering leaves fitted values unchanged and the maximum gradient is below 2e-4.",
@@ -121,6 +196,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["nonlinear mean", "extrapolation", "sensitivity geometry"],
+    "key_terms": {
+      "Exponential decay mean": "The curve m(t) = a e^(-b t) + c with initial excess a, decay rate b and long-run baseline c.",
+      "Half-life": "The time log(2)/b for the excess above baseline to halve, which depends on the units of time.",
+      "Extrapolation": "A forecast outside the observed window that relies on the decay law continuing to hold there.",
+      "Sensitivity geometry": "How strongly the fitted means respond to each parameter direction, summarized by the singular values of the mean Jacobian."
+    },
+    "worked_examples": [
+      {
+        "title": "Nonlinear least squares versus a log-linear shortcut",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import optimize\n\nt = np.arange(0, 10, dtype=float)\nrng = np.random.default_rng(6)\ny = 5.0 * np.exp(-0.4 * t) + rng.normal(0, 0.15, t.size)\nfit = optimize.least_squares(lambda th: th[0] * np.exp(-th[1] * t) - y, x0=[1.0, 0.1])\nprint(f\"nonlinear least squares: amplitude {fit.x[0]:.3f}, rate {fit.x[1]:.3f}\")\nkeep = y > 0\nslope, intercept = np.polyfit(t[keep], np.log(y[keep]), 1)\nprint(\n    f\"log-linear OLS on {keep.sum()} positive points: amplitude {np.exp(intercept):.3f}, rate {-slope:.3f}\"\n)\nprint(\"smallest observations:\", y[-4:].round(3))\n",
+        "output": "nonlinear least squares: amplitude 5.113, rate 0.395\nlog-linear OLS on 10 positive points: amplitude 4.617, rate 0.344\nsmallest observations: [0.552 0.529 0.247 0.219]\n",
+        "interpretation": "The data follow \\(5e^{-0.4t}\\) plus normal noise with standard deviation 0.15 on ten time points. Nonlinear least squares, which matches that additive noise model, estimates amplitude 5.113 and rate 0.395. Taking logs and fitting a straight line gives 4.617 and 0.344, both noticeably worse. The last line shows why. Late observations such as 0.247 and 0.219 are small, so the same absolute noise of 0.15 is a large relative error, and the logarithm magnifies it. The log-linear fit therefore gives the noisiest points as much influence as the clean early ones. It also silently assumes multiplicative lognormal errors, a different likelihood. Here all ten observations stayed positive, but with a little more noise some would fall below zero and have to be dropped, biasing the fit further. The log transform is a fine way to choose starting values. It is not the estimator for this observation model."
+      }
+    ],
     "outcome": "Fit a transformed nonlinear curve and diagnose the information lost in a short observation window.",
     "lab": "Recover a known decay curve on log-transformed amplitude and rate, then shorten the observation window and compare conditioning.",
     "verification": "The fit recovers the generating parameters within 3e-5 with gradient below 1e-4, and the short window's condition number exceeds 100 times the long window's.",
@@ -145,6 +235,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["stable logits", "Bernoulli score", "separation"],
+    "key_terms": {
+      "Logit": "The log odds eta = x^T beta, an unrestricted linear predictor mapped to a probability by the logistic function.",
+      "Softplus": "log(1 + e^z), which lets the Bernoulli NLL be written as softplus(eta) - y eta without computing log(p) directly.",
+      "Bernoulli score": "The gradient X^T(p - y) of the logistic NLL.",
+      "Separation": "Data a linear predictor can split perfectly, so the NLL keeps decreasing as coefficients grow and no finite minimizer exists."
+    },
+    "worked_examples": [
+      {
+        "title": "Naive and stable log-sigmoid at extreme logits",
+        "language": "python",
+        "code": "import numpy as np\n\nz = np.array([-800.0, -40.0, 0.0, 40.0, 800.0])\nwith np.errstate(over=\"ignore\", divide=\"ignore\"):\n    naive = np.log(1 / (1 + np.exp(-z)))\nstable = -np.logaddexp(0, -z)\nprint(\"naive  log sigmoid:\", naive)\nprint(\"stable log sigmoid:\", stable)\ny = 1.0\nscore = y - 0.5 * (1 + np.tanh(z / 2))  # d/dz of y*log s + (1-y)*log(1-s)\nprint(\"score y - sigmoid(z) for y=1:\", score)\n",
+        "output": "naive  log sigmoid: [        -inf -40.          -0.69314718   0.           0.        ]\nstable log sigmoid: [-8.00000000e+02 -4.00000000e+01 -6.93147181e-01 -4.24835426e-18\n -0.00000000e+00]\nscore y - sigmoid(z) for y=1: [1.  1.  0.5 0.  0. ]\n",
+        "interpretation": "The naive expression \\(\\log(1/(1+e^{-z}))\\) fails at \\(z=-800\\): \\(e^{800}\\) overflows to infinity, the ratio becomes zero and the log is \\(-\\infty\\). The stable form \\(-\\log(1+e^{-z})\\), computed with logaddexp, returns the correct \\(-800\\), because for very negative \\(z\\) the log probability is essentially \\(z\\) itself. At \\(z=-40\\) both agree at \\(-40\\). At \\(z=40\\) the naive version rounds to exactly 0 while the stable one keeps \\(-4.2\\times10^{-18}\\); the loss of that tiny term is harmless, but it shows the stable path preserving information. In a logistic likelihood a single observation with a large wrong-sign logit would make the naive total \\(-\\infty\\) and its gradient nan, stopping the optimizer. The score \\(y-\\sigma(z)\\) behaves well at both extremes: 1 when the model is confidently wrong about a success and 0 when confidently right, so a bounded gradient never needs to be computed through an overflowing exponential."
+      }
+    ],
     "outcome": "Check stable logistic scores and recognize when separated data have no finite coefficient MLE.",
     "lab": "Fit logistic regression on overlapping outcomes and check its analytic gradient, then follow the loss along an increasing slope for separated data.",
     "verification": "The autograd gradient matches X^T(p - y) within 1e-12 and the fit's gradient is below 1e-6; on separated data the loss falls at every step, so no finite MLE exists, while the stable loss stays finite at extreme logits.",
@@ -165,6 +270,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Poisson rate", "exposure offset", "boundary estimate"],
+    "key_terms": {
+      "Exposure": "The known opportunity, such as time at risk, during which events could occur.",
+      "Offset": "The term log e_i added to the log mean with its coefficient fixed at one, so the model describes a rate per exposure unit.",
+      "Poisson rate": "The expected count per unit exposure; for an intercept-only model its estimate is total count divided by total exposure.",
+      "Boundary estimate": "An estimate at the edge of the parameter space, such as a zero rate when no events occur, where the log-rate optimum is not finite."
+    },
+    "worked_examples": [
+      {
+        "title": "Pooled exposure rate versus the average of unit rates",
+        "language": "python",
+        "code": "import numpy as np\n\ncounts = np.array([3, 2, 11])\nexposure = np.array([0.5, 2.0, 10.0])  # person-years\npooled = counts.sum() / exposure.sum()\nprint(f\"pooled MLE {pooled:.3f} per person-year, SE {np.sqrt(counts.sum()) / exposure.sum():.3f}\")\nprint(\n    \"unit rates\",\n    (counts / exposure).round(3),\n    \"mean of unit rates\",\n    round(float(np.mean(counts / exposure)), 3),\n)\ngrid = np.linspace(0.5, 3, 2501)\nll = np.array([np.sum(counts * np.log(r * exposure) - r * exposure) for r in grid])\nprint(\n    f\"grid maximizer of the Poisson log likelihood with log-exposure offset {grid[ll.argmax()]:.3f}\"\n)\nprint(f\"expected count at exposure 4: {pooled * 4:.2f} events\")\n",
+        "output": "pooled MLE 1.280 per person-year, SE 0.320\nunit rates [6.  1.  1.1] mean of unit rates 2.7\ngrid maximizer of the Poisson log likelihood with log-exposure offset 1.280\nexpected count at exposure 4: 5.12 events\n",
+        "interpretation": "Three units observed for 0.5, 2 and 10 person-years produced 3, 2 and 11 events. The Poisson likelihood with a log-exposure offset is maximized at the pooled rate \\(16/12.5=1.280\\) events per person-year, and the grid confirms the same 1.280. Its standard error is \\(\\sqrt{16}/12.5=0.320\\). Averaging the three unit rates instead gives 2.7, more than twice as large, because the half-year unit's rate of 6.0 counts as much as the ten-year unit's 1.1 even though it rests on 3 events instead of 11. The pooled estimator weights each unit by its exposure, which is what the likelihood demands when the rate is common. Expected counts and rates are different targets: at exposure 4 the model predicts \\(1.28\\times4=5.12\\) events, while the rate stays 1.28 regardless of exposure. A Poisson model that omits the offset would be estimating counts per unit, and its coefficients would absorb any exposure differences between groups."
+      }
+    ],
     "outcome": "Fit an exposure-adjusted event rate and distinguish expected counts from rates.",
     "lab": "Fit a common Poisson rate with a log-exposure offset, then forecast counts at a new exposure.",
     "verification": "The rate is 0.875 events per exposure unit with score 0 at the MLE, manual and library log likelihoods agree, and doubling exposure doubles the expected count.",
@@ -185,6 +305,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["right censoring", "delayed entry", "survival likelihood"],
+    "key_terms": {
+      "Right censoring": "A record that shows only that the event time exceeds the last observed time.",
+      "Survival function": "S(t) = P(T > t), the contribution a censored record makes instead of the event density.",
+      "Noninformative censoring": "The assumption that the censoring process carries no information about the event-model parameters.",
+      "Delayed entry": "Observation starting after time zero, which conditions on survival to entry and changes the risk set."
+    },
+    "worked_examples": [
+      {
+        "title": "Three ways to handle censored exponential times",
+        "language": "python",
+        "code": "import numpy as np\n\ntime = np.array([2.0, 5.0, 3.0, 8.0, 10.0])\nevent = np.array([1, 1, 0, 1, 0])\ncorrect = event.sum() / time.sum()\ndrop = event.sum() / time[event == 1].sum()\nas_events = len(time) / time.sum()\nprint(f\"correct MLE {correct:.4f}: {event.sum()} events over {time.sum():.0f} units at risk\")\nprint(f\"drop censored rows {drop:.4f}; treat censored as events {as_events:.4f}\")\nprint(f\"implied mean survival: {1 / correct:.2f}, {1 / drop:.2f}, {1 / as_events:.2f}\")\n",
+        "output": "correct MLE 0.1071: 3 events over 28 units at risk\ndrop censored rows 0.2000; treat censored as events 0.1786\nimplied mean survival: 9.33, 5.00, 5.60\n",
+        "interpretation": "Five subjects are followed for 2, 5, 3, 8 and 10 time units, and three events are observed while two follow-ups end without one. For an exponential model the likelihood is \\(\\lambda^{3}e^{-28\\lambda}\\), so the MLE is events over total time at risk, \\(3/28=0.1071\\), and the implied mean survival is 9.33. Dropping the two censored subjects discards their 13 units of event-free time and gives 0.2000, nearly doubling the hazard and cutting mean survival to 5.00. Treating censored times as events counts five events over the same 28 units, 0.1786 and a mean of 5.60. Both errors bias in the same direction, toward shorter survival, because each ignores the information that a censored subject was still event-free at the end of follow-up. The correct contribution of a censored row is the survival probability \\(e^{-\\lambda t}\\), which adds exposure to the denominator without adding an event to the numerator."
+      }
+    ],
     "outcome": "Construct event and survival contributions and account for delayed entry in time at risk.",
     "lab": "Fit an exponential rate from events and censored times, then add delayed entry and recompute time at risk.",
     "verification": "The censoring-aware rate is 0.15 (0.10 with one fewer event) with zero score, the naive all-events rate is larger, and delayed entry gives 3/16.5.",
@@ -205,6 +340,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["log scale regression", "normalization", "noise calibration"],
+    "key_terms": {
+      "Heteroskedastic model": "A Gaussian model whose standard deviation, not only its mean, depends on covariates.",
+      "Log-scale regression": "Modeling s_i = log sigma_i as a linear predictor so every fitted standard deviation stays positive.",
+      "Normalization term": "The log sigma part of the Gaussian NLL, without which the loss can be reduced by inflating every scale.",
+      "Noise calibration": "Agreement between modeled variances and squared residuals, so standardized squared residuals average about one."
+    },
+    "worked_examples": [
+      {
+        "title": "Joint mean and log-scale fit recovers a known variance slope",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import optimize\n\nrng = np.random.default_rng(10)\nx = rng.uniform(-1, 1, 400)\ny = 1.0 + 2.0 * x + np.exp(-0.5 + 0.8 * x) * rng.normal(size=x.size)\n\n\ndef nll(th):\n    mu = th[0] + th[1] * x\n    log_s = th[2] + th[3] * x\n    return np.sum(log_s + 0.5 * ((y - mu) / np.exp(log_s)) ** 2)\n\n\nfit = optimize.minimize(nll, np.zeros(4), method=\"BFGS\")\nprint(\"estimates (b0, b1, g0, g1):\", fit.x.round(3))\nprint(\"truth     (b0, b1, g0, g1): [ 1.   2.  -0.5  0.8]\")\nprint(f\"scale at x=-1 {np.exp(fit.x[2] - fit.x[3]):.3f}, at x=1 {np.exp(fit.x[2] + fit.x[3]):.3f}\")\n",
+        "output": "estimates (b0, b1, g0, g1): [ 0.97   1.983 -0.477  0.814]\ntruth     (b0, b1, g0, g1): [ 1.   2.  -0.5  0.8]\nscale at x=-1 0.275, at x=1 1.400\n",
+        "interpretation": "The simulation draws 400 points whose noise scale is \\(e^{-0.5+0.8x}\\), so the spread grows about fivefold across the range of \\(x\\). Minimizing the joint negative log likelihood, which includes \\(\\log\\sigma_i\\) for each row, recovers coefficients 0.970 and 1.983 for the mean and \\(-0.477\\) and 0.814 for the log scale, each within a few hundredths of the truth. The fitted scale is 0.275 at \\(x=-1\\) and 1.400 at \\(x=1\\), against true values 0.273 and 1.350. Two practical points follow. Parameterizing the scale as an exponential keeps it positive without any constraint in the optimizer. And the \\(\\log\\sigma_i\\) term is what stops the fit from inflating every scale: without it, the objective would keep decreasing as all scales grew. Because high-variance rows get weight \\(1/\\sigma_i^2\\) in the mean equation, the slope estimate is also more precise than an unweighted least-squares slope from the same data."
+      }
+    ],
     "outcome": "Jointly fit a mean and covariate scale while detecting a missing likelihood normalization term.",
     "lab": "Fit a mean and a covariate-dependent log scale for two noise regimes, then remove the normalization term and inflate the scale.",
     "verification": "Parameters recover (0, 0, log 3), so the group scales are 1 and 3; without the log-scale term the loss keeps falling as the scale inflates, while the proper NLL rises.",
@@ -229,6 +379,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["logsumexp", "latent mixtures", "scale collapse"],
+    "key_terms": {
+      "Finite mixture": "A model in which each observation comes from one of several component distributions with an unobserved label.",
+      "Marginalization": "Summing component probabilities over the unobserved label, which keeps the logarithm outside the sum.",
+      "logsumexp": "The stable computation m + log sum_k exp(a_k - m), with m the largest log term, that avoids underflow.",
+      "Scale collapse": "A degenerate mixture fit in which one component's scale shrinks toward zero on a single observation, sending the likelihood toward infinity."
+    },
+    "worked_examples": [
+      {
+        "title": "Mixture gradient equals responsibility-weighted residuals",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\nfrom scipy.special import logsumexp\n\ny = np.array([-0.5, 0.1, 2.2, 3.1, 3.8])\nw, mu1, mu2 = 0.4, 0.0, 3.0\n\n\ndef ll(m1):\n    return logsumexp(\n        [np.log(w) + stats.norm.logpdf(y, m1, 1), np.log1p(-w) + stats.norm.logpdf(y, mu2, 1)],\n        axis=0,\n    ).sum()\n\n\ncomp = np.vstack(\n    [np.log(w) + stats.norm.logpdf(y, mu1, 1), np.log1p(-w) + stats.norm.logpdf(y, mu2, 1)]\n)\nresp = np.exp(comp - logsumexp(comp, axis=0))[0]\nprint(\"responsibility of component 1:\", resp.round(4))\nanalytic = np.sum(resp * (y - mu1))\nh = 1e-6\nprint(\n    f\"analytic d/dmu1 {analytic:.6f}; central difference {(ll(mu1 + h) - ll(mu1 - h)) / (2 * h):.6f}\"\n)\n",
+        "output": "responsibility of component 1: [9.963e-01 9.780e-01 7.550e-02 5.500e-03 7.000e-04]\nanalytic d/dmu1 -0.214834; central difference -0.214834\n",
+        "interpretation": "For a two-component normal mixture, the derivative of the log likelihood with respect to the first mean is \\(\\sum_i r_i(y_i-\\mu_1)\\), where \\(r_i\\) is the posterior probability that point \\(i\\) came from component 1. The responsibilities show a soft assignment: 0.9963 and 0.978 for the points near 0, 0.0755 for 2.2, and almost nothing for 3.1 and 3.8. The analytic gradient \\(-0.214834\\) matches the central difference to six decimals. The point at 2.2 contributes \\(0.0755\\times2.2=0.166\\), pulling \\(\\mu_1\\) upward, while \\(-0.5\\) and 0.1 pull with weights near 1. This identity is why a stable log-sum-exp implementation is enough: autograd differentiates through it and produces responsibility-weighted residuals automatically, without the EM algorithm's explicit E step. It also explains degeneracy. If one component collapses onto a single point with shrinking scale, its responsibility for that point approaches 1 and the log likelihood grows without bound."
+      }
+    ],
     "outcome": "Evaluate a stable marginalized mixture and explain label invariance and likelihood degeneracy.",
     "lab": "Evaluate a two-component mixture with log-sum-exp at a remote observation, then swap labels and shrink one component onto a single point.",
     "verification": "Stable log probabilities match the library mixture while the direct probability underflows to 0; label swapping leaves the likelihood unchanged, and the log likelihood keeps rising as one component's scale shrinks from 1 to 0.01.",
@@ -249,6 +414,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["AR1 covariance", "Cholesky likelihood", "complete panels"],
+    "key_terms": {
+      "AR(1) covariance": "The panel covariance sigma^2 rho^|j - k| for equally spaced observations, with marginal standard deviation sigma.",
+      "Complete panel": "All measurements from one subject kept together so their joint density can be evaluated.",
+      "Cholesky factor": "The lower-triangular L with Sigma = L L^T, used to solve for the quadratic form and log determinant without forming an inverse.",
+      "Innovation variance": "The new-shock variance sigma^2(1 - rho^2) of the AR(1) recursion, distinct from the marginal variance."
+    },
+    "worked_examples": [
+      {
+        "title": "Design effect of a compound-symmetric panel",
+        "language": "python",
+        "code": "import numpy as np\n\nm, rho, s2, panels = 4, 0.6, 1.0, 25\nS = s2 * ((1 - rho) * np.eye(m) + rho * np.ones((m, m)))\nones = np.ones(m)\nvar_gls = 1 / (panels * ones @ np.linalg.solve(S, ones))\nvar_naive = s2 / (panels * m)\nprint(\n    f\"variance of the mean: correct {var_gls:.5f}, naive iid {var_naive:.5f}, ratio {var_gls / var_naive:.2f}\"\n)\nprint(\n    f\"design effect 1 + (m - 1) rho = {1 + (m - 1) * rho:.2f}; effective rows {panels * m / (1 + (m - 1) * rho):.1f} of {panels * m}\"\n)\nsign, logdet = np.linalg.slogdet(S)\nprint(\n    f\"log det per panel {logdet:.4f}; closed form {np.log((1 - rho) ** (m - 1) * (1 + (m - 1) * rho)):.4f}\"\n)\n",
+        "output": "variance of the mean: correct 0.02800, naive iid 0.01000, ratio 2.80\ndesign effect 1 + (m - 1) rho = 2.80; effective rows 35.7 of 100\nlog det per panel -1.7193; closed form -1.7193\n",
+        "interpretation": "Each panel has four measurements with common variance 1 and pairwise correlation 0.6. Estimating the overall mean by generalized least squares from 25 panels gives variance 0.0280, while treating the 100 rows as independent claims 0.0100. The ratio 2.80 equals the design effect \\(1+(4-1)\\times0.6\\), so the 100 correlated rows carry the information of about 35.7 independent ones. A naive standard error would be \\(\\sqrt{2.8}\\approx1.67\\) times too small. The log determinant of each panel's covariance, \\(-1.7193\\), matches the closed form \\(\\log[(1-\\rho)^{m-1}(1+(m-1)\\rho)]\\), a useful oracle for a Cholesky-based PyTorch implementation, since its log determinant is twice the sum of the log diagonal. The likelihood must be evaluated panel by panel. Building one large covariance that links rows across panel boundaries would introduce correlation that does not exist, while flattening to independent rows would hide the correlation that does."
+      }
+    ],
     "outcome": "Evaluate complete-panel likelihoods and detect false covariance introduced across subject boundaries.",
     "lab": "Evaluate the AR(1) likelihood for two complete independent panels, then flatten them into one series across the subject boundary.",
     "verification": "The panel NLL matches an independent oracle, rho = 0 reproduces the iid likelihood, and the cross-boundary series gives a different NLL.",
@@ -273,6 +453,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["penalized likelihood", "MAP", "global penalty"],
+    "key_terms": {
+      "Penalized likelihood": "The NLL plus a chosen regularizer, such as lambda mu^2/2, which shrinks the estimate toward zero.",
+      "MAP estimate": "The posterior mode in a stated parameterization, equal to a penalized estimate when the penalty is a negative log prior.",
+      "Global penalty": "A penalty added once to the whole objective, not once per partition or minibatch.",
+      "Penalty scale": "The strength of shrinkage relative to the data term, which changes if the data loss switches between a sum and a mean."
+    },
+    "worked_examples": [
+      {
+        "title": "Ridge, MAP and the penalty scale under a mean loss",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(13)\nn, sigma, tau = 40, 1.0, 0.5\nX = rng.normal(size=(n, 3))\ny = X @ np.array([1.0, 0.0, -1.0]) + rng.normal(0, sigma, n)\nlam = sigma**2 / tau**2\nmap_b = np.linalg.solve(X.T @ X + lam * np.eye(3), X.T @ y)  # sum loss + lam |b|^2 / 2 sigma^2 form\nmle_b = np.linalg.lstsq(X, y, rcond=None)[0]\nmean_wrong = np.linalg.solve(\n    X.T @ X / n + lam * np.eye(3), X.T @ y / n\n)  # mean loss, unscaled penalty\nmean_right = np.linalg.solve(X.T @ X / n + lam / n * np.eye(3), X.T @ y / n)\nprint(\"MLE                 \", mle_b.round(3))\nprint(\"MAP (lambda = 4)    \", map_b.round(3))\nprint(\"mean loss, lambda 4 \", mean_wrong.round(3))\nprint(\"mean loss, lambda/n \", mean_right.round(3))\n",
+        "output": "MLE                  [ 0.822  0.059 -0.832]\nMAP (lambda = 4)     [ 0.744  0.037 -0.725]\nmean loss, lambda 4  [ 0.162 -0.021 -0.122]\nmean loss, lambda/n  [ 0.744  0.037 -0.725]\n",
+        "interpretation": "With noise variance 1 and a normal(0, 0.5) prior on each coefficient, the posterior mode is ridge regression with penalty \\(\\lambda=\\sigma^2/\\tau^2=4\\) added to the summed squared error. The MLE coefficients 0.822, 0.059 and \\(-0.832\\) shrink to 0.744, 0.037 and \\(-0.725\\) at the mode. A common implementation change, switching the data loss from a sum to a mean over 40 rows, silently multiplies the penalty's relative strength by 40 if \\(\\lambda\\) is left at 4. The result is 0.162, \\(-0.021\\) and \\(-0.122\\), shrunk almost to zero and no longer the MAP for the stated prior. Dividing the penalty by \\(n\\) as well restores exactly 0.744, 0.037 and \\(-0.725\\). The rule is that data term and prior term must share one scale. The same reasoning applies across partitions: the penalty is a single global term and must be added once, not once per partition or per minibatch."
+      }
+    ],
     "outcome": "Distinguish MLE, ridge and MAP and preserve a single global penalty across partitions.",
     "lab": "Add one ridge penalty to a partitioned objective and compare it with MAP, then duplicate the penalty in every partition.",
     "verification": "The penalty added once matches the MAP gradient; each duplicate adds precision * mu^2 / 2 and shrinks the estimate further, so duplicated < penalized < MLE.",
@@ -293,6 +488,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["rank deficiency", "profile likelihood", "weak identification"],
+    "key_terms": {
+      "Identifiability": "The property that distinct parameter values imply distinct observable distributions within the model.",
+      "Rank deficiency": "A design with a nonzero direction v satisfying X v = 0, so the Hessian has zero curvature along v.",
+      "Weak identification": "Data that distinguish some parameter values only slightly, even when the optimizer stops at finite values.",
+      "Profile likelihood": "The likelihood for one parameter after minimizing over the nuisance parameters at each of its values."
+    },
+    "worked_examples": [
+      {
+        "title": "Hessian of a product parameterization has a flat direction",
+        "language": "python",
+        "code": "import numpy as np\n\nx = np.array([1.0, 2.0, 3.0, 4.0])\ny = 3.0 * x\n\n\ndef loss(th):\n    return 0.5 * np.sum((y - th[0] * th[1] * x) ** 2)\n\n\ndef hessian(f, th, h=1e-4):\n    H = np.zeros((2, 2))\n    for i in range(2):\n        for j in range(2):\n            e_i, e_j = np.eye(2)[i] * h, np.eye(2)[j] * h\n            H[i, j] = (\n                f(th + e_i + e_j) - f(th + e_i - e_j) - f(th - e_i + e_j) + f(th - e_i - e_j)\n            ) / (4 * h * h)\n    return H\n\n\nfor th in (np.array([2.0, 1.5]), np.array([1.0, 3.0])):\n    vals, vecs = np.linalg.eigh(hessian(loss, th))\n    print(\n        f\"a={th[0]}, b={th[1]}: loss {loss(th):.1f}, eigenvalues {vals.round(4)}, flat direction {vecs[:, 0].round(3)}\"\n    )\n",
+        "output": "a=2.0, b=1.5: loss 0.0, eigenvalues [ -0.  187.5], flat direction [-0.8  0.6]\na=1.0, b=3.0: loss 0.0, eigenvalues [  0. 300.], flat direction [ 0.316 -0.949]\n",
+        "interpretation": "The model \\(y=abx\\) depends on \\(a\\) and \\(b\\) only through their product, so the data \\(y=3x\\) are fit perfectly anywhere on the curve \\(ab=3\\). At \\((a,b)=(2,1.5)\\) the Hessian of the squared loss has eigenvalues 0 and 187.5, and the flat eigenvector \\((-0.8,0.6)\\) is proportional to \\((-a,b)\\), the direction along the curve that keeps the product fixed. At \\((1,3)\\) the zero eigenvalue remains, but the curved one is 300 and the flat direction has rotated to \\((0.316,-0.949)\\). The flatness is a property of the parameterization, not of the data. A singular Hessian means there is no unique MLE and no Wald standard error, because inverting the information matrix fails. An optimizer will stop wherever it reaches the curve, and different initial values will report different \\(a\\) and \\(b\\) with identical loss. Fixing \\(b=1\\) or estimating the product directly restores identifiability."
+      }
+    ],
     "outcome": "Diagnose redundant parameters and refit nuisance parameters when profiling a nonlinear rate.",
     "lab": "Inspect the Hessian of a model with duplicated design columns, then profile a nonlinear decay rate by refitting the nuisance parameters.",
     "verification": "The Hessian has eigenvalues 0 and 60, coefficient pairs with the same sum have identical NLL, the long-window profile is minimized at rate 0.7 and the short-window profile contrast is under one-thousandth of the long one.",
@@ -317,6 +527,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["LBFGS closure", "Adam", "evaluation accounting"],
+    "key_terms": {
+      "L-BFGS": "A quasi-Newton optimizer that approximates inverse curvature from recent parameter and gradient differences.",
+      "Closure": "A function that zeroes gradients, evaluates the objective, calls backward and returns the loss so L-BFGS can evaluate it repeatedly.",
+      "Adam": "A first-order optimizer that keeps moving averages of gradients and squared gradients and uses one new gradient per update.",
+      "Evaluation accounting": "Counting objective and gradient evaluations, which differ from optimizer step counts when a line search is used."
+    },
+    "worked_examples": [
+      {
+        "title": "A step reports the loss before its own update",
+        "language": "python",
+        "code": "import numpy as np\n\ntarget = np.array([3.0, -1.0])\n\n\ndef loss(th):\n    return 0.5 * np.sum((th - target) ** 2)\n\n\nth, lr = np.zeros(2), 0.5\nfor step in range(4):\n    reported = loss(th)  # what a closure-based step returns\n    th = th - lr * (th - target)\n    print(f\"step {step}: reported {reported:.4f}, loss after update {loss(th):.4f}\")\nfrom scipy import optimize\n\nres = optimize.minimize(loss, np.zeros(2), method=\"L-BFGS-B\")\nprint(f\"L-BFGS-B: fun {res.fun:.2e}, recomputed at x {loss(res.x):.2e}, iterations {res.nit}\")\n",
+        "output": "step 0: reported 5.0000, loss after update 1.2500\nstep 1: reported 1.2500, loss after update 0.3125\nstep 2: reported 0.3125, loss after update 0.0781\nstep 3: reported 0.0781, loss after update 0.0195\nL-BFGS-B: fun 4.28e-15, recomputed at x 4.28e-15, iterations 2\n",
+        "interpretation": "Gradient descent with learning rate 0.5 on a quadratic halves the distance to the target each step, so the loss falls by a factor of four: 5.0, 1.25, 0.3125, 0.0781, 0.0195. The reported column lags by one step, because a closure computes the loss and gradient at the current parameters before the update is applied. The value returned by step 3 is 0.0781, but the parameters left behind already give 0.0195. Logging the returned value as the final objective would overstate it fourfold here. PyTorch optimizers that accept a closure behave the same way, and L-BFGS may evaluate the closure several times within one step, so the returned value need not even correspond to the last evaluation. The SciPy L-BFGS-B result shows the clean pattern: its reported fun, \\(4.28\\times10^{-15}\\), equals the loss recomputed at the returned x. The safe audit is to recompute the objective after optimization ends and report that number."
+      }
+    ],
     "outcome": "Implement deterministic optimizer closures and distinguish returned step loss from final objective.",
     "lab": "Minimize the same objective with L-BFGS from two starting values and with Adam, counting every closure call.",
     "verification": "Every fit reaches mean 1.5 within 2e-5; L-BFGS evaluates the objective more often than it steps, and the loss returned by step() exceeds the recomputed final objective.",
@@ -341,6 +566,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["gradcheck", "Hessian", "detached graph"],
+    "key_terms": {
+      "gradcheck": "A PyTorch utility that compares automatic-differentiation gradients with numerical perturbations in double precision.",
+      "Hessian": "The matrix of second derivatives of the objective, here \\(X^\\top X+0.2I\\) for the penalized quadratic model.",
+      "Detached graph": "A computation cut from automatic differentiation, so a forward value can be correct while its gradient is wrong.",
+      "Curvature oracle": "A handwritten Hessian used to confirm the matrix produced by automatic differentiation."
+    },
+    "worked_examples": [
+      {
+        "title": "Observed information for location and log scale",
+        "language": "python",
+        "code": "import numpy as np\n\ny = np.array([2.1, 3.4, 1.8, 2.9, 3.6, 2.2])\nn = len(y)\n\n\ndef nll(th):\n    mu, log_s = th\n    return n * log_s + 0.5 * np.sum((y - mu) ** 2) / np.exp(2 * log_s)\n\n\ndef num_hess(th, h=1e-4):\n    H = np.zeros((2, 2))\n    for i in range(2):\n        for j in range(2):\n            ei, ej = np.eye(2)[i] * h, np.eye(2)[j] * h\n            H[i, j] = (\n                nll(th + ei + ej) - nll(th + ei - ej) - nll(th - ei + ej) + nll(th - ei - ej)\n            ) / (4 * h * h)\n    return H\n\n\nmle = np.array([y.mean(), np.log(y.std())])\nprint(\"at the MLE, numerical Hessian:\\n\", num_hess(mle).round(4))\nprint(f\"closed form diag(n/s^2, 2n) = diag({n / y.var():.4f}, {2 * n})\")\noff = mle + np.array([0.5, 0.0])\nprint(\"half a unit off in mu, numerical Hessian:\\n\", num_hess(off).round(4))\n",
+        "output": "at the MLE, numerical Hessian:\n [[13.0751  0.    ]\n [ 0.     12.    ]]\nclosed form diag(n/s^2, 2n) = diag(13.0751, 12)\nhalf a unit off in mu, numerical Hessian:\n [[ 13.0751 -13.0751]\n [-13.0751  18.5375]]\n",
+        "interpretation": "For a normal model parameterized by the mean and the log standard deviation, the negative log likelihood's Hessian at the MLE is diagonal with entries \\(n/s^2\\) and \\(2n\\). Here \\(n=6\\) and the MLE variance is 0.4589, so the closed form is \\(\\mathrm{diag}(13.0751,12)\\), and the finite-difference Hessian matches to four decimals. The zero off-diagonal entries say the two estimates are uncorrelated at the optimum, so the standard error of the mean is \\(1/\\sqrt{13.0751}=0.277\\) whether or not the scale is estimated. Half a unit away from the MLE in \\(\\mu\\) the picture changes. The cross term becomes \\(-13.0751\\), equal to \\(2n(\\bar y-\\mu)/s^2\\) with \\(\\bar y-\\mu=-0.5\\), and the log-scale curvature rises to 18.54. Observed information is therefore a local quantity, and standard errors must be computed at the optimum. Evaluating a Hessian at a point where the optimizer stopped early would introduce correlations and curvature that the fitted model does not have."
+      }
+    ],
     "outcome": "Verify Hessians independently and detect deliberately broken gradient paths.",
     "lab": "Compare an autograd Hessian with its analytic matrix and run gradcheck, then detach part of the graph and try an in-place update of a leaf.",
     "verification": "The Hessian equals [[3.2, 3], [3, 5.2]], gradcheck passes for the correct function and fails for the detached one, and the in-place leaf update is rejected.",
@@ -365,6 +605,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["delta method", "prediction intervals", "lognormal expectation"],
+    "key_terms": {
+      "Estimand": "The quantity being predicted, such as a mean curve, a new observation from an existing group or one from a new group.",
+      "Delta method": "The first-order variance approximation J V J^T for a smooth function of estimated parameters.",
+      "Prediction interval": "An interval for a future observation, which adds observation noise and any new-group variance to mean uncertainty.",
+      "Lognormal expectation": "exp(mu + sigma^2/2) for a lognormal outcome, larger than the median exp(mu) obtained by transforming a point prediction."
+    },
+    "worked_examples": [
+      {
+        "title": "A confidence interval for the mean is not a prediction interval",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(17)\nn, sigma, reps = 20, 1.0, 20000\nhit_ci = hit_pi = 0\nfor _ in range(reps):\n    y = rng.normal(0, sigma, n)\n    y_new = rng.normal(0, sigma)\n    m, s = y.mean(), y.std(ddof=1)\n    hit_ci += abs(y_new - m) < 2.093 * s / np.sqrt(n)\n    hit_pi += abs(y_new - m) < 2.093 * s * np.sqrt(1 + 1 / n)\nprint(f\"new observation inside the 95% mean interval {hit_ci / reps:.3f}\")\nprint(f\"new observation inside the 95% prediction interval {hit_pi / reps:.3f}\")\nprint(f\"width ratio sqrt(n + 1) = {np.sqrt(n + 1):.2f}\")\n",
+        "output": "new observation inside the 95% mean interval 0.342\nnew observation inside the 95% prediction interval 0.950\nwidth ratio sqrt(n + 1) = 4.58\n",
+        "interpretation": "Each of 20,000 replications draws 20 observations and one new observation from the same normal distribution. The 95 percent interval for the mean, \\(\\bar y\\pm2.093\\,s/\\sqrt{20}\\), contains the new observation only 34.2 percent of the time. That is not a failure of the interval: it is built to cover the fixed mean, and it does so 95 percent of the time. A new observation has its own noise. The prediction interval multiplies the half-width by \\(\\sqrt{1+1/20}\\) instead of \\(1/\\sqrt{20}\\), which makes it \\(\\sqrt{21}=4.58\\) times wider, and its observed coverage is 0.950 as designed. The two intervals answer different questions, and both are correct for their estimands. Reporting a model's mean interval as the range for future outcomes is one of the most common errors in applied prediction. Adding more data shrinks the first interval toward zero width, while the second approaches \\(\\pm1.96\\sigma\\) and never shrinks below it."
+      }
+    ],
     "outcome": "Separate mean, observation and new-group uncertainty and distinguish transformed means from medians.",
     "lab": "Separate mean, observation and new-group variance of forecasts with the delta method, then compare the mean and median of a lognormal prediction.",
     "verification": "At time 0 the variances are 0.05 for the mean, 0.14 for a new observation and 0.30 for a new group; the lognormal mean exp(0.58) exceeds the median exp(0.4).",
@@ -389,6 +644,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["sandwich covariance", "cluster bootstrap", "weak information"],
+    "key_terms": {
+      "Observed information": "The curvature of the NLL at its minimum, whose inverse approximates variance under a correctly specified regular model.",
+      "Sandwich covariance": "H^-1 B H^-1, combining curvature H with the observed score variability B instead of assuming they are equal.",
+      "Cluster bootstrap": "Resampling whole clusters with replacement to reflect dependence within clusters.",
+      "Singular information": "An information matrix that cannot be inverted because the objective does not identify a parameter direction, which no sandwich can repair."
+    },
+    "worked_examples": [
+      {
+        "title": "Model-based versus sandwich slope standard errors",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(18)\nn, reps = 200, 4000\nx = rng.uniform(0, 1, n)\nX = np.column_stack([np.ones(n), x])\nXtX_inv = np.linalg.inv(X.T @ X)\nslopes, model_se, sandwich_se = [], [], []\nfor _ in range(reps):\n    y = 1 + 2 * x + rng.normal(0, 0.2 + 2.0 * x**2)\n    b = XtX_inv @ X.T @ y\n    r = y - X @ b\n    slopes.append(b[1])\n    model_se.append(np.sqrt(r @ r / (n - 2) * XtX_inv[1, 1]))\n    meat = (X * r[:, None] ** 2).T @ X\n    sandwich_se.append(np.sqrt((XtX_inv @ meat @ XtX_inv)[1, 1]))\nprint(f\"actual sd of slope {np.std(slopes):.4f}\")\nprint(f\"average model SE {np.mean(model_se):.4f}; average sandwich SE {np.mean(sandwich_se):.4f}\")\n",
+        "output": "actual sd of slope 0.3127\naverage model SE 0.2523; average sandwich SE 0.3066\n",
+        "interpretation": "The noise standard deviation grows from 0.2 at \\(x=0\\) to 2.2 at \\(x=1\\), so the constant-variance assumption behind the model-based standard error is false. Across 4,000 simulated data sets the slope's actual standard deviation is 0.3127. The model-based formula averages 0.2523, about 19 percent too small, because it pools the residual variance and ignores that the noisiest rows sit at large \\(x\\), where they have the most leverage on the slope. The sandwich estimator replaces that pooled variance with each row's own squared residual and averages 0.3066, within 2 percent of the truth. The point estimate is the same in both cases; only its uncertainty changes. The sandwich does not rescue a wrong mean model or dependence between rows. For clustered data the meat must sum score contributions within clusters first, and with few clusters even that estimator is biased downward."
+      }
+    ],
     "outcome": "Compare model, iid and cluster variance calculations and enumerate a whole-cluster bootstrap.",
     "lab": "Compare model-based, iid sandwich and cluster sandwich variances for four clusters with duplicated measurements, then enumerate every whole-cluster bootstrap sample.",
     "verification": "The iid sandwich variance is 0.625 while the cluster sandwich and the exact cluster bootstrap both give 1.25, and a weakly informed curvature matrix is rejected.",
@@ -413,6 +683,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["unequal rank mass", "DistributedSampler", "serial reduction oracle"],
+    "key_terms": {
+      "Gradient averaging": "The DistributedDataParallel default of averaging rank gradients, which matches the global mean only when rank masses are equal.",
+      "Rank mass": "The number of observations, or total weight, held by one rank.",
+      "Loss rescaling": "Multiplying a rank's local mean loss by W n_p/N so averaged gradients equal the gradient of the global mean.",
+      "DistributedSampler": "The PyTorch sampler that splits indices across ranks and, with drop_last=False, pads by repeating indices to equalize lengths.",
+      "Serial reduction oracle": "A single-process computation of the declared objective used to check the distributed gradient."
+    },
+    "worked_examples": [
+      {
+        "title": "Gradient accumulation with an uneven final micro-batch",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(19)\nx = rng.normal(size=10)\ny = 2 * x + rng.normal(size=10)\nw = 0.5\ngrad_rows = -(y - w * x) * x  # d/dw of 0.5 (y - w x)^2 per row\ntrue = grad_rows.mean()\nbatches = np.split(grad_rows, [4, 8])  # sizes 4, 4, 2\nper_batch_means = [b.mean() for b in batches]\ndivided = sum(per_batch_means) / len(batches)\nsummed = sum(b.sum() for b in batches) / len(grad_rows)\nprint(f\"micro-batch sizes {[len(b) for b in batches]}\")\nprint(f\"global mean gradient {true:.4f}\")\nprint(f\"mean of micro-batch means {divided:.4f}; summed then divided by N {summed:.4f}\")\n",
+        "output": "micro-batch sizes [4, 4, 2]\nglobal mean gradient -0.9965\nmean of micro-batch means -0.9324; summed then divided by N -0.9965\n",
+        "interpretation": "Ten rows are processed in micro-batches of 4, 4 and 2 before one optimizer step. The declared objective is the mean loss over all ten rows, whose gradient is \\(-0.9965\\). A common accumulation pattern computes each micro-batch's mean gradient and divides the sum by the number of micro-batches, giving \\(-0.9324\\). The error comes from the final batch: its two rows each receive weight \\(1/(2\\times3)=1/6\\), while the eight rows in full batches receive \\(1/12\\), so the last two rows count double. Summing row gradients and dividing once by \\(N=10\\) recovers \\(-0.9965\\) exactly. The bias shrinks as batches become more equal, which is why it often goes unnoticed, but it never vanishes when the data size is not a multiple of the batch size. The same accounting applies across distributed ranks with unequal local sizes, where averaging per-rank means would overweight the smaller ranks."
+      }
+    ],
     "outcome": "Derive the global mean gradient under rank averaging and inspect sampler padding and dropping.",
     "lab": "Compute the global mean gradient for unequal local batches, compare naive rank averaging with corrected multipliers, then inspect padded and drop-last sampler shards.",
     "verification": "The global gradient is -3, naive rank averaging gives -1.75 and the corrected multipliers recover -3; padding fills six slots with index 0 twice, and drop_last keeps indices 0 to 3.",
@@ -437,6 +723,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["shared nonlinear MLE", "conditional AR1 prediction", "reproducibility"],
+    "key_terms": {
+      "Modeling dossier": "A reproducible record of the observation unit, probability law, coordinates, algorithm, derivative checks, prediction target and limits.",
+      "Shared nonlinear mean": "The decay curve a e^(-b t) + c common to all panels, with only its three parameters estimated.",
+      "Conditional AR(1) prediction": "A forecast for an observed panel with residual mean rho^h r_T and innovation variance sigma^2(1 - rho^(2h)).",
+      "False independence": "Treating correlated panel residuals as independent, which removes residual carryover and misstates uncertainty."
+    },
+    "worked_examples": [
+      {
+        "title": "Leave-one-row-out versus leave-one-subject-out error",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(20)\nsubjects, m = 30, 5\neffect = rng.normal(0, 1.0, subjects)\ny = effect[:, None] + rng.normal(0, 0.5, (subjects, m))\nrow_err, subj_err = [], []\nfor i in range(subjects):\n    for j in range(m):\n        others = np.delete(y[i], j)\n        row_err.append((y[i, j] - others.mean()) ** 2)  # other rows from the same subject\n    rest = np.delete(y, i, axis=0)\n    subj_err.extend((y[i] - rest.mean()) ** 2)  # a subject never seen before\nprint(f\"leave-one-row-out MSE {np.mean(row_err):.3f}\")\nprint(f\"leave-one-subject-out MSE {np.mean(subj_err):.3f}\")\nprint(f\"theory: 0.25 * (1 + 1/4) = {0.25 * 1.25:.4f}; 1 + 0.25 = 1.25 plus estimation error\")\n",
+        "output": "leave-one-row-out MSE 0.376\nleave-one-subject-out MSE 1.360\ntheory: 0.25 * (1 + 1/4) = 0.3125; 1 + 0.25 = 1.25 plus estimation error\n",
+        "interpretation": "Thirty subjects each contribute five measurements, with subject effects of standard deviation 1.0 and within-subject noise 0.5. Holding out one row and predicting it from the same subject's other four gives mean squared error 0.376, close to the theoretical \\(0.25\\times(1+1/4)=0.3125\\) for this simple predictor, with the difference consistent with sampling variation across 150 held-out rows. Holding out an entire subject and predicting from the remaining subjects gives 1.360, more than three times larger, because the new subject's effect must now be predicted from the population, which adds its variance of about 1. Both numbers are correct, but for different questions. Row-level cross-validation measures prediction for subjects already in the data. Subject-level cross-validation measures prediction for a new subject. A panel model evaluated only with row-level splits would report the optimistic 0.376 for a use case whose real error is about 1.36."
+      }
+    ],
     "outcome": "Fit and audit a shared nonlinear panel model with explicit prediction and evidence limitations.",
     "lab": "Fit the shared nonlinear panel model, audit its gradient and information, predict conditionally on each group, then refit under false independence.",
     "verification": "Parameters recover (2.5, 0.55, 0.6) with maximum gradient below 5e-4 and a positive minimum information eigenvalue; the independence fit recovers the same means, so compare the reported conditional and independence forecast errors instead.",

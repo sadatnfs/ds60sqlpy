@@ -6,13 +6,15 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 import subprocess
 import sys
 import tempfile
+from dataclasses import replace
 from pathlib import Path
 from textwrap import indent
 
-from model import HEADER, Case, Unit
+from model import HEADER, Case, Reasoning, Unit
 
 ROOT = Path(__file__).resolve().parents[3]
 SOURCE_ROOT = ROOT
@@ -54,9 +56,19 @@ def units() -> list[Unit]:
     from advanced import UNITS as advanced
     from composition import UNITS as composition
     from foundation import UNITS as foundations
+    from reasoning import REASONING
+    from records import RECORDS
     from scientific import UNITS as scientific
 
     result = [*foundations, *composition, *scientific, *advanced]
+    result = [
+        replace(
+            unit,
+            reasoning=REASONING.get(unit.number),
+            records=RECORDS.get(unit.number, ()),
+        )
+        for unit in result
+    ]
     numbers = [unit.number for unit in result]
     if numbers != list(range(1, len(result) + 1)):
         raise ValueError("JAX units must form one complete, unique ordered route")
@@ -67,7 +79,64 @@ def units() -> list[Unit]:
             raise ValueError(f"{unit.id} needs six distinct concrete tasks")
         if any(number >= unit.number for number in unit.prerequisites):
             raise ValueError(f"{unit.id} has a forward prerequisite")
+        check_key_terms(unit)
+        check_reasoning(unit)
+        check_records(unit)
     return result
+
+
+MIN_SOLUTION_WORDS = 700
+
+
+def _words(text: str) -> int:
+    return len(re.findall(r"\b[\w'-]+\b", text))
+
+
+def check_reasoning(unit: Unit) -> None:
+    """Require the four-part explained-reference reasoning for every unit."""
+    reasoning = unit.reasoning
+    if not isinstance(reasoning, Reasoning):
+        raise ValueError(f"{unit.id} needs solution reasoning in reasoning.py")
+    for name in ("approach", "correctness", "verification"):
+        if _words(getattr(reasoning, name)) < 35:
+            raise ValueError(f"{unit.id} reasoning {name} needs at least 35 words")
+    if len(reasoning.pitfalls) != 6 or any(_words(text) < 18 for text in reasoning.pitfalls):
+        raise ValueError(f"{unit.id} needs six wrong-approach notes of at least 18 words")
+    if len(set(reasoning.pitfalls)) != 6:
+        raise ValueError(f"{unit.id} wrong-approach notes must be distinct")
+    texts = (reasoning.approach, reasoning.correctness, reasoning.verification, *reasoning.pitfalls)
+    if any(dash in text for text in texts for dash in ("\u2013", "\u2014")):
+        raise ValueError(f"{unit.id} reasoning contains an en or em dash")
+
+
+def check_records(unit: Unit) -> None:
+    """Reading units carry one fenced evidence-record sketch per worked example."""
+    if unit.runtime != "reading":
+        if unit.records:
+            raise ValueError(f"{unit.id} runs code; evidence records are for reading units")
+        return
+    if len(unit.records) != len(unit.worked):
+        raise ValueError(f"{unit.id} needs one evidence record per worked example")
+    for record in unit.records:
+        lines = record.strip().splitlines()
+        if len(lines) < 5 or "```" in record:
+            raise ValueError(f"{unit.id} evidence records need five or more unfenced lines")
+        if any(dash in record for dash in ("\u2013", "\u2014")):
+            raise ValueError(f"{unit.id} evidence record contains an en or em dash")
+
+
+def check_key_terms(unit: Unit) -> None:
+    """Require three to five distinct, defined, lesson-specific vocabulary entries."""
+    names = [term.lower() for term, _ in unit.key_terms]
+    if not 3 <= len(names) <= 5 or len(set(names)) != len(names):
+        raise ValueError(f"{unit.id} needs three to five distinct key terms")
+    for term, definition in unit.key_terms:
+        if not term.strip() or any(mark in term for mark in ("*", ":", "\n")):
+            raise ValueError(f"{unit.id} has an invalid key term name {term!r}")
+        if len(definition.split()) < 6 or not definition.endswith("."):
+            raise ValueError(f"{unit.id} key term {term!r} needs a one-sentence definition")
+        if any(dash in term + definition for dash in ("\u2013", "\u2014")):
+            raise ValueError(f"{unit.id} key term {term!r} contains an en or em dash")
 
 
 def _bound_names(node: ast.stmt) -> set[str]:
@@ -309,6 +378,8 @@ def render(unit: Unit) -> dict[str, str]:
         f"# {key}: {unit.title}\n\n## Starting point and outcome\n\n"
         f"{unit.level.title()}. Direct prerequisites: {prerequisites}\n\n{unit.outcome}\n",
         "## Mechanism and purpose\n\n" + unit.narrative.strip(),
+        "## Key terms\n\n"
+        + "\n".join(f"- **{term}:** {definition}" for term, definition in unit.key_terms),
         "## Derivation and shape contract\n\n" + unit.derivation.strip(),
     ]
     if unit.runtime == "reading":
@@ -341,7 +412,8 @@ def render(unit: Unit) -> dict[str, str]:
             + (
                 f"```python\n{program(unit, (item,))}```"
                 if unit.runtime != "reading"
-                else item.code
+                else f"{item.code}\n\n**Evidence record sketch:**\n\n"
+                f"```text\n{unit.records[number - 1].strip()}\n```"
             )
         )
     sections.append("## Exercises")
@@ -370,17 +442,33 @@ def render(unit: Unit) -> dict[str, str]:
             "run output and any hardware or population claim requiring additional evidence.",
         ]
     )
-    explanation = [f"# {key}: explained reference\n\n" + unit.derivation]
+    reasoning = unit.reasoning
+    assert reasoning is not None
+    explanation = [
+        f"# {key}: explained reference\n\n" + unit.derivation,
+        "## Solution approach\n\n"
+        + reasoning.approach
+        + "\n\n**Why it is correct here:** "
+        + reasoning.correctness,
+    ]
     for number, item in enumerate(unit.practice, 1):
         explanation.append(
             f"## Exercise {number}: {item.title}\n\n{item.explanation}\n\n"
             f"**Expected:** {item.expected}\n\n"
             + (f"```python\n{item.code}\n```" if unit.runtime != "reading" else item.code)
+            + f"\n\n**Plausible wrong approach:** {reasoning.pitfalls[number - 1]}"
         )
+    explanation.append("## How to verify\n\n" + reasoning.verification)
     explanation.append("## Scope of this evidence\n\n" + unit.diagnosis + "\n\n" + unit.transfer)
+    solution_text = "\n\n".join(explanation) + "\n"
+    if _words(solution_text) < MIN_SOLUTION_WORDS:
+        raise ValueError(
+            f"{key} explained reference has {_words(solution_text)} words; "
+            f"needs at least {MIN_SOLUTION_WORDS}"
+        )
     result = {
         f"{prefix}guides/{key}.md": "\n\n".join(sections) + "\n",
-        f"{prefix}solutions/{key}_solutions.md": "\n\n".join(explanation) + "\n",
+        f"{prefix}solutions/{key}_solutions.md": solution_text,
     }
     if unit.runtime == "reading":
         result[f"{prefix}lessons/{key}.md"] = (

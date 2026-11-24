@@ -80,7 +80,7 @@ object Main {
       locally {
         assert(source.schema("id").dataType == LongType && source.count() == 2000L)
         assert(source.agg(sum("amount")).first().getLong(0) == 13993000L)
-        println("Explicit-schema source:2000 rows,total13993000")
+        println("Explicit-schema source: 2000 rows, total 13993000")
       }
       locally {
         val ids = (1990L until 2000L).filter(_ % 2L == 0L)

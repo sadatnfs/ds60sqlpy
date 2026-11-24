@@ -195,24 +195,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-032-explained-reference">julia-032: explained reference<a class="heading-anchor" href="#julia-032-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-032_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>analyze</code> reads the eight-row <code>SENSOR_CSV</code> with declared types, runs <code>validate_sensor</code> for row count, unique ids, finite values, known splits, feature and label availability and split counts of 4, 2 and 2, then fits ridge lines on the four training rows. It selects the penalty by development MSE and writes a memo with the fixture SHA-256.</p>
 <h3 id="1-audit-the-grain">1. Audit the grain<a class="heading-anchor" href="#1-audit-the-grain" aria-label="Link to this section">#</a></h3>
 <p>The eight-row contract fixes grain and denominators; repeated entities in real data would need additional grouping.</p>
 <p><strong>Expected observation:</strong> One synthetic prediction record with declared availability evidence.</p>
+<p><strong>Why it holds here:</strong> Each row has a unique id such as <code>s01</code> and represents one synthetic prediction with its own feature and label availability dates.</p>
+<p><strong>Plausible wrong approach:</strong> Treating the ids as entities that may repeat would require grouping rules that this fixture does not define.</p>
+<p><strong>How to verify:</strong> The reference duplicates <code>id[8]</code> and asserts <code>validate_sensor</code> throws <code>ArgumentError</code>.</p>
 <h3 id="2-reproduce-the-selection">2. Reproduce the selection<a class="heading-anchor" href="#2-reproduce-the-selection" aria-label="Link to this section">#</a></h3>
 <p>The declared rule chooses the minimum development MSE in fixed candidate order.</p>
 <p><strong>Expected observation:</strong> Penalty 2 is selected.</p>
+<p><strong>Why it holds here:</strong> The training rows are the same x and y values as lesson julia-021, so the four penalties give the same development errors and penalty 2 wins.</p>
+<p><strong>Plausible wrong approach:</strong> Choosing by final error reuses the assessment rows for selection and makes the reported final MSE optimistic.</p>
+<p><strong>How to verify:</strong> Worked example A asserts <code>result.memo[&quot;penalty&quot;] == 2</code> and <code>development_mse ≈ 1/98</code>.</p>
 <h3 id="3-verify-final-arithmetic">3. Verify final arithmetic<a class="heading-anchor" href="#3-verify-final-arithmetic" aria-label="Link to this section">#</a></h3>
 <p>This independent rational calculation verifies the reported floating result.</p>
 <p><strong>Expected observation:</strong> Residuals are -1/7 and -2/7; MSE is 5/98.</p>
+<p><strong>Why it holds here:</strong> Predictions 90/7 and 103/7 against 13 and 15 leave residuals -1/7 and -2/7, whose squares 1/49 and 4/49 average to 5/98.</p>
+<p><strong>Plausible wrong approach:</strong> Averaging the absolute residuals gives 3/14, a different metric from the mean squared error stored in the memo.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>result.memo[&quot;final_mse&quot;] ≈ 5/98</code>; compute the fractions by hand beside it.</p>
 <h3 id="4-inject-information-leakage">4. Inject information leakage<a class="heading-anchor" href="#4-inject-information-leakage" aria-label="Link to this section">#</a></h3>
 <p>A future-known feature cannot enter the historical decision under the declared contract.</p>
 <p><strong>Expected observation:</strong> The data validator rejects the fixture.</p>
+<p><strong>Why it holds here:</strong> Setting row 7&#x27;s feature date to 2024-02-01, after its prediction date 2024-01-07, breaks <code>feature_available_at .&lt;= prediction_at</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only that dates parse lets a future feature enter the model and makes the historical evaluation impossible in practice.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>ArgumentError</code> for that change and for a label date after the 2024-01-10 cutoff.</p>
 <h3 id="5-inspect-accessible-evidence">5. Inspect accessible evidence<a class="heading-anchor" href="#5-inspect-accessible-evidence" aria-label="Link to this section">#</a></h3>
 <p>Descriptions explain scope; exact tables support inspection without relying on visual position.</p>
 <p><strong>Expected observation:</strong> The values and IDs must match exactly.</p>
+<p><strong>Why it holds here:</strong> The Plotly table and markers come from the same <code>final</code> rows and <code>predictions</code>, so ids, observations and predictions must match exactly.</p>
+<p><strong>Plausible wrong approach:</strong> Reading values off the chart by eye introduces rounding and misses an id paired with the wrong row.</p>
+<p><strong>How to verify:</strong> Compare each table row with <code>result.final</code> and <code>result.predictions</code> programmatically.</p>
 <h3 id="6-write-the-decision-memo">6. Write the decision memo<a class="heading-anchor" href="#6-write-the-decision-memo" aria-label="Link to this section">#</a></h3>
 <p>Require representative sampling, uncertainty, domain validation and monitoring before making a deployment claim.</p>
-<p><strong>Expected observation:</strong> Synthetic computation passes; deployment is not justified.</p></article>
+<p><strong>Expected observation:</strong> Synthetic computation passes; deployment is not justified.</p>
+<p><strong>Why it holds here:</strong> The synthetic workflow passes all checks, but two final rows and a hand-built fixture cannot support a deployment decision.</p>
+<p><strong>Plausible wrong approach:</strong> Writing that the model is ready because the final MSE is small ignores sample size, selection history and domain validity.</p>
+<p><strong>How to verify:</strong> Confirm the memo&#x27;s decision text says deployment evidence is insufficient and that <code>fixture_sha256</code> matches <code>bytes2hex(sha256(SENSOR_CSV))</code>.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-032: all reference checks passed</code>:</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    table <span class="syntax-operator">=</span> load_sensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    duplicate <span class="syntax-operator">=</span> copy<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">)</span>
+    duplicate<span class="syntax-operator">.</span>id<span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> duplicate<span class="syntax-operator">.</span>id<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> validate_sensor<span class="syntax-punctuation">(</span>duplicate<span class="syntax-punctuation">)</span>
+    future <span class="syntax-operator">=</span> copy<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">)</span>
+    future<span class="syntax-operator">.</span>feature_available_at<span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> Date<span class="syntax-punctuation">(</span><span class="syntax-number">2024</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> validate_sensor<span class="syntax-punctuation">(</span>future<span class="syntax-punctuation">)</span>
+    late <span class="syntax-operator">=</span> copy<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">)</span>
+    late<span class="syntax-operator">.</span>label_available_at<span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> Date<span class="syntax-punctuation">(</span><span class="syntax-number">2024</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> validate_sensor<span class="syntax-punctuation">(</span>late<span class="syntax-punctuation">)</span>
+    invalid <span class="syntax-operator">=</span> copy<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">)</span>
+    invalid<span class="syntax-operator">.</span>x<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-builtin">NaN</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> validate_sensor<span class="syntax-punctuation">(</span>invalid<span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> validate_sensor<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-operator">:</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> analyze<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>memo<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">fixture_sha256</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> bytes2hex<span class="syntax-punctuation">(</span>sha256<span class="syntax-punctuation">(</span>SENSOR_CSV<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

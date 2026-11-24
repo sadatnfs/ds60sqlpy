@@ -1,6 +1,6 @@
 # llm-016: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these a tiny causal transformer from explicit parts answers after attempting *Build a bounded decoder* through *Reject invalid token IDs*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Recompute prefixes* points to one step. `llm-016_solution.py` holds the assertions; this page explains how they test decoder block. Then try *Reject invalid token IDs* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -81,11 +81,11 @@ assert count < 50000
 
 **Expected:** Exactly 10,464 trainable scalars, below the 50,000 teaching bound.
 
-**Verify:** In a fresh process, the exercise checks confirm `count == 10464` and `count < 50000`.
+**Verify:** For *Build a bounded decoder*, a fresh-process check confirms `count == 10464` and `count < 50000`.
 
 ## Exercise 2: Trace output axes
 
-The question is: Run the integer IDs [[2,5,7,3]] and trace the output shape and dtype.
+The question is: Run the integer IDs [[2, 5, 7, 3]] and trace the output shape and dtype.
 
 Every input position produces a distribution over the same sixteen-token vocabulary. The time axis is not a class axis and must not be reduced accidentally.
 
@@ -100,9 +100,9 @@ assert logits.dtype == torch.float32
 assert torch.isfinite(logits).all()
 ```
 
-**Expected:** Finite float32 logits with shape [1,4,16].
+**Expected:** Finite float32 logits with shape [1, 4, 16].
 
-**Verify:** In a fresh process, the exercise checks confirm `tuple(logits.shape) == (1, 4, 16)`; `logits.dtype == torch.float32` and `torch.isfinite(logits).all()`.
+**Verify:** For *Trace output axes*, a fresh-process check confirms `tuple(logits.shape) == (1, 4, 16)`; `logits.dtype == torch.float32` and `torch.isfinite(logits).all()`.
 
 ## Exercise 3: Recompute prefixes
 
@@ -123,7 +123,7 @@ with torch.no_grad():
 
 **Expected:** Every prefix matches the corresponding full-sequence early logits within 1e-6.
 
-**Verify:** In a fresh process, the exercise checks confirm for every `length` in `range(1, 5)`, `prefix` matches `full[:, :length]` within 1e-6.
+**Verify:** For *Recompute prefixes*, a fresh-process check confirms for every `length` in `range(1, 5)`, `prefix` matches `full[:, :length]` within 1e-6.
 
 ## Exercise 4: Perturb only future tokens
 
@@ -146,7 +146,7 @@ assert not torch.equal(ids, changed)
 
 **Expected:** The first two score vectors remain unchanged within 1e-6.
 
-**Verify:** In a fresh process, the exercise checks confirm `perturbed[:, :2]` matches `original[:, :2]` within 1e-6 and `not torch.equal(ids, changed)`.
+**Verify:** For *Perturb only future tokens*, a fresh-process check confirms `perturbed[:, :2]` matches `original[:, :2]` within 1e-6 and `not torch.equal(ids, changed)`.
 
 ## Exercise 5: Inspect head shapes
 
@@ -167,9 +167,9 @@ for tensor in cache.values():
 assert sum(tensor.numel() * tensor.element_size() for tensor in cache.values()) == 1024
 ```
 
-**Expected:** Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.
+**Expected:** Logits remain connected; each cache is detached float32 [1, 2, 4, 16]; combined cache data occupies 1,024 bytes.
 
-**Verify:** In a fresh process, the exercise checks confirm `logits.requires_grad`; for every `tensor` in `cache.values()`, `tuple(tensor.shape) == (1, 2, 4, 16)`; for every `tensor` in `cache.values()`, `tensor.dtype == torch.float32`; for every `tensor` in `cache.values()`, `not tensor.requires_grad` and 1 further check.
+**Verify:** For *Inspect head shapes*, a fresh-process check confirms `logits.requires_grad`; for every `tensor` in `cache.values()`, `tuple(tensor.shape) == (1, 2, 4, 16)`; for every `tensor` in `cache.values()`, `tensor.dtype == torch.float32`; for every `tensor` in `cache.values()`, `not tensor.requires_grad` and 1 further check.
 
 ## Exercise 6: Reject invalid token IDs
 
@@ -204,8 +204,8 @@ for options in [dict(width=5, heads=2), dict(heads=0), dict(context=0)]:
 
 **Expected:** Every invalid contract raises ValueError before a misleading reshape or embedding computation.
 
-**Verify:** In a fresh process, the exercise checks confirm for every `invalid` in `invalid_inputs`, `model(invalid)` raises `ValueError` and for every `options` in `[dict(width=5, heads=2), dict(heads=0), dict(context=0)]`, `TinyDecoder(**options)` raises `ValueError`.
+**Verify:** For *Reject invalid token IDs*, a fresh-process check confirms for every `invalid` in `invalid_inputs`, `model(invalid)` raises `ValueError` and for every `options` in `[dict(width=5, heads=2), dict(heads=0), dict(context=0)]`, `TinyDecoder(**options)` raises `ValueError`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Perturb only future tokens* and predict the result first; keep *Reject invalid token IDs* failing beside the repair. Log a missing PyTorch separately from a wrong decoder block value in `llm-016`.

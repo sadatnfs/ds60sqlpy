@@ -137,7 +137,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Combine repeated valid names) before changing anything, and confirm its observation: Pear totals 6 and apple totals 3.
 2. Compare Example B (Keep rejection separate from zero) with Example A and name the first line whose behavior differs. Its observation is: The valid zero remains present while three records are rejected.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Check field count before indexing.
+3. Before opening the explanation, check your task 3 attempt (Produce a sorted text report with accepted totals and rejected count) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

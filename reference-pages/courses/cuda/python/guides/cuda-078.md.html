@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>An atomic operation updates one supported location indivisibly with respect to competing atomic operations. It does not make an entire multi-location algorithm transactional. A histogram demonstrates the need: two threads reading count 0 and both writing count 1 lose an increment. Atomic addition prevents that lost update for the counter, but every thread targeting the same bin can serialize.</p>
 <p>Privatization reduces contention by building per-block or per-warp partial histograms and merging them later. The memory footprint grows with bin count and number of partials. Floating-point atomic addition can still vary with arrival order. Explain what is protected, what ordering is required, and whether non-atomic readers can observe partially completed results.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Atomic operation:</strong> A read-modify-write that the hardware completes as one indivisible step, so concurrent updates are not lost.</li>
+<li><strong>Lost update:</strong> A race in which two threads read the same old value and one thread&#x27;s write overwrites the other.</li>
+<li><strong>Privatization:</strong> Giving each block its own partial result, usually in shared memory, then merging the partials with fewer global atomics.</li>
+<li><strong>Contention:</strong> Many threads updating the same address at once, which serializes atomics and reduces throughput.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Values [0,0,1,2,2,2] produce bins [2,1,3]. Six updates aimed at one bin would be a deliberately skewed contention case.</p>
@@ -216,20 +223,56 @@ merged <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <span class="syntax-keyword">assert</span> bins <span class="syntax-operator">==</span> merged <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU histogram oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> bins<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Histogram bins [2,1,3].</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>values</code></td>
+<td><code>[0, 0, 1, 2, 2, 2]</code></td>
+</tr>
+<tr>
+<td><code>bins</code></td>
+<td><code>[2, 1, 3]</code></td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>left</code></td>
+<td><code>[2, 1, 0]</code></td>
+</tr>
+<tr>
+<td><code>right</code></td>
+<td><code>[0, 0, 3]</code></td>
+</tr>
+<tr>
+<td><code>merged</code></td>
+<td><code>[2, 1, 3]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-a-lost-update">Exercise 1: Trace a lost update<a class="heading-anchor" href="#exercise-1-trace-a-lost-update" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>trace a lost update</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming the two writes collide in a visible way, raising an error or producing a garbled value, is incorrect. The lost update produces a plausible number, which is why it escapes notice.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-compute-a-skewed-histogram">Exercise 2: Compute a skewed histogram<a class="heading-anchor" href="#exercise-2-compute-a-skewed-histogram" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>compute a skewed histogram</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using the uniform data <code>[0, 1, 2, 0, 1, 2]</code> as the contention test spreads updates evenly and measures the friendliest case instead.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-merge-partials">Exercise 3: Merge partials<a class="heading-anchor" href="#exercise-3-merge-partials" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>merge partials</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Concatenating the partials or taking the bin-wise maximum produces wrong totals. The maximum here gives <code>[2, 1, 3]</code> by coincidence, so test with overlapping partials such as <code>[1, 1, 0]</code> and <code>[1, 0, 3]</code>.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-count-private-storage">Exercise 4: Count private storage<a class="heading-anchor" href="#exercise-4-count-private-storage" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>count private storage</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting only bins times width, 1 KiB here, ignores that each partial owns its own copy and underestimates memory by a factor of the partial count.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-floating-atomic-order">Exercise 5: Explain floating atomic order<a class="heading-anchor" href="#exercise-5-explain-floating-atomic-order" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>explain floating atomic order</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Expecting atomics to give the same bits as a sequential CPU sum confuses race-freedom with order. No update is lost, but the order is still free.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-specify-completion-before-reading">Exercise 6: Specify completion before reading<a class="heading-anchor" href="#exercise-6-specify-completion-before-reading" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>specify completion before reading</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reading after only the histogram kernel ignores the merge step, so the host sees one block&#x27;s partial instead of the total.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -8,7 +8,7 @@ Advanced; approximately 105 minutes. Direct prerequisites: `spark-038`. The prep
 
 ## How to run this lesson
 
-Open `spark-039` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-039` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-039.scala) and [PySpark learner](../lessons/spark-039.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-039_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-039_solution.scala) and [PySpark reference](../solutions/spark-039_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -32,9 +32,9 @@ The [Scala learner](../lessons/spark-039.scala) and [PySpark learner](../lessons
 
 - **Stop budget:** A predeclared resource/input bound that prevents a teaching experiment from expanding without review.
 
-A performance choice should preserve correctness before it compares resource work. This lesson generates exactly 20000 rows and compares two versus four hash partitions under local[2], with AQE disabled and the same aggregation contract. It records actual executed SQL metrics, retained stage/task counters, physical partition row counts, file counts and elapsed time. It then evaluates a separate hypothetical price formula without pretending that the local run produced a cloud bill.
+A performance choice should preserve correctness before it compares resource work. This lesson generates exactly 20000 rows and compares two versus four hash partitions under `local[2]`, with AQE disabled and the same aggregation contract. It records actual executed SQL metrics, retained stage/task counters, physical partition row counts, file counts and elapsed time. It then evaluates a separate hypothetical price formula without pretending that the local run produced a cloud bill.
 
-The source has IDs 0 through 19999. IDs below 16000 share key 0;the remaining 4000 use id modulo 100. Therefore key 0 occurs 16040 times and each other key 1..99 occurs 40 times. The independent oracle has 100 key/count pairs whose counts total 20000. A result that drops the hot key or changes multiplicity is wrong even if its elapsed time is attractive.
+The source has IDs 0 through 19999. IDs below 16000 share key 0; the remaining 4000 use id modulo 100. Therefore key 0 occurs 16040 times and each other key 1..99 occurs 40 times. The independent oracle has 100 key/count pairs whose counts total 20000. A result that drops the hot key or changes multiplicity is wrong even if its elapsed time is attractive.
 
 ## What the comparison actually measures
 
@@ -48,26 +48,24 @@ The status tracker attaches retained stage/task counters to the named action. Re
 
 Both configurations still use two local execution threads. Four partitions can reduce some work-unit sizes but add scheduling and file-management overhead. Hash partitioning keeps the hot key together, so simply increasing the partition count does not divide that key's records. A different aggregation strategy or deliberate salting may address some skew, but it must preserve the original grouping semantics and account for any second-stage merge.
 
-The two configurations write into separate owned output directories. The number of actual Parquet data files is recorded, excluding metadata/CRC files. The test allows one through the configured partition count rather than assuming every partition must write a file. The files are read back and compared with every expected key/count pair. A lower file count alone is not a quality metric:oversized files, too many small files and downstream access patterns introduce different tradeoffs.
+The two configurations write into separate owned output directories. The number of actual Parquet data files is recorded, excluding metadata/CRC files. The test allows one through the configured partition count rather than assuming every partition must write a file. The files are read back and compared with every expected key/count pair. A lower file count alone is not a quality metric: oversized files, too many small files and downstream access patterns introduce different tradeoffs.
 
 The tiny run may report zero spill. That is a valid measurement for this fixture, not proof that a larger workload will remain in memory. Deliberately forcing memory exhaustion would be a different bounded experiment and is not required here. Driver collections are restricted to known small aggregate/partition metadata results; the 20000 raw rows stay in Spark execution.
 
 ## Interpret timing and cost with visible assumptions
 
-Record the compiler/runtime family, local[2], AQE setting, input formula, partition count and whether caches were used. This reference does not persist the source, so the diagnostic scans can recompute it. Warmup, JIT, filesystem caches and concurrent host activity can affect elapsed time. Do not assert that the four-partition run must be faster or extrapolate a single small timing to a cluster.
+Record the compiler/runtime family, `local[2]`, AQE setting, input formula, partition count and whether caches were used. This reference does not persist the source, so the diagnostic scans can recompute it. Warmup, JIT, filesystem caches and concurrent host activity can affect elapsed time. Do not assert that the four-partition run must be faster or extrapolate a single small timing to a cluster.
 
-The cost worksheet uses deliberately hypothetical prices:0.05 currency units per vCPU-hour and 0.02 per GiB-month, with a 30-day month. Two vCPUs for 3600 seconds cost 0.10 and two GiB for 30 days cost 0.04, for 0.14 total. This arithmetic does not include network, API requests, minimum charges, replication or support overhead. It is a model for reasoning about units, not financial advice or a real service quote.
+The cost worksheet uses deliberately hypothetical prices: 0.05 currency units per vCPU-hour and 0.02 per GiB-month, with a 30-day month. Two vCPUs for 3600 seconds cost 0.10 and two GiB for 30 days cost 0.04, for 0.14 total. This arithmetic does not include network, API requests, minimum charges, replication or support overhead. It is a model for reasoning about units, not financial advice or a real service quote.
 
-The stop budget is part of the experiment design:at most 20000 source rows and 8 partitions. A proposal to increase either is rejected before constructing a larger dataset. A sensible next experiment states what uncertainty it would resolve, which metric would change and when it would stop. The goal is a measured, correct comparison with honest limitations, not a dramatic benchmark at any cost.
+The stop budget is part of the experiment design: at most 20000 source rows and 8 partitions. A proposal to increase either is rejected before constructing a larger dataset. A sensible next experiment states what uncertainty it would resolve, which metric would change and when it would stop. The goal is a measured, correct comparison with honest limitations, not a dramatic benchmark at any cost.
 
 ## Supplied local fixture
 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
@@ -75,7 +73,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-039-")
 val source = spark
@@ -84,20 +82,7 @@ val source = spark
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -105,7 +90,7 @@ import json
 import uuid
 
 if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark4.0.1 required")
+    raise ValueError("Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-039-", dir=Path.cwd()))
 source = spark.range(0, 20000, 1, 4).withColumn(
@@ -151,7 +136,7 @@ The hypothetical cost calculation exposes time/storage unit conversions. It is d
 
 Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.
 
-**Expected result/shape:** Exact population tuple 20000,20000,100,199990000;key 0 count 16040, other keys 40.
+**Expected result/shape:** Exact population tuple 20000,20000,100,199990000; key 0 count 16040, other keys 40.
 
 **Verify:** Compare aggregate counts and the independent formula 16000+4000/100.
 
@@ -161,7 +146,7 @@ Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain ke
 
 Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product.
 
-**Expected result/shape:** 100 exact key/count pairs, total 20000;nonempty retained stage evidence; one or two data files.
+**Expected result/shape:** 100 exact key/count pairs, total 20000; nonempty retained stage evidence; one or two data files.
 
 **Verify:** Compare all rows with the literal formula before accepting any work/time report.
 
@@ -175,13 +160,13 @@ Repeat with 4 partitions and a separate output directory.
 
 **Verify:** Assert parity and print actual elapsed time/file/metric values without an ordering claim.
 
-**Progressive hint:** local[2] still has two execution threads.
+**Progressive hint:** `local[2]` still has two execution threads.
 
 ### Exercise 4: Interpret work imbalance and spill honestly
 
 Compute maximum bucket rows divided by mean bucket rows; report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values.
 
-**Expected result/shape:** Both observed work ratios exceed 1;unavailable metrics remain None/None-equivalent.
+**Expected result/shape:** Both observed work ratios exceed 1; unavailable metrics remain None/None-equivalent.
 
 **Verify:** Assert row conservation and positive ratio, then print exact available metric maps and stage receipts.
 
@@ -201,7 +186,7 @@ Use a hypothetical rate 0.05 currency units per vCPU-hour and 0.02 per GiB-month
 
 Accept only row counts 1..20000 and partition counts 1..8 for this local exercise. Reject an attempted larger fixture before constructing it.
 
-**Expected result/shape:** 20000/4 accepted;20001/4 and 20000/9 rejected.
+**Expected result/shape:** 20000/4 accepted; 20001/4 and 20000/9 rejected.
 
 **Verify:** Assert both refusals and confirm the session shuffle setting restored to 2.
 
@@ -209,11 +194,11 @@ Accept only row counts 1..20000 and partition counts 1..8 for this local exercis
 
 ## Common pitfalls
 
-Do not equate serialized dataSize with remote network traffic, absent spill metrics with zero spill, or partition-row imbalance with measured task-duration imbalance. Do not compare elapsed times for different result contracts or different included work. More partitions do not increase local[2] CPU threads. Keep hypothetical prices and model assumptions separate from actual runtime observations, and enforce the stop budget before expanding data.
+Do not equate serialized dataSize with remote network traffic, absent spill metrics with zero spill, or partition-row imbalance with measured task-duration imbalance. Do not compare elapsed times for different result contracts or different included work. More partitions do not increase `local[2]` CPU threads. Keep hypothetical prices and model assumptions separate from actual runtime observations, and enforce the stop budget before expanding data.
 
 ## Self-check
 
-Explain the contract of `fixtureMetrics` / `fixture_metrics` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `fixtureMetrics` / `fixture_metrics` without reading its solution. Then, from memory, state what Exercise 6 (Enforce the stop budget before scaling data) must produce: `20000/4` accepted; `20001/4` and `20000/9` rejected. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -221,9 +206,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark4.0.1 monitoring metrics](https://spark.apache.org/docs/4.0.1/monitoring.html)
+- [Spark 4.0.1 monitoring metrics](https://spark.apache.org/docs/4.0.1/monitoring.html)
 
-- [Spark4.0.1 SQL performance tuning](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
+- [Spark 4.0.1 SQL performance tuning](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
 
 ## Ask an AI tutor about this lesson
 

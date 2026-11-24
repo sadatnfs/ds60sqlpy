@@ -8,6 +8,13 @@ A normal likelihood penalizes large residuals quadratically. A Student-t likelih
 
 The synthetic dataset contains eight values between -.3 and .3 plus one value of eight. Two actual PyMC models use the same location and scale priors but different likelihoods. The Student-t model fixes the degrees of freedom at four to keep the example small and its tail assumption explicit.
 
+## Key terms
+
+- **Student-t likelihood:** An observation model with heavier tails than the normal, so one extreme residual has less influence on location.
+- **Degrees of freedom:** The Student-t parameter controlling tail weight, fixed at four in this example to keep the assumption explicit.
+- **Tail penalty:** The negative log density assigned to a residual, quadratic for the normal and logarithmic for Student-t.
+- **Posterior predictive criticism:** Comparing replicated data with observations to find features the model fails to reproduce.
+
 ## Worked case 1: compare posterior locations
 
 The normal model's posterior location is pulled toward the large observation. The Student-t location remains much closer to the central group. The program reports both means and checks that the robust model's location is closer to zero for this deliberately constructed fixture.
@@ -37,6 +44,40 @@ Robust estimation is also distinct from robust decision-making. A decision maker
 **Should the extreme row be deleted?** Only with a defensible data-quality or design reason. The example knows how its synthetic data were constructed; an external dataset requires investigation of measurement, units, duplicates and population structure.
 
 **What does the successful program prove?** It demonstrates actual model fitting and a numerical likelihood contrast under explicit priors and a fixed tail parameter. It does not prove which observation model should govern a different dataset or certify the short chains for every tail quantity.
+
+## Worked example: Moving one outlier: normal versus Student-t posterior means
+
+```python
+import numpy as np
+from scipy import stats
+
+base = np.array([1.1, 0.9, 1.3, 1.0, 0.8])
+mu = np.linspace(-5, 15, 8001)
+
+
+def post_mean(data, logpdf):
+    lp = np.array([logpdf(data - m).sum() for m in mu])
+    w = np.exp(lp - lp.max())
+    return w @ mu / w.sum()
+
+
+for outlier in (2.0, 4.0, 9.0, 30.0):
+    data = np.r_[base, outlier]
+    normal = post_mean(data, lambda r: stats.norm.logpdf(r, scale=0.5))
+    student = post_mean(data, lambda r: stats.t.logpdf(r, df=3, scale=0.5))
+    print(f"outlier {outlier:>4}: normal mean {normal:.3f}, Student-t mean {student:.3f}")
+```
+
+Observed output:
+
+```text
+outlier  2.0: normal mean 1.183, Student-t mean 1.127
+outlier  4.0: normal mean 1.517, Student-t mean 1.080
+outlier  9.0: normal mean 2.350, Student-t mean 1.042
+outlier 30.0: normal mean 5.850, Student-t mean 1.025
+```
+
+Five observations near 1.0 are joined by one outlier that moves from 2 to 30. Under a normal likelihood with scale 0.5 and a flat prior, the posterior mean is the sample mean, so it follows the outlier linearly: 1.183, 1.517, 2.350 and finally 5.850, a long way from every good observation. The Student-t posterior with 3 degrees of freedom behaves in the opposite way. Its mean is 1.127 when the outlier is at 2 and then falls back toward the bulk, reaching 1.025 when the outlier is at 30. The t density's log penalty grows only logarithmically in the residual, so beyond a few scale units an observation stops pulling. The influence is said to redescend. That is robustness, not deletion: a point at 2 still has some influence, and if half the data sat near 9, the t model would locate the posterior between the two groups or become bimodal. The trajectory is a better diagnostic than any single fit.
 
 ## Complete reproducible program
 

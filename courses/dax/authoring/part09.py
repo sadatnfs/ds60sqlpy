@@ -1,6 +1,6 @@
 "Stage nine: interpret work and measurements without inventing engine receipts."
 
-from .common import lesson
+from .common import explain, lesson
 from .common import result as r
 from .common import task as t
 
@@ -1012,3 +1012,504 @@ LESSONS[3]["feature"] = (
     "cases enumerate explicit domains and do not claim to "
     "execute or configure this engine setting."
 )
+
+
+REASONING = {
+    49: [
+        (
+            (
+                "SaleID is the line key. A valid new line, S9, adds one row and one distinct "
+                "SaleID, so both counts go from 8 to 9."
+            ),
+            (
+                'Reusing an existing key such as "S8" for the new line gives 9 rows but still 8 '
+                "distinct SaleIDs. The key no longer identifies one line."
+            ),
+            (
+                "After adding S9, COUNTROWS(Sales) and DISTINCTCOUNT(Sales[SaleID]) both return 9; "
+                "ProductKeys stays 3 unless S9 sells Bag."
+            ),
+        ),
+        (
+            (
+                "The fact table already stores ProductKey (3 distinct values over 8 rows) and gets "
+                "names and categories from the 4-row Product dimension."
+            ),
+            (
+                "Promising that replacing a label column with a key saves a fixed percentage of "
+                "storage. Compression depends on the data and the engine, and nothing here was "
+                "measured."
+            ),
+            (
+                "The logical check is that every Sales[ProductKey] matches one Product row and "
+                "that revenue by ProductName is still Notebook 67, Pen 24 and Mug 96."
+            ),
+        ),
+        (
+            (
+                "A performance claim needs evidence of the same answer, the same workload and a "
+                "measurement, in that order."
+            ),
+            (
+                "Timing a rewrite on this 8-row fixture and treating the result as evidence. At "
+                "this size there is nothing to separate from noise."
+            ),
+            (
+                "The checklist starts with result parity (for example NetRevenue 187 and "
+                "GrossRevenue 195), then records model, storage mode, filters, engine version, "
+                "hardware, cache state and repeated timings."
+            ),
+        ),
+        (
+            (
+                "Function names do not decide speed. SUM(Sales[NetAmount]) and SUMX(Sales, "
+                "Sales[NetAmount]) express the same calculation, 187. GrossRevenue needs the "
+                "row-level product."
+            ),
+            (
+                "Replacing SUMX(Sales, Quantity x UnitPrice) with SUM(Quantity) x SUM(UnitPrice) "
+                "to avoid an iterator gives 17 x 100 = 1700 instead of 195."
+            ),
+            (
+                "Keep the correct expression (195), and compare engine timings only between "
+                "expressions that return the same value."
+            ),
+        ),
+        (
+            (
+                "SaleID is the only column here that is unique per line. OrderID has 7 distinct "
+                "values for 8 rows because order 101 has S1 and S2."
+            ),
+            (
+                "Dropping SaleID because its cardinality equals the row count. Without it, two "
+                "identical lines could not be told apart or checked for duplicates."
+            ),
+            (
+                "DISTINCTCOUNT(Sales[SaleID]) = COUNTROWS(Sales) = 8 is the duplicate check, and "
+                "it only works while the key exists."
+            ),
+        ),
+        (
+            (
+                "OrderDate has 7 distinct days. Truncating dates to months leaves 3 values "
+                "(January 2024, January 2025 and February 2025)."
+            ),
+            (
+                "Truncating to month to save space breaks the daily windows from earlier lessons, "
+                "such as the three days ending February 3, 2025 (56 USD)."
+            ),
+            (
+                "Choose the grain from the questions to be answered: day-level windows need dates. "
+                "Then measure the storage of that choice."
+            ),
+        ),
+    ],
+    50: [
+        (
+            (
+                "The candidate grid multiplies the dimension sizes. With 5 products and 4 "
+                "customers it has 20 cells, but no new sale means no new observed pair."
+            ),
+            (
+                "Expecting ObservedPairs to rise to 7 with the new product. SUMMARIZE over Sales "
+                "only sees combinations that sold."
+            ),
+            "CandidatePairs returns 20 and ObservedPairs stays 6.",
+        ),
+        (
+            (
+                "Filtering the calendar to January 2025 leaves 31 dates in VALUES('Date'[Date]), "
+                "so the grid is 4 x 4 x 31. Observed cells come from S4, S5 and S6."
+            ),
+            (
+                "Filtering only Sales to January and expecting the grid to shrink. CROSSJOIN of "
+                "VALUES still reads all 731 dates unless the Date table is filtered."
+            ),
+            "Under Year 2025 and MonthNumber 1, CandidateCells is 496 and ObservedCells is 3.",
+        ),
+        (
+            (
+                "A coverage matrix needs every requested cell: 4 products by 4 customers, 16 "
+                "cells, of which 6 have sales. Bag's row and Di's column are empty."
+            ),
+            (
+                'Using SUMMARIZECOLUMNS(Product[ProductName], Customer[CustomerName], "Revenue", '
+                "[NetRevenue]) drops cells with blank revenue and returns 6 rows."
+            ),
+            (
+                "ADDCOLUMNS over CROSSJOIN(VALUES(Product[ProductName]), "
+                "VALUES(Customer[CustomerName])) with a missing marker returns 16 rows, 10 of them "
+                "without sales."
+            ),
+        ),
+        (
+            (
+                "11696 is 4 x 4 x 731, the size of a logical expression. The engine may never "
+                "build that table."
+            ),
+            (
+                "Reporting that the query scanned 11696 rows. No query plan or server timing was "
+                "captured, so that is a guess presented as a measurement."
+            ),
+            (
+                "Describe 11696 as the logical size of the CROSSJOIN, and back any claim about "
+                "physical work with a captured plan."
+            ),
+        ),
+        (
+            (
+                "Eligibility comes from the dimension. Di (customer 40) has no sales, so she "
+                "appears in Customer but not in any Sales grouping."
+            ),
+            (
+                "Taking the denominator from SUMMARIZE(Sales, Sales[CustomerKey]) gives 3 active "
+                "out of 3 customers, a 100 percent rate."
+            ),
+            "Over the Customer dimension, 3 of 4 customers have sales, a rate of 0.75.",
+        ),
+        (
+            (
+                "A product-by-store-by-day model multiplies the same way. 1,000 products, 50 "
+                "stores and 365 days give 18,250,000 candidate cells."
+            ),
+            (
+                "Building that full scaffold in an iterator when only store-days with sales "
+                "matter, or using only observed cells when zero-sale days count."
+            ),
+            (
+                "Estimate the grid size first, decide which empty cells the question needs, and "
+                "measure the cost of the chosen scaffold."
+            ),
+        ),
+    ],
+    51: [
+        (
+            (
+                "Every row under an incoming Quantity >= 2 filter already meets the predicate. "
+                "Replacing, intersecting or filtering the visible rows keeps the same 6 lines."
+            ),
+            (
+                "Treating this second agreement as proof that the rewrites are equivalent. Case "
+                "B's Quantity = 1 input still separates them."
+            ),
+            "Under Sales[Quantity] >= 2, all three columns return 163.",
+        ),
+        (
+            (
+                "Quantity >= 3 keeps S4 (3 units, 27) and S5 (4 units, 20). Without other filters, "
+                "all three forms keep the same two lines."
+            ),
+            (
+                "Expecting the case B pattern to change with the new threshold. Under Quantity = "
+                "1, the table and KEEPFILTERS forms still return BLANK and only the column filter "
+                "returns 47."
+            ),
+            (
+                "Unfiltered, each form returns 47; under Quantity = 1 the results are BLANK, 47 "
+                "and BLANK."
+            ),
+        ),
+        (
+            (
+                "The grid needs inputs that agree, overlap and conflict. An overlapping Quantity "
+                "IN {1, 2} filter and an unrelated Blue filter separate cases A and B."
+            ),
+            (
+                "Testing only the unfiltered case, where all three return 163 and no rewrite can "
+                "be wrong."
+            ),
+            (
+                "Under Quantity IN {1, 2}: TableFilter 116, ColumnFilter 163, KEEPFILTERS 116. "
+                "Under Blue: all three 143."
+            ),
+        ),
+        (
+            (
+                "Under Quantity = 1, the column filter replaces the selection and returns 163, "
+                "while the others return BLANK. A bigger number is not a better one."
+            ),
+            (
+                "Choosing the column filter because it fills cells the original left blank. It "
+                "changes the metric for any visual filtered on Quantity."
+            ),
+            (
+                "Decide whether the business rule should respect the incoming Quantity selection; "
+                "if so, keep case B's BLANK as the expected regression value."
+            ),
+        ),
+        (
+            (
+                "The KEEPFILTERS column form matches the FILTER(Sales, ...) form here because only "
+                "one column is involved and FILTER iterates the visible rows."
+            ),
+            (
+                "Generalizing to a table filter built on ALL(Sales). That table carries every "
+                "Sales column, and through the expanded table its reach extends to Product, "
+                "Customer and Date, so its interaction with incoming dimension filters is "
+                "different and must be tested."
+            ),
+            (
+                'Under Product[Color] = "Red", KEEPFILTERS(Sales[Quantity] >= 2) returns 20 '
+                "(S5 only). Run any whole-table form under the same Red filter and compare "
+                "before calling it equivalent."
+            ),
+        ),
+        (
+            (
+                "A SQL rewrite needs the same parity checks: duplicate rows, NULL handling and "
+                "boundaries, before timings matter."
+            ),
+            (
+                "Summing over SELECT DISTINCT NetAmount to cut rows. S1, S5, S6 and S7 all have "
+                "20, so the total falls from 187 to 127."
+            ),
+            (
+                "Compare row counts and totals between original and rewritten queries (8 lines and "
+                "187) before reading any timing."
+            ),
+        ),
+    ],
+    52: [
+        (
+            (
+                "ALL(Product) removes Product filters only, and none are active. North (Ada and "
+                "Cy) and 2025 still select S4, S5 and S8."
+            ),
+            (
+                "Expecting 187 as with ALL(Sales). ALL(Sales) clears the expanded fact table, "
+                "including Customer and Date, but ALL(Product) cannot reach them."
+            ),
+            ("Under Region North and Year 2025, CALCULATE([NetRevenue], ALL(Product)) returns 83."),
+        ),
+        (
+            (
+                "Notebook is Paper and Blue, and Mug is Home and Blue, so both requested pairs "
+                "exist in Product."
+            ),
+            (
+                "Concluding from this case that a cross product of valid values always exists. "
+                "Case B's Home and Red has no product."
+            ),
+            "RequestedPairs 2 and ExistingPairs 2 for Blue, against 2 and 1 for Red.",
+        ),
+        (
+            (
+                "The ledger lists the incoming filters (North, 2025), the modifier and the tables "
+                "it covers, the relationship type, the requested and existing pairs, and the value "
+                "at each step."
+            ),
+            (
+                'Writing only "used ALL" in the ledger, which does not say whether 187 or 83 is '
+                "expected."
+            ),
+            (
+                "For case A the ledger reads Original 83, ALL(Sales) 187 and "
+                "REMOVEFILTERS(Sales[NetAmount]) 83, each with its reason."
+            ),
+        ),
+        (
+            (
+                "To remove only the color filter, name that column. Under Blue, North and 2025, "
+                "the lines are S4 and S8."
+            ),
+            (
+                "Using ALL(Sales) also clears North and 2025, so the measure jumps to the "
+                "whole-model 187."
+            ),
+            (
+                "Blue, North and 2025 give 63. REMOVEFILTERS(Product[Color]) gives 83, while "
+                "ALL(Sales) gives 187."
+            ),
+        ),
+        (
+            (
+                "Independent and Coalesced settings control how filters on columns of the same "
+                "table combine. Formulas do not show the setting."
+            ),
+            (
+                "Predicting a result from the setting's name, such as assuming Independent means "
+                "filters never interact, without testing."
+            ),
+            (
+                "Record the setting and engine version, then test case B's Paper or Home with Red "
+                "selection and the totals in the target model."
+            ),
+        ),
+        (
+            (
+                "Size and color selections work like Category and Color here. Each label exists, "
+                "but the pair may not: Home and Red has no product."
+            ),
+            (
+                "Computing a share where the denominator counts requested pairs. For Paper or Home "
+                "with Red, only Pen exists, so the share must be based on 1 pair, not 2."
+            ),
+            (
+                "Count existing combinations with SUMMARIZE over the dimension before computing "
+                "shares; Pen's 24 USD is the only Red revenue."
+            ),
+        ),
+    ],
+    53: [
+        (
+            (
+                "Replacing 25 with 40 gives 20, 40 and 21. Recompute the same mean over all three "
+                "trials."
+            ),
+            (
+                "Dropping 40 as an outlier and reporting 20.5 ms. That changes the statistic after "
+                "seeing the data."
+            ),
+            "The mean is 81 / 3 = 27 ms; the median is 21 ms.",
+        ),
+        (
+            (
+                "Cold trials average 110 ms and warm trials 22 ms, so comparing across cache "
+                "states mixes two causes."
+            ),
+            (
+                "Timing A cold, near case A's 110 ms, and B warm, near 22 ms, then crediting "
+                "B's formula with an 88 ms gain. Cache state alone explains a gap that size."
+            ),
+            (
+                "Compare A and B only under the same cache condition, as case B does: means 20 and "
+                "32, medians 20 and 18."
+            ),
+        ),
+        (
+            (
+                "A protocol fixes what is being compared before timing: the same model and engine, "
+                "the same filters, results that match, and a stated cache preparation."
+            ),
+            (
+                "Running each candidate once after editing it, so the first run is cold for one "
+                "and warm for the other."
+            ),
+            (
+                "Each candidate must return the same result before timing; report repeated trials "
+                "with mean, median and spread, as case B's three trials show."
+            ),
+        ),
+        (
+            (
+                "B's trials are 18, 60 and 18. The best is 18, the mean 32, and the 60 ms trial "
+                "shows variability."
+            ),
+            (
+                "Quoting 18 ms as production latency. These numbers are synthetic, and a best "
+                "trial hides the slow one."
+            ),
+            "Report 18, 60 and 18 with mean 32 and median 18, and label them synthetic.",
+        ),
+        (
+            (
+                "The 8-row Sales table proves results, such as 187, not speed. Plans, memory and "
+                "contention change at millions of rows."
+            ),
+            (
+                "Timing two expressions on this fixture and expecting the faster one to stay "
+                "faster in production."
+            ),
+            "Use toy models for correctness and a representative-scale model for speed.",
+        ),
+        (
+            (
+                "Inference benchmarks have the same cold path: model loading, compilation and "
+                "warmup. A first trial like B's 60 ms can be setup cost."
+            ),
+            (
+                "Averaging the first call with steady-state calls, or reporting only warm calls "
+                "without saying so."
+            ),
+            (
+                "Report setup and steady-state timings separately, with batch size and "
+                "synchronization stated, and check the outputs match before comparing speed."
+            ),
+        ),
+    ],
+    54: [
+        (
+            (
+                "With one cost per product, multiplying each product's quantity by its cost equals "
+                "the line sum. Paper's products are Notebook (7 x 2 = 14) and Pen (5 x 1 = 5)."
+            ),
+            (
+                "Multiplying Paper's total quantity, 12, by MAX(UnitCost) over Paper, 2, gives 24. "
+                "The grouping has to be by product."
+            ),
+            'Under Category = "Paper", LineCost and GroupedCost both return 19.',
+        ),
+        (
+            (
+                "If Notebook's 2024 line S1 had cost 1.5 instead of 2, the line form gives 3 + 6 + "
+                "4 = 13 for Notebook, while grouping by product applies one rate to all 7 units."
+            ),
+            (
+                "Keeping the grouped rewrite. MAX picks 2 and returns 14, so it overstates cost by "
+                "1."
+            ),
+            (
+                "Line cost 13 versus grouped 14 for Notebook; group by the key that defines the "
+                "rate, or store the line cost."
+            ),
+        ),
+        (
+            (
+                "The rewrite matches here only because each product has one cost. Case A gives 44 "
+                "and 44, and case B gives 20 and 20."
+            ),
+            (
+                "Releasing it as faster without timings, or as correct without the context grid "
+                "from cases A and B."
+            ),
+            (
+                "Accept it as correct under the one-cost-per-product rule, keep both cases as "
+                "regressions, and require a real benchmark before claiming speed."
+            ),
+        ),
+        (
+            (
+                "Two cost rows for one product break the one-cost rule. MAX hides that by choosing "
+                "one value."
+            ),
+            (
+                "If Notebook had rows at 2 and 3, MAX returns 3 and cost becomes 21, with no "
+                "warning that the input was ambiguous."
+            ),
+            (
+                "Check that each ProductKey has one cost; COUNTROWS of cost rows per ProductKey "
+                "should be 1 before either formula runs."
+            ),
+        ),
+        (
+            (
+                "In the unknown-member model, S9 has ProductKey 999 and Net 7, with no matching "
+                "Product row, so RELATED(Product[UnitCost]) is BLANK."
+            ),
+            (
+                "Reporting cost 44 against revenue 194. S9's cost is missing, not zero, so profit "
+                "is overstated."
+            ),
+            (
+                "Count sales lines whose cost is BLANK (1 here), and label profit incomplete until "
+                "it is fixed."
+            ),
+        ),
+        (
+            (
+                "Rates depend on date and currency. Grouping by (SaleDate, Currency) matches the "
+                "row-level sum: 100 x 1 + 100 x 1.1 + 50 x 1.2 = 270."
+            ),
+            (
+                "Grouping by currency only and taking MAX of EUR rates converts 150 EUR at 1.2 for "
+                "180 USD instead of 170."
+            ),
+            (
+                "Row-level and (SaleDate, Currency)-grouped conversions both return 270; the "
+                "currency-only grouping does not."
+            ),
+        ),
+    ],
+}
+
+explain(LESSONS, REASONING)

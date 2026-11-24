@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A seed is a small versioned CSV resource loaded by dbt. It is useful for fixtures and stable reference data; it is not a general replacement for an ingestion system. A staging model then gives source fields deliberate names and types. These are separate boundaries: loading records establishes that they reached a relation, while staging defines how the analysis interprets them.</p>
 <p>The first case loads three amounts and verifies their total after staging. The second introduces a malformed token and uses a deliberate permissive conversion with a rejection condition. The raw relation remains available, so accepted rows can be reconciled with the original input. A cleaned table alone would hide the missing contribution and its cause.</p>
 <p>A staging layer should preserve enough identity to explain every decision. Do not silently convert bad text to zero or drop an identifier to make a model pass. For a production source, include an ingestion identity, schema version and rejection reason; the classroom fixture keeps the data small enough to inspect directly.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Seed:</strong> A small CSV file under seeds/ that dbt loads as a table, which models then read with <code>ref</code>.</li>
+<li><strong>Staging model:</strong> The first model over raw input, where column names, types and the acceptance policy are made explicit before business logic.</li>
+<li><strong>try_cast:</strong> A DuckDB cast that returns null instead of raising when a value cannot be converted, so a rejection rule must test for that null.</li>
+<li><strong>Quarantine:</strong> A separate relation that keeps each rejected record together with the reason it failed the acceptance policy.</li>
+<li><strong>Record accounting:</strong> The check that accepted rows plus rejected rows equals the raw row count, so no record disappears silently.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>CSV files belong under seeds/ and are referenced with ref just like dependency-aware relations. A staging model can use explicit casts for mandatory fields and try_cast when a null result is part of a declared rejection policy. The SQL WHERE condition decides which records enter the accepted relation. Compare accepted and rejected counts against the raw seed relation.</p>
 <h3 id="full-project-python-workspace">Full-project Python workspace<a class="heading-anchor" href="#full-project-python-workspace" aria-label="Link to this section">#</a></h3>

@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-profiles-and-overrides">Exercise 1: Distinguish profiles and overrides.<a class="heading-anchor" href="#exercise-1-distinguish-profiles-and-overrides" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Service selection versus model composition.</p>
 <p><strong>Why:</strong> A profile determines which optional services participate; an override modifies service and resource definitions. They can be used together but answer different questions.</p>
+<p><strong>Approach:</strong> Ask two separate questions: which services run (profiles), and what each service&#x27;s settings are (the ordered -f files).</p>
+<p><strong>Why this is correct:</strong> The tools profile only adds client to the selection; compose.study.yaml changes fields of services that already exist.</p>
+<p><strong>A plausible wrong approach:</strong> Putting a changed APP_MESSAGE in a profile expecting it to alter app misreads profiles as a way to set fields.</p>
+<p><strong>How to verify:</strong> docker compose config with and without --profile tools shows client appearing, while only the override changes app&#x27;s fields.</p>
 <h3 id="exercise-2-predict-ordinary-startup-with-the-tools-profile-disabled">Exercise 2: Predict ordinary startup with the tools profile disabled.<a class="heading-anchor" href="#exercise-2-predict-ordinary-startup-with-the-tools-profile-disabled" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The app starts and the optional client is not a persistent service.</p>
 <p><strong>Why:</strong> The profile communicates intent. An explicit run of the client remains possible, so its commands still need review.</p>
+<p><strong>Approach:</strong> Read profiles: [tools] on client and note that ordinary up does not start profiled services.</p>
+<p><strong>Why this is correct:</strong> Plain up starts app only, so nothing needs to be stopped to remove the client afterward.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting client to start with up and finding it missing does not indicate a broken model.</p>
+<p><strong>How to verify:</strong> After up --wait, docker compose ps lists app only; the explicit run in worked example 1 still runs client once.</p>
 <h3 id="exercise-3-create-an-override-for-a-public-message">Exercise 3: Create an override for a public message.<a class="heading-anchor" href="#exercise-3-create-an-override-for-a-public-message" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Only the intended environment value changes in the effective model.</p>
 <p><strong>Why:</strong> Keep the experiment narrow enough to inspect. Avoid mixing a message edit with mounts, privilege changes and network modifications.</p>
+<p><strong>Approach:</strong> Write an override containing only services, app, environment and APP_MESSAGE, and compare the merged config with the base.</p>
+<p><strong>Why this is correct:</strong> With a single changed field, any other difference in the merged output would show a mistake in the override.</p>
+<p><strong>A plausible wrong approach:</strong> Changing the message while also adding a mount and dropping read_only makes it unclear which edit caused a later failure.</p>
+<p><strong>How to verify:</strong> The merged config differs from the base in APP_MESSAGE only, and GET / returns the new message.</p>
 <h3 id="exercise-4-diagnose-an-unexpected-extra-port-after-merging">Exercise 4: Diagnose an unexpected extra port after merging.<a class="heading-anchor" href="#exercise-4-diagnose-an-unexpected-extra-port-after-merging" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect merge behavior and the complete effective ports list.</p>
 <p><strong>Why:</strong> Do not assume a sequence was replaced. Model composition must be understood for the actual Compose version and fields used.</p>
+<p><strong>Approach:</strong> Print the full merged ports list from config and compare it with each file&#x27;s ports, in the order the -f flags were given.</p>
+<p><strong>Why this is correct:</strong> Compose combines some lists, such as ports, rather than replacing them, so a later file can add a mapping.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming the override&#x27;s ports replaced the base&#x27;s leads you to remove the wrong line.</p>
+<p><strong>How to verify:</strong> The config output shows which file contributed the extra mapping, and removing it restores 127.0.0.1:18080 only.</p>
 <h3 id="exercise-5-explain-why-a-profile-is-not-access-control">Exercise 5: Explain why a profile is not access control.<a class="heading-anchor" href="#exercise-5-explain-why-a-profile-is-not-access-control" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Someone with engine and project access can enable it.</p>
 <p><strong>Why:</strong> Security should come from permissions and the absence of unnecessary authority, not from an optional default selection.</p>
+<p><strong>Approach:</strong> Ask who can run docker compose for this project: anyone who can reach the engine can pass --profile tools.</p>
+<p><strong>Why this is correct:</strong> A profile changes default selection for convenience; it checks no identity and grants or denies nothing.</p>
+<p><strong>A plausible wrong approach:</strong> Hiding an admin service behind a profile as protection leaves it one flag away for any engine user.</p>
+<p><strong>How to verify:</strong> A different user with engine access runs --profile tools and starts the service with no extra check.</p>
 <h3 id="exercise-6-write-a-reviewable-configuration-launch-record">Exercise 6: Write a reviewable configuration launch record.<a class="heading-anchor" href="#exercise-6-write-a-reviewable-configuration-launch-record" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Ordered files, profiles, project name and safe resolved settings.</p>
 <p><strong>Why:</strong> This makes the effective deployment reproducible. Retain private values separately rather than embedding them in shared evidence.</p>
+<p><strong>Approach:</strong> Write down the project name, the -f files in order, the profiles enabled, and the resolved settings with private values removed.</p>
+<p><strong>Why this is correct:</strong> Order matters because later files override earlier ones; without it, someone else gets a different effective model.</p>
+<p><strong>A plausible wrong approach:</strong> Pasting the full config output, including resolved secrets, into the launch record exposes them.</p>
+<p><strong>How to verify:</strong> Another person reruns config with the recorded flags and gets the same output apart from the redacted values.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

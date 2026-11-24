@@ -8,7 +8,7 @@ Compute temporal advantages with correct episode boundaries and inspect PPO clip
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-021`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-021` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for temporal credit, gae and the ppo clipped objective in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about GAE and termination: Without the trace the advantages are the residuals 0.86 and 1.6, termination leaves the first step at 0.5, clipping gives 1.2 in the positive case and -1.5 in the negative case, and stored rollout quantities stay frozen. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Keep the three policies and states distinct
 
@@ -21,6 +21,14 @@ A value function estimates expected future return under a declared policy and di
 \]
 
 Generalized advantage estimation combines residuals using a trace factor \(\lambda\). In the finite rollout below, work backwards with \(\widehat A_t=\delta_t+\gamma\lambda(1-d_t)\widehat A_{t+1}\). A true terminal state removes bootstrapping. A rollout cut short by a time limit may still need the final value estimate. A separate episode boundary must also stop a trace from leaking into a new episode.
+
+## Key terms
+
+- **Generalized advantage estimation:** A backward recursion A_t = delta_t + gamma lambda (1 - d_t) A_(t+1) that combines temporal residuals.
+- **Temporal residual:** delta_t = r_t + gamma (1 - d_t) V(s_(t+1)) - V(s_t), the one-step error of the value estimate.
+- **Termination versus truncation:** A true terminal state removes bootstrapping, while a time-limit cut may still need the final value estimate.
+- **PPO clipping:** Limiting the probability ratio between the current and old policy inside a surrogate objective to restrain update size.
+- **Old policy:** The frozen snapshot that collected the rollout, distinct from the current and KL reference policies.
 
 ## Worked case A: terminal versus truncated trajectories
 

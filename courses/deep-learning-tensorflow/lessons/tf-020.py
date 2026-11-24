@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Compare two reductions
-# Pool patch [[1, 3], [2, 4]] with a2x2 window.
+# Pool patch [[1, 3], [2, 4]] with a 2x2 window.
 # Expected: max 4; average 2.5.
 
 # Exercise 2: Inspect a flip

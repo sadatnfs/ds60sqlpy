@@ -16,11 +16,25 @@ The same measured CPU use can lead to different utilization ratios when requests
 
 **Expected:** 50 percent and 25 percent respectively.
 
+**Solution reasoning**
+
+- **Approach:** Divide 50m usage by each Pod's CPU request and convert to percent.
+- **Why it is correct:** HPA utilization is measured against requests, so 50m over 100m is 50 percent and over 200m is 25 percent.
+- **Plausible wrong approach:** Dividing by the limit gives a lower utilization and a smaller scaling recommendation.
+- **How to verify:** The two results are 50 percent and 25 percent.
+
 ## Exercise 2: Apply the ideal formula
 
 The proportional model scales count according to the demand ratio. It is useful for understanding the direction and approximate magnitude, while controller safeguards and incomplete measurements can alter the actual action.
 
 **Expected:** Unclipped recommendations 2 and 1.
+
+**Solution reasoning**
+
+- **Approach:** Compute current times observed over target, then take the ceiling.
+- **Why it is correct:** 1 times 80 over 50 is 1.6, rounded up to 2; 2 times 20 over 50 is 0.8, rounded up to 1.
+- **Plausible wrong approach:** Rounding to the nearest integer would give 2 and 1 here but fails for values like 1.2, where the HPA rounds up to 2.
+- **How to verify:** The unclipped recommendations are 2 and 1.
 
 ## Exercise 3: Recognize saturation at the maximum
 
@@ -28,11 +42,25 @@ The HPA can be operating exactly as configured while failing to meet latency or 
 
 **Expected:** Ideal 4, configured maximum 2; capacity adequacy remains unproven.
 
+**Solution reasoning**
+
+- **Approach:** Compute 1 times 200 over 50 and compare with maxReplicas.
+- **Why it is correct:** The ideal is 4, but the HPA clamps to maxReplicas 2, so the workload may stay overloaded.
+- **Plausible wrong approach:** Reading 2 replicas at maximum as sufficient capacity assumes the cap matched the load.
+- **How to verify:** Ideal 4, capped 2, and the answer says capacity is unproven.
+
 ## Exercise 4: Diagnose missing metrics
 
 The denominator requests and the metrics supply must both be valid. The appropriate response is to inspect the declared host capability and conditions, not to fabricate a low-utilization sample or widen the learner credential.
 
 **Expected:** Unknown load, with a qualified metrics-path investigation.
+
+**Solution reasoning**
+
+- **Approach:** Read the ScalingActive condition and its reason, then investigate the metrics path.
+- **Why it is correct:** When the metric is unavailable the HPA cannot compute a recommendation and leaves replicas unchanged.
+- **Plausible wrong approach:** Treating the missing metric as zero load would predict a scale down that does not happen.
+- **How to verify:** The condition reason is quoted, and no value is invented for the metric.
 
 ## Exercise 5: Observe a bounded live step
 
@@ -40,11 +68,25 @@ The observation chain exposes delays and failures. A desired count of 2 with onl
 
 **Expected:** Timestamped transitions within declared ranges and deadline, not an exact scaling second.
 
+**Solution reasoning**
+
+- **Approach:** Tabulate sample time, desired replicas, ready replicas and request result during the fixed load.
+- **Why it is correct:** Desired changes when the HPA reacts and ready changes later when Pods pass readiness, so both are needed.
+- **Plausible wrong approach:** Quoting the exact second scaling occurred claims precision the sampling interval cannot provide.
+- **How to verify:** Each row falls inside the declared range and deadline.
+
 ## Exercise 6: Explain stabilization and stop
 
 Stabilization deliberately avoids reacting to every temporary dip. The final packet should preserve metrics freshness, bounded workload settings and application evidence so another reader can understand the scope of the observed behavior.
 
 **Expected:** Reasoned delay explanation and confirmed load termination; no production sizing claim.
+
+**Solution reasoning**
+
+- **Approach:** Quote the scale down stabilization window from behavior and confirm the load process stopped.
+- **Why it is correct:** The HPA keeps the highest recommendation over the window, so replicas fall only after it passes.
+- **Plausible wrong approach:** Calling the slow scale down a bug ignores the configured window that causes it.
+- **How to verify:** The window value is quoted, the load end is recorded and no production sizing is claimed.
 
 ## Boundary and troubleshooting review
 

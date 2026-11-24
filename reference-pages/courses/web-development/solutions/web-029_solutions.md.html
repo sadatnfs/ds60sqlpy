@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-029.md</code>.</p>
 <h3 id="exercise-1-compare-origins-for-the-same-host-on-two-different-ports">Exercise 1: Compare origins for the same host on two different ports.<a class="heading-anchor" href="#exercise-1-compare-origins-for-the-same-host-on-two-different-ports" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Different ports form different origins even when the host matches.</p>
+<p><strong>Approach:</strong> Compare the scheme, host and port of both URLs; an origin is the exact triple, so any difference makes them distinct.</p>
 <p><strong>Why:</strong> An origin is the triple of scheme, host and port, so a different port is a different origin.</p>
+<p><strong>Plausible wrong approach:</strong> Treating <code>localhost:3000</code> and <code>localhost:8000</code> as one origin fails because the port is part of the origin.</p>
+<p><strong>How to verify:</strong> <code>new URL(&#x27;http://localhost:3000&#x27;).origin</code> and the 8000 version print different strings in the console.</p>
 <h3 id="exercise-2-render-an-angle-bracket-string-safely-as-visible-text">Exercise 2: Render an angle-bracket string safely as visible text.<a class="heading-anchor" href="#exercise-2-render-an-angle-bracket-string-safely-as-visible-text" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> No extra element or event handler is created.</p>
+<p><strong>Approach:</strong> Assign the untrusted string with <code>textContent</code> and inspect the output element to confirm it holds a single text node.</p>
 <p><strong>Why:</strong> textContent creates a text node, so the angle brackets display as characters and no img element or handler is created.</p>
+<p><strong>Plausible wrong approach:</strong> Escaping only <code>&lt;</code> with a replace call fails because other contexts such as attributes and URLs need different handling.</p>
+<p><strong>How to verify:</strong> The output shows the angle brackets literally, and the Elements panel shows no <code>img</code> child.</p>
 <h3 id="exercise-3-build-a-small-rendering-demo-that-separates-text-handling-from-url-policy">Exercise 3: Build a small rendering demo that separates text handling from URL policy.<a class="heading-anchor" href="#exercise-3-build-a-small-rendering-demo-that-separates-text-handling-from-url-policy" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Plain text remains data and navigation candidates pass an explicit scheme decision.</p>
+<p><strong>Approach:</strong> Render free text with <code>textContent</code>, and parse candidate links with <code>new URL</code> before allowing only the <code>https:</code> scheme.</p>
 <p><strong>Why:</strong> Text needs safe insertion, while URLs need an explicit allowlist of schemes before they become navigation targets.</p>
+<p><strong>Plausible wrong approach:</strong> Checking <code>startsWith(&#x27;http&#x27;)</code> fails because strings such as <code>httpx:</code> or mixed case schemes can confuse the check.</p>
+<p><strong>How to verify:</strong> Submitting <code>javascript:alert(1)</code> produces a rejected link, while <code>https://example.invalid/</code> is accepted without any fetch.</p>
 <h3 id="exercise-4-explain-why-cors-is-not-authorization">Exercise 4: Explain why CORS is not authorization.<a class="heading-anchor" href="#exercise-4-explain-why-cors-is-not-authorization" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Non-browser clients can still send requests, and the server must enforce permissions.</p>
+<p><strong>Approach:</strong> Separate what the browser enforces for its own scripts from what the server must check for every request it receives.</p>
 <p><strong>Why:</strong> CORS only controls which browser pages may read responses; it does not stop requests, so the server must check permissions.</p>
+<p><strong>Plausible wrong approach:</strong> Saying a restrictive CORS policy blocks attackers fails because curl and other clients ignore CORS and still reach the endpoint.</p>
+<p><strong>How to verify:</strong> A command line request reaches the endpoint even when a browser script on another origin is blocked from reading its reply.</p>
 <h3 id="exercise-5-inspect-the-preview-without-relying-on-cookies-or-parent-window-access">Exercise 5: Inspect the preview without relying on cookies or parent-window access.<a class="heading-anchor" href="#exercise-5-inspect-the-preview-without-relying-on-cookies-or-parent-window-access" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The lesson remains functional within its isolated local contract.</p>
+<p><strong>Approach:</strong> Run the demo inside the classroom preview and confirm it never reads cookies, <code>localStorage</code> or <code>window.parent</code> properties.</p>
 <p><strong>Why:</strong> The sandboxed preview has no cookies or parent access, so a correct lesson works without them.</p>
+<p><strong>Plausible wrong approach:</strong> Loosening the iframe sandbox to make storage work fails because it removes the isolation the lesson is meant to describe.</p>
+<p><strong>How to verify:</strong> The demo works in the preview, and the console shows no SecurityError from storage or parent access.</p>
 <h3 id="exercise-6-explain-the-separate-roles-of-escaping-validation-csp-and-sandboxing">Exercise 6: Explain the separate roles of escaping, validation, CSP and sandboxing.<a class="heading-anchor" href="#exercise-6-explain-the-separate-roles-of-escaping-validation-csp-and-sandboxing" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> They address contextual interpretation, accepted values, document capabilities and isolation respectively.</p>
+<p><strong>Approach:</strong> Write one line for each control: escaping by context, validation of accepted values, CSP limits on loaded code, and sandboxing for isolation.</p>
 <p><strong>Why:</strong> Escaping stops data from being interpreted as code in one context, validation limits accepted values, CSP limits what the page may load or run, and sandboxing isolates a document&#x27;s capabilities.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on CSP alone fails because a policy that allows inline script would still run injected handlers.</p>
+<p><strong>How to verify:</strong> Your table names a separate failure each control prevents, with no control repeated for two rows.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-029_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

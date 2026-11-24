@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Label a hardware and software map that separates SMs, warps, memory levels and compute capability.
+
 Work through *Meet the hardware without memorizing a product catalog* with the concrete cases below. Finish with this evidence:
 labeled hardware/software map and a capability report if hardware exists. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 An SM, or streaming multiprocessor, schedules groups of GPU threads and owns finite execution and storage resources. A block is a cooperating group in your program; it is not a physical processor. Blocks can wait for resources and need not run in index order. Within a block, threads are organized into warps, normally 32 threads in CUDA. A warp issues instructions with a set of participating lanes. Registers hold per-thread working values, shared memory supports block cooperation, and device DRAM holds larger arrays. Copy engines may transfer data while computation proceeds, but concurrency depends on hardware and dependencies. Compute capability identifies a hardware feature family; toolkit version identifies software.
+
+### Key terms
+
+- **Streaming multiprocessor (SM):** A GPU processing unit that schedules warps and owns finite registers, shared memory and execution pipelines.
+- **Warp:** A group of 32 threads that an SM schedules together when it issues instructions.
+- **Thread block:** A programmer-defined group of threads that runs on one SM and can cooperate through shared memory and barriers.
+- **Compute capability:** A version number that identifies a GPU architecture's hardware feature set, separate from the toolkit version.
+- **Copy engine:** A hardware unit that moves data between host and device memory and may overlap transfers with computation.
 
 ## How to run and study this lesson
 

@@ -115,6 +115,28 @@ values = jnp.arange(256., dtype=jnp.float64).reshape(16, 16) / 256.""",
             ("Asynchronous dispatch", "https://docs.jax.dev/en/latest/async_dispatch.html"),
             ("Profiling", "https://docs.jax.dev/en/latest/profiling.html"),
         ),
+        key_terms=(
+            (
+                "Asynchronous dispatch",
+                "JAX returning a result array before its computation finishes, so a timer around the call may measure only dispatch.",
+            ),
+            (
+                "block_until_ready",
+                "A method that waits until an array computation completes, giving a timing measurement a meaningful end point.",
+            ),
+            (
+                "Cold call",
+                "The first call of a jitted function in a process, which can include tracing and compilation as well as execution.",
+            ),
+            (
+                "Warm call",
+                "A later compatible call that reuses the compiled form, so its time excludes tracing and compilation.",
+            ),
+            (
+                "Timing boundary",
+                "The declared set of operations a measurement includes, such as input creation or transfers, which compared timings must share.",
+            ),
+        ),
     ),
     Unit(
         26,
@@ -211,6 +233,24 @@ consume = jax.jit(lambda values: values + 1., donate_argnums=(0,))""",
         (
             ("Checkpointing", "https://docs.jax.dev/en/latest/301/remat.html"),
             ("JIT donation", "https://docs.jax.dev/en/latest/_autosummary/jax.jit.html"),
+        ),
+        key_terms=(
+            (
+                "Gradient checkpointing",
+                "Applying jax.checkpoint so reverse mode recomputes selected intermediates instead of storing them for the backward pass.",
+            ),
+            (
+                "Rematerialization",
+                "Recomputing intermediate values during the backward pass, trading extra computation for fewer stored values.",
+            ),
+            (
+                "Buffer donation",
+                "Declaring with donate_argnums that a jitted call may reuse an input buffer, after which the caller must not use that input.",
+            ),
+            (
+                "Memory evidence",
+                "A measured observation of live or peak memory on the relevant hardware, which a CPU parity check cannot provide.",
+            ),
         ),
     ),
 ]
@@ -314,6 +354,28 @@ host = np.arange(6., dtype=np.float64).reshape(3, 2)""",
                 ("Sharding", "https://docs.jax.dev/en/latest/201/sharding.html"),
                 ("Sharding API", "https://docs.jax.dev/en/latest/jax.sharding.html"),
             ),
+            key_terms=(
+                (
+                    "Mesh",
+                    "A named arrangement of devices along axes, such as a data axis, used to describe where array pieces are placed.",
+                ),
+                (
+                    "PartitionSpec",
+                    "A specification that maps each array dimension to a mesh axis, or to None when that dimension is not partitioned.",
+                ),
+                (
+                    "NamedSharding",
+                    "The combination of a Mesh and a PartitionSpec that defines how an array is laid out across devices.",
+                ),
+                (
+                    "Addressable shard",
+                    "A piece of a distributed array stored on a device that the current process can access.",
+                ),
+                (
+                    "Replicated layout",
+                    "A placement in which every device holds the complete array rather than one partition of it.",
+                ),
+            ),
         ),
         Unit(
             28,
@@ -413,6 +475,28 @@ local_counts = jnp.array([1., 3.])""",
             (
                 ("vmap named axes", "https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html"),
                 ("Manual parallelism", "https://docs.jax.dev/en/latest/201/shard-map.html"),
+            ),
+            key_terms=(
+                (
+                    "Named mapped axis",
+                    "An axis_name given to a mapping transformation such as vmap so collectives can refer to its participants.",
+                ),
+                (
+                    "psum",
+                    "A collective that sums a value over every participant of a named axis and returns the total to each participant.",
+                ),
+                (
+                    "Global mean",
+                    "The total of local sums divided by the total of local counts, which differs from a mean of local means when counts differ.",
+                ),
+                (
+                    "Gradient aggregation",
+                    "Combining local gradient sums, or count-weighted local means, and then dividing by the global observation count.",
+                ),
+                (
+                    "all_gather",
+                    "A collective that stacks each participant value along a new axis, keeping identities instead of reducing them.",
+                ),
             ),
         ),
     ]
@@ -540,6 +624,28 @@ b = jnp.zeros((2, 8))""",
             (
                 "JAX transformations",
                 "https://docs.jax.dev/en/latest/automatic-differentiation.html",
+            ),
+        ),
+        key_terms=(
+            (
+                "Scaled dot-product attention",
+                "Softmax of query-key scores divided by the square root of the key dimension, used to average value rows.",
+            ),
+            (
+                "Causal mask",
+                "A mask that blocks each query from keys at later positions, so an output cannot depend on future tokens.",
+            ),
+            (
+                "LoRA",
+                "A low-rank adapter that adds s times AB to a fixed weight W and trains only the small factors A and B.",
+            ),
+            (
+                "Zero-initialized B factor",
+                "Starting B at zero so the adapted model equals the base model and A receives a zero first gradient.",
+            ),
+            (
+                "Framework parity",
+                "Agreement of values and gradients between a port and independent oracles derived from the equations rather than API names.",
             ),
         ),
     )
@@ -672,6 +778,28 @@ mask = jnp.ones(3, dtype=bool)""",
                 ),
                 ("Numerical accuracy", "https://docs.jax.dev/en/latest/accuracy.html"),
             ),
+            key_terms=(
+                (
+                    "Input-validation contract",
+                    "Host-side checks of shapes, finite values and a nonempty mask that run before the pure numerical functions.",
+                ),
+                (
+                    "Masked objective",
+                    "A loss averaged only over rows whose mask is one, so a masked outlier does not count as an observation.",
+                ),
+                (
+                    "Ridge penalty",
+                    "The term lambda times the squared coefficient norm, applied here to every coefficient including any intercept column.",
+                ),
+                (
+                    "Normal equations",
+                    "The linear system obtained by setting the ridge objective gradient to zero, solved here for a small well-conditioned fixture.",
+                ),
+                (
+                    "Layered acceptance",
+                    "Separate checks of data validity, an exact coefficient fixture, mask and permutation policy and a vanishing optimum gradient.",
+                ),
+            ),
         ),
         Unit(
             31,
@@ -796,6 +924,28 @@ trained = jax.jit(lambda w: advance(w, 400))(jnp.zeros(3))[0]""",
                     "https://docs.jax.dev/en/latest/automatic-differentiation.html",
                 ),
             ),
+            key_terms=(
+                (
+                    "Baseline model",
+                    "A simpler comparison candidate, here an affine fit, that cannot express the quadratic term of the authored rule.",
+                ),
+                (
+                    "Feature map",
+                    "The function phi(x) = (1, x, x squared) that turns each input into the columns used by the quadratic candidate.",
+                ),
+                (
+                    "Fixed budget",
+                    "A predetermined number of gradient-descent updates and learning rate applied identically to every compared candidate.",
+                ),
+                (
+                    "Held-out inputs",
+                    "Points fixed before fitting and never used for updates, on which both candidates are evaluated.",
+                ),
+                (
+                    "Restart state",
+                    "The coefficients plus the count of completed updates, which are enough to resume this deterministic trajectory.",
+                ),
+            ),
         ),
     ]
 )
@@ -899,6 +1049,28 @@ TPU and GPU qualification are distinct. They use different backend packages, har
                 ("Benchmarking", "https://docs.jax.dev/en/latest/benchmarking.html"),
             ),
             runtime="reading",
+            key_terms=(
+                (
+                    "Backend qualification",
+                    "A recorded set of observations showing that a program actually ran on the requested accelerator with correct values.",
+                ),
+                (
+                    "Device readback",
+                    "Copying a synchronized result from the device to the host and comparing it with an exact oracle.",
+                ),
+                (
+                    "Memory allocator",
+                    "The runtime component that may reserve a large pool before arrays exist, so reserved memory differs from live payload.",
+                ),
+                (
+                    "Silent CPU fallback",
+                    "Running on the CPU when the requested accelerator is unavailable, which does not satisfy an accelerator exercise.",
+                ),
+                (
+                    "Hardware evidence",
+                    "Observations taken on the actual device, such as placement, completed execution and measured memory, rather than CPU proxies.",
+                ),
+            ),
         ),
         Unit(
             33,
@@ -1000,6 +1172,28 @@ A successful local multi-process experiment is useful, but it does not establish
                 ),
             ),
             runtime="reading",
+            key_terms=(
+                (
+                    "Distributed initialization",
+                    "The jax.distributed.initialize call that connects processes and must precede device queries or global computations.",
+                ),
+                (
+                    "Global array",
+                    "An array with one logical shape whose shards are spread across devices owned by several processes.",
+                ),
+                (
+                    "Addressability",
+                    "Whether a shard lives on a device the current process can access, which limits what that process can read locally.",
+                ),
+                (
+                    "Collective order",
+                    "The requirement that every participant calls the same collectives in the same sequence, since a skipped call can hang the job.",
+                ),
+                (
+                    "Process launcher",
+                    "A separately prepared job system that starts the participating processes, because JAX itself does not launch them.",
+                ),
+            ),
         ),
         Unit(
             34,
@@ -1098,6 +1292,28 @@ The final review also integrates the rest of the course. A numerical component s
                 ),
             ),
             runtime="reading",
+            key_terms=(
+                (
+                    "Pallas",
+                    "The JAX extension for writing custom kernels with explicit control over memory access and indexing on supported devices.",
+                ),
+                (
+                    "FFI",
+                    "The foreign function interface that lets JAX call compiled external code under a declared buffer, layout and device contract.",
+                ),
+                (
+                    "Memory layout",
+                    "The order and strides in which array elements are stored, which a kernel must handle explicitly, including noncontiguous inputs.",
+                ),
+                (
+                    "Backward rule",
+                    "The derivative a custom operation supplies, which must scale the upstream gradient, such as a times G for y = ax + b.",
+                ),
+                (
+                    "Reference baseline",
+                    "A trusted high-level implementation kept as the oracle for values, gradients and a fair performance comparison.",
+                ),
+            ),
         ),
     ]
 )

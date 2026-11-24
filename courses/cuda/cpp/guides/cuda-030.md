@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Reduce a shape-dependent failure to a minimal reproducer and repair it with a regression case.
+
 Work through *Debugging difficult failures without harming the session* with the concrete cases below. Finish with this evidence:
 a repair with a regression case and preserved learner source/results. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A minimal reproducer removes unrelated work while preserving the failure. For a shape-dependent bug, reduce dimensions and data complexity independently, then retain the smallest case that still fails. Add source line information and stage-specific checks before interpreting a large trace. Debug builds change optimization and resource usage; a disappearing failure is a clue, not proof of a fix. A device fault can make further operations in a context unreliable. Preserve source and diagnostics before restarting a process. Device reset and shared-engine recovery belong to the resource owner, not an automatic learner-code repair path.
+
+### Key terms
+
+- **Regression test:** A test that reproduces a fixed defect so the failure cannot silently return.
+- **Line information:** Debug metadata, added with the `-lineinfo` option, that maps device instructions to source lines.
+- **Device fault:** An error during kernel execution that can leave the CUDA context unusable until the process restarts.
+- **Debug build:** A compilation, for example with `-G`, that disables device optimizations and can change timing and resource use.
 
 ## How to run and study this lesson
 

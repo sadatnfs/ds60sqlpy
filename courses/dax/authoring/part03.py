@@ -1,6 +1,6 @@
 """Stage three: the two contexts and explicit evaluation order."""
 
-from .common import lesson
+from .common import explain, lesson
 from .common import result as r
 from .common import task as t
 
@@ -798,3 +798,485 @@ LESSONS = [
         ],
     ),
 ]
+
+
+REASONING = {
+    13: [
+        (
+            (
+                "A model measure reference carries an implicit CALCULATE, so each Product row "
+                "becomes a ProductKey filter that the relationship passes to Sales. The values "
+                "match case B."
+            ),
+            (
+                "Pasting the measure's body, SUM(Sales[NetAmount]), in place of the reference "
+                "drops that implicit transition and brings back 187 on every row, as in case A."
+            ),
+            "Expect Bag BLANK, Mug 96, Notebook 67 and Pen 24, which add to 187.",
+        ),
+        (
+            (
+                "The outer North filter does reach Sales through Customer, so the raw SUM sees "
+                "Ada's and Cy's five lines. The Product row context still adds no filter, so each "
+                "row repeats 107."
+            ),
+            (
+                "Expecting North's per-product split from RawSum is the error. That split "
+                "(Notebook 47, Pen 24, Mug 36) needs a transition, not just an outer filter."
+            ),
+            (
+                'Under `Customer[Region] = "North"` RawSum reads 107 on all four rows, while a '
+                "transitioned column reads 47, 24, 36 and BLANK."
+            ),
+        ),
+        (
+            (
+                "Two labeled columns in one SELECTCOLUMNS share each Product row, so RawSum (no "
+                "transition) and Revenue (with CALCULATE) differ only by the transition."
+            ),
+            (
+                "Iterating with SUMX(Product, SUM(Sales[NetAmount])) to get a total adds 187 four "
+                "times and returns 748, the same missing transition hidden in one number."
+            ),
+            ("Expect rows Bag 187 and BLANK, Mug 187 and 96, Notebook 187 and 67, Pen 187 and 24."),
+        ),
+        (
+            (
+                "The ProductKey relationship is active and one to many, and it works whenever a "
+                "Product filter exists. Case A simply creates no filter, so nothing travels to "
+                "Sales."
+            ),
+            (
+                "Making the relationship bidirectional or rebuilding it changes nothing here, "
+                "because a row context is still not a filter, and every row still shows 187."
+            ),
+            (
+                "`CALCULATE ( SUM ( Sales[NetAmount] ), Product[ProductKey] = 3 )` returns 96, "
+                "which shows the relationship already filters correctly."
+            ),
+        ),
+        (
+            (
+                "SELECTCOLUMNS keeps one output row per input row, so all four Product rows "
+                "appear. Bag's Revenue is BLANK because no Sales line carries key 4."
+            ),
+            (
+                "Expecting SELECTCOLUMNS to drop Bag mixes it up with SUMMARIZECOLUMNS, which "
+                "removes rows whose measures are all blank and would return three rows."
+            ),
+            (
+                "COUNTROWS of case B returns 4, while `SUMMARIZECOLUMNS ( Product[Product], "
+                '"Revenue", SUM ( Sales[NetAmount] ) )` returns 3 rows without Bag.'
+            ),
+        ),
+        (
+            (
+                "In a Customer calculated column, CALCULATE or [NetRevenue] turns the row into a "
+                "CustomerKey filter, which gives Ada 51, Bo 80, Cy 56 and Di BLANK."
+            ),
+            (
+                "A raw SUM(Sales[NetAmount]) column stores 187 for every customer. Summing that "
+                "column over four customers reports 748."
+            ),
+            "The transitioned column sums to 187, and Di's BLANK stays BLANK rather than 0.",
+        ),
+    ],
+    14: [
+        (
+            (
+                "Customer 20 (Bo) is the only South customer. Under 2025 his lines are S6 and S7 "
+                "at 20 each, so South revenue is 40."
+            ),
+            (
+                "Leaving out the year returns 80, because Bo's 2024 Mug line S3 (40) joins the "
+                "result."
+            ),
+            (
+                "`CALCULATE ( [NetRevenue], Customer[Region] = \"South\", 'Date'[Year] = 2025 )` "
+                "returns 40, and 83 + 40 equals case B's 123."
+            ),
+        ),
+        (
+            (
+                "The region set, the year and the category all apply together. Among 2025 lines, "
+                "Paper keeps S4 (27), S5 (20) and S7 (20), so revenue is 67."
+            ),
+            (
+                "Letting the category filter replace the earlier filters returns all-years Paper "
+                "revenue of 91, which adds the 2024 lines S1 and S2."
+            ),
+            (
+                'Case B with `Product[Category] = "Paper"` added returns 67, and dropping Paper '
+                "returns 123 again."
+            ),
+        ),
+        (
+            (
+                "North admits customers 10 and 30, Home admits product 3 and 2025 admits S4 to S8. "
+                "Only S8 (Cy's Mug, 36) passes all three."
+            ),
+            (
+                "A ledger that writes down only the visible Home slicer predicts 96, because it "
+                "forgets the region and year filters on other tables."
+            ),
+            "The three filters together return 36, the NetAmount of S8.",
+        ),
+        (
+            (
+                "A fair comparison uses the same period on both sides: North 83 against South 40 "
+                "in 2025, or North 107 against South 80 for all years."
+            ),
+            (
+                "Comparing North 2025 (83) with South all years (80) suggests the regions are "
+                "nearly equal, when in the same year North sold about twice as much."
+            ),
+            (
+                "Query both regions under one year filter and expect 83 and 40, then without it "
+                "and expect 107 and 80."
+            ),
+        ),
+        (
+            (
+                "West is a valid Customer member (Di, key 40) with no Sales rows, so the year "
+                "makes no difference and revenue is BLANK."
+            ),
+            (
+                "Taking BLANK as a broken relationship or an invalid selection leads to model "
+                "changes, when it is simply a population with no facts."
+            ),
+            (
+                "Under West and 2025, COUNTROWS(Customer) returns 1 while `ISEMPTY ( Sales )` "
+                "returns TRUE and revenue is BLANK."
+            ),
+        ),
+        (
+            (
+                "Each number needs its full context written down. A card showing 83 may have a "
+                "visible North slicer and a hidden 2025 page filter, and it uses the active "
+                "OrderDate relationship."
+            ),
+            (
+                "Documenting only the visible North caption leads a reader to expect 107. "
+                "Switching the date role also matters: January 2025 is 67 by order date and 47 by "
+                "ship date."
+            ),
+            (
+                "Replaying CALCULATE with every captured filter should reproduce 83; S6, ordered "
+                "January 5 and shipped February 1, explains the date-role difference."
+            ),
+        ),
+    ],
+    15: [
+        (
+            (
+                'Product[Color] = "Red" replaces the incoming Blue filter on that same column. '
+                "Green replaces it the same way, leaving Bag, which has no sales."
+            ),
+            (
+                "Reading BLANK as proof that Blue and Green were intersected is the mistake. The "
+                "intersection is also empty, so revenue cannot tell the two rules apart."
+            ),
+            (
+                'Under Blue, `CALCULATE ( COUNTROWS ( Product ), Product[Color] = "Green" )` '
+                "returns 1 (Bag), while the KEEPFILTERS version returns BLANK."
+            ),
+        ),
+        (
+            (
+                "Color and Category are different columns, so the Red filter is added beside "
+                "Paper. Only Pen is both, and its lines S2 and S5 give 24."
+            ),
+            (
+                "Offering Red as proof that Paper survived proves nothing, because all-Red revenue "
+                "is also 24. Blue is the case that tells them apart: 67 against 163."
+            ),
+            "Under Paper, CALCULATE with Red returns 24 and COUNTROWS(Product) returns 1.",
+        ),
+        (
+            (
+                "CALCULATE([NetRevenue], 'Date'[Year] = 2025) replaces only the year. A "
+                "Customer[Region] filter stays, so under North it returns 83."
+            ),
+            (
+                "`CALCULATE ( [NetRevenue], FILTER ( ALL ( Sales ), RELATED ( 'Date'[Year] ) = "
+                "2025 ) )` also removes the region filter through ALL(Sales) and returns 123 under "
+                "North."
+            ),
+            "Expect 83 under North, 40 under South and 123 with no region selected.",
+        ),
+        (
+            (
+                "CALCULATE replaces filters only on the columns its arguments name. In case B the "
+                "Color filter is new, so the incoming Category filter stays."
+            ),
+            (
+                "If CALCULATE cleared every filter, BluePaperRevenue would be all-Blue revenue, "
+                "163, and would include the Mug lines."
+            ),
+            "BluePaperRevenue is 67, the Notebook lines S1 (20), S4 (27) and S7 (20).",
+        ),
+        (
+            (
+                "A fixed-color measure answers a fixed question. Named Blue Revenue, it returns "
+                "163 under any color slicer, which is right only if readers know it ignores that "
+                "selection."
+            ),
+            (
+                "Naming it Revenue and showing 163 under a Red slicer contradicts the user's "
+                "choice; an intersection with KEEPFILTERS would return BLANK there."
+            ),
+            (
+                "Under Red, the base measure returns 24, the fixed measure 163 and the KEEPFILTERS "
+                "version BLANK."
+            ),
+        ),
+        (
+            (
+                "For a category share within the current region and year, remove only the category "
+                "filter. North 2025 Paper is 47 (S4 and S5) out of 83, about 0.566."
+            ),
+            (
+                "Using ALL or REMOVEFILTERS on everything makes the denominator 187, and Paper's "
+                "share drops to about 0.251 of a total outside the selection."
+            ),
+            (
+                "Under North and 2025, Paper is 47 / 83 and Home is 36 / 83, and the two shares "
+                "add to 1."
+            ),
+        ),
+    ],
+    16: [
+        (
+            (
+                "MAX(Product[ProductKey]) is evaluated in the incoming Paper context, so it "
+                "returns 2. Red with key 2 leaves Pen, whose revenue is 24."
+            ),
+            (
+                "Taking 24 as proof that the filters ran from left to right overlooks that Pen is "
+                "both the incoming maximum and the only Red Paper product."
+            ),
+            "The row reads IncomingMaxKey 2 and Revenue 24, from S2 (4) and S5 (20).",
+        ),
+        (
+            (
+                "The outer Red filter is applied first, so the inner MAX sees only Pen and returns "
+                "2. Revenue is 24, the same as case A with Red."
+            ),
+            (
+                "Assuming the outer Red replaces Paper confuses the columns. Color and Category "
+                "differ, so Paper stays, though here both readings happen to give Pen."
+            ),
+            (
+                "Inside the outer Red context COUNTROWS(Product) is 1 and MAX(Product[ProductKey]) "
+                "is 2, so revenue is 24."
+            ),
+        ),
+        (
+            (
+                "Ledger: Paper gives keys {1, 2}; MAX bound there is 2; Blue gives {1, 3}; key 2 "
+                "gives {2}. Their intersection with Paper is empty."
+            ),
+            (
+                "A ledger written in argument order, applying Blue before computing MAX, binds key "
+                "1 and predicts Notebook's 67, which is case B's answer, not case A's."
+            ),
+            (
+                "Case A returns IncomingMaxKey 2 and Revenue BLANK, which matches the empty "
+                "intersection."
+            ),
+        ),
+        (
+            (
+                "Red returns 24 under both forms, so it cannot show which order is used. Blue can: "
+                "the incoming maximum stays 2 in case A, while the nested inner MAX sees {1} in "
+                "case B."
+            ),
+            (
+                "Declaring the forms equivalent after one passing Red test treats agreement on one "
+                "input as proof for all inputs."
+            ),
+            "Run both forms with Blue and expect BLANK for case A and 67 for case B.",
+        ),
+        (
+            (
+                "A variable is evaluated where it is defined. `VAR K = MAX ( Product[ProductKey] "
+                ")` under Paper binds 2 before the outer Blue filter exists."
+            ),
+            (
+                "Moving the MAX into a variable to tidy case B brings back the bug, because the "
+                "inner filter then uses the stored 2 rather than the key under Blue."
+            ),
+            (
+                "The variable version returns BLANK under Paper, while the nested form with MAX "
+                "inline returns 67."
+            ),
+        ),
+        (
+            (
+                "Find the last Paper sale date inside the Paper filter. Paper's last order is S7 "
+                "on 2025-02-02, worth 20."
+            ),
+            (
+                "Computing MAX(Sales[OrderDate]) as a sibling of the Paper filter evaluates it "
+                "over all sales, which gives 2025-02-03, the date of the Mug line S8, so the "
+                "result is BLANK."
+            ),
+            (
+                "Nested as `CALCULATE ( CALCULATE ( [NetRevenue], 'Date'[Date] = MAX ( "
+                'Sales[OrderDate] ) ), Product[Category] = "Paper" )`, expect 20.'
+            ),
+        ),
+    ],
+    17: [
+        (
+            (
+                "Under Paper, SUMX visits five lines. A raw SUM inside sees the whole Paper "
+                "context each time and returns 91, so the result is 5 x 91 = 455."
+            ),
+            (
+                "Thinking the raw SUM sees only the current line, as a SQL row expression would, "
+                "predicts 91. The transition is what makes that true."
+            ),
+            "Under Paper, RawRepeated returns 455 and Transitioned returns 91.",
+        ),
+        (
+            (
+                "[NetRevenue] includes an implicit CALCULATE, so each line becomes a filter on its "
+                "own unique SaleID and contributes only its NetAmount. The total stays 187."
+            ),
+            (
+                "Expecting the measure to act like the raw SUM and return 1,496 forgets that "
+                "measure references always transition."
+            ),
+            (
+                "`SUMX ( Sales, [NetRevenue] )` returns 187, while the raw version returns 1,496, "
+                "which is 8 x 187."
+            ),
+        ),
+        (
+            (
+                "NetAmount is stored per line and adds up across lines, so SUM(Sales[NetAmount]) "
+                "gives 187 with no iterator and no transitions."
+            ),
+            (
+                "Keeping SUMX(Sales, [NetRevenue]) runs eight transitions to get the same 187, and "
+                "it would overcount if two rows were identical (see the fifth exercise)."
+            ),
+            "SUM(Sales[NetAmount]) and SUMX(Sales, Sales[NetAmount]) both return 187.",
+        ),
+        (
+            (
+                "Dividing by the row count happens to work here, because the raw SUMX adds the "
+                "total once per row. It does not give per-row values."
+            ),
+            (
+                "Applied to a Customer iteration, the patch still shows 187 for each customer, and "
+                "SUMX(Customer, SUM(Sales[NetAmount])) / COUNTROWS(Sales) returns 748 / 8 = 93.5."
+            ),
+            (
+                "Per customer, [NetRevenue] returns Ada 51, Bo 80, Cy 56 and Di BLANK; the patched "
+                "expression cannot produce those."
+            ),
+        ),
+        (
+            (
+                "A transition filters on every column's value, not on a physical row. SaleID is "
+                "unique today, so each line matches only itself."
+            ),
+            (
+                "If S5 were loaded twice with identical values, SUM would give 207, but "
+                "SUMX(Sales, [NetRevenue]) would give 247, because each copy matches both copies "
+                "(40 twice)."
+            ),
+            (
+                "Before relying on transitions, check that COUNTROWS(Sales) equals "
+                "DISTINCTCOUNT(Sales[SaleID]); both are 8 here."
+            ),
+        ),
+        (
+            (
+                "To split a 100 USD charge by revenue, transition each customer with [NetRevenue] "
+                "and divide by 187 bound outside the iterator: Ada gets about 27.27, Bo 42.78 and "
+                "Cy 29.95."
+            ),
+            (
+                "A raw SUM inside SUMX(Customer, ...) gives every customer a share of 187 / 187 = "
+                "1, which allocates the full 100 to each of four customers."
+            ),
+            "The allocations should add to 100, and Di, with no sales, should receive BLANK.",
+        ),
+    ],
+    18: [
+        (
+            (
+                "FILTER evaluates [NetRevenue] once per ProductKey. Notebook (67) and Mug (96) "
+                "exceed 24, while Pen equals 24 and Bag is BLANK, so revenue is 163."
+            ),
+            (
+                "Filtering lines with Sales[NetAmount] > 24 answers a different question. It keeps "
+                "S3, S4 and S8 for 103, because it tests lines, not product totals."
+            ),
+            "The candidate table has 2 rows and CALCULATE over it returns 163.",
+        ),
+        (
+            (
+                "With >= 24, Pen's 24 also qualifies. Bag's BLANK compares as 0, which is below "
+                "24, so three products qualify and revenue is 187."
+            ),
+            (
+                "Lowering the threshold to >= 0 would also admit Bag, because BLANK >= 0 is TRUE, "
+                "so a product with no sales would join the list."
+            ),
+            "Expect Products 3 and Revenue 187, and check that Bag is not in the list.",
+        ),
+        (
+            (
+                "Iterate VALUES(Customer[CustomerKey]) and invoke [NetRevenue] per key. Bo (80) "
+                "and Cy (56) exceed 55, Ada (51) does not and Di is BLANK."
+            ),
+            (
+                "`FILTER ( Sales, Sales[NetAmount] > 55 )` checks single lines, and the largest "
+                "line is 40, so the result is BLANK."
+            ),
+            "Expect 2 customers with revenue 80 + 56 = 136.",
+        ),
+        (
+            (
+                "A simple Boolean filter in CALCULATE must test a column. FILTER over "
+                "VALUES(Product[ProductKey]) gives the measure one product context per candidate."
+            ),
+            (
+                "`FILTER ( Sales, [NetRevenue] > 50 )` runs but transitions to single lines, and "
+                "since no line exceeds 50 it returns an empty table and BLANK."
+            ),
+            "The ProductKey candidate version returns 2 products and 163, as in case A.",
+        ),
+        (
+            (
+                "Mug's 96 is the largest product total, so a threshold of 100 leaves the candidate "
+                "table empty. CALCULATE with an empty filter table sees no rows."
+            ),
+            (
+                "Assuming an empty filter means no filter predicts 187. It actually admits no "
+                "products, so revenue is BLANK."
+            ),
+            "At > 100 the row should read Products BLANK and Revenue BLANK.",
+        ),
+        (
+            (
+                "State the period and the candidates. Under 2025, Ada has 27, Bo 40 and Cy 56, so "
+                "only Cy exceeds 50. Over all years, Ada (51), Bo (80) and Cy (56) all do."
+            ),
+            (
+                "Building the segment over all years but reporting it in a 2025 view labels Ada "
+                "high value, though her 2025 revenue is 27."
+            ),
+            (
+                "Under 2025 the FILTER returns Cy alone with 56; with no year filter it returns "
+                "three customers and 187."
+            ),
+        ),
+    ],
+}
+
+explain(LESSONS, REASONING)

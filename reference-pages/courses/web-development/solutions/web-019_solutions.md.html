@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-019.md</code>.</p>
 <h3 id="exercise-1-distinguish-a-condition-selector-from-generated-content">Exercise 1: Distinguish a condition selector from generated content.<a class="heading-anchor" href="#exercise-1-distinguish-a-condition-selector-from-generated-content" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A pseudo-class selects an existing state; a pseudo-element styles a represented part.</p>
+<p><strong>Approach:</strong> Ask whether the selector matches an element in a state, such as <code>:checked</code>, or creates a stylable part, such as <code>::before</code>.</p>
 <p><strong>Why:</strong> A pseudo-class such as :focus selects existing elements in a state, while a pseudo-element such as ::before styles a generated part.</p>
+<p><strong>Plausible wrong approach:</strong> Calling <code>::before</code> a state fails because it never matches a condition; it creates a box that exists only for presentation.</p>
+<p><strong>How to verify:</strong> The Elements panel shows <code>::before</code> as a pseudo node inside the element, while <code>:checked</code> appears only as a matched selector.</p>
 <h3 id="exercise-2-add-focus-within-feedback-around-a-labeled-input">Exercise 2: Add focus-within feedback around a labeled input.<a class="heading-anchor" href="#exercise-2-add-focus-within-feedback-around-a-labeled-input" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The group is highlighted while the control has focus.</p>
+<p><strong>Approach:</strong> Wrap the label and input in a <code>.field</code> container and add a <code>:focus-within</code> border color to that container.</p>
 <p><strong>Why:</strong> :focus-within matches an element when it or any descendant has focus, so the whole field group can change.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>.field:focus</code> fails because the container itself never receives focus, so the rule never matches.</p>
+<p><strong>How to verify:</strong> Tab into the input and the field border changes; tab out and the border returns to its default.</p>
 <h3 id="exercise-3-build-a-preferences-list-whose-selected-state-is-visible-and-semantic">Exercise 3: Build a preferences list whose selected state is visible and semantic.<a class="heading-anchor" href="#exercise-3-build-a-preferences-list-whose-selected-state-is-visible-and-semantic" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Native checkboxes carry the state and text styling reinforces it.</p>
+<p><strong>Approach:</strong> Use native checkboxes inside labels and style <code>input:checked + span</code> so text weight reinforces the checked state.</p>
 <p><strong>Why:</strong> The checkbox keeps the real state and keyboard behavior, and the sibling selector reflects that state visually.</p>
+<p><strong>Plausible wrong approach:</strong> Building toggles from <code>span</code> elements with a <code>selected</code> class fails because no state reaches assistive technology or keyboard users.</p>
+<p><strong>How to verify:</strong> Pressing Space on a focused checkbox toggles it, its accessible state changes, and the adjacent text becomes bold.</p>
 <h3 id="exercise-4-remove-an-essential-instruction-placed-only-in-before-and-restore-it-as-html">Exercise 4: Remove an essential instruction placed only in ::before and restore it as HTML.<a class="heading-anchor" href="#exercise-4-remove-an-essential-instruction-placed-only-in-before-and-restore-it-as-html" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The instruction becomes real document content available independently of generated decoration.</p>
+<p><strong>Approach:</strong> Move the instruction text into a real element in HTML and connect it to the field with <code>aria-describedby</code>.</p>
 <p><strong>Why:</strong> Generated content is not reliably exposed to assistive technology or copy and paste, so essential text belongs in the document.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>aria-label</code> to the pseudo element fails because pseudo elements are not DOM nodes and cannot carry attributes.</p>
+<p><strong>How to verify:</strong> Selecting all text on the page now includes the instruction, and the input&#x27;s description lists it.</p>
 <h3 id="exercise-5-operate-the-controls-without-hover">Exercise 5: Operate the controls without hover.<a class="heading-anchor" href="#exercise-5-operate-the-controls-without-hover" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> All actions and state information remain usable by keyboard and touch.</p>
+<p><strong>Approach:</strong> Disconnect the mouse mentally: reach every control with Tab, toggle with Space or Enter, and read each state without hovering.</p>
 <p><strong>Why:</strong> Hover is unavailable on touch and keyboard, so anything shown only on hover is lost to those users.</p>
+<p><strong>Plausible wrong approach:</strong> Revealing state only on <code>:hover</code> fails because keyboard and touch users never trigger hover in a dependable way.</p>
+<p><strong>How to verify:</strong> Every state label is visible without hovering, and each action is completed using only the keyboard.</p>
 <h3 id="exercise-6-explain-why-css-state-cannot-authorize-a-server-action">Exercise 6: Explain why CSS state cannot authorize a server action.<a class="heading-anchor" href="#exercise-6-explain-why-css-state-cannot-authorize-a-server-action" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Presentation can be changed by the client; the server must enforce permission using trusted context.</p>
+<p><strong>Approach:</strong> Note that any CSS state can be changed in developer tools, so permission must be checked by the server using its own session.</p>
 <p><strong>Why:</strong> Users can change styles and requests freely, so permission decisions must use trusted server-side identity and data.</p>
+<p><strong>Plausible wrong approach:</strong> Hiding an admin button with <code>display: none</code> fails because the endpoint still accepts a request sent directly.</p>
+<p><strong>How to verify:</strong> Unhiding the button in developer tools shows it again, proving the style held no security decision.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-019_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

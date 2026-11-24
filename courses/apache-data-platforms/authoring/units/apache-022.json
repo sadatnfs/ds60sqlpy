@@ -5,6 +5,38 @@
   "minutes": 75,
   "prerequisites": ["apache-021", "apache-003"],
   "concepts": ["filesystem visibility", "plan versus action", "immutable source identity"],
+  "key_terms": [
+    [
+      "Filesystem visibility",
+      "Whether a path names the same bytes in every process that must read it. A path present in the client may not exist in an executor's mount namespace."
+    ],
+    [
+      "Plan versus action",
+      "Registering a table or building a query only constructs a plan; executors read data when an action such as collect runs it, which is when a missing file appears."
+    ],
+    [
+      "Immutable fixture identity",
+      "The recorded checksum of the shared Parquet fixture. The project refuses to replace a fixture whose checksum differs, preserving it for inspection."
+    ],
+    [
+      "Object storage URI",
+      "An address that lets each executor request an object over the network with credentials, which adds endpoint, authorization, consistency and version concerns."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Print the paths each process sees",
+      "language": "bash",
+      "code": "cd work/ballista\nbash run.sh start\nbash run.sh paths",
+      "interpretation": "In an owned workshop, the paths report should show actual_ballista and embedded_control as true and removed_source_rejected as true. The first two confirm the shared Parquet fixture was readable from the scheduler and executor path and matched the local oracle. The third shows the removed copy did not silently return the original rows. If paths passes on one host but fails after moving storage, the new mount is not visible to every executor under the same name."
+    },
+    {
+      "title": "Register a file, delete it, then query",
+      "language": "python",
+      "code": "missing = Path(temporary) / \"removed.parquet\"\npq.write_table(pa.Table.from_pylist(ROWS[:3]), missing)\nctx.register_parquet(\"removed_source\", str(missing))\nmissing.unlink()\nselected = ctx.sql(\"SELECT id, region, amount FROM removed_source ORDER BY id\")",
+      "interpretation": "This fragment from the project client shows why registration is not proof of availability: the table name exists after the delete, and the failure surfaces only when execution opens the file. Depending on the release, the query either raises a not-found error or returns an empty result, so the client accepts both but rejects any return of the original three rows. Validate file presence at the point of execution, and keep the canonical fixture checksum unchanged."
+    }
+  ],
   "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
   "sources": [
     [

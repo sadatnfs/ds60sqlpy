@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Choose collection representations according to identity, ordering, mutability and lookup needs.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-008</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a record with explicit fields) and worked case B (count categories and inspect membership) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-008: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Tuple:</strong> An immutable, fixed-length ordered collection whose element types are part of its own type.</li>
+<li><strong>NamedTuple:</strong> An immutable tuple with named fields, such as <code>(id = 7, score = 0.5)</code>, read with field syntax like <code>row.score</code>.</li>
+<li><strong>Dict:</strong> A hash table that maps keys to values and whose iteration order is unspecified, so reports should sort keys explicitly.</li>
+<li><strong>Key equality:</strong> Dictionaries and sets match keys with <code>isequal</code> and <code>hash</code>, so <code>1</code> and <code>1.0</code> select the same entry.</li>
+<li><strong>Set:</strong> An unordered collection of distinct elements that uses the same equality and hashing rules as dictionary keys.</li>
+</ul>
 <h3 id="a-collection-has-a-contract-beyond-its-contents">A collection has a contract beyond its contents<a class="heading-anchor" href="#a-collection-has-a-contract-beyond-its-contents" aria-label="Link to this section">#</a></h3>
 <p>A tuple is an immutable ordered collection whose element types can differ. A named tuple adds field names, making a small record easier to interpret. A dictionary maps keys to values, while a set records membership. These structures answer different questions and should not be selected only because they can all hold several values.</p>
 <p>A one-element tuple needs a trailing comma to distinguish it from parentheses around an expression. Named tuples expose fields by name as well as position. Their field names and order are part of their type, which can support clear small record interfaces. They do not automatically make nested mutable values immutable.</p>

@@ -4,12 +4,17 @@
 from __future__ import annotations
 
 import ast
+import contextlib
+import io
 import json
+import types
 from pathlib import Path
 
 from python_deep_notes import DETAILS
 from python_gpu_labs import CUPY, TORCH, cupy_program, tensorflow_program, torch_program
+from python_key_terms import KEY_TERMS
 from python_lessons import LESSONS
+from python_reasoning import REASONING
 from spark_lessons import SPARK_LESSONS
 from spark_programs import PYSPARK_BODY, pyspark_program, scala_program
 
@@ -214,6 +219,49 @@ def variant(label, title, profile, source, solution, explanation):
     )
 
 
+REASONING_LABELS = (
+    "Approach",
+    "Why it is correct here",
+    "A plausible wrong approach",
+    "How to verify",
+)
+
+
+def variable_trace(code):
+    """Return a Markdown table of the short final values the CPU model binds."""
+    namespace = {"__name__": "variable_trace"}
+    with contextlib.redirect_stdout(io.StringIO()):
+        exec(compile(code, "<cpu-model>", "exec"), namespace)  # noqa: S102 - trusted authoring data
+    rows = []
+    for name, value in namespace.items():
+        if name.startswith("_") or callable(value) or isinstance(value, types.ModuleType):
+            continue
+        shown = repr(value)
+        if len(shown) > 60 or " at 0x" in shown:
+            continue
+        rows.append(f"| `{name}` | `{shown}` |")
+        if len(rows) == 6:
+            break
+    if not rows:
+        return ""
+    return (
+        "\n\n**Variable trace.** Before running the model, predict these final values; then compare:\n\n"
+        "| Variable | Final value |\n|---|---|\n" + "\n".join(rows)
+    )
+
+
+def checked_reasoning(n):
+    """Return chapter n's six four-part reasonings after validating their shape."""
+    entries = REASONING.get(n)
+    assert entries is not None and len(entries) == 6, f"chapter {n} needs six reasonings"
+    for entry in entries:
+        assert len(entry) == 4, f"chapter {n} reasoning needs four parts"
+        for text in entry:
+            assert text.strip(), f"chapter {n} has an empty reasoning part"
+            assert "\u2014" not in text and "\u2013" not in text, f"chapter {n} uses a dash"
+    return entries
+
+
 def build(record):
     n = record["n"]
     number = n + 64
@@ -249,12 +297,19 @@ def build(record):
     sources = "\n".join(f"- [{title}]({url})" for title, url in SOURCE_GROUPS[group])
     prereq = ", ".join(f"`{value}`" for value in ids)
     theory = record["mechanism"] + "\n\n" + DETAILS.get(n, "")
+    terms = KEY_TERMS[n]
+    assert 3 <= len(terms) <= 5, ident
+    key_terms = "\n".join(f"- **{term}:** {meaning}" for term, meaning in terms.items())
     worked = "\n\n".join(
         f"### Worked example {i + 1}\n\n{text}" for i, text in enumerate(record["examples"])
     )
+    # Each exercise names its own tempting wrong route, taken from the chapter's
+    # reasoning data, so the prompt is specific without stating the answer.
+    traps = [entry[2] for entry in checked_reasoning(n)]
     tasks = "\n\n".join(
-        f"### Exercise {i + 1}: {text}\n\nWrite your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise {i + 1} targets **{lower_initial(text)}** in the examples above."
-        for i, text in enumerate(exercises)
+        f"### Exercise {i + 1}: {text}\n\n**Trap to avoid:** {trap}\n\n"
+        "Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet."
+        for i, (text, trap) in enumerate(zip(exercises, traps, strict=True))
     )
     # Each hint points to a different part of this lesson's reasoning rather than
     # revealing the answer. Explanatory answers remain in a separate artifact.
@@ -389,6 +444,10 @@ By the end, you can **{lower_initial(exercises[0])}**, **{lower_initial(exercise
 
 {theory}
 
+### Key terms
+
+{key_terms}
+
 ## Worked examples
 
 {worked}
@@ -400,7 +459,7 @@ The **CPU reference model** variant runs this bounded worked example using `pyth
 ```python
 {source_code}```
 
-**Expected observation:** {record["expected"]}
+**Expected observation:** {record["expected"]}{variable_trace(source_code)}
 
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 {framework}{gpu_section}
@@ -446,11 +505,13 @@ not as GPU or cluster measurements.
     )
     put(learner, worksheet)
     solution = f"# {ident}: explained solutions\n\nThese answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.\n\n"
+    reasoning = checked_reasoning(n)
     solution += "\n\n".join(
-        f"## Exercise {i + 1}: {task}\n\n{answer}.\n\nConnect this conclusion to "
-        + ("worked example 1" if i % 2 == 0 else "worked example 2")
-        + f" and the declared contract. State what additional observation would be needed on your actual backend before claiming **{lower_initial(task)}** is qualified there."
-        for i, (task, answer) in enumerate(zip(exercises, answers, strict=True))
+        f"## Exercise {i + 1}: {task}\n\n{answer}.\n\n"
+        + "\n\n".join(
+            f"**{label}.** {text}" for label, text in zip(REASONING_LABELS, parts, strict=True)
+        )
+        for i, (task, answer, parts) in enumerate(zip(exercises, answers, reasoning, strict=True))
     )
     solution += f"\n\n## Reference observation\n\n{record['expected']}\n\nThe reference file is `{reference}`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.\n"
     put(explanation, solution)
@@ -484,6 +545,7 @@ not as GPU or cluster measurements.
 def main():
     python_records = [row for row in LESSONS if row["n"] <= 48]
     assert len(python_records) == 48 and len(SPARK_LESSONS) == 16
+    assert sorted(KEY_TERMS) == list(range(1, 65))
     for name, records in [("python", python_records), ("spark", SPARK_LESSONS)]:
         built = [build(row) for row in records]
         fragment = dict(

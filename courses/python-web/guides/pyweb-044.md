@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-043`.
 
 The FastAPI branch now combines a typed write schema, identity dependency, SQL storage, response filtering and object-level access. This chapter walks through one complete note creation and read sequence, then proves that rejected writes and cross-user reads do not alter or expose the stored record.
 
+## Key terms
+
+- **Write schema:** The request model that permits only the fields a client may set when creating a resource, such as a bounded title.
+- **Identity dependency:** A dependency that maps the caller's credential to an identity before the route body runs, refusing a missing credential with 401.
+- **Scoped read:** A query whose WHERE clause includes both the identifier and the owner, so visibility is part of data access.
+- **Non-disclosure policy:** Answering 404 for a row outside the caller's scope so the response does not reveal that the row exists.
+
 ## Mechanism: compose the request into one accountable operation
 
 The request schema permits only a bounded title. A dependency maps a synthetic bearer credential to an identity. The database write assigns that identity as owner on the server and uses parameter binding. The response model exposes identifier and title while excluding the internal owner field.
@@ -29,6 +36,44 @@ Bob requests Alice's identifier and receives 404. A write that tries to provide 
 That final effect check is stronger than checking three refusal codes. It detects accidental writes performed before a validation or authentication exception. It also catches an implementation that silently creates a second record while returning an error.
 
 The read predicate is important even when identifiers are difficult to guess. An identifier can leak through logs, links or browser history. Access control must continue to work when an attacker knows the identifier; obscurity is not a substitute for the owner condition.
+
+## Worked example: owner scoping inside the write statement
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE notes(id INTEGER PRIMARY KEY, owner TEXT NOT NULL, title TEXT NOT NULL)")
+db.executemany(
+    "INSERT INTO notes(owner, title) VALUES (?, ?)",
+    [("alice", "Integrated"), ("bob", "Groceries"), ("alice", "Draft")],
+)
+
+
+def rename(owner, identifier, title):
+    changed = db.execute(
+        "UPDATE notes SET title=? WHERE id=? AND owner=?", (title, identifier, owner)
+    ).rowcount
+    return 200 if changed else 404
+
+
+def listing(owner):
+    rows = db.execute("SELECT title FROM notes WHERE owner=? ORDER BY id", (owner,))
+    return [row[0] for row in rows]
+
+
+print(rename("bob", 1, "taken over"), rename("alice", 3, "Final"))
+print(listing("alice"), listing("bob"))
+```
+
+Expected output:
+
+```text
+404 200
+['Integrated', 'Final'] ['Groceries']
+```
+
+The integrated API only reads notes, and this sketch extends its rule to a write. Bob guessed Alice's note number 1, and because `owner` sits in the `WHERE` clause of the `UPDATE`, the statement matched nothing and the route answered 404 exactly as it would for a note that does not exist. The owner value comes from the authenticated identity dependency, never from the request body, which is also why the lesson's `Create` model forbids an `owner` field.
 
 ## Failure diagnosis and discussion
 

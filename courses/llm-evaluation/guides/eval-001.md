@@ -8,7 +8,7 @@ Define which population, unit, loss and decision an evaluation estimates, and de
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-001`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-001` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for evaluation contracts, populations and estimands in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about estimand and sampling unit: The reversed comparison gives +1 and -1, the reweighted improvement is 0.5, a duplicated identifier and an empty population are rejected, and observed accuracy 1 is reported beside label coverage 0.5. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Define the quantity before collecting scores
 
@@ -25,6 +25,14 @@ R_s(P)=\mathbb{E}_{(X,Y)\sim P}[L(s(X),Y)].
 Here \(\mathbb{E}\) denotes expectation: the population-weighted average of the loss under the stated distribution. A sample mean estimates that quantity only under an appropriate sampling or modeling argument.
 
 A paired improvement can be defined as \(\Delta=\mathbb{E}[L_A-L_B]\), so positive values favor B. If using correctness instead, define \(\Delta=\mathbb{E}[C_B-C_A]\). Do not reuse the word improvement while silently reversing this sign convention. The programs use correctness differences with explicit identifiers.
+
+## Key terms
+
+- **Estimand:** The quantity an analysis seeks to learn, such as the expected loss of a system over a declared target population.
+- **Metric:** A rule applied to observations to estimate or describe the estimand, including its denominator and treatment of failures.
+- **Sampling unit:** What counts as an independent opportunity or randomized entity, such as a user or question family rather than a request row.
+- **Risk:** The expected loss R_s(P) of system s under target distribution P, which a sample mean estimates only under a sampling argument.
+- **Label coverage:** The share of eligible requests that received an adjudicated label; accuracy over labeled rows alone hides a selection problem when coverage is low.
 
 ## Worked case A: family balance changes the question
 

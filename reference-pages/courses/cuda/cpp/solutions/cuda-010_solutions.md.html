@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-010_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>An operation acquires buffer A, then fails to acquire B. If A already belongs to an automatic owner, stack unwinding releases A. The event trace is acquire-A, acquire-B-failed, release-A. If A is only a raw pointer and cleanup exists only at the normal return, the failure path leaks A.</p>
+<p><strong>Approach:</strong> Trace the events: A is acquired, B fails, unwinding runs A&#x27;s cleanup.</p>
+<p><strong>Why it is correct:</strong> An automatic owner&#x27;s destructor runs during unwinding, so release does not depend on the normal return path.</p>
+<p><strong>A plausible wrong approach:</strong> Freeing A only at the end of the function skips that line when B throws, leaking A.</p>
+<p><strong>How to verify:</strong> The reference asserts events == [&#x27;acquire-A&#x27;, &#x27;acquire-B-failed&#x27;, &#x27;release-A&#x27;].</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>Moving owner A into owner B changes who releases the allocation. The moved-from A stores an empty handle; only B releases the original resource. A default copy that leaves two nonempty owners would lead to two releases. Neither a destructor nor a smart-sounding class name alone proves this invariant.</p>
+<p><strong>Approach:</strong> Move A into B, record that A now holds an empty handle, and release only through B.</p>
+<p><strong>Why it is correct:</strong> Moving transfers the single ownership, so exactly one release happens for one allocation.</p>
+<p><strong>A plausible wrong approach:</strong> A default member-wise copy duplicates the raw handle, and both destructors free the same memory.</p>
+<p><strong>How to verify:</strong> Delete the copy constructor and verify a copy attempt fails to compile while a move succeeds.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Each live nonempty allocation has exactly one owner; borrowers never release it, moves empty the source, and destruction happens after outstanding uses finish.</p>
+<p><strong>Approach:</strong> State one owner per allocation, borrower restrictions, move semantics and completion ordering.</p>
+<p><strong>Why it is correct:</strong> These rules together prevent leaks, double frees and freeing memory a kernel still reads.</p>
+<p><strong>A plausible wrong approach:</strong> Writing only &#x27;the destructor frees memory&#x27; omits moves and outstanding GPU work.</p>
+<p><strong>How to verify:</strong> Check each rule against the move and two-stream scenarios in later exercises.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>An exception during unwinding can terminate the process. Keep destructor cleanup nonthrowing and report operational failures through an explicit checked path.</p>
+<p><strong>Approach:</strong> Make the destructor noexcept and route release failures to a logged status instead of throwing.</p>
+<p><strong>Why it is correct:</strong> A second exception during unwinding calls std::terminate, ending the process before error reporting.</p>
+<p><strong>A plausible wrong approach:</strong> Throwing from the destructor to surface a free failure turns one error into an abort.</p>
+<p><strong>How to verify:</strong> Simulate a failing release in a test and confirm the original allocation error is still reported.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Nothing. Represent the empty state distinctly so partial initialization and moved-from objects are safe.</p>
+<p><strong>Approach:</strong> Check for the empty state at the top of release and return without calling the free function.</p>
+<p><strong>Why it is correct:</strong> Moved-from and partially constructed owners hold no allocation, so release must be a no-op.</p>
+<p><strong>A plausible wrong approach:</strong> Calling free on a stale handle in a moved-from owner releases memory now owned by someone else.</p>
+<p><strong>How to verify:</strong> Destroy a moved-from owner in a test and confirm the free counter does not increase.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Record both consumers&#x27; completion dependencies before freeing or reusing the buffer. Host scope exit alone does not prove GPU completion.</p>
+<p><strong>Approach:</strong> Record completion events from both streams and make release wait on both.</p>
+<p><strong>Why it is correct:</strong> Each stream may still read the buffer after the host leaves scope, so release needs both completions.</p>
+<p><strong>A plausible wrong approach:</strong> Freeing when the host wrapper goes out of scope can release memory a queued kernel still reads.</p>
+<p><strong>How to verify:</strong> Trace a schedule where one stream finishes late and confirm release happens after both events.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-010_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Create a reusable experiment template that records inputs, environment, timing scope and capability status.
+
 Work through *Reproducibility, safety and the first evidence notebook* with the concrete cases below. Finish with this evidence:
 a reusable experiment template and correctly labeled capability status. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A reproducible experiment records enough context to explain why a result happened. An input seed is useful only alongside the generator, dtype, shape and distribution. A benchmark needs timing scope, warm-up policy and retained samples, while a correctness result needs an independent expected answer. Hardware access, successful compilation, successful execution and acceptable numerical output are four distinct observations. A resource budget limits input size and repeated work before running. On a shared GPU, reserve only the memory and compute time that the owner has authorized; do not use unbounded spin loops as teaching fixtures.
+
+### Key terms
+
+- **Random seed:** The initial value for a pseudorandom generator, meaningful only together with the generator, dtype, shape and distribution.
+- **Warm-up run:** An untimed execution that absorbs one-time initialization or JIT costs before repeated measurements.
+- **Timing scope:** The exact set of operations, such as kernel only or end to end, that a measurement includes.
+- **Capability status:** A labeled record of which observations exist, such as compiled, executed on a GPU or validated numerically.
 
 ## How to run and study this lesson
 
@@ -47,7 +56,6 @@ caches, instruction timing or device memory visibility.
 ```python
 x, y = [0, -2, 5], [3, 2, -1]
 assert [a + b for a, b in zip(x, y)] == [3, 0, 4]
-assert 3 * 1_000_000 * 4 == 12_000_000
 receipt = {"surface": "CPU reference", "shape": [3], "result": [3, 0, 4], "gpu_executed": False}
 print(receipt)
 ```

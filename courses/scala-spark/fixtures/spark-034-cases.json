@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Declare both streaming schemas and watermark policies",
       "input_contract": "Read the owned impression and click file directories with their explicit schemas, maxFilesPerTrigger 1 and five-minute watermarks on their respective event-time columns.",
-      "expected": "Both relations are streaming;the minimum multiple-watermark policy isexplicit and no query runs merely fromconstruction.",
+      "expected": "Both relations are streaming;the minimum multiple-watermark policy is explicit and no query runs merely from construction.",
       "verification": "Assert both streaming flags, the declared timestamp fields and policymin before execution."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Reject an outer join without an event-time bound",
       "input_contract": "In a separate owned checkpoint/output namespace, attempt a stream-stream left outer join using only key equality despite input watermarks. Require analysis rejection and stop any unexpectedly created query.",
-      "expected": "AnalysisException because this design lacks the required bounded match/finalization condition. The valid inner/outer sinks remain unchanged and no query isactive.",
+      "expected": "AnalysisException because this design lacks the required bounded match/finalization condition. The valid inner/outer sinks remain unchanged and no query is active.",
       "verification": "Assert the named rejection, inactive state and unchanged final valid outer pairs."
     }
   ],

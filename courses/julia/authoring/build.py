@@ -33,9 +33,74 @@ def prose_defects(text: str) -> list[str]:
 
 def unit_prose(row: dict[str, Any]) -> list[str]:
     fields = [row["title"], row["outcome"]]
+    for term, definition in row["key_terms"]:
+        fields += [term, definition]
+    fields.append(row["approach"])
+    if row.get("checks_note"):
+        fields.append(row["checks_note"])
     for item in row["exercises"]:
-        fields += [item[key] for key in ("title", "task", "expected", "hint", "answer")]
+        fields += [
+            item[key]
+            for key in ("title", "task", "expected", "hint", "answer", "why", "wrong", "verify")
+        ]
     return fields
+
+
+MIN_SOLUTION_WORDS = 700
+REASONING_FIELDS = {"why": 12, "wrong": 12, "verify": 6}
+
+
+def words(text: str) -> int:
+    return len(re.findall(r"\b[\w'-]+\b", text))
+
+
+def check_reasoning(row: dict[str, Any]) -> None:
+    """Require a unit approach plus why, wrong-approach and verify notes per exercise."""
+    key = f"julia-{row['number']:03}"
+    if words(row.get("approach", "")) < 35:
+        raise ValueError(f"{key} needs an approach paragraph of at least 35 words")
+    texts = [row["approach"]]
+    for index, item in enumerate(row["exercises"], 1):
+        for name, minimum in REASONING_FIELDS.items():
+            if words(item.get(name, "")) < minimum:
+                raise ValueError(f"{key} exercise {index} needs {name} of {minimum}+ words")
+            texts.append(item[name])
+    if "checks_note" in row:
+        if words(row["checks_note"]) < 30:
+            raise ValueError(f"{key} checks_note needs 30+ words when present")
+        texts.append(row["checks_note"])
+    wrong = [item["wrong"] for item in row["exercises"]]
+    if len(set(wrong)) != len(wrong):
+        raise ValueError(f"{key} wrong-approach notes must be distinct")
+    if any(dash in text for text in texts for dash in ("\u2013", "\u2014")):
+        raise ValueError(f"{key} solution reasoning contains an en or em dash")
+
+
+def exercise_checks(source: str, key: str) -> str:
+    """Return the reference's exercise_checks function for display in the solution."""
+    match = re.search(r"^function exercise_checks\(\)\n.*?^end\n", source, re.S | re.M)
+    if not match:
+        raise ValueError(f"{key} reference needs a top-level exercise_checks function")
+    return match.group(0)
+
+
+def check_key_terms(row: dict[str, Any]) -> None:
+    """Require three to five distinct, defined, lesson-specific vocabulary entries."""
+    key = f"julia-{row['number']:03}"
+    pairs = row.get("key_terms", [])
+    names = [pair[0].lower() for pair in pairs]
+    if not 3 <= len(names) <= 5 or len(set(names)) != len(names):
+        raise ValueError(f"{key} needs three to five distinct key terms")
+    for pair in pairs:
+        if len(pair) != 2:
+            raise ValueError(f"{key} key terms must be [term, definition] pairs")
+        term, definition = pair
+        if not term.strip() or any(mark in term for mark in ("*", ":", "\n")):
+            raise ValueError(f"{key} has an invalid key term name {term!r}")
+        if len(definition.split()) < 6 or not definition.endswith("."):
+            raise ValueError(f"{key} key term {term!r} needs a one-sentence definition")
+        if any(dash in term + definition for dash in ("\u2013", "\u2014")):
+            raise ValueError(f"{key} key term {term!r} contains an en or em dash")
 
 
 def units() -> list[dict[str, Any]]:
@@ -48,6 +113,8 @@ def units() -> list[dict[str, Any]]:
             or len(row["exercises"]) != 6
         ):
             raise ValueError("Invalid teaching stage or practice contract")
+        check_key_terms(row)
+        check_reasoning(row)
         body = (HERE / "chapters" / f"julia-{row['number']:03}.md").read_text("utf-8")
         if len(re.findall(r"\b\w+\b", body)) < 450:
             raise ValueError("Chapter needs a substantive original explanation")
@@ -133,12 +200,18 @@ def artifacts() -> dict[str, str]:
             "runtime: a fresh offline `main.jl` process with two threads and a fixed "
             "package environment.\n\n"
         )
+        intro += (
+            "## Key terms\n\n"
+            + "\n".join(f"- **{term}:** {definition}" for term, definition in row["key_terms"])
+            + "\n\n"
+        )
         guide = intro + guide + "\n\n## Six investigations\n\n"
         explanation = [
             f"# {key}: explained reference\n\n"
             f"The executable reference is `{key}_reference.jl`. "
             "Its checks cover the stated authored inputs; they are not a claim "
-            "of general scientific validity or mastery.\n"
+            "of general scientific validity or mastery.\n\n"
+            f"## Approach\n\n{row['approach']}\n"
         ]
         for index, item in enumerate(row["exercises"], 1):
             guide += (
@@ -147,7 +220,10 @@ def artifacts() -> dict[str, str]:
             )
             explanation.append(
                 f"## {index}. {item['title']}\n\n{item['answer']}\n\n"
-                f"**Expected observation:** {item['expected']}\n"
+                f"**Expected observation:** {item['expected']}\n\n"
+                f"**Why it holds here:** {item['why']}\n\n"
+                f"**Plausible wrong approach:** {item['wrong']}\n\n"
+                f"**How to verify:** {item['verify']}\n"
             )
         concepts = row["concepts"]
         concept_phrase = (
@@ -167,7 +243,18 @@ def artifacts() -> dict[str, str]:
         output[f"{prefix}/guides/{key}.md"] = guide
         output[f"{prefix}/lessons/{key}.jl"] = code["learner"]
         output[f"{prefix}/solutions/{key}_reference.jl"] = code["reference"]
-        output[f"{prefix}/solutions/{key}_solutions.md"] = "\n".join(explanation)
+        explanation.append(
+            "## Reference checks\n\nThe reference's `exercise_checks` function runs these "
+            f"assertions before `main` prints `{key}: all reference checks passed`:\n\n"
+            + (f"{row['checks_note']}\n\n" if row.get("checks_note") else "")
+            + "```julia\n"
+            + exercise_checks(code["reference"], key)
+            + "```\n"
+        )
+        solution = "\n".join(explanation)
+        if words(solution) < MIN_SOLUTION_WORDS:
+            raise ValueError(f"{key} explained reference has {words(solution)} words; needs 700")
+        output[f"{prefix}/solutions/{key}_solutions.md"] = solution
         # Plain-text metadata: show concrete expected observations without Markdown.
         concrete = [
             item["expected"] for item in row["exercises"] if re.search(r"[0-9`]", item["expected"])

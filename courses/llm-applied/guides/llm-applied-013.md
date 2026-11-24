@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-012`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-012` (Evaluating retrieval and answers with oracle controls). They introduce the notation this lesson needs for paired evaluation and family unit.
 
 ## Learning objectives
 
@@ -82,19 +82,21 @@ Separate a statistical comparison from acceptance gates. A favorable average los
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-013/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-013.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-013.py` in the declared `python-core` profile. *Align paired errors*, *Aggregate by family* and *Resample paired families* need only NumPy and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-013/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Aggregate by family* and *Resample paired families* reuse the helper and fixture introduced in *Align paired errors*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: differences `[-1, -1, 1]` by sorted ID. Example B should give: Row mean -1/3; family mean 0. Example C should give: All estimates are -1, 0 or 1; repeatable with same seed. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
-Join system error tables by question ID and reject unequal key sets. Compute errorA-errorB for each pair, aggregate within family, then sample family indices with one seeded NumPy generator. The same sampled family applies to both systems because the difference is already paired. Report the number of independent families, not only the number of paraphrases. Calculate answered accuracy and coverage with separate denominators.
+Join system error tables by question ID and reject unequal key sets. Compute error A minus error B for each pair, aggregate within family, then sample family indices with one seeded NumPy generator. The same sampled family applies to both systems because the difference is already paired. Report the number of independent families, not only the number of paraphrases. Calculate answered accuracy and coverage with separate denominators.
 
 ## Derive the paired and family-level comparison
 
-System A has errors[0, 0, 1] on q1, q2, q3; system B has[1, 1, 0] on the same IDs. Subtracting A minus B gives[-1, -1, 1], where negative favors A because smaller error is better. Sorting dictionary keys aligns identities. Pairing by insertion order would compare different questions and produce a statistic with no intended case-level meaning.
+System A has errors `[0, 0, 1]` on q1, q2, q3; system B has `[1, 1, 0]` on the same IDs. Subtracting A minus B gives `[-1, -1, 1]`, where negative favors A because smaller error is better. Sorting dictionary keys aligns identities. Pairing by insertion order would compare different questions and produce a statistic with no intended case-level meaning.
 
-The row-weighted mean is(-1-1+1)/3=-1/3. If q1 and q2 are related variants of family F and q3 is family G, the family means are[-1, +1], whose equally weighted average is zero. This is not a disagreement between arithmetic implementations. The row estimand gives family F twice the weight, while the family estimand gives F and G equal weight.
+The row-weighted mean is (-1-1+1)/3=-1/3. If q1 and q2 are related variants of family F and q3 is family G, the family means are `[-1, +1]`, whose equally weighted average is zero. This is not a disagreement between arithmetic implementations. The row estimand gives family F twice the weight, while the family estimand gives F and G equal weight.
 
 The bootstrap draws two family indices with replacement. There are four equally likely ordered samples from the empirical family distribution:
 
@@ -125,7 +127,7 @@ The saved errors here are teaching data. Their bootstrap computation is real ari
 
 ### Example A: Align paired errors
 
-Pairing by IDs prevents dictionary order from changing which observations are subtracted. A negative difference favorsA because the metric is error.
+Pairing by IDs prevents dictionary order from changing which observations are subtracted. A negative difference favors A because the metric is error.
 
 ```python
 import numpy as np
@@ -138,7 +140,7 @@ difference = np.array([a[i] - b[i] for i in ids], dtype=float)
 np.testing.assert_array_equal(difference, [-1, -1, 1])
 ```
 
-**Expected:** differences[-1, -1, 1] by sortedID.
+**Expected:** differences `[-1, -1, 1]` by sorted ID.
 
 ### Example B: Aggregate by family
 
@@ -151,7 +153,7 @@ np.testing.assert_allclose(difference.mean(), -1 / 3, atol=1e-12, rtol=0)
 assert family_values.mean() == 0
 ```
 
-**Expected:** row mean-1/3; family mean 0.
+**Expected:** row mean -1/3; family mean 0.
 
 ### Example C: Resample paired families
 
@@ -164,29 +166,32 @@ assert set(np.unique(estimates)) == {-1.0, 0.0, 1.0}
 np.testing.assert_array_equal(indices, np.random.default_rng(17).integers(0, 2, size=(2000, 2)))
 ```
 
-**Expected:** all estimates are-1, 0 or 1; repeatable with same seed.
+**Expected:** all estimates are -1, 0 or 1; repeatable with same seed.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: differences[-1, -1, 1] by sortedID. test-based selection rejected. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Aggregate by family*, predict its result from the prompt alone: Assign q1 and q2 to family F and q3 to G; compare row mean with family mean. Write the guess beside the stated outcome (row mean -1/3; family mean 0). Then predict how the decisive case, *Keep final tests out of selection*, should end: Record retriever selection on validation and final scoring on test; flag a test-based parameter change. For paired reliability studies and family-aware uncertainty, the finish condition is: differences `[-1, -1, 1]` by sorted ID. test-based selection rejected.
 
 ## Exercises
 
 1. **Align paired errors.** Use system A errors \(q_{1}=0\), \(q_{2}=0\), \(q_{3}=1\) and B \(q_{1}=1\), \(q_{2}=1\), \(q_{3}=0\).
-   **Expected:** differences[-1, -1, 1] by sortedID.
-   **Verify:** Save the assertion results for exercise 1, including differences[-1, -1, 1] by sortedID.
+   **Expected:** differences `[-1, -1, 1]` by sorted ID.
+   **Verify:** Save the assertion results for exercise 1, including differences `[-1, -1, 1]` by sorted ID.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-2. **Aggregate by family.** Assignq 1, q2 tofamilyF and q 3 toG; compare row mean with family mean.
-   **Expected:** row mean-1/3; family mean 0.
-   **Verify:** Save the assertion results for exercise 2, including row mean-1/3; family mean 0.
+2. **Aggregate by family.** Assign q1 and q2 to family F and q3 to G; compare row mean with family mean.
+   **Expected:** row mean -1/3; family mean 0.
+   **Verify:** Save the assertion results for exercise 2, including row mean -1/3; family mean 0.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Resample paired families.** Draw 2000 bootstrap samples of the two family differences with seed 17.
-   **Expected:** all estimates are-1, 0 or 1; repeatable with same seed.
-   **Verify:** Save the assertion results for exercise 3, including all estimates are-1, 0 or 1; repeatable with same seed.
+   **Expected:** all estimates are -1, 0 or 1; repeatable with same seed.
+   **Verify:** Save the assertion results for exercise 3, including all estimates are -1, 0 or 1; repeatable with same seed.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Report coverage and answered accuracy.** For 10 questions, answer 6 with 5 correct and abstain on 4.
-   **Expected:** coverage.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5.
-   **Verify:** Save the assertion results for exercise 4, including coverage.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5.
+   **Expected:** coverage 0.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5.
+   **Verify:** Save the assertion results for exercise 4, including coverage 0.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5.
 
 5. **Block a severe boundary failure.** Combine a favorable mean comparison with one access leak and apply a zero-access-leak gate.
    **Expected:** release decision False.
@@ -204,19 +209,21 @@ If answered accuracy improves while users receive fewer useful responses, inspec
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate paired evaluation and family unit for the fixture in *Align paired errors*. Hint 2: change one literal in *Aggregate by family* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Report coverage and answered accuracy*, with its stated result (coverage 0.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5). If *Keep final tests out of selection* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Paired evaluation, Family unit, Bootstrap estimate using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain paired evaluation, family unit and bootstrap estimate using *Align paired errors*. Recompute its result (differences `[-1, -1, 1]` by sorted ID) from the inputs. Change one input in *Resample paired families* and predict whether the stated result (all estimates are -1, 0 or 1; repeatable with same seed) still holds. Say which part of paired reliability studies and family-aware uncertainty the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-012` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Align paired errors* cannot be reconstructed without the solution, revisit `llm-applied-012` (Evaluating retrieval and answers with oracle controls). Otherwise keep the six observations from paired reliability studies and family-aware uncertainty and continue to `llm-applied-014` (Supervised fine-tuning data and answer-target masks).
 
 ## Sources and verification status
 
-API and mechanism reference: [NumPy reference](https://numpy.org/doc/stable/reference/), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for paired evaluation: [NumPy reference](https://numpy.org/doc/stable/reference/), reviewed 2026-10-22. The fixtures for *Align paired errors*, *Aggregate by family* and *Resample paired families* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

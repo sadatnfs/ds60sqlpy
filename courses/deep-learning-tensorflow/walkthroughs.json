@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "track_id": "deep-learning-tensorflow",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "tf-007",
+      "title": "Recording gradients with tf.GradientTape",
+      "anchor": "reference",
+      "source_path": "courses/deep-learning-tensorflow/solutions/tf-007_solution.py",
+      "source_sha256": "3d05a28453455f95e0d456eb6dc145327c0867a48d229dc7f57cad807b3230dd",
+      "expected_output": ["{'loss': 4.0, 'gradient': -4.0, 'optimum_gradient': 0.0}"],
+      "steps": [
+        {
+          "lines": [8, 16],
+          "excerpt": "def gradient_at(value):\n    with tf.device(\"/CPU:0\"):\n        weight = tf.Variable(value, dtype=tf.float64)\n        with tf.GradientTape() as tape:\n            loss = tf.square(weight - 2.0)\n        gradient = tape.gradient(loss, weight)\n    if gradient is None:\n        raise ValueError(\"recorded scalar path is disconnected\")\n    return float(loss.numpy()), float(gradient.numpy())",
+          "title": "Record a loss and ask for its gradient",
+          "explanation": "tf.Variable creates a trainable value, here in float64 for exact small numbers. Operations inside the with tf.GradientTape() block are recorded. tape.gradient then works backward from the loss to the weight. For (w minus 2) squared the derivative is 2 times (w minus 2), so at w = 0 it is -4. A None gradient means the loss was not connected to the weight, which is a bug, so the function raises.",
+          "observe": "float(x.numpy()) converts a scalar tensor to a plain Python number."
+        },
+        {
+          "lines": [19, 23],
+          "excerpt": "def verify():\n    # Exercise 1: connected scalar path\n    assert gradient_at(0.0) == (4.0, -4.0)\n    # Exercise 2: a genuine connected zero\n    assert gradient_at(2.0) == (0.0, 0.0)",
+          "title": "Exercises 1 and 2: a connected path and a true zero",
+          "explanation": "At w = 0 the loss is 4 and the gradient is -4. At the optimum w = 2 the gradient is 0.0, which is a real computed zero, not the missing None from a disconnected path.",
+          "observe": "A zero gradient and a None gradient mean different things."
+        },
+        {
+          "lines": [24, 30],
+          "excerpt": "    with tf.device(\"/CPU:0\"):\n        weight = tf.Variable(0.0, dtype=tf.float64)\n        # Exercise 3: outside recording versus repaired forward\n        precomputed = tf.square(weight - 2.0)\n        with tf.GradientTape() as tape:\n            copied = tf.identity(precomputed)\n        assert tape.gradient(copied, weight) is None",
+          "title": "Exercise 3: work done before the tape starts",
+          "explanation": "precomputed is calculated outside the tape, so the tape never saw it depend on weight. Copying it inside the tape does not repair that link, and the gradient is None.",
+          "observe": "Compute the forward pass inside the tape."
+        },
+        {
+          "lines": [31, 39],
+          "excerpt": "        # Exercise 4: a constant must be watched explicitly\n        constant = tf.constant(0.0, dtype=tf.float64)\n        with tf.GradientTape() as tape:\n            loss = tf.square(constant - 2.0)\n        assert tape.gradient(loss, constant) is None\n        with tf.GradientTape() as tape:\n            tape.watch(constant)\n            loss = tf.square(constant - 2.0)\n        assert float(tape.gradient(loss, constant).numpy()) == -4.0",
+          "title": "Exercise 4: constants must be watched",
+          "explanation": "Tapes automatically track Variables but not constants. Without tape.watch the gradient with respect to the constant is None. After watch, it is -4.",
+          "observe": "watch is how you differentiate with respect to an input."
+        },
+        {
+          "lines": [40, 45],
+          "excerpt": "        # Exercise 5: assignment keeps the mutable object\n        old = weight\n        rebound = weight - tf.constant(0.1, tf.float64) * (-4.0)\n        assert not isinstance(rebound, tf.Variable) and float(old.numpy()) == 0\n        weight.assign_sub(tf.constant(0.1, tf.float64) * (-4.0))\n        assert weight is old and math.isclose(float(weight.numpy()), 0.4, rel_tol=0, abs_tol=1e-12)",
+          "title": "Exercise 5: update the variable in place",
+          "explanation": "weight minus a step creates a new ordinary tensor and leaves the variable unchanged. assign_sub changes the variable itself, so the object stays the same and now holds 0.4. That is one gradient descent step with learning rate 0.1.",
+          "observe": "weight is old remains True after the update."
+        },
+        {
+          "lines": [46, 59],
+          "excerpt": "        # Exercise 6: fresh tape and constant-feature dependence\n        weight.assign(0.0)\n        with tf.GradientTape() as tape:\n            loss = tf.square(weight - 2.0)\n        assert float(tape.gradient(loss, weight).numpy()) == -4.0\n        try:\n            tape.gradient(loss, weight)\n        except RuntimeError:\n            pass\n        else:\n            raise AssertionError(\"consumed tape accepted second gradient query\")\n        with tf.GradientTape() as fresh:\n            feature_loss = tf.square(weight * 2.0 - 4.0)\n        assert float(fresh.gradient(feature_loss, weight).numpy()) == -16.0",
+          "title": "Exercise 6: tapes are used once",
+          "explanation": "A regular tape releases its records after the first gradient call. Asking again raises RuntimeError, which the test expects. A fresh tape records a new loss where the weight is multiplied by 2, so the chain rule doubles the derivative twice to give -16.",
+          "observe": "Use a new tape, or persistent=True, for multiple gradient calls."
+        },
+        {
+          "lines": [60, 64],
+          "excerpt": "    return {\"loss\": 4.0, \"gradient\": -4.0, \"optimum_gradient\": 0.0}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Return the headline numbers",
+          "explanation": "verify returns a dictionary of the values the asserts already proved, and the script prints it.",
+          "observe": "The output is {'loss': 4.0, 'gradient': -4.0, 'optimum_gradient': 0.0}."
+        }
+      ]
+    },
+    {
+      "lesson_id": "tf-013",
+      "title": "Sigmoid probabilities, logits loss and decision thresholds",
+      "anchor": "reference",
+      "source_path": "courses/deep-learning-tensorflow/solutions/tf-013_solution.py",
+      "source_sha256": "4c577f8b84194f6c09cbe33d71e905216f52023b87952f4e60928c0bbd212576",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [7, 11],
+          "excerpt": "def verify():\n    # Exercise 1: Convert scores\n    z = tf.constant([-2.0, 0.0, 2.0])\n    p = tf.math.sigmoid(z).numpy()\n    assert p[1] == 0.5 and np.all(np.diff(p) > 0)",
+          "title": "Exercise 1: scores to probabilities",
+          "explanation": "A logit is a raw score that can be any real number. tf.math.sigmoid squashes it into a probability between 0 and 1. A score of 0 gives exactly 0.5, and np.diff confirms that larger scores always give larger probabilities.",
+          "observe": "p holds three increasing probabilities with 0.5 in the middle."
+        },
+        {
+          "lines": [13, 17],
+          "excerpt": "    # Exercise 2: Check the midpoint loss\n    loss = tf.nn.sigmoid_cross_entropy_with_logits(\n        labels=tf.constant([1.0]), logits=tf.constant([0.0])\n    )\n    np.testing.assert_allclose(loss.numpy(), [np.log(2)], atol=1e-6, rtol=0)",
+          "title": "Exercise 2: the loss expects logits",
+          "explanation": "sigmoid_cross_entropy_with_logits applies the sigmoid internally and then computes cross entropy. At logit 0 with label 1, the probability is 0.5, so the loss is log 2. The tolerance 1e-6 suits float32.",
+          "observe": "The loss is about 0.693."
+        },
+        {
+          "lines": [19, 21],
+          "excerpt": "    # Exercise 3: Move the threshold\n    assert (p >= 0.5).tolist() == [False, True, True]\n    assert (p >= 0.8).tolist() == [False, False, True]",
+          "title": "Exercise 3: the threshold is a separate decision",
+          "explanation": "Turning probabilities into yes or no answers needs a threshold. Moving it from 0.5 to 0.8 changes which examples are predicted positive, while the model's scores stay the same.",
+          "observe": "At 0.8 only the last example is positive."
+        },
+        {
+          "lines": [23, 27],
+          "excerpt": "    # Exercise 4: Expose a convention mismatch\n    wrong = float(\n        tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant(1.0), logits=tf.constant(0.5))\n    )\n    assert abs(wrong - np.log(2)) > 0.1",
+          "title": "Exercise 4: passing a probability where a logit belongs",
+          "explanation": "If someone feeds 0.5, a probability, into a function expecting a logit, the loss is computed as if the logit were 0.5. The result is noticeably different from log 2, which is how this mistake can be detected.",
+          "observe": "The difference from log 2 is greater than 0.1."
+        },
+        {
+          "lines": [29, 34],
+          "excerpt": "    # Exercise 5: Stress large scores\n    stable = tf.nn.sigmoid_cross_entropy_with_logits(\n        labels=tf.constant([1.0, 0.0]), logits=tf.constant([1000.0, -1000.0])\n    ).numpy()\n    assert np.isfinite(stable).all()\n    np.testing.assert_allclose(stable, [0, 0], atol=1e-6, rtol=0)",
+          "title": "Exercise 5: large scores stay stable",
+          "explanation": "Logits of 1000 and -1000 would overflow a naive exp. The built in loss is written to stay finite, and correct confident predictions give a loss near 0.",
+          "observe": "Both losses are close to 0 and finite."
+        },
+        {
+          "lines": [36, 44],
+          "excerpt": "    # Exercise 6: Count decisions separately\n    labels = np.array([0, 1, 1])\n    assert np.count_nonzero((p >= 0.5) != labels) == 0\n    assert np.count_nonzero((p >= 0.8) != labels) == 1\n    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercise 6: count errors at each threshold",
+          "explanation": "Comparing predictions with labels and counting mismatches shows the threshold changes the error count from 0 to 1. Report the threshold alongside any accuracy figure. The script prints the summary.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    },
+    {
+      "lesson_id": "tf-025",
+      "title": "Similarity, contrastive loss and temperature for embeddings",
+      "anchor": "reference",
+      "source_path": "courses/deep-learning-tensorflow/solutions/tf-025_solution.py",
+      "source_sha256": "b0483785429cc24d2ccaa48804d9f4c28212c53096135fcd300e2f0d4b800d66",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [7, 18],
+          "excerpt": "def verify():\n    # Exercise 1: Compare similarity measures\n    a = np.array([1.0, 0.0])\n    pos = np.array([1.0, 1.0])\n    neg = np.array([0.0, 1.0])\n    assert (a @ pos, a @ neg) == (1, 0)\n    np.testing.assert_allclose(\n        [(a @ pos) / (np.linalg.norm(a) * np.linalg.norm(pos)), a @ neg],\n        [1 / np.sqrt(2), 0],\n        atol=1e-12,\n        rtol=0,\n    )",
+          "title": "Exercise 1: dot product versus cosine",
+          "explanation": "The anchor a, a positive example and a negative example are small 2D vectors. The dot product gives 1 and 0. Cosine divides by both lengths, so a and pos score 1 over the square root of 2, because pos points diagonally.",
+          "observe": "Cosine depends on direction only."
+        },
+        {
+          "lines": [20, 28],
+          "excerpt": "    # Exercise 2: Scale a candidate\n    scaled = 10 * pos\n    assert a @ scaled == 10\n    np.testing.assert_allclose(\n        (a @ scaled) / (np.linalg.norm(a) * np.linalg.norm(scaled)),\n        1 / np.sqrt(2),\n        atol=1e-12,\n        rtol=0,\n    )",
+          "title": "Exercise 2: scaling a candidate",
+          "explanation": "Multiplying pos by 10 multiplies the dot product by 10 but leaves cosine unchanged. A retrieval system using raw dot products can favor long vectors.",
+          "observe": "a @ scaled is 10 while cosine stays at 1 over root 2."
+        },
+        {
+          "lines": [30, 32],
+          "excerpt": "    # Exercise 3: Calculate a contrastive loss\n    loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0], logits=[[1.0, 0.0]])\n    np.testing.assert_allclose(loss.numpy(), [np.log1p(np.exp(-1))], atol=1e-6, rtol=0)",
+          "title": "Exercise 3: contrastive loss as classification",
+          "explanation": "sparse_softmax_cross_entropy_with_logits treats the similarity scores as logits and label 0 as the index of the true positive. With scores 1 and 0 the loss is log(1 + e to the -1).",
+          "observe": "Higher similarity for the positive lowers the loss."
+        },
+        {
+          "lines": [34, 38],
+          "excerpt": "    # Exercise 4: Detect a false negative\n    positive_id = \"doc-a\"\n    negative_id = \"doc-a\"\n    duplicate = np.array_equal(pos, pos.copy())\n    assert duplicate and positive_id == negative_id",
+          "title": "Exercise 4: a false negative",
+          "explanation": "If the same document appears as both positive and negative, the loss pushes the model to separate a document from itself. Comparing ids and vectors detects this case before training.",
+          "observe": "duplicate is True and the ids match."
+        },
+        {
+          "lines": [40, 43],
+          "excerpt": "    # Exercise 5: Observe temperature\n    p1 = tf.nn.softmax([1.0, 0.0]).numpy()\n    p2 = tf.nn.softmax(np.array([1.0, 0.0], dtype=\"float32\") / 0.5).numpy()\n    assert p2[0] > p1[0] and int(p1.argmax()) == int(p2.argmax()) == 0",
+          "title": "Exercise 5: temperature sharpens",
+          "explanation": "Dividing logits by a temperature of 0.5 doubles their gaps, so softmax becomes more confident. The order of the choices does not change.",
+          "observe": "p2[0] is larger than p1[0], and both pick index 0."
+        },
+        {
+          "lines": [45, 58],
+          "excerpt": "    # Exercise 6: Reject undefined cosine\n    def cosine(x, y):\n        x, y = np.asarray(x), np.asarray(y)\n        den = np.linalg.norm(x) * np.linalg.norm(y)\n        if x.shape != y.shape or not np.isfinite(den) or den == 0:\n            raise ValueError(\"finite nonzero vectors\")\n        return float(x @ y / den)\n\n    try:\n        cosine([0, 0], [1, 1])\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"undefined cosine accepted\")",
+          "title": "Exercise 6: refuse an undefined cosine",
+          "explanation": "A zero vector has length 0, so cosine would divide by zero. The local cosine function raises ValueError for mismatched shapes, infinite or zero lengths, and the test expects that error.",
+          "observe": "The zero vector case raises ValueError."
+        },
+        {
+          "lines": [59, 63],
+          "excerpt": "    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Return and print",
+          "explanation": "verify returns the summary after all six checks pass, and the script prints it.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    }
+  ]
+}

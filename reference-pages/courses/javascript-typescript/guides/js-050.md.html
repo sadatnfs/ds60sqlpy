@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A scatterplot uses two quantitative positions to show the joint distribution of observations. Each point should have a defined row grain, such as one person or one experiment. A visible association does not by itself establish causality, and a few synthetic points cannot support a population conclusion.</p>
 <p>When a third quantity controls circle size, decide whether the quantity maps to radius or area. Viewers perceive the filled area, so a square-root radius scale often makes area proportional to a nonnegative quantity. Doubling a radius quadruples area. A legend should explain the size meaning.</p>
 <p>Overplotting occurs when points overlap. Opacity, smaller marks, aggregation or a density representation can help, but each changes what the reader can infer. Jitter can reveal repeated values while deliberately moving positions; explain and bound it rather than presenting moved points as exact measurements.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Scatterplot:</strong> A chart that places each record as a point at two quantitative positions to show the joint distribution of two variables.</li>
+<li><strong>Area encoding:</strong> Representing a third quantity by circle area. A <code>d3.scaleSqrt</code> radius keeps area proportional to the value, since doubling a radius quadruples the area.</li>
+<li><strong>Overplotting:</strong> Points overlapping so that density and repeated values are hidden. Opacity, smaller marks, jitter or aggregation can reveal them, each changing what a reader can infer.</li>
+<li><strong>Jitter:</strong> Small, bounded, disclosed offsets added to point positions to separate identical coordinates; jittered points are no longer exact measurements.</li>
+<li><strong>Correlation:</strong> The degree to which two variables move together. A visible association in a scatterplot does not by itself establish causation.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use independent x and y scales for their units. A <code>scaleSqrt</code> radius range maps nonnegative magnitude to radius. A circle at <code>(x(d.x), y(d.y))</code> encodes one record. Colors can represent categories, but labels or shapes should support readers who cannot distinguish the colors.</p>
 <p>The reference validates finite positions and the area relationship for magnitudes 1 and 4. It does not perform a statistical test. Use a tooltip or table for exact records and make missing or invalid coordinates an explicit data policy.</p>

@@ -89,6 +89,10 @@
       "reason": "Deterministic generated TeX source inventory. Refresh with scripts/compile_lesson_tex.py; preserve its compiler input byte contract."
     },
     {
+      "pattern": "curriculum/coverage-matrix.json",
+      "reason": "Generated one-row-per-lesson coverage matrix. Refresh with scripts/build_coverage_matrix.py, whose --check gate validates the exact compact layout."
+    },
+    {
       "pattern": "lesson-pages/*",
       "reason": "Generated HTML readers. Rebuild with scripts/build_lesson_readers.py after formatting maintained source."
     },

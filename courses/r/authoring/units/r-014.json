@@ -38,6 +38,12 @@
       "code": "groups <- list(A = c(1, 2), B = c(4, 6))\nsummaries <- lapply(groups, \\(x) list(n = length(x), total = sum(x)))\nstopifnot(summaries$B$n == 2L, summaries$B$total == 10)\nresult <- c(3, 1, 2) |>\n  sort() |>\n  head(2)\nstopifnot(identical(result, c(1, 2)))\nprint(result)\n",
       "explanation": "A list is appropriate for structured group outputs. The anonymous function uses `\\(x)`, the R 4.1 shorthand for `function(x)`. The pipe is ordinary sequential evaluation with an inspectable intermediate order.",
       "expected": "1,2."
+    },
+    {
+      "title": "sapply changes its result type with the data",
+      "code": "groups <- list(A = c(1, 2), B = c(4, 6), empty = numeric(0))\nloose_none <- sapply(groups[0], sum)\ntyped_none <- vapply(groups[0], sum, numeric(1))\nstopifnot(is.list(loose_none), is.numeric(typed_none), length(typed_none) == 0L)\nloose_big <- sapply(groups, function(x) x[x > 1])\nstopifnot(is.list(loose_big), lengths(loose_big) == c(1L, 2L, 0L))\ntyped_big <- tryCatch(vapply(groups, function(x) x[x > 1], numeric(1)), error = function(e) \"rejected\")\nstopifnot(identical(typed_big, \"rejected\"))\nprint(lengths(loose_big))\n",
+      "explanation": "With no groups, sapply has nothing to simplify and returns an empty list, while vapply returns an empty numeric vector because the prototype says what each element would have been. Filtering values above 1 keeps one value in A, two in B and none in empty. Those lengths differ, so sapply again falls back to a list, and code expecting one number per group breaks later, far from the cause. vapply stops at B, the first group that returns two values, which is the place the contract was broken.",
+      "expected": "Named lengths A 1, B 2 and empty 0."
     }
   ],
   "exercises": [

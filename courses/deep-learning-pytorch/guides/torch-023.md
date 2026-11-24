@@ -137,7 +137,7 @@ torch.testing.assert_close(parameter.grad, torch.tensor([0.6, 0.8]), atol=1e-6, 
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The detached loss cannot backpropagate, the repaired weights are \(\frac{28}{15}\) then \(\frac{448}{225}\), clipping returns the original norm 5 and the gradient [0.6, 0.8], the clipped step gives approximately [-0.06, -0.08], and an infinite gradient raises RuntimeError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Expose detachment. Predict exercise 6, Recompute post-update loss, from its prompt alone: Calculate current loss after the two scalar updates and compare with the one-step oracle. Then explain why this finish condition holds: The detached loss cannot backpropagate, the repaired weights are \(\frac{28}{15}\) then \(\frac{448}{225}\), clipping returns the original norm 5 and the gradient [0.6, 0.8], the clipped step gives approximately [-0.06, -0.08], and an infinite gradient raises RuntimeError. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -173,15 +173,15 @@ If accumulation differs from a full-batch reference, compare valid counts and lo
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Repair two exact updates) alters one assumption of Example A (Expose detachment). Hint 2: exercise 4, Apply the clipped update, should end at approximately -0.06, -0.08. Work backward from it. Hint 3: exercise 5, Reject nonfinite gradient norms, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Disconnected loss, Gradient clipping, Update trace using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Inspect norm clipping, from its inputs alone. Predict whether exercise 3, Clip a new gradient, survives one changed input. Then explain Disconnected loss, Gradient clipping, Update trace in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-022` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Expose detachment) cannot be rebuilt without help, revisit `torch-022` first. Otherwise keep your exercise 2 attempt, Trace two updates on a new target, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

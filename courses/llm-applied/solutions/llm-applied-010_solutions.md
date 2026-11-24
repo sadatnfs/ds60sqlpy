@@ -1,6 +1,6 @@
 # llm-applied-010: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for query rewriting and bounded multi-hop retrieval only after attempting *Apply a controlled synonym rewrite* through *Preserve authorization across hops*. A discrepancy in *Retain a rewrite trace* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-010_solution.py` runs the assertions; this page explains why they test query rewrite and multi-hop retrieval.
 
 ## Mechanism review
 
@@ -32,9 +32,9 @@ The fixture starts at metric with depth zero. A queue entry records both node an
 
 The visited set is updated when a node is enqueued, not only when it is removed. That prevents two parent nodes from adding the same child repeatedly while it is already waiting. In an unweighted graph with this breadth-first order, the first discovered path has minimum edge count. A depth bound therefore has a precise interpretation. Weighted relevance or confidence costs would require a different search policy; breadth-first order does not optimize them.
 
-The original validation only rejected a negative max_hops. A fractional value such as1.5 could pass that check, but integer depths never equaled1.5 at the stopping comparison, so the walk could continue across the whole finite graph. The repaired contract requires a nonnegative Python integer and rejects Boolean, fractional and NaN values before traversal. This is a real configuration boundary, not a numerical-tolerance issue.
+The original validation only rejected a negative max_hops. A fractional value such as 1.5 could pass that check, but integer depths never equaled 1.5 at the stopping comparison, so the walk could continue across the whole finite graph. The repaired contract requires a nonnegative Python integer and rejects Boolean, fractional and NaN values before traversal. This is a real configuration boundary, not a numerical-tolerance issue.
 
-Even an integer hop limit can admit many nodes. With branching factor b and depth h in a tree without merging, the number reachable through that depth is \(1+b+\cdots+b^h\). For \(b=10\), \(h=3\), that is1111 nodes. A visited set prevents repeated identities, but it does not make all reachable evidence cheap. A remote retrieval service needs explicit candidate/work budgets and failure behavior beyond this bounded local graph.
+Even an integer hop limit can admit many nodes. With branching factor b and depth h in a tree without merging, the number reachable through that depth is \(1+b+\cdots+b^h\). For \(b=10\), \(h=3\), that is 1111 nodes. A visited set prevents repeated identities, but it does not make all reachable evidence cheap. A remote retrieval service needs explicit candidate/work budgets and failure behavior beyond this bounded local graph.
 
 Reachability is not support. An edge from a metric page to an exclusion page may be a navigation link, a reference or merely a related-topic connection. To conclude that an exclusion applies to the metric, the system must inspect the bridge's meaning and version. A graph path alone cannot license a factual inference. The fixture's edges are authored to demonstrate traversal; they do not implement semantic entailment.
 
@@ -52,7 +52,7 @@ Authorization remains fixed across hops. The helper follows a target only when i
 
 ## Exercise 1: Apply a controlled synonym rewrite
 
-The question is: Rewritebuy rate usingbuy->purchase while preserving the original question.
+The question is: Rewrite buy rate using the rule buy -> purchase while preserving the original question.
 
 The substitution is explicitly authored. A learned rewrite would need evaluation for intent preservation and unsupported expansion.
 
@@ -62,9 +62,9 @@ rewritten = rewrite(original, {"buy": "purchase"})
 assert rewritten == "purchase rate" and original == "buy rate"
 ```
 
-**Expected:** rewrittenpurchase rate; original unchanged.
+**Expected:** rewritten query purchase rate; original question unchanged.
 
-**Verify:** Compare the computed values or written argument with rewrittenpurchase rate; original unchanged.
+**Verify:** Compare the computed values or written argument with rewritten query purchase rate; original question unchanged.
 
 ## Exercise 2: Retain a rewrite trace
 
@@ -150,4 +150,4 @@ assert walk("metric", admitted, 3) == ["metric"]
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Follow two evidence hops* and predict how the result changes before checking it; the unchanged inputs give: visited metric, exclusions, test_accounts. Keep the original *Preserve authorization across hops* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

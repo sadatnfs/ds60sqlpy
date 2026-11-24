@@ -42,11 +42,23 @@ Predict the permitted population for the synthetic south principal.
 
 One customer, Bo, is permitted; expected revenue is 80.
 
+**Why it fits this model:** The Access table maps south.learner@example.test to South, and only Bo (customer 20) is in South.
+
+**Tempting mistake:** Comparing USERNAME() (often DOMAIN\user) with the email-style Principal column. Nothing matches, so a mapped user sees nothing.
+
+**How to confirm:** As the south principal, VisibleCustomers returns 1 and VisibleRevenue returns 80.
+
 ### Exercise 2
 
 AddWest to a principal's allowed-region set conceptually.
 
 The allowed-customer count can increase while revenue stays unchanged; permission population and fact activity are different.
+
+**Why it fits this model:** Di (customer 40, West) has no sales, so permission to see her changes the customer count but not revenue.
+
+**Tempting mistake:** Treating unchanged revenue as proof that adding West failed, or expecting revenue to rise because the mapping grew.
+
+**How to confirm:** For the north principal with North and West, VisibleCustomers goes from 2 to 3 and VisibleRevenue stays 107.
 
 ### Exercise 3
 
@@ -54,11 +66,23 @@ Write a default-deny mapping test matrix.
 
 Record each fictional principal, allowed regions, expected Customer keys and amounts, plus the required real identity/role evidence before deployment.
 
+**Why it fits this model:** A default-deny matrix lists mapped, unmapped and invalid-domain principals with their expected rows.
+
+**Tempting mistake:** Testing only north.learner, which returns 2 customers and 107, and assuming unmapped and bad-value cases behave.
+
+**How to confirm:** Rows: north 2 and 107, south 1 and 80, unmapped empty (HasVisibleRows False), and a principal mapped to "East", a region not in Customer, also empty.
+
 ### Exercise 4
 
 Diagnose granting all regions when no mapping exists.
 
 That reverses the supplied default-deny contract and risks unintended access. Keep an explicit denial and investigate provisioning.
+
+**Why it fits this model:** The declared rule filters Customer to regions the principal maps to. An empty mapping gives an empty set, which is a denial.
+
+**Tempting mistake:** Adding a fallback such as returning TRUE() when the mapping is empty. The unmapped principal would then see all 4 customers and 187.
+
+**How to confirm:** As unmapped.learner@example.test, VisibleCustomers and VisibleRevenue are BLANK and HasVisibleRows is False, as in case B.
 
 ### Exercise 5
 
@@ -66,12 +90,24 @@ Explain why securing Customer does not prove Access itself is protected.
 
 Review mapping-table visibility and disconnected data independently; do not infer complete protection from one correctly filtered sales result.
 
+**Why it fits this model:** The rule filters Customer, but Access is a separate table. Without its own rule or hiding it, any reader can query it.
+
+**Tempting mistake:** Concluding that the model is protected because the north principal sees 107, while COUNTROWS(Access) still returns 2 and shows the south mapping.
+
+**How to confirm:** As north.learner, query the Access table; the policy should decide whether 2, 1 or no rows are acceptable, and test that result.
+
 ### Exercise 6
 
 Transfer the policy to tenant identifiers.
 
 Validate authenticated identity, membership changes, allowed tenant keys and every query surface; an editable tenant filter is not an access-control system.
 
+**Why it fits this model:** Tenant access follows the same contract: authenticated identity, an explicit mapping to tenant keys, and denial when nothing maps.
+
+**Tempting mistake:** Taking the tenant ID from a URL parameter or slicer, so a user can change one value and read another tenant.
+
+**How to confirm:** Test a mapped user, an unmapped user (no rows) and a user who edits the tenant parameter; only the mapped tenant's rows may appear.
+
 ## Review the boundary
 
-A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.
+Another readable expression is sound when its population, context and units match; record any assumed engine separately.

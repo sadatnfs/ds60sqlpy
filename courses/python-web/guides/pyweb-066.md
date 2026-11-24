@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-065`.
 
 Caching and rate limiting both depend on state, but they have different correctness requirements. This chapter demonstrates tenant/version-aware cache keys and a deterministic token bucket, then shows why an independent worker has an independent budget when coordination lives only in process memory.
 
+## Key terms
+
+- **Cache key dimensions:** The inputs, such as tenant and representation version, that must be in a cache key so one entry is never served for another.
+- **Token bucket:** A rate limiter that holds up to a capacity of tokens, refills them at a fixed rate and spends one per admitted request.
+- **Refill rate:** The number of tokens added per second, capped at the bucket's capacity.
+- **Monotonic clock:** A clock that never moves backward, used for elapsed time so wall-clock adjustments cannot distort the refill.
+- **Global quota:** A limit shared by every worker, which needs shared atomic state because one bucket per process grants each worker its own budget.
+
 ## Mechanism: key dimensions and coordination scope matter
 
 A cached summary depends on the tenant and the representation version. Those dimensions belong in its key. Omitting tenant can disclose one tenant's value to another; omitting version can return an old representation after the application changes its schema.
@@ -29,6 +37,42 @@ One bucket admits two requests at time 0, refuses the third and admits another a
 If each of four workers owns an independent capacity 2 bucket, the aggregate burst can exceed 2. A requirement for a global quota therefore needs shared atomic coordination or a deliberate distribution strategy. Merely using the same class and configuration in every worker does not share its state.
 
 A rate limiter also needs a failure policy for its coordination backend. Failing open preserves availability but can exceed limits; failing closed protects the budget but can deny legitimate work. The choice depends on the operation and must be visible in the system design.
+
+## Worked example: read then write admits twice, one conditional update admits once
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE quota (key TEXT PRIMARY KEY, remaining INTEGER)")
+db.execute("INSERT INTO quota VALUES ('tenant-a', 1)")
+
+seen_a = db.execute("SELECT remaining FROM quota").fetchone()[0]
+seen_b = db.execute("SELECT remaining FROM quota").fetchone()[0]
+admitted = [seen > 0 for seen in (seen_a, seen_b)]
+db.execute("UPDATE quota SET remaining = ?", (seen_a - 1,))
+db.execute("UPDATE quota SET remaining = ?", (seen_b - 1,))
+print(admitted, db.execute("SELECT remaining FROM quota").fetchone()[0])
+
+db.execute("UPDATE quota SET remaining = 1")
+
+
+def take():
+    sql = "UPDATE quota SET remaining = remaining - 1 WHERE key = ? AND remaining > 0"
+    return db.execute(sql, ("tenant-a",)).rowcount == 1
+
+
+print([take(), take()], db.execute("SELECT remaining FROM quota").fetchone()[0])
+```
+
+Expected output:
+
+```text
+[True, True] 0
+[True, False] 0
+```
+
+The first half interleaves two workers the way real processes can: both read one remaining request, both decide to admit, and both write zero. The quota ends at zero and looks correct, yet two requests got through. The second half moves the check into the write itself, so the store decides and `rowcount` reports whether this caller won. This is the shared, atomic coordination the lesson's return value says a distributed limit needs; its in-process `Bucket` objects cannot provide it, since `worker_b` admits a request after `worker_a` has refused one.
 
 ## Failure diagnosis and discussion
 

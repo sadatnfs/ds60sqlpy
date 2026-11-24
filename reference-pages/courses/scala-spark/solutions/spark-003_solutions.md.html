@@ -220,34 +220,34 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 <p><strong>Expected:</strong> 9 maps to 0L and 10 maps to 2L.</p>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-definition-and-call">Exercise 1: Separate definition and call<a class="heading-anchor" href="#exercise-1-separate-definition-and-call" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 1, addCents(100L, 25L), addCents(0L, 25L).</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 1, 125L and 25L.</p>
-<p><strong>Verify:</strong> For spark-003 Exercise 1, assert both returned values; distinguish parameter names from arguments.</p>
+<p><strong>Inputs/evidence:</strong> <code>AddCents(100L, 25L)</code>, <code>addCents(0L, 25L)</code>.</p>
+<p><strong>Expected result/shape:</strong> 125L and 25L.</p>
+<p><strong>Verify:</strong> Assert both returned values; distinguish parameter names from arguments.</p>
 <p>left/right name inputs in the definition. 100L and 25L are arguments in a call. The function definition is reused rather than copied and edited.</p>
 <h4 id="exercise-2-implement-branch-order">Exercise 2: Implement branch order<a class="heading-anchor" href="#exercise-2-implement-branch-order" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 2, 0L with both membership values;100L with both values.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 2, fees 0/0 for zero and 0/20 for 100.</p>
-<p><strong>Verify:</strong> For spark-003 Exercise 2, assert all four cases and inspect guard order.</p>
+<p><strong>Inputs/evidence:</strong> 0L with both membership values; 100L with both values.</p>
+<p><strong>Expected result/shape:</strong> Fees 0/0 for zero and 0/20 for 100.</p>
+<p><strong>Verify:</strong> Assert all four cases and inspect guard order.</p>
 <p>If nonmember is checked first, zero can incorrectly receive the flat 20-cent fee. The boundary guard must take precedence over membership.</p>
 <h4 id="exercise-3-test-the-membership-threshold">Exercise 3: Test the membership threshold<a class="heading-anchor" href="#exercise-3-test-the-membership-threshold" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 3, member 499L, 500L, 501L.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 3, fees 0L, 25L, 25L.</p>
-<p><strong>Verify:</strong> For spark-003 Exercise 3, assert the exact three outputs and explain integer division.</p>
+<p><strong>Inputs/evidence:</strong> Member 499L, 500L, 501L.</p>
+<p><strong>Expected result/shape:</strong> Fees 0L, 25L, 25L.</p>
+<p><strong>Verify:</strong> Assert the exact three outputs and explain integer division.</p>
 <p>The 500 equality belongs to the percentage branch. 501*5/100 floors 25.05 to 25 integer cents under the stated policy; this is a deliberate rounding rule.</p>
 <h4 id="exercise-4-use-named-arguments">Exercise 4: Use named arguments<a class="heading-anchor" href="#exercise-4-use-named-arguments" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 4, feeCents(isMember=true, amount=1000L).</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 4, 50L, equal to the positional call.</p>
-<p><strong>Verify:</strong> For spark-003 Exercise 4, assert both calls give 50L; do not change the definition.</p>
+<p><strong>Inputs/evidence:</strong> <code>feeCents(isMember=true, amount=1000L)</code>.</p>
+<p><strong>Expected result/shape:</strong> 50L, equal to the positional call.</p>
+<p><strong>Verify:</strong> Assert both calls give 50L; do not change the definition.</p>
 <p>Named arguments bind by parameter name. Reordering them is a readability choice and does not change the fee rule or types.</p>
 <h4 id="exercise-5-reject-hidden-state">Exercise 5: Reject hidden state<a class="heading-anchor" href="#exercise-5-reject-hidden-state" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 5, two consecutive feeCents(1000L, true) calls and negative amount-1L.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 5, both calls 50L; negative amount yields 0L even for a nonmember.</p>
-<p><strong>Verify:</strong> For spark-003 Exercise 5, repeat exact calls and explain why a call counter must not alter the returned fee.</p>
+<p><strong>Inputs/evidence:</strong> Two consecutive <code>feeCents(1000L, true)</code> calls and negative amount-1L.</p>
+<p><strong>Expected result/shape:</strong> Both calls 50L; negative amount yields 0L even for a nonmember.</p>
+<p><strong>Verify:</strong> Repeat exact calls and explain why a call counter must not alter the returned fee.</p>
 <p>Counting calls inside a pricing rule can make retries change business output. Preserve a pure calculation and keep operational counting separate.</p>
 <h4 id="exercise-6-transfer-and-explain-the-domain">Exercise 6: Transfer and explain the domain<a class="heading-anchor" href="#exercise-6-transfer-and-explain-the-domain" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 6, 2000L, true/false and 2000000L.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 6, 100L/20L; the out-of-domain input is rejected by the reference precondition.</p>
-<p><strong>Verify:</strong> For spark-003 Exercise 6, assert the two valid results and identify the violated bound for the third.</p>
+<p><strong>Inputs/evidence:</strong> 2000L, true/false and 2000000L.</p>
+<p><strong>Expected result/shape:</strong> 100L/20L; the out-of-domain input is rejected by the reference precondition.</p>
+<p><strong>Verify:</strong> Assert the two valid results and identify the violated bound for the third.</p>
 <p>The rule scales within the bounded domain. The require guard is evidence of that domain, not a claim that all financial products can use this rounding or fee policy.</p>
 <h3 id="retrieval-review">Retrieval review<a class="heading-anchor" href="#retrieval-review" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>

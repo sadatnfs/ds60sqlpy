@@ -46,7 +46,7 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result, 5)`. Restoring the original line brings back the worked observation: sum 5 with runtime typeof number.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result, 5)`. Restoring `const result = add(2, 3);` brings back: sum 5 with runtime typeof number.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result, 5)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -65,7 +65,7 @@ assert.equal(typeof claimed, 'string');
 assert.equal(String(claimed), 'wrong');
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(String(claimed), 'wrong')`; after it the line reads `const external: unknown = 'wrong';` again and the runtime value remains the string wrong.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(String(claimed), 'wrong')`. Restoring `const external: unknown = 'wrong';` brings back: the runtime value remains the string wrong.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(String(claimed), 'wrong')` for this input.
 

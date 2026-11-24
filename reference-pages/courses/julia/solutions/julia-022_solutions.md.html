@@ -195,24 +195,54 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-022-explained-reference">julia-022: explained reference<a class="heading-anchor" href="#julia-022-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-022_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Check every automatic derivative against an independent calculation and its shape. <code>quadratic(x) = x[1]^2 + 3x[2]^2</code> has gradient <code>[2x1, 6x2]</code>, <code>vector_function</code> has a 2 by 2 Jacobian, and <code>generic_storage</code> uses <code>similar(x)</code> so dual numbers can pass through, while <code>hardcoded_storage</code> forces <code>Float64</code>.</p>
 <h3 id="1-differentiate-analytically">1. Differentiate analytically<a class="heading-anchor" href="#1-differentiate-analytically" aria-label="Link to this section">#</a></h3>
 <p>An analytic case provides an independent reference for the AD implementation.</p>
 <p><strong>Expected observation:</strong> The result is <code>[4, 18]</code>.</p>
+<p><strong>Why it holds here:</strong> At <code>[2, 3]</code>, 2 times 2 is 4 and 6 times 3 is 18, so the gradient is <code>[4, 18]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Testing the gradient only against another AD call reproduces any mistake in the function definition.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>ForwardDiff.gradient(quadratic, x) ≈ [4, 18]</code> and a central finite difference along <code>[1, -1]</code> matching <code>dot([4, 18], direction)</code>.</p>
 <h3 id="2-check-jacobian-axes">2. Check Jacobian axes<a class="heading-anchor" href="#2-check-jacobian-axes" aria-label="Link to this section">#</a></h3>
 <p>A transposed derivative array can have plausible values but the wrong meaning.</p>
 <p><strong>Expected observation:</strong> Rows correspond to outputs and columns to inputs.</p>
+<p><strong>Why it holds here:</strong> Row 1 is the derivative of <code>x1^2 + x2</code>, giving <code>[4, 1]</code>, and row 2 is the derivative of <code>x1 * x2</code>, giving <code>[3, 2]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Transposing the Jacobian produces <code>[4 3; 1 2]</code>, which has plausible numbers but swaps outputs with inputs.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>ForwardDiff.jacobian(vector_function, x) ≈ [4 1; 3 2]</code>; the reference checks its size is <code>(2, 2)</code>.</p>
 <h3 id="3-preserve-numeric-types">3. Preserve numeric types<a class="heading-anchor" href="#3-preserve-numeric-types" aria-label="Link to this section">#</a></h3>
 <p>Ordinary evaluation alone does not reveal a differentiation-incompatible conversion.</p>
 <p><strong>Expected observation:</strong> The dual-number path can retain derivative information.</p>
+<p><strong>Why it holds here:</strong> <code>similar(x)</code> allocates storage with the input&#x27;s element type, so dual numbers fit and the gradient <code>[4, 6]</code> is returned.</p>
+<p><strong>Plausible wrong approach:</strong> Keeping <code>zeros(Float64, length(x))</code> works for plain evaluation but cannot store a dual number, so differentiation fails.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>@test_throws MethodError ForwardDiff.gradient(hardcoded_storage, x)</code> and the generic gradient <code>[4, 6]</code>.</p>
 <h3 id="4-compare-reductions">4. Compare reductions<a class="heading-anchor" href="#4-compare-reductions" aria-label="Link to this section">#</a></h3>
 <p>A reduction change alters gradient scale and cannot be treated as a cosmetic refactor.</p>
 <p><strong>Expected observation:</strong> Gradients are <code>[1, 1]</code> and <code>[0.5, 0.5]</code>.</p>
+<p><strong>Why it holds here:</strong> Each input contributes once to a sum, giving <code>[1, 1]</code>, while dividing by <code>length(x) = 2</code> halves that to <code>[0.5, 0.5]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Switching a loss from sum to mean without adjusting the learning rate halves every step and changes training behavior.</p>
+<p><strong>How to verify:</strong> The reference asserts both gradients at <code>[1.0, 2.0]</code>.</p>
 <h3 id="5-inspect-a-branch-boundary">5. Inspect a branch boundary<a class="heading-anchor" href="#5-inspect-a-branch-boundary" aria-label="Link to this section">#</a></h3>
 <p>At a nondifferentiable point, a returned convention should not be promoted to a unique mathematical derivative.</p>
 <p><strong>Expected observation:</strong> A library result needs a differentiability interpretation.</p>
+<p><strong>Why it holds here:</strong> At the kink of <code>abs</code> at 0, ForwardDiff follows whichever branch the code executes and returns that branch&#x27;s slope.</p>
+<p><strong>Plausible wrong approach:</strong> Reporting that value as the derivative of <code>abs</code> at 0 claims a unique derivative where only a subgradient set exists.</p>
+<p><strong>How to verify:</strong> Evaluate the derivative just left and right of 0 and state the convention the library used at 0 itself.</p>
 <h3 id="6-validate-a-new-gradient">6. Validate a new gradient<a class="heading-anchor" href="#6-validate-a-new-gradient" aria-label="Link to this section">#</a></h3>
 <p>Derivative checks should inspect shapes, scales and domain assumptions before optimization.</p>
-<p><strong>Expected observation:</strong> Use meaningful tolerances and retain failures.</p></article>
+<p><strong>Expected observation:</strong> Use meaningful tolerances and retain failures.</p>
+<p><strong>Why it holds here:</strong> A directional finite difference with a small step approximates the derivative up to truncation and rounding error.</p>
+<p><strong>Plausible wrong approach:</strong> Shrinking the step toward 1e-15 to tighten the check lets cancellation error dominate and makes a correct gradient look wrong.</p>
+<p><strong>How to verify:</strong> Compare at several inputs with a stated tolerance, as example A does with <code>atol = 1e-8</code>, and keep any failing input.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-022: all reference checks passed</code>:</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> ForwardDiff<span class="syntax-operator">.</span>derivative<span class="syntax-punctuation">(</span>sin<span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+    <span class="syntax-decorator">@test</span> ForwardDiff<span class="syntax-operator">.</span>derivative<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-&gt;</span> x<span class="syntax-operator">^</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">12</span>
+    <span class="syntax-decorator">@test</span> size<span class="syntax-punctuation">(</span>ForwardDiff<span class="syntax-operator">.</span>jacobian<span class="syntax-punctuation">(</span>vector_function<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> ForwardDiff<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-&gt;</span> sum<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> ForwardDiff<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-&gt;</span> sum<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>length<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> generic_storage<span class="syntax-punctuation">(</span><span class="syntax-keyword">Float32</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">isa</span> <span class="syntax-keyword">Float32</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

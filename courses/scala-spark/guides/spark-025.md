@@ -8,7 +8,7 @@ Intermediate; approximately 105 minutes. Direct prerequisites: `spark-024`. The 
 
 ## How to run this lesson
 
-Open `spark-025` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-025` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-025.scala) and [PySpark learner](../lessons/spark-025.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-025_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-025_solution.scala) and [PySpark reference](../solutions/spark-025_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -55,7 +55,7 @@ All cleanup is scoped to that fresh root. The program does not delete a user-sel
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths}
@@ -84,20 +84,8 @@ val manyPath = ownedRoot.resolve("many").toString
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 from pathlib import Path
 import tempfile
 import shutil
@@ -126,13 +114,13 @@ many_path = str(owned_root / "many")
 ```scala
 assert(source.schema("id").dataType == LongType && source.count() == 2000L)
 assert(source.agg(sum("amount")).first().getLong(0) == 13993000L)
-println("Explicit-schema source:2000 rows,total13993000")
+println("Explicit-schema source: 2000 rows, total 13993000")
 ```
 
 ```python
 assert isinstance(source.schema["id"].dataType, LongType) and source.count() == 2000
 assert source.agg(F.sum("amount")).first()[0] == 13993000
-print("Explicit-schema source:2000 rows,total13993000")
+print("Explicit-schema source: 2000 rows, total 13993000")
 ```
 
 The declared long type and arithmetic total provide an input contract before any file layout is chosen. File format, writer task count and directory partitioning are downstream physical decisions that must preserve these values and occurrence identities.
@@ -169,7 +157,7 @@ Repartition source by day into 2 execution partitions, write Parquet with error-
 
 Select only id and amount for day=even and id>=1990. Return the five ordered tuples.
 
-**Expected result/shape:** (1990,13930),(1992,13944),(1994,13958),(1996,13972),(1998,13986). No payload column is requested.
+**Expected result/shape:** `(1990, 13930)`, `(1992, 13944)`, `(1994, 13958)`, `(1996, 13972)`, `(1998, 13986)`. No payload column is requested.
 
 **Verify:** Assert every projected identity and amount and exact two-column output schema.
 
@@ -221,7 +209,7 @@ Do not count all filesystem entries as data files or assume one file per storage
 
 ## Self-check
 
-Explain the contract of `writeCompact` / `write_compact` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `writeCompact` / `write_compact` without reading its solution. Then, from memory, state what Exercise 6 (Reject an existing target and preserve its product) must produce: The second write fails with an existing-path analysis exception; the original 2000-row product remains unchanged. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

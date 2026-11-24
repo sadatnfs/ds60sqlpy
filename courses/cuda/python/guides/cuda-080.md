@@ -14,6 +14,13 @@ Keep a validation ladder: mathematical reference, CPU mapping model, compiler ac
 
 
 
+### Key terms
+
+- **CUDA simulator:** An interpreter that runs kernel code on the CPU for debugging, without real GPU timing or memory behavior.
+- **Data race:** Unsynchronized accesses to the same address by several threads where at least one access is a write.
+- **Serialized execution:** Running threads one at a time, which can hide races that would appear under true parallel execution.
+- **Validation ladder:** A sequence of checks from simulator to CPU oracle to real hardware, where each step catches a different class of error.
+
 ## Worked examples
 
 ### Worked example 1
@@ -40,33 +47,53 @@ print("CPU race illustration:", serial_counter, lost_update)
 
 **Expected observation:** Serial count 2 versus a possible lost-update count 1.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `serial_counter` | `2` |
+| `parallel_reads` | `[0, 0]` |
+| `lost_update` | `1` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Classify a CPU result
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **classify a CPU result** in the examples above.
+**Trap to avoid:** Calling the result GPU verified because the same Python source was used assumes the compiled device code behaves like the interpreter.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Construct a race hidden by serialization
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **construct a race hidden by serialization** in the examples above.
+**Trap to avoid:** Concluding the kernel needs no atomics because the simulator printed the right count treats a serial schedule as representative of every parallel schedule.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Name an unsupported feature
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **name an unsupported feature** in the examples above.
+**Trap to avoid:** Assuming anything that runs in the simulator runs identically on hardware ignores that the simulator interprets kernels in Python.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Design the validation ladder
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **design the validation ladder** in the examples above.
+**Trap to avoid:** Collapsing the ladder into a single pass/fail end-to-end test hides where a failure came from.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose a tiny debugging input
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **choose a tiny debugging input** in the examples above.
+**Trap to avoid:** Debugging with a million random elements makes a single wrong index hard to find. A size that is a multiple of the block hides tail bugs.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Write an honest evidence label
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **write an honest evidence label** in the examples above.
+**Trap to avoid:** Writing only verified or tests pass gives no executor and invites the reader to assume GPU coverage.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

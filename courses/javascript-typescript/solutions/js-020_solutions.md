@@ -35,7 +35,7 @@ assert.equal(formatResult({ kind: 'success', value: 7 }), 'value:7');
 assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline')`. Restoring the original line brings back the worked observation: value:7 and error:offline.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(formatResult({ kind: 'failure', message: 'offline!' }), 'error:offline');`. Restoring `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');` brings back: `value:7` and `error:offline`.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline')` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -55,7 +55,7 @@ assert.equal(describe(''), 0);
 assert.equal(describe(undefined), 'missing');
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(describe(undefined), 'missing')`; after it the line reads `assert.equal(describe(undefined), 'missing');` again and empty string has length 0; absent value returns missing.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(describe(undefined), 'missing!');`. Restoring `assert.equal(describe(undefined), 'missing');` brings back: empty string has length 0; absent value returns missing.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(describe(undefined), 'missing')` accepts.
 

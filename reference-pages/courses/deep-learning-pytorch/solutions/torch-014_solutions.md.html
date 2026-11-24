@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-014_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="torch-014-explanatory-solutions">torch-014: explanatory solutions<a class="heading-anchor" href="#torch-014-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers only after attempting CrossEntropyLoss, multiclass and multilabel contracts yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Calculate uniform multiclass loss, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Multiclass target, Multilabel target, Class axis. After a pass, choose a new input for exercise 6, Reject an out-of-vocabulary class, without looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Multiclass classification chooses exactly one outcome among mutually exclusive classes. Multilabel classification makes several independent binary decisions, so multiple labels can be present. A final layer with three outputs can serve either task; the target meaning determines the loss. PyTorch CrossEntropyLoss expects raw class logits and class-index targets by default. It includes log-softmax internally, so applying softmax first changes the intended calculation.</p>
 <p>The class axis convention matters. For ordinary batches, logits have shape (N, C) and targets (N). For spatial tasks, the class axis remains dimension 1, unlike many channels-last examples in other frameworks. Multilabel BCEWithLogitsLoss instead expects a target matrix matching the logits. Report which axes are averaged before comparing losses with different output widths.</p>
@@ -301,7 +301,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <p><strong>Expected:</strong> IndexError or RuntimeError identifying an invalid target.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>F.cross_entropy(torch.zeros((1, 3)), torch.tensor([3]))</code> raises <code>(IndexError, RuntimeError)</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Repeat exercise 4, Check class-axis normalization, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Name the multilabel denominator, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
   </main>
 </body>
 </html>

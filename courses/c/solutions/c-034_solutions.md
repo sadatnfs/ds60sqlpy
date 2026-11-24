@@ -1,6 +1,6 @@
 # c-034: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-034_solution.c`, implements all six cases, from the "transfer a small pipe payload" case to the "transfer a bounded record decoder" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -24,13 +24,13 @@ CHECK(read(fds[0], out, 3) == 3 && strcmp(out, "abc") == 0);
 CHECK(close(fds[0]) == 0);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `close(fds[0]) == 0`. Restoring the original line brings back the worked observation: three bytes arrive unchanged.
+**Expected:** With `CHECK(close(fds[1]) == 0);` the run stops with `Check failed` at the CHECK on `close(fds[0]) == 0`, because the "transfer a small pipe payload" case no longer shows that three bytes arrive unchanged. Restoring `CHECK(close(fds[0]) == 0);` brings that observation back.
 
 The tiny write is within the pipe atomic-write bound. General streams still require loops for partial operations.
 
 ## Exercise 2: Observe EOF after closure: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(close(fds[1]) == 0);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+A careless edit changed the CHECK in worked example 2, the "observe EOF after closure" case, so that it reads `CHECK(close(fds[1]) == 0);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means read returns zero, and restore it.
 
 The unchanged code is worked example 2:
 
@@ -43,7 +43,7 @@ CHECK(read(fds[0], &byte, 1) == 0);
 CHECK(close(fds[0]) == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `close(fds[0]) == 0`; after it the line reads `CHECK(close(fds[0]) == 0);` again and read returns zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `close(fds[0]) == 0`. Once the line reads `CHECK(close(fds[0]) == 0);` again, the "observe EOF after closure" case again shows that read returns zero.
 
 Zero is EOF for this positive-sized read, not an error. All writers are closed before waiting.
 
@@ -124,4 +124,4 @@ The caller defines framing. Real protocol code must validate lengths and handle 
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a bounded record decoder" case to your own c-034 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected file descriptor failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "observe EOF after closure" case apart from ordinary output: the fixture proves its stated file descriptor, pipe endpoint and descriptor ownership assumptions, not universal safety.

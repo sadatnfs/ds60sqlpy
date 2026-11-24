@@ -8,7 +8,7 @@ Intermediate; approximately 90 minutes. Direct prerequisites: `spark-020`. The p
 
 ## How to run this lesson
 
-Open `spark-021` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-021` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-021.scala) and [PySpark learner](../lessons/spark-021.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-021_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-021_solution.scala) and [PySpark reference](../solutions/spark-021_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -42,7 +42,7 @@ EXPLAIN FORMATTED presents a physical outline and node details. The scan detail 
 
 Column pruning is visible when the scan ReadSchema contains only id and amount for the projection query. The fixture's unused_payload is deliberately stored but unneeded. The reference extracts the ReadSchema line and checks the needed and excluded fields there, rather than searching the entire extended plan, where the original table schema legitimately still appears. That scope matters: testing the wrong portion of plan text can produce a false claim that pruning failed.
 
-The grouped aggregate uses local partial aggregation and a redistribution so equal group keys can meet for final aggregation in this setup. An Exchange is expected under the fixed two-partition, AQE-disabled file scan. Its presence explains a data-movement boundary; it does not report how many network bytes were sent or how long tasks took. A local[2] shuffle is still a logical redistribution, but it is not a measurement of a remote cluster network.
+The grouped aggregate uses local partial aggregation and a redistribution so equal group keys can meet for final aggregation in this setup. An Exchange is expected under the fixed two-partition, AQE-disabled file scan. Its presence explains a data-movement boundary; it does not report how many network bytes were sent or how long tasks took. A `local[2]` shuffle is still a logical redistribution, but it is not a measurement of a remote cluster network.
 
 Plan text contains identifiers and local paths that vary across runs. This lesson normalizes expression IDs and the owned scratch-root path for readability. It deliberately avoids an exact whole-plan snapshot assertion. Relevant operator names, query fields and independent outputs are checked instead. Stable normalization should not erase semantics such as partitioning keys, predicates or required columns merely to make a test pass.
 
@@ -55,9 +55,7 @@ All file creation is under a fresh lesson-owned root, and cleanup removes only t
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters._
 
@@ -77,20 +75,7 @@ val aggregateQuery =
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -118,13 +103,13 @@ aggregate_query = "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_
 ```scala
 assert(input.count() == 12L)
 assert(input.columns.toSeq == Seq("id", "group_id", "amount", "unused_payload"))
-println("Owned Parquet fixture has four stored columns and12 rows")
+println("Owned Parquet fixture has four stored columns and 12 rows")
 ```
 
 ```python
 assert input_frame.count() == 12
 assert input_frame.columns == ["id", "group_id", "amount", "unused_payload"]
-print("Owned Parquet fixture has four stored columns and12 rows")
+print("Owned Parquet fixture has four stored columns and 12 rows")
 ```
 
 The stored schema and population establish the baseline for later pruning and filtering claims. Parquet reads may mark fields nullable for compatibility, so the lesson checks field names and logical values without asserting writer-side nullability must be preserved exactly.
@@ -149,9 +134,9 @@ The output check and plan display answer different questions. The first establis
 
 ### Exercise 1: Check the query meaning before its execution plan
 
-Execute the projection query and return ordered(id, doubled) tuples. Compare all nine rows with the literal rule id 3..11, doubled=20*id.
+Execute the projection query and return ordered (id, doubled) tuples. Compare all nine rows with the literal rule id 3..11, doubled=20*id.
 
-**Expected result/shape:** Nine tuples from(3,60) through(11,220), with no missing or extra identities.
+**Expected result/shape:** Nine tuples from `(3, 60)` through `(11, 220)`, with no missing or extra identities.
 
 **Verify:** Assert the complete tuple list, not only the first/last rows or a printed plan.
 
@@ -213,7 +198,7 @@ Do not treat EXPLAIN as a benchmark or proof that the final action completed. Do
 
 ## Self-check
 
-Explain the contract of `projectionResult` / `projection_result` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `projectionResult` / `projection_result` without reading its solution. Then, from memory, state what Exercise 6 (Compare equivalent query forms with separate semantic and plan evidence) must produce: The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

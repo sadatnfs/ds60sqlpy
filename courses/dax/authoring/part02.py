@@ -1,6 +1,6 @@
 """Stage two: typed expressions, storage lifetime, aggregation and variables."""
 
-from .common import lesson
+from .common import explain, lesson
 from .common import result as r
 from .common import task as t
 
@@ -113,8 +113,8 @@ LESSONS = [
                 "Give each output its own name and unit.",
                 (
                     "Use SUM(Sales[Quantity]), [NetRevenue] and "
-                    "DIVIDE([NetRevenue],SUM(Sales[Quantity])); the values are "
-                    "17, 187 and 11."
+                    "DIVIDE([NetRevenue],SUM(Sales[Quantity])); quantity is 17, revenue "
+                    "is 187 and revenue per unit is 11."
                 ),
             ),
             t(
@@ -838,7 +838,7 @@ LESSONS = [
                 (
                     "Bind numerator=[NetRevenue] and "
                     "denominator=CALCULATE([NetRevenue],REMOVEFILTERS(Product[C"
-                    "olor])), then DIVIDE(numerator,denominator)."
+                    "olor])), then DIVIDE(numerator, denominator)."
                 ),
             ),
             t(
@@ -875,3 +875,548 @@ LESSONS = [
         ],
     ),
 ]
+
+
+REASONING = {
+    7: [
+        (
+            (
+                "DAX binds multiplication tighter than addition, so 2 + 3 * 4 first forms 12 and "
+                "then adds 2. The parentheses build a different tree whose sum 5 is multiplied by "
+                "4."
+            ),
+            (
+                "Reading the expression strictly left to right gives 20 for both forms, which "
+                "hides the fact that the parentheses changed the structure rather than the style."
+            ),
+            ('`EVALUATE ROW ( "Plain", 2 + 3 * 4, "Grouped", ( 2 + 3 ) * 4 )` returns 14 and 20.'),
+        ),
+        (
+            (
+                "NumericRevenue is SUM(Sales[NetAmount]), a USD number of 187. FORMAT only "
+                "produces DisplayText, so a euro sign in place of the dollar sign changes a string "
+                "and leaves the number alone."
+            ),
+            (
+                "Showing 187.00 with a euro sign claims a conversion that never happened. At an "
+                "assumed 1.10 USD per EUR the same sales would be about 170 EUR, so the label "
+                "would overstate them."
+            ),
+            (
+                "Both rows keep NumericRevenue at 187; only the DisplayText column differs, and no "
+                "rate table appears anywhere in the query."
+            ),
+        ),
+        (
+            (
+                "Each output keeps its own unit: 17 units, 187 USD and their ratio of totals, 11 "
+                "USD per unit. The ratio pools all eight lines, so heavy lines such as S5's four "
+                "Pens weigh more."
+            ),
+            (
+                "AVERAGE(Sales[UnitPrice]) returns 100 / 8 = 12.5. It averages list prices per "
+                "line and ignores both quantities and the 8 USD of discounts."
+            ),
+            "The row reads quantity 17, revenue 187 and per unit 11, and 11 x 17 reproduces 187.",
+        ),
+        (
+            (
+                "FORMAT returns text, and text compares character by character. The line amounts "
+                "4, 20, 27, 36 and 40 become strings whose order follows their first digits, not "
+                "their size."
+            ),
+            (
+                'Sorting the DisplayText column puts S2\'s "$4.00" after "$36.00" and before '
+                '"$40.00", because "." sorts before "0". The smallest line then looks '
+                "mid-sized."
+            ),
+            (
+                "Order the rows by Sales[NetAmount] and expect 4, 20, 20, 20, 20, 27, 36, 40; the "
+                "text labels can then follow that numeric order."
+            ),
+        ),
+        (
+            (
+                "A rate of 0.1 is dimensionless, so 0.1 x 187 USD stays in USD and gives 18.7. The "
+                "percent sign in a label is only a display convention for that fraction."
+            ),
+            (
+                'Typing the displayed "10" into the formula multiplies 187 by 10 and reports '
+                "1,870 USD, a hundredfold error that still looks like a plausible dollar figure."
+            ),
+            (
+                '`ROW ( "Fee", 0.1 * [NetRevenue] )` returns 18.7, and 18.7 / 187 returns the '
+                "0.1 rate back."
+            ),
+        ),
+        (
+            (
+                "The label 02:30 could mean 150 minutes, 150 seconds or half past two at night. "
+                "Storing a number with a declared unit, such as 150 minutes, lets SUM and AVERAGE "
+                "mean something."
+            ),
+            (
+                "Parsing the string as minutes and seconds gives 150 seconds while hours and "
+                "minutes gives 150 minutes, a sixtyfold disagreement that no formatting choice "
+                "reveals."
+            ),
+            (
+                "Two stored durations of 150 minutes sum to 300 minutes, which you may then format "
+                "as 05:00 after an explicit conversion from minutes to hours."
+            ),
+        ),
+    ],
+    8: [
+        (
+            (
+                "ISBLANK asks whether the value itself is BLANK. Zero is a real number, so it "
+                "fails the test, while BLANK() passes. Case A shows why a separate test is needed: "
+                "BLANK() = 0 is TRUE."
+            ),
+            (
+                "Testing a result with = 0 returns TRUE for both values, because loose equality "
+                "coerces BLANK to zero. A missing value and an observed zero become identical."
+            ),
+            (
+                '`ROW ( "Zero", ISBLANK ( 0 ), "Blank", ISBLANK ( BLANK () ), "Loose", BLANK '
+                "() = 0 )` returns FALSE, TRUE and TRUE."
+            ),
+        ),
+        (
+            (
+                "Pen is ProductKey 2, and the relationship keeps S2 (4) and S5 (20). Revenue is "
+                "therefore 24 and nonblank, so COALESCE leaves it unchanged at 24."
+            ),
+            (
+                "Putting COALESCE([NetRevenue], 0) in the Revenue column instead of a separate "
+                "display column agrees for Pen but shows 0 for Bag, which then reads as an "
+                "observed zero sale."
+            ),
+            (
+                "Under ProductKey 2 the row is Products 1, SalesRows 2, Revenue 24 and "
+                "DisplayRevenue 24."
+            ),
+        ),
+        (
+            (
+                'Checking ISBLANK first sends Bag, whose filter reaches no Sales rows, to "No '
+                'matching sales". Notebook (67), Pen (24) and Mug (96) all reach "Revenue '
+                'observed".'
+            ),
+            (
+                "`IF ( [NetRevenue] <= 0, ... )` also catches Bag, because BLANK coerces to 0, but "
+                "it would mislabel a real zero, such as a product whose lines were fully "
+                "discounted to 0, as having no sales."
+            ),
+            (
+                '`ADDCOLUMNS ( VALUES ( Product[Product] ), "Label", ... )` should label Bag '
+                "alone as no sales and the other three as observed."
+            ),
+        ),
+        (
+            (
+                "The retail facts end on 2025-02-03. February is observed: Bo and Cy bought and "
+                "Ada did not, so Ada's February blank is real inactivity. March has no observation "
+                "for anyone."
+            ),
+            (
+                'Coalescing every blank cell to "lost" marks all three buyers lost in March. '
+                "That is a 100% churn claim for a month the data never covered."
+            ),
+            (
+                "`MAX ( Sales[OrderDate] )` returns 2025-02-03. Classify only months up to that "
+                "date, and leave March marked as unobserved."
+            ),
+        ),
+        (
+            (
+                "Under the Bag filter Sales has no rows, so COUNTROWS(Sales) is BLANK. ROW always "
+                "builds one row, so a table wrapping the blank revenue still has one member."
+            ),
+            (
+                "Testing ISEMPTY on the ROW result to detect missing sales returns FALSE for Bag, "
+                "because the row exists even though its revenue cell is BLANK."
+            ),
+            (
+                'Under ProductKey 4, `ISEMPTY ( Sales )` is TRUE while `COUNTROWS ( ROW ( "R", '
+                "[NetRevenue] ) )` is 1."
+            ),
+        ),
+        (
+            (
+                "Cost lives on Product. Today the cost is Notebook 7 x 2, Pen 5 x 1 and Mug 5 x 5, "
+                "or 44, giving a margin of 143. A missing Mug cost should surface as three unknown "
+                "lines, not as cheap lines."
+            ),
+            (
+                "COALESCE ( RELATED ( Product[UnitCost] ), 0 ) would drop cost to 19 if Mug's cost "
+                "were missing, inflating margin to 168 and making Mug look like pure profit."
+            ),
+            (
+                "Count Sales lines where RELATED(Product[UnitCost]) is BLANK. On the current data "
+                "expect 0 such lines and a margin of 143."
+            ),
+        ),
+    ],
+    9: [
+        (
+            (
+                "A filter only decides which rows a measure can see. Selecting South keeps S3 "
+                "(40), S6 (20) and S7 (20) for 80, and S4 still stores 27 because Ada is in North."
+            ),
+            (
+                "A calculated column that rewrites S4 to 0 whenever the region is not South would "
+                "make stored data depend on one slicer, and North would lose 27 of its 107."
+            ),
+            (
+                '`CALCULATE ( [NetRevenue], Customer[Region] = "South" )` returns 80, while '
+                '`CALCULATE ( SUM ( Sales[NetAmount] ), Sales[SaleID] = "S4" )` with no region '
+                "filter still returns 27."
+            ),
+        ),
+        (
+            (
+                "In 2024 the only North lines are Ada's S1 (20) and S2 (4), so revenue is 24 and "
+                "quantity is 3. Both filters must hold at once, so Bo's S3 is excluded."
+            ),
+            (
+                "Changing the year but also dropping the region filter returns 64 and 5, because "
+                "Bo's 40 USD Mug line from order 102 joins the result."
+            ),
+            (
+                "The 2024 row reads 24 and 3. Adding the 2025 row (83 and 9) gives the North "
+                "totals of 107 and 12."
+            ),
+        ),
+        (
+            (
+                "A calculated column evaluates per Sales row, so S1 gets 2 x 10 = 20 and S2 gets 1 "
+                "x 5 = 5. S2's stored NetAmount is 4 because its 1 USD discount is already "
+                "removed."
+            ),
+            (
+                "A measure written as SUM(Sales[Quantity]) * SUM(Sales[UnitPrice]) multiplies "
+                "totals, 17 x 100 = 1,700, instead of summing row products."
+            ),
+            (
+                "Summing the gross column, or running `SUMX ( Sales, Sales[Quantity] * "
+                "Sales[UnitPrice] )`, returns 195, and 195 minus 8 of discounts equals 187."
+            ),
+        ),
+        (
+            (
+                "North has five lines: Ada's S1, S2 and S4 and Cy's S5 and S8. A measure filtered "
+                "to North returns 107 once, whatever grain the visual uses."
+            ),
+            (
+                "Writing 107 onto each North line and summing it gives 5 x 107 = 535, five times "
+                "the real revenue, and the multiple would change as lines are added."
+            ),
+            (
+                "Under North, SUM of the stored column returns 535 while `CALCULATE ( "
+                '[NetRevenue], Customer[Region] = "North" )` returns 107.'
+            ),
+        ),
+        (
+            (
+                "Product[Category] is a stored column with the members Paper, Home and Travel. Bag "
+                "stays in Travel even with no sales, so relationships and slicers have a fixed "
+                "domain."
+            ),
+            (
+                "Deriving a category from a measure such as revenue over 50 makes membership move "
+                "with filters: Mug is 96 overall but 36 under North, so its category would flip "
+                "with the region slicer."
+            ),
+            (
+                "`VALUES ( Product[Category] )` returns three rows under any Customer filter, "
+                "while the Mug revenue changes from 96 to 36."
+            ),
+        ),
+        (
+            (
+                "A band from the row itself, such as NetAmount of at least 30 for S3 and S8, may "
+                "be stored and recomputed at refresh. A share of the selected total depends on the "
+                "filter, so it must be a measure."
+            ),
+            (
+                "A column storing NetAmount divided by the refresh total gives S8 36 / 187, about "
+                "0.193, and keeps it under North, where S8's real share is 36 / 107, about 0.336."
+            ),
+            (
+                "Under North the measure returns about 0.336 for S8 and about 0.193 with no "
+                "filter; the column shows 0.193 in both views."
+            ),
+        ),
+    ],
+    10: [
+        (
+            (
+                "DISTINCTCOUNT(Sales[CustomerKey]) is evaluated in each category. Paper reaches "
+                "Ada, Bo and Cy (3); Home reaches Bo and Cy (2). Bo and Cy bought in both."
+            ),
+            (
+                "Adding the category counts gives 5 customers, but the whole model has only three "
+                "customers with sales. Overlapping populations are not additive."
+            ),
+            (
+                '`SUMMARIZECOLUMNS ( ROLLUPADDISSUBTOTAL ( Product[Category], "IsTotal" ), '
+                '"Customers", DISTINCTCOUNT ( Sales[CustomerKey] ) )` shows 3, 2 and a total of '
+                "3."
+            ),
+        ),
+        (
+            (
+                "Removing 2024 drops order 101, which held two Paper lines (S1 and S2). Paper "
+                "keeps S4, S5 and S7 in orders 201, 202 and 204, for 3 orders and 67 USD."
+            ),
+            (
+                "Subtracting the two removed lines from Paper's four orders gives 2. That treats "
+                "lines as orders, though both removed lines came from one order."
+            ),
+            (
+                "`CALCULATE ( [OrderCount], Product[Category] = \"Paper\", 'Date'[Year] = 2025 )` "
+                "returns 3, and NetRevenue under the same filters returns 67."
+            ),
+        ),
+        (
+            (
+                "COUNTROWS(Customer) counts catalog members (4, including Di), while "
+                "DISTINCTCOUNT(Sales[CustomerKey]) counts buyers in eligible facts (3). Under West "
+                "these are 1 and BLANK."
+            ),
+            (
+                'Using COUNTROWS(Customer) as "customers who bought Paper" returns 4, because '
+                "the single-direction relationship does not filter Customer from Product through "
+                "Sales."
+            ),
+            (
+                "Under Paper expect a catalog count of 4 and a buyer count of 3; under West expect "
+                "1 and BLANK."
+            ),
+        ),
+        (
+            (
+                "Each product has two buyers: Notebook (Ada, Bo), Pen (Ada, Cy) and Mug (Bo, Cy). "
+                "The total row must reevaluate DISTINCTCOUNT over all eight lines, which gives 3."
+            ),
+            (
+                "`SUMX ( VALUES ( Product[Product] ), [Customers] )` adds 2 + 2 + 2 and reports 6 "
+                "customers, double counting every buyer."
+            ),
+            (
+                "The per-product rows show 2, 2 and 2 while the total row shows 3, the same as the "
+                "whole-model case."
+            ),
+        ),
+        (
+            (
+                "DISTINCTCOUNT treats BLANK as one more distinct value. If one sales line lacked a "
+                "CustomerKey, the count would rise from 3 to 4 without any new person."
+            ),
+            (
+                "Reporting 4 as customers counts an unknown bucket as a buyer; quietly dropping "
+                "the line instead hides a data-quality failure."
+            ),
+            (
+                "With such a row, DISTINCTCOUNT returns 4, DISTINCTCOUNTNOBLANK returns 3 and "
+                "COUNTBLANK(Sales[CustomerKey]) returns 1, so all three can be reported."
+            ),
+        ),
+        (
+            (
+                "In 2025 each sales date has one buyer: Ada on January 2, Cy on January 3, Bo on "
+                "January 5, Bo on February 2 and Cy on February 3. Their sum, 5, is a count of "
+                "customer-days."
+            ),
+            (
+                "Calling that 5 the unique 2025 customers overstates the population, because only "
+                "Ada, Bo and Cy bought that year; Bo and Cy are counted twice."
+            ),
+            (
+                "Under 2025, `SUMX ( VALUES ( 'Date'[Date] ), DISTINCTCOUNT ( Sales[CustomerKey] ) "
+                ")` returns 5 and DISTINCTCOUNT alone returns 3."
+            ),
+        ),
+    ],
+    11: [
+        (
+            (
+                "The 2025 lines are S4 to S8, with 123 USD over 12 units. Dividing the two totals "
+                "weights each line by its units, so 10.25 USD per unit is the pooled rate."
+            ),
+            (
+                "Averaging the line ratios (9, 5, 20, 10 and 18) gives 62 / 5 = 12.4. S6's single "
+                "20 USD Mug then counts as much as S5's four Pens."
+            ),
+            (
+                "`CALCULATE ( DIVIDE ( [NetRevenue], [QuantitySold] ), 'Date'[Year] = 2025 )` "
+                "returns 10.25, and 10.25 x 12 = 123."
+            ),
+        ),
+        (
+            (
+                "OrderCount uses DISTINCTCOUNT on OrderID because order 101 has two lines. Seven "
+                "orders share 187 USD, about 26.7143 USD per order."
+            ),
+            (
+                "Dividing by COUNTROWS(Sales) uses 8 lines and returns 23.375. That is revenue per "
+                "line, not per order, because S1 and S2 belong to one order."
+            ),
+            (
+                "`DIVIDE ( [NetRevenue], DISTINCTCOUNT ( Sales[OrderID] ) )` returns about "
+                "26.7143, and 26.7143 x 7 reproduces 187."
+            ),
+        ),
+        (
+            (
+                "DIVIDE with two arguments returns BLANK for an empty or zero denominator. Bag has "
+                "no units, so its rate stays blank, while Notebook returns 67 / 7, about 9.571."
+            ),
+            (
+                "Supplying 0 as the third argument shows Bag at 0 USD per unit, as if it sold "
+                "units for free. Using `/` after coalescing units to 0 would produce infinity or "
+                "NaN."
+            ),
+            (
+                "By product expect Notebook about 9.571, Pen 24 / 5 = 4.8, Mug 96 / 5 = 19.2 and "
+                "Bag BLANK."
+            ),
+        ),
+        (
+            (
+                "Units are the denominator, so the pooled ratio weights each year by its units: "
+                "12.8 x 5 + 10.25 x 12 = 64 + 123 = 187, and 187 / 17 = 11."
+            ),
+            (
+                "`AVERAGEX ( VALUES ( 'Date'[Year] ), [NetPerUnit] )` gives each year equal weight "
+                "and returns 11.525, as if 2024's five units mattered as much as 2025's twelve."
+            ),
+            (
+                "The pooled measure returns 11 at the total, while the yearly rows show 12.8 and "
+                "10.25."
+            ),
+        ),
+        (
+            (
+                "A zero is observed when the denominator shows real opportunity. Bo's lines S3, S6 "
+                "and S7 have 80 USD gross and no discount, so his discount rate is a true 0 / 80 = "
+                "0."
+            ),
+            (
+                "Using DIVIDE ( 0, 0, 0 ) for Di, who has no lines, shows his undefined rate as 0, "
+                "so he looks exactly like Bo in the report."
+            ),
+            (
+                "The case row shows DefaultResult BLANK but ZeroNumerator 0. By customer, Bo's "
+                "discount rate is 0 and Di's is BLANK."
+            ),
+        ),
+        (
+            (
+                "The design assigns two units per arm, so the denominator is assigned units. "
+                "Control converts 1 of 2 (0.5) and Treatment converts 2 of 2 (1.0)."
+            ),
+            (
+                "Building the denominator from exposure rows counts U3 twice, because it was "
+                "exposed twice, and drops U4, which was assigned but never exposed."
+            ),
+            (
+                "The rates should match ExperimentSummary: Assigned 2 and Rate 0.5 for Control, "
+                "and Assigned 2 and Rate 1 for Treatment."
+            ),
+        ),
+    ],
+    12: [
+        (
+            (
+                "The variable is bound once, with no filter, as 187. CALCULATE can change the "
+                "filter around a scalar but cannot reevaluate it. Pen is the only Red product, so "
+                "the direct measure returns 24."
+            ),
+            (
+                "Expecting FrozenInRed to show 24 treats the variable as a formula that "
+                "reevaluates in its new context. VAR stores a value, not the expression."
+            ),
+            (
+                "The row should read FrozenInRed 187 and RecomputedInRed 24, the value of Pen's "
+                "lines S2 and S5."
+            ),
+        ),
+        (
+            (
+                "Binding inside the Blue CALCULATETABLE evaluates [NetRevenue] under Blue, so the "
+                "variable holds 163. Every later use reuses 163, even under another filter."
+            ),
+            (
+                "Binding the variable before CALCULATETABLE and expecting the outer Blue filter to "
+                "reach it still returns 187, because the binding happened first."
+            ),
+            (
+                "Inside Blue the variable returns 163, the same as `CALCULATE ( [NetRevenue], "
+                'Product[Color] = "Blue" )`.'
+            ),
+        ),
+        (
+            (
+                "Each variable is bound in its own context: the numerator under the current color, "
+                "and the denominator after REMOVEFILTERS on Color. Under Blue that gives 163 / "
+                "187, about 0.872."
+            ),
+            (
+                "Binding the denominator to [NetRevenue] under Blue and wrapping it in CALCULATE "
+                "with REMOVEFILTERS keeps 163, so the share becomes 1.0 for every color."
+            ),
+            (
+                "Under Blue the share returns about 0.872, under Red 24 / 187, about 0.128, and "
+                "the two shares add to 1."
+            ),
+        ),
+        (
+            (
+                "The denominator must reevaluate the measure, so it is CALCULATE([NetRevenue], "
+                "REMOVEFILTERS(Product[Color])). That returns 187 under Blue and under Red alike."
+            ),
+            (
+                "Adding ALL or more CALCULATE layers around the frozen variable keeps 163 under "
+                "Blue, because no wrapper can recompute a value that is already bound."
+            ),
+            (
+                "Show the denominator as its own column. It should read 187 on every color row; if "
+                "it equals the numerator, it is still frozen."
+            ),
+        ),
+        (
+            (
+                "A variable defined before SUMX is one shared scalar, so `VAR Total = "
+                "[NetRevenue]` holds 187 on every row. Each line divided by it gives a share, and "
+                "the shares add to 1."
+            ),
+            (
+                "Calling [NetRevenue] inside the iterator causes context transition to each line. "
+                "Each share then divides the line by itself, and the eight results add to 8."
+            ),
+            (
+                "`SUMX ( Sales, DIVIDE ( Sales[NetAmount], Total ) )` returns 1, while the in-row "
+                "version returns 8."
+            ),
+        ),
+        (
+            (
+                "A ledger records each step: the starting filter, the binding context, the value "
+                "bound, the later filters and whether each use reuses or reevaluates. It can be "
+                "checked against the fact rows."
+            ),
+            (
+                "Debugging from the final number alone cannot tell whether 187 came from a frozen "
+                "variable or a missing filter, because both give the same output."
+            ),
+            (
+                "Blue is S1, S3, S4, S6, S7 and S8, which sum to 163; Red is S2 and S5, for 24; "
+                "together they reconcile to 187."
+            ),
+        ),
+    ],
+}
+
+explain(LESSONS, REASONING)

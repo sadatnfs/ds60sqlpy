@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-backup-creation-and-restore-acceptance">Exercise 1: Distinguish backup creation and restore acceptance.<a class="heading-anchor" href="#exercise-1-distinguish-backup-creation-and-restore-acceptance" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> An archive exists versus a new instance can use recovered data.</p>
 <p><strong>Why:</strong> The latter catches missing files, invalid formats and wrong ownership that a successful copy can hide.</p>
+<p><strong>Approach:</strong> Separate the two events: making an archive of study-data, and starting a fresh service that reads restored data correctly.</p>
+<p><strong>Why this is correct:</strong> Only the second proves recovery, because it exercises read_counter&#x27;s schema and type checks on the restored file.</p>
+<p><strong>A plausible wrong approach:</strong> Calling the job done when the archive file exists misses a truncated or wrongly owned counter.json.</p>
+<p><strong>How to verify:</strong> Start a reader on the restored volume; GET /counter returns the expected value with schema_version 1.</p>
 <h3 id="exercise-2-predict-the-risk-of-copying-a-live-transactional-database-directory">Exercise 2: Predict the risk of copying a live transactional database directory.<a class="heading-anchor" href="#exercise-2-predict-the-risk-of-copying-a-live-transactional-database-directory" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The copy may not represent a consistent transaction boundary.</p>
 <p><strong>Why:</strong> Databases can coordinate several files and buffered writes. Use their documented backup mechanism instead of assuming a file copy captures a valid snapshot.</p>
+<p><strong>Approach:</strong> Recall that transactional databases keep data across several files and in memory, with their own logging.</p>
+<p><strong>Why this is correct:</strong> A file copy taken mid-write can capture files from different moments, which the database may reject or misread.</p>
+<p><strong>A plausible wrong approach:</strong> Using tar on a live database directory because it worked for counter.json ignores that the fixture writes one file atomically.</p>
+<p><strong>How to verify:</strong> Use the database&#x27;s own dump or backup command, then restore it into a new instance and query it.</p>
 <h3 id="exercise-3-design-a-separate-restore-target">Exercise 3: Design a separate restore target.<a class="heading-anchor" href="#exercise-3-design-a-separate-restore-target" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A new owned volume with no overwrite of the source.</p>
 <p><strong>Why:</strong> The test should not destroy the only working state. Keeping the source untouched also makes comparison and rollback possible.</p>
+<p><strong>Approach:</strong> Create a new volume with a distinct name, restore the archive into it, and mount it in a separate container.</p>
+<p><strong>Why this is correct:</strong> The source volume stays intact, so if the restore is bad the original is still the working state.</p>
+<p><strong>A plausible wrong approach:</strong> Restoring over the live study-data volume to test risks destroying the only good copy.</p>
+<p><strong>How to verify:</strong> docker volume ls shows both volumes, and the source&#x27;s counter is unchanged after the test.</p>
 <h3 id="exercise-4-diagnose-a-valid-checksum-with-invalid-application-data">Exercise 4: Diagnose a valid checksum with invalid application data.<a class="heading-anchor" href="#exercise-4-diagnose-a-valid-checksum-with-invalid-application-data" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Byte identity does not establish schema or semantic correctness.</p>
 <p><strong>Why:</strong> A checksum proves a relationship between byte sequences. The application must still parse and validate the data it will use.</p>
+<p><strong>Approach:</strong> Separate byte integrity from meaning: a matching checksum shows the archive equals the source, not that the source was valid.</p>
+<p><strong>Why this is correct:</strong> If counter.json already held a negative counter, the copy matches and read_counter still raises on start.</p>
+<p><strong>A plausible wrong approach:</strong> Trusting the checksum and skipping startup lets an invalid file pass every backup check.</p>
+<p><strong>How to verify:</strong> Start the reader on the restored volume; validation either succeeds or reports the invalid counter state.</p>
 <h3 id="exercise-5-explain-rpo-and-rto-using-the-counter-lab">Exercise 5: Explain RPO and RTO using the counter lab.<a class="heading-anchor" href="#exercise-5-explain-rpo-and-rto-using-the-counter-lab" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Allowed lost updates and time to a usable restored instance.</p>
 <p><strong>Why:</strong> Name the workload and measurement period. A small local result cannot be advertised as a production recovery guarantee for larger or different data.</p>
+<p><strong>Approach:</strong> Define RPO as how many increments may be lost (backup interval) and RTO as how long from failure to a working /counter.</p>
+<p><strong>Why this is correct:</strong> With a backup taken after counter 7 and two more increments before failure, the restored value is 7 and two updates are lost.</p>
+<p><strong>A plausible wrong approach:</strong> Quoting a local RTO of seconds as a production guarantee ignores larger data and different storage.</p>
+<p><strong>How to verify:</strong> Time the restore from start to a successful GET /counter and record the counter gap together with the workload.</p>
 <h3 id="exercise-6-produce-a-recovery-evidence-packet">Exercise 6: Produce a recovery evidence packet.<a class="heading-anchor" href="#exercise-6-produce-a-recovery-evidence-packet" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Source identity, export hash, restore target, parsed value and cleanup record.</p>
 <p><strong>Why:</strong> The packet ties the copy to a particular source and proves independent use. Cleanup should remove only the disposable restore resources after review.</p>
+<p><strong>Approach:</strong> Record the source volume name, the archive hash, the restore volume name, the counter value read back and the cleanup commands run.</p>
+<p><strong>Why this is correct:</strong> The hash ties the archive to the source; the parsed value proves use; the cleanup entry shows only disposable resources were removed.</p>
+<p><strong>A plausible wrong approach:</strong> Deleting the restore volume before review leaves nothing to check if someone questions the result.</p>
+<p><strong>How to verify:</strong> A reviewer can match each field and see that only the restore volume was removed after sign-off.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

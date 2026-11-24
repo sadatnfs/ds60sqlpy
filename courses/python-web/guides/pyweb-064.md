@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-063`.
 
 A service can commit a business change and crash before notifying another component. It can also send a notification successfully and lose the acknowledgement. This chapter implements a small transactional outbox and an idempotent consumer using actual SQLite transactions to expose both problems clearly.
 
+## Key terms
+
+- **Transactional outbox:** A table written in the same transaction as the business change, so the change and its notification intent commit or roll back together.
+- **Dispatcher:** A separate process that reads outbox entries and delivers them, retrying when delivery is not confirmed.
+- **At-least-once delivery:** A guarantee that a message is delivered one or more times, because a lost acknowledgement leads to a retry.
+- **Idempotent consumer:** A receiver that records each event identity with its effect, here with `INSERT OR IGNORE`, so a repeated delivery changes nothing.
+
 ## Mechanism: commit intent alongside the business effect
 
 An outbox stores a message or event in the same database transaction as the business operation. If the transaction commits, both the operation and the notification intent exist. If it rolls back, neither exists. A separate dispatcher can later read the outbox and deliver its entries.
@@ -29,6 +36,33 @@ The consumer first inserts the event identity into the applied table. Only when 
 The order of those operations matters. Recording the identity and then updating the total in separate transactions could lose the effect after a crash. Updating the total first and recording the identity later could duplicate it after a retry. Atomicity joins the decision and effect.
 
 An external effect that cannot participate in the consumer's transaction needs its own idempotency/reconciliation mechanism. The outbox pattern does not magically make an arbitrary email or third-party API call transactional with the local database.
+
+## Worked example: a capped backoff schedule that respects a deadline
+
+```python
+def schedule(base, cap, attempts, budget):
+    delays, spent = [], 0.0
+    for attempt in range(attempts):
+        ceiling = min(cap, base * 2**attempt)
+        if spent + ceiling > budget:
+            break
+        delays.append(ceiling)
+        spent += ceiling
+    return delays
+
+
+print(schedule(0.1, 2.0, 8, 5.0))
+print(schedule(0.1, 2.0, 8, 1.0))
+```
+
+Expected output:
+
+```text
+[0.1, 0.2, 0.4, 0.8, 1.6]
+[0.1, 0.2, 0.4]
+```
+
+Each delay doubles until the two second cap, and the loop stops before the total wait would pass the caller's budget, so eight permitted attempts shrink to five under a five second deadline and to three under one second. In production each ceiling would be the upper bound of a random full jitter delay, so many clients do not retry in lockstep. A schedule only makes retries polite; it does not make them safe. They are safe in the lesson because `accept` looks up the order identifier first and returns `replayed` instead of inserting a second order.
 
 ## Failure diagnosis and discussion
 

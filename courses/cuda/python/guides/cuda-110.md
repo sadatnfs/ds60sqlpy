@@ -14,6 +14,14 @@ Use a fixed project with reviewed build dependencies and reproducible metadata. 
 
 
 
+### Key terms
+
+- **Framework ABI:** The binary interface of a framework build that a native extension must match.
+- **Wheel:** A built Python package whose tags describe Python and platform compatibility but not every GPU it can run on.
+- **Native cubin:** Compiled device code for a specific GPU architecture that runs without just-in-time compilation.
+- **PTX:** An intermediate representation that the driver can JIT-compile for newer architectures within compatibility rules.
+- **Build ledger:** A record of compiler, toolkit, framework, architecture targets and what was actually executed.
+
 ## Worked examples
 
 ### Worked example 1
@@ -50,27 +58,39 @@ Treat printed timing values as synthetic whenever the program says model, fixtur
 
 ### Exercise 1: List compatibility axes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **list compatibility axes** in the examples above.
+**Trap to avoid:** Recording only the Python version suggests one wheel works everywhere that Python runs, while a framework ABI change alone can break the import.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Separate import and execution
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **separate import and execution** in the examples above.
+**Trap to avoid:** Treating a successful import as proof of portability passes packages that cannot run any kernel on the target GPU.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain native code versus intermediate code
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **explain native code versus intermediate code** in the examples above.
+**Trap to avoid:** Shipping native code only for the build machine's GPU makes the package fail on any older or newer architecture.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Design a build ledger
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **design a build ledger** in the examples above.
+**Trap to avoid:** Building from a developer machine without recording flags yields an artifact nobody can reproduce or audit.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Test unsupported dtype
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **test unsupported dtype** in the examples above.
+**Trap to avoid:** Silently casting to float32 hides precision loss and gives callers a different result from what they requested.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Define a package release gate
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **define a package release gate** in the examples above.
+**Trap to avoid:** Testing one environment and declaring the whole matrix supported presents untested claims as verified.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

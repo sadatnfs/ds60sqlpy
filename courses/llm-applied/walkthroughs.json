@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "track_id": "llm-applied",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "llm-applied-001",
+      "title": "Choosing between a tool, retrieval, adaptation or a measured baseline",
+      "anchor": "reference",
+      "source_path": "courses/llm-applied/solutions/llm-applied-001_solution.py",
+      "source_sha256": "784bfe24c2e56358a2dfb155cf323cedfb8cf999dbda83dd2d1ee60298cf1960",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [1, 3],
+          "excerpt": "\"\"\"llm-applied-001: bounded local reference checks. No network or persistent data writes.\"\"\"\n\nimport numpy as np",
+          "title": "A bounded local check",
+          "explanation": "The docstring promises no network calls and no persistent writes, so the whole solution is safe to run anywhere. numpy is imported but this solution only uses plain Python.",
+          "observe": "Nothing runs at import time except the function definitions."
+        },
+        {
+          "lines": [6, 13],
+          "excerpt": "def choose(task):\n    if task[\"exact_computation\"]:\n        return \"deterministic_tool\", \"exact computation\"\n    if task[\"fresh_evidence\"] or task[\"citation_required\"]:\n        return \"retrieval\", \"current cited evidence\"\n    if task[\"stable_behavior_gap\"] and task[\"governed_examples\"] >= 100:\n        return \"adaptation_candidate\", \"stable measured behavior\"\n    return \"measure_baseline\", \"prompt and evaluation first\"",
+          "title": "An ordered routing rule",
+          "explanation": "choose reads a task description and returns a mechanism plus a short reason. The order of the if statements is the policy: exact calculations go to a deterministic tool first, then anything needing fresh or cited evidence goes to retrieval. Only a stable behavior gap backed by at least 100 governed examples becomes an adaptation candidate. Everything else starts by measuring a prompt baseline.",
+          "observe": "Because the checks are ordered, a task can match several conditions but only the first one wins."
+        },
+        {
+          "lines": [16, 35],
+          "excerpt": "def verify():\n    # Exercise 1: Route a changing definition\n    task = {\n        \"exact_computation\": False,\n        \"fresh_evidence\": True,\n        \"citation_required\": True,\n        \"stable_behavior_gap\": False,\n        \"governed_examples\": 0,\n    }\n    assert choose(task) == (\"retrieval\", \"current cited evidence\")\n\n    # Exercise 2: Route an exact calculation\n    task = {\n        \"exact_computation\": True,\n        \"fresh_evidence\": False,\n        \"citation_required\": False,\n        \"stable_behavior_gap\": False,\n        \"governed_examples\": 0,\n    }\n    assert choose(task) == (\"deterministic_tool\", \"exact computation\")",
+          "title": "Exercises 1 and 2: retrieval and exact computation",
+          "explanation": "Each exercise builds a task dictionary with all five fields set explicitly and asserts the full tuple choose returns. A changing definition that needs citations routes to retrieval. An exact calculation routes to a deterministic tool, because a language model should not be trusted to do arithmetic it can hand off.",
+          "observe": "If either assert fails, the script stops with an AssertionError instead of printing."
+        },
+        {
+          "lines": [37, 47],
+          "excerpt": "    # Exercise 3: Require evidence before fine-tuning\n    task = {\n        \"exact_computation\": False,\n        \"fresh_evidence\": False,\n        \"citation_required\": False,\n        \"stable_behavior_gap\": True,\n        \"governed_examples\": 0,\n    }\n    assert choose(task)[0] == \"measure_baseline\"\n    task[\"governed_examples\"] = 120\n    assert choose(task)[0] == \"adaptation_candidate\"",
+          "title": "Exercise 3: evidence before fine tuning",
+          "explanation": "A stable behavior gap alone is not enough. With 0 governed examples the result is measure_baseline. Changing only governed_examples to 120 flips it to adaptation_candidate, which shows that the threshold is what controls the decision.",
+          "observe": "Mutating one field and asserting again isolates the cause of the change."
+        },
+        {
+          "lines": [49, 62],
+          "excerpt": "    # Exercise 4: Keep mechanisms composable\n    task = {\n        \"exact_computation\": False,\n        \"fresh_evidence\": True,\n        \"citation_required\": True,\n        \"stable_behavior_gap\": True,\n        \"governed_examples\": 120,\n    }\n    assert choose(task)[0] == \"retrieval\"\n    architecture = {\n        \"knowledge\": \"versioned retrieval\",\n        \"format\": \"prompt baseline, then measured adapter if needed\",\n    }\n    assert architecture[\"knowledge\"] == \"versioned retrieval\"",
+          "title": "Exercise 4: mechanisms compose",
+          "explanation": "When a task needs fresh evidence and also has a behavior gap, retrieval still wins the routing decision. The architecture dictionary records that knowledge comes from versioned retrieval while formatting may later use a measured adapter. The two mechanisms solve different problems.",
+          "observe": "choose returns retrieval even though 120 examples are available."
+        },
+        {
+          "lines": [64, 76],
+          "excerpt": "    # Exercise 5: Avoid training on secrets as an access mechanism\n    policy = {\"access_control\": \"external pre-retrieval filter\", \"weights_are_acl\": False}\n    assert not policy[\"weights_are_acl\"] and \"pre-retrieval\" in policy[\"access_control\"]\n\n    # Exercise 6: Write a measurable subject-assistant contract\n    contract = {\n        \"fields\": [\"assignment_unit\", \"outcome\", \"status\"],\n        \"unknown_policy\": \"explicit unknown\",\n        \"split_unit\": \"study family\",\n        \"metric\": \"field exact match plus unsupported-field rate\",\n    }\n    assert contract[\"split_unit\"] == \"study family\" and \"unsupported\" in contract[\"metric\"]\n    return {\"checks\": 6, \"status\": \"passed\"}",
+          "title": "Exercises 5 and 6: access control and a measurable contract",
+          "explanation": "Model weights are not an access control list, so access is enforced by a filter before retrieval. The contract names the output fields, an explicit policy for unknown answers, the unit used to split data and a metric that includes unsupported fields. verify returns a summary only after all six exercises pass.",
+          "observe": "The returned dictionary reports 6 checks with status passed."
+        },
+        {
+          "lines": [79, 80],
+          "excerpt": "if __name__ == \"__main__\":\n    print(verify())",
+          "title": "Print the result",
+          "explanation": "The guard runs verify only when the file is executed directly, then prints its dictionary.",
+          "observe": "The single output line is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    },
+    {
+      "lesson_id": "llm-applied-007",
+      "title": "Cosine ranking of embeddings with strict input validation",
+      "anchor": "reference",
+      "source_path": "courses/llm-applied/solutions/llm-applied-007_solution.py",
+      "source_sha256": "49bd534b9851cf68861ac6b79f0ba3ca5df2fb7ae8d31b57caf3d23f9af33ebb",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [6, 13],
+          "excerpt": "def unit(value):\n    value = np.asarray(value, dtype=np.float64)\n    if value.ndim != 1 or not len(value) or not np.isfinite(value).all():\n        raise ValueError(\"finite vector required\")\n    norm = np.linalg.norm(value)\n    if norm == 0 or not np.isfinite(norm):\n        raise ValueError(\"nonzero finite norm required\")\n    return value / norm",
+          "title": "Normalize a vector to unit length",
+          "explanation": "unit converts the input to a float64 array and refuses anything that is not a nonempty one dimensional vector of finite numbers. It then divides by the Euclidean norm so the result has length 1. A zero vector has no direction, so it is rejected instead of dividing by zero.",
+          "observe": "Errors are raised as ValueError with a message that names the problem."
+        },
+        {
+          "lines": [16, 24],
+          "excerpt": "def cosine_rank(query, documents):\n    q = unit(query)\n    scores = []\n    for key, value in documents.items():\n        v = unit(value)\n        if v.shape != q.shape:\n            raise ValueError(\"embedding dimensions differ\")\n        scores.append((key, float(q @ v)))\n    return sorted(scores, key=lambda row: (-row[1], row[0]))",
+          "title": "Rank documents by cosine similarity",
+          "explanation": "After normalizing, the dot product q @ v equals the cosine of the angle between the vectors. Each document gets a score and a dimension check. sorted uses the key (-score, key) so the highest score comes first and ties break alphabetically, which keeps the order deterministic.",
+          "observe": "The result is a list of (name, score) pairs, best match first."
+        },
+        {
+          "lines": [27, 35],
+          "excerpt": "def verify():\n    # Exercise 1: Rank fixed topic vectors\n    table = {\n        \"purchase\": np.array([1.0, 0.1, 0.0]),\n        \"geometry\": np.array([0.0, 1.0, 0.0]),\n        \"mixed\": np.array([0.5, 0.5, 0.0]),\n    }\n    ranked = cosine_rank(np.array([1.0, 0.0, 0.0]), table)\n    assert [key for key, score in ranked] == [\"purchase\", \"mixed\", \"geometry\"]",
+          "title": "Exercise 1: rank three topic vectors",
+          "explanation": "The query points along the first axis. purchase is closest, mixed is halfway between two axes and geometry is perpendicular. Only the order of names is asserted, not exact scores.",
+          "observe": "The ranking is purchase, mixed, geometry."
+        },
+        {
+          "lines": [37, 44],
+          "excerpt": "    # Exercise 2: Separate cosine from magnitude\n    query = np.array([1.0, 0.0, 0.0])\n    original = table[\"purchase\"]\n    scaled = 10 * original\n    np.testing.assert_allclose(\n        unit(original) @ unit(query), unit(scaled) @ unit(query), atol=1e-12, rtol=0\n    )\n    assert scaled @ query == 10 * (original @ query)",
+          "title": "Exercise 2: cosine ignores magnitude",
+          "explanation": "Multiplying a vector by 10 does not change its direction, so its cosine with the query is unchanged. assert_allclose compares within a tiny tolerance because floating point results can differ in the last bits. The raw dot product, by contrast, grows by exactly 10.",
+          "observe": "This is why retrieval systems normalize before comparing."
+        },
+        {
+          "lines": [46, 49],
+          "excerpt": "    # Exercise 3: Expose hand-authored synonym knowledge\n    word_vectors = {\"buy\": np.array([1.0, 0.0, 0.0]), \"purchase\": np.array([1.0, 0.0, 0.0])}\n    assert set(\"buy\".split()) & set(\"purchase\".split()) == set()\n    np.testing.assert_array_equal(word_vectors[\"buy\"], word_vectors[\"purchase\"])",
+          "title": "Exercise 3: synonyms come from the vectors",
+          "explanation": "The words buy and purchase share no characters as tokens, yet their hand written vectors are identical. Similarity in embedding search comes entirely from the vectors, not the spelling.",
+          "observe": "The two vectors compare equal element by element."
+        },
+        {
+          "lines": [51, 63],
+          "excerpt": "    # Exercise 4: Reject zero and nonfinite vectors\n    for bad in [np.array([0.0, 0.0]), np.array([1.0, np.nan])]:\n        try:\n            unit(bad)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"invalid vector accepted\")\n\n    # Exercise 5: Reject incompatible spaces\n    query_meta = {\"model\": \"A\", \"width\": 3, \"normalization\": \"unit\"}\n    index_meta = {\"model\": \"B\", \"width\": 3, \"normalization\": \"unit\"}\n    assert query_meta != index_meta",
+          "title": "Exercises 4 and 5: reject bad inputs",
+          "explanation": "The for, try, except, else pattern expects unit to raise. If it does not, the else branch raises AssertionError. Exercise 5 records that vectors from different models are not comparable even when their width matches.",
+          "observe": "Zero and NaN vectors both fail; the two metadata records differ by model."
+        },
+        {
+          "lines": [65, 74],
+          "excerpt": "    # Exercise 6: Measure a domain failure\n    misleading = {\"wrong\": np.array([1.0, 0.0, 0.0]), \"relevant\": np.array([0.5, 0.5, 0.0])}\n    relevant = {\"relevant\"}\n    top = cosine_rank(query, misleading)[0][0]\n    assert top == \"wrong\" and top not in relevant\n    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercise 6: a measured domain failure",
+          "explanation": "A misleading document can score highest even though it is not relevant. Asserting that the top result is wrong documents a real limitation instead of hiding it. The solution then prints its summary.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    },
+    {
+      "lesson_id": "llm-applied-022",
+      "title": "A bounded tool dispatcher for grouped means",
+      "anchor": "reference",
+      "source_path": "courses/llm-applied/solutions/llm-applied-022_solution.py",
+      "source_sha256": "3bb3879358ac317ada824aa4692760e8f9406116814107fc098a22c2d9fd1aa0",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [7, 15],
+          "excerpt": "def dispatch(request, rows):\n    if not isinstance(request, dict) or set(request) != {\"operation\", \"group_by\", \"value\"}:\n        raise ValueError(\"exact tool fields required\")\n    if request != {\"operation\": \"group_mean\", \"group_by\": \"group\", \"value\": \"value\"}:\n        raise ValueError(\"operation or columns not allowed\")\n    if not 1 <= len(rows) <= 20:\n        raise ValueError(\"row budget1..20 required\")\n    if len({row[\"id\"] for row in rows}) != len(rows):\n        raise ValueError(\"duplicate row ID\")",
+          "title": "Accept only one exact request",
+          "explanation": "dispatch is the only path from a model proposal to computation. It checks that the request has exactly the three expected keys and exactly the allowed values, so extra fields such as a query string are rejected. It also caps the work at 20 rows and requires unique row ids.",
+          "observe": "Anything unexpected raises ValueError before a single value is read."
+        },
+        {
+          "lines": [16, 29],
+          "excerpt": "    groups = defaultdict(list)\n    for row in rows:\n        if (\n            set(row) != {\"id\", \"group\", \"value\"}\n            or not isinstance(row[\"id\"], str)\n            or not isinstance(row[\"group\"], str)\n        ):\n            raise ValueError(\"row schema\")\n        value = row[\"value\"]\n        if type(value) not in (int, float):\n            raise TypeError(\"numeric value required\")\n        if not math.isfinite(value):\n            raise ValueError(\"finite value required\")\n        groups[row[\"group\"]].append(value)",
+          "title": "Validate each row while grouping",
+          "explanation": "defaultdict(list) creates an empty list the first time a group appears. Each row must have exactly id, group and value, with text id and group. type(value) not in (int, float) excludes booleans, and math.isfinite rejects NaN and infinity.",
+          "observe": "Valid values are appended to their group's list."
+        },
+        {
+          "lines": [30, 41],
+          "excerpt": "    result = []\n    for key, values in sorted(groups.items()):\n        scale = max(abs(value) for value in values)\n        mean = (\n            0.0\n            if scale == 0\n            else scale * (math.fsum(value / scale for value in values) / len(values))\n        )\n        if not math.isfinite(mean):\n            raise ValueError(\"finite group mean required\")\n        result.append({\"group\": key, \"count\": len(values), \"mean\": mean})\n    return result",
+          "title": "A numerically careful mean",
+          "explanation": "Values are divided by the largest magnitude before summing, then multiplied back. That avoids overflow when values are near the float limit. math.fsum adds with extra precision. Groups are processed in sorted order so the output is stable.",
+          "observe": "Each result row has group, count and mean."
+        },
+        {
+          "lines": [44, 56],
+          "excerpt": "def verify():\n    # Exercise 1: Execute a bounded grouped mean\n    rows = [\n        {\"id\": \"a1\", \"group\": \"A\", \"value\": 1.0},\n        {\"id\": \"a2\", \"group\": \"A\", \"value\": 3.0},\n        {\"id\": \"b1\", \"group\": \"B\", \"value\": 10.0},\n    ]\n    request = {\"operation\": \"group_mean\", \"group_by\": \"group\", \"value\": \"value\"}\n    result = dispatch(request, rows)\n    assert result == [\n        {\"group\": \"A\", \"count\": 2, \"mean\": 2.0},\n        {\"group\": \"B\", \"count\": 1, \"mean\": 10.0},\n    ]",
+          "title": "Exercise 1: a correct grouped mean",
+          "explanation": "Two rows in group A and one in B produce means of 2.0 and 10.0. The whole result list is compared at once, which checks counts, order and values together.",
+          "observe": "Group A has count 2 and mean 2.0."
+        },
+        {
+          "lines": [58, 83],
+          "excerpt": "    # Exercise 2: Reject an arbitrary operation\n    for proposal in [\n        {\"operation\": \"run_sql\", \"group_by\": \"group\", \"value\": \"value\"},\n        {**request, \"query\": \"DROP TABLE anything\"},\n    ]:\n        try:\n            dispatch(proposal, rows)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"unbounded operation accepted\")\n\n    # Exercise 3: Reject invalid numeric values\n    for bad in [True, float(\"nan\"), None]:\n        changed = [dict(r) for r in rows]\n        changed[0][\"value\"] = bad\n        try:\n            dispatch(request, changed)\n        except (TypeError, ValueError):\n            pass\n        else:\n            raise AssertionError(\"invalid numeric value accepted\")\n    huge = [{\"id\": \"h1\", \"group\": \"A\", \"value\": 1e308}, {\"id\": \"h2\", \"group\": \"A\", \"value\": 1e308}]\n    assert dispatch(request, huge) == [{\"group\": \"A\", \"count\": 2, \"mean\": 1e308}]\n    huge[1][\"value\"] = -1e308\n    assert dispatch(request, huge)[0][\"mean\"] == 0.0",
+          "title": "Exercises 2 and 3: refuse unsafe operations and values",
+          "explanation": "A run_sql operation and a request carrying a DROP TABLE text are both rejected. True, NaN and None are each tested as a value. Two values of 1e308 would overflow a naive sum, but the scaled mean returns 1e308; with opposite signs it returns 0.0.",
+          "observe": "Every bad input raises, and the extreme cases stay finite."
+        },
+        {
+          "lines": [85, 97],
+          "excerpt": "    # Exercise 4: Enforce identity and work limits\n    too_many = [{\"id\": str(i), \"group\": \"A\", \"value\": 1.0} for i in range(21)]\n    for bad_rows in [rows + [dict(rows[0])], too_many]:\n        try:\n            dispatch(request, bad_rows)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"identity or budget ignored\")\n\n    # Exercise 5: Verify an explanation against the artifact\n    lookup = {r[\"group\"]: r for r in result}\n    assert lookup[\"A\"][\"mean\"] == 2 and lookup[\"A\"][\"mean\"] != 20",
+          "title": "Exercises 4 and 5: limits and checking explanations",
+          "explanation": "A duplicated row id and a 21 row request both fail. Exercise 5 checks a claim against the computed artifact: the mean for A is 2, not 20.",
+          "observe": "Explanations are verified against data rather than trusted."
+        },
+        {
+          "lines": [99, 110],
+          "excerpt": "    # Exercise 6: Refuse an unsupported causal interpretation\n    report = {\n        \"group_means\": result,\n        \"random_assignment_verified\": False,\n        \"causal_effect_established\": False,\n    }\n    assert report[\"group_means\"] and not report[\"causal_effect_established\"]\n    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercise 6: no causal claim without evidence",
+          "explanation": "The report includes the means but states that random assignment was not verified, so no causal effect is claimed. The script prints the summary when every exercise passes.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    }
+  ]
+}

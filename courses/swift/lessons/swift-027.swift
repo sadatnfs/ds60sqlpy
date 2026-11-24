@@ -3,7 +3,7 @@ import Foundation
 
 // Task 1: Name a wrong implementation rejected by each fixture.
 // Task 2: Add the minimum Int case without unsafe negation.
-// Task 3: Add a real JourneyCore test for rejected negative quantity.
+// Task 3: Add a real JourneyCore test that rejects a blank item title.
 // Task 4: Diagnose a test comparing the same function call on both sides.
 // Task 5: Test empty, duplicate and malformed inputs separately.
 // Task 6: Create a verification plan distinguishing unit, package, UI and device evidence.

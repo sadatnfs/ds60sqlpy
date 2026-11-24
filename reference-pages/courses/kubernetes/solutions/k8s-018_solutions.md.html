@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-identify-the-serviceaccount">Exercise 1: Identify the ServiceAccount<a class="heading-anchor" href="#exercise-1-identify-the-serviceaccount" aria-label="Link to this section">#</a></h3>
 <p>A token proves possession of an identity credential under the server&#x27;s validation rules. The RoleBindings determine what that identity may do. Recording the identity does not require exposing the token.</p>
 <p><strong>Expected:</strong> A nonsecret identity record is distinct from credential bytes and permissions.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write the full ServiceAccount username and keep it apart from token bytes and Role rules.</li>
+<li><strong>Why it is correct:</strong> The identity is just a namespaced name; the token proves it and the Role defines what it may do.</li>
+<li><strong>Plausible wrong approach:</strong> Pasting the mounted token to show identity leaks a credential without adding anything the name does not already say.</li>
+<li><strong>How to verify:</strong> The record reads system:serviceaccount:&lt;namespace&gt;:&lt;name&gt; and contains no token text.</li>
+</ul>
 <h3 id="exercise-2-trace-the-binding-scope">Exercise 2: Trace the binding scope<a class="heading-anchor" href="#exercise-2-trace-the-binding-scope" aria-label="Link to this section">#</a></h3>
 <p>The fields are easy to confuse because both can contain namespace names. A live setup must use exact provisioned identities and verify effective behavior. The synthetic lesson-auth name is not an ambient target.</p>
 <p><strong>Expected:</strong> Subject identifies the ServiceAccount; binding scope determines the namespaced grant.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the RoleBinding namespace and the subject namespace as two separate fields.</li>
+<li><strong>Why it is correct:</strong> A RoleBinding grants its Role only within its own metadata.namespace, while the subject namespace just identifies which ServiceAccount.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the grant follows the subject&#x27;s namespace would predict access where the binding does not exist.</li>
+<li><strong>How to verify:</strong> The binding namespace is named as the limit on the grant.</li>
+</ul>
 <h3 id="exercise-3-predict-allowed-and-denied-requests">Exercise 3: Predict allowed and denied requests<a class="heading-anchor" href="#exercise-3-predict-allowed-and-denied-requests" aria-label="Link to this section">#</a></h3>
 <p>A narrow role does not grant adjacent actions by implication. The negative checks are part of the successful access-boundary demonstration, not errors to fix by adding wildcard permissions.</p>
 <p><strong>Expected:</strong> Only the intended own-namespace Pod reads are allowed; Secrets and privilege changes denied.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> For each of the five rows, look for a Role rule matching verb, resource and namespace.</li>
+<li><strong>Why it is correct:</strong> RBAC is additive and default deny, so only own-namespace Pod get and list match a rule and everything else is denied.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming list on pods implies read on secrets treats resources as a hierarchy RBAC does not have.</li>
+<li><strong>How to verify:</strong> Pod reads in the bound namespace are allowed, and every other row is denied for lack of a rule.</li>
+</ul>
 <h3 id="exercise-4-protect-workload-credentials">Exercise 4: Protect workload credentials<a class="heading-anchor" href="#exercise-4-protect-workload-credentials" aria-label="Link to this section">#</a></h3>
 <p>The host worker needs scoped API access to manage the fixture. The application itself does not, so mounting a token would be unnecessary exposure. This control does not prove all possible credential paths are absent in arbitrary workloads.</p>
 <p><strong>Expected:</strong> The synthetic workload does not receive an automatic API token mount.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Find automountServiceAccountToken false in the Pod source and confirm it in a host readback.</li>
+<li><strong>Why it is correct:</strong> With automount disabled, the ServiceAccount admission plugin does not add the projected kube-api-access volume, so no token is mounted.</li>
+<li><strong>Plausible wrong approach:</strong> Removing the RoleBinding and calling the workload tokenless still leaves a mounted token that authenticates.</li>
+<li><strong>How to verify:</strong> The readback shows automount false and no kube-api-access volume.</li>
+</ul>
 <h3 id="exercise-5-rehearse-expiry-handling">Exercise 5: Rehearse expiry handling<a class="heading-anchor" href="#exercise-5-rehearse-expiry-handling" aria-label="Link to this section">#</a></h3>
 <p>The refusal preserves the identity and cleanup budget. An operational retry should not modify the runtime to ignore expiry. Keep release bounded to the recorded cluster/container/namespace identity and preserve learner source.</p>
 <p><strong>Expected:</strong> Guard refuses; exact owned session is released and a fresh session is prepared immediately before use.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Order the steps: guard refuses, release the exact owned session, then prepare a fresh one just before Run.</li>
+<li><strong>Why it is correct:</strong> An expired lease must not authorize a request, and a fresh session restores a bounded target without using leftover credentials.</li>
+<li><strong>Plausible wrong approach:</strong> Falling back to the default kubeconfig context would send the Run to whatever cluster that context points at.</li>
+<li><strong>How to verify:</strong> No step reuses the expired lease or an ambient context.</li>
+</ul>
 <h3 id="exercise-6-record-live-effective-evidence">Exercise 6: Record live effective evidence<a class="heading-anchor" href="#exercise-6-record-live-effective-evidence" aria-label="Link to this section">#</a></h3>
 <p>The live result supports the effective policy claim for that target and moment. It does not authorize future operations beyond the lease or prove that all admission/runtime checks will succeed.</p>
 <p><strong>Expected:</strong> Identity, target, verb/resource, result and time are recorded; token/kubeconfig contents are excluded.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record kubectl auth can-i results under the owned receipt with identity, target, verb, resource, result and time.</li>
+<li><strong>Why it is correct:</strong> can-i asks the API server&#x27;s authorizer, so a yes or no is an actual decision for that identity at that time.</li>
+<li><strong>Plausible wrong approach:</strong> Inferring results from the Role YAML alone ignores other bindings that might also grant access.</li>
+<li><strong>How to verify:</strong> Each row carries its source and time, and no credential text appears.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A yes/no self-authorization result describes a requested action for an identity at a point in time. It does not prove that a later API request will pass every admission or object-state check. Conversely, a denied Secret read is expected in this lab and should not trigger a broader Role.</p>
 <p>Use nonsecret request tuples and results in the worksheet. Do not impersonate a more privileged user, print tokens or copy a real Secret to demonstrate that access is absent. The offline matrix is a model of the intended policy, not a live control-plane response.</p></article>

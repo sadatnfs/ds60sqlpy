@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Broadcasting extends dimensions of size one logically, so a column mean can be subtracted from every row without constructing a full repeated matrix. A reduction consumes an axis; matrix multiplication combines contracted dimensions. These shape rules matter before choosing a backend. Express a correct reference using clear operations, then inspect whether intermediates and repeated launches dominate the useful work.</p>
 <p>For squared distances, expanding <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mi>y</mi><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">(x-y)^2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span> gives <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup><mo>−</mo><mn>2</mn><mi>x</mi><mi>y</mi></mrow><annotation encoding="application/x-tex">x^2+y^2-2xy</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8974em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0085em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">2</span><span class="mord mathnormal">x</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span>. The expanded form avoids a full pairwise difference tensor but can lose relative accuracy when large nearly equal vectors cancel. A custom fused kernel can reduce temporary traffic, yet it creates maintenance, numerical and testing obligations. A mature library baseline is therefore both a correctness comparison and a performance competitor.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Broadcasting:</strong> A rule that stretches size-one or missing axes so arrays of different shapes combine elementwise without copying.</li>
+<li><strong>Reduction axis:</strong> The axis that an operation such as sum or max collapses, removing that dimension from the result.</li>
+<li><strong>Pairwise temporary:</strong> An intermediate array of size m by n created when two vectors are broadcast against each other, which can exhaust device memory.</li>
+<li><strong>Catastrophic cancellation:</strong> Loss of significant digits when subtracting two nearly equal floating-point numbers, as in the expanded squared-distance formula.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Center rows [[1,3],[3,7]] by column means [2,5], producing [[-1,-2],[1,2]]. Each centered column sums to zero.</p>
@@ -216,6 +223,36 @@ distance <span class="syntax-operator">=</span> <span class="syntax-builtin">sum
 <span class="syntax-keyword">assert</span> distance <span class="syntax-operator">==</span> <span class="syntax-number">25</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU array reference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> centered<span class="syntax-punctuation">,</span> distance<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Centered columns and distance 25.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>rows</code></td>
+<td><code>[[1.0, 3.0], [3.0, 7.0]]</code></td>
+</tr>
+<tr>
+<td><code>means</code></td>
+<td><code>[2.0, 5.0]</code></td>
+</tr>
+<tr>
+<td><code>centered</code></td>
+<td><code>[[-1.0, -2.0], [1.0, 2.0]]</code></td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td><code>[1, 2]</code></td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td><code>[4, 6]</code></td>
+</tr>
+<tr>
+<td><code>distance</code></td>
+<td><code>25</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
 <p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
@@ -234,17 +271,23 @@ cp<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</spa
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA centered features:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> cp<span class="syntax-operator">.</span>asnumpy<span class="syntax-punctuation">(</span>centered<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-centered-columns">Exercise 1: Compute centered columns<a class="heading-anchor" href="#exercise-1-compute-centered-columns" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute centered columns</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Subtracting row means instead is tempting because they are also 2 and 5 here, a coincidence of this data. Broadcasting them down the wrong axis gives <code>[[-1,1],[-2,2]]</code>; the shapes still match, so no error appears, and the columns no longer sum to zero.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-add-a-constant-feature">Exercise 2: Add a constant feature<a class="heading-anchor" href="#exercise-2-add-a-constant-feature" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>add a constant feature</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Dividing by the column standard deviation after centering, as in standardization, divides zero by zero for this column and produces NaN that spreads into later steps.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-implement-distance-directly">Exercise 3: Implement distance directly<a class="heading-anchor" href="#exercise-3-implement-distance-directly" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>implement distance directly</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Taking a square root and reporting 5 answers a different question. The chapter defines squared distance, and mixing the two breaks comparisons against the reference.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-expanded-form-cancellation">Exercise 4: Explain expanded-form cancellation<a class="heading-anchor" href="#exercise-4-explain-expanded-form-cancellation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>explain expanded-form cancellation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Concluding that the expanded form is safe because the small worked example matches is the trap. Exact agreement on tiny integers says nothing about inputs where the squared norms dominate.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-count-a-pairwise-temporary">Exercise 5: Count a pairwise temporary<a class="heading-anchor" href="#exercise-5-count-a-pairwise-temporary" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>count a pairwise temporary</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting only the output <code>N*M</code> elements underestimates peak memory by a factor of D. The allocation fails or swaps even though the result itself would fit.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-choose-a-library-baseline">Exercise 6: Choose a library baseline<a class="heading-anchor" href="#exercise-6-choose-a-library-baseline" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>choose a library baseline</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Starting with a raw kernel for centering means writing reduction, broadcasting and tail handling by hand, with no reference to tell whether a wrong column mean is a kernel bug or a math bug.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -103,7 +103,7 @@ def main():
             "SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing"
         ).first()
         assert tuple(row) == (True, False, False)
-        print("Missing,empty and literal null text are distinct")
+        print("Missing, empty and literal null text are distinct")
         print("spark-026: worked examples passed; six task implementations remain")
     finally:
         try:

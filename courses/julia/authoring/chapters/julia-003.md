@@ -28,6 +28,8 @@ For bounded text processing, state whether offsets refer to bytes, characters or
 
 An ASCII-only fixture can hide indexing mistakes. Add multibyte and combining examples, empty strings and invalid positions. Use the exception to identify the failed assumption, not to catch every indexing error and silently skip text. An empty input also needs a defined policy before taking a first character.
 
+A short diagnostic routine helps here. For a failing string, print `length`, `ncodeunits` and `collect(eachindex(s))` side by side. If the failing index is missing from that list, the code computed a byte position by arithmetic instead of asking the string where the next character starts.
+
 Text length should not be treated as a language-independent measure of information or effort. A byte budget is useful for storage and transport. A grapheme count may be useful for a user interface. A model tokenizer provides another representation with its own boundaries. These counts should not be substituted for one another without an explicit purpose.
 
 The examples operate on authored literal strings and standard Unicode functions. They do not prove that a normalization policy is suitable for every language, identifier system or security boundary. They establish inspectable byte/character/grapheme distinctions needed before building reliable parsers, annotations and scientific text workflows.

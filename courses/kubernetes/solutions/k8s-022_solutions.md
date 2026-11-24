@@ -16,11 +16,25 @@ The manifest describes desired storage. Binding status and application access ne
 
 **Expected:** The data claim is mounted at /data and depends on a qualified lesson-local class.
 
+**Solution reasoning**
+
+- **Approach:** Follow volumeClaimTemplates name data to the volumeMounts entry and storageClassName to the class.
+- **Why it is correct:** The StatefulSet creates one claim per ordinal from the template, and the mount with the same name places it at /data.
+- **Plausible wrong approach:** Adding a separate PersistentVolumeClaim and referencing it from the Pod template would make all replicas share one claim.
+- **How to verify:** Each link cites a field: template name, mountPath /data and storageClassName.
+
 ## Exercise 2: Record initial data once
 
 An initializer that recreates the expected bytes after loss can fake persistence. The writer should refuse an existing marker or otherwise make initialization history explicit, while later readers remain read-only.
 
 **Expected:** One initialization receipt, claim/PV identities and a known marker checksum.
+
+**Solution reasoning**
+
+- **Approach:** Run the writer once with exclusive create and record claim UID, PV name and SHA-256.
+- **Why it is correct:** Exclusive create fails if the marker already exists, so a second run cannot silently overwrite the initial data.
+- **Plausible wrong approach:** Writing with plain overwrite would hide an accidental second run behind a new hash.
+- **How to verify:** One receipt holds claim UID, bound PV and marker hash.
 
 ## Exercise 3: Replace only the Pod
 
@@ -28,11 +42,25 @@ The StatefulSet can replace a Pod while reusing its claim. The before/after grap
 
 **Expected:** New Pod UID with the intended stable ordinal and same claim binding.
 
+**Solution reasoning**
+
+- **Approach:** Delete only the recorded Pod and compare UID, ordinal name and claim before and after.
+- **Why it is correct:** The StatefulSet recreates the same ordinal name and reattaches the same claim, while the Pod gets a new UID.
+- **Plausible wrong approach:** Scaling the StatefulSet down and up to replace the Pod changes more than one Pod and is not the minimal operation.
+- **How to verify:** Only the Pod UID changed; name and claim binding are the same.
+
 ## Exercise 4: Verify the marker independently
 
 The independent read closes the application-data boundary. It catches empty or wrong storage even if the container starts successfully. This is the core persistence evidence for the tested failure.
 
 **Expected:** Hash remains h1 in the synthetic trace; actual live bytes/hash are recorded separately.
+
+**Solution reasoning**
+
+- **Approach:** Run only the read-only reader and hash the marker it reads.
+- **Why it is correct:** If the claim was reattached, the bytes are unchanged and the hash equals h1.
+- **Plausible wrong approach:** Running the writer again to check the file would recreate the evidence you are trying to verify.
+- **How to verify:** The reader hash equals the recorded initialization hash, with live values kept separate.
 
 ## Exercise 5: Explain retention and reclaim
 
@@ -40,11 +68,25 @@ Retaining a PVC after StatefulSet deletion does not guarantee data survives node
 
 **Expected:** Each lifecycle boundary has its own policy; retention is not backup.
 
+**Solution reasoning**
+
+- **Approach:** For each deletion, name the deleted object and the policy that decides what happens next.
+- **Why it is correct:** StatefulSet claim retention governs the PVC when the StatefulSet or replicas are removed, and the PV reclaim policy governs the volume when the claim is deleted.
+- **Plausible wrong approach:** Calling Retain a backup ignores that the data still lives on one volume with no independent copy.
+- **How to verify:** Each deletion cites claim retention or PV reclaim, and retention is distinguished from backup.
+
 ## Exercise 6: Diagnose a Pending claim
 
 Storage setup is a separate host responsibility. A bounded lesson should report an unavailable class or incompatible mode instead of deleting data or installing a provisioner automatically.
 
 **Expected:** No destructive claim reset; the missing capability or binding condition is identified.
+
+**Solution reasoning**
+
+- **Approach:** Read PVC events and binding status, then check the StorageClass provisioner, capacity and topology.
+- **Why it is correct:** A Pending claim means no volume was bound, and the event usually names the missing class, capacity or zone.
+- **Plausible wrong approach:** Deleting and recreating the claim discards the evidence and returns to the same Pending state.
+- **How to verify:** The check uses class, events or binding status and leaves the claim in place.
 
 ## Boundary and troubleshooting review
 

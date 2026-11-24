@@ -16,6 +16,14 @@ Pruning means removing resources considered unused by a tool’s rules. Unused d
 
 A useful incident sequence preserves evidence, assesses current state, identifies the failing layer, applies a scoped repair and verifies recovery. If an engine VM needs restart, that can interrupt unrelated workloads. A course lesson does not authorize such a host-wide action.
 
+### Key terms
+
+- **Incident:** An observed deviation from expected behavior that requires diagnosis or recovery.
+- **Disk pressure:** A shortage of free disk space caused by images, build cache, writable layers, logs or volumes.
+- **`docker system df`:** A read-only command that reports disk usage by images, containers, local volumes and build cache.
+- **Pruning:** Removing resources that a tool's rules consider unused, which is not the same as unimportant.
+- **Scoped cleanup:** Deleting only identified resources whose ownership and retention are known, then verifying recovery.
+
 ## Anatomy and a trace you can follow
 
 Use read-only inventory first. `docker system df` summarizes storage categories; project-scoped ps, image and volume inspection add ownership. Capture small results privately. Remove only resources you created and have decided to discard, using explicit names or labels checked against the project.
@@ -90,11 +98,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Running `docker system prune -a --volumes` during an incident. Deleting a dangling volume without finding its owner. Cleaning up before recording evidence.
 
-Exercise 4 is this chapter's boundary case: Diagnose a detached volume labeled unused. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a detached volume labeled unused. Read the volume's labels and creating project, and ask who owns its data, before treating unattached as unwanted. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using incident response, disk pressure, docker system df and scoped cleanup. Reconstruct worked example 2 (Stop only the study application) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Say what `docker compose down` removes and what it leaves for a separate, deliberate decision. Then reconstruct worked example 2 (Stop only the study application) with one different value, predict what changes, and name which of incident response, disk pressure, docker system df and scoped cleanup the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

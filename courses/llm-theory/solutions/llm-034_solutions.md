@@ -1,6 +1,6 @@
 # llm-034: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these precision and quantization error budgets answers after attempting *Quantize a second matrix* through *Expose clipping and tie policy*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Measure output error* points to one step. `llm-034_solution.py` holds the assertions; this page explains how they test scale. Then try *Expose clipping and tie policy* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -30,9 +30,9 @@ np.testing.assert_array_equal(q2, [[32, -76], [16, 127]])
 assert scale2 == 2 / 127
 ```
 
-**Expected:** scale 2/127; integer array [[32, -76], [16, 127]].
+**Expected:** scale 2/127; integer array `[[32, -76], [16, 127]]`.
 
-**Verify:** In a fresh process, the exercise checks confirm `q2` equals `[[32, -76], [16, 127]]` and `scale2 == 2 / 127`.
+**Verify:** For *Quantize a second matrix*, a fresh-process check confirms `q2` equals `[[32, -76], [16, 127]]` and `scale2 == 2 / 127`.
 
 ## Exercise 2: Predict the reconstruction error
 
@@ -48,7 +48,7 @@ assert err <= scale2 / 2
 
 **Expected:** largest error 0.5/127, about 0.0039, within the half-step bound 1/127.
 
-**Verify:** In a fresh process, the exercise checks confirm `err` matches `0.5 / 127` within 1e-12 and `err <= scale2 / 2`.
+**Verify:** For *Predict the reconstruction error*, a fresh-process check confirms `err` matches `0.5 / 127` within 1e-12 and `err <= scale2 / 2`.
 
 ## Exercise 3: Measure output error
 
@@ -65,7 +65,7 @@ assert np.isfinite(error) and 0 < error < 0.02
 
 **Expected:** finite maximum absolute output error below 0.02.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(error)` and `0 < error < 0.02`.
+**Verify:** For *Measure output error*, a fresh-process check confirms `np.isfinite(error)` and `0 < error < 0.02`.
 
 ## Exercise 4: Use per-row scales
 
@@ -84,7 +84,7 @@ assert np.isfinite(row_error)
 
 **Expected:** row scales 0.9/127 and 1.7/127; row 0 integers [14, -127].
 
-**Verify:** In a fresh process, the exercise checks confirm `qr[0]` equals `[14, -127]`; `scales[:, 0]` matches `[0.9 / 127, 1.7 / 127]` within 1e-12 and `np.isfinite(row_error)`.
+**Verify:** For *Use per-row scales*, a fresh-process check confirms `qr[0]` equals `[14, -127]`; `scales[:, 0]` matches `[0.9 / 127, 1.7 / 127]` within 1e-12 and `np.isfinite(row_error)`.
 
 ## Exercise 5: Account for storage metadata
 
@@ -100,7 +100,7 @@ assert (per_tensor, per_row) == (8, 12)
 
 **Expected:** 8 bytes per-tensor; 12 bytes per-row; excluding overhead.
 
-**Verify:** In a fresh process, the exercise checks confirm `(per_tensor, per_row) == (8, 12)`.
+**Verify:** For *Account for storage metadata*, a fresh-process check confirms `(per_tensor, per_row) == (8, 12)`.
 
 ## Exercise 6: Expose clipping and tie policy
 
@@ -118,8 +118,8 @@ np.testing.assert_array_equal(np.rint([0.5, 1.5, 2.5]), [0, 2, 2])
 
 **Expected:** one saturation for 128; ties round 0, 2, 2.
 
-**Verify:** In a fresh process, the exercise checks confirm `saturated == 1` and `np.rint([0.5, 1.5, 2.5])` equals `[0, 2, 2]`.
+**Verify:** For *Expose clipping and tie policy*, a fresh-process check confirms `saturated == 1` and `np.rint([0.5, 1.5, 2.5])` equals `[0, 2, 2]`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Use per-row scales* and predict the result first; keep *Account for storage metadata* failing beside the repair. Log a missing NumPy separately from a wrong scale value in `llm-034`.

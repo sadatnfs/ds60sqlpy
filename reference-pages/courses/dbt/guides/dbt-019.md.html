@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A target selects a named execution environment from a profile. A project can use the same model definitions while changing database or schema routing and other adapter settings. That flexibility must not turn into ambient selection of a valuable database. Every example here uses one newly created local DuckDB file; dev and prod are synthetic schema labels inside it.</p>
 <p>The first case builds the same model into separate schemas and returns target.name as data so the routing is visible. The result demonstrates environment selection without implying that two schemas in one file provide the isolation, access control or durability of independent production systems.</p>
 <p>The second case requests an undefined target and expects failure. Falling back silently to another environment would make the observation ambiguous and could be dangerous in a real project. Keep target identity, database ownership and credentials explicit, and separate source configuration from secrets when adapting the project outside the classroom.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Target:</strong> A named output under a profile that sets the database, schema and settings for one environment.</li>
+<li><strong>--target:</strong> The command option that selects which output of the profile a run uses.</li>
+<li><strong>target.name:</strong> The Jinja variable holding the active target&#x27;s name, which models and macros can read or return as data.</li>
+<li><strong>Schema routing:</strong> Building each target&#x27;s relations in its own schema; two schemas in one DuckDB file separate names, not access or failures.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>profiles.yml defines named outputs and a default target. --target chooses an output explicitly. target.name is available during template compilation and can be useful for bounded environment logic, but core business semantics should not drift accidentally between environments. The example changes schema routing while preserving the declared calculation.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

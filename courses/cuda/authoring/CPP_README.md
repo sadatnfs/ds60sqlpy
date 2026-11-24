@@ -10,7 +10,10 @@ Durable sources:
 
 - `cpp_units.json`: original prose, concrete questions/answers, CPU model and a
   representative CPU observation. Assertions, rather than floating-point string
-  spelling, define acceptance.
+  spelling, define acceptance. Each unit also carries an `outcome` (one
+  capitalized, observable sentence used in the guide and manifest) and
+  `key_terms` (three to five term-to-definition pairs rendered under the guide's
+  `### Key terms` heading); the generator rejects units that break either rule.
 - `cpp_gpu_programs.json`: eight complete standalone CUDA references and separate
   learner harnesses. These are optional GPU labs, not a CPU emulator.
 - `cpp_content.py` and `cpp_gpu_sources.py`: deterministic generation.

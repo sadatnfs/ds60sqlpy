@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Gate a broadcast candidate on explicit bounded evidence",
       "input_contract": "Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside(0,1MiB]. Return the bounded dimension with a broadcast hint only after those checks.",
-      "expected": "The 20-row dimension passes;the same dimension with a duplicate key and a101-row candidate fail. No unbounded input is collected or materialized by the gate.",
+      "expected": "The 20-row dimension passes;the same dimension with a duplicate key and a 101-row candidate fail. No unbounded input is collected or materialized by the gate.",
       "verification": "Assert accepted logical join metrics and explicit rejection for duplicate and row-budget cases."
     }
   ],

@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Publish a source release with precise platform and performance claims.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A release packet connects source identity to a tested binary and a documented platform. Portability is demonstrated by execution on each claimed environment. Reproducibility records enough inputs to repeat a build, while performance evidence states workload, limits and measurements. A release checklist must keep untested platforms visible.</p>
+<ul>
+<li><strong>release packet:</strong> a record that links source identity to a tested binary, a documented platform and its evidence.</li>
+<li><strong>source identity:</strong> a revision or hash that names exactly which source was built.</li>
+<li><strong>portability:</strong> a claim demonstrated only by execution on each claimed environment.</li>
+<li><strong>output schema:</strong> the report format that consumers rely on, such as schema 1 with rows and total.</li>
+<li><strong>performance evidence:</strong> a statement of workload, limits and measurements, not a single unqualified timing.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Build Debug and Release in separate directories. Record compiler version, target architecture, C++ level, dependency hashes and test counts. A successful build does not prove a binary starts on another operating system, and timing a different workload cannot validate a performance change.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

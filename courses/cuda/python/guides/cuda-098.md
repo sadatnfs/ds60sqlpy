@@ -29,6 +29,13 @@ A central finite difference computes \([f(x+\epsilon)-f(x-\epsilon)]/(2\epsilon)
 Backward also has memory and stream contracts. Saved forward intermediates must remain valid until consumed. Recomputing a mask can save storage only when it reproduces the same forward branch under the supported precision policy. Test non-unit upstream gradients, because differentiating a sum supplies all ones and may hide missing multiplication by the incoming gradient. State whether second derivatives are supported and test them separately; first-order correctness does not imply higher-order graph support.
 
 
+### Key terms
+
+- **Vector-Jacobian product:** The quantity backward computes: the upstream gradient multiplied by the operator's Jacobian.
+- **Subgradient:** A valid slope choice at a kink such as ReLU at zero, where the ordinary derivative is undefined.
+- **Finite difference:** A numerical derivative estimate from evaluating a function at nearby points, used to check analytic gradients.
+- **Gradient check (gradcheck):** A PyTorch utility that compares analytic and finite-difference gradients, usually in double precision.
+
 ## Worked examples
 
 ### Worked example 1
@@ -60,6 +67,17 @@ print("CPU gradient oracle:", numeric, bias_grad)
 
 **Expected observation:** Finite-difference derivative approximately 2 and bias VJP 3.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `x` | `2.0` |
+| `eps` | `1e-05` |
+| `numeric` | `2.0000000000131024` |
+| `upstream` | `[1, 3]` |
+| `mask` | `[0, 1]` |
+| `bias_grad` | `3` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -84,27 +102,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: Derive the input VJP
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **derive the input VJP** in the examples above.
+**Trap to avoid:** Using the output `y` instead of a mask, `upstream * a * y`, scales gradients by activation values and is wrong for every positive input not equal to 1.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Derive bias gradient
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **derive bias gradient** in the examples above.
+**Trap to avoid:** Returning the upstream sum without masking gives 4, including a contribution from a position where the ReLU blocked gradient.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Run finite differences away from a kink
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **run finite differences away from a kink** in the examples above.
+**Trap to avoid:** Running the check in float32 with a tiny epsilon loses precision to cancellation and fails even when the analytic gradient is right.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain a failed kink gradcheck
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain a failed kink gradcheck** in the examples above.
+**Trap to avoid:** Changing the backward to return 1 at the kink so the check passes chooses a convention for the test's sake.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Specify higher-order support
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **specify higher-order support** in the examples above.
+**Trap to avoid:** Assuming double backward works because first-order gradcheck passed leads to silent zero second derivatives.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Compare each framework reference
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **compare each framework reference** in the examples above.
+**Trap to avoid:** Comparing PyTorch's custom op with TensorFlow's custom op only checks they agree with each other.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

@@ -205,6 +205,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Freezing <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi></mrow><annotation encoding="application/x-tex">W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span></span></span></span> does not remove the forward multiplication by <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi></mrow><annotation encoding="application/x-tex">W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span></span></span></span>. Inputs still traverse the base model, and activations may still be needed to train adapters at earlier or later layers. Optimizer state for the frozen weights can disappear when those weights are genuinely excluded from optimization, but the weights themselves remain resident unless an explicit offload or quantization scheme changes their storage. Count these categories separately.</p>
 <p>The paired framework examples intentionally use a tiny low-rank matrix rather than downloading a model. The base is an identity matrix, one adapter factor is small and the other starts at zero. The zero update preserves the base function initially. Gradients for the two factors can differ at that initialization, so verify actual gradients instead of assuming both must change on the first step. Then connect this mechanism to attention projection matrices in the existing transformer curriculum.</p>
 <p>A complete adaptation study defines the target task, training examples, held-out evaluation, trainable-variable list, optimizer membership, precision policy, sequence/batch cap, checkpoint and rollback. Subject-matter factual knowledge is not guaranteed by lowering training loss: evaluate whether answers use the intended domain evidence and compare a retrieval baseline where appropriate. Parameter-efficient tuning, RAG and prompt design solve overlapping but distinct problems. The GPU lesson supplies resource and training mechanics, while the applied-LLM route supplies grounded-answer and task evaluation design.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Full fine-tuning:</strong> Updating every model parameter, which needs gradients and optimizer state for all of them.</li>
+<li><strong>Adapter:</strong> A small trainable module added to a frozen base model.</li>
+<li><strong>Low-rank adaptation (LoRA):</strong> Learning a weight update as the product of two small matrices added to a frozen weight.</li>
+<li><strong>Trainable parameter count:</strong> The number of parameters that receive gradients, which sets gradient and optimizer memory.</li>
+<li><strong>Optimizer membership:</strong> The set of parameters passed to the optimizer; frozen parameters should be excluded.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A 1024 by 1024 matrix has 1,048,576 parameters. A rank 8 update uses<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8</mn><mo stretchy="false">(</mo><mn>1024</mn><mo>+</mo><mn>1024</mn><mo stretchy="false">)</mo><mo>=</mo><mn>16,384</mn></mrow><annotation encoding="application/x-tex">8(1024+1024)=16{,}384</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">8</span><span class="mopen">(</span><span class="mord">1024</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1024</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">16</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">384</span></span></span></span> trainable parameters while the original matrix remains present.</p>
@@ -219,6 +227,32 @@ adapter <span class="syntax-operator">=</span> rank <span class="syntax-operator
 <span class="syntax-keyword">assert</span> base <span class="syntax-operator">+</span> adapter <span class="syntax-operator">&gt;</span> base
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU adapter ledger:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> base<span class="syntax-punctuation">,</span> adapter<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">parameters</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Base 1,048,576 and adapter 16,384 parameters.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>rows</code></td>
+<td><code>1024</code></td>
+</tr>
+<tr>
+<td><code>cols</code></td>
+<td><code>1024</code></td>
+</tr>
+<tr>
+<td><code>rank</code></td>
+<td><code>8</code></td>
+</tr>
+<tr>
+<td><code>base</code></td>
+<td><code>1048576</code></td>
+</tr>
+<tr>
+<td><code>adapter</code></td>
+<td><code>16384</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -231,17 +265,23 @@ adapter <span class="syntax-operator">=</span> rank <span class="syntax-operator
 <p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-low-rank-parameters">Exercise 1: Count low-rank parameters<a class="heading-anchor" href="#exercise-1-count-low-rank-parameters" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>count low-rank parameters</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Computing rank times the product of dimensions, <code>8*1024*1024</code>, gives eight times the original matrix. That figure would make the adapter larger than the weight it adapts, which should immediately signal an error.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-include-base-storage">Exercise 2: Include base storage<a class="heading-anchor" href="#exercise-2-include-base-storage" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>include base storage</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Budgeting memory from adapter parameters alone underestimates by the full base model. For this matrix the adapter is about 1.6 percent of the total, so the omitted base dominates the real footprint.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-inspect-optimizer-membership">Exercise 3: Inspect optimizer membership<a class="heading-anchor" href="#exercise-3-inspect-optimizer-membership" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>inspect optimizer membership</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming freezing alone excludes parameters from the optimizer can waste memory. Some optimizers skip parameters whose <code>.grad</code> is None, but weight decay or other per-parameter bookkeeping may still allocate state, so membership should be explicit rather than implied.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-sequence-length-budgets">Exercise 4: Compare sequence-length budgets<a class="heading-anchor" href="#exercise-4-compare-sequence-length-budgets" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>compare sequence-length budgets</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming adapters make long-sequence fine-tuning cheap confuses parameter savings with activation savings. Gradients must still flow back through the frozen layers to reach adapters in earlier layers, so those activations are kept during the forward pass.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-tiny-offline-training">Exercise 5: Design tiny offline training<a class="heading-anchor" href="#exercise-5-design-tiny-offline-training" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design tiny offline training</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using a full public model and dataset for a first test risks long downloads and exhausting memory. A failure in that setting is also harder to localize, because data, model size and wiring all vary at once.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-held-out-evaluation">Exercise 6: Define held-out evaluation<a class="heading-anchor" href="#exercise-6-define-held-out-evaluation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>define held-out evaluation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the training loss as model quality overstates performance. Choosing the rank or learning rate by repeatedly looking at the evaluation set leaks it into tuning in the same way.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

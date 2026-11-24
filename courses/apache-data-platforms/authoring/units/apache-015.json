@@ -5,6 +5,38 @@
   "minutes": 60,
   "prerequisites": ["apache-013"],
   "concepts": ["session", "SQL", "DataFrame"],
+  "key_terms": [
+    [
+      "SessionContext",
+      "The DataFusion object holding the registered tables, functions and settings visible to one session. A second context starts with its own registrations."
+    ],
+    [
+      "Table registration",
+      "Binding a name to a data source in one session so queries can refer to it. It does not publish the name to other sessions or processes."
+    ],
+    [
+      "DataFrame",
+      "DataFusion's lazily built relational expression. Methods such as filter and aggregate extend a plan, and an action such as collect executes it."
+    ],
+    [
+      "Input partition",
+      "One inner list of record batches passed to register_record_batches. Several partitions allow parallel execution within one process, not distribution across machines."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Ask the same question through SQL and expressions",
+      "language": "python",
+      "code": "import pyarrow as pa\nfrom datafusion import SessionContext, col, functions\n\nctx = SessionContext()\nevents = pa.table({\"region\": [\"east\", \"west\", \"east\", \"west\"], \"amount\": [4, 9, 7, -2]})\nctx.register_record_batches(\"events\", [events.to_batches()])\nsql = ctx.sql(\n    \"SELECT region, SUM(amount) AS total FROM events \"\n    \"WHERE amount > 0 GROUP BY region ORDER BY region\"\n)\nframe = (\n    ctx.table(\"events\")\n    .filter(col(\"amount\") > 0)\n    .aggregate([col(\"region\")], [functions.sum(col(\"amount\")).alias(\"total\")])\n    .sort(col(\"region\").sort())\n)\nprint(sql.to_pylist())\nprint(frame.to_pylist())",
+      "interpretation": "Both lines should print the same two dictionaries, east with 11 and west with 9. The four events match Worked case A: the `WHERE amount > 0` clause and the `.filter(col(\"amount\") > 0)` expression both drop the nonpositive west value -2 before grouping, so east sums 4 and 7 while west keeps only 9. SQL fixes the row order with `ORDER BY region` and the DataFrame with `.sort`; without an explicit order, row order is not guaranteed, so a comparison that skips sorting can fail intermittently when the session uses more than one partition. Choose SQL for readable fixed reports and expressions when application code assembles the query from validated parts."
+    },
+    {
+      "title": "Show that a table name belongs to one session",
+      "language": "python",
+      "code": "from datafusion import SessionContext\n\nother = SessionContext()\ntry:\n    other.sql(\"SELECT * FROM events\").collect()\nexcept Exception as error:\n    print(type(error).__name__, \"events\" in str(error))",
+      "interpretation": "A fresh context has never seen the events registration, so planning fails and the message names the missing table; the exact exception class depends on the DataFusion release, so match on the table name rather than the class. This matters in services that build one context per request: a table registered during startup in a different context is invisible, and the error appears only on the first real query."
+    }
+  ],
   "evidence": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums.",
   "sources": [
     [

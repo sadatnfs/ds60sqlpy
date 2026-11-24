@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-003`.
 
 HTTP carries bytes. Applications interpret those bytes using a media type and an encoding. JSON is one representation format, not a synonym for every request body. This chapter distinguishes a valid JSON object, malformed JSON and a body sent with an unsupported media type.
 
+## Key terms
+
+- **Content-Type:** The header that declares the media type of the body being sent, such as `application/json`, so the receiver knows how to parse it.
+- **Accept:** The request header listing media types the client is willing to receive in the response, a different question from the body's Content-Type.
+- **415 Unsupported Media Type:** The status a server returns when the request body is declared in a media type the endpoint does not process.
+- **UTF-8:** A variable-length encoding of Unicode code points into bytes; `"café"` has four code points but five UTF-8 bytes.
+- **Content negotiation:** Selecting a response representation from client preferences such as Accept; this endpoint documents one format instead of implementing full quality-weighted negotiation.
+
 ## Mechanism: parse only the declared representation
 
 The echo endpoint first checks `request.is_json`. If the request is not declared as JSON, it returns 415 Unsupported Media Type. It then attempts JSON parsing and requires an object with a string `text` field. A body that cannot satisfy that contract returns 400 in this particular example.
@@ -27,6 +35,41 @@ The malformed request advertises JSON but ends halfway through an object. Parsin
 Keeping these cases distinct gives clients useful feedback. Treating every body as JSON regardless of its header can hide mistakes. Treating every parse failure as an internal server error incorrectly blames the server for input that violated the contract.
 
 The handler uses silent parsing so it can provide its own controlled error representation. That does not mean errors should be ignored. The parsed result is explicitly checked, and invalid input never reaches the success branch.
+
+## Worked example: characters, bytes and the Content-Type header
+
+```python
+import json
+
+from flask import Flask, request
+
+app = Flask(__name__)
+
+
+@app.post("/measure")
+def measure():
+    raw = request.get_data()
+    return {
+        "is_json": request.is_json,
+        "body_bytes": len(raw),
+        "decoded": json.loads(raw.decode("utf-8"))["text"] if request.is_json else None,
+    }
+
+
+body = json.dumps({"text": "naïve"}, ensure_ascii=False).encode("utf-8")
+with app.test_client() as client:
+    print(client.post("/measure", data=body, content_type="application/json").json)
+    print(client.post("/measure", data=body, content_type="text/plain").json)
+```
+
+Expected output:
+
+```text
+{'body_bytes': 18, 'decoded': 'naïve', 'is_json': True}
+{'body_bytes': 18, 'decoded': None, 'is_json': False}
+```
+
+Both requests carried the identical 18 bytes: `{"text": "naïve"}` is 17 characters, but `ï` takes two bytes in UTF-8. Only the header changed, and that alone decided whether `request.is_json` was true. The server did not sniff the payload; it trusted the declared media type, which is why the lesson's handler returns 415 for `text/plain`. Counting `len(raw)` measures bytes on the wire, while `len("naïve")` would report 5 characters, so size limits and character limits are different checks. If you encoded with `ensure_ascii=True` the body would contain `\u00ef` instead, grow to 22 bytes and still decode to the same Python string.
 
 ## Failure diagnosis
 

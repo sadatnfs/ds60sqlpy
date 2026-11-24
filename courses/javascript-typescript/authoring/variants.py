@@ -341,7 +341,7 @@ def _claims(items, first, last):
 
 
 INPUT_KINDS = ("literal", "fixture", "boolean", "text")
-LOGIC_KINDS = ("operator", "negation", "verb")
+LOGIC_KINDS = ("comparator", "operator", "negation", "verb")
 
 
 def _string_digits(text):
@@ -416,6 +416,25 @@ def candidates(code):
                     "before": text,
                     "after": str(int(text) + 1),
                     "kind": "literal",
+                    "inside": within,
+                }
+            )
+        elif (
+            kind == "ident"
+            and 2 <= index < len(items) - 1
+            and items[index - 2][1] == "sort"
+            and items[index - 1][1] == "("
+            and items[index + 1][1] == ")"
+        ):
+            # Dropping a named comparator gives the default string order, a deterministic regression.
+            found.append(
+                {
+                    "token": index,
+                    "start": 0,
+                    "end": len(text),
+                    "before": text,
+                    "after": "",
+                    "kind": "comparator",
                     "inside": within,
                 }
             )

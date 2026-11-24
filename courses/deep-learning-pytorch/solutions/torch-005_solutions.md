@@ -1,6 +1,6 @@
 # torch-005: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting Derivatives, `requires_grad` and finite-difference checks yourself. They reuse the guide's literal inputs, starting from Example A, Derive a scalar slope, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Derivative, Finite difference, Learning rate. After a pass, choose a new input for exercise 6, Reject invalid probes, without looking.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ For \(f(w)=(w-2)^2\), the analytic derivative is \(2(w-2)\). Construct a scalar 
 
 For \(f(w)=(w-2)^2\), expand the derivative or apply the square rule to obtain \(f'(w)=2(w-2)\). At \(w=0\) the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With learning rate \(\eta=0.1\), the update is \(w_{\mathrm{new}}=0-0.1(-4)=0.4\) and the recomputed loss is \(f(0.4)=(0.4-2)^2=2.56\).
 
-The central finite difference uses two probes separated by 2 h:
+The central finite difference uses two probes separated by \(2h\):
 
 \(D_h=\frac{f(w+h)-f(w-h)}{2h}\).
 
@@ -146,4 +146,4 @@ else:
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Inspect a stationary point, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Observe grad-return behavior, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

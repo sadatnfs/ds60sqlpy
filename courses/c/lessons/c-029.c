@@ -5,16 +5,20 @@ int main(void) {
      Copy worked example 1 into a scratch pad and change `CHECK(restored ==
      original);` to `CHECK(restored != original);` inside its CHECK. Before
      running, predict whether the CHECK still holds and explain why; then
-     restore it. Expected: The changed run stops with `Check failed` at the
-     CHECK on `restored == original`. Restoring the original line brings back
-     the worked observation: the restored value is 1.5. */
+     restore it. Expected: With `CHECK(restored != original);` the run stops
+     with `Check failed` at the CHECK on `restored == original`, because the
+     "copy a representation safely" case no longer shows that the restored value
+     is 1.5. Restoring `CHECK(restored == original);` brings that observation
+     back. */
 
   /* Exercise 2: Inspect bytes without type punning: debug a regression
-     A regression changed one token in worked example 2, so one line now reads
-     `sum -= bytes[i];`. Run worked example 2 with that line, use the failing
-     CHECK to locate the defect and repair it without changing the CHECK.
-     Expected: Before the repair the run stops with `Check failed` at the CHECK
-     on `sum == 7u`; after it the line reads `sum += bytes[i];` again and the
+     A regression changed one token in worked example 2, the "inspect bytes
+     without type punning" case, so one line now reads `sum -= bytes[i];`. Run
+     the example with that line, use the failing CHECK to find why the bytes sum
+     to 7 whatever the byte order no longer holds and repair the line without
+     changing the CHECK. Expected: Before the repair the run stops with `Check
+     failed` at the CHECK on `sum == 7u`. Once the line reads `sum += bytes[i];`
+     again, the "inspect bytes without type punning" case again shows that the
      bytes sum to 7 whatever the byte order. */
 
   /* Exercise 3: Handle overlapping moves

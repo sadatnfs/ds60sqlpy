@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-012`.
 
 An application factory is a function that constructs a configured application. This gives tests and deployments a deliberate initialization boundary. The example creates two Flask applications with different options and verifies that their request counters do not share mutable state.
 
+## Key terms
+
+- **Application factory:** A function that constructs and configures a new Flask application on each call, giving tests and deployments a deliberate initialization boundary.
+- **app.config:** The application's configuration mapping; `from_mapping` establishes defaults and `update` applies explicit overrides.
+- **Explicit boolean parsing:** Converting configuration text into True or False with defined rules; `bool("false")` is True because every nonempty string is truthy.
+- **Instance isolation:** Each application object owning its own mutable state, such as a counter in `app.extensions`, so two applications never share request counts.
+- **Configuration allowlist:** An explicit list of harmless settings an endpoint may return, which keeps signing keys and credentials out of responses.
+
 ## Mechanism: configuration is typed application input
 
 `app.config.from_mapping` establishes defaults, and `update` applies explicit overrides. Values in environment variables usually begin as strings, so their interpretation needs a defined parser. The helper accepts only the strings `true` and `false`; anything else is rejected. Calling `bool("false")` would produce True because the string is nonempty, an easy configuration mistake to reproduce.
@@ -25,6 +33,48 @@ The counter is a fixture, not a production request metric or shared database. Un
 The helper refuses `maybe` instead of guessing whether the feature should be enabled. It also demonstrates the surprising truthiness of the literal string `false`. A failed configuration check at startup is often easier to diagnose than a service silently running in the wrong mode.
 
 Apply the same principle to ports, timeouts, body limits and environment names. Parse them into supported types, check useful bounds and give an actionable error. Some values may have defaults suitable for a local workshop, while a public deployment should require an explicit setting. Keep that distinction in configuration code rather than scattered conditionals throughout handlers.
+
+## Worked example: parsing environment overrides into typed configuration
+
+```python
+import os
+
+from flask import Flask
+
+os.environ.update(
+    {
+        "DEMO_MAX_PAGE_SIZE": "5",
+        "DEMO_FEATURE_ENABLED": "false",
+        "DEMO_REGION": "west",
+    }
+)
+
+
+def make_app(test_config=None):
+    app = Flask(__name__)
+    app.config.from_mapping(MAX_PAGE_SIZE=20, FEATURE_ENABLED=False)
+    app.config.from_prefixed_env(prefix="DEMO")
+    if test_config:
+        app.config.update(test_config)
+    return app
+
+
+prod = make_app()
+test = make_app({"FEATURE_ENABLED": True})
+print([(k, repr(prod.config[k])) for k in ("MAX_PAGE_SIZE", "FEATURE_ENABLED", "REGION")])
+print(test.config["FEATURE_ENABLED"], prod.config["FEATURE_ENABLED"])
+print(bool(os.environ["DEMO_FEATURE_ENABLED"]))
+```
+
+Expected output:
+
+```text
+[('MAX_PAGE_SIZE', '5'), ('FEATURE_ENABLED', 'False'), ('REGION', "'west'")]
+True False
+True
+```
+
+Environment variables are always strings. `from_prefixed_env` strips the `DEMO_` prefix and tries to parse each value as JSON, so `"5"` became the integer 5 and `"false"` became the boolean False, while `west` was not valid JSON and stayed a string. The last line repeats the trap that the lesson's `enabled` helper exists to prevent: `bool("false")` is True because any nonempty string is truthy. The factory layers its sources in a fixed order, defaults, then environment, then the test mapping, so the test application saw True without changing the production object. Both applications were built from one function and share no configuration dictionary, which is what lets a test suite create many isolated instances. A typo such as `DEMO_FEATURE_ENABLE` would add an unused key, not an error, so validate the settings your factory requires.
 
 ## Failure diagnosis
 

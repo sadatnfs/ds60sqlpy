@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-017_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-017-explained-reference">eval-017: explained reference<a class="heading-anchor" href="#eval-017-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-017_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-017_reference.py</code> asserts each answer below, from <em>Equal scores</em> to <em>Interpret a preference cycle</em>, on the authored Bradley-Terry and pairwise likelihood fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Reverse empirical counts</em> tests.</p>
 <h3 id="1-equal-scores">1. Equal scores<a class="heading-anchor" href="#1-equal-scores" aria-label="Link to this section">#</a></h3>
 <p>Equal scores express no preference under the model; observing a chosen response still incurs positive negative log likelihood.</p>
+<p><strong>Approach.</strong> Call <code>pair_loss([0, 0])</code>. The score difference is 0, so the loss is <code>logaddexp(0, 0)</code>, which is log(1 + 1) = log 2.</p>
+<p><strong>Why it holds for this fixture.</strong> The sigmoid of 0 is 0.5, so the model assigns equal probability to either response being preferred. Observing that the first response was chosen has probability 0.5, and its negative log is log 2, about 0.693.</p>
+<p><strong>A tempting wrong approach.</strong> Expecting zero loss because the scores are equal is the mistake. Zero loss would require probability 1 for the observed choice; an indifferent model still pays log 2 for every labeled comparison.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.isclose(pair_loss([0, 0]), np.log(2))</code>. Compute <code>sigmoid(0)</code> and confirm 0.5.</p>
 <p><strong>Expected observation:</strong> Preference probability 0.5 and loss log 2.</p>
 <h3 id="2-shift-both-rewards">2. Shift both rewards<a class="heading-anchor" href="#2-shift-both-rewards" aria-label="Link to this section">#</a></h3>
 <p>Pairwise labels cannot determine a common reward offset, including prompt-specific offsets when comparisons stay within prompts.</p>
+<p><strong>Approach.</strong> Add 100 to both scores and recompute <code>pair_loss</code> and <code>pair_gradient</code>. Case A uses <code>[1, -1]</code> and <code>[101, 99]</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> The loss depends only on the difference a - b, which is 2 in both cases. The gradient is <code>[g, -g]</code> with g = sigmoid(2) - 1, again a function of the difference only. A common offset leaves every quantity unchanged.</p>
+<p><strong>A tempting wrong approach.</strong> Reading a learned reward of 101 as better than a reward of 1 from another run is the mistake. Pairwise data cannot pin down the absolute level, so rewards are only comparable within the same comparison.</p>
+<p><strong>How to verify.</strong> Case A asserts <code>np.isclose(pair_loss(scores), pair_loss(shifted))</code>, and the exercise checks assert equal gradients for <code>[4, 2]</code> and <code>[104, 102]</code>. The gradient components also sum to 0.</p>
 <p><strong>Expected observation:</strong> Loss and score gradient remain unchanged.</p>
 <h3 id="3-reverse-empirical-counts">3. Reverse empirical counts<a class="heading-anchor" href="#3-reverse-empirical-counts" aria-label="Link to this section">#</a></h3>
 <p>Reversing labels changes the sign of the fitted log odds, while finite counts still imply uncertainty.</p>
+<p><strong>Approach.</strong> Call <code>mle_difference(1, 3)</code>. The maximum-likelihood score difference is log(wins / losses) = log(1 / 3).</p>
+<p><strong>Why it holds for this fixture.</strong> The sigmoid of log(1 / 3) is (1 / 3) / (1 + 1 / 3) = 0.25, which equals the observed win fraction 1 / 4. Reversing case B&#x27;s 3 to 1 counts flips the sign of the log odds and gives 0.25 instead of 0.75.</p>
+<p><strong>A tempting wrong approach.</strong> Reporting 0.25 as the true preference rate is too strong. With four comparisons, many probabilities near 0.25 fit nearly as well; the estimate needs an interval.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.isclose(sigmoid(mle_difference(1, 3)), 0.25)</code> and <code>np.isclose(mle_difference(2, 2), 0)</code> for balanced counts.</p>
 <p><strong>Expected observation:</strong> The fitted preference probability is 0.25.</p>
 <h3 id="4-all-wins-and-no-losses">4. All wins and no losses<a class="heading-anchor" href="#4-all-wins-and-no-losses" aria-label="Link to this section">#</a></h3>
 <p>Regularization or a prior can produce a finite estimate, but it changes the model and must be stated.</p>
+<p><strong>Approach.</strong> Call <code>mle_difference(4, 0)</code>. The function requires both wins and losses to be positive and raises otherwise.</p>
+<p><strong>Why it holds for this fixture.</strong> With four wins and zero losses, the likelihood keeps increasing as the difference grows, approaching 1 without reaching it. There is no finite maximum, so any finite number returned would be arbitrary.</p>
+<p><strong>A tempting wrong approach.</strong> Plugging in a tiny loss count such as 0.001 to get a finite answer is the mistake if left unstated. That is a form of regularization, and it changes the model; the chosen prior must be reported.</p>
+<p><strong>How to verify.</strong> The reference wraps <code>mle_difference(4, 0)</code> in a try block and raises <code>Infinite MLE represented as finite</code> if no error occurs.</p>
 <p><strong>Expected observation:</strong> No finite maximum-likelihood difference exists.</p>
 <h3 id="5-test-numerical-stability">5. Test numerical stability<a class="heading-anchor" href="#5-test-numerical-stability" aria-label="Link to this section">#</a></h3>
 <p>Stable softplus arithmetic preserves the large finite loss without underflowing a probability to zero first.</p>
+<p><strong>Approach.</strong> Call <code>pair_loss([-1000, 1000])</code>. The preferred response has score -1000 and the rejected one 1000, so the difference is -2000.</p>
+<p><strong>Why it holds for this fixture.</strong> The loss is <code>logaddexp(0, 2000)</code>, which equals 2000 to machine precision. A naive form, -log(sigmoid(-2000)), would compute a sigmoid that underflows to 0 and then return infinity.</p>
+<p><strong>A tempting wrong approach.</strong> Computing the probability first and taking its log is the common error. The result is <code>inf</code> or <code>nan</code>, which then corrupts any average or gradient that includes it.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.isfinite(pair_loss([-1000, 1000]))</code> and that the value equals exactly 2000.</p>
 <p><strong>Expected observation:</strong> Loss remains finite at 2000.</p>
 <h3 id="6-interpret-a-preference-cycle">6. Interpret a preference cycle<a class="heading-anchor" href="#6-interpret-a-preference-cycle" aria-label="Link to this section">#</a></h3>
 <p>Their sum would need to be positive while algebraically equaling zero. Investigate stochasticity, annotator heterogeneity and multiple criteria.</p>
+<p><strong>Approach.</strong> Write the three preferences as scalar inequalities: a &gt; b, b &gt; c and c &gt; a. Sum the implied differences.</p>
+<p><strong>Why it holds for this fixture.</strong> (a - b) + (b - c) + (c - a) = 0, yet each term would need to be positive, so the sum would be positive. No scalar scores satisfy all three; case B shows a = 2, b = 1, c = 0 satisfies two but not c &gt; a.</p>
+<p><strong>A tempting wrong approach.</strong> Fitting a scalar reward anyway and reporting its order as the true ranking hides the cycle. The cycle may reflect label noise, different annotators or different criteria, and each calls for a different response.</p>
+<p><strong>How to verify.</strong> Case B asserts that <code>(a &gt; b) and (b &gt; c) and not (c &gt; a)</code> for the example scores. Check cycle frequency in the raw labels before fitting.</p>
 <p><strong>Expected observation:</strong> A deterministic scalar ordering cannot satisfy all three.</p></article>
   </main>
 </body>

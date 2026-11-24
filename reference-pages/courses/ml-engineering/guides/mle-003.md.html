@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Feature construction transforms raw events into one record for a decision. It must preserve the decision population, not merely return rows with convenient history. A request with no eligible feature is still a request and may need a default, an abstention or a failure response. Dropping it can change both model evaluation and service coverage.</p>
 <p>The first case constructs event aggregates using Polars with explicit entity, event-time and known-time conditions. The event window excludes the current cutoff while known-time eligibility includes it. These boundary choices are stated so the aggregate can be checked directly. The result has one row per request after aggregation.</p>
 <p>The second case distinguishes a real zero feature from an absent feature. It left-joins selected values back onto the complete request table and validates one-to-one matching. This pattern protects coverage even when an upstream tool omits unmatched rows. Later Feast lessons test that behavior against the actual prepared backend.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Feature window:</strong> The interval of events aggregated into one feature. Here the event window excludes the current cutoff while known-time eligibility includes it.</li>
+<li><strong>Request population:</strong> The complete set of decisions the system must answer. It stays authoritative even when some requests have no eligible feature history.</li>
+<li><strong>Request key:</strong> The stable identifier of one decision, used to group aggregates and to reattach features through a validated one-to-one left join.</li>
+<li><strong>Missingness:</strong> The absence of an eligible value. It must stay distinct from a real zero and needs a declared default, abstention or failure response.</li>
+<li><strong>Coverage:</strong> The share of requests that received an eligible feature value. Silently dropped requests change both evaluation and service behavior.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Join events to requests by entity, filter by the complete temporal rule, then group by the stable request identifier. The small candidate join is an inspectable mechanism, not an arbitrary-scale implementation. Reattach selected features to the authoritative request table with a validated left join so absent history does not erase requests.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

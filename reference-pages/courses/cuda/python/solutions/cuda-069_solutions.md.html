@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-predict-repeated-seeding">Exercise 1: Predict repeated seeding<a class="heading-anchor" href="#exercise-1-predict-repeated-seeding" aria-label="Link to this section">#</a></h3>
 <p>Repeated initialization repeats the sequence.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>predict repeated seeding</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Predict that two fresh generators seeded with 7, or one generator reseeded with 7, produce the same first draws. Reseeding resets the stream to its start.</p>
+<p><strong>Why it is correct here.</strong> A seeded pseudo-random generator is deterministic: the seed fixes the internal state, and the state fixes every subsequent draw. Worked example 1 shows two <code>Random(7)</code> objects agreeing on four draws.</p>
+<p><strong>A plausible wrong approach.</strong> Reseeding inside a training loop each step to get reproducibility makes every step see the same random numbers, so dropout masks or shuffles repeat and the experiment loses its randomness.</p>
+<p><strong>How to verify.</strong> Create <code>random.Random(7)</code> twice and compare the first four <code>random()</code> values; they must be equal. Then reseed one mid-stream and confirm it returns to the first value.</p>
 <h3 id="exercise-2-continue-a-stream">Exercise 2: Continue a stream<a class="heading-anchor" href="#exercise-2-continue-a-stream" aria-label="Link to this section">#</a></h3>
 <p>Retain the generator between batches.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>continue a stream</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Keep one generator object alive across batches and draw from it; the second batch continues the stream instead of repeating the first.</p>
+<p><strong>Why it is correct here.</strong> The reference draws <code>first</code>, then <code>second</code> from the same object and asserts <code>first != second</code>. The state after batch one is the starting point for batch two.</p>
+<p><strong>A plausible wrong approach.</strong> Creating a new generator per batch with the same seed makes each batch identical. Creating one per batch with <code>seed + batch</code> gives distinct but correlated-by-construction streams that are harder to reason about.</p>
+<p><strong>How to verify.</strong> Run the cuda-069 reference and check that <code>first != second</code> holds. Record the first value of each batch to show the continuation.</p>
 <h3 id="exercise-3-restore-generator-state">Exercise 3: Restore generator state<a class="heading-anchor" href="#exercise-3-restore-generator-state" aria-label="Link to this section">#</a></h3>
 <p>Save state before drawing.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>restore generator state</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Call <code>rng.getstate()</code> before drawing a batch, and later call <code>rng.setstate(saved)</code> to replay exactly that batch.</p>
+<p><strong>Why it is correct here.</strong> The state captures the whole generator, not just the seed. The reference saves state, draws <code>first</code>, draws <code>second</code>, restores, and asserts the replay equals <code>first</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Saving state after drawing the batch captures the position for the next batch. Restoring it replays <code>second</code>, not <code>first</code>, which is an off-by-one in time.</p>
+<p><strong>How to verify.</strong> In the reference, the assertion <code>first == [rng.random() for _ in range(4)]</code> after <code>setstate</code> is the check. It passes only if state was saved before the first draw.</p>
 <h3 id="exercise-4-design-a-distribution-check">Exercise 4: Design a distribution check<a class="heading-anchor" href="#exercise-4-design-a-distribution-check" aria-label="Link to this section">#</a></h3>
 <p>Check sample mean and variance with tolerances.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a distribution check</strong> is qualified there.</p>
+<p><strong>Approach.</strong> For a large sample, compare the sample mean and variance with the distribution&#x27;s known values within a tolerance. For uniform on [0, 1), the mean is 0.5 and variance 1/12.</p>
+<p><strong>Why it is correct here.</strong> Different backends implement different generators, so draw-by-draw equality is not a fair test across CPU and GPU. Statistical moments are a property every correct uniform generator shares.</p>
+<p><strong>A plausible wrong approach.</strong> Requiring exact equality between CuPy and Python random draws fails even when both are correct, because their algorithms differ. Using a tolerance tighter than sampling error also fails randomly.</p>
+<p><strong>How to verify.</strong> Draw 100000 values, compute mean and variance, and accept if each is within a tolerance chosen from sampling error, for example about <code>0.0037</code> for the mean (four times <code>0.2887 / sqrt(100000)</code>) at four standard errors. Record seed and sample size.</p>
 <h3 id="exercise-5-separate-backend-equality-from-exact-bytes">Exercise 5: Separate backend equality from exact bytes<a class="heading-anchor" href="#exercise-5-separate-backend-equality-from-exact-bytes" aria-label="Link to this section">#</a></h3>
 <p>Use numeric or statistical contracts.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate backend equality from exact bytes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write the contract as numeric or statistical agreement across backends, and reserve exact-byte equality for replays within the same backend, version and seed.</p>
+<p><strong>Why it is correct here.</strong> Worked example 2 notes that restoring Python state does not make CuPy or TensorFlow produce the same values. Their generators and parallel streams are different algorithms.</p>
+<p><strong>A plausible wrong approach.</strong> Hashing the output bytes of a CPU run and a GPU run and calling the mismatch a bug wastes debugging time on something that is not a defect.</p>
+<p><strong>How to verify.</strong> Verify within-backend replay by comparing bytes for the same seed twice. Verify cross-backend agreement with the moment test or with a downstream metric tolerance.</p>
 <h3 id="exercise-6-list-checkpoint-randomness">Exercise 6: List checkpoint randomness<a class="heading-anchor" href="#exercise-6-list-checkpoint-randomness" aria-label="Link to this section">#</a></h3>
 <p>Include Python, NumPy, framework, device and sampler state.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>list checkpoint randomness</strong> is qualified there.</p>
+<p><strong>Approach.</strong> List every source of randomness a resumed run needs: Python <code>random</code> state, NumPy generator state, the framework CPU and per-device generator states, and the data sampler or shuffler state.</p>
+<p><strong>Why it is correct here.</strong> Training uses several generators at once. Restoring only the Python state, as in this chapter&#x27;s reference, replays Python draws but not GPU dropout or the order the sampler yields batches.</p>
+<p><strong>A plausible wrong approach.</strong> Saving only the initial seed and reseeding on resume restarts the streams at the beginning, so the resumed run repeats the first epoch&#x27;s shuffles instead of continuing.</p>
+<p><strong>How to verify.</strong> Checkpoint, resume, and compare the next batch indices and a dropout mask with an uninterrupted run under the same backend. Both must match for the checkpoint to be complete.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Restored batch matches and continued batch differs.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-069_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

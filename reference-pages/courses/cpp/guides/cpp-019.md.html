@@ -201,6 +201,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Separate a lazy view from a materialized result and preserve ordering contracts.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A range combines an iterable start and end. A view can lazily filter or transform a range without owning a new collection. Laziness means the work happens during traversal, so later owner changes can affect what is seen. A projection selects a member for an algorithm without changing the record.</p>
+<ul>
+<li><strong>range:</strong> anything that provides a beginning and an end that can be traversed.</li>
+<li><strong>lazy view:</strong> a range adaptor such as a filter that does its work during iteration rather than when it is built.</li>
+<li><strong>materialization:</strong> copying a view&#x27;s results into an owning container so later changes to the source do not affect them.</li>
+<li><strong>projection:</strong> a member pointer or function such as <code>&amp;Score::points</code> that selects what an algorithm compares without changing the record.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>xs | std::views::filter(predicate) | std::views::transform(function)</code> composes lazy operations using the pipe operator. The referenced owner must outlive traversal. Materialize into a vector when an independent stable result is needed.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

@@ -10,6 +10,14 @@ Solve small linear systems, inspect residuals and distinguish a fitted predictio
 
 Open `julia-019` in `/classroom` with its prepared `julia` runtime. Worked case A (solve and check the residual) and worked case B (identical predictions from different coefficients) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-019: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Linear solve:** Computing `A \ b` to solve a linear system with a method suited to the matrix, rather than forming an explicit inverse.
+- **LU factorization:** Decomposing a square matrix into permuted lower and upper triangular factors once so several right-hand sides solve cheaply.
+- **Rank:** The number of linearly independent columns, which numerical code estimates with a tolerance on singular values.
+- **Pseudoinverse:** The `pinv` result that gives the minimum-norm least-squares solution when a system is rank deficient.
+- **Adjoint:** The conjugate transpose written `A'`, which equals the ordinary transpose only for real matrices.
+
 ## A matrix calculation needs named axes
 
 A linear system \(A x=b\) relates a matrix, a vector of unknowns and an observed right-hand side. The dimensions determine which products are defined, but they do not establish whether the solution is unique or stable. Name the row and column meanings before applying a numerical operation.
@@ -75,6 +83,8 @@ Choose tolerances according to scale, conditioning and the intended decision. A 
 ## Diagnose before optimizing
 
 Check dimensions, rank assumptions, input finiteness and residuals on small fixtures. An unexpected result can come from a transposed axis, a duplicated feature or an unsupported assumption about independence. Do not automatically regularize every failure without stating how the regularization changes the problem.
+
+A compact first check is to print `size(design)`, `rank(design)` and `norm(design * solution - target)` together. A rank below the number of columns explains why several coefficient vectors fit equally well, and a large residual means the system has no exact solution, so least squares is answering a different question.
 
 A pseudoinverse is a particular mathematical and numerical choice. It does not make a nonidentified parameter scientifically identifiable. Likewise, a factorization can solve an equation accurately while the equation is a poor model of the underlying data.
 

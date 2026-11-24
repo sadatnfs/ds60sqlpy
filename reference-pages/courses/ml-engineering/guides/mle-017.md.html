@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A model card should make intended use, inputs, evidence, limitations and operational ownership inspectable. It is not a certificate produced by filling a template. A useful card must reflect actual evaluated populations, known failure modes and the decision process used to accept or reject a version.</p>
 <p>The first case compares two synthetic slices with different sample sizes and true-positive rates. The counts remain visible, so a rate difference is not presented as a precise population conclusion. One parity metric does not establish fairness, and a model&#x27;s appropriate use depends on context, harms, alternatives and an adequately designed evaluation.</p>
 <p>The second case defines a small input allowlist and rejects an unnecessary email field. Data minimization reduces avoidable exposure and keeps the interface focused on its purpose. It does not establish legal compliance or prove that every allowed feature is appropriate. A real system needs separately qualified governance, access, retention and review processes.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Slice metric:</strong> A metric such as the true-positive rate computed for one subgroup from its own confusion counts and reported with its denominator.</li>
+<li><strong>Sample size:</strong> The number of cases behind a slice metric. Small slices give imprecise rates, so a rate difference is not a population conclusion.</li>
+<li><strong>Model card:</strong> A document recording intended use, inputs, evaluated populations, limitations, owner and rollback version for one model.</li>
+<li><strong>Data minimization:</strong> Accepting only the fields a purpose needs, enforced here with an input allowlist that rejects an unnecessary email field.</li>
+<li><strong>Governance:</strong> The access, retention, review and approval processes around a model, which must rest on actual evidence and be qualified separately.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Compute slice metrics from explicit confusion counts and retain their denominators. The card records purpose, permitted features, excluded fields, owner, limits and a rollback version. Compare incoming fields against the allowlist. Keep governance statements tied to actual evidence rather than treating an artifact&#x27;s filename as approval.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

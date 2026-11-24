@@ -5,29 +5,28 @@
 // assert.rejects(pending, error => error.name === 'AbortError!' && error.cause === reason);`
 // inside its check. Before running it, predict whether the check still passes and explain
 // why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause ===
-// reason)`. Restoring the original line brings back the worked observation: abortError with
-// the original reason as cause.
+// Expected: The changed run fails with an `AssertionError` at `await assert.rejects(pending,
+// error => error.name === 'AbortError!' && error.cause === reason);`. Restoring `await
+// assert.rejects(pending, error => error.name === 'AbortError' && error.cause === reason);`
+// brings back: abortError with the original reason as cause.
 
 // Exercise 2: Reject an already aborted request before work: diagnose an edited check
 // A careless edit changed a check in Example B so that it reads `await
 // assert.rejects(cancellableValue(7, controller.signal, trace), error => error !==
 // reason);`. Run Example B with that line, explain why the edited check now fails for the
 // same program state, and restore it.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.rejects(cancellableValue(7, controller.signal, trace), (error) => error ===
-// reason)`; after it the line reads `await assert.rejects(cancellableValue(7,
-// controller.signal, trace), error => error === reason);` again and the exact reason is
-// rejected; no timer starts.
+// Expected: Before the repair the run fails with an `AssertionError` at `await
+// assert.rejects(cancellableValue(7, controller.signal, trace), error => error !==
+// reason);`. Restoring `await assert.rejects(cancellableValue(7, controller.signal, trace),
+// error => error === reason);` brings back: the exact reason is rejected; no timer starts.
 
 // Exercise 3: Complete normally and clean up once
 // Run the custom operation without aborting, then abort its signal after completion.
-// Expected: value 7; started,completed,cleaned exactly once.
+// Expected: value 7; trace `started`, `completed`, `cleaned`, with cleanup exactly once.
 
 // Exercise 4: Cancel custom work and release its timer
 // Start the custom operation and immediately abort.
-// Expected: rejected reason; started,aborted,cleaned.
+// Expected: rejected reason; trace `started`, `aborted`, `cleaned`.
 
 // Exercise 5: Keep the first abort reason
 // Abort a controller twice and call throwIfAborted.

@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict all-2025 totals for both roles.</p>
 <p>Both totals are 123; an annual-only test would hide the monthly role difference.</p>
+<p><strong>Why it fits this model:</strong> Every 2025 order also ships in 2025 (the latest is S8, shipped 2025-02-04), so the year contains the same five lines, S4 to S8, in both roles.</p>
+<p><strong>Tempting mistake:</strong> Testing ShipRevenue only at the year level and calling it validated. 123 against 123 passes even if the measure ignored the ship role completely.</p>
+<p><strong>How to confirm:</strong> For Year 2025 both return 123; January returns 67 against 47 and February 56 against 76.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Move S6&#x27;s shipment back into January conceptually.</p>
 <p>January ShipRevenue would rise from 47 to 67 and February ShipRevenue fall from 76 to 56.</p>
+<p><strong>Why it fits this model:</strong> Only the ship role reads ShipDate. Moving S6&#x27;s 20 USD shipment to January makes ship revenue 47 + 20 = 67 in January and 76 - 20 = 56 in February.</p>
+<p><strong>Tempting mistake:</strong> Editing S6&#x27;s OrderDate instead moves OrderRevenue as well, so the comparison loses the very difference it is meant to show.</p>
+<p><strong>How to confirm:</strong> After the change OrderRevenue stays 67 and 56, and ShipRevenue becomes 67 and 56.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a clearly named shipment-revenue measure.</p>
 <p>ShipRevenue = CALCULATE([NetRevenue],USERELATIONSHIP(Sales[ShipDate],&#x27;Date&#x27;[Date])).</p>
+<p><strong>Why it fits this model:</strong> Put USERELATIONSHIP inside the measure, so every visual that uses ShipRevenue attributes by ShipDate and the active OrderDate relationship is switched off.</p>
+<p><strong>Tempting mistake:</strong> Adding <code>TREATAS ( VALUES ( &#x27;Date&#x27;[Date] ), Sales[ShipDate] )</code> while the order relationship stays active requires both dates in the month. January still shows 47, but February drops S6 and shows 56 instead of 76.</p>
+<p><strong>How to confirm:</strong> Check February, not January: the measure must return 76 under Year 2025 and MonthNumber 2.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose using a nonexistent computed date expression in USERELATIONSHIP.</p>
 <p>Model the required relationship or a separate date role first; the function does not create an arbitrary join.</p>
+<p><strong>Why it fits this model:</strong> USERELATIONSHIP switches on a relationship already defined between two columns. The inactive Sales[ShipDate] to &#x27;Date&#x27;[Date] link exists, so case A works.</p>
+<p><strong>Tempting mistake:</strong> Passing an expression such as <code>Sales[OrderDate] + 7</code> for an expected delivery date fails, because the arguments must be columns in an existing relationship.</p>
+<p><strong>How to confirm:</strong> Store an ExpectedDate column with an inactive relationship, then test it. Each 2025 order plus 7 days stays in its order month here (S6 lands on January 12), so January reads 67 and February 56.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why active/inactive status is not a security bypass.</p>
 <p>Real RLS behavior and model compatibility require explicit external validation; a hand-derived period comparison does not prove security propagation.</p>
+<p><strong>Why it fits this model:</strong> Choosing a relationship changes which date a fact is filed under. It does not change which rows a security role exposes, and Microsoft documents limits on using USERELATIONSHIP where row-level security applies to a related table.</p>
+<p><strong>Tempting mistake:</strong> Assuming the ship role could reveal rows a North-only role hides, or that a correct 67 against 47 proves the measure works under security, when that comparison ran with no role at all.</p>
+<p><strong>How to confirm:</strong> Under a tested North-only role, January order and ship revenue should both be 47 (S4 and S5); verify with the engine&#x27;s role testing, not by hand.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Choose between one shared Date table and separate OrderDate/ShipDate dimensions.</p>
 <p>Separate role-playing dimensions can make independent slicers clearer; a shared dimension with explicit role measures can suit comparable-period analysis.</p>
+<p><strong>Why it fits this model:</strong> Separate OrderDate and ShipDate dimensions allow two independent selections. Ordered in January 2025 and shipped in February 2025 selects S6 alone, 20.</p>
+<p><strong>Tempting mistake:</strong> Expecting one shared Date slicer to express that question. A single selection applies to whichever role each measure activates, so no visual can show the 20.</p>
+<p><strong>How to confirm:</strong> With separate dimensions, OrderDate January 2025 and ShipDate February 2025 return 20; with one Date table, use role measures for side-by-side comparisons such as 67 against 47.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

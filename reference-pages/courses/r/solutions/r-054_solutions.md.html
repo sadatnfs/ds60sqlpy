@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Count six raw category records with geom_bar.</p>
 <p>The three category heights are 2,1,3.</p>
 <p><strong>Expected evidence:</strong> Correct count heights.</p>
+<p><strong>Approach:</strong> Map only category in aes and add geom_bar, letting its default count statistic tally the six raw rows.</p>
+<p><strong>Why it holds here:</strong> d has two A rows, one B row and three C rows, and the factor levels fix the order A, B, C. stat_count therefore produces heights 2, 1 and 3 in that order.</p>
+<p><strong>Tempting mistake:</strong> Reaching for geom_histogram because the plot shows counts. The bin statistic needs a continuous x, so a factor such as category is rejected instead of being counted.</p>
+<p><strong>Verify:</strong> <code>as.numeric(ggplot2::ggplot_build(p)$data[[1]]$y)</code> returns 2, 1, 3.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Draw an existing count table with geom_col.</p>
 <p>The supplied counts are drawn directly rather than counting the three summary rows.</p>
 <p><strong>Expected evidence:</strong> Correct identity heights.</p>
+<p><strong>Approach:</strong> Map category to x and n to y on the counts table and draw geom_col, which uses the identity statistic.</p>
+<p><strong>Why it holds here:</strong> counts already holds one row per category with n = 2, 1 and 3, so the bar heights must be read straight from n. Counting those rows again would add nothing true.</p>
+<p><strong>Tempting mistake:</strong> Expanding the table back into rows with rep(counts$category, counts$n) and calling geom_bar. It happens to match here, but rep truncates a weighted count such as 2.5 to 2, so the bar height changes without warning.</p>
+<p><strong>Verify:</strong> <code>as.numeric(ggplot2::ggplot_build(identity)$data[[1]]$y)</code> returns 2, 1, 3.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Diagnose geom_bar(aes(category,n)) with the default statistic.</p>
 <p>The count statistic does not accept both x and y this way; use geom_col for supplied heights or remove y for raw counting.</p>
 <p><strong>Expected evidence:</strong> A specific contract error and repair.</p>
+<p><strong>Approach:</strong> Read the failure of geom_bar(aes(category, n)) as a contract violation: stat_count accepts one positional aesthetic. Repair it with geom_col, or with geom_bar(stat = &quot;identity&quot;).</p>
+<p><strong>Why it holds here:</strong> The counts table has already been summarized, so the y value must be drawn as given. The count statistic was built for raw records and refuses to choose between counting rows and using n.</p>
+<p><strong>Tempting mistake:</strong> Deleting n from aes and keeping geom_bar on the counts table. The plot now builds, but each category appears in one row, so all three bars have height 1 instead of 2, 1 and 3.</p>
+<p><strong>Verify:</strong> <code>inherits(try(ggplot2::ggplot_build(bad), silent = TRUE), &quot;try-error&quot;)</code> returns TRUE.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Construct two person-specific lines over shared times.</p>
 <p>The built line layer contains two groups and six observations.</p>
 <p><strong>Expected evidence:</strong> Two trajectories.</p>
+<p><strong>Approach:</strong> Map group = person, and colour = person for the legend, before adding geom_line and geom_point.</p>
+<p><strong>Why it holds here:</strong> Person A rises 1, 2, 3 and person B falls 3, 2, 1 over times 1 to 3. The two paths cross at time 2, where both values are 2, so separate groups are what show that they cross rather than bounce off each other.</p>
+<p><strong>Tempting mistake:</strong> Dropping both group and colour. All six rows become one group, and the single line jumps vertically at each time between the A and B values, which does not represent either person.</p>
+<p><strong>Verify:</strong> <code>length(unique(ggplot2::ggplot_build(lines)$data[[1]]$group))</code> returns 2.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Build a histogram with explicit binwidth and boundary and verify total count.</p>
 <p>The bin policy is recorded and the bin counts sum to the number of admitted observations.</p>
 <p><strong>Expected evidence:</strong> Histogram count conservation.</p>
+<p><strong>Approach:</strong> Set binwidth = 2, boundary = 0 and closed = &quot;left&quot; on geom_histogram for the values 1, 2, 3 and 4, then sum the built count column.</p>
+<p><strong>Why it holds here:</strong> With those settings 1 falls in the bin starting at 0, and 2 and 3 fall in the bin starting at 2. The value 4 sits exactly on a break, which is the case the closed argument and boundary must decide. Whatever happens to it, no value may be lost or counted twice.</p>
+<p><strong>Tempting mistake:</strong> Accepting the default of 30 bins and its message. Four values spread over 30 narrow bins leave most bins empty, so the plot looks like isolated spikes and the bin policy goes unrecorded.</p>
+<p><strong>Verify:</strong> <code>sum(ggplot2::ggplot_build(histogram)$data[[1]]$count)</code> returns 4.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain why changing bins can change a visual conclusion without changing observations.</p>
 <p>Different boundaries aggregate observations differently; use a documented policy and sensitivity checks before interpreting a pattern.</p>
 <p><strong>Expected evidence:</strong> Binning sensitivity identified.</p>
+<p><strong>Approach:</strong> Rebuild the same histogram with boundary = 1 and compare the built counts with the boundary 0 version before describing a shape.</p>
+<p><strong>Why it holds here:</strong> With boundary 1 and width 2 the bins hold 1 and 2, then 3 and 4, so the heights are 2 and 2 and the data look flat. Boundary 0 isolates the value 1 in its own bin and makes the heights unequal, although the four observations never changed.</p>
+<p><strong>Tempting mistake:</strong> Trying several boundaries and keeping the one that shows the expected pattern. That treats the layer transformation as evidence about the data.</p>
+<p><strong>Verify:</strong> Rebuilding with boundary = 1 returns counts 2 and 2, and both versions return a count total of 4.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

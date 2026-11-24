@@ -3,6 +3,28 @@
   "title": "Forward-mode automatic differentiation",
   "concepts": ["ForwardDiff", "dual number", "gradient", "Jacobian", "generic storage"],
   "outcome": "Differentiate supported numerical functions and validate derivatives while preserving the numeric representation carried by dual numbers.",
+  "key_terms": [
+    [
+      "ForwardDiff",
+      "A forward-mode automatic differentiation package that evaluates ordinary Julia code with dual numbers."
+    ],
+    [
+      "Dual number",
+      "A number carrying a value and derivative parts, so ordinary arithmetic propagates exact derivatives."
+    ],
+    [
+      "Gradient",
+      "The vector of partial derivatives of a scalar function, returned by `ForwardDiff.gradient`."
+    ],
+    [
+      "Jacobian",
+      "The matrix of partial derivatives of a vector-valued function, with one row per output and one column per input."
+    ],
+    [
+      "Generic storage",
+      "Buffers created with `similar` on the input so dual numbers fit, unlike a hard-coded `Float64` buffer that blocks differentiation."
+    ]
+  ],
   "level": "advanced",
   "minutes": 150,
   "prerequisites": ["julia-012", "julia-019"],
@@ -11,48 +33,67 @@
     ["ForwardDiff limitations", "https://juliadiff.org/ForwardDiff.jl/stable/user/limitations/"]
   ],
   "figure": 0,
+  "approach": "Check every automatic derivative against an independent calculation and its shape. `quadratic(x) = x[1]^2 + 3x[2]^2` has gradient `[2x1, 6x2]`, `vector_function` has a 2 by 2 Jacobian, and `generic_storage` uses `similar(x)` so dual numbers can pass through, while `hardcoded_storage` forces `Float64`.",
   "exercises": [
     {
       "title": "Differentiate analytically",
       "task": "Compute the gradient of x1 squared plus 3x2 squared at `[2, 3]`.",
       "expected": "The result is `[4, 18]`.",
       "hint": "Differentiate each coordinate separately.",
-      "answer": "An analytic case provides an independent reference for the AD implementation."
+      "answer": "An analytic case provides an independent reference for the AD implementation.",
+      "why": "At `[2, 3]`, 2 times 2 is 4 and 6 times 3 is 18, so the gradient is `[4, 18]`.",
+      "wrong": "Testing the gradient only against another AD call reproduces any mistake in the function definition.",
+      "verify": "Example A asserts `ForwardDiff.gradient(quadratic, x) ≈ [4, 18]` and a central finite difference along `[1, -1]` matching `dot([4, 18], direction)`."
     },
     {
       "title": "Check Jacobian axes",
       "task": "Differentiate the vector-valued function.",
       "expected": "Rows correspond to outputs and columns to inputs.",
       "hint": "Inspect the stated function shapes.",
-      "answer": "A transposed derivative array can have plausible values but the wrong meaning."
+      "answer": "A transposed derivative array can have plausible values but the wrong meaning.",
+      "why": "Row 1 is the derivative of `x1^2 + x2`, giving `[4, 1]`, and row 2 is the derivative of `x1 * x2`, giving `[3, 2]`.",
+      "wrong": "Transposing the Jacobian produces `[4 3; 1 2]`, which has plausible numbers but swaps outputs with inputs.",
+      "verify": "Example A asserts `ForwardDiff.jacobian(vector_function, x) ≈ [4 1; 3 2]`; the reference checks its size is `(2, 2)`."
     },
     {
       "title": "Preserve numeric types",
       "task": "Replace a hardcoded Float64 buffer with `similar(x)`.",
       "expected": "The dual-number path can retain derivative information.",
       "hint": "Use the input representation when the contract is generic.",
-      "answer": "Ordinary evaluation alone does not reveal a differentiation-incompatible conversion."
+      "answer": "Ordinary evaluation alone does not reveal a differentiation-incompatible conversion.",
+      "why": "`similar(x)` allocates storage with the input's element type, so dual numbers fit and the gradient `[4, 6]` is returned.",
+      "wrong": "Keeping `zeros(Float64, length(x))` works for plain evaluation but cannot store a dual number, so differentiation fails.",
+      "verify": "Example B asserts `@test_throws MethodError ForwardDiff.gradient(hardcoded_storage, x)` and the generic gradient `[4, 6]`."
     },
     {
       "title": "Compare reductions",
       "task": "Differentiate a sum and a mean of two inputs.",
       "expected": "Gradients are `[1, 1]` and `[0.5, 0.5]`.",
       "hint": "The denominator is part of the objective.",
-      "answer": "A reduction change alters gradient scale and cannot be treated as a cosmetic refactor."
+      "answer": "A reduction change alters gradient scale and cannot be treated as a cosmetic refactor.",
+      "why": "Each input contributes once to a sum, giving `[1, 1]`, while dividing by `length(x) = 2` halves that to `[0.5, 0.5]`.",
+      "wrong": "Switching a loss from sum to mean without adjusting the learning rate halves every step and changes training behavior.",
+      "verify": "The reference asserts both gradients at `[1.0, 2.0]`."
     },
     {
       "title": "Inspect a branch boundary",
       "task": "Evaluate a nonsmooth function near its kink.",
       "expected": "A library result needs a differentiability interpretation.",
       "hint": "The executed branch is not a symbolic proof.",
-      "answer": "At a nondifferentiable point, a returned convention should not be promoted to a unique mathematical derivative."
+      "answer": "At a nondifferentiable point, a returned convention should not be promoted to a unique mathematical derivative.",
+      "why": "At the kink of `abs` at 0, ForwardDiff follows whichever branch the code executes and returns that branch's slope.",
+      "wrong": "Reporting that value as the derivative of `abs` at 0 claims a unique derivative where only a subgradient set exists.",
+      "verify": "Evaluate the derivative just left and right of 0 and state the convention the library used at 0 itself."
     },
     {
       "title": "Validate a new gradient",
       "task": "Compare analytic or finite-difference directional behavior at several valid inputs.",
       "expected": "Use meaningful tolerances and retain failures.",
       "hint": "Separate approximation error from a wrong formula.",
-      "answer": "Derivative checks should inspect shapes, scales and domain assumptions before optimization."
+      "answer": "Derivative checks should inspect shapes, scales and domain assumptions before optimization.",
+      "why": "A directional finite difference with a small step approximates the derivative up to truncation and rounding error.",
+      "wrong": "Shrinking the step toward 1e-15 to tighten the check lets cancellation error dominate and makes a correct gradient look wrong.",
+      "verify": "Compare at several inputs with a stated tolerance, as example A does with `atol = 1e-8`, and keep any failing input."
     }
   ]
 }

@@ -10,25 +10,73 @@ The separate [CPU reference](../references/cuda-058_cpu.py) checks the chapter's
 
 A 2-by-3 logical tile with strides (3,1) maps coordinate (1,2) to offset five. A transposed view uses shape (3,2) and strides (1,3), mapping (2,1) to the same offset. Trace tiny layouts before interpreting a large template type.
 
+**Approach:** Compute offset as row times stride 3 plus column times stride 1 for the 2-by-3 tile, then apply the transposed view's strides (1, 3).
+
+**Why it is correct:** Coordinate (1, 2) gives 3 + 2 = 5, and the transposed (2, 1) gives 2 + 3 = 5, so both name the same element.
+
+**A plausible wrong approach:** Swapping shape without swapping strides makes the transposed view index the wrong memory entirely.
+
+**How to verify:** The reference asserts 1 * 3 + 2 == 5 and 2 * 1 + 1 * 3 == 5.
+
 ## Exercise 2
 
 An epilogue applies bias then ReLU to accumulated values \([-2,1,4]\) with bias one, producing \([0,2,5]\). Moving the bias after ReLU would produce \([1,2,5]\), changing semantics. A fused epilogue must match the reference order, type conversion and scaling contract.
+
+**Approach:** Add bias 1 to accumulators [-2, 1, 4] for [-1, 2, 5], then apply ReLU.
+
+**Why it is correct:** ReLU gives [0, 2, 5], matching the reference order of operations.
+
+**A plausible wrong approach:** Applying ReLU first and adding bias afterward gives [1, 2, 5], which changes the first element.
+
+**How to verify:** The reference asserts correct == [0, 2, 5] and wrong == [1, 2, 5].
 
 ## Exercise 3
 
 Four. Shape controls valid coordinates; strides control physical mapping.
 
+**Approach:** Multiply row 1 by stride 3 and add column 1 times stride 1.
+
+**Why it is correct:** The offset is 3 + 1 = 4, within the six-element tile.
+
+**A plausible wrong approach:** Using shape (2, 3) as strides gives 1 * 2 + 1 * 3 = 5, the wrong element.
+
+**How to verify:** Enumerate all six coordinates and confirm offsets 0 through 5 appear once.
+
 ## Exercise 4
 
 Runtime architecture and operation qualification, plus correct layout/alignment and library support. Compilation alone is not dispatch evidence.
+
+**Approach:** Check that the target architecture, operation, layout and alignment are supported at runtime.
+
+**Why it is correct:** Templates compile for configurations the device or library may not run.
+
+**A plausible wrong approach:** Treating a clean compile as proof of support ignores runtime dispatch requirements.
+
+**How to verify:** Run a small instantiation on the target and compare output with a reference GEMM.
 
 ## Exercise 5
 
 Use a supported tail strategy or reject unsupported shapes explicitly; do not assume padded storage contains valid zeros.
 
+**Approach:** Use the library's tail handling or reject shapes it does not support.
+
+**Why it is correct:** Padded storage outside the logical matrix may contain arbitrary values.
+
+**A plausible wrong approach:** Assuming the padding is zero adds garbage into partial tiles.
+
+**How to verify:** Test a 5-by-7 matrix against a host reference.
+
 ## Exercise 6
 
 When it expresses the required semantics and passes accuracy/performance tests while reducing maintenance; compare against the relevant library baseline first.
+
+**Approach:** Pick the library epilogue if it expresses the needed operation order and passes accuracy and speed tests.
+
+**Why it is correct:** It reduces custom code to maintain.
+
+**A plausible wrong approach:** Writing a custom kernel before checking the library duplicates tested work.
+
+**How to verify:** Compare both against a reference and a library baseline.
 
 ## Numerical reference and its limits
 

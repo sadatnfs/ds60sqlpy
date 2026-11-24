@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement chunked double buffering with pinned host memory and show or explain the overlap on a timeline.
+
 Work through *Pinned memory and overlapping transfer with compute* with the concrete cases below. Finish with this evidence:
 correct chunk boundaries and a timeline that either demonstrates overlap or explains why the current device/workload does not overlap. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Pinned host memory is page-locked storage that can support suitable asynchronous transfers. Pinning has a host resource cost, so use bounded reusable buffers rather than pinning arbitrary datasets. Overlap needs eligible transfers, independent work, compatible copy engines and correct dependencies. In double buffering, one slot can be computing while another is filled, but a producer must not overwrite a slot before its previous consumers finish. Chunk size trades fixed overhead against latency and memory. The word Async in an API name does not prove useful overlap occurred; a timeline supplies that evidence.
+
+### Key terms
+
+- **Pinned memory:** Page-locked host memory, allocated with `cudaMallocHost` or `cudaHostAlloc`, that the copy engine can transfer asynchronously.
+- **cudaMemcpyAsync:** A copy that is queued in a stream and can overlap with other streams when the host buffer is pinned.
+- **Double buffering:** Alternating two buffers so one chunk transfers while another is processed.
+- **Chunk size:** The amount of data per transfer and compute step, which trades per-operation overhead against overlap.
 
 ## Mathematical contract
 

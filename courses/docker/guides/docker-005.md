@@ -16,6 +16,14 @@ A successful build means the build instructions completed under the builder’s 
 
 The maintained fixture uses only Python’s standard library, so it can teach build mechanics without a package repository. Its base image is still an external dependency during the first build. Later chapters pin immutable identities and export prepared images for disconnected use. The local tag is intentionally never pushed by a course command.
 
+### Key terms
+
+- **Dockerfile:** A build recipe whose instructions define a sequence of filesystem and configuration changes for an image.
+- **`FROM`:** The instruction that selects the base image a build starts from.
+- **`COPY`:** The instruction that copies named files from the build context into the image.
+- **`CMD`:** The instruction that supplies the default command a future container runs; it does not execute during the build.
+- **Image tag:** A local, human-readable name for a built image; creating one does not push anything to a registry.
+
 ## Anatomy and a trace you can follow
 
 The final dot in `docker build -t NAME .` is the context directory, not punctuation to omit. Docker reads the Dockerfile relative to the command’s options and copies only eligible files from that context. The tag names the result locally. `--progress=plain` makes build steps and cache decisions visible in terminal logs.
@@ -80,7 +88,7 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 **Hint:** Compare the file's path with the context directory you passed.
 
-### Exercise 5: Explain why EXPOSE does not make localhost:8080 work.
+### Exercise 5: Explain why EXPOSE does not make `localhost:8080` work.
 
 **Hint:** Compare EXPOSE in the Dockerfile with ports in compose.yaml.
 
@@ -94,11 +102,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Expecting `RUN` to start the server or `CMD` to run at build time. Copying from a path outside the build context. Treating `EXPOSE` as port publishing.
 
-Exercise 4 is this chapter's boundary case: Diagnose COPY failure when a file is outside context. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose COPY failure when a file is outside context. Read the build log line that names the context size and the failing `COPY` source path before moving any file or widening the context directory. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using Dockerfile, FROM, COPY, RUN, CMD and image tag. Reconstruct worked example 2 (Build from the copied fixture) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. List the Dockerfile instructions of the fixture in order and say which one changes when only the source file changes. Then reconstruct worked example 2 (Build from the copied fixture) with one different value, predict what changes, and name which of Dockerfile, FROM, COPY, RUN, CMD and image tag the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

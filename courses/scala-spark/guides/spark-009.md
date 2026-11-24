@@ -28,7 +28,7 @@ Open `spark-009` in the classroom, select the Scala source, prepare the `scala-j
 
 A source file, a compiled class and a dependency artifact are different objects. The classroom compiles the single Scala source as Main.scala and runs object Main. A real project can organize source into packages and build modules, but this fixed single-file pad does not implicitly run sbt, download artifacts or resolve arbitrary dependencies. A build specification should record the actual Scala binary family, JDK and Spark version separately from the source text.
 
-Spark's Scala artifacts use a binary suffix such as spark-sql_2.13. A Scala 3 artifact or a2.12 artifact is not interchangeable merely because the package name looks similar. The authored worker target is Spark 4.0.1 with Scala binary 2.13 and JDK 17. The earlier expansion plan's4.2.0/JDK 21 tuple is a proposal, not evidence that this runtime has those versions. Each reference prints actual Scala and Java readback.
+Spark's Scala artifacts use a binary suffix such as spark-sql_2.13. A Scala 3 artifact or a 2.12 artifact is not interchangeable merely because the package name looks similar. The authored worker target is Spark 4.0.1 with Scala binary 2.13 and JDK 17. The earlier expansion plan's 4.2.0/JDK 21 tuple is a proposal, not evidence that this runtime has those versions. Each reference prints actual Scala and Java readback.
 
 A closure retains the values it needs from an outer scope. If a class method returns value => factor*value and factor is a field, the closure may retain the owner object to access that field. If the owner also contains a nonserializable resource, the function can fail when sent through Java serialization. The failure concerns the captured object graph, not whether the arithmetic expression itself is simple.
 
@@ -36,7 +36,7 @@ Copying the needed immutable numeric value into a local val can produce a closur
 
 The reference serializes only objects constructed inside its own process into an in-memory byte array. Deserialization is used only to round-trip those self-produced bytes; it is not a recipe for loading arbitrary untrusted serialized objects. A successful local round trip demonstrates that this function's captured state can be serialized under the current classes and runtime. It does not prove deployment to another JVM or executor has all compatible code and configuration.
 
-A master URL is also an execution boundary. The fixed teaching profile accepts only local[2], not a remote cluster address or unconstrained local[*]. The version report distinguishes an actual runtime readback from the intended Spark target. This keeps source/configuration evidence separate from a future cluster deployment or performance claim.
+A master URL is also an execution boundary. The fixed teaching profile accepts only `local[2]`, not a remote cluster address or unconstrained `local[*]`. The version report distinguishes an actual runtime readback from the intended Spark target. This keeps source/configuration evidence separate from a future cluster deployment or performance claim.
 
 ## Worked example / walkthrough
 
@@ -78,9 +78,9 @@ Construct an org.apache.spark coordinate for a lowercase hyphenated artifact bas
 
 ### Exercise 2: Keep execution local and bounded
 
-Accept exactly local[2] as the course master and reject remote addresses, local[*] and null. Return the accepted value without starting a session.
+Accept exactly `local[2]` as the course master and reject remote addresses, `local[*]` and null. Return the accepted value without starting a session.
 
-**Expected result/shape:** local[2] passes; local[*], spark://example:7077 and null raise IllegalArgumentException.
+**Expected result/shape:** `local[2]` passes; `local[*]`, `spark://example:7077` and null raise IllegalArgumentException.
 
 **Verify:** Assert the accepted literal and all three rejected values with no network action.
 

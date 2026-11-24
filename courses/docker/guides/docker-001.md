@@ -16,6 +16,14 @@ An image is not a miniature running computer. Starting two containers from one i
 
 Linux containers share the engine’s Linux kernel. On macOS and a Windows WSL 2 setup, the engine lives in a Linux environment managed by the desktop product or distribution. The application therefore follows Linux process and path rules even when your browser is on another operating system. A VM isolates a whole guest kernel; a container primarily isolates processes using the host kernel. Neither word alone tells you the strength of a deployment’s security boundary.
 
+### Key terms
+
+- **Process:** A running program together with its memory, open files and operating-system identity.
+- **Image:** A packaged, read-only filesystem plus startup configuration from which containers are created.
+- **Container:** A running or stopped instance created from an image, with its own writable layer and isolation settings.
+- **Writable layer:** The per-container record of file changes made on top of the image's read-only content.
+- **Shared kernel:** The engine's single Linux kernel, which every container on that engine uses instead of booting a guest kernel.
+
 ## Anatomy and a trace you can follow
 
 Read `docker run --rm IMAGE COMMAND` from left to right. `run` creates a new container and starts its main process. `--rm` asks Docker to remove that container after it exits. `IMAGE` selects a filesystem and defaults; the remaining arguments replace the default command when the image permits. This is different from `docker start NAME`, which restarts an existing container. A printed line is process output, while the exit status tells you whether that invocation reported success.
@@ -86,11 +94,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Treating the image as the running program, so removing an image looks like a way to delete data. Expecting `--rm` to remove the image as well as the container. Assuming a container on macOS or Windows runs on the host's own kernel.
 
-Exercise 4 is this chapter's boundary case: Explain why an exited container can still appear in docker ps -a. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Explain why an exited container can still appear in docker ps -a. Compare `docker ps` with `docker ps -a` for the same container ID before deciding anything was deleted, and read the STATUS column rather than the name. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using process, image, container, writable layer and shared kernel. Reconstruct worked example 2 (Compare image and process inventories) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. From memory, give one creation event and one removal event for each of image, container and writable layer. Then reconstruct worked example 2 (Compare image and process inventories) with one different value, predict what changes, and name which of process, image, container, writable layer and shared kernel the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

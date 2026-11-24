@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the raw repeated formula for Paper&#x27;s five lines.</p>
 <p>It repeats 91 five times, producing 455; the transitioned sum is 91.</p>
+<p><strong>Why it fits this model:</strong> Under Paper, SUMX visits five lines. A raw SUM inside sees the whole Paper context each time and returns 91, so the result is 5 x 91 = 455.</p>
+<p><strong>Tempting mistake:</strong> Thinking the raw SUM sees only the current line, as a SQL row expression would, predicts 91. The transition is what makes that true.</p>
+<p><strong>How to confirm:</strong> Under Paper, RawRepeated returns 455 and Transitioned returns 91.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Replace the transitioned inner SUM with [NetRevenue].</p>
 <p>The result stays 187 for unique Sales rows in this context.</p>
+<p><strong>Why it fits this model:</strong> [NetRevenue] includes an implicit CALCULATE, so each line becomes a filter on its own unique SaleID and contributes only its NetAmount. The total stays 187.</p>
+<p><strong>Tempting mistake:</strong> Expecting the measure to act like the raw SUM and return 1,496 forgets that measure references always transition.</p>
+<p><strong>How to confirm:</strong> <code>SUMX ( Sales, [NetRevenue] )</code> returns 187, while the raw version returns 1,496, which is 8 x 187.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write the simplest formula for this additive revenue total.</p>
 <p>SUM(Sales[NetAmount]) directly expresses the total without a per-row context transition.</p>
+<p><strong>Why it fits this model:</strong> NetAmount is stored per line and adds up across lines, so SUM(Sales[NetAmount]) gives 187 with no iterator and no transitions.</p>
+<p><strong>Tempting mistake:</strong> Keeping SUMX(Sales, [NetRevenue]) runs eight transitions to get the same 187, and it would overcount if two rows were identical (see the fifth exercise).</p>
+<p><strong>How to confirm:</strong> SUM(Sales[NetAmount]) and SUMX(Sales, Sales[NetAmount]) both return 187.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose fixing RawRepeated by dividing by COUNTROWS(Sales).</p>
 <p>It does not express the intended measure and can hide other context or blank issues. Correct the expression instead.</p>
+<p><strong>Why it fits this model:</strong> Dividing by the row count happens to work here, because the raw SUMX adds the total once per row. It does not give per-row values.</p>
+<p><strong>Tempting mistake:</strong> Applied to a Customer iteration, the patch still shows 187 for each customer, and SUMX(Customer, SUM(Sales[NetAmount])) / COUNTROWS(Sales) returns 748 / 8 = 93.5.</p>
+<p><strong>How to confirm:</strong> Per customer, [NetRevenue] returns Ada 51, Bo 80, Cy 56 and Di BLANK; the patched expression cannot produce those.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain the risk of two completely identical fact rows without a unique key.</p>
 <p>Both rows can match the transition on each iteration, so an inner aggregation can count both repeatedly.</p>
+<p><strong>Why it fits this model:</strong> A transition filters on every column&#x27;s value, not on a physical row. SaleID is unique today, so each line matches only itself.</p>
+<p><strong>Tempting mistake:</strong> If S5 were loaded twice with identical values, SUM would give 207, but SUMX(Sales, [NetRevenue]) would give 247, because each copy matches both copies (40 twice).</p>
+<p><strong>How to confirm:</strong> Before relying on transitions, check that COUNTROWS(Sales) equals DISTINCTCOUNT(Sales[SaleID]); both are 8 here.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the reasoning to a per-customer cost allocation.</p>
 <p>Define the allocation grain and denominator, then transition only where the measure should be evaluated for each customer or line.</p>
+<p><strong>Why it fits this model:</strong> To split a 100 USD charge by revenue, transition each customer with [NetRevenue] and divide by 187 bound outside the iterator: Ada gets about 27.27, Bo 42.78 and Cy 29.95.</p>
+<p><strong>Tempting mistake:</strong> A raw SUM inside SUMX(Customer, ...) gives every customer a share of 187 / 187 = 1, which allocates the full 100 to each of four customers.</p>
+<p><strong>How to confirm:</strong> The allocations should add to 100, and Di, with no sales, should receive BLANK.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

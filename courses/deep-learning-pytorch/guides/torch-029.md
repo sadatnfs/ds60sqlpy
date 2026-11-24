@@ -125,7 +125,7 @@ torch.testing.assert_close(
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Direct exponentials overflow to infinity, the stable loss equals \(\log(1+\exp(-1))\) within 1e-6, shifted logits give probabilities that match within 1e-6, gradients are finite and sum to about 0, bfloat16 has a larger range than float16, and a NaN logit raises ValueError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Expose naive overflow. Predict exercise 6, Reject a nonfinite input contract, from its prompt alone: Pass a NaN logit through an explicit finite-input validator. Then explain why this finish condition holds: Direct exponentials overflow to infinity, the stable loss equals \(\log(1+\exp(-1))\) within 1e-6, shifted logits give probabilities that match within 1e-6, gradients are finite and sum to about 0, bfloat16 has a larger range than float16, and a NaN logit raises ValueError. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -161,15 +161,15 @@ If a gradient becomes nonfinite, locate the first invalid stage rather than repl
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Compute a stable class loss) alters one assumption of Example A (Expose naive overflow). Hint 2: exercise 4, Inspect stable gradients, should end at finite gradients summing approximately 0. Work backward from it. Hint 3: exercise 5, Compare dtype ranges explicitly, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Overflow, Log-sum-exp, Mixed precision using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Check shift invariance, from its inputs alone. Predict whether exercise 3, Check a new shift, survives one changed input. Then explain Overflow, Log-sum-exp, Mixed precision in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-028` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Expose naive overflow) cannot be rebuilt without help, revisit `torch-028` first. Otherwise keep your exercise 2 attempt, Compute a stable loss for target 1, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

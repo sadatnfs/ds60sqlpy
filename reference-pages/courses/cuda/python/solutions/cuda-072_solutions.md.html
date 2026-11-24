@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-order-the-evidence-levels">Exercise 1: Order the evidence levels<a class="heading-anchor" href="#exercise-1-order-the-evidence-levels" aria-label="Link to this section">#</a></h3>
 <p>Import, visibility, allocation, launch, completion and correctness.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>order the evidence levels</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Order the evidence as import, device visibility, allocation, kernel launch, completion and correctness, and record each as passed, failed or not attempted.</p>
+<p><strong>Why it is correct here.</strong> Each stage depends on the previous one: no allocation without a visible device, no launch without an allocation, no correctness check without completion. The reference lists the six stages in this order and finds the first failure with <code>next(...)</code>, so a later stage is never credited when an earlier one is missing.</p>
+<p><strong>A plausible wrong approach.</strong> Collapsing all stages into one boolean <code>gpu_ok</code> hides where a failure happened and makes a correctness failure look like a missing driver.</p>
+<p><strong>How to verify.</strong> Run the cuda-072 reference: it marks correctness false and asserts the first failed stage is <code>correctness</code>.</p>
 <h3 id="exercise-2-classify-missing-device">Exercise 2: Classify missing device<a class="heading-anchor" href="#exercise-2-classify-missing-device" aria-label="Link to this section">#</a></h3>
 <p>Inspect explicit runtime exposure and host capability.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>classify missing device</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Classify a probe that imports CuPy but reports zero devices as a visibility failure, then check whether the runtime exposes devices and whether the host has an NVIDIA GPU.</p>
+<p><strong>Why it is correct here.</strong> Worked example 1 shows that import succeeded, so the Python package and its modules are present. The failure sits at the next stage, visibility, and allocation and launch were never reached, so they must be recorded as not attempted rather than failed.</p>
+<p><strong>A plausible wrong approach.</strong> Reinstalling CuPy treats the problem as a package issue when the package is fine; the missing piece is device exposure or hardware.</p>
+<p><strong>How to verify.</strong> Record import passed, visibility failed, allocation and later stages not attempted. Then check two independent facts: whether the container or process was started with the GPU exposed to it, and whether the host itself lists an NVIDIA device and a loaded driver.</p>
 <h3 id="exercise-3-classify-wrong-output">Exercise 3: Classify wrong output<a class="heading-anchor" href="#exercise-3-classify-wrong-output" aria-label="Link to this section">#</a></h3>
 <p>Correctness failure after execution.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>classify wrong output</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Classify a probe that launched, completed, and returned wrong values as a correctness failure after execution.</p>
+<p><strong>Why it is correct here.</strong> Worked example 2 describes exactly this. Launch and completion evidence are real and worth keeping, because they rule out driver and visibility problems, but readiness requires correct values, so the overall status is not ready and the investigation moves to the kernel or its inputs.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the probe as ready because the exit code was zero ignores the value check. A probe that prints wrong numbers and exits normally is worse than one that crashes, because nothing downstream notices.</p>
+<p><strong>How to verify.</strong> The reference sets correctness to False and asserts <code>failed == &quot;correctness&quot;</code>, while every earlier stage is True. A real probe should compare its output with a known host value, such as doubling <code>[1, 2, 3]</code> to <code>[2, 4, 6]</code>, and fail with the mismatched values printed.</p>
 <h3 id="exercise-4-design-fail-closed-device-selection">Exercise 4: Design fail-closed device selection<a class="heading-anchor" href="#exercise-4-design-fail-closed-device-selection" aria-label="Link to this section">#</a></h3>
 <p>Require requested backend and visible device.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design fail-closed device selection</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Make device selection fail closed: if the requested backend is CUDA and no visible device exists, raise an error instead of continuing on CPU.</p>
+<p><strong>Why it is correct here.</strong> A GPU-labeled result must come from a GPU. When the caller asked for CUDA, the only honest outcomes are a CUDA result or an error; failing closed keeps the label attached to the backend that actually ran.</p>
+<p><strong>A plausible wrong approach.</strong> Defaulting to CPU with a warning lets automated runs record a GPU pass for a CPU result.</p>
+<p><strong>How to verify.</strong> Run the selector on a CPU-only host requesting CUDA; it must raise. Run it requesting CPU explicitly; it must proceed with a CPU label.</p>
 <h3 id="exercise-5-explain-process-restart-after-fatal-device-error">Exercise 5: Explain process restart after fatal device error<a class="heading-anchor" href="#exercise-5-explain-process-restart-after-fatal-device-error" aria-label="Link to this section">#</a></h3>
 <p>Discard unhealthy execution context.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain process restart after fatal device error</strong> is qualified there.</p>
+<p><strong>Approach.</strong> After a fatal device error, end the process and start a fresh one rather than continuing to issue work in the same context.</p>
+<p><strong>Why it is correct here.</strong> Some CUDA errors, such as an illegal memory access inside a kernel, are sticky: the context stays in an error state and later calls in the same process keep failing or cannot be trusted. A new process gets a new context.</p>
+<p><strong>A plausible wrong approach.</strong> Catching the exception and retrying in the same process often fails again, and if it seems to succeed the evidence is suspect.</p>
+<p><strong>How to verify.</strong> Record the error, restart, rerun the probe stages, and require all six stages to pass in the new process.</p>
 <h3 id="exercise-6-compare-alternative-backend-labels">Exercise 6: Compare alternative backend labels<a class="heading-anchor" href="#exercise-6-compare-alternative-backend-labels" aria-label="Link to this section">#</a></h3>
 <p>Name CUDA, ROCm, MPS or CPU truthfully.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare alternative backend labels</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Name the backend that ran: CUDA for NVIDIA, ROCm for AMD, MPS for Apple, or CPU, and never relabel one as another.</p>
+<p><strong>Why it is correct here.</strong> Each backend has its own runtime, operator coverage and numerical behavior. A result on Apple MPS or AMD ROCm can be correct and useful, but it is not evidence that the CUDA path works.</p>
+<p><strong>A plausible wrong approach.</strong> Calling any accelerator run a GPU pass loses which runtime produced it, so a CUDA requirement can be satisfied by an Apple run on paper.</p>
+<p><strong>How to verify.</strong> Check the device object&#x27;s type string (for example <code>cuda:0</code> or <code>mps</code>) and record it beside every result.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Fixture fails at correctness, not readiness success.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-072_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

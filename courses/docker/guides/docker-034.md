@@ -16,6 +16,14 @@ A safe migration procedure identifies the starting schema, validates preconditio
 
 The fixture counter includes a schema_version field so learners can discuss this boundary without a full database. The course does not run destructive migrations on the main classroom’s progress store. Work on copied synthetic records and a separate disposable restore target.
 
+### Key terms
+
+- **Migration:** A change that moves stored data or a schema from one version to another.
+- **Schema version:** A stored marker, such as the fixture's `schema_version` field, that tells code which data format it is reading.
+- **Rollback:** Returning to an earlier image, which does not automatically reverse a data migration.
+- **Durable state:** Data that outlives containers and images and therefore carries its own version and recovery needs.
+- **Precondition:** A fact about the starting schema or data that a migration verifies before changing anything.
+
 ## Anatomy and a trace you can follow
 
 An expand-and-contract approach first adds a compatible representation, allows both versions to work, migrates data and only later removes the old representation. It costs temporary complexity but can reduce deployment downtime. A tiny offline app may instead choose a documented maintenance window and an exclusive migration.
@@ -89,11 +97,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Rolling back the image and expecting the data to roll back too. Migrating without a verified backup. Letting old and new writers run against incompatible formats.
 
-Exercise 4 is this chapter's boundary case: Diagnose an old reader failing after deployment rollback. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an old reader failing after deployment rollback. Read the version marker in the stored data and compare it with the versions the rolled-back reader accepts before restarting it again. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using migration, schema version, rollback and durable state. Reconstruct worked example 2 (Plan a compatible transition) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Recall the order of the compatible transition and the point after which rollback needs a migration back. Then reconstruct worked example 2 (Plan a compatible transition) with one different value, predict what changes, and name which of migration, schema version, rollback and durable state the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

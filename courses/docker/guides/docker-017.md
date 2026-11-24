@@ -16,6 +16,14 @@ An Apple Silicon laptop commonly runs arm64 natively while many hosted runners u
 
 Cross-compilation and emulation are distinct strategies. A compiler may emit target binaries while itself running natively; an emulator executes foreign instructions. Some projects need target-specific libraries or test hosts. A release matrix must name which platforms were actually built and executed.
 
+### Key terms
+
+- **CPU architecture:** A machine instruction family such as `amd64` or `arm64` that a binary is compiled for.
+- **Image index:** A multi-platform list that points to platform-specific images so the engine can select a compatible one.
+- **Target platform:** The operating system and architecture pair, such as `linux/arm64`, requested with the `--platform` option.
+- **Emulation:** Executing foreign-architecture instructions through a translator such as QEMU, which is slower and does not prove native behavior.
+- **Cross-compilation:** A compiler running natively while emitting binaries for a different target architecture.
+
 ## Anatomy and a trace you can follow
 
 BuildKit exposes platform arguments such as BUILDPLATFORM and TARGETPLATFORM. A Dockerfile may choose a native builder stage and pass the target into a compiler. Do not use these names as a substitute for correct compiler flags. A multi-platform build also needs an output strategy compatible with your image store or a deliberate export.
@@ -91,11 +99,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Assuming Linux means amd64. Treating an emulated run as proof of native performance. Loading a multi-platform index into an image store that holds one platform.
 
-Exercise 4 is this chapter's boundary case: Diagnose exec format error. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose exec format error. Compare the image platform with the host architecture and check the executable's format before reading any application code. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using CPU architecture, image index, --platform, emulation and cross-compilation. Reconstruct worked example 2 (Read the index model) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Name the image index entry the engine selects on an arm64 host and the error a mismatched binary produces. Then reconstruct worked example 2 (Read the index model) with one different value, predict what changes, and name which of CPU architecture, image index, --platform, emulation and cross-compilation the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

@@ -28,7 +28,7 @@ Open `spark-006` in the classroom, select the Scala source, prepare the `scala-j
 
 A domain model makes valid states explicit. A Paid event carries cents, a Voided event carries a reason, and a Refunded event carries refund cents. A single record with status text and several nullable fields would allow combinations such as a paid event with no amount or an unknown status spelling. Separate case classes make those differences visible in types and pattern matches.
 
-`sealed trait Event { def id: String }` says every event exposes an identity. `final case class Paid(id: String, cents: Long) extends Event` defines one allowed shape with immutable fields. Case-class equality compares every field, not only the monetary amount. Paid("p1",100L) and Paid("p2",100L) are distinct events despite equal values. Data-grain reasoning must therefore preserve the ID rather than deduplicate a projection of cents.
+`sealed trait Event { def id: String }` says every event exposes an identity. `final case class Paid(id: String, cents: Long) extends Event` defines one allowed shape with immutable fields. Case-class equality compares every field, not only the monetary amount. `Paid("p1", 100L)` and `Paid("p2", 100L)` are distinct events despite equal values. Data-grain reasoning must therefore preserve the ID rather than deduplicate a projection of cents.
 
 A match expression returns a value. `event match { case Paid(_, amount) => amount ... }` extracts the amount from the Paid shape. The underscore deliberately ignores a field; it is not a missing value. A sealed family lets the compiler warn when a defined shape is omitted, but a warning does not automatically prevent execution in every compiler configuration. The final references cover every case explicitly and assertions include every state.
 
@@ -77,9 +77,9 @@ Every case returns a String, so the match is itself a String-valued expression. 
 
 Return the event's identity for every domain state. Test two paid events with equal cents but different IDs and verify constructor rejection of a blank ID.
 
-**Expected result/shape:** Paid(p1,100), Paid(p2,100), Voided(v1, duplicate), Refunded(r1,25) retain IDs p1, p2, v1, r1. A blank-ID Paid cannot be constructed.
+**Expected result/shape:** `Paid(p1, 100)`, `Paid(p2, 100)`, `Voided(v1, duplicate)`, `Refunded(r1, 25)` retain IDs p1, p2, v1, r1. A blank-ID Paid cannot be constructed.
 
-**Verify:** Assert the four IDs in input order and catch IllegalArgumentException for Paid("",100L).
+**Verify:** Assert the four IDs in input order and catch IllegalArgumentException for `Paid("", 100L)`.
 
 **Progressive hint:** The trait already declares the shared id contract.
 
@@ -97,7 +97,7 @@ Return paid, voided or refunded through an exhaustive pattern match. Include Ref
 
 Return positive cents for Paid, negative cents for Refunded, and zero for Voided. Stored payment/refund magnitudes must remain within constructor bounds. Test observed zero and a rejected negative magnitude.
 
-**Expected result/shape:** The fixture contributes 100, 100, 0, -25. Refunded(r0,0) contributes 0 but remains refunded; Paid with -1 cents is rejected.
+**Expected result/shape:** The fixture contributes `100`, `100`, `0` and `-25`. `Refunded(r0, 0)` contributes 0 but remains refunded; Paid with -1 cents is rejected.
 
 **Verify:** Assert exact signed contributions, zero-refund behavior and the constructor failure for a negative paid amount.
 
@@ -107,7 +107,7 @@ Return positive cents for Paid, negative cents for Refunded, and zero for Voided
 
 Return a new Paid value with the same ID and a revised amount, leaving the original unchanged. Use copy and preserve constructor validation for an out-of-domain amount.
 
-**Expected result/shape:** Paid(p1,100) revised to 125 becomes Paid(p1,125), while the original remains 100. Amount 1000001 is rejected.
+**Expected result/shape:** `Paid(p1, 100)` revised to 125 becomes `Paid(p1, 125)`, while the original remains 100. Amount 1000001 is rejected.
 
 **Verify:** Assert old/new amounts and equal IDs, then catch the out-of-domain constructor failure.
 
@@ -117,7 +117,7 @@ Return a new Paid value with the same ID and a revised amount, leaving the origi
 
 Compute the checked Long sum of signedCents for every event. Empty input returns 0. Preserve all domain states in the source even when their numerical contribution is zero.
 
-**Expected result/shape:** The four-event fixture nets 175 cents. Paid(z,0) and Voided(v, reason) together net 0 while remaining two distinct events.
+**Expected result/shape:** The four-event fixture nets 175 cents. `Paid(z, 0)` and Voided(v, reason) together net 0 while remaining two distinct events.
 
 **Verify:** Assert 175, empty 0, and a two-event zero-total fixture without filtering either event.
 

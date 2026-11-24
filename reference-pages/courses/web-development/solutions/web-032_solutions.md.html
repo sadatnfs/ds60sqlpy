@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-032.md</code>.</p>
 <h3 id="exercise-1-predict-strict-equality-for-0-0-and-false">Exercise 1: Predict strict equality for &#x27;0&#x27;, 0 and false.<a class="heading-anchor" href="#exercise-1-predict-strict-equality-for-0-0-and-false" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Each has a different type, so cross-type strict comparisons are false.</p>
+<p><strong>Approach:</strong> Note the type of each value, string, int and bool, and recall that <code>===</code> returns false whenever the two types differ.</p>
 <p><strong>Why:</strong> === compares type and value, so a string, an integer and a boolean are never strictly equal to each other.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>==</code> and reporting true fails because loose comparison converts types first and hides the distinction the question asks about.</p>
+<p><strong>How to verify:</strong> Running <code>var_export</code> on each strict pair prints false three times.</p>
 <h3 id="exercise-2-add-a-typed-diagnostic-to-a-value-before-converting-it">Exercise 2: Add a typed diagnostic to a value before converting it.<a class="heading-anchor" href="#exercise-2-add-a-typed-diagnostic-to-a-value-before-converting-it" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The output identifies the actual type rather than relying on its printed appearance.</p>
+<p><strong>Approach:</strong> Print <code>get_debug_type($value)</code> before converting, so the output names the actual type such as string or int.</p>
 <p><strong>Why:</strong> A typed diagnostic shows whether &#x27;0&#x27; is a string or an integer, which echo alone hides.</p>
+<p><strong>Plausible wrong approach:</strong> Printing the value with <code>echo</code> fails because &#x27;30&#x27; and 30 look identical in output while their types differ.</p>
+<p><strong>How to verify:</strong> The diagnostic line reads string for the raw input and int after the deliberate conversion.</p>
 <h3 id="exercise-3-model-an-optional-note-without-confusing-missing-empty-and-null">Exercise 3: Model an optional note without confusing missing, empty and null.<a class="heading-anchor" href="#exercise-3-model-an-optional-note-without-confusing-missing-empty-and-null" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The program documents and checks the chosen interpretation of each state.</p>
+<p><strong>Approach:</strong> Use <code>array_key_exists</code> to detect a missing key, then check for null, then check for an empty string, each with a stated meaning.</p>
 <p><strong>Why:</strong> array_key_exists distinguishes a missing key from a key holding null, while ?? treats both the same, so the chosen meaning must be explicit.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>empty($record[&#x27;note&#x27;])</code> fails because it treats a missing key, null, &#x27;&#x27; and &#x27;0&#x27; as the same state.</p>
+<p><strong>How to verify:</strong> Four test records, missing, null, empty and a real note, each produce a different documented label.</p>
 <h3 id="exercise-4-repair-a-loose-comparison-that-accepts-an-unintended-type">Exercise 4: Repair a loose comparison that accepts an unintended type.<a class="heading-anchor" href="#exercise-4-repair-a-loose-comparison-that-accepts-an-unintended-type" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Use strict comparison after deliberate validation and conversion.</p>
+<p><strong>Approach:</strong> Validate the input with a pattern or a filter, convert it explicitly with <code>(int)</code>, and then compare with <code>===</code>.</p>
 <p><strong>Why:</strong> Loose comparison coerces types, so values such as &#x27;1&#x27; and true can compare equal unexpectedly; strict comparison after validation removes that surprise.</p>
+<p><strong>Plausible wrong approach:</strong> Adding a cast inside a loose comparison fails because the loose operator still accepts other spellings you did not intend.</p>
+<p><strong>How to verify:</strong> The repaired check rejects &#x27;1e1&#x27; when only &#x27;10&#x27; is allowed and accepts the exact expected value.</p>
 <h3 id="exercise-5-test-zero-as-a-valid-numeric-boundary">Exercise 5: Test zero as a valid numeric boundary.<a class="heading-anchor" href="#exercise-5-test-zero-as-a-valid-numeric-boundary" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Zero is retained when the contract permits it, rather than discarded as generic falsy data.</p>
+<p><strong>Approach:</strong> Run the program with 0 as a valid entry and confirm that a strict null check, not truthiness, decides whether it is kept.</p>
 <p><strong>Why:</strong> 0 is falsy, so a truthiness check such as <code>if ($minutes)</code> drops a valid zero; compare with null or use a range check instead.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>if ($minutes)</code> fails because 0 is falsy, so a legitimate zero entry is skipped as if it were missing.</p>
+<p><strong>How to verify:</strong> The output lists the zero entry, and the total includes it as 0 rather than omitting the row.</p>
 <h3 id="exercise-6-explain-the-limited-scope-of-stricttypes">Exercise 6: Explain the limited scope of strict_types.<a class="heading-anchor" href="#exercise-6-explain-the-limited-scope-of-stricttypes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It affects relevant scalar call coercions; it does not replace runtime validation or static analysis.</p>
+<p><strong>Approach:</strong> State that <code>strict_types</code> changes how scalar arguments are coerced at function calls in this file, and nothing more.</p>
 <p><strong>Why:</strong> strict_types controls scalar coercion for calls made from that file; it does not validate ranges, formats or array contents at runtime.</p>
+<p><strong>Plausible wrong approach:</strong> Claiming strict mode validates form input fails because data from requests is still a string that needs explicit checks.</p>
+<p><strong>How to verify:</strong> Passing &#x27;30&#x27; to an <code>int</code> parameter under strict mode throws a TypeError, while comparisons elsewhere are unaffected.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-032_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

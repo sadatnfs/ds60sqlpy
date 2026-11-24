@@ -14,6 +14,14 @@ For binary treatment, an inverse-probability score is
 
 Its average targets an additive population effect under the identification assumptions. These are probability weights attached to treatment assignment. Survey inclusion weights, censoring weights and transport weights represent different mechanisms and must be derived separately before being multiplied together.
 
+## Key terms
+
+- **Positivity:** The requirement that every covariate pattern in the target support has a treatment probability strictly between zero and one.
+- **Practical overlap:** Whether the observed sample actually contains useful treated and control comparisons, even when the theoretical probabilities are nonzero.
+- **Inverse-probability weight:** A weight of 1/e(x) for treated units and 1/(1 - e(x)) for controls that rebuilds the target population within each arm.
+- **Overlap weighting:** Weighting strata in proportion to p(x)e(x)(1 - e(x)), which targets the population where either treatment is plausible rather than the original population.
+- **Effective sample size:** Kish's concentration summary (sum of weights) squared divided by the sum of squared weights; it equals n for equal weights and shrinks as weights concentrate.
+
 ## Worked case 1: exact balance in a finite population
 
 The program builds 100 records across two covariate strata. Treatment probabilities are .2 and .8. Outcomes follow \(Y=1+4X+2A\), so the known intervention effect is two everywhere. The raw treated and control groups have different covariate compositions. Inverse-probability weighting nevertheless recovers two exactly because the fixture repeats each cell in its stated probability proportion.
@@ -49,6 +57,38 @@ The program rejects probabilities of zero or one explicitly. It does not silentl
 **Can outcome regression solve a positivity violation?** A fitted model can extrapolate into missing cells, but the result then relies on its extrapolation assumptions. That may be an informed modeling decision; it is not the same evidence as an observed comparison.
 
 **Should effective sample size replace the original count in a confidence formula?** Not automatically. The estimator, estimated weights, dependence structure and design determine the uncertainty calculation. Use the concentration measure to reveal influential contributions, then derive or resample the actual analysis procedure at the correct unit.
+
+## Worked example: Weights that balance versus weights that change the population
+
+```python
+import numpy as np
+
+e = np.array([0.05, 0.20, 0.50, 0.80, 0.95])  # propensity of five units
+treated = np.array([1, 0, 1, 1, 0])
+
+
+def ess(w):
+    return w.sum() ** 2 / (w**2).sum()
+
+
+ipw = np.where(treated == 1, 1 / e, 1 / (1 - e))
+overlap = np.where(treated == 1, 1 - e, e)
+print("IPW weights:    ", ipw.round(2), " ESS", round(ess(ipw), 2))
+print("overlap weights:", overlap.round(2), " ESS", round(ess(overlap), 2))
+print("share of IPW weight on unit 0:", round(ipw[0] / ipw.sum(), 3))
+print("tilting function e(1-e):", (e * (1 - e)).round(4))
+```
+
+Observed output:
+
+```text
+IPW weights:     [20.    1.25  2.    1.25 20.  ]  ESS 2.45
+overlap weights: [0.95 0.2  0.5  0.2  0.95]  ESS 3.67
+share of IPW weight on unit 0: 0.449
+tilting function e(1-e): [0.0475 0.16   0.25   0.16   0.0475]
+```
+
+Unit 0 has propensity 0.05 and was treated, so its inverse-probability weight is \(1/0.05=20\), and unit 4, an untreated unit with propensity 0.95, gets \(1/(1-0.95)=20\) as well. Those two units carry most of the total weight of 44.5; unit 0 alone holds 0.449 of it. The effective sample size \((\sum w)^2/\sum w^2 = 44.5^2/807.125 = 2.45\) says the five observations behave like fewer than three equally weighted ones. Overlap weights replace the extreme values with 0.95 and raise the effective sample size to 3.67, but they do not estimate the same quantity. Their implied target population is tilted by \(e(1-e)\), which is 0.25 at the center and only 0.0475 for units 0 and 4, so the estimate describes people whose treatment was genuinely uncertain. Moving unit 0's propensity to 0.01 would raise its IPW weight to 100 and drive the effective sample size toward one, while its overlap weight would barely change.
 
 ## Complete reproducible program
 

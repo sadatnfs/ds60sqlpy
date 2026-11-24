@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-write-three-constraints">Exercise 1: Write three constraints<a class="heading-anchor" href="#exercise-1-write-three-constraints" aria-label="Link to this section">#</a></h3>
 <p>Use measurable limits with units.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>write three constraints</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write three measurable constraints with units, such as peak memory at most 8 GiB, p95 latency at most 20 ms and held-out accuracy at least 0.9.</p>
+<p><strong>Why it is correct here.</strong> Constraints with units and thresholds can be checked mechanically against candidate measurements. Vague goals such as fast enough cannot reject any candidate.</p>
+<p><strong>A plausible wrong approach.</strong> Writing a single goal of maximizing speed ignores memory and quality, so the fastest candidate wins even when it cannot run on the device or produces worse answers.</p>
+<p><strong>How to verify.</strong> Each constraint should map to a field in the candidate records: <code>memory</code>, <code>latency</code> and <code>quality</code> in the reference fixture, with a comparison operator and threshold.</p>
 <h3 id="exercise-2-filter-infeasible-candidates">Exercise 2: Filter infeasible candidates<a class="heading-anchor" href="#exercise-2-filter-infeasible-candidates" aria-label="Link to this section">#</a></h3>
 <p>Reject memory and quality violations before speed ranking.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>filter infeasible candidates</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Filter infeasible candidates before ranking by speed: B needs 12 GiB on an 8 GiB device and C has quality 0.80 below 0.9, so only A remains.</p>
+<p><strong>Why it is correct here.</strong> A candidate that violates a hard constraint cannot be deployed whatever its speed. B&#x27;s 10 ms timing is irrelevant because the model does not fit.</p>
+<p><strong>A plausible wrong approach.</strong> Ranking all candidates by latency first and picking B, then trying to make it fit later, wastes effort and treats a hard constraint as a preference.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>valid == [&#x27;A&#x27;]</code>. Change B&#x27;s memory to 8 and confirm it then becomes valid, showing the filter responds to the constraint.</p>
 <h3 id="exercise-3-choose-a-bottleneck-hypothesis">Exercise 3: Choose a bottleneck hypothesis<a class="heading-anchor" href="#exercise-3-choose-a-bottleneck-hypothesis" aria-label="Link to this section">#</a></h3>
 <p>Tie a change to a trace.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose a bottleneck hypothesis</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Choose one bottleneck hypothesis tied to a trace, such as the latency dominated by host-to-device copies, and name the change that would test it.</p>
+<p><strong>Why it is correct here.</strong> A hypothesis grounded in a measured trace predicts which change should help. If the change does not move the measured stage, the hypothesis was wrong.</p>
+<p><strong>A plausible wrong approach.</strong> Making several optimizations at once without a hypothesis means any improvement cannot be attributed to a cause, and regressions get hidden by gains elsewhere.</p>
+<p><strong>How to verify.</strong> Record the trace before and after the single change and check that the targeted stage shrank while results stayed the same.</p>
 <h3 id="exercise-4-preserve-rollback">Exercise 4: Preserve rollback<a class="heading-anchor" href="#exercise-4-preserve-rollback" aria-label="Link to this section">#</a></h3>
 <p>Keep the unchanged baseline runnable.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>preserve rollback</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Preserve a rollback path: keep the unchanged baseline runnable with its configuration and recorded metrics so it can be restored if the new candidate fails.</p>
+<p><strong>Why it is correct here.</strong> A rollback provides a known-good fallback and a reference for comparing later measurements, so deployment risk stays bounded.</p>
+<p><strong>A plausible wrong approach.</strong> Replacing the baseline code in place leaves no way to reproduce earlier results or revert quickly.</p>
+<p><strong>How to verify.</strong> Run the baseline from its saved configuration and confirm it reproduces the recorded metric within tolerance.</p>
 <h3 id="exercise-5-design-failure-tests">Exercise 5: Design failure tests<a class="heading-anchor" href="#exercise-5-design-failure-tests" aria-label="Link to this section">#</a></h3>
 <p>Test bounded invalid inputs and resource refusal.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design failure tests</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design failure tests with bounded invalid inputs, such as wrong dtype, oversized batch and empty input, and test that resource refusal produces a clear error.</p>
+<p><strong>Why it is correct here.</strong> A GPU service should fail predictably. Rejecting an oversized request is better than an out-of-memory crash that also affects other requests.</p>
+<p><strong>A plausible wrong approach.</strong> Testing only valid inputs leaves error paths untested, and those paths are where GPU services typically fail in production.</p>
+<p><strong>How to verify.</strong> Assert each invalid input yields a specific error and that the service still answers a valid request afterward.</p>
 <h3 id="exercise-6-state-evidence-gaps">Exercise 6: State evidence gaps<a class="heading-anchor" href="#exercise-6-state-evidence-gaps" aria-label="Link to this section">#</a></h3>
 <p>Pending GPU validation must remain visible.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>state evidence gaps</strong> is qualified there.</p>
+<p><strong>Approach.</strong> State evidence gaps explicitly: candidate measurements in the fixture are illustrative, and any GPU timing not measured on target hardware stays marked as pending validation.</p>
+<p><strong>Why it is correct here.</strong> A decision record must show which numbers were measured and which were assumed. Hiding gaps makes an unverified choice look final.</p>
+<p><strong>A plausible wrong approach.</strong> Presenting fixture numbers such as 18 ms as measured performance claims evidence that does not exist.</p>
+<p><strong>How to verify.</strong> Include a section listing each unmeasured quantity and the hardware run that would measure it, and check that no unmeasured value is labeled as measured.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Only candidate A satisfies all three constraints.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-104_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

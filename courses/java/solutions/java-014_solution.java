@@ -53,5 +53,6 @@ public class Main {
     // Exercise 6: Expose nonassociative subtraction
     assert (10 - 3) - 2 == 5 && 10 - (3 - 2) == 9;
     assert java.util.stream.IntStream.rangeClosed(1, 100).parallel().sum() == 5050;
+    System.out.println("java-014: all six exercises passed");
   }
 }

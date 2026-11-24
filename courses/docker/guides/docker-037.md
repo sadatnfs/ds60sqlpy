@@ -16,6 +16,14 @@ The study app is intentionally host-loopback only and uses HTTP for local teachi
 
 Proxy headers such as a forwarded client address are claims from the proxy chain. An application should trust them only from known proxies under an explicit configuration. Accepting arbitrary client-supplied forwarding headers can break rate limits or audit attribution.
 
+### Key terms
+
+- **TLS:** A protocol that authenticates the server identity and encrypts traffic in transit under a certificate trust model.
+- **Certificate:** A signed document binding a server name to a public key, which clients verify through trusted issuers.
+- **Reverse proxy:** A server that receives client requests and forwards them to an upstream application, often terminating TLS.
+- **Public exposure:** Making a service reachable from the internet, which adds identity, access control, patching and abuse handling duties.
+- **Forwarded header:** A proxy-added claim about the original client, which an application should trust only from known proxies.
+
 ## Anatomy and a trace you can follow
 
 Draw the full request path before configuring a proxy: client name resolution, public endpoint, TLS handshake, proxy routing, upstream connection and application response. Each hop has its own timeout and identity. A certificate for one hostname does not validate a different name merely because both resolve to the same IP.
@@ -89,11 +97,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Treating HTTPS as authorization. Trusting forwarded headers from any client. Publishing the learning server to the internet.
 
-Exercise 4 is this chapter's boundary case: Diagnose a proxy 502 separately from an app 404. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a proxy 502 separately from an app 404. Read the proxy log for the upstream it contacted and request the app route directly from an owned vantage point before changing either side. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using TLS, reverse proxy, certificate and public exposure. Reconstruct worked example 2 (Compare identity and routing failures) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Match a certificate mismatch, a proxy 502 and an app 401 to the layer that failed. Then reconstruct worked example 2 (Compare identity and routing failures) with one different value, predict what changes, and name which of TLS, reverse proxy, certificate and public exposure the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

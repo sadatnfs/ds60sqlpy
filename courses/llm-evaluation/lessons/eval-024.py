@@ -77,7 +77,8 @@ def worked_a():
 worked_a()
 
 # Task 1: Set the target policy equal to the behavior policy in case A.
-# Task 2: Use target rows[0.9,0.1] and[0.1,0.9] with the exact synthetic outcome table.
+# Task 2: Use target rows `[0.9, 0.1]` and `[0.1, 0.9]` with the exact synthetic outcome
+# table.
 # Task 3: Give an action zero behavior probability but positive target probability.
 # Task 4: Set every outcome-model prediction to zero.
 # Task 5: Compare IPS and SNIS in case B.

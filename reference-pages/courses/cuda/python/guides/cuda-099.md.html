@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Gradient accumulation splits an effective batch across microbatches and delays the optimizer step. To match a full mean-loss gradient, weight each microbatch by its number of examples divided by the total. Equal division by microbatch count works only when sizes are equal. Batch-dependent layers, random state and optimizer timing can still break equivalence.</p>
 <p>Activation checkpointing saves selected intermediates and recomputes others during backward. It exchanges compute for memory rather than eliminating arithmetic. PyTorch checkpoint utilities and TensorFlow recomputation mechanisms have framework-specific state and randomness rules. Frozen parameters still occupy storage, and upstream activations may remain necessary for trainable downstream components. Compare updates first, then measured peak memory and time.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Gradient accumulation:</strong> Summing gradients over several microbatches before one optimizer step to emulate a larger batch.</li>
+<li><strong>Microbatch weighting:</strong> Scaling each microbatch loss so the accumulated gradient equals the average over the full batch.</li>
+<li><strong>Activation checkpointing:</strong> Discarding selected activations in forward and recomputing them in backward to trade compute for memory.</li>
+<li><strong>Frozen weights:</strong> Parameters with gradient tracking disabled, which need no gradient or optimizer-state memory.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Microbatch mean gradients 2 and 8 over sizes 3 and 1 combine to<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo>×</mo><mn>2</mn><mo>+</mo><mn>1</mn><mo>×</mo><mn>8</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>4</mn><mo>=</mo><mn>3.5</mn></mrow><annotation encoding="application/x-tex">(3\times2+1\times8)/4=3.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">8</span><span class="mclose">)</span><span class="mord">/4</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3.5</span></span></span></span>. Averaging the two means gives 5, which is wrong for the effective batch.</p>
@@ -213,6 +220,28 @@ wrong <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</s
 <span class="syntax-keyword">assert</span> weighted <span class="syntax-operator">==</span> <span class="syntax-number">3.5</span> <span class="syntax-operator">and</span> wrong <span class="syntax-operator">==</span> <span class="syntax-number">5</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU accumulation oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> weighted<span class="syntax-punctuation">,</span> wrong<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Correct weighted gradient 3.5 versus incorrect 5.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>sizes</code></td>
+<td><code>[3, 1]</code></td>
+</tr>
+<tr>
+<td><code>means</code></td>
+<td><code>[2.0, 8.0]</code></td>
+</tr>
+<tr>
+<td><code>weighted</code></td>
+<td><code>3.5</code></td>
+</tr>
+<tr>
+<td><code>wrong</code></td>
+<td><code>5.0</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -225,17 +254,23 @@ wrong <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</s
 <p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-weighted-accumulation">Exercise 1: Compute weighted accumulation<a class="heading-anchor" href="#exercise-1-compute-weighted-accumulation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute weighted accumulation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Averaging the two means, <code>(2 + 8)/2 = 5</code>, gives the single example in the second microbatch the same weight as the three in the first, so it counts three times as much as it should.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-find-unequal-batch-normalization-error">Exercise 2: Find unequal-batch normalization error<a class="heading-anchor" href="#exercise-2-find-unequal-batch-normalization-error" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>find unequal-batch normalization error</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Trusting that the loop is right because it matches the full-batch gradient on evenly divisible data hides the error, which only appears for an uneven final microbatch.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-place-optimizer-steps">Exercise 3: Place optimizer steps<a class="heading-anchor" href="#exercise-3-place-optimizer-steps" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>place optimizer steps</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calling <code>zero_grad()</code> inside the microbatch loop discards earlier contributions, so only the last microbatch affects the update.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-checkpoint-recomputation">Exercise 4: Explain checkpoint recomputation<a class="heading-anchor" href="#exercise-4-explain-checkpoint-recomputation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>explain checkpoint recomputation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Checkpointing every layer when memory is not the constraint adds recomputation with no benefit.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-account-for-frozen-weights">Exercise 5: Account for frozen weights<a class="heading-anchor" href="#exercise-5-account-for-frozen-weights" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>account for frozen weights</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming a frozen model costs nothing in memory leads to under-budgeting by the full parameter size.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-equal-update-tests">Exercise 6: Design equal-update tests<a class="heading-anchor" href="#exercise-6-design-equal-update-tests" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design equal-update tests</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Running the comparison with dropout enabled and different seeds produces differences that hide or mimic accumulation bugs.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

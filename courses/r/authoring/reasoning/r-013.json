@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Inspecting what each closure captured",
+      "body": "After `a <- make_multiplier(2); b <- make_multiplier(3)` from the reference, the enclosing environments can be read directly:\n\n```text\nexpression                                   result\nls(environment(a))                           \"factor\"\nenvironment(a)$factor                        2\nenvironment(b)$factor                        3\nidentical(environment(a), environment(b))    FALSE\n```\n\nEach call to make_multiplier created a separate environment holding its own factor, which is why a and b do not interfere. Reading these values is useful for debugging; assigning into them from outside would hide configuration in a place no caller can see.\n\nThe threshold check in the reference uses 20 for a reason:\n\n```text\npolicy                    threshold used   predicate(20)\nforced at construction    10               TRUE\nlazy, read at first call  100              FALSE\n```\n\n20 sits between the original 10 and the rebinding to 100, so it is the one input that separates the two policies. A test value of 5 or 200 would give the same answer under both, and the missing force call would go unnoticed."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Read the call in two stages: `make_multiplier(4)` returns a function with factor 4, and `(2)` calls that function.",
+      "why": "The returned function computes x times its captured factor, so 2 times 4 is 8.",
+      "wrong": "Rewriting it as `make_multiplier(4, 2)`. The factory takes one argument, so R stops with an unused argument error instead of returning 8.",
+      "verify": "`make_multiplier(4)(2)` returns 8."
+    },
+    {
+      "approach": "Build `a <- make_multiplier(2)` and `b <- make_multiplier(3)` as two separate calls.",
+      "why": "Each call creates a fresh environment, so a holds factor 2 and b holds factor 3, and neither reads a global setting.",
+      "wrong": "Using one function that reads a global `factor` variable. Setting it to 3 for b also changes a, so a(5) becomes 15.",
+      "verify": "`a(5)` returns 10 and `b(5)` returns 15; `environment(a)$factor` shows 2."
+    },
+    {
+      "approach": "Call `force(threshold)` in make_threshold before returning the predicate.",
+      "why": "The caller sets t to 10, builds the predicate and then sets t to 100. Forcing fixes 10 at construction, so 20 counts as meeting the threshold.",
+      "wrong": "Leaving out force. The promise is first evaluated when predicate(20) runs, when t is already 100, so the result is FALSE.",
+      "verify": "`predicate(20)` returns TRUE, which the reference checks."
+    },
+    {
+      "approach": "Trace lazy_factory: v is 2 at construction, becomes 5, and `lazy(3)` is the first call that reads factor. Fix it by forcing the argument.",
+      "why": "The promise reads v only on first use, so it sees 5 and returns 15 rather than the intended 6.",
+      "wrong": "Calling `lazy(3)` once before changing v. That does evaluate the promise and fix it at 2, but the result now depends on call order, which any refactor can break.",
+      "verify": "The reference `lazy(3)` returns 15; the forced `fixed(3)` from Example 2 returns 6."
+    },
+    {
+      "approach": "Force the factor, then check numeric, length one and finite before building the closure.",
+      "why": "`NA_real_` is numeric and has length 1, so only `is.finite()` rejects it. Checking at construction reports the problem where the configuration was set.",
+      "wrong": "Deferring the check to the inner function or skipping it. `make_multiplier(NA_real_)(2)` would then return NA, and the error, if any, appears far from the bad setting.",
+      "verify": "In the reference `bad` returns TRUE, and `is.finite(NA_real_)` returns FALSE."
+    },
+    {
+      "approach": "Pass configuration as arguments or capture it with force, and avoid `<<-` updates that change behavior between calls.",
+      "why": "This lesson already shows a hidden dependency: `lazy(3)` returned 15 or 6 depending on code that ran between definition and use.",
+      "wrong": "A closure that increments a counter with `<<-` to label runs. Rerunning a pipeline in the same session gives different labels than a fresh session, so results cannot be reproduced.",
+      "verify": "Calling `fixed(3)` before and after `rate <- 5` returns 6 both times."
+    }
+  ]
+}

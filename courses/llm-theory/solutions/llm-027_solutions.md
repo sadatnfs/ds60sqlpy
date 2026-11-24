@@ -1,6 +1,6 @@
 # llm-027: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these calibration and comparable evaluation answers after attempting *Weight three documents* through *Reject incompatible tokenizer scores*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Represent an empty bin* points to one step. `llm-027_solution.py` holds the assertions; this page explains how they test calibration. Then try *Reject incompatible tokenizer scores* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -31,7 +31,7 @@ np.testing.assert_allclose(means3.mean(), 7 / 3, atol=1e-12, rtol=0)
 
 **Expected:** token-weighted mean 13/8 = 1.625; document mean 7/3, about 2.333.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.average(means3, weights=counts3)` matches `13 / 8` within 1e-12 and `means3.mean()` matches `7 / 3` within 1e-12.
+**Verify:** For *Weight three documents*, a fresh-process check confirms `np.average(means3, weights=counts3)` matches `13 / 8` within 1e-12 and `means3.mean()` matches `7 / 3` within 1e-12.
 
 ## Exercise 2: Summarize a second calibration bin
 
@@ -50,7 +50,7 @@ np.testing.assert_allclose(conf2.mean() - correct2.mean(), 0.2, atol=1e-12, rtol
 
 **Expected:** count 5, mean confidence 0.8, accuracy 0.6: overconfident by 0.2.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(conf2) == 5`, `conf2.mean()` matches `0.8` within 1e-12, `correct2.mean() == 0.6` and `conf2.mean() - correct2.mean()` matches `0.2` within 1e-12.
+**Verify:** For *Summarize a second calibration bin*, a fresh-process check confirms `len(conf2) == 5`, `conf2.mean()` matches `0.8` within 1e-12, `correct2.mean() == 0.6` and `conf2.mean() - correct2.mean()` matches `0.2` within 1e-12.
 
 ## Exercise 3: Represent an empty bin
 
@@ -69,7 +69,7 @@ assert summary == {"count": 0, "accuracy": None}
 
 **Expected:** count 0 and accuracy None.
 
-**Verify:** In a fresh process, the exercise checks confirm `summary == {'count': 0, 'accuracy': None}`.
+**Verify:** For *Represent an empty bin*, a fresh-process check confirms `summary == {'count': 0, 'accuracy': None}`.
 
 ## Exercise 4: Check boundary membership
 
@@ -85,7 +85,7 @@ assert (int(low.sum()), int(high.sum())) == (1, 3) and int((low | high).sum()) =
 
 **Expected:** counts 1 and 3, total 4.
 
-**Verify:** In a fresh process, the exercise checks confirm `(int(low.sum()), int(high.sum())) == (1, 3)` and `int((low | high).sum()) == 4`.
+**Verify:** For *Check boundary membership*, a fresh-process check confirms `(int(low.sum()), int(high.sum())) == (1, 3)` and `int((low | high).sum()) == 4`.
 
 ## Exercise 5: Align paired errors
 
@@ -104,7 +104,7 @@ assert diff.mean() == 0
 
 **Expected:** differences [-1, 1], mean 0.
 
-**Verify:** In a fresh process, the exercise checks confirm `diff` equals `[-1, 1]` and `diff.mean() == 0`.
+**Verify:** For *Align paired errors*, a fresh-process check confirms `diff` equals `[-1, 1]` and `diff.mean() == 0`.
 
 ## Exercise 6: Reject incompatible tokenizer scores
 
@@ -120,8 +120,8 @@ assert left != right
 
 **Expected:** direct token-loss comparison marked incompatible.
 
-**Verify:** In a fresh process, the exercise checks confirm `left != right`.
+**Verify:** For *Reject incompatible tokenizer scores*, a fresh-process check confirms `left != right`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Check boundary membership* and predict the result first; keep *Align paired errors* failing beside the repair. Log a missing NumPy separately from a wrong calibration value in `llm-027`.

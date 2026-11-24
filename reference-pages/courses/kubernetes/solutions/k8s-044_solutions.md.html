@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-pod-ip-membership-in-the-fixture-cidr">Exercise 1: Predict Pod-IP membership in the fixture CIDR.<a class="heading-anchor" href="#exercise-1-predict-pod-ip-membership-in-the-fixture-cidr" aria-label="Link to this section">#</a></h3>
 <p>Use network arithmetic rather than text comparison. Membership says nothing yet about whether the address is allocated or reachable.</p>
 <p><strong>Expected:</strong> 10.244.1.7 belongs to 10.244.0.0/16.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Apply the /16 mask to 10.244.1.7 and compare the network bits with 10.244.0.0.</li>
+<li><strong>Why it is correct:</strong> A /16 fixes the first two octets, and 10.244 matches, so the address is inside the range regardless of the last two octets.</li>
+<li><strong>Plausible wrong approach:</strong> Comparing strings, such as checking that both start with 10.244.0, would wrongly reject 10.244.1.7.</li>
+<li><strong>How to verify:</strong> Membership is true, with no claim yet that the address is allocated or reachable.</li>
+</ul>
 <h3 id="exercise-2-compare-16-and-24-address-set-sizes">Exercise 2: Compare/16 and/24 address set sizes.<a class="heading-anchor" href="#exercise-2-compare-16-and-24-address-set-sizes" aria-label="Link to this section">#</a></h3>
 <p>Prefix length counts fixed bits. More fixed bits leave fewer varying address bits.</p>
 <p><strong>Expected:</strong> The/24 is the smaller, more specific network.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Count varying bits for each prefix length: 16 for /16 and 8 for /24.</li>
+<li><strong>Why it is correct:</strong> More fixed prefix bits leave fewer host bits, so a /24 holds 256 addresses and a /16 holds 65536.</li>
+<li><strong>Plausible wrong approach:</strong> Reading the larger number 24 as the larger network reverses the relationship.</li>
+<li><strong>How to verify:</strong> The /24 is identified as the smaller, more specific network.</li>
+</ul>
 <h3 id="exercise-3-build-a-nonoverlapping-synthetic-address-plan-table">Exercise 3: Build a nonoverlapping synthetic address-plan table.<a class="heading-anchor" href="#exercise-3-build-a-nonoverlapping-synthetic-address-plan-table" aria-label="Link to this section">#</a></h3>
 <p>The plan must include networks outside Kubernetes that the caller traverses. Ignoring the host can leave an otherwise coherent cluster unreachable.</p>
 <p><strong>Expected:</strong> Node, Pod and Service ranges plus host/VPN ranges are compared.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List node, Pod and Service ranges together with host and VPN ranges, and check each pair for overlap.</li>
+<li><strong>Why it is correct:</strong> A caller routes through its own host and VPN networks first, so an overlap there can capture traffic before it reaches the cluster.</li>
+<li><strong>Plausible wrong approach:</strong> Checking only the three cluster ranges against each other misses a VPN range that shadows the Pod CIDR.</li>
+<li><strong>How to verify:</strong> Every pair in the table, including host and VPN ranges, is shown not to overlap.</li>
+</ul>
 <h3 id="exercise-4-diagnose-a-vpn-route-overlapping-the-pod-range">Exercise 4: Diagnose a VPN route overlapping the Pod range.<a class="heading-anchor" href="#exercise-4-diagnose-a-vpn-route-overlapping-the-pod-range" aria-label="Link to this section">#</a></h3>
 <p>Locate the first wrong next hop. Changing a Service selector does not repair the host route decision.</p>
 <p><strong>Expected:</strong> The caller can select an unintended route before cluster delivery.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Trace the caller&#x27;s route lookup for a Pod address and find the first hop that leaves the intended path.</li>
+<li><strong>Why it is correct:</strong> When a VPN route overlaps the Pod range, the host may prefer it, so packets leave toward the VPN before the cluster sees them.</li>
+<li><strong>Plausible wrong approach:</strong> Editing the Service selector cannot change which route the host chose for the destination address.</li>
+<li><strong>How to verify:</strong> The answer names the overlapping VPN route as the first wrong next hop.</li>
+</ul>
 <h3 id="exercise-5-explain-why-256-addresses-do-not-guarantee-256-allocatable-endpoints">Exercise 5: Explain why 256 addresses do not guarantee 256 allocatable endpoints.<a class="heading-anchor" href="#exercise-5-explain-why-256-addresses-do-not-guarantee-256-allocatable-endpoints" aria-label="Link to this section">#</a></h3>
 <p>Arithmetic cardinality is only one input. The allocator and network design determine actual usable capacity.</p>
 <p><strong>Expected:</strong> Reservation and implementation rules reduce or constrain allocation.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Separate the address count of a /24 from how many addresses the allocator will hand out.</li>
+<li><strong>Why it is correct:</strong> Network and broadcast addresses, gateway reservations and per-node block sizes reduce or partition what can be assigned to Pods.</li>
+<li><strong>Plausible wrong approach:</strong> Planning for 256 Pods per /24 assumes every address is assignable, which no implementation guarantees.</li>
+<li><strong>How to verify:</strong> The answer names at least one reservation or allocation rule that reduces usable endpoints.</li>
+</ul>
 <h3 id="exercise-6-defend-an-address-plan-for-a-second-local-cluster">Exercise 6: Defend an address plan for a second local cluster.<a class="heading-anchor" href="#exercise-6-defend-an-address-plan-for-a-second-local-cluster" aria-label="Link to this section">#</a></h3>
 <p>Multiple local clusters still share a host environment. Explicit planning prevents hard-to-diagnose cross-target ambiguity.</p>
-<p><strong>Expected:</strong> Ranges and routes avoid collisions with the first cluster and host networks.</p></article>
+<p><strong>Expected:</strong> Ranges and routes avoid collisions with the first cluster and host networks.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Choose node, Pod and Service ranges for the second cluster that avoid the first cluster&#x27;s and the host&#x27;s ranges.</li>
+<li><strong>Why it is correct:</strong> Both clusters share one host routing table, so overlapping ranges make destinations ambiguous on that host.</li>
+<li><strong>Plausible wrong approach:</strong> Copying the first cluster&#x27;s defaults for convenience creates identical ranges and routes that conflict.</li>
+<li><strong>How to verify:</strong> Every range in the new plan is distinct from the first cluster and the host networks.</li>
+</ul></article>
   </main>
 </body>
 </html>

@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Run a complete Julia script, trace bindings and distinguish a computed value from printed output.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-001</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (trace a calculation) and worked case B (rebinding a scalar) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-001: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Script:</strong> A <code>main.jl</code> file that Julia runs from top to bottom in a fresh process, so no state survives from an earlier run.</li>
+<li><strong>Binding:</strong> An association between a name and a value, so reassigning the name points it at a new value without changing the old one.</li>
+<li><strong>Expression value:</strong> The result an expression returns, which a script shows only when the program prints it, unlike the REPL that echoes each result.</li>
+<li><strong>Type:</strong> The concrete kind of a value, such as <code>Int64</code> or <code>String</code>, reported by <code>typeof</code> and attached to values rather than to names.</li>
+<li><strong>Just-in-time compilation:</strong> Julia compiles a method for the argument types of its first call, so that call can be slower than later calls.</li>
+</ul>
 <h3 id="the-execution-model">The execution model<a class="heading-anchor" href="#the-execution-model" aria-label="Link to this section">#</a></h3>
 <p>Julia evaluates expressions to values. A value has a type, such as an integer, floating-point number or string. A name is a binding to a value. Assignment changes that binding; it is not a mathematical equation that must remain true after later assignments. This distinction is the first tool for explaining what a program actually did.</p>
 <p>The classroom executes a source file called <code>main.jl</code> in a fresh Julia process. It does not preserve variables from an earlier Run. Saving a source draft or note is separate from retaining a running interpreter. A script also differs from the interactive REPL: a bare expression can be displayed automatically in the REPL, while a script generally needs <code>println</code> or another output operation to make a result visible.</p>

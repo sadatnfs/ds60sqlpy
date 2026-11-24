@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-013.md</code>.</p>
 <h3 id="exercise-1-identify-the-missing-information-in-a-red-only-error-dot">Exercise 1: Identify the missing information in a red-only error dot.<a class="heading-anchor" href="#exercise-1-identify-the-missing-information-in-a-red-only-error-dot" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The user needs a textual error meaning and a useful recovery action.</p>
+<p><strong>Approach:</strong> List what a reader needs from an error: what went wrong and what to do next, then check which of these the red dot conveys.</p>
 <p><strong>Why:</strong> Color alone fails people with color-vision differences and screen-reader users, so the error needs words and a recovery instruction.</p>
+<p><strong>Plausible wrong approach:</strong> Making the dot bigger or a brighter red fails because readers with color vision differences or a screen reader still get no words.</p>
+<p><strong>How to verify:</strong> The repaired status contains visible text such as Needs attention plus a recovery step, readable in grayscale.</p>
 <h3 id="exercise-2-add-a-focus-visible-style-without-removing-focus-support">Exercise 2: Add a focus-visible style without removing focus support.<a class="heading-anchor" href="#exercise-2-add-a-focus-visible-style-without-removing-focus-support" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Keyboard focus is visibly distinguishable from hover.</p>
+<p><strong>Approach:</strong> Add a <code>:focus-visible</code> outline with an offset and a color distinct from the hover style, without any <code>outline: none</code> rule.</p>
 <p><strong>Why:</strong> :focus-visible matches when the browser decides a focus indicator is needed, such as keyboard navigation, so keyboard users get a clear ring.</p>
+<p><strong>Plausible wrong approach:</strong> Styling focus identically to hover fails because a user cannot tell whether the highlighted control is focused or just under the pointer.</p>
+<p><strong>How to verify:</strong> Tab to a button and see the outline; hover another button and see a different, weaker change.</p>
 <h3 id="exercise-3-build-status-cards-whose-meaning-does-not-depend-on-color">Exercise 3: Build status cards whose meaning does not depend on color.<a class="heading-anchor" href="#exercise-3-build-status-cards-whose-meaning-does-not-depend-on-color" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each card contains a clear label, readable text and visible interactive focus.</p>
+<p><strong>Approach:</strong> Give each card a text label like Ready or Needs attention, use color only as reinforcement, and keep interactive elements focusable with a visible ring.</p>
 <p><strong>Why:</strong> Text carries the meaning, so color only reinforces it and the cards remain understandable in monochrome or forced colors.</p>
+<p><strong>Plausible wrong approach:</strong> Encoding status in a colored left border alone fails because the meaning disappears in grayscale and is never announced.</p>
+<p><strong>How to verify:</strong> Switch the preview to grayscale with a filter in developer tools; every card&#x27;s status is still readable as words.</p>
 <h3 id="exercise-4-diagnose-a-focus-ring-clipped-by-overflow">Exercise 4: Diagnose a focus ring clipped by overflow.<a class="heading-anchor" href="#exercise-4-diagnose-a-focus-ring-clipped-by-overflow" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect the ancestor clipping boundary and provide space or a different visible indicator.</p>
+<p><strong>Approach:</strong> Inspect ancestors of the focused control for <code>overflow: hidden</code> and either add padding inside the container or use an inset outline.</p>
 <p><strong>Why:</strong> An overflow boundary clips anything drawn outside it, including an outline, so the fix is space inside the boundary or an inset indicator.</p>
+<p><strong>Plausible wrong approach:</strong> Increasing <code>z-index</code> on the button fails because overflow clipping is applied by the ancestor regardless of stacking order.</p>
+<p><strong>How to verify:</strong> Tab to the button near the container&#x27;s edge; the full outline is visible on all four sides.</p>
 <h3 id="exercise-5-inspect-the-page-in-a-forced-colors-or-high-contrast-setting">Exercise 5: Inspect the page in a forced-colors or high-contrast setting.<a class="heading-anchor" href="#exercise-5-inspect-the-page-in-a-forced-colors-or-high-contrast-setting" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Native boundaries and meaningful labels remain available; document actual browser behavior.</p>
+<p><strong>Approach:</strong> Turn on forced colors through the operating system or developer tools emulation, then tab through and read each status card.</p>
 <p><strong>Why:</strong> Forced colors replace author colors with system colors, so information carried only by a background color disappears while borders and text remain.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on <code>background-color</code> for state fails because forced colors replace author colors, so a background-only state disappears.</p>
+<p><strong>How to verify:</strong> In forced colors the labels remain, focus rings are visible, and you write down what the browser actually showed.</p>
 <h3 id="exercise-6-compute-the-contrast-of-94a3b8-text-on-ffffff-and-explain-why-one-palette-check-does-not-qualify-every-interaction-state">Exercise 6: Compute the contrast of #94a3b8 text on #ffffff and explain why one palette check does not qualify every interaction state.<a class="heading-anchor" href="#exercise-6-compute-the-contrast-of-94a3b8-text-on-ffffff-and-explain-why-one-palette-check-does-not-qualify-every-interaction-state" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> About 2.56:1, below the 4.5:1 minimum for normal text, so it fails; hover, focus, disabled and error states change the foreground or background, so each important pair needs its own check.</p>
+<p><strong>Approach:</strong> Convert both colors to relative luminance, apply (L1 + 0.05) / (L2 + 0.05), then repeat for hover, focus, disabled and error pairs.</p>
 <p><strong>Why:</strong> Relative luminance is about 0.36 for #94a3b8 and 1.0 for white, so the ratio is (1.0 + 0.05) / (0.36 + 0.05), about 2.56:1. That fails both the 4.5:1 normal-text and the 3:1 large-text minimums, and because hover, focus, disabled and error states each change a color pair, each pair needs its own measurement.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only the default text color fails because a hover background or error tint can push a different pair below 4.5:1.</p>
+<p><strong>How to verify:</strong> A contrast checker reports about 2.56:1 for #94a3b8 on #ffffff, and your table lists a ratio for each state pair.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-013_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

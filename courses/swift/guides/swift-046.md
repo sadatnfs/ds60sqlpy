@@ -108,7 +108,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Separate acceptance categories) before changing anything, and confirm its observation: Domain and package evidence do not imply UI or device qualification.
 2. Compare Example B (Require every declared release gate) with Example A and name the first line whose behavior differs. Its observation is: Save/reload remains an explicit incomplete gate.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Never commit a personal development team, certificate or provisioning profile.
+3. Before opening the explanation, check your task 3 attempt (Generate JourneyApp, list destinations and run its provided test scheme on an available simulator or macOS destination) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

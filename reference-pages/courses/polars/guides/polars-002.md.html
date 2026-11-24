@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Expressions are evaluated in a context supplied by a table operation. A selection can return a scalar reduction or a row-sized result. A with_columns call describes a set of column computations over the same input context. That distinction matters when one new column appears to depend on another new column in the same call. The expression using x sees the input x, not a partially updated value created by an earlier argument.</p>
 <p>This is a data-dependency rule, not a promise about the machine&#x27;s execution order. An optimizer can parallelize independent expressions precisely because their meaning does not depend on which argument happens to execute first. When a later expression needs an earlier result, create an explicit stage with another with_columns call. Naming intermediate fields is often clearer than trying to pack an entire pipeline into one large expression.</p>
 <p>Strings require equal care. In many expression positions a bare string denotes a column name. pl.lit(&quot;paid&quot;) unambiguously describes a literal value. Conditions should state what happens for every row, including missing conditions, and each output should have a deliberate name. The purpose of an alias is to define a result schema, not merely to improve a printed table.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>select:</strong> The context that returns only the columns or reductions its expressions produce.</li>
+<li><strong>with_columns:</strong> The context that keeps every existing column and adds or replaces the columns its expressions produce.</li>
+<li><strong>alias:</strong> The expression method that names the output column instead of the name Polars would derive.</li>
+<li><strong>Literal:</strong> A constant wrapped as an expression with <code>pl.lit</code>, so it can be combined with columns or broadcast to every row.</li>
+<li><strong>Dependency ordering:</strong> Every expression in one call reads the input frame, so a column created in a call is visible only to a later call.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>In pl.col(&quot;x&quot;)+1, x is selected from the current input. alias(&quot;x&quot;) asks the result to use that name, replacing the returned x column. Two calls form two contexts: frame.with_columns(...).with_columns(...). A when/then/otherwise expression constructs conditional values; pl.lit distinguishes a constant from a column reference. Prefer readable intermediate names when a calculation has several stages.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

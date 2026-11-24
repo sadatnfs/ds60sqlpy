@@ -1,6 +1,6 @@
 # c-003: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-003_solution.c`, implements all six cases, from the "group before calculating" case to the "transfer integer promotion" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -19,13 +19,13 @@ CHECK(2 + 3 * 4 == 14);
 CHECK((2 + 3) * 4 == 20);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `(2 + 3) * 4 == 20`. Restoring the original line brings back the worked observation: the values are 14 and 20.
+**Expected:** With `CHECK((3 + 3) * 4 == 20);` the run stops with `Check failed` at the CHECK on `(2 + 3) * 4 == 20`, because the "group before calculating" case no longer shows that the values are 14 and 20. Restoring `CHECK((2 + 3) * 4 == 20);` brings that observation back.
 
 Parentheses alter grouping. This example has no side effects, so it does not depend on evaluation order.
 
 ## Exercise 2: Use a short-circuit guard: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `bool found = length >= 0 && values[0] == 7;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "use a short-circuit guard" case, so one line now reads `bool found = length >= 0 && values[0] == 7;`. Run the example with that line, use the failing CHECK to find why the access is skipped and the condition is false no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +36,7 @@ bool found = length > 0 && values[0] == 7;
 CHECK(!found);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!found`; after it the line reads `bool found = length > 0 && values[0] == 7;` again and the access is skipped and the condition is false.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!found`. Once the line reads `bool found = length > 0 && values[0] == 7;` again, the "use a short-circuit guard" case again shows that the access is skipped and the condition is false.
 
 The right operand is evaluated only when the left is true. A guard must precede the operation it protects.
 
@@ -100,4 +100,4 @@ Operands narrower than int, such as unsigned char, are promoted to int before ar
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer integer promotion" case to your own c-003 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected precedence failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "use a short-circuit guard" case apart from ordinary output: the fixture proves its stated precedence, sequencing, integer promotion and usual arithmetic conversions assumptions, not universal safety.

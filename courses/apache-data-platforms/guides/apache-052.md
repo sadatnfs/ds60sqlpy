@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-051`.
 
+## Key terms
+
+- **Commitlog:** An append-only log on each node that records a write before it is applied in memory, so it can be replayed after a restart.
+- **Memtable:** The mutable in-memory structure that holds recent writes for a table until it is flushed to disk.
+- **SSTable:** An immutable sorted string table file written when a memtable flushes. Reads may merge several SSTables and the memtable.
+- **Write timestamp:** The timestamp attached to each written cell. When versions of the same cell conflict, the one with the highest timestamp wins.
+- **Bloom filter:** A per-SSTable probabilistic structure that can prove a partition key is absent but can return false positives, so a possible match still needs a read.
+
 ## Follow the write path and the read path separately
 
 Cassandra's storage engine combines a commitlog, mutable memory structures and
@@ -77,6 +85,46 @@ That is different from a network failure or a missing partition. The two cases
 connect actual timestamp resolution and bounded clustering access to the LSM
 storage mechanisms, while keeping physical-file and failure-durability claims
 separate from the observed logical results.
+
+## Worked examples
+
+### Competing writes with explicit timestamps
+
+```sql
+INSERT INTO ds60_orders.clocked (key, value)
+VALUES ('demo', 'initial')
+USING TIMESTAMP 1700000000000000;
+
+UPDATE ds60_orders.clocked USING TIMESTAMP 1700000000000010
+SET value = 'newest'
+WHERE key = 'demo';
+
+UPDATE ds60_orders.clocked USING TIMESTAMP 1700000000000005
+SET value = 'stale'
+WHERE key = 'demo';
+
+SELECT value
+FROM ds60_orders.clocked
+WHERE key = 'demo';
+```
+
+The final SELECT returns newest even though stale was written last, because Cassandra resolves each cell by its write timestamp in microseconds and not by arrival order. This is why client clock skew matters: a writer whose clock runs ahead can silently win against later, correct updates. The client in the project raises an AssertionError if this rule ever changes, which makes the check repeatable after restarts.
+
+### A clustering range inside one partition
+
+```sql
+SELECT
+  order_id,
+  amount
+FROM
+  ds60_orders.by_customer
+WHERE
+  customer_id = 'c1'
+  AND day_bucket = '2026-01-01'
+  AND ordered_at >= '2026-01-01 00:00:02';
+```
+
+The illustrative customer and day values follow the shape of the by_customer table, whose partition key is customer_id plus day_bucket and whose rows are ordered by ordered_at descending. The partition key routes the read to one replica set, and the clustering range then reads a contiguous slice inside that partition. Remove the partition key and Cassandra refuses the query unless ALLOW FILTERING is added, which turns a targeted read into a scan; that refusal is a design signal, not an error to suppress.
 
 ## Complete worked source
 

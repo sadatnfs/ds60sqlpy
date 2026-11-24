@@ -16,6 +16,14 @@ A local image cache is not a registry. Building an image with a tag does not upl
 
 An archive must be treated as executable supply-chain input. Verify its source and checksum through a trustworthy channel, inspect the imported reference, and execute only the intended image. A checksum copied from the same untrusted source is an integrity hint, not independent authenticity.
 
+### Key terms
+
+- **Image reference:** A name made of an optional registry, a repository, and an optional tag or digest.
+- **Tag:** A mutable, human-friendly name that can be moved to different image content.
+- **Digest:** A content hash that identifies exact image bytes and cannot be moved to other content.
+- **`docker image save`:** The command that exports local images into an archive for transfer without a registry.
+- **Archive checksum:** A hash of the archive, compared with a value from a trustworthy channel, that detects altered transfers.
+
 ## Anatomy and a trace you can follow
 
 The course uses local builds and performs no registry pushes. Save only the study image to a file in your learner copy. Record the image ID, platform and archive checksum. Load into a deliberately chosen compatible engine and use `--pull never` to ensure the next run does not silently fetch a missing dependency.
@@ -89,11 +97,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Treating a tag as an immutable identity. Expecting a tagged build to be published. Trusting a checksum without knowing who supplied it.
 
-Exercise 4 is this chapter's boundary case: Diagnose a missing image with --pull never. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a missing image with --pull never. Run `docker image ls` for the exact repository and tag before the run; with `--pull never` an absent image is reported as an error rather than downloaded. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using image reference, tag, digest, docker image save and docker image load. Reconstruct worked example 2 (Import and run deliberately offline) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Recall the commands that move an image offline and the flag that proves no download happened. Then reconstruct worked example 2 (Import and run deliberately offline) with one different value, predict what changes, and name which of image reference, tag, digest, docker image save and docker image load the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

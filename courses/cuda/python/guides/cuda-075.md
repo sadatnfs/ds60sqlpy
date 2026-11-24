@@ -14,6 +14,13 @@ Stencil operations read neighbors, so boundary policy is part of correctness: ze
 
 
 
+### Key terms
+
+- **Flat pixel offset:** The position `row * width + col` of a pixel in a row-major image buffer.
+- **Zero padding:** A boundary rule that treats out-of-range neighbors as zero.
+- **Clamp to edge:** A boundary rule that replaces an out-of-range coordinate with the nearest valid one.
+- **In-place contamination:** Corruption that occurs when a stencil writes results into the same buffer that neighboring threads are still reading.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,33 +48,52 @@ print("CPU image reference:", clamped)
 
 **Expected observation:** Clamped horizontal average [4, 6, 8].
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `values` | `[3, 6, 9]` |
+| `clamped` | `[4.0, 6.0, 8.0]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Trace a rectangular tile
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **trace a rectangular tile** in the examples above.
+**Trap to avoid:** Writing pairs directly from a single flattened thread number tempts the reader to assign `x` to rows, because rows are listed first in mathematics. The tile then covers three rows and two columns, a transposed shape.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Calculate flat offsets
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **calculate flat offsets** in the examples above.
+**Trap to avoid:** Using `column * width + row` swaps the roles. For row 1 column 2 it gives `2*3 + 1 = 7`, which lies past the six-element allocation, so a kernel would read or write out of bounds.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Change clamp to zero padding
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **change clamp to zero padding** in the examples above.
+**Trap to avoid:** Calling both versions a three-point average and comparing only the interior value 6 hides the change. Tests that skip the edges will pass for either padding and miss a semantic regression.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Find in-place stencil contamination
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **find in-place stencil contamination** in the examples above.
+**Trap to avoid:** Assuming each thread writes only its own element and therefore cannot interfere ignores that neighbors read that element. Ownership of writes is not the same as ownership of reads.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Test width one
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **test width one** in the examples above.
+**Trap to avoid:** Assuming width is always at least 3 and reading `values[i-1]` and `values[i+1]` directly fails: `values[-1]` silently returns the last element in Python, and `values[1]` raises IndexError. A device version reads out of bounds.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain row and column tail guards
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **explain row and column tail guards** in the examples above.
+**Trap to avoid:** Guarding only the flat offset with `offset < height*width` lets a thread with column 3 and row 0 in a width-3 image pass, because its offset 3 is valid. It then writes into row 1, column 0, corrupting another pixel.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

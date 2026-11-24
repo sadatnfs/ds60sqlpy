@@ -16,6 +16,14 @@ The effective model matters more than any one input file. Merge rules differ for
 
 Profiles are not a security boundary. A service omitted from the default startup is still available when explicitly selected or enabled. Use profiles for intentional optional tools and workloads, not for hiding privileged services in a file and assuming they cannot run.
 
+### Key terms
+
+- **Override file:** A Compose file layered on a base file that changes or adds to the application model.
+- **Merge rules:** The rules for combining Compose files, which differ for scalar values, mappings and sequences such as ports.
+- **Profile:** A label that makes a service optional, so it starts only when that profile is enabled or the service is named.
+- **Effective model:** The combined configuration after every file, override and interpolation has been applied.
+- **`docker compose config`:** The command that renders and validates the effective model without starting anything.
+
 ## Anatomy and a trace you can follow
 
 The fixture’s client has the tools profile. Ordinary `up` starts the app; an explicit tools invocation runs the peer check. For an override experiment, copy the fixture and change only a public message or unused loopback host port. Use `-f` in a fixed order and validate that same order.
@@ -88,11 +96,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Forgetting that Compose merges list fields such as `ports` instead of replacing them. Using profiles as a security boundary. Launching with a different file order than the one you reviewed.
 
-Exercise 4 is this chapter's boundary case: Diagnose an unexpected extra port after merging. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an unexpected extra port after merging. Render the merged model with `docker compose config` and read the complete `ports` list for the service before assuming an override replaced it. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using override file, merge rules, profiles and docker compose config. Reconstruct worked example 2 (Review a combined model) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Predict the merged `ports` list when both Compose files declare a port for the same service. Then reconstruct worked example 2 (Review a combined model) with one different value, predict what changes, and name which of override file, merge rules, profiles and docker compose config the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

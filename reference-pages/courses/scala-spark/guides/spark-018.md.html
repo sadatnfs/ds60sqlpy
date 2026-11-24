@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>spark-017</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-018</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
+<p>Open <code>spark-018</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-018.scala.html">Scala learner</a> and <a href="../lessons/spark-018.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-018_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-018_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-018_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -232,7 +232,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The lesson uses exact historical fixtures, not a claim that every business zone has the same daylight-saving transitions. Zone databases and runtime versions are recorded by the worker separately. The technique is to preserve sufficient timestamp evidence, declare types and zones, test boundary membership, and avoid assigning causal or chronological meaning to an ambiguous displayed clock value.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
 <p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
-<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-class">Row</span>
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
 
@@ -254,20 +254,8 @@ spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuatio
   <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
   schema
 <span class="syntax-punctuation">)</span></code></pre>
-<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
-<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>
-    StructType<span class="syntax-punctuation">,</span>
-    StructField<span class="syntax-punctuation">,</span>
-    LongType<span class="syntax-punctuation">,</span>
-    IntegerType<span class="syntax-punctuation">,</span>
-    StringType<span class="syntax-punctuation">,</span>
-    DoubleType<span class="syntax-punctuation">,</span>
-    BooleanType<span class="syntax-punctuation">,</span>
-    ArrayType<span class="syntax-punctuation">,</span>
-    MapType<span class="syntax-punctuation">,</span>
-    TimestampType<span class="syntax-punctuation">,</span>
-    DecimalType<span class="syntax-punctuation">,</span>
-<span class="syntax-punctuation">)</span>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> LongType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> StructType
 
 spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.timestampType</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">TIMESTAMP_LTZ</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 schema <span class="syntax-operator">=</span> StructType<span class="syntax-punctuation">(</span>
@@ -319,12 +307,12 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Verify:</strong> Assert TimestampType, zero null timestamps, exact same-instant equality and the 3600-second separation.</p>
 <p><strong>Progressive hint:</strong> Use the pattern literal T inside single quotes and XXX for colon-bearing offsets or Z.</p>
 <h4 id="exercise-2-render-a-zone-without-changing-the-underlying-instant">Exercise 2: Render a zone without changing the underlying instant<a class="heading-anchor" href="#exercise-2-render-a-zone-without-changing-the-underlying-instant" aria-label="Link to this section">#</a></h4>
-<p>Return ordered(event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH: mm: ss. Set the zone only during materialization and restore the previous setting in finally.</p>
+<p>Return ordered (event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH: mm: ss. Set the zone only during materialization and restore the previous setting in finally.</p>
 <p><strong>Expected result/shape:</strong> Events 2 and 3 render 08:30 and 09:30 under UTC but both 01:30 under America/Los_Angeles. Session zone is UTC afterward.</p>
 <p><strong>Verify:</strong> Assert both full clock strings for IDs 2/3 and the restored session configuration.</p>
 <p><strong>Progressive hint:</strong> Lazy DataFrames are not materialized evidence. Collect the bounded labels inside the scoped zone setting.</p>
 <h4 id="exercise-3-filter-a-complete-local-day-with-instant-boundaries">Exercise 3: Filter a complete local day with instant boundaries<a class="heading-anchor" href="#exercise-3-filter-a-complete-local-day-with-instant-boundaries" aria-label="Link to this section">#</a></h4>
-<p>Select events in the half-open interval [2024-11-03T07:00:00Z,2024-11-04T08:00:00Z). Return all event columns.</p>
+<p>Select events in the half-open interval [2024-11-03T07:00:00Z, 2024-11-04T08:00:00Z). Return all event columns.</p>
 <p><strong>Expected result/shape:</strong> Ordered event IDs [1, 2, 3, 5]. Lower-bound ID 1 included, upper-bound ID 4 excluded and prior-second ID 6 excluded.</p>
 <p><strong>Verify:</strong> Assert the exact ID set and the 25-hour boundary duration; do not use an inclusive BETWEEN.</p>
 <p><strong>Progressive hint:</strong> Combine event_time&gt;=lower and event_time&lt;upper after parsing both boundaries as instants.</p>
@@ -334,9 +322,9 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Verify:</strong> Assert identical local clock strings and explicit type under both zones, then confirm session restoration.</p>
 <p><strong>Progressive hint:</strong> Use an explicit SQL TIMESTAMP_NTZ cast rather than relying on the session default timestamp type.</p>
 <h4 id="exercise-5-expose-the-information-lost-by-a-local-clock-key">Exercise 5: Expose the information lost by a local clock key<a class="heading-anchor" href="#exercise-5-expose-the-information-lost-by-a-local-clock-key" aria-label="Link to this section">#</a></h4>
-<p>For the two fold events 2 and 3, compare local formatted labels with their epoch values. Return(label_count, instant_count), retaining original event identity.</p>
+<p>For the two fold events 2 and 3, compare local formatted labels with their epoch values. Return (label_count, instant_count), retaining original event identity.</p>
 <p><strong>Expected result/shape:</strong> One distinct local label but two distinct instants. They must not be deduplicated by the displayed clock.</p>
-<p><strong>Verify:</strong> Assert(1,2) using separately materialized local labels and original epoch evidence.</p>
+<p><strong>Verify:</strong> Assert <code>(1, 2)</code> using separately materialized local labels and original epoch evidence.</p>
 <p><strong>Progressive hint:</strong> A rendering can be many-to-one; compare distinct counts without overwriting event_time.</p>
 <h4 id="exercise-6-quarantine-invalid-timestamps-without-confusing-missingness">Exercise 6: Quarantine invalid timestamps without confusing missingness<a class="heading-anchor" href="#exercise-6-quarantine-invalid-timestamps-without-confusing-missingness" aria-label="Link to this section">#</a></h4>
 <p>Build an inline source containing a valid offset timestamp, bad text and NULL. Use try_to_timestamp with the declared offset pattern and classify accepted, malformed_timestamp, missing_timestamp.</p>
@@ -346,7 +334,7 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not confuse a timestamp&#x27;s displayed timezone with its original textual offset. Do not use a local clock string as a unique event key. Do not add 86400 seconds to represent every local calendar day. Do not assign an arbitrary offset to an ambiguous NTZ value. Restoring a session setting matters even in a tiny demonstration because subsequent lazy analysis can depend on it. Preserve precision deliberately: epoch seconds are sufficient for this second-resolution fixture, but subsecond event ordering requires a higher-resolution representation and its own tests.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>parseInstants</code> / <code>parse_instants</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>parseInstants</code> / <code>parse_instants</code> without reading its solution. Then, from memory, state what Exercise 6 (Quarantine invalid timestamps without confusing missingness) must produce: IDs 1, 2, 3 have those reasons respectively; only 1 is accepted while ANSI remains true. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>

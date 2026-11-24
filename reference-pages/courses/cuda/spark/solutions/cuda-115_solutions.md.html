@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-draw-logical-versus-physical-plan">Exercise 1: Draw logical versus physical plan<a class="heading-anchor" href="#exercise-1-draw-logical-versus-physical-plan" aria-label="Link to this section">#</a></h3>
 <p>Logical nodes describe intent and physical nodes choose execution.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>draw logical versus physical plan</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Draw the logical plan as intent, such as a scan, a filter and an aggregate, and the physical plan as the chosen execution, such as a file scan, a filter operator, a partial aggregate, an exchange and a final aggregate.</p>
+<p><strong>Why it is correct here.</strong> Catalyst optimizes the logical plan and then picks physical operators. Only physical nodes show where data is shuffled and which implementation runs.</p>
+<p><strong>A plausible wrong approach.</strong> Reading device placement from the logical plan fails, because logical nodes carry no device information and the plugin acts only on the physical plan.</p>
+<p><strong>How to verify.</strong> Print <code>explain(mode=&quot;formatted&quot;)</code> and match each logical step to the physical nodes that implement it.</p>
 <h3 id="exercise-2-mark-gpu-candidate-nodes">Exercise 2: Mark GPU candidate nodes<a class="heading-anchor" href="#exercise-2-mark-gpu-candidate-nodes" aria-label="Link to this section">#</a></h3>
 <p>Use actual plugin names from the selected release.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>mark GPU candidate nodes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Mark GPU candidate nodes using the actual operator names from the selected plugin release, such as names beginning with <code>Gpu</code>, in the synthetic plan the filter and aggregate.</p>
+<p><strong>Why it is correct here.</strong> Plugin operator names identify replaced nodes directly. Names can differ between releases, so the release documentation is the authority.</p>
+<p><strong>A plausible wrong approach.</strong> Guessing GPU placement from operator type, for example assuming all aggregates run on the GPU, ignores expression-level fallback.</p>
+<p><strong>How to verify.</strong> Count nodes with GPU names in the executed plan; the reference counts two GPU nodes in its synthetic plan.</p>
 <h3 id="exercise-3-locate-transitions">Exercise 3: Locate transitions<a class="heading-anchor" href="#exercise-3-locate-transitions" aria-label="Link to this section">#</a></h3>
 <p>Each transition may copy or change representation.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>locate transitions</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Locate transitions between CPU and GPU nodes. The synthetic plan <code>scan CPU, filter GPU, aggregate GPU, collect CPU</code> has two, one into and one out of the GPU section.</p>
+<p><strong>Why it is correct here.</strong> Each transition can copy data between host and device or convert between row and columnar format, so transitions carry cost not shown by operator names.</p>
+<p><strong>A plausible wrong approach.</strong> Counting GPU nodes and ignoring transitions makes a plan with many short GPU sections look better than one long section.</p>
+<p><strong>How to verify.</strong> The reference computes <code>transitions == 2</code>. In a real plan, count the row to columnar and columnar to row nodes.</p>
 <h3 id="exercise-4-explain-lazy-evaluation">Exercise 4: Explain lazy evaluation<a class="heading-anchor" href="#exercise-4-explain-lazy-evaluation" aria-label="Link to this section">#</a></h3>
 <p>An action is required for work.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain lazy evaluation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain lazy evaluation: building a DataFrame with filters and aggregations creates a plan only, and an action such as <code>count()</code> or <code>collect()</code> triggers execution.</p>
+<p><strong>Why it is correct here.</strong> Spark delays work so it can optimize the whole plan. Before an action, no tasks run and no runtime metrics exist.</p>
+<p><strong>A plausible wrong approach.</strong> Timing the line that defines the DataFrame and reporting it as query time measures plan construction, which is nearly instant.</p>
+<p><strong>How to verify.</strong> Watch the Spark UI and confirm that a job appears only after the action is called.</p>
 <h3 id="exercise-5-compare-initial-and-final-aqe-plan">Exercise 5: Compare initial and final AQE plan<a class="heading-anchor" href="#exercise-5-compare-initial-and-final-aqe-plan" aria-label="Link to this section">#</a></h3>
 <p>Inspect the final executed plan.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare initial and final AQE plan</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare the initial and final adaptive query execution plans: AQE can change join strategies or coalesce partitions during execution, so the final plan shows what ran.</p>
+<p><strong>Why it is correct here.</strong> AQE uses runtime statistics. The plan printed before execution is a starting point that may be replaced.</p>
+<p><strong>A plausible wrong approach.</strong> Citing the pre-execution plan as the executed plan can report a join strategy that never ran.</p>
+<p><strong>How to verify.</strong> After the action, read the final plan from the SQL tab in the Spark UI and compare it with the initial <code>explain</code> output.</p>
 <h3 id="exercise-6-choose-operator-metrics">Exercise 6: Choose operator metrics<a class="heading-anchor" href="#exercise-6-choose-operator-metrics" aria-label="Link to this section">#</a></h3>
 <p>Use rows batches time spill and device observations together.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose operator metrics</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Choose operator metrics together: output rows, batches, operator time, spill bytes and GPU memory observations, so that one metric does not mislead.</p>
+<p><strong>Why it is correct here.</strong> Rows confirm correctness of scale, time shows cost, and spill reveals memory pressure. A fast operator that spilled heavily may not stay fast with larger data.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting only total job time hides which operator dominates and whether spilling occurred.</p>
+<p><strong>How to verify.</strong> Collect metrics for each GPU operator from the SQL view after the action and check row counts against expectations.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Synthetic plan has two GPU nodes and two backend transitions.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-115_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

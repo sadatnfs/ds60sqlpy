@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use owned types to represent data contracts and distinguish immutable bindings from recursively immutable state.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-010</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a measurement constructor) and worked case B (mutable fields inside an immutable object) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-010: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Struct:</strong> An immutable composite type whose fields cannot be reassigned after construction.</li>
+<li><strong>Inner constructor:</strong> A constructor defined inside the type body that calls <code>new</code> and can reject invalid field values before any instance exists.</li>
+<li><strong>Mutable struct:</strong> A composite type whose fields can be reassigned after construction, so validation at construction alone no longer protects it.</li>
+<li><strong>Invariant:</strong> A condition that every valid instance must satisfy, such as a finite value with a declared unit.</li>
+<li><strong>Nested state:</strong> A mutable object, such as a vector, stored in a field of an immutable struct that can still change in place.</li>
+</ul>
 <h3 id="a-type-can-carry-a-data-contract">A type can carry a data contract<a class="heading-anchor" href="#a-type-can-carry-a-data-contract" aria-label="Link to this section">#</a></h3>
 <p>A composite type groups named fields. A constructor creates an instance and can enforce invariants before an invalid object enters the rest of a program. The field types describe representations; they do not, by themselves, establish units, ranges or scientific meaning.</p>
 <p>An immutable <code>struct</code> prevents reassignment of its fields after construction. A <code>mutable struct</code> allows field updates. Neither choice automatically validates every future state. A mutable object may need methods that preserve its invariants, while an immutable object can still contain a mutable array that another reference can change.</p>

@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Topic discovery tries to summarize recurring structure in a document collection without a supplied class label for every document. A topic is a model component with a pattern of word weights or probabilities. It is not automatically a real organizational category, a causal factor or a uniquely defined human concept. Analysts label components after inspecting representative words and documents.</p>
 <p>This lesson fits three actual local models to four authored documents: latent semantic analysis through truncated SVD, nonnegative matrix factorization and latent Dirichlet allocation. Their outputs can all be displayed as document-by-component arrays, but the mathematical meanings differ. Confusing those meanings can turn an arbitrary coordinate into an unjustified topic probability.</p>
 <p>The corpus intentionally separates pet-related and vehicle-related vocabulary so the fitted behavior is easy to inspect. A successful separation on this constructed corpus is a mechanism demonstration, not evidence that the method will discover reliable topics in messy reviews, support tickets or scientific literature.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Topic:</strong> A model component with a pattern of word weights. It is not automatically a real category, and analysts label it after inspecting words and documents.</li>
+<li><strong>Latent semantic analysis:</strong> A truncated SVD of a term-document matrix, often TF-IDF. Components can carry negative weights, so coordinates are not probabilities.</li>
+<li><strong>Nonnegative matrix factorization:</strong> An approximation of X by the product of nonnegative factors W and H, linking documents to components and components to words, with scaling and permutation ambiguity.</li>
+<li><strong>Latent Dirichlet allocation:</strong> A generative probabilistic model in which documents have topic mixtures and topics generate words from topic-specific distributions.</li>
+<li><strong>Component alignment:</strong> Matching components across fits, for example by cosine similarity over one vocabulary, because topic indices are arbitrary.</li>
+</ul>
 <h3 id="compare-three-objectives-before-comparing-plots">Compare three objectives before comparing plots<a class="heading-anchor" href="#compare-three-objectives-before-comparing-plots" aria-label="Link to this section">#</a></h3>
 <p>LSA applies a low-rank linear decomposition to a term-document representation, often TF-IDF. It seeks a useful approximation in a vector space, and components can have positive or negative weights. A document coordinate is not inherently a probability. Flipping the sign of a component and its document coordinates leaves the reconstruction unchanged, which already shows why a coordinate label is not unique.</p>
 <p>NMF approximates a nonnegative matrix X by <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>⋅</mo><mi>H</mi></mrow><annotation encoding="application/x-tex">W\cdot H</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span></span></span></span> with W and H constrained nonnegative. W associates documents with components, while H associates components with words. The additive representation can be easier to inspect, but the factors have scaling and permutation ambiguities. Multiplying one W column by a positive constant and dividing the corresponding H row by the same constant preserves the product. Normalizing a row for display does not retroactively make it a posterior probability.</p>
@@ -247,7 +255,7 @@ match <span class="syntax-operator">=</span> np<span class="syntax-operator">.</
 <p><strong>Hints:</strong> Inspect get_feature_names_out and use transform for the probe.</p>
 <h4 id="exercise-2-fit-and-inspect-lsa">Exercise 2: Fit and inspect LSA<a class="heading-anchor" href="#exercise-2-fit-and-inspect-lsa" aria-label="Link to this section">#</a></h4>
 <p>Fit two-component <code>TruncatedSVD</code> on TF-IDF and reconstruct the matrix.</p>
-<p><strong>Expected:</strong> Document coordinates shape(4,2); reconstruction error below the zero-matrix baseline.</p>
+<p><strong>Expected:</strong> Document coordinates shape (4, 2); reconstruction error below the zero-matrix baseline.</p>
 <p><strong>Verify:</strong> Assert the document coordinates have shape (4, 2) and that the reconstruction error is below the error of predicting all zeros.</p>
 <p><strong>Hints:</strong> Use transform output times components_ without claiming probability meaning.</p>
 <h4 id="exercise-3-fit-nonnegative-components">Exercise 3: Fit nonnegative components<a class="heading-anchor" href="#exercise-3-fit-nonnegative-components" aria-label="Link to this section">#</a></h4>
@@ -262,7 +270,7 @@ match <span class="syntax-operator">=</span> np<span class="syntax-operator">.</
 <p><strong>Hints:</strong> Use count events rather than signed LSA coordinates.</p>
 <h4 id="exercise-5-align-topic-identities">Exercise 5: Align topic identities<a class="heading-anchor" href="#exercise-5-align-topic-identities" aria-label="Link to this section">#</a></h4>
 <p>Compare H with its reversed row order using cosine and assignment.</p>
-<p><strong>Expected:</strong> Permutation[1,0] and matched similarities[1,1].</p>
+<p><strong>Expected:</strong> Permutation [1, 0] and matched similarities [1, 1].</p>
 <p><strong>Verify:</strong> Assert the alignment between H and its reversed rows is permutation [1, 0] with matched cosine similarities [1, 1].</p>
 <p><strong>Hints:</strong> Match across the shared vocabulary before comparing numeric topic IDs.</p>
 <h4 id="exercise-6-write-an-error-aware-topic-interpretation">Exercise 6: Write an error-aware topic interpretation<a class="heading-anchor" href="#exercise-6-write-an-error-aware-topic-interpretation" aria-label="Link to this section">#</a></h4>

@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Read a text fixture while distinguishing EOF, parse failure and an I/O error.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A stream is an interface that moves characters between a program and a source or destination. RAII ties resource cleanup to scope exit. EOF means there is no more input, while a bad I/O state means a device operation failed. The loop must ask whether a read succeeded before using the buffer.</p>
+<ul>
+<li><strong>stream:</strong> an object that moves characters between a program and a source or destination and records whether its last operation succeeded.</li>
+<li><strong><code>getline</code>:</strong> extracts the next line and reports through the stream whether that extraction succeeded.</li>
+<li><strong>EOF:</strong> the condition that no more input remains, which is set only after a read attempts to go past the available data.</li>
+<li><strong>bad I/O state:</strong> a stream condition meaning an underlying device operation failed, which differs from reaching EOF.</li>
+<li><strong>RAII:</strong> tying resource cleanup to scope exit, so a file stream closes its file when the stream object is destroyed.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>while (std::getline(input,line))</code> reads one line, then enters the body only on success. Testing eof before reading processes stale data after a failed read. File paths are resolved against the process working directory, which can differ from the source directory.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

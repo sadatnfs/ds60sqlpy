@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-identify-image-and-process-contract">Exercise 1: Identify image and process contract<a class="heading-anchor" href="#exercise-1-identify-image-and-process-contract" aria-label="Link to this section">#</a></h3>
 <p>The source describes the requested image and process. Actual preload and runtime behavior require a host/image receipt and observed Pod. The port declaration alone does not create routing or host exposure.</p>
 <p><strong>Expected:</strong> Image 0.2.0, Never, fixed fixture server, port 8080 named http.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the container block of the starter field by field: image, imagePullPolicy, command and the first ports entry.</li>
+<li><strong>Why it is correct:</strong> These four fields fully determine which preloaded image tag the kubelet may use, that it must not pull, which fixture process starts and which port name later objects can reference.</li>
+<li><strong>Plausible wrong approach:</strong> Quoting the lesson title or guessing from the file name skips the YAML, and would miss that <code>Never</code> forbids a registry pull rather than merely preferring a cache.</li>
+<li><strong>How to verify:</strong> Each answer cites an exact path under <code>spec.template.spec.containers[0]</code> and reads 0.2.0, Never, the fixed server command and 8080 named http.</li>
+</ul>
 <h3 id="exercise-2-trace-broad-and-precise-state">Exercise 2: Trace broad and precise state<a class="heading-anchor" href="#exercise-2-trace-broad-and-precise-state" aria-label="Link to this section">#</a></h3>
 <p>Pod phase is intentionally broad. Readiness controls whether the application is considered eligible for normal Service traffic, while process liveness and client correctness are separate questions.</p>
 <p><strong>Expected:</strong> The first Run fails its bounded readiness check without an application crash: the process can be Running while Ready stays False. After /ready is restored, a fresh Run can establish Ready.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Classify phase and readiness as separate signals, then change only the readinessProbe path from /missing back to /ready.</li>
+<li><strong>Why it is correct:</strong> The fixture server keeps running when /missing returns an error, so the phase stays Running while the Ready condition stays False until the probe succeeds.</li>
+<li><strong>Plausible wrong approach:</strong> Calling the first Run a crash would send you to the command or image, yet restartCount stays unchanged because a readiness failure never restarts the container.</li>
+<li><strong>How to verify:</strong> The first result names the failed readiness check, and the second Run reports the Ready condition True for a new Pod.</li>
+</ul>
 <h3 id="exercise-3-diagnose-the-image-boundary">Exercise 3: Diagnose the image boundary<a class="heading-anchor" href="#exercise-3-diagnose-the-image-boundary" aria-label="Link to this section">#</a></h3>
 <p>The broker may reject source before the cluster sees it. A kubelet image-absence reason implies an accepted Pod reached node image handling. Preserving the phase prevents ineffective repairs such as changing application code for an image that never started.</p>
 <p><strong>Expected:</strong> Two different failure phases are named; neither is described as an application crash.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Place each failure on the timeline: broker admission before any API object, or kubelet image handling after the Pod is accepted and scheduled.</li>
+<li><strong>Why it is correct:</strong> An unapproved image is refused by the broker allowlist, while ErrImageNeverPull appears only when an accepted Pod with pull policy Never lands on a node lacking the image.</li>
+<li><strong>Plausible wrong approach:</strong> Rebuilding application code treats both as runtime crashes, but in neither case did the container process start, so code changes cannot help.</li>
+<li><strong>How to verify:</strong> State object created no and process started no for the broker case, object created yes and process started no for ErrImageNeverPull.</li>
+</ul>
 <h3 id="exercise-4-read-logs-with-identity">Exercise 4: Read logs with identity<a class="heading-anchor" href="#exercise-4-read-logs-with-identity" aria-label="Link to this section">#</a></h3>
 <p>A reused name or previous container log can mislead diagnosis. UID and restart context explain which execution produced the line. No real secret or unrelated workload output belongs in the learner evidence packet.</p>
 <p><strong>Expected:</strong> An evidence record ties the line to the exact observed process instance.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Attach Pod UID, container name and restartCount to the bounded excerpt before interpreting the line.</li>
+<li><strong>Why it is correct:</strong> Pod names repeat across replacements and <code>--previous</code> can return output from an earlier container instance, so only those three fields pin the line to one process.</li>
+<li><strong>Plausible wrong approach:</strong> Copying the newest lines by Pod name could mix output from a replaced Pod with the same generated name pattern, or a previous container after a restart.</li>
+<li><strong>How to verify:</strong> A second reader finds the same UID, container name and restartCount in a readback; the excerpt contains no secrets or unrelated workloads.</li>
+</ul>
 <h3 id="exercise-5-distinguish-restart-from-replacement">Exercise 5: Distinguish restart from replacement<a class="heading-anchor" href="#exercise-5-distinguish-restart-from-replacement" aria-label="Link to this section">#</a></h3>
 <p>A Deployment can replace a Pod, while the kubelet can restart a container inside an existing Pod. These events have different lifetime implications for ephemeral storage and owner relationships, developed in later chapters.</p>
 <p><strong>Expected:</strong> First is a container restart; second is a different Pod instance.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare metadata.uid first and only then interpret restartCount within one Pod.</li>
+<li><strong>Why it is correct:</strong> restartCount counts kubelet restarts of a container inside one Pod object, while a new UID means a controller created a different Pod with a fresh count of 0.</li>
+<li><strong>Plausible wrong approach:</strong> Reading the drop from 1 to 0 as a counter reset inside one Pod hides the replacement and the loss of that Pod&#x27;s emptyDir data.</li>
+<li><strong>How to verify:</strong> Same UID with count 1 is a container restart; different UID with count 0 is a new Pod instance.</li>
+</ul>
 <h3 id="exercise-6-prove-the-bounded-baseline">Exercise 6: Prove the bounded baseline<a class="heading-anchor" href="#exercise-6-prove-the-bounded-baseline" aria-label="Link to this section">#</a></h3>
 <p>The evidence should match the operation that ran. Do not copy a Service success claim from another lesson when this source contains no Service. Keep runtime qualification and the six-task explanation separate from a successful process status.</p>
 <p><strong>Expected:</strong> Controller/Ready Pod identities and owned cleanup are observed; Deployment-only run has no Service-client proof.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List what this source creates (a Deployment and its Pods only) and map each claim to a named check in the Run result.</li>
+<li><strong>Why it is correct:</strong> The Deployment-only starter has no Service, so the run can observe controller ownership, Ready Pod identities and cleanup but no Service routing or client response.</li>
+<li><strong>Plausible wrong approach:</strong> Borrowing a Service success line from k8s-008 would claim traffic evidence for an object that this manifest never creates.</li>
+<li><strong>How to verify:</strong> Every sentence in your statement points to a check name, and any Service or client claim without one is deleted.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Do not infer readiness from phase Running, infer a successful image pull from a tag name, or infer current process identity from a reused Pod name. An old saved image 0.1 source receives an explicit broker version refusal; that is a source-admission result, not an observed node pull failure.</p>
 <p>Use the narrowest discriminating field: Waiting.reason for image availability, container termination state for exit behavior, Ready condition for routing eligibility and a client response for the application. A source review or synthetic trace is labeled as such until an actual owned observation exists.</p></article>

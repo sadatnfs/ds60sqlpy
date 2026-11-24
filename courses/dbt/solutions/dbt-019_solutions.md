@@ -9,11 +9,23 @@ The executable reference contains the two complete worked cases with assertions.
 
 Record adapter type, database identity and schema. Names such as prod should not be assumed to point to real production or to be safe without inspection.
 
+**Why it holds here:** Both targets use the same warehouse.duckdb file and differ only in schema, dev or prod.
+
+**Plausible wrong approach:** Assuming a target named prod is real production is wrong here; it is a schema in a local file.
+
+**How to verify:** Read profiles.yml outputs and run dbt debug --target prod; expect the local path and schema prod.
+
 **Expected:** Both are owned local fixtures.
 
 ## 2. Preserve calculation semantics
 
 Use environment branches only where their behavior is deliberate and tested. Hidden semantic differences can invalidate promotion evidence.
+
+**Why it holds here:** The model adds target.name only as a label. answer is 42 in both schemas.
+
+**Plausible wrong approach:** Branching numeric logic on target.name would make dev results differ from what prod publishes.
+
+**How to verify:** Query select answer from dev.answer and from prod.answer and expect 42 in both.
 
 **Expected:** The result remains 42.
 
@@ -21,11 +33,23 @@ Use environment branches only where their behavior is deliberate and tested. Hid
 
 A repeatable job should record the chosen target. Relying on a mutable local default weakens reproducibility.
 
+**Why it holds here:** Changing the profile default to prod does not matter when --target dev is passed; the flag wins.
+
+**Plausible wrong approach:** Relying on the default means a teammate with a different profile writes somewhere else.
+
+**How to verify:** Set target: prod in profiles.yml, run build --target dev, and confirm only dev.answer changes.
+
 **Expected:** The explicit selection wins for the invocation.
 
 ## 4. Reject missing configuration
 
 Preserve the failure and repair the environment declaration. Do not redirect checks to a shared database to make them run.
+
+**Why it holds here:** example_two runs with --target missing and dbt fails before writing run_results.json.
+
+**Plausible wrong approach:** Pointing the missing name at another shared database just to make it run hides the misconfiguration.
+
+**How to verify:** Confirm the command fails and target/run_results.json does not exist.
 
 **Expected:** The command fails clearly.
 
@@ -33,11 +57,23 @@ Preserve the failure and repair the environment declaration. Do not redirect che
 
 Use an approved secret mechanism in a separately owned environment. Do not place real passwords or tokens into the versioned lesson project.
 
+**Why it holds here:** Real credentials belong in an approved secret store or environment variables read through env_var, never in the committed profiles.yml.
+
+**Plausible wrong approach:** Hardcoding a password in the lesson project leaks it to anyone who can read the repo or logs.
+
+**How to verify:** Search the project and logs for the secret value and expect no match; profiles.yml should only reference env_var.
+
 **Expected:** They are outside maintained public fixtures and logs.
 
 ## 6. Compare isolation claims
 
 Evaluate actual permissions, concurrency, backups, network boundaries and recovery for a deployed environment. The local case demonstrates routing only.
+
+**Why it holds here:** Two schemas in one DuckDB file show routing only. They share the same file, process and permissions.
+
+**Plausible wrong approach:** Claiming dev and prod are isolated because they have different schema names ignores that a single file corruption affects both.
+
+**How to verify:** List what a deployed setup needs: separate credentials, grants, backups and network rules, and confirm none exist here.
 
 **Expected:** They do not provide independent failure domains or access control.
 

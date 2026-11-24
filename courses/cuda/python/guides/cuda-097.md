@@ -23,6 +23,13 @@ PyTorch integration needs a registered operator and appropriate backend implemen
 The practical acceptance matrix includes normal data, zero elements, a nonmultiple tail, rejected dtype, rejected layout, wrong-device input, stream ordering and output aliasing. The custom operator should match a native framework expression before performance is considered. A classroom single-file Python pad can inspect or call a prepared operation; it cannot safely infer arbitrary build commands, download compilers or manufacture a multi-file extension project from lesson metadata.
 
 
+### Key terms
+
+- **Operator schema:** The declared name, argument and return types, and aliasing behavior of a framework operator.
+- **Dispatch:** The framework mechanism that selects an operator implementation for the input's backend, such as CPU or CUDA.
+- **Meta implementation:** A shape-only implementation that predicts output dtype, shape and device without real data, used by compilation systems.
+- **Mutation annotation:** Schema markings that declare which inputs an operator modifies in place or aliases in its output.
+
 ## Worked examples
 
 ### Worked example 1
@@ -67,27 +74,39 @@ Choose either lane first, then compare the other using identical mathematical in
 
 ### Exercise 1: Write the operator schema
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **write the operator schema** in the examples above.
+**Trap to avoid:** Leaving the schema implicit in a Python wrapper lets callers pass float64 or integers, which the C++ kernel then reinterprets.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Derive output values
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **derive output values** in the examples above.
+**Trap to avoid:** Clamping before the affine step, `2*max(0, x) + 1`, gives `[1, 1, 7]`, a different function.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Specify aliasing
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **specify aliasing** in the examples above.
+**Trap to avoid:** Writing the output into `x` without declaring it breaks autograd when `x` was saved for backward.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Reject unsupported layout
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **reject unsupported layout** in the examples above.
+**Trap to avoid:** Assuming every tensor reaching the operator is contiguous because the tests used fresh tensors misses views created by slicing or transposing.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare framework registration mechanisms
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **compare framework registration mechanisms** in the examples above.
+**Trap to avoid:** Assuming a PyTorch extension can be loaded directly in TensorFlow treats a framework binding as a generic library. The library loads only if the framework finds a registered op, which it will not.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Define fixed-project build evidence
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **define fixed-project build evidence** in the examples above.
+**Trap to avoid:** Recording only that the build succeeded omits whether the kernel ran on a real device. A build can succeed on a machine with no GPU at all, so the record proves compilation only.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

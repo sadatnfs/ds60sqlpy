@@ -16,6 +16,14 @@ A local tag does not publish anything. Publication is a deliberate operation wit
 
 Mutable tags such as latest are useful conveniences but weak deployment identities. A release procedure should resolve or record an immutable digest and relate it to source, build inputs and acceptance evidence. A registry availability problem should not cause an operator to deploy a different unreviewed image merely because its tag looks similar.
 
+### Key terms
+
+- **Registry:** A service that stores image manifests and blobs for distribution.
+- **Repository:** A group of related image names, with their tags, inside a registry.
+- **Authorization:** The decision about which operations an authenticated identity may perform, such as pull but not overwrite.
+- **Release tag:** A tag used for a published release, which a reviewed process should resolve to an immutable digest.
+- **Publication review:** A deliberate check of credentials, destination, retention and rollback before anything is pushed.
+
 ## Anatomy and a trace you can follow
 
 Read a reference as registry/repository:tag or registry/repository@digest. A tag may point to a platform index, which then selects a platform manifest. Keep that level of identity clear when comparing builds. Registry credentials belong in an approved credential store or short-lived CI mechanism, never in a Dockerfile.
@@ -93,11 +101,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Publishing by reusing a mutable tag such as `latest`. Leaving credentials in the build context. Assuming a local tag was uploaded.
 
-Exercise 4 is this chapter's boundary case: Diagnose an overwritten mutable release tag. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an overwritten mutable release tag. Resolve the tag to its current digest and compare it with the digest recorded beside the earlier acceptance evidence. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using registry, repository, tag, digest and publication review. Reconstruct worked example 2 (Design a release identity record) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. List the fields a release identity record needs and say which one never changes after publication. Then reconstruct worked example 2 (Design a release identity record) with one different value, predict what changes, and name which of registry, repository, tag, digest and publication review the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

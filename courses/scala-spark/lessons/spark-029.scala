@@ -76,7 +76,7 @@ object Main {
       locally {
         val ids = 0L until 30L
         assert(ids.map(_ * 2L).sum == 870L)
-        println("Declared30-row product total=870")
+        println("Declared 30-row product total=870")
       }
       locally {
         val a = receiptText("run-a", "0" * 64); val b = receiptText("run-b", "0" * 64)

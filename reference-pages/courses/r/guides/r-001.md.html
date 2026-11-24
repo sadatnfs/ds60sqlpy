@@ -245,6 +245,24 @@ quantity <span class="syntax-operator">&lt;-</span> <span class="syntax-number">
 <span class="syntax-function">stopifnot</span><span class="syntax-punctuation">(</span>total <span class="syntax-operator">==</span> <span class="syntax-number">18</span><span class="syntax-punctuation">,</span> quantity <span class="syntax-operator">*</span> unit_price <span class="syntax-operator">==</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> saved_total 18; recalculated 24.</p>
 <p>total contains the earlier result. Changing quantity does not convert total into a spreadsheet formula that reevaluates itself.</p>
+<h4 id="example-3-a-quoted-label-is-not-the-computed-value">Example 3: A quoted label is not the computed value<a class="heading-anchor" href="#example-3-a-quoted-label-is-not-the-computed-value" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-r">quantity <span class="syntax-operator">&lt;-</span> <span class="syntax-number">3</span>
+unit_price <span class="syntax-operator">&lt;-</span> <span class="syntax-number">6</span>
+total <span class="syntax-operator">&lt;-</span> quantity <span class="syntax-operator">*</span> unit_price
+mistake <span class="syntax-operator">&lt;-</span> <span class="syntax-function">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total&quot;</span><span class="syntax-punctuation">)</span>
+fixed <span class="syntax-operator">&lt;-</span> <span class="syntax-function">print</span><span class="syntax-punctuation">(</span>total<span class="syntax-punctuation">)</span>
+<span class="syntax-function">stopifnot</span><span class="syntax-punctuation">(</span><span class="syntax-function">identical</span><span class="syntax-punctuation">(</span>mistake<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">total&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> fixed <span class="syntax-operator">==</span> <span class="syntax-number">18</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected observation:</strong> The first line shows [1] &quot;total&quot; with quotes; the second shows [1] 18.</p>
+<p>The quoted version hands print the five-character text &quot;total&quot;, so the invoice arithmetic never reaches the output. The unquoted name asks R to look up the binding created on line three, which holds 18. print returns its argument invisibly, which is why mistake and fixed can be checked afterward. Change unit_price to 7 and the fixed line shows 21 while the quoted line still shows the same word, a quick way to tell a label from data.</p>
+<h3 id="trace-the-rebinding-example-line-by-line">Trace the rebinding example line by line<a class="heading-anchor" href="#trace-the-rebinding-example-line-by-line" aria-label="Link to this section">#</a></h3>
+<p>Example 2 is easiest to read as a table of bindings after each line runs. A dash means the name does not exist yet in this fresh process.</p>
+<pre class="highlighted-code"><code class="language-text">line                              quantity  unit_price  total
+quantity &lt;- 3                     3         -           -
+unit_price &lt;- 6                   3         6           -
+total &lt;- quantity * unit_price    3         6           18
+quantity &lt;- 4                     4         6           18
+print(c(...))                     4         6           18</code></pre>
+<p>The fourth row is the whole lesson: quantity changes to 4, but total keeps the 18 it received on the third row because R stored a number, not a formula. The printed vector therefore shows saved_total 18 next to recalculated 24, and the stopifnot line passes only because it asserts both facts. If you moved <code>quantity &lt;- 4</code> above the total line, the table would show total 24 in every later row and saved_total would print 24, which would make the first half of that assertion fail and stop the run before the final line.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict 4 * 7 before running it.</p>

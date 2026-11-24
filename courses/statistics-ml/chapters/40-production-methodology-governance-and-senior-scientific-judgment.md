@@ -240,7 +240,7 @@ A canonical JSON configuration includes the model, feature names and decision th
 
 ### Derive an action from costs
 
-With false-positive cost two and false-negative cost eight, the simple optimal threshold is \(\frac{2}{2+8}=0.2\). Probabilities [0.1,0.4,0.8] imply actions [false,true,true]. The program separately computes expected positive and negative costs and verifies the same decision, making the threshold derivation inspectable.
+With false-positive cost two and false-negative cost eight, the simple optimal threshold is \(\frac{2}{2+8}=0.2\). Probabilities `[0.1, 0.4, 0.8]` imply actions `[False, True, True]`. The program separately computes expected positive and negative costs and verifies the same decision, making the threshold derivation inspectable.
 
 ### Separate extraction validity from analytical truth
 

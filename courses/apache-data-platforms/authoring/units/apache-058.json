@@ -5,6 +5,28 @@
   "minutes": 80,
   "prerequisites": ["apache-057"],
   "concepts": ["Kafka ingestion and real-time segments"],
+  "key_terms": [
+    [
+      "Real-time table",
+      "A Pinot table that ingests records from a stream such as Kafka instead of from uploaded batch segments."
+    ],
+    [
+      "Consuming segment",
+      "An in-progress real-time segment that a server builds from stream records and later commits as a completed segment."
+    ],
+    [
+      "Flush threshold",
+      "The row count or time limit at which a consuming segment is completed and committed."
+    ],
+    [
+      "Stream decoder",
+      "The configured component, here JSON, that turns stream messages into typed column values."
+    ],
+    [
+      "Ingestion lag",
+      "The gap between the latest source offset and the records already queryable in Pinot. A small query result does not show it is zero."
+    ]
+  ],
   "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
   "sources": [
     [

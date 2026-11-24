@@ -914,7 +914,7 @@ assert citation['version']!=newer['version']""",
         ex(
             "Keep arithmetic separate from prose",
             "Compute3 purchases over10 visits and attach the deterministic result to an explanation record.",
-            "rate.3 with input counts preserved.",
+            "rate 0.3 with input counts preserved.",
             """calculation={'purchases':3,'visits':10}; value=calculation['purchases']/calculation['visits']
 record={'computed_rate':value,'inputs':calculation,'method':'purchases / eligible visits'}
 assert record['computed_rate']==.3 and record['inputs']['visits']==10""",
@@ -1517,14 +1517,14 @@ np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)""",
         ex(
             "Inspect the preference gradient",
             "Backpropagate the equal-margin loss.",
-            "gradient-.25.",
+            "gradient -0.25.",
             """loss.backward(); np.testing.assert_allclose(difference.grad.item(),-.25,atol=1e-12,rtol=0)""",
             "The negative gradient means gradient descent increases the chosen-response advantage. The scale includes beta and the sigmoid derivative at zero.",
         ),
         ex(
             "Perform an actual update",
             "TakeSGD.2 on the scalar policy difference and recompute the loss.",
-            "difference.05;loss belowlog2.",
+            "difference 0.05; loss below log(2).",
             """opt=torch.optim.SGD([difference],lr=.2); opt.step(); after=F.softplus(-beta*(difference-reference))
 np.testing.assert_allclose(difference.item(),.05,atol=1e-12,rtol=0); assert after.item()<loss.item()""",
             "The reference remains fixed while the policy margin changes. A smaller loss demonstrates agreement with the supplied preference label,not independent answer quality.",
@@ -1975,7 +1975,7 @@ assert public['status']=='unknown' and privileged['citation']['document_id']=='p
         ex(
             "Compute a data-science result deterministically",
             "Calculate3 purchases over10 eligible visits and reject11 purchases over10 visits.",
-            "rate.3;invalid counts raise ValueError.",
+            "rate 0.3; invalid counts raise ValueError.",
             """assert conversion(3,10)==.3
 try: conversion(11,10)
 except ValueError: pass

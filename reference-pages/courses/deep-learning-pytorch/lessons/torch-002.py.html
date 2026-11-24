@@ -207,12 +207,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Write through a column view</span></span>
 <span class="source-line"><span class="syntax-comment"># Take column 1 of the (3, 2) tensor as a view, set its last entry to -7 and inspect the</span></span>
 <span class="source-line"><span class="syntax-comment"># original tensor and the view&#x27;s stride.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: grid[2, 1] becomes -7; the column view has stride (2,).</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: `grid[2, 1]` becomes -7; the column view has stride (2,).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Separate contiguous from clone</span></span>
 <span class="source-line"><span class="syntax-comment"># Call contiguous() and clone() on the already contiguous grid, then write 100 into the</span></span>
 <span class="source-line"><span class="syntax-comment"># [0, 0] entry of the first result and -100 into the second.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: contiguous() returns the same storage, so grid[0, 0] becomes 100; the clone write leaves grid unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: contiguous() returns the same storage, so `grid[0, 0]` becomes 100; the clone write leaves grid unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Trace a transposed layout</span></span>
 <span class="source-line"><span class="syntax-comment"># Transpose x and inspect shape, strides and contiguity.</span></span>

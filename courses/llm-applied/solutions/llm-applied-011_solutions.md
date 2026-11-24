@@ -1,6 +1,6 @@
 # llm-applied-011: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for grounded claims, citations and evidence-based abstention only after attempting *Return a supported extractive answer* through *Keep arithmetic separate from prose*. A discrepancy in *Reject a corrupted span* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-011_solution.py` runs the assertions; this page explains why they test grounded claim and citation integrity.
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ This chapter implements an extractive subject-assistant baseline. It selects an 
 
 ## Reading the implementation
 
-An answer record contains status, claims and citations. Each citation includesdocument_id, version, start, end. The examples check source-slice equality and inspect an authored support map separately. The helper constructs the span record; a complete caller must enforce semantic claim support before accepting it. For missing evidence, return status unknown with an empty claim list and a reason. Do not use a low retrieval score alone as a universal answerability threshold without calibration.
+An answer record contains status, claims and citations. Each citation includes document_id, version, start, end. The examples check source-slice equality and inspect an authored support map separately. The helper constructs the span record; a complete caller must enforce semantic claim support before accepting it. For missing evidence, return status unknown with an empty claim list and a reason. Do not use a low retrieval score alone as a universal answerability threshold without calibration.
 
 ## Separate the four questions behind a citation
 
@@ -34,7 +34,7 @@ Computed claims need a different lineage. The result 0.3 comes from purchases 3 
 
 Abstention is a decision under uncertainty about support. In a simple illustrative utility model, a correct supported answer earns benefit B, an incorrect or unsupported answer incurs cost C, and abstention has utility zero. If p were a calibrated probability of meeting the complete answer contract, answering is favored when pB-(1-p)C>0, or \(p>\frac{C}{B+C}\). This is a derivation under explicit assumptions, not permission to interpret a retrieval score as p. Additional answer costs or asymmetric abstention costs change the threshold.
 
-Coverage and conditional quality must be reported together. If a system answers six of ten questions and five answers satisfy the full contract, coverage is 0.6 and accepted-answer accuracy is5/6. Reporting only5/6 hides the four refusals; reporting only five successes hides whether the failures were unsupported answers or appropriate unknowns. The final task population and cost policy determine which tradeoff is useful.
+Coverage and conditional quality must be reported together. If a system answers six of ten questions and five answers satisfy the full contract, coverage is 0.6 and accepted-answer accuracy is 5/6. Reporting only 5/6 hides the four refusals; reporting only five successes hides whether the failures were unsupported answers or appropriate unknowns. The final task population and cost policy determine which tradeoff is useful.
 
 Conflicting sources need a policy too. A newer version may supersede an older one for current questions, but historical questions can require the older rule. Two simultaneously applicable sources may disagree. Preserve the conflict and source-precedence rule rather than using fluent synthesis to erase it. A supported quote from each side can establish that a conflict exists without establishing which side is correct.
 
@@ -79,9 +79,9 @@ bad = {"quote": "Conversion rate is always one."}
 assert text[0:end] != bad["quote"]
 ```
 
-**Expected:** citation integrity check returnsFalse.
+**Expected:** citation integrity check returns False.
 
-**Verify:** Compare the computed values or written argument with citation integrity check returnsFalse.
+**Verify:** Compare the computed values or written argument with citation integrity check returns False.
 
 ## Exercise 3: Abstain on missing evidence
 
@@ -115,7 +115,7 @@ assert document["id"] == "metric-v1" and document["id"] not in support.get("sign
 
 ## Exercise 5: Bind the source version
 
-The question is: Compare a citation requiringversion1 with a suppliedversion2 document.
+The question is: Compare a citation requiring version 1 with a supplied version 2 document.
 
 A source update can change meaning or offsets. Reusing old citations against new text can produce apparently precise but incorrect evidence links.
 
@@ -131,7 +131,7 @@ assert citation["version"] != newer["version"]
 
 ## Exercise 6: Keep arithmetic separate from prose
 
-The question is: Compute3 purchases over10 visits and attach the deterministic result to an explanation record.
+The question is: Compute 3 purchases over 10 visits and attach the deterministic result to an explanation record.
 
 The generated explanation must use the computed artifact rather than independently inventing a numerical answer. The formula also depends on the domain definition of eligible visits.
 
@@ -142,10 +142,10 @@ record = {"computed_rate": value, "inputs": calculation, "method": "purchases / 
 assert record["computed_rate"] == 0.3 and record["inputs"]["visits"] == 10
 ```
 
-**Expected:** rate.3 with input counts preserved.
+**Expected:** rate 0.3 with input counts preserved.
 
-**Verify:** Compare the computed values or written argument with rate.3 with input counts preserved.
+**Verify:** Compare the computed values or written argument with rate 0.3 with input counts preserved.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Abstain on missing evidence* and predict how the result changes before checking it; the unchanged inputs give: status unknown; claims empty; reason missing evidence. Keep the original *Keep arithmetic separate from prose* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

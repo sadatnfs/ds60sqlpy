@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-058`, `python-l
 
 Django supports asynchronous views and asynchronous ORM operations, but synchronous database calls remain unsafe when invoked directly from an active async context. This chapter tests both the supported async path and an explicit sync bridge, using a file-backed temporary SQLite database shared by the involved threads.
 
+## Key terms
+
+- **Async view:** A Django view defined with `async def` that can await operations without blocking the event loop.
+- **Async ORM method:** A QuerySet method with an `a` prefix, such as `acount()`, that runs a supported query safely from async code.
+- **SynchronousOnlyOperation:** The error Django raises when synchronous ORM code is called directly from a running event loop.
+- **sync_to_async:** An asgiref adapter that runs a synchronous function in a thread-sensitive worker so async code can await it.
+- **Thread-sensitive:** Running synchronous calls on one shared thread so database connections stay with the thread that opened them.
+
 ## Mechanism: protect thread-sensitive database ownership
 
 An async view can await operations that yield control. Django's async ORM methods provide an appropriate interface for supported query operations. A synchronous ORM call inside that async context raises SynchronousOnlyOperation rather than silently blocking the event loop under unsafe assumptions.
@@ -29,6 +37,50 @@ Inside the async exercise, a direct synchronous count is expected to raise Synch
 The refusal is a useful guard, not an error to suppress through a global unsafe setting. Disabling the guard would obscure the ownership problem and could permit concurrent access patterns that the database adapter does not support safely.
 
 Bridging every tiny attribute access separately can create unnecessary overhead and fragmented transaction boundaries. Group related synchronous work into a coherent unit, return plain results and keep connection/session objects inside their owning context.
+
+## Worked example: a blocking call freezes every other coroutine
+
+```python
+import asyncio
+import time
+
+
+def blocking_count():
+    time.sleep(0.3)
+    return 1
+
+
+async def run(bridge):
+    ticks = 0
+
+    async def ticker():
+        nonlocal ticks
+        while True:
+            await asyncio.sleep(0.01)
+            ticks += 1
+
+    task = asyncio.create_task(ticker())
+    await asyncio.sleep(0)
+    before = ticks
+    if bridge:
+        await asyncio.to_thread(blocking_count)
+    else:
+        blocking_count()
+    during = ticks - before
+    task.cancel()
+    return during
+
+
+print(asyncio.run(run(False)), asyncio.run(run(True)) > 10)
+```
+
+Expected output:
+
+```text
+0 True
+```
+
+The ticker coroutine stands in for every other request an async worker is serving. When the 300 millisecond call runs directly on the event loop, the ticker does not advance once, because nothing can run until `time.sleep` returns. Moved to a thread, the same call leaves the loop free and the ticker keeps counting. A synchronous ORM query is exactly such a blocking call, which is why Django raises `SynchronousOnlyOperation` when the lesson calls `Note.objects.count()` inside the async context, and why the sync unit goes through `sync_to_async` with `thread_sensitive=True` and closes its own connections afterward.
 
 ## Failure diagnosis and discussion
 

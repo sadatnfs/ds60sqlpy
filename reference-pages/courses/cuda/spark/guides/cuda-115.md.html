@@ -205,6 +205,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Start by drawing the logical intent without backend labels. Then inspect <code>explain(&quot;formatted&quot;)</code> in the exact Spark environment. Highlight CPU/GPU representation transitions and exchanges separately: a device transfer is not the same operation as redistribution across executors, although one stage can involve both. Add operator metrics after an action completes. If AQE is enabled, retain the final executed plan because broadcast and partition decisions may have changed.</p>
 <p>The plugin&#x27;s explain diagnostics can report why a node is not selected for GPU execution. Read the reason at the expression and dtype level. An unsupported child can change the useful acceleration region around it, and a small unsupported expression can force expensive conversions. Do not rewrite the query merely to maximize the count of GPU nodes; preserve semantics and compare complete latency.</p>
 <p>A useful review table has columns node, semantic role, input/output representation, supported status, fallback reason, rows/batches, elapsed time and spill. This turns a screenshot into an argument. A GPU node in a planned diagram is weaker evidence than that node in an executed query with metrics, and even the executed node must be accompanied by a correct result comparison.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Catalyst:</strong> Spark&#x27;s query optimizer, which transforms logical plans and selects physical implementations.</li>
+<li><strong>Logical plan:</strong> A description of what a query computes, independent of how it executes.</li>
+<li><strong>Columnar transition:</strong> An operator inserted to convert between row and columnar formats around GPU operators.</li>
+<li><strong>AQE final plan:</strong> The physical plan after Adaptive Query Execution applies runtime statistics, which can differ from the initial plan.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A synthetic plan Scan -&gt; Filter -&gt; Aggregate can contain a GPU filter and aggregate with a CPU-side source boundary. Count transfers and conversions rather than labeling the whole query GPU-only.</p>
@@ -218,20 +225,36 @@ transitions <span class="syntax-operator">=</span> <span class="syntax-builtin">
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>device <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">GPU</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> device <span class="syntax-operator">in</span> plan<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Synthetic plan worksheet:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> transitions<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CPU/GPU transitions</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Synthetic plan has two GPU nodes and two backend transitions.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>transitions</code></td>
+<td><code>2</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-draw-logical-versus-physical-plan">Exercise 1: Draw logical versus physical plan<a class="heading-anchor" href="#exercise-1-draw-logical-versus-physical-plan" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>draw logical versus physical plan</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reading device placement from the logical plan fails, because logical nodes carry no device information and the plugin acts only on the physical plan.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-mark-gpu-candidate-nodes">Exercise 2: Mark GPU candidate nodes<a class="heading-anchor" href="#exercise-2-mark-gpu-candidate-nodes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>mark GPU candidate nodes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Guessing GPU placement from operator type, for example assuming all aggregates run on the GPU, ignores expression-level fallback.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-locate-transitions">Exercise 3: Locate transitions<a class="heading-anchor" href="#exercise-3-locate-transitions" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>locate transitions</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting GPU nodes and ignoring transitions makes a plan with many short GPU sections look better than one long section.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-lazy-evaluation">Exercise 4: Explain lazy evaluation<a class="heading-anchor" href="#exercise-4-explain-lazy-evaluation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>explain lazy evaluation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Timing the line that defines the DataFrame and reporting it as query time measures plan construction, which is nearly instant.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-compare-initial-and-final-aqe-plan">Exercise 5: Compare initial and final AQE plan<a class="heading-anchor" href="#exercise-5-compare-initial-and-final-aqe-plan" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>compare initial and final AQE plan</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Citing the pre-execution plan as the executed plan can report a join strategy that never ran.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-choose-operator-metrics">Exercise 6: Choose operator metrics<a class="heading-anchor" href="#exercise-6-choose-operator-metrics" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>choose operator metrics</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting only total job time hides which operator dominates and whether spilling occurred.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -108,7 +108,7 @@ object Main {
         val impressionMinute = 0
         assert(3 >= impressionMinute && 3 < impressionMinute + 10)
         assert(!(10 >= impressionMinute && 10 < impressionMinute + 10))
-        println("Minute3 matches;minute10 is outside the half-open window")
+        println("Minute 3 matches; minute 10 is outside the half-open window")
       }
       locally {
         val impressions = Seq(("i1", "A", 0), ("i2", "B", 0), ("i3", "C", 5))

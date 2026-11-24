@@ -28,6 +28,8 @@ Choose tolerances according to scale, conditioning and the intended decision. A 
 
 Check dimensions, rank assumptions, input finiteness and residuals on small fixtures. An unexpected result can come from a transposed axis, a duplicated feature or an unsupported assumption about independence. Do not automatically regularize every failure without stating how the regularization changes the problem.
 
+A compact first check is to print `size(design)`, `rank(design)` and `norm(design * solution - target)` together. A rank below the number of columns explains why several coefficient vectors fit equally well, and a large residual means the system has no exact solution, so least squares is answering a different question.
+
 A pseudoinverse is a particular mathematical and numerical choice. It does not make a nonidentified parameter scientifically identifiable. Likewise, a factorization can solve an equation accurately while the equation is a poor model of the underlying data.
 
 The programs use the prepared LinearAlgebra library and tiny matrices. They establish the stated solve, null-space and conjugation properties, not a universal recommendation for large sparse systems or arbitrary numerical scales. Later regression and optimization units retain these distinctions when constructing fitted models.

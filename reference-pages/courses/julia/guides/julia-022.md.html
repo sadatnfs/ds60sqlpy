@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Differentiate supported numerical functions and validate derivatives while preserving the numeric representation carried by dual numbers.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-022</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (independent analytic derivatives) and worked case B (a storage mistake blocks differentiation) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-022: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>ForwardDiff:</strong> A forward-mode automatic differentiation package that evaluates ordinary Julia code with dual numbers.</li>
+<li><strong>Dual number:</strong> A number carrying a value and derivative parts, so ordinary arithmetic propagates exact derivatives.</li>
+<li><strong>Gradient:</strong> The vector of partial derivatives of a scalar function, returned by <code>ForwardDiff.gradient</code>.</li>
+<li><strong>Jacobian:</strong> The matrix of partial derivatives of a vector-valued function, with one row per output and one column per input.</li>
+<li><strong>Generic storage:</strong> Buffers created with <code>similar</code> on the input so dual numbers fit, unlike a hard-coded <code>Float64</code> buffer that blocks differentiation.</li>
+</ul>
 <h3 id="automatic-differentiation-follows-the-implemented-computation">Automatic differentiation follows the implemented computation<a class="heading-anchor" href="#automatic-differentiation-follows-the-implemented-computation" aria-label="Link to this section">#</a></h3>
 <p>Forward-mode automatic differentiation propagates derivative information through supported numerical operations. A dual number carries a value and partial information. Arithmetic combines both components according to differentiation rules. This is different from estimating a derivative by subtracting nearby function values or manipulating a symbolic formula.</p>
 <p>ForwardDiff supplies derivative, gradient, Jacobian and Hessian operations for suitable Julia functions. Their input/output shapes matter. A gradient belongs to a scalar-valued function of a vector; a Jacobian describes a vector-valued function; a Hessian describes second derivatives of a scalar function. A correct shape does not establish that the chosen function is the right scientific objective.</p>

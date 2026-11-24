@@ -1,33 +1,22 @@
 # llm-002: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/llm-002.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
+Use this scores, stable softmax and probability mass reference after your own attempt. The [learner guide](../guides/llm-002.md) keeps the fixture and Expected/Verify contracts for *Explain the shift* to *Transfer to temperature*, six separate actions; any implementation is acceptable if *Reject invalid distributions* still fails on that input.
 
-The [executable reference](llm-002_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+`verify()` in the [executable reference](llm-002_solution.py) uses NumPy and literals only; on failure, keep the *Reject invalid distributions* input. A pass says nothing beyond these scores, stable softmax and probability mass fixtures, so next explain score from memory on a changed fixture. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.
 
 ## Exercise 1: Explain the shift
 
-For [0,0], shifted scores are [0,0], exponential masses are [1,1] and their sum is 2. The normalized values are one half each. For [1000,1000], subtracting the maximum yields the same [0,0], so the actual exponentials remain [1,1]. Algebraically, the common factor \(e^{\mathrm{offset}}\) cancels in the ratio. Avoid computing that factor merely to cancel it afterward, because it may overflow before the mathematical simplification can help.
+For [0, 0], shifted scores are [0, 0], exponential masses are [1, 1] and their sum is 2. The normalized values are one half each. For [1000, 1000], subtracting the maximum yields the same [0, 0], so the actual exponentials remain [1, 1]. Algebraically, the common factor \(e^{\mathrm{offset}}\) cancels in the ratio. Avoid computing that factor merely to cancel it afterward, because it may overflow before the mathematical simplification can help.
 
-**Expected:** Both outputs are [0.5,0.5] and every row sum is 1.
+**Expected:** Both outputs are [0.5, 0.5] and every row sum is 1.
 
 **Verify:** Assert the output vectors with rtol=0, atol=1e-12 and record the two exponentials actually formed after shifting.
 
 ## Exercise 2: Construct a stable helper
 
-The masses for \([0,\log(3)]\) are proportional to [1,3], giving \([\frac{1}{4},\frac{3}{4}]\). The same vector plus 1000 should yield the same result. A stable implementation subtracts the maximum, producing masses \([\frac{1}{3},1]\), whose normalization is still \([\frac{1}{4},\frac{3}{4}]\). The reference accepts one finite nonempty vector, validates an optional boolean mask and rejects unsupported shapes. That narrow interface avoids accidentally treating a whole matrix as one categorical distribution.
+The masses for \([0,\log(3)]\) are proportional to [1, 3], giving \([\frac{1}{4},\frac{3}{4}]\). The same vector plus 1000 should yield the same result. A stable implementation subtracts the maximum, producing masses \([\frac{1}{3},1]\), whose normalization is still \([\frac{1}{4},\frac{3}{4}]\). The reference accepts one finite nonempty vector, validates an optional boolean mask and rejects unsupported shapes. That narrow interface avoids accidentally treating a whole matrix as one categorical distribution.
 
-**Expected:** Both yield [0.25,0.75] within 1e-12.
+**Expected:** Both yield [0.25, 0.75] within 1e-12.
 
 **Verify:** Assert each vector and their difference separately; no direct \(\exp(1000)\) is needed.
 
@@ -35,7 +24,7 @@ The masses for \([0,\log(3)]\) are proportional to [1,3], giving \([\frac{1}{4},
 
 Remove the forbidden middle score before the maximum and denominator are formed. The remaining two zeros give \([\frac{1}{2},0,\frac{1}{2}]\). If you first normalize [0,100,0], almost all mass goes to the middle choice; deleting it afterward leaves a row sum near zero. The triangle or zero at that position may look convincing while the legal row is no longer normalized. Renormalization can repair ordinary cases, but the pre-normalization mask avoids needless extreme exponentials.
 
-**Expected:** Legal distribution [0.5,0,0.5]; the post-normalization deletion loses probability mass.
+**Expected:** Legal distribution [0.5, 0, 0.5]; the post-normalization deletion loses probability mass.
 
 **Verify:** Assert the legal row sum is 1 and compare it with the tiny remaining mass from the broken order.
 
@@ -53,7 +42,7 @@ An empty vector and an all-false mask have no legal probability distribution. Na
 
 **Expected:** Empty, NaN and all-false cases raise ValueError; integer mask raises TypeError.
 
-**Verify:** Capture all four exceptions independently and verify the original equal-score case still returns [0.5,0.5].
+**Verify:** Capture all four exceptions independently and verify the original equal-score case still returns [0.5, 0.5].
 
 ## Exercise 6: Transfer to temperature
 
@@ -65,9 +54,7 @@ Dividing \([0,\log(3)]\) by 2 makes the relative exponential masses \([1,\sqrt{3
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+*A stable shift of equal scores* validates and reduces its input in the functions below; the executable file covers all six scores, stable softmax and probability mass exercises. Keep the *Reject invalid distributions* assertion and its invalid-input case; never replace them with a default.
 
 ```python
 from __future__ import annotations
@@ -94,9 +81,4 @@ def softmax(scores, allowed=None):
 
 Close the helper and explain why a common score offset cancels but a positive temperature can change probabilities. Use a three-choice fixture with one forbidden option and state the denominator before calculating it.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Next, pick a fixture unlike *A stable shift of equal scores* to test independent recall, and explain why *Reject invalid distributions* rejects its case rather than naming the exception. Any notation works if score and its denominator stay explicit; these scores, stable softmax and probability mass checks say nothing about unseen model quality or safety.

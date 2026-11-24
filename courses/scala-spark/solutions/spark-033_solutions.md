@@ -64,7 +64,7 @@ The key is the logical event identity, while delivery identity remains an output
 
 Run both first-phase branches with AvailableNow: deduplicated records to accepted-output and missing-ID records to quarantine-output. Use distinct checkpoints and bounded await/stop scopes.
 
-**Expected:** Accepted(e1, delivery 1,10), (e2, delivery 2,10); quarantine(delivery 3, NULL, missing_event_id). The raw source has 3 rows; prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.
+**Expected:** `Accepted(e1, delivery 1, 10)`, `(e2, delivery 2, 10)`; quarantine (delivery 3, NULL, missing_event_id). The raw source has 3 rows; prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.
 
 ```scala
 def runBranches(
@@ -89,7 +89,7 @@ def run_branches(spark, root):
     return accepted, rejected
 ```
 
-The two sink populations are complementary business decisions. In this prepared plan, the reported source metrics reflect branch filtering:2 known-ID rows and 1 missing-ID row. A separate static read proves the raw source count 3. Separate checkpoints prevent one branch from advancing another branch source progress. The exact NULL quarantine row proves that unknown identity was retained for review rather than silently discarded ormerged into an accepted key.
+The two sink populations are complementary business decisions. In this prepared plan, the reported source metrics reflect branch filtering: 2 known-ID rows and 1 missing-ID row. A separate static read proves the raw source count 3. Separate checkpoints prevent one branch from advancing another branch source progress. The exact NULL quarantine row proves that unknown identity was retained for review rather than silently discarded ormerged into an accepted key.
 
 **Verification evidence:** Assert both exact output populations, branch metrics 2/1 and an independent raw batch-source count 3.
 
@@ -97,7 +97,7 @@ The two sink populations are complementary business decisions. In this prepared 
 
 Publish the second file after the first phase terminates and run both compatible branches again. Compare the accepted business identities and their total.
 
-**Expected:** Accepted(e1, delivery 1,10), (e2, delivery 2,10), (e3, delivery 5,10); delivery 4 replay contributes no additional row. Business total 30.
+**Expected:** `Accepted(e1, delivery 1, 10)`, `(e2, delivery 2, 10)`, `(e3, delivery 5, 10)`; delivery 4 replay contributes no additional row. Business total 30.
 
 ```scala
 def businessRows(spark: SparkSession, root: Path): Seq[(String, Long, Long)] = {
@@ -143,7 +143,7 @@ The metric substantiates an actual retention boundary instead of merely restatin
 
 Read the six source deliveries once as a bounded batch and compare them with both sinks. Return source deliveries, known-ID deliveries, quarantine rows, accepted rows including advancer, and business total.
 
-**Expected:** Ledger(6,5,1,4,30). One known-ID delivery is suppressed as an in-horizon replay; three distinct equal-valued business events remain.
+**Expected:** `Ledger(6, 5, 1, 4, 30)`. One known-ID delivery is suppressed as an in-horizon replay; three distinct equal-valued business events remain.
 
 ```scala
 def deliveryLedger(spark: SparkSession, root: Path): (Long, Long, Long, Long, Long) = {
@@ -179,4 +179,6 @@ The ledger connects physical delivery occurrences to business decisions without 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Classify missing event identity before deduplication) is built inside the program, so opening the lesson fetches nothing; it expects: Delivery 3 is quarantined; known IDs are eligible for the separate deduplication policy. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

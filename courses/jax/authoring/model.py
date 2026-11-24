@@ -16,6 +16,16 @@ class Case:
 
 
 @dataclass(frozen=True)
+class Reasoning:
+    """Explained-reference reasoning: approach, correctness, one wrong turn per task, checks."""
+
+    approach: str
+    correctness: str
+    pitfalls: tuple[str, str, str, str, str, str]
+    verification: str
+
+
+@dataclass(frozen=True)
 class Unit:
     number: int
     title: str
@@ -32,6 +42,9 @@ class Unit:
     transfer: str
     sources: tuple[tuple[str, str], ...]
     runtime: str = "jax-cpu"
+    key_terms: tuple[tuple[str, str], ...] = ()
+    reasoning: Reasoning | None = None
+    records: tuple[str, ...] = ()
 
     @property
     def id(self) -> str:

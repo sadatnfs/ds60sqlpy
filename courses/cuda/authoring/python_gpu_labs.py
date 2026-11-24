@@ -28,13 +28,20 @@ y = x * 2 + 1
 end.record()
 end.synchronize()
 cp.testing.assert_allclose(y, 2 * cp.arange(4096, dtype=cp.float32) + 1)
-print("CUDA event interval:", cp.cuda.get_elapsed_time(start, end), "ms; excludes transfers and initial compilation")""",
-    10: '''kernel = cp.RawKernel(r"""
+print(
+    "CUDA event interval:",
+    cp.cuda.get_elapsed_time(start, end),
+    "ms; excludes transfers and initial compilation",
+)""",
+    10: '''kernel = cp.RawKernel(
+    r"""
 extern "C" __global__ void twice(const float* x, float* y, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n) y[i] = 2.0f * x[i];
 }
-""", "twice")
+""",
+    "twice",
+)
 for n in [0, 1, 127, 128, 129, 257]:
     x = cp.arange(n, dtype=cp.float32)
     y = cp.empty_like(x)
@@ -49,12 +56,15 @@ result = float(cp.sum(x).get())
 assert math.isclose(result, math.fsum(values), rel_tol=1e-12, abs_tol=1e-12)
 cp.cuda.get_current_stream().synchronize()
 print("CUDA library reduction:", result, "; order-sensitive cases need a documented tolerance")""",
-    20: '''kernel = cp.RawKernel(r"""
+    20: '''kernel = cp.RawKernel(
+    r"""
 extern "C" __global__ void affine(const float* x, float* y, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n) y[i] = 2.0f * x[i] + 1.0f;
 }
-""", "affine")
+""",
+    "affine",
+)
 x = cp.asarray([-1.0, 0.0, 3.0], dtype=cp.float32)
 y = cp.empty_like(x)
 kernel((1,), (128,), (x, y, cp.int32(x.size)))

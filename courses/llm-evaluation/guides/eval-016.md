@@ -8,7 +8,7 @@ Compute and seal a complete held-out decision packet from the connected syntheti
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-016`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-016` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for a reproducible evaluation decision packet in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about decision memo and artifact digest: Changing one constraint passes only the coverage gate, a missing protocol result and a critical failure each fail their gates, editing the artifact invalidates the old digest, and the memo states no-go with all four failing conditions. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## The deliverable is a reconstructable argument
 
@@ -17,6 +17,13 @@ An evaluation report should let another analyst reconstruct the population, data
 The packet records a protocol identity, system versions, dataset identity, eligibility and labeling rules, effect and uncertainty estimates, coverage and operational constraints. Every gate has a named criterion and evidence status. A no-go result can be a complete and useful evaluation when it identifies what failed and what new evidence would support reconsideration.
 
 A content digest binds a serialized artifact to its bytes under a declared encoding. It detects later modification when compared with a trusted recorded digest. It does not establish who created the artifact, whether the protocol was followed or whether the scientific assumptions are valid. Authentication, access control and study validity are separate concerns.
+
+## Key terms
+
+- **Decision packet:** A reconstructable report of protocol, versions, data identity, estimates, gates and the resulting decision.
+- **Content digest:** A hash binding serialized bytes under a declared encoding, which detects modification but not authorship or validity.
+- **Release gate:** A named criterion with an evidence status that must pass for a go decision.
+- **Minimum effect:** The smallest improvement that matters for the decision, distinct from statistical detectability.
 
 ## Worked case A: calculate the packet from the held-out ledger
 

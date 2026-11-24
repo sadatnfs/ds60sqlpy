@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-041`.
 
 Server-sent events carry server-to-client updates over an HTTP response. They are useful when the browser sends ordinary requests but receives a continuing stream of progress or notifications. This chapter builds valid finite event framing and an explicit resume cursor, while keeping delivery timing claims separate.
 
+## Key terms
+
+- **Server-sent events:** A one-way stream of server-to-client events carried over one long HTTP response with the `text/event-stream` media type.
+- **Event frame:** One SSE event: lines of fields such as `id`, `event` and `data`, ended by a blank line.
+- **Last-Event-ID:** The request header a reconnecting client sends with the last event id it received, so the server can resume after that point.
+- **Resume cursor:** The ordered event identity used to choose which later events to resend; a malformed cursor returns 400 and an unknown future one returns 409.
+
 ## Mechanism: event identity is more than a line number
 
 An SSE event consists of named fields followed by a blank line. The data field carries text; this example encodes a JSON object on one data line. An id field gives the client a cursor it can send as Last-Event-ID when reconnecting. The event field names the application event type.
@@ -29,6 +36,44 @@ A request with Last-Event-ID 2 receives only event 3. A malformed cursor receive
 The ahead-of-stream check is one explicit fixture policy. A larger service also needs a policy for a cursor older than retained history, perhaps returning a reset/snapshot instruction. Silent truncation would make a reconnecting client believe it had seen all relevant changes when it had not.
 
 Repeated delivery remains possible around reconnects. Clients should apply events idempotently or track the latest accepted identity. The stream's event ID and the business operation's idempotency key are related coordination tools, but they identify different things and should not be conflated.
+
+## Worked example: why event data with a newline needs encoding
+
+```python
+import json
+
+
+def frame(identifier, text):
+    return f"id: {identifier}\ndata: {text}\n\n"
+
+
+def parse(stream):
+    events = []
+    for block in stream.strip("\n").split("\n\n"):
+        fields = {}
+        for line in block.split("\n"):
+            name, _, value = line.partition(": ")
+            fields.setdefault(name, []).append(value)
+        events.append((fields["id"][0], "\n".join(fields.get("data", []))))
+    return events
+
+
+raw = frame(3, "line one\nline two")
+encoded = frame(3, json.dumps("line one\nline two"))
+print(parse(raw))
+print(parse(encoded))
+print(repr(json.loads(parse(encoded)[0][1])))
+```
+
+Expected output:
+
+```text
+[('3', 'line one')]
+[('3', '"line one\\nline two"')]
+'line one\nline two'
+```
+
+In the event stream format a newline ends a field, so writing raw text that contains one after `data:` produced a second line, `line two`, that the parser read as a field with an unknown name and discarded. The client silently lost half the message. Passing the value through `json.dumps` first turns the newline into the two characters backslash and n, keeping the whole value on one `data:` line, and `json.loads` restores it on the receiving side. The lesson's `encode` generator applies the same rule to every event it yields.
 
 ## Failure diagnosis and discussion
 

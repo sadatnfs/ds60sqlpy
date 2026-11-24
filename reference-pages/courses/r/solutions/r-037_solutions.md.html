@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Derive the probability of at least three heads in four fair flips.</p>
 <p>It is 5/16.</p>
+<p><strong>Approach:</strong> Count the sequences with exactly three heads and with four heads, then divide by all sequences.</p>
+<p><strong>Why it holds here:</strong> Three heads can occur in choose(4, 3) = 4 orders and four heads in 1, so 5 of 2^4 = 16 equally likely sequences qualify, which is 0.3125 for a fair coin.</p>
+<p><strong>Tempting mistake:</strong> Using <code>pbinom(3, 4, 0.5, lower.tail = FALSE)</code> or <code>heads &gt; 3</code>. Both describe more than three heads and give 1/16, which leaves out the four sequences with exactly three.</p>
+<p><strong>Verify:</strong> <code>sum(choose(4, 3:4)) / 2^4</code> returns 0.3125, and the worked example&#x27;s table shows 4 and 1 sequences for three and four heads.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Quadruple the number of independent simulation repetitions.</p>
 <p>The standard error is halved under the same model.</p>
+<p><strong>Approach:</strong> Compute the standard error at 100 and at 400 repetitions with p = 0.3 and compare the two.</p>
+<p><strong>Why it holds here:</strong> The error is the square root of p(1 - p)/B. Multiplying B by 4 divides the quantity under the root by 4, so the error halves, from about 0.0458 to about 0.0229.</p>
+<p><strong>Tempting mistake:</strong> Expecting the error to fall to a quarter. That is what happens to the variance; the standard error only halves, so cutting it to a quarter takes 16 times the repetitions.</p>
+<p><strong>Verify:</strong> <code>isTRUE(all.equal(large, small / 2))</code> returns TRUE, and the printed values show about 0.0458 and 0.0229.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Simulate an event and retain seed, B, estimate and error estimate.</p>
 <p>The report states both the model and finite-repetition uncertainty.</p>
+<p><strong>Approach:</strong> Keep the event indicator <code>heads &gt;= 3</code> as its own step and report the seed, B, estimate and mcse together.</p>
+<p><strong>Why it holds here:</strong> With seed 41 and 20000 draws the mcse is about 0.0033, so the estimate is a value near 0.3125 with a stated precision, and anyone can rerun it and get the same number.</p>
+<p><strong>Tempting mistake:</strong> Reporting the estimate alone, for example 0.31. A reader cannot tell whether that came from 100 draws, with an error near 0.046, or from 20000.</p>
+<p><strong>Verify:</strong> Running <code>set.seed(41)</code> and the same rbinom call twice returns identical estimates, and the printed vector shows estimate, exact and mcse.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose choosing a seed because it produces a desired conclusion.</p>
 <p>Fix a declared seed policy and evaluate the model honestly.</p>
+<p><strong>Approach:</strong> Fix the seed before looking at any results, and judge the model with a tolerance wider than the simulation noise.</p>
+<p><strong>Why it holds here:</strong> Seeds only change which draws are made. Across seeds the estimate varies by about 0.0033, so trying 20 seeds and keeping the one closest to a hoped for value can shift the answer by roughly two standard errors.</p>
+<p><strong>Tempting mistake:</strong> Running several seeds and reporting the one that gives the preferred estimate. The reported precision then overstates what the simulation supports.</p>
+<p><strong>Verify:</strong> Running seeds 1 to 20 shows estimates spread over a few thousandths around 0.3125, and the declared seed&#x27;s result falls inside that range.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain p equal to zero or one.</p>
 <p>The model-based Monte Carlo variance is zero, which is not proof that an uncertain real-world probability is known exactly.</p>
+<p><strong>Approach:</strong> Treat p = 0 and p = 1 as degenerate models whose draws do not vary, and say that the zero error is a property of the model.</p>
+<p><strong>Why it holds here:</strong> With p = 0 every draw is 0 heads and with p = 1 every draw is 4, so p(1 - p) = 0 and the mcse is 0 exactly.</p>
+<p><strong>Tempting mistake:</strong> Reporting a real probability as known exactly because the simulation shows no variation. If p were 0.001 and only 100 draws were made, most runs would also show zero events and a zero error.</p>
+<p><strong>Verify:</strong> <code>all(rbinom(10, 4, 0) == 0)</code> and <code>all(rbinom(10, 4, 1) == 4)</code> both return TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Separate more simulation from better scientific assumptions.</p>
 <p>Increasing B reduces simulation noise but does not remove misspecification or observational bias.</p>
+<p><strong>Approach:</strong> Separate the simulation error, which more draws reduce, from model error, which comes from the fair, independent flips assumption.</p>
+<p><strong>Why it holds here:</strong> If the real coin lands heads 55 percent of the time, three or more heads has probability about 0.391, not 0.3125. That gap of about 0.078 is more than 20 times the mcse.</p>
+<p><strong>Tempting mistake:</strong> Running 2 million draws and reporting 0.3125 as settled. The simulation error shrinks to about 0.0003, while the error from assuming a fair coin stays the same.</p>
+<p><strong>Verify:</strong> <code>sum(dbinom(3:4, 4, 0.55))</code> returns about 0.391, while the fair coin model returns 0.3125.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

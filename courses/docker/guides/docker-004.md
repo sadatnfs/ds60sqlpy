@@ -16,6 +16,14 @@ A signal is a notification delivered to a process. A graceful termination handle
 
 The exec form of a Dockerfile command gives the runtime an argument array directly. The shell form starts a shell, whose signal forwarding and child handling can become relevant. An init process can reap adopted children and forward signals, but it does not add application-specific transaction recovery. Good shutdown is a cooperation between the orchestrator, process tree and application.
 
+### Key terms
+
+- **PID 1:** The process ID of a container's initial process, which has special Linux signal and child-reaping behavior.
+- **Signal:** A notification delivered to a process, such as SIGTERM asking it to stop or SIGKILL ending it without cleanup.
+- **Graceful shutdown:** Refusing new work, finishing bounded in-flight work, closing resources and exiting before the grace period ends.
+- **Exec form:** The JSON array form of `CMD` or `ENTRYPOINT`, which gives the runtime the arguments directly without starting a shell.
+- **Init process:** A small PID 1 program that reaps adopted child processes and forwards signals to the application.
+
 ## Anatomy and a trace you can follow
 
 Compare `CMD ["python", "server.py"]` with `CMD python server.py`. The JSON array has no shell interpolation; each string is one argument. Compose `init: true` requests a small init where supported. The fixture uses it, sets a stop grace period, and logs to standard streams. Do not add an infinite sleep to hide that the real application exited.
@@ -91,11 +99,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Starting the server in the background and keeping the container alive with `sleep`. Using shell form, so a shell becomes PID 1 and may not forward SIGTERM. Reading exit code 137 as proof of an out-of-memory kill without checking the OOMKilled state.
 
-Exercise 4 is this chapter's boundary case: Diagnose a service kept alive only by sleep. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a service kept alive only by sleep. List the processes inside the container and identify which one is PID 1 before reading the running status as evidence about the server. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using PID 1, signals, graceful shutdown, exec form and init process. Reconstruct worked example 2 (Observe a bounded stop) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Describe what happens to the main process during `docker compose stop --timeout 10` when it ignores SIGTERM. Then reconstruct worked example 2 (Observe a bounded stop) with one different value, predict what changes, and name which of PID 1, signals, graceful shutdown, exec form and init process the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

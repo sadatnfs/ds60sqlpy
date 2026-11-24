@@ -24,7 +24,7 @@ Stronger L2 regularization penalizes large weights, so the small-C solution uses
 
 Only the middle probability lies between the thresholds. The comparison must state whether equality triggers the positive action. In deployment the threshold should follow costs, capacity and calibration evidence, not be selected retrospectively on the final test labels.
 
-**Expected:** Actions [false,false,true] and [false,true,true].
+**Expected:** Actions [false, false, true] and [false, true, true].
 
 ## Exercise 5: Inspect probability quality
 

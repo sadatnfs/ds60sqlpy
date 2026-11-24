@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-039`, `apache-042`.
 
+## Key terms
+
+- **Logical deletion:** Removing rows from the current table view through a new snapshot while older snapshots may still reference files containing them.
+- **Delete file:** An Iceberg file that marks rows in existing data files as deleted instead of rewriting those data files, with its own reader compatibility requirements.
+- **Snapshot expiration:** A maintenance operation that removes old snapshots from table metadata under a retention rule, after which their files become eligible for cleanup.
+- **Orphan file cleanup:** A separate operation that deletes files no retained snapshot or active write references. Selecting files by age alone is unsafe.
+- **Retention boundary:** The policy stating how much table history remains readable, which determines how far back time travel and recovery can reach.
+
 ## Logical deletion and physical deletion have different consequences
 
 Deleting a row from a versioned table changes the current logical view. It does
@@ -78,6 +86,29 @@ replacement data, and metadata expiration may not perform physical deletion.
 These two cases make the logical view, retained history and actual file presence
 independently observable, which is necessary before choosing a safe maintenance
 and retention plan.
+
+## Worked examples
+
+### Delete one order from the current snapshot
+
+```python
+first = table.current_snapshot().snapshot_id
+table.delete("id = 1")
+current = table.scan().to_arrow()
+print(sorted(current["id"].to_pylist()), table.scan(snapshot_id=first).to_arrow().num_rows)
+```
+
+The current view lists ids 2 and 3 while the first snapshot still returns three rows, so the order is gone logically but the bytes remain readable through history. For a privacy deletion this is not enough. Track which snapshots still reference the deleted row, and treat the request as complete only after those snapshots are expired and the unreferenced files are removed.
+
+### Expire the historical snapshot
+
+```python
+table.maintenance.expire_snapshots().by_id(first).commit()
+print(first in {snapshot.snapshot_id for snapshot in table.snapshots()})
+print(sorted(table.scan().to_arrow()["id"].to_pylist()))
+```
+
+The membership test prints False and the current ids remain 2 and 3. Expiration removes the snapshot from metadata, so time travel to it now fails, but in the lesson the warehouse files are still on disk afterward. Physical removal depends on cleanup of files no longer referenced by any retained snapshot. Branches or tags that protect a snapshot block its expiration, so check references before promising deletion.
 
 ## Complete worked source
 

@@ -10,6 +10,13 @@ The regression fixture has five observations and two design columns. The first c
 
 The self-contained constants are in `transformed data`. In a reusable project, N, X and y would normally be declared in a data block and supplied separately. Keeping that distinction explicit prevents a learner from confusing a bounded classroom convenience with the preferred structure of a general analysis program.
 
+## Key terms
+
+- **Stan container types:** The distinct scalar, vector, row_vector, matrix and array types that let the compiler reject malformed calculations.
+- **Design matrix:** The N by K matrix X of predictors, here an intercept column and a covariate column.
+- **Linear predictor:** The mean vector mu = X beta, whose shape must match the number of observations.
+- **New mean versus new outcome:** The difference between predicting mu at a new x and predicting an observation that also includes noise.
+
 ## Worked case 1: follow one observation through the model
 
 The code constructs the design matrix row by row using Stan's one-based indexing. `beta[1]` is the intercept and `beta[2]` is the slope. `transformed parameters` calculates the full mean vector, and a vectorized normal statement contributes the likelihood for all observed outcomes.
@@ -39,6 +46,35 @@ Scale priors in the units of the variables. A prior standard deviation of two on
 **Does vectorization change the independence assumption?** The vectorized normal statement expresses the elementwise density contributions supplied by that distribution interface. It is a concise implementation of this model, not a replacement for reviewing its conditional independence structure.
 
 **Why retain a tiny matrix example after learning a library regression?** It exposes indices, shapes, priors, deterministic transforms and predictions in one compiled program. Those contracts remain important when a model grows large enough that a dimension mistake is harder to recognize from its output.
+
+## Worked example: Shape contract and two interval widths at a new design row
+
+```python
+import numpy as np
+
+X = np.array([[1, 0.0], [1, 1.0], [1, 2.0], [1, 3.0], [1, 4.0]])
+y = np.array([1.2, 2.1, 2.8, 4.2, 4.9])
+sigma = 0.3  # treat the noise scale as known
+V = sigma**2 * np.linalg.inv(X.T @ X)
+beta = np.linalg.solve(X.T @ X, X.T @ y)
+print("X", X.shape, "beta", beta.shape, "X @ beta", (X @ beta).shape)
+for x0 in (np.array([1, 2.0]), np.array([1, 8.0])):
+    sd_mean = np.sqrt(x0 @ V @ x0)
+    sd_new = np.sqrt(sd_mean**2 + sigma**2)
+    print(
+        f"x={x0[1]}: mean {x0 @ beta:.3f}, sd of mean {sd_mean:.3f}, sd of new outcome {sd_new:.3f}"
+    )
+```
+
+Observed output:
+
+```text
+X (5, 2) beta (2,) X @ beta (5,)
+x=2.0: mean 3.040, sd of mean 0.134, sd of new outcome 0.329
+x=8.0: mean 8.740, sd of mean 0.585, sd of new outcome 0.657
+```
+
+The shapes line restates the Stan type contract in NumPy: a matrix with 5 rows and 2 columns times a vector of length 2 returns a vector of length 5, one linear predictor per observation. Declaring those dimensions in Stan makes a mismatch a compile or data error instead of silent broadcasting. With the noise scale held at 0.3, the coefficients have a normal posterior, and two different predictive questions follow. At \(x=2\), the center of the design, the mean line is known to within a standard deviation of 0.134, but a new outcome there has standard deviation \(\sqrt{0.134^2+0.3^2}=0.329\), dominated by observation noise. At \(x=8\), four units beyond the last observed input, as far again as the data's own range, uncertainty about the line grows to 0.585 and the new-outcome standard deviation to 0.657; extrapolation has made parameter uncertainty the larger part. A Stan generated quantities block that draws normal_rng(mu, sigma) answers the second question, while reporting mu alone answers the first.
 
 ## Complete reproducible program
 

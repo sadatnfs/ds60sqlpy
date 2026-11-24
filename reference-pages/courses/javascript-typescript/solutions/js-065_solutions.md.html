@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use one <code>state</code> object and an <code>update(nextState)</code> function that derives data and renders every view. Native controls dispatch state changes. Keep the original rows immutable by convention or freeze them in a small example. A reset restores a known initial state.</p>
 <p>The reference links a category filter to bars and a numeric summary. Programmatic control activation checks state wiring, while manual keyboard review checks the actual user experience. Saving a dashboard view should record filter values and data identity, not only a screenshot.</p>
 <h3 id="exercise-1-predict-selected-ids-for-groupa">Exercise 1: Predict selected IDs for groupA.<a class="heading-anchor" href="#exercise-1-predict-selected-ids-for-groupa" aria-label="Link to this section">#</a></h3>
-<p>A filter is a precise predicate. Check IDs before trusting a changed chart.</p>
+<p>A filter is a precise predicate. Check IDs before trusting a changed chart. Clicking &quot;Show A&quot; sets state.group to &quot;A&quot;, and the filter keeps A1 (2) and A2 (3), so the summary reads &quot;A: 2 records; total 5&quot;. A filter written as d.group.includes(state.group) would still work for A but would also match a future group &quot;AA&quot;. The reference checks the summary text and two rects.</p>
 <p><strong>Expected:</strong> Only records whose group isA remain.</p>
 <h3 id="exercise-2-reset-the-dashboard-to-all-groups">Exercise 2: Reset the dashboard to all groups.<a class="heading-anchor" href="#exercise-2-reset-the-dashboard-to-all-groups" aria-label="Link to this section">#</a></h3>
-<p>Reset must update shared state and all derived views, not merely clear one control’s visual highlight.</p>
+<p>Reset must update shared state and all derived views, not merely clear one control’s visual highlight. &quot;Show all&quot; sets state.group back to &quot;all&quot; and calls render, which restores three bars and &quot;all: 3 records; total 9&quot;. Clearing only the button highlight would leave the old filter in state. The reference checks render().length is 3.</p>
 <p><strong>Expected:</strong> Every view returns to the same initial analytical universe.</p>
 <h3 id="exercise-3-build-two-coordinated-views-from-one-state">Exercise 3: Build two coordinated views from one state.<a class="heading-anchor" href="#exercise-3-build-two-coordinated-views-from-one-state" aria-label="Link to this section">#</a></h3>
-<p>Derive once or use the same pure predicate. Independent hidden filters can create contradictory outputs.</p>
+<p>Derive once or use the same pure predicate. Independent hidden filters can create contradictory outputs. One render function computes visible and uses it for both the bars and the summary, so they cannot disagree. A second filter inside the summary code could drift if someone edits only one. Click each button and compare bar count to the record count in the text.</p>
 <p><strong>Expected:</strong> Bars and summary report the same selected records and total.</p>
 <h3 id="exercise-4-diagnose-a-rate-denominator-changing-silently">Exercise 4: Diagnose a rate denominator changing silently.<a class="heading-anchor" href="#exercise-4-diagnose-a-rate-denominator-changing-silently" aria-label="Link to this section">#</a></h3>
-<p>Display the current population or denominator and decide whether filtering should alter it.</p>
+<p>Display the current population or denominator and decide whether filtering should alter it. If a share were computed as value / sum(visible), filtering to A would change the denominator from 9 to 5. Show the denominator in the summary. Keep counts like &quot;2 records&quot; visible so readers know which population a rate refers to after filtering.</p>
 <p><strong>Expected:</strong> The analytical question changed without a visible label.</p>
 <h3 id="exercise-5-verify-the-source-rows-are-unchanged">Exercise 5: Verify the source rows are unchanged.<a class="heading-anchor" href="#exercise-5-verify-the-source-rows-are-unchanged" aria-label="Link to this section">#</a></h3>
-<p>Shared immutable input makes reset and comparison predictable. Copy before sorting when needed.</p>
+<p>Shared immutable input makes reset and comparison predictable. Copy before sorting when needed. rows and each row are frozen with Object.freeze, so an accidental sort in place would throw in strict mode. The check confirms <code>rows[0].value</code> is still 2 after reset.</p>
 <p><strong>Expected:</strong> Filtering and rendering do not mutate original values or order.</p>
 <h3 id="exercise-6-design-a-reproducible-saved-view">Exercise 6: Design a reproducible saved view.<a class="heading-anchor" href="#exercise-6-design-a-reproducible-saved-view" aria-label="Link to this section">#</a></h3>
-<p>A screenshot lacks enough information to reconstruct the analysis. Save the decisions that generated the view.</p>
+<p>A screenshot lacks enough information to reconstruct the analysis. Save the decisions that generated the view. Save { group: &quot;A&quot; } plus the dataset name and aggregation rule; reloading that state should reproduce &quot;A: 2 records; total 5&quot;. A screenshot of the A view would not record that the total is a sum of value over frozen rows.</p>
 <p><strong>Expected:</strong> Record data identity, filters, units and aggregation policy.</p></article>
   </main>
 </body>

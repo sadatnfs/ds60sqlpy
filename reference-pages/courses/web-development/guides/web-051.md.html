@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>PDO is a database access interface with drivers for particular engines. The classroom prepares PDO SQLite so examples can use an in-memory database without credentials or network access. PostgreSQL and SQLite differ in types, SQL features and concurrency, so a SQLite pass does not prove PostgreSQL behavior. Revisit the SQL route for relational design and engine-specific queries.</p>
 <p>A prepared statement separates the fixed query structure from parameter values. A value containing a quote or SQL-looking text remains a value when bound correctly. Parameters cannot stand in for arbitrary identifiers, keywords or sort directions. Dynamic column selection needs an explicit allowlist that maps a choice to trusted SQL structure. Escaping HTML output is a separate boundary after fetching data.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>PDO:</strong> PHP Data Objects, one interface for connecting to databases such as SQLite and running queries.</li>
+<li><strong>Prepared statement:</strong> An SQL statement with placeholders whose values are sent separately, so they cannot change the query&#x27;s structure.</li>
+<li><strong>Bound parameter:</strong> A value attached to a placeholder such as <code>:email</code>, which the database always treats as data.</li>
+<li><strong>Allowlist:</strong> An explicit mapping from each permitted choice, such as a sort column, to trusted SQL text, because parameters cannot replace identifiers.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Create a PDO connection with exception error mode, create a tiny schema and prepare an INSERT. Execute it with a parameter map, then prepare a SELECT using a value predicate. Keep the database handle local to this run. The example&#x27;s table is disposable in-memory state, not the learner&#x27;s persistent classroom database.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -216,6 +223,18 @@ $stmt-&gt;execute([&#x27;title&#x27; =&gt; &quot;Ada&#x27;s notes&quot;]);</code
 <pre class="highlighted-code"><code class="language-php">$columns = [&#x27;title&#x27; =&gt; &#x27;title&#x27;, &#x27;created&#x27; =&gt; &#x27;id&#x27;];
 $orderBy = $columns[$requested] ?? &#x27;id&#x27;;</code></pre>
 <p><strong>Expected observation:</strong> Only reviewed column names can enter a dynamic query structure.</p>
+<h3 id="contrast-case-a-search-string-concatenated-into-sql">Contrast case: a search string concatenated into SQL<a class="heading-anchor" href="#contrast-case-a-search-string-concatenated-into-sql" aria-label="Link to this section">#</a></h3>
+<p>Both queries search the notes table for an exact title. Store two notes, then search with the value x&#x27; OR &#x27;1&#x27;=&#x27;1.</p>
+<pre class="highlighted-code"><code class="language-php">$q = &quot;x&#x27; OR &#x27;1&#x27;=&#x27;1&quot;;
+
+$rows = $db-&gt;query(
+  &quot;SELECT title FROM notes WHERE title = &#x27;&quot; . $q . &quot;&#x27;&quot;
+)-&gt;fetchAll();
+
+$stmt = $db-&gt;prepare(&#x27;SELECT title FROM notes WHERE title = :title&#x27;);
+$stmt-&gt;execute([&#x27;title&#x27; =&gt; $q]);
+$bound = $stmt-&gt;fetchAll();</code></pre>
+<p>In the first query the quote inside the search text closes the string literal, and the rest becomes SQL, so the WHERE clause reads title = &#x27;x&#x27; OR &#x27;1&#x27;=&#x27;1&#x27;. That condition is true for every row, so both notes come back even though neither has that title. In the second query the whole value travels as one parameter, the database compares it with each title as text, and the result is empty. The prepared statement keeps the query structure fixed before any value arrives, which is exactly what concatenation gives up.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-what-a-prepared-value-parameter-can-and-cannot-replace">Exercise 1: Explain what a prepared value parameter can and cannot replace.<a class="heading-anchor" href="#exercise-1-explain-what-a-prepared-value-parameter-can-and-cannot-replace" aria-label="Link to this section">#</a></h4>

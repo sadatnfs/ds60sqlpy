@@ -62,7 +62,7 @@ def run_parquet(spark, input_path, checkpoint, output):
     OWNED_QUERIES.append(query)
     try:
         if not query.awaitTermination(45):
-            raise TimeoutError("Finite query exceeded45-second deadline")
+            raise TimeoutError("Finite query exceeded 45-second deadline")
         if query.exception() is not None:
             raise RuntimeError(str(query.exception()))
         progress = query.recentProgress
@@ -100,7 +100,7 @@ def canonical_batch(frame):
     ]:
         raise ValueError("Schema mismatch")
     if frame.count() > 8:
-        raise ValueError("At most8 rows per teaching microbatch")
+        raise ValueError("At most 8 rows per teaching microbatch")
     if frame.filter(
         F.col("id").isNull() | F.col("cents").isNull() | (F.col("id") <= 0) | (F.col("cents") < 0)
     ).count():
@@ -266,7 +266,7 @@ def main():
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
         if spark.version != "4.0.1":
-            raise ValueError("Prepared Spark4.0.1 required")
+            raise ValueError("Prepared Spark 4.0.1 required")
         spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
         owned_root = Path(tempfile.mkdtemp(prefix="spark-036-", dir=Path.cwd()))
         input_path = owned_root / "input"

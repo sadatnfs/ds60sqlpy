@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-inventory-the-vendored-chart">Exercise 1: Inventory the vendored chart<a class="heading-anchor" href="#exercise-1-inventory-the-vendored-chart" aria-label="Link to this section">#</a></h3>
 <p>The inventory establishes which inputs the renderer can use. It should reveal hidden resource-producing files before a deployment action is considered.</p>
 <p><strong>Expected:</strong> One local template, no dependencies/plugins/hooks/CRDs.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List Chart.yaml, values.yaml, values.schema.json, the single template and the expected output, and compare with a directory listing.</li>
+<li><strong>Why it is correct:</strong> A chart with no dependencies, hooks or CRDs renders only what its one template declares.</li>
+<li><strong>Plausible wrong approach:</strong> Inventorying from Chart.yaml alone misses a crds directory or a hook template that could install extra resources.</li>
+<li><strong>How to verify:</strong> The listing matches: no charts or crds directory and exactly one template.</li>
+</ul>
 <h3 id="exercise-2-render-the-default-locally">Exercise 2: Render the default locally<a class="heading-anchor" href="#exercise-2-render-the-default-locally" aria-label="Link to this section">#</a></h3>
 <p>The expected file is an independent reference. A real render should be observed and versioned rather than inferred from readable template syntax.</p>
 <p><strong>Expected:</strong> One Deployment with replicas 1 and approved image; record actual renderer receipt or unavailable status.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record helm version and diff helm template output against expected-default.json structurally.</li>
+<li><strong>Why it is correct:</strong> helm template renders locally without contacting a cluster, so the output reflects only chart and default values.</li>
+<li><strong>Plausible wrong approach:</strong> Using helm install to see the output sends resources to a cluster before review.</li>
+<li><strong>How to verify:</strong> One Deployment with replicas 1 and the approved image, or the tool marked unavailable.</li>
+</ul>
 <h3 id="exercise-3-review-an-allowed-override">Exercise 3: Review an allowed override<a class="heading-anchor" href="#exercise-3-review-an-allowed-override" aria-label="Link to this section">#</a></h3>
 <p>The schema limits input values, but the rendered output still needs review because a template could use one value in several fields. The simple fixture makes that relationship explicit.</p>
 <p><strong>Expected:</strong> Only spec.replicas changes.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Render with replicas 2 and diff the full object against the default.</li>
+<li><strong>Why it is correct:</strong> The template only reads replicas from values, so the override should change exactly one path.</li>
+<li><strong>Plausible wrong approach:</strong> Checking replicas alone would not detect a template that also changes labels with the value.</li>
+<li><strong>How to verify:</strong> spec.replicas is the only changed path.</li>
+</ul>
 <h3 id="exercise-4-reject-invalid-values">Exercise 4: Reject invalid values<a class="heading-anchor" href="#exercise-4-reject-invalid-values" aria-label="Link to this section">#</a></h3>
 <p>The failure is a rendering/input-contract result, not a Kubernetes scheduling failure. Preserve the diagnostic and restore valid values rather than disabling validation.</p>
 <p><strong>Expected:</strong> Schema/review rejection before any cluster operation.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Render each invalid scratch values file and record the schema rule that rejects it.</li>
+<li><strong>Why it is correct:</strong> Helm validates values against values.schema.json before rendering, so out-of-range, unapproved or unknown values fail locally.</li>
+<li><strong>Plausible wrong approach:</strong> Removing the schema to make the render succeed disables the check the exercise relies on.</li>
+<li><strong>How to verify:</strong> Each file fails with a named schema rule, before any cluster operation.</li>
+</ul>
 <h3 id="exercise-5-detect-lifecycle-resources">Exercise 5: Detect lifecycle resources<a class="heading-anchor" href="#exercise-5-detect-lifecycle-resources" aria-label="Link to this section">#</a></h3>
 <p>Hooks, CRDs and release storage change authority and cleanup needs. The lesson keeps them visible rather than relying on a chart&#x27;s name or suppressing output that would reveal them.</p>
 <p><strong>Expected:</strong> The output is outside the normal worker contract and is not installed.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Search the render for helm.sh/hook annotations and any kind other than Deployment.</li>
+<li><strong>Why it is correct:</strong> Hooks run outside normal install ordering, and cluster-scoped kinds exceed the worker&#x27;s namespaced permissions.</li>
+<li><strong>Plausible wrong approach:</strong> Installing and checking afterward lets a hook run before anyone reviewed it.</li>
+<li><strong>How to verify:</strong> Any hook or extra kind is flagged and the render is not installed.</li>
+</ul>
 <h3 id="exercise-6-hand-off-a-reviewed-render">Exercise 6: Hand off a reviewed render<a class="heading-anchor" href="#exercise-6-hand-off-a-reviewed-render" aria-label="Link to this section">#</a></h3>
 <p>The handoff connects inputs to desired objects without pretending rendering grants deployment authority. Any host install requires its own scoped capability and lifecycle/cleanup evidence.</p>
 <p><strong>Expected:</strong> A reviewer can reproduce the local render and identify the exact owned runtime boundary.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record chart hash, values hash, renderer version and full diff, and keep apply evidence separate.</li>
+<li><strong>Why it is correct:</strong> Hashes and the version pin every input, so a reviewer can reproduce the render offline.</li>
+<li><strong>Plausible wrong approach:</strong> Recording only the release name ties the review to cluster state rather than reproducible inputs.</li>
+<li><strong>How to verify:</strong> A reviewer reproduces the render from the hashes and version without a cluster.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Pin chart contents, dependency inputs, values, renderer version and rendered output identity. A chart version string alone can be reused or refer to changed bytes. Diff the complete output before applying, including security and namespace fields.</p>
 <p>If Helm is unavailable, the live render row remains unavailable while the source/expected-output reasoning can be completed offline. A valid render is not API acceptance, reconciliation or application correctness. Those remain separate owned operations with their own cleanup receipts.</p></article>

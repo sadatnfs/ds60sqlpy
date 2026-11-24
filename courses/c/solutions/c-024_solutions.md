@@ -1,6 +1,6 @@
 # c-024: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-024_solution.c`, implements all six cases, from the "find an interior boundary" case to the "transfer an exact membership check" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ Maintain an interval [low, high) containing the answer. Compute middle as low+(h
 
 ## Exercise 1: Find an interior boundary: change one input
 
-Copy worked example 1 into a scratch pad and change `int values[] = {2, 4, 6, 8};` to `int values[] = {2, 5, 6, 8};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "find an interior boundary" case, into a scratch pad and change `int values[] = {2, 4, 6, 8};` to `int values[] = {2, 5, 6, 8};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the lower-bound index is 2); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +19,21 @@ int values[] = {2, 4, 6, 8};
 CHECK(lower_bound(values, 4, 5) == 2);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `lower_bound(values, 4, 5) == 2`. Restoring the original line brings back the worked observation: the lower-bound index is 2.
+**Expected:** With `int values[] = {2, 5, 6, 8};` the run stops with `Check failed` at the CHECK on `lower_bound(values, 4, 5) == 2`, because the "find an interior boundary" case no longer shows that the lower-bound index is 2. Restoring `int values[] = {2, 4, 6, 8};` brings that observation back.
 
 The result is an insertion position, not a claim that 5 exists.
 
+**Approach.** Find the first element that is not less than 5: in `{2, 5, 6, 8}` that is the 5 at index 1.
+
+**Why it holds here.** Lower bound returns the first position whose value is `>=` the target, so a matching element is found at its own index, and 1 is not 2.
+
+**A plausible wrong approach.** Predicting 2 because 5 "goes after 4". That is the upper-bound answer, the position after all elements `<=` the target; lower bound stops at the first equal element.
+
+**Verify.** Print `lower_bound(values, 4, 5)` and see 1 with the edit and 2 after restoring `{2, 4, 6, 8}`.
+
 ## Exercise 2: Find the first duplicate: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(lower_bound(values, 4, 4) == 1);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+A careless edit changed the CHECK in worked example 2, the "find the first duplicate" case, so that it reads `CHECK(lower_bound(values, 4, 4) == 1);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means the index is the first 3 at position 1, and restore it.
 
 The unchanged code is worked example 2:
 
@@ -34,9 +42,17 @@ int values[] = {1, 3, 3, 5};
 CHECK(lower_bound(values, 4, 3) == 1);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `lower_bound(values, 4, 3) == 1`; after it the line reads `CHECK(lower_bound(values, 4, 3) == 1);` again and the index is the first 3 at position 1.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `lower_bound(values, 4, 3) == 1`. Once the line reads `CHECK(lower_bound(values, 4, 3) == 1);` again, the "find the first duplicate" case again shows that the index is the first 3 at position 1.
 
 The high=middle branch keeps earlier equal values in the candidate interval.
+
+**Approach.** Search for 4 in `{1, 3, 3, 5}`: no element equals 4, and the first element `>= 4` is the 5 at index 3.
+
+**Why it holds here.** The array is unchanged; only the target changed, so the edited CHECK compares 3 with 1 and fails. With target 3, the `high = middle` branch keeps the earlier 3 and returns 1.
+
+**A plausible wrong approach.** Using `<=` in the comparison, `if (values[middle] <= target)`. That computes the upper bound and returns 3 for target 3, past both duplicates, so the original CHECK fails too.
+
+**Verify.** Print `lower_bound(values, 4, 4)` and see 3; the `<=` variant prints 3 for target 3.
 
 ## Exercise 3: Handle no larger value
 
@@ -51,6 +67,14 @@ CHECK(lower_bound(values, 3, 9) == 3);
 
 The returned one-past index must not be dereferenced.
 
+**Approach.** Return `n` when every element is smaller than the target, here 3 for `{2, 4, 6}` and 9.
+
+**Why it holds here.** Each probe finds a value below 9 and moves `low` past it until `low` reaches `high`, which started at `n`, so the result is one past the end.
+
+**A plausible wrong approach.** Reading `values[i]` right after the call to see what was found. With `i` 3 that reads past the 3-element array, which is undefined; every caller must test `i < n` first.
+
+**Verify.** Print the result and see 3, and confirm it equals `sizeof values / sizeof values[0]`.
+
 ## Exercise 4: Handle empty input
 
 Search an empty logical view.
@@ -62,6 +86,14 @@ CHECK(lower_bound(NULL, 0, 7) == 0);
 **Expected:** The insertion index is zero.
 
 The loop performs no access because low already equals high.
+
+**Approach.** Start with `low` 0 and `high` equal to `n`, so an empty range never enters the loop.
+
+**Why it holds here.** With `n` 0, `low < high` is false at once, no element is read, and the insertion index 0 is returned without touching the null pointer.
+
+**A plausible wrong approach.** Adding a fast path such as `if (target <= values[0]) return 0;` before the loop. It reads the first element through `NULL` when the view is empty, which is undefined and usually crashes.
+
+**Verify.** Run the CHECK and see the success line; the fast-path variant should only be compiled, never run, with `NULL`.
 
 ## Exercise 5: Check the first boundary
 
@@ -75,6 +107,14 @@ CHECK(lower_bound(values, 3, 1) == 0);
 **Expected:** The index is zero.
 
 The answer can be before the first stored value without requiring a negative index.
+
+**Approach.** Use the half-open interval `[low, high)` so the answer 0 is reached by shrinking `high`, never by subtracting below 0.
+
+**Why it holds here.** Every element is at least 1, so each probe sets `high = middle` until `high` reaches 0, and `low` 0 is returned.
+
+**A plausible wrong approach.** Using a closed interval with `size_t` and `high = middle - 1`. When `middle` is 0 that wraps to 18446744073709551615, `low <= high` stays true and the next probe reads far out of bounds.
+
+**Verify.** Print `(size_t)0 - 1` and see 18446744073709551615, then print `lower_bound(values, 3, 1)` and see 0.
 
 ## Exercise 6: Transfer an exact membership check
 
@@ -90,6 +130,14 @@ CHECK(i < 3 && values[i] == 4);
 
 Membership requires both an in-range result and equality. A lower-bound index by itself is not proof of presence.
 
+**Approach.** Combine both tests: `i < 3` proves the index is in range, and `values[i] == 4` proves the element matches.
+
+**Why it holds here.** 4 is present at index 1, the lower bound returns 1, and both operands are true; `&&` evaluates the bounds test first, so the read is always safe.
+
+**A plausible wrong approach.** Testing only `i < 3`. For a missing target such as 5 the lower bound is 2, which is in range, so the code would report 5 present even though `values[2]` is 6.
+
+**Verify.** Print `lower_bound(values, 3, 5)` and see 2, then confirm that `values[2] == 5` is false.
+
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Write `bool count_equal(const int *values, size_t n, int target, size_t *count)` that uses `lower_bound` and an upper bound with `<=` to count matching elements in a sorted array. Check `{1, 3, 3, 5}` for 3 (2), 4 (0) and 5 (1), and an empty `NULL` view (0). Explain why the count is the difference of the two bounds, and why that takes about 2 log2 n comparisons instead of one pass over every element.

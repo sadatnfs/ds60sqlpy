@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-050.md</code>.</p>
 <h3 id="exercise-1-explain-hashing-versus-reversible-encryption-for-passwords">Exercise 1: Explain hashing versus reversible encryption for passwords.<a class="heading-anchor" href="#exercise-1-explain-hashing-versus-reversible-encryption-for-passwords" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A password verifier needs a one-way verification representation, not recovery of the original secret.</p>
+<p><strong>Approach:</strong> Note that a login check only needs to confirm a candidate matches, so the stored form never needs to be turned back into the password.</p>
 <p><strong>Why:</strong> Verification only needs to recompute and compare, so a one-way slow hash avoids storing anything that can be decrypted.</p>
+<p><strong>Plausible wrong approach:</strong> Encrypting passwords with a reversible key fails because anyone who obtains the key can recover every stored password.</p>
+<p><strong>How to verify:</strong> Your explanation shows <code>password_verify</code> checking a candidate without any decryption step.</p>
 <h3 id="exercise-2-verify-both-a-correct-and-incorrect-synthetic-phrase">Exercise 2: Verify both a correct and incorrect synthetic phrase.<a class="heading-anchor" href="#exercise-2-verify-both-a-correct-and-incorrect-synthetic-phrase" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The library accepts only the correct candidate.</p>
+<p><strong>Approach:</strong> Call <code>password_verify</code> with the correct phrase and with a different one against the same stored hash.</p>
 <p><strong>Why:</strong> password_verify recomputes the hash using the algorithm, salt and parameters stored in the encoded string.</p>
+<p><strong>Plausible wrong approach:</strong> Comparing <code>password_hash($candidate)</code> with the stored string fails because each call uses a new salt and never matches.</p>
+<p><strong>How to verify:</strong> The correct phrase prints true and the different phrase prints false. Verifying against a second hash of the same phrase also prints true, despite the different salt.</p>
 <h3 id="exercise-3-build-a-password-verification-demonstration-without-printing-the-hash-or-secret">Exercise 3: Build a password-verification demonstration without printing the hash or secret.<a class="heading-anchor" href="#exercise-3-build-a-password-verification-demonstration-without-printing-the-hash-or-secret" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The output reports the test result while keeping credential-shaped values out of logs.</p>
+<p><strong>Approach:</strong> Hash a synthetic phrase, verify it, and print only labeled booleans such as verify correct: true.</p>
 <p><strong>Why:</strong> Hashes and passwords in logs give attackers offline guessing material.</p>
+<p><strong>Plausible wrong approach:</strong> Printing the hash for debugging fails because logs then hold material an attacker can try to crack offline.</p>
+<p><strong>How to verify:</strong> The program output contains no <code>$argon2id$</code> string and no passphrase text.</p>
 <h3 id="exercise-4-diagnose-using-a-general-fast-hash-such-as-sha-256-for-password-storage">Exercise 4: Diagnose using a general fast hash such as SHA-256 for password storage.<a class="heading-anchor" href="#exercise-4-diagnose-using-a-general-fast-hash-such-as-sha-256-for-password-storage" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Fast general hashes do not provide a suitable password-guessing cost by themselves.</p>
+<p><strong>Approach:</strong> Replace <code>hash(&#x27;sha256&#x27;, ...)</code> with <code>password_hash</code> and plan to rehash each account at its next successful login.</p>
 <p><strong>Why:</strong> General-purpose hashes are designed to be fast, so attackers can test billions of guesses; password hashes add memory and time cost per guess.</p>
+<p><strong>Plausible wrong approach:</strong> Adding a single shared salt to SHA-256 fails because the hash stays fast, so guessing remains cheap.</p>
+<p><strong>How to verify:</strong> New records begin with <code>$argon2id$</code>, and old records are flagged by <code>password_needs_rehash</code>.</p>
 <h3 id="exercise-5-explain-an-algorithm-specific-input-length-boundary-and-a-hash-that-needs-an-upgrade">Exercise 5: Explain an algorithm-specific input-length boundary and a hash that needs an upgrade.<a class="heading-anchor" href="#exercise-5-explain-an-algorithm-specific-input-length-boundary-and-a-hash-that-needs-an-upgrade" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> bcrypt uses only the first 72 bytes, so the input policy must reject or document longer passphrases; password_needs_rehash returns true for a cost-10 bcrypt hash checked against the Argon2id options.</p>
+<p><strong>Approach:</strong> State the bcrypt limit of 72 bytes, define a policy for longer inputs, and call <code>password_needs_rehash</code> on a bcrypt hash.</p>
 <p><strong>Why:</strong> bcrypt ignores bytes after the 72nd, and password_needs_rehash detects any algorithm or parameter change, so old hashes can be upgraded at the next login.</p>
+<p><strong>Plausible wrong approach:</strong> Accepting a 100 byte passphrase under bcrypt without a note fails because bytes beyond 72 are silently ignored.</p>
+<p><strong>How to verify:</strong> A cost 10 bcrypt hash checked against the Argon2id options returns true from <code>password_needs_rehash</code>.</p>
 <h3 id="exercise-6-list-the-additional-controls-required-around-a-real-login">Exercise 6: List the additional controls required around a real login.<a class="heading-anchor" href="#exercise-6-list-the-additional-controls-required-around-a-real-login" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> TLS, rate limits, session rotation, recovery, safe errors and authorization remain separate requirements.</p>
+<p><strong>Approach:</strong> List controls outside hashing: TLS, rate limits, session rotation, recovery flow, generic errors and authorization after login.</p>
 <p><strong>Why:</strong> Credential stuffing, interception, session theft and account-recovery abuse need rate limits, TLS, session rotation and careful recovery design.</p>
+<p><strong>Plausible wrong approach:</strong> Raising Argon2 memory and calling the login secure fails because an unlimited guessing endpoint still lets attackers try many passwords.</p>
+<p><strong>How to verify:</strong> Your list names at least five controls, each with what it protects against. Rate limits appear first because they directly cap online guessing.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-050_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

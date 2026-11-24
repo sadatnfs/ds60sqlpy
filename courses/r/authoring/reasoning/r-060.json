@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Keep d with all ten records, form observed from the non missing rows, and record n and missing per group in summary.",
+      "why": "Each group has five records and one missing value, A5 and B5, so the ledger shows 10 records, 8 observed values and 2 missing ones, four observed per group. The figure can then say exactly what it excludes.",
+      "wrong": "Calling na.omit(d) first and summarizing what remains. The counts of 4 look complete, and nothing in the output says two measurements were absent.",
+      "verify": "`nrow(observed)` returns 8, `summary$n` returns 4 and 4, and `summary$missing` returns 1 and 1."
+    },
+    {
+      "approach": "Inside the split, compute n, sd, se and qt(0.975, n - 1) from the non missing values only, then store lower, upper and half.",
+      "why": "Group A's observed values 1, 2, 3, 4 give mean 2.5 and SE squared 5/12. Group B's 2, 3, 6, 7 give mean 4.5 and 17/12. With 3 degrees of freedom the half widths are about 2.05 and 3.79.",
+      "wrong": "Taking n as length(values), which counts the missing entry. A would then use 5 and 4 degrees of freedom, and its half width would fall from about 2.05 to about 1.60, overstating precision from a value that was never measured.",
+      "verify": "`summary$se^2` returns 5/12 and 17/12, and `summary$half` returns about 2.05 and 3.79."
+    },
+    {
+      "approach": "Plot observed as points, then add geom_errorbar and a cross geom_point using data = summary and inherit.aes = FALSE, with a caption naming the interval type.",
+      "why": "The global mapping uses value, which exists in observed but not in summary. Turning off inheritance lets the summary layers use lower, upper and mean, so the plot shows eight raw values and two intervals as different objects.",
+      "wrong": "Omitting inherit.aes = FALSE on the summary layers. They then look for value in summary, and the build stops instead of drawing the intervals.",
+      "verify": "`nrow(layers[[1]])` returns 8, and `nrow(layers[[2]])` and `nrow(layers[[3]])` each return 2."
+    },
+    {
+      "approach": "Add the observed trace with customdata = ~id and a hover template, then a separate summary trace with error_y set from summary$half.",
+      "why": "The two traces hold different things: eight measured values with IDs A1 to A4 and B1 to B4, and two means with their interval half widths. Keeping them apart means the observation count stays at 8.",
+      "wrong": "Appending the two means to the observed rows and drawing one trace. It then has ten points, two of them with no ID, and anyone counting markers sees ten observations.",
+      "verify": "`length(traces[[1]]$x)` returns 8, `length(traces[[2]]$x)` returns 2, and the sorted customdata returns the eight observed IDs."
+    },
+    {
+      "approach": "Describe the gap of 2 between the means as a difference in this sample, and name what would be required before calling it an effect.",
+      "why": "d contains only id, group and value. Nothing records how records came to be in A or B, and with intervals of about 0.45 to 4.55 and 0.71 to 8.29 the data are also compatible with a much smaller or larger gap.",
+      "wrong": "Writing that being in group B raises the value by 2. That needs an assignment mechanism or an identification argument, and the fixture supplies neither.",
+      "verify": "`diff(summary$mean)` returns 2, and `names(d)` returns only id, group and value."
+    },
+    {
+      "approach": "Write the evidence record in three parts: numerical checks, layer and trace checks with the figures actually printed, and the browser checks still outstanding.",
+      "why": "The reference establishes 10, 8 and 2 records, the means, SEs and half widths, layer counts 8, 2 and 2, trace counts 8 and 2, and the error array. It prints the summary table and both figures, but it does not observe hover, readability or screen reader output.",
+      "wrong": "Writing that the figure was validated because the script finished. That merges payload checks with classroom observations that nobody made.",
+      "verify": "The reference prints r-060 reference checks passed after the three printed objects, and the record shows the browser checks marked as not yet performed."
+    }
+  ]
+}

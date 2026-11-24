@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Trace the rebinding example line by line",
+      "body": "Example 2 is easiest to read as a table of bindings after each line runs. A dash means the name does not exist yet in this fresh process.\n\n```text\nline                              quantity  unit_price  total\nquantity <- 3                     3         -           -\nunit_price <- 6                   3         6           -\ntotal <- quantity * unit_price    3         6           18\nquantity <- 4                     4         6           18\nprint(c(...))                     4         6           18\n```\n\nThe fourth row is the whole lesson: quantity changes to 4, but total keeps the 18 it received on the third row because R stored a number, not a formula. The printed vector therefore shows saved_total 18 next to recalculated 24, and the stopifnot line passes only because it asserts both facts. If you moved `quantity <- 4` above the total line, the table would show total 24 in every later row and saved_total would print 24, which would make the first half of that assertion fail and stop the run before the final line."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Write the prediction, 28, in a comment or your notes before running anything, then evaluate `4 * 7` and compare. The reference turns that comparison into `stopifnot(4 * 7 == 28)` so the expectation lives in the script instead of in memory.",
+      "why": "Both operands are small whole numbers stored as doubles, and 28 is represented exactly, so plain `==` is a fair check here and no tolerance is needed.",
+      "wrong": "Running first and then copying the printed 28 into the prediction removes the evidence the task exists to collect. A typo such as `4 + 7` would print 11, and only a prediction made beforehand exposes that the operator, not the arithmetic, was wrong.",
+      "verify": "`print(4 * 7)` shows `[1] 28`. Temporarily change the assertion to `== 27` and the run stops with `4 * 7 == 27 is not TRUE`, which shows the check is live rather than decorative."
+    },
+    {
+      "approach": "Edit the input line to `quantity <- 5` above the line that computes total, then rerun so `total <- quantity * unit_price` sees the new binding. The reference asserts `total == 30`.",
+      "why": "unit_price stays 6, so the product is 5 times 6, or 30. Because each Run is a fresh process evaluated top to bottom, the edited line is the only quantity R knows about on that run.",
+      "wrong": "Adding `quantity <- 5` after total was already computed leaves total at the old 3 times 6 product, 18. That is the exact trap shown in Example 2: the input changed but the stored result did not.",
+      "verify": "`print(total)` shows `[1] 30`. As a second probe, set unit_price to 7 and confirm the printed total becomes 35, which proves both inputs flow into the result."
+    },
+    {
+      "approach": "Bind `subtotal <- 20` and `fee <- 3` as separate named inputs, add them, print the sum and assert it. The reference checks `subtotal + fee == 23`.",
+      "why": "Naming both inputs keeps the script self-contained: anyone reading it can see the 23 came from 20 and 3 in this run, not from a value typed into yesterday's console.",
+      "wrong": "Writing `print(23)` or `print(\"23\")` shows the right digits without performing the addition. The second is also a character string, so `\"23\" + 1` fails with a non-numeric argument error the moment later code treats it as a number.",
+      "verify": "The run prints `[1] 23` and the stopifnot line passes. Change fee to 4 and the output should become 24; if it stays 23, the print is not reading the computed sum."
+    },
+    {
+      "approach": "Read the script from the top and locate the line that created total. That line bound total to the product of the inputs at that moment; later lines that rebind quantity change only quantity.",
+      "why": "R stores the value an expression produced, not the expression. In the reference, quantity moves from 5 to 8 after total was computed, and `stopifnot(total == 30, quantity * unit_price == 48)` asserts the stale 30 and the fresh 48 side by side.",
+      "wrong": "Treating total like a spreadsheet cell that references quantity. A learner who adds a second `print(total)` and sees 30 again may suspect the print is stale, but the binding is what stayed fixed.",
+      "verify": "Re-evaluate `total <- quantity * unit_price` after the change and print it: total becomes 48 for quantity 8, and the old assertion `total == 30` would now fail."
+    },
+    {
+      "approach": "Set `quantity <- 0` and compute `quantity * unit_price`. The reference asserts the product is 0 and then prints it as current_total.",
+      "why": "Zero is a measured count here, meaning nothing was ordered, so 0 times 6 equals 0 is the correct invoice total. It is an ordinary number, and no value is missing.",
+      "wrong": "Recording the empty order as `NA` changes its meaning to unknown. `NA * 6` is `NA`, and `stopifnot(NA * 6 == 0)` stops the script because the comparison is NA instead of TRUE, so an empty order would look like a broken run.",
+      "verify": "The reference's final print shows current_total 0 beside total_from_prior_calculation 30, and the run still reaches `r-001 reference checks passed`."
+    },
+    {
+      "approach": "Save the pad without running it, then run it, and compare what each action produced. Saving stores source text; only a Run evaluates that text, prints output and reaches the marker line.",
+      "why": "Each Run starts a fresh R process, so the saved file is the complete input to the next run. The five stopifnot calls in this reference are the declared properties a run actually checks.",
+      "wrong": "Treating a saved file, or output left over from an earlier run, as proof the current source works. If you change unit_price after your last run, the old printed 18 describes code that no longer exists in the pad.",
+      "verify": "Change one input, save without running and confirm no new output appears. Then run and confirm `r-001 reference checks passed` prints only when all five assertions hold."
+    }
+  ]
+}

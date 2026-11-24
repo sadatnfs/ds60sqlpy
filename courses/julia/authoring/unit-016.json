@@ -3,6 +3,28 @@
   "title": "Joins, key validation and duplicate fanout",
   "concepts": ["join grain", "key uniqueness", "fanout", "missing keys", "aggregation"],
   "outcome": "Validate relational assumptions in DataFrames joins and reconcile totals before and after a merge.",
+  "key_terms": [
+    [
+      "Join grain",
+      "The unit that one row represents on each side of a join, which must be known before the joined result can be interpreted."
+    ],
+    [
+      "Key uniqueness",
+      "The requirement that a key appears once on a side expected to hold one row per entity, enforced with the join `validate` option."
+    ],
+    [
+      "Fanout",
+      "Row multiplication that occurs when one key matches several rows on the other side, inflating any total computed after the join."
+    ],
+    [
+      "Missing key",
+      "A join key equal to `missing`, which DataFrames rejects by default unless `matchmissing` states how to treat it."
+    ],
+    [
+      "Pre-join aggregation",
+      "Collapsing a many-row table to one row per key before joining, so the result keeps the intended grain."
+    ]
+  ],
   "level": "intermediate",
   "minutes": 150,
   "prerequisites": ["julia-015"],
@@ -11,48 +33,67 @@
     ["Existing SQL bag reasoning", "../../../sql/professional/README.md"]
   ],
   "figure": 0,
+  "approach": "Before every join, state the expected cardinality and reconcile totals afterward. In the worked example two entities with weights 100 and 200 meet two observations for entity 1, which fans the left row out. `validate` turns the uniqueness assumption into an error, preaggregation restores one row per entity, and `matchmissing` must be chosen explicitly.",
   "exercises": [
     {
       "title": "Trace the duplicate pair",
       "task": "Join the duplicated right-side entity 1 observations.",
       "expected": "The left entity 1 weight appears twice.",
       "hint": "Enumerate the matching row pairs.",
-      "answer": "Join multiplicity can inflate a sum even when every individual match is syntactically valid."
+      "answer": "Join multiplicity can inflate a sum even when every individual match is syntactically valid.",
+      "why": "Entity 1 matches two observation rows and entity 2 matches none, so the left join has 3 rows and weight total 100 + 100 + 200 = 400.",
+      "wrong": "Summing `weight` after the join and reporting 400 double counts entity 1, even though every pair matched correctly by key.",
+      "verify": "Example A asserts `nrow(duplicated) == 3` and `sum(duplicated.weight) == 400`."
     },
     {
       "title": "Enforce a lookup contract",
       "task": "Require uniqueness on the right lookup key.",
       "expected": "The duplicate-key input is rejected.",
       "hint": "Use the join validation option.",
-      "answer": "An executable cardinality check prevents an unintended many-to-many relationship from passing silently."
+      "answer": "An executable cardinality check prevents an unintended many-to-many relationship from passing silently.",
+      "why": "`validate = (true, true)` requires unique keys on both sides; the right side has id 1 twice, so `leftjoin` throws `ArgumentError`.",
+      "wrong": "Relying on a visual check of a small table misses duplicates that appear only in production extracts.",
+      "verify": "Example A asserts the `ArgumentError`; the reference checks a validated join on unique keys returning 2 rows."
     },
     {
       "title": "Aggregate at a declared grain",
       "task": "Sum observations to one row per entity before the join.",
       "expected": "Two entity rows and weight total 300 are preserved.",
       "hint": "Choose an aggregation that matches the analytical question.",
-      "answer": "Preaggregation is a semantic decision, not a universal repair for duplicates."
+      "answer": "Preaggregation is a semantic decision, not a universal repair for duplicates.",
+      "why": "Summing observations per id first gives one row with value_total 30, so the validated join keeps 2 rows and weight total 300.",
+      "wrong": "Taking the first observation per id also removes duplicates but silently discards the value 20.",
+      "verify": "Example A asserts `nrow(reconciled) == 2`, `sum(reconciled.weight) == 300` and the value total 30."
     },
     {
       "title": "Choose missing-key behavior",
       "task": "Compare equal and nonmatching missing-key policies.",
       "expected": "The fixture yields 1 or 0 matched rows.",
       "hint": "Unknown keys do not imply identical entities.",
-      "answer": "The policy must reflect the data model and should be reported with excluded counts."
+      "answer": "The policy must reflect the data model and should be reported with excluded counts.",
+      "why": "With `matchmissing = :equal` the two missing ids pair to give 1 row; with `:notequal` they never match, giving 0 rows.",
+      "wrong": "Picking `:equal` because it returns more rows assumes that two unknown ids refer to the same entity.",
+      "verify": "Example B asserts both counts and that the default `innerjoin` throws `ArgumentError` on missing keys."
     },
     {
       "title": "Inspect unmatched keys",
       "task": "Use an outer join with an origin indicator.",
       "expected": "The fixture exposes left-only, both and right-only rows.",
       "hint": "Retain mismatch evidence.",
-      "answer": "A row-count total is not enough to explain which entities failed to match."
+      "answer": "A row-count total is not enough to explain which entities failed to match.",
+      "why": "`outerjoin` with `source = :origin` labels id 1 `left_only`, id 2 `both` and id 3 `right_only`.",
+      "wrong": "Comparing only `nrow` before and after the join cannot show which ids were lost or added.",
+      "verify": "The reference asserts `result.id == [1, 2, 3]` and the three origin strings, plus `antijoin` returning one row."
     },
     {
       "title": "Avoid cosmetic deduplication",
       "task": "Remove duplicate output rows without reviewing their cause.",
       "expected": "The scientific meaning remains unresolved.",
       "hint": "Reconcile the intended input/output grain first.",
-      "answer": "Distinct operations can conceal a modeling error and need their own justified rule."
+      "answer": "Distinct operations can conceal a modeling error and need their own justified rule.",
+      "why": "`unique` after a fanout join removes identical rows but leaves the question of why the right side had several rows per key.",
+      "wrong": "Deduplicating the output makes the total look right on this fixture while a later fixture with differing values still inflates it.",
+      "verify": "Reconcile the left-side `sum(left.x) == 30` before and after the join, and record which key produced duplicates."
     }
   ]
 }

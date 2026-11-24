@@ -38,6 +38,12 @@
       "code": "x <- c(10, 20, 30)\nmask <- c(TRUE, NA, FALSE)\nraw <- x[mask]\nknown <- x[!is.na(mask) & mask]\nstopifnot(identical(raw, c(10, NA_real_)), identical(known, 10))\nprint(list(raw = raw, known = known))\n",
       "explanation": "The first output preserves an unknown selected position. The second explicitly restricts selection to known TRUE predicates.",
       "expected": "raw contains 10 and NA; known contains 10."
+    },
+    {
+      "title": "A misspelled name appends instead of failing",
+      "code": "x <- c(A = 1, B = 2)\ntypo <- x\ntypo[\"b\"] <- 9\nprint(typo)\nkey <- \"b\"\nfound <- key %in% names(x)\nstopifnot(length(typo) == 3L, identical(names(typo), c(\"A\", \"B\", \"b\")))\nstopifnot(!found, identical(unname(typo[\"B\"]), 2))\n",
+      "explanation": "Names are case sensitive, so \"b\" does not match \"B\". Assigning to a name that does not exist is not an error in R: it appends a new element, and the vector grows from two entries to three while B still holds 2. Nothing in the output warns you, so the intended update simply never happens. The fix is the guard from task three: check key %in% names(x) before assigning, which is FALSE here and stops the script before the bad write.",
+      "expected": "typo prints A 1, B 2, b 9; the key check is FALSE."
     }
   ],
   "exercises": [

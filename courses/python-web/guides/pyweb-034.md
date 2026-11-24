@@ -6,6 +6,13 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-033`.
 
 An internal object often contains more information than an API should expose. A database row might include an owner key, private annotation or password hash. This chapter uses a response model to define the public representation, then deliberately returns an invalid value to show that output validation can reveal an application defect.
 
+## Key terms
+
+- **Response model:** The declared public representation FastAPI uses to filter and validate whatever object a route returns.
+- **Output filtering:** Leaving fields outside the response model, such as an owner key or password hash, out of the serialized response.
+- **Response validation:** Checking returned data against the response model; a failure is a server defect and produces 500, not a client error.
+- **Data leakage:** Exposure of sensitive values through any path, including debug logs and exception messages that never pass through the response model.
+
 ## Mechanism: output is a separate contract
 
 Request validation protects the input boundary. Response validation protects the representation produced by the application. They are independent: valid input does not guarantee valid output, and a correctly shaped response does not prove that the underlying operation was authorized.
@@ -29,6 +36,43 @@ The second route returns data that cannot satisfy its response model. With the d
 These are two observation surfaces for one application failure. The exception form is useful while developing because it retains a precise diagnostic. The HTTP form resembles what a remote caller receives and should avoid exposing internal data. Neither should be mistaken for successful execution merely because the handler function returned something.
 
 A production error handler should record a request correlation identifier and safe error classification. It should not copy the entire invalid response or private model into public JSON. The next chapter builds explicit problem responses for expected and unexpected failures.
+
+## Worked example: a response model as an allow list
+
+```python
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+
+class PublicUser(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    name: str
+
+
+class UserRow:
+    def __init__(self):
+        self.id = 1
+        self.name = "Ada"
+        self.password_hash = "fixture-must-not-leak"
+
+
+print(PublicUser.model_validate(UserRow()).model_dump())
+print(PublicUser.model_validate({"id": "2", "name": "Lin", "internal_role": "admin"}).model_dump())
+try:
+    PublicUser.model_validate({"id": "not-an-integer", "name": None})
+except ValidationError as error:
+    print(error.error_count(), [e["loc"][0] for e in error.errors()])
+```
+
+Expected output:
+
+```text
+{'id': 1, 'name': 'Ada'}
+{'id': 2, 'name': 'Lin'}
+2 ['id', 'name']
+```
+
+A `response_model` works as an allow list, and these three calls show the pieces FastAPI relies on. The first input is an ordinary object shaped like an ORM row; `from_attributes=True` lets the model read its attributes, and `password_hash` is dropped because the model never declared it. The second input is a dictionary with an extra `internal_role` key, which the default `extra="ignore"` setting discards while the string `"2"` is coerced to an integer. The third input is the server's own mistake, so validation fails on both fields. In the lesson's `/broken` route FastAPI turns that failure into `ResponseValidationError`, which a test sees as an exception and a client sees only as a bare 500. Keeping the public model separate from the storage model is what makes the filtering automatic: adding a sensitive column to the row later cannot leak unless someone also adds it to `PublicUser`.
 
 ## Failure diagnosis and discussion
 

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Build a multi-stage GPU data pipeline with a CPU oracle, adversarial fixtures and an honest end-to-end report.
+
 Work through *First capstone: a reliable GPU data pipeline* with the concrete cases below. Finish with this evidence:
 a specification, CPU oracle, adversarial fixtures, checked error paths, actual GPU output and honest end-to-end report. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A pipeline is more than a list of correct kernels. Each stage has a shape, ownership and validity contract that must match its consumer. Filtering changes count; normalization changes numeric range; histogramming assumes valid bins. Keep the count with the output buffer, and do not pass allocation capacity as the number of valid elements. First build a tiny CPU oracle, then introduce one GPU stage at a time. A useful capstone report includes cases where a CPU is preferable, because proving that a GPU exists is different from proving it helps the application.
+
+### Key terms
+
+- **Pipeline stage:** One transformation with its own shape, ownership and validity contract that its consumer depends on.
+- **CPU oracle:** An independent, trusted CPU implementation used to judge GPU outputs.
+- **Valid count:** The number of meaningful elements in a buffer, which can be smaller than its allocated capacity.
+- **Adversarial fixture:** A deliberately difficult input, such as an empty, tiny or boundary-sized case, chosen to expose defects.
 
 ## How to run and study this lesson
 

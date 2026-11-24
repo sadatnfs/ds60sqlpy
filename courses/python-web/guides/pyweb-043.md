@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-042`.
 
 An OpenAPI document describes an HTTP API's paths, operations, schemas and responses. FastAPI derives much of it from route declarations and Pydantic models. This chapter checks that generated contract directly and examines a small breaking request change without depending on an external documentation CDN.
 
+## Key terms
+
+- **OpenAPI document:** A machine-readable description of an API's paths, operations, parameters, schemas and responses, which FastAPI derives from route declarations.
+- **operationId:** A stable name for one operation, here `createNote`, that generated clients and documentation use to identify it.
+- **Breaking change:** A contract change that makes requests valid under the old schema fail, such as adding a new required request field.
+- **Generated client:** Code produced from an OpenAPI document that faithfully follows the contract, including any mistakes the contract contains.
+
 ## Mechanism: generated documentation still needs review
 
 The route declares a stable operationId, a request model and a response model. The generated schema includes a successful 201 response and the framework's validation response. Required fields and forbidden extra properties come from the request model.
@@ -29,6 +36,48 @@ The program compares an earlier request's required-field set with a proposed set
 Compatibility is directional. Adding an optional response field may be tolerated by some clients but rejected by strict ones. Removing a response field can break consumers. Tightening an enum, changing units or altering pagination semantics can break callers without a dramatic structural difference.
 
 A useful compatibility review combines schema comparison with representative client requests and documented semantics. The small set comparison here explains one mechanism; it is not advertised as a complete OpenAPI compatibility checker.
+
+## Worked example: spotting breaking changes in a request schema
+
+```python
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class CreateV1(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    title: str = Field(min_length=1, max_length=60)
+
+
+class CreateV2(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    title: str = Field(min_length=1, max_length=40)
+    category: str
+    pinned: bool = False
+
+
+def breaking(old, new):
+    old_schema, new_schema = old.model_json_schema(), new.model_json_schema()
+    added = set(new_schema.get("required", [])) - set(old_schema.get("required", []))
+    problems = [f"new required field {name}" for name in sorted(added)]
+    for name, spec in old_schema["properties"].items():
+        limit = new_schema["properties"].get(name, {}).get("maxLength")
+        if limit is not None and limit < spec.get("maxLength", limit):
+            problems.append(f"{name} maxLength {spec['maxLength']} to {limit}")
+    return problems
+
+
+print(CreateV1.model_json_schema()["properties"]["title"])
+print(breaking(CreateV1, CreateV2))
+```
+
+Expected output:
+
+```text
+{'maxLength': 60, 'minLength': 1, 'title': 'Title', 'type': 'string'}
+['new required field category', 'title maxLength 60 to 40']
+```
+
+FastAPI builds each request body entry in `/openapi.json` from `model_json_schema`, so comparing two versions of that output is a cheap contract test you can run before a release. Version 2 makes three changes and the checker flags two of them. Adding the required `category` field breaks every existing client that does not send it, and shrinking `maxLength` from 60 to 40 rejects titles that used to be accepted. The new `pinned` field has a default, so old requests still validate and it is correctly left off the list. Notice that the rule runs the other way for response models: adding a field to a response is usually safe, while removing one breaks readers. A real compatibility tool also compares types, enums, paths and status codes, but the principle is the one the lesson's `previous_required` and `proposed_required` sets demonstrate: diff the published contract rather than relying on memory of what changed.
 
 ## Failure diagnosis and discussion
 

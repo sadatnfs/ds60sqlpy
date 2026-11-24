@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-042_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A 64 MiB managed array is initialized by the CPU and then processed repeatedly on a GPU. The first GPU pass may include migration costs that later resident passes do not. Report the first pass separately rather than using a warm result to promise cold-start latency.</p>
+<p><strong>Approach:</strong> Time the first GPU pass over the CPU-initialized 64 MiB managed array separately from later passes.</p>
+<p><strong>Why it is correct:</strong> The first pass may fault and migrate pages to the device, which later resident passes avoid.</p>
+<p><strong>A plausible wrong approach:</strong> Reporting only a warm pass as the speed of managed memory hides the first-touch migration a user pays.</p>
+<p><strong>How to verify:</strong> Record first and steady-state times separately on a GPU and label which pass each number describes.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>Alternating a full CPU pass and full GPU pass for ten rounds can move the working set repeatedly. A simplified model counts twenty ownership transitions, unlike a batched design with one transfer to each side. Actual migration can occur at finer granularity and depends on platform support.</p>
+<p><strong>Approach:</strong> Batch CPU and GPU passes so data changes owner once per side instead of every round.</p>
+<p><strong>Why it is correct:</strong> Ten alternating rounds model twenty transitions of 64 MiB, or 1,280 MiB of potential movement.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming a single pointer means no data moves ignores that pages follow whichever processor touches them.</p>
+<p><strong>How to verify:</strong> The reference asserts modeled_moved_mib == 1280 and marks actual_migration_measured False.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>The address identifies a virtual allocation; residency describes where backing data currently lives or is accessible under the platform&#x27;s memory system.</p>
+<p><strong>Approach:</strong> Separate the virtual address in the pointer from where the backing pages currently reside.</p>
+<p><strong>Why it is correct:</strong> The same address stays valid while pages migrate between host and device memory.</p>
+<p><strong>A plausible wrong approach:</strong> Reading the pointer value to decide whether data is on the GPU treats an address as a location.</p>
+<p><strong>How to verify:</strong> Query residency with the platform&#x27;s attribute APIs rather than inspecting the pointer.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Virtual address convenience does not guarantee sufficient device/host memory, supported oversubscription or acceptable fault/migration behavior.</p>
+<p><strong>Approach:</strong> Check device memory, oversubscription support and fault behavior before relying on managed memory.</p>
+<p><strong>Why it is correct:</strong> A unified address space does not add physical memory or guarantee acceptable migration costs.</p>
+<p><strong>A plausible wrong approach:</strong> Allocating more managed memory than the device holds and assuming it just works can thrash or fail.</p>
+<p><strong>How to verify:</strong> Run a working set larger than device memory on the target and watch for errors or slowdown.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Use a declared supported fallback or leave the optional experiment unavailable; do not reinterpret failure as a successful placement operation.</p>
+<p><strong>Approach:</strong> Fall back to a declared path or mark the prefetch experiment unavailable.</p>
+<p><strong>Why it is correct:</strong> An unsupported call did not place any data, so no placement claim follows.</p>
+<p><strong>A plausible wrong approach:</strong> Ignoring the returned error and timing as if prefetch happened credits a nonexistent optimization.</p>
+<p><strong>How to verify:</strong> Check the capability and the call&#x27;s return status, then log which path ran.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Group dependent operations on one processor while data is resident, then transfer ownership deliberately; verify latency and memory constraints still fit.</p>
+<p><strong>Approach:</strong> Group dependent steps on one processor while data is resident, then hand ownership over once.</p>
+<p><strong>Why it is correct:</strong> Fewer handoffs mean fewer migrations of the working set.</p>
+<p><strong>A plausible wrong approach:</strong> Adding prefetch calls inside the alternating loop still moves the data every round.</p>
+<p><strong>How to verify:</strong> Count transitions in the new design and check latency and memory limits still fit.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-042_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

@@ -53,7 +53,7 @@ worked_a()
 # Task 1: Evaluate the two requests at day 2.
 # Task 2: Evaluate the same requests at day 10.
 # Task 3: Compare a histogram to itself.
-# Task 4: Compare[1,0] with[0,1] using natural logarithms.
+# Task 4: Compare `[1, 0]` with `[0, 1]` using natural logarithms.
 # Task 5: Requests from one user share conversational history.
 # Task 6: A drift score rises while mature-cohort quality is stable.
 

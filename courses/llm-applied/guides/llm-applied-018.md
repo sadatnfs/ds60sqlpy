@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-017`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-017` (Quantized frozen bases, adapter gradients and QLoRA limits). They introduce the notation this lesson needs for controlled adaptation comparison and target module.
 
 ## Learning objectives
 
@@ -66,7 +66,7 @@ Keep independent model objects and optimizers, shared initial state, the same su
 
 ## Vocabulary and concepts
 
-**Controlled adaptation comparison:** Candidates sharing base state,data and evaluation contract.
+**Controlled adaptation comparison:** Candidates sharing base state, data and evaluation contract.
 
 **Target module:** The specific layer receiving an adapter update.
 
@@ -76,9 +76,11 @@ Keep independent model objects and optimizers, shared initial state, the same su
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-018/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `llm-torch-cpu` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-018.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-018.py` in the declared `llm-torch-cpu` profile. *Clone one base into two candidates*, *Install an output-head adapter* and *Train both candidates under fixed budgets* need only PyTorch and NumPy and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-018/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Install an output-head adapter* and *Train both candidates under fixed budgets* reuse the helper and fixture introduced in *Clone one base into two candidates*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: All initial base parameters equal. Example B should give: 96 trainable adapter entries; initial logits match base. Example C should give: Both training losses decrease; all logged values finite. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -240,27 +242,30 @@ for name, model, rate in [("full", full, 0.01), ("adapter", adapted, 0.03)]:
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: all initial base parameters equal. adapter 96 entries; 20 updates each; scope literal-token task. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Install an output-head adapter*, predict its result from the prompt alone: Freeze the adapted model, replace its output layer with rank 2LoRA, and compare initial logits. Write the guess beside the stated outcome (96 trainable adapter entries; initial logits match base). Then predict how the decisive case, *Record comparison limits*, should end: Build a report with trainable counts, update budgets, target module and task scope. For compare full and adapter fine-tuning on frozen tasks, the finish condition is: All initial base parameters equal. Adapter 96 entries; 20 updates each; scope literal-token task.
 
 ## Exercises
 
 1. **Clone one base into two candidates.** Create a seed 31 decoder and copy its state into full and adapted candidates.
    **Expected:** all initial base parameters equal.
    **Verify:** Save the assertion results for exercise 1, including all initial base parameters equal.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Install an output-head adapter.** Freeze the adapted model, replace its output layer with rank 2LoRA, and compare initial logits.
    **Expected:** 96 trainable adapter entries; initial logits match base.
    **Verify:** Save the assertion results for exercise 2, including 96 trainable adapter entries; initial logits match base.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-3. **Train both candidates under fixed budgets.** Run 20 full-SFT updates at.01 and 20 adapter updates at.03 on the same masked batch.
+3. **Train both candidates under fixed budgets.** Run 20 full-SFT updates at 0.01 and 20 adapter updates at 0.03 on the same masked batch.
    **Expected:** both training losses decrease; all logged values finite.
    **Verify:** Save the assertion results for exercise 3, including both training losses decrease; all logged values finite.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Prove base preservation.** Compare every frozen adapted-model parameter against its saved copy.
    **Expected:** all frozen tensors exactly equal.
    **Verify:** Save the assertion results for exercise 4, including all frozen tensors exactly equal.
 
-5. **Compare a frozen held-out task.** Evaluate prompt[7, 2] with answer[5, 3] for both candidates using the same mask.
+5. **Compare a frozen held-out task.** Evaluate prompt `[7, 2]` with answer `[5, 3]` for both candidates using the same mask.
    **Expected:** two finite held-out losses; no predetermined winner.
    **Verify:** Save the assertion results for exercise 5, including two finite held-out losses; no predetermined winner.
 
@@ -276,19 +281,21 @@ If one candidate wins the tiny held-out loss, preserve the fixed learning-rate p
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate controlled adaptation comparison and target module for the fixture in *Clone one base into two candidates*. Hint 2: change one literal in *Install an output-head adapter* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Prove base preservation*, with its stated result (all frozen tensors exactly equal). If *Record comparison limits* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Controlled adaptation comparison, Target module, Frozen-state proof using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain controlled adaptation comparison, target module and frozen-state proof using *Clone one base into two candidates*. Recompute its result (all initial base parameters equal) from the inputs. Change one input in *Train both candidates under fixed budgets* and predict whether the stated result (both training losses decrease; all logged values finite) still holds. Say which part of compare full and adapter fine-tuning on frozen tasks the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-017` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Clone one base into two candidates* cannot be reconstructed without the solution, revisit `llm-applied-017` (Quantized frozen bases, adapter gradients and QLoRA limits). Otherwise keep the six observations from compare full and adapter fine-tuning on frozen tasks and continue to `llm-applied-019` (Preference optimization, DPO and the RLHF distinction).
 
 ## Sources and verification status
 
-API and mechanism reference: [LoRA](https://arxiv.org/abs/2106.09685), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for controlled adaptation comparison: [LoRA](https://arxiv.org/abs/2106.09685), reviewed 2026-10-22. The fixtures for *Clone one base into two candidates*, *Install an output-head adapter* and *Train both candidates under fixed budgets* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

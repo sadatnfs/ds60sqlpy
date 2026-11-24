@@ -10,6 +10,14 @@ Use explicit random generators, compare simulation with analytic quantities and 
 
 Open `julia-020` in `/classroom` with its prepared `julia` runtime. Worked case A (compare a sample with a known model) and worked case B (probabilities and stable tail calculations) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-020: all reference checks passed`. One program in this unit publishes a bounded Plotly figure with its description and exact table. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Seeded generator:** An explicit generator such as `Xoshiro(42)` passed to `rand`, so a run reproduces exactly the same draws.
+- **Distribution object:** A Distributions.jl value such as `Normal(2, 3)` that supplies methods like `rand`, `cdf` and `quantile`.
+- **Monte Carlo standard error:** The sampling uncertainty of a simulated mean, estimated as the standard deviation divided by the square root of the draw count.
+- **Tail probability:** The chance that a variable exceeds a threshold, computed with `ccdf` or with `logccdf` when the value is tiny.
+- **DS60Plots:** The classroom helper module that captures one bounded Plotly figure with a description and an exact data table.
+
 ## Randomness needs an explicit role
 
 A random-number generator has state. Reusing an object advances that state, while constructing another generator with the same seed can reproduce a sequence under the same implementation. A seed is useful provenance, but it is not a promise of identical draws across every library version, algorithm or hardware environment.

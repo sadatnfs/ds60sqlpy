@@ -85,7 +85,7 @@ def main():
         spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
         assert facts.count() == 20000 and dimension.count() == 20
         assert dimension.select("key").distinct().count() == 20
-        print("Known finite build side:20 unique keys")
+        print("Known finite build side: 20 unique keys")
         total = sum((i % 7 + 1) * (i % 20 + 1) for i in range(20000))
         assert total == 839916
         print("Independent weighted-total oracle=", total)

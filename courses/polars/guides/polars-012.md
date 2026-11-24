@@ -14,6 +14,14 @@ The first case demonstrates a value-preserving conversion between Polars and an 
 
 Categories introduce a further contract. A closed business vocabulary can have an order that differs from alphabetical order. Enum declares that vocabulary explicitly. It is useful for states such as new, paid and shipped, where unknown values should be rejected or quarantined. Physical category codes are implementation details and should not replace stable labels in an external interface.
 
+## Key terms
+
+- **Apache Arrow:** A language-independent columnar memory format that Polars uses and can exchange with other libraries.
+- **Validity bitmap:** The Arrow bit array that marks which slots of a column hold values and which are null.
+- **Zero-copy:** Sharing compatible buffers without copying; casting, rechunking or conversion to Python objects can still allocate memory.
+- **Enum:** A Polars categorical type with a fixed, ordered list of allowed labels; a strict cast of an unknown label raises an error.
+- **Category order:** The declared order of Enum labels, which sorting and comparisons use instead of alphabetical order.
+
 ## Syntax and data contract
 
 to_arrow returns an Arrow Table; pl.from_arrow constructs a Polars result. Arrow columns expose type and null information, and to_pylist is a convenient small-fixture inspection method that creates Python objects. pl.Enum takes the ordered allowed labels. Casting an unknown label under strict behavior raises a real conversion error.

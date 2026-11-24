@@ -8,7 +8,7 @@ Advanced; approximately 120 minutes. Direct prerequisites: `spark-031`. The prep
 
 ## How to run this lesson
 
-Open `spark-032` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-032` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-032.scala) and [PySpark learner](../lessons/spark-032.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-032_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-032_solution.scala) and [PySpark reference](../solutions/spark-032_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -57,9 +57,7 @@ All queries have bounded awaits and stop in finally. Checkpoint schema, source p
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import org.apache.spark.sql.streaming.{StreamingQuery, StreamingQueryProgress, Trigger}
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
@@ -88,20 +86,7 @@ val batches = Seq(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 from datetime import datetime, timedelta
 import tempfile
@@ -138,13 +123,13 @@ batches = [
 ```scala
 val firstWindow = Seq((1, 10L), (2, 20L), (3, 5L))
 assert(firstWindow.map(_._2).sum == 35L)
-println("Retained out-of-order event contributes to35,not30")
+println("Retained out-of-order event contributes to 35, not 30")
 ```
 
 ```python
 first_window = [(1, 10), (2, 20), (3, 5)]
 assert sum(amount for _, amount in first_window) == 35
-print("Retained out-of-order event contributes to35,not30")
+print("Retained out-of-order event contributes to 35, not 30")
 ```
 
 The expected first-window value explicitly includes the out-of-order event from the second phase. It excludes the later 999 event only because the controlled query history finalizes that window before the third phase arrives, not simply because its timestamp is smaller.
@@ -154,13 +139,13 @@ The expected first-window value explicitly includes the out-of-order event from 
 ```scala
 val latest = Instant.parse("2024-01-01T00:30:00Z")
 assert(latest.minusSeconds(300L) == Instant.parse("2024-01-01T00:25:00Z"))
-println("Five-minute delay is event-time arithmetic;actual watermark still needs a receipt")
+println("Five-minute delay is event-time arithmetic; actual watermark still needs a receipt")
 ```
 
 ```python
 latest = datetime.fromisoformat("2024-01-01T00:30:00+00:00")
 assert latest - timedelta(minutes=5) == datetime.fromisoformat("2024-01-01T00:25:00+00:00")
-print("Five-minute delay is event-time arithmetic;actual watermark still needs a receipt")
+print("Five-minute delay is event-time arithmetic; actual watermark still needs a receipt")
 ```
 
 The arithmetic predicts a useful progress boundary but does not replace inspection of the actual query watermark. Microbatch advancement and stateful processing determine when that boundary is applied.
@@ -169,7 +154,7 @@ The arithmetic predicts a useful progress boundary but does not replace inspecti
 
 ### Exercise 1: Define watermark placement and window state
 
-Apply withWatermark(event_time,5 minutes) before grouping by a 5-minute window and team. Aggregate records and total amount, retaining the window struct in the result.
+Apply withWatermark(event_time, 5 minutes) before grouping by a 5-minute window and team. Aggregate records and total amount, retaining the window struct in the result.
 
 **Expected result/shape:** A streaming aggregate with window, team, records, total. The watermark is attached to the same event-time column used by the window.
 
@@ -189,9 +174,9 @@ Run phase 1 and extract nonmissing watermark strings from retained progress. Par
 
 ### Exercise 3: Accept a retained out-of-order event and observe finalization
 
-Publish phase 2, run the compatible query again and read finalized sink rows as(start, team, records, total). Verify the 00:03 event contributed before the first window closed.
+Publish phase 2, run the compatible query again and read finalized sink rows as (start, team, records, total). Verify the 00:03 event contributed before the first window closed.
 
-**Expected result/shape:** The finalized sink contains only(00:00, A,3,35) at this point. The actual watermark reaches at least 00:07.
+**Expected result/shape:** The finalized sink contains only `(00:00, A, 3, 35)` at this point. The actual watermark reaches at least 00:07.
 
 **Verify:** Assert the exact first-window tuple and the observed progress boundary.
 
@@ -211,7 +196,7 @@ Publish phase 3 after phase 2 has terminated. Read the actual state-operator dro
 
 Publish the 00:30 administrative advancer, run phase 4 and return a ledger of total source inputs, observed drops and final business-window records.
 
-**Expected result/shape:** Seven total inputs, one observed drop, five finalized business records across three tuples:(00:00, A,3,35),(00:10, A,1,30),(00:10, B,1,7). The advancer window remains pending.
+**Expected result/shape:** Seven total inputs, one observed drop, five finalized business records across three tuples: `(00:00, A, 3, 35)`, `(00:10, A, 1, 30)`, `(00:10, B, 1, 7)`. The advancer window remains pending.
 
 **Verify:** Assert all final tuples, input/drop reconciliation and actual watermark at least 00:25.
 
@@ -233,7 +218,7 @@ Do not translate watermark delay into a wall-clock sleep deadline. Do not assume
 
 ## Self-check
 
-Explain the contract of `windowed` / `windowed` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `windowed` / `windowed` without reading its solution. Then, from memory, state what Exercise 6 (Verify output-mode and sink eligibility through explicit failures) must produce: Both configurations raise `AnalysisException`; no active query remains. The valid windowed append sink stays intact. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

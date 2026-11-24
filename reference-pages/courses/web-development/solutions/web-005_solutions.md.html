@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-005.md</code>.</p>
 <h3 id="exercise-1-choose-a-list-type-for-steps-and-an-unordered-tool-collection">Exercise 1: Choose a list type for steps and an unordered tool collection.<a class="heading-anchor" href="#exercise-1-choose-a-list-type-for-steps-and-an-unordered-tool-collection" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Steps use ol; interchangeable peer tools use ul.</p>
+<p><strong>Approach:</strong> Ask whether reordering the items would change the meaning; steps fail that test and get <code>ol</code>, while peer tools pass it and get <code>ul</code>.</p>
 <p><strong>Why:</strong> An ordered list communicates sequence, so assistive technology announces item numbers; an unordered list signals interchangeable items.</p>
+<p><strong>Plausible wrong approach:</strong> Choosing <code>ol</code> for tools because numbering looks tidy fails because it tells readers the order matters when it does not.</p>
+<p><strong>How to verify:</strong> The steps list exposes <code>ol</code> with three ordered <code>li</code> items and the tools list exposes <code>ul</code> in the Elements panel.</p>
 <h3 id="exercise-2-add-two-vocabulary-terms-with-definitions">Exercise 2: Add two vocabulary terms with definitions.<a class="heading-anchor" href="#exercise-2-add-two-vocabulary-terms-with-definitions" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A dl contains paired dt and dd elements.</p>
+<p><strong>Approach:</strong> Write a <code>dl</code> and add each term as a <code>dt</code> followed directly by its <code>dd</code> definition.</p>
 <p><strong>Why:</strong> A description list associates each dt with its dd, so the relationship is expressed by markup instead of bold text.</p>
+<p><strong>Plausible wrong approach:</strong> Using two paragraphs with bold terms fails because the pairing becomes visual only, and no element ties each definition to its term.</p>
+<p><strong>How to verify:</strong> <code>document.querySelectorAll(&#x27;dl &gt; dt&#x27;).length</code> and <code>dl &gt; dd</code> both return 2, alternating in the tree.</p>
 <h3 id="exercise-3-build-a-study-checklist-with-a-code-example-and-glossary">Exercise 3: Build a study checklist with a code example and glossary.<a class="heading-anchor" href="#exercise-3-build-a-study-checklist-with-a-code-example-and-glossary" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The page exposes list, code and definition structures without relying on spacing.</p>
+<p><strong>Approach:</strong> Combine an <code>ol</code> checklist, a <code>pre</code> with <code>code</code> whose angle brackets are escaped, and a <code>dl</code> glossary inside one <code>main</code>.</p>
 <p><strong>Why:</strong> Each element tells browsers and assistive technology what the content is, so the page stays meaningful without spacing or color.</p>
+<p><strong>Plausible wrong approach:</strong> Pasting raw <code>&lt;p&gt;</code> inside the <code>code</code> block fails because the parser creates a real paragraph and the example text disappears.</p>
+<p><strong>How to verify:</strong> The preview shows literal angle brackets in the code region and the tree contains no element created from the example text.</p>
 <h3 id="exercise-4-repair-a-nested-list-placed-as-a-sibling-of-its-parent-item">Exercise 4: Repair a nested list placed as a sibling of its parent item.<a class="heading-anchor" href="#exercise-4-repair-a-nested-list-placed-as-a-sibling-of-its-parent-item" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The nested list belongs inside the associated li.</p>
+<p><strong>Approach:</strong> Move the nested <code>ul</code> inside the <code>li</code> it elaborates, before that <code>li</code> closes.</p>
 <p><strong>Why:</strong> ul and ol may contain only li children, so a sublist must sit inside an item to show that it belongs to that step.</p>
+<p><strong>Plausible wrong approach:</strong> Fixing the indentation alone fails because whitespace does not change parent and child relationships in the parsed tree.</p>
+<p><strong>How to verify:</strong> <code>document.querySelector(&#x27;ul &gt; ul&#x27;)</code> returns null after the repair and the inner list&#x27;s parent is an <code>li</code>.</p>
 <h3 id="exercise-5-test-a-long-code-line-in-a-narrow-preview">Exercise 5: Test a long code line in a narrow preview.<a class="heading-anchor" href="#exercise-5-test-a-long-code-line-in-a-narrow-preview" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The code region can scroll without making the entire page horizontally overflow.</p>
+<p><strong>Approach:</strong> Give <code>pre</code> an <code>overflow-x: auto</code> rule so the long line scrolls inside its own box at narrow widths.</p>
 <p><strong>Why:</strong> overflow-x: auto on the code container creates a local scroll area, so the rest of the page keeps its width.</p>
+<p><strong>Plausible wrong approach:</strong> Applying <code>white-space: nowrap</code> to the whole body fails because every paragraph then overflows, widening the entire page.</p>
+<p><strong>How to verify:</strong> At the narrow viewport preset, the page has no horizontal scrollbar while the code box shows its own scrollbar.</p>
 <h3 id="exercise-6-explain-the-difference-between-preserving-whitespace-and-preserving-meaning">Exercise 6: Explain the difference between preserving whitespace and preserving meaning.<a class="heading-anchor" href="#exercise-6-explain-the-difference-between-preserving-whitespace-and-preserving-meaning" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Pre preserves formatting; semantic elements additionally communicate content roles.</p>
+<p><strong>Approach:</strong> Contrast <code>pre</code>, which keeps spaces and line breaks, with semantic elements such as <code>ol</code> or <code>code</code>, which say what the content is.</p>
 <p><strong>Why:</strong> pre only preserves spaces and line breaks; semantic elements state what the content is, which whitespace alone cannot.</p>
+<p><strong>Plausible wrong approach:</strong> Building a list from <code>pre</code> and spaces fails because the text lines up visually but exposes no list or item to assistive technology.</p>
+<p><strong>How to verify:</strong> A list written in <code>pre</code> shows no list role in the accessibility tree, while the <code>ol</code> version reports its item count.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-005_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

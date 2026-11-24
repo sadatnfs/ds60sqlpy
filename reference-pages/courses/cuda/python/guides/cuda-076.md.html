@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Shared memory is a block-local cooperation area. Threads load assigned pieces, synchronize, then consume data another thread may have produced. A barrier is a collective obligation: all threads that participate in a block must reach compatible synchronization points. Returning early for a tail lane before a required barrier can leave other threads waiting or produce undefined behavior.</p>
 <p>For a partial tile, valid lanes load input while invalid lanes write the operation&#x27;s identity, such as zero for a sum. Every lane still reaches the barrier. The identity is algorithm-specific: minimum needs a suitably large sentinel, and a weighted average needs counts as well as sums. Shared storage does not communicate between arbitrary blocks; cross-block cooperation needs a separate algorithm or explicitly supported launch mechanism.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Shared memory:</strong> Fast on-chip memory visible to all threads of one block and lasting only for that block&#x27;s lifetime.</li>
+<li><strong>Block barrier:</strong> A collective such as <code>cuda.syncthreads()</code> that every thread in the block must reach before any thread proceeds.</li>
+<li><strong>Identity element:</strong> A value that leaves a reduction unchanged, such as zero for addition, used to fill inactive slots.</li>
+<li><strong>Early return before a barrier:</strong> A thread leaving the kernel before a barrier, which leaves the collective incomplete and produces undefined behavior.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A four-lane tile reads [2,4,6] and stores [2,4,6,0]. All four lanes synchronize, then the block computes sum 12.</p>
@@ -215,20 +222,48 @@ participants <span class="syntax-operator">=</span> <span class="syntax-builtin"
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>shared<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">12</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU cooperative model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> shared<span class="syntax-punctuation">,</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>shared<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> All four modeled lanes participate; padded sum is 12.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>tile</code></td>
+<td><code>[2, 4, 6]</code></td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>shared</code></td>
+<td><code>[2, 4, 6, 0]</code></td>
+</tr>
+<tr>
+<td><code>participants</code></td>
+<td><code>[0, 1, 2, 3]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-choose-a-sum-identity">Exercise 1: Choose a sum identity<a class="heading-anchor" href="#exercise-1-choose-a-sum-identity" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>choose a sum identity</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Padding with the value of the last valid element, 6, changes the sum to 18. Such a pad looks harmless because it is in the data range, which is why it passes casual inspection.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-choose-a-minimum-identity">Exercise 2: Choose a minimum identity<a class="heading-anchor" href="#exercise-2-choose-a-minimum-identity" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>choose a minimum identity</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Padding with 0 is the common mistake carried over from sums. For data <code>[2, 4, 6]</code> it reports a minimum of 0, a value not in the input.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-trace-barrier-participants">Exercise 3: Trace barrier participants<a class="heading-anchor" href="#exercise-3-trace-barrier-participants" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>trace barrier participants</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Listing only lanes 0 to 2 because they hold data treats the barrier as a data operation. On hardware, a barrier not reached by all threads is undefined behavior and can hang or corrupt shared memory.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-repair-early-return">Exercise 4: Repair early return<a class="heading-anchor" href="#exercise-4-repair-early-return" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>repair early return</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Moving the early return below the first barrier but above the second still leaves later barriers missing a participant. Every barrier after the return is affected, not only the first.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-block-and-grid-scope">Exercise 5: Separate block and grid scope<a class="heading-anchor" href="#exercise-5-separate-block-and-grid-scope" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>separate block and grid scope</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reading another block&#x27;s partial from shared memory assumes a grid-wide shared space. The read returns the current block&#x27;s own data, so the total silently counts one block several times.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-a-nonmultiple-test">Exercise 6: Design a nonmultiple test<a class="heading-anchor" href="#exercise-6-design-a-nonmultiple-test" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design a nonmultiple test</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Testing only with <code>n = 4</code> or <code>n = 8</code> makes every block full. Bugs in padding or early returns never execute, so the test passes against broken code.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

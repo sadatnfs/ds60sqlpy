@@ -233,23 +233,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the closing balance for Notebook and Mug at February 28.</p>
 <p>It is 8 + 7 = 15, coincidentally equal to the earlier carried subset for different reasons.</p>
+<p><strong>Why it fits this model:</strong> Inventory is a state. At February 28 the closing balance for Notebook and Mug is that date&#x27;s snapshot: 8 + 7 = 15.</p>
+<p><strong>Tempting mistake:</strong> Summing both month-end snapshots for the two products gives 10 + 5 + 8 + 7 = 30, which counts each product twice.</p>
+<p><strong>How to confirm:</strong> Under &#x27;Date&#x27;[Date] = DATE(2025, 2, 28) and ProductKey IN {1, 3}, SUM(Inventory[Units]) returns 15; case B&#x27;s 15 comes from the January 31 values 10 + 5.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Remove Mug&#x27;s February snapshot conceptually.</p>
 <p>A shared February 28 date can omit Mug, while per-product carry-forward would use January 31&#x27;s5. The policies must be named separately.</p>
+<p><strong>Why it fits this model:</strong> Without Mug&#x27;s February row, the two policies differ. A shared last date (February 28) has only Notebook, while per-product carry-forward takes Mug&#x27;s last known 5 from January 31.</p>
+<p><strong>Tempting mistake:</strong> Using LASTDATE(&#x27;Date&#x27;[Date]) or the latest snapshot across all products and calling it per-product last known. Mug silently drops out.</p>
+<p><strong>How to confirm:</strong> The shared-date policy gives 8; per-product carry-forward gives 8 + 5 = 13. Label which one the measure implements.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a staleness acceptance rule for carried balances.</p>
 <p>For example, retain a balance only if its age is at most a declared number of days; otherwise return BLANK and a missing/stale indicator.</p>
+<p><strong>Why it fits this model:</strong> A carried balance has an age: cutoff minus the snapshot used. At the February 15 cutoff, the January 31 snapshots are 15 days old.</p>
+<p><strong>Tempting mistake:</strong> Carrying the last known value with no age limit, so a snapshot that is months old still shows as current stock.</p>
+<p><strong>How to confirm:</strong> With a 31-day limit, February 15 returns 15; with a 7-day limit it returns BLANK plus a stale flag for both products.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose dividing 65 by six rows and calling it average inventory over two months.</p>
 <p>The result mixes product and temporal weighting. Define whether the desired average is across products, observation dates or time intervals.</p>
+<p><strong>Why it fits this model:</strong> The six rows are three products at two dates. Daily totals are 35 on January 31 and 30 on February 28.</p>
+<p><strong>Tempting mistake:</strong> 65 / 6, about 10.83, mixes products and dates: it is the mean per product-snapshot, not the average stock held.</p>
+<p><strong>How to confirm:</strong> AVERAGEX(VALUES(Inventory[SnapshotDate]), CALCULATE(SUM(Inventory[Units]))) returns 32.5 units averaged over the two snapshot dates.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain a product with no snapshot before the cutoff.</p>
 <p>Return an explicit unavailable result; do not invent a zero or use a later snapshot that leaks future information.</p>
+<p><strong>Why it fits this model:</strong> If the cutoff is January 15, 2025, no snapshot is on or before it, so LastKnown is BLANK and no rows match. Bag (ProductKey 4) has no snapshots at all.</p>
+<p><strong>Tempting mistake:</strong> Returning 0 for these products, or using the February 28 snapshot, which reports stock not yet known on January 15.</p>
+<p><strong>How to confirm:</strong> Case B with Cutoff set to DATE(2025, 1, 15) returns BLANK, and the report should flag the products with no available balance.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer semi-additivity to account balances.</p>
 <p>Sum compatible accounts at a date, but use closing/average-balance rules over time rather than summing repeated states.</p>
+<p><strong>Why it fits this model:</strong> Account balances behave like inventory. If an account shows 100 on January 31 and 120 on February 28, the two-month closing balance is 120.</p>
+<p><strong>Tempting mistake:</strong> Summing the two month-end balances to 220, while the 20 of net transactions across February is the flow that explains the change.</p>
+<p><strong>How to confirm:</strong> The closing balance (120) equals the opening balance (100) plus February transactions (20); balances add across accounts on one date, not across dates.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

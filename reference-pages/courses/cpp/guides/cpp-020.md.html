@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Express a useful generic contract and read a constraint diagnostic.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A template describes a family of functions parameterized by types. Deduction selects a type from arguments. A concept is a compile-time requirement that determines which template candidates are valid. A constraint improves the interface boundary, but it does not automatically prove arithmetic safety.</p>
+<ul>
+<li><strong>function template:</strong> describes a family of functions parameterized by types or values.</li>
+<li><strong>template argument deduction:</strong> the compiler choosing template arguments from the types of the call arguments.</li>
+<li><strong>instantiation:</strong> the compiler generating a concrete specialization for the chosen template arguments.</li>
+<li><strong>concept:</strong> a named compile-time requirement such as <code>std::integral</code> that decides which types a template accepts.</li>
+<li><strong><code>static_assert</code>:</strong> a check evaluated during compilation that stops the build when its condition is false.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>template&lt;std::integral T&gt;</code> admits integral types and excludes std::string and floating types. The requires mechanism checks validity during compilation. Adding signed values can still overflow, so a concept is separate from a runtime range contract.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

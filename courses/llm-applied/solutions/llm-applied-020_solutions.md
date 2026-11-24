@@ -1,6 +1,6 @@
 # llm-applied-020: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for fine-tuning embeddings and a small reranker only after attempting *Construct paired retrieval features* through *Bound the model claim*. A discrepancy in *Train the query projection* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-020_solution.py` runs the assertions; this page explains why they test bi-encoder and contrastive objective.
 
 ## Mechanism review
 
@@ -18,17 +18,17 @@ This chapter performs actual CPU updates on a small linear query projection and 
 
 ## Reading the implementation
 
-Compute query_embeddings=query_features@W andscore_matrix=query_embeddings@document_features.T. Cross entropy uses the diagonal document index as the positive label. Clear gradients and updateW under a fixed budget. For the reranker, score each pair with a linear weight and optimize softplus(-(positive_score-negative_score)). Inspect parameter changes, training loss and ranking separately. Freeze document features in this fixture so only the query projection is trained.
+Compute query_embeddings=query_features@W and `score_matrix`=query_embeddings@document_features.T. Cross entropy uses the diagonal document index as the positive label. Clear gradients and update W under a fixed budget. For the reranker, score each pair with a linear weight and optimize softplus(-(positive_score-negative_score)). Inspect parameter changes, training loss and ranking separately. Freeze document features in this fixture so only the query projection is trained.
 
 ## Derive the first query-projection and reranker updates
 
-Queries and documents are both the2-by-2 identity matrix, while W begins at zero. The score matrix \(QWD^{\mathsf T}\) is therefore W itself. Each row has uniform class probabilities[0.5, 0.5], and the labels are[0, 1]. Mean cross entropy across two rows gives gradient[[-0.25, 0.25], [0.25, -0.25]]. SGD at0.5 produces W=[[0.125, -0.125], [-0.125, 0.125]] after one update.
+Queries and documents are both the 2-by-2 identity matrix, while W begins at zero. The score matrix \(QWD^{\mathsf T}\) is therefore W itself. Each row has uniform class probabilities `[0.5, 0.5]`, and the labels are `[0, 1]`. Mean cross entropy across two rows gives gradient `[[-0.25, 0.25], [0.25, -0.25]]`. SGD at 0.5 produces W=[[0.125, -0.125], [-0.125, 0.125]] after one update.
 
-The positive-minus-negative score margin is 0.25 in both training rows. Symmetry preserves the form[[a, -a], [-a, a]] during this particular optimization, with positive a after the first step. For a new query[x, y], the two scores are[a(x-y), -a(x-y)], so the decision boundary is \(x=y\). The held-out[0.9, 0.1] lies well on the document0 side; after the first step its scores are[0.1, -0.1]. That is a local feature-space check, not a test of understanding a new sentence.
+The positive-minus-negative score margin is 0.25 in both training rows. Symmetry preserves the form[[a, -a], [-a, a]] during this particular optimization, with positive a after the first step. For a new query `[x, y]`, the two scores are[a(x-y), -a(x-y)], so the decision boundary is \(x=y\). The held-out `[0.9, 0.1]` lies well on the document 0 side; after the first step its scores are `[0.1, -0.1]`. That is a local feature-space check, not a test of understanding a new sentence.
 
 The cross-entropy derivative can be written \(\frac{Q^{\mathsf T}(P-Y)D}{B}\) for this fixed-feature linear projection, where P contains row probabilities, Y the one-hot targets and B the number of query rows. Its shape matches W. In a real trainable encoder, gradients would flow through encoder and embedding parameters for fixed tokenized inputs; ordinary discrete token IDs and the tokenizer are not differentiable parts of that graph. Here document features remain fixed and only four projection entries are updated.
 
-The reranker has weight w=[w = 0, w1], positive feature[1, 0] and negative[0, 1]. Its score margin is w0-w1 and its loss is softplus(-(w0-w1)). At zero, the gradient is[-0.5, 0.5]. A0.2 SGD step produces[0.1, -0.1], giving margin0.2 and a smaller loss. This independent calculation shows what the pairwise objective favors without assuming the training loop's result.
+The reranker has weight w=[w = 0, w1], positive feature `[1, 0]` and negative `[0, 1]`. Its score margin is w0-w1 and its loss is softplus(-(w0-w1)). At zero, the gradient is `[-0.5, 0.5]`. A0.2 SGD step produces `[0.1, -0.1]`, giving margin 0.2 and a smaller loss. This independent calculation shows what the pairwise objective favors without assuming the training loop's result.
 
 A pairwise loss for one query should compare candidates under that same query's intended relevance. Mixing a positive from one question with a negative from an unrelated question can teach a shortcut unless the dataset design explicitly calls for it. In-batch negatives also assume that another row's positive is not a valid answer for the current query. Multiple correct passages or duplicated source families can violate that assumption.
 
@@ -59,13 +59,13 @@ scores = (queries @ projection) @ documents.T
 assert tuple(scores.shape) == (2, 2) and labels.tolist() == [0, 1]
 ```
 
-**Expected:** score shape(2, 2); one positive per query.
+**Expected:** score shape `(2, 2)`; one positive per query.
 
-**Verify:** Compare the computed values or written argument with score shape(2, 2); one positive per query.
+**Verify:** Compare the computed values or written argument with score shape `(2, 2)`; one positive per query.
 
 ## Exercise 2: Train the query projection
 
-The question is: Run30SGD.5 updates on cross entropy against diagonal positives.
+The question is: Run 30SGD at 0.5 updates on cross entropy against diagonal positives.
 
 The projection actually changes through gradients. The resulting training ranking is a mechanics check, not evidence of transfer to unseen language.
 
@@ -90,7 +90,7 @@ assert F.cross_entropy(final_scores, labels).item() < initial and final_scores.a
 
 ## Exercise 3: Evaluate a perturbed held-out query
 
-The question is: Use held-out feature[.9, .1] and compare its two document scores.
+The question is: Use held-out feature `[.9, .1]` and compare its two document scores.
 
 This tests one nearby feature perturbation under an authored relevance label. It is much narrower than evaluating new document families or real paraphrases.
 
@@ -100,13 +100,13 @@ held_scores = (held @ projection) @ documents.T
 assert held_scores.argmax(1).item() == 0
 ```
 
-**Expected:** document0 remains higher on this declared local perturbation.
+**Expected:** document 0 remains higher on this declared local perturbation.
 
-**Verify:** Compare the computed values or written argument with document0 remains higher on this declared local perturbation.
+**Verify:** Compare the computed values or written argument with document 0 remains higher on this declared local perturbation.
 
 ## Exercise 4: Train a pairwise reranker
 
-The question is: Use positive feature[1, 0], negative[0, 1] and a zero linear weight; run20SGD.2 updates.
+The question is: Use positive feature `[1, 0]`, negative `[0, 1]` and a zero linear weight; run 20SGD at 0.2 updates.
 
 The reranker objective compares candidates for one query. Its training data must distinguish relevance from superficial length or lexical artifacts.
 
@@ -171,4 +171,4 @@ assert (
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Evaluate a perturbed held-out query* and predict how the result changes before checking it; the unchanged inputs give: document 0 remains higher on this declared local perturbation. Keep the original *Bound the model claim* failure beside the repaired result; a missing PyTorch runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

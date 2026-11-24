@@ -124,7 +124,7 @@ assert tuple(sampled.shape) == (4, 8) and set(sampled.unique().tolist()) <= {0.0
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: L1 is 3 and squared L2 is 5, eval-mode Dropout returns its input exactly, train mode outputs only 0 or 2, a 0.1 coefficient adds a penalty of 0.5 for a total of 2.5, and the penalty gradient is [0.2, -0.4]. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Calculate two penalties. Predict exercise 6, Keep mode separate from gradients, from its prompt alone: Set Dropout to eval and pass a requires_grad input. Then explain why this finish condition holds: L1 is 3 and squared L2 is 5, eval-mode Dropout returns its input exactly, train mode outputs only 0 or 2, a 0.1 coefficient adds a penalty of 0.5 for a total of 2.5, and the penalty gradient is [0.2, -0.4]. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -160,15 +160,15 @@ If a regularization coefficient behaves differently after changing batch size or
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Check evaluation dropout) alters one assumption of Example A (Calculate two penalties). Hint 2: exercise 4, Separate data and penalty terms, should end at penalty 0.5; total 2.5. Work backward from it. Hint 3: exercise 5, Differentiate the explicit penalty, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Regularization penalty, Dropout mode, Weight decay using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Check training invariants, from its inputs alone. Predict whether exercise 3, Confirm eval disables the new rate, survives one changed input. Then explain Regularization penalty, Dropout mode, Weight decay in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-016` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Calculate two penalties) cannot be rebuilt without help, revisit `torch-016` first. Otherwise keep your exercise 2 attempt, Predict train-mode values for p=0.25, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-009`, `pyweb-012`, 
 
 A request may depend on several concurrent operations, but those operations need one accountable lifetime. Structured concurrency keeps child tasks inside a parent scope that waits for their completion or cancellation. This chapter uses TaskGroup and an explicit deadline to verify cleanup when one dependency fails.
 
+## Key terms
+
+- **Structured concurrency:** Keeping child tasks inside a parent scope that does not exit until every child has finished or been cancelled.
+- **TaskGroup:** The asyncio context manager that owns the tasks created in it and cancels the remaining ones when one task fails.
+- **ExceptionGroup:** An exception that carries several task failures together and is handled selectively with `except*`.
+- **asyncio.timeout:** A context manager that cancels the work inside it when a deadline passes and raises TimeoutError at the context boundary.
+- **Deadline budget:** The total time allowed for a request, which must cover queueing, dependency calls, retries, cleanup and the response.
+
 ## Mechanism: task ownership forms a tree
 
 An asyncio TaskGroup owns the tasks created inside its context. If one task fails, the group cancels remaining tasks and waits for them before leaving the context. Related exceptions are represented through an exception group, which the caller can handle with except*. This makes unfinished child work visible at the parent boundary.
@@ -29,6 +37,61 @@ A separate operation waits on an event that will not be released. An asyncio tim
 Cancellation does not undo a committed external effect. A database write or remote payment may have completed before the caller's timeout. The next chapter introduces stable operation identities and transactional outboxes to reconcile that uncertainty.
 
 Work that must survive request cancellation should move into an explicitly durable job system. Detaching a task with create_task and dropping its reference does not provide durable ownership. It merely makes the lifetime harder to observe and can lose work when the process stops.
+
+## Worked example: gather leaves a sibling running, TaskGroup cancels it
+
+```python
+import asyncio
+
+
+async def slow(log):
+    try:
+        await asyncio.sleep(0.2)
+        log.append("slow finished")
+    except asyncio.CancelledError:
+        log.append("slow cancelled")
+        raise
+
+
+async def fail():
+    await asyncio.sleep(0.01)
+    raise ValueError("dependency failed")
+
+
+async def with_gather():
+    log = []
+    try:
+        await asyncio.gather(slow(log), fail())
+    except ValueError:
+        log.append("caller saw error")
+    await asyncio.sleep(0.3)
+    return log
+
+
+async def with_group():
+    log = []
+    try:
+        async with asyncio.TaskGroup() as group:
+            group.create_task(slow(log))
+            group.create_task(fail())
+    except* ValueError:
+        log.append("caller saw error")
+    await asyncio.sleep(0.3)
+    return log
+
+
+print(asyncio.run(with_gather()))
+print(asyncio.run(with_group()))
+```
+
+Expected output:
+
+```text
+['caller saw error', 'slow finished']
+['slow cancelled', 'caller saw error']
+```
+
+With `asyncio.gather`, the first exception propagates to the caller at once, but the slow sibling keeps running in the background and finishes after the request has already failed. In a web handler that means work, connections and possibly writes outliving the response that reported an error. The `TaskGroup` version cancels the sibling, waits for its `finally` or `except` cleanup, and only then raises the `ExceptionGroup` that `except*` unpacks. That ordering is what the lesson asserts with its `cleaned` event: the caller sees the failure only after every child has stopped.
 
 ## Failure diagnosis and discussion
 

@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-verify-selector-scope">Exercise 1: Verify selector scope<a class="heading-anchor" href="#exercise-1-verify-selector-scope" aria-label="Link to this section">#</a></h3>
 <p>A budget label should match the application it protects. Including an unrelated healthy Pod could make the arithmetic look safer than the target application really is, while selecting none can leave the intended workload unprotected.</p>
 <p><strong>Expected:</strong> Exactly the two hello Pods contribute to this example.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Apply app=hello to each of the three Pods&#x27; labels.</li>
+<li><strong>Why it is correct:</strong> A PodDisruptionBudget counts only Pods its selector matches, so the unrelated Pod has no effect on the budget.</li>
+<li><strong>Plausible wrong approach:</strong> Counting all three Pods in the namespace would overstate healthy Pods and allow an eviction the budget should block.</li>
+<li><strong>How to verify:</strong> Exactly the two hello Pods are selected.</li>
+</ul>
 <h3 id="exercise-2-predict-healthy-count-changes">Exercise 2: Predict healthy-count changes<a class="heading-anchor" href="#exercise-2-predict-healthy-count-changes" aria-label="Link to this section">#</a></h3>
 <p>Negative capacity is represented as no allowed disruptions. The live status can include additional controller bookkeeping, so this calculation is a prediction to compare with observations rather than an authorization token.</p>
 <p><strong>Expected:</strong> Potential disruptions 1, 0, 0 in the simplified model.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Subtract minAvailable 1 from healthy counts 2, 1 and 0 and floor at zero.</li>
+<li><strong>Why it is correct:</strong> Allowed disruptions are the healthy Pods above the minimum, which can never be negative.</li>
+<li><strong>Plausible wrong approach:</strong> Reporting minus 1 for zero healthy Pods suggests a debt the API does not track.</li>
+<li><strong>How to verify:</strong> The results are 1, 0 and 0.</li>
+</ul>
 <h3 id="exercise-3-capture-a-denied-eviction">Exercise 3: Capture a denied eviction<a class="heading-anchor" href="#exercise-3-capture-a-denied-eviction" aria-label="Link to this section">#</a></h3>
 <p>The refusal demonstrates why the budget exists. Preserve the reason and state, then repair missing readiness or capacity if that is the actual problem. Bypassing the API would invalidate the maintenance exercise.</p>
 <p><strong>Expected:</strong> Denial is tied to the intended PDB and Pod UID.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Call the Eviction API with one selected healthy Pod and keep the response and the Pod&#x27;s UID.</li>
+<li><strong>Why it is correct:</strong> With allowed disruptions 0, the API server refuses the eviction with 429 and names the blocking budget.</li>
+<li><strong>Plausible wrong approach:</strong> Using kubectl delete pod to test the budget bypasses the Eviction API, and the PDB does not block it.</li>
+<li><strong>How to verify:</strong> A 429 names the intended PDB, and the Pod UID is unchanged.</li>
+</ul>
 <h3 id="exercise-4-observe-a-permitted-maintenance-path">Exercise 4: Observe a permitted maintenance path<a class="heading-anchor" href="#exercise-4-observe-a-permitted-maintenance-path" aria-label="Link to this section">#</a></h3>
 <p>The evidence should include before/after Pod identities and selected Node identity. A replacement that remains Pending means the maintenance goal is not complete, even if the initial eviction was legitimate.</p>
 <p><strong>Expected:</strong> Allowed disruption, replacement readiness and finite application success are recorded.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> With two healthy replicas, request one owned eviction and track the replacement.</li>
+<li><strong>Why it is correct:</strong> Allowed disruptions are 1, so one eviction succeeds and the Deployment creates a replacement that must become Ready.</li>
+<li><strong>Plausible wrong approach:</strong> Stopping at the successful eviction ignores whether capacity returned for clients.</li>
+<li><strong>How to verify:</strong> The record shows the evicted UID, the replacement UID with Ready time and one successful request.</li>
+</ul>
 <h3 id="exercise-5-diagnose-unavailable-replacement-capacity">Exercise 5: Diagnose unavailable replacement capacity<a class="heading-anchor" href="#exercise-5-diagnose-unavailable-replacement-capacity" aria-label="Link to this section">#</a></h3>
 <p>PDBs cannot create spare resources. The appropriate repair depends on the observed constraint and the qualified host environment. Increasing replicas repeatedly without addressing the constraint may only add Pending Pods.</p>
 <p><strong>Expected:</strong> A specific scheduling/storage cause is named without weakening unrelated policy.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the Pending Pod&#x27;s FailedScheduling event and name the single reported condition.</li>
+<li><strong>Why it is correct:</strong> The scheduler states why no node fit, such as insufficient CPU, unmatched affinity or a volume zone conflict.</li>
+<li><strong>Plausible wrong approach:</strong> Lowering the PDB minimum to unblock maintenance does nothing for a Pod that cannot be scheduled.</li>
+<li><strong>How to verify:</strong> One named condition from the event explains the Pending state.</li>
+</ul>
 <h3 id="exercise-6-state-protection-limits-and-restore">Exercise 6: State protection limits and restore<a class="heading-anchor" href="#exercise-6-state-protection-limits-and-restore" aria-label="Link to this section">#</a></h3>
 <p>The final review should explain what the PDB enforced and what redundancy, placement and storage would need to handle separately. Exact owned cleanup and Node restoration remain part of the maintenance contract.</p>
 <p><strong>Expected:</strong> Only the tested voluntary path is claimed; owned Node state is restored.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Limit the claim to voluntary eviction and set spec.unschedulable back to its recorded value.</li>
+<li><strong>Why it is correct:</strong> A PDB only governs the Eviction API, so direct deletion and node failure are outside what was tested.</li>
+<li><strong>Plausible wrong approach:</strong> Saying the budget guarantees one replica always ignores node loss, which no PDB prevents.</li>
+<li><strong>How to verify:</strong> The claim names voluntary eviction only, and the node&#x27;s unschedulable field matches the original.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A blocked eviction is useful evidence of a protected boundary, not an invitation to delete the Pod directly. Record the budget, selected Pod UID, readiness and response reason. A successful eviction is also not enough: replacement readiness and application behavior must satisfy the end-to-end maintenance goal.</p>
 <p>This small kind rehearsal does not establish production high availability, zone failure tolerance or durable storage resilience. Report the specific voluntary maintenance path, finite observations and untested failure modes.</p></article>

@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "What each accessor returns from the starter record",
+      "body": "All rows below use the starter `record` with fields id, values and metadata.\n\n```text\nexpression                       class      result\nrecord[\"values\"]                 list       one-element list named values\nrecord[[\"values\"]]               numeric    2 4\nrecord$values                    numeric    2 4\nrecord[[\"metadata\"]][[\"unit\"]]   character  \"kg\"\nrecord[[\"missing\"]]              NULL       NULL\nrecord$val                       numeric    2 4\nrecord[[\"val\"]]                  NULL       NULL\n```\n\nThe last two rows explain the advice to use `[[` with an exact name. The dollar operator does partial matching on lists, so a truncated name like `val` quietly finds `values`. Double brackets require the full name and return NULL, which a later `is.numeric()` check rejects. A missing field also returns NULL rather than an error, so checking `names(record)` first gives a clearer failure than discovering a NULL several steps later."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Apply single brackets to the list and test the class of the result.",
+      "why": "Single brackets select a sub-list. `record[1]` is a list holding one element named id, not the string \"A\" itself.",
+      "wrong": "Expecting the contained value, as `record[[1]]` would return. Code that then calls `nchar()` or `toupper()` on the result gets a list method or an error instead of text handling.",
+      "verify": "The reference asserts `is.list(record[1])`, and `length(record[1])` returns 1."
+    },
+    {
+      "approach": "Extract in two stages: `record[[\"values\"]]` gives the numeric vector, then `[[1]]` gives its first element.",
+      "why": "The values field holds 2 and 4, so the first number is 2. Each stage has one clear job.",
+      "wrong": "Writing `record[\"values\"][[1]]`. The first step keeps the list wrapper, so `[[1]]` unwraps it and returns the whole vector 2, 4 instead of a single number.",
+      "verify": "The reference check `record[[\"values\"]][[1]] == 2` passes and the result has length 1."
+    },
+    {
+      "approach": "Check that both names exist, then check that id is one character string and values is numeric.",
+      "why": "Testing names first makes a missing field fail with a clear message. The type checks then confirm the starter's id \"A\" is a single string and values 2, 4 are numbers.",
+      "wrong": "Only testing `!is.null(record$id)`. That passes for an id of 7 or of c(\"A\", \"B\"), neither of which identifies one record.",
+      "verify": "On the starter record every check passes; setting `record$id <- 7` makes the stopifnot report `is.character(record$id) is not TRUE`."
+    },
+    {
+      "approach": "Replace the single-bracket argument with `record[[\"values\"]]` so mean receives the numeric vector.",
+      "why": "`record[\"values\"]` is a list containing the vector. mean does not look inside lists, so it cannot average 2 and 4 from it.",
+      "wrong": "Calling `mean(record[\"values\"])`. It returns NA with a warning that the argument is not numeric or logical, and a script that ignores warnings carries the NA forward.",
+      "verify": "`mean(record[[\"values\"]])` returns 3, which the reference asserts."
+    },
+    {
+      "approach": "Assign a list containing NULL through single brackets: `record[\"note\"] <- list(NULL)`.",
+      "why": "Single-bracket replacement sets list elements from the list on the right, so the note element is created and holds NULL. The record now has three fields.",
+      "wrong": "Writing `record$note <- NULL`. Assigning NULL with the dollar or double-bracket form removes a field; here note does not exist yet, so nothing is added at all.",
+      "verify": "`\"note\" %in% names(record)` returns TRUE, `is.null(record$note)` is TRUE, and `length(record)` returns 3."
+    },
+    {
+      "approach": "Keep mixed records as lists and extract each field with its own type; flatten only fields that share one type.",
+      "why": "The id is text and values are numbers. `unlist()` needs a common type, so it converts everything to character, as Example 3 shows.",
+      "wrong": "Flattening and then calling `as.numeric()` to recover the numbers. The id becomes NA with a coercion warning, so one field is destroyed to repair another.",
+      "verify": "The reference asserts `is.character(unlist(record[c(\"id\", \"values\")]))`, and the flattened result has length 3 from two fields."
+    }
+  ]
+}

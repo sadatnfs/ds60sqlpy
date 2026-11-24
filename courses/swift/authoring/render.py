@@ -19,6 +19,7 @@ if str(HERE) not in sys.path:
 
 from answers import ANSWERS  # noqa: E402
 from outcomes import MINUTES, OUTCOMES  # noqa: E402
+from reasoning import REASONING  # noqa: E402
 
 TASK_NAMES = (
     "Predict and explain",
@@ -115,10 +116,6 @@ def code_answers(number):
     )
 
 
-def first_sentence(text):
-    return text.split(". ")[0].rstrip(".") + "."
-
-
 def answer_text(number, task, spec, identity):
     """The explanation for one task: its reference answer or an honest pointer."""
     answer = ANSWERS.get(number, {}).get(task)
@@ -137,8 +134,34 @@ def answer_text(number, task, spec, identity):
         3: f"No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **{spec['terms'][0][0]}** and the lesson notes.",
         4: f"No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: {spec['pitfalls']}",
         5: f"No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A ({a[0]}) and Example B ({b[0]}).",
-        6: f"No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **{spec['terms'][0][0]}**, and state one limitation of your choice.",
+        6: f"No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above ({spec['tasks'][2].rstrip('.')}) and the mechanism described below, and state one limitation of your choice.",
     }[task]
+
+
+REASONING_PARTS = (
+    ("approach", "Approach"),
+    ("correct", "Why it is correct"),
+    ("wrong", "A plausible wrong approach"),
+    ("verify", "How to verify"),
+)
+
+
+def reasoning_text(number, identity):
+    """The four-part solution reasoning for one lesson, validated before rendering."""
+    entry = REASONING.get(number)
+    if entry is None or set(entry) != {key for key, _ in REASONING_PARTS}:
+        raise ValueError(
+            f"{identity} needs reasoning with exactly {[k for k, _ in REASONING_PARTS]}"
+        )
+    for key, _ in REASONING_PARTS:
+        text = " ".join(entry[key].split())
+        if len(text.split()) < 20:
+            raise ValueError(f"{identity} reasoning '{key}' needs at least 20 words")
+        if "\u2014" in text or "\u2013" in text:
+            raise ValueError(f"{identity} reasoning '{key}' contains an em or en dash")
+    return "\n\n".join(
+        f"**{label}.** {' '.join(entry[key].split())}" for key, label in REASONING_PARTS
+    )
 
 
 def write(path, value):
@@ -217,6 +240,10 @@ def build():
             f"{i}. **{name}.** {task}"
             for i, (name, task) in enumerate(zip(TASK_NAMES, spec["tasks"], strict=True), 1)
         )
+        hint3 = (
+            f"Before opening the explanation, check your task 3 attempt ({spec['tasks'][2].rstrip('.')}) "
+            "against each pitfall listed above, and add one input that would expose the tempting wrong rule."
+        )
         task_answers = "\n\n".join(
             f"### Task {i}: {name}\n\n{task}\n\n{answer_text(number, i, spec, identity)}"
             for i, (name, task) in enumerate(zip(TASK_NAMES, spec["tasks"], strict=True), 1)
@@ -287,7 +314,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A ({spec["a"][0]}) before changing anything, and confirm its observation: {spec["a"][2]}
 2. Compare Example B ({spec["b"][0]}) with Example A and name the first line whose behavior differs. Its observation is: {spec["b"][2]}
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: {first_sentence(spec["pitfalls"])}
+3. {hint3}
 
 ## Self-check and next step
 
@@ -334,6 +361,10 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 ## Task answers
 
 {task_answers}
+
+## Solution reasoning
+
+{reasoning_text(number, identity)}
 
 ## Mechanism and diagnostic reasoning
 

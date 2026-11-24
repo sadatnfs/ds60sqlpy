@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-008`.
 
 Python web frameworks sit behind application interfaces. WSGI describes a synchronous HTTP application boundary. ASGI supports asynchronous event-oriented application interactions, including HTTP and WebSockets. This chapter observes each interface through its real framework client and explains what an `async def` handler actually changes.
 
+## Key terms
+
+- **WSGI:** A synchronous Python interface in which the server passes an environment dictionary and a `start_response` callback, then consumes the response iterable.
+- **ASGI:** An asynchronous Python interface in which the server passes a connection scope plus awaitable receive and send callables, supporting HTTP and WebSockets.
+- **ASGI scope:** The dictionary that identifies an interaction's type, such as `http`, and its connection metadata such as method and path.
+- **Server boundary:** The division between a server such as Uvicorn, which owns network connections, and the application callable, which implements request behavior.
+- **Event loop:** The asyncio scheduler that runs coroutines and switches between them only at `await` points that yield control.
+
 ## Mechanism: an interface is a contract between components
 
 A WSGI server supplies an environment dictionary and a response-start callback, then consumes the application's response iterable. Flask exposes that interface. Values such as request method and path are represented in the environment, including the WSGI version tuple.
@@ -25,6 +33,61 @@ This observation helps locate responsibility. A route sees the application-level
 The FastAPI endpoint is asynchronous. It awaits a zero-delay scheduling point and returns the scope type from a real Request object. The TestClient drives the ASGI application and obtains `http` as the scope type. The complete program checks both interface outputs and then exits.
 
 The zero-delay await is a mechanism demonstration. It is not a performance benchmark or evidence that this application serves more users than the Flask example. There is no actual TCP connection, TLS handshake or process pool in either case. A fair deployment comparison would require comparable workloads, resource limits and measured server behavior.
+
+## Worked example: calling WSGI and ASGI applications by hand
+
+```python
+import asyncio
+
+
+def wsgi_app(environ, start_response):
+    start_response("200 OK", [("Content-Type", "text/plain")])
+    return [("WSGI " + environ["PATH_INFO"]).encode()]
+
+
+async def asgi_app(scope, receive, send):
+    await send(
+        {
+            "type": "http.response.start",
+            "status": 200,
+            "headers": [(b"content-type", b"text/plain")],
+        }
+    )
+    await send({"type": "http.response.body", "body": ("ASGI " + scope["path"]).encode()})
+
+
+def start_response(status, headers):
+    print("wsgi status:", status)
+
+
+print(b"".join(wsgi_app({"PATH_INFO": "/interface"}, start_response)))
+
+
+async def main():
+    messages = []
+
+    async def receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
+    async def send(message):
+        messages.append(message)
+
+    await asgi_app({"type": "http", "path": "/interface"}, receive, send)
+    print([m["type"] for m in messages], messages[1]["body"])
+
+
+asyncio.run(main())
+```
+
+Expected output:
+
+```text
+wsgi status: 200 OK
+b'WSGI /interface'
+['http.response.start', 'http.response.body'] b'ASGI /interface'
+```
+
+Here the server role is played by a few lines of Python. The WSGI application is an ordinary function: the caller passes an `environ` dictionary and a `start_response` callback, and the body comes back as an iterable of bytes when the function returns. The ASGI application is a coroutine that receives a `scope` and two awaitables, then reports its response as a sequence of messages, first the status and headers, then the body. That message stream is what lets ASGI carry WebSockets and long-lived streams that a single WSGI return value cannot express. Flask's test client builds the `environ` for you and FastAPI's client sends these ASGI messages, which is why the lesson can observe `wsgi.version` and `scope["type"]` without any socket. If the ASGI app forgot the `http.response.start` message, a real server would raise an error instead of sending a body.
 
 ## Failure diagnosis
 

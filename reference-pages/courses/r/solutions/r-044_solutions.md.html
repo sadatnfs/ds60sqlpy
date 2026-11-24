@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Fit the two-group binomial model and reconstruct probabilities from the link scale.</p>
 <p>The fitted probabilities are 0.2 and 0.6; inverse-link predictions agree with response predictions.</p>
 <p><strong>Expected evidence:</strong> Two matching probability paths.</p>
+<p><strong>Approach:</strong> Fit glm with cbind(successes, failures) on the left, take the link scale predictions and apply plogis.</p>
+<p><strong>Why it holds here:</strong> The groups have 2 of 10 and 6 of 10 successes, so the fitted probabilities are 0.2 and 0.6 and the log odds are log(0.25), about -1.39, and log(1.5), about 0.41. plogis inverts the logit, so both routes give the same two numbers.</p>
+<p><strong>Tempting mistake:</strong> Applying exp to the link scale. That returns the odds 0.25 and 1.5, and 1.5 cannot be a probability, so the mix up is visible at x = 1.</p>
+<p><strong>Verify:</strong> <code>max(abs(plogis(predict(fit, type = &quot;link&quot;)) - p))</code> returns a value below 1e-10.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Interpret the x coefficient as an odds ratio.</p>
 <p>Odds are 0.25 and 1.5, so their ratio is 6. The probability ratio is 3, a different quantity.</p>
 <p><strong>Expected evidence:</strong> Odds ratio 6, probability ratio 3.</p>
+<p><strong>Approach:</strong> Convert each probability to odds, p / (1 - p), and divide the x = 1 odds by the x = 0 odds.</p>
+<p><strong>Why it holds here:</strong> The odds are 0.2/0.8 = 0.25 and 0.6/0.4 = 1.5, so the ratio is 6, which equals exp of the x coefficient log(6), about 1.79. The probability ratio is 0.6/0.2 = 3.</p>
+<p><strong>Tempting mistake:</strong> Saying x = 1 makes success six times as likely. Success becomes three times as likely; six is the change in the odds, and the two diverge because 0.6 is far from 0.</p>
+<p><strong>Verify:</strong> <code>odds[2] / odds[1]</code> returns 6 and <code>p[2] / p[1]</code> returns 3, both within 1e-7.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Calculate the trial-weighted Brier score.</p>
 <p>Successes contribute (1-p)^2 and failures p^2; their sum over 20 trials gives 0.2.</p>
 <p><strong>Expected evidence:</strong> Brier 0.2.</p>
+<p><strong>Approach:</strong> Score each trial separately: a success adds (1 - p)^2, a failure adds p^2, and the sum is divided by the 20 trials.</p>
+<p><strong>Why it holds here:</strong> At x = 0 the 2 successes add 2 times 0.64 = 1.28 and the 8 failures add 8 times 0.04 = 0.32. At x = 1 the 6 successes add 6 times 0.16 = 0.96 and the 4 failures add 4 times 0.36 = 1.44. The total is 4, and 4/20 = 0.2.</p>
+<p><strong>Tempting mistake:</strong> Squaring the gap between each fitted probability and its group rate. Both gaps are 0 because the fit reproduces 0.2 and 0.6, so that score hides the outcome variation that the Brier score measures.</p>
+<p><strong>Verify:</strong> <code>n == 20</code> returns TRUE and <code>abs(brier - 0.2) &lt; 1e-10</code> returns TRUE.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose treating the proportions 0.2 and 0.6 as two equally weighted binary observations.</p>
 <p>The aggregation represents 20 Bernoulli trials. Losing the denominators changes the likelihood and uncertainty interpretation.</p>
 <p><strong>Expected evidence:</strong> Trial count 20 retained.</p>
+<p><strong>Approach:</strong> Keep each group&#x27;s 10 trials in the response through the two column form or through prior weights.</p>
+<p><strong>Why it holds here:</strong> Each row summarizes 10 Bernoulli trials, so the likelihood counts 20 outcomes. With 2 parameters for 2 groups the point estimates match the rates either way, but the standard errors depend on the trial count.</p>
+<p><strong>Tempting mistake:</strong> Fitting the proportions as one trial each, such as <code>glm(rate ~ x, family = binomial())</code> without weights. R warns about non-integer successes, the coefficients stay at log(0.25) and log(6), and the standard errors grow by <code>sqrt(10)</code>, about 3.16.</p>
+<p><strong>Verify:</strong> <code>sum(d$successes + d$failures)</code> returns 20.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Recognize complete separation for x=c(-2,-1,1,2) and y=c(0,0,1,1).</p>
 <p>A threshold at zero separates all outcomes. An unpenalized logistic fit can lack a finite optimum; a numerical convergence flag alone is insufficient.</p>
 <p><strong>Expected evidence:</strong> Separation identified without inventing finite coefficient evidence.</p>
+<p><strong>Approach:</strong> Before fitting, check whether a cut on x separates the outcomes completely.</p>
+<p><strong>Why it holds here:</strong> In x = -2, -1, 1, 2 with y = 0, 0, 1, 1, every 0 sits below zero and every 1 above it. A steeper logistic curve always fits these four points better, so the likelihood has no finite maximum.</p>
+<p><strong>Tempting mistake:</strong> Running glm anyway and reporting the large slope and its huge standard error as an estimate. R warns that fitted probabilities are numerically 0 or 1, and a converged flag can still be TRUE, so the flag says nothing about a finite optimum.</p>
+<p><strong>Verify:</strong> <code>all(x_sep[y_sep == 0] &lt; 0)</code> and <code>all(x_sep[y_sep == 1] &gt; 0)</code> both return TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Assess held-out group outcomes 1/10 and 8/10 under predictions 0.2 and 0.6.</p>
-<p>The frequency gaps are-0.1 and 0.2. Their weighted absolute gap is 0.15 for equal counts; uncertainty and binning choices remain relevant.</p>
+<p>The observed-minus-predicted gaps are -0.1 and 0.2. Their weighted absolute gap is 0.15 for equal counts; uncertainty and binning choices remain relevant.</p>
 <p><strong>Expected evidence:</strong> Held-out gaps and denominator reported.</p>
+<p><strong>Approach:</strong> Subtract the training predictions from the new rates, 1/10 and 8/10, and report the absolute gaps with their 10 trial counts.</p>
+<p><strong>Why it holds here:</strong> 0.1 - 0.2 = -0.1 and 0.8 - 0.6 = 0.2. With equal group sizes the mean absolute gap is 0.15, and 10 outcomes per group are few enough that a gap of 0.1 or 0.2 is weak evidence.</p>
+<p><strong>Tempting mistake:</strong> Comparing the predictions with the training rates 0.2 and 0.6, which shows zero gaps because the model fit those rates. Averaging the signed gaps is a second error: -0.1 and 0.2 average to 0.05, which hides that one group is overpredicted and the other underpredicted.</p>
+<p><strong>Verify:</strong> The largest gap between <code>gaps</code> and c(-0.1, 0.2) returns a value below 1e-8, and <code>mean(abs(gaps))</code> returns 0.15.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

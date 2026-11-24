@@ -1,6 +1,6 @@
 "Stage ten: storage/security boundaries and three integrated reference capstones."
 
-from .common import BASE, lesson
+from .common import BASE, explain, lesson
 from .common import result as r
 from .common import task as t
 
@@ -1151,3 +1151,513 @@ LESSONS[4]["extra"] = (
     "procedure. DAX can\nreconcile the unit-level data without "
     "substituting for that statistical design.\n"
 )
+
+
+REASONING = {
+    55: [
+        (
+            (
+                "Two modes can only be compared when they read the same population at the same "
+                "observation time. Case A matches at 187 because the data and definition are "
+                "fixed."
+            ),
+            (
+                "Comparing yesterday's Import snapshot with a DirectQuery result taken now and "
+                "calling case B's 10 USD gap (187 against 197) a formula difference."
+            ),
+            (
+                "Record source version, snapshot time, filters and role for both runs; with those "
+                "equal, NetRevenue should agree, as case A's 187 and 187 do."
+            ),
+        ),
+        (
+            (
+                "A correction replaces a value in an existing line instead of adding a new one. "
+                "The change is whatever the corrected line differs by."
+            ),
+            (
+                "Assuming every source change adds an amount, so the later total must be 197. If "
+                "S8 were corrected from 36 to 30, the total would fall."
+            ),
+            (
+                "Recompute from the corrected source: 187 - 36 + 30 = 181 for that illustrative "
+                "correction, not 197."
+            ),
+        ),
+        (
+            (
+                "Capability depends on each object and the relationship it uses, so the review "
+                "lists every measure, calculated column and RLS rule in the model."
+            ),
+            (
+                "Checking only that NetRevenue (a plain SUM) works and assuming GrossRevenue's "
+                "row-level SUMX, the cost lookup through RELATED and the region role all behave "
+                "the same."
+            ),
+            (
+                "For each object, record the target mode, relationship type, documented support "
+                "and an observed test result, and mark anything untested as open."
+            ),
+        ),
+        (
+            (
+                "Freshness is a requirement with a number attached, such as visible within 15 "
+                "minutes. A storage mode is one input to meeting it."
+            ),
+            (
+                "Treating the DirectQuery number, such as case B's 197, as live truth while result "
+                "caches, source replication lag or uncommitted transactions are still possible."
+            ),
+            (
+                "State the freshness target, insert a known test event like the 10 USD line, and "
+                "time when it appears in the report."
+            ),
+        ),
+        (
+            (
+                "The lesson's numbers, 187 and 197, come from checked-in fixtures and stated "
+                "assumptions, so the reasoning can be done offline."
+            ),
+            (
+                'Provisioning a trial capacity to "verify" 187. A live Direct Lake model adds '
+                "account, permission and data questions that this lesson does not need to answer."
+            ),
+            (
+                "Reproduce 187 from the fixture query; treat any live Direct Lake configuration as "
+                "a separately authorized task with its own evidence."
+            ),
+        ),
+        (
+            (
+                "A cached feature table is a snapshot, like the stored model in case B. Its total "
+                "reflects the version it was built from."
+            ),
+            (
+                "Blaming a transformation step when the feature table and source differ, when the "
+                "cache was simply built before the late event."
+            ),
+            (
+                "Store build time and source version with the feature table; a gap that equals the "
+                "late events, here exactly 10 USD, points to freshness."
+            ),
+        ),
+    ],
+    56: [
+        (
+            (
+                "Case A has no role, so the North filter is the only restriction. Without it, "
+                "every sales line is visible."
+            ),
+            (
+                "Assuming that because users normally see North, North is the unfiltered total. A "
+                "report filter is a default view, not a limit."
+            ),
+            (
+                'EVALUATE ROW("Total", [NetRevenue]) with no filters returns 187, and '
+                "REMOVEFILTERS(Customer) under North also returns 187."
+            ),
+        ),
+        (
+            (
+                "SouthViewer allows only Bo (customer 20), whose lines are S3 (40), S6 (20) and S7 "
+                "(20). RLS filters the rows before any measure runs."
+            ),
+            (
+                "Expecting REMOVEFILTERS(Customer) to return 187 as in case A. It removes filter "
+                "context, not the role."
+            ),
+            (
+                "Under an enforced SouthViewer role, VisibleRevenue and "
+                "AfterRemovingCustomerFilters both return 80."
+            ),
+        ),
+        (
+            (
+                "An acceptance record proves who ran what, under which role, and that disallowed "
+                "rows stayed hidden."
+            ),
+            (
+                'Recording only "North shows 107". That does not show whether a South user is '
+                "blocked from Ada's 51 and Cy's 56."
+            ),
+            (
+                "Each row lists identity, role, model version, query, expected rows and observed "
+                "value, including denial cases: North 107, South 80, together 187."
+            ),
+        ),
+        (
+            (
+                "Workspace Admin, Member and Contributor roles are not restricted by RLS the way a "
+                "Viewer is, so they see every row."
+            ),
+            (
+                "Signing off NorthViewer after an administrator saw 187 or applied a filter that "
+                "returned 107. Neither result came from the role."
+            ),
+            (
+                "Test with a Viewer identity assigned to NorthViewer and expect 107, including "
+                "after REMOVEFILTERS(Customer)."
+            ),
+        ),
+        (
+            (
+                "Hiding a South page only changes navigation. The model still answers any query "
+                "the user's permissions allow."
+            ),
+            (
+                "Considering South hidden because the page is gone, while the user can build a new "
+                "query and read Bo's 80."
+            ),
+            (
+                "As the restricted user, run a query with REMOVEFILTERS(Customer); an enforced "
+                "role returns 107, an unenforced one returns 187."
+            ),
+        ),
+        (
+            (
+                "A SQL dashboard's WHERE region = 'North' plays the same role as case A's ordinary "
+                "filter: any other query can omit it."
+            ),
+            (
+                "Writing the predicate into every dashboard query and treating that as access "
+                "control."
+            ),
+            (
+                "Connect as the restricted database login and run SELECT SUM(net) with no WHERE "
+                "clause; enforced row security returns 107 instead of 187."
+            ),
+        ),
+    ],
+    57: [
+        (
+            (
+                "The Access table maps south.learner@example.test to South, and only Bo (customer "
+                "20) is in South."
+            ),
+            (
+                "Comparing USERNAME() (often DOMAIN\\user) with the email-style Principal column. "
+                "Nothing matches, so a mapped user sees nothing."
+            ),
+            "As the south principal, VisibleCustomers returns 1 and VisibleRevenue returns 80.",
+        ),
+        (
+            (
+                "Di (customer 40, West) has no sales, so permission to see her changes the "
+                "customer count but not revenue."
+            ),
+            (
+                "Treating unchanged revenue as proof that adding West failed, or expecting revenue "
+                "to rise because the mapping grew."
+            ),
+            (
+                "For the north principal with North and West, VisibleCustomers goes from 2 to 3 "
+                "and VisibleRevenue stays 107."
+            ),
+        ),
+        (
+            (
+                "A default-deny matrix lists mapped, unmapped and invalid-domain principals with "
+                "their expected rows."
+            ),
+            (
+                "Testing only north.learner, which returns 2 customers and 107, and assuming "
+                "unmapped and bad-value cases behave."
+            ),
+            (
+                "Rows: north 2 and 107, south 1 and 80, unmapped empty (HasVisibleRows False), and "
+                'a principal mapped to "East", a region not in Customer, also empty.'
+            ),
+        ),
+        (
+            (
+                "The declared rule filters Customer to regions the principal maps to. An empty "
+                "mapping gives an empty set, which is a denial."
+            ),
+            (
+                "Adding a fallback such as returning TRUE() when the mapping is empty. The "
+                "unmapped principal would then see all 4 customers and 187."
+            ),
+            (
+                "As unmapped.learner@example.test, VisibleCustomers and VisibleRevenue are BLANK "
+                "and HasVisibleRows is False, as in case B."
+            ),
+        ),
+        (
+            (
+                "The rule filters Customer, but Access is a separate table. Without its own rule "
+                "or hiding it, any reader can query it."
+            ),
+            (
+                "Concluding that the model is protected because the north principal sees 107, "
+                "while COUNTROWS(Access) still returns 2 and shows the south mapping."
+            ),
+            (
+                "As north.learner, query the Access table; the policy should decide whether 2, 1 "
+                "or no rows are acceptable, and test that result."
+            ),
+        ),
+        (
+            (
+                "Tenant access follows the same contract: authenticated identity, an explicit "
+                "mapping to tenant keys, and denial when nothing maps."
+            ),
+            (
+                "Taking the tenant ID from a URL parameter or slicer, so a user can change one "
+                "value and read another tenant."
+            ),
+            (
+                "Test a mapped user, an unmapped user (no rows) and a user who edits the tenant "
+                "parameter; only the mapped tenant's rows may appear."
+            ),
+        ),
+    ],
+    58: [
+        (
+            (
+                "Each refund is attributed through its SaleID, so it lands in the year of its "
+                "sale: R1 (4) on S2 in 2024 and R2 (9) on S4 in 2025."
+            ),
+            (
+                "Including the 270 USD of foreign sales in the yearly totals. They are a separate "
+                "population with their own currency rules."
+            ),
+            (
+                "2024 gives 64 - 4 = 60 and 2025 gives 123 - 9 = 114; they add to 174, matching "
+                "case A."
+            ),
+        ),
+        (
+            (
+                "Returns has ReturnID, SaleID and Refund. It has no date, so a refund-event month "
+                "cannot be derived."
+            ),
+            (
+                "Reporting refunds by the original order month without saying so. R2 would appear "
+                "in January 2025 because S4 was ordered then, whenever the refund happened."
+            ),
+            (
+                "Check the Returns columns (ReturnID, SaleID, Refund). Until a ReturnDate is added "
+                "with its own relationship, label any monthly refund view by sale date."
+            ),
+        ),
+        (
+            (
+                "The specification states the grain, keys, currency and date role of each input so "
+                "that core 187, refunds 13, adjusted core 174 and foreign 270 can be rebuilt."
+            ),
+            (
+                'Publishing one "revenue" figure of 444 (174 + 270) that mixes adjusted core '
+                "sales with converted foreign sales."
+            ),
+            (
+                "The spec lists the regression rows: case A (core 187, refunds 13, adjusted 174, "
+                "foreign 270) and case B (core 123, refunds 9, adjusted 114, budget 165, "
+                "variance -51)."
+            ),
+        ),
+        (
+            "NetAmount is already net of line discounts: 195 gross minus 8 discount is 187.",
+            (
+                "Subtracting Discount again gives 179, and 166 after refunds, understating "
+                "adjusted core revenue by 8."
+            ),
+            (
+                "SUMX of Quantity x UnitPrice returns 195, SUM of Discount returns 8, and "
+                "NetRevenue returns 187 before the 13 in refunds."
+            ),
+        ),
+        (
+            (
+                "174 is revenue after refunds. Profit needs costs and a policy for what happens to "
+                "returned goods."
+            ),
+            (
+                "Calling 174 profit. Even the simple product cost here is 44 for all lines, and "
+                "the returned Pen (S2) and Notebook (S4) need a cost treatment."
+            ),
+            (
+                "List the missing inputs: cost of goods (44 before returns), returned-unit policy, "
+                "tax and other expenses."
+            ),
+        ),
+        (
+            (
+                "Each acceptance gate needs its own evidence: model loading, measures in context, "
+                "data quality, security, refresh and performance."
+            ),
+            (
+                "Treating the offline reference rows as deployment approval because they match the "
+                "expected values."
+            ),
+            (
+                "In the target engine, run cases A and B and expect the spec's regression rows "
+                "(case A from core 187 to foreign 270, case B from core 123 to variance -51); "
+                "then add role, missing-rate and refresh tests."
+            ),
+        ),
+    ],
+    59: [
+        (
+            (
+                "Assignments define the denominator. Exposure events can repeat, so a new U3 event "
+                "adds an event and nothing else."
+            ),
+            (
+                "Using COUNTROWS(Exposures) as the denominator. With 3 events, Treatment's rate "
+                "would become 2 / 3 instead of 1."
+            ),
+            (
+                "Treatment shows Assigned 2, Converted 2, ExposedUnits 1, ExposureEvents 3 and "
+                "AssignedUnitRate 1."
+            ),
+        ),
+        (
+            (
+                "The intention-to-treat estimand counts every assigned unit. U4 was assigned to "
+                "Treatment and converted, whether or not an exposure was recorded."
+            ),
+            (
+                "Dropping U4 because it has no exposure. Treatment's rate stays 1 (1 / 1), which "
+                "hides that the denominator went from 2 to 1."
+            ),
+            (
+                "Keep Treatment at 2 assigned and 2 converted; label any exposure-based analysis "
+                "separately with its own design."
+            ),
+        ),
+        (
+            (
+                "Before reading Treatment 1 and Control 0.5, check that each unit has one "
+                "assignment, one outcome and clean events."
+            ),
+            (
+                "Checking only the rate column. That misses that U3 has two exposure events and U4 "
+                "has none."
+            ),
+            (
+                "COUNTROWS(Assignments) = DISTINCTCOUNT(Assignments[UnitID]) = 4, 4 outcome rows, "
+                "exposure events per unit (U3 has 2), and the provenance of the Wilson summary."
+            ),
+        ),
+        (
+            "With n = 2, an observed rate of 1 is consistent with much lower true rates.",
+            (
+                'Reporting "100 percent conversion" as certain. The supplied interval says '
+                "otherwise."
+            ),
+            (
+                "Report Treatment as 1 with a Wilson interval of about 0.342 to 1, and Control as "
+                "0.5 with about 0.095 to 0.905."
+            ),
+        ),
+        (
+            (
+                "The question is about the difference between arms, which has its own sampling "
+                "distribution."
+            ),
+            (
+                'Reading the overlap of 0.095 to 0.905 and 0.342 to 1 as "no effect", or a lack '
+                "of overlap as significance."
+            ),
+            (
+                "Compute an interval for the 0.5 difference with a stated method; with two units "
+                "per arm it will be wide."
+            ),
+        ),
+        (
+            (
+                "Cohorts need the same care: members come from CohortMember, and follow-up depends "
+                "on how long the cohort has been observed."
+            ),
+            (
+                "Scoring the 202502 cohort's month-one retention as 0 of 2. March 2025 is after "
+                "the February 28 observation end."
+            ),
+            (
+                "Month zero: 202501 is 2 of 2 (A1, A3) and 202502 is 1 of 2 (A4). Month one: "
+                "202501 is 1 of 2 (A2), and 202502 is unobserved."
+            ),
+        ),
+    ],
+    60: [
+        (
+            (
+                "NorthViewer allows Ada and Cy and SouthViewer allows Bo. Di (West) has no sales, "
+                "so the two roles cover every sales line once."
+            ),
+            (
+                "Adding role rows as a reconciliation where principals can map to overlapping "
+                "regions; overlap would count lines twice."
+            ),
+            "Cost 25 + 19 = 44 and revenue 107 + 80 = 187, matching the unrestricted results.",
+        ),
+        (
+            (
+                "The declared policy denies unmapped principals, so every measure sees empty "
+                "Customer and Sales tables."
+            ),
+            "Expecting zeros, or the unrestricted 187, for an unmapped principal.",
+            (
+                "The expected row is Revenue, LineCost, GroupedCost and AfterCustomerFilterRemoval "
+                "all BLANK, with a note that a real role test is still required."
+            ),
+        ),
+        (
+            (
+                "The packet ties formula, assumptions and expected results together so another "
+                "reviewer can check each claim."
+            ),
+            (
+                'A packet with only the new formula and the word "faster", which does not show '
+                "what must stay equal."
+            ),
+            (
+                "Include unrestricted 44 and 44, North 25 and 25, South 19 and 19, unmapped BLANK, "
+                "the one-cost-per-product assumption, and the checks not yet run."
+            ),
+        ),
+        (
+            (
+                "Matching text proves the source is the one reviewed. It says nothing about how an "
+                "engine loads or secures it."
+            ),
+            ("Approving the release because the exported DAX is byte-identical to the reference."),
+            (
+                "In the target service, run the role rows: NorthViewer revenue 107, line and "
+                "grouped cost 25 each, 107 after customer filter removal; SouthViewer revenue 80, "
+                "costs 19 each, 80 after removal."
+            ),
+        ),
+        (
+            (
+                "Customer to GroupMembership is single-direction, so an Audience filter does not "
+                "reach Sales today. Making it bidirectional lets it."
+            ),
+            (
+                "Assuming the measures still return what they did. Under NorthViewer, a visual by "
+                "Audience currently repeats 107 for each audience; after the change Newsletter "
+                "(Ada, Bo) shows 51 and Prospects (Bo, Cy) shows 56."
+            ),
+            (
+                "Rerun the full matrix after the change, including role rows and audience "
+                "breakdowns (unrestricted Newsletter 131 and Prospects 136)."
+            ),
+        ),
+        (
+            (
+                "One new requirement with its own evidence is a bounded extension. Return-event "
+                "dates fill the gap from the commercial capstone."
+            ),
+            (
+                "Adding a live platform deployment as the next step, which increases scope without "
+                "answering a new business question."
+            ),
+            (
+                "Add ReturnDate to R1 and R2 with a stated date role, then check that refunds "
+                "still total 13 and adjusted revenue 174 across refund months."
+            ),
+        ),
+    ],
+}
+
+explain(LESSONS, REASONING)

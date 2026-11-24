@@ -14,6 +14,14 @@ PyTorch state dictionaries and TensorFlow checkpoints track state differently; b
 
 
 
+### Key terms
+
+- **Training checkpoint:** Saved state sufficient to resume training identically, which includes much more than model weights.
+- **Optimizer moments:** Per-parameter running averages stored by optimizers such as Adam that must be restored with the weights.
+- **RNG state:** Saved generator states for each library and device that make dropout and shuffling continue the same sequence.
+- **Sampler position:** The epoch and index in the data order, which prevents repeating or skipping batches after resume.
+- **Update boundary:** A point between complete optimizer steps where state is consistent and safe to save.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,6 +49,17 @@ print("CPU restart model:", continued, weights_only)
 
 **Expected observation:** Correct restored update 0.935 differs from weights-only 0.98.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `w` | `1.0` |
+| `v` | `0.5` |
+| `checkpoint` | `{'w': 1.0, 'v': 0.5, 'next_batch': 3}` |
+| `grad` | `0.2` |
+| `continued` | `0.935` |
+| `weights_only` | `0.98` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -65,27 +84,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: List checkpoint fields
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **list checkpoint fields** in the examples above.
+**Trap to avoid:** Saving only `model.state_dict()` because that is what inference needs leaves out optimizer and sampler state, which training needs.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Compute momentum continuation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **compute momentum continuation** in the examples above.
+**Trap to avoid:** Recomputing velocity from the current gradient alone, `v = g`, gives `1.0 - 0.1*0.2 = 0.98`, the weights-only value, which ignores accumulated history.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Diagnose weights-only restart
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **diagnose weights-only restart** in the examples above.
+**Trap to avoid:** Treating the difference as random noise from reloading misses that it is deterministic: the same restart always produces the same wrong value.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Record sampler position
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **record sampler position** in the examples above.
+**Trap to avoid:** Restarting the epoch from the beginning replays batches 1 and 2, which double counts them, while skipping to a new shuffle may omit batch 3 entirely.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose a safe save boundary
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **choose a safe save boundary** in the examples above.
+**Trap to avoid:** Saving from a signal handler at an arbitrary moment can capture a half-updated state.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Define cross-hardware tolerance
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **define cross-hardware tolerance** in the examples above.
+**Trap to avoid:** Requiring byte-identical weights across hardware leads to false failures that obscure real restart bugs.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

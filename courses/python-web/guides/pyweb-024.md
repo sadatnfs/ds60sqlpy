@@ -6,6 +6,13 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-023`, `python-s
 
 Many web handlers call another service. That introduces latency, failures and a second response contract. This chapter uses a real HTTPX2 client with MockTransport to exercise the application's translation of success, a read timeout and an upstream error. No remote service is contacted.
 
+## Key terms
+
+- **Upstream service:** Another service that a handler calls while building its own response, adding latency, failures and a second response contract.
+- **Read timeout:** A limit on how long the client waits for response data before raising a timeout exception instead of hanging.
+- **MockTransport:** An HTTPX2 transport that answers requests by calling a Python handler instead of performing network I/O.
+- **Error translation:** Mapping upstream failures to distinct local responses, here 504 Gateway Timeout for a timeout and 502 Bad Gateway for an upstream error.
+
 ## Mechanism: a bounded client is an owned resource
 
 The HTTP client has an explicit base URL, timeout and transport. The endpoint accepts only three fixture case names, so it cannot become an arbitrary URL-fetching proxy. It performs the configured request, checks the upstream status and returns a controlled local response.
@@ -27,6 +34,46 @@ The slow fixture raises a ReadTimeout immediately. The endpoint translates it to
 The timeout is simulated as an exception, so the test proves translation rather than actual timer enforcement. This distinction is useful when diagnosing failures: a deterministic test can validate the application's policy, while a real service test validates the network/runtime path that triggers it.
 
 Retries must follow the upstream operation's semantics. A failed read can be different from a timed-out creation that may already have committed. The existing reliable-HTTP Python lesson and the later idempotency chapter provide the deeper retry contract; this endpoint does not silently retry every operation.
+
+## Worked example: separate connect and read timeouts
+
+```python
+import httpx2
+
+
+def transport(request):
+    if request.url.path == "/refused":
+        raise httpx2.ConnectTimeout("fixture connect timeout", request=request)
+    if request.url.path == "/stalled":
+        raise httpx2.ReadTimeout("fixture read timeout", request=request)
+    return httpx2.Response(429, headers={"Retry-After": "3"})
+
+
+timeout = httpx2.Timeout(5.0, connect=1.0)
+print(timeout.connect, timeout.read, timeout.pool)
+with httpx2.Client(
+    transport=httpx2.MockTransport(transport), timeout=timeout, base_url="https://upstream.example"
+) as client:
+    for path in ("/refused", "/stalled", "/busy"):
+        try:
+            response = client.get(path)
+            response.raise_for_status()
+        except httpx2.TimeoutException as error:
+            print(path, type(error).__name__, isinstance(error, httpx2.TransportError))
+        except httpx2.HTTPStatusError as error:
+            print(path, error.response.status_code, error.response.headers["Retry-After"])
+```
+
+Expected output:
+
+```text
+1.0 5.0 5.0
+/refused ConnectTimeout True
+/stalled ReadTimeout True
+/busy 429 3
+```
+
+`Timeout(5.0, connect=1.0)` keeps the 5 second default for reading, writing and waiting for a pooled connection but fails fast when the upstream host does not accept a connection within 1 second. Both timeout classes share the `TimeoutException` base, so the lesson's single `except` maps them to 504, yet they mean different things: a connect timeout means the request never reached the upstream and is safe to retry, while a read timeout may follow a request the upstream already processed. The 429 response did not raise until `raise_for_status`, and its `Retry-After` value of 3 is information the lesson's generic 502 discards. A proxy that should honor backpressure could return 503 with that header instead.
 
 ## Failure diagnosis
 

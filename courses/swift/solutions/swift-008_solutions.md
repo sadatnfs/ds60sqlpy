@@ -14,13 +14,23 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Explain each argument label and local parameter name.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: Readable call sites reduce accidental parameter swaps and reveal the function purpose. Labels show which dimension each argument supplies.
+**Written answer.** In `area(width: Int, height: Int)` each parameter has one name, so `width` and `height` serve both as the argument labels at the call site and as the local names inside the body. In `increment(_ value: inout Int)` the underscore removes the label, so callers write `increment(&count)`, while the body still refers to the parameter as `value`. Labels describe the role of an argument to the caller; parameter names are what the implementation reads.
 
 ### Task 2: Guided modification
 
 Add a depth label for a volume function.
 
-No separate reference answer has been written for this task. Start from Example B: The ampersand makes the mutation boundary visible instead of hiding it behind a normal-looking value call. The caller explicitly grants mutation and observes 5.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+func volume(width: Int, height: Int, depth: Int) -> Int { width * height * depth }
+precondition(volume(width: 2, height: 3, depth: 4) == 24)
+precondition(volume(width: 2, height: 3, depth: 0) == 0)
+```
+
+**Observe:** A 2 by 3 by 4 box has volume 24, and depth 0 gives 0.
+
+The depth label makes the third dimension readable at the call site, so a caller cannot silently confuse it with width or height.
 
 ### Task 3: Independent construction
 
@@ -45,19 +55,43 @@ The function takes its argument by value and returns a new result, so it cannot 
 
 Diagnose an inout call missing the ampersand and explain the compiler rule.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Labels are part of API usability. Inout access cannot overlap conflicting access to the same storage. Do not use mutation merely to avoid returning a small value.
+**Written answer.** Calling `increment(count)` instead of `increment(&count)` is a compile error: swiftc reports that passing a value of type Int to an inout parameter requires an explicit &. The rule exists so that every call that may change the caller's storage is visible where it is written. Because compilation fails, no line of the program runs; adding the ampersand restores the call and Example B again observes 5.
 
 ### Task 5: Boundary evidence
 
 Test zero and negative dimensions under a documented validation policy.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Name the dimensions) and Example B (Make mutation explicit).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+func checkedArea(width: Int, height: Int) -> Int? {
+  guard width >= 0, height >= 0 else { return nil }
+  return width * height
+}
+precondition(checkedArea(width: 0, height: 4) == 0)
+precondition(checkedArea(width: -3, height: 4) == nil)
+precondition(checkedArea(width: -3, height: -4) == nil)
+```
+
+**Observe:** A zero width gives area 0, while one or two negative dimensions are rejected as nil.
+
+The policy accepts zero as a degenerate but valid shape and rejects negatives; checking each dimension matters because -3 times -4 would otherwise produce a plausible 12.
 
 ### Task 6: Transfer and justify
 
 Choose return values or inout for an API and justify who owns state changes.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Argument label**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Write a pure function normalizing a quantity without mutating its caller) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** Example A labels both arguments of `area(width:height:)` so every call names its dimensions. Example B declares `increment(_ value: inout Int)` and calls it with `&count`, making mutation visible at the call site. The task 3 answer clamps a quantity with a pure function that returns a new value and leaves the caller's variable alone.
+
+**Why it is correct.** 3 times 4 is 12 and a zero width gives 0, so both area checks hold regardless of label order in the declaration. The `inout` parameter is copied in, incremented and written back when the call ends, so `count` changes from 4 to 5. In task 3, 15 normalizes to 10 and -4 to 0 while the original 15 stays 15.
+
+**A plausible wrong approach.** Calling `increment(count)` without the ampersand is rejected by the compiler, because passing to an `inout` parameter requires explicit `&`. A subtler mistake is making the task 3 normalizer take `inout` and overwrite the caller; the check that the caller still holds 15 then fails.
+
+**How to verify.** Remove the `&` from `increment(&count)` and read the compiler diagnostic, which names the missing ampersand; that is a compile-time rejection, not a runtime failure. Restore it and confirm the task 3 values 10, 0 and the unchanged 15.
 
 ## Mechanism and diagnostic reasoning
 

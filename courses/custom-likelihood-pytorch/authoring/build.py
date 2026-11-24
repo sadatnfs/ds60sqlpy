@@ -12,6 +12,41 @@ BASE = Path(__file__).resolve().parents[1]
 ROOT = BASE.parents[1]
 
 
+def key_terms(unit: dict) -> str:
+    terms = unit["key_terms"]
+    if not 3 <= len(terms) <= 5 or any(
+        not term or not text or set(term) & set(":*") or set(term + text) & set("\u2013\u2014")
+        for term, text in terms.items()
+    ):
+        raise ValueError(unit["id"] + " needs three to five plain key terms")
+    return "## Key terms\n\n" + "\n".join(f"- **{t}:** {d}" for t, d in terms.items())
+
+
+def worked_examples(unit: dict, prose: str, seen: set[str]) -> str:
+    examples = unit["worked_examples"]
+    fields = ("title", "language", "code", "interpretation")
+    for item in examples:
+        values = [item.get(name, "") for name in fields] + [item.get("output", "")]
+        if not all(isinstance(v, str) for v in values) or not all(v.strip() for v in values[:4]):
+            raise ValueError(unit["id"] + " worked examples need title, language, code and reading")
+        if any(set(v) & set("\u2013\u2014") for v in values):
+            raise ValueError(unit["id"] + " worked examples must not use em or en dashes")
+        for v in (item["title"], item["code"], item["interpretation"]):
+            if v.casefold() in seen:
+                raise ValueError(unit["id"] + " repeats worked example content")
+            seen.add(v.casefold())
+    if not examples or len(examples) + prose.count("## Worked case") < 2:
+        raise ValueError(unit["id"] + " needs at least two worked treatments")
+    parts = []
+    for item in examples:
+        block = f"## Worked example: {item['title']}\n\n```{item['language']}\n"
+        block += item["code"].rstrip() + "\n```\n\n"
+        if item.get("output", "").strip():
+            block += "Observed output:\n\n```text\n" + item["output"].rstrip() + "\n```\n\n"
+        parts.append(block + item["interpretation"].strip())
+    return "\n\n".join(parts)
+
+
 def outputs() -> dict[Path, str]:
     units = json.loads((BASE / "authoring/units.json").read_text("utf-8"))
     if [u["id"] for u in units] != [f"clp-{i:03}" for i in range(1, 21)]:
@@ -21,6 +56,7 @@ def outputs() -> dict[Path, str]:
     result: dict[Path, str] = {}
     rows = []
     lessons = []
+    seen: set[str] = set()
     for unit in units:
         key = unit["id"]
         prose = (BASE / "authoring/chapters" / (key + ".md")).read_text("utf-8").strip()
@@ -31,6 +67,7 @@ def outputs() -> dict[Path, str]:
             raise ValueError(key + " exceeds the published source limit")
         if len(prose.split()) < 600 or prose.count("## Worked case") < 2:
             raise ValueError(key + " needs developed, distinct worked treatments")
+        prose = prose.replace("\n## Worked case", "\n" + key_terms(unit) + "\n\n## Worked case", 1)
         if "\u2014" in prose:
             raise ValueError("Use professional prose without em dashes")
         prefix = f"courses/{BASE.name}"
@@ -50,6 +87,8 @@ def outputs() -> dict[Path, str]:
         text = (
             header
             + prose
+            + "\n\n"
+            + worked_examples(unit, prose, seen)
             + "\n\n## Complete reproducible program\n\n"
             + setup
             + f" Runtime: `{unit['runtime']}`.\n\n```{unit['language']}\n"

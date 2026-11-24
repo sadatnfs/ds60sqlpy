@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate, approximately 90 minutes. Prerequisites: <code>rust-024</code></p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Write and read files as bytes or UTF-8 and remove owned temporary files on every path. The central exercise is task 3: Create an owned temporary-file round trip for a report.</p>
+<p>Write and read files as bytes or UTF-8, remove owned temporary files on the normal path and use a guard type to cover early returns. The central exercise is task 3: Create an owned temporary-file round trip for a report.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A path names a filesystem location relative to a context. It is not the file data and is not permission to access arbitrary storage. A container&#x27;s temporary worker files are distinct from durable classroom pads and progress. Use an owned temporary location for experiments and retain the user-owned data separately.</p>
 <p>Rust resource ownership closes a File when its owner drops, but deleting a temporary pathname is a separate operation. The fixture uses create_new to avoid overwriting another file and removes only its own path. Production persistence adds atomic replacement, recovery and permission policies. A successful round trip does not establish crash durability.</p>

@@ -6,19 +6,23 @@ int main(void) {
      7) && table_get(&t, 1, &out) && out == 7);` to `CHECK(table_put(&t, 2, 7)
      && table_get(&t, 1, &out) && out == 7);` inside its CHECK. Before running,
      predict whether the CHECK still holds and explain why; then restore it.
-     Expected: The changed run stops with `Check failed` at the CHECK on
-     `table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7`. Restoring the
-     original line brings back the worked observation: lookup succeeds with 7.
-   */
+     Expected: With `CHECK(table_put(&t, 2, 7) && table_get(&t, 1, &out) && out
+     == 7);` the run stops with `Check failed` at the CHECK on `table_put(&t, 1,
+     7) && table_get(&t, 1, &out) && out == 7`, because the "insert and
+     retrieve" case no longer shows that lookup succeeds with 7. Restoring
+     `CHECK(table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7);` brings
+     that observation back. */
 
   /* Exercise 2: Resolve a collision: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2 so that it reads
-     `CHECK(table_put(&t, 1, 10) && table_put(&t, 10, 90));`. Run worked example
-     2 with that line, explain why the edited CHECK now fails for the same
-     program state, and restore it. Expected: Before the repair the run stops
-     with `Check failed` at the CHECK on `table_get(&t, 9, &out) && out == 90`;
-     after it the line reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 9,
-     90));` again and both values remain retrievable. */
+     A careless edit changed the CHECK in worked example 2, the "resolve a
+     collision" case, so that it reads `CHECK(table_put(&t, 1, 10) &&
+     table_put(&t, 10, 90));`. Run the example with that line, explain why the
+     edited CHECK now fails even though the program state still means both
+     values remain retrievable, and restore it. Expected: Before the repair the
+     run stops with `Check failed` at the CHECK on `table_get(&t, 9, &out) &&
+     out == 90`. Once the line reads `CHECK(table_put(&t, 1, 10) &&
+     table_put(&t, 9, 90));` again, the "resolve a collision" case again shows
+     that both values remain retrievable. */
 
   /* Exercise 3: Replace an existing key
      Write key 2 twice with different values.

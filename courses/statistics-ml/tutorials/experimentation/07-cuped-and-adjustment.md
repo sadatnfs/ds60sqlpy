@@ -2,6 +2,13 @@
 
 Tutorial ID: `statistics-exp-007`. Prerequisites: `statistics-exp-006`, `statistics-011`, `statistics-014`. Complete example: [experiment_07.py](examples/experiment_07.py).
 
+## Key terms
+
+- **CUPED:** A variance reduction that subtracts \(\theta\) times the centered pretreatment covariate from the outcome, with \(\theta=\operatorname{Cov}(X,Y)/\operatorname{Var}(X)\).
+- **Prognostic covariate:** A pretreatment variable that predicts the outcome; the stronger the prediction, the larger the precision gain from adjustment.
+- **Treatment-covariate interaction:** A regression term multiplying treatment by the centered covariate, so baseline slopes can differ by arm while the treatment coefficient remains the average contrast.
+- **HC2 covariance:** A heteroskedasticity-robust variance estimate that divides each squared residual by one minus its leverage instead of assuming a common residual variance.
+
 ## Remove predictable noise
 
 Users differ greatly before the page experiment. A pretreatment activity measurement can explain outcome variation that random assignment did not cause. Adjustment can make the treatment comparison more precise while preserving its assignment target under the appropriate design and estimation conditions.
@@ -41,5 +48,53 @@ New users may have no preperiod record. Dropping them changes the population. Fi
 Post-treatment visits are different: the interface may change them. Adjusting for visits can remove part of the policy effect or induce selection bias. A predictive covariate is not automatically an admissible causal covariate.
 
 **Answered discussion: Must adjusted estimates always be closer to the true effect?** No. Precision is a repeated-procedure property. A well-designed adjustment can still move an individual estimate away from the truth. Compare its sampling behavior under plausible scenarios and report the method chosen before seeing which answer looks better.
+
+## Worked example: estimate theta and the variance it removes
+
+This block computes the CUPED coefficient from pooled data and applies it with a common center. Append it to [experiment_07.py](examples/experiment_07.py).
+
+```python
+users, _, _, _ = experiment_fixture()
+x, y, a = users.baseline, users.value, users.assigned
+theta = np.cov(x, y, ddof=1)[0, 1] / x.var(ddof=1)
+rho2 = np.corrcoef(x, y)[0, 1] ** 2
+y_star = y - theta * (x - x.mean())
+est, se, _ = welch_summary(y_star[a == 1], y_star[a == 0])
+print(f"theta={theta:.3f} rho^2={rho2:.3f} variance kept={1 - rho2:.3f}")
+print(f"CUPED estimate={est:.3f} se={se:.3f}")
+```
+
+```text
+theta=3.980 rho^2=0.913 variance kept=0.087
+CUPED estimate=1.504 se=0.159
+```
+
+The estimated slope, 3.980, is close to the generating coefficient of four, and baseline explains about 91% of outcome variance. Keeping 8.7% of the variance should shrink the SE by about \(\sqrt{0.087}\approx0.30\); indeed 0.159 is about a quarter of the raw 0.623. The match is approximate because the pooled \(\rho^2\) mixes both arms, including their mean shift, while the SE depends on within-arm variances. The adjusted estimate equals the interacted-regression estimate of 1.504 to three decimals because the slopes barely differ by arm. Estimating theta from the same outcomes adds a small amount of uncertainty that this Welch SE ignores; the HC2 regression in the main example accounts for it.
+
+## Worked example: adjusting for a post-treatment variable
+
+Suppose an analyst adds an engagement score measured after assignment. Here engagement rises with the treatment effect itself, which is the defining feature of a mediator.
+
+```python
+users, _, _, effect = experiment_fixture()
+rng = np.random.default_rng(707)
+engagement = users.baseline + users.assigned * effect + rng.normal(0, 0.5, len(users))
+a = users.assigned.to_numpy()
+x = users.baseline - users.baseline.mean()
+for label, cols in [("baseline", [a, x]), ("post-treatment", [a, x, engagement])]:
+    fit = sm.OLS(users.value, sm.add_constant(np.column_stack(cols))).fit(cov_type="HC2")
+    print(f"adjust for {label:14s}: treatment coef={fit.params.iloc[1]:.3f}")
+```
+
+```text
+adjust for baseline      : treatment coef=1.504
+adjust for post-treatment: treatment coef=0.621
+```
+
+Adding engagement cuts the treatment coefficient from 1.504 to 0.621. Nothing about the redesign changed; the regression now asks what treatment does holding engagement fixed, and engagement is one of the paths through which the redesign works. The coefficient on engagement absorbs most of the effect. A diagnostic is to regress each candidate covariate on assignment: a pretreatment variable should show no systematic arm difference, while engagement here differs by about 1.6 by construction.
+
+## When CUPED gains little
+
+If baseline and outcome correlate weakly, \(1-\rho^2\) stays near one and the adjustment mostly adds estimation noise. New users without history, a changed metric definition between periods, or a seasonal shift can all break the correlation that made the preperiod useful.
 
 Continue to [monitoring](08-monitoring-and-multiplicity.md). Primary source: [original CUPED paper](https://ai.stanford.edu/~ronnyk/2013-02CUPEDImprovingSensitivityOfControlledExperiments.pdf).

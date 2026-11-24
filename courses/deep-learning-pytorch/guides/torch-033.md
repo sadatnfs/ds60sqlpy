@@ -144,7 +144,7 @@ for bad in [torch.empty((0, 2)), torch.zeros((5, 2))]:
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The batch predicts 0 and 2 with shape (2,), single-row calls agree, invalid shapes raise ValueError, an int64 matrix raises TypeError, a NaN raises ValueError, and the caller's input is unchanged. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Predict a valid batch. Predict exercise 6, Preserve caller data, from its prompt alone: Mutate the returned output and compare the original input. Then explain why this finish condition holds: The batch predicts 0 and 2 with shape (2,), single-row calls agree, invalid shapes raise ValueError, an int64 matrix raises TypeError, a NaN raises ValueError, and the caller's input is unchanged. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -180,15 +180,15 @@ If a finite request produces a nonfinite prediction, inspect arithmetic range an
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Check per-record batching parity) alters one assumption of Example A (Predict a valid batch). Hint 2: exercise 4, Reject shape and dtype ambiguity, should end at shape ValueErrors and dtype TypeError. Work backward from it. Hint 3: exercise 5, Reject nonfinite values, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Inference mode, Input contract, Batch independence using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Reject empty and oversized batches, from its inputs alone. Predict whether exercise 3, Reject a float64 batch, survives one changed input. Then explain Inference mode, Input contract, Batch independence in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-032` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Predict a valid batch) cannot be rebuilt without help, revisit `torch-032` first. Otherwise keep your exercise 2 attempt, Check the batch boundary, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

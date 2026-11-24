@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-069`, `docker-005`,
 
 A Docker image contains prepared code and dependencies, while a running container has a process lifecycle and external storage holds durable data. This chapter uses the owned web lab to distinguish those layers through stop, exact resume and application-container replacement. No step rebuilds an image merely to recover a stopped service.
 
+## Key terms
+
+- **Image:** A prepared, read-only package of code and dependencies from which containers are created.
+- **Container:** A running or stopped process instance created from an image, with its own lifecycle separate from the image.
+- **Named volume:** Docker-managed storage, here holding PostgreSQL data, that persists when application containers are replaced.
+- **Resume versus replace:** Resume restarts the exact existing containers; replace recreates the application containers from the saved image while keeping the database volume.
+- **Migration step:** Applying reviewed schema migrations as an explicit start action rather than on every resume or inside a request.
+
 ## Mechanism: separate preparation, migration and serving
 
 The workshop prepare action builds a small source/static-assets layer from an already prepared python-web image. It saves the selected project, image references and ports. The start action uses those local images, starts PostgreSQL, applies the reviewed migrations and synthetic fixture preparation, then starts the three web servers and worker.
@@ -29,6 +37,45 @@ The replace action creates new app/worker containers from the saved image, then 
 The workshop does not delete the PostgreSQL volume or private settings. Using down with volume removal, switching project names or pruning state would invalidate the recovery claim. Export evidence before cleaning only explicitly owned synthetic resources, and keep learner data unless the learner deliberately requests deletion.
 
 A newer application image may require a migration or compatibility review. Replacing containers is not permission to apply an arbitrary incompatible schema change. Preserve immutable released images and qualify the new source/version through the repository's release process.
+
+## Worked example: an added column breaks positional reads in old code
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE note (id INTEGER PRIMARY KEY, title TEXT)")
+db.execute("INSERT INTO note (title) VALUES ('kept')")
+
+
+def old_explicit():
+    return db.execute("SELECT id, title FROM note").fetchall()
+
+
+def old_star():
+    identifier, title = db.execute("SELECT * FROM note").fetchone()
+    return title
+
+
+db.execute("ALTER TABLE note ADD COLUMN owner TEXT")
+db.execute("PRAGMA user_version = 2")
+print(old_explicit())
+try:
+    old_star()
+except ValueError as error:
+    print(type(error).__name__)
+print(db.execute("PRAGMA user_version").fetchone()[0])
+```
+
+Expected output:
+
+```text
+[(1, 'kept')]
+ValueError
+2
+```
+
+During a rolling replacement the migration runs while containers with the old image are still serving. Adding a nullable column is the expand step, and it is compatible only with code that names its columns: the explicit query still returns the prior record, while the `SELECT *` unpacking fails on the third column. The schema version moved to 2 in the same database the old process reads, which is why a migration must be safe for both images at once. Dropping or renaming the old column waits for a later release, after no old container remains.
 
 ## Failure diagnosis and discussion
 

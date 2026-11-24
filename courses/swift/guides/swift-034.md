@@ -118,7 +118,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Consume a finite stream) before changing anything, and confirm its observation: The finite stream totals 5 and terminates.
 2. Compare Example B (Make drop behavior observable) with Example A and name the first line whose behavior differs. Its observation is: The newest-one policy retains 2 and drops the older buffered value.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: AsyncStream buffering is not automatically backpressure.
+3. Before opening the explanation, check your task 3 attempt (Build a finite event stream with explicit completion ownership) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

@@ -198,9 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-017</code>, <code>cuda-020</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Compute exact histogram counts with atomics and explain two timing regimes through contention.</p>
 <p>Work through <em>Histograms, atomics and contention</em> with the concrete cases below. Finish with this evidence: exact counts and a contention-based explanation of two timing regimes. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A histogram counts values into bins. Several threads can increment the same bin, so ordinary read-modify-write operations can lose updates. An atomic addition makes that individual update indivisible at its supported scope. It does not make an entire multi-step algorithm atomic or publish unrelated data automatically. A block-private histogram can reduce global contention by combining local counts before a global merge. It also costs shared memory and initialization work. Distribution matters: uniformly spread samples and one hot bin exercise very different contention patterns even with identical input size.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Atomic operation:</strong> A read-modify-write update, such as <code>atomicAdd</code>, that is indivisible with respect to competing updates at its scope.</li>
+<li><strong>Contention:</strong> Many threads updating the same location, which serializes their atomic operations.</li>
+<li><strong>Privatization:</strong> Giving each block its own shared-memory histogram and merging the partial counts globally afterward.</li>
+<li><strong>Lost update:</strong> A wrong count that occurs when two threads read the same old value and both write back an increment.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-022_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-022_cpu.py</code></pre>

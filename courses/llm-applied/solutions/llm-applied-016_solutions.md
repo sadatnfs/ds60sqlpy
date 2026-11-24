@@ -1,6 +1,6 @@
 # llm-applied-016: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for low-rank adaptation: dimensions, gradients and a real update only after attempting *Count and orient parameters* through *Inspect rank and scaling consequences*. A discrepancy in *Prove zero-delta initialization* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-016_solution.py` runs the assertions; this page explains why they test adapter rank and lora scale.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ Only A and B are optimized. The frozen base remains part of the forward computat
 
 ### Orientation and parameter accounting
 
-A base [Din, Dout] matrix contains \(D_{\mathrm{in}}\cdot D_{\mathrm{out}}\) entries. The factors contain \(r\cdot (D_{\mathrm{in}}+D_{\mathrm{out}})\). For this 8-by-8 example and \(r=2\), the base has 64 entries and the adapter has 32. For a square width d the ratio is \(\frac{2r}{d}\), so a width-4096, rank-8 adapter has 65, 536 entries versus 16, 777, 216 base entries, a ratio of \(\frac{1}{256}\). That counts these matrices only; it is not a measured total-memory reduction.
+A base [Din, Dout] matrix contains \(D_{\mathrm{in}}\cdot D_{\mathrm{out}}\) entries. The factors contain \(r\cdot (D_{\mathrm{in}}+D_{\mathrm{out}})\). For this 8-by-8 example and \(r=2\), the base has 64 entries and the adapter has 32. For a square width d the ratio is \(\frac{2r}{d}\), so a width-4096, rank-8 adapter has 65,536 entries versus 16,777,216 base entries, a ratio of \(\frac{1}{256}\). That counts these matrices only; it is not a measured total-memory reduction.
 
 PyTorch Linear stores a weight with shape [Dout, Din] and applies its transpose to row inputs. In that storage convention a typical update is B_pt A_pt, where A_pt is [r, Din] and B_pt is [Dout, r]. The course factors are \(A={A_{\mathrm{pt}}}^{T}\) and \(B={B_{\mathrm{pt}}}^{T}\), making \((B_{\mathrm{pt}}A_{\mathrm{pt}})^{\mathsf T}=AB\). Copying factor names from another implementation without translating the orientation can produce a shape error or, for square matrices, a silently different function.
 
@@ -158,4 +158,4 @@ torch.testing.assert_close((4 / rank) * delta, 2 * ((2 / rank) * delta), atol=1e
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Inspect the first gradients* and predict how the result changes before checking it; the unchanged inputs give: A has a connected zero gradient; every B-gradient entry is 0.5; W has no accumulated gradient. Keep the original *Inspect rank and scaling consequences* failure beside the repaired result; a missing PyTorch runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

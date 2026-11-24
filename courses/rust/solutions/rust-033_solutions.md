@@ -1,6 +1,6 @@
 # rust-033: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-033_solution.rs](rust-033_solution.rs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-033_solution.rs](rust-033_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -14,13 +14,40 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Separate future creation, polling and completion.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: A no-op waker is sufficient only because this fixture cannot require a later external wakeup. The immediately ready future yields seven on its first poll.
+**Written answer.** `async { 7 }` creates a future value and runs none of its body. `Box::pin` gives it a stable address, which `poll` requires. The single `poll` call runs the body; because nothing inside waits, it finishes and returns `Poll::Ready(7)`, which is completion. In Example B, `pending()` returns `Poll::Pending` on every poll and never completes.
+
+**Why it is correct.** A future is a state machine that advances only when something polls it. Creation, each poll and completion are separate events, and only an executor (or this one-poll fixture) causes the middle one.
+
+**Plausible wrong approach.** Thinking `async { 7 }` evaluates 7 at creation predicts side effects before any poll. Put a `println!` inside the block and nothing prints until the poll.
+
+**How to verify.** Add `let mut flag = false; let mut probe = Box::pin(async { flag = true; });` and check that `flag` changes only after `probe.as_mut().poll(&mut context)`.
 
 ### Task 2: Guided modification
 
 Compose two immediately ready async values and poll the combined fixture.
 
-No separate reference answer has been written for this task. Start from Example B: The program stops after one inspection rather than wasting CPU pretending a tight loop is a runtime. The pending future reports no completed value.
+**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use std::future::Future;
+    use std::task::{Context, Poll, Waker};
+    let left = async { 3 };
+    let right = async { 4 };
+    let mut combined = Box::pin(async { left.await + right.await });
+    let mut context = Context::from_waker(Waker::noop());
+    assert_eq!(combined.as_mut().poll(&mut context), Poll::Ready(7));
+    Ok(())
+}
+```
+
+**Observe:** One poll of the combined future returns Ready(7).
+
+`combined` owns `left` and `right` and awaits them one after the other. Both are immediately ready, so a single poll drives all three futures to completion. With a future that could return `Pending`, the same poll would stop at that `.await` and report `Pending`.
+
+**Plausible wrong approach.** Expecting the two inner futures to run in parallel misreads `.await`: inside one async block they run sequentially, and neither runs at all until `combined` is polled.
+
+**How to verify.** Run the block. Replace `right` with `std::future::pending::<i32>()` and the poll returns `Poll::Pending`.
 
 ### Task 3: Independent construction
 
@@ -32,13 +59,56 @@ Explain the ownership responsibilities of an executor in a written event trace.
 
 Diagnose creating a future and expecting it to run without a consumer.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Async is not automatically parallel. A no-op waker cannot drive real asynchronous I/O. Dropping a future does not necessarily reverse effects already performed by external systems.
+**Written answer.** The defect is calling an async function such as `save_report(rows);` without `.await` or a runtime. The call only builds a future, which is dropped at the semicolon without ever being polled, so no report is written. rustc warns `unused implementer of Future that must be used` and notes that futures do nothing unless you `.await` or poll them.
+
+**Why it is correct.** Rust futures are lazy: work happens only during `poll`. Without a consumer there is no poll, so the program silently skips the operation.
+
+**Plausible wrong approach.** Binding the result, `let _pending = save_report(rows);`, removes the warning but still never polls it, so the report is never written.
+
+**How to verify.** Compile `async fn save() {} fn main() { save(); }` and read the `unused_must_use` warning.
 
 ### Task 5: Boundary evidence
 
 Contrast Ready, Pending and dropping an uncompleted future.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Poll a ready computation) and Example B (Observe pending without spinning).
+**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use std::future::Future;
+    use std::task::{Context, Poll, Waker};
+    struct Note<'a>(&'a std::cell::RefCell<Vec<&'static str>>);
+    impl Drop for Note<'_> {
+        fn drop(&mut self) {
+            self.0.borrow_mut().push("dropped");
+        }
+    }
+    let mut context = Context::from_waker(Waker::noop());
+    let mut ready = Box::pin(async { 1 });
+    assert_eq!(ready.as_mut().poll(&mut context), Poll::Ready(1));
+    let mut waiting = Box::pin(std::future::pending::<i32>());
+    assert_eq!(waiting.as_mut().poll(&mut context), Poll::Pending);
+    let log = std::cell::RefCell::new(Vec::new());
+    let mut unfinished = Box::pin(async {
+        let _note = Note(&log);
+        log.borrow_mut().push("started");
+        std::future::pending::<()>().await;
+        log.borrow_mut().push("finished");
+    });
+    assert_eq!(unfinished.as_mut().poll(&mut context), Poll::Pending);
+    drop(unfinished);
+    assert_eq!(*log.borrow(), vec!["started", "dropped"]);
+    Ok(())
+}
+```
+
+**Observe:** The ready future yields Ready(1), the pending one yields Pending, and the unfinished future logs started and then dropped, but never finished.
+
+Dropping a pending future cancels it at its current `.await`: the code after that point never runs, while values the body already created are dropped normally. The log shows both halves, which is why cancellation safety matters when a future has already performed part of its work.
+
+**Plausible wrong approach.** Expecting `finished` in the log assumes a dropped future runs to the end in the background. Nothing polls it after `drop`, so its remaining code is discarded.
+
+**How to verify.** Run the block. Remove `std::future::pending::<()>().await;` and the first poll returns `Ready(())`, with `finished` logged before `dropped`.
 
 ### Task 6: Transfer and justify
 

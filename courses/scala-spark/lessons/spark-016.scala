@@ -101,7 +101,7 @@ object Main {
           )
           .first()
         assert(comparison.isNullAt(0) && comparison.getBoolean(1))
-        println("Ordinary equality is unknown;explicit NULL-safe equality is true")
+        println("Ordinary equality is unknown; explicit NULL-safe equality is true")
       }
       println("spark-016: worked examples passed; six task implementations remain")
     } finally { spark.stop() }

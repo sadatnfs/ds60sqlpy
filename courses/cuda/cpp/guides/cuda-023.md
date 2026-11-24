@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a stencil time step with a declared boundary condition and verify interior, boundary and conserved values.
+
 Work through *Stencils and boundary conditions* with the concrete cases below. Finish with this evidence:
 correct interior and boundary values plus a conserved or monotonic quantity appropriate to the chosen model. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A stencil computes each output from a neighborhood of input values. The boundary policy is part of the mathematics: clamped, periodic and fixed-zero boundaries describe different problems. Use separate input and output buffers for a time step so one update cannot change a neighbor's inputs halfway through the step. A tiled implementation loads a halo around its interior region because edge outputs need values from neighboring tiles. A barrier only protects data loaded by the same cooperating group; it does not legalize global in-place updates across independently scheduled blocks.
+
+### Key terms
+
+- **Stencil:** A computation in which each output depends on a fixed neighborhood of input values.
+- **Halo:** The extra border of neighbor values that a tile loads so its edge outputs can be computed.
+- **Ping-pong buffers:** Separate input and output arrays for each time step, swapped afterward, so updates never read partially updated neighbors.
+- **Periodic boundary:** A boundary condition in which indices wrap around so the last element neighbors the first.
 
 ## Mathematical contract
 

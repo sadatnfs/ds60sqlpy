@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A unit fixture supplies controlled inputs to test a model&#x27;s transformation logic. An integration test examines relations produced from an actual source or seed. Both are useful, but they answer different questions. A unit fixture can demonstrate aggregation behavior on a boundary case without claiming that the production input has valid keys or complete coverage.</p>
 <p>The worked model sums amounts per customer. Its unit fixture contains two orders for one customer, while the actual loaded seed contains a different customer and amount. The expected result belongs to the fixture, not to the seed. Checking that the seed remains unchanged makes the distinction concrete.</p>
 <p>The second case deliberately uses the wrong expected total. dbt must report a failed unit test even though the SQL is executable. A test suite should contain examples that would fail under meaningful defects such as missing grouping, wrong keys, incorrect boundaries or duplicated joins. Tests that only repeat the model&#x27;s own calculation can agree with the same mistake.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Unit test:</strong> A <code>unit_tests</code> YAML entry that runs one model&#x27;s SQL against fixed <code>given</code> rows and compares the result with <code>expect</code> rows.</li>
+<li><strong>Fixture:</strong> The small, hand-chosen input rows supplied under <code>given</code> in place of the model&#x27;s real upstream relations.</li>
+<li><strong>Expected rows:</strong> The <code>expect</code> rows written independently of the model logic; the unit test fails when the actual output differs.</li>
+<li><strong>Integration test:</strong> A data test that checks the rows of the real built relation rather than fixture inputs.</li>
+<li><strong>Boundary case:</strong> A fixture row placed exactly at a rule&#x27;s edge, such as a threshold value or a null, where off-by-one logic fails.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The unit_tests YAML section names the model, supplied inputs and expected rows. The input declaration ref(&#x27;raw_orders&#x27;) substitutes a controlled relation for that dependency. The example first prepares the parent schema, then selects test_type:unit. Result artifacts are inspected for the actual pass or fail status.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

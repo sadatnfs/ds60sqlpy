@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-004`, `apache-038`.
 
+## Key terms
+
+- **Segment:** A column-oriented Pinot unit of data and indexes that servers load and query.
+- **Controller:** The Pinot role that manages table configuration, segment metadata and segment assignment to servers.
+- **Broker:** The Pinot role that accepts a query, routes it to the servers holding relevant segments and merges their responses.
+- **Server:** The Pinot role that stores or consumes segments and executes query work on them.
+- **ZooKeeper:** The coordination service through which Pinot's cluster manager stores cluster state and segment assignment.
+
 ## An analytical serving system has distinct roles
 
 Pinot serves analytical queries from segments, which are column-oriented units
@@ -47,7 +55,7 @@ before deciding whether an explicit recovery action is safe.
 
 ## Worked case B: a broker query crosses the serving topology
 
-The client sends SQL to broker:8099, not directly to a data file. The broker
+The client sends SQL to `broker:8099`, not directly to a data file. The broker
 routes work to the assigned serving instance and combines the result. The project
 also reads controller segment and instance metadata so the result can be tied
 to the actual serving topology. A query against an unknown column must return
@@ -86,6 +94,43 @@ Upload, assignment and server readiness are separate stages. A complete diagnosi
 compares expected source identities with segment state and actual broker results.
 The two cases establish a reproducible segment contract and explain the serving
 path that must be healthy before the contract can be observed.
+
+## Worked examples
+
+### Batch ingestion job specification
+
+```yaml
+jobType: SegmentCreationAndTarPush
+inputDirURI: file:///project/input
+includeFileNamePattern: glob:**/*.jsonl
+outputDirURI: file:///staging/segments
+overwriteOutput: false
+tableSpec:
+  tableName: ds60_orders
+  schemaURI: file:///project/schema.json
+  tableConfigURI: file:///project/table.json
+pinotClusterSpecs:
+  - controllerURI: http://controller:9000
+```
+
+This excerpt of ingestion.yaml shows the two halves of offline loading: build a segment from the JSON lines input, then push the tar file to the controller. The controller records segment metadata and assigns it to servers, while the broker only learns routing from that assignment. overwriteOutput false keeps a second run from replacing a staged segment silently, so a rerun that fails on an existing output is protecting evidence rather than misbehaving.
+
+### Query through the broker and compare totals
+
+```sql
+SELECT
+  region,
+  SUM(amount)
+FROM
+  ds60_orders
+GROUP BY
+  region
+ORDER BY
+  region
+LIMIT 10
+```
+
+Sent to the broker at /query/sql, this should return east 11 and west 9 for the three fixture rows. The response metadata also reports numServersQueried and numSegmentsQueried, which tell you whether the broker reached the server holding the segment. A correct total from zero segments is impossible, so if those counts are zero while rows appear, you are reading a different table or cluster. The client checks the exact ID list before trusting the aggregate.
 
 ## Complete worked source
 

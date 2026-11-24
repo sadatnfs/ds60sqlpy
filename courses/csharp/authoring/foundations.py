@@ -36,6 +36,7 @@ The first skill is distinguishing three outcomes: a compiler diagnostic means th
         "Model boxes containing packets containing items. Explain each intermediate value and check the final product.",
     ],
     "Printing a copied expected number skips the calculation. A missing brace can produce several later diagnostics, so repair the first structural problem before interpreting the rest. Do not treat the lesson marker as a replacement for inspecting the greeting or invariant.",
+    usings=("System", "System.Threading.Tasks"),
 )
 
 lesson(

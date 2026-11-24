@@ -8,6 +8,13 @@
     "Brier score",
     "calibration error"
   ],
+  "key_terms": {
+    "LLM as judge": "Using a language model to label or compare outputs, whose decisions remain measurements with error.",
+    "Position bias": "A judge's preference for a display slot, such as the first or left answer, independent of quality.",
+    "Counterbalancing": "Showing each pair in both orientations so position effects become observable.",
+    "Identity consistency": "Whether a judge prefers the same candidate after its display position is swapped.",
+    "Brier score": "The mean squared difference between predicted probabilities and binary outcomes."
+  },
   "outcome": "Audit a judge using identity-aware order swaps and held-out probability calibration while keeping agreement distinct from correctness.",
   "verification": "The order-swapped identity score for A is 0, perfect probabilities give Brier and ECE 0, maximally wrong ones give 1, a constant judge gets ECE 0 with Brier 0.25, and final labels never influence the frozen recalibration map.",
   "level": "intermediate",
@@ -20,42 +27,78 @@
       "task": "Candidate A is on the right and the left answer wins.",
       "expected": "The identity score for A is 0.",
       "hint": "Map position back to candidate identity.",
-      "answer": "A position-level label has no fixed model meaning until the display order is known."
+      "answer": "A position-level label has no fixed model meaning until the display order is known.",
+      "reasoning": {
+        "approach": "Encode the case: candidate A is on the right, so `a_on_left` is `False`, and the left answer wins, so `left_wins` is 1. `identity_wins` maps that to `1 - 1 = 0` for A.",
+        "why": "The judge preferred the left slot, which held B. In identity terms, A lost. The reference checks the two-item version `identity_wins([0, 1], [True, False])`, where A loses both times: once on the left and once on the right.",
+        "pitfall": "Averaging position-level wins (the left won, so count a win) without the orientation is the mistake. Worked case A shows a judge that always picks the left side scoring 0.5 for A once orientations are balanced.",
+        "verify": "The reference asserts `identity_wins([0, 1], [True, False]).tolist() == [0.0, 0.0]`. Case A asserts `identity_wins([1, 1], [True, False]).tolist() == [1.0, 0.0]`."
+      }
     },
     {
       "title": "Check perfect probabilities",
       "task": "Score probabilities 1,0 against labels 1,0.",
       "expected": "Brier and the stated ECE are 0.",
       "hint": "Use the actual labels, not a thresholded probability.",
-      "answer": "Perfect probabilities have zero squared error and zero within-bin calibration gap on this fixture."
+      "answer": "Perfect probabilities have zero squared error and zero within-bin calibration gap on this fixture.",
+      "reasoning": {
+        "approach": "Call `calibration([1, 0], [1, 0])`. The probabilities exactly equal the labels.",
+        "why": "Each squared error is 0, so Brier is 0. Probability 1 falls in the upper bin with label 1, and 0 falls in the lower bin with label 0; each bin's mean probability equals its mean label, so ECE is 0.",
+        "pitfall": "Reading ECE 0 as proof of a good judge in general is the mistake. Two items cannot show calibration in the middle range, and a perfect score on a tiny authored fixture is a correctness check on the code, not a model property.",
+        "verify": "The reference asserts `calibration([1, 0], [1, 0]) == (0.0, 0.0)`. A single item `calibration([1], [1])` also has Brier 0."
+      }
     },
     {
       "title": "Check maximally wrong probabilities",
       "task": "Score 0,1 against 1,0.",
       "expected": "Both reported scores are 1.",
       "hint": "Each squared error is 1.",
-      "answer": "The example diagnoses probability failure even if a separate presentation metric remains favorable."
+      "answer": "The example diagnoses probability failure even if a separate presentation metric remains favorable.",
+      "reasoning": {
+        "approach": "Call `calibration([0, 1], [1, 0])`. Every probability is the opposite of its label.",
+        "why": "Each squared error is 1, so Brier is 1. Probability 0 sits alone in the lower bin with label 1, a gap of 1, and probability 1 sits alone in the upper bin with label 0, also a gap of 1. Each bin holds half the items, so ECE is 0.5 + 0.5 = 1.",
+        "pitfall": "Assuming a judge with good pairwise win rates must have useful probabilities is the mistake. Preference accuracy and calibration are separate properties, and this fixture is wrong on calibration regardless of any ranking metric.",
+        "verify": "The reference asserts `calibration([0, 1], [1, 0]) == (1.0, 1.0)`."
+      }
     },
     {
       "title": "Use a constant judge",
       "task": "Give probability 0.5 to balanced labels.",
       "expected": "ECE 0 and Brier 0.25 under these bins.",
       "hint": "Calibration and discrimination answer different questions.",
-      "answer": "A constant predictor can match the overall class frequency while providing no item-level ranking information."
+      "answer": "A constant predictor can match the overall class frequency while providing no item-level ranking information.",
+      "reasoning": {
+        "approach": "Call `calibration([0.5] * 4, [1, 1, 0, 0])`. Every item receives probability 0.5 and half the labels are 1.",
+        "why": "Each squared error is 0.25, so Brier is 0.25. With edges 0, 0.5, 1 and `side=\"right\"`, 0.5 falls in the upper bin, so all four items share one bin with mean probability 0.5 and mean label 0.5. The gap is 0, so ECE is 0.",
+        "pitfall": "Picking the judge with the lowest ECE is the mistake here. The constant predictor is perfectly calibrated and useless: it cannot tell any item from another. Case B's informative scores have ECE 0.15 but Brier 0.025, ten times better.",
+        "verify": "Worked case B asserts `constant == (0.25, 0.0)` and the informative pair `brier` near 0.025 and `ece` near 0.15."
+      }
     },
     {
       "title": "Test verbosity invariance",
       "task": "Duplicate an answer paragraph without adding a claim.",
       "expected": "Record whether identity preference changes.",
       "hint": "Hold candidate meaning and the comparison partner fixed.",
-      "answer": "A change diagnoses one presentation sensitivity. It does not prove all longer answers are favored or all length adjustments are valid."
+      "answer": "A change diagnoses one presentation sensitivity. It does not prove all longer answers are favored or all length adjustments are valid.",
+      "reasoning": {
+        "approach": "Take one comparison, duplicate a paragraph in one answer without adding any claim, and rerun the judge in both orientations. Record identity wins before and after.",
+        "why": "If the duplicated answer now wins where it lost before, the judge responds to length or repetition, not content. Running both orientations separates this from the position effect shown in exercise 1.",
+        "pitfall": "Concluding from one flip that the judge always favors longer answers is too strong. One perturbation shows one sensitivity; length can also correlate with real completeness on other items, so a blanket length penalty is not justified either.",
+        "verify": "No reference assertion covers this task. Record a table with item ID, orientation, original identity win and perturbed identity win, and count flips over several items before generalizing."
+      }
     },
     {
       "title": "Freeze a recalibration mapping",
       "task": "Fit a mapping on development labels, then evaluate it on new families.",
       "expected": "Final labels do not influence the fitted mapping.",
       "hint": "Treat recalibration as model selection.",
-      "answer": "Independent assessment is needed because a reliability diagram can be made attractive by fitting and evaluating on the same cases."
+      "answer": "Independent assessment is needed because a reliability diagram can be made attractive by fitting and evaluating on the same cases.",
+      "reasoning": {
+        "approach": "Fit any recalibration map, such as binning or a logistic fit, using only development labels. Freeze its parameters, then apply it to new families and compute Brier and ECE there.",
+        "why": "Fitting and evaluating on the same items lets the map memorize each bin's label rate, so ECE on those items drops toward zero by construction. Only items the map never saw can show whether it transfers.",
+        "pitfall": "Plotting a reliability diagram on the development set after fitting and presenting it as evidence of calibration is the mistake. It shows the fit, not generalization.",
+        "verify": "Check that no final-set label appears in the data used for fitting (compare ID sets), then report Brier and ECE on the final families only, with the bin edges stated."
+      }
     }
   ],
   "sources": [

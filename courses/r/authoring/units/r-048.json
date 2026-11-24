@@ -31,7 +31,7 @@
       "definition": "A relative instantaneous event rate conditional on the model, distinct from a survival-probability ratio."
     }
   ],
-  "anatomy": "Use survival::Surv(time,event) with an explicit validated 0/1 event indicator. survfit(Surv(...)~1) estimates the single-group Kaplan-Meier curve. coxph(Surv(...)~x) fits a proportional-hazards model; exp(coef(fit)) returns the modeled hazard ratio. summary at selected times and cox.zph diagnostics answer different questions and retain their own assumptions.",
+  "anatomy": "Use `survival::Surv(time, event)` with an explicit validated 0/1 event indicator. `survfit(Surv(...) ~ 1)` estimates the single-group Kaplan-Meier curve. `coxph(Surv(...) ~ x)` fits a proportional-hazards model; `exp(coef(fit))` returns the modeled hazard ratio. `summary` at selected times and `cox.zph` diagnostics answer different questions and retain their own assumptions.",
   "worked_examples": [
     {
       "title": "A censor changes risk, not survival directly",

@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Distinguish a declaration from a definition and diagnose a link failure.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A translation unit is a source file after its includes are expanded. A header shares declarations across translation units. A declaration states a name and type; a definition supplies storage or a function body. The linker connects references to definitions. The one-definition rule prevents incompatible or multiply defined entities.</p>
+<ul>
+<li><strong>translation unit:</strong> one source file after preprocessing has expanded its includes.</li>
+<li><strong>declaration:</strong> states a name and its type so that calls can be type-checked.</li>
+<li><strong>definition:</strong> supplies the function body or object storage for a declared name.</li>
+<li><strong>linker:</strong> the tool that connects references in object files to the definitions they need.</li>
+<li><strong>one-definition rule:</strong> the rule that forbids multiple or incompatible definitions of the same entity across translation units.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>int add(int,int);</code> is a declaration and can compile without a body. Calling it requires exactly one linked definition such as <code>int add(int a,int b){return a+b;}</code>. An include guard prevents repeated header inclusion within a translation unit; it does not make a non-inline function definition safe in every source file.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

@@ -45,7 +45,7 @@ assert.deepEqual(trace, ['started']);
 cursor.return();
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(trace, ['started'])`. Restoring the original line brings back the worked observation: trace is empty before next; then started, with value 2.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(trace, ['started'])`. Restoring `trace.push('started');` brings back: trace is empty before next; then started, with value 2.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(trace, ['started'])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -75,7 +75,7 @@ for (const value of rows()) {
 assert.deepEqual(trace, ['opened', 1, 'closed']);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(trace, ['opened', 1, 'closed'])`; after it the line reads `yield 1;` again and trace records opened, value 1, closed.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(trace, ['opened', 1, 'closed'])`. Restoring `yield 1;` brings back: trace records opened, value 1, closed.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(trace, ['opened', 1, 'closed'])` for this input.
 

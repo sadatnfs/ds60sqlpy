@@ -204,22 +204,64 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-a-readiness-failure-consequence">Exercise 1: Predict a readiness failure consequence.<a class="heading-anchor" href="#exercise-1-predict-a-readiness-failure-consequence" aria-label="Link to this section">#</a></h3>
 <p>Readiness and liveness are separate control signals. A temporary inability to serve need not mean the process is irrecoverable.</p>
 <p><strong>Expected:</strong> Ordinary new Service eligibility changes without necessarily restarting the container.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Trace a failing readinessProbe to the Pod&#x27;s Ready condition and its endpoint state.</li>
+<li><strong>Why it is correct:</strong> Readiness failure removes the Pod from ready endpoints for new traffic, and only liveness failure restarts containers.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting a restart after readiness failure confuses it with a liveness probe.</li>
+<li><strong>How to verify:</strong> The prediction says eligibility changes without a required restart.</li>
+</ul>
 <h3 id="exercise-2-choose-a-startup-allowance-for-a-slow-initializer">Exercise 2: Choose a startup allowance for a slow initializer.<a class="heading-anchor" href="#exercise-2-choose-a-startup-allowance-for-a-slow-initializer" aria-label="Link to this section">#</a></h3>
 <p>Do not increase every timeout indiscriminately. Name the phase receiving the allowance.</p>
 <p><strong>Expected:</strong> A bounded measured initialization window with separate request deadlines.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Measure initialization and set startupProbe failureThreshold times periodSeconds to cover it with a margin.</li>
+<li><strong>Why it is correct:</strong> The startup probe holds off liveness checks until the app starts, without stretching normal request deadlines.</li>
+<li><strong>Plausible wrong approach:</strong> Raising liveness initialDelaySeconds a lot slows detection of real hangs for the Pod&#x27;s lifetime.</li>
+<li><strong>How to verify:</strong> The window is bounded by measurement, and request deadlines stay separate.</li>
+</ul>
 <h3 id="exercise-3-design-a-graceful-shutdown-timeline">Exercise 3: Design a graceful shutdown timeline.<a class="heading-anchor" href="#exercise-3-design-a-graceful-shutdown-timeline" aria-label="Link to this section">#</a></h3>
 <p>Account for propagation and existing connections. Application cleanup must fit the configured grace period.</p>
 <p><strong>Expected:</strong> Stop new work, drain bounded in-flight work and exit before forced termination.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Order the steps as become unready, stop new work, drain in-flight work and exit before terminationGracePeriodSeconds.</li>
+<li><strong>Why it is correct:</strong> After SIGTERM the kubelet waits for the grace period and then kills the container, so draining must finish first.</li>
+<li><strong>Plausible wrong approach:</strong> Exiting on SIGTERM drops in-flight requests, while ignoring it ends in a forced kill.</li>
+<li><strong>How to verify:</strong> The timeline ends before forced termination.</li>
+</ul>
 <h3 id="exercise-4-diagnose-200-responses-during-a-failed-new-rollout">Exercise 4: Diagnose 200 responses during a failed new rollout.<a class="heading-anchor" href="#exercise-4-diagnose-200-responses-during-a-failed-new-rollout" aria-label="Link to this section">#</a></h3>
 <p>Old replicas can mask the failure. Preserve image and Pod identity in acceptance evidence.</p>
 <p><strong>Expected:</strong> Identify the serving revision and new-revision readiness separately.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Identify which ReplicaSet served each response and check the new ReplicaSet&#x27;s readiness.</li>
+<li><strong>Why it is correct:</strong> A rolling update keeps old Pods serving while new ones fail readiness, so 200s can come from the old revision.</li>
+<li><strong>Plausible wrong approach:</strong> Treating 200 responses as rollout success ignores which revision answered.</li>
+<li><strong>How to verify:</strong> The answer names the serving revision and new-revision readiness separately.</li>
+</ul>
 <h3 id="exercise-5-explain-why-database-dependent-liveness-can-be-harmful">Exercise 5: Explain why database-dependent liveness can be harmful.<a class="heading-anchor" href="#exercise-5-explain-why-database-dependent-liveness-can-be-harmful" aria-label="Link to this section">#</a></h3>
 <p>Choose probes according to recoverability. Cascading restarts can worsen an outage.</p>
 <p><strong>Expected:</strong> It may restart healthy clients without fixing the unavailable dependency.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Show that a liveness probe that calls the database restarts the app whenever the database is down.</li>
+<li><strong>Why it is correct:</strong> Restarting the client does not repair the dependency and adds load as restarted Pods reconnect.</li>
+<li><strong>Plausible wrong approach:</strong> Checking dependencies in liveness to be thorough turns one outage into a restart loop.</li>
+<li><strong>How to verify:</strong> The answer says it restarts healthy clients without fixing the dependency.</li>
+</ul>
 <h3 id="exercise-6-define-rollout-traffic-continuity-acceptance">Exercise 6: Define rollout traffic-continuity acceptance.<a class="heading-anchor" href="#exercise-6-define-rollout-traffic-continuity-acceptance" aria-label="Link to this section">#</a></h3>
 <p>The complete claim includes revision identity and lifecycle behavior, not just a momentary successful request.</p>
 <p>Consider a synthetic ten-second request already in progress when a thirty-second termination grace period begins. The app should stop admitting new work and let that request finish within its bounded drain policy. A preStop action consumes part of the same grace period, so sleeping for the entire allowance leaves no promised extra drain time. Observe the actual connection result and process termination rather than counting only Ready replicas.</p>
-<p><strong>Expected:</strong> Current revision becomes ready, expected responses succeed and old resources drain/clean up.</p></article>
+<p><strong>Expected:</strong> Current revision becomes ready, expected responses succeed and old resources drain/clean up.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Require that the new revision is ready, expected responses succeed and old Pods drain and are removed.</li>
+<li><strong>Why it is correct:</strong> Each condition shows a different part of a clean rollout, from readiness to cleanup.</li>
+<li><strong>Plausible wrong approach:</strong> Stopping at rollout status complete skips response evidence and leftover old resources.</li>
+<li><strong>How to verify:</strong> The acceptance record covers readiness, responses and cleanup.</li>
+</ul></article>
   </main>
 </body>
 </html>

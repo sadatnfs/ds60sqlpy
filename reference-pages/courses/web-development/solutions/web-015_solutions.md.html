@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-015.md</code>.</p>
 <h3 id="exercise-1-name-the-axes-for-flex-direction-column">Exercise 1: Name the axes for flex-direction:column.<a class="heading-anchor" href="#exercise-1-name-the-axes-for-flex-direction-column" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The main axis is vertical in the usual horizontal writing mode; the cross axis is horizontal.</p>
+<p><strong>Approach:</strong> Note that <code>flex-direction: column</code> sets the main axis along the block direction, so in horizontal writing it runs top to bottom.</p>
 <p><strong>Why:</strong> flex-direction: column makes the main axis vertical, so justify-content distributes items vertically and align-items aligns them horizontally.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming <code>justify-content</code> still aligns horizontally fails because it always follows the main axis, which is now vertical.</p>
+<p><strong>How to verify:</strong> With a fixed container height, <code>justify-content: center</code> moves items vertically and <code>align-items: center</code> moves them horizontally.</p>
 <h3 id="exercise-2-add-gap-between-navigation-items-without-per-item-margins">Exercise 2: Add gap between navigation items without per-item margins.<a class="heading-anchor" href="#exercise-2-add-gap-between-navigation-items-without-per-item-margins" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Spacing is owned by the container and stays consistent when wrapping.</p>
+<p><strong>Approach:</strong> Remove per-item margins and set <code>gap: 0.75rem</code> on the flex container so spacing applies only between items.</p>
 <p><strong>Why:</strong> gap adds space only between items, including after wrapping, so the outer edges stay flush.</p>
+<p><strong>Plausible wrong approach:</strong> Keeping <code>margin-right</code> on every link fails because the last item gets extra trailing space and wrapped rows start misaligned.</p>
+<p><strong>How to verify:</strong> When the links wrap, the first link on each row lines up with the container edge and gaps look equal.</p>
 <h3 id="exercise-3-build-a-wrapping-navigation-bar-and-flexible-card-row">Exercise 3: Build a wrapping navigation bar and flexible card row.<a class="heading-anchor" href="#exercise-3-build-a-wrapping-navigation-bar-and-flexible-card-row" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Long labels stay reachable at narrow widths and DOM order remains logical.</p>
+<p><strong>Approach:</strong> Use a wrapping flex <code>ul</code> for navigation and a wrapping flex container for cards with <code>flex: 1 1 12rem</code> and <code>min-inline-size: 0</code>.</p>
 <p><strong>Why:</strong> Wrapping moves items to a new line instead of overflowing, while source order keeps reading and focus order logical.</p>
+<p><strong>Plausible wrong approach:</strong> Using the <code>order</code> property to move the last link first fails because keyboard focus still follows DOM order and seems to jump.</p>
+<p><strong>How to verify:</strong> At the narrow preset every link is visible, and pressing Tab visits them in the same order they appear.</p>
 <h3 id="exercise-4-diagnose-a-flex-child-that-refuses-to-shrink">Exercise 4: Diagnose a flex child that refuses to shrink.<a class="heading-anchor" href="#exercise-4-diagnose-a-flex-child-that-refuses-to-shrink" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect its minimum size, long content and flex-basis before forcing overflow hidden.</p>
+<p><strong>Approach:</strong> Inspect the child&#x27;s computed <code>min-width</code>, its longest word and its <code>flex-basis</code> before changing anything.</p>
 <p><strong>Why:</strong> Flex items default to min-width: auto, so they will not shrink below their longest content until you set min-width: 0 or allow wrapping.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>overflow: hidden</code> to the parent fails because it hides the overflow and the clipped text silently becomes unreadable.</p>
+<p><strong>How to verify:</strong> After setting <code>min-inline-size: 0</code>, the item&#x27;s computed width is below its content width and nothing is clipped.</p>
 <h3 id="exercise-5-test-one-item-many-items-and-a-very-long-label">Exercise 5: Test one item, many items and a very long label.<a class="heading-anchor" href="#exercise-5-test-one-item-many-items-and-a-very-long-label" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The layout remains readable without relying on exactly three equal strings.</p>
+<p><strong>Approach:</strong> Run three fixtures: a single item, twelve items and one item with a very long label, at both wide and narrow widths.</p>
 <p><strong>Why:</strong> A layout tuned for three equal labels can overflow or wrap badly when the content changes.</p>
+<p><strong>Plausible wrong approach:</strong> Testing with three equal labels fails because it never exercises wrapping or the content-based minimum that real labels trigger.</p>
+<p><strong>How to verify:</strong> Each fixture shows no horizontal page scrollbar and every label is fully readable.</p>
 <h3 id="exercise-6-explain-when-flexbox-fits-better-than-grid">Exercise 6: Explain when Flexbox fits better than Grid.<a class="heading-anchor" href="#exercise-6-explain-when-flexbox-fits-better-than-grid" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Use Flexbox for distributing items along one primary dimension; use Grid for explicit two-dimensional alignment.</p>
+<p><strong>Approach:</strong> Ask whether items only need to line up along one row or column, or whether rows and columns must align with each other.</p>
 <p><strong>Why:</strong> Flexbox distributes items along one axis based on their content, while Grid places items in explicit rows and columns.</p>
+<p><strong>Plausible wrong approach:</strong> Using Flexbox for a card grid with aligned columns fails because each wrapped row sizes independently, so columns drift.</p>
+<p><strong>How to verify:</strong> In a wrapped flex row of unequal cards, edges in different rows do not line up, while Grid aligns them.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-015_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

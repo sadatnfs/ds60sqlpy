@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A dbt package is another project that contributes resources such as macros or models. Declaring a package and preparing it are separate steps. A model can reference a package namespace only after the dependency is available under the project&#x27;s configured package installation location. This is a project dependency boundary, not a reason to download arbitrary code during a learner run.</p>
 <p>The example uses a local package created inside the owned temporary project. Its macro adds one to a supplied SQL expression. The deps command prepares that local dependency and writes a lock artifact; the subsequent build resolves the namespace and executes the emitted SQL in DuckDB. No registry or network request is needed.</p>
 <p>A package name or lockfile is not a trust certificate. Review source, license, versions and transitive requirements before adopting an external package. A local path dependency can change without an external release number, so a reproducible project also needs its source identity. Keep authored local packages separate from generated installation directories and never treat copied build output as the maintained source.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>dbt package:</strong> A dbt project whose macros and models another project installs and uses.</li>
+<li><strong>packages.yml:</strong> The file listing package dependencies; here it points to a local path, so installation needs no download.</li>
+<li><strong>dbt deps:</strong> The command that installs declared packages and writes package-lock.yml; it must run before a build that uses them.</li>
+<li><strong>Package namespace:</strong> The prefix that calls a package macro by package name, such as <code>classroom_utils.add_one</code>, avoiding name collisions.</li>
+<li><strong>package-lock.yml:</strong> The file that pins resolved package versions for repeatable installs; it records what was installed, not that the code is trustworthy.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>packages.yml declares a local package path. The package has its own dbt_project.yml, name and macros directory. A namespace-qualified call such as classroom_utils.add_one identifies the package that supplies the macro. Run deps before compile/build, then inspect package-lock.yml and the manifest macro entry. Local dependencies are the only package preparation performed in these offline examples.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

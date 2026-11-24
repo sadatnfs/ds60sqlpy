@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Check solver status and report residual and condition estimates to interpret the accuracy of a linear solve.
+
 Work through *cuSOLVER, conditioning and robust linear algebra* with the concrete cases below. Finish with this evidence:
 checked solver status, residual report and a numerically justified interpretation. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A linear solver seeks x such that A*x approximates b. Factorization usually avoids the unnecessary work and numerical costs of explicitly constructing an inverse. Library status tells whether the requested procedure completed; a residual checks how well the returned vector satisfies the equation. A small residual does not guarantee a small error in x when A is ill-conditioned, meaning small input changes can greatly change the solution. Report both the residual and a conditioning interpretation. Workspace, matrix layout, pivoting and rank assumptions belong to the solver contract rather than being incidental implementation details.
+
+### Key terms
+
+- **Factorization:** A decomposition such as LU or Cholesky that turns one solve into simpler triangular solves.
+- **Residual:** The vector b - Ax for a computed x, which measures how well the equation is satisfied.
+- **Condition number:** A measure of how much relative input error can be amplified in the solution.
+- **devInfo:** A device integer that cuSOLVER sets to report invalid parameters or a singular factorization.
 
 ## Mathematical contract
 

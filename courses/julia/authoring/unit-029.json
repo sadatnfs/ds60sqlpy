@@ -3,6 +3,28 @@
   "title": "Tasks, channels and bounded asynchronous pipelines",
   "concepts": ["Task", "Channel", "backpressure", "closure", "failure propagation"],
   "outcome": "Build a bounded producer-consumer pipeline, join its work and explain how asynchronous scheduling differs from simultaneous CPU execution.",
+  "key_terms": [
+    [
+      "Task",
+      "A lightweight unit of concurrent work that runs until it finishes or waits, then lets other tasks proceed."
+    ],
+    [
+      "Channel",
+      "A typed queue between tasks with a capacity, where `put!` adds an item and `take!` removes one."
+    ],
+    [
+      "Backpressure",
+      "A full channel makes `put!` wait until a consumer takes an item, so a fast producer cannot queue unlimited records."
+    ],
+    [
+      "Channel closure",
+      "Closing a channel tells consumers that no more values will arrive, so iteration ends after the buffered values are consumed."
+    ],
+    [
+      "Failure propagation",
+      "The `@sync` block waits for its tasks and throws a `CompositeException` when any of them fails, so errors are not lost."
+    ]
+  ],
   "level": "advanced",
   "minutes": 150,
   "prerequisites": ["julia-005", "julia-009", "julia-027"],
@@ -14,48 +36,68 @@
     ["Tasks and channels", "https://docs.julialang.org/en/v1/base/parallel/"]
   ],
   "figure": 0,
+  "approach": "`squared_pipeline` connects one producer task and one consumer task through `Channel{Int}(2)` inside `@sync`. The producer closes the channel in `finally`, so the consumer's loop always ends, and `@sync` waits for both tasks and rethrows any failure as `CompositeException`. Tasks interleave on one thread here; they do not run simultaneously.",
   "exercises": [
     {
       "title": "Trace the queue",
       "task": "Describe what happens when a producer fills a capacity-two buffer.",
       "expected": "The next put! waits until space is available.",
       "hint": "Backpressure limits queued values.",
-      "answer": "The consumer drains a value, allowing the producer to continue without unbounded queue growth."
+      "answer": "The consumer drains a value, allowing the producer to continue without unbounded queue growth.",
+      "why": "With capacity 2, a third `put!` blocks until the consumer takes a value, so at most two values wait in the channel.",
+      "wrong": "Using an unbounded channel removes the wait but lets a fast producer fill memory when the consumer is slow.",
+      "verify": "Print a message before each `put!` and `take!` in an owned copy and observe that puts never run more than two ahead."
     },
     {
       "title": "Preserve output meaning",
       "task": "Predict the output for `[-2, 0, 3]`.",
       "expected": "The result is `[4, 0, 9]`.",
       "hint": "One producer preserves this input order.",
-      "answer": "Squares are emitted into the result in channel-consumption order; broader parallel pipelines need explicit ordering."
+      "answer": "Squares are emitted into the result in channel-consumption order; broader parallel pipelines need explicit ordering.",
+      "why": "A single producer puts -2, 0 and 3 in order and the single consumer appends their squares in the same order, giving `[4, 0, 9]`.",
+      "wrong": "Assuming the same order holds with several consumers ignores that each can take values at different times.",
+      "verify": "The reference asserts `squared_pipeline([-2, 0, 3]) == [4, 0, 9]` and `[2, 2]` gives `[4, 4]`."
     },
     {
       "title": "Inject a failure",
       "task": "Set `fail_after = 0` on a nonempty list.",
       "expected": "A CompositeException reaches the caller.",
       "hint": "The finally block still closes the channel.",
-      "answer": "No shortened result is mislabeled success; joining propagates the producer failure."
+      "answer": "No shortened result is mislabeled success; joining propagates the producer failure.",
+      "why": "`fail_after = 0` makes the producer raise on index 1 before any `put!`; `finally` closes the channel and `@sync` reports `CompositeException`.",
+      "wrong": "Wrapping the producer in `try` and swallowing the error returns an empty list that looks like a successful run.",
+      "verify": "The reference asserts `@test_throws CompositeException squared_pipeline([1]; fail_after = 0)`."
     },
     {
       "title": "Drain a closed channel",
       "task": "Put 7 into a channel, close it, then collect it.",
       "expected": "The buffered value is still returned.",
       "hint": "Closure means no future puts, not immediate deletion.",
-      "answer": "Buffered values can be drained before iteration terminates."
+      "answer": "Buffered values can be drained before iteration terminates.",
+      "why": "Closing a channel stops future `put!` calls, but the buffered 7 can still be read, so `collect` returns `[7]`.",
+      "wrong": "Expecting `close` to discard buffered values loses the last items a producer sent before finishing.",
+      "verify": "Example B asserts `collect(channel) == [7]`, `!isopen(channel)` and an `InvalidStateException` on a later `put!`."
     },
     {
       "title": "Identify an unsupported generalization",
       "task": "Explain what can go wrong if an arbitrary consumer callback throws.",
       "expected": "A producer can remain blocked without coordinated cancellation.",
       "hint": "Inspect who closes and who waits.",
-      "answer": "The bounded example proves its stated simple consumer path; a generic pipeline needs both failure directions designed."
+      "answer": "The bounded example proves its stated simple consumer path; a generic pipeline needs both failure directions designed.",
+      "why": "If the consumer throws, nothing takes from the channel, so a producer blocked on a full buffer waits forever and `@sync` never returns.",
+      "wrong": "Assuming the `finally` in the producer handles every failure ignores that it only runs when the producer itself finishes.",
+      "verify": "Inject a consumer error in an owned copy with a timeout and design who closes the channel in that direction."
     },
     {
       "title": "Transfer to file processing",
       "task": "Specify identifiers and completion evidence for concurrent files.",
       "expected": "Use stable file IDs and explicit per-file outcomes.",
       "hint": "A printed line is not a durable acknowledgment.",
-      "answer": "Define ordering, retries and partial failure semantics before introducing concurrency."
+      "answer": "Define ordering, retries and partial failure semantics before introducing concurrency.",
+      "why": "For files, each result should carry a stable file id and an explicit success or failure outcome so retries and partial runs can be audited.",
+      "wrong": "Treating a printed `done` line as completion loses the record if the process stops before output is flushed.",
+      "verify": "Write one outcome row per file id and check that the count of rows equals the count of input files."
     }
-  ]
+  ],
+  "checks_note": "`[2, 2]` and `[4]` add repeated and single-value cases. The `@async 6 * 7` lines show that `fetch` waits for the task and returns 42, after which `istaskdone(job)` is true, which is the same join that `@sync` performs for the pipeline."
 }

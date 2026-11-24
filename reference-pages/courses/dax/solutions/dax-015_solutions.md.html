@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict setting Color = Green inside the Blue context.</p>
 <p>Green selects Bag, whose revenue is BLANK because it has no facts.</p>
+<p><strong>Why it fits this model:</strong> Product[Color] = &quot;Red&quot; replaces the incoming Blue filter on that same column. Green replaces it the same way, leaving Bag, which has no sales.</p>
+<p><strong>Tempting mistake:</strong> Reading BLANK as proof that Blue and Green were intersected is the mistake. The intersection is also empty, so revenue cannot tell the two rules apart.</p>
+<p><strong>How to confirm:</strong> Under Blue, <code>CALCULATE ( COUNTROWS ( Product ), Product[Color] = &quot;Green&quot; )</code> returns 1 (Bag), while the KEEPFILTERS version returns BLANK.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change case B&#x27;s Color to Red.</p>
 <p>The modified revenue is 24.</p>
+<p><strong>Why it fits this model:</strong> Color and Category are different columns, so the Red filter is added beside Paper. Only Pen is both, and its lines S2 and S5 give 24.</p>
+<p><strong>Tempting mistake:</strong> Offering Red as proof that Paper survived proves nothing, because all-Red revenue is also 24. Blue is the case that tells them apart: 67 against 163.</p>
+<p><strong>How to confirm:</strong> Under Paper, CALCULATE with Red returns 24 and COUNTROWS(Product) returns 1.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a measure that forces year 2025 but retains region.</p>
 <p>CALCULATE([NetRevenue],&#x27;Date&#x27;[Year]=2025) retains an independent Customer.Region filter; under North the result is 83.</p>
+<p><strong>Why it fits this model:</strong> CALCULATE([NetRevenue], &#x27;Date&#x27;[Year] = 2025) replaces only the year. A Customer[Region] filter stays, so under North it returns 83.</p>
+<p><strong>Tempting mistake:</strong> <code>CALCULATE ( [NetRevenue], FILTER ( ALL ( Sales ), RELATED ( &#x27;Date&#x27;[Year] ) = 2025 ) )</code> also removes the region filter through ALL(Sales) and returns 123 under North.</p>
+<p><strong>How to confirm:</strong> Expect 83 under North, 40 under South and 123 with no region selected.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose saying CALCULATE removed every report filter.</p>
 <p>They can remain active. Case B retains Category and therefore does not return all-Blue revenue 163.</p>
+<p><strong>Why it fits this model:</strong> CALCULATE replaces filters only on the columns its arguments name. In case B the Color filter is new, so the incoming Category filter stays.</p>
+<p><strong>Tempting mistake:</strong> If CALCULATE cleared every filter, BluePaperRevenue would be all-Blue revenue, 163, and would include the Mug lines.</p>
+<p><strong>How to confirm:</strong> BluePaperRevenue is 67, the Notebook lines S1 (20), S4 (27) and S7 (20).</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain when a constant filter is inappropriate for an interactive metric.</p>
 <p>A fixed-year or fixed-color measure should be clearly named; use an intersection policy when the metric should respect the selection.</p>
+<p><strong>Why it fits this model:</strong> A fixed-color measure answers a fixed question. Named Blue Revenue, it returns 163 under any color slicer, which is right only if readers know it ignores that selection.</p>
+<p><strong>Tempting mistake:</strong> Naming it Revenue and showing 163 under a Red slicer contradicts the user&#x27;s choice; an intersection with KEEPFILTERS would return BLANK there.</p>
+<p><strong>How to confirm:</strong> Under Red, the base measure returns 24, the fixed measure 163 and the KEEPFILTERS version BLANK.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the distinction to a share denominator.</p>
 <p>Preserve filters defining the comparable population while changing only the category or time dimension required by the denominator&#x27;s definition.</p>
+<p><strong>Why it fits this model:</strong> For a category share within the current region and year, remove only the category filter. North 2025 Paper is 47 (S4 and S5) out of 83, about 0.566.</p>
+<p><strong>Tempting mistake:</strong> Using ALL or REMOVEFILTERS on everything makes the denominator 187, and Paper&#x27;s share drops to about 0.251 of a total outside the selection.</p>
+<p><strong>How to confirm:</strong> Under North and 2025, Paper is 47 / 83 and Home is 36 / 83, and the two shares add to 1.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

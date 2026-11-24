@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Freshness asks whether a source has been updated within a permitted age. It is different from completeness, correctness and event-time coverage. A source can contain a recent timestamp while missing many records, and an old historical dataset can be complete for its intended purpose. Choose the freshness clock and threshold from the consumer&#x27;s requirement.</p>
 <p>The example uses the actual DuckDB clock and constructs a fresh record or a record two days old. A one-hour error threshold distinguishes those cases. The timestamp is explicitly timezone-aware. This is a bounded local check of dbt&#x27;s freshness behavior, not an observation about an external ingestion service.</p>
 <p>The meaning of loaded_at matters. It might represent ingestion completion, upstream publication or a field supplied by the source. If future timestamps, partial loads or clock skew are possible, max(loaded_at) alone can produce a misleading pass. A production contract should combine freshness with coverage, batch identity and relevant consistency checks.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Source:</strong> A YAML declaration for an existing table that dbt reads but does not build, referenced in models with <code>source()</code>.</li>
+<li><strong>Source freshness:</strong> A check that compares the newest loaded_at_field value with the current time and reports pass, warn or error against declared thresholds.</li>
+<li><strong>loaded_at_field:</strong> The timestamp column freshness measures; whether it records load time or event time decides what the reported age means.</li>
+<li><strong>Freshness threshold:</strong> A <code>warn_after</code> or <code>error_after</code> count and period that sets how old the newest record may be before freshness warns or fails.</li>
+<li><strong>sources.json:</strong> The artifact written by <code>dbt source freshness</code> with each source&#x27;s newest loaded time, its age and its status.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>A source declaration names a schema and table identifier independently of a model. Its loaded_at_field and freshness thresholds define the check. source freshness writes target/sources.json. The program checks its actual pass/error status and uses source() in the model to declare the dependency. Do not confuse this artifact with ordinary model run_results.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

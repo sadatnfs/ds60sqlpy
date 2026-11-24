@@ -73,6 +73,11 @@ def verify_line(lesson_id, exercise, reading):
     return f"In a fresh process, the exercise checks confirm {described}."
 
 
+def sentence(text):
+    text = text.strip()
+    return text if text[-1:] in ".?!" else text + "."
+
+
 def practice_note(lesson_id):
     if lesson_id in FROZEN_REFERENCES:
         return "Exercises 1-3 repeat the worked examples as guided reconstructions; exercises 4-6 change the fixture or expose a failure."
@@ -147,6 +152,15 @@ and evidence about generalization. Done when I can derive the worked values, pas
                 "diagnosis",
                 "When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.",
             )
+            w = [e["title"] for e in worked]
+            x = [e["title"] for e in exercises]
+            term_list = ", ".join(k for k, v in s["terms"][:3])
+            prediction = f"Derive Example A again with its **Expected** line covered: {w[0]}. Predict exercise 6, {x[5]}, from its prompt alone: {sentence(exercises[5]['prompt'])} Then explain why this finish condition holds: {p['verification']} Keep each prediction beside the observed value."
+            hints = f"Hint 1: Example B ({w[1]}) alters one assumption of Example A ({w[0]}). Hint 2: exercise 4, {x[3]}, should end at {sentence(exercises[3]['expected'])} Work backward from it. Hint 3: exercise 5, {x[4]}, changes one input; predict which value moves first."
+            self_check = f"Close the worked examples and rebuild Example C, {w[2]}, from its inputs alone. Predict whether exercise 3, {x[2]}, survives one changed input. Then explain {term_list} in terms of that fixture; say which claims the code guarantees and which need new observations."
+            next_step = f"If Example A ({w[0]}) cannot be rebuilt without help, revisit {prereq} first. Otherwise keep your exercise 2 attempt, {x[1]}, as a regression case alongside a fresh transfer input, then continue along the course plan."
+            if "capstone" in p["title"].lower():
+                next_step += " In a capstone, a failed acceptance condition is a valid no-go decision; state what evidence would reopen it."
             document = f"""# {id}: {p["title"]}
 
 ## Level and prerequisites
@@ -199,7 +213,7 @@ Compare [{paired}](../../deep-learning-tensorflow/guides/{paired}.md) after deri
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: {p["verification"]} Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+{prediction}
 
 ## Exercises
 
@@ -211,15 +225,15 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+{hints}
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain {", ".join(k for k, v in s["terms"][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+{self_check}
 
 ## Next step
 
-Revisit the direct prerequisite {prereq} if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+{next_step}
 
 ## Sources and verification status
 
@@ -239,7 +253,7 @@ API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026
 """
             explanation_doc = f"""# {id}: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting {p["title"]} yourself. They reuse the guide's literal inputs, starting from Example A, {w[0]}, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests {term_list}. After a pass, choose a new input for exercise 6, {x[5]}, without looking.
 
 ## Mechanism review
 
@@ -282,7 +296,7 @@ The question is: {e["prompt"]}
                     e["code"], "    "
                 )
             blocks.extend(exercise_blocks[index] for index in reference_order)
-            explanation_doc += "## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
+            explanation_doc += f"## Review after comparison\n\nRepeat exercise 4, {x[3]}, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, {x[4]}, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.\n"
             if id in FROZEN_GUIDES:
                 (ROOT / guide).write_bytes(
                     (AUTHORING / "frozen_guides" / f"{id}.md.snapshot").read_bytes()

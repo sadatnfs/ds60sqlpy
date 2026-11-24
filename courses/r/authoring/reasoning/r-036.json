@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Tracing the state through three chunks",
+      "body": "The reference call `combine(list(c(1, NA_real_), c(3, 5), NA_real_))` updates three numbers per chunk:\n\n```text\nstep       chunk    valid        observed  missing  total\nstart                            0         0        0\nchunk 1    1, NA    TRUE FALSE   1         1        1\nchunk 2    3, 5     TRUE TRUE    3         1        9\nchunk 3    NA       FALSE        3         2        9\nfinalize   mean = 9 / 3 = 3\n```\n\nIn chunk 3, `chunk[valid]` is empty and `sum(numeric(0))` is 0, so the total stays 9 while the missing count rises. An empty chunk adds zeros to all three entries in the same way.\n\nThe state never grows: three numbers describe any number of chunks, and the mean is computed once at the end. That is the memory contract. A reader that loads one chunk at a time from a file only ever needs that chunk plus the state in memory. The reference, however, builds the whole list of chunks before combining, so it demonstrates the arithmetic, not the memory saving. A memory claim needs a reader that streams from disk and a measurement of the running process."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Divide the merged total by the merged count once: 100 over 4.",
+      "why": "The chunks hold 10, and 20, 30 and 40. Their counts and sums add to 4 and 100, so the mean is 25, the same as averaging all four values at once.",
+      "wrong": "Averaging the chunk means 10 and 30 to get 20. The single value chunk counts as much as the three value chunk.",
+      "verify": "`a$mean` returns 25, while `mean(c(10, 30))` returns 20."
+    },
+    {
+      "approach": "Split the same four values differently, including an empty chunk, and compare the results.",
+      "why": "a uses 10 and then 20, 30, 40; b uses 10, 20, then nothing, then 30, 40. The state only adds counts and sums, so both reach count 4, missing 0 and total 100. These values are integers, so the comparison can be exact.",
+      "wrong": "Using identical on fractional measurements. Grouping 0.1 and 0.2 apart from 0.3 can change the last bit of the total, so a correct implementation would fail; such data need all.equal.",
+      "verify": "`identical(a, b)` returns TRUE, and both `a$mean` and `b$mean` return 25."
+    },
+    {
+      "approach": "Check the observed count before dividing, and return NA_real_ when it is 0.",
+      "why": "For three missing values, observed is 0, missing is 3 and total is 0. A mean over no observations does not exist, and the missing count shows why.",
+      "wrong": "Dividing without the check. 0 divided by 0 returns NaN, which passes downstream as a number and hides that every value was missing.",
+      "verify": "`is.na(missing$mean)` returns TRUE, and `missing$state[[\"missing\"]]` returns 3."
+    },
+    {
+      "approach": "Keep the values needed for the exact median, or count each distinct value across chunks, or make a second pass over the data.",
+      "why": "For a's chunks the medians are 10 and 30, which average to 20. The four values 10, 20, 30 and 40 have median 25. With b's boundaries the chunk medians 15 and 35 happen to average to 25, so the method can look right on one split and be wrong on another.",
+      "wrong": "Averaging chunk medians. A median depends on where each value sits in the combined order, and one number per chunk loses that.",
+      "verify": "`median(c(10, 20, 30, 40))` returns 25, while `mean(c(10, 30))` returns 20."
+    },
+    {
+      "approach": "Let the loop add the empty chunk's zero count, zero missing and zero total.",
+      "why": "For `numeric(0)`, valid is `logical(0)`, both sums are 0, and the sum of no values is 0. The state is unchanged, which is why b, which contains an empty chunk, still matches a.",
+      "wrong": "Computing a mean per chunk before merging. `mean(numeric(0))` is NaN, and adding NaN to the state turns the final result into NaN as well.",
+      "verify": "`identical(a, b)` returns TRUE although b includes an empty chunk."
+    },
+    {
+      "approach": "State that the reference checks arithmetic equivalence only, and name what a scalability claim needs: a disk reader, realistic sizes, peak memory and timing.",
+      "why": "Here all chunks already sit in one R list, so memory is the same as for a single vector. Only a streamed source shows the benefit of keeping three numbers of state.",
+      "wrong": "Claiming the function handles data larger than memory because it loops over chunks. The loop proves the merge is correct, not that the data were never fully loaded.",
+      "verify": "A run on a file many chunks long shows the same mean as an in memory calculation, with peak memory measured by a process monitor."
+    }
+  ]
+}

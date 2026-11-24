@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-040.md</code>.</p>
 <h3 id="exercise-1-name-the-invariant-enforced-by-the-constructor">Exercise 1: Name the invariant enforced by the constructor.<a class="heading-anchor" href="#exercise-1-name-the-invariant-enforced-by-the-constructor" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A successfully constructed duration cannot begin with negative minutes.</p>
+<p><strong>Approach:</strong> Read the constructor check and state its guarantee: any <code>Duration</code> that exists was created with minutes of zero or more.</p>
 <p><strong>Why:</strong> Because the constructor throws for negative minutes and the property is readonly, every Duration object has nonnegative minutes for its whole life.</p>
+<p><strong>Plausible wrong approach:</strong> Saying the check makes <code>minutes</code> unchangeable fails because that comes from <code>readonly</code>, while the check only guards the starting value.</p>
+<p><strong>How to verify:</strong> <code>new Duration(-1)</code> throws InvalidArgumentException and <code>new Duration(0)</code> succeeds. Trying <code>$d-&gt;minutes = 5</code> afterward throws an Error, which is the separate readonly guarantee.</p>
 <h3 id="exercise-2-add-a-method-that-formats-the-duration">Exercise 2: Add a method that formats the duration.<a class="heading-anchor" href="#exercise-2-add-a-method-that-formats-the-duration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Formatting derives from state without changing it.</p>
+<p><strong>Approach:</strong> Add <code>public function label(): string</code> that returns the minutes with a unit, reading <code>$this-&gt;minutes</code> without assigning to it.</p>
 <p><strong>Why:</strong> A method that only reads state keeps the object immutable and the formatting reusable.</p>
+<p><strong>Plausible wrong approach:</strong> Storing the label in a second property fails because a future change to minutes could leave the label out of date.</p>
+<p><strong>How to verify:</strong> Calling <code>label()</code> twice returns 45 minutes both times, and minutes is still 45.</p>
 <h3 id="exercise-3-build-a-validated-study-session-value-object">Exercise 3: Build a validated study-session value object.<a class="heading-anchor" href="#exercise-3-build-a-validated-study-session-value-object" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Its topic and duration satisfy explicit constructor checks and remain readonly.</p>
+<p><strong>Approach:</strong> Promote <code>string $topic</code> and <code>int $minutes</code> as readonly, trim and reject an empty topic, and reject negative minutes in the constructor.</p>
 <p><strong>Why:</strong> Constructor validation plus readonly properties mean invalid sessions cannot be created or changed later.</p>
+<p><strong>Plausible wrong approach:</strong> Validating in a separate <code>isValid()</code> method fails because callers can construct and use an invalid object without calling it.</p>
+<p><strong>How to verify:</strong> Each invalid input throws during <code>new</code>, and the valid object shows both fields unchanged after use. A topic of three spaces is rejected too, because the constructor trims before checking for empty text.</p>
 <h3 id="exercise-4-diagnose-a-setter-that-allows-invalid-state-after-construction">Exercise 4: Diagnose a setter that allows invalid state after construction.<a class="heading-anchor" href="#exercise-4-diagnose-a-setter-that-allows-invalid-state-after-construction" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Every mutation boundary must preserve the invariant, or mutation should be removed.</p>
+<p><strong>Approach:</strong> Remove the setter or make it validate with the same rule as the constructor before assigning the new value.</p>
 <p><strong>Why:</strong> A setter without the constructor&#x27;s checks lets invalid state in later, so it must validate the same rule or be removed.</p>
+<p><strong>Plausible wrong approach:</strong> Keeping a public setter with no check fails because any caller can set minutes to -10 after construction.</p>
+<p><strong>How to verify:</strong> After the repair, no public method can leave minutes below zero, as a test of each method shows. Searching the class for assignments to <code>$this-&gt;minutes</code> finds only the constructor, or a setter that repeats the check.</p>
 <h3 id="exercise-5-test-an-empty-topic-and-zero-duration">Exercise 5: Test an empty topic and zero duration.<a class="heading-anchor" href="#exercise-5-test-an-empty-topic-and-zero-duration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The topic is rejected while zero follows the declared nonnegative policy.</p>
+<p><strong>Approach:</strong> Construct with an empty topic and with zero minutes, catching the expected exception for the first one.</p>
 <p><strong>Why:</strong> The empty topic violates the rule and throws, while zero minutes satisfies the nonnegative rule.</p>
+<p><strong>Plausible wrong approach:</strong> Treating zero minutes as invalid fails because the stated policy is nonnegative, which includes zero.</p>
+<p><strong>How to verify:</strong> The empty topic throws InvalidArgumentException, while zero minutes creates a valid object. Printing the zero minute object&#x27;s <code>label()</code> shows 0 minutes, matching the documented nonnegative rule.</p>
 <h3 id="exercise-6-explain-shallow-readonly-versus-deep-immutability">Exercise 6: Explain shallow readonly versus deep immutability.<a class="heading-anchor" href="#exercise-6-explain-shallow-readonly-versus-deep-immutability" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A readonly property cannot be reassigned, but referenced mutable objects can have their own changing state.</p>
+<p><strong>Approach:</strong> Explain that readonly blocks reassignment of the property but not changes inside an object it refers to.</p>
 <p><strong>Why:</strong> readonly prevents reassigning the property but not mutating the object it refers to, so deep immutability needs immutable members too.</p>
+<p><strong>Plausible wrong approach:</strong> Claiming a readonly <code>ArrayObject</code> property makes the list unchangeable fails because appending items still works.</p>
+<p><strong>How to verify:</strong> In the contrast case, the append succeeds and count prints 2, while reassignment throws an Error. Copying the input into a plain readonly array property instead makes both the append and the reassignment fail.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-040_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

@@ -63,7 +63,7 @@ def review_dimension(raw):
     reviewed = raw.filter(F.col("approved")).select("key", "factor")
     rows = reviewed.limit(101).count()
     if rows > 100 or reviewed.agg(F.countDistinct("key")).first()[0] != rows:
-        raise ValueError("Approved keys must be known,unique and bounded")
+        raise ValueError("Approved keys must be known, unique and bounded")
     return reviewed
 
 

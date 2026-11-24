@@ -9,6 +9,28 @@
     "type ownership"
   ],
   "outcome": "Design generic operations over owned types and resolve overlapping method signatures explicitly.",
+  "key_terms": [
+    [
+      "Multiple dispatch",
+      "Julia selects a method using the runtime types of all positional arguments, not only the first one."
+    ],
+    [
+      "Abstract type",
+      "A type that cannot be instantiated and groups concrete types, so one method can serve a whole family of them."
+    ],
+    [
+      "Method specificity",
+      "When several methods apply, Julia calls the one whose signature is more specific than every other applicable signature."
+    ],
+    [
+      "Method ambiguity",
+      "An error raised when two applicable methods are each more specific in a different argument and neither is chosen."
+    ],
+    [
+      "Type piracy",
+      "Adding a method to a function you do not own for argument types you do not own, which can change behavior in unrelated code."
+    ]
+  ],
   "level": "intermediate",
   "minutes": 150,
   "prerequisites": ["julia-010"],
@@ -17,48 +39,68 @@
     ["Julia interfaces", "https://docs.julialang.org/en/v1/manual/interfaces/"]
   ],
   "figure": 0,
+  "approach": "Dispatch chooses a method from the types of all positional arguments, while each constructor still checks its own numeric domain. `Circle` and `Rectangle` accept finite nonnegative sizes, `area` has one method per shape, and `classify` has two one-sided integer methods plus an explicit `(Integer, Integer)` method that resolves their overlap.",
   "exercises": [
     {
       "title": "Add a zero-size shape",
       "task": "Construct a circle with radius 0.",
       "expected": "Its area is 0.",
       "hint": "Check the boundary without rejecting a valid degenerate shape.",
-      "answer": "The constructor permits nonnegative dimensions, including zero."
+      "answer": "The constructor permits nonnegative dimensions, including zero.",
+      "why": "Radius 0 satisfies `stored >= 0`, so `Circle(0)` is valid and `pi * 0^2` is 0.",
+      "wrong": "Rejecting zero as if it were negative removes a legitimate degenerate case and makes empty shapes impossible to represent.",
+      "verify": "The reference asserts `area(Circle(0)) == 0` and `area(Rectangle(0, 5)) == 0`."
     },
     {
       "title": "Reject an invalid dimension",
       "task": "Use a negative rectangle side.",
       "expected": "Construction raises ArgumentError.",
       "hint": "Dispatch does not replace domain validation.",
-      "answer": "A method for the right type can still receive scientifically invalid values unless its contract prevents them."
+      "answer": "A method for the right type can still receive scientifically invalid values unless its contract prevents them.",
+      "why": "`Rectangle(1, -1)` fails `h >= 0`, so the constructor throws `ArgumentError` even though the argument types are valid reals.",
+      "wrong": "Relying on the `Real` type annotation to block bad sizes misses that -1 is a perfectly good `Real`.",
+      "verify": "The reference asserts `@test_throws ArgumentError Rectangle(1, -1)` and the same for `Circle(-1)`."
     },
     {
       "title": "Trace both arguments",
       "task": "Call classify with an integer in each position separately.",
       "expected": "Different methods handle the two cases.",
       "hint": "Method selection uses the positional type tuple.",
-      "answer": "There is no requirement that one argument be a special receiver."
+      "answer": "There is no requirement that one argument be a special receiver.",
+      "why": "`classify(1, \"x\")` matches only `(Integer, Any)` and `classify(\"x\", 1)` matches only `(Any, Integer)`, so they return different symbols.",
+      "wrong": "Reasoning as in single-dispatch languages, where only the first argument selects behavior, predicts the same method for both calls.",
+      "verify": "Example B asserts `:first_integer` and `:second_integer` for these two calls."
     },
     {
       "title": "Resolve the overlap",
       "task": "Call classify with two integers.",
       "expected": "The explicit intersection method is selected.",
       "hint": "Neither one-sided signature alone expresses the complete overlap rule.",
-      "answer": "An intersection method documents behavior and prevents ambiguity."
+      "answer": "An intersection method documents behavior and prevents ambiguity.",
+      "why": "Both one-sided methods match `(1, 2)`, and neither is more specific; the `(Integer, Integer)` method is more specific than both and is chosen.",
+      "wrong": "Deleting the intersection method to simplify the code turns `classify(1, 2)` into a `MethodError` reporting ambiguity.",
+      "verify": "Example B asserts `classify(1, 2) == :both_integers`; `methods(classify)` lists all three signatures."
     },
     {
       "title": "Keep an unsupported case visible",
       "task": "Pass two floating-point values to classify.",
       "expected": "A MethodError is raised.",
       "hint": "No method promises that case.",
-      "answer": "A catch-all fallback should be added only when its semantics are defined."
+      "answer": "A catch-all fallback should be added only when its semantics are defined.",
+      "why": "`(1.0, 2.0)` matches none of the three signatures, so Julia raises `MethodError` rather than guessing a result.",
+      "wrong": "Adding `classify(a, b) = :other` to silence the error claims a meaning for float pairs that the design never defined.",
+      "verify": "Example B asserts `@test_throws MethodError classify(1.0, 2.0)`."
     },
     {
       "title": "Extend an owned interface",
       "task": "Sketch another Shape subtype and an area method.",
       "expected": "The generic total can use the operation if its laws hold.",
       "hint": "An abstract type does not implement the behavior itself.",
-      "answer": "Test the new method and invariants rather than assuming subtype membership proves interface correctness."
+      "answer": "Test the new method and invariants rather than assuming subtype membership proves interface correctness.",
+      "why": "A new `struct Square <: Shape` with an `area` method lets `total_area` include it, because the sum only calls `area` on each element.",
+      "wrong": "Declaring the subtype without an `area` method compiles, but `total_area` then fails with `MethodError` at the first square.",
+      "verify": "Test the new `area` on a known side length and include it in a `Shape[]` passed to `total_area`."
     }
-  ]
+  ],
+  "checks_note": "Zero-size shapes are allowed, so `Circle(0)` and `Rectangle(0, 5)` both have area 0, while negative radius or height fails in the inner constructor with `ArgumentError`. The subtype line shows `Circle <: Shape`, and the concreteness check explains why: `Circle` can be instantiated with fields, while `Shape` is an abstract node that only groups methods. A new shape must define its own `area` method to join the dispatch table."
 }

@@ -115,7 +115,7 @@ assert (probabilities >= 0.8).tolist() == [False, False, True]
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The middle probability is 0.5, the zero-logit loss is log 2, threshold 0.5 gives 0 errors and 0.8 gives 1 on truth 0, 1, 1, the double-sigmoid loss differs by more than 0.1, and logits of magnitude 1000 stay finite. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Convert fixed logits. Predict exercise 6, Count threshold errors, from its prompt alone: Use truth 0, 1, 1 and compare the two decision policies. Then explain why this finish condition holds: The middle probability is 0.5, the zero-logit loss is log 2, threshold 0.5 gives 0 errors and 0.8 gives 1 on truth 0, 1, 1, the double-sigmoid loss differs by more than 0.1, and logits of magnitude 1000 stay finite. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -151,15 +151,15 @@ If error counts change while logits stay fixed, inspect threshold and tie policy
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Check the midpoint objective) alters one assumption of Example A (Convert fixed logits). Hint 2: exercise 4, Expose a double-sigmoid mistake, should end at incorrect loss differs by more than 0.1. Work backward from it. Hint 3: exercise 5, Test extreme finite scores, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Logit, BCEWithLogitsLoss, Decision threshold using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Move the decision threshold, from its inputs alone. Predict whether exercise 3, Threshold the new probabilities, survives one changed input. Then explain Logit, BCEWithLogitsLoss, Decision threshold in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-012` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Convert fixed logits) cannot be rebuilt without help, revisit `torch-012` first. Otherwise keep your exercise 2 attempt, Compute a negative-label loss, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

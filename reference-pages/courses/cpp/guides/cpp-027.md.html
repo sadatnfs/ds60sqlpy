@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Build offline from reviewed inputs and name license/version obligations.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Reproducibility means another environment can reconstruct the same declared build inputs. Vendoring keeps an approved source dependency locally. A CMake target names include paths, features and link requirements so consumers inherit the right settings. A lock records exact dependency identities but still needs an actual offline build check.</p>
+<ul>
+<li><strong>reproducibility:</strong> the ability of another environment to reconstruct the same declared build inputs.</li>
+<li><strong>dependency identity:</strong> the exact source or artifact, version, build options and toolchain behind a dependency.</li>
+<li><strong>vendoring:</strong> keeping an approved dependency&#x27;s source inside the project.</li>
+<li><strong>CMake target:</strong> a named build unit that passes its include paths, compile features and link requirements to consumers.</li>
+<li><strong>lock:</strong> a record of exact dependency identities that still needs an actual offline build check.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use target_include_directories and target_compile_features on named targets instead of machine-specific global paths. An offline default must not call FetchContent to download missing sources. Delivery also includes licenses and platform/compiler receipts.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
@@ -223,7 +230,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">namespace</span> vendored <span class="syntax-punctuation">{</span>
 <span class="syntax-keyword">constexpr</span> <span class="syntax-keyword">int</span> api_version <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">constexpr</span> <span class="syntax-keyword">int</span> <span class="syntax-function">add</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> a<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> b<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> a <span class="syntax-operator">+</span> b<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span> <span class="syntax-comment">// namespace vendored</span>
+<span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">int</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   <span class="syntax-keyword">static_assert</span><span class="syntax-punctuation">(</span>vendored<span class="syntax-operator">:</span><span class="syntax-operator">:</span>api_version <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-027 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
@@ -239,7 +246,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">namespace</span> vendored <span class="syntax-punctuation">{</span>
 <span class="syntax-keyword">constexpr</span> <span class="syntax-keyword">int</span> api_version <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">constexpr</span> <span class="syntax-keyword">int</span> <span class="syntax-function">add</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> a<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> b<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> a <span class="syntax-operator">+</span> b<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span> <span class="syntax-comment">// namespace vendored</span>
+<span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">int</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   assert<span class="syntax-punctuation">(</span>vendored<span class="syntax-operator">:</span><span class="syntax-operator">:</span>add<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-027 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>

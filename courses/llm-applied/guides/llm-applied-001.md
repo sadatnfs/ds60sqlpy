@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Beginner; approximately 180 minutes. Direct prerequisites: `llm-014`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Beginner; approximately 180 minutes. Direct prerequisites: `llm-014` (llm-014). They introduce the notation this lesson needs for subject assistant and rag.
 
 ## Learning objectives
 
@@ -76,9 +76,11 @@ The fixture's numeric admission rule is intentionally simple: at least 100 gover
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-001/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-001.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-001.py` in the declared `python-core` profile. *Route a changing definition*, *Route an exact calculation* and *Require evidence before fine-tuning* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-001/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Route an exact calculation* and *Require evidence before fine-tuning* reuse the helper and fixture introduced in *Route a changing definition*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Route retrieval; reason current cited evidence. Example B should give: Route deterministic_tool; reason exact computation. Example C should give: First measure_baseline; then adaptation_candidate. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -181,21 +183,24 @@ assert choose(task)[0] == "adaptation_candidate"
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: route retrieval; reason current cited evidence. contract has exact fields, an abstention policy and a family split. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Route an exact calculation*, predict its result from the prompt alone: Describe a request to sum validated purchase amounts and return an integer-cent total. Write the guess beside the stated outcome (route deterministic_tool; reason exact computation). Then predict how the decisive case, *Write a measurable subject-assistant contract*, should end: Define an assistant for study-design extraction with fields assignment_unit, outcome and unknown status; name a held-out family split. For the subject assistant decision: prompts, retrieval or fine-tuning, the finish condition is: Route retrieval; reason current cited evidence. Contract has exact fields, an abstention policy and a family split.
 
 ## Exercises
 
 1. **Route a changing definition.** Describe a request for the current conversion-rate definition requiring a citation.
    **Expected:** route retrieval; reason current cited evidence.
    **Verify:** Save the assertion results for exercise 1, including route retrieval; reason current cited evidence.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Route an exact calculation.** Describe a request to sum validated purchase amounts and return an integer-cent total.
    **Expected:** route deterministic_tool; reason exact computation.
    **Verify:** Save the assertion results for exercise 2, including route deterministic_tool; reason exact computation.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Require evidence before fine-tuning.** Describe a stable schema-formatting gap with zero governed examples, then with 120 reviewed examples.
    **Expected:** first measure_baseline; then adaptation_candidate.
    **Verify:** Save the assertion results for exercise 3, including first measure_baseline; then adaptation_candidate.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Keep mechanisms composable.** A task needs current policy citations and a stable response schema; state which stage retrieves evidence and which might be adapted.
    **Expected:** retrieval remains required; format adaptation is separate.
@@ -217,19 +222,21 @@ If every proposed fix adds another model, compare the existing stages against an
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate subject assistant and rag for the fixture in *Route a changing definition*. Hint 2: change one literal in *Route an exact calculation* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Keep mechanisms composable*, with its stated result (retrieval remains required; format adaptation is separate). If *Write a measurable subject-assistant contract* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Subject assistant, RAG, SFT using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain subject assistant, rag and sft using *Route a changing definition*. Recompute its result (route retrieval; reason current cited evidence) from the inputs. Change one input in *Require evidence before fine-tuning* and predict whether the stated result (first measure_baseline; then adaptation_candidate) still holds. Say which part of the subject assistant decision: prompts, retrieval or fine-tuning the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-014` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Route a changing definition* cannot be reconstructed without the solution, revisit `llm-014` (llm-014). Otherwise keep the six observations from the subject assistant decision: prompts, retrieval or fine-tuning and continue to `llm-applied-002` (Data-science task contracts and structured extraction).
 
 ## Sources and verification status
 
-API and mechanism reference: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for subject assistant: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixtures for *Route a changing definition*, *Route an exact calculation* and *Require evidence before fine-tuning* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

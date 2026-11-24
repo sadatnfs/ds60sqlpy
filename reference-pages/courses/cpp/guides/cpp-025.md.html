@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use diagnostic builds to distinguish a memory error from a successful test run.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Undefined behavior is an operation outside the language contract, such as out-of-bounds access or signed overflow. Sanitizers instrument compiled code to detect selected violations at runtime. AddressSanitizer targets many memory errors, while UndefinedBehaviorSanitizer targets several undefined operations. A clean bounded run is evidence only for the paths exercised.</p>
+<ul>
+<li><strong>undefined behavior:</strong> an operation outside the language contract, such as out-of-bounds access or signed overflow, that has no meaningful result.</li>
+<li><strong><code>vector::at</code>:</strong> checked element access that throws <code>std::out_of_range</code> when the index is not less than the size.</li>
+<li><strong>sanitizer:</strong> compiler instrumentation that detects selected violations while the program runs.</li>
+<li><strong>AddressSanitizer:</strong> a sanitizer for memory errors such as certain out-of-bounds accesses and use-after-free.</li>
+<li><strong>UndefinedBehaviorSanitizer:</strong> a sanitizer that detects several kinds of undefined operations, such as signed overflow.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use a separate owned host build with -g -O1 -fsanitize=address, undefined -fno-omit-frame-pointer if the compiler/runtime supports it. Both compile and link need sanitizer flags. Do not execute an intentional invalid program through the ordinary unsanitized browser profile.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
@@ -259,7 +266,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Verify:</strong> Check your explanation against <code>xs.size() == 2</code>: the last valid index is <code>size() - 1</code>, and <code>checked_at({2, 4}, 1) == 4</code> in Worked example 1 is the boundary that works.</p>
 <p><strong>Progressive hints:</strong> A half-open index interval ends before size.</p>
 <h4 id="exercise-2-use-checked-access">Exercise 2: Use checked access<a class="heading-anchor" href="#exercise-2-use-checked-access" aria-label="Link to this section">#</a></h4>
-<p>Compare at(2) with the contract of operator[2].</p>
+<p>Compare at(2) with the contract of <code>operator[](2)</code>.</p>
 <p><strong>Expected result/shape:</strong> at throws; unchecked invalid access is undefined behavior.</p>
 <p><strong>Verify:</strong> Confirm Worked example 2 catches <code>std::out_of_range</code> from <code>at(2)</code>, and do not run <code>xs[2]</code>; your answer must call it undefined behavior rather than predict its output.</p>
 <p><strong>Progressive hints:</strong> A deterministic exception is not a sanitizer report.</p>

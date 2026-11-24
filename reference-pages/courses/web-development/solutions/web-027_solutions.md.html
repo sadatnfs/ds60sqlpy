@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-027.md</code>.</p>
 <h3 id="exercise-1-predict-number-and-explain-the-validation-hazard">Exercise 1: Predict Number(&#x27;&#x27;) and explain the validation hazard.<a class="heading-anchor" href="#exercise-1-predict-number-and-explain-the-validation-hazard" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It produces zero, so an explicit empty-input check prevents misleading acceptance or errors.</p>
+<p><strong>Approach:</strong> Evaluate <code>Number(&#x27;&#x27;)</code>, see that it returns 0, and note that 0 is a valid number that fails the range check for the wrong reason.</p>
 <p><strong>Why:</strong> Number(&#x27;&#x27;) returns 0, a finite number, so without an explicit empty check a blank field reaches the range check and gets the wrong message.</p>
+<p><strong>Plausible wrong approach:</strong> Checking <code>Number.isNaN</code> alone fails because an empty field converts to 0, not NaN, and slips past that test.</p>
+<p><strong>How to verify:</strong> Logging <code>Number(&#x27;&#x27;)</code> prints 0, and the strict validator returns Enter minutes. for both &#x27;&#x27; and &#x27;   &#x27;.</p>
 <h3 id="exercise-2-add-the-upper-bound-case-to-a-validation-table">Exercise 2: Add the upper-bound case to a validation table.<a class="heading-anchor" href="#exercise-2-add-the-upper-bound-case-to-a-validation-table" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> 120 is accepted and 121 is rejected under the declared inclusive bounds.</p>
+<p><strong>Approach:</strong> Add rows for 120 and 121 to the table and run each through <code>validate</code>, keeping the comparison as <code>minutes &lt;= 120</code>.</p>
 <p><strong>Why:</strong> Inclusive bounds accept the boundary value, so 120 passes and 121 fails; testing both sides catches off-by-one errors.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>minutes &lt; 120</code> fails because the declared bounds are inclusive, so a valid 120 would be rejected.</p>
+<p><strong>How to verify:</strong> The table shows &#x27;&#x27; returned for 120 and Use 5 to 120 minutes. returned for 121.</p>
 <h3 id="exercise-3-build-a-local-form-with-preserved-input-and-linked-validation-feedback">Exercise 3: Build a local form with preserved input and linked validation feedback.<a class="heading-anchor" href="#exercise-3-build-a-local-form-with-preserved-input-and-linked-validation-feedback" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A failed attempt identifies the problem without clearing the user&#x27;s value.</p>
+<p><strong>Approach:</strong> Validate on a button click, write any message with <code>textContent</code> into an element whose <code>id</code> the input lists in <code>aria-describedby</code>, and never clear the input.</p>
 <p><strong>Why:</strong> Keeping the value lets the user correct the mistake, and a linked message explains what to change.</p>
+<p><strong>Plausible wrong approach:</strong> Resetting the form after an error fails because the reader must retype everything and cannot see what was wrong.</p>
+<p><strong>How to verify:</strong> Enter 200, validate, and see the message beside the field while 200 is still in the input.</p>
 <h3 id="exercise-4-diagnose-a-message-shown-visually-but-not-associated-with-its-control">Exercise 4: Diagnose a message shown visually but not associated with its control.<a class="heading-anchor" href="#exercise-4-diagnose-a-message-shown-visually-but-not-associated-with-its-control" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Use a stable message id and aria-describedby on the input.</p>
+<p><strong>Approach:</strong> Give the error element a stable <code>id</code> and add that <code>id</code> to the input&#x27;s <code>aria-describedby</code> attribute.</p>
 <p><strong>Why:</strong> aria-describedby makes the message part of the input&#x27;s accessible description, so it is announced with the field.</p>
+<p><strong>Plausible wrong approach:</strong> Placing the message near the field with only CSS proximity fails because assistive technology does not link nearby text to the input.</p>
+<p><strong>How to verify:</strong> The input&#x27;s description in the accessibility panel contains the current error text.</p>
 <h3 id="exercise-5-test-empty-whitespace-negative-nonnumeric-hexadecimal-0x1e-exponent-1e2-fractional-7-5-and-valid-values">Exercise 5: Test empty, whitespace, negative, nonnumeric, hexadecimal (0x1e), exponent (1e2), fractional (7.5) and valid values.<a class="heading-anchor" href="#exercise-5-test-empty-whitespace-negative-nonnumeric-hexadecimal-0x1e-exponent-1e2-fractional-7-5-and-valid-values" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each produces the declared result with no uncaught exception.</p>
+<p><strong>Approach:</strong> Run each listed input through <code>validate</code> in a table and record the exact returned string next to the expected one.</p>
 <p><strong>Why:</strong> Number accepts 0x1e, 1e2 and 7.5, so only the digits-only check rejects them; a loop shows that every case returns a message instead of throwing.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only 30 and abc fails because hexadecimal, exponent and fractional strings are the ones a looser rule wrongly accepts.</p>
+<p><strong>How to verify:</strong> 0x1e, 1e2 and 7.5 each return Use whole minutes from 5 to 120., and &#x27; 30 &#x27; returns an empty string.</p>
 <h3 id="exercise-6-explain-which-validation-logic-must-be-repeated-on-the-server">Exercise 6: Explain which validation logic must be repeated on the server.<a class="heading-anchor" href="#exercise-6-explain-which-validation-logic-must-be-repeated-on-the-server" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> All acceptance and authorization rules must be enforced independently of client behavior.</p>
+<p><strong>Approach:</strong> Repeat every acceptance rule on the server, because the server receives raw requests that may never have run this script.</p>
 <p><strong>Why:</strong> Any client can send data without running this script, so the server must repeat every acceptance and authorization rule.</p>
+<p><strong>Plausible wrong approach:</strong> Trusting a hidden flag that says the client validated fails because a request tool can send the flag with any value.</p>
+<p><strong>How to verify:</strong> A direct request with minutes=0x1e is rejected by the server rule taught in web-047.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-027_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

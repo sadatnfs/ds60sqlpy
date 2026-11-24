@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-010.md</code>.</p>
 <h3 id="exercise-1-predict-the-winning-color-in-the-second-example">Exercise 1: Predict the winning color in the second example.<a class="heading-anchor" href="#exercise-1-predict-the-winning-color-in-the-second-example" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The later equally specific declaration wins.</p>
+<p><strong>Approach:</strong> Confirm both rules use the same selector, <code>.note</code>, so specificity ties and the later declaration in source order wins.</p>
 <p><strong>Why:</strong> When origin, importance, layer and specificity are equal, the declaration that appears later in the source wins.</p>
+<p><strong>Plausible wrong approach:</strong> Choosing blue because it came first fails because the cascade breaks a specificity tie with the last declaration, not the first.</p>
+<p><strong>How to verify:</strong> The Computed panel for a <code>.note</code> element reports <code>rgb(139, 0, 0)</code>, which is dark red, for <code>color</code>.</p>
 <h3 id="exercise-2-move-a-shared-text-color-to-a-parent-and-inspect-inheritance">Exercise 2: Move a shared text color to a parent and inspect inheritance.<a class="heading-anchor" href="#exercise-2-move-a-shared-text-color-to-a-parent-and-inspect-inheritance" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Children inherit it unless a direct declaration overrides it.</p>
+<p><strong>Approach:</strong> Move <code>color: #17324d</code> from the cards to their shared parent and let the cards inherit it.</p>
 <p><strong>Why:</strong> color is inherited, so descendants use the parent&#x27;s value unless they have a declaration of their own.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting <code>padding</code> to inherit the same way fails because padding is not an inherited property.</p>
+<p><strong>How to verify:</strong> Each child shows the color as inherited from the parent in the Computed panel, while its padding stays at its own value.</p>
 <h3 id="exercise-3-style-two-note-cards-using-one-low-specificity-class">Exercise 3: Style two note cards using one low-specificity class.<a class="heading-anchor" href="#exercise-3-style-two-note-cards-using-one-low-specificity-class" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Both cards share styling without duplicate ids or inline declarations.</p>
+<p><strong>Approach:</strong> Write one <code>.note</code> rule and add <code>class=&quot;note&quot;</code> to both cards instead of styling each card separately.</p>
 <p><strong>Why:</strong> A single class has low specificity and is reusable, so later or more specific rules can still adjust one card.</p>
+<p><strong>Plausible wrong approach:</strong> Styling <code>#card1</code> and <code>#card2</code> with duplicate rules fails because any change must be made twice and specificity rises.</p>
+<p><strong>How to verify:</strong> Changing one value in the <code>.note</code> rule updates both cards at once, and the source contains no <code>style</code> attributes.</p>
 <h3 id="exercise-4-diagnose-a-crossed-out-declaration-in-developer-tools">Exercise 4: Diagnose a crossed-out declaration in developer tools.<a class="heading-anchor" href="#exercise-4-diagnose-a-crossed-out-declaration-in-developer-tools" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Identify the winning rule and the cascade reason rather than guessing.</p>
+<p><strong>Approach:</strong> Click the crossed-out declaration in the Styles panel and trace upward to the rule that won, noting its selector and origin.</p>
 <p><strong>Why:</strong> Developer tools strike through declarations that lost the cascade, and the winning rule reveals the reason: importance, layer, specificity or order.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>!important</code> to the losing declaration fails because it hides the conflict and makes the next override harder.</p>
+<p><strong>How to verify:</strong> You can name the winning selector and the reason (specificity, order or importance) shown by developer tools.</p>
 <h3 id="exercise-5-add-a-child-color-rule-under-a-highly-specific-parent-selector">Exercise 5: Add a child color rule under a highly specific parent selector.<a class="heading-anchor" href="#exercise-5-add-a-child-color-rule-under-a-highly-specific-parent-selector" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A direct declaration on the child overrides an otherwise inherited color.</p>
+<p><strong>Approach:</strong> Give the child its own <code>color</code> declaration with a simple class selector, even though the parent rule is very specific.</p>
 <p><strong>Why:</strong> Inheritance only supplies a value when an element has none of its own, so any declaration that matches the child beats an inherited value, whatever the parent selector&#x27;s specificity.</p>
+<p><strong>Plausible wrong approach:</strong> Raising the child&#x27;s selector specificity to beat the parent fails because inherited values never compete with direct declarations by specificity.</p>
+<p><strong>How to verify:</strong> The child shows its own color in Computed while the parent keeps the highly specific value.</p>
 <h3 id="exercise-6-explain-why-specificity-alone-does-not-describe-the-cascade">Exercise 6: Explain why specificity alone does not describe the cascade.<a class="heading-anchor" href="#exercise-6-explain-why-specificity-alone-does-not-describe-the-cascade" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Origin, importance and layer ordering can be decided before selector specificity.</p>
+<p><strong>Approach:</strong> List the cascade checks in order: origin and importance, then layers, then specificity, then source order.</p>
 <p><strong>Why:</strong> The cascade compares origin and importance, then cascade layers, and only then specificity and order, so a simple selector in a later layer can still win.</p>
+<p><strong>Plausible wrong approach:</strong> Saying the more specific selector always wins fails because an <code>!important</code> declaration of lower specificity beats a normal one.</p>
+<p><strong>How to verify:</strong> A <code>.note { color: green !important; }</code> rule overrides <code>#summary { color: navy; }</code> in the preview.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-010_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

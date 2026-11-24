@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-locate-the-source-of-intent">Exercise 1: Locate the source of intent<a class="heading-anchor" href="#exercise-1-locate-the-source-of-intent" aria-label="Link to this section">#</a></h3>
 <p>The overlay expresses the intended environment difference. Local paths and a small resource set make review tractable and avoid a hidden network dependency.</p>
 <p><strong>Expected:</strong> One local Deployment base plus explicit dev (1 replica) and test (2 replicas) overrides.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Open the base and both overlay kustomization.yaml files and point to resources and replicas.</li>
+<li><strong>Why it is correct:</strong> The base supplies one Deployment, and each overlay&#x27;s replicas entry sets 1 for dev and 2 for test.</li>
+<li><strong>Plausible wrong approach:</strong> Editing replicas in the base would change both environments and erase the difference the overlays express.</li>
+<li><strong>How to verify:</strong> Each claim cites a resources or replicas entry in a named file.</li>
+</ul>
 <h3 id="exercise-2-render-with-prepared-tooling">Exercise 2: Render with prepared tooling<a class="heading-anchor" href="#exercise-2-render-with-prepared-tooling" aria-label="Link to this section">#</a></h3>
 <p>The checked-in expected output is an independent target, not a fabricated execution transcript. A real render receipt should include tool identity and source hashes, especially when versions can change transformations.</p>
 <p><strong>Expected:</strong> Actual output is compared with expected JSON; missing tool is recorded as unavailable.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run the pinned renderer, record its version and compare output with the expected JSON structurally.</li>
+<li><strong>Why it is correct:</strong> Structural comparison ignores key order and formatting, so only real field differences remain.</li>
+<li><strong>Plausible wrong approach:</strong> Comparing text by eye can miss a changed value or report reordered keys as a change.</li>
+<li><strong>How to verify:</strong> The version is recorded, and the structural comparison is clean or the tool is marked unavailable.</li>
+</ul>
 <h3 id="exercise-3-compare-the-full-diff">Exercise 3: Compare the full diff<a class="heading-anchor" href="#exercise-3-compare-the-full-diff" aria-label="Link to this section">#</a></h3>
 <p>A successful renderer can still produce an unsafe or unintended object. The diff must cover the full output set so an extra resource or changed target is not hidden behind the expected count change.</p>
 <p><strong>Expected:</strong> Exactly one intended field path changes.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Diff the dev and test renders and list every differing path.</li>
+<li><strong>Why it is correct:</strong> The overlays only change replicas, so any other differing path reveals an unintended transform.</li>
+<li><strong>Plausible wrong approach:</strong> Checking only that replicas differs would miss an extra label or image change.</li>
+<li><strong>How to verify:</strong> spec.replicas is the only differing path.</li>
+</ul>
 <h3 id="exercise-4-interpret-field-ownership">Exercise 4: Interpret field ownership<a class="heading-anchor" href="#exercise-4-interpret-field-ownership" aria-label="Link to this section">#</a></h3>
 <p>Authorization can permit a request while field ownership still conflicts. The correct response is to coordinate which actor should manage the field or change the design, not assume force is harmless.</p>
 <p><strong>Expected:</strong> The same field has competing intent; manager identity and current UID/version are recorded.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read managedFields for the contested field and name both managers with UID and resourceVersion.</li>
+<li><strong>Why it is correct:</strong> Server-side apply records an owner per field, so a conflict shows two managers with competing intent for one path.</li>
+<li><strong>Plausible wrong approach:</strong> Forcing conflicts takes ownership silently and the other manager may revert the field later.</li>
+<li><strong>How to verify:</strong> Both managers are named, and the conflict is reported rather than forced.</li>
+</ul>
 <h3 id="exercise-5-reject-a-namespace-escape">Exercise 5: Reject a namespace escape<a class="heading-anchor" href="#exercise-5-reject-a-namespace-escape" aria-label="Link to this section">#</a></h3>
 <p>The target must remain bound to the owned receipt. Neither a valid YAML parser nor a successful Kustomize command grants permission to apply elsewhere.</p>
 <p><strong>Expected:</strong> The output fails the course ownership/allowlist review before apply.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check the rendered namespace and image against the course allowlist before any apply.</li>
+<li><strong>Why it is correct:</strong> A local render only proves the YAML is well formed; the course review decides whether the output may be applied.</li>
+<li><strong>Plausible wrong approach:</strong> Treating a successful render as approval would apply a resource into another namespace or with an unapproved image.</li>
+<li><strong>How to verify:</strong> The escaping render is refused before apply.</li>
+</ul>
 <h3 id="exercise-6-preserve-reproducibility">Exercise 6: Preserve reproducibility<a class="heading-anchor" href="#exercise-6-preserve-reproducibility" aria-label="Link to this section">#</a></h3>
 <p>Keeping the transformation inputs and output connected prevents drift between declared and applied intent. Live acceptance remains a separate bounded host operation with UID-aware cleanup.</p>
 <p><strong>Expected:</strong> A reviewer can separate render, admission, reconciliation and application evidence.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record overlay source, renderer version, rendered hash, diff and any apply readback as separate items.</li>
+<li><strong>Why it is correct:</strong> With source and tool version, a reviewer can regenerate the same hash and tell render evidence from cluster evidence.</li>
+<li><strong>Plausible wrong approach:</strong> Saving only the apply output loses the link back to which overlay and renderer produced it.</li>
+<li><strong>How to verify:</strong> A reviewer reproduces the rendered hash from the recorded overlay and version.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A rendered file can be valid YAML and still contain an unsupported API, an unapproved image or a namespace escape. A server dry-run can provide admission evidence but is not a completed reconciliation. An apply response is still weaker than application verification.</p>
 <p>Do not edit generated output as a hidden second source of truth without recording the change in the overlay. Retain the base/overlay identity, rendered diff and actual runtime receipt when a host apply is performed.</p></article>

@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A file boundary is both an I/O boundary and a data contract. CSV stores textual fields and relies on parsing rules. Parquet stores typed columns and metadata that can support selective reading. Neither format guarantees correct identifiers, units or valid rows. The program should state the expected schema and verify the records that cross the boundary.</p>
 <p>Partitioned data adds another layer of identity. A glob can select several files, but file order is not a meaningful record order. A stable key and an explicit sort are needed for sequence comparisons. A new output file should also be kept outside the input pattern; otherwise a later run may accidentally ingest its previous output and duplicate records.</p>
 <p>When parsing a textual source, preserve raw values until rejection is accounted for. Reading a mixed amount column as text and then casting it under an explicit policy makes the bad token visible. The accepted total and rejected identifiers form complementary evidence. Publishing only a successful total would hide the fact that one source row did not contribute.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Parquet:</strong> A columnar file format that stores its schema and typed column chunks, unlike CSV text whose types must be inferred or declared.</li>
+<li><strong>scan_parquet:</strong> A lazy reader that builds a plan over Parquet files, so filters and column choices can be pushed into the read.</li>
+<li><strong>sink_parquet:</strong> A method that executes a LazyFrame and writes its result to a Parquet file without returning a DataFrame.</li>
+<li><strong>schema_overrides:</strong> A CSV reading option that fixes the types of named columns, such as keeping a problematic field as text.</li>
+<li><strong>Readback check:</strong> Reading a written file again and comparing its schema and rows with what was intended.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>write_parquet emits typed columnar data, scan_parquet builds a lazy source, and sink_parquet materializes a query into an output file. A glob such as part-*.parquet should name only inputs. schema_overrides can keep a problematic CSV field as text so its parsing policy is explicit. Use readback checks on the output artifact instead of assuming a completed write preserves the intended result.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

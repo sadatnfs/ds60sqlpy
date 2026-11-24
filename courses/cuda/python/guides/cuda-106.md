@@ -14,6 +14,13 @@ Use a selected prepared Triton or CUDA tile implementation only after recording 
 
 
 
+### Key terms
+
+- **Tile-level language:** A kernel language such as Triton that describes operations on blocks of data and lets the compiler map them to threads.
+- **Program instance:** One launched instance of a tile kernel, identified by its program ID, that processes one tile.
+- **Boundary mask:** A boolean vector that disables out-of-bounds loads and stores at tile edges.
+- **Block size:** The compile-time tile dimensions, trading parallelism against register and shared memory use.
+
 ## Worked examples
 
 ### Worked example 1
@@ -38,33 +45,53 @@ print("CPU tile model:", blocks)
 
 **Expected observation:** Three tiles cover ten elements exactly once.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `n` | `10` |
+| `tile` | `4` |
+| `blocks` | `[[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Create tile boundaries
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **create tile boundaries** in the examples above.
+**Trap to avoid:** Using closed intervals `[start, start + tile]` makes adjacent tiles share an element, so index 4 is processed twice and a sum reduction double counts it.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Mask a final tile
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **mask a final tile** in the examples above.
+**Trap to avoid:** Masking only the store still issues out-of-bounds loads, which can fault or read unrelated memory, and an unmasked reduction then includes garbage values.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Compare thread and tile abstractions
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **compare thread and tile abstractions** in the examples above.
+**Trap to avoid:** Assuming a tile kernel behaves like a thread kernel with the same block size misreads the model, since a tile program instance is not a single thread.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: State compiler requirements
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **state compiler requirements** in the examples above.
+**Trap to avoid:** Writing that the kernel requires a recent version gives no way to reproduce the build.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a library comparison
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design a library comparison** in the examples above.
+**Trap to avoid:** Timing the DSL kernel once against a warmed library call reports the DSL as much slower purely because of compilation.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain a resource tradeoff
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **explain a resource tradeoff** in the examples above.
+**Trap to avoid:** Concluding that larger tiles are always faster because they reuse more data predicts a direction that only device evidence can establish.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

@@ -14,6 +14,13 @@ PyTorch profiler activities and named ranges make forward, backward and update v
 
 
 
+### Key terms
+
+- **Profiler trace:** A timeline of host calls, kernel launches, copies and synchronizations recorded during a bounded run.
+- **Critical path:** The longest chain of dependent work in the timeline, which determines total elapsed time.
+- **Forced synchronization:** A host wait inserted by operations such as `.item()` or printing, which appears as an idle gap in the trace.
+- **Profiler overhead:** Extra time introduced by instrumentation, so profiled timings should not be reported as performance.
+
 ## Worked examples
 
 ### Worked example 1
@@ -38,6 +45,14 @@ print("CPU timeline analysis:", summed, wall)
 
 **Expected observation:** Summed event durations 14 ms, complete interval 10 ms.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `events` | `[('prepare', 0, 6), ('gpu', 2, 10)]` |
+| `summed` | `14` |
+| `wall` | `10` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -56,27 +71,39 @@ Choose either lane first, then compare the other using identical mathematical in
 
 ### Exercise 1: Compute timeline wall time
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute timeline wall time** in the examples above.
+**Trap to avoid:** Summing durations, `6 + 8 = 14` ms, double counts the 4 ms overlap and overstates the step.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Identify an overlap
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **identify an overlap** in the examples above.
+**Trap to avoid:** Treating events on different rows of the trace as sequential hides the concurrency that is already happening. The step then looks like it needs a faster GPU when the existing overlap is already working.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Find a forced synchronization
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **find a forced synchronization** in the examples above.
+**Trap to avoid:** Blaming the gaps on slow kernels leads to optimizing compute while the host dependency stays. Faster kernels only make the GPU wait longer for the next enqueue.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Name profiler overhead
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **name profiler overhead** in the examples above.
+**Trap to avoid:** Quoting step times from a detailed profiler run as production numbers overstates the step time.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Propose one targeted change
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **propose one targeted change** in the examples above.
+**Trap to avoid:** Applying several optimizations at once makes it impossible to tell which helped or which hurt. One change might help while another reintroduces a synchronization.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Verify outside profiling
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **verify outside profiling** in the examples above.
+**Trap to avoid:** Reporting the speedup measured under the profiler assumes overhead is equal in both versions. Removing host reads also removes instrumented events, so overhead itself changes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

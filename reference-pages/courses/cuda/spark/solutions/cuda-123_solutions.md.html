@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-calculate-partition-averages">Exercise 1: Calculate partition averages<a class="heading-anchor" href="#exercise-1-calculate-partition-averages" aria-label="Link to this section">#</a></h3>
 <p>Divide rows by partitions.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate partition averages</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Calculate partition averages: one million rows over 100 partitions averages 10000 rows, and over 10 partitions averages 100000.</p>
+<p><strong>Why it is correct here.</strong> Fewer partitions mean more rows per task, which raises per-task memory and can cause spills even though scheduling overhead falls.</p>
+<p><strong>A plausible wrong approach.</strong> Reducing partitions to cut scheduling overhead without checking per-task memory can turn a working job into a spilling one.</p>
+<p><strong>How to verify.</strong> The reference asserts both averages. Compare with actual task input sizes in the Spark UI.</p>
 <h3 id="exercise-2-explain-skew-beyond-averages">Exercise 2: Explain skew beyond averages<a class="heading-anchor" href="#exercise-2-explain-skew-beyond-averages" aria-label="Link to this section">#</a></h3>
 <p>Report tails and maximum sizes.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain skew beyond averages</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain skew beyond averages: report the maximum and tail of partition sizes, since one large partition sets the stage time.</p>
+<p><strong>Why it is correct here.</strong> An average of 10000 rows can hide a single partition of 200000, and that task runs much longer than the rest.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting only the average leaves skew invisible. Adding partitions does not fix skew either, because a hot key still lands in one partition however many there are.</p>
+<p><strong>How to verify.</strong> Collect per-task input rows and report median, 95th percentile and maximum. A maximum several times the median marks a stage worth investigating for key skew.</p>
 <h3 id="exercise-3-capture-final-aqe-plan">Exercise 3: Capture final AQE plan<a class="heading-anchor" href="#exercise-3-capture-final-aqe-plan" aria-label="Link to this section">#</a></h3>
 <p>Inspect after the action.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>capture final AQE plan</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Capture the final AQE plan after the action, since adaptive execution may coalesce small partitions or split large ones at runtime.</p>
+<p><strong>Why it is correct here.</strong> The partition counts in the initial plan may not be the ones that ran.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting partition counts from the pre-execution plan can describe a configuration AQE changed. Coalescing may reduce 200 shuffle partitions to a handful, which changes per-task memory considerably.</p>
+<p><strong>How to verify.</strong> Read the final plan from the SQL tab and record partition counts per stage. Record the AQE advisory partition size alongside, since it drives the coalescing result.</p>
 <h3 id="exercise-4-define-cache-policy">Exercise 4: Define cache policy<a class="heading-anchor" href="#exercise-4-define-cache-policy" aria-label="Link to this section">#</a></h3>
 <p>Use equivalent cold or warm states.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define cache policy</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define a cache policy with equivalent states for both runs, either both cold or both warm with the same data cached.</p>
+<p><strong>Why it is correct here.</strong> Reading cached data is faster than downloading or reading from disk, so a warm GPU run against a cold CPU run measures caching, not execution.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing those runs reports a speedup partly caused by the cache, as the reference rejects for unmatched cache states.</p>
+<p><strong>How to verify.</strong> Record cache state for each run and reject comparisons where the states differ. Clearing caches or restarting the application before cold runs, and running a discarded warm-up before warm runs, makes the states reproducible.</p>
 <h3 id="exercise-5-choose-semantic-and-performance-fixtures">Exercise 5: Choose semantic and performance fixtures<a class="heading-anchor" href="#exercise-5-choose-semantic-and-performance-fixtures" aria-label="Link to this section">#</a></h3>
 <p>Tiny bounded correctness data and representative measured data serve different purposes.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose semantic and performance fixtures</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Choose fixtures for different purposes: tiny bounded data for semantic correctness and representative data sizes for performance measurement.</p>
+<p><strong>Why it is correct here.</strong> Tiny data finishes quickly and exercises edge cases, but its timings are dominated by overhead.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting performance from the tiny correctness fixture gives timings that say nothing about production scale. At a few rows, Spark job scheduling dominates and both backends look the same, or the GPU looks slower.</p>
+<p><strong>How to verify.</strong> Label each fixture by purpose and use only the representative one for timing claims. Run the correctness fixture on both backends too, so the representative timings are known to come from equivalent computations.</p>
 <h3 id="exercise-6-separate-estimated-and-observed-speedup">Exercise 6: Separate estimated and observed speedup<a class="heading-anchor" href="#exercise-6-separate-estimated-and-observed-speedup" aria-label="Link to this section">#</a></h3>
 <p>Predictions remain predictions until executed.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate estimated and observed speedup</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate estimated and observed speedup: an estimate from a model remains a prediction until a run on target hardware measures it.</p>
+<p><strong>Why it is correct here.</strong> Estimates guide which experiments to run, while observations support claims. Keeping them separate prevents treating predictions as results.</p>
+<p><strong>A plausible wrong approach.</strong> Writing an estimated 3 times speedup into a report as achieved presents unverified data as fact. Readers then plan hardware purchases or migrations around a number nobody measured.</p>
+<p><strong>How to verify.</strong> Mark each speedup in the report as estimated or observed, and for observed values cite the run. If an observation disagrees with the estimate, keep both and note which model assumption failed.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Partition averages 10000 and 100000; unmatched cache states rejected.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-123_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

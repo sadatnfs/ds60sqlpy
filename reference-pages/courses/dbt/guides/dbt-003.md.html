@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>ref creates a dependency on another dbt resource and resolves its database relation. That gives dbt a graph it can order and inspect. Hardcoding a table name can bypass this dependency information even when the SQL happens to run. The graph is therefore part of the execution contract, not just a diagram for documentation.</p>
 <p>A materialization defines how a model result is represented. A view stores a query definition, a table stores a materialized result, and an ephemeral model is compiled into a dependent query rather than created as its own relation. These choices change storage, freshness, reuse and query cost. They do not change the need to validate grain and values.</p>
 <p>The first case uses a staging view and a downstream table, then inspects both the manifest dependency and the actual database relation types. The second uses an ephemeral model to make the absence of a standalone relation explicit. The purpose is to connect configuration to observed behavior rather than memorize names.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>ref:</strong> The Jinja function that resolves a model name to its relation and records a dependency edge in the project graph.</li>
+<li><strong>DAG:</strong> The directed acyclic graph of resources and their dependencies, which dbt uses to choose execution order.</li>
+<li><strong>Materialization:</strong> The strategy, such as view, table, incremental or ephemeral, that decides how a model&#x27;s SQL becomes a database object.</li>
+<li><strong>View versus table:</strong> A view stores only its query and recomputes it on each read; a table stores the rows computed when the model ran.</li>
+<li><strong>Ephemeral model:</strong> A model that creates no relation; dbt inlines its SQL as a common table expression in each model that refers to it.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>config(materialized=&#x27;view&#x27;) or config(materialized=&#x27;table&#x27;) declares a model representation. ref(&#x27;staging&#x27;) connects the downstream model to its dependency. For an ephemeral input, compiled SQL includes a generated common-table expression. Inspect manifest depends_on nodes and information_schema tables to distinguish graph structure from database objects.</p>
 <h3 id="full-project-python-workspace">Full-project Python workspace<a class="heading-anchor" href="#full-project-python-workspace" aria-label="Link to this section">#</a></h3>

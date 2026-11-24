@@ -38,6 +38,12 @@
       "code": "first <- new.env(parent = emptyenv())\nfirst$count <- 1\nsecond <- first\nsecond$count <- 2\nstopifnot(first$count == 2, identical(first, second))\nprint(first$count)\n",
       "explanation": "Both names point to the same environment. This is a reference object, so the mutation is visible through either binding.",
       "expected": "2."
+    },
+    {
+      "title": "Selecting one column silently drops its shape",
+      "code": "m <- matrix(1:4, nrow = 2)\nfirst_col <- m[, 1]\nkept <- m[, 1, drop = FALSE]\nprint(dim(first_col))\nprint(dim(kept))\nstopifnot(is.null(dim(first_col)), identical(dim(kept), c(2L, 1L)))\nstopifnot(identical(as.vector(kept), first_col))\n",
+      "explanation": "Both selections hold the same two values, 1 and 2, as the last check confirms. The difference is metadata. By default m[, 1] simplifies a single column to a plain vector, so the dim attribute disappears and nrow() of the result is NULL. Code downstream that expects a matrix with two rows and one column then fails or takes a different branch. Adding drop = FALSE keeps the 2 by 1 shape, which is what a return contract that promises a matrix should test.",
+      "expected": "NULL, then 2 1."
     }
   ],
   "exercises": [

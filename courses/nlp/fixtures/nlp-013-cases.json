@@ -9,7 +9,7 @@
     {
       "exercise": 2,
       "task": "Fit two-component TruncatedSVD on TF-IDF and reconstruct the matrix.",
-      "expected": "Document coordinates shape(4,2); reconstruction error below the zero-matrix baseline."
+      "expected": "Document coordinates shape (4, 2); reconstruction error below the zero-matrix baseline."
     },
     {
       "exercise": 3,
@@ -24,7 +24,7 @@
     {
       "exercise": 5,
       "task": "Compare H with its reversed row order using cosine and assignment.",
-      "expected": "Permutation[1,0] and matched similarities[1,1]."
+      "expected": "Permutation [1, 0] and matched similarities [1, 1]."
     },
     {
       "exercise": 6,

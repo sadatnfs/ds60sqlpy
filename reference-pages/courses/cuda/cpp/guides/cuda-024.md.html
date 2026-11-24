@@ -198,9 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-014</code>, <code>cuda-020</code>, <code>cuda-021</code>, <code>cuda-022</code>, <code>cuda-008</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Build a multi-stage GPU data pipeline with a CPU oracle, adversarial fixtures and an honest end-to-end report.</p>
 <p>Work through <em>First capstone: a reliable GPU data pipeline</em> with the concrete cases below. Finish with this evidence: a specification, CPU oracle, adversarial fixtures, checked error paths, actual GPU output and honest end-to-end report. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A pipeline is more than a list of correct kernels. Each stage has a shape, ownership and validity contract that must match its consumer. Filtering changes count; normalization changes numeric range; histogramming assumes valid bins. Keep the count with the output buffer, and do not pass allocation capacity as the number of valid elements. First build a tiny CPU oracle, then introduce one GPU stage at a time. A useful capstone report includes cases where a CPU is preferable, because proving that a GPU exists is different from proving it helps the application.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Pipeline stage:</strong> One transformation with its own shape, ownership and validity contract that its consumer depends on.</li>
+<li><strong>CPU oracle:</strong> An independent, trusted CPU implementation used to judge GPU outputs.</li>
+<li><strong>Valid count:</strong> The number of meaningful elements in a buffer, which can be smaller than its allocated capacity.</li>
+<li><strong>Adversarial fixture:</strong> A deliberately difficult input, such as an empty, tiny or boundary-sized case, chosen to expose defects.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-024_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-024_cpu.py</code></pre>

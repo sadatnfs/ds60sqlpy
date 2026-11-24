@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "track_id": "nlp",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "nlp-007",
+      "title": "TF-IDF by hand and by scikit-learn, then a cosine search",
+      "anchor": "reference",
+      "source_path": "courses/nlp/solutions/nlp-007_solution.py",
+      "source_sha256": "0304f0374d1a1db77e3fcf09e7feebce101b62eb7ad094bce9b223d2cb979095",
+      "expected_output": [
+        "nlp-007: manual DF/IDF/TF-IDF and sparse cosine match; OOV abstention boundary passed"
+      ],
+      "steps": [
+        {
+          "lines": [1, 4],
+          "excerpt": "import numpy as np\nfrom sklearn.feature_extraction.text import TfidfVectorizer\n\nTRAIN = [\"tea tea cup\", \"coffee cup\"]",
+          "title": "A two document corpus",
+          "explanation": "TfidfVectorizer turns text into numeric vectors: each column is a word and each value grows with how often the word appears in a document and shrinks with how many documents contain it. TRAIN is deliberately tiny so every weight can be checked by hand.",
+          "observe": "The corpus has two documents and three distinct words: coffee, cup and tea."
+        },
+        {
+          "lines": [7, 11],
+          "excerpt": "def main():\n    vectorizer = TfidfVectorizer(norm=\"l2\", smooth_idf=True, sublinear_tf=False)\n    x = vectorizer.fit_transform(TRAIN)\n    names = vectorizer.get_feature_names_out().tolist()\n    assert names == [\"coffee\", \"cup\", \"tea\"] and x.shape == (2, 3)",
+          "title": "Fit the vectorizer and read the vocabulary",
+          "explanation": "fit_transform learns the vocabulary and the inverse document frequencies from TRAIN, then returns a sparse matrix with one row per document. get_feature_names_out lists the columns, sorted alphabetically. norm=\"l2\" scales each row to length 1, and smooth_idf adds one to every document count to avoid dividing by zero.",
+          "observe": "x has shape (2, 3): two documents by three words. The column order is coffee, cup, tea."
+        },
+        {
+          "lines": [12, 16],
+          "excerpt": "    a = np.log(3 / 2) + 1\n    assert np.allclose(vectorizer.idf_, [a, 1, a])\n    raw = np.array([[0.0, 1.0, 2 * a], [a, 1.0, 0.0]])\n    expected = raw / np.linalg.norm(raw, axis=1, keepdims=True)\n    assert np.allclose(x.toarray(), expected)",
+          "title": "Recompute the weights by hand",
+          "explanation": "With smoothing, idf is log((1 + n) / (1 + df)) + 1. With n = 2 documents, a word in one document gets log(3 / 2) + 1, called a here, and cup, in both documents, gets exactly 1. raw multiplies counts by idf: tea appears twice in the first document. Dividing each row by its length reproduces the l2 normalization, and np.allclose compares within floating point tolerance.",
+          "observe": "The library's matrix matches the hand computation. Exact equality is avoided on purpose because the values are floats."
+        },
+        {
+          "lines": [17, 19],
+          "excerpt": "    query = vectorizer.transform([\"tea\"])\n    score = (x @ query.T).toarray().ravel()\n    assert np.isclose(score[0], 2 * a / np.sqrt(1 + 4 * a * a)) and score[1] == 0",
+          "title": "Score a query with a dot product",
+          "explanation": "transform maps the query into the same column space without refitting. Because rows have length 1, the dot product of a document row with the query row is their cosine similarity. x @ query.T does this for every document at once, and toarray().ravel() flattens the result into a plain list of scores.",
+          "observe": "The first document scores above zero and the coffee document scores exactly 0, because it does not contain tea."
+        },
+        {
+          "lines": [20, 23],
+          "excerpt": "    before = vectorizer.vocabulary_.copy()\n    unknown = vectorizer.transform([\"matcha\", \"\"])\n    assert unknown.nnz == 0 and vectorizer.vocabulary_ == before\n    assert np.allclose(np.sqrt(x.multiply(x).sum(axis=1)).A.ravel(), 1.0)",
+          "title": "Unknown words give an empty vector, not a guess",
+          "explanation": "matcha is out of vocabulary and the empty string has no words, so their vectors have no nonzero entries, which nnz counts. The vocabulary copy proves that transform never learns new words. The last assert recomputes every row length and confirms each is 1.",
+          "observe": "Out of vocabulary input produces zeros. A search system should treat that as no evidence rather than a weak match."
+        },
+        {
+          "lines": [24, 28],
+          "excerpt": "    sublinear = TfidfVectorizer(norm=None, smooth_idf=True, sublinear_tf=True).fit(TRAIN)\n    weighted = sublinear.transform([\"tea tea cup\"]).toarray()[0]\n    tea = sublinear.vocabulary_[\"tea\"]\n    assert np.isclose(weighted[tea], (1 + np.log(2)) * a)\n    print(\"nlp-007: manual DF/IDF/TF-IDF and sparse cosine match; OOV abstention boundary passed\")",
+          "title": "Sublinear term frequency",
+          "explanation": "With sublinear_tf=True, a word that appears k times gets weight 1 + log(k) instead of k, so repetition counts for less. norm=None keeps the raw weights so the formula can be checked directly for tea, which appears twice.",
+          "observe": "After every check passes the program prints one line starting with nlp-007:."
+        }
+      ]
+    },
+    {
+      "lesson_id": "nlp-011",
+      "title": "Dictionary entity spans, exact match F1 and a strict relation pattern",
+      "anchor": "reference",
+      "source_path": "courses/nlp/solutions/nlp-011_solution.py",
+      "source_sha256": "e717c91e024f57514083877f375a6a30028ce810972474b5a91ddaef1d9c4f4e",
+      "expected_output": [
+        "nlp-011: raw spans, exact F1=.4, directed relations and abstention checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [4, 13],
+          "excerpt": "def extract_entities(text, lexicon):\n    if not isinstance(text, str):\n        raise TypeError(\"text must be a string\")\n    if not lexicon:\n        return []\n    names = sorted(lexicon, key=lambda name: (-len(name), name))\n    if any(not name for name in names):\n        raise ValueError(\"empty entity name\")\n    pattern = re.compile(r\"(?<!\\w)(?:\" + \"|\".join(re.escape(name) for name in names) + r\")(?!\\w)\")\n    return [(m.start(), m.end(), lexicon[m.group()], m.group()) for m in pattern.finditer(text)]",
+          "title": "Longest match first entity extraction",
+          "explanation": "The function rejects non string text and returns nothing for an empty lexicon. Names are sorted longest first so Acme Labs wins over Acme when both could match. re.escape makes punctuation such as the plus signs in C++ literal. The lookbehind (?<!\\w) and lookahead (?!\\w) act like word boundaries that also work next to symbols. Each match becomes a tuple of start, end, label and surface text.",
+          "observe": "The offsets are character positions in the original string, so text[start:end] always gives back the matched name."
+        },
+        {
+          "lines": [16, 25],
+          "excerpt": "def exact_scores(gold, predicted):\n    gold = set(gold)\n    predicted = set(predicted)\n    tp = len(gold & predicted)\n    fp = len(predicted - gold)\n    fn = len(gold - predicted)\n    precision = tp / (tp + fp) if tp + fp else 0.0\n    recall = tp / (tp + fn) if tp + fn else 0.0\n    f1 = 2 * tp / (2 * tp + fp + fn) if 2 * tp + fp + fn else 0.0\n    return tp, fp, fn, precision, recall, f1",
+          "title": "Exact span scoring",
+          "explanation": "Gold and predicted spans are turned into sets so that order does not matter. True positives are spans in both sets, false positives are predicted only and false negatives are gold only. Each ratio guards against division by zero. F1 is written as 2tp / (2tp + fp + fn), which equals the harmonic mean of precision and recall.",
+          "observe": "A span counts as correct only if document, label, start and end all match exactly."
+        },
+        {
+          "lines": [28, 40],
+          "excerpt": "def acquisition(text):\n    # Strict authored grammar, not general relation extraction.\n    pattern = r\"(?P<subject>Acme Labs|Beta Ltd) acquired (?P<object>Acme Labs|Beta Ltd)\\.\"\n    match = re.fullmatch(pattern, text)\n    if match is None:\n        return None\n    return {\n        \"subject\": match.group(\"subject\"),\n        \"predicate\": \"acquired\",\n        \"object\": match.group(\"object\"),\n        \"subject_span\": match.span(\"subject\"),\n        \"object_span\": match.span(\"object\"),\n    }",
+          "title": "A deliberately narrow relation extractor",
+          "explanation": "re.fullmatch requires the whole sentence to fit the pattern, so extra words make it return None. Named groups capture the subject and object, and match.span records where each one sits. The comment is honest: this is an authored grammar for one sentence shape, not general relation extraction.",
+          "observe": "Returning None is the function's way of abstaining when the sentence does not fit."
+        },
+        {
+          "lines": [43, 51],
+          "excerpt": "def main():\n    text = \"Ada joined Acme Labs in Paris.\"\n    lexicon = {\"Ada\": \"PER\", \"Acme\": \"ORG\", \"Acme Labs\": \"ORG\", \"Paris\": \"LOC\"}\n    spans = extract_entities(text, lexicon)\n    assert spans == [(0, 3, \"PER\", \"Ada\"), (11, 20, \"ORG\", \"Acme Labs\"), (24, 29, \"LOC\", \"Paris\")]\n    assert all(text[start:end] == surface for start, end, kind, surface in spans)\n    repeated = extract_entities(\"Ada met Ada.\", {\"Ada\": \"PER\"})\n    assert [(s, e) for s, e, _, _ in repeated] == [(0, 3), (8, 11)]\n    assert extract_entities(\"C++ Labs\", {\"C++ Labs\": \"ORG\"}) == [(0, 8, \"ORG\", \"C++ Labs\")]",
+          "title": "Spans on real sentences",
+          "explanation": "The first assert lists the three expected spans. The second checks that slicing the text with each span returns its surface form, which is the property downstream code relies on. The next two lines show that repeated names are both found and that a name full of regex symbols still matches.",
+          "observe": "Acme Labs is found as one ORG span from 11 to 20, not as Acme alone."
+        },
+        {
+          "lines": [52, 55],
+          "excerpt": "    gold = {(\"d1\", kind, start, end) for start, end, kind, _ in spans}\n    pred = {(\"d1\", \"PER\", 0, 3), (\"d1\", \"ORG\", 11, 15)}\n    tp, fp, fn, p, r, f1 = exact_scores(gold, pred)\n    assert (tp, fp, fn) == (1, 1, 2) and p == 0.5 and r == 1 / 3 and f1 == 0.4",
+          "title": "Score a prediction that gets one boundary wrong",
+          "explanation": "gold is built from the correct spans. The prediction finds Ada correctly but marks only Acme, 11 to 15, as ORG and misses Paris. Exact scoring counts the partial Acme span as a false positive and both Acme Labs and Paris as false negatives.",
+          "observe": "tp, fp, fn are 1, 1, 2, so precision is 0.5, recall is one third and F1 is 0.4."
+        },
+        {
+          "lines": [56, 62],
+          "excerpt": "    forward = acquisition(\"Acme Labs acquired Beta Ltd.\")\n    reverse = acquisition(\"Beta Ltd acquired Acme Labs.\")\n    assert forward[\"subject\"] == reverse[\"object\"] and forward[\"object\"] == reverse[\"subject\"]\n    assert acquisition(\"Acme Labs did not acquire Beta Ltd.\") is None\n    assert acquisition(\"Rumor: Acme Labs acquired Beta Ltd.\") is None\n    assert extract_entities(\"\", lexicon) == []\n    print(\"nlp-011: raw spans, exact F1=.4, directed relations and abstention checks passed\")",
+          "title": "Direction and abstention",
+          "explanation": "Swapping the sentence swaps subject and object, which shows the relation is directed. Negation and a hedged rumor both fail fullmatch and return None. An empty text gives an empty span list.",
+          "observe": "The single output line starts with nlp-011: and mentions exact F1=.4."
+        }
+      ]
+    },
+    {
+      "lesson_id": "nlp-018",
+      "title": "Characters, bytes and words, cautious language hints and slice metrics",
+      "anchor": "reference",
+      "source_path": "courses/nlp/solutions/nlp-018_solution.py",
+      "source_sha256": "58f99fe641ef71bddd16a86d09ea66158a3a5fbc03b5e8033f5746d71059998a",
+      "expected_output": [
+        "nlp-018: codepoint/byte/whitespace differences; ambiguous-language abstention; slice metrics passed"
+      ],
+      "steps": [
+        {
+          "lines": [5, 11],
+          "excerpt": "def narrow_language_hint(text):\n    words = set(text.lower().split())\n    english = len(words & {\"the\", \"is\"})\n    spanish = len(words & {\"el\", \"es\"})\n    if english == spanish:\n        return None\n    return \"en\" if english > spanish else \"es\"",
+          "title": "A language hint that may say nothing",
+          "explanation": "The function counts a few English and Spanish function words. If the counts tie, including zero to zero, it returns None instead of guessing. That abstention is the point: a short or mixed text often does not carry enough evidence for a language label.",
+          "observe": "The result is en, es or None. None is a valid, honest answer."
+        },
+        {
+          "lines": [14, 17],
+          "excerpt": "def strip_marks(text):\n    return \"\".join(\n        ch for ch in unicodedata.normalize(\"NFD\", text) if unicodedata.category(ch) != \"Mn\"\n    )",
+          "title": "Removing accents with Unicode normalization",
+          "explanation": "NFD normalization splits a letter like e with an acute accent into a base letter and a separate combining mark. Marks have Unicode category Mn, so filtering them out leaves the base letters. This is lossy: two different words can collapse into the same string.",
+          "observe": "strip_marks turns an accented word into plain ASCII letters."
+        },
+        {
+          "lines": [20, 22],
+          "excerpt": "def main():\n    text = \"服务正常\"\n    assert len(text) == 4 and len(text.encode(\"utf-8\")) == 12 and len(text.split()) == 1",
+          "title": "Length depends on what you count",
+          "explanation": "The Chinese string has four characters, but UTF-8 stores each in three bytes, so the byte length is 12. It contains no spaces, so split returns one item. Code that assumes words are separated by spaces, or that characters are one byte, breaks on text like this.",
+          "observe": "Three different lengths for one string: 4 code points, 12 bytes, 1 whitespace token."
+        },
+        {
+          "lines": [23, 28],
+          "excerpt": "    assert narrow_language_hint(\"the service is ready\") == \"en\"\n    assert narrow_language_hint(\"el servicio es correcto\") == \"es\"\n    assert (\n        narrow_language_hint(\"bank\") is None\n        and narrow_language_hint(\"the servicio es ready\") is None\n    )",
+          "title": "Clear cases and ambiguous cases",
+          "explanation": "Two sentences give clear hints. A single word with no function words, and a sentence that mixes both languages evenly, both return None. Wrapping the long condition in parentheses lets it span several lines.",
+          "observe": "Ambiguous input produces None rather than a confident wrong label."
+        },
+        {
+          "lines": [29, 31],
+          "excerpt": "    assert strip_marks(\"résumé\") == \"resume\" and \"résumé\" != \"resume\"\n    assert \"İ\".lower() == \"i\\u0307\" and len(\"İ\".lower()) == 2\n    assert \"Straße\".casefold() == \"strasse\"",
+          "title": "Case and accent rules are not universal",
+          "explanation": "Removing accents changes the string, so normalized and original forms are no longer equal. Lowercasing the dotted capital I produces two code points, an i plus a combining dot. casefold is stronger than lower and maps the German sharp s to ss, which is what caseless matching needs.",
+          "observe": "Each assert documents a surprise that can break naive text matching."
+        },
+        {
+          "lines": [32, 39],
+          "excerpt": "    english = np.array([1] * 9 + [0])\n    spanish = np.array([1, 0])\n    pooled = (english.sum() + spanish.sum()) / (len(english) + len(spanish))\n    macro = (english.mean() + spanish.mean()) / 2\n    assert np.isclose(pooled, 5 / 6) and macro == 0.7\n    print(\n        \"nlp-018: codepoint/byte/whitespace differences; ambiguous-language abstention; slice metrics passed\"\n    )",
+          "title": "Pooled versus per slice accuracy",
+          "explanation": "english has ten results with nine correct and spanish has two with one correct. Pooling divides total correct by total count, which lets the large English slice dominate. The macro average weights each language equally. Reporting both shows when a small slice is doing badly.",
+          "observe": "Pooled accuracy is 5/6 while the macro average is 0.7. The final line starts with nlp-018:."
+        }
+      ]
+    }
+  ]
+}

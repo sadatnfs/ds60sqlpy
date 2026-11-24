@@ -108,7 +108,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Borrow only within the closure) before changing anything, and confirm its observation: The result escapes as an integer while the borrowed pointer does not.
 2. Compare Example B (Handle empty storage without dereferencing) with Example A and name the first line whose behavior differs. Its observation is: An empty buffer is valid to inspect by count.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Unsafe does not disable all runtime checks or make an operation faster.
+3. Before opening the explanation, check your task 3 attempt (Wrap a scoped read-only buffer operation behind a safe function contract) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

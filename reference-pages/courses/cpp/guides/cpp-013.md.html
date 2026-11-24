@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Turn behavioral contracts into tests that still run in Release builds.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A warning is compiler feedback about suspicious code even when compilation succeeds. A test is an executable check against a contract. CTest runs registered processes and reports their statuses. The NDEBUG macro disables standard assert expressions, so a Release test that only uses assert can accidentally check nothing.</p>
+<ul>
+<li><strong>compiler warning:</strong> a diagnostic about suspicious code that does not by itself stop compilation.</li>
+<li><strong>CTest:</strong> the CMake test driver, which runs registered test processes and reports their statuses.</li>
+<li><strong><code>NDEBUG</code>:</strong> a macro that, when defined, removes standard <code>assert</code> expressions together with any side effects inside them.</li>
+<li><strong>always-active check:</strong> an ordinary condition with an explicit failure result that runs in every build configuration.</li>
+<li><strong>build configuration:</strong> a named set of compiler options such as Debug or Release whose actual flags should be inspected.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>if (actual != expected) return 1;</code> is an always-active test. <code>-Wall -Wextra -Wpedantic</code> requests common warning groups; it is not a proof of correctness. A successful CMake configure does not execute tests; run ctest and inspect the executed count.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
@@ -235,7 +242,6 @@ cpp-013 example 1 checks passed</code></pre>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
 
-<span class="syntax-keyword">int</span> <span class="syntax-function">twice</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> x <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   <span class="syntax-keyword">int</span> evaluations <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
   assert<span class="syntax-punctuation">(</span><span class="syntax-operator">+</span><span class="syntax-operator">+</span>evaluations <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>

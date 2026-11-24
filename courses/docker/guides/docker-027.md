@@ -16,6 +16,14 @@ A recoverable system is more than a system that restarts. It has an identified d
 
 Your deliverable is a short operator guide plus evidence, not a collection of screenshots. A future reader should know which project the commands affect, which volume contains state, how to inspect a failure, and what they can remove without losing the retained counter.
 
+### Key terms
+
+- **Two-tier system:** An application tier that owns state plus a client tier that reaches it through service DNS.
+- **Service DNS:** Lookup of a peer by its Compose service name, so the client survives the app container's address changing.
+- **Resource limits:** Bounds on memory, CPU and processes that keep each service's execution constrained and predictable.
+- **Restore target:** A separate, disposable volume or project that receives a backup during a recovery test.
+- **Operator guide:** A short document naming the project, the state volume, inspection steps and what can be removed safely.
+
 ## Anatomy and a trace you can follow
 
 Work only in the copied fixture. Verify host and peer requests, record the non-root user and read-only configuration, export the stopped app’s counter, restore into a distinct target and compare. A deliberately wrong service port in a scratch client should fail with a bounded transport error.
@@ -92,11 +100,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Testing only from the host and missing a broken peer path. Restoring over the source volume. Claiming high availability from a single engine.
 
-Exercise 4 is this chapter's boundary case: Diagnose a passing host request with failing peer request. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a passing host request with failing peer request. Send the same request from the host and from a peer container, then compare the host mapping with the service name and internal port the peer used. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using service discovery, resource limits, recovery test and release review. Reconstruct worked example 2 (Review the operational state machine) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Draw the recovery state machine and mark where a failure stops the sequence. Then reconstruct worked example 2 (Review the operational state machine) with one different value, predict what changes, and name which of service discovery, resource limits, recovery test and release review the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-build-the-source-inventory">Exercise 1: Build the source inventory<a class="heading-anchor" href="#exercise-1-build-the-source-inventory" aria-label="Link to this section">#</a></h3>
 <p>The API data store records Kubernetes state, while workload data can live in a separate storage system. Treating the claim object as the file backup confuses a reference to storage with the contents of that storage.</p>
 <p><strong>Expected:</strong> Two distinct sources and restore checks.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List each item, where its bytes live and which backup captures them.</li>
+<li><strong>Why it is correct:</strong> API objects live in etcd and appear in a control plane snapshot, while the marker lives on the volume and needs a data backup.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming an etcd snapshot includes PVC contents restores the claim object with no data behind it.</li>
+<li><strong>How to verify:</strong> Two sources and two restore checks are named.</li>
+</ul>
 <h3 id="exercise-2-record-a-synthetic-data-checksum">Exercise 2: Record a synthetic data checksum<a class="heading-anchor" href="#exercise-2-record-a-synthetic-data-checksum" aria-label="Link to this section">#</a></h3>
 <p>Recomputing both expected and actual from the restored file would make the check meaningless. The expected digest belongs to the captured backup record, and the read-only verification must inspect the restored application path.</p>
 <p><strong>Expected:</strong> Equal bytes match; changed bytes fail the reference digest.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compute SHA-256 of the fixed and changed marker and compare each with the reference digest.</li>
+<li><strong>Why it is correct:</strong> Any byte change produces a different digest, so only the unchanged marker matches.</li>
+<li><strong>Plausible wrong approach:</strong> Comparing file sizes would pass a same-length change.</li>
+<li><strong>How to verify:</strong> The fixed marker matches the reference, and the changed one does not.</li>
+</ul>
 <h3 id="exercise-3-define-consistency-assumptions">Exercise 3: Define consistency assumptions<a class="heading-anchor" href="#exercise-3-define-consistency-assumptions" aria-label="Link to this section">#</a></h3>
 <p>The fixture deliberately holds data constant so the learner can isolate restoration boundaries. A real database requires its own consistency and recovery design, which cannot be inferred from a successful marker copy.</p>
 <p><strong>Expected:</strong> No claim of database-consistent backup or log replay.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> State what makes the immutable marker easy to back up and name a live database property it lacks.</li>
+<li><strong>Why it is correct:</strong> A file that never changes has no in-flight writes, so a copy at any moment is consistent.</li>
+<li><strong>Plausible wrong approach:</strong> Treating a file copy of a running database as consistent ignores open transactions and unflushed pages.</li>
+<li><strong>How to verify:</strong> The answer names a property such as concurrent writes and makes no database consistency claim.</li>
+</ul>
 <h3 id="exercise-4-evaluate-the-partial-restore">Exercise 4: Evaluate the partial restore<a class="heading-anchor" href="#exercise-4-evaluate-the-partial-restore" aria-label="Link to this section">#</a></h3>
 <p>The separate failure row prevents a misleading success report. It also points to the correct repair path: investigate or repeat the qualified data restoration, rather than merely restarting an already Ready Pod.</p>
 <p><strong>Expected:</strong> Overall recovery fails until both API and data gates pass.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Evaluate the API gate and data gate separately and combine with AND.</li>
+<li><strong>Why it is correct:</strong> Restored objects with wrong data are not a recovery, so both gates must pass.</li>
+<li><strong>Plausible wrong approach:</strong> Reporting partial success because objects returned hides that the data is wrong.</li>
+<li><strong>How to verify:</strong> API passes, data fails and overall recovery fails.</li>
+</ul>
 <h3 id="exercise-5-protect-backup-material">Exercise 5: Protect backup material<a class="heading-anchor" href="#exercise-5-protect-backup-material" aria-label="Link to this section">#</a></h3>
 <p>Operational evidence should identify the procedure and outcome without copying the source of sensitive data. Access, encryption and retention belong to the host backup contract and are distinct from the classroom checksum exercise.</p>
 <p><strong>Expected:</strong> No snapshots or secrets in portable progress; only bounded metadata and synthetic checksums.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Mark snapshots and credentials private and allow only bounded metadata and synthetic checksums in progress.</li>
+<li><strong>Why it is correct:</strong> Snapshots contain every Secret in the cluster, so sharing one exposes credentials beyond this lesson.</li>
+<li><strong>Plausible wrong approach:</strong> Attaching the snapshot as proof of backup publishes all stored Secrets.</li>
+<li><strong>How to verify:</strong> Each item is classified, and no snapshot or secret is shareable.</li>
+</ul>
 <h3 id="exercise-6-review-target-isolation-and-cleanup">Exercise 6: Review target isolation and cleanup<a class="heading-anchor" href="#exercise-6-review-target-isolation-and-cleanup" aria-label="Link to this section">#</a></h3>
 <p>The host must prove the intended destination before executing a restore and retain a recovery path for failures. The lesson worksheet alone never authorizes arbitrary control-plane changes or deletion of unrelated volumes.</p>
 <p><strong>Expected:</strong> No restore into an ambient or shared target; exact owned cleanup.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name the dedicated source and destination and list exact identities for disposal.</li>
+<li><strong>Why it is correct:</strong> Restoring into a shared cluster could overwrite objects owned by others, and exact identities bound the cleanup.</li>
+<li><strong>Plausible wrong approach:</strong> Restoring into the current kubeconfig context targets whatever cluster happens to be active.</li>
+<li><strong>How to verify:</strong> The destination is dedicated and owned, and disposal names exact identities.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>If the API object exists but the marker hash is wrong, recovery has not met the application-data contract. If the marker is correct but the Service route is broken, recovery has not met the serving contract. A Ready Pod alone proves neither complete restoration nor acceptable data loss.</p>
 <p>Never use a live production snapshot as a convenient classroom fixture. The synthetic rehearsal makes scope visible while avoiding personal or organizational data. A passed rehearsal establishes the tested procedure and version combination, not universal restore compatibility.</p></article>

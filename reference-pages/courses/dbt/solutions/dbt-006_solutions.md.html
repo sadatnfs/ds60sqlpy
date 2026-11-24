@@ -198,21 +198,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-add-a-second-customer">1. Add a second customer<a class="heading-anchor" href="#1-add-a-second-customer" aria-label="Link to this section">#</a></h3>
 <p>This catches a model that returns one global total. Verify row identities as well as amounts.</p>
+<p><strong>Why it holds here:</strong> The given rows for ref(&#x27;raw_orders&#x27;) currently hold only customer 1, so a model that drops group by customer and returns sum(amount) over everything still produces a single row with total 5. A second customer makes the grouping observable.</p>
+<p><strong>Plausible wrong approach:</strong> Adding the second customer only to the production seed raw_orders.csv changes nothing in the unit test, because the fixture replaces that relation during test_type:unit.</p>
+<p><strong>How to verify:</strong> Add customer 2 with amount 10 to the given rows and expect rows [customer 1 total 5, customer 2 total 10]; dbt test --select test_type:unit should report pass, and the run_results entry should show status pass.</p>
 <p><strong>Expected:</strong> The expected result has one row per customer.</p>
 <h3 id="2-add-a-zero-amount">2. Add a zero amount<a class="heading-anchor" href="#2-add-a-zero-amount" aria-label="Link to this section">#</a></h3>
 <p>A separate count output or row-accounting test can reveal a dropped zero-valued row when that distinction matters.</p>
+<p><strong>Why it holds here:</strong> sum(amount) ignores whether a zero row is present, so adding customer 1 amount 0 leaves total at 5. The exercise shows that this model&#x27;s output cannot detect a dropped zero row on its own.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting total 5 and concluding the zero row was processed is wrong; a filter such as where amount &gt; 0 would give the same 5 and pass the same test.</p>
+<p><strong>How to verify:</strong> Add count(*) as order_count to a scratch copy of the model and expect order_count 3 for customer 1; the filtered version then fails with order_count 2, proving the extra column adds coverage.</p>
 <p><strong>Expected:</strong> The total is unchanged but row coverage increases.</p>
 <h3 id="3-change-a-key">3. Change a key<a class="heading-anchor" href="#3-change-a-key" aria-label="Link to this section">#</a></h3>
 <p>The fixture should catch grouping by a nonunique display field. Use the actual intended key in both SQL and expectation.</p>
+<p><strong>Why it holds here:</strong> When rows carry customer ids 1 and 2 but share a label like Acme, grouping by the label merges them into one total while grouping by customer keeps them apart. The fixture is chosen to make that difference visible.</p>
+<p><strong>Plausible wrong approach:</strong> Writing the expectation by grouping on the label as well would let the test pass on the merged total, since model and oracle would share the same mistake.</p>
+<p><strong>How to verify:</strong> Expect two rows, customer 1 total 5 and customer 2 total 10, and temporarily group by label in the model; the unit test should fail with one row of 15 versus the two expected rows.</p>
 <p><strong>Expected:</strong> They remain separate groups.</p>
 <h3 id="4-remove-a-grouping-clause">4. Remove a grouping clause<a class="heading-anchor" href="#4-remove-a-grouping-clause" aria-label="Link to this section">#</a></h3>
 <p>A failure proves that this fixture detects that defect. It does not prove the suite detects all possible changes.</p>
+<p><strong>Why it holds here:</strong> Deleting group by customer makes the select list invalid in DuckDB, because customer is neither aggregated nor grouped, so dbt test reports an error for the unit test node rather than a passing comparison.</p>
+<p><strong>Plausible wrong approach:</strong> Concluding from one caught defect that the suite is complete is wrong: replacing sum(amount) with sum(distinct amount) still returns 5 for the amounts 2 and 3, so that defect passes this fixture unnoticed.</p>
+<p><strong>How to verify:</strong> Run dbt test --select test_type:unit after the edit and read run_results.json; the totals unit test status should be error or fail, and restoring the clause should return it to pass.</p>
 <p><strong>Expected:</strong> The unit test rejects wrong output or SQL.</p>
 <h3 id="5-compare-test-types">5. Compare test types<a class="heading-anchor" href="#5-compare-test-types" aria-label="Link to this section">#</a></h3>
 <p>Use integration tests, source contracts and operational observations for the actual data. Keep the evidence categories separate.</p>
+<p><strong>Why it holds here:</strong> The unit test swaps ref(&#x27;raw_orders&#x27;) for two inline rows, so it says nothing about the seeded table holding customer 2 amount 100. The reference even asserts that seed value is unchanged after the test.</p>
+<p><strong>Plausible wrong approach:</strong> Reading a passing unit test as evidence that raw_orders has unique, complete rows mixes logic evidence with data evidence; production duplicates would never reach the fixture.</p>
+<p><strong>How to verify:</strong> Add not_null and relationships or unique data tests on the real raw_orders relation and run dbt test --select test_type:data; those results, not the unit result, describe the source.</p>
 <p><strong>Expected:</strong> It cannot prove actual source completeness or uniqueness.</p>
 <h3 id="6-build-an-independent-oracle">6. Build an independent oracle<a class="heading-anchor" href="#6-build-an-independent-oracle" aria-label="Link to this section">#</a></h3>
 <p>Independent expected values reduce the risk that the model and test share the same error. Document the assumptions behind the oracle.</p>
+<p><strong>Why it holds here:</strong> The oracle is computed by hand from the fixture rows: 2 plus 3 gives 5 for customer 1. Because it comes from the inputs rather than the SQL, a shared bug cannot make both sides agree.</p>
+<p><strong>Plausible wrong approach:</strong> Generating the expected rows by running the totals model on the fixture and pasting its output would freeze whatever the current SQL returns, including errors, as the expectation.</p>
+<p><strong>How to verify:</strong> Compute the expectation in Python from the given rows, for example sum of amounts per customer, compare it with the YAML expect block, and confirm the deliberately wrong 99 case reports fail.</p>
 <p><strong>Expected:</strong> The oracle does not copy the SQL expression verbatim.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;dbt-006: actual local dbt and DuckDB reference.&quot;&quot;&quot;</span>

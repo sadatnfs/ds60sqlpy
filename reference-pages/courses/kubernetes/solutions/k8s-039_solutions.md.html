@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-write-a-threat-model">Exercise 1: Write a threat model<a class="heading-anchor" href="#exercise-1-write-a-threat-model" aria-label="Link to this section">#</a></h3>
 <p>The host operator has powers the learner deliberately lacks. Distinguishing those actors prevents a namespace boundary from being misrepresented as protection against the administrator who controls the host or credentials.</p>
 <p><strong>Expected:</strong> Actors and assets are explicit rather than a blanket secure claim.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name learner, host operator and unrelated tenant, their capabilities and each asset&#x27;s owner.</li>
+<li><strong>Why it is correct:</strong> Threats come from what each actor can do, so explicit capabilities show which paths need controls.</li>
+<li><strong>Plausible wrong approach:</strong> Writing that the cluster is secure names no actor and gives nothing to test.</li>
+<li><strong>How to verify:</strong> Each actor lists capabilities, and each asset has an owner.</li>
+</ul>
 <h3 id="exercise-2-classify-six-adversarial-fields">Exercise 2: Classify six adversarial fields<a class="heading-anchor" href="#exercise-2-classify-six-adversarial-fields" aria-label="Link to this section">#</a></h3>
 <p>The rejected shapes are concrete and reviewable. A successful local negative test shows the broker source boundary, while independent API and runtime controls require their own evidence and should not be inferred automatically.</p>
 <p><strong>Expected:</strong> Every field has a named closed-schema or ownership rule.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Map each of the six fields to the closed schema or ownership rule that rejects it.</li>
+<li><strong>Why it is correct:</strong> The parser accepts only known fields and owned values, so each adversarial field fails a specific rule.</li>
+<li><strong>Plausible wrong approach:</strong> Relying on Pod Security alone misses the foreign namespace and foreign ServiceAccount, which it does not check.</li>
+<li><strong>How to verify:</strong> Every field cites one rejecting rule.</li>
+</ul>
 <h3 id="exercise-3-review-credential-exposure">Exercise 3: Review credential exposure<a class="heading-anchor" href="#exercise-3-review-credential-exposure" aria-label="Link to this section">#</a></h3>
 <p>The effective boundary includes the process environment and mounts, not just the manifest form. A learner-facing API that rejects unsafe YAML is insufficient if the same process can directly reach an unrestricted engine socket.</p>
 <p><strong>Expected:</strong> No alternate path around the bounded operation API.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check learner-visible files for tokens, container engine sockets and kubeconfig paths.</li>
+<li><strong>Why it is correct:</strong> Any of these would let a learner call the API or the engine directly and bypass the bounded operation API.</li>
+<li><strong>Plausible wrong approach:</strong> Hiding the kubeconfig with file permissions while leaving its path in an artifact still points to it.</li>
+<li><strong>How to verify:</strong> No credential, socket or kubeconfig path appears.</li>
+</ul>
 <h3 id="exercise-4-separate-resource-and-network-controls">Exercise 4: Separate resource and network controls<a class="heading-anchor" href="#exercise-4-separate-resource-and-network-controls" aria-label="Link to this section">#</a></h3>
 <p>CPU limits constrain execution consumption, quotas constrain admitted object/resource totals, deadlines bound operations, and network policy governs supported traffic paths. Their effectiveness and failure modes must be tested separately.</p>
 <p><strong>Expected:</strong> Each constrains a different resource or traffic dimension.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name the dimension each control limits.</li>
+<li><strong>Why it is correct:</strong> CPU limits cap compute per container, quota caps object counts and requests per namespace, deadlines cap time and NetworkPolicy caps traffic.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting quota to stop network scanning gives it a traffic role it does not have.</li>
+<li><strong>How to verify:</strong> Four controls map to compute, object count, time and traffic.</li>
+</ul>
 <h3 id="exercise-5-inspect-cleanup-identity-defenses">Exercise 5: Inspect cleanup identity defenses<a class="heading-anchor" href="#exercise-5-inspect-cleanup-identity-defenses" aria-label="Link to this section">#</a></h3>
 <p>Cleanup is itself a security-sensitive action. Ownership labels, nonce and UID preconditions prevent a stale operation from deleting a replacement or unrelated object after a race or partial failure.</p>
 <p><strong>Expected:</strong> Foreign object preserved and cleanup reports the mismatch.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare the found object&#x27;s UID and nonce with the receipt before deleting.</li>
+<li><strong>Why it is correct:</strong> A same-name object with a different UID was created by someone else, so deleting it would harm another tenant.</li>
+<li><strong>Plausible wrong approach:</strong> Deleting by name because it matches the expected name removes the foreign object.</li>
+<li><strong>How to verify:</strong> The foreign object is kept, and cleanup reports the mismatch.</li>
+</ul>
 <h3 id="exercise-6-state-residual-assumptions">Exercise 6: State residual assumptions<a class="heading-anchor" href="#exercise-6-state-residual-assumptions" aria-label="Link to this section">#</a></h3>
 <p>The conclusion should tell an instructor what was actually established and what would need a different design. It preserves useful assurance while avoiding an unsupported promise about hostile tenants or kernel vulnerabilities.</p>
 <p><strong>Expected:</strong> No arbitrary-code or VM-equivalent isolation claim; host trust and qualified controls are named.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write the isolation statement with trusted host assumptions, qualified controls and untested threats.</li>
+<li><strong>Why it is correct:</strong> Containers share a kernel, so namespace controls do not equal virtual machine separation.</li>
+<li><strong>Plausible wrong approach:</strong> Claiming tenants are fully isolated implies protection from kernel exploits nobody tested.</li>
+<li><strong>How to verify:</strong> Untested threats are listed, and no VM-equivalent claim is made.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Report the allowed operations, forbidden surfaces, observed negative cases and remaining assumptions. A clear boundary statement can support safe classroom use without claiming general hostile multitenant hosting.</p>
 <p>Do not widen permissions to demonstrate a forbidden action live. Do not collect another lease&#x27;s tokens as evidence. An authorization denial can be observed using the scoped test identity and a known synthetic target without exposing credentials or unrelated data.</p></article>

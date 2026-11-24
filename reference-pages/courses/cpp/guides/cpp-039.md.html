@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Define ownership and error transport across a language/binary boundary.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A C interface exposes stable-shaped calls to clients that may not share a C++ compiler. An opaque handle hides implementation details while preserving a documented owner. A loading boundary introduces version, symbol and cleanup responsibilities. Destroying an object in the wrong allocator or letting an exception cross the boundary can break the contract.</p>
+<ul>
+<li><strong>C interface:</strong> functions with C linkage and C-compatible types that clients built with another compiler can call.</li>
+<li><strong>opaque handle:</strong> a pointer-shaped value that hides the implementation layout from consumers.</li>
+<li><strong>paired allocation and release:</strong> the rule that the provider that created an object also destroys it, instead of the consumer using its own delete.</li>
+<li><strong>no-throw boundary:</strong> an interface that catches exceptions internally and reports failure as null or a status code.</li>
+<li><strong>custom deleter:</strong> a function given to <code>unique_ptr</code>, such as the provider&#x27;s destroy function, so cleanup uses the correct release.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Create returns a handle or failure; destroy releases it exactly once; getters validate pointers and report status. extern C controls linkage but the host still needs compatible architecture and calling conventions. Dynamic loading requires a separate platform-specific host test, not the single-file browser example.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-state-cross-correlation-convention">Exercise 1: State cross-correlation convention<a class="heading-anchor" href="#exercise-1-state-cross-correlation-convention" aria-label="Link to this section">#</a></h3>
 <p>Write the exact index formula.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>state cross-correlation convention</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write the cross-correlation formula used by deep learning libraries: <code>out[i] = sum(x[i+j]*k[j] for j in range(len(k)))</code>, with no kernel flip.</p>
+<p><strong>Why it is correct here.</strong> For <code>x = [1, 2, 3, 4]</code> and <code>k = [1, -1]</code>, each output is <code>x[i] - x[i+1] = -1</code>, giving <code>[-1, -1, -1]</code>. Mathematical convolution flips the kernel and gives <code>[1, 1, 1]</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Writing a reference with <code>k[len(k)-1-j]</code>, textbook convolution, flips every sign compared with the library, which looks like a broken GPU kernel.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>out == [-1, -1, -1]</code>. Compare against <code>torch.nn.functional.conv1d</code> on the same values.</p>
 <h3 id="exercise-2-calculate-output-length">Exercise 2: Calculate output length<a class="heading-anchor" href="#exercise-2-calculate-output-length" aria-label="Link to this section">#</a></h3>
 <p>Valid length is input minus kernel plus one.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate output length</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute the valid output length as input length minus kernel length plus one: <code>4 - 2 + 1 = 3</code>.</p>
+<p><strong>Why it is correct here.</strong> With no padding, the kernel slides only over positions where it fits entirely. There are three such starting positions, 0, 1 and 2.</p>
+<p><strong>A plausible wrong approach.</strong> Using input length as output length assumes same padding, adding an output whose computation needs a value beyond the input.</p>
+<p><strong>How to verify.</strong> Check the reference&#x27;s <code>range(len(x)-len(k)+1)</code> produces three outputs, and confirm the library&#x27;s output shape matches.</p>
 <h3 id="exercise-3-count-layout-conversion-cost">Exercise 3: Count layout conversion cost<a class="heading-anchor" href="#exercise-3-count-layout-conversion-cost" aria-label="Link to this section">#</a></h3>
 <p>Include conversions in complete latency.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count layout conversion cost</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Include layout conversion in total latency: with conversion cost 2 ms and saving 1 ms per call against 2 ms unconverted, one call costs <code>2 + 1 = 3</code> ms against 2, while four calls cost <code>2 + 4 = 6</code> against 8.</p>
+<p><strong>Why it is correct here.</strong> The conversion is paid once and the saving accrues per reuse, so it pays off only when the converted data is reused enough. The reference asserts both inequalities.</p>
+<p><strong>A plausible wrong approach.</strong> Counting only the faster convolution, 1 ms against 2, declares conversion a win even for a single call.</p>
+<p><strong>How to verify.</strong> Evaluate both expressions and note the break-even at two calls, where both total 4 ms.</p>
 <h3 id="exercise-4-compare-forward-and-backward">Exercise 4: Compare forward and backward<a class="heading-anchor" href="#exercise-4-compare-forward-and-backward" aria-label="Link to this section">#</a></h3>
 <p>Both computations matter for training.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare forward and backward</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare forward and backward costs: training runs the forward convolution plus two backward convolutions, for input gradients and weight gradients, and each may choose a different algorithm.</p>
+<p><strong>Why it is correct here.</strong> An algorithm or layout that speeds the forward pass can slow the backward ones. Training time depends on all three. Inference, by contrast, only runs the forward pass, so the best choice can differ between the two uses.</p>
+<p><strong>A plausible wrong approach.</strong> Benchmarking only the forward pass and applying the result to training ignores roughly two thirds of the convolution work.</p>
+<p><strong>How to verify.</strong> Time forward and backward separately in a profiler for each candidate layout, and confirm gradients match a reference.</p>
 <h3 id="exercise-5-explain-algorithm-warmup">Exercise 5: Explain algorithm warmup<a class="heading-anchor" href="#exercise-5-explain-algorithm-warmup" aria-label="Link to this section">#</a></h3>
 <p>Algorithm choice may need startup work.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain algorithm warmup</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain algorithm warm-up: with benchmark mode enabled, cuDNN tries several algorithms for each new shape on the first call and caches the fastest.</p>
+<p><strong>Why it is correct here.</strong> The first iteration for each shape includes that search, so it is much slower than steady state. New shapes trigger a new search.</p>
+<p><strong>A plausible wrong approach.</strong> Timing the first iteration and concluding the configuration is slow measures the search.</p>
+<p><strong>How to verify.</strong> Discard warm-up iterations for every shape and record their count. Steady-state times should be stable. Without a GPU, record the plan and mark the timings as not measured.</p>
 <h3 id="exercise-6-design-two-shape-cases">Exercise 6: Design two shape cases<a class="heading-anchor" href="#exercise-6-design-two-shape-cases" aria-label="Link to this section">#</a></h3>
 <p>Use a narrow and wider batch with unchanged semantics.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design two shape cases</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design two shape cases with unchanged semantics: a narrow batch such as 1 and a wider batch such as 32, same channels, kernel size and padding.</p>
+<p><strong>Why it is correct here.</strong> The best algorithm and layout can differ by shape, so one size may not represent the workload. A batch of 1 may favor a different algorithm than a batch of 32, and conversion overhead weighs more when each call does little work.</p>
+<p><strong>A plausible wrong approach.</strong> Testing a single shape and generalizing the chosen layout risks regressions at other batch sizes. Production traffic that mixes sizes then sees the slow path.</p>
+<p><strong>How to verify.</strong> Verify outputs for both shapes against a reference, then report time per sample for each.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Valid cross-correlation [-1,-1,-1]; conversion amortization depends on reuse.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-091_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

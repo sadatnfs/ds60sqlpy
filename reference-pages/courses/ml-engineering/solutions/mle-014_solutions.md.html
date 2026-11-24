@@ -198,21 +198,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-change-the-assignment-key">1. Change the assignment key<a class="heading-anchor" href="#1-change-the-assignment-key" aria-label="Link to this section">#</a></h3>
 <p>Choose the unit from the experiment or rollout design and retain it consistently. Do not assume request-level assignment answers an entity-level question.</p>
+<p>With the sha256 rule on f&quot;entity:{i}&quot;, the 10 percent ramp selects 8 of 100 entities (0, 27, 35, 43, 60, 77, 89 and 92) and the 25 percent ramp selects 19, and every repeat gives the same sets. Per-request random.random() &lt; 0.10 would put the same customer in both arms across requests, so no customer has a single experience to measure.</p>
 <p><strong>Expected:</strong> The cohort interpretation changes.</p>
 <h3 id="2-record-a-salt-version">2. Record a salt/version<a class="heading-anchor" href="#2-record-a-salt-version" aria-label="Link to this section">#</a></h3>
 <p>Changing it can reassign entities. Treat that as a reviewed change rather than an invisible implementation detail.</p>
+<p>Prefixing the key with &quot;v2:&quot; changes the 10 percent cohort to 15 entities, only 2 of which were in the original 8. Recording assignment_version beside each prediction makes that reassignment visible; without it, a jump in the cohort&#x27;s metrics could be mistaken for a model effect.</p>
 <p><strong>Expected:</strong> The routing rule is reproducible.</p>
 <h3 id="3-inspect-probabilities">3. Inspect probabilities<a class="heading-anchor" href="#3-inspect-probabilities" aria-label="Link to this section">#</a></h3>
 <p>Use appropriate numeric and calibration diagnostics alongside action disagreement. A small label difference does not prove equivalent probabilities.</p>
+<p>In example_two every probability moves by exactly 0.1, so disagreement is 0 while the first customer&#x27;s score doubles from 0.1 to 0.2. Reporting only the 0 disagreement would hide that change. Print np.abs(old - candidate) and confirm the maximum is 0.1, under the 0.15 acceptance limit.</p>
 <p><strong>Expected:</strong> The confidence change remains visible.</p>
 <h3 id="4-add-operational-limits">4. Add operational limits<a class="heading-anchor" href="#4-add-operational-limits" aria-label="Link to this section">#</a></h3>
 <p>Use actual service observations and a rollback rule. The local project supplies bounded HTTP/monitoring checks; production capacity needs separate evidence.</p>
+<p>Write limits as quantities the local checker can measure, for example the fraction of 5xx responses and p95 latency over a fixed number of requests, each with the action taken when exceeded. The 0.15 score-delta limit in example_two is a prediction check and says nothing about latency. A limit such as &quot;be careful with errors&quot; cannot fail, so it cannot trigger a pause either.</p>
 <p><strong>Expected:</strong> The policy names measured quantities and responses.</p>
 <h3 id="5-avoid-a-causal-claim">5. Avoid a causal claim<a class="heading-anchor" href="#5-avoid-a-causal-claim" aria-label="Link to this section">#</a></h3>
 <p>Use an appropriate randomized or otherwise identified design for that question, with interference, exposure and metric assumptions made explicit.</p>
+<p>Shadow scoring never changes an action, so the outcomes observed are those produced by the old model&#x27;s decisions. Even if the candidate would have offered support to someone, their outcome without the offer is what was recorded.</p>
 <p><strong>Expected:</strong> They do not establish the effect of changed actions.</p>
 <h3 id="6-plan-rollback">6. Plan rollback<a class="heading-anchor" href="#6-plan-rollback" aria-label="Link to this section">#</a></h3>
 <p>Restore model and feature compatibility, reconcile in-flight work and record the reason. A pointer switch alone is not every possible recovery requirement.</p>
+<p>Keep the previous model, its feature contract and the assignment version together. Rolling back only the model while the 19-entity cohort&#x27;s feature version remains newer could reintroduce a train/serve mismatch. Test the rollback by scoring the same four rows from example_two after reverting and confirming the old probabilities 0.1, 0.3, 0.6 and 0.9 come back exactly.</p>
 <p><strong>Expected:</strong> A compatible prior bundle is retained.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;mle-014: local, bounded ML engineering investigation.&quot;&quot;&quot;</span>

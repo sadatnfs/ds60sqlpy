@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Measure asynchronous GPU work with CUDA events and report the sample distribution beside a CPU baseline.
+
 Work through *Timing asynchronous work correctly* with the concrete cases below. Finish with this evidence:
 raw samples, a reported distribution and an honest comparison with CPU execution. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A host clock around an asynchronous launch measures submission unless a completion dependency is included. Device events record positions in a stream and can measure elapsed device work between those positions after completion. End-to-end host timing includes the transfers and synchronization the application actually requires. Warm-up separates one-time initialization or JIT work from repeated work, but cold start remains a real user concern and deserves its own measurement. Retain repeated samples and summarize a distribution. Profiling or sanitizer instrumentation changes execution, so do not mix instrumented and ordinary samples in one performance claim.
+
+### Key terms
+
+- **CUDA event:** A marker recorded in a stream whose completion can be queried or used to compute elapsed device time.
+- **cudaEventElapsedTime:** A call that returns the milliseconds between two completed events.
+- **End-to-end time:** Host-observed time that includes the transfers, synchronization and launches the application needs.
+- **Cold start:** The first execution, which includes one-time costs such as context creation, module loading or JIT.
 
 ## Mathematical contract
 
@@ -57,7 +66,6 @@ import statistics
 
 samples = [1.0, 1.1, 1.0, 1.2, 9.0]
 assert statistics.median(samples) == 1.1
-assert 12 / 4 == 3
 print(
     {
         "synthetic_samples_ms": samples,

@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Fit the declared depth-one classifier and predict x = 2 and x = 7.</p>
 <p>The predictions are low and high, matching the two learned regions.</p>
 <p><strong>Expected evidence:</strong> low/high.</p>
+<p><strong>Approach:</strong> Call rpart with method = &quot;class&quot; and a control that allows splits on 8 rows: minsplit 2, minbucket 1, maxdepth 1, cp 0 and xval 0.</p>
+<p><strong>Why it holds here:</strong> The labels switch from low to high between x = 4 and x = 5, so a single cut there separates them perfectly. x = 2 falls on the low side and x = 7 on the high side.</p>
+<p><strong>Tempting mistake:</strong> Relying on the default control. rpart&#x27;s default minsplit is 20, so with only 8 rows it never attempts a split, returns a lone root, and gives x = 2 and x = 7 the same class.</p>
+<p><strong>Verify:</strong> <code>as.character(predict(fit, new, type = &quot;class&quot;))</code> returns &quot;low&quot; and &quot;high&quot;.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Inspect the probability matrix and its column identities.</p>
 <p>Rows sum toone and columns identify the factor levels.</p>
 <p><strong>Expected evidence:</strong> Named low/high probabilities.</p>
+<p><strong>Approach:</strong> Request type = &quot;prob&quot;, read its column names, and select columns by name rather than by position.</p>
+<p><strong>Why it holds here:</strong> The fixture sets levels = c(&quot;low&quot;, &quot;high&quot;), so the columns appear in that order. Each leaf is pure, so the rows for x = 2 and x = 7 are (1, 0) and (0, 1) and each sums to 1.</p>
+<p><strong>Tempting mistake:</strong> Taking <code>prob[, 2]</code> as the probability of high. In the pruning example the factor is built without explicit levels, so they sort alphabetically to high, low, and column 2 would be low.</p>
+<p><strong>Verify:</strong> <code>identical(colnames(prob), c(&quot;low&quot;, &quot;high&quot;))</code> returns TRUE and <code>max(abs(rowSums(prob) - 1))</code> returns a value below 1e-12.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Prune with cp 1 and count terminal leaves.</p>
 <p>The simplified model has one terminal root.</p>
 <p><strong>Expected evidence:</strong> One leaf.</p>
+<p><strong>Approach:</strong> Store the result of prune(fit, cp = 1) in a new object and count leaves in that object&#x27;s frame.</p>
+<p><strong>Why it holds here:</strong> The single split takes misclassifications from 4 of 8 to 0, a relative improvement of 1, and pruning at that complexity removes it. The frame keeps only the root, which is itself the one leaf.</p>
+<p><strong>Tempting mistake:</strong> Counting leaves on fit after calling prune. prune returns a new tree and leaves fit unchanged, so that count still shows 2.</p>
+<p><strong>Verify:</strong> <code>nrow(small$frame)</code> returns 1 and <code>sum(small$frame$var == &quot;&lt;leaf&gt;&quot;)</code> returns 1.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose using perfect training accuracy to choose a complex tree.</p>
 <p>A tree can fit authored or noisy training patterns without generalizing. Complexity selection belongs on development resamples, followed by a distinct final assessment.</p>
 <p><strong>Expected evidence:</strong> No unsupported generalization claim.</p>
+<p><strong>Approach:</strong> Report training accuracy as a fit statistic, and choose depth or cp on development folds before a separate final assessment.</p>
+<p><strong>Why it holds here:</strong> One cut already classifies all 8 training rows correctly. Any deeper tree would also score 8 of 8, so training accuracy cannot rank the candidates at all.</p>
+<p><strong>Tempting mistake:</strong> Selecting the deepest tree because it is also perfect on training data. With noisy labels, extra splits would isolate single rows, and only rows outside training show whether those splits help.</p>
+<p><strong>Verify:</strong> <code>all(as.character(predict(fit, d, type = &quot;class&quot;)) == as.character(d$label))</code> returns TRUE, which shows fit on the 8 training rows only.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Implement a complete-finite-predictor admission policy for this application.</p>
 <p>Reject NA or infinite x values explicitly while acknowledging that rpart has its own different native missingness mechanisms.</p>
 <p><strong>Expected evidence:</strong> Invalid input rejected by the wrapper.</p>
+<p><strong>Approach:</strong> Wrap predict in a function that stops on any NA or non-finite x before rpart sees it.</p>
+<p><strong>Why it holds here:</strong> This application declares that it scores only complete finite inputs. The check sits in the wrapper, so the rule is visible in code and does not depend on how rpart routes missing values internally.</p>
+<p><strong>Tempting mistake:</strong> Passing NA straight to predict. rpart has its own rules for missing predictors and still returns a class, so a row with no x value gets a confident looking label and nothing is logged.</p>
+<p><strong>Verify:</strong> <code>inherits(try(predict_complete(NA_real_), silent = TRUE), &quot;try-error&quot;)</code> returns TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Predict at x = 1000 and explain the extrapolation limit.</p>
 <p>The tree returns the high region rather than extending a numerical trend. This is a model output outside observed support, not proof of the real-world label.</p>
 <p><strong>Expected evidence:</strong> high with a bounded interpretation.</p>
+<p><strong>Approach:</strong> Score x = 1000 through the wrapper and report it as a value far outside the training range 1 to 8.</p>
+<p><strong>Why it holds here:</strong> Every x above the cut lands in the high leaf, so 1000 gets exactly the same class and probabilities as x = 5. A tree&#x27;s leaves are constant regions, so there is no trend to extend.</p>
+<p><strong>Tempting mistake:</strong> Reading the result as stronger evidence for high because 1000 is far beyond the cut. The tree gives x = 5 and x = 1000 an identical output, and no training row says anything about values that large.</p>
+<p><strong>Verify:</strong> <code>as.character(predict_complete(1000)) == &quot;high&quot;</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

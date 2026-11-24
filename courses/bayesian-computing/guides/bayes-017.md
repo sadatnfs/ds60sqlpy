@@ -8,6 +8,13 @@ Stan is a probabilistic programming language whose compiler translates a model i
 
 The classroom stages a complete `main.stan` file, compiles it using the prepared CmdStan toolchain and runs two bounded seeded chains. Each has 100 warmup and 100 retained draws, with target acceptance .9. Tiny constants live in `transformed data` because this single-source pad has no separate JSON input editor. The linked external project demonstrates the standard data-block workflow without changing that classroom contract.
 
+## Key terms
+
+- **Stan program:** A declaration of a log density over unknowns, compiled by CmdStan into an executable for inference.
+- **Transformed data block:** A block for constants computed once before sampling, used here because the pad has no separate data input.
+- **Model block:** The block that adds prior and likelihood terms to the target log density.
+- **Generated quantities block:** A block evaluated after each draw for predictions, log likelihoods and derived values that do not affect sampling.
+
 ## Worked case 1: connect blocks to a conjugate oracle
 
 `transformed data` declares five measurements, a prior mean of zero, prior standard deviation two and known observation standard deviation one. These values are fixed before sampling. `parameters` declares the unknown mean mu. The `model` block adds its normal prior and the normal observation likelihood. A vectorized sampling statement is a concise density contribution, not a command to replace the observed data with random values.
@@ -39,6 +46,38 @@ Compilation success establishes syntactic and type validity. Sampling success es
 **How is this related to the earlier normal-normal calculation?** The statistical target is the same. The exact formula supplies an oracle for a real compiled inference path, allowing implementation and computation to be checked independently of a complex model.
 
 **How should data be handled in a larger project?** Use a reusable data block, a validated data file or interface object, explicit model/data hashes and retained output artifacts. See the [normal-mean project](../projects/normal-mean/README.md) for a complete example. That optional workflow requires its own prepared environment and does not imply hidden classroom file-upload features.
+
+## Worked example: Conjugate oracle, Monte Carlo error and a constant row
+
+```python
+import numpy as np
+
+y = np.array([4.1, 5.3, 3.8, 4.9, 5.6, 4.4])
+sigma, m0, s0 = 1.0, 0.0, 10.0  # matches normal(0, 10) prior, known sigma
+prec = 1 / s0**2 + len(y) / sigma**2
+post_mean = (m0 / s0**2 + y.sum() / sigma**2) / prec
+post_sd = np.sqrt(1 / prec)
+print(f"posterior mean {post_mean:.4f}, sd {post_sd:.4f}")
+for ess in (100, 400, 1600):
+    print(f"bulk ESS {ess:>4}: MCSE of mean {post_sd / np.sqrt(ess):.4f}")
+
+n_obs = np.full((4, 1000), 6.0)  # a transformed-data value copied into every draw
+W = n_obs.var(axis=1, ddof=1).mean()
+with np.errstate(invalid="ignore", divide="ignore"):
+    print("within-chain variance", W, "R-hat ratio", np.sqrt((W + 0.0) / W))
+```
+
+Observed output:
+
+```text
+posterior mean 4.6755, sd 0.4079
+bulk ESS  100: MCSE of mean 0.0408
+bulk ESS  400: MCSE of mean 0.0204
+bulk ESS 1600: MCSE of mean 0.0102
+within-chain variance 0.0 R-hat ratio nan
+```
+
+This check copies the structure of the unit's Stan program, a normal prior on the mean and a normal likelihood with known scale 1, with a wider normal(0, 10) prior and its own six observations, so the sampled mean has a closed-form target. The six observations summing to 28.1 give precision \(0.01+6=6.01\), posterior mean \(28.1/6.01=4.6755\) and standard deviation 0.4079. That reference turns diagnostics into checkable claims. With a bulk effective sample size of 400 the Monte Carlo standard error is \(0.4079/20=0.0204\), so a reported mean between roughly 4.63 and 4.72 is consistent with the oracle and 4.80 would not be. Quadrupling ESS only halves that error. The last line explains rows in the Stan summary that look broken. A value set in transformed data, like the number of observations, is identical in every draw; its within-chain variance is 0.0, and the R-hat ratio becomes \(0/0\), printed as nan. That row is not a convergence failure. It is a constant, and the summary simply has no variability to measure.
 
 ## Complete reproducible program
 

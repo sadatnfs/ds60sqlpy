@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-launch-size-for-n-17">Exercise 1: Compute launch size for n=17<a class="heading-anchor" href="#exercise-1-compute-launch-size-for-n-17" aria-label="Link to this section">#</a></h3>
 <p>Five blocks of four are enough.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute launch size for n=17</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Use ceiling division: <code>blocks = (n + block - 1) // block</code>, which for <code>n = 17</code> and <code>block = 4</code> gives <code>(17 + 3) // 4 = 5</code> blocks and 20 lanes.</p>
+<p><strong>Why it is correct here.</strong> Four blocks provide only 16 lanes and would skip index 16. Five blocks provide 20 lanes, which covers every index from 0 to 16 with three spare lanes in the last block.</p>
+<p><strong>A plausible wrong approach.</strong> Computing <code>n // block = 4</code> blocks is the floor-division mistake; the program runs without error and the last element is never written, so its output slot keeps whatever value was in the allocation.</p>
+<p><strong>How to verify.</strong> Evaluate the expression in Python and confirm it returns 5. Extend the reference model with <code>n = 17</code>: the list <code>visits</code> must equal <code>list(range(17))</code>, which holds only with five blocks and the <code>&lt; n</code> guard.</p>
 <h3 id="exercise-2-trace-the-last-block">Exercise 2: Trace the last block<a class="heading-anchor" href="#exercise-2-trace-the-last-block" aria-label="Link to this section">#</a></h3>
 <p>Indices 17..19 are out of range.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>trace the last block</strong> is qualified there.</p>
+<p><strong>Approach.</strong> List the global indices of the last block for <code>n = 17</code>: block 4 covers <code>4*4 + t</code> for <code>t</code> from 0 to 3, which is 16, 17, 18 and 19. Only 16 is valid.</p>
+<p><strong>Why it is correct here.</strong> The valid range is <code>0 &lt;= i &lt; 17</code>. Lanes 17, 18 and 19 exist only because the launch rounds up to whole blocks, so the tail guard <code>if i &lt; n</code> must stop them before any load or store.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming only one lane is out of range, or guarding with <code>i &lt;= n</code>, lets index 17 through. That reads one element past the end, which may return a neighbor&#x27;s data or trip a memory checker.</p>
+<p><strong>How to verify.</strong> Write the four indices with a valid or invalid mark and confirm exactly three are invalid. The reference&#x27;s comprehension uses <code>if b*block+t &lt; n</code>, the same guard, and its assertion that visits equal <code>range(n)</code> passes.</p>
 <h3 id="exercise-3-test-zero-without-launching">Exercise 3: Test zero without launching<a class="heading-anchor" href="#exercise-3-test-zero-without-launching" aria-label="Link to this section">#</a></h3>
 <p>Return empty before launch.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>test zero without launching</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Check <code>n == 0</code> in the host wrapper and return an empty output without computing a grid or launching.</p>
+<p><strong>Why it is correct here.</strong> With <code>n = 0</code> the ceiling formula gives 0 blocks. Many runtimes reject a zero-sized grid as an invalid configuration, so the empty case must be handled before the launch, and the correct result is simply an empty array.</p>
+<p><strong>A plausible wrong approach.</strong> Clamping the grid to at least one block avoids the launch error but runs lanes whose guard is always false. That works, but it hides the empty case inside the kernel and still pays launch overhead for no work.</p>
+<p><strong>How to verify.</strong> Call the wrapper with an empty input and assert the result is empty and that no launch was recorded, for example with a counter in a mock launcher. The CPU model should return <code>[]</code> for <code>n = 0</code> as well.</p>
 <h3 id="exercise-4-implement-grid-stride-coverage">Exercise 4: Implement grid-stride coverage<a class="heading-anchor" href="#exercise-4-implement-grid-stride-coverage" aria-label="Link to this section">#</a></h3>
 <p>Advance by grid size times block size.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>implement grid-stride coverage</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write a grid-stride loop: each thread starts at its global index <code>t</code> and advances by the total number of threads, <code>stride = grid_size * block_size</code>, until it passes <code>n</code>.</p>
+<p><strong>Why it is correct here.</strong> With 6 threads and <code>n = 14</code>, thread 0 visits 0, 6, 12, thread 1 visits 1, 7, 13, and threads 2 to 5 each visit two indices. Every index in 0 to 13 is visited exactly once, which the reference checks by sorting the union.</p>
+<p><strong>A plausible wrong approach.</strong> Advancing by <code>block_size</code> instead of the total thread count makes threads in different blocks visit the same indices. The output may still look right for idempotent writes, but accumulations double count.</p>
+<p><strong>How to verify.</strong> Run the reference: <code>sorted(strided) == list(range(14))</code> is asserted. Add a check that <code>len(strided) == 14</code>, which fails if any index is visited twice.</p>
 <h3 id="exercise-5-find-floor-division-data-loss">Exercise 5: Find floor-division data loss<a class="heading-anchor" href="#exercise-5-find-floor-division-data-loss" aria-label="Link to this section">#</a></h3>
 <p>Floor division omits the final partial block.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>find floor-division data loss</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Look for launch code using <code>n // block</code> and replace it with ceiling division, then keep the in-kernel guard.</p>
+<p><strong>Why it is correct here.</strong> Floor division drops the remainder. For <code>n = 10</code> and <code>block = 4</code>, it launches two blocks, covering indices 0 to 7, so elements 8 and 9 are never processed.</p>
+<p><strong>A plausible wrong approach.</strong> Fixing it by launching <code>n // block + 1</code> blocks always adds a block even when <code>n</code> is a multiple of the block size. That is safe with a guard but launches an entire idle block for <code>n = 8</code>.</p>
+<p><strong>How to verify.</strong> Test <code>n = 10</code>: the output must have all ten elements processed. Test <code>n = 8</code> and confirm the ceiling formula gives exactly two blocks.</p>
 <h3 id="exercise-6-specify-a-sanitizer-check">Exercise 6: Specify a sanitizer check<a class="heading-anchor" href="#exercise-6-specify-a-sanitizer-check" aria-label="Link to this section">#</a></h3>
 <p>Run real kernels under supported memory checking separately.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>specify a sanitizer check</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Specify a separate run of the real kernel under the CUDA memory checker (<code>compute-sanitizer</code>) with a tail size such as <code>n = 17</code>, and record its report alongside the CPU model result.</p>
+<p><strong>Why it is correct here.</strong> The CPU model proves the index arithmetic covers the range. It cannot detect an out-of-bounds access in compiled code, which is exactly what a missing tail guard causes.</p>
+<p><strong>A plausible wrong approach.</strong> Treating the passing CPU model as proof that the kernel is memory safe confuses the model of the formula with the code a compiler generated.</p>
+<p><strong>How to verify.</strong> Run the sanitizer on a device with the guard removed to see it report invalid accesses, then with the guard restored to see a clean report. Without a device, mark this check as not attempted.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Every valid index appears exactly once.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-074_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -1,6 +1,6 @@
 # c-032: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-032_solution.c`, implements all six cases, from the "swap integer objects" case to the "transfer a typed structure copy" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ void * can hold object pointers and convert back to an appropriate object pointe
 
 ## Exercise 1: Swap integer objects: change one input
 
-Copy worked example 1 into a scratch pad and change `int a = 2, b = 7;` to `int a = 3, b = 7;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "swap integer objects" case, into a scratch pad and change `int a = 2, b = 7;` to `int a = 3, b = 7;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the values become 7 and 2); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +20,13 @@ swap_bytes(&a, &b, sizeof a);
 CHECK(a == 7 && b == 2);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `a == 7 && b == 2`. Restoring the original line brings back the worked observation: the values become 7 and 2.
+**Expected:** With `int a = 3, b = 7;` the run stops with `Check failed` at the CHECK on `a == 7 && b == 2`, because the "swap integer objects" case no longer shows that the values become 7 and 2. Restoring `int a = 2, b = 7;` brings that observation back.
 
 The size comes from the actual object rather than a guessed platform width.
 
 ## Exercise 2: Swap fixed byte arrays: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `unsigned char a[] = {2, 2, 3}, b[] = {4, 5, 6};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "swap fixed byte arrays" case, so one line now reads `unsigned char a[] = {2, 2, 3}, b[] = {4, 5, 6};`. Run the example with that line, use the failing CHECK to find why their byte contents exchange exactly no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +36,7 @@ swap_bytes(a, b, sizeof a);
 CHECK(a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3`; after it the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4, 5, 6};` again and their byte contents exchange exactly.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3`. Once the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4, 5, 6};` again, the "swap fixed byte arrays" case again shows that their byte contents exchange exactly.
 
 The operation changes representation bytes without interpreting them as another type.
 
@@ -98,4 +98,4 @@ The destination is a real object of the same type. Semantic verification checks 
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a typed structure copy" case to your own c-032 source. Explain why every access in `swap_bytes` or `count_nonzero` stays within a live object and each owned resource is released. An expected type erasure failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "swap fixed byte arrays" case apart from ordinary output: the fixture proves its stated type erasure, element size and typed wrapper assumptions, not universal safety.

@@ -1,6 +1,6 @@
 # llm-020: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these initialization and residual scale answers after attempting *Measure a small linear layer* through *Check residual dimensions*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Trace gradients* points to one step. `llm-020_solution.py` holds the assertions; this page explains how they test activation norm. Then try *Check residual dimensions* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -33,7 +33,7 @@ np.testing.assert_allclose(
 
 **Expected:** output norm \(0.01\sqrt{10}\).
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.linalg.vector_norm(out).item()` matches `0.01 * np.sqrt(10)` within 1e-6.
+**Verify:** For *Measure a small linear layer*, a fresh-process check confirms `torch.linalg.vector_norm(out).item()` matches `0.01 * np.sqrt(10)` within 1e-6.
 
 ## Exercise 2: Increase only the scale
 
@@ -54,7 +54,7 @@ np.testing.assert_allclose(
 
 **Expected:** activation norm increases by factor 10000.
 
-**Verify:** In a fresh process, the exercise checks confirm `(torch.linalg.vector_norm(bigger) / torch.linalg.vector_norm(out)).item()` matches `10000` within 0.01.
+**Verify:** For *Increase only the scale*, a fresh-process check confirms `(torch.linalg.vector_norm(bigger) / torch.linalg.vector_norm(out)).item()` matches `10000` within 0.01.
 
 ## Exercise 3: Trace gradients
 
@@ -74,7 +74,7 @@ assert np.isfinite(norms).all() and norms[1] > norms[0]
 
 **Expected:** both finite; large-scale gradient norm is larger.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(norms).all()` and `norms[1] > norms[0]`.
+**Verify:** For *Trace gradients*, a fresh-process check confirms `np.isfinite(norms).all()` and `norms[1] > norms[0]`.
 
 ## Exercise 4: Find the first overflow
 
@@ -90,7 +90,7 @@ assert not torch.isfinite(objective)
 
 **Expected:** squared loss is nonfinite.
 
-**Verify:** In a fresh process, the exercise checks confirm `not torch.isfinite(objective)`.
+**Verify:** For *Find the first overflow*, a fresh-process check confirms `not torch.isfinite(objective)`.
 
 ## Exercise 5: Repair on the same input
 
@@ -105,7 +105,7 @@ assert torch.isfinite(repaired).all() and torch.isfinite(repaired.square().mean(
 
 **Expected:** both output and loss finite.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(repaired).all()` and `torch.isfinite(repaired.square().mean())`.
+**Verify:** For *Repair on the same input*, a fresh-process check confirms `torch.isfinite(repaired).all()` and `torch.isfinite(repaired.square().mean())`.
 
 ## Exercise 6: Check residual dimensions
 
@@ -125,8 +125,8 @@ else:
 
 **Expected:** valid residual shape (1, 4); width 3 branch rejected.
 
-**Verify:** In a fresh process, the exercise checks confirm `tuple((x + x @ small).shape) == (1, 4)` and `x + torch.ones((1, 3))` raises `RuntimeError`.
+**Verify:** For *Check residual dimensions*, a fresh-process check confirms `tuple((x + x @ small).shape) == (1, 4)` and `x + torch.ones((1, 3))` raises `RuntimeError`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Find the first overflow* and predict the result first; keep *Check residual dimensions* failing beside the repair. Log a missing PyTorch separately from a wrong activation norm value in `llm-020`.

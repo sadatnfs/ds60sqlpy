@@ -10,6 +10,13 @@ A simple random-effects model writes an observed estimate as \(y_i=\theta_i+\eps
 
 This tutorial implements the DerSimonian-Laird method-of-moments estimate as a transparent calculation. It is one estimator, not a universal recommendation, particularly for a small number of studies or difficult variance structures.
 
+## Key terms
+
+- **Between-study heterogeneity:** Variation in true effects across studies, summarized by the variance tau^2.
+- **Random-effects model:** A synthesis model in which each study estimates its own true effect drawn around an overall mean.
+- **DerSimonian-Laird estimator:** The moment estimator of tau^2 from Cochran's Q, truncated at zero.
+- **Prediction interval:** An interval for a new study's true effect that adds tau^2 to the uncertainty of the mean, so it is wider than the confidence interval.
+
 ## Worked case 1: estimate heterogeneity rather than assume it
 
 The four effects are .1,.2,.7,.9, each with within-study variance .04. Inverse-variance weights give a fixed-effect mean of .475. The heterogeneity statistic and moment denominator are
@@ -45,6 +52,40 @@ Missing studies and selective outcome reporting can bias the included evidence. 
 **Does a narrow pooled interval mean an intervention works similarly everywhere?** No. It can describe the mean of a heterogeneous collection. The prediction question and effect-modification structure are separate.
 
 **What should accompany the summary estimate?** Provide the study ledger, effect transformations, variance assumptions, heterogeneity method, interval method, influence checks and scope of transport to a new setting. The synthetic example verifies the mechanics of an estimated-heterogeneity workflow; it does not replace study appraisal or domain expertise.
+
+## Worked example: DerSimonian-Laird on five studies
+
+```python
+import numpy as np
+from scipy import stats
+
+y = np.array([0.10, 0.30, 0.35, 0.65, 0.45])
+v = np.array([0.010, 0.020, 0.015, 0.025, 0.010])
+w = 1 / v
+fixed = w @ y / w.sum()
+Q = w @ (y - fixed) ** 2
+k = len(y)
+tau2 = max(0.0, (Q - (k - 1)) / (w.sum() - (w**2).sum() / w.sum()))
+wr = 1 / (v + tau2)
+mu = wr @ y / wr.sum()
+se = np.sqrt(1 / wr.sum())
+z = stats.norm.ppf(0.975)
+t = stats.t.ppf(0.975, k - 2)
+half_pi = t * np.sqrt(tau2 + se**2)
+print(f"fixed {fixed:.4f}, Q {Q:.3f}, I2 {max(0, (Q - (k - 1)) / Q):.3f}, tau2 {tau2:.4f}")
+print(f"random-effects mean {mu:.4f}, 95% CI [{mu - z * se:.4f}, {mu + z * se:.4f}]")
+print(f"95% prediction interval [{mu - half_pi:.4f}, {mu + half_pi:.4f}]")
+```
+
+Observed output:
+
+```text
+fixed 0.3346, Q 10.890, I2 0.633, tau2 0.0249
+random-effects mean 0.3548, 95% CI [0.1793, 0.5304]
+95% prediction interval [-0.2227, 0.9323]
+```
+
+The inverse-variance weights pull the fixed-effect mean to 0.3346. Cochran's \(Q=10.890\) with \(k-1=4\) degrees of freedom is well above 4, so the studies disagree more than sampling error explains; \(I^2=0.633\) says 63 percent of the observed spread is between-study variation. The method-of-moments estimate \(\tau^2=0.0249\), a between-study standard deviation of about 0.158, is added to every study's variance. That flattens the weights and shifts the mean to 0.3548, with a 95 percent confidence interval of [0.179, 0.530]. That interval describes the average effect across studies like these. A new study's true effect is far less certain: the prediction interval adds \(\tau^2\) and uses a \(t\) quantile with \(k-2=3\) degrees of freedom (3.18 rather than 1.96), producing [\(-0.223\), 0.932]. A program team expecting a positive result in a new site should read the second interval: it includes harm. With only five studies, \(\tau^2\) itself is very uncertain.
 
 ## Complete reproducible program
 

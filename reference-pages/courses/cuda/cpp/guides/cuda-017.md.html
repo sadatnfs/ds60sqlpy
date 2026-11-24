@@ -198,9 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-014</code>, <code>cuda-016</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Trace producer and consumer threads through each block barrier and verify correct tail behavior.</p>
 <p>Work through <em>Shared memory and block synchronization</em> with the concrete cases below. Finish with this evidence: correct boundary behavior and a synchronization explanation naming producer and consumer threads. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Shared memory lets threads in one block communicate through a common scratch array. Communication requires ordering: a consumer must not read a location until its producer has written it. <code>__syncthreads()</code> is a block barrier with memory-ordering effects for participating threads. Put bounds predicates around loads and stores while keeping the required barrier participation uniform. Invalid tail lanes can load a neutral value and still reach the barrier. A barrier does not coordinate ordinary independent blocks, and a memory fence does not force other threads to arrive at the same program point.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Block barrier:</strong> A <code>__syncthreads()</code> call that every thread in the block must reach before any continues, which also orders shared-memory accesses.</li>
+<li><strong>Producer and consumer:</strong> A thread that writes a shared value and a thread that later reads it, which need an ordering between them.</li>
+<li><strong>Neutral value:</strong> An identity element, such as zero for addition, that invalid tail lanes load so they can still reach the barrier.</li>
+<li><strong>Divergent barrier:</strong> A barrier reached by only some threads of a block, which is undefined behavior and can hang the kernel.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-017_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-017_cpu.py</code></pre>

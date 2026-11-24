@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Progressive enhancement starts from useful content and adds capabilities when the environment supports them. A document should communicate its core information before advanced styling or scripts run. This does not mean every application must offer identical features in every environment; it means essential requirements and fallbacks are deliberate rather than accidental.</p>
 <p>Print is a different presentation context. Navigation controls that are useful on screen can waste space on paper, while a visible URL or document title may become more valuable. A print stylesheet can remove decoration, preserve contrast and avoid splitting small related blocks. It cannot guarantee the printer, paper size or user settings, so inspect the browser&#x27;s print preview before making claims.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Print stylesheet:</strong> Rules inside <code>@media print</code> that adapt a page for paper, such as hiding navigation and avoiding awkward page breaks.</li>
+<li><strong>Progressive enhancement:</strong> Starting from a working HTML baseline and adding CSS and script features only where the browser supports them.</li>
+<li><strong>Feature query:</strong> An <code>@supports</code> rule that applies its styles only when the browser supports the stated property and value.</li>
+<li><strong>Fallback:</strong> A simpler declaration or layout that remains usable when an enhancement is unsupported or fails to load.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use <code>@media print</code> for print-specific rules and <code>@supports</code> for a feature-dependent enhancement. Keep the base rule valid independently. Avoid hiding the actual article while removing navigation. <code>break-inside:avoid</code> is a request to the fragmentation system, not a promise that an arbitrarily large element fits on one page.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -231,6 +238,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Supported environments use Grid; others keep the content.</p>
+<h3 id="contrast-case-a-print-rule-that-hides-the-article">Contrast case: a print rule that hides the article<a class="heading-anchor" href="#contrast-case-a-print-rule-that-hides-the-article" aria-label="Link to this section">#</a></h3>
+<p>The page wraps navigation and content in one <code>.shell</code> element. Compare two print rules written to remove the menu.</p>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-comment">/* too broad: .shell contains nav and main */</span>
+<span class="syntax-punctuation">@</span><span class="syntax-keyword">media</span> <span class="syntax-tag">print</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">shell</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">none</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+
+<span class="syntax-comment">/* targeted */</span>
+<span class="syntax-punctuation">@</span><span class="syntax-keyword">media</span> <span class="syntax-tag">print</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">shell</span> <span class="syntax-operator">&gt;</span> <span class="syntax-tag">nav</span><span class="syntax-operator">,</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">shell</span> <span class="syntax-tag">button</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">none</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>The first rule removes the wrapper, and <code>display: none</code> takes every descendant with it, so print preview shows a blank page or only the footer even though the screen view looks perfect. The second rule names the navigation and the buttons, leaving <code>main</code> and its headings in place. Screen rendering is identical for both versions, because neither rule applies outside print media. Only opening print preview reveals the difference, which is why the guide asks you to inspect preview pages rather than the screen.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-identify-content-that-must-survive-when-scripts-fail">Exercise 1: Identify content that must survive when scripts fail.<a class="heading-anchor" href="#exercise-1-identify-content-that-must-survive-when-scripts-fail" aria-label="Link to this section">#</a></h4>

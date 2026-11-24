@@ -198,17 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `let attempts = 0;` to `let attempts =</span></span>
 <span class="source-line"><span class="syntax-comment">// 1;`. Before running it, predict which check fails and which value it now sees; then run it</span></span>
 <span class="source-line"><span class="syntax-comment">// and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(waits, [50, 100])`. Restoring the original line brings back the worked</span></span>
-<span class="source-line"><span class="syntax-comment">// observation: three attempts; delays 50 and 100; result ready.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(waits, [50,</span></span>
+<span class="source-line"><span class="syntax-comment">// 100])`. Restoring `let attempts = 0;` brings back: three attempts; delays 50 and 100;</span></span>
+<span class="source-line"><span class="syntax-comment">// result ready.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Stop on permanent failure and on exhausted attempts: diagnose an edited check</span></span>
 <span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `async () =&gt; { transient -=</span></span>
 <span class="source-line"><span class="syntax-comment">// 1`. Run Example B with that line, explain why the edited check now fails for the same</span></span>
 <span class="source-line"><span class="syntax-comment">// program state, and restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(transient, 3)`; after it the line reads `async () =&gt; { transient += 1` again</span></span>
-<span class="source-line"><span class="syntax-comment">// and permanent attempted once; transient attempted three times and still rejects.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at `async () =&gt; {</span></span>
+<span class="source-line"><span class="syntax-comment">// transient -= 1`. Restoring `async () =&gt; { transient += 1` brings back: permanent attempted</span></span>
+<span class="source-line"><span class="syntax-comment">// once; transient attempted three times and still rejects.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Reuse a completed idempotent result</span></span>
 <span class="source-line"><span class="syntax-comment">// Submit the same key and payload twice to the local store.</span></span>

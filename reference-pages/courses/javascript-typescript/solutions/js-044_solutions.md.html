@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>selection.data(values).join(&#x27;circle&#x27;)</code> binds the current values and returns the merged entered/updated selection. Without a key, matching is by index within a group. This can be correct when positions are identities, but the next lesson shows why stable entity IDs often need keys.</p>
 <p>An attribute callback <code>(d, i) =&gt; ...</code> receives the record as d and its current group index as i. Returning undefined for a required coordinate can remove or invalidate the intended attribute. Inspect the derived values before blaming SVG rendering.</p>
 <h3 id="exercise-1-predict-the-node-count-after-two-draws">Exercise 1: Predict the node count after two draws.<a class="heading-anchor" href="#exercise-1-predict-the-node-count-after-two-draws" aria-label="Link to this section">#</a></h3>
-<p>The exit selection is removed by the standard join. Repeated rendering should reflect current input cardinality.</p>
+<p>The exit selection is removed by the standard join. Repeated rendering should reflect current input cardinality. draw([20, 30, 40]) creates three circles; draw([25, 35]) updates the first two and the exit removes the third. A version that appends inside draw would end with five. The reference checks size() === 2 and radii &quot;25,35&quot;.</p>
 <p><strong>Expected:</strong> Two circles after changing three records to two.</p>
 <h3 id="exercise-2-change-the-second-input-to-an-empty-array">Exercise 2: Change the second input to an empty array.<a class="heading-anchor" href="#exercise-2-change-the-second-input-to-an-empty-array" aria-label="Link to this section">#</a></h3>
-<p>An empty dataset is a valid state. Exit handling should remove old marks rather than showing stale data.</p>
+<p>An empty dataset is a valid state. Exit handling should remove old marks rather than showing stale data. With draw([]) the join has no enter or update and every circle leaves through exit, so size() is 0. Guarding with if (values.length === 0) return would leave the old two circles on screen as if nothing changed. Assert zero circles after the call.</p>
 <p><strong>Expected:</strong> No managed circles remain.</p>
 <h3 id="exercise-3-write-a-render-function-using-a-data-join">Exercise 3: Write a render function using a data join.<a class="heading-anchor" href="#exercise-3-write-a-render-function-using-a-data-join" aria-label="Link to this section">#</a></h3>
-<p>Separate creation policy from attributes so the function can update existing nodes instead of appending duplicates.</p>
+<p>Separate creation policy from attributes so the function can update existing nodes instead of appending duplicates. Put validation first, then selectAll(&quot;circle&quot;).data(values).join(&quot;circle&quot;) and set cx, cy and r on the merged selection. Setting attributes only on the enter branch would leave updated nodes with stale radii. Call draw twice with different arrays and compare radii each time.</p>
 <p><strong>Expected:</strong> Repeated calls produce exactly one mark per current record.</p>
 <h3 id="exercise-4-diagnose-a-chart-that-doubles-its-nodes-on-every-click">Exercise 4: Diagnose a chart that doubles its nodes on every click.<a class="heading-anchor" href="#exercise-4-diagnose-a-chart-that-doubles-its-nodes-on-every-click" aria-label="Link to this section">#</a></h3>
-<p>Check the selector and join boundary first. Styling cannot correct an ever-growing stale DOM.</p>
+<p>Check the selector and join boundary first. Styling cannot correct an ever-growing stale DOM. If the selector is selectAll(&quot;g&quot;) while the code appends circles, the join never sees the existing circles and creates new ones every click. Log svg.selectAll(&quot;circle&quot;).size() after each click: a count that grows by the data length points to this mismatch.</p>
 <p><strong>Expected:</strong> It uses unconditional append or selects the wrong managed nodes.</p>
 <h3 id="exercise-5-add-an-explicit-invalid-value-rejection">Exercise 5: Add an explicit invalid-value rejection.<a class="heading-anchor" href="#exercise-5-add-an-explicit-invalid-value-rejection" aria-label="Link to this section">#</a></h3>
-<p>Geometry has a domain contract. Silent invalid attributes make a bad input look like a missing data point.</p>
+<p>Geometry has a domain contract. Silent invalid attributes make a bad input look like a missing data point. The reference checks Number.isFinite(v) &amp;&amp; v &gt;= 0 before touching the DOM, so draw([-1]) throws and the previous circles stay. Letting the browser receive r = -1 leaves an invisible circle that looks like missing data. The try/catch in the reference sets refused to true.</p>
 <p><strong>Expected:</strong> A negative radius input is refused before drawing.</p>
 <h3 id="exercise-6-apply-the-same-pattern-to-an-html-list">Exercise 6: Apply the same pattern to an HTML list.<a class="heading-anchor" href="#exercise-6-apply-the-same-pattern-to-an-html-list" aria-label="Link to this section">#</a></h3>
-<p>The mechanism is about data-to-node relationships, not SVG alone. Preserve text safety when labels are external.</p>
+<p>The mechanism is about data-to-node relationships, not SVG alone. Preserve text safety when labels are external. Replace &quot;circle&quot; with &quot;li&quot; inside a ul and set .text(d =&gt; d). Using .html() with an external label would let markup in the label run as HTML; count li nodes after two updates to confirm reconciliation.</p>
 <p><strong>Expected:</strong> Current records reconcile to current list items.</p></article>
   </main>
 </body>

@@ -5,6 +5,21 @@
   "minutes": 80,
   "prerequisites": ["apache-059", "apache-057"],
   "concepts": ["Time boundaries, hybrid tables and upserts"],
+  "key_terms": [
+    [
+      "Hybrid table",
+      "A logical Pinot table backed by an OFFLINE table for historical data and a REALTIME table for fresh data."
+    ],
+    [
+      "Time boundary",
+      "The timestamp the broker uses to split a hybrid query, reading older data from the offline side and newer data from the real-time side."
+    ],
+    ["Upsert", "A real-time table mode that keeps only the latest record for each primary key."],
+    [
+      "Comparison column",
+      "The column an upsert table uses to decide which record for a primary key is newest."
+    ]
+  ],
   "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
   "sources": [
     [

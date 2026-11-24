@@ -5,17 +5,21 @@ int main(void) {
      Copy worked example 1 into a scratch pad and change `CHECK(add_checked(7,
      5, &out) && out == 12);` to `CHECK(add_checked(8, 5, &out) && out == 12);`
      inside its CHECK. Before running, predict whether the CHECK still holds and
-     explain why; then restore it. Expected: The changed run stops with `Check
-     failed` at the CHECK on `add_checked(7, 5, &out) && out == 12`. Restoring
-     the original line brings back the worked observation: the result is 12. */
+     explain why; then restore it. Expected: With `CHECK(add_checked(8, 5, &out)
+     && out == 12);` the run stops with `Check failed` at the CHECK on
+     `add_checked(7, 5, &out) && out == 12`, because the "add ordinary values"
+     case no longer shows that the result is 12. Restoring `CHECK(add_checked(7,
+     5, &out) && out == 12);` brings that observation back. */
 
   /* Exercise 2: Reject positive overflow: debug a regression
-     A regression changed one token in worked example 2, so one line now reads
-     `int out = 10;`. Run worked example 2 with that line, use the failing CHECK
-     to locate the defect and repair it without changing the CHECK. Expected:
-     Before the repair the run stops with `Check failed` at the CHECK on
-     `!add_checked(INT_MAX, 1, &out) && out == 9`; after it the line reads `int
-     out = 9;` again and the operation fails and preserves output. */
+     A regression changed one token in worked example 2, the "reject positive
+     overflow" case, so one line now reads `int out = 10;`. Run the example with
+     that line, use the failing CHECK to find why the operation fails and
+     preserves output no longer holds and repair the line without changing the
+     CHECK. Expected: Before the repair the run stops with `Check failed` at the
+     CHECK on `!add_checked(INT_MAX, 1, &out) && out == 9`. Once the line reads
+     `int out = 9;` again, the "reject positive overflow" case again shows that
+     the operation fails and preserves output. */
 
   /* Exercise 3: Reject negative overflow
      Add negative one to INT_MIN.

@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-062_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A dispatch policy offers CPU reference on every ordinary classroom and CUDA execution only after visibility, allocation and a small numerical probe succeed. It records which path actually ran. The same expected mathematical result does not make CPU output evidence of CUDA execution.</p>
+<p><strong>Approach:</strong> Offer the CPU reference everywhere, and enable CUDA only after device visibility, allocation and a small numerical probe all succeed.</p>
+<p><strong>Why it is correct:</strong> The probe checks that the device actually computes correctly, and logging the chosen path records what really ran.</p>
+<p><strong>A plausible wrong approach:</strong> Reporting the CUDA path because the expected numbers matched hides that the CPU reference produced them.</p>
+<p><strong>How to verify:</strong> The reference asserts selected == &#x27;CPU_reference&#x27; when the probe is False and prints CUDA_execution unavailable.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A model fits on one 24 GiB GPU but fails on an 8 GiB device. The container tag is identical; the resource contract is not. Reduce the bounded workload or choose a supported alternate path, preserving the original memory error and learner source.</p>
+<p><strong>Approach:</strong> Check the model&#x27;s memory need against device memory and shrink the workload or choose another path.</p>
+<p><strong>Why it is correct:</strong> A model fitting 24 GiB does not fit 8 GiB regardless of container tag.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming the same image guarantees the same resources hides the memory limit.</p>
+<p><strong>How to verify:</strong> Run on the smaller device and confirm the original memory error is preserved and reported.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Reading/CPU references remain available across the Docker classroom. NVIDIA execution needs a separately supported Linux or WSL path and hardware; Mac local CUDA is not promised.</p>
+<p><strong>Approach:</strong> List reading and CPU references as available everywhere, and NVIDIA execution only on supported Linux or WSL with hardware.</p>
+<p><strong>Why it is correct:</strong> Mac machines lack local CUDA support.</p>
+<p><strong>A plausible wrong approach:</strong> Promising Mac CUDA execution sets expectations the platform cannot meet.</p>
+<p><strong>How to verify:</strong> Check each row against the documented support matrix.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Device presence, driver compatibility, feature support and memory vary independently of the OS.</p>
+<p><strong>Approach:</strong> Probe device presence, driver, features and memory directly.</p>
+<p><strong>Why it is correct:</strong> These vary independently of the operating system.</p>
+<p><strong>A plausible wrong approach:</strong> Dispatching on OS name alone selects CUDA on Linux machines without GPUs.</p>
+<p><strong>How to verify:</strong> Run dispatch on a GPU-less Linux machine and confirm CPU is chosen.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Source, diagnostics, completed prior results and progress. Report unavailable execution without resetting unrelated hardware or volumes.</p>
+<p><strong>Approach:</strong> Keep source, diagnostics, prior results and progress, and report execution unavailable.</p>
+<p><strong>Why it is correct:</strong> Learners should not lose work because of a device fault.</p>
+<p><strong>A plausible wrong approach:</strong> Resetting hardware or volumes destroys unrelated state.</p>
+<p><strong>How to verify:</strong> Simulate a fault and confirm earlier results remain.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Keep its own API/runtime/capability labels and numerical oracle, teach conceptual correspondence, and do not present it as executing CUDA kernels.</p>
+<p><strong>Approach:</strong> Label the alternate backend&#x27;s API, runtime and capabilities separately, with its own numerical oracle.</p>
+<p><strong>Why it is correct:</strong> Conceptual correspondence teaches ideas without claiming equivalence.</p>
+<p><strong>A plausible wrong approach:</strong> Presenting it as running CUDA kernels misleads learners.</p>
+<p><strong>How to verify:</strong> Check labels in output name the actual backend.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-062_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

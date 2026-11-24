@@ -16,6 +16,13 @@ Debugging should preserve the original artifact and evidence. Installing tools i
 
 A separate debug image or ephemeral diagnostic container can be useful when its permissions, network access and data exposure are deliberately scoped. `docker run --rm -it --pid=container:APP --network=container:APP TOOLS_IMAGE` starts a tools container that sees the app container's processes and network stack while the app image stays unchanged. It must not become an excuse to mount the whole host or attach to unrelated production workloads.
 
+### Key terms
+
+- **Minimal image:** An image that omits a shell, package manager and debugging tools to reduce size and unneeded functionality.
+- **Debug container:** A separate, short-lived tools container started deliberately to inspect a running application.
+- **Shared namespaces:** Joining another container's process or network namespace, so a tools container sees the app's processes and network stack.
+- **Diagnostic vantage point:** The namespace and permissions a diagnostic command runs with, which decide what it can actually observe.
+
 ## Anatomy and a trace you can follow
 
 The fixture already has Python, so a short standard-library request can test HTTP without adding curl. Use container inspection for configuration and logs for application behavior. If you need a shell in a different project, verify that the selected image actually contains one.
@@ -90,11 +97,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Installing tools into a live container and losing the original evidence. Reading a missing shell as an application crash. Mounting the host filesystem to debug a single HTTP endpoint.
 
-Exercise 4 is this chapter's boundary case: Diagnose an interactive repair that cannot survive recreation. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an interactive repair that cannot survive recreation. Write down what the interactive change revealed, then recreate the container from the maintained image to confirm the repair is gone. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using minimal image, debug container, shared namespaces and diagnostic vantage point. Reconstruct worked example 2 (Label observations by vantage point) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Name one observation from each vantage point, host, peer and app, without looking back. Then reconstruct worked example 2 (Label observations by vantage point) with one different value, predict what changes, and name which of minimal image, debug container, shared namespaces and diagnostic vantage point the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

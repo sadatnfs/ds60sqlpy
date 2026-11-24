@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the first case when the added color is Red.</p>
 <p>FrozenInRed remains 187; the direct measure under Red returns 24.</p>
+<p><strong>Why it fits this model:</strong> The variable is bound once, with no filter, as 187. CALCULATE can change the filter around a scalar but cannot reevaluate it. Pen is the only Red product, so the direct measure returns 24.</p>
+<p><strong>Tempting mistake:</strong> Expecting FrozenInRed to show 24 treats the variable as a formula that reevaluates in its new context. VAR stores a value, not the expression.</p>
+<p><strong>How to confirm:</strong> The row should read FrozenInRed 187 and RecomputedInRed 24, the value of Pen&#x27;s lines S2 and S5.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Move the variable binding inside the Blue calculation.</p>
 <p>Binding [NetRevenue] inside Blue produces 163. Later uses still reuse that scalar.</p>
+<p><strong>Why it fits this model:</strong> Binding inside the Blue CALCULATETABLE evaluates [NetRevenue] under Blue, so the variable holds 163. Every later use reuses 163, even under another filter.</p>
+<p><strong>Tempting mistake:</strong> Binding the variable before CALCULATETABLE and expecting the outer Blue filter to reach it still returns 187, because the binding happened first.</p>
+<p><strong>How to confirm:</strong> Inside Blue the variable returns 163, the same as <code>CALCULATE ( [NetRevenue], Product[Color] = &quot;Blue&quot; )</code>.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Rewrite a filtered share with separately named numerator and denominator.</p>
-<p>Bind numerator=[NetRevenue] and denominator=CALCULATE([NetRevenue],REMOVEFILTERS(Product[Color])), then DIVIDE(numerator,denominator).</p>
+<p>Bind numerator=[NetRevenue] and denominator=CALCULATE([NetRevenue],REMOVEFILTERS(Product[Color])), then DIVIDE(numerator, denominator).</p>
+<p><strong>Why it fits this model:</strong> Each variable is bound in its own context: the numerator under the current color, and the denominator after REMOVEFILTERS on Color. Under Blue that gives 163 / 187, about 0.872.</p>
+<p><strong>Tempting mistake:</strong> Binding the denominator to [NetRevenue] under Blue and wrapping it in CALCULATE with REMOVEFILTERS keeps 163, so the share becomes 1.0 for every color.</p>
+<p><strong>How to confirm:</strong> Under Blue the share returns about 0.872, under Red 24 / 187, about 0.128, and the two shares add to 1.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a denominator that remains equal to the numerator after REMOVEFILTERS.</p>
 <p>CALCULATE(FrozenRevenue,REMOVEFILTERS(...)) preserves the frozen value. Reevaluate the measure in the intended denominator context.</p>
+<p><strong>Why it fits this model:</strong> The denominator must reevaluate the measure, so it is CALCULATE([NetRevenue], REMOVEFILTERS(Product[Color])). That returns 187 under Blue and under Red alike.</p>
+<p><strong>Tempting mistake:</strong> Adding ALL or more CALCULATE layers around the frozen variable keeps 163 under Blue, because no wrapper can recompute a value that is already bound.</p>
+<p><strong>How to confirm:</strong> Show the denominator as its own column. It should read 187 on every color row; if it equals the numerator, it is still frozen.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain whether a variable defined before SUMX changes per row.</p>
 <p>An outer scalar is shared. A variable declared in the iterator body can bind a different result for each row&#x27;s context.</p>
+<p><strong>Why it fits this model:</strong> A variable defined before SUMX is one shared scalar, so <code>VAR Total = [NetRevenue]</code> holds 187 on every row. Each line divided by it gives a share, and the shares add to 1.</p>
+<p><strong>Tempting mistake:</strong> Calling [NetRevenue] inside the iterator causes context transition to each line. Each share then divides the line by itself, and the eight results add to 8.</p>
+<p><strong>How to confirm:</strong> <code>SUMX ( Sales, DIVIDE ( Sales[NetAmount], Total ) )</code> returns 1, while the in-row version returns 8.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Describe a debugging trace that exposes the bug without engine access.</p>
 <p>Write a ledger with original filters, variable binding, later filters and reused versus reevaluated values; reconcile 187 and 163 from their fact rows.</p>
+<p><strong>Why it fits this model:</strong> A ledger records each step: the starting filter, the binding context, the value bound, the later filters and whether each use reuses or reevaluates. It can be checked against the fact rows.</p>
+<p><strong>Tempting mistake:</strong> Debugging from the final number alone cannot tell whether 187 came from a frozen variable or a missing filter, because both give the same output.</p>
+<p><strong>How to confirm:</strong> Blue is S1, S3, S4, S6, S7 and S8, which sum to 163; Red is S2 and S5, for 24; together they reconcile to 187.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

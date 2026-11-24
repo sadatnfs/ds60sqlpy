@@ -43,7 +43,7 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(value, 7)`. Restoring the original line brings back the worked observation: number remains 7; object is the same reference.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(value, 7)`. Restoring `const value: number = identity(7);` brings back: number remains 7; object is the same reference.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(value, 7)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -68,7 +68,7 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(count, 2)`; after it the line reads `const row = { id: 'A', count: 2 };` again and id is string A; count is number 2.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(count, 2)`. Restoring `const row = { id: 'A', count: 2 };` brings back: id is string A; count is number 2.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(count, 2)` for this input.
 
@@ -126,7 +126,7 @@ assert.deepEqual(labels, ['item:2', 'item:4']);
 assert.deepEqual(values, [2, 4]);
 ```
 
-**Expected:** string array item:2,item:4; input unchanged.
+**Expected:** string array `['item:2', 'item:4']`; input unchanged.
 
 **Verify:** Keep a check equivalent to `assert.deepEqual(labels, ['item:2', 'item:4'])`. As a control, change `const values = [2, 4];` to `const values = [3, 4];`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 

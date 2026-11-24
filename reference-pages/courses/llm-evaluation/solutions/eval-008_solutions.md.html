@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-008_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-008-explained-reference">eval-008: explained reference<a class="heading-anchor" href="#eval-008-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-008_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-008_reference.py</code> asserts each answer below, from <em>Separate recall from nDCG</em> to <em>Preserve target weights</em>, on the authored recall at k and MRR fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Repeat a document</em> tests.</p>
 <h3 id="1-separate-recall-from-ndcg">1. Separate recall from nDCG<a class="heading-anchor" href="#1-separate-recall-from-ndcg" aria-label="Link to this section">#</a></h3>
 <p>nDCG evaluates the quality of the available ranking positions. Recall asks what fraction of all known relevant documents was retrieved.</p>
+<p><strong>Approach.</strong> Read case A: gold grades <code>{&quot;a&quot;: 3, &quot;b&quot;: 2, &quot;c&quot;: 0, &quot;d&quot;: 1}</code>, ranking <code>[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</code>, cutoff 2. Count relevant documents (grade above 0) and see which appear in the top two.</p>
+<p><strong>Why it holds for this fixture.</strong> Three documents are relevant: a, b and d. The top two are a and b, so recall is 2 / 3. nDCG compares the top two with the ideal top two, grades 3 and 2, which is exactly what was returned, so nDCG is 1. The missing d does not fit in two positions anyway.</p>
+<p><strong>A tempting wrong approach.</strong> Expecting nDCG 1 to mean everything relevant was found is the mistake. nDCG at k only judges the k available slots. A cutoff smaller than the relevant set guarantees recall below 1 even for a perfect ranking.</p>
+<p><strong>How to verify.</strong> Worked case A asserts the result equals <code>{&quot;recall&quot;: 2 / 3, &quot;mrr&quot;: 1.0, &quot;ndcg&quot;: 1.0}</code>. Raising k to 3 with <code>d</code> in third place would make recall 1.</p>
 <p><strong>Expected observation:</strong> An ideal top two still omits one relevant document.</p>
 <h3 id="2-return-no-relevant-hit">2. Return no relevant hit<a class="heading-anchor" href="#2-return-no-relevant-hit" aria-label="Link to this section">#</a></h3>
 <p>Zero is meaningful here because relevant documents exist in the judged corpus but none was retrieved.</p>
+<p><strong>Approach.</strong> Call <code>retrieval_metrics([&quot;b&quot;], {&quot;a&quot;: 1, &quot;b&quot;: 0}, 1)</code>. The single returned document has grade 0, and one relevant document, <code>a</code>, exists.</p>
+<p><strong>Why it holds for this fixture.</strong> Recall is 0 / 1 = 0. No relevant hit appears, so the first-hit position is <code>None</code> and reciprocal rank is 0. DCG is 0 while ideal DCG is positive, so nDCG is 0. Each zero is a real failure on a query where success was possible.</p>
+<p><strong>A tempting wrong approach.</strong> Treating these zeros like the missing values in exercise 5 would remove a real failure from the mean. The distinction is whether any relevant document exists in the judgments; here one does.</p>
+<p><strong>How to verify.</strong> The reference asserts the result equals <code>{&quot;recall&quot;: 0.0, &quot;mrr&quot;: 0, &quot;ndcg&quot;: 0.0}</code>. Swap to <code>[&quot;a&quot;]</code> with k 10 and confirm nDCG is 1.</p>
 <p><strong>Expected observation:</strong> Recall, reciprocal rank and nDCG are 0.</p>
 <h3 id="3-repeat-a-document">3. Repeat a document<a class="heading-anchor" href="#3-repeat-a-document" aria-label="Link to this section">#</a></h3>
 <p>Counting duplicates as new hits can inflate recall or distort position metrics.</p>
+<p><strong>Approach.</strong> Call <code>retrieval_metrics([&quot;a&quot;, &quot;a&quot;], {&quot;a&quot;: 1, &quot;b&quot;: 0}, 2)</code>. The guard compares <code>len(set(ranking))</code> with <code>len(ranking)</code> and raises.</p>
+<p><strong>Why it holds for this fixture.</strong> A retriever that returns the same relevant ID twice would earn DCG credit at positions 1 and 2. If recall counted list entries rather than distinct IDs, it could exceed 1. Rejecting duplicates keeps every metric tied to distinct documents.</p>
+<p><strong>A tempting wrong approach.</strong> Deduplicating inside the metric seems kind, but it hides a retriever bug. A system that wastes slots on duplicates should be fixed upstream, and its effective depth reported, not scored as if its list were clean.</p>
+<p><strong>How to verify.</strong> The reference includes <code>([&quot;a&quot;, &quot;a&quot;], 2)</code> in the invalid cases and fails with <code>Invalid ranking accepted</code> if it passes.</p>
 <p><strong>Expected observation:</strong> The fixture rejects duplicates.</p>
 <h3 id="4-add-an-unjudged-document">4. Add an unjudged document<a class="heading-anchor" href="#4-add-an-unjudged-document" aria-label="Link to this section">#</a></h3>
 <p>A separate assessment or a declared missing-judgment policy is needed before comparing systems fairly.</p>
+<p><strong>Approach.</strong> Call <code>retrieval_metrics([&quot;x&quot;], {&quot;a&quot;: 1, &quot;b&quot;: 0}, 1)</code>. Document <code>x</code> has no grade, so the check <code>d not in relevance</code> raises <code>Unjudged document</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> Unjudged documents are common when a new retriever surfaces items the original assessors never saw. Treating them as irrelevant penalizes the new system for novelty, and treating them as relevant rewards it without evidence.</p>
+<p><strong>A tempting wrong approach.</strong> Filling missing grades with 0 is the usual shortcut. It biases comparisons in favor of the system whose results were used to build the judgment pool, which is usually the older one.</p>
+<p><strong>How to verify.</strong> The reference includes <code>([&quot;x&quot;], 1)</code> in the invalid cases. Either judge the new document or declare a policy (such as condensed lists that skip unjudged items) and apply it to every system.</p>
 <p><strong>Expected observation:</strong> The calculation rejects it.</p>
 <h3 id="5-empty-relevant-set">5. Empty relevant set<a class="heading-anchor" href="#5-empty-relevant-set" aria-label="Link to this section">#</a></h3>
 <p>Report the affected query count and its interpretation instead of silently mixing undefined scores into a mean.</p>
+<p><strong>Approach.</strong> Call <code>retrieval_metrics([], {&quot;b&quot;: 0}, 1)</code>. No judged document has a positive grade, so the function returns <code>None</code> for all three metrics before computing anything.</p>
+<p><strong>Why it holds for this fixture.</strong> Recall divides by the number of relevant documents, here 0, and ideal DCG is also 0. Both ratios would be 0 / 0. Returning <code>None</code> keeps the query visible as undefined instead of assigning a misleading number.</p>
+<p><strong>A tempting wrong approach.</strong> Filling <code>None</code> with 1 (nothing to find, so perfect) or 0 (nothing found) changes the mean depending on how many such queries exist. A test set with many empty-relevance queries could then swing averages without any change in retrieval quality.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>retrieval_metrics([], {&quot;b&quot;: 0}, 1)[&quot;recall&quot;] is None</code>. In a report, give the count of such queries and exclude them explicitly from each average.</p>
 <p><strong>Expected observation:</strong> Recall and nDCG are reported as missing.</p>
 <h3 id="6-preserve-target-weights">6. Preserve target weights<a class="heading-anchor" href="#6-preserve-target-weights" aria-label="Link to this section">#</a></h3>
 <p>The weighting rule defines whose query distribution the result represents; it should be shared by every compared retriever.</p>
+<p><strong>Approach.</strong> Take two queries with nDCG 1.0 and 0.5. Average them with equal weights, then with traffic weights such as 0.9 and 0.1.</p>
+<p><strong>Why it holds for this fixture.</strong> The equal average is 0.75 and the traffic-weighted average is 0.9 times 1.0 plus 0.1 times 0.5 = 0.95. Both are correct arithmetic. They answer different questions: typical query quality versus quality experienced by the average request.</p>
+<p><strong>A tempting wrong approach.</strong> Comparing retriever A&#x27;s traffic-weighted mean with retriever B&#x27;s equal-query mean is the mistake. The gap would come from the weighting, as in eval-005, not from the retrievers.</p>
+<p><strong>How to verify.</strong> Recompute both averages for each retriever with the same weight vector, and confirm the difference between retrievers is reported under one stated weighting.</p>
 <p><strong>Expected observation:</strong> They can differ without a coding error.</p></article>
   </main>
 </body>

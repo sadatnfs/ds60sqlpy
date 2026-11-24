@@ -57,11 +57,11 @@ assert(bonus(10L) == 2L)
 
 Explain addCents then evaluate two calls.
 
-**Inputs/evidence:** For spark-003 Exercise 1, addCents(100L, 25L), addCents(0L, 25L).
+**Inputs/evidence:** `AddCents(100L, 25L)`, `addCents(0L, 25L)`.
 
-**Expected result/shape:** For spark-003 Exercise 1, 125L and 25L.
+**Expected result/shape:** 125L and 25L.
 
-**Verify:** For spark-003 Exercise 1, assert both returned values; distinguish parameter names from arguments.
+**Verify:** Assert both returned values; distinguish parameter names from arguments.
 
 **Progressive hints:**
 
@@ -73,11 +73,11 @@ Explain addCents then evaluate two calls.
 
 Implement the fee rule with the nonpositive guard first.
 
-**Inputs/evidence:** For spark-003 Exercise 2, 0L with both membership values;100L with both values.
+**Inputs/evidence:** 0L with both membership values; 100L with both values.
 
-**Expected result/shape:** For spark-003 Exercise 2, fees 0/0 for zero and 0/20 for 100.
+**Expected result/shape:** Fees 0/0 for zero and 0/20 for 100.
 
-**Verify:** For spark-003 Exercise 2, assert all four cases and inspect guard order.
+**Verify:** Assert all four cases and inspect guard order.
 
 **Progressive hints:**
 
@@ -89,11 +89,11 @@ Implement the fee rule with the nonpositive guard first.
 
 Cover just below, exactly at and just above 500.
 
-**Inputs/evidence:** For spark-003 Exercise 3, member 499L, 500L, 501L.
+**Inputs/evidence:** Member 499L, 500L, 501L.
 
-**Expected result/shape:** For spark-003 Exercise 3, fees 0L, 25L, 25L.
+**Expected result/shape:** Fees 0L, 25L, 25L.
 
-**Verify:** For spark-003 Exercise 3, assert the exact three outputs and explain integer division.
+**Verify:** Assert the exact three outputs and explain integer division.
 
 **Progressive hints:**
 
@@ -105,11 +105,11 @@ Cover just below, exactly at and just above 500.
 
 Call the same function with named parameters in reverse order.
 
-**Inputs/evidence:** For spark-003 Exercise 4, feeCents(isMember=true, amount=1000L).
+**Inputs/evidence:** `feeCents(isMember=true, amount=1000L)`.
 
-**Expected result/shape:** For spark-003 Exercise 4, 50L, equal to the positional call.
+**Expected result/shape:** 50L, equal to the positional call.
 
-**Verify:** For spark-003 Exercise 4, assert both calls give 50L; do not change the definition.
+**Verify:** Assert both calls give 50L; do not change the definition.
 
 **Progressive hints:**
 
@@ -121,11 +121,11 @@ Call the same function with named parameters in reverse order.
 
 Compare a proposed call counter with the fee contract.
 
-**Inputs/evidence:** For spark-003 Exercise 5, two consecutive feeCents(1000L, true) calls and negative amount-1L.
+**Inputs/evidence:** Two consecutive `feeCents(1000L, true)` calls and negative amount-1L.
 
-**Expected result/shape:** For spark-003 Exercise 5, both calls 50L; negative amount yields 0L even for a nonmember.
+**Expected result/shape:** Both calls 50L; negative amount yields 0L even for a nonmember.
 
-**Verify:** For spark-003 Exercise 5, repeat exact calls and explain why a call counter must not alter the returned fee.
+**Verify:** Repeat exact calls and explain why a call counter must not alter the returned fee.
 
 **Progressive hints:**
 
@@ -137,17 +137,17 @@ Compare a proposed call counter with the fee contract.
 
 Predict member 2000L and nonmember 2000L; review an out-of-domain value.
 
-**Inputs/evidence:** For spark-003 Exercise 6, 2000L, true/false and 2000000L.
+**Inputs/evidence:** 2000L, true/false and 2000000L.
 
-**Expected result/shape:** For spark-003 Exercise 6, 100L/20L; the out-of-domain input is rejected by the reference precondition.
+**Expected result/shape:** 100L/20L; the out-of-domain input is rejected by the reference precondition.
 
-**Verify:** For spark-003 Exercise 6, assert the two valid results and identify the violated bound for the third.
+**Verify:** Assert the two valid results and identify the violated bound for the third.
 
 **Progressive hints:**
 
 1. Reapply the same rule.
 2. A flat fee does not grow with the amount.
-3. 2000*5/100=100;2000000 exceeds the declared limit.
+3. 2000*5/100=100; 2000000 exceeds the declared limit.
 
 ## Self-check
 

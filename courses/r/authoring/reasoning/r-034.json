@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Following the round trip through wide form",
+      "body": "The reference reshapes four measurements to wide form and back:\n\n```text\nlong (4 rows)        wide (2 rows)              restored before cleanup\nid visit value       row id value.1 value.2     row  id visit value\nA  1     10          1   A  10      12          A.1  A  1     10\nA  2     12          3   B  20      23          B.1  B  1     20\nB  1     20                                     A.2  A  2     12\nB  2     23                                     B.2  B  2     23\n```\n\nThe wide table keeps row names 1 and 3, the rows where each id first appeared. Going back to long, reshape names each row from the id and the time, such as A.1, and lists all visit 1 rows before visit 2. Both directions also attach an attribute that records the reshape.\n\nSo the values survive the round trip, but `identical(restored, long)` would be FALSE for three reasons: row order, row names and the extra attribute. The reference sorts by id and visit, sets the row names to NULL, keeps only the three original columns and compares with `all.equal(..., check.attributes = FALSE)`. Each step removes a difference in bookkeeping, not in data."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Name the cell key as id plus visit, and check it with `anyDuplicated(long[c(\"id\", \"visit\")])`.",
+      "why": "Each value belongs to one person at one visit. The four rows have four distinct pairs, so they fill the 2 by 2 grid of wide cells exactly once each.",
+      "wrong": "Using id alone as the key. A appears twice and B appears twice, so the check would fail on correct data, and visit alone repeats in the same way.",
+      "verify": "`anyDuplicated(long[c(\"id\", \"visit\")])` returns 0."
+    },
+    {
+      "approach": "Add long rows for A and B at visit 3 and rerun the same reshape call.",
+      "why": "reshape creates one value column per distinct visit, so a third visit becomes value.3, filled by matching on id. Both people have the visit, so the new column has no missing cells.",
+      "wrong": "Appending a vector straight onto the wide table. Its values land by row position, and the order A then B exists only because of how the input happened to be sorted.",
+      "verify": "`names(wide)` shows \"id\" \"value.1\" \"value.2\" \"value.3\" after the reshape."
+    },
+    {
+      "approach": "Reshape back with varying value.1 and value.2, times 1 and 2, then sort by id and visit, drop row names and compare with all.equal ignoring attributes.",
+      "why": "The values return unchanged, but reshape adds row names such as A.1 and a record of the reshape, and lists visit 1 rows first. Sorting and resetting removes those differences, leaving only the data to compare.",
+      "wrong": "Comparing with `identical(restored, long)`. It returns FALSE because of row names, row order and the attribute, even though every measurement came back correctly.",
+      "verify": "`isTRUE(all.equal(restored, long, check.attributes = FALSE))` returns TRUE."
+    },
+    {
+      "approach": "Check the key before reshaping, then reject the batch or apply a stated aggregation rule to the duplicate pair.",
+      "why": "`rbind(long, long[1, ])` adds a second row for A at visit 1. A wide cell can hold one value, so without a rule reshape keeps the first and drops the other.",
+      "wrong": "Reshaping anyway. The second value disappears with only a warning, so the wide table looks complete while missing a reading.",
+      "verify": "`anyDuplicated(duplicate[c(\"id\", \"visit\")])` returns 5, the position of the repeated row."
+    },
+    {
+      "approach": "Carry a presence flag in long form, one TRUE per recorded row, and reshape it alongside the value.",
+      "why": "Removing B's visit 2 row leaves value.2 missing for B. A recorded row with value NA would look the same in wide form, so the value alone cannot tell absent from unknown.",
+      "wrong": "Reading every NA in the wide table as a skipped visit. Some of those cells are recorded measurements whose value is unknown, and the visit counts come out wrong.",
+      "verify": "`is.na(incomplete_wide$value.2[incomplete_wide$id == \"B\"])` returns TRUE, and the reshaped flag shows NA for the absent visit and TRUE for a recorded one."
+    },
+    {
+      "approach": "Choose the shape from the next operation: wide for a per person difference between visits, long for a chart or model with one row per measurement.",
+      "why": "In wide form `value.2 - value.1` is 2 for A and 3 for B in one vectorized line. A chart with visit on the x axis needs visit as a column, which is the long layout.",
+      "wrong": "Folding an aggregation into the reshape, such as averaging duplicates without saying so, and calling the result the same data.",
+      "verify": "`wide$value.2 - wide$value.1` returns 2 and 3, and `nrow(long)` returns 4 measurements."
+    }
+  ]
+}

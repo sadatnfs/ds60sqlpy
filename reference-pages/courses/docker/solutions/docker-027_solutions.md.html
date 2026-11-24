@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-which-resources-are-durable">Exercise 1: Predict which resources are durable.<a class="heading-anchor" href="#exercise-1-predict-which-resources-are-durable" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Only the intended named volume and explicit backup files.</p>
 <p><strong>Why:</strong> Containers, peer client instances and project networks are replaceable. Do not accidentally rely on writable-layer state when describing recovery.</p>
+<p><strong>Approach:</strong> List each resource and ask whether recreating it loses anything: study-data and the backup files hold state, while app, client and the network are rebuilt.</p>
+<p><strong>Why this is correct:</strong> server.py keeps its counter only in /data and the root is read-only, so the writable layer holds nothing worth recovering.</p>
+<p><strong>A plausible wrong approach:</strong> Describing a container restart as preserving data because the container kept its name confuses the container with the volume.</p>
+<p><strong>How to verify:</strong> Run down without -v and up again; the counter remains, while the container ID and network ID change.</p>
 <h3 id="exercise-2-change-only-the-peer-target-port-in-a-scratch-copy">Exercise 2: Change only the peer target port in a scratch copy.<a class="heading-anchor" href="#exercise-2-change-only-the-peer-target-port-in-a-scratch-copy" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The request fails within its timeout while app remains healthy.</p>
 <p><strong>Why:</strong> The controlled fault separates internal routing from application readiness. Preserve the error rather than changing multiple network settings at once.</p>
+<p><strong>Approach:</strong> In a scratch copy, change only the client&#x27;s URL from <code>app:8080</code> to another port and run the client once.</p>
+<p><strong>Why this is correct:</strong> Nothing listens on the new port, so the request fails within its 3 second timeout while app stays healthy.</p>
+<p><strong>A plausible wrong approach:</strong> Also editing the app&#x27;s ports and network to see what happens loses track of which change caused the failure.</p>
+<p><strong>How to verify:</strong> docker compose ps still shows app healthy, and the client error names the port it tried.</p>
 <h3 id="exercise-3-build-an-independent-restore-demonstration">Exercise 3: Build an independent restore demonstration.<a class="heading-anchor" href="#exercise-3-build-an-independent-restore-demonstration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> New target state equals the exported counter while source remains intact.</p>
 <p><strong>Why:</strong> Recovery evidence requires use of the restored data. A copied file existing at a path is not enough without parsing and an application-level check.</p>
+<p><strong>Approach:</strong> Export counter.json from study-data, restore it into a new volume, and start a reader on that volume.</p>
+<p><strong>Why this is correct:</strong> Reading GET /counter through server.py runs read_counter&#x27;s checks, proving the restored data is usable.</p>
+<p><strong>A plausible wrong approach:</strong> Checking only that the restored file exists skips parsing and would pass a truncated or invalid file.</p>
+<p><strong>How to verify:</strong> The reader returns the same counter as the export, and the source volume&#x27;s counter is unchanged.</p>
 <h3 id="exercise-4-diagnose-a-passing-host-request-with-failing-peer-request">Exercise 4: Diagnose a passing host request with failing peer request.<a class="heading-anchor" href="#exercise-4-diagnose-a-passing-host-request-with-failing-peer-request" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect service DNS, network attachment and internal target port.</p>
 <p><strong>Why:</strong> The two paths share an application but have different discovery and routing. Their disagreement localizes the fault.</p>
+<p><strong>Approach:</strong> Compare the two paths: the host uses <code>127.0.0.1:18080</code> through a port mapping, the client uses <code>app:8080</code> through project DNS.</p>
+<p><strong>Why this is correct:</strong> Since the host request works, the app is serving; the fault is in the client&#x27;s name, network or port.</p>
+<p><strong>A plausible wrong approach:</strong> Restarting the app because something is down ignores the passing host request.</p>
+<p><strong>How to verify:</strong> Check that client joins the project network, resolves app, and targets 8080; one of these shows the mismatch.</p>
 <h3 id="exercise-5-explain-the-limits-of-this-single-engine-design">Exercise 5: Explain the limits of this single-engine design.<a class="heading-anchor" href="#exercise-5-explain-the-limits-of-this-single-engine-design" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> No multi-host failover or database consistency guarantee is claimed.</p>
 <p><strong>Why:</strong> A small lab teaches the mechanisms honestly. Production requirements need additional architecture and qualification rather than a larger marketing claim.</p>
+<p><strong>Approach:</strong> List what the lab does not cover: other hosts, failover, replicated storage, and consistency for real databases.</p>
+<p><strong>Why this is correct:</strong> One engine with one volume teaches the mechanics without claiming a production-grade guarantee.</p>
+<p><strong>A plausible wrong approach:</strong> Presenting the capstone as a highly available design invites someone to rely on it for production.</p>
+<p><strong>How to verify:</strong> The handoff names these limits next to the parts that were tested.</p>
 <h3 id="exercise-6-write-a-beginner-operator-handoff">Exercise 6: Write a beginner operator handoff.<a class="heading-anchor" href="#exercise-6-write-a-beginner-operator-handoff" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Setup, evidence, failure diagnosis, backup/restore and scoped cleanup.</p>
 <p><strong>Why:</strong> A good handoff is executable by a reader with the documented prerequisites. It names state retention explicitly and avoids ambient context assumptions.</p>
+<p><strong>Approach:</strong> Write the handoff in operating order: prerequisites, start, health evidence, common failures, backup and restore, and scoped cleanup.</p>
+<p><strong>Why this is correct:</strong> A reader with only the listed prerequisites can follow it, and it names which volumes keep state after cleanup.</p>
+<p><strong>A plausible wrong approach:</strong> Writing steps that rely on your shell history or already-built images fails for the next operator.</p>
+<p><strong>How to verify:</strong> Someone new follows the handoff on a clean engine and reaches the same health and restore results.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

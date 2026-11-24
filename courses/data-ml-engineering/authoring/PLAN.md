@@ -38,8 +38,13 @@ inferred from this book's bounded semantic models.
 ## Deterministic fragment contract
 
 Each owned fragment supplies chapters.json with records containing id, title,
-level, minutes, prerequisites, runtime_profile, language, concepts, outcome,
-guide_source, source_path and related_paths. Source paths are repository-relative.
+level, minutes, prerequisites, runtime_profile, language, concepts, key_terms,
+worked_examples, outcome, guide_source, source_path and related_paths. key_terms holds three to
+five term/definition objects that the generator renders as a Key terms section
+before the first chapter H2. worked_examples holds
+title/language/code/output/interpretation objects with observed outputs, rendered
+after the worked-program section; with the program and any authored fences each
+chapter has at least two fenced artifacts. Source paths are repository-relative.
 related_paths contains optional label/path objects for existing local material.
 Each chapter Markdown has a full H1, Worked case 1/2 sections and exactly one
 worked-program marker. The complete program supplies example_one(), example_two()

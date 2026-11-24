@@ -91,6 +91,9 @@ Prepare builds a local layer on the already prepared native Scala/JVM Java17
 base. It downloads the exact 857,203,581-byte Apache 1.5.1 binary, verifies its
 published SHA512 before bounded path-safe extraction, and retains Apache license
 and notice files. It is a locally built workshop image, not an Apache-published
-container. Expect approximately 2 to 3 GiB temporary engine headroom during download,
+container. The layer ends as the unprivileged `nobody` account (UID 65534) and
+pre-creates its `/state` and `/staging` mount points with that owner, so new
+workshop volumes are writable without root. Volumes left by an earlier root-run
+binary workshop stay root-owned; remove that workshop before switching. Expect approximately 2 to 3 GiB temporary engine headroom during download,
 extraction and layer export. Preparation/lifecycle use one action lock. A saved
 project never switches routes automatically; resume does not build or pull.

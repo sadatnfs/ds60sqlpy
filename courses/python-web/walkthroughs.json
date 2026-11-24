@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "track_id": "python-web",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "pyweb-001",
+      "title": "A first Flask route exercised with the test client",
+      "anchor": "reference",
+      "source_path": "courses/python-web/examples/pyweb-001.py",
+      "source_sha256": "5acf0e3057b9bc7da72c061f15e2cc58c5fe69bc675efb77c83fb9e75c62c3ef",
+      "expected_output": ["pyweb-001: all reference checks passed", "\"unmatched_route\": 404"],
+      "steps": [
+        {
+          "lines": [6, 9],
+          "excerpt": "def run_cases():\n    from flask import Flask, request\n\n    app = Flask(__name__)",
+          "title": "Create the application object",
+          "explanation": "Flask is imported inside run_cases so the module can be read without starting anything. Flask(__name__) creates the WSGI application; the name helps Flask locate the module. request is a proxy object that refers to whichever request is currently being handled.",
+          "observe": "No server is started; the app is just a Python object."
+        },
+        {
+          "lines": [11, 13],
+          "excerpt": "    @app.get(\"/greet/<name>\")\n    def greet(name):\n        return {\"message\": \"Hello, \" + name, \"method\": request.method}, 200",
+          "title": "Declare a route with a path parameter",
+          "explanation": "@app.get registers greet for GET requests whose path matches /greet/<name>. Flask passes the matched part of the URL as the name argument. Returning a dict and a status code makes Flask build a JSON response with that status.",
+          "observe": "A request to /greet/Ada will produce a JSON body containing Hello, Ada."
+        },
+        {
+          "lines": [15, 17],
+          "excerpt": "    with app.test_client() as client:\n        valid = client.get(\"/greet/Ada\")\n        missing = client.get(\"/unknown\")",
+          "title": "Send requests without a network",
+          "explanation": "app.test_client() calls the application directly through WSGI, so no TCP port is opened. The with block makes sure the client cleans up its request contexts. One request hits the defined route and one hits a path that does not exist.",
+          "observe": "Both calls return response objects you can inspect."
+        },
+        {
+          "lines": [18, 21],
+          "excerpt": "        assert valid.status_code == 200\n        assert valid.json == {\"message\": \"Hello, Ada\", \"method\": \"GET\"}\n        assert valid.headers[\"Content-Type\"].startswith(\"application/json\")\n        assert missing.status_code == 404",
+          "title": "Check status, body and content type",
+          "explanation": "The asserts confirm the valid route returned 200, that .json parsed the body into the expected dictionary, and that the Content-Type header says JSON. The unknown path returns 404 because no route matches it. Testing the failure path is as important as testing the success path.",
+          "observe": "If any assert fails the script stops with AssertionError."
+        },
+        {
+          "lines": [22, 31],
+          "excerpt": "    return {\n        \"valid\": {\"status\": valid.status_code, \"body\": valid.json},\n        \"unmatched_route\": missing.status_code,\n        \"surface\": \"real Flask WSGI test client; no TCP server\",\n    }\n\n\nif __name__ == \"__main__\":\n    print(json.dumps(run_cases(), sort_keys=True, allow_nan=False))\n    print(\"pyweb-001: all reference checks passed\")",
+          "title": "Report the evidence",
+          "explanation": "The function returns a small summary and the main block prints it as JSON with sorted keys, then prints a pass line. sort_keys keeps the output order stable.",
+          "observe": "The JSON shows status 200 for the valid call and 404 for the unmatched route."
+        }
+      ]
+    },
+    {
+      "lesson_id": "pyweb-016",
+      "title": "All or nothing batch inserts with SQLAlchemy transactions",
+      "anchor": "reference",
+      "source_path": "courses/python-web/examples/pyweb-016.py",
+      "source_sha256": "62023e74e75ccbdfc1d1471470b3073b611bde27d795161bf850d599d373659d",
+      "expected_output": [
+        "\"committed_titles\": [\"existing\", \"one\", \"two\"]",
+        "\"partial_batch_rolled_back\": true"
+      ],
+      "steps": [
+        {
+          "lines": [13, 19],
+          "excerpt": "    class Base(DeclarativeBase):\n        pass\n\n    class Item(Base):\n        __tablename__ = \"items\"\n        id: Mapped[int] = mapped_column(primary_key=True)\n        title: Mapped[str] = mapped_column(String(40), unique=True)",
+          "title": "Declare a mapped table",
+          "explanation": "DeclarativeBase is the SQLAlchemy 2 base class for ORM models. Item maps to the items table; Mapped type hints plus mapped_column describe the columns. unique=True on title tells the database to reject a second row with the same title.",
+          "observe": "The uniqueness rule is enforced by the database, not by Python code."
+        },
+        {
+          "lines": [21, 27],
+          "excerpt": "    engine = create_engine(\n        \"sqlite+pysqlite:///:memory:\",\n        poolclass=StaticPool,\n        connect_args={\"check_same_thread\": False},\n    )\n    Base.metadata.create_all(engine)\n    Session = sessionmaker(engine)",
+          "title": "An in memory database that survives across sessions",
+          "explanation": "sqlite :memory: normally gives each connection its own empty database. StaticPool reuses one connection so every session sees the same data, and check_same_thread False allows the test client to use it. create_all issues CREATE TABLE and sessionmaker builds a Session factory.",
+          "observe": "The table exists before any request arrives."
+        },
+        {
+          "lines": [30, 39],
+          "excerpt": "    @app.post(\"/batch\")\n    def batch():\n        payload = request.get_json(silent=True)\n        if (\n            not isinstance(payload, dict)\n            or not isinstance(payload.get(\"titles\"), list)\n            or not 1 <= len(payload[\"titles\"]) <= 3\n            or any(not isinstance(x, str) or not 1 <= len(x) <= 40 for x in payload[\"titles\"])\n        ):\n            return {\"error\": \"one to three bounded titles required\"}, 422",
+          "title": "Validate the request body first",
+          "explanation": "get_json(silent=True) returns None instead of raising for a bad body. The checks require a dict with a titles list of one to three strings, each 1 to 40 characters. Anything else gets a 422 response before touching the database.",
+          "observe": "Input bounds protect the database and keep errors clear."
+        },
+        {
+          "lines": [40, 46],
+          "excerpt": "        try:\n            with Session.begin() as db:\n                db.add_all([Item(title=title) for title in payload[\"titles\"]])\n                db.flush()\n        except IntegrityError:\n            return {\"error\": \"duplicate title; batch rolled back\"}, 409\n        return {\"created\": len(payload[\"titles\"])}, 201",
+          "title": "One transaction per batch",
+          "explanation": "Session.begin() opens a transaction that commits when the block ends normally and rolls back if an exception escapes. flush sends the INSERTs immediately so a duplicate title raises IntegrityError inside the block. The handler catches it and returns 409, and the rollback means no title from the failed batch is kept.",
+          "observe": "Either every title in a batch is stored or none is."
+        },
+        {
+          "lines": [48, 51],
+          "excerpt": "    @app.get(\"/items\")\n    def items():\n        with Session() as db:\n            return {\"titles\": list(db.scalars(select(Item.title).order_by(Item.id)))}",
+          "title": "Read back in insertion order",
+          "explanation": "The items route selects titles ordered by id, so the list order reflects when rows were inserted.",
+          "observe": "Ordering explicitly avoids relying on database defaults."
+        },
+        {
+          "lines": [53, 60],
+          "excerpt": "    try:\n        with app.test_client() as client:\n            assert client.post(\"/batch\", json={\"titles\": [\"existing\"]}).status_code == 201\n            assert client.post(\"/batch\", json={\"titles\": [\"one\", \"two\"]}).status_code == 201\n            failed = client.post(\"/batch\", json={\"titles\": [\"temporary\", \"existing\"]})\n            assert failed.status_code == 409\n            kept = client.get(\"/items\").json[\"titles\"]\n            assert kept == [\"existing\", \"one\", \"two\"]",
+          "title": "Prove the failed batch left nothing behind",
+          "explanation": "Two valid batches succeed with 201. The third contains a new title and a duplicate; it fails with 409 and the new title temporary is rolled back along with it. The final list therefore has only the first three titles.",
+          "observe": "kept equals [\"existing\", \"one\", \"two\"]."
+        },
+        {
+          "lines": [61, 72],
+          "excerpt": "        return {\n            \"committed_titles\": kept,\n            \"partial_batch_rolled_back\": True,\n            \"database\": \"actual bounded SQLite transaction\",\n            \"postgresql_executed\": False,\n        }\n    finally:\n        engine.dispose()\n\n\nif __name__ == \"__main__\":\n    print(json.dumps(run_cases(), sort_keys=True, allow_nan=False))",
+          "title": "Return evidence and clean up",
+          "explanation": "The result states what was actually executed: SQLite, not PostgreSQL. The finally block disposes the engine so its connection is closed even if an assert fails.",
+          "observe": "The printed JSON lists committed_titles and partial_batch_rolled_back true."
+        }
+      ]
+    },
+    {
+      "lesson_id": "pyweb-026",
+      "title": "Sessions, CSRF protection and owner scoped storage in one Flask app",
+      "anchor": "reference",
+      "source_path": "courses/python-web/examples/pyweb-026.py",
+      "source_sha256": "507e628ed20b6b252cc796557c2e864546ccf79ad57980a3302fa3803b960580",
+      "expected_output": [
+        "\"authentication\": true, \"csrf\": true, \"owner_assignment\": true, \"parameterized_storage\": true"
+      ],
+      "steps": [
+        {
+          "lines": [15, 21],
+          "excerpt": "    with tempfile.TemporaryDirectory(prefix=\"pyweb-flask-app-\") as directory:\n        path = Path(directory) / \"app.sqlite3\"\n        with sqlite3.connect(path) as db:\n            db.execute(\n                \"CREATE TABLE notes \"\n                \"(id INTEGER PRIMARY KEY, owner TEXT NOT NULL, title TEXT NOT NULL)\"\n            )",
+          "title": "A temporary SQLite file",
+          "explanation": "TemporaryDirectory creates a directory that is deleted when the block ends, so the test leaves no files. The notes table stores an owner column, which later decides who can see each note.",
+          "observe": "Each run starts from an empty database."
+        },
+        {
+          "lines": [22, 25],
+          "excerpt": "        password = generate_password_hash(\"fixture-password\")\n        app = Flask(__name__)\n        app.config.update(TESTING=True, SECRET_KEY=\"test-only-integrated-fixture\")\n        CSRFProtect(app)",
+          "title": "Hash the password and enable CSRF",
+          "explanation": "generate_password_hash stores a salted hash instead of the password itself. SECRET_KEY signs the session cookie; this one is clearly a test fixture value. CSRFProtect makes every POST require a valid token, which stops other sites from submitting forms on a user's behalf.",
+          "observe": "A POST without a token will now be rejected with 400."
+        },
+        {
+          "lines": [27, 42],
+          "excerpt": "        @app.get(\"/csrf\")\n        def csrf():\n            return {\"token\": generate_csrf()}\n\n        @app.post(\"/login\")\n        def login():\n            body = request.get_json(silent=True) or {}\n            if (\n                body.get(\"name\") != \"alice\"\n                or not isinstance(body.get(\"password\"), str)\n                or not check_password_hash(password, body[\"password\"])\n            ):\n                return {\"error\": \"invalid credentials\"}, 401\n            session.clear()\n            session[\"user\"] = \"alice\"\n            return {\"authenticated\": True}",
+          "title": "Issue tokens and log in",
+          "explanation": "/csrf hands out a token tied to the session. /login checks the name and uses check_password_hash, which compares safely against the stored hash. On success session.clear() discards any previous session data before storing the user, a defence against session fixation.",
+          "observe": "Wrong credentials return 401."
+        },
+        {
+          "lines": [44, 60],
+          "excerpt": "        @app.route(\"/notes\", methods=[\"GET\", \"POST\"])\n        def notes():\n            user = session.get(\"user\")\n            if user is None:\n                return {\"error\": \"authentication required\"}, 401\n            with sqlite3.connect(path) as db:\n                if request.method == \"POST\":\n                    body = request.get_json(silent=True)\n                    if (\n                        not isinstance(body, dict)\n                        or set(body) != {\"title\"}\n                        or not isinstance(body[\"title\"], str)\n                        or not 1 <= len(body[\"title\"]) <= 80\n                    ):\n                        return {\"error\": \"bounded title required\"}, 422\n                    db.execute(\"INSERT INTO notes(owner,title) VALUES(?,?)\", (user, body[\"title\"]))\n                    return {\"created\": True}, 201",
+          "title": "Create notes for the logged in user",
+          "explanation": "The owner comes from the session, never from the request body. The body must be exactly {\"title\": ...}; any extra key such as owner is rejected with 422. The INSERT uses ? placeholders so the title is passed as data and cannot change the SQL.",
+          "observe": "A user cannot create a note on behalf of someone else."
+        },
+        {
+          "lines": [61, 68],
+          "excerpt": "                return {\n                    \"notes\": [\n                        {\"id\": row[0], \"title\": row[1]}\n                        for row in db.execute(\n                            \"SELECT id,title FROM notes WHERE owner=? ORDER BY id\", (user,)\n                        )\n                    ]\n                }",
+          "title": "List only your own notes",
+          "explanation": "The SELECT filters by owner with a parameter and orders by id, so the response is predictable and scoped to the session user.",
+          "observe": "Other users' notes never appear."
+        },
+        {
+          "lines": [70, 80],
+          "excerpt": "        with app.test_client() as client:\n            assert client.get(\"/notes\").status_code == 401\n            token = client.get(\"/csrf\").json[\"token\"]\n            assert (\n                client.post(\n                    \"/login\",\n                    json={\"name\": \"alice\", \"password\": \"fixture-password\"},\n                    headers={\"X-CSRFToken\": token},\n                ).status_code\n                == 200\n            )",
+          "title": "Unauthenticated access, then login with a token",
+          "explanation": "The client first proves /notes returns 401 without a session. It then fetches a CSRF token and sends it in the X-CSRFToken header when logging in.",
+          "observe": "Login returns 200 only when the token is present and valid."
+        },
+        {
+          "lines": [81, 95],
+          "excerpt": "            token = client.get(\"/csrf\").json[\"token\"]\n            assert (\n                client.post(\n                    \"/notes\", json={\"title\": \"kept note\"}, headers={\"X-CSRFToken\": token}\n                ).status_code\n                == 201\n            )\n            assert client.post(\"/notes\", json={\"title\": \"unprotected\"}).status_code == 400\n            assert (\n                client.post(\n                    \"/notes\", json={\"title\": \"x\", \"owner\": \"bob\"}, headers={\"X-CSRFToken\": token}\n                ).status_code\n                == 422\n            )\n            assert client.get(\"/notes\").json == {\"notes\": [{\"id\": 1, \"title\": \"kept note\"}]}",
+          "title": "Exercise the protections",
+          "explanation": "A fresh token is fetched after login. A valid note is created; a POST without a token gets 400 from CSRFProtect; a POST trying to set owner gets 422. Listing shows only the one kept note.",
+          "observe": "Each defence is tested by an attack that it must block."
+        },
+        {
+          "lines": [96, 110],
+          "excerpt": "        with sqlite3.connect(path) as db:\n            assert db.execute(\"SELECT owner,title FROM notes\").fetchall() == [\n                (\"alice\", \"kept note\")\n            ]\n        return {\n            \"authentication\": True,\n            \"csrf\": True,\n            \"parameterized_storage\": True,\n            \"owner_assignment\": True,\n            \"surface\": \"finite Flask client and temporary SQLite; deployment is separate\",\n        }\n\n\nif __name__ == \"__main__\":\n    print(json.dumps(run_cases(), sort_keys=True, allow_nan=False))",
+          "title": "Confirm directly in the database",
+          "explanation": "Reading the table outside Flask verifies what was really stored: one row owned by alice. The summary of booleans is then printed as JSON.",
+          "observe": "All four protection flags are true."
+        }
+      ]
+    }
+  ]
+}

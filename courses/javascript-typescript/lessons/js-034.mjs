@@ -3,18 +3,19 @@
 // Copy Example A into a scratch `main.mjs` and change `const result = sumTo(10000);` to
 // `const result = sumTo(10001);`. Before running it, predict which check fails and which
 // value it now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.equal(result, 50005000)`. Restoring the original line brings back the worked
-// observation: correct sum 50005000; finite nonnegative elapsed time.
+// Expected: The changed run fails with an `AssertionError` at `assert.equal(result,
+// 50005000)`. Restoring `const result = sumTo(10000);` brings back: correct sum 50005000;
+// finite nonnegative elapsed time.
 
 // Exercise 2: Preserve repeated samples and summarize them: debug a regression
-// A regression changed one token in Example B, so one line now reads `const sorted =
-// [...samples].sort((a, b) => a + b);`. Run Example B with that line, use the failing check
-// to locate the defect and repair it without changing the check.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.ok(median >= sorted[0] && median <= sorted[4])`; after it the line reads `const
-// sorted = [...samples].sort((a, b) => a - b);` again and five finite samples; median lies
-// between minimum and maximum.
+// A regression changed one token in Example B, so one line now reads `const medianOf =
+// values => [...values].sort()[Math.floor(values.length / 2)];`. Run Example B with that
+// line, use the failing check to locate the defect and repair it without changing the check.
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.equal(medianOf([9, 10, 100, 2, 30]), 10)`. Restoring `const medianOf = values =>
+// [...values].sort(byValue)[Math.floor(values.length / 2)];` brings back: five finite
+// samples; median lies between minimum and maximum; the fixed control `[9, 10, 100, 2, 30]`
+// has numeric median 10.
 
 // Exercise 3: Release owned references without claiming immediate RSS change
 // Populate and clear a Map while recording memory counters.

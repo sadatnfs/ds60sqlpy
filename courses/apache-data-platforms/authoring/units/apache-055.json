@@ -5,6 +5,38 @@
   "minutes": 75,
   "prerequisites": ["apache-054", "apache-051"],
   "concepts": ["lightweight transaction", "Storage Attached Index", "selectivity"],
+  "key_terms": [
+    [
+      "Lightweight transaction",
+      "A conditional write, such as UPDATE with IF, that uses a Paxos-based consensus round to compare and set a value within one partition."
+    ],
+    [
+      "Serial consistency",
+      "The consistency level for the consensus phase of a lightweight transaction, separate from the ordinary consistency level of its commit."
+    ],
+    [
+      "Storage Attached Index",
+      "Cassandra 5's index type that stores index data with each SSTable and supports queries on non-key columns."
+    ],
+    [
+      "Selectivity",
+      "The fraction of rows a predicate matches. An index on a column that matches most rows still leaves an expensive distributed query."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Compare and set on one partition",
+      "language": "sql",
+      "code": "UPDATE ds60_orders.inventory\nSET available = 6\nWHERE item = 'demo'\nIF available = 7;\n\nUPDATE ds60_orders.inventory\nSET available = 5\nWHERE item = 'demo'\nIF available = 7;",
+      "interpretation": "The first statement returns a row with [applied] set to true. The second returns [applied] false along with the current value 6, because the condition no longer holds; Cassandra reports the conflict instead of overwriting it. These lightweight transactions use a Paxos round and cost several times a normal write, so reserve them for the transitions that truly need a guard. They also cover only this partition, so reserving stock and charging a payment still need a separate, idempotent protocol."
+    },
+    {
+      "title": "Create and confirm a Storage Attached Index",
+      "language": "sql",
+      "code": "CREATE CUSTOM INDEX IF NOT EXISTS amount_sai\nON ds60_orders.indexed_orders (amount)\nUSING 'StorageAttachedIndex';\n\nSELECT kind, options\nFROM system_schema.indexes\nWHERE keyspace_name = 'ds60_orders'\n  AND table_name = 'indexed_orders'\n  AND index_name = 'amount_sai';",
+      "interpretation": "The metadata row should have kind CUSTOM and an options class_name ending in StorageAttachedIndex; the client checks both before trusting any query result. Creating the index starts an asynchronous build, so a query issued at once can fail or miss rows, which is why the client waits until it is queryable. With three fixture rows the index proves only that the API works, since a full scan would be just as fast; judge real use by cardinality, write amplification and query latency on production-sized partitions."
+    }
+  ],
   "evidence": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project.",
   "sources": [
     [

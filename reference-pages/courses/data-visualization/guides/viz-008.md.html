@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="preserve-the-claim-with-the-figure">Preserve the claim with the figure<a class="heading-anchor" href="#preserve-the-claim-with-the-figure" aria-label="Link to this section">#</a></h3>
 <p>At a declared observation cutoff, twelve jobs have statuses completed eight, pending three and failed one. Pending is not a failure and not a completed observation. A chart that merges pending with failed makes a different operational claim. State the cutoff, units and status definition in a caption.</p>
 <p>The reference uses bar heights, printed values and patterns as well as color. A semantic table gives exact values, and the caption explains the denominator. Color alone is insufficient for users with color-vision differences, printing or assistive technology.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Semantic table:</strong> A native table with headers and cells that gives exact values to readers who cannot rely on color, hover or the chart image.</li>
+<li><strong>Caption:</strong> Text that states the cutoff, units, status definitions and denominator so the figure&#x27;s claim is readable without the marks.</li>
+<li><strong>JSON specification:</strong> The serialized data and layout of a Plotly figure, which can be reconstructed and checked but may render differently across versions and fonts.</li>
+<li><strong>Provenance:</strong> The record of where a figure&#x27;s values and specification came from, such as the observation cutoff and a SHA-256 identity for the serialized bytes.</li>
+<li><strong>Noncolor distinction:</strong> A pattern, label or printed value that separates categories without depending on color perception.</li>
+</ul>
 <h3 id="worked-case-specification-round-trip">Worked case: specification round-trip<a class="heading-anchor" href="#worked-case-specification-round-trip" aria-label="Link to this section">#</a></h3>
 <p>A Plotly figure is a data/layout specification. Python serializes it to JSON, reconstructs a figure from that JSON, and checks that counts and table rows are preserved. It prints the serialized size and a SHA-256 identity for that specification. A hash identifies bytes; it does not establish scientific validity or capture every browser rendering detail.</p>
 <p>The JavaScript variant provides a native button that exposes readable JSON in a labeled textarea. The user can inspect and copy it. The handler checks that reconstructed counts still sum to twelve. It performs no network request, automatic file download or model publication.</p>

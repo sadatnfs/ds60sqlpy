@@ -14,6 +14,14 @@ The deduplication in this fixture is justified because the repeated event has id
 
 The second case writes a typed artifact and a receipt containing its hash, schema, row count and grain. A cryptographic hash establishes byte identity, not correctness or authenticity by itself. Readback checks the published content, while the earlier row accounting checks how it was derived. In a durable system, publication would also need ownership, atomicity, lineage and a retention policy.
 
+## Key terms
+
+- **Data contract:** The declared columns, types, keys and value rules that published rows must satisfy.
+- **Deduplication:** Removing repeated events with `unique(subset=...)`, which is justified only when the repeats have identical content.
+- **Quarantine:** Holding rows that violate the contract apart with a reason instead of publishing them or silently dropping them.
+- **Artifact hash:** A sha256 digest of the written file's bytes, which identifies exact bytes, not logical equality of the data.
+- **Readback receipt:** A JSON record of the contract and the file's SHA-256 hash, written after the published file is read back and checked.
+
 ## Syntax and data contract
 
 Parse into a new field, isolate invalid rows, apply the declared duplicate rule and only then aggregate. Use a stable sort before publishing an ordered result. write_parquet creates the typed output; hashlib.sha256 records its exact bytes; a JSON receipt makes the contract inspectable. A hash can legitimately change when a library writes an equivalent Parquet encoding, so distinguish byte identity from logical equality.

@@ -14,13 +14,37 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Predict both scale results before running.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The closure refers to the variable, not a permanently copied value from creation time. Changing factor changes later calls through the closure.
+**Written answer.** The first call `scale(3)` returns 6 because `factor` is 2. After `factor = 4`, the same delegate returns 12. The lambda captured the variable `factor`, not its value at the time the lambda was created.
+
+**Why it is correct.** The compiler moves a captured local into a hidden object shared by the method and the lambda. Assigning `factor = 4` writes to that shared storage, and the next call reads it.
+
+**Plausible wrong approach.** Predicting 6 for both calls treats capture as a copy taken at creation time. That is how a parameter or a separate local snapshot behaves, not a captured variable.
+
+**How to verify.** Example A checks both values. Insert `factor = 10;` before the second check and confirm `scale(3)` would now be 30, which shows the delegate reads the variable at each call.
 
 ### Task 2: Guided modification
 
 Capture a separate local snapshot and compare its behavior after factor changes.
 
-No separate reference answer has been written for this task. Start from Example B: Keeping the handler reference makes unsubscription precise and prevents a lingering callback. Only the first emission reaches the removed handler.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```csharp
+int factor = 2;
+int snapshot = factor;
+Func<int, int> live = value => value * factor;
+Func<int, int> frozen = value => value * snapshot;
+factor = 4;
+Check(live(3) == 12, "live capture sees the new factor");
+Check(frozen(3) == 6, "snapshot keeps the old factor");
+```
+
+**Observe:** After factor changes to 4, live(3) is 12 while frozen(3) is still 6.
+
+`snapshot` is a separate local that received the value 2 once. The `frozen` lambda captures `snapshot`, and nothing assigns to it later, so its result stays 6. The `live` lambda captures `factor`, which changed, so its result follows to 12.
+
+**Plausible wrong approach.** Writing `Func<int, int> frozen = value => value * factor;` and expecting it to remember 2 because it was created earlier gives 12 instead. The creation time of a lambda does not freeze the variables it reads.
+
+**How to verify.** Assign `snapshot = 5;` after creating `frozen` and confirm `frozen(3)` becomes 15. The snapshot is only safe while nothing writes to it.
 
 ### Task 3: Independent construction
 
@@ -50,13 +74,39 @@ The caller supplies the behavior as a Func<int, int>, while the method owns iter
 
 Diagnose unsubscribing with a newly created lambda instead of the subscribed delegate.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Closure capture can retain large objects or unexpected mutable state. Event handlers should avoid hiding failures. A new lambda with similar source is not necessarily the same delegate needed for unsubscription.
+**Written answer.** `source.Raised += (_, _) => calls++;` followed by `source.Raised -= (_, _) => calls++;` does not unsubscribe. The second lambda creates a new delegate instance that is not equal to the subscribed one, so the removal finds no match and silently does nothing. After two `Emit` calls `calls` is 2. Keep the delegate in a variable, as Example B does with `handler`, and remove that same variable.
+
+**Why it is correct.** Event removal compares delegates by target and method. Each lambda expression that captures `calls` produces its own delegate, so two textually identical lambdas do not compare equal, and `-=` removes nothing.
+
+**Plausible wrong approach.** Assuming the removal worked because no exception was raised misreads the API: removing a delegate that is not subscribed is allowed and has no effect. The leftover handler keeps the subscriber and everything it captured alive.
+
+**How to verify.** Run the faulty version: emit, remove with a new lambda, emit again, and check `calls == 2`. With the stored `handler`, the same sequence gives `calls == 1`, as Example B shows.
 
 ### Task 5: Boundary evidence
 
 Test no subscribers and two subscribers.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (A closure observes its captured variable) and Example B (Manage an event subscription).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```csharp
+var source = new Signal();
+int first = 0;
+int second = 0;
+source.Emit();
+Check(first == 0 && second == 0, "no subscribers, no calls");
+source.Raised += (_, _) => first++;
+source.Raised += (_, _) => second++;
+source.Emit();
+Check(first == 1 && second == 1, "both subscribers called once");
+```
+
+**Observe:** Emitting with no subscribers does nothing and does not throw; with two subscribers each counter becomes 1.
+
+With no subscribers `Raised` is null, and `Raised?.Invoke(...)` skips the call instead of throwing `NullReferenceException`. Each `+=` adds a delegate to the invocation list, so one `Emit` calls both handlers once, in subscription order.
+
+**Plausible wrong approach.** Writing `Raised.Invoke(this, EventArgs.Empty)` without `?.` passes the two-subscriber test but throws on the first `Emit` with no subscribers. Testing only the two-subscriber case would never reveal it.
+
+**How to verify.** Subscribe the same delegate twice and confirm one `Emit` increments it twice. Then remove it once and confirm the next `Emit` increments it once.
 
 ### Task 6: Transfer and justify
 

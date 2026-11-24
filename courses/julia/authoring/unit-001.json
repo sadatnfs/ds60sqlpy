@@ -3,6 +3,28 @@
   "title": "First Julia scripts, values and observable output",
   "concepts": ["script", "expression", "binding", "type", "compilation"],
   "outcome": "Run a complete Julia script, trace bindings and distinguish a computed value from printed output.",
+  "key_terms": [
+    [
+      "Script",
+      "A `main.jl` file that Julia runs from top to bottom in a fresh process, so no state survives from an earlier run."
+    ],
+    [
+      "Binding",
+      "An association between a name and a value, so reassigning the name points it at a new value without changing the old one."
+    ],
+    [
+      "Expression value",
+      "The result an expression returns, which a script shows only when the program prints it, unlike the REPL that echoes each result."
+    ],
+    [
+      "Type",
+      "The concrete kind of a value, such as `Int64` or `String`, reported by `typeof` and attached to values rather than to names."
+    ],
+    [
+      "Just-in-time compilation",
+      "Julia compiles a method for the argument types of its first call, so that call can be slower than later calls."
+    ]
+  ],
   "level": "beginner",
   "minutes": 90,
   "prerequisites": [],
@@ -11,48 +33,67 @@
     ["Julia variables", "https://docs.julialang.org/en/v1/manual/variables/"]
   ],
   "figure": 0,
+  "approach": "Treat each script as a fresh top-to-bottom evaluation. Read the source values, follow which name points at which value after every assignment, and only count something as output when `println` or `print` writes it. Timing questions are answered inside one process, because the classroom starts a new one for every Run.",
   "exercises": [
     {
       "title": "Change a count",
       "task": "Use accepted 20 and rejected 3.",
       "expected": "The total is 23.",
       "hint": "Change one input and recompute the arithmetic.",
-      "answer": "The output follows the current source values. A previous Run does not supply hidden counts."
+      "answer": "The output follows the current source values. A previous Run does not supply hidden counts.",
+      "why": "Twenty accepted plus three rejected is 23, and the script recomputes that sum from the literals currently in the file each time it runs.",
+      "wrong": "Editing the numbers but trusting the transcript from the previous Run reports the old total, because nothing from that earlier process is carried into the new one.",
+      "verify": "Change the two literals, press Run, and confirm the printed total equals the new sum; `@test 20 + 3 == 23` states it as an assertion."
     },
     {
       "title": "Keep a scalar snapshot",
       "task": "Bind `y` to `x = 4`, then rebind `x` to 10.",
       "expected": "y remains 4.",
       "hint": "Trace bindings separately.",
-      "answer": "Integers are immutable values; rebinding x does not rewrite the earlier value associated with y."
+      "answer": "Integers are immutable values; rebinding x does not rewrite the earlier value associated with y.",
+      "why": "`y = x` makes `y` name the value 4. Assigning 10 to `x` afterward moves only the name `x`, so `y` still names 4.",
+      "wrong": "Picturing `y` as a live link to the variable `x` predicts that `y` becomes 10, which treats names as storage cells rather than labels on values.",
+      "verify": "Print both names after the rebinding and expect `x = 10` and `y = 4`; adding `@test y == 4` makes the snapshot permanent."
     },
     {
       "title": "Print deliberately",
       "task": "Compare a bare arithmetic expression with println in a script.",
       "expected": "Only explicit output is guaranteed to appear in the script transcript.",
       "hint": "Separate computation from presentation.",
-      "answer": "The REPL has display behavior that is not equivalent to running a source file."
+      "answer": "The REPL has display behavior that is not equivalent to running a source file.",
+      "why": "A bare `2 + 3` line inside `main.jl` is evaluated and then discarded, since script mode has no automatic display; `println(2 + 3)` writes 5.",
+      "wrong": "Copying a REPL session into a file and expecting each result to echo leaves an empty transcript and a wrong belief that the line failed.",
+      "verify": "Run a file containing only `2 + 3`, then one containing `println(2 + 3)`, and compare the two transcripts line by line."
     },
     {
       "title": "Inspect a type",
       "task": "Compare `typeof(2)` and `typeof(2.5)`.",
       "expected": "They are the environment integer type and Float64.",
       "hint": "A literal selects a representation.",
-      "answer": "The type describes the value representation and available methods, not whether the value is scientifically meaningful."
+      "answer": "The type describes the value representation and available methods, not whether the value is scientifically meaningful.",
+      "why": "The literal `2` has no decimal point, so it is the platform integer, `Int64` on the 64-bit classroom runtime; `2.5` is a `Float64` literal.",
+      "wrong": "Assuming every number is a float, as in some other languages, leads to `typeof(2) == Float64`, which is false and hides integer overflow behavior.",
+      "verify": "Print `typeof(2)` and `typeof(2.5)`; the reference asserts `typeof(2.5) == Float64` among its exercise checks."
     },
     {
       "title": "Diagnose a name",
       "task": "Misspell a variable in an owned copy of the program.",
       "expected": "An undefined-variable error identifies the failed name and source location.",
       "hint": "Inspect the first relevant submitted line.",
-      "answer": "The diagnostic is evidence about a missing binding, not a reason to reinstall the runtime."
+      "answer": "The diagnostic is evidence about a missing binding, not a reason to reinstall the runtime.",
+      "why": "Misspelling `accepted` as `acepted` leaves a name with no binding, so Julia raises `UndefVarError` and points at the line that used it.",
+      "wrong": "Reinstalling packages or restarting the runtime after this error treats a typo as an environment fault; the message already names the unbound identifier.",
+      "verify": "Introduce the typo in an owned copy, read the first stack frame for the file and line, fix the spelling and confirm the run passes."
     },
     {
       "title": "Explain first-call timing",
       "task": "Time a first and repeated call in one process.",
       "expected": "Their costs can include different amounts of compilation.",
       "hint": "The classroom starts a new process for each Run.",
-      "answer": "Report the timing protocol; a cold call is not interchangeable with steady-state performance."
+      "answer": "Report the timing protocol; a cold call is not interchangeable with steady-state performance.",
+      "why": "The first call compiles a method for its argument types, so `@time f(1)` on first use includes compilation that the second call in the same process skips.",
+      "wrong": "Timing one call per Run and comparing it with a repeated call elsewhere mixes cold and warm measurements, since every classroom Run starts cold.",
+      "verify": "Call `@time f(1)` twice inside one script and compare the reported allocations and time; report which call each number came from."
     }
   ]
 }

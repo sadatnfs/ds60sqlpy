@@ -1,6 +1,6 @@
 # llm-applied-024: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for a grounded and evaluated data-science subject assistant only after attempting *Answer a supported domain definition* through *Issue a bounded capstone decision*. A discrepancy in *Abstain on missing evidence* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-024_solution.py` runs the assertions; this page explains why they test end-to-end evidence path and extractive baseline.
 
 ## Mechanism review
 
@@ -14,7 +14,7 @@ The default capstone assembles an offline extractive RAG baseline over authored 
 
 **Acceptance gate:** A required condition for a bounded release decision.
 
-**Subject-assistant artifact:** The corpus,policies,code,evaluation and model identities needed for review.
+**Subject-assistant artifact:** The corpus, policies, code, evaluation and model identities needed for review.
 
 ## Reading the implementation
 
@@ -30,15 +30,15 @@ This is an explicit lookup-and-extraction baseline. It does not embed a natural-
 | --- | --- | --- |
 | Scope filtering | Restricted target absent from public instance | Authenticated dynamic policy integration |
 | Source extraction | Exact first-sentence slice and version | General claim support and conflict handling |
-| Numerical calculation | Validated3/10=0.3 and invalid-count rejection | Real input provenance and analysis design |
+| Numerical calculation | Validated 3/10=0.3 and invalid-count rejection | Real input provenance and analysis design |
 | Task statuses | Three fixed expected statuses match | Independent question families and utility |
 | Model generation | Not invoked by this baseline | Actual candidate outputs and grounding evaluation |
 
-The three status cases include one answered definition and two correct unknowns: missing comet evidence and a restricted threshold under public scope. Status accuracy is3/3, but answer coverage is1/3. That is appropriate for these authored cases; it is not evidence that every future question is answered correctly. A high status score can coexist with low usefulness if the evaluation contains too many easy refusals.
+The three status cases include one answered definition and two correct unknowns: missing comet evidence and a restricted threshold under public scope. Status accuracy is 3/3, but answer coverage is 1/3. That is appropriate for these authored cases; it is not evidence that every future question is answered correctly. A high status score can coexist with low usefulness if the evaluation contains too many easy refusals.
 
 Citation integrity is checked separately by slicing the original document. This catches a corrupted span even if status remains answered. It does not prove that the first sentence contains every caveat needed by a future question. The metric document's second sentence excludes test accounts, while the returned first sentence gives the formula. A question requiring eligibility details would need the additional span; the current fixed key is not a general policy-synthesis test.
 
-The conversion helper accepts integer purchases and visits with 0<=purchases<=visits and a positive denominator. Its0.3 output is descriptive arithmetic under the stated counting rule. Source evidence defines eligible visits, but actual eligible counts still need validated observations. Neither this ratio nor the assistant's explanation establishes sampling uncertainty or a causal effect.
+The conversion helper accepts integer purchases and visits with 0<=purchases<=visits and a positive denominator. Its 0.3 output is descriptive arithmetic under the stated counting rule. Source evidence defines eligible visits, but actual eligible counts still need validated observations. Neither this ratio nor the assistant's explanation establishes sampling uncertainty or a causal effect.
 
 The instance captures its permitted documents at construction. It does not dynamically reevaluate revocations, implement the previous chapter's freshness gate or connect to a real identity provider. Those earlier components illustrate contracts that a larger service should integrate and test. Their separate existence in the course does not mean this small class already exercises them end to end.
 
@@ -54,7 +54,7 @@ The optional pretrained recipe supplies another real but separate result: traini
 
 ## Exercise 1: Answer a supported domain definition
 
-The question is: Ask the public assistant forconversion_definition.
+The question is: Ask the public assistant for conversion_definition.
 
 The baseline uses an explicit authored mapping so its evidence contract is transparent. A generative proposal stage would need separate support validation before returning the same answer shape.
 
@@ -71,7 +71,7 @@ assert "eligible visits" in answer["text"]
 
 ## Exercise 2: Abstain on missing evidence
 
-The question is: Ask forcomet_period, which has no supporting corpus entry.
+The question is: Ask for `comet_period`, which has no supporting corpus entry.
 
 Returning an unrelated top-ranked document would not make the question answerable. The abstention is the correct result under the task contract.
 
@@ -86,7 +86,7 @@ assert missing["status"] == "unknown" and missing["reason"] == "missing evidence
 
 ## Exercise 3: Enforce access before answering
 
-The question is: Ask a public-only assistant forrestricted_threshold, then ask a separately authorized assistant.
+The question is: Ask a public-only assistant for `restricted_threshold`, then ask a separately authorized assistant.
 
 The public trace does not reveal the restricted document ID. Access is enforced by trusted metadata filtering before evidence selection.
 
@@ -98,13 +98,13 @@ privileged = Assistant(DOCUMENTS, {"public", "restricted"}, "corpus-v1").answer(
 assert public["status"] == "unknown" and privileged["citation"]["document_id"] == "private-v1"
 ```
 
-**Expected:** public unknown; authorizedanswercitesprivate-v1.
+**Expected:** public unknown; authorized answer cites private-v1.
 
-**Verify:** Compare the computed values or written argument with public unknown; authorizedanswercitesprivate-v1.
+**Verify:** Compare the computed values or written argument with public unknown; authorized answer cites private-v1.
 
 ## Exercise 4: Compute a data-science result deterministically
 
-The question is: Calculate3 purchases over10 eligible visits and reject11 purchases over10 visits.
+The question is: Calculate 3 purchases over 10 eligible visits and reject 11 purchases over 10 visits.
 
 The assistant can explain the metric using the retrieved definition, but the value comes from validated arithmetic. This does not establish a causal effect or sampling uncertainty.
 
@@ -118,9 +118,9 @@ else:
     raise AssertionError("invalid conversion counts")
 ```
 
-**Expected:** rate.3; invalid counts raise ValueError.
+**Expected:** rate 0.3; invalid counts raise ValueError.
 
-**Verify:** Compare the computed values or written argument with rate.3; invalid counts raise ValueError.
+**Verify:** Compare the computed values or written argument with rate 0.3; invalid counts raise ValueError.
 
 ## Exercise 5: Evaluate fixed task and boundary cases
 
@@ -172,4 +172,4 @@ assert (
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Enforce access before answering* and predict how the result changes before checking it; the unchanged inputs give: public unknown; authorized answer cites private-v1. Keep the original *Issue a bounded capstone decision* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

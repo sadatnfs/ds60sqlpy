@@ -8,7 +8,7 @@ Build a reproducible family/time split and detect identifier, near-duplicate and
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-002`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-002` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for evaluation data, grouping and contamination in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about group splits and temporal split: Paraphrases split across partitions fail family validation, a row at the cutoff is eligible under the inclusive policy while a delayed label is excluded, normalization changes the fingerprint, and historical evaluation uses the earlier corpus version. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## A split protects a question, not a filename
 
@@ -17,6 +17,13 @@ Training, development and final evaluation serve different roles. Training estim
 Requests often share a template, source document or user history. If one variant is in training and a paraphrase is in testing, the apparent held-out result may measure template reuse rather than transfer to a new family. The correct grouping depends on the deployment claim. A new-document claim needs document separation; a future-period claim needs time ordering; a new-user claim needs user separation. These restrictions can be combined, and their combination may leave much less data than a random row split.
 
 The fixture records decision time and label-availability time separately. A label observed on day 12 cannot be used by a training procedure deployed on day 10 even if the underlying event happened on day 8. Similarly, a retrieval document corrected after an answer was issued cannot be treated as evidence available to that historical system. Keep the corpus snapshot and its timestamp with the model and prompt versions.
+
+## Key terms
+
+- **Group split:** Assigning complete families, documents or users to one partition so held-out results measure transfer to new groups.
+- **Temporal split:** Partitioning by time so a future-period claim is evaluated only on data that arrived after the training and selection data.
+- **Contamination:** Overlap between partitions, such as two variants of one family split across train and test, that inflates held-out results.
+- **Label-availability time:** The time a label became known, which limits what a procedure deployed earlier could have used.
 
 ## Worked case A: split complete families
 

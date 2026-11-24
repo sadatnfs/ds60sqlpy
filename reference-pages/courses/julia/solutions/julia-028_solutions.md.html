@@ -195,24 +195,58 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-028-explained-reference">julia-028: explained reference<a class="heading-anchor" href="#julia-028-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-028_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>probabilities</code> rejects empty, nonfinite, negative and all-zero weights, divides by the largest weight to avoid overflow and then normalizes. Tests combine three kinds of evidence: hand-derived asymmetric cases, properties checked on generated inputs from <code>Xoshiro(140)</code>, and invariants such as unchanged input and ratio preservation.</p>
 <h3 id="1-derive-an-oracle">1. Derive an oracle<a class="heading-anchor" href="#1-derive-an-oracle" aria-label="Link to this section">#</a></h3>
 <p>The hand-derived asymmetric case prevents a uniform-output bug from passing.</p>
 <p><strong>Expected observation:</strong> The result is <code>[0.2, 0.5, 0.3]</code>.</p>
+<p><strong>Why it holds here:</strong> The weights <code>[2, 5, 3]</code> total 10, so the probabilities are 2/10, 5/10 and 3/10.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only <code>[1, 1, 1]</code> lets a function that always returns equal shares pass, because the correct answer is uniform too.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>probabilities(values) ≈ [0.2, 0.5, 0.3]</code> and that the ratio of the second to the first is 2.5.</p>
 <h3 id="2-diagnose-overflow">2. Diagnose overflow<a class="heading-anchor" href="#2-diagnose-overflow" aria-label="Link to this section">#</a></h3>
 <p>Scaling by the maximum gives <code>[1, 1]</code>, then divides by 2 without overflowing.</p>
 <p><strong>Expected observation:</strong> The sum exceeds Float64 range.</p>
+<p><strong>Why it holds here:</strong> <code>1e308 + 1e308</code> exceeds <code>floatmax(Float64)</code> and becomes <code>Inf</code>, while dividing by the maximum first gives <code>[1, 1]</code> and then <code>[0.5, 0.5]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Dividing each weight by <code>sum(weights)</code> directly returns <code>[0, 0]</code> here because every weight is divided by infinity.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>probabilities([1e308, 1e308]) == [0.5, 0.5]</code>.</p>
 <h3 id="3-test-a-permutation">3. Test a permutation<a class="heading-anchor" href="#3-test-a-permutation" aria-label="Link to this section">#</a></h3>
 <p>Equivariance checks alignment and catches accidental sorting.</p>
 <p><strong>Expected observation:</strong> The first and last probabilities swap.</p>
+<p><strong>Why it holds here:</strong> Swapping the first and last weights to <code>[3, 5, 2]</code> should give <code>[0.3, 0.5, 0.2]</code>, because each output is tied to its own input position.</p>
+<p><strong>Plausible wrong approach:</strong> An implementation that sorts weights first returns the same order for both inputs and passes sum-to-one checks.</p>
+<p><strong>How to verify:</strong> Example B checks <code>probabilities(values[permutation]) ≈ result[permutation]</code> on 20 generated inputs.</p>
 <h3 id="4-find-a-weak-property">4. Find a weak property<a class="heading-anchor" href="#4-find-a-weak-property" aria-label="Link to this section">#</a></h3>
 <p>Properties constrain behavior from different directions; one broad invariant is insufficient.</p>
 <p><strong>Expected observation:</strong> A uniform vector passes it.</p>
+<p><strong>Why it holds here:</strong> A uniform output always sums to 1, so the sum property cannot tell correct weighting from ignoring the weights.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on <code>sum(result) ≈ 1</code> as the only test gives confidence that is not earned.</p>
+<p><strong>How to verify:</strong> Combine the sum property with the hand case and the scaling property <code>probabilities(7 .* values) ≈ result</code>.</p>
 <h3 id="5-add-an-input-contract">5. Add an input contract<a class="heading-anchor" href="#5-add-an-input-contract" aria-label="Link to this section">#</a></h3>
 <p>A rejected input gives the caller a chance to correct the model rather than silently changing its meaning.</p>
 <p><strong>Expected observation:</strong> Each is rejected with ArgumentError.</p>
+<p><strong>Why it holds here:</strong> Negative weights, all zeros and NaN or Inf each violate the definition, so <code>ArgumentError</code> lets the caller fix the model.</p>
+<p><strong>Plausible wrong approach:</strong> Clamping negatives to zero or returning a uniform vector for all zeros changes the model&#x27;s meaning without telling the caller.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>ArgumentError</code> for empty, <code>[Inf, 1]</code> and <code>[NaN]</code>; example A covers <code>[0, 0]</code> and <code>[1, -1]</code>.</p>
 <h3 id="6-transfer-to-a-regression-library">6. Transfer to a regression library<a class="heading-anchor" href="#6-transfer-to-a-regression-library" aria-label="Link to this section">#</a></h3>
 <p>Tests should detect coefficient swaps, row reordering and missing intercepts independently of the fitting implementation.</p>
-<p><strong>Expected observation:</strong> Known points, shape preservation and permutation alignment.</p></article>
+<p><strong>Expected observation:</strong> Known points, shape preservation and permutation alignment.</p>
+<p><strong>Why it holds here:</strong> For a line with known intercept 1 and slope 2, predictions at x = 0 and 1 must be 1 and 3, the output length must match the input, and reordering rows must reorder predictions.</p>
+<p><strong>Plausible wrong approach:</strong> Deriving expected predictions from the fitted coefficients of the same code cannot catch swapped coefficients.</p>
+<p><strong>How to verify:</strong> Write these properties with literal coefficients, as in <code>predict([1, 2], [0, 1]) == [1, 3]</code> from lesson julia-021.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-028: all reference checks passed</code>:</p>
+<p><code>probabilities([3]) == [1]</code> covers the single-weight case. The final three lines combine a hand-derived answer, a check that <code>values</code> still equals <code>before</code>, and the ratio 2.5, which holds because normalizing divides both entries by the same total.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> probabilities<span class="syntax-punctuation">(</span><span class="syntax-keyword">Float64</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> probabilities<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Inf</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> probabilities<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">NaN</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> probabilities<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span>
+    before <span class="syntax-operator">=</span> copy<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> probabilities<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-operator">≈</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> values <span class="syntax-operator">==</span> before
+    <span class="syntax-decorator">@test</span> probabilities<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">/</span> probabilities<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">≈</span> <span class="syntax-number">2.5</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

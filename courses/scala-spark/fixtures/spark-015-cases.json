@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Add an explicit tolerant parse column",
       "input_contract": "Return all source columns plus parsed_amount from try_cast(trim(amount_text) AS BIGINT). Preserve eight rows and distinguish this nullable parse result from a final validity decision.",
-      "expected": "Ordered parsed values are 100,0,25, NULL, NULL, NULL,-5,50. The output parsed type is bigint.",
+      "expected": "Ordered parsed values are 100, 0, 25, NULL, NULL, NULL, -5, 50. The output parsed type is bigint.",
       "verification": "Compare all eight(event_id, parsed_amount) pairs and the field type with literals."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Apply a separate nonnegative domain policy",
       "input_contract": "From parse-accepted rows, retain unknown amounts and known nonnegative amounts. Return event_id, amount_cents and report the separate negative-domain rejection at ID 7 in the checks.",
-      "expected": "Final IDs[1,2,3,4,8] have 5 rows,4 known values, total 175. The full source reconciles as 5 final accepted+2 parse rejected+1 negative-domain rejected.",
+      "expected": "Final IDs [1, 2, 3, 4, 8] have 5 rows, 4 known values, total 175. The full source reconciles as 5 final accepted + 2 parse rejected + 1 negative-domain rejected.",
       "verification": "Assert final rows/metrics, negative ID 7 and the 8-row conservation equation."
     }
   ],

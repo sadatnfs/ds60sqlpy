@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An IP address identifies a network destination within a routing context. Kubernetes commonly exposes three distinct address roles. A Pod IP reaches a particular Pod network endpoint. A node IP reaches a machine participating in the cluster. A Service ClusterIP is a virtual destination whose implementation selects eligible service endpoints. These addresses are not interchangeable names for the same object.</p>
 <p>A Pod can be replaced and receive a different IP and UID. A Service can keep its identity and virtual address while its backend Pods change. A node can host many Pods, and its address is not automatically the public address of every application on it. The correct destination depends on the caller and the intended traffic path.</p>
 <p>The synthetic topology uses Pod 10.244.1.7, node 192.0.2.10 and Service 10.96.0.20. The node address is from documentation space and is never a real target. These values illustrate roles; actual ranges are cluster configuration. A browser on your laptop generally cannot route directly to an arbitrary ClusterIP or Pod IP in a desktop cluster.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Pod IP:</strong> The address assigned to one Pod&#x27;s network namespace. It is shared by the Pod&#x27;s containers and changes when the Pod is replaced.</li>
+<li><strong>Node IP:</strong> The address of a node&#x27;s own network interface, distinct from the Pod addresses hosted on that node.</li>
+<li><strong>ClusterIP:</strong> A Service&#x27;s virtual destination address. It is implemented by forwarding rules that pick an eligible backend, not by one interface.</li>
+<li><strong>Network namespace:</strong> A Linux kernel view of interfaces, addresses and routes. Each Pod has one, so a test result depends on which namespace the caller used.</li>
+<li><strong>Documentation address range:</strong> Address blocks such as 192.0.2.0/24 reserved for examples, so a sample address is never a real target.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>The Pod status can report podIP and podIPs, while its spec names the scheduled node. A Service spec can report clusterIP, clusterIPs, type and ports. Node status contains addresses with types such as InternalIP. Read each field in its own object and preserve the object’s UID so an old address is not confused with a replacement.</p>
 <p>A Service routes transport traffic to endpoints. It is not a process that has an application socket bound to every virtual address in the ordinary way. The implementation might program kernel rules or eBPF paths. The application process still listens inside a Pod at its target port.</p>

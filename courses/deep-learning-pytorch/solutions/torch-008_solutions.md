@@ -1,6 +1,6 @@
 # torch-008: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting One optimizer step you can audit yourself. They reuse the guide's literal inputs, starting from Example A, Calculate the initial loss, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Optimizer membership, SGD step, Independent oracle. After a pass, choose a new input for exercise 6, Clear the consumed gradient, without looking.
 
 ## Mechanism review
 
@@ -150,4 +150,4 @@ assert w.grad is None and w.item() == saved
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Expose the broadcast counterexample, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Check a finite-difference gradient, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

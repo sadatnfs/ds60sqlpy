@@ -40,8 +40,8 @@
     {
       "exercise": 6,
       "title": "Verify output-mode and sink eligibility through explicit failures",
-      "input_contract": "Attempt two invalid configurations in separate owned paths:Update mode to Parquet, and Append mode for an unwatermarked team aggregate. Require analysis rejection and stop any unexpectedly created query in finally.",
-      "expected": "Both configurations raiseAnalysisException;no active query remains. The valid windowed append sink stays intact.",
+      "input_contract": "Attempt two invalid configurations in separate owned paths: Update mode to Parquet, and Append mode for an unwatermarked team aggregate. Require analysis rejection and stop any unexpectedly created query in finally.",
+      "expected": "Both configurations raise AnalysisException;no active query remains. The valid windowed append sink stays intact.",
       "verification": "Assert each named analysis failure and the unchanged three-row valid sink after the checks."
     }
   ],

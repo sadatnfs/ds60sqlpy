@@ -198,21 +198,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-name-the-side-effect">1. Name the side effect<a class="heading-anchor" href="#1-name-the-side-effect" aria-label="Link to this section">#</a></h3>
 <p>Describe whether each stage is pure, idempotent or requires reconciliation. A successful earlier stage does not authorize all later effects.</p>
+<p>In execute_pipeline the publication key holds digest(ledger[&quot;model&quot;]); it is the only value a consumer reads. features and model are pure functions of events, so recomputing them is harmless, but publishing twice to a real destination would not be.</p>
 <p><strong>Expected:</strong> Publication is separate from feature and model computation.</p>
 <h3 id="2-add-an-uncertain-outcome">2. Add an uncertain outcome<a class="heading-anchor" href="#2-add-an-uncertain-outcome" aria-label="Link to this section">#</a></h3>
 <p>Read the publication record or artifact and determine whether the operation completed. Do not blindly repeat a non-idempotent effect.</p>
+<p>Suppose the step after ledger[&quot;publication&quot;] is assigned times out. Compare the stored publication with digest(ledger[&quot;model&quot;]); if they match, the effect already happened and repeating it is unnecessary. Retrying unconditionally would be safe in this dictionary but could send a second notification in a real system.</p>
 <p><strong>Expected:</strong> The response checks the intended identity before repeating.</p>
 <h3 id="3-version-the-code">3. Version the code<a class="heading-anchor" href="#3-version-the-code" aria-label="Link to this section">#</a></h3>
 <p>Record the source or transformation version that produced a checkpoint. Reusing it under different logic can silently return stale results.</p>
+<p>Change the transformation to 3 * x but keep events [1, 2, 3]. source_id is unchanged, so the ledger keeps features [2, 4, 6] and mean 4: a stale result with no error. Including a transform version in the digested identity, for example digest({&quot;events&quot;: events, &quot;transform&quot;: &quot;double-v1&quot;}), forces recomputation. Verify the new mean is 6.</p>
 <p><strong>Expected:</strong> Changed logic invalidates incompatible reuse.</p>
 <h3 id="4-invalidate-a-descendant">4. Invalidate a descendant<a class="heading-anchor" href="#4-invalidate-a-descendant" aria-label="Link to this section">#</a></h3>
 <p>Recompute the affected descendants or use a proven compatible reuse rule. A checkpoint is useful only with its dependencies.</p>
+<p>Example_two shows the input case: [1, 2, 4] clears the whole ledger and yields features [2, 4, 8] and mean 14/3. Deleting only ledger[&quot;features&quot;] after a code change would recompute features but keep the old model and publication, because those keys remain present.</p>
 <p><strong>Expected:</strong> Model, evaluation and publication need new evidence.</p>
 <h3 id="5-keep-failure-evidence">5. Keep failure evidence<a class="heading-anchor" href="#5-keep-failure-evidence" aria-label="Link to this section">#</a></h3>
 <p>Record stage identities and actual outcomes. Avoid overwriting the original failure with a later success without preserving the distinction.</p>
+<p>After the deliberate interruption the ledger holds only source_id and features, with no record that a failure occurred. Add an attempts list with the RuntimeError text. Note that ledger.clear() on a source change would erase it too, so keep attempts outside the cleared dictionary.</p>
 <p><strong>Expected:</strong> The next attempt can explain what was reused.</p>
 <h3 id="6-choose-a-real-orchestrator">6. Choose a real orchestrator<a class="heading-anchor" href="#6-choose-a-real-orchestrator" aria-label="Link to this section">#</a></h3>
 <p>Use the existing Prefect route or an explicitly prepared external project to test actual orchestration. Do not call this dictionary a deployed scheduler.</p>
+<p>The ledger here lives in memory and vanishes when the process ends, so it cannot survive a worker restart. A real orchestrator must show that the features checkpoint persists across processes and that a retry of publication is detected as already done.</p>
 <p><strong>Expected:</strong> It includes persistence, scheduling, retries and resource behavior.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;mle-013: local, bounded ML engineering investigation.&quot;&quot;&quot;</span>

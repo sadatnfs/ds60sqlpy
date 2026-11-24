@@ -42,7 +42,7 @@ controller.abort(reason);
 await assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause === reason);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause === reason)`. Restoring the original line brings back the worked observation: abortError with the original reason as cause.
+**Expected:** The changed run fails with an `AssertionError` at `await assert.rejects(pending, error => error.name === 'AbortError!' && error.cause === reason);`. Restoring `await assert.rejects(pending, error => error.name === 'AbortError' && error.cause === reason);` brings back: abortError with the original reason as cause.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause === reason)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -63,7 +63,7 @@ await assert.rejects(cancellableValue(7, controller.signal, trace), (error) => e
 assert.deepEqual(trace, []);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.rejects(cancellableValue(7, controller.signal, trace), (error) => error === reason)`; after it the line reads `await assert.rejects(cancellableValue(7, controller.signal, trace), error => error === reason);` again and the exact reason is rejected; no timer starts.
+**Expected:** Before the repair the run fails with an `AssertionError` at `await assert.rejects(cancellableValue(7, controller.signal, trace), error => error !== reason);`. Restoring `await assert.rejects(cancellableValue(7, controller.signal, trace), error => error === reason);` brings back: the exact reason is rejected; no timer starts.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.rejects(cancellableValue(7, controller.signal, trace), (error) => error === reason)` accepts.
 
@@ -81,7 +81,7 @@ controller.abort(new Error('too late'));
 assert.deepEqual(trace, ['started', 'completed', 'cleaned']);
 ```
 
-**Expected:** value 7; started,completed,cleaned exactly once.
+**Expected:** value 7; trace `started`, `completed`, `cleaned`, with cleanup exactly once.
 
 **Verify:** Keep a check equivalent to `assert.equal(await cancellableValue(7, controller.signal, trace), 7)`. As a control, change `assert.equal(await cancellableValue(7, controller.signal, trace), 7);` to `assert.equal(await cancellableValue(8, controller.signal, trace), 7);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
@@ -101,7 +101,7 @@ await assert.rejects(pending, (error) => error === reason);
 assert.deepEqual(trace, ['started', 'aborted', 'cleaned']);
 ```
 
-**Expected:** rejected reason; started,aborted,cleaned.
+**Expected:** rejected reason; trace `started`, `aborted`, `cleaned`.
 
 **Verify:** Keep a check equivalent to `assert.deepEqual(trace, ['started', 'aborted', 'cleaned'])`. As a control, change `assert.deepEqual(trace, ['started', 'aborted', 'cleaned']);` to `assert.deepEqual(trace, ['started!', 'aborted', 'cleaned']);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 

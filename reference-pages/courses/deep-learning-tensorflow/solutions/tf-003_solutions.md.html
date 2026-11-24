@@ -205,7 +205,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> The result is [[0],[2],[5]] with shape (3,1).</p>
 <p><strong>Verify:</strong> Compare the original two output rows unchanged and assert the new scalar is 5.</p>
 <h3 id="exercise-3-reject-incompatible-features">Exercise 3: Reject incompatible features<a class="heading-anchor" href="#exercise-3-reject-incompatible-features" aria-label="Link to this section">#</a></h3>
-<p>Require X and W to be rank-two arrays, nonempty on their declared axes, and X.shape[1] equal to W.shape[0]. The supplied (2,3) and (2,1) operands disagree on three versus two input features, so raise ValueError with that mismatch before computing @. Do not transpose X merely to suppress the error. The observation and feature roles would change, and the resulting arithmetic would answer a different question.</p>
+<p>Require X and W to be rank-two arrays, nonempty on their declared axes, and <code>X.shape[1]</code> equal to <code>W.shape[0]</code>. The supplied (2, 3) and (2, 1) operands disagree on three versus two input features, so raise ValueError with that mismatch before computing @. Do not transpose X merely to suppress the error. The observation and feature roles would change, and the resulting arithmetic would answer a different question.</p>
 <p><strong>Expected:</strong> A ValueError explains the input-feature mismatch before a matrix product is attempted.</p>
 <p><strong>Verify:</strong> Capture the mismatch exception and inspect the accepted (2,3) @ (3,1) result afterward.</p>
 <h3 id="exercise-4-guard-the-bias-axis">Exercise 4: Guard the bias axis<a class="heading-anchor" href="#exercise-4-guard-the-bias-axis" aria-label="Link to this section">#</a></h3>

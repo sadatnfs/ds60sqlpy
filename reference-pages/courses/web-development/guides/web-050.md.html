@@ -201,8 +201,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Passwords should not be stored as plaintext or encrypted with a reversible key merely so the application can compare them. A password hash is designed to make verification possible without retaining the original password and to impose a computational cost on guessing. Use a maintained password-hashing API rather than inventing a hash-plus-salt scheme. The encoded result records the algorithm and parameters needed for verification.</p>
 <p>Authentication establishes an identity claim; it does not decide which objects that identity may access. A complete login flow also needs transport security, rate limiting, useful but nonrevealing errors, session rotation and account-recovery design. One successful hash comparison is only a primitive test, not a complete authentication system.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Password hash:</strong> The string <code>password_hash()</code> returns, a deliberately slow one-way digest that records its algorithm, cost and salt.</li>
+<li><strong>Salt:</strong> Random data mixed into each hash, so equal passwords produce different hashes and precomputed tables fail.</li>
+<li><strong>Password verification:</strong> Checking a candidate with <code>password_verify()</code>, which reuses the algorithm and salt stored in the hash.</li>
+<li><strong>Rehash:</strong> Replacing a stored hash after a successful login when <code>password_needs_rehash()</code> reports an outdated algorithm or cost.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
-<p>Use password_hash and password_verify. Allow storage large enough for future encoded formats, and use password_needs_rehash during a deliberate migration policy. Current OWASP guidance prefers Argon2id with at least 19 MiB of memory, 2 iterations and 1 degree of parallelism, then scrypt; bcrypt remains acceptable for existing systems with a work factor of 10 or more, and it only uses the first 72 bytes of input. The prepared php:8.4 image is built with Argon2 support, so the example uses PASSWORD_ARGON2ID with those minimums: memory_cost is in KiB, so 19456 is 19 MiB. In PHP 8.4, PASSWORD_DEFAULT is still bcrypt, with its default cost raised from 10 to 12. password_needs_rehash reports a hash made with an older algorithm or weaker parameters, so it can be replaced after the next successful login. Production parameters still require measurement on the actual servers.</p>
+<p>Use password_hash and password_verify. Allow storage large enough for future encoded formats, and use password_needs_rehash during a deliberate migration policy. Current OWASP guidance prefers Argon2id with at least 19 MiB of memory, 2 iterations and 1 degree of parallelism, then scrypt; bcrypt remains acceptable for existing systems with a work factor of 10 or more, and it only uses the first 72 bytes of input. The prepared <code>php:8.4</code> image is built with Argon2 support, so the example uses PASSWORD_ARGON2ID with those minimums: memory_cost is in KiB, so 19456 is 19 MiB. In PHP 8.4, PASSWORD_DEFAULT is still bcrypt, with its default cost raised from 10 to 12. password_needs_rehash reports a hash made with an older algorithm or weaker parameters, so it can be replaced after the next successful login. Production parameters still require measurement on the actual servers.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
 <p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-050.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-050_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
@@ -217,6 +224,19 @@ $upgrade = password_needs_rehash($hash, PASSWORD_ARGON2ID, $options);</code></pr
 <p>Verification does not reveal the original phrase.</p>
 <pre class="highlighted-code"><code class="language-php">$wrong = password_verify(&#x27;different-phrase&#x27;, $hash);</code></pre>
 <p><strong>Expected observation:</strong> The wrong candidate returns false.</p>
+<h3 id="contrast-case-a-fast-unsalted-hash">Contrast case: a fast unsalted hash<a class="heading-anchor" href="#contrast-case-a-fast-unsalted-hash" aria-label="Link to this section">#</a></h3>
+<p>Two learners chose the same passphrase. Compare what each storage method writes for them.</p>
+<pre class="highlighted-code"><code class="language-php">$phrase = &#x27;synthetic-demo-passphrase&#x27;;
+
+$a = hash(&#x27;sha256&#x27;, $phrase);
+$b = hash(&#x27;sha256&#x27;, $phrase);
+var_export($a === $b);
+
+$c = password_hash($phrase, PASSWORD_ARGON2ID);
+$d = password_hash($phrase, PASSWORD_ARGON2ID);
+var_export($c === $d);
+var_export(password_verify($phrase, $d));</code></pre>
+<p>The SHA-256 digests are identical, so the first comparison is true. Anyone with the table can see that both learners share a password, and a precomputed list of common phrases matches them all at once. SHA-256 is also designed to be fast, so guessing is cheap. <code>password_hash</code> picks a new random salt for each call, so the two stored strings differ and the comparison is false. <code>password_verify</code> still accepts the correct phrase, because the salt and parameters are stored inside each string.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-hashing-versus-reversible-encryption-for-passwords">Exercise 1: Explain hashing versus reversible encryption for passwords.<a class="heading-anchor" href="#exercise-1-explain-hashing-versus-reversible-encryption-for-passwords" aria-label="Link to this section">#</a></h4>

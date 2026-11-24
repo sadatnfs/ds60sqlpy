@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "track_id": "go",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "go-001",
+      "title": "Reading a first Go program from the top down",
+      "anchor": "reference",
+      "source_path": "courses/go/solutions/go-001_solution.go",
+      "source_sha256": "2e30eaaf41f2b3e0db5af92a7836e396f4edfe298eb8a39af5b51d17279a8324",
+      "expected_output": ["All lesson checks passed."],
+      "steps": [
+        {
+          "lines": [1, 5],
+          "excerpt": "package main\n\nimport (\n\t\"fmt\"\n)",
+          "title": "Package and imports",
+          "explanation": "Every runnable Go program starts with package main. The import block names the standard library package fmt, which the program uses later to format text and print the final line. Go refuses to compile an unused import, so each name listed here must be used somewhere below.",
+          "observe": "Notice that fmt is the only import. Nothing is downloaded at run time."
+        },
+        {
+          "lines": [7, 11],
+          "excerpt": "func check(ok bool, message string) {\n\tif !ok {\n\t\tpanic(message)\n\t}\n}",
+          "title": "A tiny check helper",
+          "explanation": "check takes a boolean and a message. When the boolean is false it calls panic, which stops the program with that message and a nonzero exit status. The lesson uses it as a plain assertion so every idea below is verified when the program runs.",
+          "observe": "If any check fails, the program never reaches its final print line."
+        },
+        {
+          "lines": [13, 25],
+          "excerpt": "func main() {\n\t// Predict a first value\n\t{\n\t\tgreeting := \"Hello, Go\"\n\t\tcheck(greeting == \"Hello, Go\", \"greeting\")\n\t}\n\n\t// Compute before formatting\n\t{\n\t\ttotal := 2 + 3\n\t\tline := fmt.Sprintf(\"total=%d\", total)\n\t\tcheck(total == 5 && line == \"total=5\", \"format\")\n\t}",
+          "title": "Values first, formatting second",
+          "explanation": "main is where execution begins. Each pair of braces opens a new block, so names declared inside one block do not leak into the next. The second block computes total with ordinary integer arithmetic and only then formats it with fmt.Sprintf, which returns a string instead of printing it.",
+          "observe": "Sprintf builds the text total=5 without writing anything to the output."
+        },
+        {
+          "lines": [27, 40],
+          "excerpt": "\t// Trace statement order\n\t{\n\t\tcount := 1\n\t\tcount++\n\t\tcount *= 3\n\t\tcheck(count == 6, \"order\")\n\t}\n\n\t// Distinguish zero initialization\n\t{\n\t\tvar n int\n\t\tvar ready bool\n\t\tcheck(n == 0 && !ready, \"zero values\")\n\t}",
+          "title": "Statement order and zero values",
+          "explanation": "Statements run in order: count starts at 1, count++ makes it 2 and count *= 3 makes it 6. A variable declared with var and no value receives its type's zero value, so an int starts at 0 and a bool starts at false.",
+          "observe": "Predict each value of count before reading the check that confirms it."
+        },
+        {
+          "lines": [42, 56],
+          "excerpt": "\t// Repair a naming assumption\n\t{\n\t\ttotal := 3\n\t\tTotal := 7\n\t\tcheck(total != Total, \"case-sensitive names\")\n\t}\n\n\t// Transfer to a receipt\n\t{\n\t\titems, unit := 4, 6\n\t\treceipt := fmt.Sprintf(\"amount=%d\", items*unit)\n\t\tcheck(receipt == \"amount=24\", \"receipt\")\n\t}\n\tfmt.Println(\"All lesson checks passed.\")\n}",
+          "title": "Names are case sensitive, then one line of output",
+          "explanation": "total and Total are two different variables because Go names are case sensitive. The last block multiplies two values declared together on one line. After every check passes, fmt.Println writes the program's only output line and adds a newline.",
+          "observe": "The program prints exactly one line: All lesson checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "go-025",
+      "title": "Channel buffering, closing and ownership",
+      "anchor": "reference",
+      "source_path": "courses/go/solutions/go-025_solution.go",
+      "source_sha256": "7199ebcc8a9fb4f25430ff812427943fbf9e9e4371d17e9996a348d5a6076516",
+      "expected_output": ["All lesson checks passed."],
+      "steps": [
+        {
+          "lines": [13, 13],
+          "excerpt": "func produce(out chan<- int) { defer close(out); out <- 1; out <- 2 }",
+          "title": "The sender owns the close",
+          "explanation": "produce receives a send-only channel, written chan<- int, so it can send but cannot receive. It sends two values and uses defer close(out) so the channel is closed when the function returns. The goroutine that sends is the one that closes.",
+          "observe": "The direction in the parameter type is checked by the compiler."
+        },
+        {
+          "lines": [16, 27],
+          "excerpt": "\t// Drain before iteration ends\n\t{\n\t\tch := make(chan int, 2)\n\t\tch <- 2\n\t\tch <- 3\n\t\tclose(ch)\n\t\tsum := 0\n\t\tfor v := range ch {\n\t\t\tsum += v\n\t\t}\n\t\tcheck(sum == 5, \"drain\")\n\t}",
+          "title": "Ranging over a closed, buffered channel",
+          "explanation": "A buffered channel with capacity 2 accepts two sends without a receiver. After close, the range loop still receives every buffered value and ends only when the buffer is empty. Closing does not discard values already sent.",
+          "observe": "sum is 2 plus 3, so the check expects 5."
+        },
+        {
+          "lines": [29, 37],
+          "excerpt": "\t// Distinguish zero from closed\n\t{\n\t\tch := make(chan int, 1)\n\t\tch <- 0\n\t\tclose(ch)\n\t\ta, okA := <-ch\n\t\tb, okB := <-ch\n\t\tcheck(a == 0 && b == 0 && okA && !okB, \"closed presence\")\n\t}",
+          "title": "Zero value versus closed channel",
+          "explanation": "The comma ok form of a receive reports whether a real value arrived. The first receive gets the buffered 0 with ok true. The second receive happens after the buffer is drained on a closed channel, so it returns the zero value with ok false.",
+          "observe": "Both receives return 0; only the ok flag tells them apart."
+        },
+        {
+          "lines": [39, 48],
+          "excerpt": "\t// Use sender ownership\n\t{\n\t\tch := make(chan int)\n\t\tgo produce(ch)\n\t\tcount := 0\n\t\tfor range ch {\n\t\t\tcount++\n\t\t}\n\t\tcheck(count == 2, \"producer close\")\n\t}",
+          "title": "An unbuffered channel and a goroutine",
+          "explanation": "go produce(ch) starts the sender concurrently. With an unbuffered channel each send waits for a matching receive. The range loop counts values until produce closes the channel, which is what lets the loop finish.",
+          "observe": "count reaches 2 because produce sends exactly two values."
+        },
+        {
+          "lines": [60, 73],
+          "excerpt": "\t// Disable a nil select arm\n\t{\n\t\tvar disabled <-chan int\n\t\tready := make(chan struct{})\n\t\tclose(ready)\n\t\tselected := false\n\t\tselect {\n\t\tcase <-disabled:\n\t\t\tpanic(\"nil selected\")\n\t\tcase <-ready:\n\t\t\tselected = true\n\t\t}\n\t\tcheck(selected, \"nil arm\")\n\t}",
+          "title": "A nil channel disables a select case",
+          "explanation": "Receiving from a nil channel blocks forever, so select never chooses that case. The ready channel is closed, and receiving from a closed channel succeeds at once, so select takes the ready case.",
+          "observe": "The panic in the nil case is never reached."
+        },
+        {
+          "lines": [75, 85],
+          "excerpt": "\t// Transfer independent message storage\n\t{\n\t\toriginal := []int{1}\n\t\tch := make(chan []int, 1)\n\t\tch <- append([]int(nil), original...)\n\t\toriginal[0] = 9\n\t\treceived := <-ch\n\t\tcheck(received[0] == 1, \"copy\")\n\t}\n\tfmt.Println(\"All lesson checks passed.\")\n}",
+          "title": "Send a copy, not shared storage",
+          "explanation": "Sending a slice sends a header that points at the same backing array. The program sends a copy made with append, then changes the original. The received slice still holds 1 because it has its own storage. After all checks pass, main prints one line.",
+          "observe": "The program prints exactly one line: All lesson checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "go-037",
+      "title": "A reconcile plan as a pure, idempotent decision",
+      "anchor": "reference",
+      "source_path": "courses/go/solutions/go-037_solution.go",
+      "source_sha256": "906be05916ea0e3ae14ae1aae28ad864bb83f9ea357736c23c26dfcd3ffa2607",
+      "expected_output": ["All lesson checks passed."],
+      "steps": [
+        {
+          "lines": [13, 24],
+          "excerpt": "func plan(wanted int, exists bool, current int) string {\n\tif wanted < 0 {\n\t\treturn \"invalid\"\n\t}\n\tif !exists {\n\t\treturn \"create\"\n\t}\n\tif wanted != current {\n\t\treturn \"update\"\n\t}\n\treturn \"none\"\n}",
+          "title": "One function decides the action",
+          "explanation": "plan compares desired state with observed state and returns a single action name. It rejects invalid intent first, then creates a missing child, updates a child whose value differs, and otherwise returns none. It reads no clock, network or global state, so the same inputs always give the same answer.",
+          "observe": "The order of the if statements is the policy: validation comes first."
+        },
+        {
+          "lines": [27, 40],
+          "excerpt": "\t// Plan a missing child\n\t{\n\t\tcheck(plan(3, false, 0) == \"create\", \"missing child\")\n\t}\n\n\t// Plan a changed child\n\t{\n\t\tcheck(plan(3, true, 2) == \"update\", \"changed child\")\n\t}\n\n\t// Make convergence a no-op\n\t{\n\t\tcheck(plan(3, true, 3) == \"none\", \"converged\")\n\t}",
+          "title": "Create, update and no-op",
+          "explanation": "The first three blocks call plan with a missing child, a changed child and a child that already matches. A matching child returns none, which is what makes running the loop again safe.",
+          "observe": "Running plan twice on converged state never asks for more work."
+        },
+        {
+          "lines": [42, 45],
+          "excerpt": "\t// Reject invalid desired state\n\t{\n\t\tcheck(plan(-1, true, 2) == \"invalid\", \"invalid intent\")\n\t}",
+          "title": "Invalid desired state is refused",
+          "explanation": "A negative replica count is rejected before the existence check, so even an existing child is never updated toward an impossible target.",
+          "observe": "plan(-1, true, 2) returns invalid, not update."
+        },
+        {
+          "lines": [47, 53],
+          "excerpt": "\t// Simulate a converging step\n\t{\n\t\tcurrent := 1\n\t\tcheck(plan(3, true, current) == \"update\", \"first plan\")\n\t\tcurrent = 3\n\t\tcheck(plan(3, true, current) == \"none\", \"second plan\")\n\t}",
+          "title": "One converging step",
+          "explanation": "This block models two passes of a control loop. The first pass sees 1 and plans an update. After the update is applied the observed value is 3, and the second pass plans nothing. This is a model of convergence, not a real cluster controller.",
+          "observe": "The second plan is none because desired and observed now match."
+        },
+        {
+          "lines": [55, 60],
+          "excerpt": "\t// Transfer scale-to-zero\n\t{\n\t\tcheck(plan(0, true, 2) == \"update\" && plan(0, true, 0) == \"none\", \"zero scale\")\n\t}\n\tfmt.Println(\"All lesson checks passed.\")\n}",
+          "title": "Scaling to zero is still a value",
+          "explanation": "Zero is valid desired state. A child at 2 is updated toward 0, and a child already at 0 needs nothing. After all checks pass, main prints one line.",
+          "observe": "The program prints exactly one line: All lesson checks passed."
+        }
+      ]
+    }
+  ]
+}

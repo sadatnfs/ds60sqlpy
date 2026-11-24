@@ -229,25 +229,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 	<span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span>
 
-<span class="syntax-keyword">type</span> ServiceState <span class="syntax-keyword">struct</span> <span class="syntax-punctuation">{</span>
-	Accepting <span class="syntax-keyword">bool</span>
-	Active    <span class="syntax-keyword">int</span>
-<span class="syntax-punctuation">}</span>
-
-<span class="syntax-keyword">func</span> <span class="syntax-punctuation">(</span>s <span class="syntax-operator">*</span>ServiceState<span class="syntax-punctuation">)</span> Admit<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">bool</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>s<span class="syntax-punctuation">.</span>Accepting <span class="syntax-punctuation">{</span>
-		<span class="syntax-keyword">return</span> <span class="syntax-keyword">false</span>
-	<span class="syntax-punctuation">}</span>
-	s<span class="syntax-punctuation">.</span>Active<span class="syntax-operator">++</span>
-	<span class="syntax-keyword">return</span> <span class="syntax-keyword">true</span>
-<span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">func</span> <span class="syntax-punctuation">(</span>s <span class="syntax-operator">*</span>ServiceState<span class="syntax-punctuation">)</span> Drain<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> s<span class="syntax-punctuation">.</span>Accepting <span class="syntax-punctuation">=</span> <span class="syntax-keyword">false</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">func</span> <span class="syntax-punctuation">(</span>s <span class="syntax-operator">*</span>ServiceState<span class="syntax-punctuation">)</span> Finish<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">if</span> s<span class="syntax-punctuation">.</span>Active <span class="syntax-punctuation">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-punctuation">{</span>
-		s<span class="syntax-punctuation">.</span>Active<span class="syntax-operator">--</span>
-	<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-
 <span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
 	<span class="syntax-comment">// Inspect the current target</span>
 	<span class="syntax-punctuation">{</span>
@@ -269,25 +250,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">func</span> check<span class="syntax-punctuation">(</span>ok <span class="syntax-keyword">bool</span><span class="syntax-punctuation">,</span> message <span class="syntax-keyword">string</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
 	<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>ok <span class="syntax-punctuation">{</span>
 		<span class="syntax-builtin">panic</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span>
-	<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-
-<span class="syntax-keyword">type</span> ServiceState <span class="syntax-keyword">struct</span> <span class="syntax-punctuation">{</span>
-	Accepting <span class="syntax-keyword">bool</span>
-	Active    <span class="syntax-keyword">int</span>
-<span class="syntax-punctuation">}</span>
-
-<span class="syntax-keyword">func</span> <span class="syntax-punctuation">(</span>s <span class="syntax-operator">*</span>ServiceState<span class="syntax-punctuation">)</span> Admit<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">bool</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>s<span class="syntax-punctuation">.</span>Accepting <span class="syntax-punctuation">{</span>
-		<span class="syntax-keyword">return</span> <span class="syntax-keyword">false</span>
-	<span class="syntax-punctuation">}</span>
-	s<span class="syntax-punctuation">.</span>Active<span class="syntax-operator">++</span>
-	<span class="syntax-keyword">return</span> <span class="syntax-keyword">true</span>
-<span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">func</span> <span class="syntax-punctuation">(</span>s <span class="syntax-operator">*</span>ServiceState<span class="syntax-punctuation">)</span> Drain<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> s<span class="syntax-punctuation">.</span>Accepting <span class="syntax-punctuation">=</span> <span class="syntax-keyword">false</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">func</span> <span class="syntax-punctuation">(</span>s <span class="syntax-operator">*</span>ServiceState<span class="syntax-punctuation">)</span> Finish<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">if</span> s<span class="syntax-punctuation">.</span>Active <span class="syntax-punctuation">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-punctuation">{</span>
-		s<span class="syntax-punctuation">.</span>Active<span class="syntax-operator">--</span>
 	<span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span>
 

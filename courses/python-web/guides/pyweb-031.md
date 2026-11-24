@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-030`, `python-l
 
 Asynchronous Python can overlap operations that yield control while waiting. It does not turn CPU work into parallel execution or remove resource limits. This chapter uses explicit synchronization and cancellation observations to show what concurrent tasks actually do, without relying on a noisy speed benchmark.
 
+## Key terms
+
+- **Coroutine:** The object an `async def` function returns; its body runs only when it is awaited or scheduled as a task.
+- **Suspension point:** An `await` on an operation that yields control, where the event loop may switch to another ready task.
+- **Blocking call:** A synchronous operation, such as file or HTTP I/O or a long CPU loop, that holds the event-loop thread and stops other tasks from progressing.
+- **Concurrency versus parallelism:** Concurrency means several tasks are in progress at once; parallelism means instructions execute simultaneously, which one event-loop thread does not provide.
+- **Cancellation:** Delivering `CancelledError` to a task at its next await; the caller should await the cancelled task so its `finally` cleanup can finish.
+
 ## Mechanism: progress happens at suspension points
 
 An async function returns a coroutine until it is awaited or scheduled. When that coroutine awaits an operation that suspends, the event loop may run another ready task. A blocking filesystem call, synchronous HTTP call or long numerical loop inside the coroutine can prevent that cooperative progress.
@@ -29,6 +37,50 @@ The second case starts an operation that records cleanup in a finally block. The
 In a real request, cancellation may follow client disconnect, deadline expiry or application shutdown. The application should decide which work can stop and which durable job must continue independently. A request handler is usually the wrong owner for a long-running operation that must survive the loss of that request or process.
 
 Cancellation does not reverse a completed external effect. If a database commit succeeded just before the caller timed out, retry logic must reconcile the outcome using an operation identity. The later idempotency and outbox chapters build that distinction explicitly.
+
+## Worked example: a blocking call starves the event loop
+
+```python
+import asyncio
+import time
+
+order = []
+
+
+async def ticker():
+    for n in range(3):
+        order.append(f"tick {n}")
+        await asyncio.sleep(0)
+
+
+async def blocking_handler():
+    time.sleep(0.01)
+    order.append("blocking done")
+
+
+async def cooperative_handler():
+    await asyncio.to_thread(time.sleep, 0.01)
+    order.append("cooperative done")
+
+
+async def main(handler):
+    order.clear()
+    await asyncio.gather(handler(), ticker())
+    return list(order)
+
+
+print(asyncio.run(main(blocking_handler)))
+print(asyncio.run(main(cooperative_handler)))
+```
+
+Expected output:
+
+```text
+['blocking done', 'tick 0', 'tick 1', 'tick 2']
+['tick 0', 'tick 1', 'tick 2', 'cooperative done']
+```
+
+The ticker stands in for every other request an async server is handling. With `time.sleep` inside an `async def`, the handler never reaches an `await`, so the ticker cannot take a single step until the sleep ends. Moving the same blocking call into `asyncio.to_thread` gives the loop a suspension point, and all three ticks run while the thread waits. In FastAPI this is why a blocking database driver or `requests.get` inside an `async def` endpoint stalls unrelated clients, while a plain `def` endpoint is run in a threadpool for you.
 
 ## Failure diagnosis and discussion
 

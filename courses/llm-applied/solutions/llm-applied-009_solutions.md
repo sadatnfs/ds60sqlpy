@@ -1,6 +1,6 @@
 # llm-applied-009: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for metadata filtering and access-controlled retrieval only after attempting *Filter before scoring* through *Avoid restricted identifiers in public traces*. A discrepancy in *Permit an explicitly privileged scope* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-009_solution.py` runs the assertions; this page explains why they test authorization filter and metadata filter.
 
 ## Mechanism review
 
@@ -70,9 +70,9 @@ privileged = admit(DOCUMENTS, {"public", "restricted"})
 assert len(privileged) == 6 and any(d["id"] == "private-v1" for d in privileged)
 ```
 
-**Expected:** all6 documents admitted.
+**Expected:** all 6 documents admitted.
 
-**Verify:** Compare the computed values or written argument with all6 documents admitted.
+**Verify:** Compare the computed values or written argument with all 6 documents admitted.
 
 ## Exercise 3: Partition answer caches
 
@@ -138,4 +138,4 @@ assert "private-v1" not in trace["candidate_ids"]
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Partition answer caches* and predict how the result changes before checking it; the unchanged inputs give: keys differ. Keep the original *Avoid restricted identifiers in public traces* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A failed data workflow can fail at different layers. Project parsing and template compilation establish whether definitions can be resolved. Database execution establishes whether the generated SQL can run under the selected schema and privileges. Data tests and independent reconciliation ask whether the resulting values satisfy the intended contract. These layers should be diagnosed separately.</p>
 <p>The first case uses a valid template that refers to a nonexistent database column. Compilation produces SQL, but execution fails when DuckDB binds that column. The second case produces a valid but doubled amount. It runs successfully as SQL and is rejected by an independently specified reconciliation test. The difference prevents a common mistake: assuming a compiled or materialized result is correct.</p>
 <p>A useful incident record names the source revision, selected resources, target, first relevant error and observed database state. Avoid changing several things at once or weakening a test before understanding its assertion. The goal is to identify which assumption failed and produce new evidence for a specific correction.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Compilation error:</strong> A failure while resolving Jinja or the project graph, raised before any SQL reaches the database.</li>
+<li><strong>Binding error:</strong> A database error raised when compiled SQL names a column, table or function that the database cannot resolve.</li>
+<li><strong>Singular data test:</strong> A SQL file under tests/ that returns the failing rows for one specific expectation.</li>
+<li><strong>Independent expectation:</strong> A value derived outside the model, such as the fixed total 12, that a test compares the model output against.</li>
+<li><strong>Semantic failure:</strong> SQL that runs successfully but produces wrong values, which only a data test or an independent check can reveal.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Inspect compiled SQL for a database error and run_results for execution/test outcomes. A singular data test returns failing rows; zero rows mean that particular condition passed. The example uses a fixed independently calculated total 12 rather than deriving the expectation through the same mistaken expression as the model.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

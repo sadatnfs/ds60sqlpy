@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Egress policy controls selected Pods&#x27; outgoing traffic under an enforcing implementation. A deny-by-default design begins by selecting the workloads and then allowing the dependencies they actually require. It can expose hidden dependencies such as DNS, metadata endpoints, package downloads or external APIs.</p>
 <p>DNS is itself network traffic. Blocking it can make every named dependency fail even while a direct allowed IP connection works. UDP is common for DNS, but TCP can also be required. The correct DNS target and policy depend on the cluster’s DNS deployment and any node-local cache.</p>
 <p>An IP allowlist is not the same as a domain-name policy. External services can change addresses, use shared infrastructure or return several families. The standard NetworkPolicy API does not provide a general hostname allowlist. Implementation extensions must be named and qualified separately.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Egress policy:</strong> A NetworkPolicy rule set that limits outbound connections from the selected Pods.</li>
+<li><strong>DNS dependency:</strong> Pods still need to reach cluster DNS over UDP and TCP, so a strict egress policy must allow it explicitly.</li>
+<li><strong>ipBlock:</strong> A NetworkPolicy peer that allows an address range in CIDR form, typically for destinations outside the cluster.</li>
+<li><strong>Hostname allowlist:</strong> Permitting egress by DNS name. The standard NetworkPolicy API cannot express it, although some implementations add it.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A policy with policyTypes Egress and an empty egress list isolates selected Pods without permitting outgoing flows through that policy. Additional applicable policies can add allowances. A source egress allowance is not sufficient when the destination is ingress-isolated: the destination must also permit the connection. Replies for a permitted connection are implicitly allowed, while a new reverse connection is evaluated as a new flow. Peer and port rules should be derived from the actual dependency map.</p>
 <p>ipBlock represents CIDR-based address ranges with optional exclusions. Address translation can affect which IP an implementation evaluates at a boundary, so test the actual traffic path. Do not promise identical pre-NAT or post-NAT behavior across every plugin and Service combination.</p>

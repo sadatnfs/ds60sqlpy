@@ -3,6 +3,28 @@
   "title": "Errors, tests and explicit input contracts",
   "concepts": ["ArgumentError", "DomainError", "test set", "boundary case", "rethrow"],
   "outcome": "Validate scientific inputs, test expected failures and preserve unexpected errors instead of turning them into successful results.",
+  "key_terms": [
+    [
+      "ArgumentError",
+      "The exception thrown when a caller supplies an unacceptable argument, such as an empty vector where data are required."
+    ],
+    [
+      "DomainError",
+      "The exception thrown when a numeric value lies outside a function's mathematical domain, such as `sqrt(-1.0)` on real inputs."
+    ],
+    [
+      "Test set",
+      "A `@testset` block from the `Test` standard library that groups related `@test` checks and reports their results together."
+    ],
+    [
+      "Boundary case",
+      "An input at the edge of the valid domain, such as zero or one element, where validation and off-by-one mistakes appear."
+    ],
+    [
+      "Rethrow",
+      "Calling `rethrow()` inside a `catch` block reraises the current exception with its original backtrace after local handling."
+    ]
+  ],
   "level": "beginner",
   "minutes": 90,
   "prerequisites": ["julia-006", "julia-008"],
@@ -11,48 +33,68 @@
     ["Julia Test standard library", "https://docs.julialang.org/en/v1/stdlib/Test/"]
   ],
   "figure": 0,
+  "approach": "`finite_mean` enforces its contract in order: reject an empty vector with `ArgumentError`, reject any nonfinite value with `DomainError`, then return `mean`. `outcome` converts only those two promised failures into a `:rejected` named tuple and rethrows anything else, so a programming defect still stops the run.",
   "exercises": [
     {
       "title": "Keep valid zero",
       "task": "Calculate the mean of -1 and 1.",
       "expected": "The result is the valid number 0.",
       "hint": "Do not confuse a zero result with rejection.",
-      "answer": "The input satisfies the contract and its arithmetic mean happens to be zero."
+      "answer": "The input satisfies the contract and its arithmetic mean happens to be zero.",
+      "why": "`[-1, 1]` is nonempty and finite, so both guards pass and `mean` returns 0.0, a legitimate result rather than a rejection signal.",
+      "wrong": "Using zero as a sentinel for invalid input would make this valid mean indistinguishable from a rejected batch in any downstream table.",
+      "verify": "Worked example A asserts `finite_mean([-1, 1]) == 0`; pass the same vector through `outcome` and expect status `:ok`."
     },
     {
       "title": "Reject empty input",
       "task": "Call the helper on an empty vector.",
       "expected": "ArgumentError identifies the missing observation requirement.",
       "hint": "The denominator cannot be zero.",
-      "answer": "A fabricated zero would hide the absence of evidence."
+      "answer": "A fabricated zero would hide the absence of evidence.",
+      "why": "`isempty(values)` is checked first, so `Float64[]` raises `ArgumentError` before `mean` could divide by a count of zero.",
+      "wrong": "Returning 0.0 for empty input invents an observation, and averaging that into a report weights a group that has no data.",
+      "verify": "Assert `@test_throws ArgumentError finite_mean(Float64[])`, then check that `outcome(Float64[]).reason` mentions observation."
     },
     {
       "title": "Reject nonfinite values",
       "task": "Include NaN or Inf in the input.",
       "expected": "DomainError is raised.",
       "hint": "Check the numeric domain before aggregation.",
-      "answer": "Nonfinite values need a declared policy rather than silent propagation into a report."
+      "answer": "Nonfinite values need a declared policy rather than silent propagation into a report.",
+      "why": "`all(isfinite, values)` fails for NaN or Inf, so the function throws `DomainError` and names the offending vector.",
+      "wrong": "Letting NaN flow into `mean` yields NaN, which then compares false with everything and quietly drops out of later filters.",
+      "verify": "The reference asserts `@test_throws DomainError finite_mean([NaN])` and `outcome([Inf]).status == :rejected`."
     },
     {
       "title": "Preserve an unexpected error",
       "task": "Pass a value for which the required methods do not exist.",
       "expected": "The unexpected method error is rethrown.",
       "hint": "Catch only the failures that the boundary promises to handle.",
-      "answer": "A broad catch can hide a programming defect behind a normal-looking outcome."
+      "answer": "A broad catch can hide a programming defect behind a normal-looking outcome.",
+      "why": "A vector of strings passes the empty check, then `isfinite` has no string method, so `MethodError` escapes and `outcome` rethrows it.",
+      "wrong": "A bare `catch` returning `:rejected` for every error would label a type mistake in the caller as bad data and hide the bug.",
+      "verify": "The reference checks `@test_throws MethodError finite_mean([\"not numeric\"])`; example B also shows `outcome(nothing)` rethrowing."
     },
     {
       "title": "Test independently",
       "task": "Validate a result using a hand calculation and a limiting case.",
       "expected": "The assertion has an independent basis.",
       "hint": "Avoid copying the same implementation expression.",
-      "answer": "Different reasoning paths reduce the chance that code and test share one unnoticed error."
+      "answer": "Different reasoning paths reduce the chance that code and test share one unnoticed error.",
+      "why": "A hand calculation such as (1 + 2 + 3) / 3 = 2 and a limiting case like a single value `[7]` come from reasoning separate from the code.",
+      "wrong": "Writing the expected value as `sum(v) / length(v)` copies the implementation, so the test passes even if both share a mistake.",
+      "verify": "Keep `finite_mean([7]) == 7` from the reference and add one hand-derived mean with its arithmetic written in a comment."
     },
     {
       "title": "Report rejected rows",
       "task": "Aggregate valid outcomes from a mixed input stream.",
       "expected": "Retain counts and reasons for rejected rows.",
       "hint": "The valid-result denominator needs provenance.",
-      "answer": "Selection through validation can change the target population and should remain visible."
+      "answer": "Selection through validation can change the target population and should remain visible.",
+      "why": "Mapping `outcome` over rows yields `:ok` and `:rejected` tuples, so valid values and rejection reasons can be counted separately.",
+      "wrong": "Averaging only the successful values and printing that mean alone hides how many rows were excluded and why.",
+      "verify": "Report the counts of `:ok` and `:rejected` beside the mean and confirm they add up to the number of input rows."
     }
-  ]
+  ],
+  "checks_note": "The checks follow the two error styles in the lesson. `finite_mean` returns 7 for `[7]` and throws `DomainError` for NaN, while `outcome` packages the same decision as a status, so `[Inf]` yields `:rejected` without an exception. A string input fails with `MethodError` before any arithmetic, showing that dispatch rejects it first. The last line accepts `0.1 + 0.2` rounding because it only asks for a finite result."
 }

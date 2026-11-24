@@ -1,6 +1,6 @@
 # llm-033: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these preference objectives and what they do not prove answers after attempting *Compute a margin from log probabilities* through *Limit the claim*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Reverse the labels* points to one step. `llm-033_solution.py` holds the assertions; this page explains how they test preference pair. Then try *Limit the claim* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -32,7 +32,7 @@ assert loss2 < np.log(2)
 
 **Expected:** margin 0.5; loss \(\log(1+e^{-0.5})\approx 0.474\), below \(\log 2\).
 
-**Verify:** In a fresh process, the exercise checks confirm `margin2 == 0.5`, `loss2` matches `np.log1p(np.exp(-0.5))` within 1e-12 and `loss2 < np.log(2)`.
+**Verify:** For *Compute a margin from log probabilities*, a fresh-process check confirms `margin2 == 0.5`, `loss2` matches `np.log1p(np.exp(-0.5))` within 1e-12 and `loss2 < np.log(2)`.
 
 ## Exercise 2: Predict the effect of beta
 
@@ -50,7 +50,7 @@ assert loss3 < loss2
 
 **Expected:** margin 2; loss \(\log(1+e^{-2})\approx 0.127\), smaller than at beta 0.25.
 
-**Verify:** In a fresh process, the exercise checks confirm `margin3 == 2`, `loss3` matches `np.log1p(np.exp(-2))` within 1e-12 and `loss3 < loss2`.
+**Verify:** For *Predict the effect of beta*, a fresh-process check confirms `margin3 == 2`, `loss3` matches `np.log1p(np.exp(-2))` within 1e-12 and `loss3 < loss2`.
 
 ## Exercise 3: Reverse the labels
 
@@ -66,7 +66,7 @@ assert reversed_margin == -1 and reversed_loss > loss
 
 **Expected:** margin -1 and larger loss.
 
-**Verify:** In a fresh process, the exercise checks confirm `reversed_margin == -1` and `reversed_loss > loss`.
+**Verify:** For *Reverse the labels*, a fresh-process check confirms `reversed_margin == -1` and `reversed_loss > loss`.
 
 ## Exercise 4: Check numeric stability
 
@@ -82,7 +82,7 @@ np.testing.assert_allclose(values, [0, 1000], atol=1e-12, rtol=0)
 
 **Expected:** finite losses approximately 0 and 1000.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(values).all()` and `values` matches `[0, 1000]` within 1e-12.
+**Verify:** For *Check numeric stability*, a fresh-process check confirms `np.isfinite(values).all()` and `values` matches `[0, 1000]` within 1e-12.
 
 ## Exercise 5: Track pair identity
 
@@ -99,7 +99,7 @@ assert flipped["chosen"] == "r2" and scores["r1"] == -2
 
 **Expected:** chosen identity changes to r2; scores remain keyed by ID.
 
-**Verify:** In a fresh process, the exercise checks confirm `flipped['chosen'] == 'r2'` and `scores['r1'] == -2`.
+**Verify:** For *Track pair identity*, a fresh-process check confirms `flipped['chosen'] == 'r2'` and `scores['r1'] == -2`.
 
 ## Exercise 6: Limit the claim
 
@@ -114,8 +114,8 @@ assert not report["factuality_verified"] and not report["online_rl_executed"]
 
 **Expected:** preference agreement True, factuality_verified False.
 
-**Verify:** In a fresh process, the exercise checks confirm `not report['factuality_verified']` and `not report['online_rl_executed']`.
+**Verify:** For *Limit the claim*, a fresh-process check confirms `not report['factuality_verified']` and `not report['online_rl_executed']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Check numeric stability* and predict the result first; keep *Track pair identity* failing beside the repair. Log a missing NumPy separately from a wrong preference pair value in `llm-033`.

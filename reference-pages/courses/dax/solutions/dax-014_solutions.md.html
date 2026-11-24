@@ -231,23 +231,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict 2025 South revenue.</p>
 <p>S6 and S7 contribute 20 each, totaling 40.</p>
+<p><strong>Why it fits this model:</strong> Customer 20 (Bo) is the only South customer. Under 2025 his lines are S6 and S7 at 20 each, so South revenue is 40.</p>
+<p><strong>Tempting mistake:</strong> Leaving out the year returns 80, because Bo&#x27;s 2024 Mug line S3 (40) joins the result.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( [NetRevenue], Customer[Region] = &quot;South&quot;, &#x27;Date&#x27;[Year] = 2025 )</code> returns 40, and 83 + 40 equals case B&#x27;s 123.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add Product.Category = Paper to case B.</p>
 <p>S4, S5 and S7 remain, totaling 67.</p>
+<p><strong>Why it fits this model:</strong> The region set, the year and the category all apply together. Among 2025 lines, Paper keeps S4 (27), S5 (20) and S7 (20), so revenue is 67.</p>
+<p><strong>Tempting mistake:</strong> Letting the category filter replace the earlier filters returns all-years Paper revenue of 91, which adds the 2024 lines S1 and S2.</p>
+<p><strong>How to confirm:</strong> Case B with <code>Product[Category] = &quot;Paper&quot;</code> added returns 67, and dropping Paper returns 123 again.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a context ledger for North, Home and 2025.</p>
 <p>North admits customers 10/30, Home admits product 3, and 2025 keeps S8; revenue is 36.</p>
+<p><strong>Why it fits this model:</strong> North admits customers 10 and 30, Home admits product 3 and 2025 admits S4 to S8. Only S8 (Cy&#x27;s Mug, 36) passes all three.</p>
+<p><strong>Tempting mistake:</strong> A ledger that writes down only the visible Home slicer predicts 96, because it forgets the region and year filters on other tables.</p>
+<p><strong>How to confirm:</strong> The three filters together return 36, the NetAmount of S8.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a report comparing North 2025 with South across all years.</p>
 <p>The comparison mixes 83 with 80 rather than comparable-year 83 with 40. Define the intended period consistently.</p>
+<p><strong>Why it fits this model:</strong> A fair comparison uses the same period on both sides: North 83 against South 40 in 2025, or North 107 against South 80 for all years.</p>
+<p><strong>Tempting mistake:</strong> Comparing North 2025 (83) with South all years (80) suggests the regions are nearly equal, when in the same year North sold about twice as much.</p>
+<p><strong>How to confirm:</strong> Query both regions under one year filter and expect 83 and 40, then without it and expect 107 and 80.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Predict a West-plus-2025 selection.</p>
 <p>The result is BLANK because customer 40 has no Sales rows.</p>
+<p><strong>Why it fits this model:</strong> West is a valid Customer member (Di, key 40) with no Sales rows, so the year makes no difference and revenue is BLANK.</p>
+<p><strong>Tempting mistake:</strong> Taking BLANK as a broken relationship or an invalid selection leads to model changes, when it is simply a population with no facts.</p>
+<p><strong>How to confirm:</strong> Under West and 2025, COUNTROWS(Customer) returns 1 while <code>ISEMPTY ( Sales )</code> returns TRUE and revenue is BLANK.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the ledger to a dashboard with several pages.</p>
 <p>Capture effective filters, date role and relationship assumptions for each reported number, not only the visible slicer caption.</p>
+<p><strong>Why it fits this model:</strong> Each number needs its full context written down. A card showing 83 may have a visible North slicer and a hidden 2025 page filter, and it uses the active OrderDate relationship.</p>
+<p><strong>Tempting mistake:</strong> Documenting only the visible North caption leads a reader to expect 107. Switching the date role also matters: January 2025 is 67 by order date and 47 by ship date.</p>
+<p><strong>How to confirm:</strong> Replaying CALCULATE with every captured filter should reproduce 83; S6, ordered January 5 and shipped February 1, explains the date-role difference.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

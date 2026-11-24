@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A timestamp identifies an instant only when its interpretation is unambiguous. A local clock display can repeat or skip during a daylight-saving transition. Storing a timezone-aware instant in UTC and converting it for display separates elapsed time from the local clock label. A one-hour elapsed interval can span two displayed hour numbers when a region moves its clocks forward.</p>
 <p>Conversion and relabeling are different operations. Converting a known instant into another zone preserves the instant. Assigning a zone to a naive timestamp interprets previously ambiguous clock text and needs a policy for repeated or nonexistent times. The first case begins with UTC offsets, so no local-time ambiguity needs guessing. The region is named explicitly rather than inferred from the machine running the lesson.</p>
 <p>Windows also need a boundary convention. A half-open interval includes its start and excludes its end. Adjacent periods can then share a boundary without counting the same event twice. This is a useful convention for daily metrics, feature windows and incremental processing, but the scientific question still determines which clock and which cutoff should be used.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>UTC instant:</strong> A point in time stored in Coordinated Universal Time, which has no daylight saving jumps, so elapsed time is exact.</li>
+<li><strong>dt.convert_time_zone:</strong> A method that shows the same instant in another time zone; the instant itself does not change.</li>
+<li><strong>Wall clock time:</strong> Local time as read on a clock, where a daylight saving change can skip or repeat an hour.</li>
+<li><strong>Half-open interval:</strong> An interval that includes its start and excludes its end, so adjacent intervals never count a boundary event twice.</li>
+<li><strong>str.to_datetime:</strong> The method that parses text into a Datetime column, here with <code>time_zone=&quot;UTC&quot;</code> fixing its zone.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>str.to_datetime parses the source timestamp, time_zone=&quot;UTC&quot; fixes its timezone representation, and dt.convert_time_zone produces a different display of the same instant. Filtering uses an explicit start comparison and a strict end comparison. Keep timezone-aware Python datetime objects at these boundaries; comparing naive and aware timestamps should not be treated as a harmless coercion.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

@@ -127,7 +127,7 @@ torch.testing.assert_close(packed_state, prefix_state, atol=1e-6, rtol=0)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The embedding has shape (1, 3, 2) with mask True, True, False, the padding row receives zero gradient, the packed final state matches the two-step state within 1e-6, the unmasked run differs, and the masked mean loss stays log 2. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Lookup and mark padding. Predict exercise 6, Reject zero-length recurrent input, from its prompt alone: Attempt to pack a sequence with length 0. Then explain why this finish condition holds: The embedding has shape (1, 3, 2) with mask True, True, False, the padding row receives zero gradient, the packed final state matches the two-step state within 1e-6, the unmasked run differs, and the masked mean loss stays log 2. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -163,15 +163,15 @@ If the padding row has a lookup gradient, verify `padding_idx` and the actual ID
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Verify padding-row gradient behavior) alters one assumption of Example A (Lookup and mark padding). Hint 2: exercise 4, Expose an unmasked recurrent tail, should end at final state differs from the valid-prefix state. Work backward from it. Hint 3: exercise 5, Average only valid token losses, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Padding index, Packed sequence, Final valid state using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Compare packed and valid-prefix GRU state, from its inputs alone. Predict whether exercise 3, Pack a batch with two lengths, survives one changed input. Then explain Padding index, Packed sequence, Final valid state in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-020` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Lookup and mark padding) cannot be rebuilt without help, revisit `torch-020` first. Otherwise keep your exercise 2 attempt, Count gradients for repeated IDs, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

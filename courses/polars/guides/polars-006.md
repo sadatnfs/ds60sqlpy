@@ -14,6 +14,14 @@ Declare the expected cardinality where the API supports it, then independently r
 
 Semi and anti joins answer membership questions. A semi join keeps matching left rows without appending right-side columns. An anti join keeps unmatched left rows. These are useful for eligibility and quarantine logic because a membership test should not accidentally multiply facts. Null-key matching is a separate policy: a missing customer identifier is not automatically the same entity as another missing identifier.
 
+## Key terms
+
+- **Join cardinality:** The expected match pattern between keys, such as many-to-one, which decides whether a join can multiply rows.
+- **validate:** The join argument, such as `validate="m:1"`, that raises an error when right-side keys are not unique as declared.
+- **Fanout:** Row multiplication when a key matches more than one row on the other side, which inflates additive totals.
+- **Semi join and anti join:** Joins that keep the left rows with at least one match, or with no match, returning left columns only and never duplicating rows.
+- **nulls_equal:** The join option that lets null keys match each other; by default a null key matches nothing.
+
 ## Syntax and data contract
 
 join takes a key, join type and optional cardinality validation. A left join preserves unmatched left rows, but may multiply matched rows if right keys repeat. semi and anti return left columns only. nulls_equal=True deliberately allows missing keys to match; use it only when that semantics is justified. Sort by a stable identifier before comparing output records.

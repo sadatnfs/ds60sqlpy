@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; approximately 105 minutes. Direct prerequisites: <code>spark-030</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-031</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
+<p>Open <code>spark-031</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-031.scala.html">Scala learner</a> and <a href="../lessons/spark-031.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-031_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-031_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-031_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -236,9 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>This finite example does not establish an indefinitely bounded aggregate state. Without a watermark or another retention rule, an unbounded stream with ever-new team keys can grow state. It also does not establish end-to-end exactly-once behavior for arbitrary external sinks. Later lessons introduce event-time policies, deduplication, checkpoint restart and idempotent side effects with their own explicit limits.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
 <p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
-<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
-<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>streaming<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">StreamingQuery</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Trigger</span><span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>file<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Files</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Paths</span><span class="syntax-punctuation">,</span> <span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">,</span> <span class="syntax-class">StandardCopyOption</span><span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>charset<span class="syntax-punctuation">.</span><span class="syntax-class">StandardCharsets</span>
@@ -268,20 +266,7 @@ ownedTable <span class="syntax-operator">=</span> <span class="syntax-string">&q
     <span class="syntax-string">&quot;&quot;&quot;{&quot;id&quot;:9,&quot;team&quot;:&quot;A&quot;,&quot;amount&quot;:null}&quot;&quot;&quot;</span>
   <span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span></code></pre>
-<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
-<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>
-    StructType<span class="syntax-punctuation">,</span>
-    StructField<span class="syntax-punctuation">,</span>
-    LongType<span class="syntax-punctuation">,</span>
-    IntegerType<span class="syntax-punctuation">,</span>
-    StringType<span class="syntax-punctuation">,</span>
-    DoubleType<span class="syntax-punctuation">,</span>
-    BooleanType<span class="syntax-punctuation">,</span>
-    ArrayType<span class="syntax-punctuation">,</span>
-    MapType<span class="syntax-punctuation">,</span>
-    TimestampType<span class="syntax-punctuation">,</span>
-    DecimalType<span class="syntax-punctuation">,</span>
-<span class="syntax-punctuation">)</span>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> functions <span class="syntax-keyword">as</span> F
 <span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 <span class="syntax-keyword">import</span> tempfile
 <span class="syntax-keyword">import</span> shutil
@@ -345,7 +330,7 @@ known <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <p><strong>Progressive hint:</strong> A streaming plan needs a sink and trigger before it becomes a running query.</p>
 <h4 id="exercise-3-define-a-cumulative-aggregate-with-separate-completeness-counts">Exercise 3: Define a cumulative aggregate with separate completeness counts<a class="heading-anchor" href="#exercise-3-define-a-cumulative-aggregate-with-separate-completeness-counts" aria-label="Link to this section">#</a></h4>
 <p>Group by team and compute row_count, known_amounts and total_amount. Use the same expression for streaming and batch relations without filling unknown amounts.</p>
-<p><strong>Expected result/shape:</strong> The streaming result remains streaming and has one state/result row per team. Its eventual literal result is A(4,3,15), B(3,2,35), C(2,2,30).</p>
+<p><strong>Expected result/shape:</strong> The streaming result remains streaming and has one state/result row per team. Its eventual literal result is <code>A(4, 3, 15)</code>, <code>B(3, 2, 35)</code>, <code>C(2, 2, 30)</code>.</p>
 <p><strong>Verify:</strong> Assert output columns and streaming status now; verify the exact final tuples after bounded execution.</p>
 <p><strong>Progressive hint:</strong> COUNT(*) and COUNT(amount) differ because two amounts are unknown.</p>
 <h4 id="exercise-4-run-availablenow-with-a-deadline-and-owned-cleanup">Exercise 4: Run AvailableNow with a deadline and owned cleanup<a class="heading-anchor" href="#exercise-4-run-availablenow-with-a-deadline-and-owned-cleanup" aria-label="Link to this section">#</a></h4>
@@ -354,19 +339,19 @@ known <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <p><strong>Verify:</strong> Assert bounded await success, no query exception and inactive state. No sleep or external producer is used.</p>
 <p><strong>Progressive hint:</strong> Keep the query handle inside a try/finally scope even when awaitTermination raises.</p>
 <h4 id="exercise-5-reconcile-processed-input-through-progress-evidence">Exercise 5: Reconcile processed input through progress evidence<a class="heading-anchor" href="#exercise-5-reconcile-processed-input-through-progress-evidence" aria-label="Link to this section">#</a></h4>
-<p>Return(batch_id, num_input_rows) from retained query progress. Sum input rows and inspect positive-input batches without confusing cumulative sink snapshots with new input.</p>
+<p>Return (batch_id, num_input_rows) from retained query progress. Sum input rows and inspect positive-input batches without confusing cumulative sink snapshots with new input.</p>
 <p><strong>Expected result/shape:</strong> Three positive-input batches of 3 records and total input 9. Any zero-input progress entry contributes zero to that total.</p>
 <p><strong>Verify:</strong> Assert total 9, three positive batches of 3 and unique recorded batch IDs; print the actual ledger.</p>
 <p><strong>Progressive hint:</strong> Complete-mode output rows are snapshots, so summing their sizes does not count source records.</p>
 <h4 id="exercise-6-compare-final-streaming-output-with-batch-and-literal-oracles">Exercise 6: Compare final streaming output with batch and literal oracles<a class="heading-anchor" href="#exercise-6-compare-final-streaming-output-with-batch-and-literal-oracles" aria-label="Link to this section">#</a></h4>
 <p>Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literal A/B/C oracle.</p>
-<p><strong>Expected result/shape:</strong> Exactly A(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.</p>
+<p><strong>Expected result/shape:</strong> Exactly <code>A(4, 3, 15)</code>, <code>B(3, 2, 35)</code>, <code>C(2, 2, 30)</code>, whose record counts sum 9, known counts 7 and amounts 80.</p>
 <p><strong>Verify:</strong> Assert both path comparisons and the independent literal tuple list; confirm no active query remains before cleanup.</p>
 <p><strong>Progressive hint:</strong> Agreement between two paths is insufficient if both share the same incorrect expression.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not write partially completed files into the watched input directory or reuse processed filenames. Do not call readStream construction a running query. Do not sum complete-mode snapshots as if each were new input. A memory sink is not a durable production sink, and AvailableNow termination does not prove indefinite state is bounded. Always await and stop owned queries before session cleanup, and preserve scratch if a query is still active rather than deleting its checkpoint underneath it.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>publishFile</code> / <code>publish_file</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>publishFile</code> / <code>publish_file</code> without reading its solution. Then, from memory, state what Exercise 6 (Compare final streaming output with batch and literal oracles) must produce: exactly <code>A(4, 3, 15)</code>, <code>B(3, 2, 35)</code>, <code>C(2, 2, 30)</code>, whose record counts sum 9, known counts 7 and amounts 80. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>

@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-056`.
 
 Django REST Framework adds serializers, API views, routers and other tools for HTTP APIs. This chapter uses a serializer and a ViewSet to create and list notes, while making clear which fields are writable and how validation failures differ from successful creation.
 
+## Key terms
+
+- **Serializer:** A DRF class that validates incoming data into Python values and converts objects into a response representation.
+- **Read-only field:** A serializer field, such as the identifier, that appears in output but is ignored in client input.
+- **ViewSet:** A DRF class that groups related actions, such as list and create, for one resource.
+- **Router:** A DRF object, here SimpleRouter, that generates URL patterns that map HTTP methods to ViewSet actions.
+- **raise_exception:** An `is_valid()` option that makes DRF return its standard 400 validation response when the data is invalid.
+
 ## Mechanism: serializer and view responsibilities differ
 
 A serializer validates incoming data and produces a representation. A ViewSet groups related actions such as list and create. A router connects those actions to URL patterns. These abstractions do not automatically provide persistence or authorization; the application still defines those behaviors.
@@ -29,6 +37,45 @@ A title whose meaningful length is too short receives 400. The later list still 
 Validation must happen before the application appends or commits the object. A common mistake is to construct and persist a partial object before calling all validators, then catch an error and return a refusal while leaving the object behind.
 
 DRF's validation status differs from FastAPI's default 422 in earlier chapters. That is not inherently a defect. An API should adopt and document a coherent convention and clients should follow its contract. Framework comparison is more useful when it identifies actual semantics instead of declaring one default universally correct.
+
+## Worked example: a client supplied identifier is dropped, not trusted
+
+```python
+from pydantic import BaseModel, ConfigDict, ValidationError, field_validator
+
+
+class NoteIn(BaseModel):
+    title: str
+
+    @field_validator("title")
+    @classmethod
+    def tidy(cls, value):
+        value = value.strip()
+        if len(value) < 3:
+            raise ValueError("Use at least three characters")
+        return value
+
+
+class StrictNoteIn(NoteIn):
+    model_config = ConfigDict(extra="forbid")
+
+
+payload = {"title": "  Plan  ", "identifier": 999}
+print(NoteIn(**payload))
+try:
+    StrictNoteIn(**payload)
+except ValidationError as error:
+    print(error.errors()[0]["type"], error.errors()[0]["loc"])
+```
+
+Expected output:
+
+```text
+title='Plan'
+extra_forbidden ('identifier',)
+```
+
+This uses pydantic to show the same contract as the lesson's DRF `NoteSerializer`. A field marked `read_only=True` never reaches `validated_data`, so the forged `identifier: 999` is discarded and `create` assigns `len(records) + 1`; `NoteIn` does the same by having no identifier field at all. `validate_title` and the `tidy` validator both strip before checking length, which is why `" Plan "` is stored as `Plan`. The strict model is the alternative policy: refuse unknown keys with a 400 so a confused client learns that the server owns identifiers instead of having its value quietly ignored.
 
 ## Failure diagnosis and discussion
 

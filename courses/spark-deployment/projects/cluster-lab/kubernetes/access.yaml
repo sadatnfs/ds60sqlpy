@@ -18,9 +18,16 @@ metadata:
   name: spark-driver
   namespace: NAMESPACE
 rules:
+  # Cluster mode: the submitting kubeconfig identity creates the driver Pod, its
+  # Service and its ConfigMap. Inside the cluster the driver only creates, watches
+  # and removes executor Pods plus their configuration ConfigMap, so it holds no
+  # Service, workload-controller, Secret or update/patch permission.
   - apiGroups: [""]
-    resources: [pods, services, configmaps]
+    resources: [pods]
     verbs: [create, get, list, watch, delete]
+  - apiGroups: [""]
+    resources: [configmaps]
+    verbs: [create, get, list, delete]
   - apiGroups: [""]
     resources: [pods/log]
     verbs: [get]

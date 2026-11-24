@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-061`, `apache-057`.
 
+## Key terms
+
+- **Deep store:** The durable storage where Pinot keeps copies of completed segments, separate from servers' local copies.
+- **Health endpoint:** A narrow liveness check for one component. It does not prove that the expected schema, segments and rows are present.
+- **Segment identity:** The names and metadata of the segments a table should serve, which a recovery check compares after restart.
+- **Read-only verification:** A recovery check that queries the existing table and compares results with known source event identities without recreating or reingesting data.
+
 ## Recovery must compare durable source and serving identities
 
 Pinot state is distributed across coordination metadata, controller storage,
@@ -75,6 +82,48 @@ application may have regenerated its fixture, connected to another project or
 only checked an open port. These cases require exact process reuse and then
 replacement over retained state, with independent row-level readback and no
 hidden initialization at either boundary.
+
+## Worked examples
+
+### Identity before and after a stop
+
+```bash
+cd work/pinot
+bash run.sh identity
+bash run.sh stop
+bash run.sh resume
+bash run.sh identity
+```
+
+Both identity reports should show the same container IDs, image IDs, segment names and exact order rows, because stop and resume keep the containers and their volumes. Identity is read-only, so it is safe to run as often as needed. If the second report has new container IDs, something replaced the containers; if the segment list is empty, the controller lost its ZooKeeper metadata and the next step is reading logs, not running initialize.
+
+### Replace containers over retained volumes
+
+```bash
+cd work/pinot
+bash run.sh identity
+bash run.sh down
+bash run.sh start
+bash run.sh identity
+```
+
+Here the container IDs are expected to change while segment metadata and order rows stay the same, because down removes containers but keeps named volumes. That makes this the closer rehearsal for a host replacement. A segment that is listed but returns no rows usually means the server has not finished loading it from deep storage yet, so wait and query again before deciding data was lost. Running initialize here would push a fresh segment and hide exactly the retention failure this test is meant to detect.
+
+### Compare broker results across the restart
+
+```sql
+SELECT
+  id,
+  region,
+  amount
+FROM
+  ds60_orders
+ORDER BY
+  id
+LIMIT 10
+```
+
+Save the full row list before stopping and compare it after resume and after replacement; all three should be (1, east, 4), (2, west, 9), (3, east, 7). A matching aggregate is weaker evidence than matching rows, since a lost row and a duplicated row can cancel out in a sum. Also compare the totalDocs field in the response; a doubled count with correct distinct IDs points to a segment that was pushed twice under different names.
 
 ## Complete worked source
 

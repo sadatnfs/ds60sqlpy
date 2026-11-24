@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-040_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Three chunks each need 2 ms upload, 3 ms compute and 2 ms download. Fully serial time is 21 ms. An ideal three-stage pipeline takes 7 ms for the first result plus two 3 ms steady-state intervals, totaling 13 ms. This optimistic model assumes independent stages and sufficient engines/resources.</p>
+<p><strong>Approach:</strong> Add 2 + 3 + 2 per chunk for 21 ms serial, then 7 ms for the first chunk plus two 3 ms intervals.</p>
+<p><strong>Why it is correct:</strong> Once the pipeline fills, compute at 3 ms is the longest stage and sets the interval, giving 13 ms.</p>
+<p><strong>A plausible wrong approach:</strong> Dividing 21 by 3 stages for 7 ms assumes perfect overlap including fill and drain.</p>
+<p><strong>How to verify:</strong> The reference asserts serial == 21 and ideal == 13 and marks measured_overlap False.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>With two reusable slots, chunk 2 reuses chunk 0&#x27;s slot only after chunk 0&#x27;s download and host consumption are complete. Checking only compute completion can still overwrite an output that is being transferred or read. Ownership includes every stage, not just the kernel.</p>
+<p><strong>Approach:</strong> Reuse chunk 0&#x27;s slot for chunk 2 only after chunk 0&#x27;s download and host use finish.</p>
+<p><strong>Why it is correct:</strong> Two slots alternate, so chunk 2 overwrites memory chunk 0 may still be using.</p>
+<p><strong>A plausible wrong approach:</strong> Waiting only for chunk 0&#x27;s compute lets the new upload overwrite data being downloaded.</p>
+<p><strong>How to verify:</strong> Add a per-slot done event recorded after host consumption and test with slow consumers.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>First result seven milliseconds plus four intervals of three gives nineteen milliseconds, versus thirty-five serially.</p>
+<p><strong>Approach:</strong> Compute 7 ms for the first chunk plus four intervals of 3 ms.</p>
+<p><strong>Why it is correct:</strong> Five chunks give 7 + 12 = 19 ms against 5 * 7 = 35 ms serial.</p>
+<p><strong>A plausible wrong approach:</strong> Multiplying 13 by five thirds assumes the fill cost repeats each chunk.</p>
+<p><strong>How to verify:</strong> Plug chunks = 5 into the reference formula and expect 19 and 35.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Repeated allocation and registration costs can dominate. Prepare a bounded pool and include setup separately in cold-start reporting.</p>
+<p><strong>Approach:</strong> Allocate a bounded pinned pool once and reuse it.</p>
+<p><strong>Why it is correct:</strong> Pinning pages has fixed setup cost that repeats if done every iteration.</p>
+<p><strong>A plausible wrong approach:</strong> Allocating fresh pinned memory per chunk can erase the transfer gain.</p>
+<p><strong>How to verify:</strong> Time cold setup separately and confirm per-iteration times exclude it.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Preserve its actual count, bound transfers and kernel accesses, and validate that no stale elements from the previous slot use appear.</p>
+<p><strong>Approach:</strong> Carry the last chunk&#x27;s real count into transfers and kernel bounds.</p>
+<p><strong>Why it is correct:</strong> A short chunk reusing a slot leaves stale values past its count.</p>
+<p><strong>A plausible wrong approach:</strong> Copying full slot size for the last chunk returns stale elements.</p>
+<p><strong>How to verify:</strong> Fill slots with a sentinel and confirm none appears in the final output.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Measure both per-request latency and throughput under a memory budget; maximum batching may violate response-time requirements.</p>
+<p><strong>Approach:</strong> Measure latency and throughput for several chunk sizes within a memory budget.</p>
+<p><strong>Why it is correct:</strong> Larger chunks raise throughput but delay the first response.</p>
+<p><strong>A plausible wrong approach:</strong> Choosing the largest chunk because throughput peaks violates response-time needs.</p>
+<p><strong>How to verify:</strong> Plot both metrics per size and pick one that meets the latency target.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-040_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

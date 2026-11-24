@@ -10,6 +10,13 @@ For a scalar parameter and S posterior draws, ranks range from zero through S. U
 
 The example uses a normal prior and one normal observation with unit variances. Its exact posterior is normal with mean \(y/2\) and variance .5, allowing independent iid posterior samples and an analytic conditional oracle.
 
+## Key terms
+
+- **Simulation-based calibration:** Drawing parameters from the prior, simulating data, running inference and checking the rank of each true parameter among the posterior draws.
+- **Rank statistic:** The number of posterior draws below the simulated true value, from zero through S, uniform when inference is correct.
+- **Conditional oracle:** An exact posterior, here mean y/2 and variance .5, that checks inference for each simulated dataset rather than only marginally.
+- **Prior-only algorithm:** A failed sampler that ignores the data and returns prior draws, yet can produce marginally uniform ranks.
+
 ## Worked case 1: compare correct and shifted inference
 
 Across 500 simulated datasets, the program draws 64 posterior samples per dataset and records the rank of the simulated parameter. It compares the correct posterior with an algorithm whose posterior location is shifted upward by one. The shifted algorithm produces much smaller ranks on average because the true parameter tends to lie below its posterior draws.
@@ -39,6 +46,42 @@ Inspect calibration across important parameter regions and data conditions. An a
 **Does a uniform-looking rank histogram prove that the posterior is correct?** No. It is evidence about specified test quantities under a specified simulation design. The prior-only counterexample demonstrates why additional quantities and independent checks matter.
 
 **How should calibration be used in practice?** Combine it with tractable reference models, density/gradient checks, sampler diagnostics and scientific model criticism. Each answers a different question. The purpose is to locate and understand failures, not to obtain a single badge that certifies an entire Bayesian workflow.
+
+## Worked example: SBC ranks expose an overconfident posterior
+
+```python
+import numpy as np
+from scipy import stats
+
+rng = np.random.default_rng(8)
+N, L, n = 2000, 19, 5  # replicates, posterior draws, data size
+
+
+def ranks(scale):
+    out = np.empty(N, int)
+    for r in range(N):
+        theta = rng.normal()  # prior N(0, 1), data y ~ N(theta, 1)
+        y = rng.normal(theta, 1, n)
+        mean, sd = y.sum() / (n + 1), np.sqrt(1 / (n + 1))
+        draws = rng.normal(mean, scale * sd, L)
+        out[r] = np.sum(draws < theta)
+    return out
+
+
+for label, scale in (("correct", 1.0), ("sd x 0.6", 0.6)):
+    counts = np.bincount(ranks(scale) // 4, minlength=5)
+    p = stats.chisquare(counts, f_exp=np.array([4, 4, 4, 4, 4]) / 20 * N).pvalue
+    print(f"{label:9s}: rank-bin counts {counts}, chi-square p {p:.3g}")
+```
+
+Observed output:
+
+```text
+correct  : rank-bin counts [397 409 385 396 413], chi-square p 0.87
+sd x 0.6 : rank-bin counts [603 241 296 251 609], chi-square p 3.33e-76
+```
+
+Each replicate draws a true \(\theta\) from the prior, simulates five observations and records how many of 19 posterior draws fall below the truth. A correct posterior makes that rank uniform on 0 through 19, so grouping into five bins of four ranks should give about 400 per bin. The correct sampler shows 385 to 413 with chi-square p 0.87. Shrinking the posterior standard deviation to 60 percent of its true value produces 603 and 609 in the outer bins and only 241 to 296 in the middle: the truth falls outside the overconfident draws too often, on both sides, giving the characteristic U shape and p of \(3.33\times10^{-76}\). The shape is diagnostic, not just the p-value. A shifted posterior would pile ranks at one end; an underconfident one would produce a hump in the middle. Two thousand replicates give about 400 expected per bin, so a gap of 200 is unmistakable. With far fewer replicates each bin count is noisier and milder miscalibration can hide, so a passing SBC is evidence only at the resolution it was run.
 
 ## Complete reproducible program
 

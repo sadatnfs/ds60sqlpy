@@ -38,6 +38,12 @@
       "code": "quantity <- 3\nunit_price <- 6\ntotal <- quantity * unit_price\nquantity <- 4\nprint(c(saved_total = total, recalculated = quantity * unit_price))\nstopifnot(total == 18, quantity * unit_price == 24)\n",
       "explanation": "total contains the earlier result. Changing quantity does not convert total into a spreadsheet formula that reevaluates itself.",
       "expected": "saved_total 18; recalculated 24."
+    },
+    {
+      "title": "A quoted label is not the computed value",
+      "code": "quantity <- 3\nunit_price <- 6\ntotal <- quantity * unit_price\nmistake <- print(\"total\")\nfixed <- print(total)\nstopifnot(identical(mistake, \"total\"), fixed == 18)\n",
+      "explanation": "The quoted version hands print the five-character text \"total\", so the invoice arithmetic never reaches the output. The unquoted name asks R to look up the binding created on line three, which holds 18. print returns its argument invisibly, which is why mistake and fixed can be checked afterward. Change unit_price to 7 and the fixed line shows 21 while the quoted line still shows the same word, a quick way to tell a label from data.",
+      "expected": "The first line shows [1] \"total\" with quotes; the second shows [1] 18."
     }
   ],
   "exercises": [

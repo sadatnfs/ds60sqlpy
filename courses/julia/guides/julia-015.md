@@ -10,6 +10,14 @@ Transform a typed table and compute grouped summaries while preserving names, mi
 
 Open `julia-015` in `/classroom` with its prepared `julia` runtime. Worked case A (select and transform named columns) and worked case B (summarize with missingness counts) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-015: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **DataFrame:** A table from DataFrames.jl whose named columns are vectors that may each have a different element type.
+- **Column selection:** Choosing output columns explicitly, where `df[!, :x]` shares the stored vector and `df[:, :x]` returns a copy.
+- **ByRow:** A wrapper that makes a `select` or `transform` function receive one row's values at a time instead of whole columns.
+- **groupby:** A function that splits a data frame by key columns, usually followed by `combine` to produce one row per group.
+- **Row accounting:** Recording row counts before and after each filter or reshaping step so every removed or duplicated row is explained.
+
 ## A table needs a schema and a grain
 
 A DataFrame organizes named columns into rows. Its grain states what one row represents. Column names and element types are useful schema information, but a table also needs semantic contracts such as unique request IDs, units and missingness rules. DataFrames does not infer those scientific meanings automatically.

@@ -133,6 +133,31 @@ EQUATIONS = {
 }
 
 
+REASONING_PARTS = (
+    ("approach", "Approach"),
+    ("why", "Why it is correct"),
+    ("wrong", "A plausible wrong approach"),
+    ("verify", "How to verify"),
+)
+
+
+def check_reasoning(unit: dict) -> None:
+    """Require four non-empty, dash-free reasoning parts for each of six exercises."""
+
+    reasoning = unit.get("reasoning")
+    assert isinstance(reasoning, list) and len(reasoning) == 6, unit["n"]
+    for entry in reasoning:
+        assert set(entry) == {key for key, _ in REASONING_PARTS}, unit["n"]
+        for key, _ in REASONING_PARTS:
+            text = entry[key]
+            assert isinstance(text, str) and text.strip(), (unit["n"], key)
+            assert "\u2014" not in text and "\u2013" not in text, (unit["n"], key)
+
+
+def reasoning_markdown(entry: dict[str, str]) -> str:
+    return "\n\n".join(f"**{label}:** {entry[key]}" for key, label in REASONING_PARTS)
+
+
 def lesson_id(number: int) -> str:
     return f"cuda-{number:03}"
 
@@ -254,7 +279,8 @@ def render(unit: dict, gpu: dict[int, str]) -> dict[str, str]:
         worksheet.append(
             f"## Exercise {index}\n\n{question}\n\nMy prediction or design:\n\nMy calculation, trace or observation:\n\nEvidence surface (reading / CPU reference / actual NVIDIA execution):\n\nWhat this does not establish:\n"
         )
-        solutions.append(f"## Exercise {index}\n\n{answer}\n")
+        reasoning = reasoning_markdown(unit["reasoning"][index - 1])
+        solutions.append(f"## Exercise {index}\n\n{answer}\n\n{reasoning}\n")
     equation = ""
     if number in EQUATIONS:
         expression, meaning = EQUATIONS[number]
@@ -285,6 +311,9 @@ do not deliberately launch a hanging kernel or reset a shared GPU to reproduce i
     if number == 45:
         sources = [["CUDA Core Compute Libraries", "https://nvidia.github.io/cccl/"]]
     links = "\n".join(f"- [{label}]({url})" for label, url in sources)
+    key_terms = "\n".join(
+        f"- **{term}:** {definition}" for term, definition in unit["key_terms"].items()
+    )
     guide = f"""# {identity}: {title}
 
 ## Level and prerequisites
@@ -297,6 +326,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+{unit["outcome"]}
+
 Work through *{title}* with the concrete cases below. Finish with this evidence:
 {unit["evidence"][0].lower() + unit["evidence"][1:] if unit["evidence"][1:2].islower() else unit["evidence"]} Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -305,6 +336,10 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 {unit["mechanism"]}
+
+### Key terms
+
+{key_terms}
 
 {equation}## How to run and study this lesson
 
@@ -399,8 +434,13 @@ Do not install drivers, download packages, run external jobs, reset devices or c
 Ask me to explain the boundary case and which observation would disprove my answer.
 ```
 """
+    answer_checks = (
+        f" It also asserts an exercise answer that the guide's model leaves for you to derive: `{unit['reference_checks']}`."
+        if "reference_checks" in unit
+        else ""
+    )
     solutions.append(
-        f"## Numerical reference and its limits\n\nThe complete CPU model is [here](../references/{identity}_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.\n\n## Transfer review\n\n{unit['tasks'][3]['answer']}\n\nA complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.\n"
+        f"## Numerical reference and its limits\n\nThe complete CPU model is [here](../references/{identity}_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present.{answer_checks} It does not claim CUDA execution, concurrency safety or a performance measurement.\n\n## Transfer review\n\n{unit['tasks'][3]['answer']}\n\nA complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.\n"
     )
     result = {
         guide_path: guide,
@@ -411,6 +451,7 @@ Ask me to explain the boundary case and which observation would disprove my answ
             + ("\n" if unit["code"].startswith("def ") else "")
             + unit["code"]
             + "\n"
+            + (unit["reference_checks"] + "\n" if "reference_checks" in unit else "")
         ),
         f"{PREFIX}/lessons/{identity}_cpu.py": cpu_starter(unit),
     }
@@ -423,6 +464,10 @@ Ask me to explain the boundary case and which observation would disprove my answ
 def artifacts() -> dict[str, str]:
     units = json.loads((AUTHORING / "cpp_units.json").read_text(encoding="utf-8"))
     assert [unit["n"] for unit in units] == list(range(1, 65))
+    for unit in units:
+        assert unit["outcome"][:1].isupper() and len(unit["outcome"].split()) >= 4, unit["n"]
+        assert 3 <= len(unit["key_terms"]) <= 5, unit["n"]
+        check_reasoning(unit)
     gpu = references()
     files: dict[str, str] = {}
     track, admissions = [], []
@@ -438,7 +483,7 @@ def artifacts() -> dict[str, str]:
                 "prerequisites": unit["prerequisites"],
                 "runtime": "reading",
                 "concepts": [unit["title"], "CPU reference and explicit GPU evidence"],
-                "outcome": unit["evidence"],
+                "outcome": unit["outcome"],
                 "lab": unit["tasks"][0]["question"],
                 "verification": unit["tasks"][0]["answer"],
             }

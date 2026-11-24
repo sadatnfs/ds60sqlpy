@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-021`, `apache-019`, `rust-001`.
 
+## Key terms
+
+- **Language binding:** A package that exposes an engine's native implementation to another language. Ballista's Python package wraps supported behavior and does not make arbitrary Python callbacks serializable.
+- **Native Rust API:** The Ballista and DataFusion crates whose types and execution contracts the Python binding wraps. A Rust client needs its own prepared Cargo project and dependency lock.
+- **Version compatibility:** The requirement that client, scheduler and executors agree on release and dependency versions, here Ballista 54.1.0 with DataFusion 54 from one image.
+- **Lazy action:** A DataFrame or SQL call that only builds a plan until an action such as collect submits it to the scheduler for execution.
+
 ## A language binding is not a universal compatibility promise
 
 Ballista's native implementation and Rust API use DataFusion types and execution

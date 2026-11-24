@@ -237,23 +237,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the number of Date rows in February 2024.</p>
 <p>There are 29 unique calendar dates.</p>
+<p><strong>Why it fits this model:</strong> The Date table holds one row per calendar day from 2024-01-01 to 2025-12-31, and 2024 is a leap year, so February 2024 has 29 rows whether or not anything sold.</p>
+<p><strong>Tempting mistake:</strong> Counting sale dates instead: DISTINCTCOUNT(Sales[OrderDate]) under February 2024 is BLANK, because the first sales are in January of each year.</p>
+<p><strong>How to confirm:</strong> Under Year 2024 and MonthNumber 2, COUNTROWS(&#x27;Date&#x27;) returns 29.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change case B to January 2, 2025.</p>
 <p>CalendarDates is 1, SalesRows is 1 and Revenue is 27.</p>
+<p><strong>Why it fits this model:</strong> The filter names one full date, 2025-01-02, so the calendar contributes one row and the order relationship brings in S4 alone, 27 USD.</p>
+<p><strong>Tempting mistake:</strong> Filtering DayOfMonth = 2 and MonthNumber = 1 without the year also selects 2024-01-02, which adds S1 and S2 and gives 3 rows and 51.</p>
+<p><strong>How to confirm:</strong> CalendarDates 1, SalesRows 1 and Revenue 27.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a date-table quality checklist.</p>
 <p>Check one row per date, no blanks or gaps in the required classic calendar, correct date type, explicit coverage and the intended active fact relationship.</p>
+<p><strong>Why it fits this model:</strong> Each check has a number here: 731 rows for 731 distinct dates, no blanks, MAX minus MIN plus 1 equal to the row count, and 31 rows in January 2025 against 3 sale dates.</p>
+<p><strong>Tempting mistake:</strong> Building the calendar from DISTINCT(Sales[OrderDate]) leaves 7 dates. January 2025 would then have 3 days, and every per-day or window measure would skip the gaps.</p>
+<p><strong>How to confirm:</strong> <code>INT ( MAX ( &#x27;Date&#x27;[Date] ) - MIN ( &#x27;Date&#x27;[Date] ) ) + 1</code> equals COUNTROWS(&#x27;Date&#x27;) and DISTINCTCOUNT(&#x27;Date&#x27;[Date]), all 731.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose using MAX(Date[Date]) as the latest observed sales date.</p>
 <p>It is a calendar extent, not an observation watermark. Use a declared availability boundary or the appropriate fact-date contract.</p>
+<p><strong>Why it fits this model:</strong> The calendar runs to 2025-12-31 so that future dates exist, but the data is declared observed only through 2025-02-28 and the last order date is 2025-02-03.</p>
+<p><strong>Tempting mistake:</strong> Using MAX(&#x27;Date&#x27;[Date]) as the latest data date returns December 31, 2025, so a freshness label would claim ten months of coverage that do not exist.</p>
+<p><strong>How to confirm:</strong> Unfiltered, MAX(&#x27;Date&#x27;[Date]) is 2025-12-31 and MAX(Sales[OrderDate]) is 2025-02-03; neither replaces the declared watermark, 2025-02-28.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why filling every future blank with zero can distort a forecast baseline.</p>
 <p>It inserts invented zero-demand observations after the availability boundary.</p>
+<p><strong>Why it fits this model:</strong> Observed days without sales are true zeros. Days after the watermark are unknown. January and February 2025 are 59 observed days with 123 USD, about 2.08 per day.</p>
+<p><strong>Tempting mistake:</strong> Coalescing every future day to 0 adds March as 31 days of zero demand and drops the baseline to 123 / 90, about 1.37, as if sales had collapsed.</p>
+<p><strong>How to confirm:</strong> The observed-window average is about 2.08, and any day after 2025-02-28 should return BLANK rather than 0.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the distinction to working days.</p>
 <p>Define working-day membership explicitly and reconcile the denominator, rather than deleting dates with no transactions.</p>
+<p><strong>Why it fits this model:</strong> A working-day denominator needs its own rule. January 2025 has 23 weekdays, and S6 was ordered on Sunday, January 5, so the policy must also say where weekend sales belong.</p>
+<p><strong>Tempting mistake:</strong> Dropping dates without transactions leaves three sale dates and reports 67 / 3, about 22.33 per working day, which counts a Sunday as a working day too.</p>
+<p><strong>How to confirm:</strong> With a weekday flag such as WEEKDAY(&#x27;Date&#x27;[Date], 2) &lt;= 5, January 2025 has 23 working days and 47 USD sold on them (S4 and S5).</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

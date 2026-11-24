@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Write a testing policy that specifies reference precision, tolerances and adversarial floating-point cases.
+
 Work through *Numbers, units and a trustworthy answer* with the concrete cases below. Finish with this evidence:
 a testing policy specifying reference precision, tolerance and adversarial cases. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Floating-point arithmetic stores a finite approximation to a real number. Adding a small quantity to a large one may round away the small quantity; subtracting similar large values can expose that loss. Relative error scales with a reference magnitude, while absolute error remains meaningful near zero. A common comparison accepts an error no larger than absolute tolerance plus relative tolerance times reference magnitude. The tolerances must come from input ranges, precision and the calculation, not from repeatedly widening them until a broken index passes. Check finite output explicitly, and use exact comparison for integer counts that cannot overflow.
+
+### Key terms
+
+- **Relative error:** The absolute difference from a reference divided by the reference magnitude, which is meaningful away from zero.
+- **Absolute tolerance:** A fixed allowed difference that keeps a comparison meaningful for values near zero.
+- **Catastrophic cancellation:** The loss of significant digits when two nearly equal rounded values are subtracted.
+- **Conditioning:** How strongly the exact answer changes when the input changes slightly, independent of the algorithm.
+- **NaN:** A floating-point not-a-number value produced by invalid operations, which compares unequal even to itself.
 
 ## Mathematical contract
 

@@ -195,24 +195,57 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-030-explained-reference">julia-030: explained reference<a class="heading-anchor" href="#julia-030-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-030_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>chunk_squares</code> splits the input into two index ranges, spawns one task per range that sums squares with <code>init = 0</code>, then fetches and adds the two partial sums in a fixed order. <code>locked_counter</code> spawns workers that each increment a shared <code>Ref</code> inside <code>lock(guard)</code>, so every read and write of the counter is protected.</p>
 <h3 id="1-derive-the-reduction-oracle">1. Derive the reduction oracle<a class="heading-anchor" href="#1-derive-the-reduction-oracle" aria-label="Link to this section">#</a></h3>
 <p>The independent formula checks the reduction without copying its loop.</p>
 <p><strong>Expected observation:</strong> The result is 338350.</p>
+<p><strong>Why it holds here:</strong> The formula n(n+1)(2n+1)/6 with n = 100 gives 100 times 101 times 201 divided by 6, which is 338350.</p>
+<p><strong>Plausible wrong approach:</strong> Checking the threaded result against a serial loop written by the same author shares any indexing mistake with the parallel code.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>chunk_squares(collect(1:100)) == 338350</code> five times in a row.</p>
 <h3 id="2-trace-an-empty-chunk">2. Trace an empty chunk<a class="heading-anchor" href="#2-trace-an-empty-chunk" aria-label="Link to this section">#</a></h3>
 <p>The additive identity makes the empty partial result well-defined.</p>
 <p><strong>Expected observation:</strong> The empty range contributes 0.</p>
+<p><strong>Why it holds here:</strong> For <code>[3]</code>, <code>middle = cld(1, 2) = 1</code>, so the second range is <code>2:1</code>, which is empty, and <code>sum</code> with <code>init = 0</code> returns 0.</p>
+<p><strong>Plausible wrong approach:</strong> Dropping <code>init = 0</code> makes <code>sum</code> over an empty view throw, so a one-element input fails.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>chunk_squares([3]) == 9</code>, and the reference checks <code>chunk_squares([-2, 3]) == 13</code>.</p>
 <h3 id="3-explain-lost-updates">3. Explain lost updates<a class="heading-anchor" href="#3-explain-lost-updates" aria-label="Link to this section">#</a></h3>
 <p>Locking the full read-modify-write operation prevents this schedule under the stated protocol.</p>
 <p><strong>Expected observation:</strong> One update can overwrite the other.</p>
+<p><strong>Why it holds here:</strong> Two tasks can both read 5, both compute 6 and both write 6, so one increment is lost without a lock.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming <code>counter[] += 1</code> is a single indivisible step predicts the full count even without the lock.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>locked_counter(4, 100) == 400</code>; an unprotected owned copy may sometimes print less.</p>
 <h3 id="4-review-scratch-ownership">4. Review scratch ownership<a class="heading-anchor" href="#4-review-scratch-ownership" aria-label="Link to this section">#</a></h3>
 <p>Task-owned state or explicit synchronization is safer than undocumented schedule assumptions.</p>
 <p><strong>Expected observation:</strong> Tasks may migrate or interleave.</p>
+<p><strong>Why it holds here:</strong> Tasks can move between threads, so a buffer indexed by <code>Threads.threadid()</code> may be shared by two tasks that both start on one thread.</p>
+<p><strong>Plausible wrong approach:</strong> Allocating per-thread buffers by <code>threadid()</code> assumes a task keeps its thread for life, which the scheduler does not promise.</p>
+<p><strong>How to verify:</strong> Give each spawned task its own local buffer and confirm results do not depend on the thread count.</p>
 <h3 id="5-analyze-floating-reduction">5. Analyze floating reduction<a class="heading-anchor" href="#5-analyze-floating-reduction" aria-label="Link to this section">#</a></h3>
 <p>Use a justified tolerance or a numerically stable reduction when extending the integer example.</p>
 <p><strong>Expected observation:</strong> Floating addition rounds intermediate values.</p>
+<p><strong>Why it holds here:</strong> Floating addition rounds each partial result, so grouping the sum into two chunks can change the last bits compared with a serial sum.</p>
+<p><strong>Plausible wrong approach:</strong> Asserting exact equality between a threaded float reduction and a serial one fails or passes by luck depending on the data.</p>
+<p><strong>How to verify:</strong> Compare float sums with <code>isapprox</code> and a stated tolerance; the integer example can stay exact.</p>
 <h3 id="6-design-a-performance-comparison">6. Design a performance comparison<a class="heading-anchor" href="#6-design-a-performance-comparison" aria-label="Link to this section">#</a></h3>
 <p>Measure the full warmed operation with identical correct outputs and representative data.</p>
-<p><strong>Expected observation:</strong> Include scheduling, work, reduction and thread configuration.</p></article>
+<p><strong>Expected observation:</strong> Include scheduling, work, reduction and thread configuration.</p>
+<p><strong>Why it holds here:</strong> A speedup claim must compare warmed runs of the whole operation, with identical correct outputs, on the same thread configuration.</p>
+<p><strong>Plausible wrong approach:</strong> Timing 100 small integers once on two threads and calling it faster ignores the scheduling cost that dominates tiny workloads.</p>
+<p><strong>How to verify:</strong> Report the thread count from <code>Threads.nthreads()</code>, input size and repeated timings for one and two threads.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-030: all reference checks passed</code>:</p>
+<p><code>[0, 0]</code> gives 0 through the zero contributions, while <code>locked_counter(1, 7) == 7</code> is the serial baseline with no contention. The <code>before</code> copy confirms that splitting work into views reads the input without changing it, and the sum of squares of 1, 2 and 3 is 14.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> chunk_squares<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">13</span>
+    <span class="syntax-decorator">@test</span> chunk_squares<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test</span> locked_counter<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> locked_counter<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
+    before <span class="syntax-operator">=</span> copy<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> chunk_squares<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">14</span>
+    <span class="syntax-decorator">@test</span> values <span class="syntax-operator">==</span> before
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

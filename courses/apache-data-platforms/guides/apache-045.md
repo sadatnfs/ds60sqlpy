@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-008`, `apache-004`, `java-001`.
 
+## Key terms
+
+- **Execution graph:** The connected sources, operators and sinks of a Flink job, split into parallel subtasks for execution.
+- **JobManager:** The Flink process that coordinates a job, schedules its subtasks and triggers checkpoints.
+- **TaskManager:** A Flink worker process that runs subtasks in its task slots and exchanges records with other subtasks.
+- **Boundedness:** Whether a source eventually ends. A bounded file can run through streaming operators, so boundedness is separate from the API or execution mode.
+- **Subtask:** One parallel instance of an operator that a TaskManager executes.
+
 ## A stream job is an execution graph
 
 Flink executes a job as connected sources, transformations and sinks. A source
@@ -93,6 +101,26 @@ query. It writes final rows for east and west, which must equal the independent
 sum oracle. The result has two final groups even though the stream case can expose
 three incremental updates. This difference illustrates result semantics rather
 than a disagreement about the source amounts.
+
+The SQL mode registers the fixture as a filesystem table and asks the grouped
+question in batch mode:
+
+From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
+
+```java
+TableEnvironment table = TableEnvironment.create(settings);
+table.executeSql(
+  "CREATE TEMPORARY TABLE orders (id BIGINT, region STRING, amount BIGINT, event_ms BIGINT) " +
+    "WITH ('connector'='filesystem','path'='file:///state/input/orders.csv','format'='csv')"
+);
+var result = table.executeSql(
+  "SELECT region, SUM(amount) AS total FROM orders GROUP BY region ORDER BY region"
+);
+```
+
+The `CREATE TEMPORARY TABLE` statement names the same columns as the Java source,
+and `GROUP BY region` returns one final row per region instead of a stream of
+updates. The job then rejects any result other than `east,11` and `west,9`.
 
 A Table API or SQL planner can choose physical operators that differ from the
 handwritten Java graph. The user still needs compatible connectors, formats,

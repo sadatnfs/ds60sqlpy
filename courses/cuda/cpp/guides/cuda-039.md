@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement two-stream work with explicit event dependencies and annotate the resulting timeline.
+
 Work through *Streams as dependency-ordered work queues* with the concrete cases below. Finish with this evidence:
 correct results with explicit dependencies and an annotated timeline. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A stream is an ordered queue of work. Operations in one stream respect that stream's ordering, while separate streams need explicit dependencies when sharing data. Record an event after a producer and make the consumer stream wait for it before reading the result. Two streams allow concurrency; they do not guarantee simultaneous execution or isolated memory. Default-stream semantics depend on the selected configuration, so educational code should use explicit streams rather than relying on invisible ordering. Buffer lifetimes must cover all queued consumers, and a host completion check is required before validating or releasing their outputs.
+
+### Key terms
+
+- **Stream:** An ordered queue of device work in which operations run in submission order.
+- **cudaStreamWaitEvent:** A call that makes later work in one stream wait until an event recorded in another stream completes.
+- **Default stream:** The stream used when none is given, which can synchronize with other streams under legacy semantics.
+- **Concurrency:** Independent work in different streams that the device may overlap when resources allow, without any guarantee that it will.
 
 ## How to run and study this lesson
 

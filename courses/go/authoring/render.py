@@ -16,6 +16,7 @@ from scripts.format_inline_code import canonical_markdown  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import variants  # noqa: E402
 from outcomes import MINUTES, OUTCOMES  # noqa: E402
+from reasoning import LABELS, REASONING  # noqa: E402
 
 BASE = Path(__file__).resolve().parents[1]
 SPECS = []
@@ -70,8 +71,18 @@ def format_snippet(source):
     return textwrap.dedent(wrapped.split("func main() {\n", 1)[1].rsplit("\n}", 1)[0]).strip()
 
 
+def needed_helper(s, count):
+    """The helper source, or nothing when none of the shown cases refers to it."""
+    code = "\n".join(c["code"] for c in s["cases"][:count])
+    names = re.findall(r"\b(?:func|type|var|const)\s+(?:\([^)]*\)\s*)?(\w+)", s["helper"])
+    if any(re.search(r"\b" + re.escape(name) + r"\b", code) for name in names):
+        return s["helper"]
+    return ""
+
+
 def program(s, count=6):
-    used = s["helper"] + "\n" + "\n".join(c["code"] for c in s["cases"][:count])
+    helper = needed_helper(s, count)
+    used = helper + "\n" + "\n".join(c["code"] for c in s["cases"][:count])
     imports = sorted(
         set(
             ["fmt"]
@@ -90,8 +101,8 @@ def program(s, count=6):
         "package main\n\nimport (\n"
         + "".join('    "' + v + '"\n' for v in imports)
         + ")\n\nfunc check(ok bool, message string) { if !ok { panic(message) } }\n\n"
-        + s["helper"]
-        + "\n\nfunc main() {\n"
+        + (helper + "\n\n" if helper else "")
+        + "func main() {\n"
         + textwrap.indent(body, "    ")
         + '\n    fmt.Println("'
         + ("All lesson checks passed." if count == 6 else "Worked example checks passed.")
@@ -347,12 +358,28 @@ and finish with a fresh boundary case about {s["terms"][-1][0].lower()}.
 ```
 """
         answers = f"# {ident}: explained solutions\n\nThese are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.\n\n## Mechanism\n\n{s['model']}\n\n{s['anatomy']}\n\n"
+        notes = REASONING.get(ident)
+        if notes and len(notes["cases"]) != len(rows):
+            raise ValueError(ident + " reasoning needs one entry per case")
         for i, r in enumerate(rows, 1):
             lead = ""
             if i <= 2:
                 lead = f"The unchanged code is worked example {i}:\n\n"
             answers += f"## {i}. {r['title']}\n\n{r['task']}\n\n{lead}```go\n{r['shown']}\n```\n\n**Expected:** {r['expected']}\n\n{r['explanation']}\n\n"
-        answers += "## Transfer after comparison\n\nReturn to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.\n"
+            if notes:
+                answers += "".join(
+                    f"**{label}.** {text}\n\n"
+                    for label, text in zip(LABELS, notes["cases"][i - 1], strict=True)
+                )
+        answers += (
+            "## Transfer after comparison\n\n"
+            + (
+                notes["transfer"]
+                if notes
+                else "Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes."
+            )
+            + "\n"
+        )
         starter = (
             'package main\n\nimport "fmt"\n\nfunc main() {\n'
             + "".join(

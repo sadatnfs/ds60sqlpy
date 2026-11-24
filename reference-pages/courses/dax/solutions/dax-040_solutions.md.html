@@ -243,23 +243,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict January retention if member 100 has three February events.</p>
 <p>Retention stays 1/2. An event-count numerator would incorrectly inflate it.</p>
+<p><strong>Why it fits this model:</strong> Retention counts retained members, not events. DISTINCTCOUNT(Activity[MemberKey]) counts member 100 once however many February rows exist.</p>
+<p><strong>Tempting mistake:</strong> Using COUNTROWS(Activity) for the numerator gives 3 / 2 = 1.5, a retention rate above 100 percent.</p>
+<p><strong>How to confirm:</strong> With three February events for member 100, ActiveAtAgeOne stays 1 and RetentionAtAgeOne stays 0.5.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add a February event for member 200.</p>
 <p>Both January members would be active at age one, so retention becomes 1.</p>
+<p><strong>Why it fits this model:</strong> The denominator is the January cohort (100 and 200), fixed at entry. A February event for 200 adds to the numerator only.</p>
+<p><strong>Tempting mistake:</strong> Counting the new event as a new member, or letting the denominator follow the activity, gives a ratio that is no longer defined by the cohort.</p>
+<p><strong>How to confirm:</strong> ActiveAtAgeOne becomes 2 with EligibleMembers still 2, so retention is 1.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a cohort metric contract.</p>
 <p>For this fixture: enrolled members by signup month, any observed activity in the target calendar month, distinct member count, full enrollment denominator and a coverage guard.</p>
+<p><strong>Why it fits this model:</strong> Each part of the contract has a number here: cohorts by CohortMonth (202501 for 100 and 200), activity as any Activity row in the target month, a distinct member count, and observation through 202502.</p>
+<p><strong>Tempting mistake:</strong> Defining the cohort by first activity instead of enrollment. A member with no activity would never enter the denominator.</p>
+<p><strong>How to confirm:</strong> The contract reproduces case A (2 eligible, 1 active, 0.5) and case B (BLANK at age one).</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose dropping inactive member 400 before calculating the February entry rate.</p>
 <p>It would turn 1/2 into 1/1 and conceal inactive eligible members.</p>
+<p><strong>Why it fits this model:</strong> Members 300 and 400 enrolled in February. Only 300 was active, so the February entry activity rate is 1 / 2.</p>
+<p><strong>Tempting mistake:</strong> Removing member 400 because it has no activity makes the rate 1 / 1. Filtering on the outcome removes the evidence it should measure.</p>
+<p><strong>How to confirm:</strong> Case B returns EligibleMembers 2 and EntryActivityRate 0.5; COUNTROWS(CohortMember) must not depend on Activity.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why 202512 + 1 is not a valid next-month calculation.</p>
 <p>It gives 202513. Use a date-aware calendar mapping or EDATE with explicit period membership.</p>
+<p><strong>Why it fits this model:</strong> MonthKey is a YYYYMM label. Adding 1 works inside a year, 202501 to 202502, but gives 202513 after December.</p>
+<p><strong>Tempting mistake:</strong> Writing the next-month filter as MonthKey + 1 because it works for both cohorts here. It fails at the first year boundary.</p>
+<p><strong>How to confirm:</strong> Derive the next month from a date: EDATE(DATE(2025, 12, 1), 1) is 2026-01-01, giving 202601 through &#x27;Date&#x27;[MonthKey].</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the coverage rule to survival follow-up.</p>
 <p>Retain observation time and censoring status; choose an estimator matching those assumptions rather than zero-filling future outcomes.</p>
+<p><strong>Why it fits this model:</strong> Survival needs follow-up time and censoring. The February cohort has no month after entry in the observed range, so its members are censored, not lost.</p>
+<p><strong>Tempting mistake:</strong> Counting members 300 and 400 as churned at age one gives 0 / 2 retention, which conflicts with case B&#x27;s BLANK.</p>
+<p><strong>How to confirm:</strong> Record each member&#x27;s observed months; the February cohort contributes entry month only, and an estimator such as Kaplan-Meier uses that.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

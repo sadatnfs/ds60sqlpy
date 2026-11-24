@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Trace measurement_total(measurement(c(3,7), &quot;ms&quot;)).</p>
 <p>UseMethod selects measurement_total.measurement; it returns c(ms=10).</p>
 <p><strong>Expected evidence:</strong> Named total ms=10.</p>
+<p><strong>Approach:</strong> Follow the call in order: measurement() builds the list and validates it, UseMethod reads <code>class(x)</code>, finds &quot;measurement&quot; and runs measurement_total.measurement, which validates again and returns <code>setNames(sum(x$values), x$unit)</code>.</p>
+<p><strong>Why it holds here:</strong> 3 and 7 are finite and &quot;ms&quot; is one nonempty string, so both validator checks pass. sum gives 10, and setNames attaches the unit, so the result is the named value c(ms = 10) rather than a bare number.</p>
+<p><strong>Tempting mistake:</strong> Expecting a bare 10, or the default method. The default runs only when no class matches, and a total without its name loses the unit, so <code>identical(result, 10)</code> is FALSE.</p>
+<p><strong>Verify:</strong> <code>identical(measurement_total(x), c(ms = 10))</code> returns TRUE, and <code>names(measurement_total(x))</code> returns &quot;ms&quot;.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add one observation five to the input and check that the earlier object is unchanged.</p>
 <p>measurement(c(x$values,5), x$unit) has total 15; x retains total 10.</p>
 <p><strong>Expected evidence:</strong> Totals 10 and 15 with the same unit.</p>
+<p><strong>Approach:</strong> Build <code>y &lt;- measurement(c(x$values, 5), x$unit)</code> so the new observation goes through the same constructor and validator, then total both objects.</p>
+<p><strong>Why it holds here:</strong> Constructing a new object never touches x, so x keeps 3 and 7. y holds 3, 7 and 5 with the same unit, so its total is 15 ms while x still totals 10 ms.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>x$values &lt;- c(x$values, 5)</code>. That rebinds x itself, so the earlier total of 10 is gone, and it also skips the validator, so a nonfinite addition would not be caught.</p>
+<p><strong>Verify:</strong> <code>measurement_total(x)</code> returns c(ms = 10), and <code>measurement_total(y)</code> returns c(ms = 15).</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Implement an observed-count generic for measurement objects.</p>
 <p>measurement_count uses UseMethod and its measurement method returns length(validate_measurement(x)$values). The three-observation object returns 3L.</p>
 <p><strong>Expected evidence:</strong> Count 3L and explicit default rejection.</p>
+<p><strong>Approach:</strong> Define <code>measurement_count &lt;- function(x, ...) UseMethod(&quot;measurement_count&quot;)</code>, a measurement method returning <code>length(validate_measurement(x)$values)</code>, and a default method that stops.</p>
+<p><strong>Why it holds here:</strong> A separate generic keeps counting distinct from totaling, and validating inside the method rejects forged objects. length returns an integer, so the three observations in y give 3L.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>length(y)</code> directly. y is a list with two elements, values and unit, so the result is 2 no matter how many observations it holds.</p>
+<p><strong>Verify:</strong> <code>identical(measurement_count(y), 3L)</code> returns TRUE, and <code>measurement_count(1)</code> stops with the message &quot;unsupported count input&quot;.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose structure(list(values=c(1,Inf),unit=&quot;ms&quot;), class=&quot;measurement&quot;).</p>
 <p>The object dispatches as a measurement but violates the finite-vector invariant. The public operation must reject it.</p>
 <p><strong>Expected evidence:</strong> A matching finite-vector validation error.</p>
+<p><strong>Approach:</strong> Treat the object as forged: call <code>measurement_total()</code> on it and expect the validator&#x27;s error, because the method revalidates before summing.</p>
+<p><strong>Why it holds here:</strong> structure() only sets the class attribute; it checks nothing. Dispatch therefore selects the measurement method, and only the validator call inside that method sees Inf and stops.</p>
+<p><strong>Tempting mistake:</strong> Trusting <code>inherits(x, &quot;measurement&quot;)</code> as proof of validity. A method that summed directly would return c(ms = Inf), and that infinite total would flow into every average and report built on it.</p>
+<p><strong>Verify:</strong> <code>tryCatch(measurement_total(forged), error = conditionMessage)</code> returns &quot;values must be a finite numeric vector&quot;.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Define the empty-vector and empty-unit cases.</p>
 <p>measurement(numeric(0),&quot;ms&quot;) has total 0 and count 0; an empty unit string is rejected.</p>
 <p><strong>Expected evidence:</strong> Zero total; malformed unit rejected.</p>
+<p><strong>Approach:</strong> Construct <code>measurement(numeric(0), &quot;ms&quot;)</code> and check its total and count, then construct <code>measurement(1, &quot;&quot;)</code> and expect a rejection.</p>
+<p><strong>Why it holds here:</strong> numeric(0) is numeric, has no dim and contains no nonfinite value, so the validator accepts it; sum returns 0 and length returns 0L. The unit check requires nzchar, so the empty string fails.</p>
+<p><strong>Tempting mistake:</strong> Adding a rule that values must be nonempty. A period with no observations would then raise an error, although a total of 0 ms is a correct answer for it.</p>
+<p><strong>Verify:</strong> <code>measurement_total(empty)</code> returns c(ms = 0), <code>measurement_count(empty)</code> returns 0L, and <code>measurement(1, &quot;&quot;)</code> stops with &quot;unit must be one nonempty string&quot;.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain whether a measurement containing an environment would have the same copy guarantee.</p>
 <p>An environment can be shared across list copies. The current constructor excludes such values, so its tested numeric representation has a narrower value-semantics claim.</p>
 <p><strong>Expected evidence:</strong> State the representation-specific limit.</p>
+<p><strong>Approach:</strong> Separate the list container, which is copied when modified, from any component that is itself a reference, and state the copy guarantee only for the numeric representation the constructor accepts.</p>
+<p><strong>Why it holds here:</strong> In the reference, <code>copy$values[[1]] &lt;- 9</code> leaves x at 3, because changing a numeric component duplicates it. An environment stored in a list is not duplicated, so both copies hold the same one, and a change through either is seen by both.</p>
+<p><strong>Tempting mistake:</strong> Claiming value semantics for every measurement. Adding a cache environment field later would break the claim without any error.</p>
+<p><strong>Verify:</strong> <code>x$values[[1]]</code> still returns 3 after the copy is set to 9, while for a list field holding an environment <code>identical(copy$env, x$env)</code> returns TRUE after copying.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

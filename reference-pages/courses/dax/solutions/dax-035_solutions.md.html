@@ -237,23 +237,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict FiscalYear for January 3, 2025.</p>
 <p>The fiscal label is 2025.</p>
+<p><strong>Why it fits this model:</strong> FiscalYear is Year plus 1 from July onward. January 3, 2025 is in the July 2024 to June 2025 year, labeled by its ending year, 2025.</p>
+<p><strong>Tempting mistake:</strong> Reading the label from Year coincides in January but fails from July: July 1, 2024 has Year 2024 and FiscalYear 2025.</p>
+<p><strong>How to confirm:</strong> SELECTCOLUMNS for 2025-01-03 returns FiscalYear 2025; case A shows 2024-07-01 as 2025.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the naming convention to the starting year.</p>
 <p>July 1, 2024 would be labeled FY 2024. Update labels and documentation without pretending the population changed.</p>
+<p><strong>Why it fits this model:</strong> A starting-year label renames the same date set. July 2024 to June 2025 becomes FY 2024, and fiscal-to-date revenue through February 28, 2025 is still 123.</p>
+<p><strong>Tempting mistake:</strong> Changing the label but keeping the filter &#x27;Date&#x27;[FiscalYear] = 2025 now selects July 2025 onward, past the watermark, and returns BLANK.</p>
+<p><strong>How to confirm:</strong> Under the new labels, FiscalYear = 2024 and dates &lt;= 2025-02-28 return 123, the same population as case B.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a fiscal-to-date metric caption.</p>
 <p>For example: FY 2025 order revenue through February 28, 2025, fiscal year ending June 30.</p>
+<p><strong>Why it fits this model:</strong> The caption must say three things: which fiscal year, its end month, and the as-of date. 123 covers July 1, 2024 to February 28, 2025, and its sales are S4 to S8.</p>
+<p><strong>Tempting mistake:</strong> A caption of only &quot;FY 2025 revenue: 123&quot; reads as the full year to June 2025, of which four months are still unobserved.</p>
+<p><strong>How to confirm:</strong> The caption matches case B&#x27;s filters, and S4 to S8 add to 123.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose comparing this 123 with a complete prior fiscal year as if coverage matched.</p>
 <p>A partial-versus-full comparison mixes period completeness and performance. Construct a comparable prior as-of period.</p>
+<p><strong>Why it fits this model:</strong> A comparable prior uses the same span. The Date table starts on January 1, 2024, so FY 2024 has only its last six months here, and its 64 USD all comes from January 2024.</p>
+<p><strong>Tempting mistake:</strong> Calling 123 against 64 growth of about 92 percent compares 8 months of a year with an incomplete 6. A single March 2024 sale would push the full-year figure above the as-of value.</p>
+<p><strong>How to confirm:</strong> FY 2024 through 2024-02-29 returns 64, and the caption should note that the calendar starts on January 1, 2024.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why a fiscal label alone cannot define a 4-4-5 retail calendar.</p>
 <p>Month shifting is insufficient for irregular week-based periods; provide and validate the intended calendar metadata.</p>
+<p><strong>Why it fits this model:</strong> A 4-4-5 calendar groups whole weeks: 28, 28 and 35 days per quarter. RetailYear here is only a month shift that starts on February 1.</p>
+<p><strong>Tempting mistake:</strong> Treating RetailYear as week-based works for February 2025, which has exactly 28 days, but March has 31 days where a 4-4-5 period has 28.</p>
+<p><strong>How to confirm:</strong> A 4-4-5 quarter has 91 days, while February to April 2025 has 89; the calendar needs week-level metadata, not a label.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the boundary review to an accounting close.</p>
 <p>Model the chosen accounting period explicitly and retain reconciliation to transaction dates rather than silently substituting one for the other.</p>
+<p><strong>Why it fits this model:</strong> Keep both dates. S6 was ordered on January 5 and shipped on February 1, so the January close differs by role: 67 by order date, 47 by ship date.</p>
+<p><strong>Tempting mistake:</strong> Overwriting transaction dates with the accounting period loses the trace, and nobody can then explain the 20 USD gap between the two January figures.</p>
+<p><strong>How to confirm:</strong> January order revenue 67 equals January ship revenue 47 plus S6&#x27;s 20, which ships in February.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

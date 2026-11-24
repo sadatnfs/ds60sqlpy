@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-004.md</code>.</p>
 <h3 id="exercise-1-resolve-images-plot-svg-from-notes-week1-page-html">Exercise 1: Resolve ../images/plot.svg from /notes/week1/page.html.<a class="heading-anchor" href="#exercise-1-resolve-images-plot-svg-from-notes-week1-page-html" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The resolved path is /notes/images/plot.svg on the same origin.</p>
+<p><strong>Approach:</strong> Drop the file name <code>page.html</code> to get the base <code>/notes/week1/</code>, apply <code>..</code> once to reach <code>/notes/</code>, then append <code>images/plot.svg</code>.</p>
 <p><strong>Why:</strong> The base directory is /notes/week1/; .. moves up to /notes/, then images/plot.svg is appended, and the scheme and host stay the same.</p>
+<p><strong>Plausible wrong approach:</strong> Resolving from <code>/notes/week1/page.html/</code> as if the file were a directory fails because it leaves you one level too deep, at <code>/notes/week1/images/</code>.</p>
+<p><strong>How to verify:</strong> Run <code>new URL(&#x27;../images/plot.svg&#x27;, &#x27;https://example.test/notes/week1/page.html&#x27;).pathname</code> in the console and read /notes/images/plot.svg.</p>
 <h3 id="exercise-2-replace-vague-link-text-with-destination-specific-wording">Exercise 2: Replace vague link text with destination-specific wording.<a class="heading-anchor" href="#exercise-2-replace-vague-link-text-with-destination-specific-wording" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The link makes sense outside its surrounding sentence.</p>
+<p><strong>Approach:</strong> Rewrite each link so the text alone names the destination, such as Read the methods section instead of Click here.</p>
 <p><strong>Why:</strong> People often navigate by a list of links, where text such as click here gives no destination.</p>
+<p><strong>Plausible wrong approach:</strong> Adding a long <code>title</code> attribute to a vague link fails because many users never see the tooltip and link lists still read Click here.</p>
+<p><strong>How to verify:</strong> Read only the link texts in order, out of context; each one still tells you where it goes.</p>
 <h3 id="exercise-3-build-a-contents-list-that-navigates-to-three-local-sections">Exercise 3: Build a contents list that navigates to three local sections.<a class="heading-anchor" href="#exercise-3-build-a-contents-list-that-navigates-to-three-local-sections" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Every fragment matches one unique section id and works with keyboard activation.</p>
+<p><strong>Approach:</strong> Write three sections with unique ids first, then build the contents list by copying each id exactly into an <code>href</code> that begins with <code>#</code>.</p>
 <p><strong>Why:</strong> A fragment link scrolls to the element whose id matches; a duplicate or missing id makes the target ambiguous or absent.</p>
+<p><strong>Plausible wrong approach:</strong> Typing the ids twice by hand fails easily, since a single letter or case difference produces a link with no target.</p>
+<p><strong>How to verify:</strong> Tab to each contents link and press Enter; the URL fragment changes and the matching heading scrolls into view each time.</p>
 <h3 id="exercise-4-diagnose-a-link-whose-fragment-has-no-matching-id">Exercise 4: Diagnose a link whose fragment has no matching id.<a class="heading-anchor" href="#exercise-4-diagnose-a-link-whose-fragment-has-no-matching-id" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The link has no intended target even if its visual style looks correct.</p>
+<p><strong>Approach:</strong> Read the link&#x27;s <code>href</code>, strip the <code>#</code>, and search the document for an element with exactly that <code>id</code>.</p>
 <p><strong>Why:</strong> Fragment matching is exact and case-sensitive, so a link can look correct and still have no target.</p>
+<p><strong>Plausible wrong approach:</strong> Judging by the link&#x27;s styling fails because a broken fragment link looks identical to a working one until it is activated.</p>
+<p><strong>How to verify:</strong> <code>document.getElementById(&#x27;method&#x27;)</code> returns null for the broken target, and returns the section after the <code>id</code> and <code>href</code> match.</p>
 <h3 id="exercise-5-distinguish-a-disabled-action-from-an-unavailable-destination">Exercise 5: Distinguish a disabled action from an unavailable destination.<a class="heading-anchor" href="#exercise-5-distinguish-a-disabled-action-from-an-unavailable-destination" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A button can be disabled; a meaningful alternative explanation should replace a dead link.</p>
+<p><strong>Approach:</strong> Use a <code>button</code> with the <code>disabled</code> attribute for an action that is temporarily unavailable, and plain explanatory text where a destination does not exist.</p>
 <p><strong>Why:</strong> Buttons have a disabled state that blocks activation, while links do not; an unavailable destination should be explained in text instead of left as a dead link.</p>
+<p><strong>Plausible wrong approach:</strong> Leaving <code>&lt;a href=&quot;#&quot;&gt;</code> for a missing page fails because it still looks clickable, jumps to the top and gives no reason.</p>
+<p><strong>How to verify:</strong> The disabled button is skipped by Tab, and the unavailable destination is described in text with no focusable dead link.</p>
 <h3 id="exercise-6-explain-the-difference-between-absolute-root-relative-and-document-relative-paths">Exercise 6: Explain the difference between absolute, root-relative and document-relative paths.<a class="heading-anchor" href="#exercise-6-explain-the-difference-between-absolute-root-relative-and-document-relative-paths" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Each has a distinct base and can resolve differently when the document moves.</p>
+<p><strong>Approach:</strong> Resolve the same target with three hrefs: a full <code>https://</code> URL, a path starting with <code>/</code>, and a <code>../</code> path, noting the base each uses.</p>
 <p><strong>Why:</strong> An absolute URL includes scheme and host, a root-relative path starts at the site root and a document-relative path depends on the current document&#x27;s directory, so only the last one changes when the page moves.</p>
+<p><strong>Plausible wrong approach:</strong> Treating root-relative and document-relative paths as interchangeable fails as soon as the page moves to another folder.</p>
+<p><strong>How to verify:</strong> Changing the base URL in a <code>new URL(href, base)</code> console call alters the relative result but not the absolute one.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-004_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

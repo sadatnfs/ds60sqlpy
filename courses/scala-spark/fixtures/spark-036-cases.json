@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Reject identity collisions and admit the next batch",
       "input_contract": "Reject different content under an existing batch key, then publish a new source file 3:300 and resume the real query.",
-      "expected": "The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files.",
+      "expected": "The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1, 2, 3 and total 600 across two batch files.",
       "verification": "Assert collision rejection, old receipt equality, attempt sequence 0,0,1 and exact 3-row sink."
     }
   ],

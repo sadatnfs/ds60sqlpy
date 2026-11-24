@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A scale maps values from a data domain to a visual range. A linear scale preserves proportional differences: equal changes in input produce equal changes in output. The domain is expressed in data units, while the range can be pixels or SVG coordinates. Mixing those spaces is a common source of invisible or misleading marks.</p>
 <p>A vertical quantitative scale often has range <code>[bottom, top]</code> because SVG y increases downward. This reversal makes larger values appear higher. A band scale maps categories to discrete bands and provides a bandwidth for bars. The category order is an explicit design decision.</p>
 <p>Bars encode magnitude by length, so a zero baseline is usually essential. A line chart can sometimes use a narrower vertical domain if the axis clearly communicates it and the analytical purpose warrants it. Log scales require positive values in an ordinary positive domain; zero cannot be inserted casually. Explain the scale choice as part of the claim.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Domain:</strong> The input extent of a scale in data units, such as <code>[0, 10]</code> counts.</li>
+<li><strong>Range:</strong> The output extent of a scale in visual units, such as <code>[40, 600]</code> SVG coordinates. A vertical range is often written <code>[bottom, top]</code> because SVG y grows downward.</li>
+<li><strong>Linear scale:</strong> A callable <code>d3.scaleLinear</code> mapping in which equal input differences produce equal output differences. Its <code>.invert</code> method maps a coordinate back to a data value.</li>
+<li><strong>Band scale:</strong> A <code>d3.scaleBand</code> mapping from discrete categories to evenly spaced bands whose <code>bandwidth()</code> gives bar thickness. A category outside its domain returns undefined.</li>
+<li><strong>Zero baseline:</strong> Starting a bar chart&#x27;s quantitative domain at zero so each bar&#x27;s length stays proportional to its value.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>A linear scale is callable: <code>x(5)</code> returns a coordinate. Its <code>.invert(pixel)</code> maps a coordinate back to data, useful for interactions. <code>.clamp(true)</code> bounds output to the range but can hide out-of-domain values if used without a clear policy. <code>.nice()</code> adjusts domain endpoints for readable ticks; it does not modify the raw data.</p>
 <p>For the example, domain <code>[0, 10]</code> and range <code>[40, 600]</code> maps 0 to 40, 5 to 320 and 10 to 600. The zero-origin formula is simple enough to check by hand before relying on the library.</p>

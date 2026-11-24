@@ -124,7 +124,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Validate before returning) before changing anything, and confirm its observation: Three is accepted and a negative quantity is rejected.
 2. Compare Example B (Store an outcome for later inspection) with Example A and name the first line whose behavior differs. Its observation is: The stored outcome retains a QuantityError.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Try! turns recoverable failure into a trap.
+3. Before opening the explanation, check your task 3 attempt (Write a throwing validator for an inventory record) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

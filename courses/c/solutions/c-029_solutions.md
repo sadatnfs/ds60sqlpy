@@ -1,6 +1,6 @@
 # c-029: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-029_solution.c`, implements all six cases, from the "copy a representation safely" case to the "transfer a bounded byte copy" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -22,13 +22,13 @@ memcpy(&restored, bytes, sizeof restored);
 CHECK(restored == original);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `restored == original`. Restoring the original line brings back the worked observation: the restored value is 1.5.
+**Expected:** With `CHECK(restored != original);` the run stops with `Check failed` at the CHECK on `restored == original`, because the "copy a representation safely" case no longer shows that the restored value is 1.5. Restoring `CHECK(restored == original);` brings that observation back.
 
 The copied bytes originated from a valid object of the same type. This does not claim arbitrary external bytes are a valid float representation.
 
 ## Exercise 2: Inspect bytes without type punning: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `sum -= bytes[i];`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "inspect bytes without type punning" case, so one line now reads `sum -= bytes[i];`. Run the example with that line, use the failing CHECK to find why the bytes sum to 7 whatever the byte order no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -41,7 +41,7 @@ for (size_t i = 0; i < sizeof value; i++)
 CHECK(sum == 7u);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 7u`; after it the line reads `sum += bytes[i];` again and the bytes sum to 7 whatever the byte order.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 7u`. Once the line reads `sum += bytes[i];` again, the "inspect bytes without type punning" case again shows that the bytes sum to 7 whatever the byte order.
 
 Character access is the appropriate representation-view mechanism. The value 7 occupies one byte and the other bytes are zero in either byte order, so the sum does not depend on endianness. Reading the same storage through an incompatible pointer type would break the aliasing rule instead.
 
@@ -101,4 +101,4 @@ Here bytewise equality is the semantic contract because the objects are explicit
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a bounded byte copy" case to your own c-029 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected effective type failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "inspect bytes without type punning" case apart from ordinary output: the fixture proves its stated effective type, object representation and strict aliasing assumptions, not universal safety.

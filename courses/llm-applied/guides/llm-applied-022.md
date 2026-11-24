@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-021`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-021` (Optional pretrained-model adaptation with pinned offline artifacts). They introduce the notation this lesson needs for tool proposal and dispatcher.
 
 ## Learning objectives
 
@@ -76,9 +76,11 @@ The numeric implementation now uses scaled summation so two large finite values 
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-022/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-022.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-022.py` in the declared `python-core` profile. *Execute a bounded grouped mean*, *Reject an arbitrary operation* and *Reject invalid numeric values* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-022/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Reject an arbitrary operation* and *Reject invalid numeric values* reuse the helper and fixture introduced in *Execute a bounded grouped mean*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: A count 2 mean 2; B count 1 mean 10. Example B should give: ValueError before any computation. Example C should give: Invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -90,11 +92,11 @@ The accepted request is exactly operation=group_mean, group_by=group, value=valu
 
 The input grain is one identified observation per row. The output grain is one row per group, carrying count and mean. For A values 1, 3, the sum is four, count two and mean two. B has value ten, count one and mean ten. The descriptive difference B minus A is eight. The output preserves the different sample counts instead of presenting both means as equally supported by data.
 
-Aggregation can change meaning. The overall observation mean is(1+3+10)/3=\(\frac{14}{3}\). Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
+Aggregation can change meaning. The overall observation mean is (1+3+10)/3=\(\frac{14}{3}\). Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
 
-Finite input checks alone do not prevent intermediate overflow. With values[1e308, 1e308], ordinary floating summation can become infinity before division by two, although the mathematical mean is 1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.
+Finite input checks alone do not prevent intermediate overflow. With values `[1e308, 1e308]`, ordinary floating summation can become infinity before division by two, although the mathematical mean is 1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.
 
-For the two large equal values, scaled values are[1, 1], their mean is one and the output is 1e308. For equal opposite values, the scaled terms cancel to zero. This is an arithmetic stability improvement, not a guarantee of exactness for every representable combination; rounding and underflow remain part of floating-point computation. Use an explicitly different numeric representation if the task requires exact monetary units or exact decimal rounding rules.
+For the two large equal values, scaled values are `[1, 1]`, their mean is one and the output is 1e308. For equal opposite values, the scaled terms cancel to zero. This is an arithmetic stability improvement, not a guarantee of exactness for every representable combination; rounding and underflow remain part of floating-point computation. Use an explicitly different numeric representation if the task requires exact monetary units or exact decimal rounding rules.
 
 Missing values and booleans are rejected under this strict policy. Dropping None would change count and potentially bias the result; accepting True as one would conflate logical and measured data. A different missingness policy may be appropriate for another task, but it should have its own output count, denominator and explanation. Duplicate IDs are also a data-quality failure because repeated observations would change weights.
 
@@ -213,27 +215,30 @@ assert dispatch(request, huge)[0]["mean"] == 0.0
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: A count 2 mean 2; B count 1 mean 10. descriptive statistic available; causal claim not established. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Reject an arbitrary operation*, predict its result from the prompt alone: Submitoperationrun_sql or an extra query field. Write the guess beside the stated outcome (ValueError before any computation). Then predict how the decisive case, *Refuse an unsupported causal interpretation*, should end: Attach a descriptive result to a claim that group caused the difference without assignment-design evidence. For structured tools for extraction, aggregation and data-science work, the finish condition is: A count 2 mean 2; B count 1 mean 10. Descriptive statistic available; causal claim not established.
 
 ## Exercises
 
 1. **Execute a bounded grouped mean.** Use rows A1, A3, B10 and the admitted group_mean request.
    **Expected:** A count 2 mean 2; B count 1 mean 10.
    **Verify:** Save the assertion results for exercise 1, including A count 2 mean 2; B count 1 mean 10.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Reject an arbitrary operation.** Submitoperationrun_sql or an extra query field.
    **Expected:** ValueError before any computation.
    **Verify:** Save the assertion results for exercise 2, including ValueError before any computation.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Reject invalid numeric values.** Replace one value with True, NaN or None, then check large finite values and cancellation under the same numeric policy.
    **Expected:** invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0.
    **Verify:** Save the assertion results for exercise 3, including invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Enforce identity and work limits.** Duplicatea 1, then supply 21 unique rows.
    **Expected:** duplicate identity and row-limit violations rejected.
    **Verify:** Save the assertion results for exercise 4, including duplicate identity and row-limit violations rejected.
 
-5. **Verify an explanation against the artifact.** Check a proposed sentence saying groupAmean 2 against the result; reject a proposed mean 20.
+5. **Verify an explanation against the artifact.** Check a proposed sentence saying group A mean 2 against the result; reject a proposed mean 20.
    **Expected:** 2accepted; 20mismatch.
    **Verify:** Save the assertion results for exercise 5, including 2accepted; 20mismatch.
 
@@ -249,19 +254,21 @@ If a model proposes extra columns or arbitrary SQL, reject the unsupported reque
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate tool proposal and dispatcher for the fixture in *Execute a bounded grouped mean*. Hint 2: change one literal in *Reject an arbitrary operation* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Enforce identity and work limits*, with its stated result (duplicate identity and row-limit violations rejected). If *Refuse an unsupported causal interpretation* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Tool proposal, Dispatcher, Deterministic analysis artifact using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain tool proposal, dispatcher and deterministic analysis artifact using *Execute a bounded grouped mean*. Recompute its result (A count 2 mean 2; B count 1 mean 10) from the inputs. Change one input in *Reject invalid numeric values* and predict whether the stated result (invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0) still holds. Say which part of structured tools for extraction, aggregation and data-science work the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-021` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Execute a bounded grouped mean* cannot be reconstructed without the solution, revisit `llm-applied-021` (Optional pretrained-model adaptation with pinned offline artifacts). Otherwise keep the six observations from structured tools for extraction, aggregation and data-science work and continue to `llm-applied-023` (Domain assistant boundaries: freshness, injection, budgets and traces).
 
 ## Sources and verification status
 
-API and mechanism reference: [Python numeric types](https://docs.python.org/3.12/library/stdtypes.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for tool proposal: [Python numeric types](https://docs.python.org/3.12/library/stdtypes.html), reviewed 2026-10-22. The fixtures for *Execute a bounded grouped mean*, *Reject an arbitrary operation* and *Reject invalid numeric values* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

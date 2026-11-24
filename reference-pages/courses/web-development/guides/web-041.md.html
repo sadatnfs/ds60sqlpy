@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>An interface describes operations a caller can rely on without selecting a specific implementation. Composition builds behavior from collaborating objects. Dependency injection means supplying a dependency rather than constructing an unknown global dependency inside the operation. These techniques help when a real boundary varies, such as storage or time, but unnecessary interfaces can add ceremony to a tiny fixed calculation.</p>
 <p>A test double supplies a controlled implementation for a test. An in-memory repository can verify application behavior without a database, but it does not prove SQL syntax, transactions or connection recovery. Keep unit evidence separate from integration evidence. The same interface can make both tests possible without pretending they are identical.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Interface:</strong> A named set of method signatures that a class promises to implement, without providing any behavior itself.</li>
+<li><strong>Composition:</strong> Building behavior by holding other objects and calling them, instead of inheriting from a base class.</li>
+<li><strong>Dependency injection:</strong> Passing a collaborator, such as a clock or a store, into an object instead of letting the object create it.</li>
+<li><strong>Test double:</strong> A simple stand-in that implements the same interface as a real collaborator so a test can control its answers.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Define a repository interface with a narrow operation such as countCompleted. The service receives that interface through its constructor. A memory implementation holds synthetic records for this lesson. The service can then be tested with known data and no network. Later PDO lessons qualify the database boundary separately.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -216,6 +223,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   public function label(): string { return $this-&gt;store-&gt;completedCount() . &#x27; complete&#x27;; }
 }</code></pre>
 <p><strong>Expected observation:</strong> A controlled store makes the summary behavior deterministic.</p>
+<h3 id="contrast-case-a-service-that-builds-its-own-database-connection">Contrast case: a service that builds its own database connection<a class="heading-anchor" href="#contrast-case-a-service-that-builds-its-own-database-connection" aria-label="Link to this section">#</a></h3>
+<p>This summary class works in production, but try writing the zero completed lessons test for it.</p>
+<pre class="highlighted-code"><code class="language-php">final class SummaryFixed {
+  public function label(): string {
+    $pdo = new PDO(&#x27;sqlite:/srv/app/progress.sqlite&#x27;);
+    $count = (int) $pdo-&gt;query(
+      &#x27;SELECT COUNT(*) FROM progress WHERE done = 1&#x27;
+    )-&gt;fetchColumn();
+    return $count . &#x27; complete&#x27;;
+  }
+}</code></pre>
+<p>The class decides on its own which database file to open, so a test can only run where that exact path exists, and the answer depends on whatever rows happen to be stored there today. There is no way to hand it a store that reports 0 or 3 on demand, so the empty state and the normal state cannot both be checked deterministically. In the CLI worker the file does not exist and the constructor of PDO fails before any summary logic runs. Worked example 2 moves that choice out: the caller passes any <code>ProgressStore</code>, a memory store in tests and a PDO store in the application. The label logic is identical in both cases, and only the source of the count changes.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-identify-the-dependency-hidden-by-the-interface">Exercise 1: Identify the dependency hidden by the interface.<a class="heading-anchor" href="#exercise-1-identify-the-dependency-hidden-by-the-interface" aria-label="Link to this section">#</a></h4>

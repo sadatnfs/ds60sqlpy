@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-calculate-duplicate-join-output">Exercise 1: Calculate duplicate join output<a class="heading-anchor" href="#exercise-1-calculate-duplicate-join-output" aria-label="Link to this section">#</a></h3>
 <p>Multiply key multiplicities.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate duplicate join output</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Calculate duplicate join output by multiplying key multiplicities: A appears twice on each side, so the inner join produces <code>2*2 = 4</code> rows for A.</p>
+<p><strong>Why it is correct here.</strong> Each left row with key A pairs with each right row with key A. Duplicates multiply rather than add.</p>
+<p><strong>A plausible wrong approach.</strong> Expecting the output size to be at most the smaller input underestimates joins with duplicate keys, which can grow much larger than either input.</p>
+<p><strong>How to verify.</strong> The reference asserts four joined rows, all with key A. Compute the per-key product before running large joins.</p>
 <h3 id="exercise-2-add-unmatched-keys">Exercise 2: Add unmatched keys<a class="heading-anchor" href="#exercise-2-add-unmatched-keys" aria-label="Link to this section">#</a></h3>
 <p>Inner joins exclude unmatched keys while outer joins preserve defined null rows.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>add unmatched keys</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Add unmatched keys: B on the left and C on the right have no partners, so an inner join drops them, while a full outer join keeps each with nulls on the other side.</p>
+<p><strong>Why it is correct here.</strong> Join type defines what happens to unmatched rows. The outer join here would return six rows.</p>
+<p><strong>A plausible wrong approach.</strong> Using an inner join where unmatched records must be preserved silently drops them. Downstream totals then shrink without any error, which is harder to detect than a failure.</p>
+<p><strong>How to verify.</strong> Run inner, left and full outer joins on this fixture and count rows: 4, 5 and 6.</p>
 <h3 id="exercise-3-identify-skew">Exercise 3: Identify skew<a class="heading-anchor" href="#exercise-3-identify-skew" aria-label="Link to this section">#</a></h3>
 <p>Compare maximum and distribution not average alone.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>identify skew</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Identify skew by comparing the maximum partition with the distribution: one partition of 900 rows beside nine of about 11 has a small average but one task dominates.</p>
+<p><strong>Why it is correct here.</strong> Stage time is set by the slowest task. The maximum matters more than the mean for wall time.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the average partition size of about 100 rows hides the 900-row partition.</p>
+<p><strong>How to verify.</strong> Report maximum, median and percentiles of task durations or input sizes for the join stage.</p>
 <h3 id="exercise-4-compare-broadcast-and-shuffle">Exercise 4: Compare broadcast and shuffle<a class="heading-anchor" href="#exercise-4-compare-broadcast-and-shuffle" aria-label="Link to this section">#</a></h3>
 <p>Broadcast replicates one side and shuffle redistributes both as needed.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare broadcast and shuffle</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare broadcast and shuffle joins: a broadcast join copies the small side to every executor, while a shuffle join redistributes both sides by key.</p>
+<p><strong>Why it is correct here.</strong> Broadcast avoids shuffling the large side but requires the small side to fit in memory on every executor.</p>
+<p><strong>A plausible wrong approach.</strong> Broadcasting a table that is large after a filter misestimate can exhaust executor memory. The driver also collects the broadcast side before sending it, so a too-large table can fail on the driver first.</p>
+<p><strong>How to verify.</strong> Check the size estimate and the chosen strategy in the executed plan. Compare the estimated size with the actual rows read for the small side, to see whether the threshold decision was based on accurate statistics.</p>
 <h3 id="exercise-5-design-a-safe-rewrite">Exercise 5: Design a safe rewrite<a class="heading-anchor" href="#exercise-5-design-a-safe-rewrite" aria-label="Link to this section">#</a></h3>
 <p>Preserve duplicates and null-key semantics.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a safe rewrite</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a safe skew rewrite, such as salting a hot key, that preserves duplicates and null-key semantics.</p>
+<p><strong>Why it is correct here.</strong> Salting splits a hot key across partitions and must reunite the rows so the join output is the same. The other side&#x27;s rows for that key are replicated across every salt value, so each salted left row still meets every matching right row.</p>
+<p><strong>A plausible wrong approach.</strong> Dropping null keys or deduplicating to reduce skew changes results. Salting only one side without replicating the other loses matches, which reduces output silently rather than raising an error.</p>
+<p><strong>How to verify.</strong> Compare the rewritten join output with the original on the fixture, including duplicates and nulls. Then compare the maximum task duration before and after, which is the quantity the rewrite targeted.</p>
 <h3 id="exercise-6-inspect-final-aqe-decision">Exercise 6: Inspect final AQE decision<a class="heading-anchor" href="#exercise-6-inspect-final-aqe-decision" aria-label="Link to this section">#</a></h3>
 <p>Capture executed plan after action.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>inspect final AQE decision</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Inspect the final AQE decision after the action, since adaptive execution may switch to a broadcast join or split skewed partitions at runtime.</p>
+<p><strong>Why it is correct here.</strong> AQE uses statistics from completed stages, so the executed plan may differ from the initial one.</p>
+<p><strong>A plausible wrong approach.</strong> Citing the pre-execution plan reports a strategy that may not have run. Skew handling in particular appears only in the final plan, so the initial plan cannot show whether a skewed partition was split.</p>
+<p><strong>How to verify.</strong> Compare the initial explain output with the final plan in the SQL tab. Record the AQE settings with the plan, since disabling adaptive execution changes which plan runs.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Four A matches from two-by-two duplicate keys.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-121_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

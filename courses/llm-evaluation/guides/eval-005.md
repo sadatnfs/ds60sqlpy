@@ -8,7 +8,7 @@ Estimate a declared target mixture from an intentionally balanced evaluation and
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-005`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-005` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for stratified sampling and population weighting in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about stratification and inclusion probability: The reweighted target accuracy is 0.6; missing support and zero inclusion probability are rejected; the known-size and sampled-weight denominators give 0.2 and 1/3; concentrated weights drive the effective sample size below 1.03; both systems use identical IDs and weights. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Sampling for precision changes the observed mix
 
@@ -21,6 +21,13 @@ Let stratum \(h\) have target weight \(W_h\), with nonnegative weights summing t
 \]
 
 If the sample draws independently within every stratum, its sampling variance depends on the within-stratum variability and sample sizes. A population weight is not the same as an inverse inclusion-probability weight for an arbitrary sampling design. In particular, overlapping sampling frames or repeated users need more than a two-column weight lookup.
+
+## Key terms
+
+- **Stratification:** Sampling separately within defined subgroups, often oversampling rare but consequential requests.
+- **Stratified estimate:** The weighted sum of stratum means by declared target weights W_h, which describes the deployment mix.
+- **Inclusion probability:** The chance a unit enters the sample under the design, whose inverse is the Horvitz-Thompson weight.
+- **Effective sample size:** The equal-weight sample size with the same precision as a weighted sample, reduced by unequal weights.
 
 ## Worked case A: a balanced sample, an unequal target
 

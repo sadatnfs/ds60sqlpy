@@ -8,7 +8,7 @@ Audit a judge using identity-aware order swaps and held-out probability calibrat
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-011`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-011` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for judge calibration and presentation bias in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about LLM as judge and position bias: The order-swapped identity score for A is 0, perfect probabilities give Brier and ECE 0, maximally wrong ones give 1, a constant judge gets ECE 0 with Brier 0.25, and final labels never influence the frozen recalibration map. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Evaluate the evaluator
 
@@ -17,6 +17,14 @@ A model judge can help scale annotation, but its outputs remain measurements wit
 In a paired comparison, distinguish candidate identity from display position. If candidate A is shown on the left, a left win favors A; if A is shown on the right, that same left win favors B. Failing to invert the outcome after swapping positions produces an incorrect identity-level score. Counterbalancing makes position effects observable, although it does not automatically remove every interaction between position and answer quality.
 
 Research on model judges motivates audits of order, verbosity and related presentation effects. The examples here do not call a judge model. They use deliberately authored judge decisions so the accounting and failure modes can be checked independently of a particular model's behavior.
+
+## Key terms
+
+- **LLM as judge:** Using a language model to label or compare outputs, whose decisions remain measurements with error.
+- **Position bias:** A judge's preference for a display slot, such as the first or left answer, independent of quality.
+- **Counterbalancing:** Showing each pair in both orientations so position effects become observable.
+- **Identity consistency:** Whether a judge prefers the same candidate after its display position is swapped.
+- **Brier score:** The mean squared difference between predicted probabilities and binary outcomes.
 
 ## Worked case A: an always-left judge
 
@@ -221,7 +229,7 @@ Fit a mapping on development labels, then evaluate it on new families.
 
 ## Interactive figure variant
 
-Select **Interactive Plotly** in the lesson variant control. Its complete program uses the same authored inputs to draw the corresponding risk, calibration or policy curve. The captured figure retains a description and exact data table, and its JSON can be downloaded. Hovering a point does not create new statistical evidence. The default numerical reference remains separately saved.
+The LLM as judge and position bias curve for judge calibration and presentation bias is drawn from the same authored inputs when you pick **Interactive Plotly** in the variant control. Hover values add nothing beyond the *Invert the swapped result* numbers; the saved figure keeps a description, its exact data table and downloadable JSON, beside the separately saved numerical reference.
 
 ## Ask an AI tutor about this lesson
 

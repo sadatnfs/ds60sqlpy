@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The final networking project asks you to explain one complete application path and its failure boundaries. The application has a Deployment, an internal Service, a deliberately prepared external routing layer, TLS where the chosen lab supports it, and a narrow network policy. Every capability must be named rather than assumed.</p>
 <p>Start with the synthetic fixture and produce a design packet even when no advanced cluster is available. A live extension requires an explicitly owned target, installed controller support, an enforcing network implementation and a reviewed resource ledger. A source-only design is valuable, but it must not be labeled as an executed production deployment.</p>
 <p>The strongest learning outcome is independent diagnosis. You should be able to trace a request, identify a wrong selector or port, distinguish readiness from process state, explain public versus internal addresses, and recover from one controlled failure while preserving data and cleanup ownership.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Design packet:</strong> The capstone&#x27;s written design, with a diagram, manifests, ownership ledger, checks and limitations that align.</li>
+<li><strong>Resource ledger:</strong> A reviewed list of every object to create, its owner and how it is cleaned up.</li>
+<li><strong>Acceptance matrix:</strong> A table of checks across source validation, admission, controller conditions, endpoints, requests, policy flows, rollout and cleanup.</li>
+<li><strong>Controlled fault:</strong> Exactly one field changed in a copied source, used to show that the checks detect it and that recovery works.</li>
+<li><strong>Cleanup ownership:</strong> Deleting only the resources recorded as owned by the exercise, so shared objects survive.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Build an acceptance matrix across source validation, API admission, controller conditions, endpoint identity, internal request, external request, allowed/denied policy flows, rollout revision and cleanup. Mark unavailable capabilities explicitly. No row is automatically implied by another.</p>
 <p>Use the same source and object identities throughout a run. Record a fresh response from the intended revision after a repair. For stateful extensions, add independent data recovery evidence rather than assuming network success preserves records. The capstone is a bounded learning project, not a certificate of universal Kubernetes expertise.</p>

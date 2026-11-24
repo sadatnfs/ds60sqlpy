@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Justify a storage space for each kernel variable and verify the result on two input shapes.
+
 Work through *GPU memory spaces in one working program* with the concrete cases below. Finish with this evidence:
 a justified storage choice for each variable and a correct result across two input shapes. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Storage spaces describe accessibility and lifetime as well as likely performance. Global allocations can hold data used by many kernels. Shared memory belongs to a block and lasts for that block's execution. Registers hold thread-local values, but a large local array or register pressure can place values in local memory backed by device memory. Constant storage is useful for certain read-only patterns, especially broadcast-like access, but it is not an automatic speedup for arbitrary divergent addresses. A compiler resource report helps explain implementation choices; source variable scope alone does not prove where every value resides.
+
+### Key terms
+
+- **Register:** The fastest per-thread storage, allocated by the compiler from a finite per-SM register file.
+- **Local memory:** Per-thread storage that the compiler places in device memory, for example for spills or large local arrays.
+- **Shared memory:** On-chip storage visible to all threads of one block for the lifetime of that block.
+- **Constant memory:** Read-only device storage with a dedicated cache that suits one value broadcast to many threads.
+- **Global memory:** Device DRAM visible to every thread and kernel, with the largest capacity and the highest latency.
 
 ## How to run and study this lesson
 

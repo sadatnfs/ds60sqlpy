@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>State the observations needed to compare Import and DirectQuery fairly.</p>
 <p>Record equivalent populations, source/snapshot versions, filters, roles, function support and actual query/refresh evidence.</p>
+<p><strong>Why it fits this model:</strong> Two modes can only be compared when they read the same population at the same observation time. Case A matches at 187 because the data and definition are fixed.</p>
+<p><strong>Tempting mistake:</strong> Comparing yesterday&#x27;s Import snapshot with a DirectQuery result taken now and calling case B&#x27;s 10 USD gap (187 against 197) a formula difference.</p>
+<p><strong>How to confirm:</strong> Record source version, snapshot time, filters and role for both runs; with those equal, NetRevenue should agree, as case A&#x27;s 187 and 187 do.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the hypothetical later event to a correction of an existing line.</p>
 <p>Recompute the metric from the corrected source identity; do not assume every change adds an amount.</p>
+<p><strong>Why it fits this model:</strong> A correction replaces a value in an existing line instead of adding a new one. The change is whatever the corrected line differs by.</p>
+<p><strong>Tempting mistake:</strong> Assuming every source change adds an amount, so the later total must be 197. If S8 were corrected from 36 to 30, the total would fall.</p>
+<p><strong>How to confirm:</strong> Recompute from the corrected source: 187 - 36 + 30 = 181 for that illustrative correction, not 197.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a storage-mode capability review.</p>
 <p>List measures versus calculated columns/RLS uses, supported functions, regular/limited relationships, security identity, source constraints and refresh/fallback behavior.</p>
+<p><strong>Why it fits this model:</strong> Capability depends on each object and the relationship it uses, so the review lists every measure, calculated column and RLS rule in the model.</p>
+<p><strong>Tempting mistake:</strong> Checking only that NetRevenue (a plain SUM) works and assuming GrossRevenue&#x27;s row-level SUMX, the cost lookup through RELATED and the region role all behave the same.</p>
+<p><strong>How to confirm:</strong> For each object, record the target mode, relationship type, documented support and an observed test result, and mark anything untested as open.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose saying DirectQuery guarantees real-time truth.</p>
 <p>Define and measure an actual freshness/consistency requirement; the mode name alone does not satisfy it.</p>
+<p><strong>Why it fits this model:</strong> Freshness is a requirement with a number attached, such as visible within 15 minutes. A storage mode is one input to meeting it.</p>
+<p><strong>Tempting mistake:</strong> Treating the DirectQuery number, such as case B&#x27;s 197, as live truth while result caches, source replication lag or uncommitted transactions are still possible.</p>
+<p><strong>How to confirm:</strong> State the freshness target, insert a known test event like the 10 USD line, and time when it appears in the report.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why this course does not require a Fabric account for Direct Lake study.</p>
 <p>The lesson provides model and scenario reasoning offline. Live Direct Lake configuration would be a separately authorized external workflow.</p>
+<p><strong>Why it fits this model:</strong> The lesson&#x27;s numbers, 187 and 197, come from checked-in fixtures and stated assumptions, so the reasoning can be done offline.</p>
+<p><strong>Tempting mistake:</strong> Provisioning a trial capacity to &quot;verify&quot; 187. A live Direct Lake model adds account, permission and data questions that this lesson does not need to answer.</p>
+<p><strong>How to confirm:</strong> Reproduce 187 from the fixture query; treat any live Direct Lake configuration as a separately authorized task with its own evidence.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the freshness boundary to a cached feature table.</p>
 <p>Attach observation/version metadata and compare like-for-like populations before blaming a transformation for a changed total.</p>
+<p><strong>Why it fits this model:</strong> A cached feature table is a snapshot, like the stored model in case B. Its total reflects the version it was built from.</p>
+<p><strong>Tempting mistake:</strong> Blaming a transformation step when the feature table and source differ, when the cache was simply built before the late event.</p>
+<p><strong>How to confirm:</strong> Store build time and source version with the feature table; a gap that equals the late events, here exactly 10 USD, points to freshness.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

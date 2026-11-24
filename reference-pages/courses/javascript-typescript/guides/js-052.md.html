@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A summary reduces a distribution to selected quantities. The median is a central order statistic; quartiles describe the middle part of the distribution. A box plot communicates chosen quantiles and whisker rules, which must be stated because conventions differ. It does not preserve every feature of the raw observations.</p>
 <p>An uncertainty interval describes uncertainty about a parameter under a statistical procedure and assumptions. It is not the same as the spread of individual observations. A box showing sample quartiles and an interval around a mean answer different questions. Label both the statistic and the interval method when presenting estimates.</p>
 <p>The lesson uses tiny synthetic samples to make quartiles and interval endpoints inspectable. It does not claim a confidence interval from an arbitrary pair of numbers. A visualization may render a supplied estimate and bounds correctly while the upstream statistical method is invalid; those checks remain separate.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Quantile:</strong> The value below which a given fraction of sorted observations falls. <code>d3.quantileSorted</code> assumes its input is already sorted in ascending order.</li>
+<li><strong>Median:</strong> The 0.5 quantile, the middle value of the sorted data; for <code>[1, 2, 3, 4, 5]</code> it is 3.</li>
+<li><strong>Box plot:</strong> A summary that draws the first and third quartiles as a box, the median as a line and whiskers by a stated rule. It omits most features of the raw observations.</li>
+<li><strong>Sampling uncertainty:</strong> Uncertainty about a parameter estimate that comes from observing only a sample. An interval from a stated procedure describes it, which differs from the spread of individual observations.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Sort numerical values before using a function that assumes sorted input. <code>d3.quantileSorted</code> computes a quantile of an ordered array. For <code>[1, 2, 3, 4, 5]</code>, median is 3 and the first and third quartiles are 2 and 4. A simple box can map those values to x positions, with a median line inside.</p>
 <p>For a supplied interval, check lower &lt;= estimate &lt;= upper before drawing a segment and point. If the interval spans zero, that visual fact should not be hidden by a truncated axis. The statistical interpretation still depends on the stated estimator and procedure.</p>

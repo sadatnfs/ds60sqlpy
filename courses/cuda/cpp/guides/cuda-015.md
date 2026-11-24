@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Compute correct results on non-square images while preserving padding and stating the edge policy.
+
 Work through *Two-dimensional indexing and image kernels* with the concrete cases below. Finish with this evidence:
 correct non-square results, preserved padding and explicit edge behavior. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A dim3 value holds three dimensions, though an image often uses only x and y. Map x to a column and y to a row, then calculate storage using the row stride. Logical width and stored leading dimension are different quantities. The grid must cover both axes, and each thread predicates both coordinate bounds before accessing storage. This is especially important for rectangular images because square examples can conceal a swapped width and height. If an allocation uses a byte pitch, convert coordinates using that byte quantity deliberately rather than treating it as an element stride.
+
+### Key terms
+
+- **dim3:** A CUDA type holding x, y and z extents for grid and block shapes.
+- **Leading dimension:** The stored distance in elements between the starts of consecutive rows, which can exceed the logical width.
+- **Pitched allocation:** A two-dimensional allocation whose row length in bytes, the pitch, is padded for alignment.
+- **Boundary policy:** The declared rule for outputs whose coordinates or neighbors fall outside the image.
 
 ## How to run and study this lesson
 

@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-trace-storage-references">Exercise 1: Trace storage references<a class="heading-anchor" href="#exercise-1-trace-storage-references" aria-label="Link to this section">#</a></h3>
 <p>The manifest describes desired storage. Binding status and application access need runtime evidence. A missing class is a capability problem, not a reason to substitute an arbitrary hostPath.</p>
 <p><strong>Expected:</strong> The data claim is mounted at /data and depends on a qualified lesson-local class.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Follow volumeClaimTemplates name data to the volumeMounts entry and storageClassName to the class.</li>
+<li><strong>Why it is correct:</strong> The StatefulSet creates one claim per ordinal from the template, and the mount with the same name places it at /data.</li>
+<li><strong>Plausible wrong approach:</strong> Adding a separate PersistentVolumeClaim and referencing it from the Pod template would make all replicas share one claim.</li>
+<li><strong>How to verify:</strong> Each link cites a field: template name, mountPath /data and storageClassName.</li>
+</ul>
 <h3 id="exercise-2-record-initial-data-once">Exercise 2: Record initial data once<a class="heading-anchor" href="#exercise-2-record-initial-data-once" aria-label="Link to this section">#</a></h3>
 <p>An initializer that recreates the expected bytes after loss can fake persistence. The writer should refuse an existing marker or otherwise make initialization history explicit, while later readers remain read-only.</p>
 <p><strong>Expected:</strong> One initialization receipt, claim/PV identities and a known marker checksum.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run the writer once with exclusive create and record claim UID, PV name and SHA-256.</li>
+<li><strong>Why it is correct:</strong> Exclusive create fails if the marker already exists, so a second run cannot silently overwrite the initial data.</li>
+<li><strong>Plausible wrong approach:</strong> Writing with plain overwrite would hide an accidental second run behind a new hash.</li>
+<li><strong>How to verify:</strong> One receipt holds claim UID, bound PV and marker hash.</li>
+</ul>
 <h3 id="exercise-3-replace-only-the-pod">Exercise 3: Replace only the Pod<a class="heading-anchor" href="#exercise-3-replace-only-the-pod" aria-label="Link to this section">#</a></h3>
 <p>The StatefulSet can replace a Pod while reusing its claim. The before/after graph should show which identity changed and which remained, not merely a familiar Pod name.</p>
 <p><strong>Expected:</strong> New Pod UID with the intended stable ordinal and same claim binding.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Delete only the recorded Pod and compare UID, ordinal name and claim before and after.</li>
+<li><strong>Why it is correct:</strong> The StatefulSet recreates the same ordinal name and reattaches the same claim, while the Pod gets a new UID.</li>
+<li><strong>Plausible wrong approach:</strong> Scaling the StatefulSet down and up to replace the Pod changes more than one Pod and is not the minimal operation.</li>
+<li><strong>How to verify:</strong> Only the Pod UID changed; name and claim binding are the same.</li>
+</ul>
 <h3 id="exercise-4-verify-the-marker-independently">Exercise 4: Verify the marker independently<a class="heading-anchor" href="#exercise-4-verify-the-marker-independently" aria-label="Link to this section">#</a></h3>
 <p>The independent read closes the application-data boundary. It catches empty or wrong storage even if the container starts successfully. This is the core persistence evidence for the tested failure.</p>
 <p><strong>Expected:</strong> Hash remains h1 in the synthetic trace; actual live bytes/hash are recorded separately.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run only the read-only reader and hash the marker it reads.</li>
+<li><strong>Why it is correct:</strong> If the claim was reattached, the bytes are unchanged and the hash equals h1.</li>
+<li><strong>Plausible wrong approach:</strong> Running the writer again to check the file would recreate the evidence you are trying to verify.</li>
+<li><strong>How to verify:</strong> The reader hash equals the recorded initialization hash, with live values kept separate.</li>
+</ul>
 <h3 id="exercise-5-explain-retention-and-reclaim">Exercise 5: Explain retention and reclaim<a class="heading-anchor" href="#exercise-5-explain-retention-and-reclaim" aria-label="Link to this section">#</a></h3>
 <p>Retaining a PVC after StatefulSet deletion does not guarantee data survives node or cluster destruction. The handoff should state the chosen synthetic-data retention and eventual cleanup policy explicitly.</p>
 <p><strong>Expected:</strong> Each lifecycle boundary has its own policy; retention is not backup.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> For each deletion, name the deleted object and the policy that decides what happens next.</li>
+<li><strong>Why it is correct:</strong> StatefulSet claim retention governs the PVC when the StatefulSet or replicas are removed, and the PV reclaim policy governs the volume when the claim is deleted.</li>
+<li><strong>Plausible wrong approach:</strong> Calling Retain a backup ignores that the data still lives on one volume with no independent copy.</li>
+<li><strong>How to verify:</strong> Each deletion cites claim retention or PV reclaim, and retention is distinguished from backup.</li>
+</ul>
 <h3 id="exercise-6-diagnose-a-pending-claim">Exercise 6: Diagnose a Pending claim<a class="heading-anchor" href="#exercise-6-diagnose-a-pending-claim" aria-label="Link to this section">#</a></h3>
 <p>Storage setup is a separate host responsibility. A bounded lesson should report an unavailable class or incompatible mode instead of deleting data or installing a provisioner automatically.</p>
 <p><strong>Expected:</strong> No destructive claim reset; the missing capability or binding condition is identified.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read PVC events and binding status, then check the StorageClass provisioner, capacity and topology.</li>
+<li><strong>Why it is correct:</strong> A Pending claim means no volume was bound, and the event usually names the missing class, capacity or zone.</li>
+<li><strong>Plausible wrong approach:</strong> Deleting and recreating the claim discards the evidence and returns to the same Pending state.</li>
+<li><strong>How to verify:</strong> The check uses class, events or binding status and leaves the claim in place.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A healthy Pod or recreated constant file does not prove old data survived. Use a marker whose initialization is not silently repeated, and keep writer/read operations separate. A Bound PVC alone does not prove the application can read the intended bytes.</p>
 <p>Do not delete a claim as a routine repair for a Pending Pod. Inspect binding, events, access mode and ownership first. Live storage operations remain unavailable until the host capability and retention choice are explicit.</p></article>

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-012.md</code>.</p>
 <h3 id="exercise-1-explain-the-reference-for-rem-and-a-typical-em-use">Exercise 1: Explain the reference for rem and a typical em use.<a class="heading-anchor" href="#exercise-1-explain-the-reference-for-rem-and-a-typical-em-use" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Rem uses the root font size; em commonly scales with the relevant element&#x27;s font size.</p>
+<p><strong>Approach:</strong> Name the reference element for each unit: <code>rem</code> reads the root font size, while <code>em</code> reads the current element&#x27;s font size (or the parent&#x27;s when used in <code>font-size</code>).</p>
 <p><strong>Why:</strong> rem always refers to the root element&#x27;s font size, while em refers to the current element&#x27;s font size, or to the parent&#x27;s when it is used in font-size itself.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>em</code> for nested list text fails in a different way than expected, because each level multiplies the inherited size and text keeps shrinking or growing.</p>
+<p><strong>How to verify:</strong> Set <code>html { font-size: 20px; }</code> and confirm in Computed that <code>2rem</code> resolves to 40px regardless of the parent&#x27;s size.</p>
 <h3 id="exercise-2-apply-a-system-font-stack-without-network-dependencies">Exercise 2: Apply a system font stack without network dependencies.<a class="heading-anchor" href="#exercise-2-apply-a-system-font-stack-without-network-dependencies" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The page remains readable offline on different operating systems.</p>
+<p><strong>Approach:</strong> Set <code>font-family: system-ui, sans-serif</code> so each operating system uses its installed interface font without any download.</p>
 <p><strong>Why:</strong> A system font stack uses fonts that are already installed, so text renders offline without network requests.</p>
+<p><strong>Plausible wrong approach:</strong> Linking a hosted web font fails in this pad because external requests are blocked, so the fallback appears with an unexpected layout shift.</p>
+<p><strong>How to verify:</strong> The Network panel shows no font requests, and the Computed panel lists a rendered local font family.</p>
 <h3 id="exercise-3-build-a-reading-page-with-bounded-measure-and-scalable-headings">Exercise 3: Build a reading page with bounded measure and scalable headings.<a class="heading-anchor" href="#exercise-3-build-a-reading-page-with-bounded-measure-and-scalable-headings" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Text stays comfortable at wide and narrow sizes without fixed-height clipping.</p>
+<p><strong>Approach:</strong> Combine a <code>.prose</code> column with <code>max-inline-size: 65ch</code>, a unitless line height and the clamped heading rule from worked example 2.</p>
 <p><strong>Why:</strong> A bounded measure keeps line length readable, and clamp scales headings between safe limits while respecting the reader&#x27;s font size.</p>
+<p><strong>Plausible wrong approach:</strong> Giving the reading column a fixed <code>height</code> fails because longer content or larger text then overflows or is clipped.</p>
+<p><strong>How to verify:</strong> At wide, narrow and enlarged sizes the column stays narrow enough to read and no paragraph is clipped.</p>
 <h3 id="exercise-4-diagnose-text-that-overlaps-after-zooming">Exercise 4: Diagnose text that overlaps after zooming.<a class="heading-anchor" href="#exercise-4-diagnose-text-that-overlaps-after-zooming" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect fixed heights, line heights and positioned containers rather than disabling zoom.</p>
+<p><strong>Approach:</strong> Zoom until overlap appears, then inspect the overlapping elements for fixed heights, pixel line heights or absolute positioning.</p>
 <p><strong>Why:</strong> Zoom enlarges text but fixed boxes keep their size, so content spills out and overlaps.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>maximum-scale=1</code> to the viewport meta tag fails because it blocks the reader&#x27;s zoom instead of fixing the layout.</p>
+<p><strong>How to verify:</strong> After replacing fixed heights with content-driven sizing, the same zoom level shows no overlapping lines.</p>
 <h3 id="exercise-5-test-at-increased-browser-zoom-with-long-content">Exercise 5: Test at increased browser zoom with long content.<a class="heading-anchor" href="#exercise-5-test-at-increased-browser-zoom-with-long-content" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Reading order, text visibility and controls remain intact.</p>
+<p><strong>Approach:</strong> Paste several long paragraphs, then step browser zoom up to 200 percent and scroll through the whole page.</p>
 <p><strong>Why:</strong> Text must remain usable when resized to 200 percent, which reveals fixed-size assumptions in the layout.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only the top of the page fails because clipping often appears lower, inside cards or footers with fixed sizes.</p>
+<p><strong>How to verify:</strong> At 200 percent every paragraph is readable in order and every link and button can still be reached with Tab.</p>
 <h3 id="exercise-6-explain-why-ch-is-a-useful-approximation-rather-than-a-word-count-guarantee">Exercise 6: Explain why ch is a useful approximation rather than a word-count guarantee.<a class="heading-anchor" href="#exercise-6-explain-why-ch-is-a-useful-approximation-rather-than-a-word-count-guarantee" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It measures the font&#x27;s zero glyph, and actual character widths vary.</p>
+<p><strong>Approach:</strong> Compare a line of digits with a line of mixed letters at <code>65ch</code> and note how many characters actually fit.</p>
 <p><strong>Why:</strong> 1ch is the advance width of the 0 glyph, so a line of narrow letters fits more characters and a line of wide letters fewer.</p>
+<p><strong>Plausible wrong approach:</strong> Promising exactly 65 letters per line fails because <code>ch</code> is the width of 0, and narrow letters like i let more characters fit.</p>
+<p><strong>How to verify:</strong> Counting characters on two different lines of the same column gives different totals near, but not equal to, 65.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-012_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

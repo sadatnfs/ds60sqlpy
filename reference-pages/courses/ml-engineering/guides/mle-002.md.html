@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A historical model must use information eligible at its decision time. Event time describes when something happened; knowledge or availability time describes when the system could use it. A backfilled event can have an old event time and a later known time. A row that looks historical can therefore contain future knowledge.</p>
 <p>The shared dataset uses integer hours relative to a synthetic epoch. Features become available two hours before each prediction cutoff, while labels become available four hours afterward. At training cutoff 180, the most recent decisions do not all have mature labels. Selecting every decision before 180 would include three outcomes that were not yet available.</p>
 <p>The worked cases make both boundaries explicit. The first chooses a feature using event and known clocks. The second separates decision eligibility from label maturity. These rules should be part of the data-generation and evaluation process, not comments added after a score has already been selected.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Event time:</strong> When something happened in the world, as recorded on the event itself.</li>
+<li><strong>Availability time:</strong> When the system could first know and use a value. A backfilled event can have an old event time and a much later availability time.</li>
+<li><strong>Label delay:</strong> The gap between a decision and the moment its outcome becomes available; here labels arrive four hours after each prediction cutoff.</li>
+<li><strong>Label maturity:</strong> A label is mature at a cutoff when its availability time is at or before that cutoff, so it may be used for training or evaluation.</li>
+<li><strong>Leakage:</strong> Using information that was not available at the decision time, such as a future known value or an immature label, which inflates measured performance.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Feature eligibility uses both event_at&lt;=cutoff and known_at&lt;=cutoff in the first fixture. Training eligibility additionally requires label_available_at&lt;=training_cutoff. The example keeps the original decision identifier so every excluded record can be explained. Use explicit timestamp units and boundary operators when adapting the integer-clock illustration.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

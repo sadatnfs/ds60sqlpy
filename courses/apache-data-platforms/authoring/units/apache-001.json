@@ -5,6 +5,44 @@
   "minutes": 50,
   "prerequisites": [],
   "concepts": ["platform boundaries", "data contract", "independent oracle"],
+  "key_terms": [
+    [
+      "Data contract",
+      "The agreed meaning of a dataset's records, types, units, time period and population, such as which orders count as paid. A system can satisfy its interface and still violate this contract."
+    ],
+    [
+      "Platform boundary",
+      "A point where responsibility passes between storage, file format, query engine, transport, catalog, orchestration or governance. Naming the boundary states which component a claim is about."
+    ],
+    [
+      "Arrow IPC",
+      "Arrow's interprocess communication format, which carries typed record batches between processes without converting them into rows of Python objects."
+    ],
+    [
+      "DataFusion",
+      "The Apache query engine, written in Rust and used here through its Python bindings, that plans and executes SQL over Arrow data inside one process."
+    ],
+    [
+      "Independent oracle",
+      "An expected answer derived separately from the computation under test, such as a hand-computed sum over listed order identities, used to judge whether an observed result is correct."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Group paid orders by region with Arrow compute",
+      "language": "python",
+      "code": "import pyarrow as pa\n\norders = pa.table(\n    {\n        \"id\": [1, 2, 3],\n        \"region\": [\"east\", \"east\", \"west\"],\n        \"amount_minor\": [400, 700, 900],\n        \"paid\": [True, True, False],\n    }\n)\npaid = orders.filter(orders[\"paid\"])\nprint(paid.group_by(\"region\").aggregate([(\"amount_minor\", \"sum\"), (\"id\", \"count\")]))",
+      "output": "pyarrow.Table\nregion: string\namount_minor_sum: int64\nid_count: int64\n----\nregion: [[\"east\"]]\namount_minor_sum: [[1100]]\nid_count: [[2]]",
+      "interpretation": "Only the east group survives because the single west order is unpaid, so the filter removed it before grouping. The east sum of 1100 minor units over two orders is the number every later engine in this lesson must reproduce. If a run reports a west row, the paid predicate was applied after aggregation or ignored, and that is a correctness bug rather than a formatting difference."
+    },
+    {
+      "title": "Prove an IPC round trip keeps the schema",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.ipc as ipc\n\norders = pa.table({\"id\": [1, 2], \"amount_minor\": [400, 700]})\nsink = pa.BufferOutputStream()\nwith ipc.new_stream(sink, orders.schema) as writer:\n    writer.write_table(orders)\nrestored = ipc.open_stream(sink.getvalue()).read_all()\nprint(restored.schema)\nprint(restored.equals(orders))",
+      "output": "id: int64\namount_minor: int64\nTrue",
+      "interpretation": "The printed schema still says int64 for both columns and the equality check returns True, which shows the stream carried types as well as values. A CSV export of the same rows would arrive as text and force the reader to guess types again. When a handoff between tools changes a column from int64 to double or string, inspect the producer schema first, because the IPC format itself does not reinterpret types."
+    }
+  ],
   "evidence": "Exact real-library outputs checked against small independent records, with explicit rejected inputs.",
   "sources": [
     ["Arrow Python data model", "https://arrow.apache.org/docs/python/data.html"],

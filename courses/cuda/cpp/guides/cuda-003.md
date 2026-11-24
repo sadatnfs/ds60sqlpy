@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Place six CUDA failure messages at the responsible layer of the stack, from application to host driver.
+
 Work through *The software stack from application to driver* with the concrete cases below. Finish with this evidence:
 correctly place six failure messages at their responsible layer. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 An application calls a runtime API or a higher-level library. User-space CUDA libraries then cooperate with the host NVIDIA driver to access a device. A container packages application code and user-space dependencies; it does not package a physical GPU or replace the host kernel driver. The toolkit includes tools such as the nvcc compiler. A framework wheel may bring compatible CUDA user-space components without a general-purpose CUDA compiler. Conversely, nvcc can exist on a machine where no GPU is visible. Each observation answers a different question: compilation, driver management access, framework device discovery, allocation and numerical execution are separate checks.
+
+### Key terms
+
+- **CUDA runtime API:** The library interface, such as `cudaMalloc` and kernel launch syntax, that applications call to manage devices and work.
+- **Host driver:** The NVIDIA driver installed on the host operating system that controls the physical GPU; a container image cannot supply it.
+- **CUDA toolkit:** The developer package with `nvcc`, headers, libraries and tools for building CUDA programs.
+- **nvidia-smi:** A driver management utility that reports visible GPUs and driver state but does not prove that a kernel computes correctly.
 
 ## How to run and study this lesson
 

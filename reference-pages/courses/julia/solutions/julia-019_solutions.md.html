@@ -195,24 +195,56 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-019-explained-reference">julia-019: explained reference<a class="heading-anchor" href="#julia-019-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-019_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Solve with a factorization, then check the original equation. Worked example A factorizes <code>[3.0 1.0; 1.0 2.0]</code> with <code>lu</code> and solves for <code>[9.0, 8.0]</code>. Worked example B builds a design with two identical <code>x</code> columns, so its rank is 2 of 3 and many coefficient vectors give the same fitted values.</p>
 <h3 id="1-verify-a-solution">1. Verify a solution<a class="heading-anchor" href="#1-verify-a-solution" aria-label="Link to this section">#</a></h3>
 <p>A residual is a useful numerical check but must be interpreted alongside conditioning.</p>
 <p><strong>Expected observation:</strong> The residual is near zero.</p>
+<p><strong>Why it holds here:</strong> <code>[3 1; 1 2] * [2, 3]</code> gives 6 + 3 = 9 and 2 + 6 = 8, so the residual <code>matrix * solution - target</code> is close to zero.</p>
+<p><strong>Plausible wrong approach:</strong> Checking the solution against itself, for example by solving twice, cannot detect a transcription error in the matrix.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>solution ≈ [2.0, 3.0]</code> and <code>norm(matrix * solution - target) &lt; 1e-12</code>.</p>
 <h3 id="2-reuse-a-factorization">2. Reuse a factorization<a class="heading-anchor" href="#2-reuse-a-factorization" aria-label="Link to this section">#</a></h3>
 <p>Reusable factorization separates setup from repeated solves.</p>
 <p><strong>Expected observation:</strong> The solution doubles for this linear system.</p>
+<p><strong>Why it holds here:</strong> Linearity means <code>factorization \ (2target)</code> returns twice the old solution, <code>[4, 6]</code>, reusing the same LU factors.</p>
+<p><strong>Plausible wrong approach:</strong> Calling <code>matrix \ (2target)</code> inside a loop of many right-hand sides refactorizes each time and wastes the setup work.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>factorization \ (2target) ≈ 2solution</code>.</p>
 <h3 id="3-expose-nonidentification">3. Expose nonidentification<a class="heading-anchor" href="#3-expose-nonidentification" aria-label="Link to this section">#</a></h3>
 <p>Fitted-value agreement does not uniquely identify every parameter.</p>
 <p><strong>Expected observation:</strong> Predictions on the design remain unchanged.</p>
+<p><strong>Why it holds here:</strong> The design has columns <code>1</code>, <code>x</code> and <code>x</code>, so <code>design * [0, 1, -1]</code> is zero and adding it leaves every prediction unchanged.</p>
+<p><strong>Plausible wrong approach:</strong> Reading the second coefficient as the effect of <code>x</code> assumes identification that the duplicated column removes.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>rank(design) == 2</code> and that <code>design * alternative ≈ target</code>.</p>
 <h3 id="4-interpret-a-pseudoinverse">4. Interpret a pseudoinverse<a class="heading-anchor" href="#4-interpret-a-pseudoinverse" aria-label="Link to this section">#</a></h3>
 <p>It does not supply missing scientific identification assumptions.</p>
 <p><strong>Expected observation:</strong> The pseudoinverse solution has smaller norm than the shifted alternative.</p>
+<p><strong>Why it holds here:</strong> The pseudoinverse picks the minimum-norm solution, which splits the slope of 2 evenly to give <code>[1, 1, 1]</code> with norm sqrt(3), while the shifted <code>[1, 2, 0]</code> has norm sqrt(5).</p>
+<p><strong>Plausible wrong approach:</strong> Presenting the pseudoinverse coefficients as the true effects treats a tie-breaking rule as scientific evidence.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>norm(coefficients) &lt; norm(alternative)</code>; print both vectors and their norms.</p>
 <h3 id="5-use-the-correct-transpose">5. Use the correct transpose<a class="heading-anchor" href="#5-use-the-correct-transpose" aria-label="Link to this section">#</a></h3>
 <p>Matching dimensions alone is insufficient to choose the correct complex inner-product convention.</p>
 <p><strong>Expected observation:</strong> The products are 7 and 3-2im.</p>
+<p><strong>Why it holds here:</strong> <code>values&#x27; * values</code> conjugates, giving |1+i|^2 + |2-i|^2 = 2 + 5 = 7; <code>transpose(values) * values</code> does not, giving (1+i)^2 + (2-i)^2 = 3 - 2i.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>transpose</code> for a complex norm because the shapes match returns a complex number that is not a length.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>values&#x27; * values == 7+0im</code>, <code>transpose(values) * values == 3-2im</code> and <code>norm(values)^2 ≈ 7</code>.</p>
 <h3 id="6-assess-sensitivity">6. Assess sensitivity<a class="heading-anchor" href="#6-assess-sensitivity" aria-label="Link to this section">#</a></h3>
 <p>Numerical accuracy and scientific interpretation require the appropriate assumptions and scales.</p>
-<p><strong>Expected observation:</strong> Inspect conditioning as well as residuals.</p></article>
+<p><strong>Expected observation:</strong> Inspect conditioning as well as residuals.</p>
+<p><strong>Why it holds here:</strong> A nearly singular matrix can have a tiny residual while its solution swings widely under small changes in the data.</p>
+<p><strong>Plausible wrong approach:</strong> Reporting a small residual as proof of reliable coefficients ignores the condition number that multiplies input errors.</p>
+<p><strong>How to verify:</strong> Print <code>cond(matrix)</code>, perturb the target slightly and compare the change in the solution with the change in the data; the reference shows <code>rank([1.0 2.0; 2.0 4.0]) == 1</code> as a singular case.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-019: all reference checks passed</code>:</p>
+<p>For complex vectors, <code>dot</code> and the adjoint product both conjugate the first argument, giving 7, the squared norm. <code>transpose(values) * values</code> skips conjugation and returns <code>3 - 2im</code>, so the two operators must not be swapped. <code>rank([1 2; 2 4]) == 1</code> detects the dependent rows, and multiplying a two by two matrix by a length-three vector raises <code>DimensionMismatch</code>.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    values <span class="syntax-operator">=</span> <span class="syntax-keyword">ComplexF64</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-operator">+</span><span class="syntax-builtin">im</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-operator">-</span><span class="syntax-builtin">im</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> dot<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-operator">+</span><span class="syntax-number">0</span><span class="syntax-builtin">im</span>
+    <span class="syntax-decorator">@test</span> values<span class="syntax-operator">&#x27;</span> <span class="syntax-operator">*</span> values <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-operator">+</span><span class="syntax-number">0</span><span class="syntax-builtin">im</span>
+    <span class="syntax-decorator">@test</span> transpose<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> values <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-builtin">im</span>
+    <span class="syntax-decorator">@test</span> norm<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-operator">^</span><span class="syntax-number">2</span> <span class="syntax-operator">≈</span> <span class="syntax-number">7</span>
+    <span class="syntax-decorator">@test</span> rank<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">;</span> <span class="syntax-number">2.0</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">DimensionMismatch</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">;</span> <span class="syntax-number">0.0</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

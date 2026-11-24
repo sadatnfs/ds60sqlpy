@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Library selection is an engineering decision about contracts, algorithm quality, maintenance and deployment. A tuned reduction or matrix library usually handles more shapes and architectures than a teaching kernel. A custom implementation may be justified by fusion, unusual layout or a domain-specific operation, but the benefit must survive correctness checks and end-to-end measurement.</p>
 <p>Make a comparison ledger: supported dtypes and layouts, temporary memory, numerical behavior, warmup, concurrency, packaging and fallback. Include input sizes where launch overhead dominates and sizes where useful work dominates. A slower educational kernel can still be successful learning evidence; it should not be presented as a production improvement. Prefer the simplest implementation that satisfies the real acceptance criteria.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Library baseline:</strong> A tuned vendor or framework implementation used as the reference point before writing a custom kernel.</li>
+<li><strong>Numerical contract:</strong> The dtype, accuracy, rounding and special-value behavior an implementation promises.</li>
+<li><strong>Workspace:</strong> Temporary device memory a library routine needs in addition to its inputs and outputs.</li>
+<li><strong>Maintenance cost:</strong> The ongoing effort to test, port and update custom code across hardware and library versions.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A library pipeline takes 8 ms of kernels and 2 ms of transfer. A custom kernel saves 2 ms but adds 3 ms of packing, so total latency worsens from 10 to 11 ms.</p>
@@ -213,20 +220,40 @@ custom <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>custom<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">11</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU decision model: library</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>library<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">custom</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>custom<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Library 10 and custom 11 modeled milliseconds.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>library</code></td>
+<td><code>{&#x27;kernel&#x27;: 8, &#x27;transfer&#x27;: 2, &#x27;packing&#x27;: 0}</code></td>
+</tr>
+<tr>
+<td><code>custom</code></td>
+<td><code>{&#x27;kernel&#x27;: 6, &#x27;transfer&#x27;: 2, &#x27;packing&#x27;: 3}</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-complete-latency">Exercise 1: Compute complete latency<a class="heading-anchor" href="#exercise-1-compute-complete-latency" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute complete latency</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing kernel times alone, 6 against 8 ms, declares the custom version a win while ignoring the new packing step.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-list-a-numerical-contract">Exercise 2: List a numerical contract<a class="heading-anchor" href="#exercise-2-list-a-numerical-contract" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>list a numerical contract</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Testing only that the shapes match accepts any numbers of the right size, so a kernel that returns zeros, or that silently turns NaN inputs into finite outputs, would pass every check.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-add-temporary-memory">Exercise 3: Add temporary memory<a class="heading-anchor" href="#exercise-3-add-temporary-memory" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>add temporary memory</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Summing only the input and output ignores intermediates, so the custom path can run out of memory at a size where the library path fit, even though both outputs are the same size.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-identify-a-maintenance-cost">Exercise 4: Identify a maintenance cost<a class="heading-anchor" href="#exercise-4-identify-a-maintenance-cost" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>identify a maintenance cost</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting only the development time ignores ongoing cost, which repeats every time the team adopts a new GPU or toolkit release and often exceeds the original effort.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-choose-two-workload-sizes">Exercise 5: Choose two workload sizes<a class="heading-anchor" href="#exercise-5-choose-two-workload-sizes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>choose two workload sizes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Benchmarking only at the largest size that fits hides the small-input behavior, which matters when production calls are mostly small batches.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-write-a-keep-or-replace-decision">Exercise 6: Write a keep-or-replace decision<a class="heading-anchor" href="#exercise-6-write-a-keep-or-replace-decision" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>write a keep-or-replace decision</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Choosing the custom kernel because its compute portion, 6 ms against 8 ms, is faster ignores the stated total and the packing step that the custom path requires.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

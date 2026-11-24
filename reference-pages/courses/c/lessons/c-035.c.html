@@ -200,19 +200,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(signal(SIGINT,</span></span>
 <span class="source-line"><span class="syntax-comment">     previous) != SIG_ERR);` to `CHECK(signal(SIGINT, previous) == SIG_ERR);`</span></span>
 <span class="source-line"><span class="syntax-comment">     inside its CHECK. Before running, predict whether the CHECK still holds and</span></span>
-<span class="source-line"><span class="syntax-comment">     explain why; then restore it. Expected: The changed run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Restoring</span></span>
-<span class="source-line"><span class="syntax-comment">     the original line brings back the worked observation: both operations</span></span>
-<span class="source-line"><span class="syntax-comment">     succeed. */</span></span>
+<span class="source-line"><span class="syntax-comment">     explain why; then restore it. Expected: With `CHECK(signal(SIGINT,</span></span>
+<span class="source-line"><span class="syntax-comment">     previous) == SIG_ERR);` the run stops with `Check failed` at the CHECK on</span></span>
+<span class="source-line"><span class="syntax-comment">     `signal(SIGINT, previous) != SIG_ERR`, because the &quot;install and restore a</span></span>
+<span class="source-line"><span class="syntax-comment">     handler&quot; case no longer shows that both operations succeed. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(signal(SIGINT, previous) != SIG_ERR);` brings that observation back.</span></span>
+<span class="source-line"><span class="syntax-comment">   */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Record a raised notification: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2 so that it reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Run worked example 2 with</span></span>
-<span class="source-line"><span class="syntax-comment">     that line, explain why the edited CHECK now fails for the same program</span></span>
-<span class="source-line"><span class="syntax-comment">     state, and restore it. Expected: Before the repair the run stops with</span></span>
-<span class="source-line"><span class="syntax-comment">     `Check failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`; after</span></span>
-<span class="source-line"><span class="syntax-comment">     it the line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again and</span></span>
-<span class="source-line"><span class="syntax-comment">     the signal flag becomes one. */</span></span>
+<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2, the &quot;record a raised</span></span>
+<span class="source-line"><span class="syntax-comment">     notification&quot; case, so that it reads `CHECK(signal(SIGINT, previous) ==</span></span>
+<span class="source-line"><span class="syntax-comment">     SIG_ERR);`. Run the example with that line, explain why the edited CHECK</span></span>
+<span class="source-line"><span class="syntax-comment">     now fails even though the program state still means the signal flag becomes</span></span>
+<span class="source-line"><span class="syntax-comment">     one, and restore it. Expected: Before the repair the run stops with `Check</span></span>
+<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Once the</span></span>
+<span class="source-line"><span class="syntax-comment">     line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, the &quot;record</span></span>
+<span class="source-line"><span class="syntax-comment">     a raised notification&quot; case again shows that the signal flag becomes one.</span></span>
+<span class="source-line"><span class="syntax-comment">   */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Keep work outside the handler</span></span>
 <span class="source-line"><span class="syntax-comment">     Raise SIGINT with the lesson handler installed and let a normal-flow</span></span>

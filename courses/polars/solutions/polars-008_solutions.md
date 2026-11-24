@@ -20,11 +20,23 @@ assert long.height == 6
 assert long.group_by("id").len().sort("id")["len"].to_list() == [3, 3]
 ```
 
+**Why it holds here:** Unpivot creates one long row for each id and listed column, so 2 ids times 3 periods gives 6 rows, with id 1 holding 10, 12, 11 and id 2 holding 20, 18, 19.
+
+**Plausible wrong approach:** Leaving followup out of on drops its values and gives 4 rows; listing it as index would repeat it beside every period instead of making it a period.
+
+**How to verify:** Run the answer code: long.height is 6 and the per id counts are [3, 3]. Pivot back and compare with the wide frame for a full round trip.
+
 **Expected:** There are six long rows for two identifiers.
 
 ## 2. Check cell identity
 
 Validate the compound key. This catches multiple records that would otherwise be compressed into one displayed cell.
+
+**Why it holds here:** Pivot needs each (id, period) pair to identify exactly one value. A frequency table over those two keys exposes any pair with more than one row before it gets merged.
+
+**Plausible wrong approach:** Pivoting first and inspecting the wide output only shows one number per cell, so a duplicate summed or averaged into that cell is invisible.
+
+**How to verify:** Run long.group_by('id', 'period').len() and assert every len equals 1; for the duplicate fixture in example_two the count is 2.
 
 **Expected:** Each valid cell has count 1.
 
@@ -42,11 +54,23 @@ assert total["after"].item() == 10
 assert average["after"].item() == 5.0
 ```
 
+**Why it holds here:** The duplicate cell for id 1 holds 4 and 6. A sum treats them as two contributions and gives 10; a mean treats them as repeated readings and gives 5.0.
+
+**Plausible wrong approach:** Omitting aggregate_function makes pivot raise ComputeError on this input, as example_two shows; guessing first or last instead just drops one reading.
+
+**How to verify:** Run the answer code and assert total 10 and average 5.0, then decide which policy matches the meaning of value before choosing one.
+
 **Expected:** Sum is 10 and mean is 5.
 
 ## 4. Preserve missing values
 
 The structural operation should preserve absence. Filling nulls after the pivot is an additional analytical decision that needs explanation.
+
+**Why it holds here:** Unpivot and pivot only move values between shapes, so a null in after for id 2 becomes a null long value and returns as a null cell.
+
+**Plausible wrong approach:** Calling fill_null(0) during the round trip makes the rebuilt frame look complete and turns a missing measurement into a measured zero.
+
+**How to verify:** Set id 2 after to None, unpivot, pivot back, and assert rebuilt equals the input including the null; null_count on after should still be 1.
 
 **Expected:** The same cell remains null.
 
@@ -54,11 +78,23 @@ The structural operation should preserve absence. Filling nulls after the pivot 
 
 Joining or aligning by position without the identifier can pair different people or devices. Verify identity before subtracting.
 
+**Why it holds here:** In wide form each row already aligns before and after for one id, so after minus before gives 12 minus 10 = 2 and 18 minus 20 = -2.
+
+**Plausible wrong approach:** Subtracting the long after rows from the long before rows by position works only while both are sorted identically; any reordering pairs one id's after with another's before.
+
+**How to verify:** Compute the difference in wide form, then recompute from long records joined on id and assert both give [2, -2] sorted by id.
+
 **Expected:** The differences are 2 and -2.
 
 ## 6. Publish a grain statement
 
 Include the statement in the transformation receipt or documentation so downstream authors know which keys are valid.
+
+**Why it holds here:** The wide frame has one row per id with one column per period; the long frame has one row per id and period. Writing that down tells consumers which columns form the key.
+
+**Plausible wrong approach:** Describing the long table as one row per id invites a join on id alone, which fans out to 2 or 3 rows per id.
+
+**How to verify:** Assert wide['id'].is_unique().all() and long.select('id', 'period').is_unique().all() both hold for the fixture.
 
 **Expected:** Wide is one row per id; long is one row per id-period.
 

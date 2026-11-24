@@ -9,7 +9,10 @@ python courses/data-ml-engineering/authoring/build.py --check
 ```
 
 The publisher requires all 72 stable chapter records, complete sources, exact
-worked-program insertion, earlier prerequisite IDs and declared result contracts.
+worked-program insertion, earlier prerequisite IDs, three to five unique key terms
+per chapter, at least two fenced artifacts per chapter counting the program and
+valid, book-unique worked_examples with observed outputs, and declared result
+contracts.
 Do not edit generated guides, track.json, lessons.json, figure-contracts.json or
 the generated subject README directly. Shared classroom HTML and TeX generation
 belong to the repository integration pass after this publisher succeeds.

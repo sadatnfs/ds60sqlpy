@@ -107,7 +107,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Keep portable policy independent) before changing anything, and confirm its observation: The same domain summary works without a UI framework.
 2. Compare Example B (Declare a capability rather than guess) with Example A and name the first line whose behavior differs. Its observation is: The Linux capability set does not invent SwiftUI support.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: CanImport proves a module is available to the compiler, not that every API is available at the deployment target.
+3. Before opening the explanation, check your task 3 attempt (Build JourneyCore on a prepared Linux Swift environment and separately build JourneyApp on macOS) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

@@ -1,6 +1,6 @@
 # llm-014: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these capstone: a small language-model evidence notebook answers after attempting *Count transitions in new documents* through *Write the bounded comparison*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Score held-out transitions* points to one step. `llm-014_solution.py` holds the assertions; this page explains how they test bigram model. Then try *Write the bounded comparison* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -34,7 +34,7 @@ assert counts2.sum() == 5 and counts2[1, 1] == 0
 
 **Expected:** C to A: 2, A to A: 1, A to B: 1, B to C: 1; total 5; no B to B transition across the document boundary.
 
-**Verify:** In a fresh process, the exercise checks confirm `counts2[2, 0] == 2`; `counts2[0, 0] == 1`; `counts2[0, 1] == 1`; `counts2[1, 2] == 1` and 2 further checks.
+**Verify:** For *Count transitions in new documents*, a fresh-process check confirms `counts2[2, 0] == 2`; `counts2[0, 0] == 1`; `counts2[0, 1] == 1`; `counts2[1, 2] == 1` and 2 further checks.
 
 ## Exercise 2: Predict two smoothed rows
 
@@ -50,7 +50,7 @@ np.testing.assert_allclose(prob2[2], [3 / 5, 1 / 5, 1 / 5], atol=1e-12, rtol=0)
 
 **Expected:** row A [2/5, 2/5, 1/5]; row C [3/5, 1/5, 1/5].
 
-**Verify:** In a fresh process, the exercise checks confirm `prob2[0]` matches `[2 / 5, 2 / 5, 1 / 5]` within 1e-12 and `prob2[2]` matches `[3 / 5, 1 / 5, 1 / 5]` within 1e-12.
+**Verify:** For *Predict two smoothed rows*, a fresh-process check confirms `prob2[0]` matches `[2 / 5, 2 / 5, 1 / 5]` within 1e-12 and `prob2[2]` matches `[3 / 5, 1 / 5, 1 / 5]` within 1e-12.
 
 ## Exercise 3: Score held-out transitions
 
@@ -68,7 +68,7 @@ assert len(held) - 1 == 2
 
 **Expected:** 2 targets; NLL log 3+log 3.
 
-**Verify:** In a fresh process, the exercise checks confirm `nll` matches `2 * np.log(3)` within 1e-12 and `len(held) - 1 == 2`.
+**Verify:** For *Score held-out transitions*, a fresh-process check confirms `nll` matches `2 * np.log(3)` within 1e-12 and `len(held) - 1 == 2`.
 
 ## Exercise 4: Prove no assessment update
 
@@ -82,7 +82,7 @@ np.testing.assert_array_equal(counts, saved)
 
 **Expected:** counts unchanged exactly.
 
-**Verify:** In a fresh process, the exercise checks confirm `counts` equals `saved`.
+**Verify:** For *Prove no assessment update*, a fresh-process check confirms `counts` equals `saved`.
 
 ## Exercise 5: Verify a causal prefix oracle
 
@@ -102,7 +102,7 @@ for cut in range(1, 4):
 
 **Expected:** outputs 2, 3, 14/3.
 
-**Verify:** In a fresh process, the exercise checks confirm `out` matches `[2, 3, 14 / 3]` within 1e-12 and for every `cut` in `range(1, 4)`, `out[:cut]` matches `[values[:i + 1].mean() for i in range(cut)]` within 1e-12.
+**Verify:** For *Verify a causal prefix oracle*, a fresh-process check confirms `out` matches `[2, 3, 14 / 3]` within 1e-12 and for every `cut` in `range(1, 4)`, `out[:cut]` matches `[values[:i + 1].mean() for i in range(cut)]` within 1e-12.
 
 ## Exercise 6: Write the bounded comparison
 
@@ -126,8 +126,8 @@ assert (
 
 **Expected:** report includes finite mean NLL and no broad competence claim.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(report['mean_nll'])`, `report['targets'] == 2` and `'untested' in report['limitation']`.
+**Verify:** For *Write the bounded comparison*, a fresh-process check confirms `np.isfinite(report['mean_nll'])`, `report['targets'] == 2` and `'untested' in report['limitation']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Prove no assessment update* and predict the result first; keep *Verify a causal prefix oracle* failing beside the repair. Log a missing NumPy separately from a wrong bigram model value in `llm-014`.

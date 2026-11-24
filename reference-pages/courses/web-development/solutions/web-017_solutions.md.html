@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-017.md</code>.</p>
 <h3 id="exercise-1-predict-the-base-layout-below-the-breakpoint">Exercise 1: Predict the base layout below the breakpoint.<a class="heading-anchor" href="#exercise-1-predict-the-base-layout-below-the-breakpoint" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The layout stays in one column.</p>
+<p><strong>Approach:</strong> Read the base rule outside the media query: it sets grid with a gap but no columns, so one implicit column holds every section.</p>
 <p><strong>Why:</strong> Rules outside the query apply at every width, and the min-width query only adds the two-column layout when there is room.</p>
+<p><strong>Plausible wrong approach:</strong> Predicting two columns because the stylesheet mentions them fails because that rule only applies when the <code>min-width</code> query matches.</p>
+<p><strong>How to verify:</strong> Below 48rem wide, the grid overlay shows one column and the Styles panel shows the media rule as inactive.</p>
 <h3 id="exercise-2-choose-a-breakpoint-by-resizing-actual-content">Exercise 2: Choose a breakpoint by resizing actual content.<a class="heading-anchor" href="#exercise-2-choose-a-breakpoint-by-resizing-actual-content" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Record where labels or article width become uncomfortable rather than choosing a device name.</p>
+<p><strong>Approach:</strong> Slowly narrow the preview and write down the width where labels wrap awkwardly or the article column becomes too narrow.</p>
 <p><strong>Why:</strong> Content-driven breakpoints follow the design&#x27;s real limits, while device-named widths go out of date as screens change.</p>
+<p><strong>Plausible wrong approach:</strong> Choosing 768px because it matches a tablet fails because your content may break earlier or later than that device.</p>
+<p><strong>How to verify:</strong> Your recorded breakpoint, converted to rem, matches the width where you saw the layout become cramped.</p>
 <h3 id="exercise-3-build-a-responsive-course-outline-with-a-readable-article">Exercise 3: Build a responsive course outline with a readable article.<a class="heading-anchor" href="#exercise-3-build-a-responsive-course-outline-with-a-readable-article" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The page adapts between stacked and two-column layouts without losing content.</p>
+<p><strong>Approach:</strong> Write a single-column base, then add a <code>min-width</code> query that places navigation in a bounded column beside a flexible article.</p>
 <p><strong>Why:</strong> A small-screen baseline works everywhere, and the enhancement applies only when the measured space allows it.</p>
+<p><strong>Plausible wrong approach:</strong> Starting from the desktop layout and hiding parts with <code>max-width</code> queries fails because narrow screens may lose content entirely.</p>
+<p><strong>How to verify:</strong> Below the breakpoint, navigation and article stack; above it, they sit side by side with every link still present.</p>
 <h3 id="exercise-4-diagnose-a-mobile-page-rendered-as-a-tiny-desktop-screenshot">Exercise 4: Diagnose a mobile page rendered as a tiny desktop screenshot.<a class="heading-anchor" href="#exercise-4-diagnose-a-mobile-page-rendered-as-a-tiny-desktop-screenshot" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Check viewport metadata and inflexible widths.</p>
+<p><strong>Approach:</strong> Check the head for viewport metadata, then look for fixed widths such as <code>width: 1024px</code> on wrappers.</p>
 <p><strong>Why:</strong> Without width=device-width the mobile browser lays out a wide virtual page and scales it down, and fixed widths prevent reflow.</p>
+<p><strong>Plausible wrong approach:</strong> Adding more media queries fails when the metadata is missing, because the browser still pretends the screen is wide.</p>
+<p><strong>How to verify:</strong> After adding viewport metadata, a phone emulation shows the base layout and <code>window.innerWidth</code> matches the device width.</p>
 <h3 id="exercise-5-test-narrow-width-together-with-enlarged-text">Exercise 5: Test narrow width together with enlarged text.<a class="heading-anchor" href="#exercise-5-test-narrow-width-together-with-enlarged-text" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> All controls and text remain reachable with no required two-axis page scrolling.</p>
+<p><strong>Approach:</strong> Combine the narrow preset with 200 percent zoom and scroll through the page in both directions.</p>
 <p><strong>Why:</strong> Larger text needs more space, so a layout that fits at default size can force horizontal scrolling when zoomed.</p>
+<p><strong>Plausible wrong approach:</strong> Testing narrow width at default text size fails because enlarged text often reveals fixed widths that force sideways scrolling.</p>
+<p><strong>How to verify:</strong> At narrow width and 200 percent zoom, reading requires only vertical scrolling and every control is reachable.</p>
 <h3 id="exercise-6-explain-why-responsive-design-is-more-than-media-queries">Exercise 6: Explain why responsive design is more than media queries.<a class="heading-anchor" href="#exercise-6-explain-why-responsive-design-is-more-than-media-queries" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Intrinsic sizing, wrapping, content order and user settings are fundamental parts of the behavior.</p>
+<p><strong>Approach:</strong> List behaviors that work without any query: wrapping flex rows, <code>minmax</code> grid tracks, <code>max-inline-size</code> and user font settings.</p>
 <p><strong>Why:</strong> Intrinsic sizing, wrapping, flexible units and source order already respond to space and user settings; media queries only adjust the remaining cases.</p>
+<p><strong>Plausible wrong approach:</strong> Treating breakpoints as the whole design fails because between breakpoints the layout can still overflow when nothing else is intrinsic.</p>
+<p><strong>How to verify:</strong> Remove all media queries temporarily; the page still remains readable at narrow widths, only less polished.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-017_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

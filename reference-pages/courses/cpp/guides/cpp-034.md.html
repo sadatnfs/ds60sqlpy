@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Explain a measured cost using layout and allocation evidence.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Data layout determines which values are adjacent in memory. Array-of-structs stores complete records together; struct-of-arrays groups each field separately. Locality can reduce memory traffic when a calculation uses one field, while another workload may favor complete records. Allocation count is a separate cost from algorithmic work.</p>
+<ul>
+<li><strong>data layout:</strong> the arrangement that determines which values sit next to each other in memory.</li>
+<li><strong>array of structures:</strong> a layout that stores complete records together.</li>
+<li><strong>structure of arrays:</strong> a layout that stores each field in its own sequence.</li>
+<li><strong>locality:</strong> accessing nearby memory, which can reduce memory traffic when a calculation reads one field.</li>
+<li><strong>allocation count:</strong> the number of dynamic allocations, a cost separate from algorithmic work.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Compare equivalent values before measuring layout. Reserve can reduce vector reallocations but does not change size. A local benchmark must retain the same row count, arithmetic and checksum, with measured units and build mode. No fixed speedup is promised by these tiny fixtures.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
@@ -208,7 +215,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="data-layout-follows-the-access-pattern">Data layout follows the access pattern<a class="heading-anchor" href="#data-layout-follows-the-access-pattern" aria-label="Link to this section">#</a></h3>
 <p>An array of structures stores complete records together. A structure-of-arrays layout stores each field in its own sequence. Neither layout is universally faster. The useful question is which fields the operation reads and in what order. Summing only value can benefit from dense values, while operations that need id and value together may favor a record layout.</p>
 <p>The first example stores three Sample records with IDs 1, 2, 3 and values 10, 20, 30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce 60 before any timing comparison is meaningful. Equal totals are a basic correctness check; in a richer transformation, also verify that identity-to-value relationships remain intact.</p>
-<p>reserve(rows.size()) can avoid repeated growth allocations while materializing a values vector. It changes capacity, not size. push_back constructs the actual elements. Writing values[0] immediately after reserve on an empty vector would violate the element-access contract. This is a concrete link between performance-oriented allocation control and the ownership rules from cpp-007.</p>
+<p>reserve(rows.size()) can avoid repeated growth allocations while materializing a values vector. It changes capacity, not size. push_back constructs the actual elements. Writing <code>values[0]</code> immediately after reserve on an empty vector would violate the element-access contract. This is a concrete link between performance-oriented allocation control and the ownership rules from cpp-007.</p>
 <p>Data movement has a cost. Creating a separate values sequence may improve repeated scans but require an upfront copy and additional memory. If only one tiny scan is performed, the conversion cost can dominate. A benchmark should state whether layout conversion is included and how many queries reuse the result. Otherwise two timings can describe different amounts of work.</p>
 <p>Hardware cache behavior, alignment, compiler vectorization and input size influence performance. The tiny fixture teaches representation and equality of results, not a cache-speed claim. Measure a representative bounded workload in the intended build configuration, and keep the original data contract visible while changing layout.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>

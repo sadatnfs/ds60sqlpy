@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-data-retention-after-app-recreation">Exercise 1: Predict data retention after app recreation.<a class="heading-anchor" href="#exercise-1-predict-data-retention-after-app-recreation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Named-volume data remains if the same volume is mounted.</p>
 <p><strong>Why:</strong> The container object changes, but the volume is separate. A changed project name can select a different volume, so identity matters as much as the mount path.</p>
+<p><strong>Approach:</strong> Look for the volume line study-data:/data and check that the recreated container mounts the same named volume.</p>
+<p><strong>Why this is correct:</strong> Recreation replaces the container and its writable layer, but study-data is a separate object, so counter.json survives.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming any recreate keeps data fails when the project name changes, because Compose then creates a new prefixed volume.</p>
+<p><strong>How to verify:</strong> Read GET /counter before and after worked example 2; the value is unchanged and the container ID differs.</p>
 <h3 id="exercise-2-compare-named-volume-and-bind-mount-ownership">Exercise 2: Compare named volume and bind mount ownership.<a class="heading-anchor" href="#exercise-2-compare-named-volume-and-bind-mount-ownership" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Engine-managed storage versus an explicit host directory.</p>
 <p><strong>Why:</strong> Bind mounts are convenient for editing and exports but can expose private or sensitive host paths. Volumes are easier to keep independent of a host directory layout.</p>
+<p><strong>Approach:</strong> Compare where the bytes live: a named volume is managed by the engine, and a bind mount is a host path you choose.</p>
+<p><strong>Why this is correct:</strong> A bind mount exposes the exact host directory and its permissions to the container, while a named volume avoids depending on host layout.</p>
+<p><strong>A plausible wrong approach:</strong> Bind-mounting a home directory to share a single file gives the container write access to everything else in it.</p>
+<p><strong>How to verify:</strong> docker volume inspect shows an engine-managed Mountpoint for study-data, while a bind mount&#x27;s Source in docker inspect is the host path you chose.</p>
 <h3 id="exercise-3-build-a-persistence-evidence-table">Exercise 3: Build a persistence evidence table.<a class="heading-anchor" href="#exercise-3-build-a-persistence-evidence-table" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Before value, old/new container IDs, volume identity and after value.</p>
 <p><strong>Why:</strong> A value alone can be ambiguous if a seed coincidentally matches. Recording both storage and container identities makes the replacement experiment stronger.</p>
+<p><strong>Approach:</strong> Record the counter before, the old container ID, the volume name, the new container ID and the counter after.</p>
+<p><strong>Why this is correct:</strong> Matching counter values alone could be coincidence; adding both IDs and the volume name ties persistence to the replacement.</p>
+<p><strong>A plausible wrong approach:</strong> Recording only the after value of 3 cannot exclude a fresh volume seeded or incremented to the same number.</p>
+<p><strong>How to verify:</strong> The table shows two different container IDs, one unchanged volume name and a counter that continues from its previous value.</p>
 <h3 id="exercise-4-diagnose-missing-code-after-mounting-over-app">Exercise 4: Diagnose missing code after mounting over /app.<a class="heading-anchor" href="#exercise-4-diagnose-missing-code-after-mounting-over-app" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The mount hides packaged content at that path.</p>
 <p><strong>Why:</strong> A mount presents another filesystem view. It does not automatically copy all image files into an arbitrary bind directory, so mount code and data intentionally.</p>
+<p><strong>Approach:</strong> Notice that mounting any source at /app places a different filesystem over the image directory holding server.py.</p>
+<p><strong>Why this is correct:</strong> A bind mount hides image content at the mount point; it does not merge or copy files, so python finds no server.py.</p>
+<p><strong>A plausible wrong approach:</strong> Rebuilding the image to restore the file fails, because the mount still hides whatever the image places at /app.</p>
+<p><strong>How to verify:</strong> Remove the mount or point it elsewhere, then python -c printing Path(&#x27;/app/server.py&#x27;).is_file() reports True again.</p>
 <h3 id="exercise-5-explain-why-changing-project-names-may-look-like-data-loss">Exercise 5: Explain why changing project names may look like data loss.<a class="heading-anchor" href="#exercise-5-explain-why-changing-project-names-may-look-like-data-loss" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The new project can create a different named volume.</p>
 <p><strong>Why:</strong> The original data may still exist under the original project. Inspect ownership and volume names before declaring corruption or deleting apparently unused storage.</p>
+<p><strong>Approach:</strong> Check volume names: Compose prefixes study-data with the project name, so a new -p value refers to a different volume.</p>
+<p><strong>Why this is correct:</strong> The old volume and counter still exist under the old name. The new project simply started with an empty volume.</p>
+<p><strong>A plausible wrong approach:</strong> Deleting volumes that look unused in a panic can destroy the real progress that was never lost.</p>
+<p><strong>How to verify:</strong> docker volume ls lists both prefixed volumes; switching back to the original project shows the old counter again.</p>
 <h3 id="exercise-6-choose-a-safe-cleanup-policy-for-progress">Exercise 6: Choose a safe cleanup policy for progress.<a class="heading-anchor" href="#exercise-6-choose-a-safe-cleanup-policy-for-progress" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Stop containers routinely; delete data only after an explicit reset decision.</p>
 <p><strong>Why:</strong> Learner progress has a longer intended lifetime than runtime processes. Cleanup should preserve it and provide a backup/export route before any irreversible deletion.</p>
+<p><strong>Approach:</strong> Use down without -v for routine stops, and require an explicit reset step with a backup before docker volume rm.</p>
+<p><strong>Why this is correct:</strong> Learner progress outlives containers. Separating stop from reset ensures that only a deliberate action deletes it.</p>
+<p><strong>A plausible wrong approach:</strong> Putting docker compose down -v into a convenience script turns every stop into an irreversible reset.</p>
+<p><strong>How to verify:</strong> After a routine stop and start, GET /counter returns the earlier value; only the documented reset path sets it to 0.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

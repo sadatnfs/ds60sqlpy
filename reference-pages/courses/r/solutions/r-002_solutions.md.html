@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the storage type of c(1L, 2.5).</p>
 <p>Both entries are stored as doubles.</p>
+<p><strong>Approach:</strong> Combine the two values and inspect the result with <code>typeof()</code>. The reference asserts <code>typeof(c(1L, 2.5)) == &quot;double&quot;</code>.</p>
+<p><strong>Why it holds here:</strong> An atomic vector holds one type. 2.5 cannot be stored as an integer, so R promotes the integer 1L to double; the value 1 is unchanged, only its storage widens. Printing the vector shows <code>[1] 1.0 2.5</code> because both entries share one numeric format.</p>
+<p><strong>Tempting mistake:</strong> Predicting &quot;integer&quot; because the first element was written with the L suffix, or expecting each element to keep its own type. That would be true of a list, not of <code>c()</code>.</p>
+<p><strong>Verify:</strong> <code>typeof(c(1L, 2.5))</code> prints &quot;double&quot; and <code>is.integer(c(1L, 2.5))</code> is FALSE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Replace numeric 17 with the identifier &quot;0017&quot;.</p>
 <p>Keep the identifier character to preserve leading zeros.</p>
+<p><strong>Approach:</strong> Keep the starter&#x27;s identifier as the character string &quot;0017&quot;. The reference asserts <code>is.character(identifier)</code> and <code>nchar(identifier) == 4</code>.</p>
+<p><strong>Why it holds here:</strong> An identifier labels a record; nobody adds or averages identifiers, and its leading zeros are part of the label. Character storage preserves all four characters exactly as written.</p>
+<p><strong>Tempting mistake:</strong> Converting with <code>as.numeric(&quot;0017&quot;)</code> yields 17, and <code>as.character()</code> on that gives &quot;17&quot;, only two characters. Two different codes such as &quot;017&quot; and &quot;0017&quot; would also collapse into the same number 17.</p>
+<p><strong>Verify:</strong> <code>print(identifier)</code> shows &quot;0017&quot; with quotes, and <code>nchar(identifier)</code> returns 4. Running <code>nchar(as.character(as.numeric(identifier)))</code> returns 2, which shows the loss.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Check that 19 items form three groups of five with four left.</p>
 <p>19 %/% 5 is 3 and 19 %% 5 is 4.</p>
+<p><strong>Approach:</strong> Compute the number of full groups with <code>19 %/% 5</code> and the leftover items with <code>19 %% 5</code> as two separate results. The reference asserts 3 and 4.</p>
+<p><strong>Why it holds here:</strong> The starter supplies 19 items and a group size of 5. Three groups use 15 items and 4 remain, and 3 * 5 + 4 rebuilds 19, so the pair accounts for every item.</p>
+<p><strong>Tempting mistake:</strong> Using <code>round(19 / 5)</code> gives 4, claiming a fourth full group that would need 20 items. Using <code>ceiling()</code> answers a different question, the number of boxes needed, which may be valid elsewhere but is not this task.</p>
+<p><strong>Verify:</strong> <code>stopifnot(19 %/% 5 * 5 + 19 %% 5 == 19)</code> passes, and printing both results shows 3 and 4.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose identical(2L, 2) being false.</p>
 <p>The storage types differ even though numeric equality holds.</p>
+<p><strong>Approach:</strong> Inspect each side with <code>typeof()</code> and compare the two kinds of test: <code>2L == 2</code> asks about value after coercion, while <code>identical(2L, 2)</code> also compares storage type.</p>
+<p><strong>Why it holds here:</strong> 2L is an integer and 2 is a double, so identity fails even though numeric equality holds. The reference asserts both <code>!identical(2L, 2)</code> and <code>2L == 2</code> to keep the two claims separate.</p>
+<p><strong>Tempting mistake:</strong> Concluding that 2L and 2 are different numbers, or writing <code>identical(length(x), 3)</code> as a test. <code>length()</code> returns an integer, so that check is FALSE for a three-element vector; <code>identical(length(x), 3L)</code> is the matching form.</p>
+<p><strong>Verify:</strong> <code>typeof(2L)</code> prints &quot;integer&quot;, <code>typeof(2)</code> prints &quot;double&quot;, and <code>2L == 2</code> prints TRUE.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Check a decimal calculation near 0.3.</p>
 <p>isTRUE(all.equal(...)) supplies one logical result.</p>
+<p><strong>Approach:</strong> Wrap the comparison as <code>isTRUE(all.equal(0.1 + 0.2, 0.3, tolerance = 1e-12))</code> so the check produces one logical value.</p>
+<p><strong>Why it holds here:</strong> The representation error here is about 5.55e-17, many orders of magnitude below 1e-12, so the tolerance accepts rounding noise while still rejecting a real change in amount.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>0.1 + 0.2 == 0.3</code> gives FALSE. Using <code>all.equal()</code> alone inside <code>if</code> or <code>stopifnot</code> is also risky: when values differ it returns a text description such as a mean relative difference, not FALSE, so the condition is not a clean logical.</p>
+<p><strong>Verify:</strong> The reference also asserts <code>!isTRUE(all.equal(0.31, 0.3, tolerance = 1e-12))</code>, so the check still rejects a 0.01 change.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>State why a large tolerance can hide a defect.</p>
 <p>A tolerance should permit representation error, not an arbitrary change in the intended amount.</p>
+<p><strong>Approach:</strong> Choose the tolerance from the units and the decision, then test that it rejects a defect you care about. Here 1e-12 covers double rounding for values near 0.3.</p>
+<p><strong>Why it holds here:</strong> all.equal measures relative difference. For 0.31 against 0.3 that is about 0.03, so 1e-12 correctly rejects it, which is the second check in the reference.</p>
+<p><strong>Tempting mistake:</strong> Setting <code>tolerance = 0.1</code> so a stubborn check passes. <code>all.equal(0.31, 0.3, tolerance = 0.1)</code> returns TRUE, silently accepting a 3 percent error in an amount that should have been exact to the cent.</p>
+<p><strong>Verify:</strong> Run both tolerances on 0.31 versus 0.3: 1e-12 gives a difference message, while 0.1 gives TRUE. That contrast is the evidence that a loose tolerance can hide a defect.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

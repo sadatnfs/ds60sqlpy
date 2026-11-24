@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A load balancer distributes traffic among eligible destinations. A Kubernetes Service of type LoadBalancer asks an integrated implementation to provision or configure an external entrypoint. The API object is a request; a controller and supporting infrastructure must exist to fulfill it.</p>
 <p>In a cloud, the controller may create provider resources, addresses, listeners and health checks. A local cluster may have no such integration and leave the external address pending. Local load-balancer implementations have their own routing and address-allocation requirements. The course does not install one or incur cloud resources automatically.</p>
 <p>Load balancing is not a database replication mechanism, a certificate authority or application authorization. A reachable address can still route to unready nodes, wrong ports or an app that returns errors. Diagnose controller status, infrastructure health and actual request behavior separately.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>LoadBalancer Service:</strong> A Service type that asks a cloud integration for an external load balancer in front of the Service.</li>
+<li><strong>Cloud controller:</strong> The component that talks to the provider to create load balancers and writes their address to status.loadBalancer.</li>
+<li><strong>Load balancer health check:</strong> The provider&#x27;s probe of nodes or backends that decides where external traffic is sent.</li>
+<li><strong>Pending external address:</strong> A LoadBalancer Service with no address in status.loadBalancer yet, often because no controller can provision one.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Inspect Service spec.type, loadBalancerClass when used, traffic policy, ports and status.loadBalancer.ingress. An ingress entry can contain an IP or hostname. Do not assume status arrives immediately or that a returned hostname resolves from every network.</p>
 <p>Many implementations use NodePorts, while others can route directly to Pods or use alternate mechanisms. The allocation and routing design is implementation-specific. Changing allocateLoadBalancerNodePorts without knowing the implementation can remove a required path.</p>

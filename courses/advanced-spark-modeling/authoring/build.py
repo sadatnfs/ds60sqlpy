@@ -79,8 +79,86 @@ def lab(prose: str, reading: bool) -> str:
     )
 
 
+def key_terms_block(unit: dict) -> str:
+    """Render the unit's authored vocabulary as a Key terms section."""
+    terms = unit.get("key_terms", [])
+    names = [term for term, _ in terms]
+    if not 3 <= len(terms) <= 5 or len(set(names)) != len(names):
+        raise ValueError(unit["id"] + " needs three to five distinct key terms")
+    for term, definition in terms:
+        if not term.strip() or not definition.strip():
+            raise ValueError(unit["id"] + " has an empty key term")
+        if any(dash in term + definition for dash in ("\u2014", "\u2013")):
+            raise ValueError(unit["id"] + " key terms must not use em or en dashes")
+    return "## Key terms\n\n" + "\n".join(f"- **{t}:** {d}" for t, d in terms)
+
+
+def with_key_terms(prose: str, block: str) -> str:
+    """Place Key terms after the opening section, before the mechanism."""
+    headings = [m.start() for m in re.finditer(r"^## ", prose, re.M)]
+    if len(headings) < 2:
+        raise ValueError("Chapter needs an opening section before its mechanism")
+    second = headings[1]
+    return prose[:second].rstrip() + "\n\n" + block + "\n\n" + prose[second:]
+
+
+EXAMPLE_LANGUAGES = {"python", "scala", "sql", "bash", "yaml", "text"}
+EXAMPLE_FIELDS = {"title", "language", "code", "output", "interpretation"}
+FENCE = re.compile(r"^```", re.M)
+
+
+def worked_examples_block(unit: dict, titles: set[str], codes: set[str]) -> str:
+    """Validate and render the unit's authored worked examples as guide sections.
+
+    ``output`` is optional and must be text observed by running the block itself.
+    """
+    key = unit["id"]
+    examples = unit.get("worked_examples", [])
+    if not examples:
+        raise ValueError(key + " needs at least one worked example")
+    sections = []
+    for example in examples:
+        if set(example) - EXAMPLE_FIELDS or not EXAMPLE_FIELDS - {"output"} <= set(example):
+            raise ValueError(key + " worked examples need exactly the documented fields")
+        title, code = example["title"].strip(), example["code"].strip("\n")
+        language, note = example["language"], example["interpretation"].strip()
+        output = example.get("output", "").strip("\n")
+        if not title or not code.strip() or language not in EXAMPLE_LANGUAGES:
+            raise ValueError(key + " has an empty or unsupported worked example")
+        if title.lower() in titles or code in codes:
+            raise ValueError(key + " repeats a worked example title or program: " + title)
+        titles.add(title.lower())
+        codes.add(code)
+        if any(d in "".join(example.values()) for d in ("\u2014", "\u2013")):
+            raise ValueError(key + " worked examples must not use em or en dashes")
+        if "```" in code + output:
+            raise ValueError(key + " worked example text cannot contain a fence")
+        if "\n" in note or len(note.split()) < 40 or not note.endswith("."):
+            raise ValueError(key + " interpretation must be one paragraph of 40+ words")
+        if language == "python":
+            ast.parse(code, filename=key + " worked example")
+        observed = f"Output from running the block above:\n\n```text\n{output}\n```\n\n"
+        sections.append(
+            f"## Worked example: {title}\n\n```{language}\n{code}\n```\n\n"
+            + (observed if output else "")
+            + note
+        )
+    return "\n\n".join(sections)
+
+
+def with_worked_examples(prose: str, block: str) -> str:
+    """Place worked examples after the worked cases, before failure diagnosis."""
+    marker = "\n## Failure diagnosis"
+    if prose.count(marker) != 1:
+        raise ValueError("Chapter needs one Failure diagnosis section")
+    head, tail = prose.split(marker)
+    return head.rstrip() + "\n\n" + block + "\n" + marker + tail
+
+
 def outputs() -> dict[Path, str]:
     units = json.loads((BASE / "authoring/units.json").read_text("utf-8"))
+    titles: set[str] = set()
+    codes: set[str] = set()
     if [u["id"] for u in units] != [f"asm-{i:03}" for i in range(1, 39)]:
         raise ValueError("Keep all 38 stable tutorial identities in order")
     if len({u["id"] for u in units}) != len(units):
@@ -106,6 +184,8 @@ def outputs() -> dict[Path, str]:
             raise ValueError(key + " needs developed, distinct worked treatments")
         if "\u2014" in prose:
             raise ValueError("Use professional prose without em dashes")
+        prose = with_key_terms(prose, key_terms_block(unit))
+        prose = with_worked_examples(prose, worked_examples_block(unit, titles, codes))
         prefix = f"courses/{BASE.name}"
         guide = f"{prefix}/guides/{key}.md"
         source = f"{prefix}/examples/{key}{unit['suffix']}"
@@ -143,6 +223,8 @@ def outputs() -> dict[Path, str]:
             + refs
             + "\n"
         )
+        if len(FENCE.findall(text)) < 4 or len(text.split()) < 1050:
+            raise ValueError(key + " guide needs two fenced examples and 1050 words")
         result[ROOT / guide] = text
         result[ROOT / source] = program
         rows.append(

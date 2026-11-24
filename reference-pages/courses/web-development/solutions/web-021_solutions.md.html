@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-021.md</code>.</p>
 <h3 id="exercise-1-explain-why-two-cards-on-the-same-viewport-can-use-different-layouts">Exercise 1: Explain why two cards on the same viewport can use different layouts.<a class="heading-anchor" href="#exercise-1-explain-why-two-cards-on-the-same-viewport-can-use-different-layouts" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Their query containers can have different widths.</p>
+<p><strong>Approach:</strong> Identify the query container for each card and compare the inline size of those two wrappers, not the width of the browser window.</p>
 <p><strong>Why:</strong> Container queries test the nearest query container, so the same component can match in one slot and not in another.</p>
+<p><strong>Plausible wrong approach:</strong> Saying both cards must match because they share one viewport fails, since <code>@container</code> never reads the viewport width at all.</p>
+<p><strong>How to verify:</strong> Inspect each <code>.slot</code>; the wider one shows a matched container rule while the narrower one shows the same rule unmatched.</p>
 <h3 id="exercise-2-add-a-container-wrapper-around-a-reusable-card">Exercise 2: Add a container wrapper around a reusable card.<a class="heading-anchor" href="#exercise-2-add-a-container-wrapper-around-a-reusable-card" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The card has an explicit local sizing context.</p>
+<p><strong>Approach:</strong> Wrap the card in an element such as <code>.slot</code>, give that wrapper <code>container-type: inline-size</code>, and keep the card&#x27;s own grid rule as the stacked baseline.</p>
 <p><strong>Why:</strong> An element cannot query its own size, so the wrapper must establish the container that the card&#x27;s rules test.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>container-type</code> to the card itself fails because a query only looks at ancestors, so the card cannot change its own columns.</p>
+<p><strong>How to verify:</strong> The Elements panel shows a container badge on <code>.slot</code>, and the card becomes a descendant of that badge.</p>
 <h3 id="exercise-3-render-the-same-component-in-wide-and-narrow-slots">Exercise 3: Render the same component in wide and narrow slots.<a class="heading-anchor" href="#exercise-3-render-the-same-component-in-wide-and-narrow-slots" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each instance adapts independently while preserving its content.</p>
+<p><strong>Approach:</strong> Place one slot in a wide main column and one in a narrow sidebar, using the same card markup and a single <code>@container</code> rule.</p>
 <p><strong>Why:</strong> Each instance evaluates the query against its own container, so they adapt independently.</p>
+<p><strong>Plausible wrong approach:</strong> Writing separate classes such as <code>.card-wide</code> and <code>.card-narrow</code> fails because each placement then needs manual edits whenever the layout around it changes.</p>
+<p><strong>How to verify:</strong> Narrow the main column until it crosses 28rem and only that card switches layout while the sidebar card stays stacked.</p>
 <h3 id="exercise-4-diagnose-a-query-that-never-matches-because-no-ancestor-is-eligible">Exercise 4: Diagnose a query that never matches because no ancestor is eligible.<a class="heading-anchor" href="#exercise-4-diagnose-a-query-that-never-matches-because-no-ancestor-is-eligible" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect container-type and the relevant ancestor relationship.</p>
+<p><strong>Approach:</strong> Walk up from the card to the first ancestor with a non-normal <code>container-type</code> and confirm the query condition uses an axis it contains.</p>
 <p><strong>Why:</strong> A container query only matches when an ancestor establishes size containment; without one, the query never applies.</p>
+<p><strong>Plausible wrong approach:</strong> Using a <code>block-size</code> condition with <code>container-type: inline-size</code> fails because that container only exposes its inline dimension to queries.</p>
+<p><strong>How to verify:</strong> After adding containment to the right ancestor, the Styles panel lists the container rule as matched at the wide size.</p>
 <h3 id="exercise-5-disable-the-query-and-inspect-the-fallback">Exercise 5: Disable the query and inspect the fallback.<a class="heading-anchor" href="#exercise-5-disable-the-query-and-inspect-the-fallback" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The baseline stacked component remains usable.</p>
+<p><strong>Approach:</strong> Comment out the whole <code>@container</code> block and read the card at wide and narrow widths with only the baseline grid rule active.</p>
 <p><strong>Why:</strong> The baseline rules outside the query must work on their own, because the query is an enhancement.</p>
+<p><strong>Plausible wrong approach:</strong> Hiding the image or text by default and revealing it in the query fails because readers lose content wherever the query does not match.</p>
+<p><strong>How to verify:</strong> Without the query, the image, heading and text all appear in one readable stacked column at every width.</p>
 <h3 id="exercise-6-choose-between-a-viewport-query-and-a-container-query-for-a-sidebar-card">Exercise 6: Choose between a viewport query and a container query for a sidebar card.<a class="heading-anchor" href="#exercise-6-choose-between-a-viewport-query-and-a-container-query-for-a-sidebar-card" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A container query fits a component whose available space depends on placement.</p>
+<p><strong>Approach:</strong> Decide which measurement controls the card: the window for page-level structure, or the slot the card happens to occupy for a reusable component.</p>
 <p><strong>Why:</strong> A card in a sidebar gets the sidebar&#x27;s width, so a container query describes its real space better than the viewport.</p>
+<p><strong>Plausible wrong approach:</strong> Using a viewport breakpoint for the sidebar card fails because a wide screen can still give the sidebar too little room for two columns.</p>
+<p><strong>How to verify:</strong> On a wide screen with a narrow sidebar, the container version stays stacked while a viewport version would squeeze two columns.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-021_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

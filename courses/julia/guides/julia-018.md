@@ -10,6 +10,14 @@ Use calendar arithmetic deliberately and reconstruct features using both event a
 
 Open `julia-018` in `/classroom` with its prepared `julia` runtime. Worked case A (month arithmetic and clamping) and worked case B (choose an available historical value) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-018: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Calendar period:** A unit such as `Month(1)` whose length in days depends on the date it is added to, unlike `Day(30)`.
+- **Month clamping:** Adding one month to January 31 yields the last valid day of February instead of spilling into March.
+- **Duration:** Elapsed time in fixed units, such as the milliseconds produced by subtracting one `DateTime` from another.
+- **Point-in-time correctness:** Using only records whose availability time is at or before the decision time, rather than filtering by event time alone.
+- **Tie rule:** An explicit decision about whether a record available exactly at the cutoff counts as known, encoded and tested.
+
 ## Calendar time is not one uniform integer
 
 A date identifies a calendar day, while a datetime adds a clock value. A calendar month does not have a fixed number of days. Adding a month and adding thirty days can therefore produce different results. The difference is meaningful for billing periods, cohorts and scientific observation windows.

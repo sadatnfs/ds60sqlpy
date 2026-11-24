@@ -5,6 +5,38 @@
   "minutes": 75,
   "prerequisites": ["apache-079", "apache-075"],
   "concepts": ["reference server", "retained version", "failure diagnosis", "recovery"],
+  "key_terms": [
+    [
+      "Share configuration",
+      "The server's declaration of shares, schemas and tables, which must survive a process replacement separately from the table storage."
+    ],
+    [
+      "Version-pinned retry",
+      "Repeating a read for the same table version, which is safe because the read does not change the provider's table."
+    ],
+    [
+      "Object-store signer",
+      "The server component that creates pre-signed URLs for a supported cloud store. A local file URI is not an interchangeable replacement."
+    ],
+    [
+      "Failure diagnosis",
+      "Classifying an outage as service, configuration, storage or network unavailability before choosing a recovery action."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Compare the shared table across a server replacement",
+      "language": "bash",
+      "code": "cd work/delta-sharing\nbash run.sh check\nbash run.sh check",
+      "interpretation": "Run check before and after the reference server is resumed or replaced. Both receipts should report version 0 and the same three rows, because the table lives in object storage and the server only reads it. The server itself holds no table data, so replacing it is cheap; what must survive is the configuration naming shares and table locations, plus the storage the location points to."
+    },
+    {
+      "title": "Unavailable server versus missing file",
+      "language": "bash",
+      "code": "curl -s -o /dev/null -w \"%{http_code}\\n\" \\\n  -H \"Authorization: Bearer $RECIPIENT_TOKEN\" \\\n  \"$SHARING_ENDPOINT/shares?maxResults=1\"",
+      "interpretation": "A connection error or 503 here means the server is down; recipient credentials and the table may both be fine. If this listing succeeds but a later presigned URL returns 404, the server is up but a data file was removed from storage, often by an aggressive VACUUM on the source table. These need different owners: platform operations for the first, the table owner for the second."
+    }
+  ],
   "evidence": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred.",
   "sources": [
     ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"],

@@ -680,7 +680,9 @@
       "concepts": [
         "Result builder",
         "Declarative composition",
-        "Intermediate result"
+        "Intermediate result",
+        "Builder method",
+        "buildOptional"
       ],
       "outcome": "Compose declarative structures with result builders, including optional parts.",
       "lab": "Build a small report declaration using the existing builder.",
@@ -773,8 +775,8 @@
         "Transport adapter"
       ],
       "outcome": "Model loading states and discard stale network results with a deterministic fake transport.",
-      "lab": "Reproduce Example A (Accept the current request result) and Example B (Ignore a superseded result) and explain each check.",
-      "verification": "The matching generation updates current state. The stale response cannot overwrite the newer value."
+      "lab": "Implement a deterministic fake transport returning success and failure values.",
+      "verification": "The fake returns Read for /ok and a status 503 failure for /down, the same way on every run."
     },
     {
       "id": "swift-044",

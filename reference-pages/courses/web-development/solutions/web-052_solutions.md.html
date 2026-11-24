@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-052.md</code>.</p>
 <h3 id="exercise-1-explain-atomicity-without-claiming-every-transaction-is-serializable">Exercise 1: Explain atomicity without claiming every transaction is serializable.<a class="heading-anchor" href="#exercise-1-explain-atomicity-without-claiming-every-transaction-is-serializable" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Atomicity concerns all-or-nothing application; isolation is a separate property.</p>
+<p><strong>Approach:</strong> Define atomicity as all or nothing for one transaction&#x27;s writes, and isolation as how concurrent transactions see each other&#x27;s changes.</p>
 <p><strong>Why:</strong> Atomicity means all writes commit or none do; isolation, a separate property, governs interference between concurrent transactions.</p>
+<p><strong>Plausible wrong approach:</strong> Saying a transaction makes concurrent edits safe fails because lost updates can still occur under weaker isolation levels.</p>
+<p><strong>How to verify:</strong> Your explanation gives an example where a transaction commits atomically but still overwrites another editor&#x27;s change. The example names the isolation property that would have prevented the overwrite.</p>
 <h3 id="exercise-2-add-a-database-constraint-for-nonnegative-minutes">Exercise 2: Add a database constraint for nonnegative minutes.<a class="heading-anchor" href="#exercise-2-add-a-database-constraint-for-nonnegative-minutes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The database rejects invalid writes even if an application check is missed.</p>
+<p><strong>Approach:</strong> Add <code>CHECK (minutes &gt;= 0)</code> to the column in the CREATE TABLE statement and insert a negative value directly with SQL.</p>
 <p><strong>Why:</strong> A database constraint rejects invalid rows even when a code path forgets the application check.</p>
+<p><strong>Plausible wrong approach:</strong> Relying only on the PHP validator fails because a script, migration or other client can write to the table without it.</p>
+<p><strong>How to verify:</strong> Inserting minutes of -5 raises a PDOException for the constraint, and the table has no new row.</p>
 <h3 id="exercise-3-implement-a-version-checked-update-in-a-disposable-database">Exercise 3: Implement a version-checked update in a disposable database.<a class="heading-anchor" href="#exercise-3-implement-a-version-checked-update-in-a-disposable-database" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The first expected version succeeds and the repeated stale version affects zero rows.</p>
+<p><strong>Approach:</strong> Prepare the guarded UPDATE, run it with the current version, then run it again with the old version, and read <code>rowCount()</code> each time.</p>
 <p><strong>Why:</strong> The first update matches the version and increments it, so the second, stale update matches zero rows.</p>
+<p><strong>Plausible wrong approach:</strong> Fetching the row, comparing versions in PHP, then updating without the predicate fails because another write can land between those steps.</p>
+<p><strong>How to verify:</strong> The counts are 1 then 0, and the stored minutes hold the first submitted value. The version column reads 4 afterward, one step above the starting value of 3.</p>
 <h3 id="exercise-4-diagnose-accepting-a-zero-row-update-as-success">Exercise 4: Diagnose accepting a zero-row update as success.<a class="heading-anchor" href="#exercise-4-diagnose-accepting-a-zero-row-update-as-success" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect affected-row evidence and handle the conflict explicitly.</p>
+<p><strong>Approach:</strong> Check <code>rowCount()</code> after the update and return a conflict result to the caller when it is 0.</p>
 <p><strong>Why:</strong> Zero affected rows means the expected version no longer exists, which is a conflict to report, not a success.</p>
+<p><strong>Plausible wrong approach:</strong> Treating no exception as success fails because a predicate that matches nothing is a normal completed statement in SQL.</p>
+<p><strong>How to verify:</strong> A stale update now returns a conflict message, while a current one returns success. The conflict branch also tells the editor to reload the plan before trying again.</p>
 <h3 id="exercise-5-force-a-failure-after-a-write-and-verify-rollback">Exercise 5: Force a failure after a write and verify rollback.<a class="heading-anchor" href="#exercise-5-force-a-failure-after-a-write-and-verify-rollback" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The stored value remains the pre-transaction value.</p>
+<p><strong>Approach:</strong> Begin a transaction, update the value, throw an exception, roll back in the catch block, and read the value again.</p>
 <p><strong>Why:</strong> rollBack discards uncommitted writes, so the stored value is the one from before the transaction.</p>
+<p><strong>Plausible wrong approach:</strong> Calling <code>rollBack()</code> after the connection already committed fails because there is no open transaction to undo.</p>
+<p><strong>How to verify:</strong> After the rollback, the stored minutes equal the value from before <code>beginTransaction()</code>. Calling <code>inTransaction()</code> after the rollback returns false, so nothing is left open.</p>
 <h3 id="exercise-6-explain-the-limits-of-the-single-connection-concurrency-demonstration">Exercise 6: Explain the limits of the single-connection concurrency demonstration.<a class="heading-anchor" href="#exercise-6-explain-the-limits-of-the-single-connection-concurrency-demonstration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It tests predicates and rollback, while real races require controlled concurrent integration tests on the target engine.</p>
+<p><strong>Approach:</strong> Note that one connection runs statements strictly in sequence, so it can test predicates but never real interleaving.</p>
 <p><strong>Why:</strong> Sequential statements test predicates and rollback, but real races need concurrent connections on the target database.</p>
+<p><strong>Plausible wrong approach:</strong> Citing the sequential demo as proof that parallel requests are safe fails because no two transactions overlapped.</p>
+<p><strong>How to verify:</strong> Your answer describes a test with two connections or processes on the target engine.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-052_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Fit lm(y ~ x) and build z from d$id, fitted(fit) and residuals(fit) in the model's own row order.",
+      "why": "The authored errors -0.3, 0.2, 0.1, -0.2, 0.4, -0.1, 0.2, -0.3 sum to 0 and their products with x 0 to 7 also sum to 0. They are orthogonal to the intercept and slope, so lm recovers exactly 1 and 2 and each residual equals its authored error.",
+      "wrong": "Building z with residual = sort(residuals(fit)). The ids stop pointing at their own rows, so id 5, whose residual is 0.4, is paired with 0.1 and any follow up on a flagged id inspects the wrong record.",
+      "verify": "`nrow(z)` returns 8, `anyDuplicated(z$id)` returns 0, and `unname(coef(fit))` returns 1 and 2 within 1e-10."
+    },
+    {
+      "approach": "Map fitted to x and residual to y, add a dashed reference at 0, and compare the built point layer with z$residual.",
+      "why": "The residuals here lie between -0.3 and 0.4, so a panel on the residual scale makes their spread around 0 visible, and the comparison confirms the plot draws those values and not a transformed copy.",
+      "wrong": "Mapping the response y against fitted values instead. y runs from about 0.7 to 14.7, so the errors of a few tenths are swamped and the panel just shows the rising line.",
+      "verify": "`max(abs(ggplot2::ggplot_build(p)$data[[1]]$y - z$residual))` returns a value below 1e-12."
+    },
+    {
+      "approach": "Map sample = residual and add stat_qq and stat_qq_line, with axis titles naming the reference quantile and the ordered residual.",
+      "why": "stat_qq sorts the eight residuals, -0.3, -0.3, -0.2, -0.1, 0.1, 0.2, 0.2 and 0.4, and pairs them with normal quantiles from about -1.53 to 1.53. The line gives the comparison the eye needs.",
+      "wrong": "Mapping y = residual for stat_qq. The statistic requires the sample aesthetic and stops with a missing aesthetic error instead of drawing anything.",
+      "verify": "`nrow(ggplot2::ggplot_build(qq)$data[[1]])` returns 8."
+    },
+    {
+      "approach": "Fit lm(y ~ x) to the spread fixture f and check the slope and the relation between residual size and fitted value separately.",
+      "why": "At each x the two responses are 2x minus x and 2x plus x, so their mean is exactly 2x and the slope is 2. The residuals are plus and minus x, and their size rises in step with the fitted value 2x, which is a variance problem, not a mean problem.",
+      "wrong": "Adding a quadratic term because the residual plot fans out. The group means lie exactly on 2x, so the squared term contributes nothing while the growing spread, which affects the default standard errors, is left untreated.",
+      "verify": "`coef(ff)[[\"x\"]]` returns 2, and `cor(abs(residuals(ff)), fitted(ff))` returns 1."
+    },
+    {
+      "approach": "Trace the largest residual, 0.4 at id 5, to its source before deciding anything, and write the exclusion rule down if one is applied.",
+      "why": "That value is one of the authored errors from the same process as the others, not a recording mistake. Removing it refits to intercept about 0.96 and slope about 1.99, and id 7 then holds the largest residual, about 0.27, so the same visual rule would call for another deletion.",
+      "wrong": "Dropping whichever point looks furthest from the dashed line and refitting once. The residual spread shrinks from about 0.28 to about 0.24, which looks like a better model but only reflects lost data.",
+      "verify": "`coef(lm(y ~ x, data = d[d$id != 5, ]))` returns about 0.96 and 1.99 instead of 1 and 2."
+    },
+    {
+      "approach": "Report the Q-Q plot as diagnostic evidence for these eight residuals and list what it leaves open.",
+      "why": "Residuals from a fitted line are constrained: they sum to 0 and are orthogonal to x, so the eight values carry only six degrees of freedom. Eight points also cannot separate a mild tail difference from chance.",
+      "wrong": "Concluding from points near the line that the errors are normal and independent and that the model is valid for prediction or causal claims. Dependence and misspecification do not show up in a Q-Q plot.",
+      "verify": "`sum(z$residual)` and `sum(z$residual * d$x)` both return 0 within rounding error, which shows the constraint."
+    }
+  ]
+}

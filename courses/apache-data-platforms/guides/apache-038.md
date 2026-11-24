@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-033`, `apache-035`, `apache-036`.
 
+## Key terms
+
+- **KRaft controller:** A Kafka node role that manages cluster metadata through Kafka's own quorum. Kafka 4.x runs only in KRaft mode.
+- **process.roles:** The setting that assigns broker, controller or both roles to a node. The workshop runs both in one process, so it has no high availability.
+- **Bootstrap address:** The first endpoint a client contacts to fetch cluster metadata, after which it connects to the partition leaders that metadata names.
+- **Advertised listener:** The address a broker returns to clients in metadata. Advertising localhost to a client in another container makes that client connect to itself.
+- **Cluster identity:** The saved cluster identifier that must match the retained metadata and log volume. The startup script refuses a mismatched volume instead of formatting it.
+
 ## Metadata and data listeners have operational responsibilities
 
 KRaft uses Kafka's own metadata quorum. Kafka 4.0 removed ZooKeeper mode, so every
@@ -38,7 +46,7 @@ inter.broker.listener.name=PLAINTEXT
 `controller.quorum.voters` lists a single voter, so there is no quorum to lose a
 member from. The broker listens on port 9092 for clients and 9093 for controller
 traffic, and `advertised.listeners` is the address returned to clients in metadata.
-The workshop advertises kafka:9092 inside its owned private Compose network and
+The workshop advertises `kafka:9092` inside its owned private Compose network and
 publishes no host ports. Its saved cluster identity is separate from container
 identity and image identity. Kafka's retained metadata and log volume must agree
 with that cluster identity; the startup script refuses a mismatched existing

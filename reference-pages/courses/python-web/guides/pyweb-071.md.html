@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>pyweb-070</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A useful test suite combines successful boundary cases, invalid inputs, side-effect checks and recovery after failure. This chapter executes a small unittest suite against a real FastAPI application. It deliberately does not call those tests a load benchmark or a deployed-service acceptance test.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Test isolation:</strong> Giving each test its own fresh application and state so results do not depend on the order tests run in.</li>
+<li><strong>Boundary value:</strong> An input at or just beyond an accepted limit, such as quantity 0, 1, 5 or 6, which is where validation errors usually hide.</li>
+<li><strong>subTest:</strong> A unittest context manager that reports each related input separately so a failure names the exact value.</li>
+<li><strong>Side-effect assertion:</strong> Checking stored effects after a request, since a status code alone cannot prove that a refused request changed nothing.</li>
+<li><strong>Dependency failure:</strong> A simulated unavailable dependency that returns 503 before any effect, followed by a check that the service recovers.</li>
+</ul>
 <h3 id="mechanism-each-test-states-a-behavioral-claim">Mechanism: each test states a behavioral claim<a class="heading-anchor" href="#mechanism-each-test-states-a-behavioral-claim" aria-label="Link to this section">#</a></h3>
 <p>The fixture accepts a strict integer quantity between 1 and 5. A successful request appends one effect and returns 201. An unavailable dependency causes 503 before the append. Each test creates a fresh application and effects list, then closes its TestClient during teardown.</p>
 <p>Isolation matters because a test that depends on another test&#x27;s mutation can pass in one order and fail in another. A fresh fixture gives each case its own state and makes parallel execution practical. Shared real databases need separately owned namespaces or reviewed grouping, not accidental cross-test interference.</p>
@@ -209,6 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The second behavior disables the controlled dependency flag, sends a valid request and receives 503 without an effect. It then restores availability, repeats a valid request and observes one successful effect.</p>
 <p>This checks recovery, which a failure-only test can miss. A resource may remain poisoned after an error, or an exception handler may close shared state accidentally. A successful operation after the failure demonstrates that the finite fixture returned to a usable state.</p>
 <p>The dependency flag is an explicit fault-injection seam, not a simulated network outage presented as one. The owned workshop separately stops/restarts actual service components and observes durable state. Both kinds of tests are useful when their claims remain distinct.</p>
+<h3 id="worked-example-lax-coercion-accepts-values-the-strict-contract-refuses">Worked example: lax coercion accepts values the strict contract refuses<a class="heading-anchor" href="#worked-example-lax-coercion-accepts-values-the-strict-contract-refuses" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel<span class="syntax-punctuation">,</span> ConfigDict<span class="syntax-punctuation">,</span> Field<span class="syntax-punctuation">,</span> ValidationError
+
+
+<span class="syntax-keyword">class</span> <span class="syntax-class">Lax</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    quantity<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> Field<span class="syntax-punctuation">(</span>ge<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> le<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">class</span> <span class="syntax-class">Strict</span><span class="syntax-punctuation">(</span>Lax<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    model_config <span class="syntax-operator">=</span> ConfigDict<span class="syntax-punctuation">(</span>strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    results <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> model <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>Lax<span class="syntax-punctuation">,</span> Strict<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+            results<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>quantity<span class="syntax-operator">=</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>quantity<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">except</span> ValidationError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+            results<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>error<span class="syntax-operator">.</span>errors<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">repr</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> results<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">2 [2, 2]
+&#x27;2&#x27; [2, &#x27;int_type&#x27;]
+True [1, &#x27;int_type&#x27;]
+2.0 [2, &#x27;int_type&#x27;]</code></pre>
+<p>In lax mode pydantic converts the string <code>&quot;2&quot;</code>, the float <code>2.0</code> and even <code>True</code>, which becomes a reservation of quantity 1. The lesson&#x27;s <code>Input</code> model sets <code>strict=True</code>, and its <code>test_invalid_values_have_no_effect</code> case lists <code>True</code> and <code>&quot;2&quot;</code> for this reason: a boundary test that only tried 0 and 6 would pass against either model and miss the coercion. Running each value inside <code>subTest</code> lets one failing input be reported without hiding the others, and checking <code>self.effects</code> afterward proves that a 422 also left no side effect.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why not measure requests per second here?</strong> In-process client execution, synthetic handlers and shared host scheduling do not represent the deployed workload. Load testing needs an actual server path, controlled concurrency, latency distributions and resource/error observations.</p>
 <p><strong>Why test state after a refusal?</strong> An implementation can return the expected error after already mutating storage. The no-effect assertion catches that ordering defect.</p>

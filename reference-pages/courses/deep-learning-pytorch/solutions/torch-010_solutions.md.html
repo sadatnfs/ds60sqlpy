@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="torch-010-explanatory-solutions">torch-010: explanatory solutions<a class="heading-anchor" href="#torch-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers only after attempting Datasets, held-out families and leakage controls yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Inspect a literal Dataset, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Map-style Dataset, Subset, Split unit. After a pass, choose a new input for exercise 6, Apply the frozen transform, without looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. Related records need a shared split unit, such as account or source document. Subset selects indices from a dataset, but choosing those indices is a statistical-design responsibility. Fit preprocessing only on the training subset and freeze it before transforming validation or holdout records. A validation-only extreme should not change a training mean.</p>
 <p>This lesson implements a tiny map-style Dataset over eight literal account records. Each item includes identity, group and numeric value so split and pairing checks remain possible. The dataset is deterministic and contains no file or network reads. Grouped splitting, training-only normalization and an explicit held-out perturbation distinguish data-interface correctness from evaluation validity.</p>
@@ -205,7 +205,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Subclass Dataset and implement <strong>len</strong> and<strong>getitem</strong>. A Subset stores a sequence of indices and delegates item retrieval to the original dataset. Build training indices from whole account groups before calculating any statistic. Stack only selected training values to estimate the mean. Use sets of group IDs to check isolation; disjoint row indices alone are insufficient.</p>
 <h3 id="trace-selection-fitted-state-and-delegated-access">Trace selection, fitted state and delegated access<a class="heading-anchor" href="#trace-selection-fitted-state-and-delegated-access" aria-label="Link to this section">#</a></h3>
-<p>The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 from A and B; assessment selects 4, 5, 6, 7 from C and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, account C, value 20. A local batch position zero is not a replacement for the source identity.</p>
+<p>The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 from A and B; assessment selects 4, 5, 6, 7 from C and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus <code>assessment[0]</code> returns original identity 4, account C, value 20. A local batch position zero is not a replacement for the source identity.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Population</th>
 <th>Original identities</th>
@@ -295,7 +295,7 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <p><strong>Expected:</strong> 16, 18, 26, 28.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>centered</code> matches <code>torch.tensor([16.0, 18.0, 26.0, 28.0], dtype=torch.float64)</code> exactly.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Repeat exercise 4, Perturb only assessment values, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose row-level leakage, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
   </main>
 </body>
 </html>

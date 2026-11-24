@@ -206,6 +206,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The factor two accounts for keys and values. This is the tensor payload, not allocator padding, fragmentation, page tables, temporary buffers or scheduler state. A paged cache changes allocation management but does not make its underlying values free. Grouped-query attention can use fewer KV heads than query heads, so inspect the model rather than assuming both counts match.</p>
 <p>During prefill, many query positions are processed together. During decode, each new query reads the growing history, often producing a very different arithmetic-intensity pattern. Report time to first token and subsequent token latency separately, and state whether tokenization, sampling and output transfer are included. A throughput gain from batching may increase a single user&#x27;s queueing delay.</p>
 <p>Cache correctness requires position and mask consistency. Compare uncached and cached logits at every step for a small deterministic model, with dropout disabled and the same input prefix. Test batch members with different valid lengths and an explicit maximum generation length. If quantization is introduced, compare output quality and numerical error independently. A fake-quantization rounding exercise remains an educational approximation until a real packed low-bit backend executes and its memory/performance are measured.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Prefill:</strong> The phase that processes the whole prompt in parallel and fills the KV cache.</li>
+<li><strong>Decode:</strong> The token-by-token generation phase, usually limited by memory bandwidth.</li>
+<li><strong>KV cache:</strong> Stored key and value tensors for earlier tokens, growing with layers, KV heads, head size and sequence length.</li>
+<li><strong>Grouped-query attention:</strong> Sharing each key and value head across several query heads to shrink the KV cache.</li>
+<li><strong>Fake quantization:</strong> Rounding values to a low-precision grid while keeping float storage, which models accuracy but not memory savings.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>For 2 layers, batch 1, sequence 16,4 KV heads, head dimension 8 and 2-byte elements, keys and values consume 4096 bytes in the simple dense model.</p>
@@ -219,6 +227,36 @@ cache <span class="syntax-operator">=</span> <span class="syntax-number">2</span
 <span class="syntax-keyword">assert</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> layers <span class="syntax-operator">*</span> batch <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> seq<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> heads <span class="syntax-operator">*</span> dim <span class="syntax-operator">*</span> width <span class="syntax-operator">==</span> <span class="syntax-number">8192</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU KV-cache ledger:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> cache<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> 4096 bytes, doubling to 8192 at twice the sequence length.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>layers</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>batch</code></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>seq</code></td>
+<td><code>16</code></td>
+</tr>
+<tr>
+<td><code>heads</code></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>dim</code></td>
+<td><code>8</code></td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td><code>2</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -228,17 +266,23 @@ cache <span class="syntax-operator">=</span> <span class="syntax-number">2</span
 <p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-derive-cache-bytes">Exercise 1: Derive cache bytes<a class="heading-anchor" href="#exercise-1-derive-cache-bytes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>derive cache bytes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Leaving out the factor two for keys and values gives 2048 bytes and underestimates the cache by half.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-double-the-sequence">Exercise 2: Double the sequence<a class="heading-anchor" href="#exercise-2-double-the-sequence" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>double the sequence</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Lowering weight precision to reduce memory does nothing for this term, since the cache precision is set separately.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-distinguish-query-and-kv-heads">Exercise 3: Distinguish query and KV heads<a class="heading-anchor" href="#exercise-3-distinguish-query-and-kv-heads" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>distinguish query and KV heads</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming KV heads equal attention heads for every model gives a 4 times overestimate here.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-cached-logits">Exercise 4: Compare cached logits<a class="heading-anchor" href="#exercise-4-compare-cached-logits" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>compare cached logits</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing only the final generated text hides small differences that alter sampling later. A wrong position offset in the cache can produce plausible text for many tokens before the output visibly drifts.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-prefill-and-decode-timing">Exercise 5: Separate prefill and decode timing<a class="heading-anchor" href="#exercise-5-separate-prefill-and-decode-timing" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>separate prefill and decode timing</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting a single tokens-per-second number mixes two regimes. A long prompt with short output looks very different from a short prompt with long output under one combined number.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-label-fake-versus-real-quantization">Exercise 6: Label fake versus real quantization<a class="heading-anchor" href="#exercise-6-label-fake-versus-real-quantization" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>label fake versus real quantization</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting speed or memory gains from a simulation claims benefits only a deployed kernel can show. Memory can even rise under simulation, because both the original float weights and rounding scales may be held.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Decide whether to accelerate or keep each of two tasks on the CPU using an end-to-end Amdahl model.
+
 Work through *What a GPU accelerates, and what it cannot make fast* with the concrete cases below. Finish with this evidence:
 a decomposition diagram and a justified decision to accelerate or keep two tasks on CPU. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A CPU is optimized to make progress on a comparatively small number of complicated instruction streams. A GPU spends more of its resources on throughput across many pieces of work. This is a design distinction, not a rule that the GPU wins. A dependency means that one result must exist before another calculation can start. Pixel brightness updates have independent destinations; a running account balance has a dependency between successive balances. There can still be a parallel prefix algorithm for that balance, but changing the algorithm is real work. Include loading data, launching kernels and returning results when deciding whether acceleration helps a person waiting for an answer.
+
+### Key terms
+
+- **Throughput:** The amount of completed work per unit of time across many independent pieces of work, which GPU designs favor.
+- **Latency:** The time from submitting one piece of work until its result is available, including transfer and launch costs.
+- **Data dependency:** A relationship in which one calculation needs another calculation's result before it can start.
+- **Amdahl's law:** A bound on whole-application speedup set by the fraction of time that stays serial or unaccelerated.
 
 ## Mathematical contract
 
@@ -57,7 +66,6 @@ cpu = 20 + 80
 gpu = 20 + 80 / 10 + 4
 assert gpu == 32
 assert cpu / gpu == 3.125
-assert 100 / 40 == 2.5
 print({"CPU_seconds": cpu, "modeled_GPU_seconds": gpu, "speedup": cpu / gpu})
 ```
 

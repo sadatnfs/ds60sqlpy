@@ -80,7 +80,7 @@ The explicit schema makes parsing independent of whichever file happens to be di
 
 Group by team and compute row_count, known_amounts and total_amount. Use the same expression for streaming and batch relations without filling unknown amounts.
 
-**Expected:** The streaming result remains streaming and has one state/result row per team. Its eventual literal result is A(4,3,15), B(3,2,35), C(2,2,30).
+**Expected:** The streaming result remains streaming and has one state/result row per team. Its eventual literal result is `A(4, 3, 15)`, `B(3, 2, 35)`, `C(2, 2, 30)`.
 
 ```scala
 def teamSummary(frame: DataFrame): DataFrame = {
@@ -156,7 +156,7 @@ The trigger defines a finite processing boundary for the files available at quer
 
 ### Exercise 5: Reconcile processed input through progress evidence
 
-Return(batch_id, num_input_rows) from retained query progress. Sum input rows and inspect positive-input batches without confusing cumulative sink snapshots with new input.
+Return (batch_id, num_input_rows) from retained query progress. Sum input rows and inspect positive-input batches without confusing cumulative sink snapshots with new input.
 
 **Expected:** Three positive-input batches of 3 records and total input 9. Any zero-input progress entry contributes zero to that total.
 
@@ -179,7 +179,7 @@ The progress ledger measures what this query consumed, not just what the fixture
 
 Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literal A/B/C oracle.
 
-**Expected:** Exactly A(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.
+**Expected:** Exactly `A(4, 3, 15)`, `B(3, 2, 35)`, `C(2, 2, 30)`, whose record counts sum 9, known counts 7 and amounts 80.
 
 ```scala
 def summaryRows(frame: DataFrame): Seq[(String, Long, Long, Long)] = {
@@ -202,4 +202,6 @@ The final table is checked against an independent value contract as well as the 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Publish complete input files atomically) is built inside the program, so opening the lesson fetches nothing; it expects: Three input files, each with 3 complete JSON records; no staging temporary file remains. Reusing `batch-0.json` is rejected. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

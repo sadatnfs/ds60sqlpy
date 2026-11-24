@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-barrier-time">Exercise 1: Compute barrier time<a class="heading-anchor" href="#exercise-1-compute-barrier-time" aria-label="Link to this section">#</a></h3>
 <p>The slowest rank controls the barrier.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute barrier time</strong> is qualified there.</p>
+<p><strong>Approach.</strong> With ranks taking 10, 12 and 30 ms before a barrier, the compute phase takes at least <code>max(10, 12, 30) = 30</code> ms, not the mean of about 17.3 ms.</p>
+<p><strong>Why it is correct here.</strong> A barrier releases only when every rank arrives. The two fast ranks spend 20 and 18 ms waiting, so the slowest rank sets the step time.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the average rank time predicts 17.3 ms and hides 13 ms of idle time per step, which makes adding ranks look more efficient than it is.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>max(rank_ms) == 30</code>. In a real trace, compare the per-rank time spent waiting in the collective with the gap to the slowest rank.</p>
 <h3 id="exercise-2-compare-parallelism-types">Exercise 2: Compare parallelism types<a class="heading-anchor" href="#exercise-2-compare-parallelism-types" aria-label="Link to this section">#</a></h3>
 <p>Separate model replication and operation/layer/state partition.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare parallelism types</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare data parallelism, which replicates the model and splits examples, with tensor, pipeline and sharded-state parallelism, which partition operations, layers or optimizer state.</p>
+<p><strong>Why it is correct here.</strong> Data parallelism needs the whole model on each device and communicates gradients. Partitioning methods fit larger models but add communication inside the forward and backward passes.</p>
+<p><strong>A plausible wrong approach.</strong> Using data parallelism for a model that does not fit on one device fails immediately, because each replica needs all parameters, gradients and optimizer state.</p>
+<p><strong>How to verify.</strong> For each method write down what is replicated, what is partitioned and what is communicated per step, then check the per-device memory against device capacity.</p>
 <h3 id="exercise-3-diagnose-a-missing-rank">Exercise 3: Diagnose a missing rank<a class="heading-anchor" href="#exercise-3-diagnose-a-missing-rank" aria-label="Link to this section">#</a></h3>
 <p>Bound waits and stop the owned job.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>diagnose a missing rank</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Diagnose a missing rank by bounding waits: a collective timeout turns a hang into an error that names the operation, after which the launcher stops all owned processes.</p>
+<p><strong>Why it is correct here.</strong> Without a bound, ranks that reached the collective wait forever for a rank that crashed or never started, and no error reaches anyone.</p>
+<p><strong>A plausible wrong approach.</strong> Restarting only the missing rank while the others wait in a collective fails, because the new process does not join the existing communicator state.</p>
+<p><strong>How to verify.</strong> Simulate the failure by delaying one rank past the timeout in a small job and confirm every rank exits with an error inside the configured bound.</p>
 <h3 id="exercise-4-define-checkpoint-consistency">Exercise 4: Define checkpoint consistency<a class="heading-anchor" href="#exercise-4-define-checkpoint-consistency" aria-label="Link to this section">#</a></h3>
 <p>Use a documented common update boundary.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define checkpoint consistency</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define checkpoint consistency as every rank saving at the same completed update step; a checkpoint with rank 0 at step 10 and rank 1 at step 11 is rejected.</p>
+<p><strong>Why it is correct here.</strong> Ranks share parameters or hold partitions of the same model. Mixing steps combines states that never coexisted, so resuming does not continue any real training run.</p>
+<p><strong>A plausible wrong approach.</strong> Accepting each rank&#x27;s latest file independently produces mixed-step checkpoints whenever a failure occurs during saving.</p>
+<p><strong>How to verify.</strong> The reference computes <code>consistent = len(set(steps.values())) == 1</code> and asserts it is false. Store the step in each shard and check equality before loading.</p>
 <h3 id="exercise-5-budget-communication">Exercise 5: Budget communication<a class="heading-anchor" href="#exercise-5-budget-communication" aria-label="Link to this section">#</a></h3>
 <p>Count bytes and frequency per collective.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>budget communication</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Budget communication by counting bytes and frequency for each collective, such as an all-reduce of gradient bytes once per step for data parallelism.</p>
+<p><strong>Why it is correct here.</strong> Communication time depends on the bytes moved and link bandwidth, so the byte count per step shows whether the network can keep up with compute.</p>
+<p><strong>A plausible wrong approach.</strong> Estimating communication from the parameter count without element size or frequency misses that float32 gradients are four bytes and some collectives run several times per step.</p>
+<p><strong>How to verify.</strong> Compute bytes per step from parameter count and dtype, then compare against bytes recorded by the communication library&#x27;s logging for one step.</p>
 <h3 id="exercise-6-design-owned-host-cleanup">Exercise 6: Design owned-host cleanup<a class="heading-anchor" href="#exercise-6-design-owned-host-cleanup" aria-label="Link to this section">#</a></h3>
 <p>Terminate only declared job resources and preserve checkpoints.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design owned-host cleanup</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design owned-host cleanup: on failure, terminate only processes and resources the job created, recorded by process IDs or job labels, and keep completed checkpoints.</p>
+<p><strong>Why it is correct here.</strong> Shared hosts run other jobs. Ownership records make cleanup safe, and keeping checkpoints allows resuming from the last consistent step.</p>
+<p><strong>A plausible wrong approach.</strong> Killing every GPU process on a host stops other users&#x27; jobs, while deleting the output directory loses valid checkpoints.</p>
+<p><strong>How to verify.</strong> List the recorded process IDs before cleanup and confirm afterward that only those exited and checkpoints remain.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Barrier 30 ms; mixed-step checkpoint rejected.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-105_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

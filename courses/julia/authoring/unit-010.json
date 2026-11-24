@@ -3,6 +3,25 @@
   "title": "Composite types, constructors and nested mutability",
   "concepts": ["struct", "constructor", "mutable struct", "invariant", "nested state"],
   "outcome": "Use owned types to represent data contracts and distinguish immutable bindings from recursively immutable state.",
+  "key_terms": [
+    ["Struct", "An immutable composite type whose fields cannot be reassigned after construction."],
+    [
+      "Inner constructor",
+      "A constructor defined inside the type body that calls `new` and can reject invalid field values before any instance exists."
+    ],
+    [
+      "Mutable struct",
+      "A composite type whose fields can be reassigned after construction, so validation at construction alone no longer protects it."
+    ],
+    [
+      "Invariant",
+      "A condition that every valid instance must satisfy, such as a finite value with a declared unit."
+    ],
+    [
+      "Nested state",
+      "A mutable object, such as a vector, stored in a field of an immutable struct that can still change in place."
+    ]
+  ],
   "level": "intermediate",
   "minutes": 150,
   "prerequisites": ["julia-009"],
@@ -11,48 +30,68 @@
     ["Julia constructors", "https://docs.julialang.org/en/v1/manual/constructors/"]
   ],
   "figure": 0,
+  "approach": "`Measurement` has an inner constructor that converts the value with `Float64`, requires it to be finite and requires the unit to be `:m` or `:cm` before calling `new`. The struct is immutable, but `VectorRecord` stores a mutable `Vector{Int}`, so a fixed field binding can still expose changing contents.",
   "exercises": [
     {
       "title": "Validate a unit",
       "task": "Attempt to construct a measurement with an unsupported unit.",
       "expected": "Construction fails explicitly.",
       "hint": "Check the invariant before new creates the object.",
-      "answer": "Field types alone cannot distinguish supported and unsupported physical units."
+      "answer": "Field types alone cannot distinguish supported and unsupported physical units.",
+      "why": "`unit in (:m, :cm)` fails for anything else, so construction throws `ArgumentError` and no invalid object ever exists.",
+      "wrong": "Validating units later in each analysis function lets an object with `:unknown` circulate and depends on every caller remembering the check.",
+      "verify": "Example A asserts `@test_throws ArgumentError Measurement(1, :unknown)`; try `:km` as well and expect the same error."
     },
     {
       "title": "Inspect conversion",
       "task": "Construct a measurement from integer 1.",
       "expected": "Its stored value is Float64.",
       "hint": "The constructor chooses that representation.",
-      "answer": "The conversion is deliberate and can have precision consequences for other numeric inputs."
+      "answer": "The conversion is deliberate and can have precision consequences for other numeric inputs.",
+      "why": "The constructor calls `Float64(value)` before storing, so `Measurement(1, :cm).value` is the float 1.0.",
+      "wrong": "Assuming the integer type is kept would predict `Int` storage, but `fieldtypes(Measurement)` fixes the field as `Float64`.",
+      "verify": "The reference asserts `fieldtypes(Measurement) == (Float64, Symbol)`; print `typeof(Measurement(1, :cm).value)`."
     },
     {
       "title": "Try field reassignment",
       "task": "Reassign a field of an immutable measurement.",
       "expected": "The operation is rejected.",
       "hint": "The struct field binding is fixed after construction.",
-      "answer": "This says nothing about whether the original measurement was scientifically valid."
+      "answer": "This says nothing about whether the original measurement was scientifically valid.",
+      "why": "Fields of an immutable struct cannot be reassigned after construction, so `measurement.value = 3.0` throws `ErrorException`.",
+      "wrong": "Concluding that the failed assignment proves the measurement is valid confuses a language rule about mutation with domain validation.",
+      "verify": "Example A asserts `@test_throws ErrorException measurement.value = 3.0`."
     },
     {
       "title": "Mutate nested storage",
       "task": "Change the vector inside VectorRecord.",
       "expected": "Its contents can change despite the immutable outer struct.",
       "hint": "The vector itself is mutable.",
-      "answer": "Deep immutability requires more than an immutable wrapper."
+      "answer": "Deep immutability requires more than an immutable wrapper.",
+      "why": "`VectorRecord(a)` stores the same vector object `a`, so `a[1] = 3` is visible as `record.values[1] == 3`.",
+      "wrong": "Calling the outer struct immutable and therefore frozen predicts the old value, ignoring that the vector inside is shared and mutable.",
+      "verify": "The reference performs exactly this mutation and asserts `record.values[1] == 3`."
     },
     {
       "title": "Create a snapshot",
       "task": "Copy the vector before storing it in another record.",
       "expected": "Later source-vector mutation does not affect that copied vector.",
       "hint": "Choose the required storage independence explicitly.",
-      "answer": "A snapshot policy must account for every nested mutable layer."
+      "answer": "A snapshot policy must account for every nested mutable layer.",
+      "why": "`VectorRecord(copy(a))` stores a fresh vector, so later writes to `a` do not reach the stored copy.",
+      "wrong": "Copying the record wrapper instead of the vector still shares the inner storage, so the supposed snapshot keeps changing.",
+      "verify": "The reference sets `a[1] = 4` after the copy and asserts `separate.values[1] == 3`."
     },
     {
       "title": "Review a convenience constructor",
       "task": "Add a constructor with a default unit in an owned copy.",
       "expected": "It preserves the same validation contract.",
       "hint": "Route convenience paths through validated construction.",
-      "answer": "An API becomes inconsistent if one creation path bypasses its stated invariant."
+      "answer": "An API becomes inconsistent if one creation path bypasses its stated invariant.",
+      "why": "A convenience method such as `Measurement(value) = Measurement(value, :m)` routes through the inner constructor and keeps both checks.",
+      "wrong": "Writing it with `new` directly or with a different field order can create objects that skip the unit and finiteness guards.",
+      "verify": "Call the convenience method with NaN and expect `ArgumentError`, proving the same contract applies."
     }
-  ]
+  ],
+  "checks_note": "Construction checks confirm that `Measurement` stores a `Float64` and a `Symbol`, converting the integer 1 but refusing the string \"1\" with `MethodError`. The vector lines show what immutability does not protect: `VectorRecord(a)` keeps a reference to `a`, so setting `a[1] = 3` is visible through `record.values`. Passing `copy(a)` breaks that link, and the later write of 4 leaves `separate.values[1]` at 3."
 }

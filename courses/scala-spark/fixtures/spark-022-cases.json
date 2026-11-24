@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Establish the high-cardinality fixture oracle",
       "input_contract": "Compute input row count, distinct key count and total id sum. Confirm the key formula supports exactly 20 occurrences per key.",
-      "expected": "Metrics(20000,1000,199990000);keys 0..999 each occur 20 times by construction.",
+      "expected": "Metrics(20000, 1000, 199990000);keys 0..999 each occur 20 times by construction.",
       "verification": "Assert the aggregate tuple and independent arithmetic sum 0+...+19999."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Separate a workload model from measured evidence",
       "input_contract": "For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics.",
-      "expected": "For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.",
+      "expected": "For 2 reducers: 5000, 4000, 500. For 5 reducers: 5000, 4000, 200. These values do not assert actual balanced hash buckets or network bytes.",
       "verification": "Assert the two model tuples and print Spark 4.0.1, AQEfalse, local[2] with the distinct p2/p5 observations."
     }
   ],
@@ -51,6 +51,6 @@
     "per_key": 20,
     "input_partitions": 4,
     "reduce_partitions": [2, 5],
-    "metrics_scope": "Actual executed classic Spark4.0.1 Exchange metrics;dataSize is serialized exchange data,not claimed remote network bytes."
+    "metrics_scope": "Actual executed classic Spark 4.0.1 Exchange metrics; dataSize is serialized exchange data, not claimed remote network bytes."
   }
 }

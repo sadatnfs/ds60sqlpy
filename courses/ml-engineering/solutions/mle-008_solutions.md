@@ -9,6 +9,8 @@ The executable reference contains the two complete worked cases with assertions.
 
 Use explicit named selections or validate a positional interface carefully. A raw array without a recorded order is easy to misuse.
 
+Build the request as {"region": "south", "tickets": 2, "usage": 40.0}. pd.DataFrame([r]) keeps column names and ColumnTransformer selects usage and tickets by name, so the probability equals the one from the original order. Passing list(r.values()) as a NumPy row would feed "south" to the usage imputer and fail, or silently swap two numeric fields if both were numbers.
+
 ```python
 # Uses pd, dataset() and fit_pipeline() from main.py.
 frame = dataset()
@@ -33,11 +35,15 @@ Retain the fitted imputer with the model and make missingness handling explicit.
 
 Decide whether to reject, map or encode unknown values. Document and test the same policy at training and serving boundaries.
 
+The encoder uses handle_unknown="ignore", so region "east" becomes all zeros and a probability is still returned with no error. That is a policy, not a neutral default. Verify it by scoring the same row as "east" and as an all-zero baseline and seeing equal probabilities.
+
 **Expected:** Behavior matches the chosen encoder/API contract.
 
 ## 4. Inspect fitted state
 
 Record the relevant pipeline/version with the model artifact. Recomputing those values from a later dataset changes the model.
+
+train holds the 77 rows with label_available_at <= 180. Read model.named_steps["features"].named_transformers_["numeric"].named_steps["scale"].mean_ and compare it with train[["usage", "tickets"]].mean(); they agree, and differ from the mean over all 120 rows. In example_two the same idea is visible in miniature: fitting on [0, 2] gives 99 for 100, while fitting on [0, 2, 100] gives about 1.41.
 
 **Expected:** They come only from training rows.
 

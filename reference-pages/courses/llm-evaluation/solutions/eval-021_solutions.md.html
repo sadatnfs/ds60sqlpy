@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-021-explained-reference">eval-021: explained reference<a class="heading-anchor" href="#eval-021-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-021_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-021_reference.py</code> asserts each answer below, from <em>Remove the trace</em> to <em>Freeze rollout quantities</em>, on the authored GAE and termination fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Positive advantage outside the interval</em> tests.</p>
 <h3 id="1-remove-the-trace">1. Remove the trace<a class="heading-anchor" href="#1-remove-the-trace" aria-label="Link to this section">#</a></h3>
 <p>This isolates the one-step residual calculation and its terminal mask.</p>
+<p><strong>Approach.</strong> Call <code>gae([1, 2], [0.5, 0.4, 0.2], [False, True], lam=0)</code>. With lambda 0 the carried term is multiplied by zero, so each advantage is its one-step residual.</p>
+<p><strong>Why it holds for this fixture.</strong> Step 1 is terminal, so its residual is 2 + 0 - 0.4 = 1.6. Step 0 is not terminal, so its residual is 1 + 0.9 times 0.4 - 0.5 = 0.86. With lambda 0.8, step 0 instead becomes 0.86 + 0.72 times 1.6 = 2.012, as in case A.</p>
+<p><strong>A tempting wrong approach.</strong> Forgetting the terminal mask on step 1 would add 0.9 times 0.2 and give 1.78, the truncated case. The value after a true terminal state must not be bootstrapped.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>[0.86, 1.6]</code> for lambda 0. Case A asserts <code>[2.012, 1.6]</code> for terminal and <code>[2.1416, 1.78]</code> for truncated.</p>
 <p><strong>Expected observation:</strong> Advantages reduce to residuals 0.86 and 1.6.</p>
 <h3 id="2-terminate-the-first-step">2. Terminate the first step<a class="heading-anchor" href="#2-terminate-the-first-step" aria-label="Link to this section">#</a></h3>
 <p>The array illustrates boundary behavior; separate episodes should otherwise be processed with explicit episode structure.</p>
+<p><strong>Approach.</strong> Call <code>gae([1, 2], [0.5, 0.4, 0.2], [True, True])</code>. Both steps are now terminal.</p>
+<p><strong>Why it holds for this fixture.</strong> Step 0&#x27;s residual drops the bootstrap term, giving 1 - 0.5 = 0.5, and the terminal flag also zeroes the carry from step 1. Step 1 is unchanged at 1.6. The result is <code>[0.5, 1.6]</code>.</p>
+<p><strong>A tempting wrong approach.</strong> Treating the array as one continuous rollout and letting step 0 inherit step 1&#x27;s advantage mixes two episodes. Rewards after an episode ends must not be credited to earlier actions.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.testing.assert_allclose(gae([1, 2], [0.5, 0.4, 0.2], [True, True]), [0.5, 1.6])</code>.</p>
 <p><strong>Expected observation:</strong> The first result is 0.5 and does not inherit the second residual.</p>
 <h3 id="3-positive-advantage-outside-the-interval">3. Positive advantage outside the interval<a class="heading-anchor" href="#3-positive-advantage-outside-the-interval" aria-label="Link to this section">#</a></h3>
 <p>The surrogate stops rewarding that favorable increase beyond the upper boundary.</p>
+<p><strong>Approach.</strong> Call <code>clipped_terms([1.5], [1], epsilon=0.2)</code>. Compare the unclipped term 1.5 times 1 with the clipped term 1.2 times 1 and take the minimum.</p>
+<p><strong>Why it holds for this fixture.</strong> The minimum is 1.2. Once the ratio passes 1 + epsilon, the clipped term is constant, so its gradient with respect to the policy is zero. The objective stops rewarding further increase of an already favored action.</p>
+<p><strong>A tempting wrong approach.</strong> Expecting 1.5 because the ratio was observed is the mistake. Clipping exists to remove the incentive for large steps that the old samples cannot justify.</p>
+<p><strong>How to verify.</strong> Case B asserts the first term of <code>clipped_terms([1.5, 0.5, 0.5, 1.5], [1, 1, -1, -1])</code> is 1.2. Also check that ratio 1 with advantages 2 and -2 returns them unchanged.</p>
 <p><strong>Expected observation:</strong> The clipped term is 1.2.</p>
 <h3 id="4-negative-advantage-outside-the-interval">4. Negative advantage outside the interval<a class="heading-anchor" href="#4-negative-advantage-outside-the-interval" aria-label="Link to this section">#</a></h3>
 <p>The bad-direction probability increase still receives its larger penalty.</p>
+<p><strong>Approach.</strong> Call <code>clipped_terms([1.5], [-1])</code>. The unclipped term is -1.5 and the clipped term is -1.2.</p>
+<p><strong>Why it holds for this fixture.</strong> The minimum of -1.5 and -1.2 is -1.5, so the unclipped term is used. An action with negative advantage that became more likely keeps its full penalty and full gradient, pushing the policy back.</p>
+<p><strong>A tempting wrong approach.</strong> Assuming clipping is symmetric and always caps the term at the boundary gives -1.2. The minimum is pessimistic: it caps gains but not losses.</p>
+<p><strong>How to verify.</strong> Case B asserts the last term is -1.5. The third term, ratio 0.5 with advantage -1, is -0.8 because the clipped value is the smaller one there.</p>
 <p><strong>Expected observation:</strong> The term is -1.5, not-1.2.</p>
 <h3 id="5-check-an-unobserved-action">5. Check an unobserved action<a class="heading-anchor" href="#5-check-an-unobserved-action" aria-label="Link to this section">#</a></h3>
 <p>Clipping a finite sampled objective cannot by itself bound every unobserved action probability or full-distribution divergence.</p>
+<p><strong>Approach.</strong> Compare <code>p = [0.6, 0.39, 0.01]</code> and <code>other = [0.6, 0.01, 0.39]</code> against <code>old = [0.5, 0.49, 0.01]</code>. Only action 0 was sampled.</p>
+<p><strong>Why it holds for this fixture.</strong> Both policies give action 0 ratio 1.2, so the sampled clipped terms match. Their full KL from old differs a lot: about 0.02 for p and about 1.5 for other, because other moved 0.38 probability onto an action old almost never took.</p>
+<p><strong>A tempting wrong approach.</strong> Believing clipping bounds the overall policy change is the mistake. It constrains only the sampled actions&#x27; terms; unobserved actions can shift freely.</p>
+<p><strong>How to verify.</strong> Case B asserts the two sampled terms are equal and <code>kl(other, old) &gt; kl(p, old)</code>. Monitor full KL separately if it is computable.</p>
 <p><strong>Expected observation:</strong> Their sampled terms agree while global KL differs.</p>
 <h3 id="6-freeze-rollout-quantities">6. Freeze rollout quantities<a class="heading-anchor" href="#6-freeze-rollout-quantities" aria-label="Link to this section">#</a></h3>
 <p>Gradients through old probabilities or an unintended baseline optimize another objective and can destroy the interpretation of the ratio estimator.</p>
+<p><strong>Approach.</strong> Store old log probabilities and advantages as constants when the rollout is collected, and compute the ratio from current log probabilities against those stored values.</p>
+<p><strong>Why it holds for this fixture.</strong> The ratio&#x27;s denominator represents the policy that generated the data. If gradients flow into it, the update changes the denominator too, and the ratio no longer estimates the change from the sampling policy.</p>
+<p><strong>A tempting wrong approach.</strong> Recomputing old probabilities from the live model each inner step, or leaving advantages attached to the critic graph, is the usual bug. The loss then optimizes a different objective, and the actor can lower loss by moving the baseline.</p>
+<p><strong>How to verify.</strong> No reference assertion covers this task. In PyTorch, assert <code>old.requires_grad</code> and <code>advantage.requires_grad</code> are both false, as eval-022&#x27;s <code>fit_policy</code> does.</p>
 <p><strong>Expected observation:</strong> Stored old log probabilities and computed advantages are fixed.</p></article>
   </main>
 </body>

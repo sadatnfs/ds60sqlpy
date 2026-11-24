@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-012`.
 
 Django organizes an application around settings, URL configuration, views and reusable applications. This chapter reduces that structure to a complete finite example so each connection is visible. It also demonstrates a subtle boundary: declaring ALLOWED_HOSTS does not mean every arbitrary view automatically calls the host-validation API.
 
+## Key terms
+
+- **URLconf:** Django's ordered list of URL patterns that resolves an incoming path to a view and its captured arguments.
+- **Path converter:** A typed segment such as `<int:identifier>` that decides whether text matches the route and converts it before calling the view.
+- **reverse():** A Django function that builds a URL from a route name and arguments instead of repeating the literal path.
+- **ALLOWED_HOSTS:** The setting listing acceptable Host header values, enforced only when code calls `request.get_host()`, which CommonMiddleware does.
+- **Settings:** Django's process-level configuration of installed applications, middleware and databases, normally kept in a settings module.
+
 ## Mechanism: configuration connects components
 
 Settings define installed applications, middleware, database connections and other process-level choices. Django setup initializes its application registry. A URL configuration contains ordered patterns that resolve an incoming path into a view and captured arguments. A named route supports reverse construction of a URL without duplicating its literal path throughout the code.
@@ -29,6 +37,50 @@ The minimal JSON view does not read request.get_host. With no relevant middlewar
 This is not a recommendation to omit host validation. It demonstrates why a security claim should identify the actual enforcement point. ALLOWED_HOSTS configures Django's host-validation behavior when that boundary is invoked; raw access to request metadata is not the same API.
 
 A production project must review middleware order, trusted proxy behavior and direct access to the application server. Forwarded host settings are meaningful only when the request comes through an actually trusted proxy path. A configuration value alone is not network acceptance evidence.
+
+## Worked example: how converters and route order pick a view
+
+```python
+from django.conf import settings
+
+settings.configure(ROOT_URLCONF=__name__)
+import django
+
+django.setup()
+from django.urls import Resolver404, path, resolve, reverse
+
+
+def detail(request, identifier): ...
+
+
+def by_slug(request, slug): ...
+
+
+urlpatterns = [
+    path("notes/<int:identifier>/", detail, name="note-detail"),
+    path("notes/<slug:slug>/", by_slug, name="note-slug"),
+]
+
+for url in ("/notes/7/", "/notes/first-draft/", "/notes/7", "/notes/-3/"):
+    try:
+        match = resolve(url)
+        print(url, match.url_name, match.kwargs)
+    except Resolver404:
+        print(url, "404")
+print(reverse("note-slug", args=["release-notes"]))
+```
+
+Expected output:
+
+```text
+/notes/7/ note-detail {'identifier': 7}
+/notes/first-draft/ note-slug {'slug': 'first-draft'}
+/notes/7 404
+/notes/-3/ note-slug {'slug': '-3'}
+/notes/release-notes/
+```
+
+Django tries `urlpatterns` from top to bottom and stops at the first pattern whose converters all match. The `int` converter only accepts digits, so `7` reached `detail` already converted to an integer, while `first-draft` fell through to the slug route. The last two lines are the surprises. `/notes/7` without the trailing slash matches nothing; in a running site `CommonMiddleware` with `APPEND_SLASH` would redirect it, but the resolver itself is strict. And `-3` is not a valid integer to the `int` converter, yet hyphens and digits are legal slug characters, so a request meant for a numeric note silently landed on the slug view. Ordering routes from most to least specific and choosing converters that cannot overlap prevents this. `reverse` runs the same table backwards, which is why the lesson builds links by route name instead of formatting strings.
 
 ## Failure diagnosis and discussion
 

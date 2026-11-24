@@ -9,11 +9,15 @@ The executable reference contains the two complete worked cases with assertions.
 
 State the unit, eligibility and time boundary. A change from repeat customers to unseen customers changes the learning problem.
 
+In this fixture the 120 rows are not 120 people: customer_id is id modulo 12, so each of 12 synthetic customers contributes exactly 10 decisions, one per cutoff from 100 to 219. Calling the population "customers" would overstate independence; a split that puts one customer's rows on both sides of train and evaluation measures memory of that customer. Verify by printing frame.groupby("customer_id").size(), which shows 10 for every customer.
+
 **Expected:** The answer identifies synthetic customer decisions.
 
 ## 2. Exclude the target
 
 Validate a reviewed allowlist, not every non-null column. Other leakage fields such as future status or post-decision aggregates need the same review.
+
+The allowlist is correct here because REVIEWED_FEATURES names the three columns a reviewer approved, so a new column such as label_available_at fails even though it is numeric and complete. Selecting every column except label looks equivalent today but would silently admit cutoff, available_at and label_available_at, the last of which encodes when the answer arrives. Run the snippet: the first call returns None and the second raises ValueError mentioning label.
 
 ```python
 REVIEWED_FEATURES = {"usage", "tickets", "region"}
@@ -42,17 +46,23 @@ else:
 
 Update the label construction and availability contract, then revalidate training/evaluation cohorts. A title change alone does not implement a new target.
 
+Concretely, label_available_at is cutoff + 4 in dataset(); a 24 hour horizon means cutoff + 24, and contract["label_horizon_hours"] must change with it. Editing only the dictionary value leaves the assertion label_available_at > cutoff passing, which is why that check alone cannot catch a horizon mismatch. Verify the new rule by checking (frame.label_available_at - frame.cutoff).unique() equals [24] after rebuilding.
+
 **Expected:** Labels, maturity rules and evaluation need review.
 
 ## 4. Add a dependency
 
 Add a reviewed node and prerequisite. Do not mark it complete merely because training produced a file.
 
+Add "model_card": {"evaluate"} and change publish to {"evaluate", "model_card"}. With completed still {validate, features, train}, ready stays ["evaluate"]; after adding evaluate to completed, ready becomes ["model_card"] and publish is still absent. Making publish depend only on model_card would also block it, but would hide the evaluation edge if someone later removed the card step.
+
 **Expected:** Publication remains blocked until that artifact exists.
 
 ## 5. Inspect identity
 
 Retain the previous contract and explain the change. A new hash detects different bytes but cannot judge scientific validity.
+
+The second assertion matters as much as the first: digest() uses sort_keys=True, so reversing key order produces the same hash, while changing label_horizon_hours from 4 to 24 produces a different one (the first 12 hex characters move from 60992e449952 to c2e24b0037d3 on this contract). Hashing str(contract) instead would change with key order and report a false change.
 
 ```python
 # Uses digest() from main.py.
@@ -75,6 +85,8 @@ assert digest(dict(reversed(list(contract.items())))) == digest(contract)
 ## 6. Define ownership
 
 A real deployment needs acknowledged owners and procedures. Keep that external qualification separate from this local fixture.
+
+The fixture's contract has a single owner, "learning team", for everything, which is acceptable only because nothing is deployed. Split it into named reviewers for the feature list, the evaluation report and the support offer decision, and check that each node in the dependency dictionary that needs approval names one of them.
 
 **Expected:** Responsibilities are explicit.
 

@@ -14,6 +14,13 @@ Reduction also changes the parallel ownership pattern. Threads first accumulate 
 
 
 
+### Key terms
+
+- **Non-associative addition:** Floating-point addition whose result depends on grouping because each step rounds.
+- **Tree reduction:** A pairwise combining order that halves the active values each step and rounds differently from a sequential sum.
+- **Absolute and relative tolerance:** Bounds that accept a result when its error is small in absolute terms or relative to the magnitude of the expected value.
+- **Deterministic algorithm setting:** A framework option that selects reproducible kernels, often at a performance cost.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,6 +48,13 @@ print("CPU reduction reference:", math.fsum(values), items[0])
 ```
 
 **Expected observation:** Accurate cancellation sum 1 and tail-preserving sum 15.
+
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `values` | `[1e+16, 1.0, -1e+16]` |
+| `items` | `[15]` |
 
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
@@ -71,27 +85,39 @@ print("CUDA library reduction:", result, "; order-sensitive cases need a documen
 
 ### Exercise 1: Compute a tree by hand
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute a tree by hand** in the examples above.
+**Trap to avoid:** Pairing only `range(0, len(items) - 1, 2)` drops the odd element at each odd level. For this input the result becomes 10 and the error looks small enough to mistake for rounding.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Test the odd tail
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **test the odd tail** in the examples above.
+**Trap to avoid:** Using a tolerance like `abs(result - 15) < 10` would accept 10. Picking tolerances that wide hides structural bugs inside numerical noise.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Construct cancellation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **construct cancellation** in the examples above.
+**Trap to avoid:** Using `[1.0, 2.0, 3.0]` as the cancellation test shows nothing, since every order gives 6 exactly. A test needs magnitudes far enough apart to exceed the mantissa.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Choose absolute and relative tolerance
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **choose absolute and relative tolerance** in the examples above.
+**Trap to avoid:** Using relative tolerance alone with an expected value of 0 requires exact equality. Any reordering then fails, even though both answers are within normal rounding of the large terms.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare atomics with staged reduction
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **compare atomics with staged reduction** in the examples above.
+**Trap to avoid:** Claiming the atomic version is deterministic because each update is indivisible confuses atomicity with order. Each addition is safe, but the sequence of additions still varies.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain deterministic settings limits
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **explain deterministic settings limits** in the examples above.
+**Trap to avoid:** Treating a deterministic flag as a promise of identical results across machines leads to bit-exact comparisons between environments that fail for legitimate reasons.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

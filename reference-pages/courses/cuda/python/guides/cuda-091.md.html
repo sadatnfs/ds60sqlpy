@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A convolution&#x27;s mathematical axes are distinct from its storage order. NCHW and NHWC encode where batch, channel, height and width lie; a layout conversion is real work unless a view is valid for the consuming operator. Framework and library implementations choose algorithms based on shapes, dtype, workspace and deterministic settings. The fastest choice for one shape can lose for another.</p>
 <p>PyTorch channels-last memory format and TensorFlow data-format conventions need separate explanations because identical axis names do not imply identical APIs. Compare outputs and gradients before timing. Include input conversion, algorithm search and workspace in the appropriate cost ledger. Do not promise a universal preferred layout or treat a profiler&#x27;s kernel name as proof of mathematical equivalence.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>NCHW and NHWC:</strong> Tensor layouts ordering batch, channels, height and width; channels-last NHWC often suits tensor core kernels.</li>
+<li><strong>Cross-correlation:</strong> The sliding dot product that deep learning frameworks call convolution, computed without flipping the filter.</li>
+<li><strong>Layout conversion:</strong> A transpose between layouts that costs memory traffic and can erase a faster kernel&#x27;s benefit.</li>
+<li><strong>Algorithm selection:</strong> Benchmarking candidate convolution algorithms for a shape and caching the fastest, which needs warmup before timing.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A one-dimensional valid convolution of [1,2,3,4] with kernel [1,-1], using cross-correlation convention, gives [-1,-1,-1]. Reversing the kernel changes the sign.</p>
@@ -214,6 +221,24 @@ out <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</s
 <span class="syntax-keyword">assert</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">*</span> <span class="syntax-number">4</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> <span class="syntax-number">4</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU convolution oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> out<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Valid cross-correlation [-1,-1,-1]; conversion amortization depends on reuse.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>x</code></td>
+<td><code>[1, 2, 3, 4]</code></td>
+</tr>
+<tr>
+<td><code>k</code></td>
+<td><code>[1, -1]</code></td>
+</tr>
+<tr>
+<td><code>out</code></td>
+<td><code>[-1, -1, -1]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -226,17 +251,23 @@ out <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</s
 <p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-state-cross-correlation-convention">Exercise 1: State cross-correlation convention<a class="heading-anchor" href="#exercise-1-state-cross-correlation-convention" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>state cross-correlation convention</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing a reference with <code>k[len(k)-1-j]</code>, textbook convolution, flips every sign compared with the library, which looks like a broken GPU kernel.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-calculate-output-length">Exercise 2: Calculate output length<a class="heading-anchor" href="#exercise-2-calculate-output-length" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>calculate output length</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using input length as output length assumes same padding, adding an output whose computation needs a value beyond the input.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-count-layout-conversion-cost">Exercise 3: Count layout conversion cost<a class="heading-anchor" href="#exercise-3-count-layout-conversion-cost" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>count layout conversion cost</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting only the faster convolution, 1 ms against 2, declares conversion a win even for a single call.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-forward-and-backward">Exercise 4: Compare forward and backward<a class="heading-anchor" href="#exercise-4-compare-forward-and-backward" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>compare forward and backward</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Benchmarking only the forward pass and applying the result to training ignores roughly two thirds of the convolution work.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-algorithm-warmup">Exercise 5: Explain algorithm warmup<a class="heading-anchor" href="#exercise-5-explain-algorithm-warmup" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>explain algorithm warmup</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Timing the first iteration and concluding the configuration is slow measures the search.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-two-shape-cases">Exercise 6: Design two shape cases<a class="heading-anchor" href="#exercise-6-design-two-shape-cases" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design two shape cases</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Testing a single shape and generalizing the chosen layout risks regressions at other batch sizes. Production traffic that mixes sizes then sees the slow path.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

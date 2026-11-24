@@ -9,9 +9,20 @@ if str(ROOT) not in sys.path:
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
 from verify_lines import VERIFY  # noqa: E402
+from key_terms import KEY_TERMS  # noqa: E402
 
 BASE = ROOT / "courses/nlp"
 PLAN = json.loads((BASE / "track.json").read_text())["lessons"]
+
+
+def key_terms_block(n):
+    terms = KEY_TERMS[n]
+    assert 3 <= len(terms) <= 5, n
+    assert len({term.lower() for term, _ in terms}) == len(terms), n
+    for term, meaning in terms:
+        assert term.strip() and len(meaning.split()) >= 6, (n, term)
+        assert not {"\u2013", "\u2014"} & set(term + meaning), (n, term)
+    return "\n".join(f"- **{term}:** {meaning}" for term, meaning in terms)
 
 
 def author(n, overview, sections, examples, exercises, learner, solution, interviews, refs):
@@ -27,6 +38,8 @@ def author(n, overview, sections, examples, exercises, learner, solution, interv
         f"{item['level'].capitalize()}; about {item['minutes']} minutes plus discussion. Direct prerequisites: {prereq}. Read the preceding guide if its notation or information boundaries are unfamiliar.",
         "## Purpose and mental model",
         overview,
+        "## Key terms",
+        key_terms_block(n),
     ]
     for title, body in sections:
         lines += ["## " + title, body]

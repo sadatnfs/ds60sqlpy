@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-name-the-layers">Exercise 1: Name the layers<a class="heading-anchor" href="#exercise-1-name-the-layers" aria-label="Link to this section">#</a></h3>
 <p>The layered model prevents changing application code for a name-resolution failure or blaming DNS for a returned 404. It also identifies which evidence is still missing when a timeout is ambiguous.</p>
 <p><strong>Expected:</strong> Each layer has a distinct observation and possible failure.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write the six layers in request order with one observation each.</li>
+<li><strong>Why it is correct:</strong> Each layer can fail on its own, so a layer without an observation leaves a gap in the diagnosis.</li>
+<li><strong>Plausible wrong approach:</strong> Starting with HTTP alone and calling a timeout a DNS problem skips four layers of evidence.</li>
+<li><strong>How to verify:</strong> Each layer names its observation, from resolver answer to HTTP body.</li>
+</ul>
 <h3 id="exercise-2-verify-the-allowed-path">Exercise 2: Verify the allowed path<a class="heading-anchor" href="#exercise-2-verify-the-allowed-path" aria-label="Link to this section">#</a></h3>
 <p>The client checks the intended local fixture route independently of readiness. The observed result is bounded to that source and target and does not establish arbitrary network connectivity.</p>
 <p><strong>Expected:</strong> Owned backend identity and exact /version response pass, with cleanup.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Add the Service with selector app=hello, port 8080 named http and targetPort http, then Run both objects.</li>
+<li><strong>Why it is correct:</strong> targetPort http resolves to the container port named http, and the selector picks the Deployment&#x27;s Pods as endpoints.</li>
+<li><strong>Plausible wrong approach:</strong> Setting targetPort to a name the container does not define leaves endpoints with no usable port.</li>
+<li><strong>How to verify:</strong> The result shows the owned backend identity check and an exact <code>/version</code> body.</li>
+</ul>
 <h3 id="exercise-3-classify-nxdomain">Exercise 3: Classify NXDOMAIN<a class="heading-anchor" href="#exercise-3-classify-nxdomain" aria-label="Link to this section">#</a></h3>
 <p>The trace should include the requested name and client context. A typo or namespace mismatch differs from DNS infrastructure failure, so retain the actual response rather than assuming the broadest cause.</p>
 <p><strong>Expected:</strong> Investigate name, namespace and DNS context before backend application state.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Treat NXDOMAIN as a naming fault and check the name, namespace and resolver search path first.</li>
+<li><strong>Why it is correct:</strong> NXDOMAIN means the resolver found no record, so the request never reached any Service or Pod.</li>
+<li><strong>Plausible wrong approach:</strong> Restarting backends after NXDOMAIN changes nothing the resolver uses.</li>
+<li><strong>How to verify:</strong> The next check concerns name, namespace or resolver configuration only.</li>
+</ul>
 <h3 id="exercise-4-classify-a-transport-failure">Exercise 4: Classify a transport failure<a class="heading-anchor" href="#exercise-4-classify-a-transport-failure" aria-label="Link to this section">#</a></h3>
 <p>Several mechanisms can produce the symptom. The next check should distinguish them within the owned target, not widen the scan or disable controls. Policy enforcement needs its own positive/negative traffic comparison.</p>
 <p><strong>Expected:</strong> Inspect ports, eligible endpoints and qualified policy evidence; cause remains conditional until discriminated.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List missing ready endpoints, wrong port mapping and policy drop as open hypotheses with their discriminating observations.</li>
+<li><strong>Why it is correct:</strong> Resolution succeeded, so the fault lies between Service and Pod, and several causes produce the same timeout.</li>
+<li><strong>Plausible wrong approach:</strong> Blaming NetworkPolicy without checking EndpointSlices could miss that no Pod was ready.</li>
+<li><strong>How to verify:</strong> The answer names the observation, such as empty EndpointSlices, that separates endpoint loss from a policy drop.</li>
+</ul>
 <h3 id="exercise-5-classify-http-failures">Exercise 5: Classify HTTP failures<a class="heading-anchor" href="#exercise-5-classify-http-failures" aria-label="Link to this section">#</a></h3>
 <p>A returned status and body provide more specific evidence than a generic unavailable report. The correct repair depends on whether the requested route or the responding application identity is wrong.</p>
 <p><strong>Expected:</strong> Route mismatch versus application-contract mismatch.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read each response&#x27;s status and body against the expected route and version.</li>
+<li><strong>Why it is correct:</strong> Any HTTP response proves DNS, Service, endpoint and port worked; 404 isolates the path and a wrong version isolates the application.</li>
+<li><strong>Plausible wrong approach:</strong> Treating both as network failures ignores that a response arrived at all.</li>
+<li><strong>How to verify:</strong> Each case names the layers it proves and the status or body field that differs.</li>
+</ul>
 <h3 id="exercise-6-design-a-finite-host-transfer">Exercise 6: Design a finite host transfer<a class="heading-anchor" href="#exercise-6-design-a-finite-host-transfer" aria-label="Link to this section">#</a></h3>
 <p>A transfer exercise can broaden understanding without broadening the worker allowlist. It needs an owned scope and actual observations; the worksheet should leave execution unavailable when that capability is absent.</p>
 <p><strong>Expected:</strong> Explicit target, allowed client, timeout, expected layer failure and cleanup are recorded.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write the target, allowed client, timeout, expected failing layer and cleanup before running.</li>
+<li><strong>Why it is correct:</strong> Naming the failing layer in advance makes the result a test rather than a search, and the timeout keeps it bounded.</li>
+<li><strong>Plausible wrong approach:</strong> Running an open cross-namespace probe without a named capability touches objects outside your lease.</li>
+<li><strong>How to verify:</strong> The design names capability, target, timeout, expected layer and cleanup.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Do not scan unrelated addresses or use an external endpoint to test a local lesson. A host port-forward is another host capability with its own scope and lifecycle; it is not implied by a ClusterIP Service. The current browser path uses the in-cluster client instead.</p>
 <p>A positive one-shot request establishes only its observed path and payload. Production availability, network isolation and DNS reliability require broader evidence. A negative case should remain within a finite timeout and cleanup scope.</p></article>

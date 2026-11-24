@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A lower-bound search returns the first index whose value is at least the target, or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming table dp[amount] stores the minimum coin count for that exact amount, with dp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
+A lower-bound search returns the first index whose value is at least the target, or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming table `dp[amount]` stores the minimum coin count for that exact amount, with `dp[0] = 0` and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
 
 ## Worked example / walkthrough
 
@@ -64,7 +64,7 @@ public class Main {
   }
 
   static int minimumCoins(int amount, int[] coins) {
-    if (amount < 0 || amount > 1000) throw new IllegalArgumentException("amount0..1000 required");
+    if (amount < 0 || amount > 1000) throw new IllegalArgumentException("amount 0..1000 required");
     for (int coin : coins)
       if (coin <= 0) throw new IllegalArgumentException("positive coins required");
     int[] dp = new int[amount + 1];
@@ -107,7 +107,7 @@ public class Main {
   }
 
   static int minimumCoins(int amount, int[] coins) {
-    if (amount < 0 || amount > 1000) throw new IllegalArgumentException("amount0..1000 required");
+    if (amount < 0 || amount > 1000) throw new IllegalArgumentException("amount 0..1000 required");
     for (int coin : coins)
       if (coin <= 0) throw new IllegalArgumentException("positive coins required");
     int[] dp = new int[amount + 1];

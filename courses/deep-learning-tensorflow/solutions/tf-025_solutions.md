@@ -1,6 +1,6 @@
 # tf-025: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for Embedding objectives and negative examples after your own attempt at Example A, Compare similarity measures, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Positive pair, Negative pair, Cosine similarity. After matching exercise 6, Reject undefined cosine, invent a new input without looking here.
 
 ## Mechanism review
 
@@ -91,7 +91,7 @@ assert duplicate and positive_id == negative_id
 
 ## Exercise 5: Observe temperature
 
-The question is: Compare softmax[1, 0] at temperatures 1 and 0.5.
+The question is: Compare `softmax([1, 0])` at temperatures 1 and 0.5.
 
 A lower positive temperature sharpens this distribution. It is not a source of additional evidence and must not be confused with a calibrated probability of semantic truth.
 
@@ -134,4 +134,4 @@ else:
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one fixture value in exercise 4, Detect a false negative, and predict the new result before running it. Keep the failing version of exercise 5, Observe temperature, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

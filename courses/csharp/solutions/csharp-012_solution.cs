@@ -35,6 +35,18 @@ internal static class Program {
       Check(ReferenceEquals(first, second), "same object");
     }
     {
+      // Task 2: Guided modification
+      var first = new Counter();
+      first.Value = 5;
+      var second = new Counter();
+      second.Value = 5;
+      Check(first.Value == second.Value, "equal property values");
+      Check(!ReferenceEquals(first, second), "separate identities");
+      Check(!first.Equals(second), "class Equals defaults to identity");
+      second.Value++;
+      Check(first.Value == 5 && second.Value == 6, "independent state");
+    }
+    {
       // Task 3: Independent construction
       var coordinate = new Point(1, 2);
       var moved = coordinate;
@@ -44,6 +56,16 @@ internal static class Program {
       sameSession.Value = 3;
       Check(coordinate.X == 1 && moved.X == 5, "coordinate copied by value");
       Check(session.Value == 3, "session shared by reference");
+    }
+    {
+      // Task 5: Boundary evidence
+      var original = (Count: 1, Items: new List<int> { 1 });
+      var copy = original;
+      copy.Count = 2;
+      copy.Items.Add(2);
+      Check(original.Count == 1, "value field copied");
+      Check(original.Items.Count == 2, "list content shared");
+      Check(ReferenceEquals(original.Items, copy.Items), "same list object");
     }
     Console.WriteLine("csharp-012: passed");
     await Task.CompletedTask;

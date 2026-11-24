@@ -201,6 +201,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Separate input, output, precondition and postcondition in a function.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A function names a computation with parameters as inputs and a return value as its output. A precondition is a promise the caller must satisfy. A postcondition describes the result. Pure functions avoid hidden state, so the same inputs produce the same value and small boundary tests are meaningful.</p>
+<ul>
+<li><strong>pass by value:</strong> each parameter receives its own copy, so changing it inside the function leaves the caller&#x27;s variable unchanged.</li>
+<li><strong>precondition:</strong> a promise the caller must satisfy before the call, such as low being at most high.</li>
+<li><strong>postcondition:</strong> the guarantee the function makes about its result when the precondition holds.</li>
+<li><strong>pure function:</strong> a function without hidden state, so the same inputs always produce the same value.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>int clamp(int value, int low, int high)</code> declares three copied integers. <code>return</code> ends that call. Checking low&gt;high before applying min/max prevents a nonsensical interval from looking like success.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

@@ -14,6 +14,14 @@ PyTorch DistributedDataParallel typically uses one process per device and a suit
 
 
 
+### Key terms
+
+- **Data parallelism:** Replicating the model on every rank and splitting each batch among them.
+- **Rank:** The integer identity of one process in a distributed group.
+- **All-reduce:** A collective that combines tensors from every rank and returns the result to all ranks, used to average gradients.
+- **Sample partition:** The assignment of distinct samples to each rank so no sample is counted twice per epoch.
+- **Effective batch size:** The per-rank batch multiplied by the number of ranks and the accumulation steps.
+
 ## Worked examples
 
 ### Worked example 1
@@ -38,6 +46,14 @@ print("CPU distributed-gradient oracle:", weighted)
 
 **Expected observation:** Global example-weighted gradient 2.5.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `counts` | `[3, 1]` |
+| `gradients` | `[2.0, 4.0]` |
+| `weighted` | `2.5` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -56,27 +72,39 @@ Choose either lane first, then compare the other using identical mathematical in
 
 ### Exercise 1: Compute equal-replica average
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute equal-replica average** in the examples above.
+**Trap to avoid:** Summing gradients without dividing by world size gives 6, which effectively doubles the learning rate whenever another GPU is added, so changing the device count silently changes training dynamics.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Handle unequal counts
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **handle unequal counts** in the examples above.
+**Trap to avoid:** Relying on the default world-size average when the sampler gives the last rank a short batch introduces a small bias every epoch, which is hard to notice because loss still falls.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Assign rank and device
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **assign rank and device** in the examples above.
+**Trap to avoid:** Creating the model before setting the device places every replica on GPU 0, and the first out-of-memory error appears far from its cause.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Check complete sample coverage
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **check complete sample coverage** in the examples above.
+**Trap to avoid:** Assuming coverage because each rank processed `len(dataset)/world_size` batches ignores padding and the `drop_last` setting.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design collective failure handling
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design collective failure handling** in the examples above.
+**Trap to avoid:** Letting surviving ranks wait without a timeout keeps the devices occupied by a job that cannot finish, and nobody receives an error to act on.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Compare framework distribution contracts
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **compare framework distribution contracts** in the examples above.
+**Trap to avoid:** Porting a training script between frameworks and assuming identical gradients because both are data-parallel skips the place where the semantics actually differ.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

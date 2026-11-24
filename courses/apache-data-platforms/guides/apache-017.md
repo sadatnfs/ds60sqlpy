@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-015`.
 
+## Key terms
+
+- **Join cardinality:** The number of rows a join produces. In an inner join, a key appearing n times on the left and m times on the right contributes n times m rows.
+- **Dimension uniqueness:** The requirement that each key appear at most once in a dimension table, so joining facts to it cannot multiply measures such as revenue.
+- **Left join:** A join that keeps every left row and fills right-side columns with nulls when no matching key exists.
+- **SQL null comparison:** In SQL, NULL = NULL is not true, so a null join key matches nothing unless the query states an explicit null-safe comparison.
+
 ## A join has a multiplicity contract
 
 A join is not simply a lookup that attaches one value to every row. If a left key
@@ -81,6 +88,42 @@ require a many-to-one mapping, a temporal lookup or a preserved unmatched group.
 Those additional assumptions must be expressed or validated. The worked cases
 show both a valid enrichment and a deliberate constraint violation, with an
 independent count/sum oracle that makes the difference visible.
+
+## Worked examples
+
+### Assert the many-to-one contract before enriching
+
+```python
+import pyarrow as pa
+
+customers = pa.table({"customer_id": [1, 1, 2], "segment": ["small", "small", "large"]})
+keys = customers["customer_id"]
+print(len(keys), len(keys.unique()))
+```
+
+```text
+3 2
+```
+
+Three rows but only two distinct keys means the dimension violates the many-to-one assumption the enrichment query relies on. Every order for customer 1 would appear twice after the join and the order total would rise from 20 to 24. Run this check against the exact snapshot the join reads, since a dimension that was unique yesterday can gain a duplicate from a single bad load.
+
+### Count unmatched orders after a left join
+
+```python
+import pyarrow as pa
+import pyarrow.compute as pc
+
+orders = pa.table({"order_id": [1, 2, 3], "customer_id": [1, 2, 99], "amount": [4, 9, 7]})
+customers = pa.table({"customer_id": [1, 2], "segment": ["small", "large"]})
+joined = orders.join(customers, "customer_id", join_type="left outer")
+print(joined.num_rows, pc.sum(joined["amount"]).as_py(), joined["segment"].null_count)
+```
+
+```text
+3 20 1
+```
+
+Row count and total match the orders table, and one segment is null because customer 99 has no dimension row. Reporting that null count as its own metric keeps unknown customers visible instead of hiding them in a default bucket. An inner join would return two rows and a total of 13, which looks plausible and is therefore harder to catch than an inflated total.
 
 ## Complete worked source
 

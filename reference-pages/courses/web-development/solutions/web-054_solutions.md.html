@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-054.md</code>.</p>
 <h3 id="exercise-1-distinguish-a-json-number-from-a-numeric-looking-string">Exercise 1: Distinguish a JSON number from a numeric-looking string.<a class="heading-anchor" href="#exercise-1-distinguish-a-json-number-from-a-numeric-looking-string" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> 30 and &quot;30&quot; have different JSON types and can affect client validation.</p>
+<p><strong>Approach:</strong> Encode <code>30</code> and <code>&#x27;30&#x27;</code> with <code>json_encode</code> and compare the output: one has no quotes and one does.</p>
 <p><strong>Why:</strong> 30 encodes as a JSON number and &quot;30&quot; as a string, and clients that validate types treat them differently.</p>
+<p><strong>Plausible wrong approach:</strong> Treating both as the same because they display identically fails because JavaScript <code>30 === &#x27;30&#x27;</code> is false on the client.</p>
+<p><strong>How to verify:</strong> <code>json_encode([&#x27;m&#x27; =&gt; 30])</code> prints {&quot;m&quot;:30}, while the string version prints {&quot;m&quot;:&quot;30&quot;}. Decoding both outputs with <code>json_decode</code> gives an int for the first and a string for the second.</p>
 <h3 id="exercise-2-add-a-consistent-error-code-to-invalid-input-responses">Exercise 2: Add a consistent error code to invalid-input responses.<a class="heading-anchor" href="#exercise-2-add-a-consistent-error-code-to-invalid-input-responses" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Clients can inspect a stable code without parsing human prose.</p>
+<p><strong>Approach:</strong> Add an <code>error.code</code> field such as invalid_plan next to the human message in every validation response.</p>
 <p><strong>Why:</strong> Clients can branch on a stable code, while the message can change wording or language freely.</p>
+<p><strong>Plausible wrong approach:</strong> Having clients match on the message text fails because rewording or translating the message silently breaks them.</p>
+<p><strong>How to verify:</strong> Two invalid inputs with different messages share the same code value in their decoded bodies.</p>
 <h3 id="exercise-3-build-a-response-model-that-maps-success-and-validation-failure-consistently">Exercise 3: Build a response model that maps success and validation failure consistently.<a class="heading-anchor" href="#exercise-3-build-a-response-model-that-maps-success-and-validation-failure-consistently" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Status, content type and JSON body agree with the declared contract.</p>
+<p><strong>Approach:</strong> Write one function that takes a domain result and returns status, headers and JSON body for both success and validation failure.</p>
 <p><strong>Why:</strong> A single mapping keeps success and error responses consistent with the documented contract.</p>
+<p><strong>Plausible wrong approach:</strong> Returning status 200 with an error object fails because clients that check status treat the failure as a success.</p>
+<p><strong>How to verify:</strong> The success case returns 200 and the failure returns a 4xx status such as 422, both with <code>Content-Type: application/json</code>. Decoding the failure body shows the same field keys the client already reads for success.</p>
 <h3 id="exercise-4-diagnose-an-internal-exception-serialized-directly-to-a-public-response">Exercise 4: Diagnose an internal exception serialized directly to a public response.<a class="heading-anchor" href="#exercise-4-diagnose-an-internal-exception-serialized-directly-to-a-public-response" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Translate it at the boundary and keep sensitive details in controlled diagnostics.</p>
+<p><strong>Approach:</strong> Catch the exception at the response boundary, log its details, and return a generic error body with a stable code.</p>
 <p><strong>Why:</strong> Internal messages can reveal paths, queries or secrets, so public responses should carry only a safe code and message.</p>
+<p><strong>Plausible wrong approach:</strong> Passing <code>$e-&gt;getMessage()</code> into the response fails because messages can include file paths, SQL text or configuration values.</p>
+<p><strong>How to verify:</strong> The response body contains only the code and a short message, while the log holds the exception class.</p>
 <h3 id="exercise-5-round-trip-a-unicode-label-and-a-boolean-through-json">Exercise 5: Round-trip a Unicode label and a boolean through JSON.<a class="heading-anchor" href="#exercise-5-round-trip-a-unicode-label-and-a-boolean-through-json" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The decoded values retain their intended types and text.</p>
+<p><strong>Approach:</strong> Encode an array with a label such as Café and <code>true</code>, decode it with <code>json_decode(..., true)</code>, and compare types.</p>
 <p><strong>Why:</strong> With JSON_UNESCAPED_UNICODE the text stays readable, and json_decode returns the same string and boolean types.</p>
+<p><strong>Plausible wrong approach:</strong> Comparing the encoded strings byte for byte fails because escaping options can change the text while the data is equal.</p>
+<p><strong>How to verify:</strong> The decoded label equals the original with <code>===</code>, and <code>is_bool</code> returns true for the flag. The decoded minutes value passes <code>is_int</code>, so numbers also survive the round trip.</p>
 <h3 id="exercise-6-explain-a-backward-compatible-versus-breaking-api-change">Exercise 6: Explain a backward-compatible versus breaking API change.<a class="heading-anchor" href="#exercise-6-explain-a-backward-compatible-versus-breaking-api-change" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Compatibility depends on the documented client contract, especially type and semantic changes.</p>
+<p><strong>Approach:</strong> Classify changes by what existing clients rely on: adding a field is usually safe, while renaming or retyping one is not.</p>
 <p><strong>Why:</strong> Adding an optional field is usually compatible, while removing a field or changing its type or meaning breaks clients.</p>
+<p><strong>Plausible wrong approach:</strong> Changing minutes from a number to a string and calling it compatible fails because clients doing arithmetic now get wrong results.</p>
+<p><strong>How to verify:</strong> Your examples include one additive change and one breaking change, with the client behavior each affects.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-054_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

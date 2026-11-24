@@ -5,6 +5,28 @@
   "minutes": 75,
   "prerequisites": ["apache-055", "apache-051"],
   "concepts": ["snapshot", "SSTable restore", "retained state", "recovery"],
+  "key_terms": [
+    [
+      "Snapshot",
+      "A point-in-time set of hard links to a table's SSTables created by nodetool snapshot. It lives on the same disk and is not an off-site backup."
+    ],
+    [
+      "SSTable import",
+      "Loading SSTable files from a snapshot into a table with a compatible schema, as the project does in an owned restore target."
+    ],
+    [
+      "Hinted handoff",
+      "Writes a coordinator stores for a temporarily unavailable replica and replays when it returns. It does not cover indefinite outages."
+    ],
+    [
+      "Retained volume",
+      "A persistent container volume that keeps a node's state across process replacement but shares the failure domain of its host disk."
+    ],
+    [
+      "Restore verification",
+      "Independently checking the schema, version and exact rows after a restore, since a backup is unproven until its restore has been exercised."
+    ]
+  ],
   "evidence": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project.",
   "sources": [
     [

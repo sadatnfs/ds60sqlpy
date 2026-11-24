@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-what-remains-after-the-short-process-exits">Exercise 1: Predict what remains after the short process exits.<a class="heading-anchor" href="#exercise-1-predict-what-remains-after-the-short-process-exits" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The local image remains; the --rm container is removed.</p>
 <p><strong>Why:</strong> The removal flag applies to the created container, not to every object derived from its image. An image can be reused by another run without retaining that earlier process or writable layer.</p>
+<p><strong>Approach:</strong> Separate the two objects that the run touched: the image tagged ds60-docker-study:local and the container that the --rm flag created for one python -c call.</p>
+<p><strong>Why this is correct:</strong> The build wrote the image once; the run only borrowed it. When print(2 + 3) returns, the container&#x27;s only process ends and --rm deletes that container, leaving the tag untouched.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming --rm cleans up everything the run used leads learners to rebuild before every run. The flag never reaches the image store, so the rebuild is wasted work.</p>
+<p><strong>How to verify:</strong> After the run, docker image ls ds60-docker-study still lists the local tag, while docker ps -a --filter ancestor=ds60-docker-study:local returns no rows.</p>
 <h3 id="exercise-2-draw-two-containers-created-from-one-image">Exercise 2: Draw two containers created from one image.<a class="heading-anchor" href="#exercise-2-draw-two-containers-created-from-one-image" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> One shared image description, two process groups and two writable layers.</p>
 <p><strong>Why:</strong> Do not draw one process shared between the containers. Sharing read-only image layers saves storage; it does not merge memory, process IDs or mutable application state.</p>
+<p><strong>Approach:</strong> Draw one box for the image&#x27;s read-only layers, then two separate boxes on top, each holding its own process tree and its own thin writable layer.</p>
+<p><strong>Why this is correct:</strong> Each docker run creates a new container with a fresh writable layer and a new PID namespace. Only the read-only image layers are referenced by both.</p>
+<p><strong>A plausible wrong approach:</strong> Drawing a single python process with two names suggests that a variable set in one container is visible in the other. Separate namespaces and writable layers make that impossible.</p>
+<p><strong>How to verify:</strong> Start two short runs that each print os.getpid(); both can report PID 1, which is only possible because each container has its own PID namespace.</p>
 <h3 id="exercise-3-classify-source-code-image-tag-container-and-volume">Exercise 3: Classify source code, image tag, container and volume.<a class="heading-anchor" href="#exercise-3-classify-source-code-image-tag-container-and-volume" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Four objects with separate creation and deletion events.</p>
 <p><strong>Why:</strong> Source is build input, a tag names an image, a container is an instance, and a volume is separately managed storage. Naming these objects correctly makes later cleanup commands predictable.</p>
+<p><strong>Approach:</strong> Write each object with the event that creates it and the command that removes it: edit server.py, docker build, docker run or compose up, and docker volume create.</p>
+<p><strong>Why this is correct:</strong> server.py lives on the host, ds60-docker-study:local is an image reference, each run produces a container, and study-data is a named volume declared in compose.yaml.</p>
+<p><strong>A plausible wrong approach:</strong> Treating the tag as the container leads to docker rm ds60-docker-study:local, which fails because rm expects a container name or ID, not an image reference.</p>
+<p><strong>How to verify:</strong> List each object with its own inventory command: ls for source, docker image ls, docker ps -a and docker volume ls. Each object appears in exactly one listing.</p>
 <h3 id="exercise-4-explain-why-an-exited-container-can-still-appear-in-docker-ps-a">Exercise 4: Explain why an exited container can still appear in docker ps -a.<a class="heading-anchor" href="#exercise-4-explain-why-an-exited-container-can-still-appear-in-docker-ps-a" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Stopped state is distinct from object removal.</p>
 <p><strong>Why:</strong> The main process ending changes container state. Unless automatic removal was requested or a later removal occurs, Docker retains its metadata and writable layer so you can inspect the outcome.</p>
+<p><strong>Approach:</strong> Reason from the main process lifecycle: when it ends, the engine records an exit code and keeps the container object unless --rm or docker rm removes it.</p>
+<p><strong>Why this is correct:</strong> docker ps -a shows all containers, including those in the exited state. The stopped record holds the exit code, logs and writable layer for later inspection.</p>
+<p><strong>A plausible wrong approach:</strong> Concluding that the process is still running because the name is listed confuses docker ps -a with docker ps. Only the default listing filters to running containers.</p>
+<p><strong>How to verify:</strong> Run a container without --rm, then compare docker ps and docker ps -a; the STATUS column for the second shows Exited with the recorded code.</p>
 <h3 id="exercise-5-compare-a-linux-container-on-macos-with-a-native-macos-process">Exercise 5: Compare a Linux container on macOS with a native macOS process.<a class="heading-anchor" href="#exercise-5-compare-a-linux-container-on-macos-with-a-native-macos-process" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The container calls a Linux kernel in the engine environment.</p>
 <p><strong>Why:</strong> CPU architecture and the kernel environment both matter. A Linux container does not gain macOS application frameworks merely because a macOS browser connects to its published port.</p>
+<p><strong>Approach:</strong> Compare what each program calls underneath: the containerized python binary is a Linux ELF executable that makes Linux system calls inside the engine&#x27;s virtual machine.</p>
+<p><strong>Why this is correct:</strong> On macOS, Docker Desktop runs a Linux kernel in a lightweight VM. Containers share that kernel, not the macOS one, so macOS APIs are unavailable inside them.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting an image built for linux/arm64 to run any macOS arm64 binary fails, because matching CPU architecture is not enough when the operating system interface differs.</p>
+<p><strong>How to verify:</strong> Run uname -s through docker run against the local image; it reports Linux, while the same command in a macOS terminal reports Darwin.</p>
 <h3 id="exercise-6-explain-what-evidence-proves-a-web-application-is-serving">Exercise 6: Explain what evidence proves a web application is serving.<a class="heading-anchor" href="#exercise-6-explain-what-evidence-proves-a-web-application-is-serving" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A running process plus a bounded HTTP request and expected response.</p>
 <p><strong>Why:</strong> An image existing proves only packaging. Container state adds process evidence. The request adds the actual application behavior at a particular endpoint, which remains a separate claim.</p>
+<p><strong>Approach:</strong> Stack three claims in order: the image exists, the container&#x27;s main process is running, and a request to the published endpoint returns the expected body.</p>
+<p><strong>Why this is correct:</strong> Only the last layer tests behavior. The fixture&#x27;s GET / should return JSON with the APP_MESSAGE text, which no image or process listing can show.</p>
+<p><strong>A plausible wrong approach:</strong> Treating a running status from docker ps as proof skips the request. A server bound to the wrong interface or crashing per request still shows a running container.</p>
+<p><strong>How to verify:</strong> From the host, send curl --max-time 3 http://127.0.0.1:18080/ and confirm a 200 response whose message field matches the compose environment value.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

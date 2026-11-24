@@ -13,10 +13,9 @@ export {};
 // A careless edit changed a check in Example B so that it reads `assert.equal(minCoins([1,
 // 3, 4], 1), 0);`. Run Example B with that line, explain why the edited check now fails for
 // the same program state, and restore it.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.equal(minCoins([1, 3, 4], 0), 0)`; after it the line reads
-// `assert.equal(minCoins([1, 3, 4], 0), 0);` again and two coins; amount zero needs zero
-// coins.
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.equal(minCoins([1, 3, 4], 1), 0);`. Restoring `assert.equal(minCoins([1, 3, 4],
+// 0), 0);` brings back: two coins; amount zero needs zero coins.
 
 // Exercise 3: Terminate on a cyclic graph
 // Search A to C through A-B-A cycles and check source-to-source.

@@ -200,29 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// assert.rejects(pending, error =&gt; error.name === &#x27;AbortError!&#x27; &amp;&amp; error.cause === reason);`</span></span>
 <span class="source-line"><span class="syntax-comment">// inside its check. Before running it, predict whether the check still passes and explain</span></span>
 <span class="source-line"><span class="syntax-comment">// why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.rejects(pending, (error) =&gt; error.name === &#x27;AbortError&#x27; &amp;&amp; error.cause ===</span></span>
-<span class="source-line"><span class="syntax-comment">// reason)`. Restoring the original line brings back the worked observation: abortError with</span></span>
-<span class="source-line"><span class="syntax-comment">// the original reason as cause.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `await assert.rejects(pending,</span></span>
+<span class="source-line"><span class="syntax-comment">// error =&gt; error.name === &#x27;AbortError!&#x27; &amp;&amp; error.cause === reason);`. Restoring `await</span></span>
+<span class="source-line"><span class="syntax-comment">// assert.rejects(pending, error =&gt; error.name === &#x27;AbortError&#x27; &amp;&amp; error.cause === reason);`</span></span>
+<span class="source-line"><span class="syntax-comment">// brings back: abortError with the original reason as cause.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Reject an already aborted request before work: diagnose an edited check</span></span>
 <span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `await</span></span>
 <span class="source-line"><span class="syntax-comment">// assert.rejects(cancellableValue(7, controller.signal, trace), error =&gt; error !==</span></span>
 <span class="source-line"><span class="syntax-comment">// reason);`. Run Example B with that line, explain why the edited check now fails for the</span></span>
 <span class="source-line"><span class="syntax-comment">// same program state, and restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.rejects(cancellableValue(7, controller.signal, trace), (error) =&gt; error ===</span></span>
-<span class="source-line"><span class="syntax-comment">// reason)`; after it the line reads `await assert.rejects(cancellableValue(7,</span></span>
-<span class="source-line"><span class="syntax-comment">// controller.signal, trace), error =&gt; error === reason);` again and the exact reason is</span></span>
-<span class="source-line"><span class="syntax-comment">// rejected; no timer starts.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at `await</span></span>
+<span class="source-line"><span class="syntax-comment">// assert.rejects(cancellableValue(7, controller.signal, trace), error =&gt; error !==</span></span>
+<span class="source-line"><span class="syntax-comment">// reason);`. Restoring `await assert.rejects(cancellableValue(7, controller.signal, trace),</span></span>
+<span class="source-line"><span class="syntax-comment">// error =&gt; error === reason);` brings back: the exact reason is rejected; no timer starts.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Complete normally and clean up once</span></span>
 <span class="source-line"><span class="syntax-comment">// Run the custom operation without aborting, then abort its signal after completion.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: value 7; started,completed,cleaned exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: value 7; trace `started`, `completed`, `cleaned`, with cleanup exactly once.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 4: Cancel custom work and release its timer</span></span>
 <span class="source-line"><span class="syntax-comment">// Start the custom operation and immediately abort.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: rejected reason; started,aborted,cleaned.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: rejected reason; trace `started`, `aborted`, `cleaned`.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 5: Keep the first abort reason</span></span>
 <span class="source-line"><span class="syntax-comment">// Abort a controller twice and call throwIfAborted.</span></span>

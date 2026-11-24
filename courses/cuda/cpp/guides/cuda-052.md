@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Compare fused and unfused normalization kernels on error, bytes moved, launch count and measured time.
+
 Work through *Normalization, fusion and memory traffic* with the concrete cases below. Finish with this evidence:
 an error-budgeted result plus measured bytes/launch reduction and an honest performance comparison. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Layer normalization centers a row by its mean and divides by a scale derived from variance; RMS normalization uses mean square without subtracting the mean. They are different operations. Epsilon stabilizes the denominator, but placing it inside versus outside a square root changes the formula. Fusion combines operations to avoid intermediates and launches. It can also increase registers, complicate reuse or prevent a good library path. Specify accumulation and output types, normalization axes and learned scale/bias if present. Compare both the mathematical contract and complete pipeline before claiming a fused kernel is better.
+
+### Key terms
+
+- **Layer normalization:** Rescaling each row to zero mean and unit variance, then applying learned scale and shift.
+- **RMS normalization:** Rescaling each row by its root mean square without subtracting the mean.
+- **Kernel fusion:** Combining steps into one kernel so intermediate values stay on chip instead of round-tripping through global memory.
+- **Epsilon:** A small constant added to a variance or mean square so normalization never divides by zero.
 
 ## Mathematical contract
 

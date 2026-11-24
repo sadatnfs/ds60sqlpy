@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A CSS rule has a selector and a declaration block. The selector chooses elements; each declaration sets a property to a value. Several rules can match the same element. The cascade resolves conflicts using origin, importance, layer order, specificity, scoping proximity where applicable and source order. Specificity is not the entire algorithm. A later rule wins only after the earlier priorities tie.</p>
 <p>Inheritance is another mechanism: some properties, such as text color, naturally pass from a parent to children unless overridden. Other properties, such as margins, normally do not. A value inherited from a parent does not beat a declaration directly targeting the child just because the parent selector is more specific. Browser developer tools reveal which rule won and which declaration was crossed out.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Selector:</strong> The pattern before a rule&#x27;s braces that chooses which elements the rule applies to.</li>
+<li><strong>Declaration:</strong> One property and value pair, such as <code>color: navy;</code>, inside a rule.</li>
+<li><strong>Cascade:</strong> The process that chooses one value when several declarations set the same property; among equal origins, higher specificity wins and later source order breaks ties.</li>
+<li><strong>Specificity:</strong> A weight calculated from a selector&#x27;s ID, class-like and type parts, compared before source order.</li>
+<li><strong>Inheritance:</strong> The way properties such as <code>color</code> and <code>font-family</code> pass a parent&#x27;s computed value to children that do not set their own.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Start with low-specificity class selectors for reusable components. <code>.note</code> targets a class, <code>#summary</code> targets one id, and <code>p</code> targets an element type. <code>color: #17324d</code> is a declaration. Use the computed-style view to inspect the resolved value. Avoid adding important flags repeatedly to fight a conflict whose origin you have not identified.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -222,6 +230,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">darkred</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Dark red wins for matching elements in this simple unlayered example.</p>
+<h3 id="contrast-case-an-id-selector-that-beats-a-later-class-rule">Contrast case: an id selector that beats a later class rule<a class="heading-anchor" href="#contrast-case-an-id-selector-that-beats-a-later-class-rule" aria-label="Link to this section">#</a></h3>
+<p>Order alone decides between equal-specificity rules, but this pair is not equal. Predict the color before opening the preview.</p>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">#</span>summary <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">navy</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">darkred</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;summary&quot;</span> <span class="syntax-attribute">class</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;note&quot;</span><span class="syntax-punctuation">&gt;</span>Weekly summary<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">class</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;note&quot;</span><span class="syntax-punctuation">&gt;</span>Second note<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></code></pre>
+<p>Weekly summary is navy even though the <code>.note</code> rule comes later, because an id selector has higher specificity than a class selector. Second note is dark red because only <code>.note</code> matches it. In the Computed view of the first paragraph, the <code>.note</code> declaration appears crossed out under the winning <code>#summary</code> rule. Swapping the rule order changes nothing for the first paragraph, which is the quickest way to prove specificity decided it rather than order.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-the-winning-color-in-the-second-example">Exercise 1: Predict the winning color in the second example.<a class="heading-anchor" href="#exercise-1-predict-the-winning-color-in-the-second-example" aria-label="Link to this section">#</a></h4>

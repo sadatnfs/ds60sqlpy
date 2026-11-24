@@ -1,6 +1,6 @@
 # torch-029: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting Stable objectives, precision and mixed-precision boundaries yourself. They reuse the guide's literal inputs, starting from Example A, Expose naive overflow, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Overflow, Log-sum-exp, Mixed precision. After a pass, choose a new input for exercise 6, Reject a nonfinite input contract, without looking.
 
 ## Mechanism review
 
@@ -160,4 +160,4 @@ else:
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Inspect stable gradients, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Compare dtype ranges explicitly, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

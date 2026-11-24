@@ -195,24 +195,59 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-024-explained-reference">julia-024: explained reference<a class="heading-anchor" href="#julia-024-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-024_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Compare each approximation with something known exactly. <code>euler_decay</code> applies the update <code>(1 - rate*step) * value</code> and returns the time grid and path; <code>bisect</code> requires a finite sign-changing bracket and a positive iteration budget, then halves the interval until the half-width is within <code>tolerance</code>. The trapezoidal rule integrates <code>x^2</code> on the interval from 0 to 1, whose exact value is 1/3.</p>
 <h3 id="1-refine-the-time-step">1. Refine the time step<a class="heading-anchor" href="#1-refine-the-time-step" aria-label="Link to this section">#</a></h3>
 <p>This checks the stated smooth problem and does not imply that every refinement improves every numerical task.</p>
 <p><strong>Expected observation:</strong> The fine final value is closer to <code>exp(-1)</code>.</p>
+<p><strong>Why it holds here:</strong> With rate 1, 4 steps give (3/4)^4 = 0.31640625 and 20 steps give (19/20)^20, which is closer to exp(-1).</p>
+<p><strong>Plausible wrong approach:</strong> Assuming any refinement must help without measuring the error against exp(-1) misses cases where rounding or instability dominates.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>coarse[end] == (3/4)^4</code> and that the fine error is smaller than the coarse error.</p>
 <h3 id="2-inspect-the-complete-path">2. Inspect the complete path<a class="heading-anchor" href="#2-inspect-the-complete-path" aria-label="Link to this section">#</a></h3>
 <p>A positive final value alone can hide an unphysical intermediate state.</p>
 <p><strong>Expected observation:</strong> The path includes a negative intermediate value.</p>
+<p><strong>Why it holds here:</strong> Rate 3 with step 1/2 gives the factor 1 - 1.5 = -0.5, so the path is <code>[1, -0.5, 0.25]</code> and passes through a negative value.</p>
+<p><strong>Plausible wrong approach:</strong> Inspecting only the final 0.25 suggests a sensible decay and hides the negative concentration in the middle.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>alternating == [1, -0.5, 0.25]</code> and <code>unstable == [1, -2]</code> for one step.</p>
 <h3 id="3-require-a-root-bracket">3. Require a root bracket<a class="heading-anchor" href="#3-require-a-root-bracket" aria-label="Link to this section">#</a></h3>
 <p>A numerical routine cannot create a real root where the stated evidence does not support one.</p>
 <p><strong>Expected observation:</strong> The helper rejects the absent sign change.</p>
+<p><strong>Why it holds here:</strong> <code>x^2 + 1</code> equals 2 at both -1 and 1, so the signs match and <code>bisect</code> throws <code>ArgumentError</code> before iterating.</p>
+<p><strong>Plausible wrong approach:</strong> Iterating anyway on the midpoint returns some number in the interval that is not a root of a function with no real root.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>@test_throws ArgumentError bisect(x -&gt; x^2+1, -1.0, 1.0)</code>.</p>
 <h3 id="4-bound-the-iteration-budget">4. Bound the iteration budget<a class="heading-anchor" href="#4-bound-the-iteration-budget" aria-label="Link to this section">#</a></h3>
 <p>A stopped computation needs a clear termination reason and evidence about its remaining error.</p>
 <p><strong>Expected observation:</strong> The helper reports budget exhaustion.</p>
+<p><strong>Why it holds here:</strong> With <code>maxiter = 1</code>, the half-width of 1 after one step is far above the tolerance, so the loop ends and <code>error</code> raises.</p>
+<p><strong>Plausible wrong approach:</strong> Returning the last midpoint as if it were converged hides that the accuracy target was never reached.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>@test_throws ErrorException bisect(x -&gt; x^2-2, 0.0, 2.0; maxiter = 1)</code>.</p>
 <h3 id="5-compare-quadrature-resolution">5. Compare quadrature resolution<a class="heading-anchor" href="#5-compare-quadrature-resolution" aria-label="Link to this section">#</a></h3>
 <p>A known integral helps separate discretization error from implementation errors.</p>
 <p><strong>Expected observation:</strong> The refined approximation is closer to 1/3.</p>
+<p><strong>Why it holds here:</strong> The coarse grid with step 0.5 gives 0.375, and the step 0.1 grid gives a value closer to 1/3.</p>
+<p><strong>Plausible wrong approach:</strong> Changing the interval or function between the two runs makes the comparison meaningless as a test of grid size.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>coarse == 0.375</code> and <code>abs(fine-1/3) &lt; abs(coarse-1/3)</code>.</p>
 <h3 id="6-name-tolerance-units">6. Name tolerance units<a class="heading-anchor" href="#6-name-tolerance-units" aria-label="Link to this section">#</a></h3>
 <p>A small residual alone does not always imply a small position error in an ill-conditioned problem.</p>
-<p><strong>Expected observation:</strong> They have different units and meanings.</p></article>
+<p><strong>Expected observation:</strong> They have different units and meanings.</p>
+<p><strong>Why it holds here:</strong> A position tolerance is measured in x, while a residual is measured in f; near sqrt(2) they are linked by the slope f&#x27;(x) = 2x.</p>
+<p><strong>Plausible wrong approach:</strong> Using a tiny residual as proof of a tiny position error fails for flat functions, where small residuals allow large position errors.</p>
+<p><strong>How to verify:</strong> Example B checks both <code>abs(root-sqrt(2)) &lt;= 1e-10</code> and <code>abs(root^2-2) &lt; 1e-8</code>; report each with its unit.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-024: all reference checks passed</code>:</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> euler_decay<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> euler_decay<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> ones<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> bisect<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-&gt;</span> x<span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    x <span class="syntax-operator">=</span> collect<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-operator">:</span><span class="syntax-number">0.5</span><span class="syntax-operator">:</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span>
+    y <span class="syntax-operator">=</span> x <span class="syntax-operator">.^</span> <span class="syntax-number">2</span>
+    coarse <span class="syntax-operator">=</span> sum<span class="syntax-punctuation">(</span>diff<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span> <span class="syntax-operator">.*</span> <span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-operator">:</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">end</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">.+</span> y<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-operator">:</span><span class="syntax-keyword">end</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span>
+    xf <span class="syntax-operator">=</span> collect<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-operator">:</span><span class="syntax-number">0.1</span><span class="syntax-operator">:</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span>
+    yf <span class="syntax-operator">=</span> xf <span class="syntax-operator">.^</span> <span class="syntax-number">2</span>
+    fine <span class="syntax-operator">=</span> sum<span class="syntax-punctuation">(</span>diff<span class="syntax-punctuation">(</span>xf<span class="syntax-punctuation">)</span> <span class="syntax-operator">.*</span> <span class="syntax-punctuation">(</span>yf<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-operator">:</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">end</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">.+</span> yf<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-operator">:</span><span class="syntax-keyword">end</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span>
+    <span class="syntax-decorator">@test</span> coarse <span class="syntax-operator">==</span> <span class="syntax-number">0.375</span>
+    <span class="syntax-decorator">@test</span> abs<span class="syntax-punctuation">(</span>fine<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> abs<span class="syntax-punctuation">(</span>coarse<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

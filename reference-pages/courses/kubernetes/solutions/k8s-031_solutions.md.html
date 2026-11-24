@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-map-the-enforcement-chain">Exercise 1: Map the enforcement chain<a class="heading-anchor" href="#exercise-1-map-the-enforcement-chain" aria-label="Link to this section">#</a></h3>
 <p>The exact server pipeline includes details beyond this sketch, but the evidence distinction is essential. A credential failure, invalid type or local parser refusal should not be counted as a successful test of an admission predicate.</p>
 <p><strong>Expected:</strong> A rejected earlier boundary cannot prove a later policy ran.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Order authentication, authorization, admission and persistence, and stop at the first step that rejects.</li>
+<li><strong>Why it is correct:</strong> Admission runs only for requests that were already authenticated and authorized, so an earlier refusal means the policy never evaluated.</li>
+<li><strong>Plausible wrong approach:</strong> Citing a 403 Forbidden as proof the admission policy works confuses an RBAC denial with a policy denial.</li>
+<li><strong>How to verify:</strong> The sequence runs in that order and ends at the first rejecting step.</li>
+</ul>
 <h3 id="exercise-2-inspect-policy-scope">Exercise 2: Inspect policy scope<a class="heading-anchor" href="#exercise-2-inspect-policy-scope" aria-label="Link to this section">#</a></h3>
 <p>The binding is what connects this policy to the intended lesson scope. The host should inspect its own namespace identity and label, because a correct expression applied to the wrong scope can still be operationally unsafe.</p>
 <p><strong>Expected:</strong> apps/v1 Deployments on CREATE/UPDATE in the labeled owned namespace only.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read matchConstraints and the binding namespace selector together and list each matched value.</li>
+<li><strong>Why it is correct:</strong> The policy matches apps/v1 deployments on CREATE and UPDATE, and the binding narrows it to namespaces carrying the owned label.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting it to cover Pods created directly ignores that resourceRules name deployments only.</li>
+<li><strong>How to verify:</strong> The list shows apps, v1, deployments, CREATE, UPDATE and the labeled namespace.</li>
+</ul>
 <h3 id="exercise-3-evaluate-all-container-logic">Exercise 3: Evaluate all-container logic<a class="heading-anchor" href="#exercise-3-evaluate-all-container-logic" aria-label="Link to this section">#</a></h3>
 <p>Checking only the first container would leave an obvious gap. This predicate handles every ordinary container in the named field, but it still does not imply coverage of init containers or other workload resource kinds.</p>
 <p><strong>Expected:</strong> True for approved-only and false for the mixed list.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Evaluate the image check one container at a time and combine with all.</li>
+<li><strong>Why it is correct:</strong> all returns true only when every element satisfies the predicate, so one unapproved image makes the whole expression false.</li>
+<li><strong>Plausible wrong approach:</strong> Using exists instead of all would accept the mixed list because one approved image is enough.</li>
+<li><strong>How to verify:</strong> Approved only gives true and the mixed list gives false.</li>
+</ul>
 <h3 id="exercise-4-capture-a-real-denial">Exercise 4: Capture a real denial<a class="heading-anchor" href="#exercise-4-capture-a-real-denial" aria-label="Link to this section">#</a></h3>
 <p>Holding all other fields constant makes the result attributable to the intended policy condition. A denied request can leave the previous valid revision in place, so readback should distinguish old state from the rejected candidate.</p>
 <p><strong>Expected:</strong> Policy-specific denial and no persisted rejected revision.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Change only the image to an unapproved one, submit through the qualified path and read the Deployment back.</li>
+<li><strong>Why it is correct:</strong> A ValidatingAdmissionPolicy denial stops the request before persistence, so the stored revision stays the same.</li>
+<li><strong>Plausible wrong approach:</strong> Judging success by a missing new Pod could also come from a failed rollout of an accepted change.</li>
+<li><strong>How to verify:</strong> The message names the policy, and the readback shows the previous revision.</li>
+</ul>
 <h3 id="exercise-5-restore-the-positive-control">Exercise 5: Restore the positive control<a class="heading-anchor" href="#exercise-5-restore-the-positive-control" aria-label="Link to this section">#</a></h3>
 <p>The positive control shows the policy is selective rather than simply blocking every request. Application checks still follow acceptance, because the policy cannot prove scheduling, startup or correct response content.</p>
 <p><strong>Expected:</strong> Allowed request accepted and its application observation recorded separately.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Submit the approved source through the same path and record acceptance apart from any readiness result.</li>
+<li><strong>Why it is correct:</strong> A positive control shows the policy admits valid input, so the earlier denial came from the image and not a broken path.</li>
+<li><strong>Plausible wrong approach:</strong> Treating acceptance as application success skips the separate readiness and client checks.</li>
+<li><strong>How to verify:</strong> Acceptance is recorded, and readiness or client results appear as separate rows.</li>
+</ul>
 <h3 id="exercise-6-document-gaps-and-teardown">Exercise 6: Document gaps and teardown<a class="heading-anchor" href="#exercise-6-document-gaps-and-teardown" aria-label="Link to this section">#</a></h3>
 <p>The result should state the exact match scope and trusted host configuration. Cleanup is a host responsibility with object identities and ownership checks, preserving any unrelated cluster policy.</p>
 <p><strong>Expected:</strong> No claim of signature verification or universal workload enforcement.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name fields the policy does not inspect, such as image digest signature and securityContext, and delete only host-owned UIDs.</li>
+<li><strong>Why it is correct:</strong> The expression reads image strings only, so signatures and other workload kinds remain outside its scope.</li>
+<li><strong>Plausible wrong approach:</strong> Claiming that all workloads are now verified extends the policy to resources and properties it never matched.</li>
+<li><strong>How to verify:</strong> Two uncovered fields are listed, and teardown names only the policy and binding UIDs.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>The expression protects only the resource and container list it names. A complete production policy would need a separately reviewed threat model, workload coverage, digest/provenance semantics and rollout strategy. Do not quietly broaden this teaching policy across the cluster.</p>
 <p>A failed admission request should not be repaired by disabling safeguards globally. Correct the intended object or report that the requested behavior is outside the lesson. The host removes only its own policy and binding after all scoped evidence is captured.</p></article>

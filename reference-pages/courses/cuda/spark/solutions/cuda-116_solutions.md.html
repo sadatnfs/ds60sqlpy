@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-classify-fallback-versus-unavailable-device">Exercise 1: Classify fallback versus unavailable device<a class="heading-anchor" href="#exercise-1-classify-fallback-versus-unavailable-device" aria-label="Link to this section">#</a></h3>
 <p>Fallback is per supported execution environment.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>classify fallback versus unavailable device</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Classify the two states: a machine with no visible GPU and the plugin disabled runs the CPU baseline, while a GPU machine with the plugin enabled can still run one operator on CPU through fallback.</p>
+<p><strong>Why it is correct here.</strong> Fallback is a per-operator decision inside a valid plugin environment. An unavailable device is an environment condition that requires the CPU configuration for the whole job.</p>
+<p><strong>A plausible wrong approach.</strong> Calling a GPU-less run a fallback suggests the plugin was active and made per-operator choices, when actually it never started.</p>
+<p><strong>How to verify.</strong> The reference asserts the first state has <code>plugin_enabled</code> False and the second has a CPU operator inside an enabled plugin. Check <code>spark.plugins</code> and plan names for each state.</p>
 <h3 id="exercise-2-find-an-unsupported-expression">Exercise 2: Find an unsupported expression<a class="heading-anchor" href="#exercise-2-find-an-unsupported-expression" aria-label="Link to this section">#</a></h3>
 <p>Consult operator type and expression rules.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>find an unsupported expression</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Find an unsupported expression by consulting the plugin&#x27;s supported operators and expressions for the selected release, and by reading fallback explanations the plugin can log.</p>
+<p><strong>Why it is correct here.</strong> Support depends on the operator, the expression and the data types involved. An aggregate can be supported while a specific function inside it is not.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming support from the operator name alone misses expression-level and type-level restrictions, which are the usual cause of fallback.</p>
+<p><strong>How to verify.</strong> Enable the plugin&#x27;s explain output for fallback reasons and confirm the listed reason names the expression found in the documentation.</p>
 <h3 id="exercise-3-count-boundary-costs">Exercise 3: Count boundary costs<a class="heading-anchor" href="#exercise-3-count-boundary-costs" aria-label="Link to this section">#</a></h3>
 <p>Include representation and transfer costs.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count boundary costs</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Count boundary costs for GPU aggregate, CPU UDF, GPU projection: two transitions, each converting columnar device batches to host rows or back, with data copies in both directions.</p>
+<p><strong>Why it is correct here.</strong> Every transition copies data and changes representation. Two transitions around a single UDF can cost more than the UDF itself.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming only the UDF runs slower and the rest stays fast ignores that the transitions stall the GPU sections on both sides.</p>
+<p><strong>How to verify.</strong> Read the transition nodes and their metrics in the executed plan, and compare their time with the UDF node&#x27;s time.</p>
 <h3 id="exercise-4-rewrite-an-opaque-function-declaratively">Exercise 4: Rewrite an opaque function declaratively<a class="heading-anchor" href="#exercise-4-rewrite-an-opaque-function-declaratively" aria-label="Link to this section">#</a></h3>
 <p>Use built-in expressions only when equivalent.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>rewrite an opaque function declaratively</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Rewrite an opaque function declaratively when an equivalent built-in exists, such as replacing a Python UDF that uppercases and trims with <code>upper(trim(col))</code>.</p>
+<p><strong>Why it is correct here.</strong> Built-in expressions are visible to Catalyst and can be supported by the plugin, removing the transitions around the UDF.</p>
+<p><strong>A plausible wrong approach.</strong> Rewriting with a built-in that differs on edge cases, such as whitespace or null handling, changes results while appearing equivalent.</p>
+<p><strong>How to verify.</strong> Run parity tests on nulls, empty strings and Unicode before accepting the rewrite, then confirm the transitions disappeared from the plan.</p>
 <h3 id="exercise-5-preserve-edge-semantics">Exercise 5: Preserve edge semantics<a class="heading-anchor" href="#exercise-5-preserve-edge-semantics" aria-label="Link to this section">#</a></h3>
 <p>Test nulls overflow strings and timestamps.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>preserve edge semantics</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Preserve edge semantics: test nulls, integer overflow, strings with multibyte characters and timestamps across time zones on both the CPU and GPU paths.</p>
+<p><strong>Why it is correct here.</strong> GPU implementations aim to match Spark semantics, but edge cases are where differences appear, and some may be documented incompatibilities.</p>
+<p><strong>A plausible wrong approach.</strong> Testing only typical values passes implementations that disagree exactly where production data is unusual.</p>
+<p><strong>How to verify.</strong> Build a small table containing each edge case and compare CPU and GPU outputs row by row.</p>
 <h3 id="exercise-6-design-a-mixed-plan-report">Exercise 6: Design a mixed-plan report<a class="heading-anchor" href="#exercise-6-design-a-mixed-plan-report" aria-label="Link to this section">#</a></h3>
 <p>List each reason and observed transition.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a mixed-plan report</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a mixed-plan report listing each CPU node in an otherwise GPU plan, the reason given for fallback, and the transitions it created.</p>
+<p><strong>Why it is correct here.</strong> A report connects each fallback to its cause, guiding which rewrite or configuration change would help.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting only the percentage of GPU operators hides which fallback is expensive. One fallback on a small lookup table may be harmless, while one on the widest projection can dominate the job.</p>
+<p><strong>How to verify.</strong> Generate the report from the executed plan and fallback log, and check each listed transition appears in the plan.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>CPU-only baseline and per-operator fallback are modeled separately.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-116_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

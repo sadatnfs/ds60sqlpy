@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A raw kernel places CUDA C++ source inside a Python string and compiles it through the selected CuPy toolchain. Python controls allocation and launch; CUDA C++ controls thread-level arithmetic. The string does not gain automatic NumPy broadcasting, dtype promotion or stride support. A pointer signature and explicit length become a contract that the host must validate.</p>
 <p>Use extern C to give the entrypoint a predictable symbol when appropriate, choose a narrow dtype contract, and guard the tail. The first invocation may compile and cache code, so separate compilation latency from warm execution. A raw kernel is attractive for a small fused operation, but a high-level CuPy expression remains a strong baseline. Existing single-source pads cannot be assumed to support arbitrary extension projects or external compiler flags.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>RawKernel:</strong> A CuPy object that compiles CUDA C source at run time and launches it with explicit grid, block and argument types.</li>
+<li><strong>extern &quot;C&quot; linkage:</strong> A declaration that disables C++ name mangling so the kernel can be found by its plain name.</li>
+<li><strong>Contiguity requirement:</strong> The assumption that array elements are densely packed, which raw pointer indexing needs to be correct.</li>
+<li><strong>Compilation cost:</strong> The one-time time spent compiling kernel source, measured separately from launch and execution time.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A float32 affine kernel computes <code>y[i] = 2*x[i] + 1</code>. For [-1,0,3] it returns [-1,1,7], and the host rejects a wrong dtype instead of reinterpreting it.</p>
@@ -217,6 +224,20 @@ n<span class="syntax-punctuation">,</span> threads <span class="syntax-operator"
 <span class="syntax-keyword">assert</span> affine<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU raw-kernel oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> affine<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Affine result [-1,1,7], with three blocks for 257 elements.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>n</code></td>
+<td><code>257</code></td>
+</tr>
+<tr>
+<td><code>threads</code></td>
+<td><code>128</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
 <p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
@@ -245,17 +266,23 @@ cp<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA raw affine:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> cp<span class="syntax-operator">.</span>asnumpy<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-derive-expected-affine-output">Exercise 1: Derive expected affine output<a class="heading-anchor" href="#exercise-1-derive-expected-affine-output" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>derive expected affine output</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing against <code>2*(x+1)</code> by mistake gives <code>[0, 2, 8]</code> and suggests the kernel is wrong when the oracle is.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-calculate-a-nonmultiple-launch">Exercise 2: Calculate a nonmultiple launch<a class="heading-anchor" href="#exercise-2-calculate-a-nonmultiple-launch" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>calculate a nonmultiple launch</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using <code>257 // 128 = 2</code> blocks loses the final element silently, a bug invisible on sizes like 256.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-explain-symbol-lookup">Exercise 3: Explain symbol lookup<a class="heading-anchor" href="#exercise-3-explain-symbol-lookup" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>explain symbol lookup</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming a lookup error means the source failed to compile misdirects debugging to the kernel body.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-reject-noncontiguous-input-or-support-strides">Exercise 4: Reject noncontiguous input or support strides<a class="heading-anchor" href="#exercise-4-reject-noncontiguous-input-or-support-strides" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>reject noncontiguous input or support strides</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Silently calling <code>cupy.ascontiguousarray</code> inside the wrapper fixes correctness but hides a copy, and with in-place updates it writes to the copy instead of the caller&#x27;s array.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-compile-timing">Exercise 5: Separate compile timing<a class="heading-anchor" href="#exercise-5-separate-compile-timing" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>separate compile timing</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Timing a single call and reporting it as kernel speed mostly measures the compiler.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-compare-raw-and-library-paths">Exercise 6: Compare raw and library paths<a class="heading-anchor" href="#exercise-6-compare-raw-and-library-paths" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>compare raw and library paths</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing a float32 raw kernel against a float64 library expression measures dtype rather than implementation.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

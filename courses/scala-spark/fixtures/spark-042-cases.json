@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Validate and canonicalize each raw microbatch",
       "input_contract": "Require the explicit four-field schema, at most 8 rows and unique delivery IDs 1..12. Preserve NULL/business-invalid fields for classification and emit deterministic JSON.",
-      "expected": "BatchA has four occurrences with IDsA, B, A, NULL;NULL is preserved in canonical input. An oversized batch is rejected before collection.",
+      "expected": "Batch A has four occurrences with IDs A, B, A, NULL;NULL is preserved in canonical input. An oversized batch is rejected before collection.",
       "verification": "Compare decoded delivery IDs 1..4 and the NULL marker;reject a12-row union."
     },
     {

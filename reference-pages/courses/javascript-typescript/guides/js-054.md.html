@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A reusable chart component has an explicit input, output and lifecycle. It should not depend on a hidden global dataset or append another entire chart every time a caller updates it. A useful render contract specifies data shape, dimensions, identity, empty state and cleanup.</p>
 <p>Responsive display is not the same as recomputing every data transformation on every resize. An SVG viewBox can scale an existing coordinate system to fit a container. More complex charts may need width-dependent tick density or label layout. Decide which parts change with available space and which analytical quantities remain invariant.</p>
 <p>The reference renders into a caller-owned group and updates a keyed join. It checks that a second render does not duplicate marks and that an empty input produces a readable message. This is a foundation for dashboards whose views share state without sharing accidental DOM mutations.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Chart component:</strong> A function that renders into a caller-owned container from explicit arguments such as data and size, and can be called again to update the same marks.</li>
+<li><strong>Render contract:</strong> The documented expectations of a component: accepted data shape, dimensions, identity key, empty state and cleanup.</li>
+<li><strong>Responsive viewBox:</strong> An SVG viewBox that lets one logical coordinate system scale to the container width, so layout math stays in fixed units while the display size changes.</li>
+<li><strong>Empty state:</strong> What a component shows when it receives no records, such as a readable message instead of blank space or stale marks.</li>
+<li><strong>ResizeObserver:</strong> A browser API that reports element size changes through a callback. A component that creates one must disconnect it when the component is removed.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Pass the container selection, data and size as arguments. Validate dimensions and records at the boundary. Compute scales from current input and update managed nodes. Keep the surrounding SVG and accessibility summary under clear ownership.</p>
 <p>A ResizeObserver can detect actual container size, but it has a lifecycle and can trigger repeated callbacks. Disconnect it when the component is removed. The reference uses two explicit widths for deterministic acceptance; a real responsive integration should also be manually tested at narrow and wide browser sizes.</p>

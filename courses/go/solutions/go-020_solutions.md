@@ -90,7 +90,7 @@ The writer chooses correct quoting. Hand-joining fields with commas cannot prese
 
 ## 6. Transfer header validation
 
-Read the header name,count and compare its exact order.
+Read the header `name,count` and compare its exact order.
 
 ```go
 v, err := csv.NewReader(strings.NewReader("name,count\n")).Read()

@@ -198,21 +198,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-move-the-monitoring-cutoff">1. Move the monitoring cutoff<a class="heading-anchor" href="#1-move-the-monitoring-cutoff" aria-label="Link to this section">#</a></h3>
 <p>Record the cutoff and cohort identities. Comparing different maturity stages without adjustment can create a misleading trend.</p>
+<p>At cutoff 5 only predictions 1 and 3 have labels (available at 3 and 5), giving coverage 0.5 and Brier 0.085 from (0.1-0)^2 and (0.6-1)^2. Move the cutoff to 8 and all four labels arrive; prediction 2 (score 0.9, label 1) and prediction 4 (score 0.2, label 0) join. Plotting Brier at cutoff 5 next to Brier at cutoff 8 as if they were two weeks of the same population would be wrong, because the evaluated rows differ.</p>
 <p><strong>Expected:</strong> Newly available labels change the evaluated population.</p>
 <h3 id="2-test-outcome-dependent-delay">2. Test outcome-dependent delay<a class="heading-anchor" href="#2-test-outcome-dependent-delay" aria-label="Link to this section">#</a></h3>
 <p>Investigate delay by outcome and cohort, and use an appropriate evaluation design. Do not assume missing-at-random labels without evidence.</p>
+<p>In the fixture the label for prediction 2, the one positive scored 0.9, arrives at time 7, later than both mature rows. If positives systematically arrive late, the early mature set is enriched for negatives and the early Brier describes an easier population. Group label delay by label value and compare.</p>
 <p><strong>Expected:</strong> Early observed quality can be biased.</p>
 <h3 id="3-interpret-drift">3. Interpret drift<a class="heading-anchor" href="#3-interpret-drift" aria-label="Link to this section">#</a></h3>
 <p>Inspect data contracts and evaluate mature outcomes when available. A changed distribution can be harmless, harmful or even beneficial depending on the model and task.</p>
+<p>Example_two shifts every baseline value by 10, so the KS statistic is 1.0 with a two-sample p-value near 0.008. That says the distributions differ; it says nothing about Brier, because no label enters the calculation. Treating the alarm as proof of degraded quality would skip the mature-label check.</p>
 <p><strong>Expected:</strong> It establishes a difference under the tested sample/comparison, not performance loss.</p>
 <h3 id="4-record-metric-scope">4. Record metric scope<a class="heading-anchor" href="#4-record-metric-scope" aria-label="Link to this section">#</a></h3>
 <p>Aggregate with suitable identities and windows when designing a real service. Preserve reset/restart behavior in the interpretation.</p>
+<p>np.quantile on the five latencies with method=&quot;higher&quot; returns 15.0 ms, while the default linear method returns 13.6 ms. State the method, the five-sample window and that the array belongs to one process, otherwise two dashboards can disagree about the same requests.</p>
 <p><strong>Expected:</strong> The scope is explicit.</p>
 <h3 id="5-choose-an-action">5. Choose an action<a class="heading-anchor" href="#5-choose-an-action" aria-label="Link to this section">#</a></h3>
 <p>Use a reviewed reject, fallback, investigation or rollback policy. Avoid silently continuing with invalid inputs while reporting healthy service status.</p>
+<p>Name the input, the threshold and the response, for example &quot;reject requests whose region is outside the schema and page the owner&quot;. An alert that only increments a counter while /health stays 200 lets invalid inputs keep flowing.</p>
 <p><strong>Expected:</strong> The response is specific and bounded.</p>
 <h3 id="6-keep-uncertainty-visible">6. Keep uncertainty visible<a class="heading-anchor" href="#6-keep-uncertainty-visible" aria-label="Link to this section">#</a></h3>
 <p>Retain counts and distributional context, then collect representative observations for a meaningful service objective or comparison.</p>
+<p>With five latencies the 0.95 quantile is essentially the maximum: one slow request moves it from 8 to 15 ms. Report n=5 beside the value so readers see how little evidence stands behind it.</p>
 <p><strong>Expected:</strong> The estimate is visibly weak.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;mle-015: local, bounded ML engineering investigation.&quot;&quot;&quot;</span>

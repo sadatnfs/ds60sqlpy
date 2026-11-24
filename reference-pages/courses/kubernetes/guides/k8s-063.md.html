@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Observability uses system outputs to reason about internal behavior. Events describe notable Kubernetes lifecycle observations. Logs record application or component messages. Metrics summarize numeric measurements over time. Traces connect spans of a request across components. Each signal has different retention, sampling and interpretation limits.</p>
 <p>A metric’s labels define its dimensions. High-cardinality labels such as every raw user ID or request token can create operational cost and privacy risk. Aggregation can hide a failing subgroup, while excessive detail can overwhelm the system. Choose dimensions that support the diagnostic question.</p>
 <p>A trace ID can connect a browser request to proxy and application work when propagation is implemented. It is not a secret or authorization token, and it should not be confused with a Kubernetes resource UID. Time synchronization and sampling affect how confidently signals can be correlated.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Log:</strong> A timestamped record of one discrete event from a process.</li>
+<li><strong>Trace:</strong> The record of one request as it crosses services, made of linked spans.</li>
+<li><strong>Span:</strong> One timed operation within a trace, with a link to its parent and descriptive attributes.</li>
+<li><strong>Trace ID:</strong> The identifier shared by every span of one request, which lets logs and spans be joined.</li>
+<li><strong>High-cardinality label:</strong> A metric label with many distinct values, such as a request ID, that multiplies time series and cost.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Begin with a named symptom and time window. Read only relevant namespace objects, bounded logs and the minimal metric dimensions needed. A Pod event about scheduling does not prove a later HTTP request’s outcome. A request latency spike can involve DNS, connection setup, queueing or handler work.</p>
 <p>The fixture supplies synthetic event and request records to practice correlation. Actual metrics stacks and distributed tracing require separately prepared components. The lesson does not install observability operators or collect all-cluster data automatically.</p>

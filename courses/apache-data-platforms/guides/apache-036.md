@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-034`, `apache-035`.
 
+## Key terms
+
+- **Transactional producer:** A producer with a transactional identifier that initializes, begins, sends, then commits or aborts, so records across partitions become visible together or not at all.
+- **read_committed:** A consumer isolation level that returns only records from committed transactions and skips aborted transactional data.
+- **read_uncommitted:** The isolation level under which a consumer also observes records from aborted transactions.
+- **Control record:** A marker the broker writes into a partition to record that a transaction committed or aborted.
+- **Producer fencing:** Rejecting an older producer instance that shares a transactional identifier with a newer one, so a stale instance cannot complete a transaction.
+
 ## A transaction groups specific Kafka operations
 
 Kafka transactions let a producer write records across partitions and make their

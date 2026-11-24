@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-065-metastore-durability-and-clients">apache-065: Metastore durability and clients<a class="heading-anchor" href="#apache-065-metastore-durability-and-clients" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-064</code>, <code>apache-063</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Remote Metastore:</strong> A standalone Metastore service that clients reach over Thrift, separate from the database that persists its records.</li>
+<li><strong>Thrift:</strong> The RPC framework and protocol that Hive Metastore clients use. Shared protocol names do not guarantee compatibility across arbitrary releases.</li>
+<li><strong>Backing database:</strong> The relational database, here PostgreSQL, that persists Metastore records. Restarting the Thrift service keeps tables only because this database survives.</li>
+<li><strong>Schema initialization:</strong> Creating the Metastore&#x27;s tables in an empty database with schematool, an explicit action that ordinary startup does not perform.</li>
+</ul>
 <h3 id="metastore-availability-and-metadata-durability-are-separate">Metastore availability and metadata durability are separate<a class="heading-anchor" href="#metastore-availability-and-metadata-durability-are-separate" aria-label="Link to this section">#</a></h3>
 <p>A remote Metastore service exposes metadata operations while PostgreSQL persists its relational state. Restarting the Thrift process can preserve tables because the database remains. Removing a disposable container can also preserve tables when its database volume is retained. Neither outcome implies that deleting the volume or losing the physical disk is recoverable without a backup.</p>
 <p>A client library must be compatible with the selected service. Shared protocol names do not guarantee every method, field or optional feature interoperates across arbitrary releases. The prepared Java client comes from the same Hive image as the server to keep that first boundary explicit. A separately prepared PyIceberg HiveCatalog or Spark client needs its own matching dependencies and actual exchange before being described as supported.</p>
@@ -210,6 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Record the client URI, server/client versions, schema version, database identity, volume ownership and table metadata. Distinguish a failed connection from missing schema, wrong catalog/database and unsupported protocol behavior. Retrying an invalid endpoint or schema cannot repair the underlying contract and may hide useful first-failure diagnostics.</p>
 <p><strong>Interview discussion: does a stateless Metastore process mean metadata needs no backup?</strong> No. Process state can be replaceable while its backing database remains authoritative. These cases preserve PostgreSQL metadata and warehouse bytes separately, then require independent fresh-client readback after exact resume and replacement.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="metadata-before-and-after-a-stop">Metadata before and after a stop<a class="heading-anchor" href="#metadata-before-and-after-a-stop" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/hive
+bash run.sh metadata
+bash run.sh stop
+bash run.sh resume
+bash run.sh metadata
+bash run.sh check</code></pre>
+<p>The two metadata reports should match, since the table and partition rows live in PostgreSQL, not in the metastore process. The metastore service itself is stateless; restarting it only proves it can reconnect to the database. The final check then confirms that the data files still answer through HiveServer2. Never run initialize during this test, because it would recreate missing definitions and make a real loss look like success.</p>
+<h4 id="the-metastore-database-connection">The metastore database connection<a class="heading-anchor" href="#the-metastore-database-connection" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-xml"><span class="syntax-tag">&lt;property</span><span class="syntax-tag">&gt;</span>
+  <span class="syntax-tag">&lt;name</span><span class="syntax-tag">&gt;</span>javax.jdo.option.ConnectionURL<span class="syntax-tag">&lt;/name&gt;</span>
+  <span class="syntax-tag">&lt;value</span><span class="syntax-tag">&gt;</span>jdbc:postgresql://postgres:5432/metastore<span class="syntax-tag">&lt;/value&gt;</span>
+<span class="syntax-tag">&lt;/property&gt;</span>
+<span class="syntax-tag">&lt;property</span><span class="syntax-tag">&gt;</span>
+  <span class="syntax-tag">&lt;name</span><span class="syntax-tag">&gt;</span>hive.metastore.warehouse.dir<span class="syntax-tag">&lt;/name&gt;</span>
+  <span class="syntax-tag">&lt;value</span><span class="syntax-tag">&gt;</span>file:///warehouse<span class="syntax-tag">&lt;/value&gt;</span>
+<span class="syntax-tag">&lt;/property&gt;</span></code></pre>
+<p>This excerpt of conf/hive-site.xml shows the two places that must survive separately: the PostgreSQL metastore database and the warehouse directory. Backing up only one is a common mistake. Restoring the database without the files leaves tables that point at empty locations, and restoring files without the database leaves Parquet that no query can find. Use a consistent pg_dump with the matching file copy and record both identities together.</p>
+<h4 id="replacement-with-a-fresh-metadata-client">Replacement with a fresh metadata client<a class="heading-anchor" href="#replacement-with-a-fresh-metadata-client" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/hive
+bash run.sh down
+bash run.sh start
+bash run.sh metadata
+bash run.sh check</code></pre>
+<p>Down removes the containers but keeps the named volumes for PostgreSQL and the warehouse, so start brings up new processes over old state. The metadata probe then reads the table through a brand new Thrift client, which rules out a cached answer from the previous session. If metadata succeeds but check fails, the definitions survived while the warehouse volume did not; if both fail, inspect logs for a database connection or schema version error before trying anything else.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="hive-apache-065-command-notebook">Hive apache-065 command notebook<a class="heading-anchor" href="#hive-apache-065-command-notebook" aria-label="Link to this section">#</a></h2>

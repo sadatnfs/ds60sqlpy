@@ -16,19 +16,19 @@ The contract should also state who produced the export, its capture cutoff, sche
 
 ### Exercise 2: Map four tricky SQL values without losing meaning
 
-**Expected:** LongType 125;DecimalType(10,2)12345678.90;the same instant rendered 19:00:00UTC under the baseline; NULL remains missing, not an empty string.
+**Expected:** `LongType` 125; `DecimalType(10,2)` 12345678.90; the same instant rendered 19:00:00 UTC under the baseline; NULL remains missing, not an empty string.
 
-bigint cents maps to a signed 64-bit integer representation when the qualified connector schema confirms it; the unit remains cents, so 125 is not automatically 125 currency units. numeric(10,2) can hold the supplied eight-digit integer part and two fractional digits. Preserve DecimalType(10,2), not a binary float whose rounding may change exact decimal comparisons. A value outside precision 10 must fail or follow an explicitly chosen error policy, not be silently truncated.
+bigint cents maps to a signed 64-bit integer representation when the qualified connector schema confirms it; the unit remains cents, so 125 is not automatically 125 currency units. `numeric(10, 2)` can hold the supplied eight-digit integer part and two fractional digits. Preserve `DecimalType(10, 2)`, not a binary float whose rounding may change exact decimal comparisons. A value outside precision 10 must fail or follow an explicitly chosen error policy, not be silently truncated.
 
 The timestamp with time zone value denotes an instant. PostgreSQL does not preserve the original named zone/offset as a separate semantic field merely because it used that spelling at input. Under Spark's declared UTC session, the instant renders 2026-10-23T19:00:00Z. A timestamp without time zone instead represents local wall-clock fields and needs a separate zone/NTZ policy. JDBC options and driver mappings can affect the inferred Spark timestamp type, so inspect the actual schema in a future qualification.
 
-SQLNULL note stays a nullable missing value. Converting it to an empty string changes comparisons, counts and downstream interpretation. The four checks are independent:an exact row count does not prove any of these conversions preserved meaning.
+SQLNULL note stays a nullable missing value. Converting it to an empty string changes comparisons, counts and downstream interpretation. The four checks are independent: an exact row count does not prove any of these conversions preserved meaning.
 
 **Verification evidence:** State source and target type, unit, precision/timezone policy and one rejected conversion for each.
 
 ### Exercise 3: Reject the lowerBound/upperBound filter misconception
 
-**Expected:** All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to [0,10).
+**Expected:** All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to [0, 10).
 
 The first illustrative partition contains -10,0 and NULL; the second contains 5,10 and 99. The lower/upper options determine how Spark divides read work, not which rows belong to the dataset. Assuming they filter would silently widen the read and potentially include data outside the intended population.
 

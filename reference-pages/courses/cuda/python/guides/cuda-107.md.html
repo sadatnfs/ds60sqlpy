@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Library algorithms expose more than an operation name. Sorting needs comparator and stability semantics; reductions need identity and dtype rules; matrix operations need layout and leading dimensions; FFTs need normalization and transform conventions. Some APIs create reusable plans or request temporary storage. Plan lifetime, workspace ownership and stream association affect both correctness and performance.</p>
 <p>Choose a small release-pinned library family instead of installing every package. Compare an educational reference and a prepared library result on tiny fixtures, including empty or rejected cases and duplicate keys. Reuse plans only when their shape/dtype contract permits. Report plan creation separately from repeated execution. Python accessibility does not eliminate CUDA resource and compatibility requirements.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Stable sort:</strong> A sort that keeps equal keys in their original relative order.</li>
+<li><strong>Comparator:</strong> The rule that orders two keys and must define a consistent ordering.</li>
+<li><strong>Reusable plan:</strong> A library object, such as an FFT plan, prepared for one shape and dtype and reused only within that contract.</li>
+<li><strong>Temporary storage:</strong> Workspace memory a library algorithm requests, whose ownership and stream association affect correctness.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A stable sort of [(2, A),(1, B),(2, C)] by key retains A before C among equal keys. An unstable sort may legally change that relative order.</p>
@@ -214,20 +221,48 @@ a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">=</sp
 <span class="syntax-keyword">assert</span> a<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> b<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU library contracts:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ordered<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">matrix output</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Stable duplicate order and matrix output shape (2,4).</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>records</code></td>
+<td><code>[(2, &#x27;A&#x27;), (1, &#x27;B&#x27;), (2, &#x27;C&#x27;)]</code></td>
+</tr>
+<tr>
+<td><code>ordered</code></td>
+<td><code>[(1, &#x27;B&#x27;), (2, &#x27;A&#x27;), (2, &#x27;C&#x27;)]</code></td>
+</tr>
+<tr>
+<td><code>a</code></td>
+<td><code>(2, 3)</code></td>
+</tr>
+<tr>
+<td><code>b</code></td>
+<td><code>(3, 4)</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-stable-sorting">Exercise 1: Trace stable sorting<a class="heading-anchor" href="#exercise-1-trace-stable-sorting" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>trace stable sorting</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming every GPU sort is stable lets downstream code rely on an order an unstable sort may legally change, which then varies between runs or releases.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-specify-duplicate-semantics">Exercise 2: Specify duplicate semantics<a class="heading-anchor" href="#exercise-2-specify-duplicate-semantics" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>specify duplicate semantics</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Leaving the rule unstated passes tests on small inputs where an unstable algorithm happens to preserve order, then fails on larger inputs that use a different internal path.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-calculate-output-shape">Exercise 3: Calculate output shape<a class="heading-anchor" href="#exercise-3-calculate-output-shape" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>calculate output shape</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Taking the output as 3 by 3 or 2 by 3 confuses contracted and kept dimensions, and allocating the wrong output buffer causes a library error or an out-of-bounds write.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-account-for-temporary-storage">Exercise 4: Account for temporary storage<a class="heading-anchor" href="#exercise-4-account-for-temporary-storage" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>account for temporary storage</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Budgeting only inputs and outputs leads to out-of-memory errors that appear only on large arrays.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-plan-creation">Exercise 5: Separate plan creation<a class="heading-anchor" href="#exercise-5-separate-plan-creation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>separate plan creation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reusing a plan prepared for a different shape or dtype gives wrong results or errors, so caching must be keyed by both.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-choose-a-release-specific-contract">Exercise 6: Choose a release-specific contract<a class="heading-anchor" href="#exercise-6-choose-a-release-specific-contract" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>choose a release-specific contract</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Relying on the latest online docs while running an older release can promise features or guarantees the installed version does not have.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

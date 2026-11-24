@@ -16,6 +16,14 @@ Linux capabilities divide some traditional root privileges into named permission
 
 The local classroom executes trusted learner code and is not a public hostile-code hosting boundary. The Docker study fixture still demonstrates least privilege: no engine socket, no privileged mode, non-root identity, dropped capabilities, read-only root and bounded temporary storage. These settings must be tested against actual functionality.
 
+### Key terms
+
+- **Linux capabilities:** Named pieces of traditional root privilege that can be granted or dropped individually.
+- **`cap_drop`:** The Compose setting that removes listed capabilities, often `ALL`, from a service's processes.
+- **`read_only`:** The Compose setting that makes a container's root filesystem read-only, leaving only explicit mounts writable.
+- **`no-new-privileges`:** A security option that stops a process from gaining privileges through set-user-ID programs or similar mechanisms.
+- **Least privilege:** Granting a process only the permissions its real work needs, then testing that the application still functions.
+
 ## Anatomy and a trace you can follow
 
 In Compose, `cap_drop: [ALL]` drops the default capability set. `read_only: true` changes the root mount. `tmpfs` gives a small temporary path. The app listens on an unprivileged port and writes retained data only to its declared volume. No control should be disabled merely to hide a missing permission contract.
@@ -96,11 +104,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Adding capabilities or `--privileged` until an error disappears. Removing `read_only` instead of mounting the one path the app must write. Calling the container secure because it runs as non-root.
 
-Exercise 4 is this chapter's boundary case: Diagnose an app that needs an undocumented cache directory. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an app that needs an undocumented cache directory. Read the application's error for the exact path it tried to write, then decide whether that cache is temporary, durable or avoidable before choosing a mount. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using Linux capabilities, cap_drop, read-only filesystem, no-new-privileges and least privilege. Reconstruct worked example 2 (Separate positive and negative acceptance) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Name the positive and negative acceptance checks and what each would show if the root filesystem were writable. Then reconstruct worked example 2 (Separate positive and negative acceptance) with one different value, predict what changes, and name which of Linux capabilities, cap_drop, read-only filesystem, no-new-privileges and least privilege the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

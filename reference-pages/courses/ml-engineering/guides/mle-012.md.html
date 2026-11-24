@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A serving interface should define which inputs it accepts and what evidence it returns. Validation errors are part of that interface, not an incidental exception path. The model version and feature contract should be visible so a prediction can be interpreted and compared with its source artifact.</p>
 <p>This lesson exercises an actual FastAPI application through an in-process ASGI client. It tests HTTP parsing, schema validation, route execution and response encoding without starting a network server. The first case compares the route&#x27;s probability with the same model&#x27;s direct prediction. The second rejects a negative usage value and an undeclared target field.</p>
 <p>These checks do not establish DNS, sockets, container networking, load capacity or external authentication. The complete local-system project later starts a real loopback HTTP service and qualifies those declared lifecycle paths separately. Keeping the evidence layers distinct prevents a useful unit-level API test from being mislabeled as a deployed system.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>ASGI:</strong> The Asynchronous Server Gateway Interface, the Python standard through which a server passes HTTP requests to an application such as FastAPI.</li>
+<li><strong>Request schema:</strong> A Pydantic model declaring accepted fields, bounds and allowed values. With extra fields forbidden, an undeclared target field is rejected.</li>
+<li><strong>Validation error:</strong> The structured HTTP 422 response FastAPI returns when a request violates the schema; it is part of the interface, not an incidental failure.</li>
+<li><strong>TestClient:</strong> A client that sends real ASGI requests to the application inside the process, covering parsing, validation and routing without opening a socket.</li>
+<li><strong>Model version:</strong> The identifier returned with each prediction so the response can be traced to its source artifact and feature contract.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The Pydantic request model declares bounded usage/tickets and an allowed region vocabulary, with extra fields forbidden. A POST route converts the validated object into the model&#x27;s expected frame and returns a numeric probability plus version. TestClient sends real ASGI requests inside the process. The networked project uses the same contract principles with Docker-owned state and loopback publication.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

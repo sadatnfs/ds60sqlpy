@@ -14,6 +14,13 @@ PyTorch channels-last memory format and TensorFlow data-format conventions need 
 
 
 
+### Key terms
+
+- **NCHW and NHWC:** Tensor layouts ordering batch, channels, height and width; channels-last NHWC often suits tensor core kernels.
+- **Cross-correlation:** The sliding dot product that deep learning frameworks call convolution, computed without flipping the filter.
+- **Layout conversion:** A transpose between layouts that costs memory traffic and can erase a faster kernel's benefit.
+- **Algorithm selection:** Benchmarking candidate convolution algorithms for a shape and caching the fastest, which needs warmup before timing.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,6 +46,14 @@ print("CPU convolution oracle:", out)
 
 **Expected observation:** Valid cross-correlation [-1,-1,-1]; conversion amortization depends on reuse.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `x` | `[1, 2, 3, 4]` |
+| `k` | `[1, -1]` |
+| `out` | `[-1, -1, -1]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -63,27 +78,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: State cross-correlation convention
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **state cross-correlation convention** in the examples above.
+**Trap to avoid:** Writing a reference with `k[len(k)-1-j]`, textbook convolution, flips every sign compared with the library, which looks like a broken GPU kernel.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Calculate output length
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **calculate output length** in the examples above.
+**Trap to avoid:** Using input length as output length assumes same padding, adding an output whose computation needs a value beyond the input.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Count layout conversion cost
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **count layout conversion cost** in the examples above.
+**Trap to avoid:** Counting only the faster convolution, 1 ms against 2, declares conversion a win even for a single call.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Compare forward and backward
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **compare forward and backward** in the examples above.
+**Trap to avoid:** Benchmarking only the forward pass and applying the result to training ignores roughly two thirds of the convolution work.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain algorithm warmup
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **explain algorithm warmup** in the examples above.
+**Trap to avoid:** Timing the first iteration and concluding the configuration is slow measures the search.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design two shape cases
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design two shape cases** in the examples above.
+**Trap to avoid:** Testing a single shape and generalizing the chosen layout risks regressions at other batch sizes. Production traffic that mixes sizes then sees the slow path.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

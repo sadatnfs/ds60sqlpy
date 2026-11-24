@@ -5,10 +5,18 @@ FROM ${DS60_TORCH_IMAGE}
 WORKDIR /recipe
 ARG TARGETARCH
 COPY requirements.${TARGETARCH}.lock /recipe/requirements.lock
-RUN python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /recipe/requirements.lock \
-    && python -m pip check
+# The classroom base ships without pip. A temporary bundled pip installs the
+# hashed lock, checks it and is removed, so the recipe image carries no installer.
+RUN python -m ensurepip --default-pip \
+    && python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /recipe/requirements.lock \
+    && python -m pip check \
+    && python -m pip uninstall --yes pip
 COPY asset_contract.json train.jsonl eval.jsonl /recipe/
 COPY prepare_assets.py verify_assets.py train_local.py infer_local.py /recipe/
 ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
     HF_HOME=/tmp/huggingface OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 TOKENIZERS_PARALLELISM=false
+# The recipe runs as the unprivileged nobody account. /models is owned by it so
+# a new ds60-pretrained-learning volume inherits a writable owner.
+RUN install -d -o 65534 -g 65534 -m 0755 /models
+USER 65534:65534
 ENTRYPOINT ["python"]

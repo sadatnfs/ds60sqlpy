@@ -10,6 +10,14 @@ Run independent chunks on the prepared two-thread runtime, combine results deter
 
 Open `julia-030` in `/classroom` with its prepared `julia` runtime. Worked case A (partial sums with exclusive local state) and worked case B (protect an intentionally shared counter) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-030: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Threads.@spawn:** A macro that schedules a task on any available thread and returns a task whose result `fetch` retrieves.
+- **Race condition:** Unsynchronized access to shared memory by concurrent tasks, at least one of them writing, which can lose updates.
+- **ReentrantLock:** A lock that serializes access to shared state, released in a `finally` block or by the `lock` do-block form.
+- **Task migration:** A task can resume on a different thread after yielding, so scratch storage indexed by `threadid()` is unsafe.
+- **Parallel reduction:** Combining partial results from several tasks, where floating-point regrouping can change the last digits of a sum.
+
 ## Parallel work needs an ownership plan
 
 Threads can execute tasks simultaneously and share memory. Shared memory avoids some copying but permits data races when concurrent accesses conflict without synchronization. An increment is conceptually a read, arithmetic operation and write; two tasks can read the same old value and lose an update. The reference does not execute an unsafe race to hope it fails. It tests a design that prevents the conflict.

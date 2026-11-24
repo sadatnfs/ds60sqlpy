@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-036`.
 
 Cookies, CSRF protections and CORS address different browser behaviors. Confusing them can leave a state-changing route exposed even when a preflight request looks restricted. This chapter combines a synthetic session cookie with an unpredictable session-bound CSRF token and an explicit origin check.
 
+## Key terms
+
+- **SameSite:** A cookie attribute, here `lax`, that limits when a browser attaches the cookie to requests initiated from another site.
+- **CSRF token:** An unpredictable value bound to the session that a state-changing request must echo, which a cross-site page cannot read or guess.
+- **Constant-time comparison:** Comparing secrets with `hmac.compare_digest` so the comparison time does not reveal how many leading characters matched.
+- **CORS:** Cross-Origin Resource Sharing: browser rules about which other origins may read responses, which do not stop a request from being sent.
+- **Preflight request:** An OPTIONS request a browser sends before certain cross-origin requests to ask whether the method and headers are allowed.
+
 ## Mechanism: browser policy and application authorization differ
 
 A browser may attach cookies automatically to requests according to cookie attributes and its origin/site rules. A CSRF defense protects an authenticated state-changing action from requests initiated through an untrusted context. CORS controls whether browser JavaScript from another origin may access particular cross-origin responses and request modes. It is not general authentication and does not stop every request from being sent.
@@ -29,6 +37,56 @@ A request with the correct session but no CSRF token is refused. Another request
 The application-level refusals are useful because a nonbrowser client can send headers directly and because some browser request forms do not require the same preflight path. The security claim should be about the actual state-changing operation, not merely about a successful OPTIONS test.
 
 SameSite cookies can reduce some cross-site request risks, but site and origin are different concepts and browser behavior has exceptions. They should not be presented as a universal replacement for a framework's CSRF protections. The Django and Flask branches show their established CSRF integrations as well.
+
+## Worked example: CORS decides what the browser reads, not what the server runs
+
+```python
+from starlette.applications import Starlette
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import JSONResponse
+from starlette.routing import Route
+from starlette.testclient import TestClient
+
+calls = []
+
+
+async def change(request):
+    calls.append(request.headers["origin"])
+    return JSONResponse({"changed": True})
+
+
+cors = Middleware(
+    CORSMiddleware,
+    allow_origins=["https://ui.example"],
+    allow_methods=["POST"],
+    allow_credentials=True,
+)
+app = Starlette(routes=[Route("/change", change, methods=["POST"])], middleware=[cors])
+with TestClient(app) as client:
+    for origin in ("https://ui.example", "https://evil.example"):
+        preflight = client.options(
+            "/change", headers={"Origin": origin, "Access-Control-Request-Method": "POST"}
+        )
+        post = client.post("/change", headers={"Origin": origin})
+        print(
+            origin,
+            preflight.status_code,
+            post.status_code,
+            post.headers.get("access-control-allow-origin"),
+        )
+print(calls)
+```
+
+Expected output:
+
+```text
+https://ui.example 200 200 https://ui.example
+https://evil.example 400 200 None
+['https://ui.example', 'https://evil.example']
+```
+
+The preflight for the foreign origin was refused with 400, yet the direct POST from that origin still reached the handler, and `calls` records both. The only thing CORS withheld was the `access-control-allow-origin` header, which tells a browser not to let the calling page read the response. A form post or a script that skips the preflight can still cause the side effect. That is why the lesson's `/change` route checks `Origin` and compares the `X-CSRF-Token` header itself instead of trusting the middleware to block writes.
 
 ## Failure diagnosis and discussion
 

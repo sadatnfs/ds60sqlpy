@@ -8,7 +8,7 @@ Compute paired and family-level uncertainty while distinguishing a randomization
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-006`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-006` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for paired comparisons and clustered uncertainty in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about paired comparison and permutation test: Vanishing differences give an exact tail of 1, four favorable pairs give 2/16 = 0.125, relabeling leaves the two-sided p-value unchanged, the two quantile conventions give about +/-0.925 and +/-1, and three families have 27 ordered bootstrap draws. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Preserve the pairing and the dependence
 
@@ -17,6 +17,13 @@ Two systems should answer the same eligible requests when the goal is a paired c
 Dependence remains after pairing. Ten paraphrases of one question can share nearly all their difficulty and evidence. If families are sampled independently, a family-level mean difference can be the appropriate resampling unit. Decide whether the target weights families equally or requests equally; aggregation and resampling must both match that estimand.
 
 A paired sign-randomization calculation changes the sign of each difference under a null that permits swapping system assignments within the relevant units. For an observed statistic \(T\), an exact two-sided tail probability on a finite randomization space is the fraction of allowed assignments with \(|T^*|\geq |T|\). That null requires a justified exchangeability or randomization argument. An arbitrary observational pair of deployed systems is not automatically a randomized experiment.
+
+## Key terms
+
+- **Paired comparison:** Evaluating two systems on the same eligible requests and analyzing their per-request differences.
+- **Sign-randomization test:** A test that enumerates or samples sign flips of paired differences to form a reference distribution under the null.
+- **Exchangeability:** The symmetry that justifies swapping system assignments within units under the null hypothesis.
+- **Cluster bootstrap:** Resampling whole families or other dependence units with replacement to reflect correlated requests.
 
 ## Worked case A: enumerate the small null
 

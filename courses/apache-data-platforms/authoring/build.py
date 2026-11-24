@@ -137,6 +137,76 @@ def lab(prose: str, language: str) -> str:
     )
 
 
+def key_terms(key: str, entries: Any) -> str:
+    """Validate a unit's structured key terms and render the guide's vocabulary section."""
+    if not isinstance(entries, list) or not 3 <= len(entries) <= 5:
+        raise ValueError(f"{key} needs 3 to 5 key_terms")
+    seen: set[str] = set()
+    bullets: list[str] = []
+    for entry in entries:
+        if not (
+            isinstance(entry, list)
+            and len(entry) == 2
+            and all(isinstance(text, str) and text.strip() == text and text for text in entry)
+        ):
+            raise ValueError(f"{key} key_terms must be [term, definition] string pairs")
+        term, definition = entry
+        if re.search(r"[*:\n]", term) or term.casefold() in seen:
+            raise ValueError(f"{key} has a malformed or duplicate key term: {term}")
+        if not definition.endswith(".") or re.search("[\n\u2013\u2014]", term + definition):
+            raise ValueError(f"{key} key term {term} needs a one-paragraph sentence definition")
+        seen.add(term.casefold())
+        bullets.append(f"- **{term}:** {definition}")
+    return "## Key terms\n\n" + "\n".join(bullets)
+
+
+EXAMPLE_FIELDS = {"title", "language", "code", "output", "interpretation"}
+
+
+def worked_examples(key: str, entries: Any) -> str:
+    """Validate a unit's optional worked examples and render the guide section."""
+    if entries is None:
+        return ""
+    if not isinstance(entries, list) or len(entries) < 2:
+        raise ValueError(f"{key} needs at least two worked_examples when it declares them")
+    titles: set[str] = set()
+    codes: set[str] = set()
+    blocks: list[str] = []
+    for entry in entries:
+        if not isinstance(entry, dict) or not {"title", "language", "code", "interpretation"} <= (
+            entry.keys()
+        ):
+            raise ValueError(f"{key} worked example needs title, language, code, interpretation")
+        if set(entry) - EXAMPLE_FIELDS or not all(
+            isinstance(value, str) and value.strip() == value and value for value in entry.values()
+        ):
+            raise ValueError(f"{key} worked example fields must be non-empty trimmed strings")
+        title, language, code = entry["title"], entry["language"], entry["code"]
+        interpretation = entry["interpretation"]
+        if "\n" in title + interpretation or not interpretation.endswith("."):
+            raise ValueError(f"{key} worked example {title} needs a one-paragraph interpretation")
+        if not re.fullmatch(r"[a-z][a-z0-9+-]*", language) or "```" in code + entry.get(
+            "output", ""
+        ):
+            raise ValueError(f"{key} worked example {title} has an invalid fence")
+        if re.search("[\u2013\u2014]", "".join(entry.values())):
+            raise ValueError(f"{key} worked example {title} contains an em or en dash")
+        if title.casefold() in titles or code in codes:
+            raise ValueError(f"{key} has a duplicate worked example: {title}")
+        if language == "python":
+            ast.parse(code, filename=f"{key}-example.py")
+            document = f"```python\n{code}\n```\n"
+            if format_document(document, FORMATTER, {"python"}, path=key)[0] != document:
+                raise ValueError(f"{key} worked example {title} is not in canonical Ruff style")
+        titles.add(title.casefold())
+        codes.add(code)
+        block = f"### {title}\n\n```{language}\n{code}\n```\n\n"
+        if "output" in entry:
+            block += f"```text\n{entry['output']}\n```\n\n"
+        blocks.append(block + interpretation)
+    return "## Worked examples\n\n" + "\n\n".join(blocks) + "\n\n"
+
+
 def outputs(*, admit: bool = False) -> dict[Path, str]:
     plan = json.loads((BASE / "authoring/chapter-map.json").read_text("utf-8"))["units"]
     if [unit["id"] for unit in plan] != [f"apache-{n:03d}" for n in range(1, 89)]:
@@ -166,6 +236,8 @@ def outputs(*, admit: bool = False) -> dict[Path, str]:
             raise ValueError(f"{key} has an unsupported authoring surface")
         if len(meta["sources"]) < 2:
             raise ValueError(f"{key} needs relevant primary sources")
+        vocabulary = key_terms(key, meta.get("key_terms"))
+        examples = worked_examples(key, meta.get("worked_examples"))
         # Sources live under authoring/chapters; generated guides are one level
         # shallower. Only this explicit course-project link prefix is relocated.
         prose = prose.replace("](../../projects/", "](../projects/")
@@ -188,8 +260,9 @@ def outputs(*, admit: bool = False) -> dict[Path, str]:
         result[ROOT / guide_path] = (
             f"# {key}: {unit['title']}\n\nTutorial mode. Stage: {meta['level']}. "
             + "Direct prerequisites: "
-            + ", ".join(f"`{p}`" for p in meta["prerequisites"])
-            + f".\n\n{prose}\n\n## Complete worked source\n\n{boundary}\n\n"
+            + (", ".join(f"`{p}`" for p in meta["prerequisites"]) or "none")
+            + f".\n\n{vocabulary}\n\n{prose}\n\n{examples}## Complete worked source\n\n"
+            + f"{boundary}\n\n"
             + complete
             + "\n\n## Primary references\n\n"
             + refs

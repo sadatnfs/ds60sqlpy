@@ -10,11 +10,11 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 2: Inspect the preference gradient
 # Backpropagate the equal-margin loss.
-# Expected: gradient-.25.
+# Expected: gradient -0.25.
 
 # Exercise 3: Perform an actual update
 # TakeSGD.2 on the scalar policy difference and recompute the loss.
-# Expected: difference.05; loss belowlog2.
+# Expected: difference 0.05; loss below log(2).
 
 # Exercise 4: Reverse the preference
 # Atzero policy difference, reverse the chosen/rejected orientation and inspect the

@@ -41,13 +41,13 @@ assert.ok(Number.isFinite(elapsed) && elapsed >= 0);
 console.log(JSON.stringify({ operation: 'sumTo10000', elapsedMs: elapsed }));
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result, 50005000)`. Restoring the original line brings back the worked observation: correct sum 50005000; finite nonnegative elapsed time.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result, 50005000)`. Restoring `const result = sumTo(10000);` brings back: correct sum 50005000; finite nonnegative elapsed time.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result, 50005000)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
 ## Exercise 2: Preserve repeated samples and summarize them: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `const sorted = [...samples].sort((a, b) => a + b);`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression changed one token in Example B, so one line now reads `const medianOf = values => [...values].sort()[Math.floor(values.length / 2)];`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 Five tiny trials illustrate record keeping, not a statistically robust benchmark. A real comparison needs workload control, enough repetitions and an analysis of variability.
 
@@ -60,17 +60,19 @@ for (let trial = 0; trial < 5; trial += 1) {
   assert.equal(sumTo(1000), 500500);
   samples.push(performance.now() - start);
 }
-const sorted = [...samples].sort((a, b) => a - b);
-const median = sorted[2];
+const byValue = (a, b) => a - b;
+const medianOf = (values) => [...values].sort(byValue)[Math.floor(values.length / 2)];
+const median = medianOf(samples);
 assert.equal(samples.length, 5);
 assert.ok(samples.every((value) => Number.isFinite(value) && value >= 0));
-assert.ok(median >= sorted[0] && median <= sorted[4]);
+assert.ok(median >= Math.min(...samples) && median <= Math.max(...samples));
+assert.equal(medianOf([9, 10, 100, 2, 30]), 10);
 console.log(JSON.stringify({ samplesMs: samples, medianMs: median }));
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.ok(median >= sorted[0] && median <= sorted[4])`; after it the line reads `const sorted = [...samples].sort((a, b) => a - b);` again and five finite samples; median lies between minimum and maximum.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(medianOf([9, 10, 100, 2, 30]), 10)`. Restoring `const medianOf = values => [...values].sort(byValue)[Math.floor(values.length / 2)];` brings back: five finite samples; median lies between minimum and maximum; the fixed control `[9, 10, 100, 2, 30]` has numeric median 10.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.ok(median >= sorted[0] && median <= sorted[4])` for this input.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(medianOf([9, 10, 100, 2, 30]), 10)` for this input.
 
 ## Exercise 3: Release owned references without claiming immediate RSS change
 
@@ -163,7 +165,7 @@ try {
 
 **Expected:** monitor disabled afterward; sample count reported honestly.
 
-**Verify:** Keep a check equivalent to `assert.ok(Number.isFinite(histogram.mean))` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the guarded check `if (count > 0) assert.ok(Number.isFinite(histogram.mean))` and confirm that the reference still passes. Then name an input that satisfies the guard but makes the check fail, and explain which value changes.
 
 ## After comparison
 

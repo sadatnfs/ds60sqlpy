@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Validate scientific inputs, test expected failures and preserve unexpected errors instead of turning them into successful results.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-009</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a finite nonempty mean) and worked case B (a bounded outcome record) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-009: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>ArgumentError:</strong> The exception thrown when a caller supplies an unacceptable argument, such as an empty vector where data are required.</li>
+<li><strong>DomainError:</strong> The exception thrown when a numeric value lies outside a function&#x27;s mathematical domain, such as <code>sqrt(-1.0)</code> on real inputs.</li>
+<li><strong>Test set:</strong> A <code>@testset</code> block from the <code>Test</code> standard library that groups related <code>@test</code> checks and reports their results together.</li>
+<li><strong>Boundary case:</strong> An input at the edge of the valid domain, such as zero or one element, where validation and off-by-one mistakes appear.</li>
+<li><strong>Rethrow:</strong> Calling <code>rethrow()</code> inside a <code>catch</code> block reraises the current exception with its original backtrace after local handling.</li>
+</ul>
 <h3 id="an-error-policy-is-part-of-an-api">An error policy is part of an API<a class="heading-anchor" href="#an-error-policy-is-part-of-an-api" aria-label="Link to this section">#</a></h3>
 <p>A calculation can fail because its input is outside the intended domain, because information is absent, or because the implementation has a defect. These situations deserve different handling. Returning an ordinary numeric value for every failure can make an invalid result look scientifically meaningful.</p>
 <p><code>throw</code> raises an exception. <code>try</code> and <code>catch</code> can handle an expected failure at a boundary. <code>rethrow</code> preserves an unexpected exception rather than replacing it with a misleading success. The standard <code>Test</code> library provides checks for values and expected exceptions. Tests should state the contract using inputs that expose normal and boundary behavior.</p>

@@ -119,7 +119,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Produce a stable completion summary) before changing anything, and confirm its observation: One of two uniquely identified items is complete.
 2. Compare Example B (Preserve identity across a value update) with Example A and name the first line whose behavior differs. Its observation is: The update retains identity and the prior snapshot.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A passing portable reference does not qualify simulator interaction or app signing.
+3. Before opening the explanation, check your task 3 attempt (Build and test JourneyCore, then run the complete JourneyApp on a prepared Apple destination) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

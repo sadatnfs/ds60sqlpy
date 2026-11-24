@@ -14,6 +14,13 @@ Compare total completion time, resource cost, operational complexity and output 
 
 
 
+### Key terms
+
+- **No-change outcome:** A credible decision to keep the existing CPU approach when acceleration does not pay off.
+- **Steady-state cost:** Recurring time per run after setup, compared separately from one-time startup cost.
+- **Operational complexity:** The ongoing effort to deploy, monitor and support a system, which counts toward total cost.
+- **Reevaluation trigger:** A recorded condition, such as data growth or a new release, that justifies revisiting the decision.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,33 +46,54 @@ print("CPU architecture decision: GPU candidate adds", net, "seconds")
 
 **Expected observation:** GPU candidate adds 10 modeled seconds end to end.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `saved_compute` | `30` |
+| `added_transfer` | `40` |
+| `net` | `10` |
+| `candidates` | `{'local_cpu': 0.1, 'spark_startup_only': 3.0}` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Compute end-to-end tradeoff
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute end-to-end tradeoff** in the examples above.
+**Trap to avoid:** Reporting the 30-second compute saving alone recommends a change that makes the application slower overall.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Choose a tiny-data tool
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **choose a tiny-data tool** in the examples above.
+**Trap to avoid:** Using GPU Spark for every analysis because it is available adds startup and operational overhead to jobs that never needed distribution.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate setup and steady state
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **separate setup and steady state** in the examples above.
+**Trap to avoid:** Reporting only steady-state throughput favors GPU Spark for interactive one-off use, where setup actually dominates.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Include operational cost
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **include operational cost** in the examples above.
+**Trap to avoid:** Comparing only query time ignores the work of keeping a GPU Spark stack compatible across upgrades. A Spark upgrade can be blocked until a matching plugin release exists, which delays security patches.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Define a reevaluation trigger
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **define a reevaluation trigger** in the examples above.
+**Trap to avoid:** Rejecting GPU Spark permanently ignores that the tradeoff can change, while revisiting constantly wastes effort. A trigger such as transfer time falling below compute savings ties the revisit to the exact term that decided the current outcome.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Write an evidence-based recommendation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **write an evidence-based recommendation** in the examples above.
+**Trap to avoid:** Recommending the most powerful technology by default ignores the measured tradeoff and the operational cost. It also skips stating missing evidence, so the decision cannot be corrected when new data arrives.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

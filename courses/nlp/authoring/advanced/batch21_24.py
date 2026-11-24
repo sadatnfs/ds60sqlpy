@@ -65,7 +65,7 @@ The reference builds a tiny provenance-aware split and a family-level paired boo
             "Define the generalization target first",
             """A future-message evaluation asks how a model performs after a time cutoff, potentially for customers or templates already seen. A new-family evaluation asks how it performs on unseen source families. A future-new-family evaluation requires both boundaries. They can produce different test sets and answer different questions.
 
-The fixture has family a at times one and two, family b at times one and three, and new family c at time three. With cutoff two, the training set contains a1,a2,b1. Future b2 is a valid known-family future case but is excluded from the future-new-family test, which contains only c1. Retain the excluded ledger so the filtering does not look like silent deletion.
+The fixture has family a at times one and two, family b at times one and three, and new family c at time three. With cutoff two, the training set contains `a1`, `a2` and `b1`. Future `b2` is a valid known-family future case but is excluded from the future-new-family test, which contains only `c1`. Retain the excluded ledger so the filtering does not look like silent deletion.
 
 A strict split can leave too little evaluation data. That is a limitation to report, not a reason to relax the boundary without changing the claim. A larger prospective collection may be needed. Choosing the split after observing which yields the best score turns evaluation design into model selection.""",
         ),
@@ -101,7 +101,7 @@ Report the number of independent families, variation across them, weighting conv
         ),
         (
             "Keep time and family exclusions explicit",
-            """At cutoff two, train IDs are a1,a2,b1, the future-new-family test contains c1 and b2 appears in an excluded-known-family ledger. Both time ordering and family disjointness are asserted. The one-case test is transparently too small for a broad performance claim.""",
+            """At cutoff two, train IDs are `a1`, `a2` and `b1`, the future-new-family test contains `c1` and `b2` appears in an excluded-known-family ledger. Both time ordering and family disjointness are asserted. The one-case test is transparently too small for a broad performance claim.""",
         ),
         (
             "Compare two weighting targets",
@@ -114,21 +114,21 @@ Report the number of independent families, variation across them, weighting conv
             "Hash the two router variants after the declared normalization.",
             "Equal normalized hashes while original strings remain unchanged.",
             "Normalize a copy and record the policy.",
-            "The hash confirms equality of the normalized representation, not semantic equivalence in every task. Preserving raw text lets a reviewer inspect information intentionally discarded by the policy.",
+            "The hash confirms equality of the normalized representation, not semantic equivalence in every task. Preserving raw text lets a reviewer inspect information intentionally discarded by the policy. Hashing raw text instead would make the two records look unrelated. Assert hash equality for the normalized pair and that the original strings are untouched.",
         ),
         (
             "Expose a near-duplicate trap",
             "Compute token-set Jaccard for ready versus not ready.",
-            "Similarity.75 despite a contradictory status claim.",
+            "Similarity .75 despite a contradictory status claim.",
             "List intersection and union tokens before scoring.",
-            "Three shared tokens and four union tokens produce .75. The missing negation changes meaning far more than its one-token contribution suggests. A near-duplicate detector should not automatically merge these records as equivalent evidence.",
+            "Three shared tokens and four union tokens produce .75. The missing negation changes meaning far more than its one-token contribution suggests. A near-duplicate detector should not automatically merge these records as equivalent evidence. Merging at Jaccard .75 would treat a record and its negation as one; inspect which token is missing before merging.",
         ),
         (
             "Build the combined split",
-            "Apply cutoff2 and exclude future families already seen in training.",
-            "Train[a1,a2,b1],test[c1],excluded[b2].",
+            "Apply cutoff 2 and exclude future families already seen in training.",
+            "Train `[a1, a2, b1]`, test `[c1]`, excluded `[b2]`.",
             "Compute known training families before selecting future-new-family cases.",
-            "The split enforces two claims at once. Retaining the exclusion list explains why a future record is absent. A different known-family forecasting target could legitimately include b2, but that would be a separately labeled evaluation.",
+            "The split enforces two claims at once. Retaining the exclusion list explains why a future record is absent. A different known-family forecasting target could legitimately include b2, but that would be a separately labeled evaluation. A random row split could put b2 in test next to b1 in train. Check the three lists exactly, including excluded b2.",
         ),
         (
             "Assert pipeline boundaries",
@@ -140,14 +140,14 @@ Report the number of independent families, variation across them, weighting conv
         (
             "Compute paired family differences",
             "Average the supplied differences by family and compare with flattened rows.",
-            "Equal-family2/15 versus row-weighted.2.",
+            "Equal-family 2/15 versus row-weighted .2.",
             "Choose the population weighting before summarizing.",
-            "Different row counts make the flattened result emphasize positive families. Neither average is intrinsically wrong, but each answers a different question. The comparison should retain paired case identities and state its weighting.",
+            "Different row counts make the flattened result emphasize positive families. Neither average is intrinsically wrong, but each answers a different question. The comparison should retain paired case identities and state its weighting. Flattening rows gives .2, which overweights the positive families. Recompute both 2/15 and .2 from the per-family deltas.",
         ),
         (
             "Bootstrap and qualify uncertainty",
             "Run the seeded family bootstrap twice and explain the small-family limit.",
-            "Identical quantiles under the same seed; support within[-.1,.3]; no strong population claim from three families.",
+            "Identical quantiles under the same seed; support within [-.1, .3]; no strong population claim from three families.",
             "Resample families, not individual near-duplicate rows.",
             "The resampling unit preserves the dependence represented by family grouping. Reproducibility is checked through the seed, while statistical credibility still depends on enough representative independent families. A toy interval is a mechanism demonstration, not a release guarantee. The future-new-family fixture also excludes b2 explicitly because its family appeared before the cutoff. Report that exclusion alongside the one remaining test family. A reviewer should see that stricter leakage control reduced the available evidence, rather than interpreting a clean split as proof that the dataset is now large enough. Collecting more independent future families is a different remedy from generating more paraphrases of c1.",
         ),
@@ -298,33 +298,33 @@ A production system also needs version-aware indexing, tombstones for removed do
             "Build the inverted index from the three documents.",
             "router postings{d0,d1}; term frequency and document frequency remain distinct.",
             "Use a set per document for postings, a Counter for within-document counts.",
-            "The repeated router token changes its term frequency but not the number of documents containing it. Conflating those quantities corrupts IDF. Retain document IDs and the tokenization policy so the index can be reproduced.",
+            "The repeated router token changes its term frequency but not the number of documents containing it. Conflating those quantities corrupts IDF. Retain document IDs and the tokenization policy so the index can be reproduced. Counting router twice in document frequency would lower its IDF as if it appeared in three documents. Verify df is 2 while d1's tf is larger.",
         ),
         (
             "Reproduce BM25 by hand",
             "Calculate d0's router reset score with the stated k1,b and IDF variant.",
             "Implementation matches the explicit formula; d0>d1>d2=0.",
-            "Compute N,df,average length and each term contribution separately.",
-            "The short document gets a favorable length normalization, while repetition in d1 saturates. The exact formula check identifies errors in scaling or denominator terms before relying on a plausible ranking.",
+            "Compute N, df, average length and each term contribution separately.",
+            "The short document gets a favorable length normalization, while repetition in d1 saturates. The exact formula check identifies errors in scaling or denominator terms before relying on a plausible ranking. Omitting the length-normalization term would rank d1 above d0 because of raw repetition. Compute each score from the written formula and compare with the implementation.",
         ),
         (
             "Handle unsupported queries",
             "Score unseen and inspect the result semantics.",
             "All numerical scores zero; the application should report no lexical evidence rather than a meaningful top result.",
             "Separate deterministic tie order from relevance evidence.",
-            "A dictionary of zero scores is a valid computational output but not a useful answer. The next layer needs an explicit no-evidence policy. A dense retriever might find a semantic match, but that would be a separately measured component.",
+            "A dictionary of zero scores is a valid computational output but not a useful answer. The next layer needs an explicit no-evidence policy. A dense retriever might find a semantic match, but that would be a separately measured component. Returning d0 as a top result because sorting picks the first zero would present an arbitrary document as evidence. Check that every score is zero and the caller reports no lexical evidence.",
         ),
         (
             "Implement reciprocal-rank fusion",
             "Fuse the two supplied rankings with k=60.",
-            "b first with score1/62+1/61; duplicate IDs in one ranking rejected.",
+            "b first with score 1/62+1/61; duplicate IDs in one ranking rejected.",
             "Use one-based ranks and one contribution per list position.",
-            "Rank fusion avoids assuming that lexical and dense raw scores share a scale. It still has a hyperparameter and can lose score-magnitude information. Evaluate its utility and cost against the components rather than assuming a fused result is always better.",
+            "Rank fusion avoids assuming that lexical and dense raw scores share a scale. It still has a hyperparameter and can lose score-magnitude information. Evaluate its utility and cost against the components rather than assuming a fused result is always better. Summing raw BM25 and cosine scores lets the larger scale dominate. Verify b's fused value equals 1/62 + 1/61 and that duplicates raise.",
         ),
         (
             "Compute nDCG and MRR",
             "Evaluate [d2,d0,d1] using the declared graded relevance.",
-            "MRR.5 and nDCG=(7/log2(3)+3/2)/(7+3/log2(3)).",
+            "MRR .5 and nDCG=(7/log2(3)+3/2)/(7+3/log2(3)).",
             "State exponential gains, cutoff and ideal ordering.",
             "The first irrelevant result delays the first useful hit and discounts the highest relevance item. Different gain conventions produce different numbers, so the configuration belongs with the result. Required-evidence recall may still be needed for multi-source questions.",
         ),
@@ -333,7 +333,7 @@ A production system also needs version-aware indexing, tombstones for removed do
             "Restrict searchable documents to d0 before scoring.",
             "Only d0 appears in results; a written handoff records source version and support limits.",
             "Apply access scope before building the model context.",
-            "The boundary controls which text is eligible for retrieval, not just which text is displayed afterward. A production implementation needs authorization metadata and audit evidence; relevance scoring cannot replace those checks. A permitted high-scoring passage still needs a separate claim-support review.",
+            "The boundary controls which text is eligible for retrieval, not just which text is displayed afterward. A production implementation needs authorization metadata and audit evidence; relevance scoring cannot replace those checks. A permitted high-scoring passage still needs a separate claim-support review. Filtering after ranking can still leak forbidden text through logs or scores; confirm only d0 is ever scored.",
         ),
     ],
     """
@@ -436,7 +436,7 @@ External documents can contain instructions, misleading claims or malformed data
             "Monitor drift, delayed labels and subgroups",
             """Total variation distance between two categorical distributions is one-half the sum of absolute probability differences. Counts [50,50] and [80,20] normalize to [.5,.5] and [.8,.2], giving distance .3. This is an interpretable amount of distribution movement under a fixed category vocabulary. It does not indicate whether predictions became wrong.
 
-Outcome labels may be delayed. For predictions [1,1,0] and labels [1,unknown,0], accuracy is one on the two mature labeled cases, while one case remains unassessed. Treating unknown as negative would create an artificial error and contaminate retraining. Report the mature count and cohort age alongside performance.
+Outcome labels may be delayed. For predictions [1, 1, 0] and labels [1, unknown, 0], accuracy is one on the two mature labeled cases, while one case remains unassessed. Treating unknown as negative would create an artificial error and contaminate retraining. Report the mature count and cohort age alongside performance.
 
 Inspect performance and missingness by language, document source, length and other task-relevant slices. Small slices need uncertainty and a minimum-evidence policy. Monitoring a single aggregate can hide a domain shift concentrated in one group, while triggering on every small statistical difference can overwhelm operators.""",
         ),
@@ -466,10 +466,10 @@ The system\'s output contract should include unsupported, stale, unauthorized an
     [
         (
             "Filter permission and freshness",
-            "Apply the role/time rule to the three source records at time10.",
-            "Only policy version2 for ops; unknown role and expired time30 yield no records.",
+            "Apply the role/time rule to the three source records at time 10.",
+            "Only policy version2 for ops; unknown role and expired time 30 yield no records.",
             "Evaluate authorization and validity before constructing context.",
-            "The result excludes both stale and unauthorized evidence. A production system must obtain identity and time from trusted inputs and preserve why a source was excluded. Relevance scoring should run only inside the permitted corpus rather than override the access decision.",
+            "The result excludes both stale and unauthorized evidence. A production system must obtain identity and time from trusted inputs and preserve why a source was excluded. Relevance scoring should run only inside the permitted corpus rather than override the access decision. Ranking first and filtering afterwards could leak a stale version into intermediate results. Verify that an unknown role and time 30 both return an empty list.",
         ),
         (
             "Fingerprint content reproducibly",
@@ -481,16 +481,16 @@ The system\'s output contract should include unsupported, stale, unauthorized an
         (
             "Measure a defined drift",
             "Compute total variation for [50,50] and [80,20].",
-            "Distance.3; negative,nonfinite or zero-total count vectors are rejected.",
+            "Distance .3; negative, nonfinite or zero-total count vectors are rejected.",
             "Normalize counts and take half the L1 difference.",
-            "The distance measures probability mass redistribution under the fixed categories. It is not a performance score or a causal explanation. Input validation prevents meaningless normalization from creating a plausible-looking alert statistic.",
+            "The distance measures probability mass redistribution under the fixed categories. It is not a performance score or a causal explanation. Input validation prevents meaningless normalization from creating a plausible-looking alert statistic. Normalizing a zero-total vector would divide by zero and could produce a plausible alert from nothing. Assert .3 for the fixture and that each invalid vector raises.",
         ),
         (
             "Respect label maturity",
-            "Evaluate predictions[1,1,0] with labels[1,None,0], then an all-unknown case.",
-            "Two mature cases with accuracy1; all-unknown returns count0 and no accuracy.",
+            "Evaluate predictions [1, 1, 0] with labels [1, None, 0], then an all-unknown case.",
+            "Two mature cases with accuracy 1; all-unknown returns count 0 and no accuracy.",
             "Exclude unknown outcomes explicitly and report their count.",
-            "Unknown is not the negative class. Mature-case performance may still be selected or unrepresentative if label delay depends on outcome, so retain cohort information and avoid claiming complete deployment accuracy from the available subset.",
+            "Unknown is not the negative class. Mature-case performance may still be selected or unrepresentative if label delay depends on outcome, so retain cohort information and avoid claiming complete deployment accuracy from the available subset. Filling unknown labels with 0 would drop accuracy for reasons unrelated to the model.",
         ),
         (
             "Treat external text as data",
@@ -501,8 +501,8 @@ The system\'s output contract should include unsupported, stale, unauthorized an
         ),
         (
             "Write a recovery and monitoring contract",
-            "Specify a stale-document incident with versions,diagnostics,rollback/reindex choice and acceptance evidence.",
-            "A concrete record distinguishes observed failure,hypothesis,authorized action and verified recovery.",
+            "Specify a stale-document incident with versions, diagnostics, rollback/reindex choice and acceptance evidence.",
+            "A concrete record distinguishes observed failure, hypothesis, authorized action and verified recovery.",
             "Choose the repair for the failed component rather than automatically retraining.",
             "If the current policy is absent from the index, changing model weights may not address the problem. A useful runbook names the affected snapshot, a bounded check and a success condition such as the correct permitted version entering retrieval. Preserve user data and original incident evidence during recovery.",
         ),
@@ -665,37 +665,37 @@ Before scaling, define resource limits, corpus ownership, privacy requirements a
         ),
         (
             "Implement exact identifier extraction",
-            "Accept one TKT-301 and reject missing,multiple or four-digit variants.",
+            "Accept one TKT-301 and reject missing, multiple or four-digit variants.",
             "Canonical TKT-301; three malformed/ambiguous cases raise ValueError.",
             "Use a trailing digit boundary so a longer ID is not accepted as a prefix.",
-            "A regex that captures the first three digits of TKT-3019 would silently create the wrong identity. Counting matches also prevents an arbitrary first-ID choice in a message containing two tickets. The parser proves format consistency only, not external ticket existence.",
+            "A regex that captures the first three digits of TKT-3019 would silently create the wrong identity. Counting matches also prevents an arbitrary first-ID choice in a message containing two tickets. The parser proves format consistency only, not external ticket existence. Taking only the first match in a message with two tickets would pick one arbitrarily. Run the three malformed inputs and confirm each raises ValueError.",
         ),
         (
             "Fit the real classifier and expose OOV",
             "Train the pipeline and test the two held-out probes plus botanical specimen.",
             "Expected labels for represented probes; unsupported-vocabulary for the all-OOV message.",
             "Inspect the transformed sparse row before calling predict.",
-            "The fitted classifier performs genuine local learning, but an empty feature row contains no lexical evidence. Detecting that condition prevents a prior-based output from masquerading as an informed domain judgment. Preserve this boundary when changing the representation.",
+            "The fitted classifier performs genuine local learning, but an empty feature row contains no lexical evidence. Detecting that condition prevents a prior-based output from masquerading as an informed domain judgment. Preserve this boundary when changing the representation. Letting the classifier return its prior class for the all-OOV message would look like a judgment. Check that the empty feature row maps to unsupported-vocabulary.",
         ),
         (
             "Retrieve current permitted evidence",
-            "Run the supported network case for ops at time10.",
+            "Run the supported network case for ops at time 10.",
             "Exactly network version2 and the unchanged approval-rule quote; old version absent.",
             "Filter role/time before computing lexical overlap.",
             "The deterministic filters enforce a separate evidence eligibility contract. The quote retains source identity and version, allowing a reviewer to verify what it says. Its presence supports a procedure statement, not an assertion about completed operational work.",
         ),
         (
             "Exercise failure paths",
-            "Repeat under billing role,time30 and malformed-ID inputs.",
+            "Repeat under billing role, time 30 and malformed-ID inputs.",
             "Insufficient-evidence for role/time changes; explicit parser failures; no unauthorized or stale quote.",
             "Change one input condition at a time and inspect the returned packet.",
-            "Independent perturbations localize the boundary being tested. A category prediction does not override access, and source expiry does not become a classification error. The failure ledger makes the appropriate repair or escalation concrete.",
+            "Independent perturbations localize the boundary being tested. A category prediction does not override access, and source expiry does not become a classification error. The failure ledger makes the appropriate repair or escalation concrete. Change one input at a time, role, time or ticket text, and verify which boundary reports the failure.",
         ),
         (
             "Deliver a reviewable analytics packet",
-            "Record normal and failure results with evidence hash,component identities and limitations.",
-            "A reviewer can reproduce parsing,prediction,source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus.",
-            "Separate model estimates,source facts and actual actions in the report.",
+            "Record normal and failure results with evidence hash, component identities and limitations.",
+            "A reviewer can reproduce parsing, prediction, source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus.",
+            "Separate model estimates, source facts and actual actions in the report.",
             "The handoff should include exact fixtures, code/configuration, observed outputs and unsupported cases. It creates a stable interface for later neural retrieval or generation. Any extension must preserve authorization, freshness and provenance while demonstrating task utility on new independent families.",
         ),
     ],

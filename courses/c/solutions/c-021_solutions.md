@@ -1,6 +1,6 @@
 # c-021: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-021_solution.c`, implements all six cases, from the "insert at the head" case to the "transfer double-reversal reasoning" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -21,13 +21,13 @@ CHECK(head->value == 2 && head->next->value == 1);
 destroy_list(&head);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `head->value == 2 && head->next->value == 1`. Restoring the original line brings back the worked observation: the list order is 2 then 1.
+**Expected:** With `CHECK(push_front(&head, 2) && push_front(&head, 2));` the run stops with `Check failed` at the CHECK on `head->value == 2 && head->next->value == 1`, because the "insert at the head" case no longer shows that the list order is 2 then 1. Restoring `CHECK(push_front(&head, 1) && push_front(&head, 2));` brings that observation back.
 
 Head insertion reverses arrival order. If FIFO order is required, a tail pointer or different structure is needed.
 
 ## Exercise 2: Count a constructed list: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `for (int i = 0; i <= 3; i++)`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "count a constructed list" case, so one line now reads `for (int i = 0; i <= 3; i++)`. Run the example with that line, use the failing CHECK to find why the length is 3 no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -39,7 +39,7 @@ CHECK(list_length(head) == 3);
 destroy_list(&head);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `list_length(head) == 3`; after it the line reads `for (int i = 0; i < 3; i++)` again and the length is 3.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `list_length(head) == 3`. Once the line reads `for (int i = 0; i < 3; i++)` again, the "count a constructed list" case again shows that the length is 3.
 
 The traversal stops at NULL and does not assume nodes occupy adjacent addresses.
 
@@ -110,4 +110,4 @@ This involution property complements exact order tests. It alone would not rejec
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer double-reversal reasoning" case to your own c-021 source. Explain why every access in `push_front` or `list_length` or `destroy_list` stays within a live object and each owned resource is released. An expected node failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "count a constructed list" case apart from ordinary output: the fixture proves its stated node, head pointer and mutation invariant assumptions, not universal safety.

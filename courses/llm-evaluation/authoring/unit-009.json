@@ -8,6 +8,12 @@
     "source version",
     "access policy"
   ],
+  "key_terms": {
+    "Link precision": "Supported citation links divided by evaluated citation links.",
+    "Claim coverage": "Eligible claims with at least one supported link divided by all eligible claims.",
+    "Entailment label": "A judgment of whether a cited passage supports its associated claim.",
+    "Document version": "The specific snapshot of a source, which determines what evidence was available and authorized when an answer was produced."
+  },
   "outcome": "Separate claim truth, citation support, evidence coverage and source availability using an auditable claim-document relation.",
   "verification": "One supported citation gives precision 1 and coverage 1/3, no citations gives missing precision and coverage 0, unknown relations and duplicate citations are rejected, and a newer document is ineligible for the historical reconstruction.",
   "level": "intermediate",
@@ -20,42 +26,78 @@
       "task": "Cite only c1 correctly among three eligible claims.",
       "expected": "Precision 1, coverage 1/3.",
       "hint": "The link and claim denominators differ.",
-      "answer": "Perfect precision does not imply that the full answer has adequate evidence coverage."
+      "answer": "Perfect precision does not imply that the full answer has adequate evidence coverage.",
+      "reasoning": {
+        "approach": "Use case A's claims `[\"c1\", \"c2\", \"c3\"]` and keep only the first link, `(\"c1\", \"d1\")`, which is judged `True`. Call `citation_metrics` and read both fields.",
+        "why": "One link is judged and it is supported, so link precision is 1 / 1 = 1. Only claim c1 has a supported link, so claim coverage is 1 / 3. The answer makes three claims and offers evidence for one of them.",
+        "pitfall": "Reporting precision alone as \"citations are 100 percent accurate\" is the mistake. A system can reach perfect precision by citing only its easiest claim and leaving the rest unsupported; coverage is what exposes that.",
+        "verify": "Worked case A asserts `citation_metrics(claims, links[:1], support) == {\"link_precision\": 1.0, \"claim_coverage\": 1 / 3}`. The full three-link version gives 2 / 3 for both."
+      }
     },
     {
       "title": "No citations",
       "task": "Evaluate an answer with one eligible claim and no links.",
       "expected": "Precision is missing; coverage is 0.",
       "hint": "Distinguish an empty link denominator from absent claim support.",
-      "answer": "There are no links to judge, but no eligible claim has supported evidence."
+      "answer": "There are no links to judge, but no eligible claim has supported evidence.",
+      "reasoning": {
+        "approach": "Call `citation_metrics([\"c\"], [], {})`. With no links the precision denominator is zero, so the function returns `None` for precision, and coverage is 0 / 1.",
+        "why": "Precision asks what share of offered links are supported; with no links offered, that share is undefined. Coverage asks what share of eligible claims have support; the one claim has none, so 0 is a real, defined failure.",
+        "pitfall": "Setting precision to 1 because no citation was wrong rewards an answer for citing nothing. Setting it to 0 confuses \"no evidence offered\" with \"evidence offered and wrong,\" which the next check distinguishes.",
+        "verify": "The reference asserts the result equals `{\"link_precision\": None, \"claim_coverage\": 0.0}`. Compare with one link judged `False`, which gives 0.0 for both."
+      }
     },
     {
       "title": "Unknown support relation",
       "task": "Add a link with no adjudicated support label.",
       "expected": "The helper rejects it.",
       "hint": "An unjudged pair is not a negative or positive label.",
-      "answer": "Retain missingness and acquire a label or use an explicit assessment-sampling protocol."
+      "answer": "Retain missingness and acquire a label or use an explicit assessment-sampling protocol.",
+      "reasoning": {
+        "approach": "Pass a link `(\"c\", \"d\")` with an empty support dictionary. The function checks `(c, d) not in support` for every link and raises `Unjudged or duplicate link`.",
+        "why": "No one has decided whether document d supports claim c. Including the link with any assumed value would make precision depend on a guess, and the guess would differ between assessors and between runs.",
+        "pitfall": "Treating unjudged links as unsupported looks conservative but is not neutral: it penalizes new citation patterns that assessors have not reached yet, which biases comparisons toward the system that produced the judged pool.",
+        "verify": "The reference includes `([(\"c\", \"d\")], {})` in its invalid list and fails with `Invalid citation accepted` if it passes. A `None` value in the support map is also rejected by the Boolean type check."
+      }
     },
     {
       "title": "Duplicate a citation",
       "task": "Repeat an identical claim-document link.",
       "expected": "The helper rejects it.",
       "hint": "Count distinct evidence relations.",
-      "answer": "Duplicated markup should not increase the apparent amount of evidence."
+      "answer": "Duplicated markup should not increase the apparent amount of evidence.",
+      "reasoning": {
+        "approach": "Pass `[(\"c\", \"d\"), (\"c\", \"d\")]` with the pair judged `True`. The guard `len(set(links)) != len(links)` raises before any metric is computed.",
+        "why": "Two identical links point to the same evidence for the same claim. Counting both would raise the numerator and denominator of precision together and could make an answer look as if it had twice the evidence it does.",
+        "pitfall": "Deduplicating quietly inside the metric hides a formatting bug in the system that produced the answer. The bug should be fixed or measured, not absorbed.",
+        "verify": "The reference includes the duplicated pair in the invalid list. After removing the duplicate, `citation_metrics([\"c\"], [(\"c\", \"d\")], {(\"c\", \"d\"): True})` returns 1.0 for both fields."
+      }
     },
     {
       "title": "Use a newer document",
       "task": "Evaluate a day 10 answer with a day 12 document.",
       "expected": "That version is ineligible for the historical reconstruction.",
       "hint": "Use availability time as well as content.",
-      "answer": "A later correction cannot be treated as information the original system had at decision time."
+      "answer": "A later correction cannot be treated as information the original system had at decision time.",
+      "reasoning": {
+        "approach": "Call `eligible_evidence({\"id\": \"d1-v2\", \"published\": 12}, 10, {\"d1-v2\"})`. The function requires both an allowed ID and `published <= cutoff`.",
+        "why": "The answer was produced at day 10, and document version d1-v2 appeared at day 12. The original system could not have cited it, so a historical reconstruction that accepts it rewards evidence from the future, the same leakage as a delayed label in eval-002.",
+        "pitfall": "Grading against the latest document version because it is more accurate mixes two questions: whether the system behaved well with the evidence it had, and whether the evidence later changed.",
+        "verify": "Worked case B asserts the call returns `False` at cutoff 10 and `True` at cutoff 12. An ID not in the allowed set, such as `\"restricted\"`, is ineligible at any cutoff."
+      }
     },
     {
       "title": "Disentangle truth and support",
       "task": "Construct a claim that accurately quotes an erroneous source.",
       "expected": "Support can be true while truth is false.",
       "hint": "Audit source authority and the task ground truth separately.",
-      "answer": "Citation evaluation measures a relation to supplied evidence. It does not establish that all evidence is correct or current."
+      "answer": "Citation evaluation measures a relation to supplied evidence. It does not establish that all evidence is correct or current.",
+      "reasoning": {
+        "approach": "Write a claim that quotes a source word for word, where the source itself states a wrong value. Judge support (does the cited passage say this?) and truth (is it correct?) separately.",
+        "why": "Support is `True` because the claim matches the passage. Truth is `False` because the passage is wrong. Worked case B encodes exactly this pair: `support = True`, `truth = False`.",
+        "pitfall": "Treating supported claims as verified facts is the mistake. Citation metrics measure faithfulness to supplied evidence; they cannot detect errors in that evidence, so a corpus with stale or wrong documents yields faithful but false answers.",
+        "verify": "Worked case B asserts `support and not truth`. In a report, label the support metric explicitly as a relation to the corpus snapshot and track truth through a separate assessment."
+      }
     }
   ],
   "sources": [

@@ -107,7 +107,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Keep a pure core function) before changing anything, and confirm its observation: The pure kernel is suitable for a reusable library.
 2. Compare Example B (Separate presentation from calculation) with Example A and name the first line whose behavior differs. Its observation is: Presentation is independently testable.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A manifest is not executed by the classroom source pad.
+3. Before opening the explanation, check your task 3 attempt (Run swift test and the journey-demo executable) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

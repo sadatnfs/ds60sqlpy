@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-007.md</code>.</p>
 <h3 id="exercise-1-explain-what-a-single-cell-value-means-with-both-headers">Exercise 1: Explain what a single cell value means with both headers.<a class="heading-anchor" href="#exercise-1-explain-what-a-single-cell-value-means-with-both-headers" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> 40 means forty minutes of HTML study, not an unlabeled count.</p>
+<p><strong>Approach:</strong> Follow the cell left to its row header and up to its column header, then join them into one sentence with the unit.</p>
 <p><strong>Why:</strong> A data cell&#x27;s meaning comes from its row and column headers, and th with scope makes that relationship explicit to screen readers.</p>
+<p><strong>Plausible wrong approach:</strong> Reading 40 as a score or a count fails because only the Minutes column header gives the number its unit.</p>
+<p><strong>How to verify:</strong> Your sentence names HTML, the value 40 and minutes, and each word comes from a header cell in the source.</p>
 <h3 id="exercise-2-add-a-caption-that-states-the-reporting-period">Exercise 2: Add a caption that states the reporting period.<a class="heading-anchor" href="#exercise-2-add-a-caption-that-states-the-reporting-period" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The visible caption explains the table&#x27;s scope.</p>
+<p><strong>Approach:</strong> Add a <code>caption</code> as the first child of <code>table</code> that states the reporting period, such as week 1.</p>
 <p><strong>Why:</strong> caption names the whole table, so assistive technology announces its scope before any values.</p>
+<p><strong>Plausible wrong approach:</strong> Putting the period in a heading above the table fails because the heading is not programmatically tied to the table and may drift away.</p>
+<p><strong>How to verify:</strong> <code>document.querySelector(&#x27;table&#x27;).caption.textContent</code> in the console returns exactly the period text you wrote in the caption.</p>
 <h3 id="exercise-3-build-a-three-row-study-table-with-correct-header-relationships">Exercise 3: Build a three-row study table with correct header relationships.<a class="heading-anchor" href="#exercise-3-build-a-three-row-study-table-with-correct-header-relationships" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The caption, row headers and column headers identify every value.</p>
+<p><strong>Approach:</strong> Write a header row of <code>th scope=&quot;col&quot;</code> cells, then three body rows that each start with <code>th scope=&quot;row&quot;</code>.</p>
 <p><strong>Why:</strong> Scoped headers let assistive technology announce the matching row and column labels for every value.</p>
+<p><strong>Plausible wrong approach:</strong> Marking only the first row with <code>th</code> fails because row values then lack the subject label that identifies them.</p>
+<p><strong>How to verify:</strong> The console shows 2 column headers and 3 row headers, and every <code>td</code> sits in a row that begins with a <code>th</code>.</p>
 <h3 id="exercise-4-replace-a-table-used-to-align-unrelated-navigation-and-article-content">Exercise 4: Replace a table used to align unrelated navigation and article content.<a class="heading-anchor" href="#exercise-4-replace-a-table-used-to-align-unrelated-navigation-and-article-content" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Use semantic regions plus CSS layout rather than false data relationships.</p>
+<p><strong>Approach:</strong> Replace the layout table with <code>nav</code> and <code>article</code> elements and arrange them with CSS grid or flexbox.</p>
 <p><strong>Why:</strong> A layout table announces false row and column relationships; landmarks with CSS Grid or Flexbox create the same arrangement without false semantics.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>role=&quot;presentation&quot;</code> to the table and stopping fails because the layout still depends on table markup and resists narrow widths.</p>
+<p><strong>How to verify:</strong> The tree has no <code>table</code> around the page regions, and the regions sit side by side through CSS at a wide preset.</p>
 <h3 id="exercise-5-inspect-the-table-at-a-narrow-width-without-deleting-data">Exercise 5: Inspect the table at a narrow width without deleting data.<a class="heading-anchor" href="#exercise-5-inspect-the-table-at-a-narrow-width-without-deleting-data" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A bounded overflow region keeps all columns reachable.</p>
+<p><strong>Approach:</strong> Wrap the table in a container with <code>overflow-x: auto</code> and a focusable label so the columns scroll inside it.</p>
 <p><strong>Why:</strong> A scrolling wrapper, made focusable so keyboard users can scroll it, keeps every column reachable without shrinking text or deleting data.</p>
+<p><strong>Plausible wrong approach:</strong> Hiding columns with <code>display: none</code> at narrow widths fails because the data disappears for everyone on small screens.</p>
+<p><strong>How to verify:</strong> At the narrow preset every column is reachable by scrolling the container, and the page body itself does not overflow.</p>
 <h3 id="exercise-6-explain-when-a-chart-should-keep-a-supporting-table">Exercise 6: Explain when a chart should keep a supporting table.<a class="heading-anchor" href="#exercise-6-explain-when-a-chart-should-keep-a-supporting-table" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Exact values and nonvisual interpretation often benefit from a tabular equivalent.</p>
+<p><strong>Approach:</strong> Keep a table whenever readers need exact values or cannot perceive the chart&#x27;s shapes, and describe the trend in prose as well.</p>
 <p><strong>Why:</strong> A chart shows a pattern quickly, while a table gives exact numbers and a nonvisual route to the same information.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on the chart plus hover tooltips fails because keyboard and screen reader users may never reach the values.</p>
+<p><strong>How to verify:</strong> Every value plotted in the chart also appears once in the table with matching units.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-007_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

@@ -10,33 +10,33 @@ A useful rubric makes disagreement diagnosable. It distinguishes a quoted urgent
 
 ## Exercise 2: Calculate agreement manually
 
-The numerator removes the agreement implied by marginal category usage, while the denominator rescales the remaining possible agreement. Comparing with the independent arithmetic catches a library-call or label-alignment mistake. The statistic still says nothing by itself about construct validity.
+The numerator removes the agreement implied by marginal category usage, while the denominator rescales the remaining possible agreement. Comparing with the independent arithmetic catches a library-call or label-alignment mistake. The statistic still says nothing by itself about construct validity. Reporting raw agreement 2/3 as the reliability figure ignores how often the raters would match by chance. Reproduce kappa as (2/3 - 1/2) / (1 - 1/2) = 1/3 and compare with the library value.
 
 **Expected:** 2/3,1/2,1/3 respectively, matching the library.
 
 ## Exercise 3: Explain the imbalanced case
 
-The raters agree on the common category but disagree on the rare exceptions. The chance-adjusted score reflects that pattern. Inspecting the confusion table and category-specific behavior is more informative than choosing whichever single statistic looks favorable.
+The raters agree on the common category but disagree on the rare exceptions. The chance-adjusted score reflects that pattern. Inspecting the confusion table and category-specific behavior is more informative than choosing whichever single statistic looks favorable. Quoting .98 alone in a report would suggest near-perfect reliability on exactly the rare cases where raters disagree. Print the confusion table to see where the disagreements sit.
 
-**Expected:** Raw agreement.98 but kappa slightly below zero.
+**Expected:** Raw agreement .98 but kappa slightly below zero.
 
 ## Exercise 4: Retain soft labels
 
-The proportions summarize this rater panel's judgments. Entropy describes their dispersion, not a calibrated probability of objective truth. A downstream use should preserve that interpretation and consider whether disagreement reflects ambiguity, measurement error or differing legitimate perspectives.
+The proportions summarize this rater panel's judgments. Entropy describes their dispersion, not a calibrated probability of objective truth. A downstream use should preserve that interpretation and consider whether disagreement reflects ambiguity, measurement error or differing legitimate perspectives. Majority voting the disputed row to 1 would discard the dissenting rater. Verify that the disputed row's proportion is 2/3 and that only it has nonzero entropy.
 
-**Expected:** Soft labels[2/3,1,0]; positive entropy only for the disputed row.
+**Expected:** Soft labels [2/3, 1, 0]; positive entropy only for the disputed row.
 
 ## Exercise 5: Preserve adjudication evidence
 
 Adjudication resolves a workflow decision while preserving its history. Replacing all raw ratings with the final value would erase the evidence needed to improve the guide or audit consistency. Include the rubric version and source evidence when extending the record.
 
-**Expected:** Original(1,1,0),final label1,rationale and item identity retained.
+**Expected:** Original (1, 1, 0), final label 1, rationale and item identity retained.
 
 ## Exercise 6: Handle undefined agreement
 
-An undefined statistic should remain visible rather than be coerced into perfect reliability. The sample contains no category variation, so it cannot reveal how raters distinguish cases. A better follow-up deliberately includes relevant difficult cases while preserving a separate representative sample for population estimates.
+An undefined statistic should remain visible rather than be coerced into perfect reliability. The sample contains no category variation, so it cannot reveal how raters distinguish cases. A better follow-up deliberately includes relevant difficult cases while preserving a separate representative sample for population estimates. Returning kappa 1.0 because raw agreement is 1 would claim reliability the data cannot show; the reference returns None instead.
 
-**Expected:** Raw agreement1,kappa undefined/None; follow-up includes rare and ambiguous categories.
+**Expected:** Raw agreement 1, kappa undefined/None; follow-up includes rare and ambiguous categories.
 
 ## Transfer and limits
 

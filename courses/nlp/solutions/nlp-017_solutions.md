@@ -4,21 +4,21 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 ## Exercise 1: Implement clipped precision
 
-Only one occurrence of the can be credited because the reference contains one. The remaining repetitions contribute to the denominator without extra matches. This prevents a simple repetition exploit but does not make overlap a semantic metric.
+Only one occurrence of the can be credited because the reference contains one. The remaining repetitions contribute to the denominator without extra matches. This prevents a simple repetition exploit but does not make overlap a semantic metric. Counting every candidate match without clipping gives precision 1 for the repeated the, rewarding a degenerate output. Verify by computing the clipped count by hand as min(candidate count, reference count) and dividing by the candidate length.
 
-**Expected:** Precision .25, not1.
+**Expected:** Precision .25, not 1.
 
 ## Exercise 2: Derive the brevity penalty
 
-The geometric mean is one because every candidate n-gram appears in the reference. The brevity penalty reduces the result for omitted content. This example isolates length handling from n-gram matching and documents the exact teaching convention.
+The geometric mean is one because every candidate n-gram appears in the reference. The brevity penalty reduces the result for omitted content. This example isolates length handling from n-gram matching and documents the exact teaching convention. Folding the penalty into the n-gram precisions, for example by dividing matches by the reference length, would blur two distinct effects. Confirm that both precisions print as 1 while only BP drops the score to exp(-0.5).
 
-**Expected:** Both precisions1; BP and score \(\exp(-0.5)\).
+**Expected:** Both precisions 1; BP and score \(\exp(-0.5)\).
 
 ## Exercise 3: Implement longest common subsequence
 
-A subsequence can skip not while preserving the other words in order. The resulting high score is mathematically correct under the metric. It demonstrates a limitation of the metric rather than a coding defect to be fixed by changing expected values.
+A subsequence can skip not while preserving the other words in order. The resulting high score is mathematically correct under the metric. It demonstrates a limitation of the metric rather than a coding defect to be fixed by changing expected values. Do not edit the expected F1 of 6/7 to something lower because the meaning changed; that would hide the metric's real behavior. Recompute LCS 3 against candidate length 3 and reference length 4.
 
-**Expected:** LCS3, precision1, recall.75, \(F_{1}=\frac{6}{7}\).
+**Expected:** LCS 3, precision 1, recall .75, \(F_{1}=\frac{6}{7}\).
 
 ## Exercise 4: Document semantic failure
 
@@ -28,9 +28,9 @@ The answer changes not ready into ready, reversing the source. A useful evaluato
 
 ## Exercise 5: Aggregate at the right unit
 
-Equal-family averaging prevents the family with more variants from receiving more weight merely because it was expanded. Row-level weighting can be appropriate for a different target population, but the choice must be stated. Confidence intervals should preserve the same dependence unit.
+Equal-family averaging prevents the family with more variants from receiving more weight merely because it was expanded. Row-level weighting can be appropriate for a different target population, but the choice must be stated. Confidence intervals should preserve the same dependence unit. Averaging rows treats the expanded family's two variants as two independent pieces of evidence. Print both 1/3 and .25 and state which population each describes.
 
-**Expected:** Family rates[.5,0] and equal-family mean.25; explain why row mean1/3 answers a different weighting question.
+**Expected:** Family rates [.5, 0] and equal-family mean .25; explain why row mean 1/3 answers a different weighting question.
 
 ## Exercise 6: Specify an evaluation packet
 

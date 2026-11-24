@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-078`, `apache-075`.
 
+## Key terms
+
+- **Capability negotiation:** Agreeing which protocol and table features both client and server support, which version numbers alone do not establish.
+- **Change data feed:** A Delta feature that exposes row-level inserts, updates and deletes between versions, with operation and commit metadata.
+- **Deletion vector:** A Delta table feature that marks deleted rows without rewriting Parquet files, which a basic Parquet reader cannot interpret.
+- **Delta format response:** A newer sharing response mode that returns Delta log actions for advanced table features, excluded by the course's portable client.
+
 ## Client and server capabilities must intersect
 
 Sharing protocols evolve to expose additional table features, history and change
@@ -77,6 +84,40 @@ read it correctly?** The table may have enabled a feature outside that client's
 supported intersection. These cases require a real bounded advanced-history
 experiment and an explicit rejection path that protects the portable reader
 from silently returning an invalid snapshot.
+
+## Worked examples
+
+### Reject unknown reader features before reading data
+
+```python
+import json
+
+lines = [
+    '{"protocol": {"minReaderVersion": 3, "readerFeatures": ["deletionVectors"]}}',
+    '{"metaData": {"id": "fixture"}}',
+]
+protocol = [json.loads(line)["protocol"] for line in lines if "protocol" in line][0]
+supported = protocol["minReaderVersion"] == 1 and not protocol.get("readerFeatures")
+print("read data" if supported else "stop: unsupported protocol")
+```
+
+```text
+stop: unsupported protocol
+```
+
+The lines imitate a query response from a table that uses deletion vectors. A reader that ignored the protocol line would download the Parquet files and return rows that the table logically deleted, which is a silent correctness bug rather than an error. The project client applies the same rule and raises before any file URL is fetched.
+
+### Ask for history only when the table shares it
+
+```yaml
+tables:
+  - name: orders
+    location: "s3a://owned-fixture-bucket/orders"
+    id: "81e0b600-1380-4b9a-a4db-000000000001"
+    historyShared: true
+```
+
+From server-config.example.yaml, historyShared true lets recipients request older versions and change data feed ranges. Without it, a query with a version or timestamp is refused even if the client supports it. Capability is the intersection of three things: the server version, the table settings and the client implementation, so check each one before blaming the others.
 
 ## Complete worked source
 

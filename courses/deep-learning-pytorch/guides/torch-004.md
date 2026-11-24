@@ -117,7 +117,7 @@ torch.testing.assert_close(gsum, 3 * gmean, atol=1e-12, rtol=0)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Sum is 6 and mean is 2, duplication doubles only the sum, the sum gradient is 3 times the mean gradient, and the masked mean of [1, 4, 100] with the last entry invalid is 2.5 rather than \(\frac{5}{3}\). Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Compute residual reductions. Predict exercise 6, Separate a metric from the objective, from its prompt alone: Compare mean absolute residual and mean squared residual for [1, -1, 2]. Then explain why this finish condition holds: Sum is 6 and mean is 2, duplication doubles only the sum, the sum gradient is 3 times the mean gradient, and the masked mean of [1, 4, 100] with the last entry invalid is 2.5 rather than \(\frac{5}{3}\). Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -153,15 +153,15 @@ If the forward scalar agrees but gradients do not, inspect per-entry losses and 
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Duplicate the batch) alters one assumption of Example A (Compute residual reductions). Hint 2: exercise 4, Inspect a feature denominator, should end at loss 1 and 4 participating elements. Work backward from it. Hint 3: exercise 5, Mask numerator and denominator together, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Reduction, Loss unit, Gradient scale using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Compare derivative scale, from its inputs alone. Predict whether exercise 3, Compare gradient scale for four entries, survives one changed input. Then explain Reduction, Loss unit, Gradient scale in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-003` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Compute residual reductions) cannot be rebuilt without help, revisit `torch-003` first. Otherwise keep your exercise 2 attempt, Predict the effect of an appended zero, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

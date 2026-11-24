@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-count-low-rank-parameters">Exercise 1: Count low-rank parameters<a class="heading-anchor" href="#exercise-1-count-low-rank-parameters" aria-label="Link to this section">#</a></h3>
 <p>Rank times sum of dimensions.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count low-rank parameters</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Count low-rank adapter parameters as rank times the sum of dimensions: <code>8*(1024 + 1024) = 16384</code> for a 1024 by 1024 weight.</p>
+<p><strong>Why it is correct here.</strong> A low-rank update factors the change as a 1024 by 8 matrix times an 8 by 1024 matrix, so its parameters are <code>1024*8 + 8*1024</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Computing rank times the product of dimensions, <code>8*1024*1024</code>, gives eight times the original matrix. That figure would make the adapter larger than the weight it adapts, which should immediately signal an error.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>adapter == 16384</code>. In a framework, sum <code>numel()</code> over adapter parameters and compare.</p>
 <h3 id="exercise-2-include-base-storage">Exercise 2: Include base storage<a class="heading-anchor" href="#exercise-2-include-base-storage" aria-label="Link to this section">#</a></h3>
 <p>Base parameters are not deleted.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>include base storage</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Include base storage in the memory ledger: the 1048576 base parameters stay in memory, so the total is <code>1048576 + 16384</code>.</p>
+<p><strong>Why it is correct here.</strong> Adapters reduce trainable parameters, gradients and optimizer state, but the forward pass still needs the frozen base weights.</p>
+<p><strong>A plausible wrong approach.</strong> Budgeting memory from adapter parameters alone underestimates by the full base model. For this matrix the adapter is about 1.6 percent of the total, so the omitted base dominates the real footprint.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>base + adapter &gt; base</code>. Measured parameter memory should include the base.</p>
 <h3 id="exercise-3-inspect-optimizer-membership">Exercise 3: Inspect optimizer membership<a class="heading-anchor" href="#exercise-3-inspect-optimizer-membership" aria-label="Link to this section">#</a></h3>
 <p>Only intended trainable tensors belong in optimizer state.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>inspect optimizer membership</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Inspect the optimizer&#x27;s parameter groups and confirm only adapter tensors are present, such as by filtering <code>p.requires_grad</code>.</p>
+<p><strong>Why it is correct here.</strong> An optimizer built from <code>model.parameters()</code> includes frozen base weights, creating optimizer state for them even if gradients are absent.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming freezing alone excludes parameters from the optimizer can waste memory. Some optimizers skip parameters whose <code>.grad</code> is None, but weight decay or other per-parameter bookkeeping may still allocate state, so membership should be explicit rather than implied.</p>
+<p><strong>How to verify.</strong> Count parameters in the optimizer groups and assert the count equals 16384. Also check that each base tensor reports <code>requires_grad == False</code>, so the two facts agree.</p>
 <h3 id="exercise-4-compare-sequence-length-budgets">Exercise 4: Compare sequence-length budgets<a class="heading-anchor" href="#exercise-4-compare-sequence-length-budgets" aria-label="Link to this section">#</a></h3>
 <p>Attention intermediates and caches grow with sequence geometry.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare sequence-length budgets</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare memory at two sequence lengths, such as 512 and 1024, since activations and attention intermediates grow with sequence geometry while parameters stay constant.</p>
+<p><strong>Why it is correct here.</strong> Activation memory grows at least linearly with sequence length and naive attention grows quadratically, so long sequences can exceed memory even with small adapters.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming adapters make long-sequence fine-tuning cheap confuses parameter savings with activation savings. Gradients must still flow back through the frozen layers to reach adapters in earlier layers, so those activations are kept during the forward pass.</p>
+<p><strong>How to verify.</strong> Measure peak allocated memory at both lengths and check the growth against the ledger.</p>
 <h3 id="exercise-5-design-tiny-offline-training">Exercise 5: Design tiny offline training<a class="heading-anchor" href="#exercise-5-design-tiny-offline-training" aria-label="Link to this section">#</a></h3>
 <p>Use generated tokens and bounded steps.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design tiny offline training</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a tiny offline training run with generated token IDs, a small model or a few layers, and a bounded number of steps such as 20.</p>
+<p><strong>Why it is correct here.</strong> Synthetic tokens avoid licensing and download needs, and a small bounded run checks wiring and memory behavior safely.</p>
+<p><strong>A plausible wrong approach.</strong> Using a full public model and dataset for a first test risks long downloads and exhausting memory. A failure in that setting is also harder to localize, because data, model size and wiring all vary at once.</p>
+<p><strong>How to verify.</strong> Confirm the loss decreases on a repeated tiny batch, showing gradients reach the adapter.</p>
 <h3 id="exercise-6-define-held-out-evaluation">Exercise 6: Define held-out evaluation<a class="heading-anchor" href="#exercise-6-define-held-out-evaluation" aria-label="Link to this section">#</a></h3>
 <p>Keep validation separate from fitting and tuning.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define held-out evaluation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Keep a held-out evaluation set that is never used for fitting or hyperparameter tuning, and report its metric separately.</p>
+<p><strong>Why it is correct here.</strong> Fine-tuning can overfit small datasets quickly. Separate evaluation measures generalization.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the training loss as model quality overstates performance. Choosing the rank or learning rate by repeatedly looking at the evaluation set leaks it into tuning in the same way.</p>
+<p><strong>How to verify.</strong> Assert there is no overlap between training and evaluation example IDs, then report both metrics.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Base 1,048,576 and adapter 16,384 parameters.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-101_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

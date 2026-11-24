@@ -118,7 +118,7 @@ The candidate relation shows the under-specification directly. Multiple top-time
 
 Return event_id, rows_total, peer_total. ROWS uses ascending time NULL last then ID and an unbounded-preceding/current-row frame. RANGE uses only ascending time NULL last over the same cumulative boundary.
 
-**Expected:** By ID:1(10,10),2(30,60),3(60,60),4(40,40),5(90,150),6(150,150),7(150,150),8(80,80).
+**Expected:** By ID: 1 `(10, 10)`, 2 `(30, 60)`, 3 `(60, 60)`, 4 `(40, 40)`, 5 `(90, 150)`, 6 `(150, 150)`, 7 `(150, 150)`, 8 `(80, 80)`.
 
 ```scala
 def runningTotals(events: DataFrame): DataFrame = {
@@ -164,7 +164,7 @@ The two frames use different membership rules. A row frame progresses through or
 
 Using ascending time NULL last then event_id, return event_id, previous_id, gap_seconds. Lag the event identity and time, then subtract epoch seconds.
 
-**Expected:** 1(NULL, NULL),2(1,60),3(2,0),4(NULL, NULL),5(4,120),6(5,0),7(8, NULL),8(NULL, NULL).
+**Expected:** 1 (NULL, NULL), 2 `(1, 60)`, 3 `(2, 0)`, 4 (NULL, NULL), 5 `(4, 120)`, 6 `(5, 0)`, 7 `(8, NULL)`, 8 (NULL, NULL).
 
 ```scala
 def previousEvidence(events: DataFrame): DataFrame = {
@@ -200,4 +200,6 @@ The previous identity proves which occurrence supplied the lagged field. Zero ga
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Validate identities before defining a winner) is built inside the program, so opening the lesson fetches nothing; it expects: The eight-event fixture passes; adding another copy of event 1 fails. Missing-time event 7 is allowed. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

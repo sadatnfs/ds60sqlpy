@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A template combines trusted structure with data. If a visitor&#x27;s text is inserted directly into HTML, the browser may interpret it as elements or script-capable attributes. Output escaping represents the data so it remains data in a particular destination context. It is not a one-time cleanup that makes a value safe everywhere. Keep the original validated value and encode it when crossing the output boundary.</p>
 <p>For HTML text and ordinary quoted attribute values, htmlspecialchars with explicit flags and UTF-8 is a useful primitive. It is not a JavaScript-string encoder, a CSS sanitizer or a URL policy. A URL in an href needs a separate scheme and destination decision before attribute escaping. Avoid dynamic inline scripts and styles when a simpler data boundary is available.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Template:</strong> Code that combines fixed markup with data to produce an HTML response.</li>
+<li><strong>Output escaping:</strong> Encoding data at the moment it is written into a page, using the rules of that exact context.</li>
+<li><strong>HTML text context:</strong> A place between tags or inside a quoted attribute, where <code>htmlspecialchars()</code> with <code>ENT_QUOTES</code> makes data display as text.</li>
+<li><strong>Cross-site scripting:</strong> XSS, an attack in which untrusted data is rendered as script or markup in another user&#x27;s browser.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Define a small e function that calls htmlspecialchars with ENT_QUOTES, ENT_SUBSTITUTE and UTF-8. Use it only for the contexts described by its contract. The CLI reference prints an HTML string as text so you can inspect the escaped bytes; it does not execute that string in a browser. A server template later uses the same contextual boundary before returning a response.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -215,6 +222,13 @@ echo htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, &#x27;UTF-8&#x27;);</c
 <p>Only the fixed structure is authored markup.</p>
 <pre class="highlighted-code"><code class="language-php">$html = &#x27;&lt;p&gt;Hello, &#x27; . e($name) . &#x27;&lt;/p&gt;&#x27;;</code></pre>
 <p><strong>Expected observation:</strong> The greeting structure is fixed and the name stays text.</p>
+<h3 id="contrast-case-escaped-text-in-an-unquoted-attribute">Contrast case: escaped text in an unquoted attribute<a class="heading-anchor" href="#contrast-case-escaped-text-in-an-unquoted-attribute" aria-label="Link to this section">#</a></h3>
+<p>Both templates call the same <code>e</code> helper. Only the quotes around the attribute value differ. Print both strings in the CLI worker.</p>
+<pre class="highlighted-code"><code class="language-php">$value = &#x27;x onfocus=alert(1) autofocus&#x27;;
+
+echo &#x27;&lt;input value=&#x27; . e($value) . &#x27;&gt;&#x27;, &quot;\n&quot;;
+echo &#x27;&lt;input value=&quot;&#x27; . e($value) . &#x27;&quot;&gt;&#x27;, &quot;\n&quot;;</code></pre>
+<p><code>htmlspecialchars</code> converts <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code> and quotes, but this value contains none of them, so <code>e</code> returns it unchanged. In the first line the output is <code>&lt;input value=x onfocus=alert(1) autofocus&gt;</code>, which an HTML parser would read as three attributes, including an event handler. In the second line the same characters sit inside double quotes, so a parser treats them as one value. The helper&#x27;s contract is HTML text and quoted attributes, and this case shows why the quotes are part of that contract.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-the-escaped-form-of-a-name-containing-and">Exercise 1: Predict the escaped form of a name containing &lt; and &amp;.<a class="heading-anchor" href="#exercise-1-predict-the-escaped-form-of-a-name-containing-and" aria-label="Link to this section">#</a></h4>

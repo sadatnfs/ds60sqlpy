@@ -41,7 +41,7 @@ await withServer(async (base) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(await response.json(), { total: 5 })`. Restoring the original line brings back the worked observation: status 200; application/json; total 5.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(await response.json(), { total: 5 })`. Restoring `new URL('/sum?a=2&b=3', base)` brings back: status 200; application/json; total 5.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(await response.json(), { total: 5 })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -62,7 +62,7 @@ await withServer(async (base) => {
 });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(await response.json(), { error: 'not_found' })`; after it the line reads `assert.deepEqual(await response.json(), { error: 'not_found' });` again and fetch resolves; status 404, ok false, error not_found.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(await response.json(), { error: 'not_found!' });`. Restoring `assert.deepEqual(await response.json(), { error: 'not_found' });` brings back: fetch resolves; status 404, ok false, error not_found.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(await response.json(), { error: 'not_found' })` accepts.
 

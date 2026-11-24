@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: beginner. Direct prerequisites: `apache-009`.
 
+## Key terms
+
+- **Struct type:** A nested Arrow type with named child fields, each with its own type and validity, so a missing child value differs from a missing parent record.
+- **List offsets:** The offsets buffer of a list array. The size of the list at position i is offset i + 1 minus offset i, which delimits its child values.
+- **Dictionary encoding:** Storing repeated values as integer indices into a dictionary of distinct values, which saves space and comparison work for low-cardinality categories.
+- **Schema metadata:** Key-value annotations on a schema or field, such as a unit or source-system label. They document intent but do not enforce any validation.
+
 ## The mechanism
 
 A business record often contains a list of items, an optional address and a
@@ -84,6 +91,46 @@ the population being measured. A strong implementation preserves the distinction
 then applies an explicit business rule when required. The two worked cases also
 show why physical encodings can be efficient while still requiring careful
 semantic interpretation at system boundaries.
+
+## Worked examples
+
+### Distinguish a null list from an empty list
+
+```python
+import pyarrow as pa
+import pyarrow.compute as pc
+
+quantities = pa.array([[2, None], [], None], type=pa.list_(pa.int64()))
+print(quantities.offsets.to_pylist())
+print(pc.list_value_length(quantities).to_pylist())
+print(quantities.null_count, quantities.values.null_count)
+```
+
+```text
+[0, 2, 2, 2]
+[2, 0, None]
+1 1
+```
+
+The offsets 0, 2, 2, 2 show that the empty list and the null list both occupy zero child slots, yet the lengths differ: zero for the empty basket and null for the unknown one. The two null counts separate a missing list from a missing element inside a list. Flattening this column before counting would erase both distinctions, so count at the list level first.
+
+### Compare dictionary columns by decoded values
+
+```python
+import pyarrow as pa
+
+left = pa.array(["east", "west"]).dictionary_encode()
+right = pa.array(["west", "east"]).dictionary_encode()
+print(left.indices.to_pylist(), right.indices.to_pylist())
+print(left.dictionary_decode().to_pylist(), right.dictionary_decode().to_pylist())
+```
+
+```text
+[0, 1] [0, 1]
+['east', 'west'] ['west', 'east']
+```
+
+Both columns store indices 0 and 1, but they decode to opposite region orders because each batch built its own dictionary. Comparing or joining on raw indices across batches would report a false match. Unify dictionaries or decode before comparison, and treat any pipeline that persists dictionary codes as stable identifiers as a defect waiting for a new batch.
 
 ## Complete worked source
 

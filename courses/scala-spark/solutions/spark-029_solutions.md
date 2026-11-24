@@ -271,4 +271,6 @@ Canonical content identity is stable across physical repartitioning, so the retr
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Validate the product before computing its digest) is built inside the program, so opening the lesson fetches nothing; it expects: A 64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

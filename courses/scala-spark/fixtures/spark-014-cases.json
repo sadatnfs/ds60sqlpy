@@ -5,7 +5,7 @@
     {
       "exercise": 1,
       "title": "Classify defects without dropping source occurrences",
-      "input_contract": "Add a nullable rejection_reason Column using the declared precedence:missing_id, invalid_id, unknown_status, negative_amount. Keep every source field and row. Unknown amounts are allowed;unknown statuses are not.",
+      "input_contract": "Add a nullable rejection_reason Column using the declared precedence: missing_id, invalid_id, unknown_status, negative_amount. Keep every source field and row. Unknown amounts are allowed;unknown statuses are not.",
       "expected": "Source row 11 has unknown_status, row 12 has missing_id, and the other 10 reasons are NULL. All 12 source_row identities remain.",
       "verification": "Assert the exact two(source_row, reason) pairs and the unchanged source count 12."
     },
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Gate the SQL report on identity and conservation",
       "input_contract": "Validate at most 100 unique nonmissing source_row occurrences, unique positive accepted event IDs, and accepted-plus-quarantine conservation before returning a SQL paid summary. Reject a duplicate accepted event ID. Compare SQL output to the same literal groups.",
-      "expected": "The base 12-row batch passes and matches all six golden groups. Appending source_row13 with a second event_id1 rejects publication instead of choosing a winner.",
+      "expected": "The base 12-row batch passes and matches all six golden groups. Appending source_row 13 with a second event_id 1 rejects publication instead of choosing a winner.",
       "verification": "Assert base SQL parity and a real failure for the duplicate-ID extension;retain the validation failure rather than publishing a partial report."
     }
   ],

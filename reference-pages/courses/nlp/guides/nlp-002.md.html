@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A <strong>Unicode code point</strong> is an integer assigned a meaning in the Unicode standard. A Python <code>str</code> is a sequence of code points. An <strong>encoding</strong> maps that sequence into bytes; UTF-8 is one such encoding. A <strong>grapheme cluster</strong> approximates a user-perceived character and can contain several code points. A font shapes those code points into visible glyphs. Neither the number of bytes nor Python&#x27;s <code>len(text)</code> generally measures what a reader perceives as the number of characters.</p>
 <p>This distinction is operational. A storage or transport limit might be in bytes. A tokenizer imposes a model limit in tokens. An annotation tool may record offsets in code points, UTF-16 code units or bytes. Before connecting tools, write down the offset convention. A correct entity span in one convention is not automatically a correct span in another.</p>
 <p>Consider two spellings of café. One uses a single precomposed <code>é</code>; the other uses <code>e</code> followed by a combining accent. Their glyphs may look identical. Their code-point sequences and UTF-8 bytes differ. This is a representation issue, not a spelling correction problem.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Unicode code point:</strong> An integer assigned a meaning in the Unicode standard. A Python <code>str</code> is a sequence of code points, so <code>len(text)</code> counts code points.</li>
+<li><strong>Encoding:</strong> A mapping from code points to bytes. UTF-8 is one encoding, and <code>encode(&quot;utf-8&quot;)</code> returns bytes without normalizing the text.</li>
+<li><strong>Grapheme cluster:</strong> An approximation of one user-perceived character that can contain several code points, such as <code>e</code> followed by a combining acute accent.</li>
+<li><strong>Canonical equivalence:</strong> Different code-point sequences that represent the same text, such as U+00E9 and U+0065 plus U+0301. NFC composes them and NFD decomposes them.</li>
+<li><strong>Compatibility normalization:</strong> NFKC or NFKD, which also map presentation variants such as <code>①</code> and full-width <code>Ａ</code> to ordinary forms and can erase task-relevant distinctions.</li>
+</ul>
 <h3 id="worked-example-inspect-all-relevant-lengths">Worked example: inspect all relevant lengths<a class="heading-anchor" href="#worked-example-inspect-all-relevant-lengths" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> unicodedata <span class="syntax-keyword">as</span> ud
 

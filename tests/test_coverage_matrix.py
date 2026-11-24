@@ -16,6 +16,8 @@ from scripts.build_coverage_matrix import (
     module_exercise_count,
     orientation,
     outcome_issue,
+    prose_paragraphs,
+    templated_word_counts,
     term_count,
     track_gap_lines,
 )
@@ -24,7 +26,15 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # Lesson-foundation gaps may only fall. Lower a ceiling whenever content work
 # closes gaps; Phase 3 ends with every ceiling at zero.
-FOUNDATION_GAP_CEILING = {"missing-outcome": 31, "weak-outcome": 132, "few-terms": 971}
+FOUNDATION_GAP_CEILING = {"missing-outcome": 0, "weak-outcome": 0, "few-terms": 0}
+
+# Practice-depth gaps may only fall; Phase 4 ends with every ceiling at zero.
+PRACTICE_GAP_CEILING = {"thin-guide": 0, "few-examples": 0, "thin-solution": 0}
+
+# Generator boilerplate across all guides and solutions. New prose must be
+# specific to its lesson, so this total may not grow; lower it when rewrites
+# replace template text.
+TEMPLATED_WORDS_CEILING = 835280
 
 
 @cache
@@ -131,6 +141,48 @@ def test_foundation_gaps_never_grow() -> None:
     assert counts == {
         code: min(counts[code], ceiling) for code, ceiling in FOUNDATION_GAP_CEILING.items()
     }
+
+
+def test_practice_gaps_never_grow() -> None:
+    rows = json.loads(_built()[0])["lessons"]
+    counts = {code: sum(code in row["gaps"] for row in rows) for code in PRACTICE_GAP_CEILING}
+    assert counts == {
+        code: min(counts[code], ceiling) for code, ceiling in PRACTICE_GAP_CEILING.items()
+    }
+
+
+def test_templated_prose_never_grows() -> None:
+    rows = json.loads(_built()[0])["lessons"]
+    assert sum(row["metrics"]["templated_words"] for row in rows) <= TEMPLATED_WORDS_CEILING
+
+
+def test_prose_paragraphs_skip_code_headings_and_short_text() -> None:
+    long = " ".join(f"word{chr(97 + i % 26)}" for i in range(25))
+    text = f"# Title\n\n```python\n{long}\n```\n\nToo short.\n\n| {long} |\n\n{long}\n"
+    paragraphs = prose_paragraphs(text)
+    assert len(paragraphs) == 1
+    assert len(paragraphs[0]) == 25
+
+
+def test_templated_word_counts_need_three_lessons() -> None:
+    template = (
+        "Restate the expected observation before running anything, then explain"
+        " why the check `{name}` decides this case and which input would make it"
+        " fail, so the result is a claim you can defend with evidence."
+    )
+    unique = " ".join(f"topic{index} detail{index}" for index in range(15))
+    texts = {
+        "a": template.format(name="x") + "\n\n" + unique,
+        "b": template.format(name="y"),
+        "c": template.format(name="z"),
+        "d": template.format(name="w").replace("evidence", "proof"),
+    }
+    words = len(prose_paragraphs(texts["b"])[0])
+    counts = templated_word_counts(texts)
+    assert counts["a"] == words
+    assert counts["b"] == counts["c"] == words
+    assert counts["d"] == len(prose_paragraphs(texts["d"])[0])
+    assert templated_word_counts({key: texts[key] for key in ("a", "b")}) == {"a": 0, "b": 0}
 
 
 def test_track_gap_lines_filter_by_track_and_code() -> None:

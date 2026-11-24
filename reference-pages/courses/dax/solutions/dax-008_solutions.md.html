@@ -243,23 +243,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict ISBLANK(0) and ISBLANK(BLANK()).</p>
 <p>They are FALSE and TRUE.</p>
+<p><strong>Why it fits this model:</strong> ISBLANK asks whether the value itself is BLANK. Zero is a real number, so it fails the test, while BLANK() passes. Case A shows why a separate test is needed: BLANK() = 0 is TRUE.</p>
+<p><strong>Tempting mistake:</strong> Testing a result with = 0 returns TRUE for both values, because loose equality coerces BLANK to zero. A missing value and an observed zero become identical.</p>
+<p><strong>How to confirm:</strong> <code>ROW ( &quot;Zero&quot;, ISBLANK ( 0 ), &quot;Blank&quot;, ISBLANK ( BLANK () ), &quot;Loose&quot;, BLANK () = 0 )</code> returns FALSE, TRUE and TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Replace the Bag filter with Pen.</p>
 <p>Products is 1, SalesRows is 2 and Revenue/DisplayRevenue are both 24.</p>
+<p><strong>Why it fits this model:</strong> Pen is ProductKey 2, and the relationship keeps S2 (4) and S5 (20). Revenue is therefore 24 and nonblank, so COALESCE leaves it unchanged at 24.</p>
+<p><strong>Tempting mistake:</strong> Putting COALESCE([NetRevenue], 0) in the Revenue column instead of a separate display column agrees for Pen but shows 0 for Bag, which then reads as an observed zero sale.</p>
+<p><strong>How to confirm:</strong> Under ProductKey 2 the row is Products 1, SalesRows 2, Revenue 24 and DisplayRevenue 24.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a label distinguishing no sales from positive revenue.</p>
 <p>IF(ISBLANK([NetRevenue]),&quot;No matching sales&quot;,&quot;Revenue observed&quot;) avoids treating an empty result as an observed zero.</p>
+<p><strong>Why it fits this model:</strong> Checking ISBLANK first sends Bag, whose filter reaches no Sales rows, to &quot;No matching sales&quot;. Notebook (67), Pen (24) and Mug (96) all reach &quot;Revenue observed&quot;.</p>
+<p><strong>Tempting mistake:</strong> <code>IF ( [NetRevenue] &lt;= 0, ... )</code> also catches Bag, because BLANK coerces to 0, but it would mislabel a real zero, such as a product whose lines were fully discounted to 0, as having no sales.</p>
+<p><strong>How to confirm:</strong> <code>ADDCOLUMNS ( VALUES ( Product[Product] ), &quot;Label&quot;, ... )</code> should label Bag alone as no sales and the other three as observed.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a report claiming every blank retention cell is a lost customer.</p>
 <p>Missing observation time is different from observed inactivity. Do not coalesce the future into failures.</p>
+<p><strong>Why it fits this model:</strong> The retail facts end on 2025-02-03. February is observed: Bo and Cy bought and Ada did not, so Ada&#x27;s February blank is real inactivity. March has no observation for anyone.</p>
+<p><strong>Tempting mistake:</strong> Coalescing every blank cell to &quot;lost&quot; marks all three buyers lost in March. That is a 100% churn claim for a month the data never covered.</p>
+<p><strong>How to confirm:</strong> <code>MAX ( Sales[OrderDate] )</code> returns 2025-02-03. Classify only months up to that date, and leave March marked as unobserved.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why an empty table differs from one row containing BLANK.</p>
 <p>An empty table has no row; a one-row table can carry a blank cell. Their membership and joins can differ.</p>
+<p><strong>Why it fits this model:</strong> Under the Bag filter Sales has no rows, so COUNTROWS(Sales) is BLANK. ROW always builds one row, so a table wrapping the blank revenue still has one member.</p>
+<p><strong>Tempting mistake:</strong> Testing ISEMPTY on the ROW result to detect missing sales returns FALSE for Bag, because the row exists even though its revenue cell is BLANK.</p>
+<p><strong>How to confirm:</strong> Under ProductKey 4, <code>ISEMPTY ( Sales )</code> is TRUE while <code>COUNTROWS ( ROW ( &quot;R&quot;, [NetRevenue] ) )</code> is 1.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the policy to missing cost data.</p>
 <p>Preserve missing cost as a quality issue or exclude/report it explicitly before calculating margins.</p>
+<p><strong>Why it fits this model:</strong> Cost lives on Product. Today the cost is Notebook 7 x 2, Pen 5 x 1 and Mug 5 x 5, or 44, giving a margin of 143. A missing Mug cost should surface as three unknown lines, not as cheap lines.</p>
+<p><strong>Tempting mistake:</strong> COALESCE ( RELATED ( Product[UnitCost] ), 0 ) would drop cost to 19 if Mug&#x27;s cost were missing, inflating margin to 168 and making Mug look like pure profit.</p>
+<p><strong>How to confirm:</strong> Count Sales lines where RELATED(Product[UnitCost]) is BLANK. On the current data expect 0 such lines and a margin of 143.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

@@ -6,6 +6,10 @@ import sys
 ROOT = Path(__file__).resolve().parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from key_terms import render as key_terms_block  # noqa: E402
+from reasoning import render as reasoning_block  # noqa: E402
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
 
@@ -69,6 +73,8 @@ def author(
         "## Vocabulary and concepts",
         overview,
     ]
+    if key_terms_block(key):
+        lines.append(key_terms_block(key))
     for heading, body in sections[:-1]:
         lines += ["## " + heading, body]
     lines += ["## Worked example / walkthrough"]
@@ -139,6 +145,8 @@ def author(
     explanation = f"# {key}: Explanatory solutions\n\nThese answers explain the stated synthetic and scoped runtime contracts. Static checks do not prove cluster acceptance.\n\n## Mechanism\n\n{overview}\n"
     for i, (title, prompt, expected, hints, answer, verify) in enumerate(tasks, 1):
         explanation += f"\n## Exercise {i}: {title}\n\n{answer}\n\n**Expected:** {expected}\n"
+        if reasoning_block(key, i):
+            explanation += f"\n{reasoning_block(key, i)}\n"
     explanation += "\n## Boundary and troubleshooting review\n\n" + sections[-1][1] + "\n"
     ledger = (
         json.dumps(

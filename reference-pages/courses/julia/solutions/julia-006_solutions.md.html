@@ -195,24 +195,59 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-006-explained-reference">julia-006: explained reference<a class="heading-anchor" href="#julia-006-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-006_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Read each function&#x27;s contract from its signature. <code>affine</code> uses keywords <code>scale = 1</code> and <code>shift = 0</code>, <code>make_scaler</code> returns a closure over <code>scale</code>, <code>rebind</code> assigns a new array to its local name, and <code>change_first!</code> mutates the caller&#x27;s array after rejecting empty input. Compare contents with <code>==</code> and identity with <code>===</code>.</p>
 <h3 id="1-use-defaults">1. Use defaults<a class="heading-anchor" href="#1-use-defaults" aria-label="Link to this section">#</a></h3>
 <p>A default is part of the function contract and should be recorded when it matters scientifically.</p>
 <p><strong>Expected observation:</strong> The result is 5.</p>
+<p><strong>Why it holds here:</strong> With <code>scale = 1</code> and <code>shift = 0</code>, <code>affine(5)</code> computes <code>1 * 5 + 0</code>, which is 5.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming unspecified keywords become zero predicts <code>0 * 5 + 0 = 0</code>; the defaults in the signature decide.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>affine(5) == 5</code>; compare it with <code>affine(5; scale = 0)</code>, which is 0.</p>
 <h3 id="2-override-one-choice">2. Override one choice<a class="heading-anchor" href="#2-override-one-choice" aria-label="Link to this section">#</a></h3>
 <p>Explicit keyword configuration makes a transformation reproducible.</p>
 <p><strong>Expected observation:</strong> The result is 3.</p>
+<p><strong>Why it holds here:</strong> <code>affine(5; shift = -2)</code> keeps <code>scale = 1</code> and gives <code>5 - 2 = 3</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Passing -2 positionally, as <code>affine(5, -2)</code>, raises <code>MethodError</code> because <code>affine</code> has one positional argument.</p>
+<p><strong>How to verify:</strong> Assert <code>affine(5; shift = -2) == 3</code> as the reference does, then confirm the positional call fails.</p>
 <h3 id="3-build-a-closure">3. Build a closure<a class="heading-anchor" href="#3-build-a-closure" aria-label="Link to this section">#</a></h3>
 <p>A closure packages a transformation and context; it does not necessarily copy mutable captured objects.</p>
 <p><strong>Expected observation:</strong> The result is 6.</p>
+<p><strong>Why it holds here:</strong> <code>make_scaler(3)</code> returns <code>x -&gt; 3 * x</code>, which remembers <code>scale = 3</code>, so applying it to 2 gives 6.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting the closure to read a global named <code>scale</code> at call time would make its result depend on unrelated script state.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>make_scaler(3)(2) == 6</code>; also map it over <code>[1, 2]</code> and expect <code>[3, 6]</code>.</p>
 <h3 id="4-trace-a-rebound-argument">4. Trace a rebound argument<a class="heading-anchor" href="#4-trace-a-rebound-argument" aria-label="Link to this section">#</a></h3>
 <p>Rebinding the argument name is different from mutating the shared object.</p>
 <p><strong>Expected observation:</strong> The caller array remains unchanged.</p>
+<p><strong>Why it holds here:</strong> In <code>rebind</code>, <code>values = [99]</code> points the local name at a new array, so the caller&#x27;s <code>[1]</code> is untouched.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting the caller to see <code>[99]</code> assumes assignment writes through the argument, which only element mutation such as <code>values[1] = 99</code> does.</p>
+<p><strong>How to verify:</strong> The reference checks <code>replacement == [99]</code>, <code>replacement !== original</code> and <code>original == [1]</code>.</p>
 <h3 id="5-trace-a-mutated-argument">5. Trace a mutated argument<a class="heading-anchor" href="#5-trace-a-mutated-argument" aria-label="Link to this section">#</a></h3>
 <p>The naming convention warns callers that the operation changes shared state.</p>
 <p><strong>Expected observation:</strong> Its first element becomes 99 and the returned object aliases it.</p>
+<p><strong>Why it holds here:</strong> <code>change_first!</code> writes <code>values[1] = 99</code> into the caller&#x27;s array and returns that same object.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only <code>returned == [99, 2]</code> cannot tell a mutated original from a modified copy; identity needs <code>===</code>.</p>
+<p><strong>How to verify:</strong> As in worked example B, assert both <code>values == [99, 2]</code> and <code>returned === values</code>.</p>
 <h3 id="6-reject-an-empty-mutation">6. Reject an empty mutation<a class="heading-anchor" href="#6-reject-an-empty-mutation" aria-label="Link to this section">#</a></h3>
 <p>A clear input contract produces a more useful diagnostic than an accidental indexing failure.</p>
-<p><strong>Expected observation:</strong> An explicit ArgumentError is raised.</p></article>
+<p><strong>Expected observation:</strong> An explicit ArgumentError is raised.</p>
+<p><strong>Why it holds here:</strong> The guard <code>isempty(values) &amp;&amp; throw(ArgumentError(...))</code> runs before indexing, so an empty input gets a named precondition error.</p>
+<p><strong>Plausible wrong approach:</strong> Dropping the guard lets <code>values[1] = 99</code> raise <code>BoundsError</code>, which describes an index rather than the violated contract.</p>
+<p><strong>How to verify:</strong> Assert <code>@test_throws ArgumentError change_first!(Int[])</code> as the reference does.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-006: all reference checks passed</code>:</p>
+<p>The keyword default leaves <code>affine(5)</code> unchanged while <code>shift = -2</code> moves it to 3, and <code>make_scaler(3)(2) == 6</code> shows the closure remembering its factor after the outer call returns. The last group is the important one: <code>rebind</code> assigns a new vector to its local name, so the caller&#x27;s <code>original</code> stays <code>[1]</code> while the returned <code>replacement</code> holds 99 and is a different object. Mutation through <code>change_first!</code> is the only way to change the caller&#x27;s array, and it refuses an empty one.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> affine<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span>
+    <span class="syntax-decorator">@test</span> affine<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">;</span> shift <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> make_scaler<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">6</span>
+    <span class="syntax-decorator">@test</span> map<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-&gt;</span> x <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> change_first!<span class="syntax-punctuation">(</span><span class="syntax-keyword">Int</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    original <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    replacement <span class="syntax-operator">=</span> rebind<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> replacement <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">99</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> replacement <span class="syntax-operator">!==</span> original
+    <span class="syntax-decorator">@test</span> original <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

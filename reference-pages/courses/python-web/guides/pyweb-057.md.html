@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-056</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Django REST Framework adds serializers, API views, routers and other tools for HTTP APIs. This chapter uses a serializer and a ViewSet to create and list notes, while making clear which fields are writable and how validation failures differ from successful creation.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Serializer:</strong> A DRF class that validates incoming data into Python values and converts objects into a response representation.</li>
+<li><strong>Read-only field:</strong> A serializer field, such as the identifier, that appears in output but is ignored in client input.</li>
+<li><strong>ViewSet:</strong> A DRF class that groups related actions, such as list and create, for one resource.</li>
+<li><strong>Router:</strong> A DRF object, here SimpleRouter, that generates URL patterns that map HTTP methods to ViewSet actions.</li>
+<li><strong>raise_exception:</strong> An <code>is_valid()</code> option that makes DRF return its standard 400 validation response when the data is invalid.</li>
+</ul>
 <h3 id="mechanism-serializer-and-view-responsibilities-differ">Mechanism: serializer and view responsibilities differ<a class="heading-anchor" href="#mechanism-serializer-and-view-responsibilities-differ" aria-label="Link to this section">#</a></h3>
 <p>A serializer validates incoming data and produces a representation. A ViewSet groups related actions such as list and create. A router connects those actions to URL patterns. These abstractions do not automatically provide persistence or authorization; the application still defines those behaviors.</p>
 <p>The fixture&#x27;s serializer marks identifier read-only and validates a bounded title. Its custom validator strips whitespace and rejects content that becomes too short. The ViewSet calls is_valid with raise_exception so the framework produces its standard validation response for invalid input.</p>
@@ -209,6 +217,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A title whose meaningful length is too short receives 400. The later list still contains only the earlier valid record. This checks both the response and the absence of an unintended side effect.</p>
 <p>Validation must happen before the application appends or commits the object. A common mistake is to construct and persist a partial object before calling all validators, then catch an error and return a refusal while leaving the object behind.</p>
 <p>DRF&#x27;s validation status differs from FastAPI&#x27;s default 422 in earlier chapters. That is not inherently a defect. An API should adopt and document a coherent convention and clients should follow its contract. Framework comparison is more useful when it identifies actual semantics instead of declaring one default universally correct.</p>
+<h3 id="worked-example-a-client-supplied-identifier-is-dropped-not-trusted">Worked example: a client supplied identifier is dropped, not trusted<a class="heading-anchor" href="#worked-example-a-client-supplied-identifier-is-dropped-not-trusted" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel<span class="syntax-punctuation">,</span> ConfigDict<span class="syntax-punctuation">,</span> ValidationError<span class="syntax-punctuation">,</span> field_validator
+
+
+<span class="syntax-keyword">class</span> <span class="syntax-class">NoteIn</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    title<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
+
+    <span class="syntax-decorator">@field_validator</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">title</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@classmethod</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">tidy</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">cls</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        value <span class="syntax-operator">=</span> value<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">3</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Use at least three characters</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> value
+
+
+<span class="syntax-keyword">class</span> <span class="syntax-class">StrictNoteIn</span><span class="syntax-punctuation">(</span>NoteIn<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    model_config <span class="syntax-operator">=</span> ConfigDict<span class="syntax-punctuation">(</span>extra<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">forbid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+payload <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">title</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">  Plan  </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">identifier</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">999</span><span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>NoteIn<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>payload<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    StrictNoteIn<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>payload<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValidationError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>error<span class="syntax-operator">.</span>errors<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> error<span class="syntax-operator">.</span>errors<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">loc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">title=&#x27;Plan&#x27;
+extra_forbidden (&#x27;identifier&#x27;,)</code></pre>
+<p>This uses pydantic to show the same contract as the lesson&#x27;s DRF <code>NoteSerializer</code>. A field marked <code>read_only=True</code> never reaches <code>validated_data</code>, so the forged <code>identifier: 999</code> is discarded and <code>create</code> assigns <code>len(records) + 1</code>; <code>NoteIn</code> does the same by having no identifier field at all. <code>validate_title</code> and the <code>tidy</code> validator both strip before checking length, which is why <code>&quot; Plan &quot;</code> is stored as <code>Plan</code>. The strict model is the alternative policy: refuse unknown keys with a 400 so a confused client learns that the server owns identifiers instead of having its value quietly ignored.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Does a router create an authorization policy?</strong> No. It maps actions to URLs. Authentication, permissions and scoped querysets remain separate responsibilities.</p>
 <p><strong>Why separate input and output field decisions?</strong> Some values are server-assigned or sensitive. A serializer can expose a value for reading while refusing or ignoring it for writing, according to the documented contract.</p>

@@ -1,6 +1,6 @@
 # torch-026: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting Custom modules, residual paths, buffers and autograd checks yourself. They reuse the guide's literal inputs, starting from Example A, Build an identity residual, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Custom module, Buffer, Grad check. After a pass, choose a new input for exercise 6, Inspect the incoming-gradient factor, without looking.
 
 ## Mechanism review
 
@@ -36,7 +36,7 @@ Stable object identity matters as much as a stable parameter count. Replacing a 
 
 ## Treat a custom backward as a local vector-Jacobian product
 
-For \(f(x)=x^3\), the local derivative is 3 \({x}^{2}\). backward receives the derivative from later computation, so it must return \(\mathrm{grad\_output}\times3x^2\). At \(x=2\), the derivative of 2 f(x) is \(2\cdot 12=24\). Returning only 3 \({x}^{2}\) would pass a unit-upstream test but fail this composition. For a vector of independently cubed elements, the returned gradient has the same shape and multiplies each incoming component by its own local derivative.
+For \(f(x)=x^3\), the local derivative is 3 \({x}^{2}\). backward receives the derivative from later computation, so it must return \(\mathrm{grad\_output}\times3x^2\). At \(x=2\), the derivative of `2 * f(x)` is \(2\cdot 12=24\). Returning only 3 \({x}^{2}\) would pass a unit-upstream test but fail this composition. For a vector of independently cubed elements, the returned gradient has the same shape and multiplies each incoming component by its own local derivative.
 
 save_for_backward preserves the tensor values required by the rule and lets autograd enforce relevant lifetime/version checks. Do not mutate saved input storage between forward and backward or detach a value that must support a higher-order derivative. A function with several inputs returns a corresponding derivative entry for each differentiable input, and None where that input has no requested derivative under the declared contract. [Extending PyTorch 2.9 autograd](https://docs.pytorch.org/docs/2.9/notes/extending.html).
 
@@ -149,4 +149,4 @@ assert value.grad.item() == 24
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Reject incompatible feature width, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Validate a custom cube derivative, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-060-time-boundaries-hybrid-tables-and-upserts">apache-060: Time boundaries, hybrid tables and upserts<a class="heading-anchor" href="#apache-060-time-boundaries-hybrid-tables-and-upserts" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-059</code>, <code>apache-057</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Hybrid table:</strong> A logical Pinot table backed by an OFFLINE table for historical data and a REALTIME table for fresh data.</li>
+<li><strong>Time boundary:</strong> The timestamp the broker uses to split a hybrid query, reading older data from the offline side and newer data from the real-time side.</li>
+<li><strong>Upsert:</strong> A real-time table mode that keeps only the latest record for each primary key.</li>
+<li><strong>Comparison column:</strong> The column an upsert table uses to decide which record for a primary key is newest.</li>
+</ul>
 <h3 id="historical-and-fresh-data-need-an-explicit-boundary">Historical and fresh data need an explicit boundary<a class="heading-anchor" href="#historical-and-fresh-data-need-an-explicit-boundary" aria-label="Link to this section">#</a></h3>
 <p>A hybrid Pinot table combines OFFLINE and REALTIME tables under a shared logical name. The broker uses a time boundary to divide which side contributes to a query. This avoids simply summing all historical and fresh data when their time ranges overlap. The timestamp column, bucket granularity, ingestion schedule and selected boundary are therefore part of the result contract.</p>
 <p>A boundary is not a general deduplication algorithm. An event with the same business identity can still appear twice within one side, or fall outside the assumptions used to divide historical and live coverage. Backfills and late corrections require an explicit strategy for replacing or updating data while preserving the intended historical meaning.</p>

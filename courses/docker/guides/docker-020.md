@@ -16,6 +16,14 @@ Running an application as a non-root user reduces the privileges of its ordinary
 
 Bind mounts expose host ownership more directly than an image’s files. Broad recursive ownership changes on a host project can break unrelated files. Diagnose the exact UID, path and mount before modifying permissions. A named teaching volume can have a deliberately prepared owner without changing your repository ownership.
 
+### Key terms
+
+- **UID:** A numeric user ID that the kernel uses for ownership and permission checks, independent of any username label.
+- **`USER`:** The Dockerfile instruction that sets the user, by name or UID, that later steps and the container process run as.
+- **File ownership:** The user and group IDs recorded on a file, which together with its mode decide who can read or write it.
+- **Writable data path:** A directory such as /data that the image deliberately prepares as writable for the non-root process.
+- **Non-root user:** A process identity other than UID 0, which reduces the ordinary privileges of the application.
+
 ## Anatomy and a trace you can follow
 
 The fixture creates `/data`, assigns it to UID 10001 and uses `USER 10001:10001`. Application code is readable and the root filesystem is read-only at runtime. The named volume is mounted at the intended data path. Check the actual mounted permissions rather than assuming every volume driver behaves identically.
@@ -91,11 +99,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Fixing permission errors with `chmod -R 777`. Running as root because a bind mount is owned by another UID. Placing writable data under the code directory.
 
-Exercise 4 is this chapter's boundary case: Diagnose a bind-mount permission failure. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a bind-mount permission failure. Record the effective UID and GID in the container, the owner and mode of the mounted path on the host, and the exact operation that was denied. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using UID, USER, file ownership and writable data path. Reconstruct worked example 2 (Inspect effective identity without secrets) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Recall the UID and GID the fixture image runs as and which host paths it may write. Then reconstruct worked example 2 (Inspect effective identity without secrets) with one different value, predict what changes, and name which of UID, USER, file ownership and writable data path the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

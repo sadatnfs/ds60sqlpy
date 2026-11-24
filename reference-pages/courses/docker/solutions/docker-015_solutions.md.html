@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-compare-a-cache-mount-and-a-secret-mount">Exercise 1: Compare a cache mount and a secret mount.<a class="heading-anchor" href="#exercise-1-compare-a-cache-mount-and-a-secret-mount" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Reusable acceleration versus sensitive transient input.</p>
 <p><strong>Why:</strong> The two mounts solve different problems. A cache may persist across builds; a secret should be available only to the intended step and should never become a normal artifact.</p>
+<p><strong>Approach:</strong> Compare the two RUN --mount types from the worked examples: type=cache at /root/.cache/pip and type=secret with id=demo at /run/secrets/demo.</p>
+<p><strong>Why this is correct:</strong> The cache directory persists between builds to save downloads, while the secret file exists only during its RUN step. Neither becomes part of an image layer.</p>
+<p><strong>A plausible wrong approach:</strong> Using a cache mount to hold a token because it also stays out of layers fails, since the cache persists and later builds can read it.</p>
+<p><strong>How to verify:</strong> docker history lists no layer holding /root/.cache/pip or /run/secrets/demo, and a later unrelated RUN cannot list /run/secrets.</p>
 <h3 id="exercise-2-predict-a-required-secret-missing-from-the-build">Exercise 2: Predict a required secret missing from the build.<a class="heading-anchor" href="#exercise-2-predict-a-required-secret-missing-from-the-build" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The step fails before pretending to authenticate.</p>
 <p><strong>Why:</strong> Failing explicitly keeps the dependency visible. Silently using another credential would undermine both reproducibility and the learner’s understanding of which identity performed the operation.</p>
+<p><strong>Approach:</strong> Read required=true on the secret mount and predict that BuildKit stops at that RUN when no secret with id demo is supplied.</p>
+<p><strong>Why this is correct:</strong> The test -s check never runs without the file, so the build fails loudly instead of continuing with an empty or borrowed credential.</p>
+<p><strong>A plausible wrong approach:</strong> Dropping required=true so the build passes everywhere makes a missing secret look like success, and a later fetch fails with a misleading error.</p>
+<p><strong>How to verify:</strong> Build without <code>--secret id=demo</code> and note the failure at that step; rebuild with <code>--secret id=demo,src=</code> pointing at a synthetic file and the step passes.</p>
 <h3 id="exercise-3-design-a-cold-build-check">Exercise 3: Design a cold-build check.<a class="heading-anchor" href="#exercise-3-design-a-cold-build-check" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Remove reliance on cache while preserving declared public inputs.</p>
 <p><strong>Why:</strong> A cache hit should not supply an otherwise missing source file. A reproducible build can rebuild necessary artifacts from declared dependencies when acceleration state is absent.</p>
+<p><strong>Approach:</strong> Run the build with --no-cache, and also with the cache mount emptied, while keeping requirements.lock and its hashes unchanged.</p>
+<p><strong>Why this is correct:</strong> --require-hashes forces pip to fetch the exact locked wheels again, so a cold build proves the lock alone describes every dependency.</p>
+<p><strong>A plausible wrong approach:</strong> Testing only warm rebuilds can hide a wheel that exists only in the local cache and is no longer published.</p>
+<p><strong>How to verify:</strong> The cold build log shows pip downloading every locked package and completing, and the image matches the warm build&#x27;s package list.</p>
 <h3 id="exercise-4-diagnose-a-secret-copied-into-an-output-file">Exercise 4: Diagnose a secret copied into an output file.<a class="heading-anchor" href="#exercise-4-diagnose-a-secret-copied-into-an-output-file" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Mount isolation does not prevent the command from leaking bytes.</p>
 <p><strong>Why:</strong> The build command remains responsible for what it writes and prints. Review outputs and layers rather than treating the mount option as a universal secrecy guarantee.</p>
+<p><strong>Approach:</strong> Read the RUN command itself: a line such as cat /run/secrets/demo &gt; /app/token writes the secret into the step&#x27;s filesystem snapshot.</p>
+<p><strong>Why this is correct:</strong> The mount keeps the secret file out of the layer, but anything the command copies or prints is captured as normal output.</p>
+<p><strong>A plausible wrong approach:</strong> Concluding that type=secret guarantees secrecy, and skipping review, leaves the leaked copy in the layer and possibly in the build log.</p>
+<p><strong>How to verify:</strong> List the image&#x27;s files and search the build log for the synthetic secret value; the leak appears in /app/token until the command is fixed.</p>
 <h3 id="exercise-5-explain-why-arg-is-unsuitable-for-a-password">Exercise 5: Explain why ARG is unsuitable for a password.<a class="heading-anchor" href="#exercise-5-explain-why-arg-is-unsuitable-for-a-password" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Build metadata and history can expose values.</p>
 <p><strong>Why:</strong> Arguments are configuration inputs and can appear in provenance or logs. Use the explicit secret channel and restrict the command that reads it.</p>
+<p><strong>Approach:</strong> Trace where an ARG value goes: it is available to RUN steps and can be recorded in image history and build provenance.</p>
+<p><strong>Why this is correct:</strong> docker history can display commands that used ARG values, so a password passed with --build-arg can be read back from the image.</p>
+<p><strong>A plausible wrong approach:</strong> Passing the password as ARG and unsetting it in a later RUN still leaves the earlier history and metadata intact.</p>
+<p><strong>How to verify:</strong> Build with a synthetic --build-arg value and check docker history; then switch to a secret mount and confirm the value no longer appears.</p>
 <h3 id="exercise-6-describe-a-dependency-acquisition-policy">Exercise 6: Describe a dependency acquisition policy.<a class="heading-anchor" href="#exercise-6-describe-a-dependency-acquisition-policy" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Locked inputs, deliberate network access and no default private credentials.</p>
 <p><strong>Why:</strong> Builds should state what they fetch and how its identity is verified. A learner must be able to distinguish a prepared offline run from the initial network-dependent acquisition.</p>
+<p><strong>Approach:</strong> Write a policy that names the lockfile, the package index, when network access is allowed, and which credentials, if any, a build may use.</p>
+<p><strong>Why this is correct:</strong> Hash-locked inputs make a fetch verifiable, and stating when the network is used lets a learner tell first acquisition from an offline rebuild.</p>
+<p><strong>A plausible wrong approach:</strong> Letting builds inherit whatever registry login exists on the host makes results depend on who ran them.</p>
+<p><strong>How to verify:</strong> Run the documented acquisition once, then rebuild with networking disabled for RUN steps and the cache warm; it succeeds without new fetches.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

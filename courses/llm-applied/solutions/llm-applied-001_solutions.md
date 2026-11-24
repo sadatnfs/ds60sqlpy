@@ -1,6 +1,6 @@
 # llm-applied-001: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for the subject assistant decision: prompts, retrieval or fine-tuning only after attempting *Route a changing definition* through *Write a measurable subject-assistant contract*. A discrepancy in *Route an exact calculation* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-001_solution.py` runs the assertions; this page explains why they test subject assistant and rag.
 
 ## Mechanism review
 
@@ -33,7 +33,7 @@ Consider: “What is our current account conversion rate, and did the new checko
 
 A trained model can participate in the first two interfaces or explain the last two, but its fluency does not replace their evidence. The routing helper returns one primary route, while the composed architecture may contain several stages. In particular, exact_computation takes precedence in the helper. That priority is a teaching decision about one requested operation; it does not mean a numerical tool can discover an unknown business definition on its own.
 
-A simple probability decomposition explains why adding components is not automatically an improvement. Let R mean sufficient admissible evidence reached the answer stage, A mean the answer is correct and supported given that evidence, and V mean the result meets the required validation contract. The success probability for this complete path is P(R) times P(A given R) times P(V given A and R). These conditional factors do not require an independence assumption. In an illustrative calculation, 0.9 times0.8 times0.95 is 0.684. Those values are invented for arithmetic explanation, not measured model performance. Improving the last factor alone cannot recover all failures from missing evidence.
+A simple probability decomposition explains why adding components is not automatically an improvement. Let R mean sufficient admissible evidence reached the answer stage, A mean the answer is correct and supported given that evidence, and V mean the result meets the required validation contract. The success probability for this complete path is P(R) times P(A given R) times P(V given A and R). These conditional factors do not require an independence assumption. In an illustrative calculation, 0.9 times 0.8 times 0.95 is 0.684. Those values are invented for arithmetic explanation, not measured model performance. Improving the last factor alone cannot recover all failures from missing evidence.
 
 Use controlled comparisons to choose an intervention. A prompt baseline can reveal whether the task is already expressible without training. An oracle-context control can show whether answer behavior improves when relevant evidence is supplied directly. A retrieval intervention holds the answering configuration fixed while changing evidence selection. An adaptation comparison holds evaluation families and access conditions fixed while changing learned behavior. If all of those change together, an improved score does not identify the useful component.
 
@@ -93,7 +93,7 @@ assert choose(task) == ("deterministic_tool", "exact computation")
 
 The question is: Describe a stable schema-formatting gap with zero governed examples, then with 120 reviewed examples.
 
-The example count 120 exceeds the helper's teaching admission threshold100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.
+The example count 120 exceeds the helper's teaching admission threshold 100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.
 
 ```python
 task = {
@@ -175,4 +175,4 @@ assert contract["split_unit"] == "study family" and "unsupported" in contract["m
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Require evidence before fine-tuning* and predict how the result changes before checking it; the unchanged inputs give: first measure_baseline; then adaptation_candidate. Keep the original *Write a measurable subject-assistant contract* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

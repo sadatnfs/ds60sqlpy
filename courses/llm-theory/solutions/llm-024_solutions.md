@@ -1,6 +1,6 @@
 # llm-024: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these KV caches and incremental equivalence answers after attempting *Compute a full-prefix oracle* through *Invalidate after a model change*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Inspect cache growth* points to one step. `llm-024_solution.py` holds the assertions; this page explains how they test KV cache. Then try *Invalidate after a model change* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -34,7 +34,7 @@ assert tuple(full.shape) == (1, 4, 16)
 
 **Expected:** logits shape (1, 4, 16).
 
-**Verify:** In a fresh process, the exercise checks confirm `tuple(full.shape) == (1, 4, 16)`.
+**Verify:** For *Compute a full-prefix oracle*, a fresh-process check confirms `tuple(full.shape) == (1, 4, 16)`.
 
 ## Exercise 2: Run one token at a time
 
@@ -55,7 +55,7 @@ torch.testing.assert_close(incremental, full, atol=1e-6, rtol=0)
 
 **Expected:** incremental logits match full within 1e-6.
 
-**Verify:** In a fresh process, the exercise checks confirm `incremental` matches `full` within 1e-6.
+**Verify:** For *Run one token at a time*, a fresh-process check confirms `incremental` matches `full` within 1e-6.
 
 ## Exercise 3: Inspect cache growth
 
@@ -69,7 +69,7 @@ assert tuple(cache["k"].shape) == tuple(cache["v"].shape) == (1, 2, 4, 16)
 
 **Expected:** cache shape (1, 2, 4, 16).
 
-**Verify:** In a fresh process, the exercise checks confirm `tuple(cache['k'].shape) == tuple(cache['v'].shape) == (1, 2, 4, 16)`.
+**Verify:** For *Inspect cache growth*, a fresh-process check confirms `tuple(cache['k'].shape) == tuple(cache['v'].shape) == (1, 2, 4, 16)`.
 
 ## Exercise 4: Bind ownership
 
@@ -98,7 +98,7 @@ else:
 
 **Expected:** ValueError for foreign request.
 
-**Verify:** In a fresh process, the exercise checks confirm `acquire(owned, 'A', 'v1') is cache` and `acquire(owned, 'B', 'v1')` raises `ValueError`.
+**Verify:** For *Bind ownership*, a fresh-process check confirms `acquire(owned, 'A', 'v1') is cache` and `acquire(owned, 'B', 'v1')` raises `ValueError`.
 
 ## Exercise 5: Start a fresh request empty
 
@@ -114,7 +114,7 @@ torch.testing.assert_close(fresh, full[:, :1], atol=1e-6, rtol=0)
 
 **Expected:** logits match the original first position.
 
-**Verify:** In a fresh process, the exercise checks confirm `fresh` matches `full[:, :1]` within 1e-6.
+**Verify:** For *Start a fresh request empty*, a fresh-process check confirms `fresh` matches `full[:, :1]` within 1e-6.
 
 ## Exercise 6: Invalidate after a model change
 
@@ -133,8 +133,8 @@ else:
 
 **Expected:** ValueError for stale version.
 
-**Verify:** In a fresh process, the exercise checks confirm `acquire(owned, 'A', 'v2')` raises `ValueError`.
+**Verify:** For *Invalidate after a model change*, a fresh-process check confirms `acquire(owned, 'A', 'v2')` raises `ValueError`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Bind ownership* and predict the result first; keep *Bind ownership* failing beside the repair. Log a missing PyTorch separately from a wrong KV cache value in `llm-024`.

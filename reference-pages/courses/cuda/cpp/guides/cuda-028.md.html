@@ -198,9 +198,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-022</code>, <code>cuda-027</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain what each fence, acquire and release operation establishes in a flag publication protocol and what it does not.</p>
 <p>Work through <em>Memory ordering and atomic scope</em> with the concrete cases below. Finish with this evidence: the learner can explain what each synchronization operation establishes and what it does not. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Atomicity means one operation is indivisible with respect to competing operations at its scope. Ordering specifies how memory operations relate; visibility concerns which observer can see writes. Publishing a payload through a flag requires a protocol that orders the payload write before a release operation and the consumer&#x27;s payload read after an appropriate acquire. Both sides must use compatible synchronization and scope. A relaxed atomic counter can correctly count events without publishing unrelated payloads. A fence orders operations but does not force another block to run, so it cannot repair a residency deadlock in an improvised global barrier.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Memory fence:</strong> An instruction such as <code>__threadfence()</code> that orders a thread&#x27;s memory operations as observed at a given scope.</li>
+<li><strong>Release and acquire:</strong> A pairing in which a release store publishes earlier writes and a matching acquire load makes them visible to the reader.</li>
+<li><strong>Atomic scope:</strong> The set of threads, such as a block, device or system, with respect to which an atomic operation is indivisible.</li>
+<li><strong>Relaxed atomic:</strong> An atomic operation that is indivisible but imposes no ordering on other memory accesses.</li>
+<li><strong>Visibility:</strong> Whether a write made by one thread can be observed by another thread.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-028_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-028_cpu.py</code></pre>

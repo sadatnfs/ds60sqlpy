@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-whether-image-rollback-reverses-a-schema-change">Exercise 1: Predict whether image rollback reverses a schema change.<a class="heading-anchor" href="#exercise-1-predict-whether-image-rollback-reverses-a-schema-change" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It does not automatically restore previous data.</p>
 <p><strong>Why:</strong> The image and volume have different lifetimes. A rollback that ignores the data format can replace one failure with another.</p>
+<p><strong>Approach:</strong> Separate lifetimes: rolling back changes the image, while study-data keeps whatever format the new code wrote.</p>
+<p><strong>Why this is correct:</strong> The old reader accepts only schema_version 1, so data migrated to version 2 fails to load after rollback.</p>
+<p><strong>A plausible wrong approach:</strong> Planning to fix a bad migration by rolling back the image leaves the volume in a format the old code rejects.</p>
+<p><strong>How to verify:</strong> Roll back in a copy after migration and see read_counter raise on the new version.</p>
 <h3 id="exercise-2-identify-migration-preconditions">Exercise 2: Identify migration preconditions.<a class="heading-anchor" href="#exercise-2-identify-migration-preconditions" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Known schema version, exclusive or compatible writers and a verified backup.</p>
 <p><strong>Why:</strong> These conditions make the transition reviewable. Guessing the starting format can corrupt records that belong to a different version.</p>
+<p><strong>Approach:</strong> Check three things first: the current schema_version, that only the migration will write during the change, and that a restored backup works.</p>
+<p><strong>Why this is correct:</strong> Knowing the format avoids misreading data, single-writer control avoids lost updates, and a tested backup allows recovery.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming every record is version 1 and starting the migration risks corrupting records in some other format.</p>
+<p><strong>How to verify:</strong> Each condition has a recorded check: the version read, the writer list, and a restore test.</p>
 <h3 id="exercise-3-design-a-v1-to-v2-synthetic-record-conversion">Exercise 3: Design a v1-to-v2 synthetic record conversion.<a class="heading-anchor" href="#exercise-3-design-a-v1-to-v2-synthetic-record-conversion" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Preserve counter value and set a validated new schema version.</p>
 <p><strong>Why:</strong> Use a pure transformation on copied input first. Reject malformed records instead of silently guessing missing values.</p>
+<p><strong>Approach:</strong> Write a function that takes the v1 record, checks it, and returns a v2 record with the same counter and schema_version 2.</p>
+<p><strong>Why this is correct:</strong> Running it on copies first means mistakes affect test data only; rejecting bad input avoids guessing values.</p>
+<p><strong>A plausible wrong approach:</strong> Defaulting a missing counter to 0 hides damaged data as a valid reset.</p>
+<p><strong>How to verify:</strong> Feed it the worked example&#x27;s record and a malformed one; the first keeps counter 7, the second is rejected.</p>
 <h3 id="exercise-4-diagnose-an-old-reader-failing-after-deployment-rollback">Exercise 4: Diagnose an old reader failing after deployment rollback.<a class="heading-anchor" href="#exercise-4-diagnose-an-old-reader-failing-after-deployment-rollback" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The data format may have advanced beyond its compatibility.</p>
 <p><strong>Why:</strong> Inspect the stored version before restarting repeatedly. Restore or use a compatible reader according to the planned recovery procedure.</p>
+<p><strong>Approach:</strong> Read the stored schema_version before restarting the old reader again.</p>
+<p><strong>Why this is correct:</strong> If the stored version is newer than the reader supports, every restart fails the same way.</p>
+<p><strong>A plausible wrong approach:</strong> Restarting repeatedly hoping it is transient repeats the failure without new information.</p>
+<p><strong>How to verify:</strong> Restore the pre-migration backup or deploy a reader that accepts both versions, as the plan specifies.</p>
 <h3 id="exercise-5-explain-atomic-file-replacement-limits">Exercise 5: Explain atomic file replacement limits.<a class="heading-anchor" href="#exercise-5-explain-atomic-file-replacement-limits" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It avoids partial file visibility under stated local assumptions, not all concurrent-write races.</p>
 <p><strong>Why:</strong> Multiple writers can still overwrite each other’s valid updates without coordination. Name the lock and single-host assumptions.</p>
+<p><strong>Approach:</strong> Read increment&#x27;s sequence: write counter.next, then replace counter.json, all under a lock in one process.</p>
+<p><strong>Why this is correct:</strong> Replace makes readers see the old or new file whole, and the lock orders writers in that process only.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming atomic replace makes two app containers on the same volume safe ignores that each has its own lock.</p>
+<p><strong>How to verify:</strong> The plan states the single-writer, single-host assumption next to the atomic write claim.</p>
 <h3 id="exercise-6-write-a-migration-release-plan">Exercise 6: Write a migration release plan.<a class="heading-anchor" href="#exercise-6-write-a-migration-release-plan" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Preconditions, backup, transition, validation, compatible rollback and cleanup.</p>
 <p><strong>Why:</strong> The plan should be concrete enough to rehearse on a copy. A code tag change alone is not a data recovery strategy.</p>
+<p><strong>Approach:</strong> Order the plan as preconditions, backup, migration, validation, a rollback that works with the new data, and cleanup of old compatibility.</p>
+<p><strong>Why this is correct:</strong> Each step can be rehearsed on a copy of study-data before touching the real volume.</p>
+<p><strong>A plausible wrong approach:</strong> Treating a new image tag as the plan leaves no way to recover data.</p>
+<p><strong>How to verify:</strong> Rehearse the plan on a restored copy and record each step&#x27;s result before the real run.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

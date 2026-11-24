@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-match-each-signal-to-a-diagnostic-question">Exercise 1: Match each signal to a diagnostic question.<a class="heading-anchor" href="#exercise-1-match-each-signal-to-a-diagnostic-question" aria-label="Link to this section">#</a></h3>
 <p>No signal is universally sufficient. Choose the smallest set that distinguishes the competing explanations.</p>
 <p><strong>Expected:</strong> Events for lifecycle, logs for messages, metrics for trends, traces for request paths.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Pair kubectl events with lifecycle questions, logs with messages, metrics with trends and traces with request paths.</li>
+<li><strong>Why it is correct:</strong> Each signal records a different thing, so the question decides which one can answer it.</li>
+<li><strong>Plausible wrong approach:</strong> Searching logs for a scheduling failure misses that the scheduler reports it as an event.</li>
+<li><strong>How to verify:</strong> Each of the four signals is matched to its diagnostic question.</li>
+</ul>
 <h3 id="exercise-2-define-a-bounded-incident-time-window">Exercise 2: Define a bounded incident time window.<a class="heading-anchor" href="#exercise-2-define-a-bounded-incident-time-window" aria-label="Link to this section">#</a></h3>
 <p>Without time alignment a healthy later observation can be mistaken for evidence about the original failure.</p>
 <p><strong>Expected:</strong> Relevant timestamps and retained identities are explicit.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Set start and end timestamps around the incident and record the Pod names and UIDs involved.</li>
+<li><strong>Why it is correct:</strong> Events expire and Pods are replaced, so a window tied to retained identities keeps evidence comparable.</li>
+<li><strong>Plausible wrong approach:</strong> Querying the last hour with no fixed bounds mixes unrelated activity into the result.</li>
+<li><strong>How to verify:</strong> The window has explicit timestamps and the identities that existed within it.</li>
+</ul>
 <h3 id="exercise-3-build-a-correlated-synthetic-request-packet">Exercise 3: Build a correlated synthetic request packet.<a class="heading-anchor" href="#exercise-3-build-a-correlated-synthetic-request-packet" aria-label="Link to this section">#</a></h3>
 <p>Resource identity and request identity serve different roles. Preserve both when connecting rollout changes to request behavior.</p>
 <p><strong>Expected:</strong> Request ID, service, status, duration and resource revision are related carefully.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Link one request ID to its service, status, duration and the revision of the serving workload.</li>
+<li><strong>Why it is correct:</strong> A shared ID lets log lines, spans and metrics describe the same request instead of nearby ones.</li>
+<li><strong>Plausible wrong approach:</strong> Joining records by timestamp alone can pair a slow request with a different request&#x27;s error.</li>
+<li><strong>How to verify:</strong> Every field in the packet is linked to the request ID and revision.</li>
+</ul>
 <h3 id="exercise-4-diagnose-a-latency-metric-without-assuming-app-cpu-is-the-cause">Exercise 4: Diagnose a latency metric without assuming app CPU is the cause.<a class="heading-anchor" href="#exercise-4-diagnose-a-latency-metric-without-assuming-app-cpu-is-the-cause" aria-label="Link to this section">#</a></h3>
 <p>A total duration measures the whole path. Use more specific evidence before changing resource limits.</p>
 <p><strong>Expected:</strong> Break down DNS, connection, queueing and handler phases.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Split the measured latency into DNS, connection, queueing and handler time before choosing a cause.</li>
+<li><strong>Why it is correct:</strong> A high total can come from any phase, and CPU only explains the handler part.</li>
+<li><strong>Plausible wrong approach:</strong> Raising CPU limits because latency rose may change nothing if the delay is in DNS or queueing.</li>
+<li><strong>How to verify:</strong> The answer breaks latency into phases with evidence for each.</li>
+</ul>
 <h3 id="exercise-5-explain-high-cardinality-label-risk">Exercise 5: Explain high-cardinality label risk.<a class="heading-anchor" href="#exercise-5-explain-high-cardinality-label-risk" aria-label="Link to this section">#</a></h3>
 <p>Use bounded dimensions for aggregation and appropriately controlled logs or traces for individual requests.</p>
 <p><strong>Expected:</strong> Unbounded unique label values expand metric state and cost.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Show that each unique label value creates a new time series in the metrics store.</li>
+<li><strong>Why it is correct:</strong> Labels such as request ID or user ID have no bound, so series count, memory and cost grow without limit.</li>
+<li><strong>Plausible wrong approach:</strong> Adding a per-request label to make metrics searchable turns them into an unbounded store.</li>
+<li><strong>How to verify:</strong> The answer ties unbounded label values to growing metric state and cost.</li>
+</ul>
 <h3 id="exercise-6-plan-privacy-aware-observability-for-a-teaching-service">Exercise 6: Plan privacy-aware observability for a teaching service.<a class="heading-anchor" href="#exercise-6-plan-privacy-aware-observability-for-a-teaching-service" aria-label="Link to this section">#</a></h3>
 <p>Diagnostics should make failures explainable without collecting unrelated personal or secret data.</p>
-<p><strong>Expected:</strong> No credentials or private payloads, bounded retention and useful correlation fields.</p></article>
+<p><strong>Expected:</strong> No credentials or private payloads, bounded retention and useful correlation fields.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Exclude credentials and private payloads, bound retention and keep fields such as request ID and revision.</li>
+<li><strong>Why it is correct:</strong> Correlation needs identifiers, not content, so useful debugging does not require sensitive data.</li>
+<li><strong>Plausible wrong approach:</strong> Logging full request bodies for convenience can capture tokens and personal data.</li>
+<li><strong>How to verify:</strong> The plan lists excluded data, a retention limit and the correlation fields kept.</li>
+</ul></article>
   </main>
 </body>
 </html>

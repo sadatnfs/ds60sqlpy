@@ -38,6 +38,12 @@
       "code": "stopifnot(length(c(1, NULL, 2)) == 2L, length(c(1, NA, 2)) == 3L)\nx <- c(NA_real_, NA_real_)\nobserved <- sum(!is.na(x))\nreported_sum <- if (observed == 0) NA_real_ else sum(x, na.rm = TRUE)\nstopifnot(observed == 0, is.na(reported_sum), sum(x, na.rm = TRUE) == 0)\nprint(c(observed = observed, reported_sum = reported_sum))\n",
       "explanation": "The reporting policy preserves no observed sum instead of interpreting the empty-sum arithmetic convention as a measurement.",
       "expected": "Observed count zero; reported sum NA."
+    },
+    {
+      "title": "Zero denominators leak into a summary",
+      "code": "cases <- c(3, 0, 5)\nvisits <- c(10, 0, 0)\nnaive <- cases / visits\nsafe <- ifelse(visits > 0, cases / visits, NA_real_)\nprint(naive)\nprint(safe)\nstopifnot(is.nan(naive[2]), is.infinite(naive[3]))\nstopifnot(identical(is.na(safe), c(FALSE, TRUE, TRUE)))\nstopifnot(is.infinite(mean(naive, na.rm = TRUE)))\n",
+      "explanation": "Three sites report cases per visit, and two had no visits. The second site gives 0 / 0, which is NaN, and the third gives 5 / 0, which is Inf. The last check shows why that matters: na.rm = TRUE removes the NaN but keeps Inf, so the mean of the naive rates is infinite. The safe version states the policy that a rate with no visits is undefined, records NA for both sites, and leaves 0.3 as the only observed rate.",
+      "expected": "naive prints 0.3, NaN, Inf; safe prints 0.3, NA, NA."
     }
   ],
   "exercises": [

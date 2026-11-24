@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement stable stream compaction with exact counts and order for empty, all-match and no-match inputs.
+
 Work through *Scans and stream compaction* with the concrete cases below. Finish with this evidence:
 exact output counts and element order for empty, all-match and no-match cases. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 An exclusive scan gives each item the reduction of preceding items; an inclusive scan includes the item itself. For stable compaction, map the selection predicate to zeros and ones, scan those flags, then let selected input i write to its exclusive prefix position. Stability means selected elements keep their relative order. Multiple blocks require scanning block totals and adding offsets in another stage. A total count says how much output is needed but does not assign every destination. Separate input and output or prove that aliasing cannot overwrite unread values.
+
+### Key terms
+
+- **Exclusive scan:** A prefix operation in which output i combines the inputs before position i, starting from the identity.
+- **Inclusive scan:** A prefix operation in which output i combines the inputs up to and including position i.
+- **Stream compaction:** Copying only selected elements into a dense output, using scanned flags as destination offsets.
+- **Stable order:** A guarantee that selected elements keep their original relative order in the output.
 
 ## Mathematical contract
 

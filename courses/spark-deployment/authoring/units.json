@@ -6,7 +6,44 @@
     "minutes": 60,
     "prerequisites": ["spark-030"],
     "concepts": ["driver", "executor", "worker", "deploy mode"],
-    "outcome": "Trace driver and executor placement and distinguish browser ports from Spark RPC."
+    "outcome": "Trace driver and executor placement and distinguish browser ports from Spark RPC.",
+    "key_terms": [
+      [
+        "Driver",
+        "The process that creates the Spark session and schedules work for one application."
+      ],
+      [
+        "Worker",
+        "A Standalone process that launches executor processes on its host; it is not itself an executor."
+      ],
+      [
+        "Deploy mode",
+        "Where the driver runs: inside the submitting process in client mode, or started by the manager elsewhere in cluster mode."
+      ],
+      [
+        "Master URL",
+        "The cluster manager address, here the Standalone master listening on port 7077 for Spark traffic."
+      ],
+      [
+        "Driver RPC port",
+        "The fixed port, 39000 in this project, on which executors reach the driver; a browser UI port such as 4040 cannot substitute for it."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "classifying every port in the lab submit command",
+        "language": "python",
+        "code": "argv = [\n    \"spark-submit\",\n    \"--master\",\n    \"spark://master:7077\",\n    \"--deploy-mode\",\n    \"client\",\n    \"--conf\",\n    \"spark.driver.host=driver\",\n    \"--conf\",\n    \"spark.driver.bindAddress=0.0.0.0\",\n    \"--conf\",\n    \"spark.driver.port=39000\",\n    \"--conf\",\n    \"spark.driver.blockManager.port=39001\",\n    \"/lab/app/bounded_job.py\",\n]\nconf = dict(argv[i + 1].split(\"=\", 1) for i, a in enumerate(argv) if a == \"--conf\")\nmaster = argv[argv.index(\"--master\") + 1]\nowners = {\n    int(master.rsplit(\":\", 1)[1]): (\"master\", \"Spark RPC from drivers and workers\"),\n    8080: (\"master\", \"browser UI\"),\n    int(conf[\"spark.driver.port\"]): (\"driver\", \"executor callbacks (RPC)\"),\n    int(conf[\"spark.driver.blockManager.port\"]): (\"driver\", \"block transfers\"),\n    4040: (\"driver\", \"browser UI, from spark-defaults.conf\"),\n}\nprint(\n    \"deploy mode:\",\n    argv[argv.index(\"--deploy-mode\") + 1],\n    \"| advertised as:\",\n    conf[\"spark.driver.host\"],\n)\nfor port in sorted(owners):\n    process, purpose = owners[port]\n    print(f\"{port:>5}  {process:<7} {purpose}\")",
+        "output": "deploy mode: client | advertised as: driver\n 4040  driver  browser UI, from spark-defaults.conf\n 7077  master  Spark RPC from drivers and workers\n 8080  master  browser UI\n39000  driver  executor callbacks (RPC)\n39001  driver  block transfers",
+        "interpretation": "The script reads the same argument list that lab.py passes to spark-submit and assigns each port to the process that owns it. Two of the five numbers belong to the master: 7077 accepts Spark RPC from drivers and workers, and 8080 serves its own status page. The other three belong to the driver, and only one of those, 4040, is meant for a browser. Ports 39000 and 39001 carry executor callbacks and block transfers, which is why they are pinned instead of left random: the Compose network and any later firewall or Kubernetes Service must route exactly those two numbers to the process advertised as driver. The printed deploy mode is client even though the driver runs in its own container, because placement is decided by where spark-submit starts the driver, not by which box it lives in. Keep a table like this in the receipt so a reviewer can tell an unreachable UI apart from an unreachable RPC route."
+      },
+      {
+        "title": "recording driver and task placement from inside the application",
+        "language": "python",
+        "code": "import os\nimport socket\n\nfrom pyspark import TaskContext\nfrom pyspark.sql import SparkSession\n\nspark = SparkSession.builder.appName(\"placement-trace\").getOrCreate()\n\n\ndef where(rows):\n    context = TaskContext.get()\n    yield (context.partitionId(), socket.gethostname(), os.getpid(), sum(1 for _ in rows))\n\n\ntry:\n    placement = spark.range(0, 800, numPartitions=8).rdd.mapPartitions(where).collect()\n    print(\"driver host:\", socket.gethostname())\n    for partition, host, pid, count in sorted(placement):\n        print(partition, host, pid, count)\nfinally:\n    spark.stop()",
+        "interpretation": "This PySpark block is shown without output because the authoring machine has no Spark installation, so any host names or PIDs printed here would be invented. On the workshop driver, expect the first line to report driver and the partition rows to name worker-a and worker-b, each with Python worker PIDs that may repeat across containers because every container has its own PID namespace. That repetition is why the bounded job records host and PID together. Eight partitions of 800 rows should each report a count of 100. If every partition reports the same host, either one worker failed to register or the executors were placed on one worker by the resource request; compare the executor inventory from the driver UI before blaming the network. A placement trace like this establishes which container ran which partition, which is narrower than proving separate physical hosts, since both workers share one laptop."
+      }
+    ]
   },
   {
     "id": "spark-deploy-002",
@@ -15,7 +52,51 @@
     "minutes": 60,
     "prerequisites": ["spark-deploy-001"],
     "concepts": ["image", "architecture", "dependencies", "preparation"],
-    "outcome": "Bind a native prepared Spark image to its immutable identity and explain notebook preparation."
+    "outcome": "Bind a native prepared Spark image to its immutable identity and explain notebook preparation.",
+    "key_terms": [
+      [
+        "Image ID",
+        "The identifier of the image bytes already present in one Docker engine, saved at initialization so a resume uses the same environment."
+      ],
+      [
+        "Mutable tag",
+        "An image name that can resolve to different contents over time unless it names a digest."
+      ],
+      [
+        "pull_policy: never",
+        "The Compose setting that forbids resolving a registry tag, so a missing image fails instead of downloading."
+      ],
+      [
+        "Native architecture",
+        "The host CPU architecture, such as ARM64 or AMD64, that the prepared image must match."
+      ],
+      [
+        "Image preparation",
+        "The separate operation that builds or loads a compatible Spark image before any lesson executes."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "checking an image inspect record before saving it",
+        "language": "python",
+        "code": "import json\n\ninspect_json = \"\"\"[{\"Id\": \"sha256:4f1c9a0e7b2d\", \"RepoTags\": [\"local/spark:4.0.1\"],\n  \"RepoDigests\": [], \"Architecture\": \"arm64\", \"Os\": \"linux\",\n  \"Config\": {\"User\": \"65534\", \"Env\": [\"SPARK_HOME=/opt/spark\", \"JAVA_HOME=/opt/java/openjdk\"]}}]\"\"\"\nrecord = json.loads(inspect_json)[0]\nproblems = []\nif record[\"Os\"] != \"linux\":\n    problems.append(\"not a Linux image\")\nif record[\"Architecture\"] != \"arm64\":\n    problems.append(\"architecture \" + record[\"Architecture\"])\nif not record[\"RepoDigests\"]:\n    problems.append(\"no registry digest: local ID only, not portable\")\nenv = dict(item.split(\"=\", 1) for item in record[\"Config\"][\"Env\"])\nprint(\"save id:\", record[\"Id\"], \"| tag is a lookup only:\", record[\"RepoTags\"][0])\nprint(\"SPARK_HOME:\", env.get(\"SPARK_HOME\"), \"| user:\", record[\"Config\"][\"User\"])\nprint(\"notes:\", problems or \"none\")",
+        "output": "save id: sha256:4f1c9a0e7b2d | tag is a lookup only: local/spark:4.0.1\nSPARK_HOME: /opt/spark | user: 65534\nnotes: ['no registry digest: local ID only, not portable']",
+        "interpretation": "The inspect record here is a hand written stand in shaped like docker image inspect output, so the identifiers are illustrative rather than taken from a real engine. The check reads the fields that lab.py init cares about: operating system, architecture, the configured user and the Spark home. Note what the output flags: an image built locally has an empty RepoDigests list, so its sha256 ID identifies bytes inside one Docker engine and cannot be pulled elsewhere. The tag `local/spark:4.0.1` is printed only as a lookup name because retagging another build under the same name would silently change what it points at. Saving the ID, refusing a foreign architecture and recording that the digest is missing are three separate facts; a receipt that only records the tag cannot show which bytes a later resume actually started."
+      },
+      {
+        "title": "probing the interfaces the lab expects inside the image",
+        "language": "bash",
+        "code": "IMAGE=YOUR_PREPARED_LOCAL_SPARK_IMAGE\ndocker image inspect --format '{{.Id}} {{.Os}}/{{.Architecture}}' \"$IMAGE\"\ndocker run --rm --pull=never --network=none --user 65534:65534 \\\n  --entrypoint /bin/sh \"$IMAGE\" -c '\n    test -x /opt/spark/bin/spark-submit && echo spark-submit ok\n    test -x /opt/spark/bin/spark-class && echo spark-class ok\n    python3 -c \"import sys; print(sys.version.split()[0])\"\n    /opt/spark/bin/spark-submit --version 2>&1 | grep -E \"version 4|Scala version\"\n  '",
+        "interpretation": "This command sequence runs on a host that already has the prepared image, so no output is shown here. Each step answers a question that inspect metadata cannot: whether spark-submit and spark-class are executable, whether python3 exists for the nonroot UID 65534, and whether the bundled Spark reports version 4.0.1 with Scala 2.13. The run uses --pull=never and --network=none so a missing image fails loudly instead of being fetched, and so the probe cannot download anything to make itself pass. Running as 65534 matters because the Compose services do; a binary readable only by root would pass a root probe and then fail at worker startup with a permission error that looks like a Spark bug. If grep prints nothing, read the full version banner before concluding the version is wrong, since some distributions format the banner differently."
+      },
+      {
+        "title": "verifying a wheel lock before an offline notebook build",
+        "language": "python",
+        "code": "import hashlib\n\nwheels = {\n    \"pyspark-4.0.1.tar.gz\": b\"stand-in bytes A\",\n    \"jupyterlab-4.2.5-py3-none-any.whl\": b\"stand-in bytes B\",\n}\nlock = {\n    \"pyspark-4.0.1.tar.gz\": hashlib.sha256(b\"stand-in bytes A\").hexdigest(),\n    \"jupyterlab-4.2.5-py3-none-any.whl\": hashlib.sha256(b\"stand-in bytes B\").hexdigest(),\n    \"py4j-0.10.9.9-py2.py3-none-any.whl\": \"0\" * 64,\n}\nfor name, expected in lock.items():\n    data = wheels.get(name)\n    if data is None:\n        print(f\"MISSING {name}: offline build will fail\")\n    elif hashlib.sha256(data).hexdigest() != expected:\n        print(f\"HASH MISMATCH {name}\")\n    else:\n        print(f\"ok {name} {expected[:12]}\")",
+        "output": "ok pyspark-4.0.1.tar.gz c4222a4debba\nok jupyterlab-4.2.5-py3-none-any.whl 767a7a3201dd\nMISSING py4j-0.10.9.9-py2.py3-none-any.whl: offline build will fail",
+        "interpretation": "The byte strings here stand in for downloaded wheel files, so the hashes are of those strings and not of real distributions; the point is the comparison logic, not the digests. Two entries match their locked SHA-256 values and print ok with a short prefix. The py4j entry has a lock line but no file in the wheelhouse, which is the situation the chapter describes: the offline notebook build with --network=none cannot fall back to an index, so pip stops instead of quietly resolving a different version. A hash mismatch is reported separately because it means a file was replaced, which is a different finding from a file that was never downloaded. Running this check before docker build turns a long failed build into a short list of names to fetch, and the list itself belongs in the preparation receipt alongside the image ID."
+      }
+    ]
   },
   {
     "id": "spark-deploy-003",
@@ -24,7 +105,45 @@
     "minutes": 60,
     "prerequisites": ["spark-deploy-002"],
     "concepts": ["Compose", "ownership", "state", "lifecycle"],
-    "outcome": "Start and resume a scoped master/two-worker/separate-driver lab without registry access or state deletion."
+    "outcome": "Start and resume a scoped master/two-worker/separate-driver lab without registry access or state deletion.",
+    "key_terms": [
+      [
+        "Compose project",
+        "The owned topology of master, two workers, a separate driver, a History Server and an optional notebook."
+      ],
+      [
+        "Internal network",
+        "A private Docker network shared by the Spark compute services with no direct host access."
+      ],
+      [
+        "UI relay",
+        "A narrow service that connects the internal network to an ingress network and publishes only fixed HTTP destinations on host loopback."
+      ],
+      [
+        "Ownership label",
+        "A container label carrying the recorded project identity, checked before the wrapper operates on any container."
+      ],
+      [
+        "State directory",
+        "The host directory holding event logs, results, notebooks and the login token, which survives container replacement."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "summing the declared container budgets in compose.yaml",
+        "language": "python",
+        "code": "services = {\n    \"master\": (\"512m\", 0.2, 128),\n    \"worker-a\": (\"1536m\", 1.0, 512),\n    \"worker-b\": (\"1536m\", 1.0, 512),\n    \"driver\": (\"1536m\", 1.0, 512),\n    \"history\": (\"768m\", 0.2, 256),\n    \"ui\": (\"96m\", 0.1, 96),\n}\nmib = {name: int(limit.rstrip(\"m\")) for name, (limit, _, _) in services.items()}\nprint(f\"memory limits total {sum(mib.values())} MiB = {sum(mib.values()) / 1024:.2f} GiB\")\nprint(f\"cpu quota total {sum(c for _, c, _ in services.values()):.1f}\")\nprint(f\"pids total {sum(p for *_, p in services.values())}\")\nworker_advertised = 1024\nprint(\n    f\"per worker: {mib['worker-a'] - worker_advertised} MiB of container limit above the 1 GiB advertised to the master\"\n)",
+        "output": "memory limits total 5984 MiB = 5.84 GiB\ncpu quota total 3.5\npids total 2016\nper worker: 512 MiB of container limit above the 1 GiB advertised to the master",
+        "interpretation": "These six services and their limits are copied from compose.yaml, and the totals are plain arithmetic over them. Together the limits allow 5984 MiB of memory, 3.5 CPUs of quota and 2016 process IDs, so a laptop with 8 GiB of memory and other applications open is already close to its ceiling before the optional notebook adds another 1536 MiB. Each worker advertises 1 GiB to the master but its container may use 1536 MiB, and the 512 MiB difference is what the worker JVM, the executor JVM overhead and Python task processes share. Shrinking the container limit to exactly the advertised value would look tidy and then fail under load with an OOM kill that Spark reports only as a lost executor. Treat these totals as the budget for one owned lab, not as sizing advice for a production cluster."
+      },
+      {
+        "title": "hashing retained state before and after replacement",
+        "language": "python",
+        "code": "import hashlib\nfrom pathlib import Path\n\nstate = Path(\"demo-state\")\n(state / \"events\").mkdir(parents=True, exist_ok=True)\n(state / \"results\").mkdir(exist_ok=True)\n(state / \"events\" / \"app-20260101000000-0000\").write_text(\n    '{\"Event\":\"SparkListenerApplicationEnd\"}\\n'\n)\n(state / \"results\" / \"app-20260101000000-0000.json\").write_text('{\"slope\": 2.0}\\n')\n\n\ndef manifest(root):\n    return {\n        str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()[:16]\n        for p in sorted(root.rglob(\"*\"))\n        if p.is_file()\n    }\n\n\nbefore = manifest(state)\ncontainer_id_before, container_id_after = \"3b9f0c2a\", \"c71e55d4\"\nafter = manifest(state)\nprint(\"files:\", len(before), \"| identical after down/up:\", before == after)\nprint(\"container id changed:\", container_id_before != container_id_after)\nfor path, digest in before.items():\n    print(digest, path)\nfor p in sorted(state.rglob(\"*\"), reverse=True):\n    p.unlink() if p.is_file() else p.rmdir()\nstate.rmdir()",
+        "output": "files: 2 | identical after down/up: True\ncontainer id changed: True\na0895cdcd25d6cae events/app-20260101000000-0000\n10ec9d3b5a05814a results/app-20260101000000-0000.json",
+        "interpretation": "The script builds a tiny state directory, computes a manifest of SHA-256 prefixes for every retained file, and compares two manifests. Both manifests are computed in the same process, so they match trivially; in the real lifecycle check the second manifest comes after lab.py down and lab.py up, and that comparison is the evidence. The printed container IDs are placeholders that illustrate why IDs cannot be data identity: replacement assigns new ones while the event log and result file keep the same bytes. A changed hash after replacement means something wrote to state, perhaps a new application or a History Server compaction setting, and should be explained before the old result is used. The example deletes its own scratch directory at the end, which mirrors the lab rule that cleanup touches only paths the workshop created."
+      }
+    ]
   },
   {
     "id": "spark-deploy-004",
@@ -33,7 +152,45 @@
     "minutes": 60,
     "prerequisites": ["spark-deploy-003", "spark-022"],
     "concepts": ["submission", "partitions", "sufficient statistics", "fitting"],
-    "outcome": "Check partition coverage, closed-form fitting and future-covariate prediction without collecting observations."
+    "outcome": "Check partition coverage, closed-form fitting and future-covariate prediction without collecting observations.",
+    "key_terms": [
+      [
+        "Submission",
+        "Sending an application to the cluster manager with spark-submit from the driver container."
+      ],
+      [
+        "Partition summary",
+        "The count, sum of x, sum of x squared, sum of y and sum of xy that one partition returns instead of its rows."
+      ],
+      [
+        "Normal equations",
+        "The two-parameter least-squares system the driver solves from the partition summaries."
+      ],
+      [
+        "Correctness oracle",
+        "The independently known values, intercept 3 and slope 2, that the fitted coefficients must match."
+      ],
+      [
+        "Future-covariate extrapolation",
+        "A deterministic prediction at a new input such as 100000, which is not a conditional-history forecast or an interval."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "combining eight partition summaries into the fitted line",
+        "language": "python",
+        "code": "n_total, parts = 100_000, 8\nsize = n_total // parts\nsummaries = []\nfor p in range(parts):\n    xs = range(p * size, (p + 1) * size)\n    summaries.append(\n        {\n            \"n\": len(xs),\n            \"sx\": sum(xs),\n            \"sxx\": sum(x * x for x in xs),\n            \"sy\": sum(3 + 2 * x for x in xs),\n            \"sxy\": sum(x * (3 + 2 * x) for x in xs),\n        }\n    )\nt = {k: sum(s[k] for s in summaries) for k in summaries[0]}\nn = t[\"n\"]\nassert t[\"sx\"] == n * (n - 1) // 2 and t[\"sxx\"] == n * (n - 1) * (2 * n - 1) // 6\nslope = (n * t[\"sxy\"] - t[\"sx\"] * t[\"sy\"]) / (n * t[\"sxx\"] - t[\"sx\"] ** 2)\nintercept = (t[\"sy\"] - slope * t[\"sx\"]) / n\nprint(\"sx\", t[\"sx\"], \"sxx\", t[\"sxx\"])\nprint(\"intercept\", intercept, \"slope\", slope)\nprint(\"predictions\", [intercept + slope * x for x in (100_000, 100_001)])",
+        "output": "sx 4999950000 sxx 333328333350000\nintercept 3.0 slope 2.0\npredictions [200003.0, 200005.0]",
+        "interpretation": "The loop reproduces the bounded job's five sufficient statistics over eight equal partitions of the integers 0 to 99999, using plain Python instead of Spark, and then combines them on the driver side. The totals match both closed form oracles, 4999950000 for the sum and 333328333350000 for the sum of squares, before any coefficient is computed. The normal equations then give intercept exactly 3.0 and slope exactly 2.0, and the two future covariates 100000 and 100001 map to 200003 and 200005, the same values reported by the retained ARM64 workshop run. Only eight dictionaries of five integers each cross into the final computation, which is why the job fits within the 1m driver result limit regardless of the input size. Python integers do not overflow here; in a JVM aggregation with long values the sum of squares is still far below the long limit."
+      },
+      {
+        "title": "detecting a missing or duplicated partition summary",
+        "language": "python",
+        "code": "def coverage(records, expected=8):\n    ids = sorted(r[\"partition\"] for r in records)\n    missing = sorted(set(range(expected)) - set(ids))\n    duplicated = sorted({i for i in ids if ids.count(i) > 1})\n    return missing, duplicated, sum(r[\"n\"] for r in records)\n\n\ngood = [{\"partition\": p, \"n\": 12_500} for p in range(8)]\nlost = good[:7]\ndoubled = good + [{\"partition\": 3, \"n\": 12_500}]\nfor name, records in ((\"complete\", good), (\"one lost\", lost), (\"one doubled\", doubled)):\n    missing, duplicated, n = coverage(records)\n    print(f\"{name:11} n={n:>6} missing={missing} duplicated={duplicated}\")",
+        "output": "complete    n=100000 missing=[] duplicated=[]\none lost    n= 87500 missing=[7] duplicated=[]\none doubled n=112500 missing=[] duplicated=[3]",
+        "interpretation": "Coverage is checked by partition ID, not by row count alone. A complete run reports 100000 rows with nothing missing or duplicated. Losing partition 7 drops the total to 87500 and names the gap. The doubled case is the dangerous one for a sum based estimator: partition 3 appears twice, the total rises to 112500, and the fitted line would still look nearly correct because the duplicated rows obey the same relation. That is why the bounded job asserts that sorted partition IDs equal range(8) before trusting any coefficient. Spark itself returns only the successful attempt for each partition of an RDD collect, so a duplicate here would point to a bug in how records were merged or to an external write repeated by a retried task, which needs its own idempotency design."
+      }
+    ]
   },
   {
     "id": "spark-deploy-005",
@@ -42,7 +199,51 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-004", "spark-009"],
     "concepts": ["JAR", "Scala", "cluster mode", "compatibility"],
-    "outcome": "Distinguish supported JVM cluster submission from unsupported Standalone Python cluster mode."
+    "outcome": "Distinguish supported JVM cluster submission from unsupported Standalone Python cluster mode.",
+    "key_terms": [
+      [
+        "Cluster deploy mode",
+        "A mode in which the cluster manager launches the driver on a worker rather than in the submitting process."
+      ],
+      [
+        "Application JAR",
+        "A Java archive containing the entrypoint and nonprovided dependencies, without its own copy of Spark."
+      ],
+      [
+        "Scala binary version",
+        "The Scala ABI line, here 2.13, that application classes must share with the Spark runtime."
+      ],
+      [
+        "Language and manager pair",
+        "The supported combination: Standalone 4.0.1 runs JVM applications in cluster mode but not Python applications."
+      ],
+      [
+        "Class conflict",
+        "A failure caused by packaging a different Spark or Scala distribution inside the application JAR."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "a submission matrix for manager, language and deploy mode",
+        "language": "python",
+        "code": "SUPPORTED = {\n    (\"standalone\", \"jvm\", \"client\"),\n    (\"standalone\", \"jvm\", \"cluster\"),\n    (\"standalone\", \"python\", \"client\"),\n    (\"kubernetes\", \"jvm\", \"client\"),\n    (\"kubernetes\", \"jvm\", \"cluster\"),\n    (\"kubernetes\", \"python\", \"client\"),\n    (\"kubernetes\", \"python\", \"cluster\"),\n}\n\n\ndef review(master, app, mode):\n    manager = \"kubernetes\" if master.startswith(\"k8s://\") else \"standalone\"\n    language = \"python\" if app.endswith(\".py\") else \"jvm\"\n    verdict = \"supported\" if (manager, language, mode) in SUPPORTED else \"refuse before submitting\"\n    return f\"{manager:10} {language:6} {mode:7} -> {verdict}\"\n\n\nprint(review(\"spark://master:7077\", \"spark-examples_2.13-4.0.1.jar\", \"cluster\"))\nprint(review(\"spark://master:7077\", \"bounded_job.py\", \"cluster\"))\nprint(review(\"spark://master:7077\", \"bounded_job.py\", \"client\"))\nprint(review(\"k8s://https://API_SERVER:6443\", \"local:///opt/app/bounded_job.py\", \"cluster\"))",
+        "output": "standalone jvm    cluster -> supported\nstandalone python cluster -> refuse before submitting\nstandalone python client  -> supported\nkubernetes python cluster -> supported",
+        "interpretation": "The table encodes the rule from the chapter for Spark 4.0.1: Standalone accepts JVM applications in cluster mode, but a Python application must run in client mode, while Kubernetes accepts both languages in both modes. The review function decides manager and language from the master URL and the application path, then refuses the unsupported pair before spark-submit is called. The Standalone JVM cluster row is the SparkPi submission from worked case A. The Python cluster row is worked case B, and the two repairs appear on the following lines: keep Standalone with a reachable client mode driver, or move the unchanged program to Kubernetes, where the local:// scheme means the file is already inside the image. Refusing early produces a clearer receipt than letting spark-submit fail and then editing the receipt's mode label."
+      },
+      {
+        "title": "checking an application JAR for a bundled Spark copy",
+        "language": "python",
+        "code": "import io\nimport zipfile\n\nbuffer = io.BytesIO()\nwith zipfile.ZipFile(buffer, \"w\") as jar:\n    jar.writestr(\"META-INF/MANIFEST.MF\", \"Main-Class: com.example.FitJob\\n\")\n    jar.writestr(\"com/example/FitJob.class\", b\"\\xca\\xfe\\xba\\xbe\")\n    jar.writestr(\"org/apache/spark/SparkContext.class\", b\"\\xca\\xfe\\xba\\xbe\")\n    jar.writestr(\"scala/collection/immutable/List.class\", b\"\\xca\\xfe\\xba\\xbe\")\n\nwith zipfile.ZipFile(buffer) as jar:\n    names = jar.namelist()\n    main = jar.read(\"META-INF/MANIFEST.MF\").decode().split(\":\", 1)[1].strip()\nprovided = [n for n in names if n.startswith((\"org/apache/spark/\", \"scala/\"))]\nprint(\"main class:\", main, \"| present:\", main.replace(\".\", \"/\") + \".class\" in names)\nprint(\"runtime-provided classes bundled:\", provided)",
+        "output": "main class: com.example.FitJob | present: True\nruntime-provided classes bundled: ['org/apache/spark/SparkContext.class', 'scala/collection/immutable/List.class']",
+        "interpretation": "An in memory ZIP stands in for a built application JAR so the inspection can run without a JVM build. The manifest names com.example.FitJob and that class file is present, which rules out the simplest class not found cause. The scan then finds org/apache/spark and scala classes inside the JAR, which the runtime already provides. Shipping a second copy of SparkContext or the Scala standard library is the class conflict the chapter warns about: whichever copy the class loader finds first wins, and a method not found error can appear even though the class exists. The repair is to mark Spark and Scala as provided in the build, rebuild and record the new artifact hash together with Spark 4.0.1 and Scala 2.13 in the submission receipt."
+      },
+      {
+        "title": "a supervised cluster submission with an idempotent output",
+        "language": "bash",
+        "code": "RUN_ID=fit-2026-01-15\n/opt/spark/bin/spark-submit \\\n  --master spark://master:7077 \\\n  --deploy-mode cluster \\\n  --supervise \\\n  --class com.example.FitJob \\\n  --conf spark.eventLog.enabled=false \\\n  /shared/jars/fit-job-1.0.jar \\\n  --output \"/results/$RUN_ID\" --mode write-once",
+        "interpretation": "This is a planning command, shown without output because no cluster was run while writing it. The --supervise flag asks the Standalone master to restart the driver if it exits with a failure, so the application may run its write step more than once. The command therefore passes an explicit run identity, fit-2026-01-15, and a write once mode that the application is assumed to implement by refusing to overwrite an existing output directory. Without that contract a supervised restart can append a second copy of results or partially overwrite the first. The JAR path under /shared assumes storage every worker can read, because in cluster mode any worker may host the driver. Event logging stays disabled for the same reason as worked case A: this recipe provides no shared event directory for a worker hosted driver."
+      }
+    ]
   },
   {
     "id": "spark-deploy-006",
@@ -51,7 +252,44 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-004"],
     "concepts": ["Jupyter", "kernel", "session", "authentication"],
-    "outcome": "Connect an explicitly prepared notebook kernel to executors and clean up its owned Spark session."
+    "outcome": "Connect an explicitly prepared notebook kernel to executors and clean up its owned Spark session.",
+    "key_terms": [
+      [
+        "Jupyter server",
+        "The web process the browser reaches over HTTP and WebSocket; it is separate from the kernel and the driver."
+      ],
+      [
+        "Kernel",
+        "The Python process that builds the SparkSession and therefore hosts a long-lived client-mode driver."
+      ],
+      [
+        "Advertised driver name",
+        "The service name notebook that executors use to reach the kernel's driver instead of the host's loopback address."
+      ],
+      [
+        "Login token",
+        "A private credential entered through the login form and never copied into reports as part of a URL."
+      ],
+      [
+        "Session release",
+        "Stopping the SparkSession to free executor resources, which a browser disconnect does not do."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "separate notebook cells for create, act and clean up",
+        "language": "python",
+        "code": "# Cell 1: create\nfrom pyspark.sql import SparkSession\n\nspark = (\n    SparkSession.builder.master(\"spark://master:7077\")\n    .appName(\"notebook-session\")\n    .config(\"spark.driver.host\", \"notebook\")\n    .config(\"spark.driver.bindAddress\", \"0.0.0.0\")\n    .config(\"spark.driver.port\", \"39000\")\n    .config(\"spark.driver.blockManager.port\", \"39001\")\n    .config(\"spark.driver.maxResultSize\", \"1m\")\n    .getOrCreate()\n)\nprint(spark.sparkContext.applicationId, spark.sparkContext.uiWebUrl)\n\n# Cell 2: act\ntotal = spark.range(100_000).selectExpr(\"sum(id) AS s\").first()[\"s\"]\nassert total == 4_999_950_000\n\n# Cell 3: clean up, run even after an error in cell 2\nspark.stop()",
+        "interpretation": "These cells are shown without output because they require the notebook container and the Standalone master. Cell 1 sets the same creation time settings as app/notebook_session.py: the master URL, the advertised name notebook, the two fixed callback ports and the 1m result bound. Printing the application ID and UI URL immediately ties later evidence to this exact session. Cell 2 runs one action and checks the sum against 4999950000 without collecting rows. Cell 3 exists because a notebook has no finally block across cells; if cell 2 raises, the kernel keeps the driver alive and its executors stay registered until spark.stop runs or the kernel is restarted. Running the cleanup cell after a failure releases the two worker cores so the next session or the bounded job can obtain executors."
+      },
+      {
+        "title": "which builder settings a running session ignores",
+        "language": "python",
+        "code": "CREATION_ONLY = {\n    \"spark.master\",\n    \"spark.driver.host\",\n    \"spark.driver.port\",\n    \"spark.driver.blockManager.port\",\n    \"spark.driver.memory\",\n    \"spark.executor.memory\",\n}\nlive = {\"spark.driver.host\": \"notebook\", \"spark.app.id\": \"app-20260115093000-0003\"}\nrequested = {\"spark.driver.host\": \"new-name\", \"spark.sql.shuffle.partitions\": \"16\"}\nfor key, value in requested.items():\n    if key in CREATION_ONLY and live.get(key) != value:\n        print(f\"{key}: live value {live[key]!r} kept; stop the session to apply {value!r}\")\n    else:\n        print(f\"{key}: runtime SQL setting, spark.conf.set can apply {value!r}\")\nprint(\"application id unchanged:\", live[\"spark.app.id\"])",
+        "output": "spark.driver.host: live value 'notebook' kept; stop the session to apply 'new-name'\nspark.sql.shuffle.partitions: runtime SQL setting, spark.conf.set can apply '16'\napplication id unchanged: app-20260115093000-0003",
+        "interpretation": "The sets here are a teaching summary written for this example, not a list read from Spark. The script compares builder settings requested after a session exists with the live values. spark.driver.host was fixed when the SparkContext was created, so getOrCreate returns the old session and the requested new-name has no effect; the message says the session must stop for the value to apply. spark.sql.shuffle.partitions is a runtime SQL setting that spark.conf.set can change on the live session. The unchanged application ID is the quickest evidence that no new driver was created. In a real kernel, read spark.sparkContext.getConf().get('spark.driver.host') and compare it with what you asked for instead of trusting the builder text in the cell."
+      }
+    ]
   },
   {
     "id": "spark-deploy-007",
@@ -60,7 +298,44 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-006", "k8s-048"],
     "concepts": ["DNS", "RPC", "bind address", "networking"],
-    "outcome": "Diagnose a reachable master with an unreachable advertised driver address."
+    "outcome": "Diagnose a reachable master with an unreachable advertised driver address.",
+    "key_terms": [
+      [
+        "Bind address",
+        "The value of spark.driver.bindAddress, which selects the local interfaces the driver listens on."
+      ],
+      [
+        "Advertised address",
+        "The value of spark.driver.host, which other processes use to call back to the driver."
+      ],
+      [
+        "Service-name DNS",
+        "Compose name resolution, such as driver or notebook, that works only inside the shared network."
+      ],
+      [
+        "Callback path",
+        "The connection an executor opens to the driver after allocation, which can fail even when the master URL is correct."
+      ],
+      [
+        "Published port",
+        "A host mapping for connections that originate outside the network; master RPC and worker data ports are never published."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "flagging an advertisement that only works from the driver",
+        "language": "python",
+        "code": "import ipaddress\n\n\ndef review(conf):\n    host = conf[\"spark.driver.host\"]\n    bind = conf.get(\"spark.driver.bindAddress\", host)\n    findings = []\n    try:\n        address = ipaddress.ip_address(host)\n        if address.is_loopback:\n            findings.append(\"advertised loopback: each executor would call itself\")\n        elif address.is_private:\n            findings.append(\"literal private IP: valid only if every executor can route to it\")\n    except ValueError:\n        findings.append(f\"name {host!r}: resolve it from an executor, not from the driver\")\n    if bind not in (\"0.0.0.0\", host):\n        findings.append(f\"bind {bind} may not listen on the interface behind {host}\")\n    return findings\n\n\nprint(review({\"spark.driver.host\": \"driver\", \"spark.driver.bindAddress\": \"0.0.0.0\"}))\nprint(review({\"spark.driver.host\": \"127.0.0.1\", \"spark.driver.bindAddress\": \"0.0.0.0\"}))\nprint(review({\"spark.driver.host\": \"192.168.1.20\", \"spark.driver.bindAddress\": \"127.0.0.1\"}))",
+        "output": "[\"name 'driver': resolve it from an executor, not from the driver\"]\n['advertised loopback: each executor would call itself']\n['literal private IP: valid only if every executor can route to it', 'bind 127.0.0.1 may not listen on the interface behind 192.168.1.20']",
+        "interpretation": "The three calls cover the configurations this chapter keeps returning to. The workshop pair, host `driver` with bind `0.0.0.0`, produces only a reminder: a service name is meaningful inside the Compose network, so the lookup that matters is the one an executor performs, not the one the driver performs on itself. The second call reproduces Worked case B, where `127.0.0.1` is advertised; every executor would dial its own loopback and get connection refused on 39000 even though the master happily allocated workers. The third call stacks two faults: a literal 192.168.1.20 advertisement that only works if every worker host routes to that LAN, plus a bind of 127.0.0.1 that would not accept connections arriving on that interface at all. The checker is deliberately static. It cannot prove reachability, and it never opens a socket, so its job is to stop an obviously wrong pair of settings before a submission wastes an allocation and leaves a confusing executor log behind."
+      },
+      {
+        "title": "testing name, route and listener from an executor container",
+        "language": "bash",
+        "code": "PROJECT=OWNED_COMPOSE_PROJECT\ndocker compose -p \"$PROJECT\" exec -T worker-a getent hosts driver\ndocker compose -p \"$PROJECT\" exec -T worker-a python3 -c '\nimport socket\nfor port in (39000, 39001):\n    try:\n        socket.create_connection((\"driver\", port), timeout=3).close()\n        print(port, \"listener reachable from worker-a\")\n    except OSError as error:\n        print(port, \"failed:\", error)\n'",
+        "interpretation": "This sequence runs the diagnosis in the order the chapter recommends, but from worker-a, which is where the executor callback actually originates. `getent hosts driver` answers the name question using the same resolver the executor JVM would use. The inline Python then attempts TCP connections to 39000 and 39001, the fixed driver RPC and block manager ports, so a refusal on one and success on the other points at a single listener rather than at DNS. No output is printed here because it depends on a live Compose project that this page cannot run; `OWNED_COMPOSE_PROJECT` must be the project name that `lab.py` created, never a guess at someone else's stack. A connect from the host terminal would test a different network namespace entirely and could succeed while executors still fail. Keep the command, its origin container and the printed lines in the incident notes, then restore the valid configuration before acceptance if the probe was part of a deliberate failure rehearsal."
+      }
+    ]
   },
   {
     "id": "spark-deploy-008",
@@ -69,7 +344,45 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-002", "spark-deploy-004"],
     "concepts": ["wheel", "JAR", "ABI", "SparkFiles"],
-    "outcome": "Place each dependency at its actual importing process and test source/architecture identity."
+    "outcome": "Place each dependency at its actual importing process and test source/architecture identity.",
+    "key_terms": [
+      [
+        "Installation boundary",
+        "The process, such as driver Python, executor Python or the JVM, in which a dependency must actually exist."
+      ],
+      [
+        "Python wheel",
+        "A built Python package archive that may contain architecture-specific native libraries and must import in every process that uses it."
+      ],
+      [
+        "Native ABI",
+        "The binary interface a shared library expects; a JAR or archive cannot make it match the worker's architecture."
+      ],
+      [
+        "SparkFiles",
+        "The Spark mechanism that distributes files to executors and resolves their executor-local paths."
+      ],
+      [
+        "Runtime network isolation",
+        "The rule that tasks cannot download a missing dependency, so preparation must supply it in advance."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "importing a shipped source archive and proving where it came from",
+        "language": "python",
+        "code": "import hashlib\nimport io\nimport sys\nimport zipfile\nfrom pathlib import Path\n\narchive = Path(\"feature_rules.zip\")\nentry = zipfile.ZipInfo(\"feature_rules/__init__.py\", date_time=(2020, 1, 1, 0, 0, 0))\nentry.create_system = 3\nentry.external_attr = 0o644 << 16\nbuffer = io.BytesIO()\nwith zipfile.ZipFile(buffer, \"w\") as zf:\n    zf.writestr(entry, \"VERSION = '1.2.0'\\ndef clip(x):\\n    return min(max(x, 0), 100)\\n\")\narchive.write_bytes(buffer.getvalue())\nsys.path.insert(0, str(archive))\nimport feature_rules\n\nprint(\"sha256\", hashlib.sha256(archive.read_bytes()).hexdigest()[:16])\nprint(\"version\", feature_rules.VERSION, \"clip(140) =\", feature_rules.clip(140))\nprint(\"loaded from\", Path(feature_rules.__file__).parent.parent.name)\nsys.path.remove(str(archive))\narchive.unlink()",
+        "output": "sha256 71643e7b37ffcc2e\nversion 1.2.0 clip(140) = 100\nloaded from feature_rules.zip",
+        "interpretation": "The archive is built in memory with a fixed entry timestamp, creator system and permission bits, so its bytes and digest are identical on every run, and written to the working directory only so the import has a real file to load from; it stands in for the `feature_rules.zip` passed with `--py-files`. Putting a ZIP on `sys.path` is the same zipimport mechanism Spark relies on when it adds shipped Python files to each executor's path. The output binds three facts together: the archive digest prefix `71643e7b37ffcc2e`, the module's declared version 1.2.0 with a behavior check (`clip(140)` returns 100), and the location the module was loaded from, which is the ZIP rather than some stray checkout. In a real run, the same three lines should be produced inside an executor task, for example by a `mapPartitions` function that returns them, because a driver-side import only proves the gateway. If the digest printed by an executor differs from the one recorded at build time, two copies are in circulation and import precedence, not numerical logic, is the first thing to investigate."
+      },
+      {
+        "title": "matching wheel platform tags to worker architectures",
+        "language": "python",
+        "code": "wheels = [\n    \"fitcore-0.4.1-cp312-cp312-manylinux_2_28_aarch64.whl\",\n    \"fitcore-0.4.1-cp312-cp312-manylinux_2_28_x86_64.whl\",\n    \"feature_rules-1.2.0-py3-none-any.whl\",\n]\nworkers = {\n    \"worker-a\": (\"cp312\", \"aarch64\"),\n    \"gpu-pool-1\": (\"cp312\", \"x86_64\"),\n    \"legacy\": (\"cp311\", \"x86_64\"),\n}\nfor wheel in wheels:\n    _, _, python_tag, _, platform = wheel[:-4].split(\"-\")\n    ok = [\n        name\n        for name, (py, arch) in workers.items()\n        if platform == \"any\" or (python_tag == py and platform.endswith(arch))\n    ]\n    print(f\"{wheel:55} -> {ok}\")",
+        "output": "fitcore-0.4.1-cp312-cp312-manylinux_2_28_aarch64.whl    -> ['worker-a']\nfitcore-0.4.1-cp312-cp312-manylinux_2_28_x86_64.whl     -> ['gpu-pool-1']\nfeature_rules-1.2.0-py3-none-any.whl                    -> ['worker-a', 'gpu-pool-1', 'legacy']",
+        "interpretation": "Wheel filenames encode the interpreter and platform they were built for, so a quick parse catches the ARM64 versus AMD64 mismatch described in the changed-condition example before any task runs. The `aarch64` build of `fitcore` matches only worker-a, the `x86_64` build matches only `gpu-pool-1`, and the `legacy` worker on CPython 3.11 matches neither native wheel because its `cp311` tag differs from `cp312`. Only the pure `py3-none-any` archive installs everywhere, which is exactly why `--py-files` works for pure source and fails silently for compiled code. The worker inventory here is invented for illustration; a real one should come from each executor reporting `platform.machine()` and `sys.version_info` from inside a task. This check is necessary but not sufficient: a matching tag still says nothing about the glibc version behind `manylinux_2_28`, missing system libraries, or whether the loaded binary was built from the source revision you recorded."
+      }
+    ]
   },
   {
     "id": "spark-deploy-009",
@@ -78,7 +391,45 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-007"],
     "concepts": ["UI", "loopback", "port forwarding", "authorization"],
-    "outcome": "Bind UI evidence to the actual application while keeping access scoped to loopback or an authorized tunnel."
+    "outcome": "Bind UI evidence to the actual application while keeping access scoped to loopback or an authorized tunnel.",
+    "key_terms": [
+      [
+        "Live application UI",
+        "The driver's view of one running application's stages, tasks, executors and environment, removed when the driver exits."
+      ],
+      [
+        "Master UI",
+        "The Standalone master's view of cluster allocation across workers and applications."
+      ],
+      [
+        "Loopback binding",
+        "Publishing a port only on 127.0.0.1, which limits reach on a trusted single-user host but is not authentication."
+      ],
+      [
+        "Port forwarding",
+        "A Kubernetes-authorized tunnel that connects a local browser port to an in-cluster UI."
+      ],
+      [
+        "Information exposure",
+        "The risk that event details and configuration in a UI reveal paths or sensitive application data."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "checking that every published UI port is loopback only",
+        "language": "python",
+        "code": "published = [\n    \"127.0.0.1:${DS60_MASTER_UI_PORT:-0}:8080\",\n    \"127.0.0.1:${DS60_DRIVER_UI_PORT:-0}:4040\",\n    \"127.0.0.1:${DS60_HISTORY_UI_PORT:-0}:18080\",\n    \"127.0.0.1:${DS60_NOTEBOOK_PORT:-0}:8888\",\n    \"127.0.0.1:${DS60_NOTEBOOK_UI_PORT:-0}:14040\",\n]\nproposed = published + [\"7077:7077\", \"0.0.0.0:39000:39000\"]\nfor entry in proposed:\n    host_part, container_port = entry.rsplit(\":\", 1)\n    bound = host_part.split(\":\", 1)[0] if \":\" in host_part else \"all interfaces\"\n    verdict = \"ok\" if bound == \"127.0.0.1\" else \"REJECT\"\n    print(f\"{verdict:6} container {container_port:>5} bound to {bound}\")",
+        "output": "ok     container  8080 bound to 127.0.0.1\nok     container  4040 bound to 127.0.0.1\nok     container 18080 bound to 127.0.0.1\nok     container  8888 bound to 127.0.0.1\nok     container 14040 bound to 127.0.0.1\nREJECT container  7077 bound to all interfaces\nREJECT container 39000 bound to 0.0.0.0",
+        "interpretation": "The first five entries mirror the published ports in the workshop's `compose.yaml`: master UI 8080, driver UI 4040, History Server 18080, notebook 8888 and the notebook's Spark UI 14040, each bound to host loopback with a host port chosen by the launcher. All five pass. The two extra entries are the kind of change someone makes while chasing a callback failure: publishing master RPC 7077 without an address binds every interface, and `0.0.0.0:39000` exposes driver RPC to the LAN. Both are rejected, since neither port is ever published in this lab and neither would fix an executor-to-driver problem inside the internal network anyway. The parser handles only the short Compose syntax used here; the long form with `host_ip` fields needs its own check. Loopback binding limits who can connect, but it is not authentication, so on a shared machine another local account could still reach these UIs."
+      },
+      {
+        "title": "redacting an Environment tab export before attaching it",
+        "language": "python",
+        "code": "import re\n\nenvironment = {\n    \"sparkProperties\": [\n        [\"spark.app.id\", \"app-20260115101500-0004\"],\n        [\"spark.driver.maxResultSize\", \"1m\"],\n        [\"spark.hadoop.fs.s3a.secret.key\", \"EXAMPLE-NOT-A-REAL-KEY\"],\n        [\"spark.ssl.keyStorePassword\", \"changeit\"],\n        [\"spark.executorEnv.API_TOKEN\", \"tok_example\"],\n    ]\n}\nSENSITIVE = re.compile(r\"secret|password|token|credential\", re.I)\nclean = [\n    [k, \"*********(redacted)\" if SENSITIVE.search(k) else v]\n    for k, v in environment[\"sparkProperties\"]\n]\nfor key, value in clean:\n    print(f\"{key:34} {value}\")",
+        "output": "spark.app.id                       app-20260115101500-0004\nspark.driver.maxResultSize         1m\nspark.hadoop.fs.s3a.secret.key     *********(redacted)\nspark.ssl.keyStorePassword         *********(redacted)\nspark.executorEnv.API_TOKEN        *********(redacted)",
+        "interpretation": "Exports from the Environment tab or the REST endpoint often get pasted into tickets, and that is where credentials leak. The stand-in property list combines two harmless settings, the application ID and `spark.driver.maxResultSize=1m` that the chapter asks you to confirm, with three entries whose names signal secrets: an S3A secret key, a keystore password and an executor environment token. The pattern masks all three while leaving the evidence you actually need intact. Spark itself applies a similar rule through `spark.redaction.regex`, whose default matches names containing secret, password, token and a few others, and the replacement text shown mirrors what the UI prints. Name-based redaction has a gap, though: a credential embedded in a URI or a job argument has an innocent key and passes straight through, and the event log already holds the raw value. Treat this as a final scrub, not as permission to put secrets in Spark configuration."
+      }
+    ]
   },
   {
     "id": "spark-deploy-010",
@@ -87,7 +438,45 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-009"],
     "concepts": ["History Server", "event logs", "retention", "readback"],
-    "outcome": "Inspect completed application history after container replacement without replaying its computation."
+    "outcome": "Inspect completed application history after container replacement without replaying its computation.",
+    "key_terms": [
+      [
+        "Event log",
+        "Structured application history the driver writes when event logging is enabled before startup."
+      ],
+      [
+        "History Server",
+        "A service that reads persisted event logs and reconstructs application views without replaying computation."
+      ],
+      [
+        "Driver log",
+        "Plain text output from the driver process, distinct from the structured event log."
+      ],
+      [
+        "Shared event directory",
+        "Storage mounted writable in the driver and read-only in the History Server, valid across machines only with real shared storage."
+      ],
+      [
+        "Retention policy",
+        "The configured compaction, cleaning and storage budget that decide how long application history remains readable."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "comparing the driver write path with the history read path",
+        "language": "python",
+        "code": "import shlex\n\ndefaults = \"\"\"\nspark.eventLog.enabled true\nspark.eventLog.dir file:/events\n\"\"\"\nhistory_opts = (\n    \"-Dspark.history.fs.logDirectory=file:/events -Dspark.history.fs.cleaner.enabled=false\"\n)\n\ndriver = dict(line.split(None, 1) for line in defaults.strip().splitlines())\nhistory = dict(token[2:].split(\"=\", 1) for token in shlex.split(history_opts))\nprint(\n    \"driver writes to \", driver[\"spark.eventLog.dir\"], \"enabled:\", driver[\"spark.eventLog.enabled\"]\n)\nprint(\"history reads from\", history[\"spark.history.fs.logDirectory\"])\nprint(\"paths agree:\", driver[\"spark.eventLog.dir\"] == history[\"spark.history.fs.logDirectory\"])\nprint(\"cleaner:\", history[\"spark.history.fs.cleaner.enabled\"])\nmoved = history_opts.replace(\"file:/events\", \"file:/tmp/events\")\nhistory = dict(token[2:].split(\"=\", 1) for token in shlex.split(moved))\nprint(\n    \"after a careless edit, paths agree:\",\n    driver[\"spark.eventLog.dir\"] == history[\"spark.history.fs.logDirectory\"],\n)",
+        "output": "driver writes to  file:/events enabled: true\nhistory reads from file:/events\npaths agree: True\ncleaner: false\nafter a careless edit, paths agree: False",
+        "interpretation": "The History Server in this lab receives its settings through `SPARK_HISTORY_OPTS` in `entrypoint.py`, while the driver reads `spark.eventLog.dir` from `spark-defaults.conf`. They live in different files, so nothing forces them to agree. The script parses both exactly as written in the project and confirms that the driver writes to `file:/events` and the server reads from `file:/events`, with the cleaner disabled so retained logs are not pruned during an evidence test. The last line simulates a one-word edit to the history options; the paths no longer match and the History Server would show an empty listing while every application still completes normally. That is the first comparison the chapter recommends when the history page is empty, before permissions or format versions. Remember that agreeing strings are still only half of the story on multiple hosts, where `file:/events` names a different disk on each machine unless a real shared mount backs it."
+      },
+      {
+        "title": "telling a finished event log from an interrupted one",
+        "language": "python",
+        "code": "import json\n\nlogs = {\n    \"app-20260115101500-0004\": [\n        {\n            \"Event\": \"SparkListenerApplicationStart\",\n            \"App ID\": \"app-20260115101500-0004\",\n            \"Timestamp\": 1768471500000,\n        },\n        {\"Event\": \"SparkListenerJobEnd\", \"Job ID\": 0, \"Job Result\": {\"Result\": \"JobSucceeded\"}},\n        {\"Event\": \"SparkListenerApplicationEnd\", \"Timestamp\": 1768471563000},\n    ],\n    \"app-20260115102000-0005.inprogress\": [\n        {\n            \"Event\": \"SparkListenerApplicationStart\",\n            \"App ID\": \"app-20260115102000-0005\",\n            \"Timestamp\": 1768471800000,\n        },\n        {\"Event\": \"SparkListenerJobStart\", \"Job ID\": 0},\n    ],\n}\nfor name, events in logs.items():\n    lines = \"\\n\".join(json.dumps(e) for e in events)\n    kinds = [json.loads(line)[\"Event\"] for line in lines.splitlines()]\n    finished = \"SparkListenerApplicationEnd\" in kinds\n    print(\n        f\"{name}: {len(kinds)} events, finished={finished}, suffix={name.endswith('.inprogress')}\"\n    )\n    if finished:\n        start = events[0][\"Timestamp\"]\n        print(f\"  duration {(events[-1]['Timestamp'] - start) / 1000:.0f}s\")",
+        "output": "app-20260115101500-0004: 3 events, finished=True, suffix=False\n  duration 63s\napp-20260115102000-0005.inprogress: 2 events, finished=False, suffix=True",
+        "interpretation": "Spark writes event logs as newline-delimited JSON, and an application still running, or one whose driver died, keeps the `.inprogress` suffix and lacks a `SparkListenerApplicationEnd` record. The two stand-in logs are minimal fabrications that follow that format, not files captured from the lab. The completed one has three events and a 63 second span between start and end timestamps; the interrupted one stops after a job start and still carries the suffix. The History Server lists both, but only the first supports a claim that the application finished. During the container replacement in Worked case B, a log that remains `.inprogress` after `lab.py down` means the driver was stopped before `spark.stop()` flushed its end event, and the right response is to preserve that file for diagnosis rather than resubmit. Rolling or compressed logs need their own reader, so check `spark.eventLog.rolling.enabled` and the codec before applying a simple parser like this."
+      }
+    ]
   },
   {
     "id": "spark-deploy-011",
@@ -96,7 +485,45 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-010", "k8s-022"],
     "concepts": ["storage", "checkpoint", "PVC", "publication"],
-    "outcome": "Identify which state must survive worker, driver and container failure and choose a compatible storage boundary."
+    "outcome": "Identify which state must survive worker, driver and container failure and choose a compatible storage boundary.",
+    "key_terms": [
+      [
+        "Executor scratch",
+        "Disposable local storage for shuffle and spill that is lost with its container and can be recomputed."
+      ],
+      [
+        "Streaming checkpoint",
+        "Recorded progress and state that a compatible streaming query needs to resume."
+      ],
+      [
+        "Persistent volume claim (PVC)",
+        "A Kubernetes storage request with its own access mode, topology, reclaim policy and permissions."
+      ],
+      [
+        "Publication contract",
+        "The rules that make a final result durable, identifiable and safe to read back."
+      ],
+      [
+        "Input identity",
+        "An immutable identifier for external source data so a task retry reads the same records."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "which paths survive which lab failure",
+        "language": "python",
+        "code": "paths = {\n    \"/tmp/spark-local\": \"tmpfs in container\",\n    \"/events\": \"host state dir\",\n    \"/results\": \"host state dir\",\n    \"/notebooks\": \"host state dir\",\n}\nfailures = {\n    \"executor JVM exits\": {\"tmpfs in container\"},\n    \"worker container stopped\": {\"tmpfs in container\"},\n    \"lab.py down then up\": {\"tmpfs in container\"},\n    \"host state dir deleted\": {\"host state dir\"},\n}\nfor failure, destroyed in failures.items():\n    lost = [p for p, kind in paths.items() if kind in destroyed]\n    print(f\"{failure:26} loses {lost}\")",
+        "output": "executor JVM exits         loses ['/tmp/spark-local']\nworker container stopped   loses ['/tmp/spark-local']\nlab.py down then up        loses ['/tmp/spark-local']\nhost state dir deleted     loses ['/events', '/results', '/notebooks']",
+        "interpretation": "The table restates the chapter's storage map as an executable check. Every failure that stays inside containers, an executor JVM crash, a stopped worker or a full `lab.py down` then `up`, destroys only `/tmp/spark-local`, the tmpfs scratch where shuffle and spill files live. Spark can rebuild that content from lineage because the bounded job regenerates its range input deterministically. The final row shows the only event that touches `/events`, `/results` and `/notebooks` together: deleting the host state directory, which the launcher intentionally provides no command for. The same model transfers to Kubernetes by replacing tmpfs with `emptyDir` and host directories with a PVC or object store, but then a node loss can also remove an `emptyDir`, and a ReadWriteOnce claim may follow a different lifecycle. Writing the mapping down before a failure rehearsal makes it obvious which before and after comparisons count as evidence and which are just regenerated scratch."
+      },
+      {
+        "title": "publishing a result directory so readers never see half of it",
+        "language": "python",
+        "code": "import json\nimport os\nimport shutil\nfrom pathlib import Path\n\nroot = Path(\"publish-demo\")\nfinal, staging = root / \"fit-v1\", root / \".fit-v1.staging\"\nstaging.mkdir(parents=True)\nfor part in range(3):\n    (staging / f\"part-{part:05d}.json\").write_text(json.dumps({\"partition\": part}) + \"\\n\")\n(staging / \"_SUCCESS\").write_text(\"\")\n\n\ndef readable(path):\n    return path.is_dir() and (path / \"_SUCCESS\").exists()\n\n\nprint(\"before rename, reader sees final:\", readable(final))\nos.rename(staging, final)\nprint(\"after rename, reader sees final:\", readable(final), sorted(p.name for p in final.iterdir()))\nretry = root / \".fit-v1.retry\"\nretry.mkdir()\n(retry / \"part-00000.json\").write_text(\"{}\\n\")\ntry:\n    os.rename(retry, final)\nexcept OSError as error:\n    print(\"retry onto the published directory refused:\", type(error).__name__)\nshutil.rmtree(root)",
+        "output": "before rename, reader sees final: False\nafter rename, reader sees final: True ['_SUCCESS', 'part-00000.json', 'part-00001.json', 'part-00002.json']\nretry onto the published directory refused: OSError",
+        "interpretation": "Readers of a result directory need a single moment when it switches from absent to complete. The script writes three part files and a `_SUCCESS` marker into a hidden staging directory, so a reader polling `fit-v1` sees nothing during the writes; then one `os.rename` makes the whole set visible at once. A retry that tries to rename a second staging directory onto the published one is refused with `OSError`, because POSIX rename will not replace a non-empty directory, which protects the accepted output from a late duplicate attempt. All of this happens in a scratch folder that is removed afterward. The guarantee depends on the filesystem: on a local disk or a POSIX shared mount the rename is atomic, while most object stores implement rename as copy then delete, so a reader can observe a partial set. For those stores use a committer or a manifest written last, and verify how readers decide that output is complete."
+      }
+    ]
   },
   {
     "id": "spark-deploy-012",
@@ -105,7 +532,42 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-004", "spark-039"],
     "concepts": ["memory", "CPU", "PIDs", "resources"],
-    "outcome": "Diagnose memory, thread and result-size failures using distinct resource evidence."
+    "outcome": "Diagnose memory, thread and result-size failures using distinct resource evidence.",
+    "key_terms": [
+      [
+        "Process tree budget",
+        "The combined memory of heap, metaspace, direct buffers, Python workers, native libraries, threads and cache in one container."
+      ],
+      [
+        "Container memory limit",
+        "The hard ceiling, 1.5 GiB per worker here, above which the container is killed regardless of the configured heap."
+      ],
+      [
+        "Executor heap",
+        "The JVM heap set for each executor, 512 MiB in this lab, which is only one memory consumer."
+      ],
+      ["PID limit", "The cap on processes and threads in a container, 512 per worker in this lab."],
+      [
+        "Maximum result size",
+        "The spark.driver.maxResultSize limit that makes an oversized collect fail instead of exhausting driver memory."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "a worker container memory ledger and scheduling waves",
+        "language": "python",
+        "code": "import math\n\nlimit = 1536\nconsumers = {\n    \"worker daemon (SPARK_DAEMON_MEMORY)\": 256,\n    \"executor heap (spark.executor.memory)\": 512,\n    \"executor JVM non-heap, estimate\": 384,\n    \"Python worker for one task, estimate\": 150,\n}\nused = sum(consumers.values())\nfor name, mib in consumers.items():\n    print(f\"{mib:5} MiB  {name}\")\nprint(f\"{used:5} MiB  total, headroom {limit - used} MiB of {limit}\")\nslots = 2 * 1\nfor partitions in (8, 9, 16):\n    print(f\"{partitions} partitions over {slots} slots -> {math.ceil(partitions / slots)} waves\")",
+        "output": "  256 MiB  worker daemon (SPARK_DAEMON_MEMORY)\n  512 MiB  executor heap (spark.executor.memory)\n  384 MiB  executor JVM non-heap, estimate\n  150 MiB  Python worker for one task, estimate\n 1302 MiB  total, headroom 234 MiB of 1536\n8 partitions over 2 slots -> 4 waves\n9 partitions over 2 slots -> 5 waves\n16 partitions over 2 slots -> 8 waves",
+        "interpretation": "The ledger adds the long-lived processes in one worker container. `SPARK_DAEMON_MEMORY` is 256m in `compose.yaml` and `spark.executor.memory` is 512m in the defaults; those two numbers are configured. The 384 MiB non-heap figure borrows the minimum overhead that Spark uses for resource managers, and the 150 MiB Python worker is a rough estimate, so both should be replaced by measured resident sizes from `docker stats` or `/proc` during a run. Even with these estimates, 1302 MiB of the 1536 MiB limit is committed, leaving 234 MiB for thread stacks, native libraries and page cache. The second half restates Worked case A: with two one-core slots, eight partitions need four waves, nine need five because one straggler partition gets a wave to itself, and sixteen need eight. These counts are scheduling arithmetic, not timings, and adding partitions to improve balance also adds per-task startup cost and more summaries returned to the driver."
+      },
+      {
+        "title": "routing a failure message to the right budget",
+        "language": "python",
+        "code": "import re\n\nRULES = [\n    (\n        r\"[Ee]xit code (is )?137|OOMKilled\",\n        \"container memory: compare limit with the whole process tree\",\n    ),\n    (r\"unable to create native thread|Resource temporarily unavailable\", \"PID or thread limit\"),\n    (r\"bigger than spark\\.driver\\.maxResultSize\", \"result size: inspect what is being collected\"),\n    (r\"java\\.lang\\.OutOfMemoryError: Java heap space\", \"JVM heap of the reporting process\"),\n]\nmessages = [\n    \"Container killed on request. Exit code is 137\",\n    \"java.lang.OutOfMemoryError: unable to create native thread: possibly out of memory or process/resource limits reached\",\n    \"Total size of serialized results of 9 tasks (1100.3 KiB) is bigger than spark.driver.maxResultSize (1024.0 KiB)\",\n    \"java.lang.OutOfMemoryError: Java heap space\",\n]\nfor message in messages:\n    match = next((label for pattern, label in RULES if re.search(pattern, message)), \"unclassified\")\n    print(f\"{match:58} <- {message[:48]}\")",
+        "output": "container memory: compare limit with the whole process tree <- Container killed on request. Exit code is 137\nPID or thread limit                                        <- java.lang.OutOfMemoryError: unable to create nat\nresult size: inspect what is being collected               <- Total size of serialized results of 9 tasks (110\nJVM heap of the reporting process                          <- java.lang.OutOfMemoryError: Java heap space",
+        "interpretation": "Each message is a realistic form of the three failures in Worked case B plus a heap exhaustion, and each routes to a different budget. Exit 137 means the kernel or runtime killed the container, so the comparison is the container limit against the whole process tree, not the JVM heap setting. The native thread message names an OutOfMemoryError but is actually a PID or thread limit, here 512 per worker, and raising `spark.executor.memory` would not help. The `maxResultSize` text, with 1100.3 KiB from nine tasks against a 1024 KiB bound, says the driver refused a collection, so the right question is what the job returns, not how big the driver heap is. Only the last line points at heap size, and even then it names the process that reported it. Order matters in the rule list because the thread message also contains OutOfMemoryError; checking the specific pattern first keeps it from being filed as a heap problem."
+      }
+    ]
   },
   {
     "id": "spark-deploy-013",
@@ -114,7 +576,45 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-011", "spark-deploy-012"],
     "concepts": ["worker loss", "retry", "partition coverage", "recovery"],
-    "outcome": "Bind an owned in-flight worker stop to task attempts and complete numerical result coverage."
+    "outcome": "Bind an owned in-flight worker stop to task attempts and complete numerical result coverage.",
+    "key_terms": [
+      [
+        "Executor loss",
+        "The disappearance of an executor, here caused by stopping an owned worker container during a running stage."
+      ],
+      [
+        "Task retry",
+        "A new attempt of a failed task on a surviving executor, recorded with a new attempt number."
+      ],
+      [
+        "Partition coverage",
+        "The check that the final partition results include every input ID exactly once after recovery."
+      ],
+      [
+        "Fault injection",
+        "A deliberate failure, such as stopping worker-a after observing its running task, used to test recovery."
+      ],
+      [
+        "Idempotency key",
+        "A durable identifier that prevents a retried task from duplicating an external effect."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "reconciling task attempts after worker-a is stopped",
+        "language": "python",
+        "code": "N, PARTS = 100000, 8\n\n\ndef summary(p):\n    lo, hi = p * N // PARTS, (p + 1) * N // PARTS\n    return {\"partition\": p, \"rows\": hi - lo, \"sx\": sum(range(lo, hi))}\n\n\nattempts = [\n    dict(summary(p), attempt=0, host=\"worker-a\" if p % 2 == 0 else \"worker-b\", ok=True)\n    for p in range(PARTS)\n]\nattempts[0][\"ok\"] = False\nattempts.append(dict(summary(0), attempt=1, host=\"worker-b\", ok=True))\n\nnaive_rows = sum(a[\"rows\"] for a in attempts)\naccepted = {a[\"partition\"]: a for a in attempts if a[\"ok\"]}\nrows = sum(a[\"rows\"] for a in accepted.values())\nsx = sum(a[\"sx\"] for a in accepted.values())\nprint(\"attempt records:\", len(attempts), \"naive row total:\", naive_rows)\nprint(\"accepted partitions:\", sorted(accepted), \"rows:\", rows, \"sx:\", sx)\nprint(\"partition 0 finished on\", accepted[0][\"host\"], \"attempt\", accepted[0][\"attempt\"])\nprint(\"coverage ok:\", sorted(accepted) == list(range(PARTS)) and rows == N and sx == 4999950000)",
+        "output": "attempt records: 9 naive row total: 112500\naccepted partitions: [0, 1, 2, 3, 4, 5, 6, 7] rows: 100000 sx: 4999950000\npartition 0 finished on worker-b attempt 1\ncoverage ok: True",
+        "interpretation": "The simulation recreates the observed qualification run in miniature. `spark.range(0, 100000, numPartitions=8)` gives each partition 12500 consecutive IDs, and partition 0's first attempt on worker-a is marked failed while attempt 1 completes on worker-b. Summing every attempt record, as a naive log scraper would, reports 112500 rows. Keeping exactly one successful attempt per partition restores 100000 rows and the exact `sx` of 4999950000, covering partitions 0 through 7 once each, which is the oracle the chapter requires before calling the run recovered. The partition summaries are computed in plain Python rather than by Spark, so they reproduce the bookkeeping, not the scheduler. In the real report, the attempt number comes from `TaskContext.attemptNumber()` and the host from the executor, and those fields must still be joined to the host-side stop timestamp, which is why the application keeps `worker_loss_observed` false instead of inferring recovery from the survivor alone."
+      },
+      {
+        "title": "why a retried side effect needs an idempotency key",
+        "language": "python",
+        "code": "def run_partition(sink, partition, attempt, keyed):\n    record = {\"partition\": partition, \"event\": \"fit-report-ready\"}\n    if keyed:\n        sink.setdefault(f\"app-0004/partition-{partition}\", record)\n    else:\n        sink.setdefault(\"log\", []).append(dict(record, attempt=attempt))\n    if attempt == 0 and partition == 0:\n        raise ConnectionError(\"executor lost after the side effect\")\n\n\nfor keyed in (False, True):\n    sink = {}\n    for partition in range(8):\n        for attempt in range(2):\n            try:\n                run_partition(sink, partition, attempt, keyed)\n                break\n            except ConnectionError:\n                continue\n    size = len(sink) if keyed else len(sink[\"log\"])\n    print(f\"keyed={keyed}: {size} sink records for 8 partitions\")",
+        "output": "keyed=False: 9 sink records for 8 partitions\nkeyed=True: 8 sink records for 8 partitions",
+        "interpretation": "A task that sends a notification and then loses its executor will run again, and the second attempt repeats the effect. The function models that: partition 0's first attempt writes to the sink and then raises, and the retry loop runs it again. With an append-only log the sink ends with nine records for eight partitions, one duplicate that no Spark metric would flag because the job itself succeeded. With a deterministic key built from the application and partition, the retry finds the existing record and the sink holds exactly eight. The key here is a plain dictionary entry; in a real system it must be enforced by the external store, for example a unique constraint or a conditional write, since two concurrent speculative attempts could both pass a separate existence check. A deterministic numerical summary, like this chapter's partition sums, needs none of this because replaying it yields identical values and only the accepted result is kept."
+      }
+    ]
   },
   {
     "id": "spark-deploy-014",
@@ -123,7 +623,41 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-005", "k8s-018"],
     "concepts": ["Kubernetes", "cluster mode", "Pod", "submission"],
-    "outcome": "Review an explicit-target Kubernetes submission and distinguish allocation, image and application failures."
+    "outcome": "Review an explicit-target Kubernetes submission and distinguish allocation, image and application failures.",
+    "key_terms": [
+      [
+        "Kubernetes cluster mode",
+        "Submission that creates a driver Pod, which then creates executor Pods through the Kubernetes API."
+      ],
+      ["Pod", "The smallest Kubernetes workload unit, here one Spark driver or executor."],
+      [
+        "Owned namespace",
+        "An explicitly selected namespace whose objects the deployment controls and can safely create or delete."
+      ],
+      [
+        "Kubeconfig context",
+        "The explicit cluster, user and namespace selection used for API requests instead of an ambient account."
+      ],
+      [
+        "Dry-run plan",
+        "The concrete submission plan that submit.py prints by default before any request is made with --execute."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "pod memory requests against the namespace quota",
+        "language": "python",
+        "code": "import math\n\nMIN_OVERHEAD_MIB = 384\nNON_JVM_FACTOR = 0.40\n\n\ndef pod_memory(heap_mib):\n    return heap_mib + max(MIN_OVERHEAD_MIB, math.floor(heap_mib * NON_JVM_FACTOR))\n\n\ndriver, executor = pod_memory(1024), pod_memory(512)\nquota = {\"pods\": 8, \"requests.cpu\": 4, \"requests.memory\": 6 * 1024}\nused = {\"pods\": 3, \"requests.cpu\": 1 + 2 * 1, \"requests.memory\": driver + 2 * executor}\nprint(\"driver pod\", driver, \"MiB; executor pod\", executor, \"MiB\")\nfor key in quota:\n    print(f\"{key:16} {used[key]:>6} of {quota[key]}\")\nheadroom = {\n    \"pods\": quota[\"pods\"] - 1,\n    \"requests.cpu\": quota[\"requests.cpu\"] - 1,\n    \"requests.memory\": (quota[\"requests.memory\"] - driver) // executor,\n}\nprint(\"max executors per limit:\", headroom, \"-> binding:\", min(headroom, key=headroom.get))",
+        "output": "driver pod 1433 MiB; executor pod 896 MiB\npods                  3 of 8\nrequests.cpu          3 of 4\nrequests.memory    3225 of 6144\nmax executors per limit: {'pods': 7, 'requests.cpu': 3, 'requests.memory': 5} -> binding: requests.cpu",
+        "interpretation": "The arithmetic uses Spark's documented rule for Kubernetes pod memory: heap plus overhead, where overhead is the larger of 384 MiB and a factor times heap, and the factor defaults to 0.40 for non-JVM applications such as this Python job. The 1g driver therefore requests 1433 MiB and each 512m executor requests 896 MiB. Against the workshop `resources.yaml` quota, the submission uses 3 of 8 pods, 3 of 4 requested CPUs and 3225 of 6144 MiB. Scaling up, CPU binds first at three executors, before memory allows five and pods allow seven. This is a calculation, not an observation, so confirm it against the actual pod spec with `kubectl get pod -o yaml` after submission, since a cluster admission controller or explicit `memoryOverhead` setting can change the numbers. When a fourth executor stays Pending with an exceeded quota event, this table explains why without any application change, and the chapter's rule applies: that is an allocation failure, not a numerical one."
+      },
+      {
+        "title": "reading pod conditions before touching application code",
+        "language": "bash",
+        "code": "K=\"kubectl --kubeconfig $OWNED_KUBECONFIG --context $OWNED_CONTEXT --namespace ds60-spark-study\"\n$K get pods -l ds60-workshop=spark-deployment \\\n  -o custom-columns=NAME:.metadata.name,PHASE:.status.phase,ROLE:.metadata.labels.spark-role\n$K describe pod OBSERVED_DRIVER_POD | sed -n '/^Events:/,$p'\n$K get events --field-selector involvedObject.name=OBSERVED_DRIVER_POD \\\n  --sort-by=.lastTimestamp\n$K logs OBSERVED_DRIVER_POD --tail=200 | grep -E 'Forbidden|ImagePull|Exception' || true",
+        "interpretation": "These commands gather the evidence that separates the four failure lines in Worked case B, and they print nothing here because no owned cluster is attached to this page. Listing pods with the workshop label and the `spark-role` column shows whether the driver exists and whether any executors were ever created. The Events section of `describe` and the filtered `get events` surface image pull errors, failed scheduling with insufficient memory or exceeded quota, and admission rejections, all of which happen before the application code runs. The final log search looks for the `Forbidden` text that appears when the driver ServiceAccount cannot create executor pods. `OBSERVED_DRIVER_POD` must be replaced with the pod name that the submission actually produced, and the explicit kubeconfig and context keep the queries from landing on an ambient cluster. Save the event output before cleanup, because Kubernetes expires events after a retention window and the receipt needs the exact failing stage."
+      }
+    ]
   },
   {
     "id": "spark-deploy-015",
@@ -132,7 +666,45 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-006", "spark-deploy-014", "k8s-057"],
     "concepts": ["client mode", "Service", "Pod identity", "garbage collection"],
-    "outcome": "Give one notebook driver a reachable Service and verify executor ownership and cleanup boundaries."
+    "outcome": "Give one notebook driver a reachable Service and verify executor ownership and cleanup boundaries.",
+    "key_terms": [
+      [
+        "In-cluster client mode",
+        "Running the driver inside a notebook Pod while executors run as separate Pods."
+      ],
+      [
+        "Headless Service",
+        "A Kubernetes Service without a cluster IP that gives the driver Pod a stable DNS name for RPC, block and UI ports."
+      ],
+      [
+        "Session selector",
+        "A unique label that must match exactly one notebook Pod so callbacks reach the right kernel."
+      ],
+      [
+        "Driver Pod name",
+        "The observed name passed in spark.kubernetes.driver.pod.name so executors are owned by that Pod."
+      ],
+      [
+        "Garbage collection",
+        "Kubernetes deletion of executor Pods through owner references when the owning driver Pod is removed."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "rendering an owned Service copy and refusing leftover placeholders",
+        "language": "python",
+        "code": "import re\n\ntemplate = \"\"\"apiVersion: v1\nkind: Service\nmetadata:\n  name: notebook-driver\n  namespace: NAMESPACE\nspec:\n  clusterIP: None\n  selector:\n    ds60-session: NOTEBOOK_SESSION\n  ports:\n    - name: driver-rpc\n      port: 39000\n    - name: blocks\n      port: 39001\n    - name: spark-ui\n      port: 4040\n\"\"\"\n\n\ndef render(values):\n    text = template\n    for placeholder, value in values.items():\n        text = text.replace(placeholder, value)\n    leftover = re.findall(r\"\\b[A-Z][A-Z_]{5,}\\b\", text)\n    if leftover:\n        raise ValueError(f\"unsubstituted: {leftover}\")\n    return text\n\n\ntry:\n    render({\"NAMESPACE\": \"ds60-spark-study\"})\nexcept ValueError as error:\n    print(error)\nowned = render({\"NAMESPACE\": \"ds60-spark-study\", \"NOTEBOOK_SESSION\": \"nb-7f3c2a\"})\nprint(\n    [line.strip() for line in owned.splitlines() if \"namespace:\" in line or \"ds60-session\" in line]\n)\nprint(\"ports:\", re.findall(r\"port: (\\d+)\", owned))",
+        "output": "unsubstituted: ['NOTEBOOK_SESSION']\n['namespace: ds60-spark-study', 'ds60-session: nb-7f3c2a']\nports: ['39000', '39001', '4040']",
+        "interpretation": "Substituting the template by hand invites a forgotten placeholder, and a Service whose selector still reads `NOTEBOOK_SESSION` silently matches nothing. The renderer replaces only the values it is given and then scans for any remaining all-caps token of six or more characters. The first call supplies the namespace but not the session label, so it is refused with the missing name. The second call fills both and the output shows the owned namespace `ds60-spark-study`, the unique session label `nb-7f3c2a` and the three ports from `notebook-service.yaml`: 39000 for driver RPC, 39001 for blocks and 4040 for the UI. The inline template omits `targetPort` lines for brevity, so render from the real file in practice. The regex is a heuristic tuned to this manifest's placeholder style; it would miss a lowercase placeholder and could flag a legitimate uppercase value, so the rendered copy still needs a human diff and a server-side dry run before it is applied."
+      },
+      {
+        "title": "counting endpoints behind the driver Service",
+        "language": "python",
+        "code": "def verdict(slice_json):\n    ready = [\n        e[\"targetRef\"][\"name\"]\n        for e in slice_json[\"endpoints\"]\n        if e[\"conditions\"].get(\"ready\") and e.get(\"targetRef\", {}).get(\"kind\") == \"Pod\"\n    ]\n    if len(ready) == 1:\n        return f\"accept: single driver endpoint {ready[0]}\"\n    if not ready:\n        return \"reject: Service has no ready endpoint (wrong label or pod not ready)\"\n    return f\"reject: selector matches {len(ready)} pods {ready}\"\n\n\ndef endpoint(name, ready=True):\n    return {\"conditions\": {\"ready\": ready}, \"targetRef\": {\"kind\": \"Pod\", \"name\": name}}\n\n\ncases = {\n    \"unique session label\": [endpoint(\"nb-alice-0\")],\n    \"shared label\": [endpoint(\"nb-alice-0\"), endpoint(\"nb-bob-0\")],\n    \"pod still starting\": [endpoint(\"nb-alice-0\", ready=False)],\n}\nfor label, endpoints in cases.items():\n    print(f\"{label:22} {verdict({'endpoints': endpoints})}\")",
+        "output": "unique session label   accept: single driver endpoint nb-alice-0\nshared label           reject: selector matches 2 pods ['nb-alice-0', 'nb-bob-0']\npod still starting     reject: Service has no ready endpoint (wrong label or pod not ready)",
+        "interpretation": "Worked case B asks you to look at EndpointSlices before accepting a notebook session, and this function encodes the decision. Only endpoints that are ready and point at a Pod count. One ready endpoint is accepted and its pod name is recorded so it can be compared with `spark.kubernetes.driver.pod.name`. Two ready endpoints mean the selector matched another notebook as well, so executor callbacks could reach Bob's kernel instead of Alice's, and the session is rejected. A single endpoint that is not ready yields the third outcome, which DNS alone cannot distinguish from the collision because a headless Service resolves either way or not at all. The case data are hand-built dictionaries shaped like the `endpoints` array of a real `kubectl get endpointslice -o json` response, not captured cluster output. In use, collect every slice for `kubernetes.io/service-name=notebook-driver`, since a Service can be split across several slices, and merge their endpoints before applying the rule."
+      }
+    ]
   },
   {
     "id": "spark-deploy-016",
@@ -141,7 +713,44 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-014", "k8s-021"],
     "concepts": ["RBAC", "ServiceAccount", "secrets", "NetworkPolicy"],
-    "outcome": "Separate notebook, Kubernetes, Spark and storage authorization and test a narrow policy."
+    "outcome": "Separate notebook, Kubernetes, Spark and storage authorization and test a narrow policy.",
+    "key_terms": [
+      [
+        "RBAC Role",
+        "A namespaced Kubernetes permission set, here for executor Pods, their ConfigMap and Pod-log reads, with no Service or cluster-admin grant."
+      ],
+      [
+        "ServiceAccount",
+        "The Kubernetes identity a Pod uses for API requests; the executor account disables automatic token mounting."
+      ],
+      [
+        "Spark RPC authentication",
+        "Protection for supported connections between Spark processes, separate from notebook login and API identity."
+      ],
+      [
+        "Storage credential",
+        "An authorization to read or write data that none of the other three boundaries configures."
+      ],
+      [
+        "NetworkPolicy",
+        "A Kubernetes rule that restricts Pod traffic; it takes effect only when the cluster's network implementation enforces it."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "evaluating the example Role offline",
+        "language": "python",
+        "code": "role_rules = [\n    {\"resources\": {\"pods\"}, \"verbs\": {\"create\", \"get\", \"list\", \"watch\", \"delete\"}},\n    {\"resources\": {\"configmaps\"}, \"verbs\": {\"create\", \"get\", \"list\", \"delete\"}},\n    {\"resources\": {\"pods/log\"}, \"verbs\": {\"get\"}},\n]\nbindings = {\"spark-driver\": role_rules, \"spark-executor\": []}\nquestions = [\n    (\"spark-driver\", \"create\", \"pods\"),\n    (\"spark-driver\", \"get\", \"pods/log\"),\n    (\"spark-driver\", \"create\", \"persistentvolumeclaims\"),\n    (\"spark-driver\", \"get\", \"secrets\"),\n    (\"spark-executor\", \"get\", \"secrets\"),\n    (\"spark-executor\", \"list\", \"pods\"),\n]\nfor account, verb, resource in questions:\n    allowed = any(resource in r[\"resources\"] and verb in r[\"verbs\"] for r in bindings[account])\n    print(f\"{account:15} {verb:7} {resource:23} {'yes' if allowed else 'no'}\")",
+        "output": "spark-driver    create  pods                    yes\nspark-driver    get     pods/log                yes\nspark-driver    create  persistentvolumeclaims  no\nspark-driver    get     secrets                 no\nspark-executor  get     secrets                 no\nspark-executor  list    pods                    no",
+        "interpretation": "The rules are copied from the Role in `access.yaml`, and the evaluator answers the same questions as `kubectl auth can-i` without needing a cluster or impersonation rights. The driver can create pods and read pod logs, which covers executor creation and diagnosis. It cannot create PersistentVolumeClaims, so a configuration that asks Spark to provision on-demand volumes would fail with Forbidden until a reviewed rule is added. Neither account can read Secrets, and the executor account has no binding at all, matching its disabled token mount. This model is intentionally narrow: it ignores ClusterRoles, aggregated roles, wildcards and resource names, any of which a real cluster may add through other bindings, so a no here does not prove the live answer is no. Use it to review a change to the manifest before applying it, then confirm the effective permissions with an authorized access review on the owned namespace as the chapter describes."
+      },
+      {
+        "title": "an explicit egress rule for the API server",
+        "language": "yaml",
+        "code": "apiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: spark-driver-api-egress\n  namespace: NAMESPACE\nspec:\n  podSelector:\n    matchLabels:\n      ds60-workshop: spark-deployment\n      spark-role: driver\n  policyTypes: [Egress]\n  egress:\n    - to:\n        - ipBlock:\n            cidr: OBSERVED_API_SERVER_IP/32\n      ports:\n        - protocol: TCP\n          port: 443",
+        "interpretation": "This additive policy is the piece Worked case B says the template leaves out on purpose. Kubernetes NetworkPolicies are unioned, so applying it alongside `spark-namespace-boundary` lets pods labeled as the Spark driver open TCP connections to one API server address while every other egress rule stays as strict as before. The `spark-role: driver` label is set by Spark on driver pods, and executors do not receive this rule because they never call the API. `OBSERVED_API_SERVER_IP` must be the address the driver actually reaches, which on many managed clusters is the `kubernetes` Service endpoint in the default namespace and may not be what the kubeconfig URL shows; port 443 may also need to be 6443 depending on that endpoint. Nothing is printed because enforcement depends on the cluster's CNI. Test both directions: executor creation should now succeed, and a connection from the same pod to an unrelated external address should still time out."
+      }
+    ]
   },
   {
     "id": "spark-deploy-017",
@@ -150,7 +759,44 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-011", "spark-deploy-016"],
     "concepts": ["cloud", "storage", "scheduling", "portability"],
-    "outcome": "Plan an explicitly authorized provider deployment while preserving untested-environment boundaries."
+    "outcome": "Plan an explicitly authorized provider deployment while preserving untested-environment boundaries.",
+    "key_terms": [
+      [
+        "Portable contract",
+        "The parts that carry across providers: source, image identity, schema, partition and result bounds and numerical oracles."
+      ],
+      [
+        "Provider-specific choice",
+        "A cloud decision such as cluster version and CNI, registry access, identity provider, connector or storage class."
+      ],
+      [
+        "Zone placement",
+        "Scheduling Pods and storage in particular availability zones; multi-zone claims need their own observations."
+      ],
+      [
+        "Resource quota",
+        "A namespace limit on CPU, memory or objects that bounds what a deployment can consume."
+      ],
+      [
+        "Provider acceptance",
+        "Separate evidence that an authorized cloud target actually ran the workload, kept apart from local qualification."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "the fixture oracle that must survive a move to cloud storage",
+        "language": "python",
+        "code": "import hashlib\n\nimport numpy as np\n\nx = np.arange(100000, dtype=np.int64)\ny = 3 + 2 * x\nslope, intercept = np.polyfit(x.astype(float), y.astype(float), 1)\nprint(\"rows\", x.size, \"sx\", int(x.sum()))\nprint(f\"intercept {intercept:.6f} slope {slope:.6f}\")\nprint(\"predictions\", [int(round(intercept + slope * v)) for v in (100000, 100001)])\n\npayload = \"x,y\\n\" + \"\\n\".join(f\"{a},{b}\" for a, b in zip(x[:5], y[:5])) + \"\\n\"\nprint(\n    \"stand-in object sha256\",\n    hashlib.sha256(payload.encode()).hexdigest()[:16],\n    \"bytes\",\n    len(payload),\n)\ntruncated = x[:87500]\nprint(\"truncated input passes slope check but fails count:\", truncated.size != 100000)",
+        "output": "rows 100000 sx 4999950000\nintercept 3.000000 slope 2.000000\npredictions [200003, 200005]\nstand-in object sha256 9d9054411eeda562 bytes 25\ntruncated input passes slope check but fails count: True",
+        "interpretation": "Moving the job to cloud storage changes where data comes from, so the oracle must be fixed before the move. NumPy stands in for Spark here: it rebuilds the 100000 row fixture with y = 3 + 2x, checks the exact `sx` of 4999950000, fits intercept 3 and slope 2, and reproduces the predictions 200003 and 200005 that the bounded job records. Those are the numbers the cloud run must match on the deterministic range before a stored dataset is introduced. The hash line computes a digest over a tiny CSV stand-in only to show the shape of a source identity; a real record would hash the versioned object or its manifest, not five rows. The last check prints True because a truncated 87500 row input still fits slope 2 perfectly. A slope comparison alone would pass that broken read, and only the row count catches it, which is why the acceptance record keeps both."
+      },
+      {
+        "title": "pinning executors to the zone that holds their volume",
+        "language": "yaml",
+        "code": "apiVersion: v1\nkind: Pod\nmetadata:\n  labels:\n    ds60-workshop: spark-deployment\nspec:\n  serviceAccountName: spark-executor\n  automountServiceAccountToken: false\n  affinity:\n    nodeAffinity:\n      requiredDuringSchedulingIgnoredDuringExecution:\n        nodeSelectorTerms:\n          - matchExpressions:\n              - key: topology.kubernetes.io/zone\n                operator: In\n                values: [SELECTED_ZONE]\n  containers:\n    - name: spark-kubernetes-executor\n      resources:\n        requests:\n          ephemeral-storage: 1Gi",
+        "interpretation": "This executor pod template fragment expresses the zone constraint from Worked case B explicitly instead of leaving it to chance. It keeps the workshop label, the executor ServiceAccount and the disabled token mount from `executor-template.yaml`, and adds a required node affinity on `topology.kubernetes.io/zone`. `SELECTED_ZONE` should be the zone in which the executors' volumes or nearby storage actually live; with a ReadWriteOnce disk bound to one zone, an executor scheduled elsewhere would stay Pending with a volume node affinity conflict. Spark reads such a file through `spark.kubernetes.executor.podTemplateFile` and merges its own container settings into it. No output is shown because only a scheduler can evaluate placement. The trade-off is availability: requiring one zone means a zonal outage or a full zone stops the job instead of moving it, so record that choice next to cost and residency constraints rather than treating it as a default for every deployment."
+      }
+    ]
   },
   {
     "id": "spark-deploy-018",
@@ -159,6 +805,44 @@
     "minutes": 90,
     "prerequisites": ["spark-deploy-013", "spark-deploy-017"],
     "concepts": ["evidence", "diagnosis", "acceptance", "cleanup"],
-    "outcome": "Combine source, topology, numerical, recovery and retained-state evidence without promoting planned checks to success."
+    "outcome": "Combine source, topology, numerical, recovery and retained-state evidence without promoting planned checks to success.",
+    "key_terms": [
+      [
+        "Deployment dossier",
+        "A record joining source identity, environment identity and observed behavior to support one narrow conclusion."
+      ],
+      [
+        "Earliest failing boundary",
+        "The first stage, such as preparation, allocation, network, numerics or publication, where a run went wrong."
+      ],
+      [
+        "Failure preservation",
+        "Keeping the original failed run separate from any repaired run so diagnosis remains checkable."
+      ],
+      [
+        "Acceptance decision",
+        "A reviewable judgment that a specific program, input and topology met its stated criteria."
+      ],
+      [
+        "Cleanup export",
+        "Saving bounded logs, event identities, result JSON and failure controls before removing resources."
+      ]
+    ],
+    "worked_examples": [
+      {
+        "title": "validating an acceptance record before anyone signs it",
+        "language": "python",
+        "code": "def problems(record):\n    found = [\n        k for k, v in record.items() if isinstance(v, str) and v.startswith((\"record-\", \"link-to-\"))\n    ]\n    found = [f\"placeholder in {k}\" for k in found]\n    if record.get(\"rows\") != 100000:\n        found.append(f\"rows {record.get('rows')} != 100000\")\n    if record.get(\"prediction_oracle\") != [200003, 200005]:\n        found.append(\"prediction oracle mismatch\")\n    if record.get(\"worker_loss\") == \"passed\" and not record.get(\"retry_attempt_observed\"):\n        found.append(\"worker_loss claimed without an observed retry\")\n    return found\n\n\ndraft = {\n    \"source_revision\": \"record-actual-revision\",\n    \"application_id\": \"app-20260115101500-0004\",\n    \"rows\": 87500,\n    \"prediction_oracle\": [200003, 200005],\n    \"worker_loss\": \"passed\",\n}\nprint(problems(draft))\nfinal = dict(draft, source_revision=\"9c1e47b\", rows=100000, worker_loss=\"not-run\")\nprint(problems(final))",
+        "output": "['placeholder in source_revision', 'rows 87500 != 100000', 'worker_loss claimed without an observed retry']\n[]",
+        "interpretation": "The validator turns the chapter's acceptance rules into checks that a reviewer can rerun. The draft fails three ways. Its source revision still holds the `record-actual-revision` placeholder from the example schema. Its row count is 87500, which the chapter says must be rejected even though the slope would still read 2. And it claims worker loss passed without any observed retry attempt, the exact incomplete recovery claim in Worked case B. The corrected record fills a revision, restores 100000 rows and marks worker loss as `not-run`, and the problem list comes back empty. An empty list means only that the record is internally consistent; the revision `9c1e47b` and the application ID here are invented, and the checker cannot tell whether they correspond to real evidence. In a real dossier, each value should link to the receipt it came from, so the reviewer can open the event log or result file rather than trusting the summary."
+      },
+      {
+        "title": "naming the earliest failing boundary from mixed symptoms",
+        "language": "python",
+        "code": "ORDER = [\"preparation\", \"allocation\", \"network\", \"numerical\", \"publication\"]\nSYMPTOMS = {\n    \"ImagePullBackOff\": \"preparation\",\n    \"Pending: exceeded quota\": \"allocation\",\n    \"executor connection refused to driver:39000\": \"network\",\n    \"count 87500 != 100000\": \"numerical\",\n    \"history page missing application\": \"publication\",\n    \"driver UI gone after completion\": None,\n}\n\n\ndef earliest(observed):\n    boundaries = [SYMPTOMS[s] for s in observed if SYMPTOMS[s]]\n    return min(boundaries, key=ORDER.index) if boundaries else \"no failure: expected behavior\"\n\n\nprint(earliest([\"history page missing application\", \"Pending: exceeded quota\"]))\nprint(earliest([\"count 87500 != 100000\", \"executor connection refused to driver:39000\"]))\nprint(earliest([\"driver UI gone after completion\"]))",
+        "output": "allocation\nnetwork\nno failure: expected behavior",
+        "interpretation": "When several symptoms appear together, the chapter advises diagnosing the earliest failing boundary first, and this helper makes that order explicit: preparation, allocation, network, numerical, publication. A missing history entry combined with a quota Pending resolves to allocation, because an application that never got executors cannot have produced events worth reading. A short count combined with a refused callback resolves to network, since a partial result may come from a run that lost executors and nothing is gained by debugging partition semantics first. A missing driver UI after completion maps to no failure at all, matching chapter 9's observation that the live UI disappears when the application stops. The symptom table is a small, hand-written sample of the incident list in the chapter, so unknown messages would raise a KeyError instead of guessing, which is the desired behavior. Extend it only with symptoms you have actually observed and attributed to a boundary."
+      }
+    ]
   }
 ]

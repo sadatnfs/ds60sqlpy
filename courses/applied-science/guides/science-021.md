@@ -17,6 +17,13 @@ I=\frac{n}{\sum_{ij}W_{ij}}
 
 This tutorial uses a simple chain graph with symmetric adjacency and no diagonal self-links. The function rejects a constant map because its standardized denominator is zero. Quietly returning zero would confuse an undefined statistic with evidence of no dependence.
 
+## Key terms
+
+- **Spatial weights:** The matrix W encoding a declared adjacency or distance relation between locations.
+- **Moran's I:** A global summary of spatial dependence comparing centered values with their weighted neighbors.
+- **Permutation reference set:** Rearrangements of the observed values over the same locations, used to compute a p-value under exchangeability.
+- **Blocked spatial validation:** Holding out contiguous regions so nearby correlated observations do not appear in both training and evaluation.
+
 ## Worked case 1: distinguish clustering from alternation
 
 The map 0,0,0,1,1,1 groups similar values together. The alternating map 0,1,0,1,0,1 places unlike values next to each other. The first has positive Moran's statistic and the second has negative statistic under the specified graph. The code checks the signs and calculates the exact values.
@@ -46,6 +53,48 @@ Spatial modeling can use correlated random effects, Gaussian processes, structur
 **Does a significant permutation result justify adding a spatial term?** It supports evidence against the specified exchangeability null. A model term still needs a scientific interpretation and evaluation of whether it improves the intended prediction or inference.
 
 **Why does the program retain the graph explicitly?** It makes the dependence assumption inspectable. Reproducing only the scalar statistic would hide which observations were considered neighbors and could make a later result impossible to interpret.
+
+## Worked example: Moran's I on a 3 by 3 grid with rook neighbors
+
+```python
+from itertools import combinations
+import numpy as np
+
+coords = [(r, c) for r in range(3) for c in range(3)]
+W = np.array(
+    [[1.0 if abs(a[0] - b[0]) + abs(a[1] - b[1]) == 1 else 0.0 for b in coords] for a in coords]
+)
+
+
+def moran(v):
+    z = np.asarray(v, float) - np.mean(v)
+    return len(z) / W.sum() * (z @ W @ z) / (z @ z)
+
+
+stripe = [1, 1, 1, 0, 0, 0, 0, 0, 1]
+checker = [1, 0, 1, 0, 1, 0, 1, 0, 1]
+print(f"neighbor pairs {int(W.sum() / 2)}")
+print(f"left block of four I = {moran([1, 1, 0, 1, 1, 0, 0, 0, 0]):.4f}")
+print(f"checkerboard I = {moran(checker):.4f}, expected under randomness {-1 / 8:.4f}")
+ref = []
+for ones in combinations(range(9), 4):
+    v = np.zeros(9)
+    v[list(ones)] = 1
+    ref.append(moran(v))
+obs = moran([1, 1, 0, 1, 1, 0, 0, 0, 0])
+print(f"{len(ref)} arrangements; exact p for block = {np.mean(np.array(ref) >= obs - 1e-12):.4f}")
+```
+
+Observed output:
+
+```text
+neighbor pairs 12
+left block of four I = 0.3500
+checkerboard I = -1.0000, expected under randomness -0.1250
+126 arrangements; exact p for block = 0.0317
+```
+
+On a 3 by 3 grid with rook adjacency there are 12 neighbor pairs, so \(\sum W=24\). Putting four ones in the upper-left 2 by 2 block gives \(I=0.35\): neighbors tend to share values. The checkerboard reaches \(I=-1\) because every neighbor pair has opposite values, the extreme of negative autocorrelation. Neither should be compared with zero. Under random arrangement the expected value is \(-1/(n-1)=-0.125\), so a modest positive \(I\) is further from randomness than it looks. The permutation reference set enumerates all \(\binom{9}{4}=126\) ways to place four ones. Exactly four arrangements, the four 2 by 2 blocks that each contain the center cell, reach 0.35, giving an exact p-value of \(4/126=0.0317\). That p-value is conditional on the neighbor definition: switching to queen adjacency, which adds diagonal pairs, changes both \(W\) and the reference distribution. The same dependence that makes \(I\) positive also inflates random-split validation scores, because neighboring cells in training and test share information.
 
 ## Complete reproducible program
 

@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "track_id": "r",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "r-012",
+      "title": "R functions with default arguments, input contracts and tested failures",
+      "anchor": "reference",
+      "source_path": "courses/r/solutions/r-012_reference.R",
+      "source_sha256": "61543285d107e11421f311a7d1e1ed769b06aafaf3a8a0007f11c88f3ab8f643",
+      "expected_output": ["r-012 reference checks passed"],
+      "steps": [
+        {
+          "lines": [1, 5],
+          "excerpt": "# r-012: complete reference for the declared synthetic inputs.\nafter_fee <- function(amount, rate = 0.1) {\n  if (!is.numeric(amount) || !is.numeric(rate) || length(rate) != 1L || !is.finite(rate) || rate < 0 || rate > 1) stop(\"invalid fee inputs\", call. = FALSE)\n  amount * (1 - rate)\n}",
+          "title": "A function with a default argument and a guard",
+          "explanation": "after_fee takes an amount and a rate that defaults to 0.1 when the caller leaves it out. Before calculating, it checks that both are numeric, that rate is a single value, finite, and between 0 and 1. The || operator stops at the first true condition, so later checks never run on bad input. stop raises an error; call. = FALSE leaves the function call out of the message so it reads cleanly. The last expression, amount * (1 - rate), is the return value; R does not need a return keyword.",
+          "observe": "Because R arithmetic is vectorised, amount can be one number or a whole vector."
+        },
+        {
+          "lines": [6, 8],
+          "excerpt": "stopifnot(after_fee(50) == 45, after_fee(50, rate = 0) == 50)\nsummary <- function(x) list(count = length(x), total = sum(x))\nstopifnot(identical(summary(c(2, 4)), list(count = 2L, total = 6)))",
+          "title": "Checking the default and an exact return type",
+          "explanation": "stopifnot raises an error if any of its conditions is not TRUE. after_fee(50) uses the default rate and gives 45; rate = 0 names the argument explicitly and leaves 50. summary returns a named list. identical is stricter than ==: length returns an integer, so count must be 2L, the L suffix meaning integer, while sum of doubles gives the double 6. Note that this small function shadows base R's summary inside this script, a naming habit to avoid in real code.",
+          "observe": "identical fails if count were the double 2 instead of the integer 2L."
+        },
+        {
+          "lines": [9, 16],
+          "excerpt": "bad <- tryCatch(\n  {\n    after_fee(50, c(0.1, 0.2)); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(bad, identical(after_fee(numeric(0)), numeric(0)))\nstopifnot(after_fee(50, rate = 0.2) != after_fee(50))",
+          "title": "Turning an expected error into TRUE",
+          "explanation": "tryCatch evaluates the block in braces. If after_fee succeeds, the block's last value, FALSE, is returned. If it raises an error, the error handler runs and returns TRUE. Passing two rates breaks the length(rate) != 1L rule, so bad becomes TRUE. An empty numeric vector is valid input and returns an empty numeric vector rather than failing. A different rate produces a different result, which shows the argument is really used.",
+          "observe": "after_fee(numeric(0)) returns numeric(0), not an error."
+        },
+        {
+          "lines": [17, 24],
+          "excerpt": "bad_type <- tryCatch(\n  {\n    after_fee(10, TRUE); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(bad_type)\ncat(\"r-012 reference checks passed\\n\")",
+          "title": "Logical values are not numbers here",
+          "explanation": "In many R functions TRUE quietly acts as 1. Here is.numeric(TRUE) is FALSE, so passing TRUE as the rate is rejected instead of meaning a 100 percent fee. The same tryCatch pattern records that the call failed. When every check has passed, cat prints the success line; \\n ends the line.",
+          "observe": "The script prints r-012 reference checks passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "r-030",
+      "title": "An S3 class with a validating constructor, a summary method and safe combination",
+      "anchor": "reference",
+      "source_path": "courses/r/solutions/r-030_reference.R",
+      "source_sha256": "c17e75e7bd695255356d709fc2c690714a77df46c35e4ffc562344c9a62634c7",
+      "expected_output": ["[1] 5.333333", "[1] \"ms\"", "r-030 reference checks passed"],
+      "steps": [
+        {
+          "lines": [1, 15],
+          "excerpt": "# r-030: complete reference for the declared synthetic inputs.\nmetric_batch <- function(ids, values, unit) {\n  if (!is.character(ids) || anyNA(ids) || any(!nzchar(ids)) || anyDuplicated(ids)) {\n    stop(\"ids must be unique nonempty strings\", call. = FALSE)\n  }\n  if (!is.numeric(values) || is.complex(values) || !is.null(dim(values)) ||\n    any(is.nan(values)) || any(is.infinite(values))) {\n    stop(\"values must be a numeric vector with only finite values or NA\", call. = FALSE)\n  }\n  if (length(ids) != length(values)) stop(\"ids and values must have equal length\", call. = FALSE)\n  if (!is.character(unit) || length(unit) != 1L || is.na(unit) || !nzchar(unit)) {\n    stop(\"unit must be one nonempty string\", call. = FALSE)\n  }\n  structure(list(ids = ids, values = as.double(values), unit = unit), class = \"metric_batch\")\n}",
+          "title": "A constructor that validates every field",
+          "explanation": "metric_batch builds an object only after checking its inputs. ids must be character, without NA, without empty strings and without duplicates; anyDuplicated returns 0 when all are unique, which counts as FALSE. values must be a plain numeric vector: complex numbers, matrices (anything with dim), NaN and Inf are rejected, while NA is allowed to mean missing. The lengths must match and unit must be one nonempty string. structure then attaches the class attribute metric_batch, which is all an S3 class is in R.",
+          "observe": "as.double makes integer input consistent so later identical checks behave predictably."
+        },
+        {
+          "lines": [16, 27],
+          "excerpt": "validate_batch <- function(x) {\n  if (!inherits(x, \"metric_batch\")) stop(\"expected a metric_batch\")\n  metric_batch(x$ids, x$values, x$unit)\n}\nsummary.metric_batch <- function(object, ...) {\n  x <- validate_batch(object)\n  observed <- !is.na(x$values)\n  list(\n    rows = length(x$ids), observed = sum(observed), missing = sum(!observed),\n    mean = if (any(observed)) mean(x$values[observed]) else NA_real_, unit = x$unit\n  )\n}",
+          "title": "Revalidation and an S3 summary method",
+          "explanation": "inherits checks the class attribute, but anyone can attach that attribute to a list by hand, so validate_batch rebuilds the object through the constructor to rerun every check. Naming a function summary.metric_batch registers it as the summary method for this class: calling summary(x) on a metric_batch dispatches here automatically. The method counts observed and missing values and computes the mean only over observed ones, returning NA_real_ when there are none instead of NaN.",
+          "observe": "A summary of a batch with no observed values reports mean NA."
+        },
+        {
+          "lines": [28, 42],
+          "excerpt": "combine_batches <- function(x, y) {\n  x <- validate_batch(x)\n  y <- validate_batch(y)\n  if (!identical(x$unit, y$unit)) stop(\"incompatible batch units\")\n  metric_batch(c(x$ids, y$ids), c(x$values, y$values), x$unit)\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}",
+          "title": "Combining batches and a helper that checks error text",
+          "explanation": "combine_batches validates both inputs, refuses to mix units such as ms and s, and builds the result through the constructor, so duplicate ids across the two batches are caught too. assert_error uses tryCatch with conditionMessage as the handler, which returns the error's message text. If no error happens, the result is NULL and the is.character check fails. grepl then confirms the message mentions the expected problem, which is stronger than only knowing that some error occurred.",
+          "observe": "Each assertion proves which rule rejected the input."
+        },
+        {
+          "lines": [44, 58],
+          "excerpt": "a <- metric_batch(c(\"a\", \"b\", \"c\"), c(2, NA_real_, 6), \"ms\")\nbefore <- a\ns <- summary(a)\nstopifnot(identical(s, list(rows = 3L, observed = 2L, missing = 1L, mean = 4, unit = \"ms\")))\nb <- combine_batches(a, metric_batch(\"d\", 8, \"ms\"))\nstopifnot(summary(b)$rows == 4L, summary(b)$observed == 3L, summary(b)$missing == 1L)\nstopifnot(isTRUE(all.equal(summary(b)$mean, 16 / 3)))\nassert_error(metric_batch(c(\"a\", \"a\"), c(2, 4), \"ms\"), \"unique nonempty\")\nassert_error(metric_batch(c(\"a\", \"b\"), 2, \"ms\"), \"equal length\")\nassert_error(metric_batch(\"a\", NaN, \"ms\"), \"finite values or NA\")\nassert_error(metric_batch(\"a\", Inf, \"ms\"), \"finite values or NA\")\nall_missing <- metric_batch(c(\"x\", \"y\"), c(NA_real_, NA_real_), \"ms\")\nstopifnot(summary(all_missing)$missing == 2L, summary(all_missing)$observed == 0L, is.na(summary(all_missing)$mean))\nempty <- metric_batch(character(0), numeric(0), \"ms\")\nstopifnot(summary(empty)$rows == 0L, summary(empty)$missing == 0L, is.na(summary(empty)$mean))",
+          "title": "Summaries, missing values and boundary cases",
+          "explanation": "Batch a has one missing value, so its summary shows 3 rows, 2 observed and a mean of 4 over 2 and 6. Combining it with d = 8 gives 4 rows and a mean of 16 / 3; all.equal compares doubles with a small tolerance. The error checks cover duplicate ids, unequal lengths, NaN and Inf. An all-missing batch and an empty batch both produce a summary with mean NA rather than an error.",
+          "observe": "summary(b) has rows 4, observed 3, missing 1."
+        },
+        {
+          "lines": [59, 67],
+          "excerpt": "forged <- structure(list(ids = \"a\", values = Inf, unit = \"ms\"), class = \"metric_batch\")\nassert_error(summary(forged), \"finite values or NA\")\nassert_error(combine_batches(a, metric_batch(\"e\", 1, \"s\")), \"incompatible batch units\")\nassert_error(combine_batches(a, metric_batch(\"a\", 9, \"ms\")), \"unique nonempty\")\nstopifnot(identical(a, before), s$mean == 4)\nnamespace <- c(\"export(metric_batch)\", \"export(combine_batches)\", \"S3method(summary,metric_batch)\")\nstopifnot(!any(grepl(\"validate_batch\", namespace, fixed = TRUE)))\nprint(summary(b))\ncat(\"r-030 reference checks passed\\n\")",
+          "title": "Forged objects, unchanged inputs and the printed summary",
+          "explanation": "forged sets the class by hand around an Inf value; summary still rejects it because the method revalidates. Mixing units and duplicating id a across batches are both rejected. identical(a, before) shows that none of these calls modified a, because R copies on modification. The namespace vector sketches a package's exports: the constructor, combine and the S3 method, but not the internal validate_batch. Finally the combined summary list is printed element by element.",
+          "observe": "The printed list ends with mean 5.333333 and unit ms before the success line."
+        }
+      ]
+    },
+    {
+      "lesson_id": "r-046",
+      "title": "Principal components in base R: scaling, sign freedom and projecting new rows",
+      "anchor": "reference",
+      "source_path": "courses/r/solutions/r-046_reference.R",
+      "source_sha256": "d94b18d8b142c93c3409b094965e68279cb946d73b601b5914b9285ff480f2e2",
+      "expected_output": ["r-046 reference checks passed"],
+      "steps": [
+        {
+          "lines": [1, 6],
+          "excerpt": "# r-046: complete reference for the declared synthetic inputs.\nx <- cbind(short = c(-2, -1, 1, 2), long = c(-20, -10, 10, 20))\nraw <- prcomp(x, center = TRUE, scale. = FALSE)\nscaled <- prcomp(x, center = TRUE, scale. = TRUE)\nstopifnot(abs(abs(raw$rotation[2, 1]) - 10 / sqrt(101)) < 1e-10)\nstopifnot(max(abs(abs(scaled$rotation[, 1]) - 1 / sqrt(2))) < 1e-10)",
+          "title": "Without scaling, the larger unit dominates",
+          "explanation": "The two columns carry the same pattern, but long is ten times larger. prcomp centres each column and finds directions of greatest variance. Without scaling, the first component points almost entirely along long: its loading is 10 divided by the square root of 101. With scale. = TRUE each column is divided by its standard deviation first, and both columns then load equally at 1 over the square root of 2. abs is used because the sign of a component is arbitrary.",
+          "observe": "Whether you scale decides which variable a component is about."
+        },
+        {
+          "lines": [7, 10],
+          "excerpt": "y <- cbind(a = c(1, 2, 4, 5), b = c(2, 1, 5, 4))\npc <- prcomp(y, center = TRUE, scale. = TRUE)\nrebuild <- function(scores, rotation) sweep(sweep(scores %*% t(rotation), 2, pc$scale, \"*\"), 2, pc$center, \"+\")\nstopifnot(max(abs(rebuild(pc$x, pc$rotation) - y)) < 1e-10)",
+          "title": "Rebuilding the data from scores and rotation",
+          "explanation": "pc$x holds the scores (each row's coordinates on the components) and pc$rotation the loadings. Multiplying scores by the transposed rotation gives back the scaled, centred data. sweep applies an operation column by column: the inner sweep multiplies each column by its scale and the outer one adds its centre. With all components kept, the original y is recovered to within 1e-10.",
+          "observe": "Keeping every component loses no information."
+        },
+        {
+          "lines": [11, 13],
+          "excerpt": "scores <- pc$x; rotation <- pc$rotation\nscores[, 1] <- -scores[, 1]; rotation[, 1] <- -rotation[, 1]\nstopifnot(max(abs(rebuild(scores, rotation) - y)) < 1e-10)",
+          "title": "Flipping a component's sign changes nothing",
+          "explanation": "Negating both the first score column and the first loading column cancels out in the product, so the rebuilt data is identical. Software can return either sign, and it may differ between versions or platforms. Interpret components by their pattern, not by whether a loading is positive or negative.",
+          "observe": "The reconstruction check passes for both signs."
+        },
+        {
+          "lines": [14, 19],
+          "excerpt": "stopifnot(inherits(try(prcomp(cbind(v = 1:4, constant = rep(1, 4)), scale. = TRUE), silent = TRUE), \"try-error\"))\nnew <- matrix(c(3, 2), nrow = 1, dimnames = list(NULL, colnames(y)))\nmanual <- sweep(sweep(new, 2, pc$center, \"-\"), 2, pc$scale, \"/\") %*% pc$rotation\nstopifnot(max(abs(manual - predict(pc, newdata = new))) < 1e-10)\nstopifnot(abs(sum(pc$sdev^2 / sum(pc$sdev^2)) - 1) < 1e-12)\ncat(\"r-046 reference checks passed\\n\")",
+          "title": "Constant columns, new rows and explained variance",
+          "explanation": "A constant column has zero standard deviation, so it cannot be scaled and prcomp stops with an error; try with silent = TRUE captures that as a try-error object. To score a new observation, you must apply the training centre and scale, not statistics of the new data, and then multiply by the rotation. The manual calculation matches predict. Finally, each sdev squared is a component's variance, and the proportions add up to 1.",
+          "observe": "The script prints r-046 reference checks passed"
+        }
+      ]
+    }
+  ]
+}

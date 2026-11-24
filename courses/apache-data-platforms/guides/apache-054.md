@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-053`, `apache-051`.
 
+## Key terms
+
+- **TTL:** A time to live attached to written data, after which the value no longer appears in reads even though its storage is not reclaimed immediately.
+- **Tombstone:** A deletion marker that prevents older replicas or SSTables from reintroducing a deleted value during reconciliation.
+- **gc_grace_seconds:** The table setting for how long tombstones must be kept before compaction may purge them, which must exceed the interval between repairs.
+- **Repair:** An anti-entropy operation that compares and reconciles replicas, ensuring that deletions and updates reach every replica.
+- **Compaction:** Merging SSTables, resolving cell versions and eventually purging expired tombstones and data.
+
 ## Expiration is a logical rule before it is reclaimed storage
 
 A time-to-live attaches an expiration rule to stored data. Once expired, a value
@@ -77,6 +85,32 @@ replicated system?** A replica can retain an older value while deletion informat
 is collected before reconciliation. The two cases explain why logical expiry,
 tombstone retention, repair and physical cleanup are different mechanisms and
 why a successful empty read alone cannot validate all four.
+
+## Worked examples
+
+### Watch a TTL count down
+
+```sql
+INSERT INTO ds60_orders.expiring (key, value)
+VALUES ('transient', 'demo')
+USING TTL 5;
+
+SELECT TTL(value) AS remaining
+FROM ds60_orders.expiring
+WHERE key = 'transient';
+```
+
+Right after the insert, remaining is at most 5 and decreases on each read; once it reaches zero the row stops appearing. The client polls under a fifteen-second deadline instead of sleeping exactly five seconds, because coordinator clocks and request latency make an exact boundary unreliable. After expiry the cell becomes a tombstone in an SSTable, so disk usage does not drop until compaction runs after gc_grace_seconds has passed.
+
+### Delete versus snapshot retention
+
+```bash
+cd work/cassandra
+bash run.sh check
+bash run.sh check-backup
+```
+
+The check route inserts and deletes a probe key and requires that a read returns nothing, which proves logical absence for current readers. The backup check works with snapshots, which are hard links to SSTable files taken at a point in time; a snapshot taken before the delete still holds the old value on disk. That combination is the usual answer to a deletion request audit: the live table is correct, but erasure also needs snapshot expiry and compaction. Shortening gc_grace_seconds to speed things up risks resurrected data if a replica missed the delete and repair has not run.
 
 ## Complete worked source
 

@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-026_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>For an array of four elements, valid indices are 0 through 3. A kernel that accesses index four has an off-by-one defect even if the returned allocation happens to contain readable bytes nearby. Memcheck is an appropriate additional diagnostic, while a CPU bounds model pinpoints the invalid logical access without a GPU.</p>
+<p><strong>Approach:</strong> Audit indices 0 through 4 against n = 4 on the CPU and run memcheck on the GPU build.</p>
+<p><strong>Why it is correct:</strong> Index 4 is outside the array whether or not nearby bytes happen to be readable.</p>
+<p><strong>A plausible wrong approach:</strong> Treating a run that did not crash as proof of safety ignores that the slack after the allocation absorbed the bad read.</p>
+<p><strong>How to verify:</strong> The reference asserts invalid == [4]; memcheck should report the access at index 4 on a GPU.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A consumer reads shared tile<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>2</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[2]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">2</span><span class="mclose">]</span></span></span></span> before its producer writes. Racecheck can add evidence about that hazard. Replacing the missing barrier with a host sleep does not establish an ordering relationship between those threads. Repair the dependency and still validate returned numerical values.</p>
+<p><strong>Approach:</strong> Restore the barrier between producer and consumer and use racecheck as supporting evidence.</p>
+<p><strong>Why it is correct:</strong> Only a barrier orders the store to tile[2] before the load by another thread.</p>
+<p><strong>A plausible wrong approach:</strong> A host sleep happens outside the kernel and creates no ordering between device threads.</p>
+<p><strong>How to verify:</strong> Run racecheck after the fix and also compare outputs to the CPU reference.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Initcheck addresses that class; retain ordinary result checks because initialization alone does not prove the formula is correct.</p>
+<p><strong>Approach:</strong> Choose initcheck for reads of global memory that were never written.</p>
+<p><strong>Why it is correct:</strong> Initcheck tracks whether device memory was initialized before it is read.</p>
+<p><strong>A plausible wrong approach:</strong> Memcheck alone accepts reads inside a valid allocation even if they were never written.</p>
+<p><strong>How to verify:</strong> Keep result comparisons too, since initialized but miscomputed values still pass initcheck.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>It makes detected tool errors visible to automation through a nonzero status rather than relying on manual log inspection.</p>
+<p><strong>Approach:</strong> Pass --error-exitcode 99 so a detected error changes the process exit status.</p>
+<p><strong>Why it is correct:</strong> CI reads exit status, and without the flag a sanitizer can report errors and still exit zero.</p>
+<p><strong>A plausible wrong approach:</strong> Searching logs by hand for error text misses reports when log formats change.</p>
+<p><strong>How to verify:</strong> Run a known-bad fixture and confirm the job fails with status 99.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>No. A ragged tail changes participating accesses and possibly synchronization. Include both sizes and additional relevant boundaries.</p>
+<p><strong>Approach:</strong> Test n = 32 and n = 33 and other boundaries under the checker.</p>
+<p><strong>Why it is correct:</strong> n = 33 adds a tail lane in a new warp and block, so accesses and barrier paths differ.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming a clean full-warp run covers every size skips exactly the guards most likely to be wrong.</p>
+<p><strong>How to verify:</strong> Include both sizes in the sanitizer job and confirm both report zero errors.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Confirm the intended failing fixture diagnoses the old problem, run the corrected checker, validate normal/tail outputs and benchmark separately without instrumentation.</p>
+<p><strong>Approach:</strong> Reproduce the old failure, apply the fix, run racecheck and synccheck, validate outputs, then benchmark without tools.</p>
+<p><strong>Why it is correct:</strong> This sequence shows the fixture detects the bug, the fix removes it, and results are correct.</p>
+<p><strong>A plausible wrong approach:</strong> Benchmarking under the sanitizer reports instrumented timings that do not reflect the real kernel.</p>
+<p><strong>How to verify:</strong> Keep the failing fixture as a regression test and check it fails on the old commit.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-026_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

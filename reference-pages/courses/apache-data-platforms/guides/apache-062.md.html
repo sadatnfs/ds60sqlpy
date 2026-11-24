@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-062-operations-recovery-and-data-verification">apache-062: Operations, recovery and data verification<a class="heading-anchor" href="#apache-062-operations-recovery-and-data-verification" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-061</code>, <code>apache-057</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Deep store:</strong> The durable storage where Pinot keeps copies of completed segments, separate from servers&#x27; local copies.</li>
+<li><strong>Health endpoint:</strong> A narrow liveness check for one component. It does not prove that the expected schema, segments and rows are present.</li>
+<li><strong>Segment identity:</strong> The names and metadata of the segments a table should serve, which a recovery check compares after restart.</li>
+<li><strong>Read-only verification:</strong> A recovery check that queries the existing table and compares results with known source event identities without recreating or reingesting data.</li>
+</ul>
 <h3 id="recovery-must-compare-durable-source-and-serving-identities">Recovery must compare durable source and serving identities<a class="heading-anchor" href="#recovery-must-compare-durable-source-and-serving-identities" aria-label="Link to this section">#</a></h3>
 <p>Pinot state is distributed across coordination metadata, controller storage, server segment storage and, for real-time tables, source-consumption state. Keeping one directory is not automatically a complete recovery strategy. Identify which components contain authoritative metadata, durable segment copies and reconstructible caches before designing backup or replacement procedures.</p>
 <p>The owned offline workshop separates coordination, controller, server and staging volumes. A container image contains software; it does not contain the learner&#x27;s ingested table. The project&#x27;s <code>.env</code> keeps the random ownership marker and project identity associated with those volumes. Copying only the image to a new machine does not transfer the data or establish a disaster-recovery plan.</p>
@@ -210,6 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Retain segment lists, query exceptions, source IDs, service identities and ownership labels. State whether the incident caused loss, duplication, stale results or temporary unavailability; those are different outcomes. Avoid deleting volumes as a diagnostic step because that destroys both persistence and the information needed to explain the failure.</p>
 <p><strong>Interview discussion: why can a successful restart fail to prove recovery?</strong> The application may have regenerated its fixture, connected to another project or only checked an open port. These cases require exact process reuse and then replacement over retained state, with independent row-level readback and no hidden initialization at either boundary.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="identity-before-and-after-a-stop">Identity before and after a stop<a class="heading-anchor" href="#identity-before-and-after-a-stop" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/pinot
+bash run.sh identity
+bash run.sh stop
+bash run.sh resume
+bash run.sh identity</code></pre>
+<p>Both identity reports should show the same container IDs, image IDs, segment names and exact order rows, because stop and resume keep the containers and their volumes. Identity is read-only, so it is safe to run as often as needed. If the second report has new container IDs, something replaced the containers; if the segment list is empty, the controller lost its ZooKeeper metadata and the next step is reading logs, not running initialize.</p>
+<h4 id="replace-containers-over-retained-volumes">Replace containers over retained volumes<a class="heading-anchor" href="#replace-containers-over-retained-volumes" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/pinot
+bash run.sh identity
+bash run.sh down
+bash run.sh start
+bash run.sh identity</code></pre>
+<p>Here the container IDs are expected to change while segment metadata and order rows stay the same, because down removes containers but keeps named volumes. That makes this the closer rehearsal for a host replacement. A segment that is listed but returns no rows usually means the server has not finished loading it from deep storage yet, so wait and query again before deciding data was lost. Running initialize here would push a fresh segment and hide exactly the retention failure this test is meant to detect.</p>
+<h4 id="compare-broker-results-across-the-restart">Compare broker results across the restart<a class="heading-anchor" href="#compare-broker-results-across-the-restart" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  id<span class="syntax-punctuation">,</span>
+  region<span class="syntax-punctuation">,</span>
+  amount
+<span class="syntax-keyword">FROM</span>
+  ds60_orders
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span></code></pre>
+<p>Save the full row list before stopping and compare it after resume and after replacement; all three should be (1, east, 4), (2, west, 9), (3, east, 7). A matching aggregate is weaker evidence than matching rows, since a lost row and a duplicated row can cancel out in a sum. Also compare the totalDocs field in the response; a doubled count with correct distinct IDs points to a segment that was pushed twice under different names.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="pinot-apache-062-command-notebook">Pinot apache-062 command notebook<a class="heading-anchor" href="#pinot-apache-062-command-notebook" aria-label="Link to this section">#</a></h2>

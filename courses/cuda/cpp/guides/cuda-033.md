@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Interpret Nsight Compute counters to support two claims and state one unresolved hypothesis.
+
 Work through *Nsight Compute: interpret kernel counters carefully* with the concrete cases below. Finish with this evidence:
 two supported claims and one explicitly unresolved hypothesis. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Kernel counters describe selected aspects of execution, often through replay or sampled collection. They require context: achieved occupancy is a residency measurement, memory throughput measures traffic, and eligible-warps metrics describe scheduling opportunity. High utilization can mean an inefficient algorithm is busy moving unnecessary data. Low utilization can be expected for tiny work. Counter permissions are separate from ordinary CUDA execution capability; a working kernel does not promise profiler access. Start with a small question and a few relevant metrics, keeping the baseline's input, dtype and result contract fixed.
+
+### Key terms
+
+- **Achieved occupancy:** The measured average ratio of active warps to the maximum warps an SM supports.
+- **Eligible warp:** A warp whose next instruction has its operands ready, so the scheduler can issue it this cycle.
+- **Memory throughput:** The achieved rate of traffic at a memory level, often reported as a percentage of the hardware peak.
+- **Kernel replay:** Re-running one kernel several times so a profiler can collect more counters than one pass allows.
 
 ## How to run and study this lesson
 
@@ -47,14 +56,13 @@ caches, instruction timing or device memory visibility.
 ```python
 useful, transferred = 400, 1600
 assert useful / transferred == 0.25
-assert 12_000_000 / 0.0002 == 60_000_000_000
-print({"useful_fraction": useful / transferred, "useful_GB_per_second": 60})
+print({"useful_fraction": useful / transferred})
 ```
 
 **Expected observation:** Every assertion succeeds. A representative CPU output is:
 
 ```text
-{'useful_fraction': 0.25, 'useful_GB_per_second': 60}
+{'useful_fraction': 0.25}
 ```
 
 Integers, shapes and ordering must match exactly; only assertions with an explicit

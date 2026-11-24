@@ -27,6 +27,13 @@ Broadcast avoids redistributing the large side by replicating a suitably small s
 AQE may change the chosen join using observed statistics. Record the final executed plan and compare output multiplicity before and after any rewrite. Salting a hot key requires careful duplication or redistribution of the matching side and a proof that every intended pair appears once. Outer joins add unmatched-row/null behavior, making an informal salting recipe particularly risky. Start with the tiny duplicate-key oracle, then expand only after exact semantic parity.
 
 
+### Key terms
+
+- **Broadcast join:** A join that replicates the small side to every worker so the large side is not redistributed.
+- **Shuffle join:** A join that redistributes both sides by key so matching keys meet in the same task.
+- **Key skew:** Concentration of rows on a few keys, creating oversized partitions and long tasks.
+- **Duplicate key expansion:** Output growth when duplicate keys on both sides multiply into many matched rows.
+
 ## Worked examples
 
 ### Worked example 1
@@ -52,6 +59,14 @@ print("CPU join oracle:", joined)
 
 **Expected observation:** Four A matches from two-by-two duplicate keys.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `left` | `[('A', 1), ('A', 2), ('B', 3)]` |
+| `right` | `[('A', 10), ('A', 20), ('C', 30)]` |
+| `joined` | `[('A', 1, 10), ('A', 1, 20), ('A', 2, 10), ('A', 2, 20)]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Scala and PySpark parity lab
@@ -64,27 +79,39 @@ For external GPU comparison, retain the same relational expressions and expected
 
 ### Exercise 1: Calculate duplicate join output
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **calculate duplicate join output** in the examples above.
+**Trap to avoid:** Expecting the output size to be at most the smaller input underestimates joins with duplicate keys, which can grow much larger than either input.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Add unmatched keys
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **add unmatched keys** in the examples above.
+**Trap to avoid:** Using an inner join where unmatched records must be preserved silently drops them. Downstream totals then shrink without any error, which is harder to detect than a failure.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Identify skew
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **identify skew** in the examples above.
+**Trap to avoid:** Reporting the average partition size of about 100 rows hides the 900-row partition.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Compare broadcast and shuffle
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **compare broadcast and shuffle** in the examples above.
+**Trap to avoid:** Broadcasting a table that is large after a filter misestimate can exhaust executor memory. The driver also collects the broadcast side before sending it, so a too-large table can fail on the driver first.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a safe rewrite
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design a safe rewrite** in the examples above.
+**Trap to avoid:** Dropping null keys or deduplicating to reduce skew changes results. Salting only one side without replicating the other loses matches, which reduces output silently rather than raising an error.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Inspect final AQE decision
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **inspect final AQE decision** in the examples above.
+**Trap to avoid:** Citing the pre-execution plan reports a strategy that may not have run. Skew handling in particular appears only in the final plan, so the initial plan cannot show whether a skewed partition was split.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

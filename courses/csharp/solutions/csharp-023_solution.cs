@@ -50,6 +50,24 @@ internal static class Program {
       Check(observed?.InnerException is IOException, "cause retained");
     }
     {
+      // Task 2: Guided modification
+      int ParseCount(string text) {
+        int value = int.Parse(text, CultureInfo.InvariantCulture);
+        if (value < 0)
+          throw new ArgumentOutOfRangeException(nameof(text));
+        return value;
+      }
+      string outcome = "none";
+      try {
+        ParseCount("-2");
+      } catch (FormatException) {
+        outcome = "format";
+      } catch (ArgumentOutOfRangeException) {
+        outcome = "negative";
+      }
+      Check(outcome == "negative", "negative is not a format error");
+    }
+    {
       // Task 3: Independent construction
       int Import(string text, bool storageAvailable) {
         if (!int.TryParse(text, out int quantity) || quantity < 0) {
@@ -74,6 +92,26 @@ internal static class Program {
         outcome = "storage";
       }
       Check(outcome == "storage", "storage failure");
+    }
+    {
+      // Task 5: Boundary evidence
+      string Classify(string text) {
+        try {
+          int value = int.Parse(text, CultureInfo.InvariantCulture);
+          return "ok " + value;
+        } catch (FormatException) {
+          return "rejected";
+        }
+      }
+      Check(Classify("4") == "ok 4", "success");
+      Check(Classify("four") == "rejected", "expected rejection");
+      bool escaped = false;
+      try {
+        Classify(null!);
+      } catch (ArgumentNullException) {
+        escaped = true;
+      }
+      Check(escaped, "unexpected exception is not swallowed");
     }
     Console.WriteLine("csharp-023: passed");
     await Task.CompletedTask;

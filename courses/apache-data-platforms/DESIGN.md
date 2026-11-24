@@ -142,7 +142,7 @@ Every product has a real-product path. Separate Docker workshops build clients i
 | apache-071 | Classifications and discovery | Attach a classification to a synthetic dataset | Search by type and classification then remove it | Separate metadata labels from enforcement in a data engine |
 | apache-072 | Hooks, notifications and integration | Inspect a supported Hive hook or explicit API ingest path | Retry a duplicate notification without inventing duplicate assets | Define provenance and delivery boundaries of metadata ingestion |
 | apache-073 | Authorization and governance workflows | Compare permitted and rejected local API requests | Document a classification review and owner decision | Keep policy intention distinct from actual enforcement |
-| apache-074 | Graph, indexes and recovery | Restart the owned Atlas backing services | Verify entity and lineage survival and diagnose index lag | Understand graph storage, search indexes and backup consistency |
+| apache-074 | Graph, indexes and recovery | Restart the owned Atlas backing services | Verify entity and lineage survival and diagnose index lag | Distinguish search index lag from missing graph data and verify Atlas entities survive a restart |
 
 ## Delta Sharing
 

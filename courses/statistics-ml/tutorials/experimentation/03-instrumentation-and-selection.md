@@ -2,6 +2,14 @@
 
 Tutorial ID: `statistics-exp-003`. Prerequisites: `statistics-exp-002`, `statistics-006`. Complete example: [experiment_03.py](examples/experiment_03.py).
 
+## Key terms
+
+- **Population spine:** The assignment table of everyone randomized, onto which event data are joined so assigned users without events stay in the analysis.
+- **Intent-to-treat analysis:** A comparison of all units as randomized, regardless of whether they generated events or used the change.
+- **User-level aggregation:** Summing event values per user before joining to assignment, so the comparison has one outcome per randomized unit.
+- **Deduplication key:** A unique identifier such as `event_id` whose repeated values mark replayed rows that can be dropped without losing real events.
+- **Treatment-affected selection:** Bias that arises when treatment changes which units or events are observed, so filtering on the observed data no longer preserves randomization.
+
 ## Keep assignment and measurement separate
 
 An assignment table records who was randomized and to what. An event table records what the instrumentation observed. Assignment remains the population spine for intent-to-treat analysis. Joining from events instead silently drops assigned users without recorded events. Counting event rows instead of users gives frequent visitors more influence.
@@ -27,5 +35,65 @@ Start from assignment counts, then compare eligible, triggered, exposure-logged 
 Reconstruct outcomes independently where possible. If outcome data are genuinely missing because the page fails, labeling them zero might or might not match the defined estimand. For a complete transaction system, no transaction can mean zero purchases. For a broken reporting system, no record can mean unknown purchases. The measurement contract decides which interpretation is defensible.
 
 **Answered discussion: Should we discard the bad device segment and ship?** Only a new, transparently defined target could support that restricted decision. The original all-user result is not repaired by deleting the harmed subgroup. Report affected scope, recover measurement if possible, and preserve the original analysis definition alongside any justified revision.
+
+## Worked example: a fan-out join changes the estimand silently
+
+The defect below raises no error. Run it inside [experiment_03.py](examples/experiment_03.py) after the fixture is defined.
+
+```python
+users, events, _, _ = experiment_fixture()
+fanned = users.merge(events, on="unit", how="left")
+print("rows after naive join:", len(fanned))
+print(
+    "mean value per row:",
+    round(fanned.value.mean(), 3),
+    "vs per user:",
+    round(users.value.mean(), 3),
+)
+try:
+    users.merge(events, on="unit", how="left", validate="one_to_one")
+except pd.errors.MergeError as error:
+    print("validate caught:", type(error).__name__)
+```
+
+```text
+rows after naive join: 943
+mean value per row: 20.407 vs per user: 20.744
+validate caught: MergeError
+```
+
+Joining user rows to event rows repeats each user's seven-day value once per visit, producing 943 rows from 240 users. The resulting mean, 20.407, is a visit-weighted average of user values rather than value per assigned user. Here the two numbers are close only because the fixture generates visits independently of value. If heavy visitors were also high-value users, the fanned mean would be inflated, and a treatment that raised visits would appear to raise value even with no change per user. The same `merge` with `validate="one_to_one"` refuses to run, turning a silent estimand change into an error the analyst must explain.
+
+## Worked example: localize the exposure loss with a funnel table
+
+A single overall count hides where users disappear. Break assignment and logging counts out by device and arm.
+
+```python
+users, _, _, _ = experiment_fixture()
+failed = (users.assigned == 1) & (users.device == "mobile") & (users.converted == 0)
+funnel = pd.DataFrame(
+    {
+        "assigned": users.groupby(["device", "assigned"]).size(),
+        "logged": users[~failed].groupby(["device", "assigned"]).size(),
+    }
+)
+funnel["retained"] = (funnel.logged / funnel.assigned).round(3)
+print(funnel)
+```
+
+```text
+                  assigned  logged  retained
+device  assigned
+desktop 0               78      78     1.000
+        1               82      82     1.000
+mobile  0               42      42     1.000
+        1               38      13     0.342
+```
+
+Three cells retain every assigned user and one cell, treated mobile, keeps only 13 of 38. That asymmetry is the signature of a treatment-caused logging failure; a loss affecting both arms on mobile would instead point to device instrumentation unrelated to the redesign. The 25 missing rows are exactly the 25 failures that inflated logged-only conversion to 32/95. Note that this table needs outcome-independent assignment records: if the assignment service itself were fed by exposure logs, no retained ratio could be computed and the failure would be invisible.
+
+## Diagnostics to run before any effect estimate
+
+Check key uniqueness on both tables, row counts at each stage by arm and segment, and the reconciliation of event totals against independently stored user totals. A defect that passes all three can still exist, for example a timestamp shift that moves events across the seven-day boundary, so also compare outcome windows by arm.
 
 Continue to [power and duration](04-power-and-duration.md). Related source: [data quality and joins](../../chapters/06-measurement-exploratory-analysis-and-data-quality.md).

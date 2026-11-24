@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-011_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-011-explained-reference">eval-011: explained reference<a class="heading-anchor" href="#eval-011-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-011_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-011_reference.py</code> asserts each answer below, from <em>Invert the swapped result</em> to <em>Freeze a recalibration mapping</em>, on the authored LLM as judge and position bias fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Check maximally wrong probabilities</em> tests.</p>
 <h3 id="1-invert-the-swapped-result">1. Invert the swapped result<a class="heading-anchor" href="#1-invert-the-swapped-result" aria-label="Link to this section">#</a></h3>
 <p>A position-level label has no fixed model meaning until the display order is known.</p>
+<p><strong>Approach.</strong> Encode the case: candidate A is on the right, so <code>a_on_left</code> is <code>False</code>, and the left answer wins, so <code>left_wins</code> is 1. <code>identity_wins</code> maps that to <code>1 - 1 = 0</code> for A.</p>
+<p><strong>Why it holds for this fixture.</strong> The judge preferred the left slot, which held B. In identity terms, A lost. The reference checks the two-item version <code>identity_wins([0, 1], [True, False])</code>, where A loses both times: once on the left and once on the right.</p>
+<p><strong>A tempting wrong approach.</strong> Averaging position-level wins (the left won, so count a win) without the orientation is the mistake. Worked case A shows a judge that always picks the left side scoring 0.5 for A once orientations are balanced.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>identity_wins([0, 1], [True, False]).tolist() == [0.0, 0.0]</code>. Case A asserts <code>identity_wins([1, 1], [True, False]).tolist() == [1.0, 0.0]</code>.</p>
 <p><strong>Expected observation:</strong> The identity score for A is 0.</p>
 <h3 id="2-check-perfect-probabilities">2. Check perfect probabilities<a class="heading-anchor" href="#2-check-perfect-probabilities" aria-label="Link to this section">#</a></h3>
 <p>Perfect probabilities have zero squared error and zero within-bin calibration gap on this fixture.</p>
+<p><strong>Approach.</strong> Call <code>calibration([1, 0], [1, 0])</code>. The probabilities exactly equal the labels.</p>
+<p><strong>Why it holds for this fixture.</strong> Each squared error is 0, so Brier is 0. Probability 1 falls in the upper bin with label 1, and 0 falls in the lower bin with label 0; each bin&#x27;s mean probability equals its mean label, so ECE is 0.</p>
+<p><strong>A tempting wrong approach.</strong> Reading ECE 0 as proof of a good judge in general is the mistake. Two items cannot show calibration in the middle range, and a perfect score on a tiny authored fixture is a correctness check on the code, not a model property.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>calibration([1, 0], [1, 0]) == (0.0, 0.0)</code>. A single item <code>calibration([1], [1])</code> also has Brier 0.</p>
 <p><strong>Expected observation:</strong> Brier and the stated ECE are 0.</p>
 <h3 id="3-check-maximally-wrong-probabilities">3. Check maximally wrong probabilities<a class="heading-anchor" href="#3-check-maximally-wrong-probabilities" aria-label="Link to this section">#</a></h3>
 <p>The example diagnoses probability failure even if a separate presentation metric remains favorable.</p>
+<p><strong>Approach.</strong> Call <code>calibration([0, 1], [1, 0])</code>. Every probability is the opposite of its label.</p>
+<p><strong>Why it holds for this fixture.</strong> Each squared error is 1, so Brier is 1. Probability 0 sits alone in the lower bin with label 1, a gap of 1, and probability 1 sits alone in the upper bin with label 0, also a gap of 1. Each bin holds half the items, so ECE is 0.5 + 0.5 = 1.</p>
+<p><strong>A tempting wrong approach.</strong> Assuming a judge with good pairwise win rates must have useful probabilities is the mistake. Preference accuracy and calibration are separate properties, and this fixture is wrong on calibration regardless of any ranking metric.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>calibration([0, 1], [1, 0]) == (1.0, 1.0)</code>.</p>
 <p><strong>Expected observation:</strong> Both reported scores are 1.</p>
 <h3 id="4-use-a-constant-judge">4. Use a constant judge<a class="heading-anchor" href="#4-use-a-constant-judge" aria-label="Link to this section">#</a></h3>
 <p>A constant predictor can match the overall class frequency while providing no item-level ranking information.</p>
+<p><strong>Approach.</strong> Call <code>calibration([0.5] * 4, [1, 1, 0, 0])</code>. Every item receives probability 0.5 and half the labels are 1.</p>
+<p><strong>Why it holds for this fixture.</strong> Each squared error is 0.25, so Brier is 0.25. With edges 0, 0.5, 1 and <code>side=&quot;right&quot;</code>, 0.5 falls in the upper bin, so all four items share one bin with mean probability 0.5 and mean label 0.5. The gap is 0, so ECE is 0.</p>
+<p><strong>A tempting wrong approach.</strong> Picking the judge with the lowest ECE is the mistake here. The constant predictor is perfectly calibrated and useless: it cannot tell any item from another. Case B&#x27;s informative scores have ECE 0.15 but Brier 0.025, ten times better.</p>
+<p><strong>How to verify.</strong> Worked case B asserts <code>constant == (0.25, 0.0)</code> and the informative pair <code>brier</code> near 0.025 and <code>ece</code> near 0.15.</p>
 <p><strong>Expected observation:</strong> ECE 0 and Brier 0.25 under these bins.</p>
 <h3 id="5-test-verbosity-invariance">5. Test verbosity invariance<a class="heading-anchor" href="#5-test-verbosity-invariance" aria-label="Link to this section">#</a></h3>
 <p>A change diagnoses one presentation sensitivity. It does not prove all longer answers are favored or all length adjustments are valid.</p>
+<p><strong>Approach.</strong> Take one comparison, duplicate a paragraph in one answer without adding any claim, and rerun the judge in both orientations. Record identity wins before and after.</p>
+<p><strong>Why it holds for this fixture.</strong> If the duplicated answer now wins where it lost before, the judge responds to length or repetition, not content. Running both orientations separates this from the position effect shown in exercise 1.</p>
+<p><strong>A tempting wrong approach.</strong> Concluding from one flip that the judge always favors longer answers is too strong. One perturbation shows one sensitivity; length can also correlate with real completeness on other items, so a blanket length penalty is not justified either.</p>
+<p><strong>How to verify.</strong> No reference assertion covers this task. Record a table with item ID, orientation, original identity win and perturbed identity win, and count flips over several items before generalizing.</p>
 <p><strong>Expected observation:</strong> Record whether identity preference changes.</p>
 <h3 id="6-freeze-a-recalibration-mapping">6. Freeze a recalibration mapping<a class="heading-anchor" href="#6-freeze-a-recalibration-mapping" aria-label="Link to this section">#</a></h3>
 <p>Independent assessment is needed because a reliability diagram can be made attractive by fitting and evaluating on the same cases.</p>
+<p><strong>Approach.</strong> Fit any recalibration map, such as binning or a logistic fit, using only development labels. Freeze its parameters, then apply it to new families and compute Brier and ECE there.</p>
+<p><strong>Why it holds for this fixture.</strong> Fitting and evaluating on the same items lets the map memorize each bin&#x27;s label rate, so ECE on those items drops toward zero by construction. Only items the map never saw can show whether it transfers.</p>
+<p><strong>A tempting wrong approach.</strong> Plotting a reliability diagram on the development set after fitting and presenting it as evidence of calibration is the mistake. It shows the fit, not generalization.</p>
+<p><strong>How to verify.</strong> Check that no final-set label appears in the data used for fitting (compare ID sets), then report Brier and ECE on the final families only, with the bin edges stated.</p>
 <p><strong>Expected observation:</strong> Final labels do not influence the fitted mapping.</p></article>
   </main>
 </body>

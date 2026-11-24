@@ -205,6 +205,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Operator fallback</strong> means a functioning plugin environment keeps an unsupported operator or expression on CPU while other supported work may use the GPU. <strong>GPU execution</strong> means the intended compatible operator actually ran on the device and produced an accepted result. These states require different troubleshooting and should be recorded separately in the learning notebook.</p>
 <p>Suppose a query filters, invokes a Python UDF, then aggregates. The UDF may create a boundary even when the surrounding operators are supported. Replacing it with built-in expressions can expose the algebra to Catalyst, but only if the replacement matches null behavior, input types, overflow, timestamps and any error semantics. A mathematically similar expression can still differ under SQL&#x27;s type rules.</p>
 <p>Use the release&#x27;s supported-operator list and <code>spark.rapids.sql.explain=NOT_ON_GPU</code> diagnostics as aids, not universal truths detached from versions. The published table may be generated against a particular Spark release; inspect the matching plugin and distribution notes. An explicit CPU/GPU parity test over adversarial tiny fixtures is the final semantic guard before measuring a larger workload.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>CPU fallback:</strong> Running an unsupported part of a query on the CPU inside a working GPU plugin environment.</li>
+<li><strong>Unsupported expression:</strong> An expression or dtype the plugin release cannot execute on the GPU under the current configuration.</li>
+<li><strong>Explain diagnostics:</strong> Plugin output that reports which operators will not run on the GPU and why.</li>
+<li><strong>CPU-only baseline:</strong> An ordinary Spark run with the GPU plugin disabled or absent, used as the semantic reference.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>GPU aggregate -&gt; CPU UDF -&gt; GPU projection crosses the boundary twice around the UDF. Replacing the UDF with an equivalent supported expression might reduce transitions after parity tests.</p>
@@ -223,17 +230,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-classify-fallback-versus-unavailable-device">Exercise 1: Classify fallback versus unavailable device<a class="heading-anchor" href="#exercise-1-classify-fallback-versus-unavailable-device" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>classify fallback versus unavailable device</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calling a GPU-less run a fallback suggests the plugin was active and made per-operator choices, when actually it never started.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-find-an-unsupported-expression">Exercise 2: Find an unsupported expression<a class="heading-anchor" href="#exercise-2-find-an-unsupported-expression" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>find an unsupported expression</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming support from the operator name alone misses expression-level and type-level restrictions, which are the usual cause of fallback.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-count-boundary-costs">Exercise 3: Count boundary costs<a class="heading-anchor" href="#exercise-3-count-boundary-costs" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>count boundary costs</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming only the UDF runs slower and the rest stays fast ignores that the transitions stall the GPU sections on both sides.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-rewrite-an-opaque-function-declaratively">Exercise 4: Rewrite an opaque function declaratively<a class="heading-anchor" href="#exercise-4-rewrite-an-opaque-function-declaratively" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>rewrite an opaque function declaratively</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Rewriting with a built-in that differs on edge cases, such as whitespace or null handling, changes results while appearing equivalent.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-preserve-edge-semantics">Exercise 5: Preserve edge semantics<a class="heading-anchor" href="#exercise-5-preserve-edge-semantics" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>preserve edge semantics</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Testing only typical values passes implementations that disagree exactly where production data is unusual.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-a-mixed-plan-report">Exercise 6: Design a mixed-plan report<a class="heading-anchor" href="#exercise-6-design-a-mixed-plan-report" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design a mixed-plan report</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting only the percentage of GPU operators hides which fallback is expensive. One fallback on a small lookup table may be harmless, while one on the widest projection can dominate the job.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

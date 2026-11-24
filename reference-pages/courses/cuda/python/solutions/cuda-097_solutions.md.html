@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-write-the-operator-schema">Exercise 1: Write the operator schema<a class="heading-anchor" href="#exercise-1-write-the-operator-schema" aria-label="Link to this section">#</a></h3>
 <p>Name tensor inputs scalar parameters and output.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>write the operator schema</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write the operator schema: one input tensor <code>x</code> of float32, scalar parameters <code>scale</code> and <code>bias</code> as floats, and one output tensor of the same shape and dtype, for example <code>fused_affine_relu(Tensor x, float scale, float bias) -&gt; Tensor</code>.</p>
+<p><strong>Why it is correct here.</strong> A schema lets the framework check argument types, dispatch to the right device implementation and reason about aliasing. It also documents the contract the CUDA kernel must satisfy.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving the schema implicit in a Python wrapper lets callers pass float64 or integers, which the C++ kernel then reinterprets.</p>
+<p><strong>How to verify.</strong> Register the schema and confirm the framework rejects a call with a missing or wrong-typed argument before the kernel runs.</p>
 <h3 id="exercise-2-derive-output-values">Exercise 2: Derive output values<a class="heading-anchor" href="#exercise-2-derive-output-values" aria-label="Link to this section">#</a></h3>
 <p>Apply affine then clamp.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>derive output values</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Apply affine then clamp to <code>[-2, 0, 3]</code> with scale 2 and bias 1: preactivations <code>-3, 1, 7</code>, clamped at zero to <code>[0, 1, 7]</code>.</p>
+<p><strong>Why it is correct here.</strong> The fused operator must compute exactly <code>max(0, 2*x + 1)</code>. The reference asserts this output and the empty case.</p>
+<p><strong>A plausible wrong approach.</strong> Clamping before the affine step, <code>2*max(0, x) + 1</code>, gives <code>[1, 1, 7]</code>, a different function.</p>
+<p><strong>How to verify.</strong> Compare the CUDA output to <code>fused_reference</code> for these values exactly, since the inputs are exactly representable in float32.</p>
 <h3 id="exercise-3-specify-aliasing">Exercise 3: Specify aliasing<a class="heading-anchor" href="#exercise-3-specify-aliasing" aria-label="Link to this section">#</a></h3>
 <p>State whether output shares storage.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>specify aliasing</strong> is qualified there.</p>
+<p><strong>Approach.</strong> State aliasing explicitly: the operator returns a new tensor that does not share storage with <code>x</code>, or, for an in-place variant, mark the input as mutated in the schema.</p>
+<p><strong>Why it is correct here.</strong> Frameworks use aliasing annotations to decide whether autograd and compilers can reorder or reuse buffers. A wrong annotation can corrupt saved values.</p>
+<p><strong>A plausible wrong approach.</strong> Writing the output into <code>x</code> without declaring it breaks autograd when <code>x</code> was saved for backward.</p>
+<p><strong>How to verify.</strong> Check the output&#x27;s data pointer differs from the input&#x27;s, and that the input values are unchanged after the call.</p>
 <h3 id="exercise-4-reject-unsupported-layout">Exercise 4: Reject unsupported layout<a class="heading-anchor" href="#exercise-4-reject-unsupported-layout" aria-label="Link to this section">#</a></h3>
 <p>Check before launch or use deliberate packing.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>reject unsupported layout</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Reject non-contiguous inputs before launch with <code>TORCH_CHECK(x.is_contiguous())</code>, or call <code>.contiguous()</code> deliberately and document the copy cost.</p>
+<p><strong>Why it is correct here.</strong> The raw-pointer kernel assumes consecutive elements. A transposed view has different strides, so reading <code>ptr[i]</code> returns the wrong elements.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming every tensor reaching the operator is contiguous because the tests used fresh tensors misses views created by slicing or transposing.</p>
+<p><strong>How to verify.</strong> Call the operator on <code>x.t()</code> and confirm it raises or returns the same values as the reference applied to the view.</p>
 <h3 id="exercise-5-compare-framework-registration-mechanisms">Exercise 5: Compare framework registration mechanisms<a class="heading-anchor" href="#exercise-5-compare-framework-registration-mechanisms" aria-label="Link to this section">#</a></h3>
 <p>Each framework needs its own registered implementation.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare framework registration mechanisms</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare registration mechanisms: PyTorch registers through <code>TORCH_LIBRARY</code> and dispatch keys, while TensorFlow uses <code>REGISTER_OP</code> and <code>REGISTER_KERNEL_BUILDER</code>, and each framework needs its own implementation registered.</p>
+<p><strong>Why it is correct here.</strong> The CUDA kernel can be shared, but each framework&#x27;s dispatch, tensor types and memory management differ.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming a PyTorch extension can be loaded directly in TensorFlow treats a framework binding as a generic library. The library loads only if the framework finds a registered op, which it will not.</p>
+<p><strong>How to verify.</strong> Build and call the operator in each framework separately and compare outputs with the shared reference.</p>
 <h3 id="exercise-6-define-fixed-project-build-evidence">Exercise 6: Define fixed-project build evidence<a class="heading-anchor" href="#exercise-6-define-fixed-project-build-evidence" aria-label="Link to this section">#</a></h3>
 <p>Record build ABI architecture and real forward tests.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define fixed-project build evidence</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Record build evidence: compiler and CUDA toolkit versions, framework version and its C++ ABI flag, target architectures such as <code>sm_80</code>, and results of forward tests on a real device.</p>
+<p><strong>Why it is correct here.</strong> Extensions are tied to the framework build and ABI. A binary built against one version may fail to load against another.</p>
+<p><strong>A plausible wrong approach.</strong> Recording only that the build succeeded omits whether the kernel ran on a real device. A build can succeed on a machine with no GPU at all, so the record proves compilation only.</p>
+<p><strong>How to verify.</strong> Reload the built extension in a clean environment matching the record and rerun the forward tests.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Fused affine-ReLU output [0,1,7].</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-097_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

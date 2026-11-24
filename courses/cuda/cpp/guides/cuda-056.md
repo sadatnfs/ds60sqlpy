@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a two-stage asynchronous copy pipeline with correct tails and explain whether the overlap helped.
+
 Work through *Asynchronous copies, barriers and software pipelines* with the concrete cases below. Finish with this evidence:
 correct tails, synchronization checks and a measured explanation of whether overlap helped. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Within-GPU asynchronous copy mechanisms can move tiles from global to shared storage while other work proceeds, subject to architecture, alignment and API requirements. These are different from host-to-device asynchronous transfers. A producer commits a stage, a consumer waits for its completion, and the stage cannot be overwritten until consumption finishes. Double buffering alternates two storage slots but does not remove these dependencies. Hardware-accelerated paths and fallback behavior must be checked for the exact toolchain and device. Correct tail loading and barrier participation remain essential even when the happy path overlaps efficiently.
+
+### Key terms
+
+- **memcpy_async:** A cooperative copy from global to shared memory that can proceed while threads do other work.
+- **cuda::pipeline:** A libcu++ object that tracks stages of asynchronous copies through acquire, commit, wait and release.
+- **Asynchronous barrier:** A `cuda::barrier` that separates arriving from waiting so threads can work between the two.
+- **Software pipelining:** Overlapping the load of the next tile with computation on the current tile using several buffers.
 
 ## How to run and study this lesson
 

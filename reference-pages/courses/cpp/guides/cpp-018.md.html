@@ -201,6 +201,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use spans and string views without extending the lifetime of their storage.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A view borrows a region owned elsewhere. span observes contiguous elements and string_view observes characters. An iterator can be invalidated when its container reallocates or erases elements. None of these lightweight handles extends the owner lifetime, and const views do not prevent the owner from changing through another path.</p>
+<ul>
+<li><strong>view:</strong> a non-owning handle that describes storage owned by another object.</li>
+<li><strong><code>std::span</code>:</strong> a view over contiguous elements described by an address and an extent.</li>
+<li><strong><code>subspan</code>:</strong> selects an offset and count within a span; the caller must keep both within bounds.</li>
+<li><strong>iterator invalidation:</strong> the loss of validity of an iterator when its container reallocates or erases elements.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>std::span&lt;const int&gt;{vector}</code> borrows the current contiguous storage. Construct the view after mutations that can reallocate. <code>subspan(offset,count)</code> describes a region but requires valid bounds; validate user lengths before building it.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
@@ -238,14 +244,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><a href="../examples/cpp-018-example-2.cpp.html">Complete program 2</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
-<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;numeric&gt;</span>
-<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;span&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string_view&gt;</span>
 
-<span class="syntax-keyword">int</span> <span class="syntax-function">sum_view</span><span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>span<span class="syntax-operator">&lt;</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> xs<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-  <span class="syntax-keyword">return</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>accumulate<span class="syntax-punctuation">(</span>xs<span class="syntax-punctuation">.</span>begin<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> xs<span class="syntax-punctuation">.</span>end<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string text <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">alpha</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string_view prefix<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">.</span>data<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>

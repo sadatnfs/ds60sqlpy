@@ -25,7 +25,7 @@
       "definition": "A bounded record of inputs, configuration and software context used for a result."
     }
   ],
-  "anatomy": "RNGkind() queries generator choices and set.seed selects an initial state. Save and restore .Random.seed with assign(...,envir=.GlobalEnv), preserving whether it existed. jsonlite::toJSON(...,auto_unbox=TRUE,digits=17) creates the chosen JSON representation; digest::digest(text,algo=\"sha256\",serialize=FALSE) hashes those bytes.",
+  "anatomy": "`RNGkind()` queries generator choices and `set.seed` selects an initial state. Save and restore `.Random.seed` with `assign(..., envir = .GlobalEnv)`, preserving whether it existed. `jsonlite::toJSON(..., auto_unbox = TRUE, digits = 17)` creates the chosen JSON representation; `digest::digest(text, algo = \"sha256\", serialize = FALSE)` hashes those bytes.",
   "worked_examples": [
     {
       "title": "Repeat a calculation while restoring the caller stream",

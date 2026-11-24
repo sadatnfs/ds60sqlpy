@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A feature store organizes feature definitions and retrieval interfaces. In this lesson Feast uses an actual local Parquet source, registry and SQLite online-store configuration. An entity defines the join identity, a feature view defines fields and a time relationship, and historical retrieval combines those features with an entity/request table.</p>
 <p>The normal fixture contains two versions for customer 1 and one for customer 2. Historical requests select values at their own timestamps, within the declared view TTL. Sorting by request_id restores an explicit output comparison order. A successful retrieval is then checked against known values rather than assumed correct because a package imported.</p>
 <p>Boundary behavior also needs direct observation. The prepared local backend can omit unmatched or expired request rows. The second case therefore treats the request table as authoritative and left-joins retrieved values back by a validated unique request key. This preserves missing cases explicitly. Neither a point-in-time API name nor a successful process should replace coverage and temporal validation.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Feature store:</strong> A system that manages feature definitions and offers offline historical and online retrieval over the same definitions.</li>
+<li><strong>Entity:</strong> In Feast, the declared join key and value type that identifies whose features are retrieved, here the customer.</li>
+<li><strong>Feature view:</strong> A Feast definition binding a schema of fields to a data source, its timestamp field and a TTL.</li>
+<li><strong>TTL:</strong> The time to live of a feature view: how far before a request timestamp a feature value may be and still be joined.</li>
+<li><strong>Point-in-time join:</strong> Historical retrieval that gives each request the latest feature value at or before its own timestamp and within the TTL, so later values cannot leak in.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Entity declares the join key and value type. FeatureView supplies a schema, TTL and FileSource timestamp field. FeatureStore.apply registers these owned local definitions. get_historical_features returns actual retrieved data; validate keys and reattach it to the original request population when necessary. The fixture timestamp represents the feature&#x27;s declared availability/validity point, not arbitrary future knowledge.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

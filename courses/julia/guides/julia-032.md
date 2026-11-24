@@ -10,6 +10,14 @@ Execute a complete synthetic modeling workflow from typed CSV to a source-identi
 
 Open `julia-032` in `/classroom` with its prepared `julia` runtime. Worked case A (carry one contract through the analysis) and worked case B (a figure and its exact underlying table) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-032: all reference checks passed`. One program in this unit publishes a bounded Plotly figure with its description and exact table. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Data contract:** Written checks on identifiers, types, finiteness and timing that reject an input file before any model is fitted.
+- **Availability time:** The time when a feature or label became known, which must precede its use for the row to be valid.
+- **Frozen selection rule:** A procedure fixed before scoring, such as choosing the lowest development error with ties broken by candidate order.
+- **Holdout split:** Rows reserved for a single final evaluation after selection and never used to choose the penalty.
+- **Provenance:** Recorded source identity, settings and split counts that link a reported result to its exact inputs.
+
 ## A decision record is more than a fitted model
 
 This capstone studies a synthetic sensor calibration problem. Each row has a stable record ID, a numerical predictor and response, an assigned split, a prediction timestamp, a feature-availability timestamp and a label-availability timestamp. The authored table is deliberately small enough to audit by hand. It is not evidence that the same model works on real sensors.

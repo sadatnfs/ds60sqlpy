@@ -5,6 +5,40 @@
   "minutes": 60,
   "prerequisites": ["apache-015"],
   "concepts": ["join cardinality", "dimension uniqueness", "SQL nulls"],
+  "key_terms": [
+    [
+      "Join cardinality",
+      "The number of rows a join produces. In an inner join, a key appearing n times on the left and m times on the right contributes n times m rows."
+    ],
+    [
+      "Dimension uniqueness",
+      "The requirement that each key appear at most once in a dimension table, so joining facts to it cannot multiply measures such as revenue."
+    ],
+    [
+      "Left join",
+      "A join that keeps every left row and fills right-side columns with nulls when no matching key exists."
+    ],
+    [
+      "SQL null comparison",
+      "In SQL, NULL = NULL is not true, so a null join key matches nothing unless the query states an explicit null-safe comparison."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Assert the many-to-one contract before enriching",
+      "language": "python",
+      "code": "import pyarrow as pa\n\ncustomers = pa.table({\"customer_id\": [1, 1, 2], \"segment\": [\"small\", \"small\", \"large\"]})\nkeys = customers[\"customer_id\"]\nprint(len(keys), len(keys.unique()))",
+      "output": "3 2",
+      "interpretation": "Three rows but only two distinct keys means the dimension violates the many-to-one assumption the enrichment query relies on. Every order for customer 1 would appear twice after the join and the order total would rise from 20 to 24. Run this check against the exact snapshot the join reads, since a dimension that was unique yesterday can gain a duplicate from a single bad load."
+    },
+    {
+      "title": "Count unmatched orders after a left join",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.compute as pc\n\norders = pa.table({\"order_id\": [1, 2, 3], \"customer_id\": [1, 2, 99], \"amount\": [4, 9, 7]})\ncustomers = pa.table({\"customer_id\": [1, 2], \"segment\": [\"small\", \"large\"]})\njoined = orders.join(customers, \"customer_id\", join_type=\"left outer\")\nprint(joined.num_rows, pc.sum(joined[\"amount\"]).as_py(), joined[\"segment\"].null_count)",
+      "output": "3 20 1",
+      "interpretation": "Row count and total match the orders table, and one segment is null because customer 99 has no dimension row. Reporting that null count as its own metric keeps unknown customers visible instead of hiding them in a default bucket. An inner join would return two rows and a total of 13, which looks plausible and is therefore harder to catch than an inflated total."
+    }
+  ],
   "evidence": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums.",
   "sources": [
     ["DataFusion SQL queries", "https://datafusion.apache.org/user-guide/sql/select.html"],

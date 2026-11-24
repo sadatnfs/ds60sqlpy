@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-051-query-first-modeling-and-cql">apache-051: Query-first modeling and CQL<a class="heading-anchor" href="#apache-051-query-first-modeling-and-cql" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-004</code>, <code>apache-008</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Query-first design:</strong> Choosing a Cassandra table&#x27;s keys from a concrete query, result size and update pattern, often keeping several denormalized tables for different questions.</li>
+<li><strong>Partition key:</strong> The first part of a primary key, such as (customer_id, day_bucket), whose hash decides which replicas store a row and which rows are read together.</li>
+<li><strong>Clustering column:</strong> A primary key column after the partition key that orders rows within a partition, such as ordered_at descending, with order_id breaking ties.</li>
+<li><strong>Day bucket:</strong> An application-chosen date value in the partition key that bounds partition size. Writers and readers must agree on its timezone and boundary rule.</li>
+<li><strong>CQL:</strong> Cassandra Query Language, which resembles SQL but has no arbitrary joins and expects queries to follow the table&#x27;s key design.</li>
+</ul>
 <h3 id="design-the-access-pattern-before-choosing-a-primary-key">Design the access pattern before choosing a primary key<a class="heading-anchor" href="#design-the-access-pattern-before-choosing-a-primary-key" aria-label="Link to this section">#</a></h3>
 <p>Cassandra is a distributed wide-column database whose useful query shapes follow its partition and clustering keys. CQL resembles SQL, but that resemblance does not give it arbitrary joins or the cost model of a relational analytical engine. Start with a concrete question, expected result size, update pattern and latency requirement. Then choose a table that can answer that question with bounded work. It is common to maintain more than one denormalized table for different questions.</p>
 <p>The example asks for one customer&#x27;s orders within one UTC day, newest first. Its primary key is <code>((customer_id, day_bucket), ordered_at, order_id)</code>. The inner parentheses identify the composite partition key. The remaining columns are clustering columns that order rows within that partition. The order identifier breaks ties between orders with the same timestamp; two real purchases must not collapse into one row merely because their timestamps happen to match.</p>

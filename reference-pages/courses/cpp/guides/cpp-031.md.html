@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Separate atomicity, ordering and visibility in an argument about a concurrent program.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>An atomic operation accesses one object without a data race. Memory ordering describes which other operations become visible across threads. A happens-before relation provides the reasoning chain for shared non-atomic data. Relaxed atomics are useful for independent counters but do not automatically publish surrounding objects.</p>
+<ul>
+<li><strong>atomic operation:</strong> an indivisible access to one atomic object that cannot form a data race.</li>
+<li><strong>data race:</strong> conflicting unsynchronized accesses to one non-atomic object from two threads, at least one a write, which is undefined behavior.</li>
+<li><strong>happens-before:</strong> the ordering relation that guarantees one operation&#x27;s effects are visible to another.</li>
+<li><strong>release and acquire:</strong> a release store paired with an acquire load that reads it, which publishes the writes made before the store.</li>
+<li><strong>relaxed ordering:</strong> atomicity without ordering of surrounding operations, suitable for independent counters.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>fetch_add(1,std::memory_order_relaxed)</code> updates a counter atomically. After joining all workers, the owner can compare the final count. Publishing a separate payload requires a release store and acquire load on a shared synchronization variable, or a mutex.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

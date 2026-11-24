@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-039`.
 
 Returning 202 means that a request was accepted under the application's contract; it does not prove that a durable worker will finish the requested work. This chapter distinguishes FastAPI BackgroundTasks from a task-queue API and from actual durable job execution.
 
+## Key terms
+
+- **202 Accepted:** A status meaning the request was accepted for processing under the application's contract, not that the work has completed.
+- **BackgroundTasks:** A FastAPI mechanism that runs a callback after the response in the same serving process, so the work is lost if that process dies.
+- **Eager mode:** A Celery test setting, `task_always_eager`, that runs a task locally and immediately instead of sending it through a broker.
+- **Message broker:** The service that holds queued task messages for workers; an in-memory broker is process-local and does not persist them.
+- **Job ledger:** Persistent records of operations and their states that a separate worker can claim, retry and reconcile.
+
 ## Mechanism: locate the owner of unfinished work
 
 BackgroundTasks attaches work to the response lifecycle in the serving process. It is convenient for small bounded follow-up operations, but its memory and execution disappear if that process is lost. A callback scheduled this way is not automatically a durable message, a retry policy or an independently managed worker.
@@ -29,6 +37,50 @@ The program registers a task with Celery, submits it through delay and retrieves
 It does not start a worker or contact a durable broker. That absence is printed in the result instead of being hidden behind a successful task identifier. A production queue test would need to observe broker acceptance, worker execution, retries, duplicate delivery handling and state recovery after process replacement.
 
 Task functions should accept stable data or identifiers rather than request objects, live database sessions or open file handles. Those process-bound objects may be invalid by the time another worker runs and are generally unsuitable for serialization.
+
+## Worked example: a failing background task silently drops the rest
+
+```python
+from starlette.applications import Starlette
+from starlette.background import BackgroundTasks
+from starlette.responses import JSONResponse
+from starlette.routing import Route
+from starlette.testclient import TestClient
+
+log = []
+
+
+def send(to):
+    log.append(f"sent to {to}")
+
+
+def flaky(to):
+    raise ConnectionError(f"mail server refused {to}")
+
+
+async def notify(request):
+    tasks = BackgroundTasks()
+    tasks.add_task(send, "ada")
+    tasks.add_task(flaky, "lin")
+    tasks.add_task(send, "grace")
+    log.append("response built")
+    return JSONResponse({"accepted": True}, status_code=202, background=tasks)
+
+
+app = Starlette(routes=[Route("/notify", notify, methods=["POST"])])
+with TestClient(app, raise_server_exceptions=False) as client:
+    print(client.post("/notify").status_code)
+print(log)
+```
+
+Expected output:
+
+```text
+202
+['response built', 'sent to ada']
+```
+
+FastAPI's `BackgroundTasks` is this Starlette class, so the behavior carries over directly. The client received 202 Accepted, the status that promises the work will happen, but the tasks ran one after another in the same process after the response, and the exception in the second task stopped the third. Grace never got her message, and nothing in the HTTP exchange could report that, because the response had already been sent. A server restart between the response and the tasks would lose all three in the same quiet way. This is the gap the lesson points at when it contrasts in-process tasks with a Celery queue: a broker keeps each job as its own record, a worker retries a job that failed, and one failure does not cancel unrelated jobs. Use `BackgroundTasks` only for work you can afford to lose, such as warming a cache.
 
 ## Failure diagnosis and discussion
 

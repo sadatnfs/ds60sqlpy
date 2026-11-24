@@ -38,6 +38,12 @@
       "code": "warnings_seen <- character()\nvalue <- withCallingHandlers(\n  {\n    warning(\"synthetic review notice\"); 4\n  },\n  warning = function(w) {\n    warnings_seen <<- c(warnings_seen, conditionMessage(w))\n    invokeRestart(\"muffleWarning\")\n  }\n)\nstopifnot(value == 4, identical(warnings_seen, \"synthetic review notice\"))\nprint(list(value = value, warnings = warnings_seen))\n",
       "explanation": "The calling handler records this known warning and permits the expression to finish. The retained warning remains evidence alongside the value.",
       "expected": "Value 4 and one recorded notice."
+    },
+    {
+      "title": "A catch-all handler turns a typo into a zero",
+      "code": "parse_count <- function(text) {\n  if (!grepl(\"^[0-9]+$\", text)) stop(\"invalid count\", call. = FALSE)\n  as.integer(text)\n}\nbroad <- function(text) tryCatch(parse_cuont(text), error = function(e) 0L)\nstopifnot(broad(\"12\") == 0L, broad(\"0\") == 0L)\nnarrow <- function(text, parser = parse_count) {\n  tryCatch(parser(text), error = function(e) {\n    if (!identical(conditionMessage(e), \"invalid count\")) stop(e)\n    NA_integer_\n  })\n}\nstopifnot(narrow(\"12\") == 12L, narrow(\"0\") == 0L, is.na(narrow(\"bad\")))\ntypo <- tryCatch(narrow(\"12\", parser = parse_cuont), error = conditionMessage)\nstopifnot(grepl(\"parse_cuont\", typo))\nprint(c(broad = broad(\"12\"), narrow = narrow(\"12\")))\n",
+      "explanation": "The broad wrapper calls a misspelled function, so every input raises a could not find function error, and the handler converts it to 0. A valid \"12\" and a valid \"0\" now look identical and nothing reports the defect. The narrow wrapper handles only the one message parse_count is known to raise, turning \"bad\" into NA, and passes every other error on with `stop(e)`. Given the same typo, it fails loudly with a message that names the missing object, which is the evidence a reviewer needs.",
+      "expected": "broad 0 and narrow 12; the typo surfaces as a message naming parse_cuont."
     }
   ],
   "exercises": [

@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Sort numerical values before using a function that assumes sorted input. <code>d3.quantileSorted</code> computes a quantile of an ordered array. For <code>[1, 2, 3, 4, 5]</code>, median is 3 and the first and third quartiles are 2 and 4. A simple box can map those values to x positions, with a median line inside.</p>
 <p>For a supplied interval, check lower &lt;= estimate &lt;= upper before drawing a segment and point. If the interval spans zero, that visual fact should not be hidden by a truncated axis. The statistical interpretation still depends on the stated estimator and procedure.</p>
 <h3 id="exercise-1-predict-the-three-quantiles">Exercise 1: Predict the three quantiles.<a class="heading-anchor" href="#exercise-1-predict-the-three-quantiles" aria-label="Link to this section">#</a></h3>
-<p>The small ordered input makes the definition visible. Different quantile conventions should be documented when comparing tools.</p>
+<p>The small ordered input makes the definition visible. Different quantile conventions should be documented when comparing tools. For [1, 2, 3, 4, 5], d3.quantileSorted interpolates at position (n - 1) * p, giving index 1, 2 and 3 for p 0.25, 0.5 and 0.75, so 2, 3 and 4. Another convention, such as excluding the median from each half, can give 1.5 and 4.5. The reference checks q1 === 2, median === 3 and q3 === 4.</p>
 <p><strong>Expected:</strong> 2, 3, 4 for the stated five-value sample.</p>
 <h3 id="exercise-2-add-an-extreme-value-and-recompute">Exercise 2: Add an extreme value and recompute.<a class="heading-anchor" href="#exercise-2-add-an-extreme-value-and-recompute" aria-label="Link to this section">#</a></h3>
-<p>A summary is a function of data. Inspect how much information the box retains and which tail behavior it hides.</p>
+<p>A summary is a function of data. Inspect how much information the box retains and which tail behavior it hides. Adding 100 gives <code>[1, 2, 3, 4, 5, 100]</code>: Q1 becomes 2.25, the median 3.5 and Q3 4.75, while the whisker jumps from 5 to 100. The box barely moves, which shows how little it says about the tail. Recompute by hand with position (n - 1) * p and compare.</p>
 <p><strong>Expected:</strong> Quantiles and the visible range change according to the new sample.</p>
 <h3 id="exercise-3-draw-a-labeled-box-and-median">Exercise 3: Draw a labeled box and median.<a class="heading-anchor" href="#exercise-3-draw-a-labeled-box-and-median" aria-label="Link to this section">#</a></h3>
-<p>The geometry should encode actual statistics, not decorative percentages of chart width.</p>
+<p>The geometry should encode actual statistics, not decorative percentages of chart width. The reference draws the rect from x(q1) to x(q3) and the median line at x(median) on a [0, 6] scale. Drawing a box of fixed width centered on the median would look the same for this symmetric sample and fail for a skewed one. Read the rect&#x27;s x and width and convert back with x.invert.</p>
 <p><strong>Expected:</strong> The box endpoints map to Q1 and Q3 and the line maps to median.</p>
 <h3 id="exercise-4-diagnose-calling-an-unsorted-only-contract-incorrectly">Exercise 4: Diagnose calling an unsorted-only contract incorrectly.<a class="heading-anchor" href="#exercise-4-diagnose-calling-an-unsorted-only-contract-incorrectly" aria-label="Link to this section">#</a></h3>
-<p>A function with a sorted-input precondition can return misleading values when that precondition is violated. The data pipeline owns the guarantee.</p>
+<p>A function with a sorted-input precondition can return misleading values when that precondition is violated. The data pipeline owns the guarantee. d3.quantileSorted([5, 1, 4, 2, 3], 0.5) returns 4, the middle element of the unsorted array, not the median 3. Sort a copy with d3.sort or slice().sort((a, b) =&gt; a - b) before calling it.</p>
 <p><strong>Expected:</strong> Sort a copy before quantileSorted.</p>
 <h3 id="exercise-5-distinguish-individual-spread-from-estimate-uncertainty">Exercise 5: Distinguish individual spread from estimate uncertainty.<a class="heading-anchor" href="#exercise-5-distinguish-individual-spread-from-estimate-uncertainty" aria-label="Link to this section">#</a></h3>
-<p>They are not interchangeable error bars. Name the population quantity and method behind any inferential interval.</p>
+<p>They are not interchangeable error bars. Name the population quantity and method behind any inferential interval. The box spans 2 to 4, describing individual values; a 95% interval for the mean of these five values would be a different range about the estimator. Label which one is drawn.</p>
 <p><strong>Expected:</strong> Quartiles describe observations; a confidence interval concerns an estimator.</p>
 <h3 id="exercise-6-design-a-comparison-of-two-estimated-effects">Exercise 6: Design a comparison of two estimated effects.<a class="heading-anchor" href="#exercise-6-design-a-comparison-of-two-estimated-effects" aria-label="Link to this section">#</a></h3>
-<p>Visual overlap alone is not a complete hypothesis test. Explain the actual comparison procedure separately.</p>
+<p>Visual overlap alone is not a complete hypothesis test. Explain the actual comparison procedure separately. Two intervals that overlap can still correspond to a significant difference; plot the estimated difference with its own interval and a zero line.</p>
 <p><strong>Expected:</strong> Show estimates, interval method, units and a meaningful zero reference.</p></article>
   </main>
 </body>

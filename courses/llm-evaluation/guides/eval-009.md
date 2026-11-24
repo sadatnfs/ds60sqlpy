@@ -8,7 +8,7 @@ Separate claim truth, citation support, evidence coverage and source availabilit
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-009`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-009` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for claim support, citations and evidence provenance in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about citation precision and claim coverage: One supported citation gives precision 1 and coverage 1/3, no citations gives missing precision and coverage 0, unknown relations and duplicate citations are rejected, and a newer document is ineligible for the historical reconstruction. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## A citation marker is not an entailment judgment
 
@@ -17,6 +17,13 @@ An answer may cite a real document while making an unsupported claim. It may als
 The Research Support Desk's evidence ledger identifies a claim, a document version and a support label. A claim may need multiple passages jointly, and a passage may support only one part of a compound claim. Splitting an answer into atomic claims is itself an annotation procedure requiring a rubric. The code uses authored atomic claims and authored support labels so that no model is secretly serving as an unquestioned judge.
 
 Define link precision as supported citation links divided by evaluated citation links, and claim coverage as claims with at least one supported link divided by eligible claims. These quantities have different denominators. A response that cites one claim correctly and leaves nine uncited can have perfect link precision with poor coverage. A response with many irrelevant links can have good coverage but low precision.
+
+## Key terms
+
+- **Link precision:** Supported citation links divided by evaluated citation links.
+- **Claim coverage:** Eligible claims with at least one supported link divided by all eligible claims.
+- **Entailment label:** A judgment of whether a cited passage supports its associated claim.
+- **Document version:** The specific snapshot of a source, which determines what evidence was available and authorized when an answer was produced.
 
 ## Worked case A: reconstruct the support relation
 

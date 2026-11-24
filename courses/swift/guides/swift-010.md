@@ -109,7 +109,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Preserve absence and zero) before changing anything, and confirm its observation: Pear is present with zero and apple is absent.
 2. Compare Example B (Deduplicate and order deliberately) with Example A and name the first line whose behavior differs. Its observation is: Duplicate red is not inserted and sorted output is deterministic.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Hash collisions do not mean values are equal; equality resolves them.
+3. Before opening the explanation, check your task 3 attempt (Build a unique sorted list of accepted inventory names) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

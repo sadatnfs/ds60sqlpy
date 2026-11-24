@@ -40,7 +40,7 @@ assert.deepEqual(trace, [
 ]);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1)`. Restoring the original line brings back the worked observation: index 1; intervals shrink to the first duplicate.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(lowerBound([1, 4, 4, 8], 5, trace), 1);`. Restoring `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);` brings back: index 1; intervals shrink to the first duplicate.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -59,7 +59,7 @@ assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5])
 assert.equal(heap.pop(), undefined);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5])`; after it the line reads `for (const value of [5, 1, 3, 1]) heap.push(value);` again and pops 1,1,3,5, then undefined.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5])`. Restoring `for (const value of [5, 1, 3, 1]) heap.push(value);` brings back: pops 1,1,3,5, then undefined.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5])` for this input.
 

@@ -1,6 +1,6 @@
 # llm-048: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these exact speculative decoding and cache rollback answers after attempting *Prove one-step distribution preservation* through *Handle equality, EOS, budgets and invalid support*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Check an all-accepted round and bonus token* points to one step. `llm-048_solution.py` holds the assertions; this page explains how they test draft distribution. Then try *Handle equality, EOS, budgets and invalid support* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ A multi-token round accepts a contiguous prefix of draft proposals. At the first
 
 ## Reading the implementation
 
-Validate finite nonnegative probability vectors with unit mass. Sample using an explicit draw in[0, 1), with half-open cumulative intervals. Compute acceptance ratios only where q is positive; a zero-q token cannot be a valid draft sample. The round helper stores the draft distributions at their proposal prefixes, then verifies in order and stops at the first rejection or accepted EOS. A TinyCache stores position-dependent key vectors and value vectors so rollback can be checked against a fresh reconstruction.
+Validate finite nonnegative probability vectors with unit mass. Sample using an explicit draw in \([0, 1)\), with half-open cumulative intervals. Compute acceptance ratios only where q is positive; a zero-q token cannot be a valid draft sample. The round helper stores the draft distributions at their proposal prefixes, then verifies in order and stops at the first rejection or accepted EOS. A TinyCache stores position-dependent key vectors and value vectors so rollback can be checked against a fresh reconstruction.
 
 Sampling builds the cumulative distribution on positive-support entries only, then maps the selected index back to the original token ID. The final cumulative boundary is assigned to the last positive entry, so floating-point rounding cannot create a tail interval for a zero-probability token. Half-open interval behavior is retained at internal boundaries.
 
@@ -43,15 +43,15 @@ np.testing.assert_allclose(residual, [1, 0, 0], atol=1e-12, rtol=0)
 np.testing.assert_allclose(accepted_mass + rejection * residual, p, atol=1e-12, rtol=0)
 ```
 
-**Expected:** accepted mass[.2, .3, .2]; rejection .3; residual[1, 0, 0]; combined mass p.
+**Expected:** accepted `mass[.2, .3, .2]`; rejection .3; `residual[1, 0, 0]`; combined mass p.
 
-**Verify:** In a fresh process, the exercise checks confirm `accepted_mass` matches `[0.2, 0.3, 0.2]` within 1e-12; `rejection` matches `0.3` within 1e-12; `residual` matches `[1, 0, 0]` within 1e-12 and `accepted_mass + rejection * residual` matches `p` within 1e-12.
+**Verify:** For *Prove one-step distribution preservation*, a fresh-process check confirms `accepted_mass` matches `[0.2, 0.3, 0.2]` within 1e-12; `rejection` matches `0.3` within 1e-12; `residual` matches `[1, 0, 0]` within 1e-12 and `accepted_mass + rejection * residual` matches `p` within 1e-12.
 
 ## Exercise 2: Exercise acceptance and correction paths
 
 The question is: Propose token 1 with acceptance draw .8, then token 2 with draw .5.
 
-For token 1, the acceptance threshold is.3/.5=.6. For token 2, it is.2/.3=2/3. The supplied draws make both branches deterministic and inspectable.
+For token 1, the acceptance threshold is 0.3/0.5 = 0.6. For token 2, it is 0.2/0.3 = 2/3. The supplied draws make both branches deterministic and inspectable.
 
 ```python
 rejected = one_step(p, q, 1, 0.8, 0.9)
@@ -61,7 +61,7 @@ assert rejected == {"token": 0, "accepted": False} and accepted == {"token": 2, 
 
 **Expected:** token 1 rejected and corrected to 0; token 2 accepted.
 
-**Verify:** In a fresh process, the exercise checks confirm `rejected == {'token': 0, 'accepted': False}` and `accepted == {'token': 2, 'accepted': True}`.
+**Verify:** For *Exercise acceptance and correction paths*, a fresh-process check confirms `rejected == {'token': 0, 'accepted': False}` and `accepted == {'token': 2, 'accepted': True}`.
 
 ## Exercise 3: Check an all-accepted round and bonus token
 
@@ -79,9 +79,9 @@ assert (
 )
 ```
 
-**Expected:** emitted[0, 1, 1]; accepted_count 2; no rejection.
+**Expected:** `emitted[0, 1, 1]`; accepted_count 2; no rejection.
 
-**Verify:** In a fresh process, the exercise checks confirm `all_accepted['tokens'] == [0, 1, 1]`; `all_accepted['accepted_count'] == 2` and `not all_accepted['rejected']`.
+**Verify:** For *Check an all-accepted round and bonus token*, a fresh-process check confirms `all_accepted['tokens'] == [0, 1, 1]`; `all_accepted['accepted_count'] == 2` and `not all_accepted['rejected']`.
 
 ## Exercise 4: Stop at the first rejection
 
@@ -101,9 +101,9 @@ assert (
 )
 ```
 
-**Expected:** draft[0, 1]; accepted prefix[0]; correction 0; emitted[0, 0].
+**Expected:** `draft[0, 1]`; accepted `prefix[0]`; correction 0; `emitted[0, 0]`.
 
-**Verify:** In a fresh process, the exercise checks confirm `round_result['proposals'] == [0, 1]`; `round_result['tokens'] == [0, 0]`; `round_result['accepted_count'] == 1` and `round_result['rejected']`.
+**Verify:** For *Stop at the first rejection*, a fresh-process check confirms `round_result['proposals'] == [0, 1]`; `round_result['tokens'] == [0, 0]`; `round_result['accepted_count'] == 1` and `round_result['rejected']`.
 
 ## Exercise 5: Rollback actual K/V arrays
 
@@ -128,7 +128,7 @@ assert broken.tokens != fresh.tokens and not np.allclose(broken.output(), fresh.
 
 **Expected:** tokens, keys, values and attention output match a fresh cache; retaining a rejected token breaks parity.
 
-**Verify:** In a fresh process, the exercise checks confirm `cache.tokens == fresh.tokens`, `cache.keys` matches `fresh.keys` exactly, `cache.output()` matches `fresh.output()` within 1e-12, `broken.tokens != fresh.tokens` and 1 further check.
+**Verify:** For *Rollback actual K/V arrays*, a fresh-process check confirms `cache.tokens == fresh.tokens`, `cache.keys` matches `fresh.keys` exactly, `cache.output()` matches `fresh.output()` within 1e-12, `broken.tokens != fresh.tokens` and 1 further check.
 
 ## Exercise 6: Handle equality, EOS, budgets and invalid support
 
@@ -153,8 +153,8 @@ else:
 
 **Expected:** rejection mass is 0 and residual is None; accepted EOS stops generation; the token cap is respected; unsupported proposals raise ValueError.
 
-**Verify:** In a fresh process, the exercise checks confirm `mass == 0`, `none is None`, `np.all(alpha == 1)`, `eos['tokens'] == [2]` and 2 further checks.
+**Verify:** For *Handle equality, EOS, budgets and invalid support*, a fresh-process check confirms `mass == 0`, `none is None`, `np.all(alpha == 1)`, `eos['tokens'] == [2]` and 2 further checks.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Stop at the first rejection* and predict the result first; keep *Rollback actual K/V arrays* failing beside the repair. Log a missing NumPy separately from a wrong draft distribution value in `llm-048`.

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-draw-the-dependency-graph">Exercise 1: Draw the dependency graph<a class="heading-anchor" href="#exercise-1-draw-the-dependency-graph" aria-label="Link to this section">#</a></h3>
 <p>Edges encode actual data dependencies.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>draw the dependency graph</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Draw the dependency graph for one batch as nodes upload, transform and download with edges upload to transform and transform to download, matching the <code>edges</code> list in the reference.</p>
+<p><strong>Why it is correct here.</strong> Edges represent data dependencies: transform reads the uploaded buffer, and download reads the transform output. Any execution order respecting these edges is valid.</p>
+<p><strong>A plausible wrong approach.</strong> Drawing edges from code order instead of data flow invents dependencies between unrelated work and hides real ones crossing library calls.</p>
+<p><strong>How to verify.</strong> Run the reference: the valid order passes the positions check. The order with download first fails, which the second assertion confirms.</p>
 <h3 id="exercise-2-locate-a-missing-wait">Exercise 2: Locate a missing wait<a class="heading-anchor" href="#exercise-2-locate-a-missing-wait" aria-label="Link to this section">#</a></h3>
 <p>Reading before the producing event is unsafe.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>locate a missing wait</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Locate a missing wait: consumer B on stream 2 reads buffer X without waiting for event E recorded after producer A wrote X on stream 1.</p>
+<p><strong>Why it is correct here.</strong> Streams are independent queues. Without an explicit wait on E, stream 2 may run B before A finishes, so B reads stale or partial data.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming the host Python call to A finishing means A&#x27;s kernel finished confuses queuing with completion.</p>
+<p><strong>How to verify.</strong> Insert <code>stream2.wait_event(E)</code> before B, and show that with a slow producer the consumer output is correct only when the wait exists.</p>
 <h3 id="exercise-3-separate-host-wait-and-stream-wait">Exercise 3: Separate host wait and stream wait<a class="heading-anchor" href="#exercise-3-separate-host-wait-and-stream-wait" aria-label="Link to this section">#</a></h3>
 <p>One blocks host progress and the other queues device ordering.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate host wait and stream wait</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate <code>event.synchronize()</code>, which blocks the host thread until the event completes, from <code>stream.wait_event(event)</code>, which queues a device-side dependency and returns immediately.</p>
+<p><strong>Why it is correct here.</strong> A host wait stalls Python and can prevent further work from being enqueued. A stream wait keeps the host free while ordering device work.</p>
+<p><strong>A plausible wrong approach.</strong> Using a host synchronize everywhere fixes correctness but serializes host and device.</p>
+<p><strong>How to verify.</strong> Inspect a profiler timeline for both versions and confirm the outputs are identical.</p>
 <h3 id="exercise-4-trace-storage-reuse">Exercise 4: Trace storage reuse<a class="heading-anchor" href="#exercise-4-trace-storage-reuse" aria-label="Link to this section">#</a></h3>
 <p>Do not recycle before final consumer completion.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>trace storage reuse</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Trace storage reuse: a buffer freed after its last consumer kernel is enqueued must not be handed to a new producer until that consumer completes on the device.</p>
+<p><strong>Why it is correct here.</strong> Caching allocators reuse memory quickly. If the stream order between the old consumer and the new producer is not guaranteed, the new producer can overwrite data still being read.</p>
+<p><strong>A plausible wrong approach.</strong> Freeing a buffer as soon as the host is done with its Python object assumes device work is done too.</p>
+<p><strong>How to verify.</strong> Use <code>record_stream</code> or an event so the allocator knows the last user, then test with a slow consumer.</p>
 <h3 id="exercise-5-design-non-default-stream-test">Exercise 5: Design non-default stream test<a class="heading-anchor" href="#exercise-5-design-non-default-stream-test" aria-label="Link to this section">#</a></h3>
 <p>Use two streams and known values.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design non-default stream test</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a non-default stream test: create two non-default streams, write known values on stream 1, record an event, wait for it on stream 2 and compute on stream 2.</p>
+<p><strong>Why it is correct here.</strong> The default stream may add implicit synchronization that hides missing waits. Using two explicit streams removes that safety net, so the test checks the intended ordering.</p>
+<p><strong>A plausible wrong approach.</strong> Testing only on the default stream passes even with the wait removed.</p>
+<p><strong>How to verify.</strong> Run the test with the wait present and confirm the known result, then remove it and observe possible wrong values.</p>
 <h3 id="exercise-6-explain-why-global-synchronization-can-mask-bugs">Exercise 6: Explain why global synchronization can mask bugs<a class="heading-anchor" href="#exercise-6-explain-why-global-synchronization-can-mask-bugs" aria-label="Link to this section">#</a></h3>
 <p>Global waits accidentally add dependencies absent from the intended program.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain why global synchronization can mask bugs</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain that calling <code>cuda.synchronize()</code> everywhere can mask a missing dependency, because the global wait orders all prior work.</p>
+<p><strong>Why it is correct here.</strong> The program then works only because of an extra global ordering, not because of explicit data edges. Removing the global wait later for performance exposes the bug.</p>
+<p><strong>A plausible wrong approach.</strong> Treating a correct result with global waits as proof that dependencies are complete hides the missing event.</p>
+<p><strong>How to verify.</strong> Remove global waits one at a time in a test and keep only explicit events. Outputs must stay correct.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Valid dependency order accepted; premature download rejected.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-082_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

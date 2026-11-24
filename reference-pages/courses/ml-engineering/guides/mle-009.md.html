@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Different metrics describe different properties of a prediction system. Ranking metrics ask whether positive cases tend to receive higher scores. Probability losses evaluate numeric confidence. A threshold turns a probability into an action under a particular cost and benefit structure. These questions should not be collapsed into a single claim that a model is good.</p>
 <p>The first case evaluates a fitted model on forty later synthetic decisions after all their labels are mature at cutoff 224. It reports Brier loss, log loss and AUC, then displays a descriptive calibration plot with bin counts and readable values. The plot is intentionally labeled as descriptive: forty observations do not justify a precise population-calibration claim without uncertainty analysis.</p>
 <p>The second case applies declared utility values to four fixed labeled examples. The best threshold on this small teaching fixture is not automatically a deployable policy. In a real workflow, select thresholds using an appropriate development design, evaluate the selected procedure independently and distinguish predictive performance from causal effects of the resulting actions.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Brier score:</strong> The mean squared difference between predicted probabilities and observed 0 or 1 outcomes; lower values mean more accurate probabilities.</li>
+<li><strong>Log loss:</strong> The average negative log-likelihood of the observed outcomes under the predicted probabilities, which heavily penalizes confident wrong predictions.</li>
+<li><strong>AUC:</strong> The area under the ROC curve: the probability that a randomly chosen positive scores above a randomly chosen negative. It measures ranking, not calibration.</li>
+<li><strong>Calibration:</strong> Agreement between predicted probabilities and observed outcome frequencies, inspected here with bins that keep their counts.</li>
+<li><strong>Decision threshold:</strong> The probability cutoff that turns a score into an action. Its best value depends on declared benefits and costs, not on the score alone.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>predict_proba returns the positive-class scores under the fitted model. The example uses standard metric implementations and checks their domains. Calibration bins retain their counts and mean predictions; empty bins are omitted explicitly. The threshold case computes benefits for true positive actions and costs for false positives, with the cost values stated in the source.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

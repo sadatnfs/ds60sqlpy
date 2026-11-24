@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-039.md) and attempt one language first. The [Sc
 
 Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.
 
-**Expected:** Exact population tuple 20000,20000,100,199990000;key 0 count 16040, other keys 40.
+**Expected:** Exact population tuple 20000,20000,100,199990000; key 0 count 16040, other keys 40.
 
 ```scala
 def fixtureMetrics(source: DataFrame): Seq[Long] = {
@@ -34,7 +34,7 @@ The source formula supplies an independent expected distribution before any conf
 
 Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product.
 
-**Expected:** 100 exact key/count pairs, total 20000;nonempty retained stage evidence; one or two data files.
+**Expected:** 100 exact key/count pairs, total 20000; nonempty retained stage evidence; one or two data files.
 
 ```scala
 def measureTwo(spark: SparkSession, source: DataFrame, root: Path): BudgetReport = {
@@ -76,7 +76,7 @@ Increasing partitions changes task granularity and output-file opportunities, no
 
 Compute maximum bucket rows divided by mean bucket rows; report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values.
 
-**Expected:** Both observed work ratios exceed 1;unavailable metrics remain None/None-equivalent.
+**Expected:** Both observed work ratios exceed 1; unavailable metrics remain None/None-equivalent.
 
 ```scala
 def imbalance(counts: Seq[Long]): Double = {
@@ -126,7 +126,7 @@ The model exposes its units and intentionally hypothetical prices. It omits bill
 
 Accept only row counts 1..20000 and partition counts 1..8 for this local exercise. Reject an attempted larger fixture before constructing it.
 
-**Expected:** 20000/4 accepted;20001/4 and 20000/9 rejected.
+**Expected:** 20000/4 accepted; 20001/4 and 20000/9 rejected.
 
 ```scala
 def withinBudget(rows: Long, partitions: Int): Boolean = {
@@ -150,4 +150,6 @@ The limit is a declared teaching workload budget, not a universal safe size for 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Validate the generated skewed fixture) is built inside the program, so opening the lesson fetches nothing; it expects: Exact population tuple `(20000, 20000, 100, 199990000)`; key 0 count 16040, other keys 40. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

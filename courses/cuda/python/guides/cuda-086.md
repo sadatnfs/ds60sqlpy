@@ -14,6 +14,13 @@ The capstone adds ownership and dependency diagrams. Show which library owns eac
 
 
 
+### Key terms
+
+- **Fitted statistic:** A value such as a mean or scale that is learned from data and then applied as a transform.
+- **Data leakage:** Information from validation or test data that influences training or preprocessing and inflates measured quality.
+- **Constant feature:** A column with zero variance, whose standardization divides by zero unless it is guarded.
+- **Schema:** The required column names, order and dtypes that every data split must share.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,33 +46,54 @@ print("CPU pipeline oracle:", means, scores)
 
 **Expected observation:** Fitted means [2,3] and scores [-1,1].
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `rows` | `[[1, 2], [3, 4]]` |
+| `means` | `[2.0, 3.0]` |
+| `centered` | `[[-1.0, -1.0], [1.0, 1.0]]` |
+| `scores` | `[-1.0, 1.0]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Derive fitted means
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **derive fitted means** in the examples above.
+**Trap to avoid:** Averaging along columns, the per-row means, gives `[1.5, 3.5]` and centers the wrong axis.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Score the centered rows
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **score the centered rows** in the examples above.
+**Trap to avoid:** Scoring the raw rows gives `[0, 2]`, which skips the fitted transformation.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Add a constant column
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **add a constant column** in the examples above.
+**Trap to avoid:** Dividing by the standard deviation without a check fills the column with NaN, which spreads into the scores.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Draw owners and waits
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **draw owners and waits** in the examples above.
+**Trap to avoid:** Drawing only the computation steps without owners loses track of when buffers can be freed.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design train-validation separation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design train-validation separation** in the examples above.
+**Trap to avoid:** Fitting on the concatenated train and validation data is a subtler leak with the same effect: validation scores look better than they would on truly unseen rows.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Write the capstone acceptance report
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **write the capstone acceptance report** in the examples above.
+**Trap to avoid:** Reporting a single speedup number leaves out correctness and the scope of the claim, so readers cannot tell whether transfers were timed or whether the means were reused.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

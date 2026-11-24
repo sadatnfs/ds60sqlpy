@@ -16,6 +16,14 @@ Patching an image generally means rebuilding from updated inputs and replacing c
 
 A rebuild can introduce regressions as well as fixes. Use a small update scope, preserve the old immutable artifact, run the relevant tests and verify the actual final image. Do not claim that a passing scan proves absence of all vulnerabilities or that an unfixed low-severity finding is automatically harmless.
 
+### Key terms
+
+- **Vulnerability finding:** A scanner's match between a component version and a published issue, which is evidence to investigate, not a verdict.
+- **Affected version:** A component version that the published issue lists as vulnerable.
+- **Scanner:** A tool that inventories an image's components and matches them against vulnerability data under its own rules.
+- **Base image update:** Moving the `FROM` reference to a patched base so a rebuild picks up fixed operating-system packages.
+- **Rebuild and retest:** Producing a new image from updated inputs and running the relevant tests on that final image before replacing containers.
+
 ## Anatomy and a trace you can follow
 
 Classify findings by component, installed version, fixed version if available, application reachability and required action. Keep the scanner database timestamp and artifact digest. A tag-based report becomes stale when the tag changes.
@@ -96,11 +104,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Patching inside a running container instead of rebuilding the image. Reading zero findings as proof of safety. Applying a scan result to a tag that now points elsewhere.
 
-Exercise 4 is this chapter's boundary case: Diagnose a scan report attached only to a mutable tag. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a scan report attached only to a mutable tag. Resolve the tag named in the scan report to a digest, compare it with the deployed digest, and note the scanner's database date. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using vulnerability finding, affected version, base image update and rebuild and retest. Reconstruct worked example 2 (Trace a reproducible patch) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Trace the patch steps and name the identity you would record before replacing the container. Then reconstruct worked example 2 (Trace a reproducible patch) with one different value, predict what changes, and name which of vulnerability finding, affected version, base image update and rebuild and retest the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

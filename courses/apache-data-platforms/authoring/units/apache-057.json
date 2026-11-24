@@ -5,6 +5,36 @@
   "minutes": 80,
   "prerequisites": ["apache-004", "apache-038"],
   "concepts": ["segments", "broker", "controller", "server", "coordination"],
+  "key_terms": [
+    ["Segment", "A column-oriented Pinot unit of data and indexes that servers load and query."],
+    [
+      "Controller",
+      "The Pinot role that manages table configuration, segment metadata and segment assignment to servers."
+    ],
+    [
+      "Broker",
+      "The Pinot role that accepts a query, routes it to the servers holding relevant segments and merges their responses."
+    ],
+    ["Server", "The Pinot role that stores or consumes segments and executes query work on them."],
+    [
+      "ZooKeeper",
+      "The coordination service through which Pinot's cluster manager stores cluster state and segment assignment."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Batch ingestion job specification",
+      "language": "yaml",
+      "code": "jobType: SegmentCreationAndTarPush\ninputDirURI: file:///project/input\nincludeFileNamePattern: glob:**/*.jsonl\noutputDirURI: file:///staging/segments\noverwriteOutput: false\ntableSpec:\n  tableName: ds60_orders\n  schemaURI: file:///project/schema.json\n  tableConfigURI: file:///project/table.json\npinotClusterSpecs:\n  - controllerURI: http://controller:9000",
+      "interpretation": "This excerpt of ingestion.yaml shows the two halves of offline loading: build a segment from the JSON lines input, then push the tar file to the controller. The controller records segment metadata and assigns it to servers, while the broker only learns routing from that assignment. overwriteOutput false keeps a second run from replacing a staged segment silently, so a rerun that fails on an existing output is protecting evidence rather than misbehaving."
+    },
+    {
+      "title": "Query through the broker and compare totals",
+      "language": "sql",
+      "code": "SELECT\n  region,\n  SUM(amount)\nFROM\n  ds60_orders\nGROUP BY\n  region\nORDER BY\n  region\nLIMIT 10",
+      "interpretation": "Sent to the broker at /query/sql, this should return east 11 and west 9 for the three fixture rows. The response metadata also reports numServersQueried and numSegmentsQueried, which tell you whether the broker reached the server holding the segment. A correct total from zero segments is impossible, so if those counts are zero while rows appear, you are reading a different table or cluster. The client checks the exact ID list before trusting the aggregate."
+    }
+  ],
   "evidence": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations.",
   "sources": [
     [

@@ -6,7 +6,7 @@ Compare after an attempt or an explicit reveal. The [guide](../guides/k8s-003.md
 
 A Kubernetes manifest describes a typed API request. `apiVersion` chooses a resource API version; `kind` chooses the object type; metadata names and labels the object. For a Deployment, spec expresses desired state, including replica count and a Pod template. Status is an observed server/controller report, not a field to invent in the learner source.
 
-YAML indentation defines nesting. A number such as replicas:1 must be a number, not a quoted string. The Deployment selector must match the Pod-template labels. Some API kinds, such as ConfigMap, use data rather than spec: do not force every object into a memorized shape. The source intentionally omits namespace so the reviewed operation binds it from a valid owned lease. It may not use current-context, accept an arbitrary host target or silently broaden credentials. [Deployment concepts](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) explain the desired-state structure.
+YAML indentation defines nesting. A number such as `replicas: 1` must be a number, not a quoted string. The Deployment selector must match the Pod-template labels. Some API kinds, such as ConfigMap, use data rather than spec: do not force every object into a memorized shape. The source intentionally omits namespace so the reviewed operation binds it from a valid owned lease. It may not use current-context, accept an arbitrary host target or silently broaden credentials. [Deployment concepts](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) explain the desired-state structure.
 
 - **apiVersion:** the API group/version for a resource type
 - **kind:** the requested resource category

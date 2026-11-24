@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-binary-and-configuration-versions">Exercise 1: Distinguish binary and configuration versions<a class="heading-anchor" href="#exercise-1-distinguish-binary-and-configuration-versions" aria-label="Link to this section">#</a></h3>
 <p>A useful experiment must name what changed. Calling this a binary upgrade would claim a version transition that never happened. The marker still provides a valid way to trace routing to two different configured backends.</p>
 <p><strong>Expected:</strong> Same binary version; different synthetic configuration markers.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Request <code>/version</code> and <code>/message</code> from each Deployment and compare each route separately.</li>
+<li><strong>Why it is correct:</strong> Both Deployments run the same image, so version matches while the message from configuration differs.</li>
+<li><strong>Plausible wrong approach:</strong> Using one route for both comparisons cannot separate a binary change from a configuration change.</li>
+<li><strong>How to verify:</strong> Version is equal across both, and message differs.</li>
+</ul>
 <h3 id="exercise-2-predict-selected-backends">Exercise 2: Predict selected backends<a class="heading-anchor" href="#exercise-2-predict-selected-backends" aria-label="Link to this section">#</a></h3>
 <p>Readiness cannot override a label mismatch. The candidate can be healthy yet receive no Service traffic, which is often intentional before a controlled cutover and explains why Pod checks and Service checks answer different questions.</p>
 <p><strong>Expected:</strong> Stable matches and candidate does not.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare every selector pair with each Deployment&#x27;s Pod template labels.</li>
+<li><strong>Why it is correct:</strong> A Service selects Pods whose labels contain every selector pair, so the candidate&#x27;s differing label excludes it.</li>
+<li><strong>Plausible wrong approach:</strong> Matching on app alone would put the candidate behind the stable Service.</li>
+<li><strong>How to verify:</strong> Stable matches all pairs, and the candidate fails at least one.</li>
+</ul>
 <h3 id="exercise-3-predeclare-the-release-gate">Exercise 3: Predeclare the release gate<a class="heading-anchor" href="#exercise-3-predeclare-the-release-gate" aria-label="Link to this section">#</a></h3>
 <p>The gate must be chosen before examining the candidate results. Retain exact sample semantics so a reviewer can tell whether retries hid failures or whether only successful responses were counted.</p>
 <p><strong>Expected:</strong> A concrete gate that can fail independently of Ready replicas.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Fix the expected marker, sample count, maximum error count and per-request deadline before release.</li>
+<li><strong>Why it is correct:</strong> Response-level thresholds can fail even when every replica is Ready, which is the gap they are meant to cover.</li>
+<li><strong>Plausible wrong approach:</strong> Using Ready replicas as the gate passes a candidate that serves wrong content.</li>
+<li><strong>How to verify:</strong> The gate has numbers and can fail with every replica Ready.</li>
+</ul>
 <h3 id="exercise-4-reject-the-failing-candidate">Exercise 4: Reject the failing candidate<a class="heading-anchor" href="#exercise-4-reject-the-failing-candidate" aria-label="Link to this section">#</a></h3>
-<p>A finite negative result is actionable because it violates the declared rule. Retrying until four successes appear would change the experiment and conceal the failure rate observed during the original window.</p>
-<p><strong>Expected:</strong> Failure with one error; do not proceed to promotion.</p>
+<p>A finite negative result is actionable because it violates the declared rule. Waiting past the deadline for the fourth answer, or retrying until four successes appear, would change the experiment and conceal the failure rate observed during the original window.</p>
+<p><strong>Expected:</strong> Failure: only three valid responses arrived within the deadline; do not proceed to promotion.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Count all four attempts, treating the TIMEOUT as an error, against the gate.</li>
+<li><strong>Why it is correct:</strong> The fourth request exceeded the declared deadline, so only three valid responses arrived and the zero error rule fails; promotion stops.</li>
+<li><strong>Plausible wrong approach:</strong> Waiting past the deadline until the fourth reviewer response arrives would let the sample pass by changing the declared rule.</li>
+<li><strong>How to verify:</strong> The gate fails with one timed-out attempt, and no promotion happens.</li>
+</ul>
 <h3 id="exercise-5-restore-and-verify-stable-traffic">Exercise 5: Restore and verify stable traffic<a class="heading-anchor" href="#exercise-5-restore-and-verify-stable-traffic" aria-label="Link to this section">#</a></h3>
 <p>The rollback sequence needs an application confirmation through the same path users would take. A selector still pointing to deleted candidate Pods can leave no endpoints even though the stable Deployment remains healthy.</p>
 <p><strong>Expected:</strong> Correct Service identity and four observed hello responses.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Apply the host selector repair and send four samples through the same Service.</li>
+<li><strong>Why it is correct:</strong> The Service object is kept, so its UID is unchanged while the selector again points only at stable Pods.</li>
+<li><strong>Plausible wrong approach:</strong> Deleting and recreating the Service changes its UID and loses the identity the check relies on.</li>
+<li><strong>How to verify:</strong> UID matches the original, and four samples return the stable marker.</li>
+</ul>
 <h3 id="exercise-6-explain-ratio-and-evidence-limits">Exercise 6: Explain ratio and evidence limits<a class="heading-anchor" href="#exercise-6-explain-ratio-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <p>The final review should identify the routing mechanism, sample size and remaining uncertainty. A real weighted canary or binary release would require additional qualified capabilities and separate evidence.</p>
 <p><strong>Expected:</strong> Replica ratio does not establish an exact traffic ratio or production reliability.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Explain why one stable and one candidate replica do not mean half the requests each.</li>
+<li><strong>Why it is correct:</strong> kube-proxy picks a backend per connection, and keep-alive or a short sample can skew the split.</li>
+<li><strong>Plausible wrong approach:</strong> Reporting exactly 50 percent traffic from replica counts claims a ratio no sample measured.</li>
+<li><strong>How to verify:</strong> The answer names a mechanism such as connection reuse or sample size.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>The two markers represent different configuration values in the same binary. Keep that distinction visible in the release packet. A successful finite sample cannot establish production capacity, error probability zero or exact canary ratios.</p>
 <p>If the candidate fails, retain its observations and restore the verified path. Do not loosen the gate after seeing a failure merely to label the release successful. Predeclare acceptable conditions and record any later policy revision as a separate decision.</p></article>

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-053.md</code>.</p>
 <h3 id="exercise-1-explain-why-knowing-a-record-id-is-not-sufficient-permission">Exercise 1: Explain why knowing a record id is not sufficient permission.<a class="heading-anchor" href="#exercise-1-explain-why-knowing-a-record-id-is-not-sufficient-permission" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Ids identify objects; a policy must authorize access for the current actor.</p>
+<p><strong>Approach:</strong> Separate identification from permission: an id locates a record, while a policy decides whether this actor may see it.</p>
 <p><strong>Why:</strong> Ids are guessable or discoverable, so each access needs a policy check against the current actor.</p>
+<p><strong>Plausible wrong approach:</strong> Making ids long and random and calling that access control fails because ids leak through links, logs and shared screens.</p>
+<p><strong>How to verify:</strong> Your explanation shows a valid id requested by the wrong actor and the check that rejects it.</p>
 <h3 id="exercise-2-add-owner-scoping-to-a-prepared-read-query">Exercise 2: Add owner scoping to a prepared read query.<a class="heading-anchor" href="#exercise-2-add-owner-scoping-to-a-prepared-read-query" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The query can return only the requested actor&#x27;s matching record.</p>
+<p><strong>Approach:</strong> Add <code>AND owner_id = :actor_id</code> to the WHERE clause and bind the trusted actor value alongside the id.</p>
 <p><strong>Why:</strong> Scoping the query by owner means another actor&#x27;s record can never be returned, even by mistake.</p>
+<p><strong>Plausible wrong approach:</strong> Fetching by id and comparing owner in PHP later fails when a code path forgets the comparison and returns the row.</p>
+<p><strong>How to verify:</strong> Running the query for another actor&#x27;s note returns false from <code>fetch()</code>. The same query with the owner&#x27;s id returns the title, which shows the scope is not blocking everyone.</p>
 <h3 id="exercise-3-build-an-object-access-function-with-separate-trusted-actor-and-requested-id-inputs">Exercise 3: Build an object-access function with separate trusted actor and requested id inputs.<a class="heading-anchor" href="#exercise-3-build-an-object-access-function-with-separate-trusted-actor-and-requested-id-inputs" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The owner can read the record and a different actor receives no record.</p>
+<p><strong>Approach:</strong> Write <code>loadOwnedNote(PDO $db, int $actorId, int $noteId)</code> that returns the title or null, with actor first and named separately.</p>
 <p><strong>Why:</strong> Keeping trusted and untrusted inputs separate makes it obvious which value decides permission.</p>
+<p><strong>Plausible wrong approach:</strong> Taking one array of request fields that includes owner_id fails because the caller can set any owner it likes.</p>
+<p><strong>How to verify:</strong> The owner gets the title, a different actor gets null, and the function never reads request data. Swapping the two arguments by mistake becomes visible in review because the parameter names differ.</p>
 <h3 id="exercise-4-diagnose-trusting-ownerid-from-a-submitted-form">Exercise 4: Diagnose trusting owner_id from a submitted form.<a class="heading-anchor" href="#exercise-4-diagnose-trusting-ownerid-from-a-submitted-form" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A caller can forge it; derive ownership from the verified server-side identity.</p>
+<p><strong>Approach:</strong> Remove owner_id from form handling and set it from the verified session identity in the adapter.</p>
 <p><strong>Why:</strong> The browser can send any value, so ownership must come from the verified session identity.</p>
+<p><strong>Plausible wrong approach:</strong> Validating that the submitted owner_id is an integer fails because a forged integer is still well formed.</p>
+<p><strong>How to verify:</strong> A request carrying another user&#x27;s owner_id still stores the note under the session&#x27;s actor.</p>
 <h3 id="exercise-5-test-own-other-and-missing-records">Exercise 5: Test own, other and missing records.<a class="heading-anchor" href="#exercise-5-test-own-other-and-missing-records" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each follows a deliberate policy without leaking another actor&#x27;s title.</p>
+<p><strong>Approach:</strong> Request an owned id, another actor&#x27;s id and a missing id, and compare the three responses.</p>
 <p><strong>Why:</strong> Returning the same no-record result for other and missing ids avoids revealing which ids exist.</p>
+<p><strong>Plausible wrong approach:</strong> Returning Forbidden for other actors and Not found for missing ids fails because the difference reveals which ids exist.</p>
+<p><strong>How to verify:</strong> The other actor case and the missing case return the same result, and neither includes a title. Logs for the denied request record the actor and id but not the title.</p>
 <h3 id="exercise-6-explain-why-hiding-an-edit-button-is-only-a-user-interface-convenience">Exercise 6: Explain why hiding an edit button is only a user-interface convenience.<a class="heading-anchor" href="#exercise-6-explain-why-hiding-an-edit-button-is-only-a-user-interface-convenience" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The server endpoint must enforce the same permission even when called directly.</p>
+<p><strong>Approach:</strong> Note that anyone can send a request directly with curl or browser tools, bypassing the page that hides the button.</p>
 <p><strong>Why:</strong> Hiding a control changes only the page; the endpoint must check permission on every request.</p>
+<p><strong>Plausible wrong approach:</strong> Hiding the delete button for non owners and calling it protected fails because the endpoint still deletes when called directly.</p>
+<p><strong>How to verify:</strong> Your answer describes a direct request test that the server rejects for a non owner. The same direct request succeeds for the owner, so the rule targets permission rather than the endpoint.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-053_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

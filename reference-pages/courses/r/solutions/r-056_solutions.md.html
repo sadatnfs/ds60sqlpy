@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Fit the authored linear fixture and retain IDs with fitted values and residuals.</p>
 <p>The fit recovers intercept 1 and slope 2, and the diagnostic table has eight aligned records.</p>
 <p><strong>Expected evidence:</strong> Correct coefficients and row identities.</p>
+<p><strong>Approach:</strong> Fit lm(y ~ x) and build z from d$id, fitted(fit) and residuals(fit) in the model&#x27;s own row order.</p>
+<p><strong>Why it holds here:</strong> The authored errors -0.3, 0.2, 0.1, -0.2, 0.4, -0.1, 0.2, -0.3 sum to 0 and their products with x 0 to 7 also sum to 0. They are orthogonal to the intercept and slope, so lm recovers exactly 1 and 2 and each residual equals its authored error.</p>
+<p><strong>Tempting mistake:</strong> Building z with residual = sort(residuals(fit)). The ids stop pointing at their own rows, so id 5, whose residual is 0.4, is paired with 0.1 and any follow up on a flagged id inspects the wrong record.</p>
+<p><strong>Verify:</strong> <code>nrow(z)</code> returns 8, <code>anyDuplicated(z$id)</code> returns 0, and <code>unname(coef(fit))</code> returns 1 and 2 within 1e-10.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Check that the residual plot uses the model&#x27;s actual residual vector.</p>
 <p>Its y coordinates agree with residuals(fit) in the retained row order.</p>
 <p><strong>Expected evidence:</strong> Layer-to-model parity.</p>
+<p><strong>Approach:</strong> Map fitted to x and residual to y, add a dashed reference at 0, and compare the built point layer with z$residual.</p>
+<p><strong>Why it holds here:</strong> The residuals here lie between -0.3 and 0.4, so a panel on the residual scale makes their spread around 0 visible, and the comparison confirms the plot draws those values and not a transformed copy.</p>
+<p><strong>Tempting mistake:</strong> Mapping the response y against fitted values instead. y runs from about 0.7 to 14.7, so the errors of a few tenths are swamped and the panel just shows the rising line.</p>
+<p><strong>Verify:</strong> <code>max(abs(ggplot2::ggplot_build(p)$data[[1]]$y - z$residual))</code> returns a value below 1e-12.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a normal Q-Q graphic of those residuals.</p>
 <p>The layer contains one ordered sample value per residual, with a clearly labeled reference comparison.</p>
 <p><strong>Expected evidence:</strong> Eight Q-Q sample values.</p>
+<p><strong>Approach:</strong> Map sample = residual and add stat_qq and stat_qq_line, with axis titles naming the reference quantile and the ordered residual.</p>
+<p><strong>Why it holds here:</strong> stat_qq sorts the eight residuals, -0.3, -0.3, -0.2, -0.1, 0.1, 0.2, 0.2 and 0.4, and pairs them with normal quantiles from about -1.53 to 1.53. The line gives the comparison the eye needs.</p>
+<p><strong>Tempting mistake:</strong> Mapping y = residual for stat_qq. The statistic requires the sample aesthetic and stops with a missing aesthetic error instead of drawing anything.</p>
+<p><strong>Verify:</strong> <code>nrow(ggplot2::ggplot_build(qq)$data[[1]])</code> returns 8.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose increasing residual magnitude in the symmetric spread fixture.</p>
 <p>The slope can be correct while error spread varies; investigate variance assumptions and uncertainty procedures separately.</p>
 <p><strong>Expected evidence:</strong> A spread concern, not an automatic slope failure.</p>
+<p><strong>Approach:</strong> Fit lm(y ~ x) to the spread fixture f and check the slope and the relation between residual size and fitted value separately.</p>
+<p><strong>Why it holds here:</strong> At each x the two responses are 2x minus x and 2x plus x, so their mean is exactly 2x and the slope is 2. The residuals are plus and minus x, and their size rises in step with the fitted value 2x, which is a variance problem, not a mean problem.</p>
+<p><strong>Tempting mistake:</strong> Adding a quadratic term because the residual plot fans out. The group means lie exactly on 2x, so the squared term contributes nothing while the growing spread, which affects the default standard errors, is left untreated.</p>
+<p><strong>Verify:</strong> <code>coef(ff)[[&quot;x&quot;]]</code> returns 2, and <code>cor(abs(residuals(ff)), fitted(ff))</code> returns 1.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why deleting a visually unusual residual is not an automatic valid repair.</p>
 <p>It may represent legitimate variation, a measurement issue or model misspecification. Any exclusion needs an explicit justified policy and sensitivity analysis.</p>
 <p><strong>Expected evidence:</strong> No appearance-only deletion rule.</p>
+<p><strong>Approach:</strong> Trace the largest residual, 0.4 at id 5, to its source before deciding anything, and write the exclusion rule down if one is applied.</p>
+<p><strong>Why it holds here:</strong> That value is one of the authored errors from the same process as the others, not a recording mistake. Removing it refits to intercept about 0.96 and slope about 1.99, and id 7 then holds the largest residual, about 0.27, so the same visual rule would call for another deletion.</p>
+<p><strong>Tempting mistake:</strong> Dropping whichever point looks furthest from the dashed line and refitting once. The residual spread shrinks from about 0.28 to about 0.24, which looks like a better model but only reflects lost data.</p>
+<p><strong>Verify:</strong> <code>coef(lm(y ~ x, data = d[d$id != 5, ]))</code> returns about 0.96 and 1.99 instead of 1 and 2.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>State what a Q-Q plot cannot prove from eight fitted residuals.</p>
 <p>The display is diagnostic evidence, not a proof of normal independent errors or of predictive/causal validity.</p>
 <p><strong>Expected evidence:</strong> Bounded interpretation.</p>
+<p><strong>Approach:</strong> Report the Q-Q plot as diagnostic evidence for these eight residuals and list what it leaves open.</p>
+<p><strong>Why it holds here:</strong> Residuals from a fitted line are constrained: they sum to 0 and are orthogonal to x, so the eight values carry only six degrees of freedom. Eight points also cannot separate a mild tail difference from chance.</p>
+<p><strong>Tempting mistake:</strong> Concluding from points near the line that the errors are normal and independent and that the model is valid for prediction or causal claims. Dependence and misspecification do not show up in a Q-Q plot.</p>
+<p><strong>Verify:</strong> <code>sum(z$residual)</code> and <code>sum(z$residual * d$x)</code> both return 0 within rounding error, which shows the constraint.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 4 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

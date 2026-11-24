@@ -203,9 +203,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 frame <span class="syntax-operator">=</span> pl<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nan</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
 observed <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span>pl<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fill_nan<span class="syntax-punctuation">(</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> observed <span class="syntax-operator">==</span> <span class="syntax-number">2</span></code></pre>
+<p><strong>Why it holds here:</strong> Of 1.0, null, NaN and 4.0, only 1.0 and 4.0 are real observations. Converting NaN to null first lets count(), which skips nulls, return 2.</p>
+<p><strong>Plausible wrong approach:</strong> Calling count() without fill_nan returns 3, because NaN is a valid float value rather than a null.</p>
+<p><strong>How to verify:</strong> Run the answer code and assert observed == 2; frame[&#x27;x&#x27;].count() alone returns 3.</p>
 <p><strong>Expected:</strong> The numeric fixture has 2 such values.</p>
 <h3 id="2-keep-a-missingness-indicator">2. Keep a missingness indicator<a class="heading-anchor" href="#2-keep-a-missingness-indicator" aria-label="Link to this section">#</a></h3>
 <p>Create was_null from the original column before fill_null. A flag computed after filling would falsely report no missing observations.</p>
+<p><strong>Why it holds here:</strong> The flag must be created from the original column, where the null is still present at index 1.</p>
+<p><strong>Plausible wrong approach:</strong> Computing is_null after fill_null(0) returns all False, so the record of missingness is lost.</p>
+<p><strong>How to verify:</strong> Add pl.col(&#x27;x&#x27;).is_null().alias(&#x27;was_null&#x27;) before filling and check it is [False, True, False, False].</p>
 <p><strong>Expected:</strong> The flag identifies the original absent record even after filling.</p>
 <h3 id="3-change-the-denominator">3. Change the denominator<a class="heading-anchor" href="#3-change-the-denominator" aria-label="Link to this section">#</a></h3>
 <p>The numerical difference follows from both changed values and denominator. Neither estimate is universally correct without a missing-data model.</p>
@@ -217,15 +223,27 @@ means <span class="syntax-operator">=</span> frame<span class="syntax-operator">
     pl<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fill_nan<span class="syntax-punctuation">(</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fill_null<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">zero_filled_mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> means<span class="syntax-operator">.</span>row<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.25</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Why it holds here:</strong> The observed mean divides 1.0 plus 4.0 by 2, giving 2.5. Zero filling adds two zeros and divides by 4, giving 1.25.</p>
+<p><strong>Plausible wrong approach:</strong> Using fill_null(0) without fill_nan leaves NaN in place and makes the mean NaN.</p>
+<p><strong>How to verify:</strong> Run the answer code and assert means.row(0) == (2.5, 1.25).</p>
 <p><strong>Expected:</strong> Observed mean is 2.5; zero-filled mean is 1.25.</p>
 <h3 id="4-retain-unknown-flags">4. Retain unknown flags<a class="heading-anchor" href="#4-retain-unknown-flags" aria-label="Link to this section">#</a></h3>
 <p>The operation changes inclusion policy. Label unknown rows in the output so they are not described as confirmed positive observations.</p>
+<p><strong>Why it holds here:</strong> A plain filter on flag keeps only id 1, because null is not true. fill_null(True) treats the unknown row as included, so ids 1 and 3 remain.</p>
+<p><strong>Plausible wrong approach:</strong> Using fill_null(False) would drop id 3, the opposite policy.</p>
+<p><strong>How to verify:</strong> Run frame.filter(pl.col(&#x27;flag&#x27;).fill_null(True)) and assert ids are [1, 3].</p>
 <p><strong>Expected:</strong> Ids 1 and 3 remain.</p>
 <h3 id="5-predict-logical-outcomes">5. Predict logical outcomes<a class="heading-anchor" href="#5-predict-logical-outcomes" aria-label="Link to this section">#</a></h3>
 <p>False does not determine an OR result; true does. This reasoning is more reliable than memorizing isolated truth-table cells.</p>
+<p><strong>Why it holds here:</strong> With OR, true dominates; false does not. false OR unknown stays unknown, true OR unknown is true.</p>
+<p><strong>Plausible wrong approach:</strong> Treating unknown as false would wrongly give false for the first case.</p>
+<p><strong>How to verify:</strong> Check example_two: the or column is [True, None, None], with False | None giving None.</p>
 <p><strong>Expected:</strong> The answers are unknown and true.</p>
 <h3 id="6-detect-invalid-arithmetic">6. Detect invalid arithmetic<a class="heading-anchor" href="#6-detect-invalid-arithmetic" aria-label="Link to this section">#</a></h3>
 <p>Use finite-value checks at the transformation boundary. Filling the symptom without inspecting a zero denominator or invalid domain can hide a coding or modeling error.</p>
+<p><strong>Why it holds here:</strong> 0.0 / 0.0 yields NaN in Polars. That is a computation result, not an absent measurement.</p>
+<p><strong>Plausible wrong approach:</strong> Converting it to null and filling it later hides the zero denominator that caused it.</p>
+<p><strong>How to verify:</strong> Build pl.DataFrame({&#x27;a&#x27;: [0.0], &#x27;b&#x27;: [0.0]}), compute a / b, and check is_nan() is True while is_null() is False.</p>
 <p><strong>Expected:</strong> The diagnostic identifies an arithmetic problem.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;polars-004: complete bounded Polars investigation.&quot;&quot;&quot;</span>

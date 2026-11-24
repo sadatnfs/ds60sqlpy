@@ -8,6 +8,13 @@ A Gaussian process specifies a mean function and covariance kernel for collectio
 
 The example uses six input positions on the unit interval, a sinusoidal synthetic signal, an exponentiated-quadratic kernel with fixed length scale .25, and observation standard deviation .1. Three new input positions receive latent-function predictions. Hyperparameters are deliberately fixed; the program does not claim to have learned their uncertainty.
 
+## Key terms
+
+- **Gaussian process:** A prior over functions defined by a mean function and a covariance kernel for any finite set of inputs.
+- **Exponentiated-quadratic kernel:** A covariance that decays with squared distance between inputs at a rate set by the length scale.
+- **Conditional predictive variance:** Uncertainty about latent function values given fixed hyperparameters, computed with linear algebra.
+- **Law of total variance:** Total variance equals the average conditional variance plus the variance of conditional means across hyperparameters.
+
 ## Worked case 1: match PyMC with a direct covariance calculation
 
 Let \(K\) be the training covariance including observation noise, \(K_*\) the train-to-test covariance and \(K_{**}\) the test covariance. The conditional mean and covariance are
@@ -52,6 +59,37 @@ Numerical conditioning can worsen when inputs are nearly duplicated or noise is 
 **Does a small GP example require MCMC?** Not when hyperparameters are fixed and the Gaussian model has an analytic conditional distribution. This unit intentionally uses that tractable case as an oracle for actual library computation.
 
 **Why distinguish conditional from integrated uncertainty?** A precise conditional prediction can be misleading when there is substantial uncertainty about the conditions. The two-component variance example makes the missing term exact and visible before a larger model makes the distinction harder to inspect.
+
+## Worked example: GP predictive sd in a data gap and far from the data
+
+```python
+import numpy as np
+
+x = np.array([0.0, 1.0, 2.0, 6.0, 7.0])
+noise = 0.1
+
+
+def predictive_sd(x_new, ell, amp=1.0):
+    k = lambda a, b: amp**2 * np.exp(-0.5 * (a[:, None] - b[None, :]) ** 2 / ell**2)
+    K = k(x, x) + noise**2 * np.eye(len(x))
+    ks = k(np.atleast_1d(x_new), x)
+    return np.sqrt(amp**2 - ks @ np.linalg.solve(K, ks.T))[0, 0]
+
+
+for ell in (0.5, 1.0, 2.0):
+    sds = [predictive_sd(v, ell) for v in (1.0, 4.0, 20.0)]
+    print(f"lengthscale {ell}: sd at x=1 {sds[0]:.3f}, gap x=4 {sds[1]:.3f}, far x=20 {sds[2]:.3f}")
+```
+
+Observed output:
+
+```text
+lengthscale 0.5: sd at x=1 0.099, gap x=4 1.000, far x=20 1.000
+lengthscale 1.0: sd at x=1 0.099, gap x=4 0.973, far x=20 1.000
+lengthscale 2.0: sd at x=1 0.088, gap x=4 0.373, far x=20 1.000
+```
+
+Five inputs sit at 0, 1, 2, 6 and 7, leaving a gap around 4. At an observed input such as 1, the predictive standard deviation of the latent function is about 0.09 to 0.1 regardless of lengthscale, close to the noise level 0.1. In the gap the lengthscale decides everything. With \(\ell=0.5\) the nearest data are four lengthscales away and the standard deviation returns to the prior amplitude, 1.000. With \(\ell=1\) it is 0.973, and with \(\ell=2\) it falls to 0.373, because a smooth function is strongly constrained by points two units away on each side. Far from all data, at 20, every lengthscale returns to 1.000: the Gaussian process reverts to its prior, and its mean reverts to zero. A conditional analysis at one fixed lengthscale therefore reports a single gap uncertainty that could be 0.37 or 1.0. Integrating over a posterior for \(\ell\) mixes those answers and widens the gap interval accordingly.
 
 ## Complete reproducible program
 

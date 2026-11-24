@@ -6,9 +6,9 @@ Read the [guide](../guides/spark-021.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Check the query meaning before its execution plan
 
-Execute the projection query and return ordered(id, doubled) tuples. Compare all nine rows with the literal rule id 3..11, doubled=20*id.
+Execute the projection query and return ordered (id, doubled) tuples. Compare all nine rows with the literal rule id 3..11, doubled=20*id.
 
-**Expected:** Nine tuples from(3,60) through(11,220), with no missing or extra identities.
+**Expected:** Nine tuples from `(3, 60)` through `(11, 220)`, with no missing or extra identities.
 
 ```scala
 def projectionResult(spark: SparkSession, query: String): Seq[(Long, Long)] = {
@@ -150,4 +150,6 @@ Semantic equality is established with concrete rows, and configuration is attach
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Check the query meaning before its execution plan) is built inside the program, so opening the lesson fetches nothing; it expects: Nine tuples from `(3, 60)` through `(11, 220)`, with no missing or extra identities. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

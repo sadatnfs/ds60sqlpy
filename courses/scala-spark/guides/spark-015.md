@@ -8,7 +8,7 @@ Intermediate; approximately 90 minutes. Direct prerequisites: `spark-014`. The p
 
 ## How to run this lesson
 
-Open `spark-015` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-015` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-015.scala) and [PySpark learner](../lessons/spark-015.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-015_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-015_solution.scala) and [PySpark reference](../solutions/spark-015_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -47,7 +47,7 @@ All data remain in a local explicit-schema fixture. No external SQL service is o
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -68,20 +68,8 @@ val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 schema = StructType(
     [StructField("event_id", LongType(), False), StructField("amount_text", StringType(), True)]
@@ -166,7 +154,7 @@ Return all source columns plus parsed_amount from try_cast(trim(amount_text) AS 
 
 **Expected result/shape:** Ordered parsed values are 100,0,25, NULL, NULL, NULL,-5,50. The output parsed type is bigint.
 
-**Verify:** Compare all eight(event_id, parsed_amount) pairs and the field type with literals.
+**Verify:** Compare all eight (event_id, parsed_amount) pairs and the field type with literals.
 
 **Progressive hint:** Use expr for the same SQL try_cast expression in both languages.
 
@@ -184,7 +172,7 @@ Add parse_status with missing for source NULL, rejected for a nonnull source tha
 
 Retain valid and missing statuses, then return event_id and parsed_amount aliased as amount_cents. Reject only malformed/overflowing nonnull tokens at this stage.
 
-**Expected result/shape:** IDs [1, 2, 3, 4, 7, 8] remain with amounts [100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170.
+**Expected result/shape:** IDs [1, 2, 3, 4, 7, 8] remain with amounts [100, 0, 25, NULL, -5, 50]. There are 6 rows,5 known values and total 170.
 
 **Verify:** Assert the exact rows and independent count/known/sum metrics.
 
@@ -226,7 +214,7 @@ If try_cast produces NULL, inspect the original token before deciding whether th
 
 ## Self-check
 
-Explain the contract of `withParsed` / `with_parsed` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `withParsed` / `with_parsed` without reading its solution. Then, from memory, state what Exercise 6 (Apply a separate nonnegative domain policy) must produce: Final IDs `[1, 2, 3, 4, 8]` have 5 rows, 4 known values, total 175. The full source reconciles as 5 final accepted + 2 parse rejected + 1 negative-domain rejected. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

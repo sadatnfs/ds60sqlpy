@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "track_id": "apache-data-platforms",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "apache-001",
+      "title": "Arrow round trip, Parquet and a DataFusion aggregate",
+      "anchor": "reference",
+      "source_path": "courses/apache-data-platforms/examples/apache-001.py",
+      "source_sha256": "3bb443d57d65f8e0d9583397c816a05b4c85d0eeea43548f7d0462ef00b10cb5",
+      "expected_output": [
+        "Paid population: [{'region': 'east', 'total': 1100, 'orders': 2}]",
+        "Different question without the filter: [{'region': 'east', 'total': 1100}, {'region': 'west', 'total': 900}]"
+      ],
+      "steps": [
+        {
+          "lines": [9, 22],
+          "excerpt": "records = [\n    {\"id\": 1, \"region\": \"east\", \"amount_minor\": 400, \"paid\": True},\n    {\"id\": 2, \"region\": \"west\", \"amount_minor\": 900, \"paid\": False},\n    {\"id\": 3, \"region\": \"east\", \"amount_minor\": 700, \"paid\": True},\n]\nschema = pa.schema(\n    [\n        (\"id\", pa.int64()),\n        (\"region\", pa.string()),\n        (\"amount_minor\", pa.int64()),\n        (\"paid\", pa.bool_()),\n    ]\n)\ntable = pa.Table.from_pylist(records, schema=schema)",
+          "title": "Records with an explicit schema",
+          "explanation": "Money is stored as integer minor units (cents) to avoid floating point rounding. The schema states every column type up front instead of letting Arrow guess, so a later file or query cannot silently change a type.",
+          "observe": "table is an in memory Arrow table with four typed columns."
+        },
+        {
+          "lines": [23, 27],
+          "excerpt": "sink = pa.BufferOutputStream()\nwith ipc.new_stream(sink, schema) as writer:\n    writer.write_table(table)\nrestored = ipc.open_stream(sink.getvalue()).read_all()\nassert restored.equals(table)",
+          "title": "Round trip through the Arrow IPC stream format",
+          "explanation": "The table is written to an in memory buffer in Arrow's streaming format and read back. equals compares schema and values, proving the serialization lost nothing.",
+          "observe": "restored is identical to table."
+        },
+        {
+          "lines": [28, 32],
+          "excerpt": "with tempfile.TemporaryDirectory(prefix=\"platform-contract-\") as temporary:\n    path = Path(temporary) / \"orders.parquet\"\n    pq.write_table(restored, path)\n    context = SessionContext(SessionConfig().with_target_partitions(2))\n    context.register_parquet(\"orders\", str(path))",
+          "title": "Write Parquet and register it with DataFusion",
+          "explanation": "The table is saved as a Parquet file in a temporary directory that is removed afterwards. A DataFusion SessionContext is a local SQL engine; with_target_partitions(2) bounds its parallelism. register_parquet makes the file queryable as the table orders.",
+          "observe": "No server or network is involved."
+        },
+        {
+          "lines": [33, 48],
+          "excerpt": "    paid = (\n        context.sql(\n            \"SELECT region, SUM(amount_minor) AS total, COUNT(*) AS orders \"\n            \"FROM orders WHERE paid GROUP BY region ORDER BY region\"\n        )\n        .to_arrow_table()\n        .to_pylist()\n    )\n    expected = [\n        {\n            \"region\": \"east\",\n            \"total\": sum(r[\"amount_minor\"] for r in records if r[\"paid\"]),\n            \"orders\": sum(r[\"paid\"] for r in records),\n        }\n    ]\n    assert paid == expected == [{\"region\": \"east\", \"total\": 1100, \"orders\": 2}]",
+          "title": "Ask the paid question in SQL and check it",
+          "explanation": "The query keeps only paid rows, groups by region and orders the result so it is deterministic. The expected answer is recomputed in plain Python from the original records, an independent check on the SQL.",
+          "observe": "Only east appears, with total 1100 from 2 orders."
+        },
+        {
+          "lines": [49, 58],
+          "excerpt": "    unfiltered = (\n        context.sql(\n            \"SELECT region, SUM(amount_minor) AS total FROM orders GROUP BY region ORDER BY region\"\n        )\n        .to_arrow_table()\n        .to_pylist()\n    )\n    assert unfiltered == [{\"region\": \"east\", \"total\": 1100}, {\"region\": \"west\", \"total\": 900}]\n    print(\"Paid population:\", paid)\n    print(\"Different question without the filter:\", unfiltered)",
+          "title": "A different question gives a different answer",
+          "explanation": "Dropping the WHERE filter answers a different business question: all orders, paid or not. west now appears. Being explicit about the population a number describes is the point of the lesson.",
+          "observe": "Both results are printed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "apache-012",
+      "title": "Arrow IPC streams versus files and schema enforcement",
+      "anchor": "reference",
+      "source_path": "courses/apache-data-platforms/examples/apache-012.py",
+      "source_sha256": "ae4697b81c872db5feb0eddb8e5404ab70b10090f665cf1861dd83619539002f",
+      "expected_output": [
+        "Mismatched batch schema rejected",
+        "Directly read second batch: [{'id': 3, 'amount_minor': 700}]"
+      ],
+      "steps": [
+        {
+          "lines": [4, 10],
+          "excerpt": "schema = pa.schema(\n    [(\"id\", pa.int64()), (\"amount_minor\", pa.int64())], metadata={b\"currency\": b\"fixture-USD\"}\n)\nbatches = [\n    pa.record_batch([[1, 2], [1299, 2500]], schema=schema),\n    pa.record_batch([[3], [700]], schema=schema),\n]",
+          "title": "A schema with metadata and two batches",
+          "explanation": "Schema metadata is a byte key value map, used here to record the currency. Record batches are the unit Arrow writes and reads; this dataset has two.",
+          "observe": "Both batches share the same schema object."
+        },
+        {
+          "lines": [11, 24],
+          "excerpt": "stream_sink = pa.BufferOutputStream()\nwith ipc.new_stream(stream_sink, schema) as writer:\n    for batch in batches:\n        writer.write_batch(batch)\nstream = stream_sink.getvalue()\nreader = ipc.open_stream(stream)\nassert reader.schema.equals(schema, check_metadata=True)\nrestored = list(reader)\nassert len(restored) == 2\nassert pa.Table.from_batches(restored).to_pylist() == [\n    {\"id\": 1, \"amount_minor\": 1299},\n    {\"id\": 2, \"amount_minor\": 2500},\n    {\"id\": 3, \"amount_minor\": 700},\n]",
+          "title": "Write and read a stream",
+          "explanation": "The streaming format writes the schema once and then batches one after another, suitable for pipes and sockets. Reading back verifies the schema including metadata and the full contents.",
+          "observe": "Two batches and three rows come back unchanged."
+        },
+        {
+          "lines": [25, 32],
+          "excerpt": "bad = pa.record_batch([[4], [\"900\"]], names=[\"id\", \"amount_minor\"])\nwith ipc.new_stream(pa.BufferOutputStream(), schema) as writer:\n    try:\n        writer.write_batch(bad)\n    except (pa.ArrowInvalid, ValueError):\n        print(\"Mismatched batch schema rejected\")\n    else:\n        raise AssertionError(\"Expected a schema mismatch\")",
+          "title": "A batch with the wrong type is refused",
+          "explanation": "bad stores amount_minor as text. Writing it into a writer declared with the integer schema raises an error, which the code catches and reports. The else branch makes the script fail if no error happens, so the test cannot pass silently.",
+          "observe": "It prints Mismatched batch schema rejected."
+        },
+        {
+          "lines": [33, 41],
+          "excerpt": "file_sink = pa.BufferOutputStream()\nwith ipc.new_file(file_sink, schema) as writer:\n    for batch in batches:\n        writer.write_batch(batch)\nfile_bytes = file_sink.getvalue()\nfile_reader = ipc.open_file(file_bytes)\nassert file_reader.num_record_batches == 2\nassert file_reader.get_batch(1).to_pylist() == [{\"id\": 3, \"amount_minor\": 700}]\nassert file_reader.read_all().equals(pa.Table.from_batches(restored), check_metadata=True)",
+          "title": "The file format supports random access",
+          "explanation": "The Arrow file format adds a footer that indexes the batches, so a reader can jump straight to batch 1 without reading batch 0. The data are the same as in the stream.",
+          "observe": "num_record_batches is 2."
+        },
+        {
+          "lines": [42, 43],
+          "excerpt": "print(\"Stream bytes:\", stream.size, \"file bytes:\", file_bytes.size)\nprint(\"Directly read second batch:\", file_reader.get_batch(1).to_pylist())",
+          "title": "Print sizes and the second batch",
+          "explanation": "The file is larger than the stream because of its footer and padding. The exact byte counts depend on the Arrow version, so focus on the batch contents.",
+          "observe": "The second batch holds id 3 with amount 700."
+        }
+      ]
+    },
+    {
+      "lesson_id": "apache-042",
+      "title": "Optimistic concurrency for Iceberg schema changes",
+      "anchor": "reference",
+      "source_path": "courses/apache-data-platforms/examples/apache-042.py",
+      "source_sha256": "b33a86fe686a0d1e5c82269d5980aadd3a50f18e9646359fe9758fee9dd90905",
+      "expected_output": [
+        "Actual stale commit rejected: CommitFailedException",
+        "Reloaded and revalidated schema: ['id', 'region', 'amount', 'note', 'reviewed']"
+      ],
+      "steps": [
+        {
+          "lines": [9, 16],
+          "excerpt": "with tempfile.TemporaryDirectory() as temporary:\n    root = Path(temporary)\n    catalog = load_catalog(\n        \"lesson\",\n        type=\"sql\",\n        uri=\"sqlite:///\" + str(root / \"catalog.db\"),\n        warehouse=(root / \"warehouse\").as_uri(),\n    )",
+          "title": "A local SQL catalog",
+          "explanation": "Iceberg tracks table metadata in a catalog. Here the catalog is a SQLite file and the warehouse is a local directory, both inside a temporary directory, so the lesson needs no services.",
+          "observe": "Everything is deleted when the with block ends."
+        },
+        {
+          "lines": [17, 20],
+          "excerpt": "    catalog.create_namespace(\"demo\")\n    data = pa.table({\"id\": [1, 2, 3], \"region\": [\"east\", \"west\", \"east\"], \"amount\": [4, 9, 7]})\n    table = catalog.create_table(\"demo.orders\", schema=data.schema)\n    table.append(data)",
+          "title": "Create and fill a table",
+          "explanation": "A namespace groups tables. The table takes its schema from the Arrow data and append writes a first snapshot.",
+          "observe": "demo.orders has three rows."
+        },
+        {
+          "lines": [22, 24],
+          "excerpt": "    stale = catalog.load_table(\"demo.orders\")\n    with table.update_schema() as update:\n        update.add_column(\"note\", LongType())",
+          "title": "Two writers, one goes first",
+          "explanation": "stale is a second handle loaded at the current version. The original handle then adds a note column and commits, which moves the table to a new metadata version.",
+          "observe": "stale still points at the old version."
+        },
+        {
+          "lines": [25, 31],
+          "excerpt": "    try:\n        with stale.update_schema() as update:\n            update.add_column(\"stale_field\", LongType())\n    except CommitFailedException as error:\n        print(\"Actual stale commit rejected:\", type(error).__name__)\n    else:\n        raise AssertionError(\"Stale schema commit accepted\")",
+          "title": "The stale commit is rejected",
+          "explanation": "Iceberg uses optimistic concurrency: a commit says which version it was based on, and the catalog refuses it if the table moved. The exception is caught and named. The else branch fails the script if the stale change were accepted.",
+          "observe": "CommitFailedException is printed."
+        },
+        {
+          "lines": [32, 36],
+          "excerpt": "    current = catalog.load_table(\"demo.orders\")\n    assert \"note\" in current.schema().column_names\n    assert \"stale_field\" not in current.schema().column_names\n    with current.update_schema() as update:\n        update.add_column(\"reviewed\", LongType())",
+          "title": "Reload, check, then change again",
+          "explanation": "The fix for a conflict is to reload the latest table, check its state and reapply the change. The asserts confirm note exists and stale_field was never added.",
+          "observe": "A reviewed column is added on top of the current schema."
+        },
+        {
+          "lines": [37, 42],
+          "excerpt": "    final = catalog.load_table(\"demo.orders\")\n    assert {\"note\", \"reviewed\"} <= set(final.schema().column_names)\n    ids = [field.field_id for field in final.schema().fields]\n    assert len(ids) == len(set(ids))\n    assert sorted(final.scan().to_arrow()[\"id\"].to_pylist()) == [1, 2, 3]\n    print(\"Reloaded and revalidated schema:\", final.schema().column_names)",
+          "title": "Verify the final table",
+          "explanation": "Field ids must be unique because Iceberg tracks columns by id, not name. The data still read back as ids 1, 2 and 3, since adding columns does not rewrite rows.",
+          "observe": "The printed schema lists id, region, amount, note and reviewed."
+        }
+      ]
+    }
+  ]
+}

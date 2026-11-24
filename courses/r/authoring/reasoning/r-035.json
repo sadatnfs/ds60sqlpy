@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Reading the rejected table",
+      "body": "For the reference input, `result$rejected` prints three rows:\n\n```text\n  id amount missing_id invalid_amount\n2        -3       TRUE           TRUE\n3  C     -1      FALSE           TRUE\n4  D     NA      FALSE           TRUE\n```\n\nThe row names 2, 3 and 4 are the positions in `raw`, and for the first rejected record they are the only identifier, because its id is empty. A quarantine file written without them, or with `row.names = FALSE`, leaves no way to point the source owner at that line. Keeping an explicit source row column is safer than relying on row names surviving later steps.\n\nD's flag deserves a second look. `NA < 0` is NA, but `!is.finite(NA)` is TRUE, and `TRUE | NA` is TRUE, so invalid_amount is a plain TRUE. Without the is.finite term the flag would be NA, `keep` would contain NA, and indexing with it would add a row of NA values to the admitted table. The first rejected row also shows both flags at once, so one resubmission can fix the id and the amount together."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Evaluate both rules for every row and admit only rows where neither flag is TRUE.",
+      "why": "A has a nonempty id and amount 2. The second row has an empty id, C has amount -1, and D has NA, which fails is.finite. That leaves only A, so the mask is TRUE, FALSE, FALSE, FALSE.",
+      "wrong": "Filtering with `raw[raw$amount >= 0, ]`. It keeps the empty id row, which has a valid amount, and returns an extra row of NA for D.",
+      "verify": "`identical(admitted, c(TRUE, FALSE, FALSE, FALSE))` returns TRUE, and `sum(admitted)` returns 1."
+    },
+    {
+      "approach": "Keep each rule in its own logical column, computed independently, so a row can carry several reasons.",
+      "why": "With amount -3, the empty id row fails both rules. The reference input does exactly that, and its first rejected row shows TRUE under missing_id and TRUE under invalid_amount.",
+      "wrong": "Recording a single reason from an if and else chain where the first failing rule wins. The row would list only the missing id, so after that fix the resubmitted record would be rejected again for its amount.",
+      "verify": "`result$rejected$missing_id[[1]]` and `result$rejected$invalid_amount[[1]]` both return TRUE."
+    },
+    {
+      "approach": "Build both tables from one mask, `data[keep, ]` and `data[!keep, ]`, and attach the flags to the rejected rows.",
+      "why": "One mask makes the two sets disjoint and complete: 1 admitted plus 3 rejected equals 4 input rows. The row names 2, 3 and 4 tie each rejection back to its position, which matters for the row with no id.",
+      "wrong": "Writing the rejected condition separately, for example `data[data$amount < 0, ]`. It misses D and the empty id row, so the counts no longer add up to 4.",
+      "verify": "`nrow(result$admitted) + nrow(result$rejected) == nrow(raw)` returns TRUE."
+    },
+    {
+      "approach": "Keep a parse failure flag next to the parsed value and treat it as a rejection reason under an explicit policy.",
+      "why": "A zero would pass this lesson's `amount < 0` rule, so a value that could not be read would be admitted as a real measurement and lower every total it enters.",
+      "wrong": "Replacing every NA from as.numeric with 0. Blank fields and malformed text both become valid looking zeros, and the original problem is no longer visible anywhere.",
+      "verify": "In the worked example, `parse_failed` returns TRUE only for the text 1,5, and the admitted mean returns 9.75."
+    },
+    {
+      "approach": "Run the full schema check on a zero row batch, then admit it if the empty batch policy allows empty days.",
+      "why": "`raw[integer(0), , drop = FALSE]` keeps id as character and amount as numeric, so the type checks pass and both tables are empty. Schema validity and row validity are separate questions.",
+      "wrong": "Skipping validation when `nrow(data) == 0`. A broken export that yields zero rows with amount read as character would pass, and the type problem would surface on a later, nonempty day.",
+      "verify": "`nrow(empty$admitted)` and `nrow(empty$rejected)` both return 0."
+    },
+    {
+      "approach": "Report the admitted row as passing these rules, and list separately what the rules do not check.",
+      "why": "A with amount 2 passes both checks, but nothing here tests the currency, whether A was already loaded yesterday, how recent the batch is, or whether the stores in it represent all stores.",
+      "wrong": "Labeling the admitted table as correct data. The rules only show that ids are present and amounts are finite and nonnegative.",
+      "verify": "The rejected table shows a reason for each of its three rows; no column in result shows freshness, duplication across batches or measurement accuracy."
+    }
+  ]
+}

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-011.md</code>.</p>
 <h3 id="exercise-1-calculate-outer-widths-for-the-two-examples">Exercise 1: Calculate outer widths for the two examples.<a class="heading-anchor" href="#exercise-1-calculate-outer-widths-for-the-two-examples" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> They are 244px and 200px, before margins.</p>
+<p><strong>Approach:</strong> Add content width, both paddings and both borders for the content-box card, and for the border-box card treat 200px as the border box itself.</p>
 <p><strong>Why:</strong> With content-box, 200px of content plus 2 × 20px padding plus 2 × 2px border gives 244px; with border-box, the padding and border fit inside the declared 200px.</p>
+<p><strong>Plausible wrong approach:</strong> Adding padding to the border-box card as well gives 244px for both, because it ignores that border-box absorbs padding and border inside the declared width.</p>
+<p><strong>How to verify:</strong> Inspect each card&#x27;s box model diagram in developer tools and read 244 and 200 as the border-box widths.</p>
 <h3 id="exercise-2-add-border-box-sizing-to-a-document-and-inspect-one-card">Exercise 2: Add border-box sizing to a document and inspect one card.<a class="heading-anchor" href="#exercise-2-add-border-box-sizing-to-a-document-and-inspect-one-card" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The declared width matches the border-box width.</p>
+<p><strong>Approach:</strong> Add <code>*, *::before, *::after { box-sizing: border-box; }</code> near the top of the stylesheet so every element and pseudo-element uses the same model.</p>
 <p><strong>Why:</strong> With border-box, the declared width includes padding and border, so the number you write matches the rendered box.</p>
+<p><strong>Plausible wrong approach:</strong> Setting border-box only on <code>.card</code> fails because nested elements and generated content keep content-box and disagree with the card&#x27;s arithmetic.</p>
+<p><strong>How to verify:</strong> The Computed panel shows <code>box-sizing: border-box</code> on the card and its children, and the card&#x27;s rendered width equals its declared width.</p>
 <h3 id="exercise-3-build-a-readable-card-that-contains-a-long-identifier">Exercise 3: Build a readable card that contains a long identifier.<a class="heading-anchor" href="#exercise-3-build-a-readable-card-that-contains-a-long-identifier" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The identifier wraps or scrolls locally without overflowing the page.</p>
+<p><strong>Approach:</strong> Give the card a <code>max-inline-size</code> in <code>ch</code> and let the long identifier break with <code>overflow-wrap: anywhere</code> or scroll in its own <code>code</code> box.</p>
 <p><strong>Why:</strong> overflow-wrap: anywhere or a local overflow area stops an unbreakable string from widening the whole page.</p>
+<p><strong>Plausible wrong approach:</strong> Setting <code>white-space: nowrap</code> on the identifier fails because the unbroken string pushes the card wider than the viewport.</p>
+<p><strong>How to verify:</strong> At the narrow preset the page has no horizontal scrollbar, and the full identifier is still readable inside the card.</p>
 <h3 id="exercise-4-repair-a-fixed-height-that-clips-a-validation-message">Exercise 4: Repair a fixed height that clips a validation message.<a class="heading-anchor" href="#exercise-4-repair-a-fixed-height-that-clips-a-validation-message" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Use content-driven height or an explicitly accessible bounded scroll region.</p>
+<p><strong>Approach:</strong> Replace the fixed <code>height</code> with <code>min-block-size</code> and let the content set the final height of the message box.</p>
 <p><strong>Why:</strong> A content-driven height grows when a message appears, while a fixed height clips or overlaps it.</p>
+<p><strong>Plausible wrong approach:</strong> Increasing the fixed height to 5rem fails because a larger font size or a longer message clips again at the new limit.</p>
+<p><strong>How to verify:</strong> Change the message to three lines and enlarge text; the entire message stays visible and the box grows.</p>
 <h3 id="exercise-5-increase-text-size-and-inspect-overflow">Exercise 5: Increase text size and inspect overflow.<a class="heading-anchor" href="#exercise-5-increase-text-size-and-inspect-overflow" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Essential text remains visible and controls remain reachable.</p>
+<p><strong>Approach:</strong> Raise the browser zoom or root font size in steps and watch every box that has a fixed <code>height</code> or <code>width</code>.</p>
 <p><strong>Why:</strong> Fixed heights and widths do not grow with text, so enlarged text exposes clipping that normal size hides.</p>
+<p><strong>Plausible wrong approach:</strong> Shrinking the viewport only fails because some clipping appears only when text grows while the layout width stays the same.</p>
+<p><strong>How to verify:</strong> At 200 percent zoom, each message, label and button remains visible and reachable with Tab.</p>
 <h3 id="exercise-6-explain-which-dimensions-margin-does-and-does-not-affect">Exercise 6: Explain which dimensions margin does and does not affect.<a class="heading-anchor" href="#exercise-6-explain-which-dimensions-margin-does-and-does-not-affect" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Margins add external separation but are not included in either box-sizing width.</p>
+<p><strong>Approach:</strong> Draw the four layers (content, padding, border, margin) and mark that width and box-sizing describe only the first three.</p>
 <p><strong>Why:</strong> Margin lies outside the border, so it changes the space between boxes but never counts toward width under either box-sizing value.</p>
+<p><strong>Plausible wrong approach:</strong> Including margin in the 244px total fails because margin sits outside the border box and never counts in width calculations.</p>
+<p><strong>How to verify:</strong> Adding <code>margin: 10px</code> leaves the inspected border-box width unchanged while the spacing between cards grows.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-011_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

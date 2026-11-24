@@ -27,7 +27,7 @@ The parser converts each explicit offset into a common instant representation. L
 
 ### Exercise 2: Render a zone without changing the underlying instant
 
-Return ordered(event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH: mm: ss. Set the zone only during materialization and restore the previous setting in finally.
+Return ordered (event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH: mm: ss. Set the zone only during materialization and restore the previous setting in finally.
 
 **Expected:** Events 2 and 3 render 08:30 and 09:30 under UTC but both 01:30 under America/Los_Angeles. Session zone is UTC afterward.
 
@@ -71,7 +71,7 @@ The same instants produce different display labels, and two distinct instants ca
 
 ### Exercise 3: Filter a complete local day with instant boundaries
 
-Select events in the half-open interval [2024-11-03T07:00:00Z,2024-11-04T08:00:00Z). Return all event columns.
+Select events in the half-open interval [2024-11-03T07:00:00Z, 2024-11-04T08:00:00Z). Return all event columns.
 
 **Expected:** Ordered event IDs [1, 2, 3, 5]. Lower-bound ID 1 included, upper-bound ID 4 excluded and prior-second ID 6 excluded.
 
@@ -135,7 +135,7 @@ NTZ deliberately represents local fields without embedding an instant interpreta
 
 ### Exercise 5: Expose the information lost by a local clock key
 
-For the two fold events 2 and 3, compare local formatted labels with their epoch values. Return(label_count, instant_count), retaining original event identity.
+For the two fold events 2 and 3, compare local formatted labels with their epoch values. Return (label_count, instant_count), retaining original event identity.
 
 **Expected:** One distinct local label but two distinct instants. They must not be deduplicated by the displayed clock.
 
@@ -158,7 +158,7 @@ def fold_evidence(events):
 
 A formatted clock is an intentionally lossy projection here. The two-source-ID relation demonstrates the collision directly and rules out the explanation that the source contained a duplicate event. Keeping event identity and the original instant allows correct joins, ordering and replay even when an analyst chooses a local label for display.
 
-**Verification evidence:** Assert(1,2) using separately materialized local labels and original epoch evidence.
+**Verification evidence:** Assert `(1, 2)` using separately materialized local labels and original epoch evidence.
 
 ### Exercise 6: Quarantine invalid timestamps without confusing missingness
 
@@ -203,4 +203,6 @@ Try parsing exposes malformed input as data so a controlled ingestion boundary c
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Parse offset evidence into comparable instants) is built inside the program, so opening the lesson fetches nothing; it expects: All 6 rows parse. `epoch(event 2) = epoch(event 5)`, and `epoch(event 3) - epoch(event 2) = 3600` seconds. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

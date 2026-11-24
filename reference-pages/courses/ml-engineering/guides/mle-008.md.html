@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A model&#x27;s effective input includes its preprocessing. Imputation values, scaling parameters, category encodings and feature order are part of the fitted state. Reimplementing those operations separately for serving can change predictions even when the classifier coefficients are unchanged. A coherent bundle should use the same fitted transformation at both boundaries.</p>
 <p>The first case fits a scikit-learn Pipeline on the eligible training data. It compares batch predictions with predictions from individual request records. The equality check is about transformation and inference consistency on the fixture; it does not prove the model generalizes or that an external service is reliable.</p>
 <p>The second case shows why preprocessing must respect the training boundary. A scaler fitted on values 0 and 2 transforms a held-out value 100 very differently from a scaler that includes 100 in its fitting population. Including held-out information changes the representation before the model even sees it. This is leakage even though the preprocessing step does not use target labels.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Pipeline:</strong> A scikit-learn object that chains preprocessing and an estimator so one fitted state serves both training and inference.</li>
+<li><strong>ColumnTransformer:</strong> Applies separate preprocessing to column groups, here median imputation with scaling for numeric fields and one-hot encoding for region.</li>
+<li><strong>Fit versus transform:</strong> The fit step learns state such as imputation values, scaling parameters and category levels from training rows; the transform step applies that stored state without relearning it.</li>
+<li><strong>Training and serving parity:</strong> Equal predictions for a record whether it is scored in a batch or as a single request, because both paths use the same fitted transformation.</li>
+<li><strong>Preprocessing leakage:</strong> Fitting a transformation such as a scaler on held-out values, which changes the representation even though no target labels are used.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The Pipeline contains a ColumnTransformer with numeric imputation/scaling and categorical encoding, followed by logistic regression. fit learns state from training rows; predict_proba applies that state. Construct serving inputs with the declared fields and preserve their meaning. A separate StandardScaler example makes the fitting-population difference visible numerically.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

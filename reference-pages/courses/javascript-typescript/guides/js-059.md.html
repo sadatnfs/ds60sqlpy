@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A hierarchy represents parent-child relationships without cycles. A tree has one root and a unique path from that root to each node. This differs from a general network, where nodes can have several relationships and cycles. Choosing a tree layout for data that is not a tree can hide important structure.</p>
 <p><code>d3.hierarchy</code> wraps nested input in nodes with parent, children, depth and traversal methods. Layout algorithms add geometry to these wrapper nodes. The original data remains available as node.data. A tree layout uses topology, not a numeric magnitude, to position nodes.</p>
 <p>The reference visualizes a small learning taxonomy. Labels explain the nodes, and links show parent-child relationships. A hierarchy can be deep or broad, so a reusable view must address label collisions, collapse state and keyboard navigation rather than assuming every tree fits one screen.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Hierarchy:</strong> Data with parent-child relationships and no cycles. <code>d3.hierarchy</code> wraps nested objects as nodes with <code>parent</code>, <code>children</code>, <code>depth</code> and the original <code>data</code>.</li>
+<li><strong>Parent:</strong> The single node directly above a node in a hierarchy. Every node except the root has exactly one parent.</li>
+<li><strong>Tree layout:</strong> The <code>d3.tree().size(...)</code> layout that assigns x and y coordinates from topology alone. For a left-to-right tree, the layout y becomes the horizontal position.</li>
+<li><strong>Link:</strong> A source-target pair from <code>root.links()</code>, one per parent-child edge, so a connected tree with n nodes has n - 1 links.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Construct the hierarchy from an object whose children field contains nested objects. Apply <code>d3.tree().size([height,width])</code> to compute coordinates. For a left-to-right tree, use the layout y coordinate as horizontal position and x as vertical position.</p>
 <p><code>root.links()</code> returns source-target pairs; <code>d3.linkHorizontal</code> converts each pair into a path. Check node and edge counts: a connected tree with n nodes has n-1 parent edges. This is a structural invariant, not a visual preference.</p>

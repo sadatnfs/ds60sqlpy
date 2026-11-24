@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-024_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-024-explained-reference">eval-024: explained reference<a class="heading-anchor" href="#eval-024-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-024_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-024_reference.py</code> asserts each answer below, from <em>Recover behavior value</em> to <em>Audit the final claim</em>, on the authored importance sampling and self-normalization fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Remove behavior support</em> tests.</p>
 <h3 id="1-recover-behavior-value">1. Recover behavior value<a class="heading-anchor" href="#1-recover-behavior-value" aria-label="Link to this section">#</a></h3>
 <p>This is a basic estimator invariant under the constructed log.</p>
+<p><strong>Approach.</strong> Call <code>estimate(log, b, b, q)</code> on the 40-event log with counts <code>[[16, 4], [6, 14]]</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> Target equals behavior, so every weight is 1. IPS becomes the plain mean reward: 16 rewards of 1 in context 0 plus 14 in context 1 give 30 / 40 = 0.75. The effective sample size is 40 squared over 40 = 40.</p>
+<p><strong>A tempting wrong approach.</strong> Expecting some difference between IPS and the observed mean is a sign of a weighting bug. This check catches swapped numerator and denominator.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.isclose(same[&quot;ips&quot;], 0.75)</code> and <code>same[&quot;weight_ess&quot;] == 40</code>.</p>
 <p><strong>Expected observation:</strong> All weights are 1 and the mean observed reward is 0.75.</p>
 <h3 id="2-evaluate-a-useful-target">2. Evaluate a useful target<a class="heading-anchor" href="#2-evaluate-a-useful-target" aria-label="Link to this section">#</a></h3>
 <p>Known counterfactual outcomes make this value inspectable only in the authored environment; real evaluations need data and assumptions.</p>
+<p><strong>Approach.</strong> Call <code>estimate</code> with target <code>[[0.9, 0.1], [0.1, 0.9]]</code> and the exact outcome table <code>[[1, 0], [0, 1]]</code> as the outcome model.</p>
+<p><strong>Why it holds for this fixture.</strong> The target puts 0.9 on the rewarded action in each context, so its value is 0.9 in each. With an exact outcome model, every DR residual is zero and each term equals p[c] dot q[c] = 0.9, so the estimate is 0.9.</p>
+<p><strong>A tempting wrong approach.</strong> Treating this as a demonstration that DR works in practice is the mistake. Here the outcome model is the true table by construction; a real model would be estimated and wrong somewhere.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.isclose(estimate(log, b, [[0.9, 0.1], [0.1, 0.9]], q)[&quot;dr&quot;], 0.9)</code>.</p>
 <p><strong>Expected observation:</strong> The target value is 0.9.</p>
 <h3 id="3-remove-behavior-support">3. Remove behavior support<a class="heading-anchor" href="#3-remove-behavior-support" aria-label="Link to this section">#</a></h3>
 <p>A value model may extrapolate there, but that is a different identifying assumption and not justified by overlap-based evaluation alone.</p>
+<p><strong>Approach.</strong> Call <code>policies([[1, 0], [0.5, 0.5]], [[0.5, 0.5], [0.5, 0.5]])</code>. The behavior never takes action 1 in context 0, yet the target does half the time.</p>
+<p><strong>Why it holds for this fixture.</strong> The weight for that action would be 0.5 / 0, and the log contains no examples of it. The helper raises <code>Target has unsupported actions</code> before any estimate is computed.</p>
+<p><strong>A tempting wrong approach.</strong> Filling in the missing action&#x27;s value from an outcome model and reporting the estimate as off-policy evaluation is the mistake. That value rests entirely on model extrapolation, a different and stronger assumption.</p>
+<p><strong>How to verify.</strong> The reference raises <code>Missing support accepted</code> if this call returns. Also check that an empty log raises.</p>
 <p><strong>Expected observation:</strong> The helper rejects the target.</p>
 <h3 id="4-use-a-zero-outcome-model">4. Use a zero outcome model<a class="heading-anchor" href="#4-use-a-zero-outcome-model" aria-label="Link to this section">#</a></h3>
 <p>This algebraic check separates the correction structure from a claim that the supplied model is correct.</p>
+<p><strong>Approach.</strong> Call <code>estimate</code> on case B&#x27;s log with the outcome model set to all zeros, and compare its DR value with IPS.</p>
+<p><strong>Why it holds for this fixture.</strong> With q = 0, each DR term is 0 + w times (r - 0) = w times r, which is exactly the IPS term. The DR estimate reduces to IPS algebraically.</p>
+<p><strong>A tempting wrong approach.</strong> Reading DR as automatically better is the mistake. Its benefit depends on the outcome model; with a useless model it is plain IPS with the same variance.</p>
+<p><strong>How to verify.</strong> Case B asserts <code>np.isclose(estimate(log, behavior, target, [[0, 0], [0, 0]])[&quot;dr&quot;], result[&quot;ips&quot;])</code>.</p>
 <p><strong>Expected observation:</strong> The doubly robust expression reduces to ordinary importance sampling.</p>
 <h3 id="5-interpret-self-normalization">5. Interpret self-normalization<a class="heading-anchor" href="#5-interpret-self-normalization" aria-label="Link to this section">#</a></h3>
 <p>Self-normalization changes the estimator. A useful variance tradeoff should not be described as exact finite-sample unbiasedness.</p>
+<p><strong>Approach.</strong> Compute IPS and SNIS on case B&#x27;s log, counts <code>[[18, 2], [10, 10]]</code>, with target <code>[[0.5, 0.5], [0.8, 0.2]]</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> Weights are 0.625, 2.5, 2.667 and 0.286. The weighted rewards sum to 18 times 0.625 + 10 times 0.286, about 14.11, so IPS is about 0.353. The weights sum to about 45.77, so SNIS is about 0.308. The effective sample size is about 22.9 of 40.</p>
+<p><strong>A tempting wrong approach.</strong> Describing SNIS as unbiased because it often has lower variance is the mistake. Dividing by the realized weight sum introduces finite-sample bias; the tradeoff should be stated as such.</p>
+<p><strong>How to verify.</strong> Case B asserts IPS and SNIS differ, DR equals 0.35 with the exact model, and <code>weight_ess &lt; len(log)</code>.</p>
 <p><strong>Expected observation:</strong> Their finite-sample values differ.</p>
 <h3 id="6-audit-the-final-claim">6. Audit the final claim<a class="heading-anchor" href="#6-audit-the-final-claim" aria-label="Link to this section">#</a></h3>
 <p>A complete alignment decision needs independent task utility, support, uncertainty and critical-condition evidence, not only a favorable training reward or off-policy point estimate.</p>
+<p><strong>Approach.</strong> If many policies were scored on one log and the best was picked, treat that log as selection evidence, as in eval-013, and evaluate the chosen policy on a new protected log or experiment.</p>
+<p><strong>Why it holds for this fixture.</strong> Choosing the maximum of many noisy estimates adds optimism. Off-policy estimates are also limited by support and effective sample size, so the selected value overstates what a fresh assessment would show.</p>
+<p><strong>A tempting wrong approach.</strong> Reporting the winning off-policy estimate as the expected deployed value is the mistake. A full decision also needs task utility, uncertainty and the critical-case gates from eval-016.</p>
+<p><strong>How to verify.</strong> No reference assertion covers this task. Record how many policies were compared on the log and confirm the final assessment data share no events with it.</p>
 <p><strong>Expected observation:</strong> Treat that log as selection evidence and obtain a protected final assessment.</p></article>
   </main>
 </body>

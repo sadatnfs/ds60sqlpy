@@ -14,6 +14,14 @@ Optimization must preserve semantics. Filtering individual measurements before t
 
 Read explain output as diagnostic evidence about this version and query. Avoid tests that require every line of a printed optimizer plan to remain identical across library releases. Instead test the intended result and inspect meaningful properties such as the selected columns, scan source and filter placement. Performance still needs measurement under a stated data and cache regime.
 
+## Key terms
+
+- **LazyFrame:** A frame that records operations as a query plan and computes nothing until `collect` runs.
+- **Logical plan:** The tree of operations a LazyFrame describes, which the optimizer may rewrite and `explain()` displays.
+- **Predicate pushdown:** An optimization that moves a filter closer to the data source so fewer rows are read and processed.
+- **Projection pushdown:** An optimization that reads only the columns the query actually uses.
+- **Semantic equivalence:** Two plans return the same result; filtering measurements before a group mean is not equivalent to filtering groups after it.
+
 ## Syntax and data contract
 
 scan_parquet creates a lazy source. filter and select append operations to its plan. collect_schema inspects the planned schema, while collect executes the query using the specified engine. explain(optimized=True) exposes a printable plan. Calling lazy() after eagerly reading the entire file cannot undo the original eager read.

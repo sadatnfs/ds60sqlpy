@@ -38,6 +38,16 @@ internal static class Program {
       Check(sum == 5 && !channel.Writer.TryWrite(9), "drained and closed");
     }
     {
+      // Task 2: Guided modification
+      var channel = Channel.CreateBounded<int>(3);
+      var admitted = new List<bool>();
+      for (int i = 1; i <= 4; i++)
+        admitted.Add(channel.Writer.TryWrite(i));
+      Check(admitted.SequenceEqual(new[] { true, true, true, false }), "cap 3");
+      Check(channel.Reader.Count == 3, "three items buffered");
+      Check(await channel.Reader.ReadAsync() == 1, "oldest item first");
+    }
+    {
       // Task 3: Independent construction
       var channel = Channel.CreateBounded<int>(2);
       Task producer = Task.Run(async () => {
@@ -54,6 +64,24 @@ internal static class Program {
       }
       await producer;
       Check(sum == 15 && count == 5, "every item consumed once");
+    }
+    {
+      // Task 5: Boundary evidence
+      var empty = Channel.CreateBounded<int>(2);
+      empty.Writer.Complete();
+      int seen = 0;
+      await foreach (int value in empty.Reader.ReadAllAsync()) { seen++; }
+      await empty.Reader.Completion;
+      Check(seen == 0, "completed empty channel ends at once");
+      var full = Channel.CreateBounded<int>(2);
+      full.Writer.TryWrite(7);
+      full.Writer.TryWrite(8);
+      Check(!full.Writer.TryWrite(9), "buffer full");
+      full.Writer.Complete();
+      int sum = 0;
+      await foreach (int value in full.Reader.ReadAllAsync()) { sum += value; }
+      await full.Reader.Completion;
+      Check(sum == 15, "full buffer drained after completion");
     }
     Console.WriteLine("csharp-031: passed");
     await Task.CompletedTask;

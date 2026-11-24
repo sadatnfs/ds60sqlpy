@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-whether-a-matching-ip-is-enough-for-a-dns-certificate">Exercise 1: Predict whether a matching IP is enough for a DNS certificate.<a class="heading-anchor" href="#exercise-1-predict-whether-a-matching-ip-is-enough-for-a-dns-certificate" aria-label="Link to this section">#</a></h3>
 <p>An IP route and an authenticated DNS identity are different properties. Use the intended name and certificate relationship.</p>
 <p><strong>Expected:</strong> The requested name must satisfy certificate identity validation.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check that the requested DNS name appears in the certificate&#x27;s subject alternative names.</li>
+<li><strong>Why it is correct:</strong> Clients validate the name they asked for against the certificate, regardless of which IP answered.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the right IP is enough ignores that hostname verification is name based.</li>
+<li><strong>How to verify:</strong> The prediction says the requested name must match the certificate identity.</li>
+</ul>
 <h3 id="exercise-2-locate-the-tls-termination-point">Exercise 2: Locate the TLS termination point.<a class="heading-anchor" href="#exercise-2-locate-the-tls-termination-point" aria-label="Link to this section">#</a></h3>
 <p>Everything after that point has a separate transport policy. Draw the upstream hop explicitly.</p>
 <p><strong>Expected:</strong> The component that decrypts the client connection.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Find the component that holds the private key and decrypts the client&#x27;s TLS session.</li>
+<li><strong>Why it is correct:</strong> Termination happens where the key lives, such as the Ingress proxy, and traffic beyond it may be plain or re-encrypted.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the app terminates TLS because the client sees HTTPS can be wrong when a proxy holds the key.</li>
+<li><strong>How to verify:</strong> The answer names the decrypting component.</li>
+</ul>
 <h3 id="exercise-3-design-a-no-secret-tls-evidence-record">Exercise 3: Design a no-secret TLS evidence record.<a class="heading-anchor" href="#exercise-3-design-a-no-secret-tls-evidence-record" aria-label="Link to this section">#</a></h3>
 <p>Useful validation does not require publishing sensitive material. Keep credentials in the prepared private channel.</p>
 <p><strong>Expected:</strong> Names, certificate metadata and status without private key bytes.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record host names, issuer, validity dates, SAN entries and Secret name, leaving out key bytes.</li>
+<li><strong>Why it is correct:</strong> This metadata is enough to check identity and expiry without exposing what an attacker would need.</li>
+<li><strong>Plausible wrong approach:</strong> Pasting the full Secret YAML into notes copies the private key with it.</li>
+<li><strong>How to verify:</strong> The record has names, certificate metadata and status, with no key bytes.</li>
+</ul>
 <h3 id="exercise-4-diagnose-certificate-mismatch-separately-from-404">Exercise 4: Diagnose certificate mismatch separately from 404.<a class="heading-anchor" href="#exercise-4-diagnose-certificate-mismatch-separately-from-404" aria-label="Link to this section">#</a></h3>
 <p>Repair the first failing layer. Changing backend selectors cannot fix an invalid certificate name.</p>
 <p><strong>Expected:</strong> Identity validation versus HTTP routing/content.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Classify a handshake failure as identity validation and a 404 as an HTTP response from a routed component.</li>
+<li><strong>Why it is correct:</strong> A certificate mismatch stops the connection before any HTTP request, while a 404 means routing ran.</li>
+<li><strong>Plausible wrong approach:</strong> Fixing routes to cure a certificate error changes a layer that was never reached.</li>
+<li><strong>How to verify:</strong> The two failures are diagnosed at different layers.</li>
+</ul>
 <h3 id="exercise-5-explain-why-base64-secret-data-is-not-encrypted-protection">Exercise 5: Explain why base64 Secret data is not encrypted protection.<a class="heading-anchor" href="#exercise-5-explain-why-base64-secret-data-is-not-encrypted-protection" aria-label="Link to this section">#</a></h3>
 <p>Protection depends on access controls, storage encryption and operational handling. Never treat encoded text as safe to publish.</p>
 <p><strong>Expected:</strong> Encoding is reversible representation, not confidentiality.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Decode a Secret value with base64 to show anyone with read access gets the plaintext.</li>
+<li><strong>Why it is correct:</strong> Base64 is a reversible encoding, so protection must come from RBAC and encryption at rest.</li>
+<li><strong>Plausible wrong approach:</strong> Treating encoded Secret data as encrypted encourages wider read access than intended.</li>
+<li><strong>How to verify:</strong> The answer calls the encoding reversible and not confidential.</li>
+</ul>
 <h3 id="exercise-6-plan-a-two-hop-trust-policy">Exercise 6: Plan a two-hop trust policy.<a class="heading-anchor" href="#exercise-6-plan-a-two-hop-trust-policy" aria-label="Link to this section">#</a></h3>
 <p>The design should say where encryption is required and which peer each component trusts, then test those claims separately.</p>
-<p><strong>Expected:</strong> Client-facing identity and upstream identity are both explicit.</p></article>
+<p><strong>Expected:</strong> Client-facing identity and upstream identity are both explicit.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> State the identity clients validate at the proxy and the identity the proxy validates upstream.</li>
+<li><strong>Why it is correct:</strong> Each hop is a separate TLS session with its own certificate and trust settings.</li>
+<li><strong>Plausible wrong approach:</strong> Securing only the client hop and assuming the upstream is trusted leaves the second hop unverified.</li>
+<li><strong>How to verify:</strong> Both client-facing and upstream identities are written down.</li>
+</ul></article>
   </main>
 </body>
 </html>

@@ -16,6 +16,14 @@ Root inside a container is not automatically identical to host root under every 
 
 The teaching application should not receive that socket. Docker lessons run as explicit host commands in a learner-owned project. Ordinary browser execution cannot install an engine, create sibling containers or inspect unrelated workloads. This separation is part of the product design.
 
+### Key terms
+
+- **Rootless mode:** Running the engine and its containers under an ordinary user identity without a root daemon.
+- **User namespace:** A kernel mapping of container user IDs to different host user IDs.
+- **Engine socket:** The daemon API endpoint through which any authorized client can create containers with powerful host access.
+- **Host trust:** What a process may do to the host, as decided by its capabilities, ID mappings, mounts and daemon access.
+- **Root inside a container:** UID 0 within a container, which is not automatically host root but is also not automatically harmless.
+
 ## Anatomy and a trace you can follow
 
 Rootless mode is an engine installation choice, not a Compose flag that magically converts an already running rootful daemon. Inspect the engine’s documented mode and test the app’s required capabilities. Do not require a learner to reconfigure their working engine for this chapter.
@@ -88,11 +96,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Assuming a non-root `USER` makes the engine rootless. Adding a user to the docker group without treating that as root-equivalent access. Mounting the engine socket into a container for convenience.
 
-Exercise 4 is this chapter's boundary case: Diagnose a lesson requiring engine access from the browser. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a lesson requiring engine access from the browser. Identify which step needs engine access and move it to a host worksheet the learner runs deliberately, rather than granting the browser session a socket. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using rootless mode, user namespace, engine socket and host trust. Reconstruct worked example 2 (Identify a dangerous mount in review) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Explain from memory why mounting `/var/run/docker.sock` grants control of the host. Then reconstruct worked example 2 (Identify a dangerous mount in review) with one different value, predict what changes, and name which of rootless mode, user namespace, engine socket and host trust the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-059`.
 
 Framework interfaces often stay the same while their backends change the operational meaning. A cache can live in one process or a shared service; email can be captured in memory or delivered through a server; a task can execute eagerly or through a durable worker. This chapter makes those backend distinctions explicit.
 
+## Key terms
+
+- **Cache backend:** The configured storage behind Django's cache API; the local-memory backend is private to one process and is not persistent.
+- **Cache key:** The name a value is stored under, which must include every dimension that changes the value, such as tenant or version.
+- **Email backend:** The component that receives messages from `send_mail`; the locmem backend stores them in `mail.outbox` instead of sending them.
+- **Tasks framework:** Django's `django.tasks` interface in which `enqueue()` returns a TaskResult; the default ImmediateBackend runs the task at once in-process.
+- **Durable worker:** A separate process that runs queued tasks from persistent storage, which none of these development backends provide.
+
 ## Mechanism: interface success has a scope
 
 Django's cache API provides get, set and delete over a configured backend. A key should include the dimensions that affect its value, such as tenant, user or schema version. The local-memory backend is useful for finite tests but does not provide cross-process coordination or persistence.
@@ -31,6 +39,30 @@ Send_mail builds one synthetic message and the test inspects the in-memory outbo
 These tests are valuable because message content and task logic can be wrong before any network integration is involved. They are incomplete for delivery and recovery. Actual email acceptance would require a controlled mail service, while durable task acceptance would require broker/worker lifecycle and duplicate-effect checks.
 
 A task should receive serializable values or stable record identities. Passing request objects, database sessions or open files assumes a shared process lifetime that a real worker does not have. The later outbox and workshop chapters use durable identities to cross that boundary.
+
+## Worked example: bumping a cache version instead of deleting keys
+
+```python
+store = {}
+
+
+def make_key(key, key_prefix="", version=1):
+    return f"{key_prefix}:{version}:{key}"
+
+
+store[make_key("summary:user-1")] = {"count": 3}
+print(list(store))
+print(store.get(make_key("summary:user-1", version=2)))
+```
+
+Expected output:
+
+```text
+[':1:summary:user-1']
+None
+```
+
+`make_key` matches Django's default key function, so every `cache.set` really stores `prefix:version:key`. Reading with `version=2` misses the old entry without a delete, which lets a deploy that changes the cached summary's shape stop reading stale values at once. The lesson's explicit `cache.delete` remains the right tool for one user's data after a write.
 
 ## Failure diagnosis and discussion
 

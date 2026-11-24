@@ -110,6 +110,28 @@ def parameter_solution(theta):
                 "https://docs.jax.dev/en/latest/_autosummary/jax.lax.custom_linear_solve.html",
             ),
         ),
+        key_terms=(
+            (
+                "Linear solve",
+                "Computing the x that satisfies Ax=b directly, for example with jnp.linalg.solve, instead of forming an inverse matrix.",
+            ),
+            (
+                "Residual",
+                "The difference Ax minus b, whose small size is necessary but not sufficient evidence that a returned solution is reliable.",
+            ),
+            (
+                "Conditioning",
+                "How strongly a matrix can amplify small perturbations in A or b into large changes in the solution.",
+            ),
+            (
+                "Implicit sensitivity",
+                "The derivative of a solution obtained by differentiating the equation Ax=b, valid only while A stays nonsingular.",
+            ),
+            (
+                "Singular matrix",
+                "A matrix without an inverse, for which a unique solution and its smooth derivative may not exist.",
+            ),
+        ),
     ),
     Unit(
         20,
@@ -207,6 +229,28 @@ The examples below use a one-dimensional system with a closed-form solution. Thi
         (
             ("Control flow", "https://docs.jax.dev/en/latest/control-flow.html"),
             ("Numerical accuracy", "https://docs.jax.dev/en/latest/accuracy.html"),
+        ),
+        key_terms=(
+            (
+                "Forward Euler step",
+                "An update that adds the step duration times the current rate of change, here subtracting k times x times h.",
+            ),
+            (
+                "Discretization error",
+                "The difference between the finite-step algorithm and the continuous model solution at the same simulated time.",
+            ),
+            (
+                "Fixed horizon",
+                "The total simulated time T, which must stay constant when comparing step sizes so only the discretization changes.",
+            ),
+            (
+                "Parameter sensitivity",
+                "The derivative of the simulated output with respect to a model parameter, such as the decay rate k.",
+            ),
+            (
+                "Algorithm derivative",
+                "The exact derivative of the implemented finite-step computation, which can differ from the continuous model derivative.",
+            ),
         ),
     ),
 ]
@@ -308,6 +352,28 @@ noise = jax.random.normal(jax.random.key(61), (1024,), dtype=jnp.float64)""",
             (
                 ("Random numbers", "https://docs.jax.dev/en/latest/random-numbers.html"),
                 ("Autodiff cookbook", "https://docs.jax.dev/en/latest/301/cookbook.html"),
+            ),
+            key_terms=(
+                (
+                    "Monte Carlo estimate",
+                    "An average of sampled values that approximates an expectation and retains finite-sample variability.",
+                ),
+                (
+                    "Reparameterization",
+                    "Writing a random quantity as a deterministic function of parameters and a parameter-free draw, such as mu plus sigma times epsilon.",
+                ),
+                (
+                    "Pathwise derivative",
+                    "The derivative of a fixed-sample objective with respect to its parameters while the base draws are held constant.",
+                ),
+                (
+                    "Common random numbers",
+                    "Reusing the same base draws for nearby parameter values so a comparison isolates the parameter change from new noise.",
+                ),
+                (
+                    "Sampling error",
+                    "The deviation of a finite-sample estimate from the population expectation that remains even when every operation is correct.",
+                ),
             ),
         ),
         Unit(
@@ -427,6 +493,28 @@ custom_square.defvjp(square_forward, square_backward)""",
                     "https://docs.jax.dev/en/latest/301/custom-jvp-vjp.html",
                 ),
             ),
+            key_terms=(
+                (
+                    "custom_jvp",
+                    "A JAX decorator whose rule maps input tangents to output tangents, which JAX can transpose for reverse-mode differentiation.",
+                ),
+                (
+                    "custom_vjp",
+                    "A JAX decorator that pairs a forward pass returning saved residuals with a backward pass mapping output cotangents to inputs.",
+                ),
+                (
+                    "Tangent linearity",
+                    "The requirement that a JVP rule scales and adds with its tangent input, so doubling the tangent doubles the result.",
+                ),
+                (
+                    "Saved residual",
+                    "A value the forward pass of a custom VJP stores so the backward pass can compute the pullback.",
+                ),
+                (
+                    "Upstream cotangent",
+                    "The incoming sensitivity that a backward rule must multiply, which a test using only a unit cotangent cannot check.",
+                ),
+            ),
         ),
     ]
 )
@@ -535,6 +623,28 @@ right = jnp.array([2., 6.])""",
                     "https://docs.jax.dev/en/latest/_autosummary/jax.lax.custom_linear_solve.html",
                 ),
             ),
+            key_terms=(
+                (
+                    "Implicit differentiation",
+                    "Differentiating a result through the equation it satisfies rather than through every step of the algorithm that produced it.",
+                ),
+                (
+                    "custom_linear_solve",
+                    "The lax function that runs an author-supplied solver while differentiating through the stated linear equation Ax=b.",
+                ),
+                (
+                    "Primal residual",
+                    "The difference between A times the solver output and b, checked because the API does not verify the solver.",
+                ),
+                (
+                    "Transpose solve",
+                    "A solve against A-transpose that reverse mode needs to pull an output cotangent back through the linear system.",
+                ),
+                (
+                    "Symmetry declaration",
+                    "The promise that A equals its transpose, which lets one solve serve both directions and gives wrong derivatives when false.",
+                ),
+            ),
         ),
         Unit(
             24,
@@ -630,6 +740,28 @@ values = jnp.array([[1., 2.], [3., 4.], [5., 6.]])""",
             (
                 ("Ahead-of-time compilation", "https://docs.jax.dev/en/latest/aot.html"),
                 ("Jaxpr", "https://docs.jax.dev/en/latest/601/jaxpr.html"),
+            ),
+            key_terms=(
+                (
+                    "eval_shape",
+                    "A JAX function that infers output shapes and dtypes from abstract inputs without computing any array values.",
+                ),
+                (
+                    "ShapeDtypeStruct",
+                    "An abstract array description carrying only shape and dtype, used as input to shape evaluation or ahead-of-time lowering.",
+                ),
+                (
+                    "jaxpr",
+                    "The staged JAX representation that lists the primitive operations and data dependencies recorded during tracing.",
+                ),
+                (
+                    "Lowering",
+                    "The stage that converts a traced function into a compiler-facing representation for one input signature before compilation.",
+                ),
+                (
+                    "Compiled signature",
+                    "The abstract input shapes and dtypes an ahead-of-time compiled executable accepts, so a new incompatible shape is rejected.",
+                ),
             ),
         ),
     ]

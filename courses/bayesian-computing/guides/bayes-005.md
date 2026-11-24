@@ -10,6 +10,13 @@ The example considers an action that costs five units and produces eight units o
 
 This is a decision model for a named future action. It does not establish that a success probability estimated under an unrelated old policy is the causal success probability after a new intervention. Transport, intervention effects and changing selection require their own scientific assumptions.
 
+## Key terms
+
+- **Utility:** A numerical statement of the consequences of an action, here eight units of benefit on success minus a cost of five.
+- **Posterior expected loss:** The loss of an action averaged over the posterior distribution of the unknown parameter, also called posterior risk.
+- **Bayes action:** The action that minimizes posterior expected loss, or equivalently maximizes posterior expected utility.
+- **Regret:** The loss of the chosen action relative to the action that would have been chosen if the parameter were known.
+
 ## Worked case 1: compare expected utility with a posterior probability
 
 The posterior mean probability is 10/14. Expected net benefit is therefore positive. The program also calculates the probability that the unknown net-benefit parameter is positive, using the threshold \(p>5/8\). These are two distinct summaries.
@@ -39,6 +46,49 @@ Constraints can change the optimal policy. A budget, safety requirement or fairn
 **Should the lower bound of a credible interval determine every action?** That is one possible conservative rule, but its relationship to costs and risk must be stated. Expected-utility optimization and chance constraints are different decision frameworks.
 
 **What does the small exact example establish?** It verifies the posterior-risk calculation under a transparent beta model and fixed consequences. A real deployment should also preserve the data boundary, intervention assumptions, operational costs, uncertainty assessment and a plan for updating or reversing the decision when evidence changes.
+
+## Worked example: Three losses, three point estimates from one Beta posterior
+
+```python
+import numpy as np
+from scipy import stats
+
+post = stats.beta(3, 9)
+grid = np.linspace(0, 1, 20001)
+dens = post.pdf(grid)
+dens /= dens.sum()
+
+
+def expected(loss, a):
+    return dens @ loss(grid, a)
+
+
+candidates = np.linspace(0.05, 0.45, 401)
+losses = {
+    "squared": lambda t, a: (t - a) ** 2,
+    "absolute": lambda t, a: np.abs(t - a),
+    "0-1 within 0.005": lambda t, a: (np.abs(t - a) > 0.005).astype(float),
+}
+for name, loss in losses.items():
+    vals = np.array([expected(loss, a) for a in candidates])
+    if name.startswith("0-1"):  # exact window mass avoids grid-edge artifacts
+        vals = 1 - (post.cdf(candidates + 0.005) - post.cdf(candidates - 0.005))
+    print(
+        f"{name:16s}: best action {candidates[vals.argmin()]:.3f}, expected loss {vals.min():.4f}"
+    )
+print(f"mean {post.mean():.3f}, median {post.median():.3f}, mode {(3 - 1) / (3 + 9 - 2):.3f}")
+```
+
+Observed output:
+
+```text
+squared         : best action 0.250, expected loss 0.0144
+absolute        : best action 0.236, expected loss 0.0961
+0-1 within 0.005: best action 0.200, expected loss 0.9668
+mean 0.250, median 0.236, mode 0.200
+```
+
+One posterior, Beta(3, 9), yields three different best actions because each loss asks a different question. Under squared loss the best report is the posterior mean 0.250, and the minimized expected loss 0.0144 is exactly the posterior variance \(27/(144\times13)\). Under absolute loss the minimizer moves left to the median 0.236, because the right-skewed posterior has a long upper tail that the mean chases and the median ignores. Under a 0-1 loss that pays only for landing within 0.005 of the truth, the best action is the mode 0.200, but its expected loss is 0.9668: even the best single guess is inside that narrow window only about 3 percent of the time. The spread from 0.200 to 0.250 is a fifth of the mean, large enough to change a downstream decision. Reporting "the posterior estimate" without naming the loss hides that choice. A defect-rate threshold set from the mode would trigger action more readily than one set from the mean.
 
 ## Complete reproducible program
 

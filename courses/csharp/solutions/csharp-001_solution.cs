@@ -1,18 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Globalization;
-using System.Collections.Concurrent;
-using System.Threading.Channels;
-using System.Net;
-using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Buffers;
 
 internal static class Program {
   private static void Check(bool condition, string reason) {
@@ -34,11 +21,24 @@ internal static class Program {
       Check(total != boxes + itemsPerBox, "multiplication is not addition");
     }
     {
+      // Task 2: Guided modification
+      string greeting = "Hi there, Ada!";
+      Check(greeting.Length == 14, "changed greeting length");
+    }
+    {
       // Task 3: Independent construction
       int rows = 4;
       int seatsPerRow = 6;
       int seats = rows * seatsPerRow;
       Check(seats == 24, "four rows of six seats");
+    }
+    {
+      // Task 5: Boundary evidence
+      int seatsPerRow = 6;
+      int noRows = 0 * seatsPerRow;
+      int oneRow = 1 * seatsPerRow;
+      Check(noRows == 0, "zero rows hold no seats");
+      Check(oneRow == seatsPerRow, "one row holds one row of seats");
     }
     Console.WriteLine("csharp-001: passed");
     await Task.CompletedTask;

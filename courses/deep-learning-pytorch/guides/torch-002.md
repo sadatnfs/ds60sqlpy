@@ -54,9 +54,9 @@ torch.arange creates a one-dimensional tensor; reshape supplies the desired axes
 
 ## Trace axes, storage and pairing separately
 
-For a contiguous 2-by-3 tensor containing 0 through 5, the stride tuple (3, 1) means one step along the first axis moves three stored elements and one step along the second moves one. Ignoring a nonzero base storage offset, element(i, j) is located at element offset 3 i+j. In float64 each element uses eight bytes, so offset 5 corresponds to 40 bytes from that base. Strides describe storage movement in elements, not a count of rows or bytes.
+For a contiguous 2-by-3 tensor containing 0 through 5, the stride tuple (3, 1) means one step along the first axis moves three stored elements and one step along the second moves one. Ignoring a nonzero base storage offset, element(i, j) is located at element offset `3i + j`. In float64 each element uses eight bytes, so offset 5 corresponds to 40 bytes from that base. Strides describe storage movement in elements, not a count of rows or bytes.
 
-Transposing gives shape (3, 2) and strides (1, 3). The value at transposed[2, 1] is the original[1, 2], still five. No rearrangement of the underlying values is required for that interpretation. A contiguous materialization may allocate a new ordering for a later operation, but the fact that a tensor is contiguous does not establish that nobody else shares its storage. The official view documentation makes that aliasing boundary explicit. [PyTorch 2.9 tensor views](https://docs.pytorch.org/docs/2.9/tensor_view.html).
+Transposing gives shape (3, 2) and strides (1, 3). The value at `transposed[2, 1]` is the original `[1, 2]` element, still five. No rearrangement of the underlying values is required for that interpretation. A contiguous materialization may allocate a new ordering for a later operation, but the fact that a tensor is contiguous does not establish that nobody else shares its storage. The official view documentation makes that aliasing boundary explicit. [PyTorch 2.9 tensor views](https://docs.pytorch.org/docs/2.9/tensor_view.html).
 
 The worked sequence deliberately mutates state. Example A creates x, Example B takes its first-row view and changes x[0, 0] to 99, and Example C clones the now-mutated tensor. Its correct comparison is therefore clone=-1 versus original=99. Re-running Example C alone with an unrelated x would be a different fixture. Keep the stated sequential scratch-file contract visible when reproducing the examples.
 
@@ -123,7 +123,7 @@ assert owned[0, 0].item() == -1 and x[0, 0].item() == 99
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The tensor reports shape (2, 3) and stride (3, 1); the view write changes x[0, 0] to 99 while the clone stays independent; the transpose has stride (1, 3); the column subtraction broadcasts to (3, 3); and adding shapes (2, 3) and (4,) raises RuntimeError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Inspect shape and stride. Predict exercise 6, Reject incompatible arithmetic, from its prompt alone: Add tensors shaped (2, 3) and (4, ) and capture the shape failure. Then explain why this finish condition holds: The tensor reports shape (2, 3) and stride (3, 1); the view write changes x[0, 0] to 99 while the clone stays independent; the transpose has stride (1, 3); the column subtraction broadcasts to (3, 3); and adding shapes (2, 3) and (4,) raises RuntimeError. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -132,11 +132,11 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** In a fresh process, the exercise checks confirm `tuple(grid.shape) == (3, 2)`; `grid.stride() == (2, 1)`; `grid.dtype == torch.float32` and `grid.device.type == 'cpu'`.
 
 2. **Write through a column view.** Take column 1 of the (3, 2) tensor as a view, set its last entry to -7 and inspect the original tensor and the view's stride.
-   **Expected:** grid[2, 1] becomes -7; the column view has stride (2,).
+   **Expected:** `grid[2, 1]` becomes -7; the column view has stride (2,).
    **Verify:** In a fresh process, the exercise checks confirm `grid[2, 1].item() == -7` and `column.stride() == (2,)`.
 
 3. **Separate contiguous from clone.** Call contiguous() and clone() on the already contiguous grid, then write 100 into the [0, 0] entry of the first result and -100 into the second.
-   **Expected:** contiguous() returns the same storage, so grid[0, 0] becomes 100; the clone write leaves grid unchanged.
+   **Expected:** contiguous() returns the same storage, so `grid[0, 0]` becomes 100; the clone write leaves grid unchanged.
    **Verify:** In a fresh process, the exercise checks confirm `same.data_ptr() == grid.data_ptr()`; `grid[0, 0].item() == 100` and `owned[0, 0].item() == -100`.
 
 4. **Trace a transposed layout.** Transpose x and inspect shape, strides and contiguity.
@@ -159,15 +159,15 @@ When caller data changes, identify views and in-place writes. Replacing view wit
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Expose shared storage) alters one assumption of Example A (Inspect shape and stride). Hint 2: exercise 4, Trace a transposed layout, should end at shape (3, 2), stride (1, 3), noncontiguous. Work backward from it. Hint 3: exercise 5, Detect a pairing broadcast, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Stride, View, Device using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Create an independent copy, from its inputs alone. Predict whether exercise 3, Separate contiguous from clone, survives one changed input. Then explain Stride, View, Device in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-001` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Inspect shape and stride) cannot be rebuilt without help, revisit `torch-001` first. Otherwise keep your exercise 2 attempt, Write through a column view, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

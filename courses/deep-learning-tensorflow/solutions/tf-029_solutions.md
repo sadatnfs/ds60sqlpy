@@ -1,6 +1,6 @@
 # tf-029: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for Precision, overflow and stable objectives after your own attempt at Example A, Expose naive overflow, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Overflow, Log-sum-exp, Precision. After matching exercise 6, Validate input finiteness, invent a new input without looking here.
 
 ## Mechanism review
 
@@ -52,7 +52,7 @@ np.testing.assert_allclose(loss.numpy(), [np.logaddexp(0, -1)], atol=1e-6, rtol=
 
 ## Exercise 3: Check shift invariance
 
-The question is: Compare softmax[1000,999] with softmax[0, -1].
+The question is: Compare `softmax([1000, 999])` with `softmax([0, -1])`.
 
 A common score shift cancels from the normalized distribution. This metamorphic property can catch an implementation that normalizes the wrong axis or clips scores inconsistently.
 
@@ -132,4 +132,4 @@ np.testing.assert_allclose(stable(z).sum(), 1, atol=1e-12, rtol=0)
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one fixture value in exercise 4, Inspect gradients, and predict the new result before running it. Keep the failing version of exercise 5, Separate precision policies, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

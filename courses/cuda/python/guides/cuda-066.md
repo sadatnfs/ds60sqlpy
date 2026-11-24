@@ -14,6 +14,14 @@ An address is the allocation base plus view offset plus the sum of index times s
 
 
 
+### Key terms
+
+- **Shape:** The number of elements along each axis of an array.
+- **Stride:** The number of bytes to step in memory to move one position along an axis.
+- **Contiguous row-major layout:** A layout where the last axis varies fastest and the elements occupy one gap-free block of memory.
+- **Transposed view:** An array that reuses the same buffer with swapped shape and strides instead of copying data.
+- **Negative stride:** A stride that walks backward through the buffer, as produced by a reversed slice.
+
 ## Worked examples
 
 ### Worked example 1
@@ -69,27 +77,39 @@ print("CUDA layout:", view.shape, view.strides, cp.asnumpy(view).tolist())
 
 ### Exercise 1: Calculate offset (1,1)
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **calculate offset (1,1)** in the examples above.
+**Trap to avoid:** Computing `1*3 + 1` and calling the answer 4 gives an element index, not a byte offset. Using the sliced view strides `(12, 8)` gives 20, which is the address of a different element in the original storage.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Change dtype to float64
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **change dtype to float64** in the examples above.
+**Trap to avoid:** Keeping strides `(12, 4)` and only relabeling the dtype reads half of each float64 as a float32. The element count matches, which is why the bug is easy to miss, but every value is garbage.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Describe a transposed view
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **describe a transposed view** in the examples above.
+**Trap to avoid:** Assuming the transpose is contiguous and indexing it with `row*2 + col` reads the original storage in the wrong order. A raw kernel given only the data pointer and new shape silently computes on the untransposed matrix.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Find the contiguous-only bug
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **find the contiguous-only bug** in the examples above.
+**Trap to avoid:** Fixing it by calling a reshape on the slice can hide the bug: reshape may copy, so the kernel becomes correct but writes go to a temporary and the original view never changes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Specify negative-stride support
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **specify negative-stride support** in the examples above.
+**Trap to avoid:** Taking absolute values of strides makes indices non-negative and appears to work, but it reads the columns in the original order, so a reversed view returns unreversed data.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design layout contract tests
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design layout contract tests** in the examples above.
+**Trap to avoid:** Testing only random contiguous arrays of various sizes gives high coverage numbers but never exercises a non-unit stride, which is the exact contract this chapter is about.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

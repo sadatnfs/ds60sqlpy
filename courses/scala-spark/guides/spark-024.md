@@ -8,7 +8,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `spark-023`. The 
 
 ## How to run this lesson
 
-Open `spark-024` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-024` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-024.scala) and [PySpark learner](../lessons/spark-024.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-024_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-024_solution.scala) and [PySpark reference](../solutions/spark-024_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -42,7 +42,7 @@ The adaptive case enables AQE and skew-join handling, keeps automatic broadcasti
 
 A successful adaptive execution can leave the relevant join arrangement unchanged. That outcome is evidence, not a reason to alter the test until a desired operator appears. The reference requires an adaptive plan to reach its final state and the full logical result to match. It prints the plan text so any coalescing or skew-related changes can be inspected. It does not claim that a configuration flag proves a split occurred or that a local elapsed-time difference proves a cluster speedup.
 
-The explicit alternative gives each hot fact a deterministic salt=fact_id modulo 4 and gives every cold fact salt 0. This divides the 9000 hot facts into four logical buckets of 2250. The dimension hot row is replicated to salts 0 through 3, while its ten cold rows keep only salt 0. The expanded dimension has 14 rows and is unique on(key, salt). Each fact still finds exactly one composite-key match. Replicating the fact side as well would multiply the business population and violate the result contract.
+The explicit alternative gives each hot fact a deterministic salt=fact_id modulo 4 and gives every cold fact salt 0. This divides the 9000 hot facts into four logical buckets of 2250. The dimension hot row is replicated to salts 0 through 3, while its ten cold rows keep only salt 0. The expanded dimension has 14 rows and is unique on (key, salt). Each fact still finds exactly one composite-key match. Replicating the fact side as well would multiply the business population and violate the result contract.
 
 The salt is a physical helper, not a business identifier. It is removed from the final projected relation, which again contains fact_id, key, amount, factor. Deterministic assignment makes debugging and repeated runs easier than a fresh random salt. If a workload uses event IDs with a biased modulo pattern, the bucket balance should be measured rather than presumed. This fixture uses consecutive identities so the exact 2250-per-salt population can be checked independently.
 
@@ -57,9 +57,7 @@ All 10000 result tuples are deliberately bounded for this demonstration and coll
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 
 spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
 spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold", "-1")
@@ -78,20 +76,7 @@ val dimension =
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 
 spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
 spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold", "-1")
@@ -148,7 +133,7 @@ The formula derives from the declared key frequencies and dimension factors, ind
 
 ### Exercise 1: Measure the key-frequency imbalance
 
-Return ordered(key, n) counts for the fact relation. Derive total population and the hot-key fraction from this ledger.
+Return ordered (key, n) counts for the fact relation. Derive total population and the hot-key fraction from this ledger.
 
 **Expected result/shape:** Key 0 has 9000; keys 1..10 each 100. Total 10000 and hot fraction 0.9.
 
@@ -178,7 +163,7 @@ Build a fresh AQE-enabled join with skew handling enabled, coalescing disabled, 
 
 ### Exercise 4: Split the hot logical key with a deterministic helper
 
-Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. With AQE disabled, compare eight-partition row-load ledgers by key and by(key, salt).
+Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. With AQE disabled, compare eight-partition row-load ledgers by key and by (key, salt).
 
 **Expected result/shape:** Hot salt buckets 0..3 each have 2250 rows; cold facts all have salt 0. Both physical ledgers reconcile to 10000, and the unsalted maximum is at least 9000.
 
@@ -190,7 +175,7 @@ Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. With AQE disabled
 
 Expand dimension key 0 to salts 0,1,2,3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key.
 
-**Expected result/shape:** 14 dimension rows, with four key 0 variants and ten cold rows. Every(key, salt) pair is unique.
+**Expected result/shape:** 14 dimension rows, with four key 0 variants and ten cold rows. Every (key, salt) pair is unique.
 
 **Verify:** Assert row count 14, distinct composite keys 14 and exact hot/cold salt populations.
 
@@ -212,7 +197,7 @@ Do not infer actual skew splitting from spark.sql.adaptive.skewJoin.enabled alon
 
 ## Self-check
 
-Explain the contract of `keyFrequencies` / `key_frequencies` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `keyFrequencies` / `key_frequencies` without reading its solution. Then, from memory, state what Exercise 6 (Remove the physical helper and reconcile the business relation) must produce: All 10000 fact tuples remain exactly equal, with amount 10000 and weighted total 15500. Salt is absent from the final schema. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

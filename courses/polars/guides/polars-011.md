@@ -14,6 +14,14 @@ Partitioned data adds another layer of identity. A glob can select several files
 
 When parsing a textual source, preserve raw values until rejection is accounted for. Reading a mixed amount column as text and then casting it under an explicit policy makes the bad token visible. The accepted total and rejected identifiers form complementary evidence. Publishing only a successful total would hide the fact that one source row did not contribute.
 
+## Key terms
+
+- **Parquet:** A columnar file format that stores its schema and typed column chunks, unlike CSV text whose types must be inferred or declared.
+- **scan_parquet:** A lazy reader that builds a plan over Parquet files, so filters and column choices can be pushed into the read.
+- **sink_parquet:** A method that executes a LazyFrame and writes its result to a Parquet file without returning a DataFrame.
+- **schema_overrides:** A CSV reading option that fixes the types of named columns, such as keeping a problematic field as text.
+- **Readback check:** Reading a written file again and comparing its schema and rows with what was intended.
+
 ## Syntax and data contract
 
 write_parquet emits typed columnar data, scan_parquet builds a lazy source, and sink_parquet materializes a query into an output file. A glob such as part-*.parquet should name only inputs. schema_overrides can keep a problematic CSV field as text so its parsing policy is explicit. Use readback checks on the output artifact instead of assuming a completed write preserves the intended result.

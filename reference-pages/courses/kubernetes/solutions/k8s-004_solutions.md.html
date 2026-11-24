@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-identify-the-request-tuple">Exercise 1: Identify the request tuple<a class="heading-anchor" href="#exercise-1-identify-the-request-tuple" aria-label="Link to this section">#</a></h3>
 <p>The API authorizes a specific action against a resource scope. An object name without namespace and caller information is incomplete. The learner record should identify the private context by its nonsecret name while keeping credential contents private.</p>
 <p><strong>Expected:</strong> A six-field request includes apps/deployments, hello, get and the explicit leased namespace.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Split the read into who asks, which server and namespace, which API group and resource, which object name and which verb.</li>
+<li><strong>Why it is correct:</strong> Authorization in this lesson is evaluated per request tuple, so <code>get</code> on <code>deployments.apps/hello</code> in the leased namespace is a different question from the same verb in another namespace.</li>
+<li><strong>Plausible wrong approach:</strong> Writing only <code>hello</code> and <code>get</code> omits the caller and namespace, so the record could describe a read against an ambient context the lease never authorized.</li>
+<li><strong>How to verify:</strong> The tuple must translate field by field into one <code>kubectl auth can-i get deployments.apps/hello</code> command with explicit kubeconfig, context and namespace flags.</li>
+</ul>
 <h3 id="exercise-2-read-the-role-grant">Exercise 2: Read the Role grant<a class="heading-anchor" href="#exercise-2-read-the-role-grant" aria-label="Link to this section">#</a></h3>
 <p>The Role contains one named read permission. It does not imply list or create rights, and namespace creation is cluster-scoped. Other bindings could add permissions, so this static inspection is a prediction to confirm with the actual owned identity.</p>
 <p><strong>Expected:</strong> Only get hello is granted by this Role; list and namespace creation are absent.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Match each of the three requests against the Role rules, requiring verb, resource and resourceNames to agree within a single rule.</li>
+<li><strong>Why it is correct:</strong> The example Role names <code>hello</code> under <code>resourceNames</code> with only <code>get</code>, so a list of all Deployments has no matching rule, and Namespaces are cluster-scoped and cannot be granted by a namespaced Role at all.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming <code>get</code> on one Deployment implies <code>list</code> treats verbs as a hierarchy, but RBAC verbs are independent strings and list returns every object, including ones the name restriction excludes.</li>
+<li><strong>How to verify:</strong> Exactly one of the three requests (get hello) should have a fully matching rule; the other two should have none.</li>
+</ul>
 <h3 id="exercise-3-check-namespace-identity">Exercise 3: Check namespace identity<a class="heading-anchor" href="#exercise-3-check-namespace-identity" aria-label="Link to this section">#</a></h3>
 <p>Deleting and recreating a namespace creates a new identity. Continuing with an old receipt could act on an unrelated replacement. The UID mismatch is therefore a decisive boundary, not a warning to ignore because the visible name looks familiar.</p>
 <p><strong>Expected:</strong> Refuse despite the matching namespace name and owner label.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare <code>metadata.uid</code> from the ns-1 receipt with the uid in the ns-2 readback before looking at any other field.</li>
+<li><strong>Why it is correct:</strong> A namespace UID is assigned by the API server at creation, so a deleted and recreated namespace keeps its name and labels but receives a new UID.</li>
+<li><strong>Plausible wrong approach:</strong> Accepting the readback because the name and owner label both match would let a stale receipt act on a replacement namespace that another process may now own.</li>
+<li><strong>How to verify:</strong> The two UIDs differ, so the decision is refuse; changing the label or name in your notes must not flip that answer.</li>
+</ul>
 <h3 id="exercise-4-observe-least-privilege">Exercise 4: Observe least privilege<a class="heading-anchor" href="#exercise-4-observe-least-privilege" aria-label="Link to this section">#</a></h3>
 <p>The live observation establishes effective policy for that identity and time. It should include the requested verb/resource and nonsecret target. A denied action is a successful negative check when the curriculum intends the identity to lack that permission.</p>
 <p><strong>Expected:</strong> Actual allow/deny results are recorded separately from source policy; no credentials enter the worksheet.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Ask the server about one permitted own-namespace action and one action the identity should lack, such as listing Secrets or reading Nodes, under the explicit lease.</li>
+<li><strong>Why it is correct:</strong> Only the server&#x27;s answer for this identity at this time reflects every binding that applies, which the single Role file cannot show.</li>
+<li><strong>Plausible wrong approach:</strong> Recording the Role YAML as the result skips the observation, and pasting the kubeconfig to prove the identity would leak the credential the exercise is meant to protect.</li>
+<li><strong>How to verify:</strong> Each row names verb, resource and namespace with the server&#x27;s yes or no, and a text search of the record finds no token or certificate data.</li>
+</ul>
 <h3 id="exercise-5-bind-a-clusterrole-inside-one-namespace">Exercise 5: Bind a ClusterRole inside one namespace<a class="heading-anchor" href="#exercise-5-bind-a-clusterrole-inside-one-namespace" aria-label="Link to this section">#</a></h3>
 <p>Binding a ClusterRole with a RoleBinding reuses the role&#x27;s rules without widening their scope: the grant applies only in the RoleBinding&#x27;s namespace. Only a ClusterRoleBinding grants the rules across all namespaces. The default view ClusterRole allows reading most namespaced objects but deliberately omits Secrets, because Secret contents can include ServiceAccount credentials that would let a reader escalate. Confirm the effective answer with <code>kubectl auth can-i</code> under the owned receipt instead of reasoning only from the YAML.</p>
 <p><strong>Expected:</strong> Pods in lesson-a: allowed. Pods in lesson-b: denied, because a RoleBinding grants only inside its own namespace. Secrets in lesson-a: denied, because the default view role excludes Secrets.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Resolve the binding&#x27;s scope first (namespace lesson-a), then check each requested resource against the rules of the <code>view</code> ClusterRole.</li>
+<li><strong>Why it is correct:</strong> A RoleBinding confines whatever role it references to its own namespace, and the built-in <code>view</code> role lists Pods but omits Secrets.</li>
+<li><strong>Plausible wrong approach:</strong> Reading <code>ClusterRole</code> in the roleRef as cluster-wide access would wrongly allow Pods in lesson-b; that scope only comes from a ClusterRoleBinding.</li>
+<li><strong>How to verify:</strong> Expect allowed, denied, denied for Pods in lesson-a, Pods in lesson-b and Secrets in lesson-a, matching <code>kubectl auth can-i</code> with <code>--as</code> and explicit <code>--namespace</code>.</li>
+</ul>
 <h3 id="exercise-6-explain-additive-authorization">Exercise 6: Explain additive authorization<a class="heading-anchor" href="#exercise-6-explain-additive-authorization" aria-label="Link to this section">#</a></h3>
 <p>A complete access claim must account for the identity&#x27;s other bindings and admission/runtime controls where relevant. The course avoids relying on a visual policy snippet alone and keeps the private session scoped and short-lived.</p>
 <p><strong>Expected:</strong> A written answer includes other RoleBindings/ClusterRoleBindings and actual effective authorization evidence.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Treat the Role as one input to a union of all bindings that reference the identity, its groups and any ServiceAccount it uses.</li>
+<li><strong>Why it is correct:</strong> Kubernetes RBAC is purely additive with no deny rules, so another RoleBinding or a ClusterRoleBinding to a group can add permissions this file never mentions.</li>
+<li><strong>Plausible wrong approach:</strong> Concluding least privilege from the narrow Role alone ignores group bindings such as a ClusterRoleBinding for <code>system:authenticated</code>, which could grant far more.</li>
+<li><strong>How to verify:</strong> Name at least one binding outside the file that could widen access and cite <code>kubectl auth can-i --list</code> in the leased namespace as the effective set.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Separate missing authentication, an expired lease, a wrong target UID and an authorization denial. They have different repairs. Retrying with an ambient administrator context would change the experiment and bypass the intended boundary. A successful own-namespace read does not prove cluster-wide permission, and a Role YAML file does not prove the server loaded that policy.</p>
 <p>The offline checker models only the explicit permission matrix and receipt equality. It makes no API request. A live claim requires the actual owned identity, a fresh namespace readback and positive/negative authorization observations.</p></article>

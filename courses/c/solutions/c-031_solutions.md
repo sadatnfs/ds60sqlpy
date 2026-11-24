@@ -1,6 +1,6 @@
 # c-031: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-031_solution.c`, implements all six cases, from the "add ordinary values" case to the "transfer the zero product" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -19,13 +19,21 @@ int out = 0;
 CHECK(add_checked(7, 5, &out) && out == 12);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `add_checked(7, 5, &out) && out == 12`. Restoring the original line brings back the worked observation: the result is 12.
+**Expected:** With `CHECK(add_checked(8, 5, &out) && out == 12);` the run stops with `Check failed` at the CHECK on `add_checked(7, 5, &out) && out == 12`, because the "add ordinary values" case no longer shows that the result is 12. Restoring `CHECK(add_checked(7, 5, &out) && out == 12);` brings that observation back.
 
 The normal case uses the same guarded path as boundary cases.
 
+**Approach.** Evaluate both operands: `add_checked(8, 5, &out)` passes both guards and stores 13, then `out == 12` is false.
+
+**Why it holds here.** 8 + 5 is far from either limit, so the function takes the normal path and returns true; the CHECK fails on the comparison, not on overflow.
+
+**A plausible wrong approach.** Inspecting the call with `printf("%d %d", add_checked(8, 5, &out), out);`. The order in which arguments are evaluated is unspecified, so `out` may be read before the call stores 13 and print the old 0.
+
+**Verify.** Print the return value and `out` in separate statements and see 1 and then 13.
+
 ## Exercise 2: Reject positive overflow: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `int out = 10;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "reject positive overflow" case, so one line now reads `int out = 10;`. Run the example with that line, use the failing CHECK to find why the operation fails and preserves output no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -34,9 +42,17 @@ int out = 9;
 CHECK(!add_checked(INT_MAX, 1, &out) && out == 9);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!add_checked(INT_MAX, 1, &out) && out == 9`; after it the line reads `int out = 9;` again and the operation fails and preserves output.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!add_checked(INT_MAX, 1, &out) && out == 9`. Once the line reads `int out = 9;` again, the "reject positive overflow" case again shows that the operation fails and preserves output.
 
 The addition itself is never evaluated after the precondition fails.
+
+**Approach.** Read the guard: for `b` 1, `a > INT_MAX - b` is `INT_MAX > INT_MAX - 1`, which is true, so the function returns false before any addition and leaves `out` alone.
+
+**Why it holds here.** The function is correct; the regression changed the initial value to 10, so `out == 9` fails until the initializer is 9 again.
+
+**A plausible wrong approach.** Checking after the fact: `int sum = a + b; if (b > 0 && sum < a) return false;`. The addition has already overflowed, which is undefined, so the compiler may assume it did not; Clang at `-O2` compiles that function to an unconditional store and `return true`.
+
+**Verify.** Compile that variant with `-O2 -S` and see that the comparison is gone; run the lesson's version and print `out` as 9.
 
 ## Exercise 3: Reject negative overflow
 
@@ -50,6 +66,14 @@ CHECK(!add_checked(INT_MIN, -1, &out) && out == 9);
 **Expected:** The operation fails without evaluating the overflow.
 
 Checking the negative boundary requires a separate inequality from the positive case.
+
+**Approach.** Use the negative branch: for `b` -1, reject when `a < INT_MIN - b`, which is `INT_MIN < INT_MIN + 1`.
+
+**Why it holds here.** `INT_MIN - b` is `INT_MIN + 1`, which is representable, so the guard itself cannot overflow and the call returns false with `out` still 9.
+
+**A plausible wrong approach.** Reusing the positive test for every `b`, `if (a > INT_MAX - b)`. With `b` -1 the expression `INT_MAX - (-1)` overflows during the check itself, which is undefined, so the guard is not a guard.
+
+**Verify.** Print `add_checked(INT_MIN, -1, &out)` and see 0, then print `out` and see 9.
 
 ## Exercise 4: Accept exact boundaries
 
@@ -65,6 +89,14 @@ CHECK(add_checked(INT_MIN, 0, &out) && out == INT_MIN);
 
 An overconservative check that rejects every extreme would violate the valid-domain contract.
 
+**Approach.** Let `b` 0 skip both inequalities, because adding 0 can never overflow.
+
+**Why it holds here.** `b > 0` and `b < 0` are both false, so the function stores `INT_MAX` and then `INT_MIN` and returns true each time.
+
+**A plausible wrong approach.** Writing the positive test with `>=`, `a >= INT_MAX - b`. For `INT_MAX` plus 0 that is `INT_MAX >= INT_MAX`, so a valid sum at the exact boundary is rejected.
+
+**Verify.** Print `add_checked(INT_MAX, 0, &out)` and see 1, then confirm `out == INT_MAX`.
+
 ## Exercise 5: Reject a size product
 
 Multiply SIZE_MAX by two through a size helper.
@@ -77,6 +109,14 @@ CHECK(!size_product(SIZE_MAX, 2, &out) && out == 7);
 **Expected:** The helper rejects it and preserves output.
 
 The division comparison avoids wrapping before allocation-size validation.
+
+**Approach.** Compare `a` with `SIZE_MAX / b` before multiplying: `SIZE_MAX` is greater than `SIZE_MAX / 2`, so the product would not fit.
+
+**Why it holds here.** Division cannot overflow, and the inequality is exact for unsigned values, so the helper returns false before computing `a * b` and leaves `out` at 7.
+
+**A plausible wrong approach.** Multiplying first and testing `product < a`. Unsigned multiplication wraps without undefined behavior, but the test misses many wraps: `3 * 2^63` wraps to 9223372036854775808, which is not less than 3. A wrapped size passed to `malloc` allocates far too little.
+
+**Verify.** Print `(size_t)3 * ((size_t)1 << 63)` and see 9223372036854775808, then confirm `size_product(SIZE_MAX, 2, &out)` returns 0.
 
 ## Exercise 6: Transfer the zero product
 
@@ -91,6 +131,14 @@ CHECK(size_product(SIZE_MAX, 0, &out) && out == 0);
 
 Arithmetic validity and whether a zero-sized allocation is useful are separate policies.
 
+**Approach.** Test `b != 0` before dividing, so a zero factor skips the division and the product 0 is stored.
+
+**Why it holds here.** Any count times 0 is 0, which fits, so the helper returns true with `out` 0.
+
+**A plausible wrong approach.** Dropping the `b != 0` guard, `if (a > SIZE_MAX / b)`. With `b` 0 that divides by zero, which is undefined; on x86-64 it traps with a floating-point exception signal, while on ARM64 it silently yields 0.
+
+**Verify.** Print `size_product(SIZE_MAX, 0, &out)` and `out` in separate statements and see 1 and 0.
+
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Write `void *checked_array_alloc(size_t count, size_t size)` that uses `size_product` and returns `NULL` when it fails or when the product is 0, otherwise `malloc(product)`. Check `count` 4 with `sizeof(int)`, `count` `SIZE_MAX` with size 2, and `count` 0, freeing every non-null pointer. Explain why calling `malloc(count * size)` directly with the second input could return a small block that later writes overrun.

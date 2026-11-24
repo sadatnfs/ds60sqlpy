@@ -203,6 +203,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A custom derivative must correspond to the implemented mathematical function and its domain. For an affine operation y=ax+b, an input derivative of one is wrong when a is three, even if the forward result passes. Non-unit upstream sensitivities are important because a backward rule that returns only the local derivative can miss the chain-rule multiplier.</p>
 <p>Performance qualification follows correctness. Compare completed equivalent work, include required transfers and account for allocation or launch overhead. Profile actual supported hardware rather than borrowing timings from another system. A CPU oracle can validate mathematics; it cannot qualify a GPU kernel&#x27;s memory behavior, race freedom or device recovery.</p>
 <p>The final review also integrates the rest of the course. A numerical component should have a shape/dtype/domain contract, explicit state and key policy, independent derivatives, transformation checks, bounded runtime evidence and an interpretation proportional to that evidence. An advanced learner should be able to identify which layer failed and propose a discriminating next observation.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Pallas:</strong> The JAX extension for writing custom kernels with explicit control over memory access and indexing on supported devices.</li>
+<li><strong>FFI:</strong> The foreign function interface that lets JAX call compiled external code under a declared buffer, layout and device contract.</li>
+<li><strong>Memory layout:</strong> The order and strides in which array elements are stored, which a kernel must handle explicitly, including noncontiguous inputs.</li>
+<li><strong>Backward rule:</strong> The derivative a custom operation supplies, which must scale the upstream gradient, such as a times G for y = ax + b.</li>
+<li><strong>Reference baseline:</strong> A trusted high-level implementation kept as the oracle for values, gradients and a fair performance comparison.</li>
+</ul>
 <h3 id="derivation-and-shape-contract">Derivation and shape contract<a class="heading-anchor" href="#derivation-and-shape-contract" aria-label="Link to this section">#</a></h3>
 <p>For <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>A</mi><mi>X</mi><mo>+</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">Y=AX+B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">A</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> with scalar A=a, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∂</mi><mi>L</mi><mi mathvariant="normal">/</mi><mi mathvariant="normal">∂</mi><mi>X</mi><mo>=</mo><mi>a</mi><mi>G</mi></mrow><annotation encoding="application/x-tex">\partial L/\partial X=aG</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord" style="margin-right:0.0556em;">∂</span><span class="mord mathnormal">L</span><span class="mord">/</span><span class="mord" style="margin-right:0.0556em;">∂</span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal">G</span></span></span></span>, where <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>=</mo><mi mathvariant="normal">∂</mi><mi>L</mi><mi mathvariant="normal">/</mi><mi mathvariant="normal">∂</mi><mi>Y</mi></mrow><annotation encoding="application/x-tex">G=\partial L/\partial Y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord" style="margin-right:0.0556em;">∂</span><span class="mord mathnormal">L</span><span class="mord">/</span><span class="mord" style="margin-right:0.0556em;">∂</span><span class="mord mathnormal" style="margin-right:0.2222em;">Y</span></span></span></span>. At a=3 and G=4, the input gradient is 12, not three or one. For matrix operations, orientation and layout must be translated explicitly. A forward-only comparison cannot establish the derivative or memory-access contract.</p>
 <h3 id="reading-and-evidence-boundary">Reading and evidence boundary<a class="heading-anchor" href="#reading-and-evidence-boundary" aria-label="Link to this section">#</a></h3>
@@ -213,11 +221,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The correct observed case should be retained without extending its claim to untested interfaces.</p>
 <p><strong>Expected:</strong> One narrow forward case only; derivative, layout, dtype and broader execution remain unqualified.</p>
 <p><strong>Review table:</strong> forward contiguous float32 observed; noncontiguous input untested; dtype rejection untested; gradient untested; synchronization/error handling untested; performance unmeasured.</p>
+<p><strong>Evidence record sketch:</strong></p>
+<pre class="highlighted-code"><code class="language-text">custom affine operator review
+forward, contiguous float32 ...... observed correct
+forward, transposed input ........ untested
+unsupported dtype rejection ...... untested
+backward rule .................... untested
+synchronization and errors ....... untested
+performance ...................... unmeasured
+current claim .................... one narrow forward case</code></pre>
 <h4 id="worked-example-2-find-a-backward-rule-defect">Worked example 2: Find a backward-rule defect<a class="heading-anchor" href="#worked-example-2-find-a-backward-rule-defect" aria-label="Link to this section">#</a></h4>
 <p>For y=3x+1, a custom backward returns the incoming cotangent unchanged. Test incoming cotangent four.</p>
 <p>The backward omitted the local derivative three. A unit or identity-scale fixture could hide the defect.</p>
 <p><strong>Expected:</strong> Expected input sensitivity 12; returned four is incorrect.</p>
 <p><strong>Independent calculation:</strong> local derivative three times upstream four equals twelve. Repeat with a changed scale and non-unit upstream value before considering a kernel implementation.</p>
+<p><strong>Evidence record sketch:</strong></p>
+<pre class="highlighted-code"><code class="language-text">backward rule check for y = 3x + 1
+local derivative dy/dx ........... 3
+incoming cotangent ............... 4
+required input cotangent ......... 3 * 4 = 12
+defective rule returns ........... 4, the cotangent unchanged
+why unit fixtures hide it ........ cotangent 1 and scale 1 give equal answers
+next fixture ..................... change the scale and use a non-unit cotangent</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-justify-the-extension">Exercise 1: Justify the extension<a class="heading-anchor" href="#exercise-1-justify-the-extension" aria-label="Link to this section">#</a></h4>
 <p>List evidence needed before replacing a correct high-level operation with a custom kernel.</p>

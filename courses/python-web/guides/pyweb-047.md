@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-046`.
 
 Django templates separate presentation from Python view logic and support inheritance for shared page structure. They also escape ordinary inserted text by default. This chapter renders a small inherited page, checks untrusted text handling and distinguishes generating a static-asset URL from actually serving that asset.
 
+## Key terms
+
+- **Template inheritance:** A child template uses `{% extends %}` to reuse a base document and replace only selected blocks.
+- **Block:** A named region of a base template, such as title or body, that a child template can override.
+- **Autoescaping:** Django's default conversion of HTML-significant characters in inserted values so untrusted text displays as text, not markup.
+- **safe filter:** A filter that marks a value as trusted HTML and disables escaping, appropriate only for content whose construction is controlled.
+- **static tag:** The `{% static %}` tag that builds an asset URL through staticfiles storage without proving the file is actually served.
+
 ## Mechanism: blocks, context and escaping
 
 A base template defines named blocks such as title and body. A child extends the base and replaces selected blocks. Context values supply data to the template. This keeps common document structure in one place while allowing individual pages to specialize their content.
@@ -31,6 +39,44 @@ A separate tiny template applies safe to a fixed original HTML fragment. The out
 The contrast explains why safe is a security-relevant operation. It is not a formatting convenience for strings that happen to contain angle brackets. If the product truly accepts rich user HTML, it needs a reviewed sanitizer and content policy, with tests for the allowed and refused constructs.
 
 The local stylesheet path remains only a URL in this test. The owned Docker workshop prepares Django admin assets with collectstatic and serves local files through an explicit static middleware/server boundary. Browser acceptance checks the real asset requests separately.
+
+## Worked example: block.super and escaping inside an inherited block
+
+```python
+from django.conf import settings
+
+settings.configure()
+import django
+
+django.setup()
+from django.template import Context, Engine
+
+engine = Engine(
+    loaders=[
+        (
+            "django.template.loaders.locmem.Loader",
+            {
+                "base.html": "<title>{% block title %}Notes{% endblock %}</title>",
+                "page.html": "{% extends 'base.html' %}"
+                "{% block title %}{{ section }} | {{ block.super }}{% endblock %}",
+                "plain.html": "{% extends 'base.html' %}",
+            },
+        )
+    ]
+)
+for name in ("base.html", "page.html", "plain.html"):
+    print(engine.get_template(name).render(Context({"section": "Q&A"})))
+```
+
+Expected output:
+
+```text
+<title>Notes</title>
+<title>Q&amp;A | Notes</title>
+<title>Notes</title>
+```
+
+A child template only replaces the blocks it names. `plain.html` overrides nothing, so it renders the base title unchanged, while `page.html` extends the title and keeps the parent's text through `{{ block.super }}` instead of copying it. The ampersand in `Q&A` came out as `&amp;` because autoescaping applies inside inherited blocks exactly as it does at the top level, the same protection that turned the lesson's script tag into harmless text.
 
 ## Failure diagnosis and discussion
 

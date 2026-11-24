@@ -14,6 +14,13 @@ Asynchronous copying also creates an ownership obligation. The source must remai
 
 
 
+### Key terms
+
+- **Transfer latency:** The fixed startup cost of a copy that is paid regardless of how many bytes move.
+- **Effective bandwidth:** Bytes moved divided by measured elapsed time; it approaches peak bandwidth only for large transfers because latency is included.
+- **Pinned memory:** Page-locked host memory that the GPU can reach by direct memory access, enabling faster and asynchronous copies.
+- **End-to-end timer:** A measurement that brackets the copy in, the kernel and the copy back, so transfer cost is not hidden.
+
 ## Worked examples
 
 ### Worked example 1
@@ -45,33 +52,56 @@ print("CPU cost model:", round_trip, resident, "bytes")
 
 **Expected observation:** 81920 versus 8192 modeled bytes; these are not measured timings.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `size` | `4096` |
+| `iterations` | `10` |
+| `round_trip` | `81920` |
+| `resident` | `8192` |
+| `latency` | `1e-05` |
+| `bandwidth` | `1000000000.0` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Count bytes for ten iterations
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **count bytes for ten iterations** in the examples above.
+**Trap to avoid:** Counting only uploads (`10B`) treats the output copy as free. Many real pipelines download a result every step for logging, so omitting it halves the modeled traffic.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Model a batched transfer
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **model a batched transfer** in the examples above.
+**Trap to avoid:** Expecting batching to reduce the payload is the mistake. The bytes are the same; if your model shows the bandwidth term shrinking, you have double-counted or dropped rows.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Find premature source reuse
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **find premature source reuse** in the examples above.
+**Trap to avoid:** Adding a sleep after the copy call seems to fix it in testing because the copy usually finishes. It is timing luck: a larger batch or a busy bus makes the race reappear.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain pinned-memory lifetime
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain pinned-memory lifetime** in the examples above.
+**Trap to avoid:** Pinning every array in the program to be safe consumes host memory the OS cannot page out, which can starve other processes. Pinning is a bounded resource, not a free speedup.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design an end-to-end timer
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design an end-to-end timer** in the examples above.
+**Trap to avoid:** Stopping the timer right after the kernel call returns measures submission only, because the call is asynchronous; it reports a tiny number regardless of the 81920 versus 8192 byte difference.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Identify an intentionally CPU-friendly workload
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **identify an intentionally CPU-friendly workload** in the examples above.
+**Trap to avoid:** Assuming the GPU always wins because it has more cores ignores the fixed costs. A benchmark on one tiny array would show the CPU ahead, and the conclusion that the GPU is slow would also be wrong.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

@@ -54,7 +54,7 @@ Instances can share packaged content without sharing process state. An exited co
 
 ### Exercise 2: Resolve the browser endpoint
 
-**Inputs/evidence:** For k8s-002 Exercise 2, host 127.0.0.1:8765 forwards to app:8080.
+**Inputs/evidence:** For k8s-002 Exercise 2, host `127.0.0.1:8765` forwards to `app:8080`.
 
 **Expected result/shape:** For k8s-002 Exercise 2, the host browser connects to 127.0.0.1:8765.
 
@@ -96,7 +96,7 @@ Offline mode depends on preparation. A correct manifest cannot manufacture missi
 
 **Inputs/evidence:** For k8s-002 Exercise 6, Service hello on 8080; client has its own loopback.
 
-**Expected result/shape:** For k8s-002 Exercise 6, http://hello:8080/version, not host 127.0.0.1:8765.
+**Expected result/shape:** For k8s-002 Exercise 6, `http://hello:8080/version`, not host `127.0.0.1:8765`.
 
 **Verify:** For k8s-002 Exercise 6, explain both network namespaces and the Service DNS name.
 

@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A dbt macro generates SQL during compilation. It can reduce repeated logic and centralize a reviewed calculation, but it is not a Python row function executed once for each database record. The generated SQL is what the database evaluates. Inspecting compiled SQL is therefore an important part of understanding and debugging a macro.</p>
 <p>The ratio macro receives SQL expressions for a numerator and denominator. It emits a CASE expression that returns null for a zero denominator and performs floating division otherwise. That is a declared undefined-rate policy, not a universal rule. A different consumer might reject zero-trial groups or expose a separate status field. The macro should make the choice visible rather than hide it behind a convenient name.</p>
 <p>Template arguments also have trust and quoting boundaries. A trusted model expression is different from an arbitrary user-supplied string. Reusing text in SQL does not automatically make it a safe identifier or a bound parameter. The lesson uses fixed authored expressions and an owned local database. External input needs a separately designed validation and parameterization boundary.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Jinja:</strong> The template language dbt evaluates before SQL reaches the database, with <code>{{ }}</code> for expressions and <code>{% %}</code> for statements.</li>
+<li><strong>Macro:</strong> A reusable Jinja function between <code>macro</code> and <code>endmacro</code> that returns SQL text once at compile time, not once per row.</li>
+<li><strong>Compiled SQL:</strong> The plain SQL written under target/compiled after Jinja is resolved, which shows exactly what the database will receive.</li>
+<li><strong>Safe ratio:</strong> A CASE expression that returns null when the denominator is zero instead of dividing, so the undefined rate stays visible.</li>
+<li><strong>Trusted expression:</strong> Project-authored SQL text that a macro inserts directly rather than binding as a parameter, so it must never come from arbitrary user input.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>A macro is declared with Jinja macro/endmacro blocks and called inside double-brace expressions. The example&#x27;s arguments are trusted column-expression strings. compile expands the macro into ordinary SQL; build then evaluates it. An undefined macro is a compilation error, which should be diagnosed before reasoning about database rows.</p>
 <h3 id="full-project-python-workspace">Full-project Python workspace<a class="heading-anchor" href="#full-project-python-workspace" aria-label="Link to this section">#</a></h3>

@@ -200,16 +200,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(restored ==</span></span>
 <span class="source-line"><span class="syntax-comment">     original);` to `CHECK(restored != original);` inside its CHECK. Before</span></span>
 <span class="source-line"><span class="syntax-comment">     running, predict whether the CHECK still holds and explain why; then</span></span>
-<span class="source-line"><span class="syntax-comment">     restore it. Expected: The changed run stops with `Check failed` at the</span></span>
-<span class="source-line"><span class="syntax-comment">     CHECK on `restored == original`. Restoring the original line brings back</span></span>
-<span class="source-line"><span class="syntax-comment">     the worked observation: the restored value is 1.5. */</span></span>
+<span class="source-line"><span class="syntax-comment">     restore it. Expected: With `CHECK(restored != original);` the run stops</span></span>
+<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `restored == original`, because the</span></span>
+<span class="source-line"><span class="syntax-comment">     &quot;copy a representation safely&quot; case no longer shows that the restored value</span></span>
+<span class="source-line"><span class="syntax-comment">     is 1.5. Restoring `CHECK(restored == original);` brings that observation</span></span>
+<span class="source-line"><span class="syntax-comment">     back. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Inspect bytes without type punning: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, so one line now reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `sum -= bytes[i];`. Run worked example 2 with that line, use the failing</span></span>
-<span class="source-line"><span class="syntax-comment">     CHECK to locate the defect and repair it without changing the CHECK.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `sum == 7u`; after it the line reads `sum += bytes[i];` again and the</span></span>
+<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;inspect bytes</span></span>
+<span class="source-line"><span class="syntax-comment">     without type punning&quot; case, so one line now reads `sum -= bytes[i];`. Run</span></span>
+<span class="source-line"><span class="syntax-comment">     the example with that line, use the failing CHECK to find why the bytes sum</span></span>
+<span class="source-line"><span class="syntax-comment">     to 7 whatever the byte order no longer holds and repair the line without</span></span>
+<span class="source-line"><span class="syntax-comment">     changing the CHECK. Expected: Before the repair the run stops with `Check</span></span>
+<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `sum == 7u`. Once the line reads `sum += bytes[i];`</span></span>
+<span class="source-line"><span class="syntax-comment">     again, the &quot;inspect bytes without type punning&quot; case again shows that the</span></span>
 <span class="source-line"><span class="syntax-comment">     bytes sum to 7 whatever the byte order. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Handle overlapping moves</span></span>

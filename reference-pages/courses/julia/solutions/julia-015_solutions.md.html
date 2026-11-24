@@ -195,24 +195,57 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-015-explained-reference">julia-015: explained reference<a class="heading-anchor" href="#julia-015-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-015_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Track three things through every DataFrames step: column names, row counts and storage sharing. <code>select</code> with <code>ByRow</code> and <code>copycols = true</code> builds a new named column, <code>input[!, :score]</code> returns the stored column while <code>input[:, :score]</code> copies it, and grouped summaries pair <code>observed_mean</code> with row and observed counts.</p>
 <h3 id="1-name-the-derived-field">1. Name the derived field<a class="heading-anchor" href="#1-name-the-derived-field" aria-label="Link to this section">#</a></h3>
 <p>Names and shape are part of the resulting schema.</p>
 <p><strong>Expected observation:</strong> The output column contains 1, 2 and 3 under the explicit name <code>scaled</code>.</p>
+<p><strong>Why it holds here:</strong> <code>:score =&gt; ByRow(x -&gt; x / 10) =&gt; :scaled</code> applies the function to each of 10, 20 and 30 and names the result <code>scaled</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>:score =&gt; (x -&gt; x / 10)</code> without a name produces an automatic column name that downstream code has to guess.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>names(selected) == [&quot;id&quot;, &quot;scaled&quot;]</code> and <code>selected.scaled == [1, 2, 3]</code>.</p>
 <h3 id="2-observe-a-shared-column">2. Observe a shared column<a class="heading-anchor" href="#2-observe-a-shared-column" aria-label="Link to this section">#</a></h3>
 <p>A caller must request a copy when independent storage is required.</p>
 <p><strong>Expected observation:</strong> The source DataFrame changes.</p>
+<p><strong>Why it holds here:</strong> <code>input[!, :score]</code> returns the column object stored in the table, so <code>alias[1] = 99</code> makes <code>input.score[1]</code> equal 99.</p>
+<p><strong>Plausible wrong approach:</strong> Treating <code>!</code> as a harmless spelling of <code>:</code> assumes a copy, which leads to accidental edits of the source table.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>input.score[1] == 99</code> after the alias write.</p>
 <h3 id="3-retain-a-column-snapshot">3. Retain a column snapshot<a class="heading-anchor" href="#3-retain-a-column-snapshot" aria-label="Link to this section">#</a></h3>
 <p>A snapshot is useful for comparison and provenance when future mutation is possible.</p>
 <p><strong>Expected observation:</strong> The copied values remain unchanged.</p>
+<p><strong>Why it holds here:</strong> <code>input[:, :score]</code> copies the column, so the snapshot still holds 10 after the alias write.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only that the snapshot equals the column at creation time cannot reveal sharing; the test must mutate the source afterward.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>snapshot[1] == 10</code>; the reference checks <code>select(...; copycols = true).id !== input.id</code>.</p>
 <h3 id="4-report-group-coverage">4. Report group coverage<a class="heading-anchor" href="#4-report-group-coverage" aria-label="Link to this section">#</a></h3>
 <p>Row accounting remains necessary after grouping.</p>
 <p><strong>Expected observation:</strong> It reports 2 rows, 1 observed score and mean 1.</p>
+<p><strong>Why it holds here:</strong> Group a has scores 1 and missing, so <code>nrow</code> is 2, the observed count is 1 and <code>observed_mean</code> gives 1.0.</p>
+<p><strong>Plausible wrong approach:</strong> Reporting only <code>mean_score</code> makes group a look as well supported as group b, which has two observed scores.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>n_rows == [2, 2]</code>, <code>n_observed == [1, 2]</code> and <code>mean_score == [1.0, 4.0]</code>.</p>
 <h3 id="5-handle-an-all-missing-group">5. Handle an all-missing group<a class="heading-anchor" href="#5-handle-an-all-missing-group" aria-label="Link to this section">#</a></h3>
 <p>A fabricated zero could change later model or business decisions.</p>
 <p><strong>Expected observation:</strong> The result is missing.</p>
+<p><strong>Why it holds here:</strong> With every score missing, the observed set is empty and <code>observed_mean</code> returns <code>missing</code> rather than a number.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>mean(skipmissing(x))</code> directly throws on the empty iterator or, with a default, invents a zero.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>ismissing(observed_mean([missing]))</code>.</p>
 <h3 id="6-interpret-a-mean-of-means">6. Interpret a mean of means<a class="heading-anchor" href="#6-interpret-a-mean-of-means" aria-label="Link to this section">#</a></h3>
 <p>Group-level and row-level summaries represent different populations.</p>
-<p><strong>Expected observation:</strong> The answers can differ.</p></article>
+<p><strong>Expected observation:</strong> The answers can differ.</p>
+<p><strong>Why it holds here:</strong> The unweighted mean of group means 1.0 and 4.0 is 2.5; weighting by observed counts 1 and 2 gives (1 + 8) / 3 = 3.0.</p>
+<p><strong>Plausible wrong approach:</strong> Averaging group means without weights and calling it the overall mean treats one observation in group a like two in group b.</p>
+<p><strong>How to verify:</strong> Compute both values from the summary table and compare 3.0 with <code>mean([1, 3, 5])</code>, the row-level observed mean.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-015: all reference checks passed</code>:</p>
+<p><code>observed_mean([missing])</code> returns missing because no observed value remains. The <code>DataFrame</code> lines confirm that <code>transform</code> returns a new table with a <code>square</code> column of <code>[4, 16]</code> while the input keeps only <code>id</code> and <code>x</code> with two rows. The final line checks that <code>select</code> with <code>copycols = true</code> gives a fresh <code>id</code> vector, so writing to the result cannot alter <code>input</code>.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> ismissing<span class="syntax-punctuation">(</span>observed_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">missing</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    input <span class="syntax-operator">=</span> DataFrame<span class="syntax-punctuation">(</span>id <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> x <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    changed <span class="syntax-operator">=</span> transform<span class="syntax-punctuation">(</span>input<span class="syntax-punctuation">,</span> <span class="syntax-string">:x</span> <span class="syntax-operator">=&gt;</span> ByRow<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-&gt;</span> x<span class="syntax-operator">^</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">:square</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> changed<span class="syntax-operator">.</span>square <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">16</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> names<span class="syntax-punctuation">(</span>input<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> nrow<span class="syntax-punctuation">(</span>input<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+    <span class="syntax-decorator">@test</span> ncol<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> select<span class="syntax-punctuation">(</span>input<span class="syntax-punctuation">,</span> <span class="syntax-string">:id</span><span class="syntax-punctuation">;</span> copycols <span class="syntax-operator">=</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>id <span class="syntax-operator">!==</span> input<span class="syntax-operator">.</span>id
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

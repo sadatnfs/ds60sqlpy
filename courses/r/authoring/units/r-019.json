@@ -38,6 +38,12 @@
       "code": "record <- list(id = \"A\", values = c(2, 4))\nencoded <- jsonlite::toJSON(record, auto_unbox = TRUE)\nrestored <- jsonlite::fromJSON(encoded)\nstopifnot(restored$id == \"A\", identical(as.numeric(restored$values), c(2, 4)))\npath <- tempfile(fileext = \".rds\")\nvalue <- factor(c(\"A\", \"B\"), levels = c(\"A\", \"B\", \"C\"))\nsaveRDS(value, path)\nstopifnot(identical(readRDS(path), value))\nunlink(path)\nprint(encoded)\n",
       "explanation": "The JSON contract contains a scalar ID and an array of values. The RDS round trip additionally retains factor levels, including the unused level.",
       "expected": "JSONrecord and exact factor round trip."
+    },
+    {
+      "title": "Default type guessing strips the leading zeros",
+      "code": "path <- tempfile(fileext = \".csv\")\nrecords <- data.frame(id = c(\"001\", \"002\"), amount = c(2, NA_real_))\nwrite.csv(records, path, row.names = FALSE, na = \"\")\nguessed <- read.csv(path, na.strings = \"\")\nstopifnot(is.integer(guessed$id), identical(guessed$id, c(1L, 2L)))\ntyped <- read.csv(path, colClasses = c(\"character\", \"numeric\"), na.strings = \"\")\nstopifnot(identical(typed$id, c(\"001\", \"002\")), identical(typed, records))\nunlink(path)\nprint(list(guessed = guessed$id, typed = typed$id))\n",
+      "explanation": "write.csv quotes the IDs, so the file really contains \"001\" and \"002\". read.csv removes the quotes before it guesses types, sees only digits and returns the integers 1 and 2, with no warning. The zeros cannot be recovered from the column afterward: a join against a customer table keyed by \"001\" now matches nothing, and padding with sprintf works only if every ID was exactly three characters wide. The typed read declares the column as character, so the type is part of the contract rather than a guess from two rows, and the whole frame comes back identical to the one that was written.",
+      "expected": "guessed holds 1 and 2; typed holds \"001\" and \"002\"."
     }
   ],
   "exercises": [

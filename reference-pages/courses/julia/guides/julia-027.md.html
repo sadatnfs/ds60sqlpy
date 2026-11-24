@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Separate namespaces from source files, execute a tiny owned multi-file project offline, and distinguish locked dependencies from code loading.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-027</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a small reusable namespace) and worked case B (exercise a real multi-file layout) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-027: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Module:</strong> A separate global namespace declared with <code>module</code>, so names defined inside it do not collide with names elsewhere.</li>
+<li><strong>Export:</strong> A declaration that makes selected module names available unqualified after <code>using</code>, while other names still need qualification.</li>
+<li><strong>include:</strong> A call that evaluates another source file in the current module as if its code were written there.</li>
+<li><strong>Project.toml:</strong> The environment file listing direct dependencies by name and UUID, along with compatibility bounds.</li>
+<li><strong>Manifest.toml:</strong> The environment file recording the exact resolved version of every direct and indirect dependency.</li>
+</ul>
 <h3 id="a-namespace-and-a-file-are-different-things">A namespace and a file are different things<a class="heading-anchor" href="#a-namespace-and-a-file-are-different-things" aria-label="Link to this section">#</a></h3>
 <p>A <code>module</code> creates a namespace with its own bindings. <code>export</code> declares names that a caller can bring into scope with <code>using</code>; it does not make other names private or inaccessible. Qualified access such as <code>LocalStats.center</code> makes ownership visible. <code>import</code> is useful when deliberately extending another module&#x27;s function, while defining your own function with the same short name can instead create a different generic function.</p>
 <p>A source file is just stored program text. <code>include(path)</code> evaluates that text in the target module and returns the final expression&#x27;s value. It can run arbitrary top-level code, so include only reviewed owned sources. Repeated inclusion can redefine methods or types. Source loading is not a security sandbox, dependency resolver or idempotent database migration.</p>

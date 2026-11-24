@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An online store serves feature values for low-latency inference. Materialization moves selected source values into that store. A successful online lookup establishes that a value was retrieved, not that it is fresh enough for the current decision. The application needs a freshness policy with a clearly defined clock and a response for stale or missing inputs.</p>
 <p>The first case actually materializes the local Feast view into SQLite and retrieves two customers. The second compares each retained feature timestamp with a declared decision time. One value is one day old and the other three days old; a two-day maximum accepts only the first. The timestamp is included as a feature value so the consumer&#x27;s policy is directly inspectable.</p>
 <p>The fixture uses fixed historical dates to make the calculation reproducible. It does not claim those values are fresh relative to the real execution date. The longer-lived project later uses a recorded training clock and actual serving-time checks. Keep retrieval, freshness and model quality as separate evidence throughout the lifecycle.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Materialization:</strong> Copying feature values for an explicit time interval from the offline source into the online store with Feast materialize.</li>
+<li><strong>Online store:</strong> A low-latency store, SQLite in this lesson, that holds the latest materialized feature values for inference lookups.</li>
+<li><strong>Online retrieval:</strong> Fetching named feature fields for specified entity rows at serving time with get_online_features.</li>
+<li><strong>Feature age:</strong> The decision time minus the timestamp of the retrieved value. It must be nonnegative and within the declared maximum.</li>
+<li><strong>Freshness policy:</strong> The serving rule that accepts, defaults or rejects a feature based on its age. A FeatureView TTL does not replace it.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>materialize receives an explicit interval and writes the prepared online store. get_online_features retrieves named fields for specified entity rows. The consumer computes age from a retained feature timestamp and applies both a nonfuture condition and an upper bound. A FeatureView TTL does not replace a tested online-serving freshness policy.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

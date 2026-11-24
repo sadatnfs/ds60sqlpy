@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Establish logical content independently of layout",
       "input_contract": "Return the ordered list of(id, key, value) tuples for the declared 24-row fixture. Compare its full bag with the literal arithmetic rule and compute count, distinct IDs, sum(id), sum(value).",
-      "expected": "IDs 0..23 appear once, key=id%4, value=10*id. Metrics are 24,24,276,2760.",
+      "expected": "IDs 0..23 appear once, key = id % 4, value = 10 * id. Metrics are 24, 24, 276, 2760.",
       "verification": "Assert every canonical tuple and all four aggregate values."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Create a globally ordered bounded preview",
       "input_contract": "Order key descending then event identity id ascending and return the first 5 rows. Repeat after several input layouts.",
-      "expected": "IDs[3,7,11,15,19], allkey 3 and values[30,70,110,150,190]. The final sixthkey 3 row is outside the limit.",
+      "expected": "IDs [3, 7, 11, 15, 19], all with key 3, and values [30, 70, 110, 150, 190]. The sixth key 3 row is outside the limit.",
       "verification": "Assert all five ordered tuples from original, keyed and coalesced inputs."
     }
   ],

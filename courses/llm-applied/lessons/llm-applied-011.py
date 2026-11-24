@@ -29,7 +29,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Exercise 6: Keep arithmetic separate from prose
 # Compute3 purchases over10 visits and attach the deterministic result to an explanation
 # record.
-# Expected: rate.3 with input counts preserved.
+# Expected: rate 0.3 with input counts preserved.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

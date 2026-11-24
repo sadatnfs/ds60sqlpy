@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-058_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A 2-by-3 logical tile with strides (3,1) maps coordinate (1,2) to offset five. A transposed view uses shape (3,2) and strides (1,3), mapping (2,1) to the same offset. Trace tiny layouts before interpreting a large template type.</p>
+<p><strong>Approach:</strong> Compute offset as row times stride 3 plus column times stride 1 for the 2-by-3 tile, then apply the transposed view&#x27;s strides (1, 3).</p>
+<p><strong>Why it is correct:</strong> Coordinate (1, 2) gives 3 + 2 = 5, and the transposed (2, 1) gives 2 + 3 = 5, so both name the same element.</p>
+<p><strong>A plausible wrong approach:</strong> Swapping shape without swapping strides makes the transposed view index the wrong memory entirely.</p>
+<p><strong>How to verify:</strong> The reference asserts 1 <em> 3 + 2 == 5 and 2 </em> 1 + 1 * 3 == 5.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>An epilogue applies bias then ReLU to accumulated values <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mo>−</mo><mn>2</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-2,1,4]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">−</span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">4</span><span class="mclose">]</span></span></span></span> with bias one, producing <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,2,5]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mclose">]</span></span></span></span>. Moving the bias after ReLU would produce <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1,2,5]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mclose">]</span></span></span></span>, changing semantics. A fused epilogue must match the reference order, type conversion and scaling contract.</p>
+<p><strong>Approach:</strong> Add bias 1 to accumulators [-2, 1, 4] for [-1, 2, 5], then apply ReLU.</p>
+<p><strong>Why it is correct:</strong> ReLU gives [0, 2, 5], matching the reference order of operations.</p>
+<p><strong>A plausible wrong approach:</strong> Applying ReLU first and adding bias afterward gives [1, 2, 5], which changes the first element.</p>
+<p><strong>How to verify:</strong> The reference asserts correct == [0, 2, 5] and wrong == [1, 2, 5].</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Four. Shape controls valid coordinates; strides control physical mapping.</p>
+<p><strong>Approach:</strong> Multiply row 1 by stride 3 and add column 1 times stride 1.</p>
+<p><strong>Why it is correct:</strong> The offset is 3 + 1 = 4, within the six-element tile.</p>
+<p><strong>A plausible wrong approach:</strong> Using shape (2, 3) as strides gives 1 <em> 2 + 1 </em> 3 = 5, the wrong element.</p>
+<p><strong>How to verify:</strong> Enumerate all six coordinates and confirm offsets 0 through 5 appear once.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Runtime architecture and operation qualification, plus correct layout/alignment and library support. Compilation alone is not dispatch evidence.</p>
+<p><strong>Approach:</strong> Check that the target architecture, operation, layout and alignment are supported at runtime.</p>
+<p><strong>Why it is correct:</strong> Templates compile for configurations the device or library may not run.</p>
+<p><strong>A plausible wrong approach:</strong> Treating a clean compile as proof of support ignores runtime dispatch requirements.</p>
+<p><strong>How to verify:</strong> Run a small instantiation on the target and compare output with a reference GEMM.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Use a supported tail strategy or reject unsupported shapes explicitly; do not assume padded storage contains valid zeros.</p>
+<p><strong>Approach:</strong> Use the library&#x27;s tail handling or reject shapes it does not support.</p>
+<p><strong>Why it is correct:</strong> Padded storage outside the logical matrix may contain arbitrary values.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming the padding is zero adds garbage into partial tiles.</p>
+<p><strong>How to verify:</strong> Test a 5-by-7 matrix against a host reference.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>When it expresses the required semantics and passes accuracy/performance tests while reducing maintenance; compare against the relevant library baseline first.</p>
+<p><strong>Approach:</strong> Pick the library epilogue if it expresses the needed operation order and passes accuracy and speed tests.</p>
+<p><strong>Why it is correct:</strong> It reduces custom code to maintain.</p>
+<p><strong>A plausible wrong approach:</strong> Writing a custom kernel before checking the library duplicates tested work.</p>
+<p><strong>How to verify:</strong> Compare both against a reference and a library baseline.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-058_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

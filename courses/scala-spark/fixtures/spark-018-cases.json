@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Parse offset evidence into comparable instants",
       "input_contract": "Return event_id, text, event_time by parsing the declared offset pattern yyyy-MM-ddTHH:mm:ss with a literal T and XXX offset. The session timestamp type must be LTZ.",
-      "expected": "All 6 rows parse. Epoch(event 2)=epoch(event 5), and epoch(event 3)-epoch(event 2)=3600 seconds.",
+      "expected": "All 6 rows parse. epoch(event 2) = epoch(event 5), and epoch(event 3) - epoch(event 2) = 3600 seconds.",
       "verification": "Assert TimestampType, zero null timestamps, exact same-instant equality and the 3600-second separation."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Quarantine invalid timestamps without confusing missingness",
       "input_contract": "Build an inline source containing a valid offset timestamp, bad text andNULL. Use try_to_timestamp with the declared offset pattern and classify accepted, malformed_timestamp, missing_timestamp.",
-      "expected": "IDs 1,2,3 have those reasons respectively;only 1 is accepted while ANSI remains true.",
+      "expected": "IDs 1, 2, 3 have those reasons respectively;only 1 is accepted while ANSI remains true.",
       "verification": "Assert all reason rows, one known timestamp and unchanged ANSI setting."
     }
   ],

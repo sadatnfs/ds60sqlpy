@@ -237,23 +237,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the permitted population for the synthetic south principal.</p>
 <p>One customer, Bo, is permitted; expected revenue is 80.</p>
+<p><strong>Why it fits this model:</strong> The Access table maps south.learner@example.test to South, and only Bo (customer 20) is in South.</p>
+<p><strong>Tempting mistake:</strong> Comparing USERNAME() (often DOMAIN\user) with the email-style Principal column. Nothing matches, so a mapped user sees nothing.</p>
+<p><strong>How to confirm:</strong> As the south principal, VisibleCustomers returns 1 and VisibleRevenue returns 80.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>AddWest to a principal&#x27;s allowed-region set conceptually.</p>
 <p>The allowed-customer count can increase while revenue stays unchanged; permission population and fact activity are different.</p>
+<p><strong>Why it fits this model:</strong> Di (customer 40, West) has no sales, so permission to see her changes the customer count but not revenue.</p>
+<p><strong>Tempting mistake:</strong> Treating unchanged revenue as proof that adding West failed, or expecting revenue to rise because the mapping grew.</p>
+<p><strong>How to confirm:</strong> For the north principal with North and West, VisibleCustomers goes from 2 to 3 and VisibleRevenue stays 107.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a default-deny mapping test matrix.</p>
 <p>Record each fictional principal, allowed regions, expected Customer keys and amounts, plus the required real identity/role evidence before deployment.</p>
+<p><strong>Why it fits this model:</strong> A default-deny matrix lists mapped, unmapped and invalid-domain principals with their expected rows.</p>
+<p><strong>Tempting mistake:</strong> Testing only north.learner, which returns 2 customers and 107, and assuming unmapped and bad-value cases behave.</p>
+<p><strong>How to confirm:</strong> Rows: north 2 and 107, south 1 and 80, unmapped empty (HasVisibleRows False), and a principal mapped to &quot;East&quot;, a region not in Customer, also empty.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose granting all regions when no mapping exists.</p>
 <p>That reverses the supplied default-deny contract and risks unintended access. Keep an explicit denial and investigate provisioning.</p>
+<p><strong>Why it fits this model:</strong> The declared rule filters Customer to regions the principal maps to. An empty mapping gives an empty set, which is a denial.</p>
+<p><strong>Tempting mistake:</strong> Adding a fallback such as returning TRUE() when the mapping is empty. The unmapped principal would then see all 4 customers and 187.</p>
+<p><strong>How to confirm:</strong> As unmapped.learner@example.test, VisibleCustomers and VisibleRevenue are BLANK and HasVisibleRows is False, as in case B.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why securing Customer does not prove Access itself is protected.</p>
 <p>Review mapping-table visibility and disconnected data independently; do not infer complete protection from one correctly filtered sales result.</p>
+<p><strong>Why it fits this model:</strong> The rule filters Customer, but Access is a separate table. Without its own rule or hiding it, any reader can query it.</p>
+<p><strong>Tempting mistake:</strong> Concluding that the model is protected because the north principal sees 107, while COUNTROWS(Access) still returns 2 and shows the south mapping.</p>
+<p><strong>How to confirm:</strong> As north.learner, query the Access table; the policy should decide whether 2, 1 or no rows are acceptable, and test that result.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the policy to tenant identifiers.</p>
 <p>Validate authenticated identity, membership changes, allowed tenant keys and every query surface; an editable tenant filter is not an access-control system.</p>
+<p><strong>Why it fits this model:</strong> Tenant access follows the same contract: authenticated identity, an explicit mapping to tenant keys, and denial when nothing maps.</p>
+<p><strong>Tempting mistake:</strong> Taking the tenant ID from a URL parameter or slicer, so a user can change one value and read another tenant.</p>
+<p><strong>How to confirm:</strong> Test a mapped user, an unmapped user (no rows) and a user who edits the tenant parameter; only the mapped tenant&#x27;s rows may appear.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

@@ -111,7 +111,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Reassign only mutable state) before changing anything, and confirm its observation: The accumulator becomes 8 while the fixed amount remains 4.
 2. Compare Example B (Convert before division) with Example A and name the first line whose behavior differs. Its observation is: Integer division yields 3; floating division yields 3.5.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Let protects the binding, not necessarily every object reachable from it.
+3. Before opening the explanation, check your task 3 attempt (Compute a mean from an integer total and count using a deliberate conversion) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

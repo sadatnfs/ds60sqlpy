@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Historical correctness depends on what was knowable at the decision time. An event can occur before a cutoff but arrive after it. A correction can revise an old event using information discovered later. Selecting only event_time&lt;=cutoff can therefore expose future knowledge to a historical analysis or model.</p>
 <p>The example represents both event_at and known_at. It joins requests to eligible feature records and uses row_number to select the latest version after applying both clocks. The counterexample omits the availability condition and returns a strikingly different value for the first request. The program compares the actual model relations, not only the SQL strings.</p>
 <p>This small candidate join is designed for inspection, not arbitrary scale. A large implementation needs an appropriate physical strategy, snapshots or source history while preserving the same semantics. The schema must also distinguish unavailable information from a legitimate zero, and requests with no eligible history must remain accounted for.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Event time:</strong> When something happened in the world, stored here as event_at.</li>
+<li><strong>Availability time:</strong> When a fact became known to the system, stored here as known_at; a prediction cannot use the fact before this time.</li>
+<li><strong>Point-in-time join:</strong> A join that keeps only facts whose event time and availability time are both at or before the prediction cutoff.</li>
+<li><strong>Feature leakage:</strong> Using information that was not available at prediction time, which makes measured accuracy look better than deployment can achieve.</li>
+<li><strong>row_number selection:</strong> Ranking rows with <code>row_number()</code> to keep the latest known version; eligibility must be filtered before ranking, not after.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The join combines entity identity with event and availability cutoffs. row_number partitions by request identity and orders eligible versions by the declared version keys. Eligibility must be applied before selecting the latest row. The fixture uses integer time keys for transparent arithmetic; a real contract must define timezone and boundary semantics for timestamps.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

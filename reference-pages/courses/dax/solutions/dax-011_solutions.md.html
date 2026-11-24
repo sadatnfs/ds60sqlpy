@@ -239,23 +239,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict net revenue per unit in 2025.</p>
 <p>2025 revenue is 123 and units are 12, so the ratio is 10.25.</p>
+<p><strong>Why it fits this model:</strong> The 2025 lines are S4 to S8, with 123 USD over 12 units. Dividing the two totals weights each line by its units, so 10.25 USD per unit is the pooled rate.</p>
+<p><strong>Tempting mistake:</strong> Averaging the line ratios (9, 5, 20, 10 and 18) gives 62 / 5 = 12.4. S6&#x27;s single 20 USD Mug then counts as much as S5&#x27;s four Pens.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( DIVIDE ( [NetRevenue], [QuantitySold] ), &#x27;Date&#x27;[Year] = 2025 )</code> returns 10.25, and 10.25 x 12 = 123.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the denominator to distinct orders.</p>
 <p>The result is 187/7, approximately 26.7143 USD per order.</p>
+<p><strong>Why it fits this model:</strong> OrderCount uses DISTINCTCOUNT on OrderID because order 101 has two lines. Seven orders share 187 USD, about 26.7143 USD per order.</p>
+<p><strong>Tempting mistake:</strong> Dividing by COUNTROWS(Sales) uses 8 lines and returns 23.375. That is revenue per line, not per order, because S1 and S2 belong to one order.</p>
+<p><strong>How to confirm:</strong> <code>DIVIDE ( [NetRevenue], DISTINCTCOUNT ( Sales[OrderID] ) )</code> returns about 26.7143, and 26.7143 x 7 reproduces 187.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a measure that leaves undefined rates blank.</p>
 <p>DIVIDE([NetRevenue],[QuantitySold]) leaves an empty or zero-denominator population blank.</p>
+<p><strong>Why it fits this model:</strong> DIVIDE with two arguments returns BLANK for an empty or zero denominator. Bag has no units, so its rate stays blank, while Notebook returns 67 / 7, about 9.571.</p>
+<p><strong>Tempting mistake:</strong> Supplying 0 as the third argument shows Bag at 0 USD per unit, as if it sold units for free. Using <code>/</code> after coalescing units to 0 would produce infinity or NaN.</p>
+<p><strong>How to confirm:</strong> By product expect Notebook about 9.571, Pen 24 / 5 = 4.8, Mug 96 / 5 = 19.2 and Bag BLANK.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose averaging the 2024 and 2025 unit-price ratios.</p>
 <p>An equal-year mean of 12.8 and 10.25 is 11.525, while the pooled unit-weighted ratio is 11.</p>
+<p><strong>Why it fits this model:</strong> Units are the denominator, so the pooled ratio weights each year by its units: 12.8 x 5 + 10.25 x 12 = 64 + 123 = 187, and 187 / 17 = 11.</p>
+<p><strong>Tempting mistake:</strong> <code>AVERAGEX ( VALUES ( &#x27;Date&#x27;[Year] ), [NetPerUnit] )</code> gives each year equal weight and returns 11.525, as if 2024&#x27;s five units mattered as much as 2025&#x27;s twelve.</p>
+<p><strong>How to confirm:</strong> The pooled measure returns 11 at the total, while the yearly rows show 12.8 and 10.25.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain when zero is a legitimate numerator result.</p>
 <p>Zero conversions among five eligible units is a valid zero; no eligible units gives an undefined conversion rate.</p>
+<p><strong>Why it fits this model:</strong> A zero is observed when the denominator shows real opportunity. Bo&#x27;s lines S3, S6 and S7 have 80 USD gross and no discount, so his discount rate is a true 0 / 80 = 0.</p>
+<p><strong>Tempting mistake:</strong> Using DIVIDE ( 0, 0, 0 ) for Di, who has no lines, shows his undefined rate as 0, so he looks exactly like Bo in the report.</p>
+<p><strong>How to confirm:</strong> The case row shows DefaultResult BLANK but ZeroNumerator 0. By customer, Bo&#x27;s discount rate is 0 and Di&#x27;s is BLANK.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the rule to experiment conversion rates.</p>
 <p>Choose the unit and eligibility policy first, then divide conversions by that population. Repeated events must not silently inflate the denominator.</p>
+<p><strong>Why it fits this model:</strong> The design assigns two units per arm, so the denominator is assigned units. Control converts 1 of 2 (0.5) and Treatment converts 2 of 2 (1.0).</p>
+<p><strong>Tempting mistake:</strong> Building the denominator from exposure rows counts U3 twice, because it was exposed twice, and drops U4, which was assigned but never exposed.</p>
+<p><strong>How to confirm:</strong> The rates should match ExperimentSummary: Assigned 2 and Rate 0.5 for Control, and Assigned 2 and Rate 1 for Treatment.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

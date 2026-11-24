@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-050`.
 
 Django forms validate user input and produce cleaned values. ModelForms connect a selected form surface to a model, but that connection must not expose every model field automatically. This chapter validates a title while assigning ownership from server context, and shows how extra submitted fields differ from explicitly declared form fields.
 
+## Key terms
+
+- **ModelForm:** A Django form generated from a model whose `Meta.fields` list selects exactly which fields the user may edit.
+- **cleaned_data:** The dictionary of validated and normalized values that `is_valid()` produces when a form has no errors.
+- **clean_title:** A field-specific clean method that normalizes and checks one value beyond the model's basic type and length rules.
+- **commit=False:** A `save()` option that builds the model instance without writing it, so the view can set trusted fields such as owner first.
+- **Undeclared input:** Submitted keys that are not form fields; Django forms ignore them, so strict rejection of unknown keys needs explicit code.
+
 ## Mechanism: the form defines writable input
 
 A ModelForm Meta.fields list selects the fields the user may edit. The model can contain additional fields such as owner that the form intentionally excludes. Custom clean_title logic can normalize whitespace and enforce a domain rule beyond the model's basic type and length.
@@ -29,6 +37,38 @@ A second form contains a title that becomes too short after stripping whitespace
 Normalization order matters. Checking length before trimming could admit a value whose meaningful content is too short. Conversely, aggressive normalization can change valid user intent. Define the domain's intended representation and test the meaningful boundary cases.
 
 For an existing object, the application must also authorize which instance is being edited. Excluding owner from the form does not stop a caller from selecting another user's object if the view loads that object without an ownership predicate. Input field control and object selection are separate authorization boundaries.
+
+## Worked example: ignoring unlisted fields versus refusing them
+
+```python
+ALLOWED = {"title"}
+
+
+def bind(payload, strict):
+    unknown = sorted(set(payload) - ALLOWED)
+    if strict and unknown:
+        return {"errors": {"__all__": f"unexpected fields: {unknown}"}}
+    title = payload.get("title", "").strip()
+    if len(title) < 3:
+        return {"errors": {"title": "Use at least three characters"}}
+    return {"title": title, "owner": "authenticated-user"}
+
+
+attack = {"title": "  Review  ", "owner": "attacker"}
+print(bind(attack, strict=False))
+print(bind(attack, strict=True))
+print(bind({"title": " x "}, strict=False))
+```
+
+Expected output:
+
+```text
+{'title': 'Review', 'owner': 'authenticated-user'}
+{'errors': {'__all__': "unexpected fields: ['owner']"}}
+{'errors': {'title': 'Use at least three characters'}}
+```
+
+The non-strict branch behaves like the lesson's `NoteForm` with `fields = ["title"]`: the forged `owner` key is simply never read, and the view sets the owner from the server side after `save(commit=False)`. That is safe, but the client gets no signal that its request carried a field the server ignored. The strict branch adds the separate unknown-key check that the program's return value mentions, which is the right choice for a JSON API whose contract says extra keys are errors. Both branches strip whitespace before the length check, which is why `" x "` fails while `" Review "` passes.
 
 ## Failure diagnosis and discussion
 

@@ -1,6 +1,6 @@
 # c-039: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-039_solution.c`, implements all six cases, from the "sum one field in records" case to the "transfer a partial block" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ sizeof reports actual object size including padding. offsetof gives a field offs
 
 ## Exercise 1: Sum one field in records: change one input
 
-Copy worked example 1 into a scratch pad and change `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` to `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "sum one field in records" case, into a scratch pad and change `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` to `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the result is 6); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -22,13 +22,13 @@ for (size_t i = 0; i < 3; i++)
 CHECK(sum == 6);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `sum == 6`. Restoring the original line brings back the worked observation: the result is 6.
+**Expected:** With `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};` the run stops with `Check failed` at the CHECK on `sum == 6`, because the "sum one field in records" case no longer shows that the result is 6. Restoring `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` brings that observation back.
 
 This traversal touches a selected field in each record. Whether unused fields waste bandwidth depends on the real layout and workload.
 
 ## Exercise 2: Compute the same result by columns: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `sum -= x[i];`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "compute the same result by columns" case, so one line now reads `sum -= x[i];`. Run the example with that line, use the failing CHECK to find why the result is also 6 no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -41,7 +41,7 @@ for (size_t i = 0; i < 3; i++)
 CHECK(sum == 6 && y[2] == 30);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 6 && y[2] == 30`; after it the line reads `sum += x[i];` again and the result is also 6.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 6 && y[2] == 30`. Once the line reads `sum += x[i];` again, the "compute the same result by columns" case again shows that the result is also 6.
 
 Equivalent semantics must be established before comparing timings. The y column remains independent storage.
 
@@ -117,4 +117,4 @@ The incomplete final block is a correctness case that an optimization must retai
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a partial block" case to your own c-039 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected locality failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "compute the same result by columns" case apart from ordinary output: the fixture proves its stated locality, array of structs and struct of arrays assumptions, not universal safety.

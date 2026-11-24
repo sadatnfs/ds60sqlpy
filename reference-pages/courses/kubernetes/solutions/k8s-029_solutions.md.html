@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-map-the-two-scopes">Exercise 1: Map the two scopes<a class="heading-anchor" href="#exercise-1-map-the-two-scopes" aria-label="Link to this section">#</a></h3>
 <p>The registration changes the API surface for the cluster. A namespaced instance is addressed under its own namespace. This difference explains why ordinary worker credentials cannot safely install a CRD as part of a learner submission.</p>
 <p><strong>Expected:</strong> CRD is cluster-scoped; hello-report is namespaced.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read spec.scope in the CRD and metadata.namespace in the instance.</li>
+<li><strong>Why it is correct:</strong> A CustomResourceDefinition is itself cluster scoped, while its scope field decides that LessonReport instances live in namespaces.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the CRD is namespaced because its instances are confuses the registration with the objects it registers.</li>
+<li><strong>How to verify:</strong> CRD is cluster scoped, and hello-report has a namespace.</li>
+</ul>
 <h3 id="exercise-2-trace-names-and-version">Exercise 2: Trace names and version<a class="heading-anchor" href="#exercise-2-trace-names-and-version" aria-label="Link to this section">#</a></h3>
 <p>The mapping determines API discovery and object addressing. A typo in the kind or API version can fail before schema validation, while a different metadata.name creates a different instance rather than changing its type.</p>
 <p><strong>Expected:</strong> learning.ds60sqlpy/v1, LessonReport, <code>lessonreports</code> and hello-report are distinct fields.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Find each value in spec.group, spec.versions name, spec.names.kind, spec.names.plural and the instance metadata.name.</li>
+<li><strong>Why it is correct:</strong> Group and version form the API path, kind is the type in YAML, plural is the URL segment and metadata.name names one object.</li>
+<li><strong>Plausible wrong approach:</strong> Using the kind LessonReport in a URL instead of the plural lesson reports addresses a resource that does not exist.</li>
+<li><strong>How to verify:</strong> Five values come from five distinct fields.</li>
+</ul>
 <h3 id="exercise-3-predict-schema-negatives">Exercise 3: Predict schema negatives<a class="heading-anchor" href="#exercise-3-predict-schema-negatives" aria-label="Link to this section">#</a></h3>
 <p>The valid object satisfies every constraint. A numeric-looking string is still the wrong type, 3 exceeds maximum 2, and absence of message violates required. These produce specific, explainable controls rather than one generic invalid example.</p>
 <p><strong>Expected:</strong> Only integer 1 with a present allowed message passes the stated complete spec.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check each candidate against required, type and range separately.</li>
+<li><strong>Why it is correct:</strong> Structural schemas reject a string where an integer is required, a value outside the range and a missing required field.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting string 2 to be coerced to an integer assumes conversion the API server does not perform.</li>
+<li><strong>How to verify:</strong> Only integer 1 with an allowed message passes.</li>
+</ul>
 <h3 id="exercise-4-inspect-unknown-field-handling">Exercise 4: Inspect unknown-field handling<a class="heading-anchor" href="#exercise-4-inspect-unknown-field-handling" aria-label="Link to this section">#</a></h3>
 <p>Pruning can remove an unknown key while leaving an object that differs from the author intention. Strict validation may reject it instead. Either outcome should be documented, and the offline subset checker cannot establish that server behavior.</p>
 <p><strong>Expected:</strong> Record validation mode and actual rejection or pruning; do not assume silently stored intent.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Send the replcias typo with a named field validation mode and read the object back.</li>
+<li><strong>Why it is correct:</strong> Depending on the mode, the server rejects the unknown field or prunes it, and in neither case is replicas set.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the typo was stored as intent because the request succeeded ignores pruning.</li>
+<li><strong>How to verify:</strong> The readback is compared with the request, and the validation mode is recorded.</li>
+</ul>
 <h3 id="exercise-5-separate-status-from-intent">Exercise 5: Separate status from intent<a class="heading-anchor" href="#exercise-5-separate-status-from-intent" aria-label="Link to this section">#</a></h3>
 <p>Status may still describe a previously successful configuration. A meaningful readiness gate joins the observed generation with child and application evidence rather than accepting a boolean without its temporal context.</p>
 <p><strong>Expected:</strong> Current generation 7 is not yet proven reconciled by that status.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare metadata.generation 7 with status.observedGeneration 6 before reading ready.</li>
+<li><strong>Why it is correct:</strong> The status describes generation 6, so ready true says nothing yet about the spec at generation 7.</li>
+<li><strong>Plausible wrong approach:</strong> Accepting ready true as current trusts a status that predates the latest change.</li>
+<li><strong>How to verify:</strong> Generation 7 is reported as not yet reconciled.</li>
+</ul>
 <h3 id="exercise-6-plan-scoped-teardown">Exercise 6: Plan scoped teardown<a class="heading-anchor" href="#exercise-6-plan-scoped-teardown" aria-label="Link to this section">#</a></h3>
 <p>The advanced lease owner should confirm controller/finalizer completion before deregistering the type. The handoff retains exact object identities and does not use registration deletion as a shortcut to bypass stuck resource cleanup.</p>
 <p><strong>Expected:</strong> Instance UID cleanup is separate from CRD removal; no learner privilege widening.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Separate instance deletion by name and UID from CRD removal as a host operation.</li>
+<li><strong>Why it is correct:</strong> Deleting the CRD deletes every instance of that type cluster wide, which exceeds learner scope.</li>
+<li><strong>Plausible wrong approach:</strong> Running kubectl delete crd to clean up after one instance removes all LessonReports everywhere.</li>
+<li><strong>How to verify:</strong> Learner steps touch only the instance, and CRD removal is listed as a host step.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A no-matches-for-kind error suggests registration or discovery/version trouble. Forbidden suggests credentials lack authorization. A schema validation error should name a field and constraint. An accepted instance with no child workload suggests missing or failing reconciliation. Those errors require different repairs.</p>
 <p>Do not grant the learner cluster-admin to make the example work. The host owns registration and the lease must provide only the intended namespaced instance operations. Removing a CRD can remove its stored custom resources, so registration cleanup is a separate host responsibility after instance/controller cleanup.</p></article>

@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-060`, `apache-057`.
 
+## Key terms
+
+- **Multistage engine:** Pinot's distributed query engine that supports joins and exchanges data between stages, beyond a single broker scatter and gather.
+- **Data exchange:** Moving intermediate rows between servers between query stages, which costs network and memory.
+- **Join key semantics:** The rule for which values match in a join. Integer 1, string 1 and null are not automatically the same business identity.
+- **Response exceptions:** Errors Pinot reports inside a query response, which a client must check instead of trusting an HTTP success alone.
+
 ## A distributed analytical query still has a resource contract
 
 Pinot's multistage engine supports distributed execution patterns beyond a

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-calculate-both-counts">Exercise 1: Calculate both counts<a class="heading-anchor" href="#exercise-1-calculate-both-counts" aria-label="Link to this section">#</a></h3>
 <p>Row count 3 and non-null count 2.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate both counts</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Calculate both counts over <code>[2, null, 5]</code>: <code>COUNT(*)</code> is 3 because it counts rows, and <code>COUNT(value)</code> is 2 because it counts non-null values; <code>SUM(value)</code> is 7.</p>
+<p><strong>Why it is correct here.</strong> SQL defines <code>COUNT(*)</code> on rows and <code>COUNT(expr)</code> on non-null expression values, and aggregate functions such as SUM skip nulls.</p>
+<p><strong>A plausible wrong approach.</strong> Treating null as zero gives the same sum but makes <code>COUNT(value)</code> 3 and the average 7/3 instead of 3.5, which disagrees with Spark.</p>
+<p><strong>How to verify.</strong> The reference asserts row count 3, non-null count 2 and sum 7. Run the same aggregates in Spark on CPU and GPU and compare.</p>
 <h3 id="exercise-2-handle-all-null-aggregate">Exercise 2: Handle all-null aggregate<a class="heading-anchor" href="#exercise-2-handle-all-null-aggregate" aria-label="Link to this section">#</a></h3>
 <p>Follow Spark SQL null-result semantics.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>handle all-null aggregate</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Handle an all-null aggregate: under Spark SQL semantics, <code>SUM</code> and <code>AVG</code> over only null values return null, while <code>COUNT(value)</code> returns 0.</p>
+<p><strong>Why it is correct here.</strong> Null means no defined value, so a sum over no values is null rather than zero. Count still has a defined answer.</p>
+<p><strong>A plausible wrong approach.</strong> Returning 0 for the sum of an all-null group makes a group with no data look like a group whose values cancel out.</p>
+<p><strong>How to verify.</strong> Create a group with only nulls and assert the documented null and zero results on both paths. Include a second group with mixed values so the test also confirms nulls are skipped there.</p>
 <h3 id="exercise-3-compare-decimal-values">Exercise 3: Compare decimal values<a class="heading-anchor" href="#exercise-3-compare-decimal-values" aria-label="Link to this section">#</a></h3>
 <p>Use exact decimal type and scale.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare decimal values</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare decimal values with an exact decimal type and scale: <code>Decimal(&#x27;1.10&#x27;) + Decimal(&#x27;2.20&#x27;)</code> equals <code>Decimal(&#x27;3.30&#x27;)</code>.</p>
+<p><strong>Why it is correct here.</strong> Decimals represent base-ten fractions exactly within their precision, so equality is exact. Spark also tracks result precision and scale.</p>
+<p><strong>A plausible wrong approach.</strong> Using float64 for the same values gives <code>3.3000000000000003</code>, which fails an exact comparison and suggests a bug that exists only in the test.</p>
+<p><strong>How to verify.</strong> The reference asserts the decimal equality. In Spark, check the result schema&#x27;s precision and scale as well as the value.</p>
 <h3 id="exercise-4-name-timestamp-timezone">Exercise 4: Name timestamp timezone<a class="heading-anchor" href="#exercise-4-name-timestamp-timezone" aria-label="Link to this section">#</a></h3>
 <p>Set and record session timezone.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>name timestamp timezone</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Name the session timezone explicitly, such as <code>spark.sql.session.timeZone = UTC</code>, and record it with every timestamp result.</p>
+<p><strong>Why it is correct here.</strong> Spark renders and parses timestamps using the session timezone. Two runs with different defaults can show different values for the same instant.</p>
+<p><strong>A plausible wrong approach.</strong> Relying on the machine&#x27;s default timezone gives results that depend on where the job runs. Executors and the driver may also disagree, producing values that differ between stages of one job.</p>
+<p><strong>How to verify.</strong> Run the same query under two timezone settings and confirm the stored instant is equal while the rendered strings differ as expected.</p>
 <h3 id="exercise-5-choose-float-tolerances">Exercise 5: Choose float tolerances<a class="heading-anchor" href="#exercise-5-choose-float-tolerances" aria-label="Link to this section">#</a></h3>
 <p>Tie tolerance to dtype algorithm and scale.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose float tolerances</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Choose float tolerances based on dtype, algorithm and magnitude, such as a relative tolerance near float64 epsilon times the number of summed terms for a parallel sum.</p>
+<p><strong>Why it is correct here.</strong> GPU aggregations may sum in a different order, which changes rounding. Tolerance should cover that difference without hiding real errors.</p>
+<p><strong>A plausible wrong approach.</strong> Using exact equality for float sums fails on correct results, while using a very loose tolerance passes wrong ones.</p>
+<p><strong>How to verify.</strong> Compare CPU and GPU sums for a fixed dataset and confirm the differences fall within the chosen tolerance.</p>
 <h3 id="exercise-6-design-ordered-result-comparison">Exercise 6: Design ordered result comparison<a class="heading-anchor" href="#exercise-6-design-ordered-result-comparison" aria-label="Link to this section">#</a></h3>
 <p>Sort by stable keys without erasing duplicate rows.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design ordered result comparison</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design an ordered comparison: sort both results by stable keys, including all columns needed to order duplicates, before comparing, and keep duplicate rows.</p>
+<p><strong>Why it is correct here.</strong> Spark does not guarantee output order without <code>ORDER BY</code>, and GPU execution may produce a different order.</p>
+<p><strong>A plausible wrong approach.</strong> Converting results to sets before comparing removes duplicates and hides a missing or extra row.</p>
+<p><strong>How to verify.</strong> Compare sorted lists and also compare row counts. When duplicates are expected, compare per-key counts too, so a duplicated row and a missing row cannot cancel each other out.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Rows 3, non-null 2, sum 7 and exact decimal 3.30.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-117_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -43,6 +43,12 @@
       "code": "stopifnot(isTRUE(TRUE | NA), identical(FALSE & NA, FALSE))\nstopifnot(is.na(FALSE | NA), is.na(TRUE & NA))\nx <- numeric(0)\nfirst_positive <- length(x) > 0 && x[[1]] > 0\nstopifnot(identical(first_positive, FALSE))\nprint(first_positive)\n",
       "explanation": "The first condition prevents an invalid extraction from an empty vector. The truth-table checks explain when uncertainty does and does not affect the combined answer.",
       "expected": "FALSE; no empty-vector extraction error."
+    },
+    {
+      "title": "Counting qualifying amounts when one is unknown",
+      "code": "amount <- c(5, 12, NA_real_, 20)\nnaive <- sum(amount >= 10)\nknown_hits <- sum(amount >= 10, na.rm = TRUE)\nunknown <- sum(is.na(amount))\nprint(c(naive = naive, known_hits = known_hits, unknown = unknown))\nstopifnot(is.na(naive), known_hits == 2L, unknown == 1L)\n",
+      "explanation": "Summing a logical vector counts its TRUE entries, so sum(amount >= 10) looks like a count of qualifying amounts. The comparison for the third amount is NA, and one NA makes the whole sum NA. Adding na.rm = TRUE returns 2, which is correct only as a statement about the three known amounts. Reporting unknown = 1 next to it keeps the gap visible: if the missing value later turns out to be 15, the true count is 3, and the 2 was never a complete answer.",
+      "expected": "naive NA, known_hits 2, unknown 1."
     }
   ],
   "exercises": [

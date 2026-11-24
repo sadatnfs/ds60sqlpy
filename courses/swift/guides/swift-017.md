@@ -128,7 +128,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Use a capability) before changing anything, and confirm its observation: The consumer calls the pricing capability without needing its storage details.
 2. Compare Example B (Substitute another policy) with Example A and name the first line whose behavior differs. Its observation is: Two conforming policies produce different valid prices.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A protocol is not automatically a good abstraction for every type.
+3. Before opening the explanation, check your task 3 attempt (Define a protocol for a deterministic label formatter) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

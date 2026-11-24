@@ -201,7 +201,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A Service provides an internal backend abstraction; an ingress or gateway controller can expose selected routes through a managed listener. Gateway API separates infrastructure ownership, listener configuration and application route attachment. Creating an HTTPRoute object does not install a controller or create a working external address.</p>
 <p>This host lab requires a preinstalled qualified Gateway controller, a host-owned Gateway named lesson-gateway, an owned Service backend and a loopback-only listener. A synthetic TLS case also needs a verified local trust chain and hostname. The normal browser adapter provides none of those cluster/controller operations and does not accept Gateway or Ingress resources.</p>
-<p>The real HTTPRoute example matches host lesson.example.test and path prefix /version, then forwards to hello:8080. It leaves other paths unmatched. The Ingress comparison is a separate fixture with its own ingressClassName; do not assume the two APIs are interpreted by the same controller or apply both to an unreviewed listener.</p>
+<p>The real HTTPRoute example matches host lesson.example.test and path prefix /version, then forwards to <code>hello:8080</code>. It leaves other paths unmatched. The Ingress comparison is a separate fixture with its own ingressClassName; do not assume the two APIs are interpreted by the same controller or apply both to an unreviewed listener.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Ingress:</strong> An API object with host and path rules that an Ingress controller uses to route external HTTP traffic to Services.</li>
+<li><strong>Gateway API:</strong> A family of role-oriented routing APIs, including GatewayClass, Gateway and HTTPRoute, that expresses more than Ingress can.</li>
+<li><strong>Gateway:</strong> An object that requests listeners, such as a port and protocol, from the implementation named by its GatewayClass.</li>
+<li><strong>HTTPRoute:</strong> A Gateway API object that attaches to a Gateway and matches HTTP requests by host, path or header to backend Services.</li>
+<li><strong>TLS verification:</strong> Checking the presented certificate against a trusted CA and the requested hostname. A TCP connection or HTTP response alone does not establish the TLS contract.</li>
+</ul>
 <h3 id="follow-gateway-ownership-and-route-status">Follow Gateway ownership and route status<a class="heading-anchor" href="#follow-gateway-ownership-and-route-status" aria-label="Link to this section">#</a></h3>
 <p>GatewayClass identifies a controller/infrastructure class and is cluster-scoped. A Gateway selects that class and defines listeners. HTTPRoute attaches through parentRefs and describes request matches and backends. The parent&#x27;s allowedRoutes policy can restrict which namespaces may attach.</p>
 <p>Inspect the route&#x27;s parent-specific Accepted and ResolvedRefs conditions and their observed generation. A syntactically valid backend reference can still be unresolved or unauthorized. Cross-namespace references may require an explicit ReferenceGrant rather than being permitted by a matching name. The host must provide that capability deliberately; the learner should not widen it during diagnosis.</p>
@@ -229,7 +237,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <span class="syntax-tag">backendRefs</span><span class="syntax-punctuation">:</span>
         <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello
           <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</code></pre>
-<p><strong>Expected:</strong> The route attaches to lesson-gateway for lesson.example.test and forwards /version to hello:8080.</p>
+<p><strong>Expected:</strong> The route attaches to lesson-gateway for lesson.example.test and forwards <code>/version</code> to <code>hello:8080</code>.</p>
 <h4 id="worked-example-2-compare-accepted-and-delivered">Worked example 2: Compare accepted and delivered<a class="heading-anchor" href="#worked-example-2-compare-accepted-and-delivered" aria-label="Link to this section">#</a></h4>
 <p>Synthetic status: Accepted=True, ResolvedRefs=True for the current generation. A matching client still receives 503 because the backend has no ready endpoints.</p>
 <p><strong>Expected:</strong> Route acceptance and reference resolution do not establish backend application readiness.</p>

@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-035`.
 
 A bearer token grants access to whoever possesses it, so its validation and handling are part of the authentication boundary. A JSON Web Token is a signed claims representation; decoding its JSON is not the same as verifying its authority. This chapter creates a local RSA key pair and checks actual signatures and claims with PyJWT.
 
+## Key terms
+
+- **Bearer token:** A credential that grants access to whoever presents it, sent in the `Authorization: Bearer` header.
+- **JWT:** A JSON Web Token: a compact signed set of claims whose decoded JSON proves nothing until the signature and claims are verified.
+- **Signature verification:** Checking a token with the issuer's public key and an explicit allowed algorithm list, here only RS256, instead of trusting the token header.
+- **Issuer and audience:** The `iss` claim names the expected issuing authority and `aud` names the intended recipient; a valid token for another API is refused.
+- **Expiration claim:** The `exp` claim, after which the recipient must reject the token even though its signature remains valid.
+
 ## Mechanism: establish issuer, audience and time
 
 The signing key proves that the token was produced by an entity controlling that key. The issuer claim names the expected issuing authority. The audience claim identifies the intended recipient. Expiration limits when the recipient may accept the token. Subject identifies the principal within the issuer's namespace. These checks answer different questions and all need an explicit policy.
@@ -29,6 +37,39 @@ Three tokens fail for different reasons: one targets another audience, one has e
 These cases prevent a common mistake: treating the presence of a syntactically valid token as authentication. The JSON can be well formed and its subject can look plausible while the token has no authority for this API. Claim checks must happen after cryptographic verification under trusted configuration.
 
 Time-based tests should avoid relying on a token expiring during execution. This fixture uses an already-expired timestamp and a comfortably future timestamp. A real verifier may define a small clock-skew allowance, but that allowance should be deliberate and bounded.
+
+## Worked example: what jwt.decode refuses and why
+
+```python
+from datetime import UTC, datetime, timedelta
+
+import jwt
+
+key = "test-only-shared-secret-at-least-32-bytes!"
+now = datetime.now(UTC)
+claims = {"sub": "learner-17", "aud": "notes-api", "exp": now + timedelta(minutes=5)}
+good = jwt.encode(claims, key, algorithm="HS256")
+unsigned = jwt.encode(claims, None, algorithm="none")
+
+print(jwt.decode(good, key, algorithms=["HS256"], audience="notes-api")["sub"])
+print(jwt.get_unverified_header(unsigned))
+for token, audience in ((unsigned, "notes-api"), (good, "billing-api")):
+    try:
+        jwt.decode(token, key, algorithms=["HS256"], audience=audience)
+    except jwt.InvalidTokenError as error:
+        print(type(error).__name__, error)
+```
+
+Expected output:
+
+```text
+learner-17
+{'alg': 'none', 'typ': 'JWT'}
+InvalidAlgorithmError The specified alg value is not allowed
+InvalidAudienceError Audience doesn't match
+```
+
+This uses a shared HMAC secret to keep the snippet short, while the lesson signs with an RSA key pair so the API only needs the public half. The unsigned token names `alg: none` in its own header, and a verifier that trusted that header would accept it with no signature at all. Passing `algorithms=["HS256"]` pins the accepted algorithm on the server side, so PyJWT refuses the token before looking at any claim. The second failure carries a valid signature but was minted for a different API, and the audience check stops it from being replayed against this one.
 
 ## Failure diagnosis and discussion
 

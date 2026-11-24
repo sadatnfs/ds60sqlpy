@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Data parallelism gives replicas different examples, computes gradients and combines those gradients before consistent updates. Rank identifies a participant; a process often owns one GPU. Correctness depends on sample partition, loss normalization, collective order and optimizer state, not merely launching more processes. Different effective batch sizes change the optimization problem.</p>
 <p>PyTorch DistributedDataParallel typically uses one process per device and a suitable collective backend. TensorFlow MirroredStrategy coordinates replicas with its own distribution and loss-scaling conventions. Test against a single-device effective-batch reference. Unequal final batches require deliberate handling; repeated examples from padding must be counted. A CPU weighted-average model teaches semantics but cannot validate NCCL, GPU peer access or communication performance.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Data parallelism:</strong> Replicating the model on every rank and splitting each batch among them.</li>
+<li><strong>Rank:</strong> The integer identity of one process in a distributed group.</li>
+<li><strong>All-reduce:</strong> A collective that combines tensors from every rank and returns the result to all ranks, used to average gradients.</li>
+<li><strong>Sample partition:</strong> The assignment of distinct samples to each rank so no sample is counted twice per epoch.</li>
+<li><strong>Effective batch size:</strong> The per-rank batch multiplied by the number of ranks and the accumulation steps.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Two equal-sized replicas with mean gradients 2 and 4 combine to 3. A single-device batch containing their examples should produce the same mathematical gradient.</p>
@@ -213,6 +221,24 @@ weighted <span class="syntax-operator">=</span> <span class="syntax-builtin">sum
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>gradients<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span> <span class="syntax-operator">==</span> <span class="syntax-number">3.0</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU distributed-gradient oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> weighted<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Global example-weighted gradient 2.5.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>counts</code></td>
+<td><code>[3, 1]</code></td>
+</tr>
+<tr>
+<td><code>gradients</code></td>
+<td><code>[2.0, 4.0]</code></td>
+</tr>
+<tr>
+<td><code>weighted</code></td>
+<td><code>2.5</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -222,17 +248,23 @@ weighted <span class="syntax-operator">=</span> <span class="syntax-builtin">sum
 <p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-equal-replica-average">Exercise 1: Compute equal-replica average<a class="heading-anchor" href="#exercise-1-compute-equal-replica-average" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute equal-replica average</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Summing gradients without dividing by world size gives 6, which effectively doubles the learning rate whenever another GPU is added, so changing the device count silently changes training dynamics.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-handle-unequal-counts">Exercise 2: Handle unequal counts<a class="heading-anchor" href="#exercise-2-handle-unequal-counts" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>handle unequal counts</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Relying on the default world-size average when the sampler gives the last rank a short batch introduces a small bias every epoch, which is hard to notice because loss still falls.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-assign-rank-and-device">Exercise 3: Assign rank and device<a class="heading-anchor" href="#exercise-3-assign-rank-and-device" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>assign rank and device</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Creating the model before setting the device places every replica on GPU 0, and the first out-of-memory error appears far from its cause.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-check-complete-sample-coverage">Exercise 4: Check complete sample coverage<a class="heading-anchor" href="#exercise-4-check-complete-sample-coverage" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>check complete sample coverage</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming coverage because each rank processed <code>len(dataset)/world_size</code> batches ignores padding and the <code>drop_last</code> setting.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-collective-failure-handling">Exercise 5: Design collective failure handling<a class="heading-anchor" href="#exercise-5-design-collective-failure-handling" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design collective failure handling</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Letting surviving ranks wait without a timeout keeps the devices occupied by a job that cannot finish, and nobody receives an error to act on.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-compare-framework-distribution-contracts">Exercise 6: Compare framework distribution contracts<a class="heading-anchor" href="#exercise-6-compare-framework-distribution-contracts" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>compare framework distribution contracts</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Porting a training script between frameworks and assuming identical gradients because both are data-parallel skips the place where the semantics actually differ.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

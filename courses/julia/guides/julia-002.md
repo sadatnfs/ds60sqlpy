@@ -10,6 +10,14 @@ Choose and validate numeric representations while distinguishing exact arithmeti
 
 Open `julia-002` in `/classroom` with its prepared `julia` runtime. Worked case A (checked and arbitrary-precision integers) and worked case B (approximate and exact decimal-looking values) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-002: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Integer overflow:** Fixed-width integer arithmetic wraps around silently when an exact result exceeds the type's range, giving a wrong value without an error.
+- **Checked arithmetic:** Functions such as `Base.Checked.checked_add` that throw an `OverflowError` instead of wrapping when the exact result does not fit.
+- **Float64:** The 64-bit binary floating-point type whose values such as `0.1` are rounded approximations, so comparisons need a stated tolerance.
+- **Rational:** An exact fraction type built with `//`, such as `1//3`, that stores an integer numerator and denominator.
+- **Promotion:** The rule that converts mixed numeric arguments to a common type before arithmetic, so an `Int` plus a `Float64` gives a `Float64`.
+
 ## Representation is part of the calculation
 
 The written number, its stored representation and the scientific quantity are related but different. Julia's ordinary integer literals use a machine integer type in this environment. Floating-point literals such as `0.1` use a binary approximation. A rational literal such as `1//10` represents an exact ratio of integers when its numerator and denominator remain representable.

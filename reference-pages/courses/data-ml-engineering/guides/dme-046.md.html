@@ -198,6 +198,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Direct prerequisites:</strong> <code>dme-018</code>, <code>dme-019</code>, <code>dme-042</code>, <code>dme-043</code>.</p>
 <p><strong>Outcome:</strong> Compute a bounded workload/capacity model and check its assumptions.</p>
 <p>Open the worked program in the classroom code pad. This tutorial exposes complete examples and answered discussions without an exam gate. The pad has fresh temporary state; separately documented projects use their own owned lifecycle.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Tail latency:</strong> The slow end of the latency distribution, such as the 99th percentile.</li>
+<li><strong>Saturation:</strong> Operating so close to capacity that small variations create queues faster than they drain.</li>
+<li><strong>Scan amplification:</strong> Bytes scanned divided by bytes needed, such as reading 30 partitions when one would do.</li>
+<li><strong>Cost unit:</strong> An invented accounting unit, such as 0.02 per decimal gigabyte, used for sensitivity analysis rather than as a provider price.</li>
+</ul>
 <h3 id="average-load-hides-the-shape-of-demand">Average load hides the shape of demand<a class="heading-anchor" href="#average-load-hides-the-shape-of-demand" aria-label="Link to this section">#</a></h3>
 <p>Capacity planning connects a workload to finite resources and a service objective. A request rate alone is insufficient. You also need service-time distribution, concurrency, burst shape, queue limits, deadlines and the resources each request occupies. A system with low average utilization can still have poor tail latency when many requests arrive together. A system near saturation can become unstable when small variations create queues faster than they drain.</p>
 <p>This chapter uses deterministic queue and scan-accounting models. It does not benchmark a machine, quote cloud prices or predict production performance from a tiny fixture. Every time and cost coefficient is declared so the calculations can be checked and changed. Models are useful for identifying which measurements matter and for rejecting impossible designs, but their predictions require validation against actual workloads.</p>
@@ -330,6 +337,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="worked-example-utilization-near-one-in-a-single-server-queue-model">Worked example: Utilization near one in a single-server queue model<a class="heading-anchor" href="#worked-example-utilization-near-one-in-a-single-server-queue-model" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python">service_ms <span class="syntax-operator">=</span> <span class="syntax-number">10</span>
+<span class="syntax-keyword">for</span> utilization <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.95</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    waiting <span class="syntax-operator">=</span> utilization <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> utilization<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> service_ms
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">utilization</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        utilization<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">mean wait ms</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>waiting<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">mean response ms</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span>waiting <span class="syntax-operator">+</span> service_ms<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-text">utilization 0.5 mean wait ms 10.0 mean response ms 20.0
+utilization 0.8 mean wait ms 40.0 mean response ms 50.0
+utilization 0.9 mean wait ms 90.0 mean response ms 100.0
+utilization 0.95 mean wait ms 190.0 mean response ms 200.0</code></pre>
+<p>This uses the textbook single-server queue with random arrivals, so the numbers describe shape, not a measured service. With 10 ms of work per request, raising utilization from 0.5 to 0.8 quadruples the mean wait from 10 ms to 40 ms. Going from 0.9 to 0.95 adds only five percentage points of load but doubles the wait from 90 to 190 ms. Capacity plans that target 95 percent busy servers therefore buy small savings with large latency. Tail latency grows even faster than the mean in this regime.</p>
 <h3 id="extend-the-model-only-when-the-added-detail-matters">Extend the model only when the added detail matters<a class="heading-anchor" href="#extend-the-model-only-when-the-added-detail-matters" aria-label="Link to this section">#</a></h3>
 <p>Real service times vary. A few long requests can occupy workers while short requests wait behind them. Separate queues, admission classes or batching can change that behavior, but each policy creates fairness and complexity tradeoffs. If a model has multiple stages, such as feature retrieval, inference and serialization, consider which resources can overlap and which bottleneck limits throughput.</p>
 <p>Batching can improve accelerator efficiency while increasing time spent waiting for a batch to fill. Increasing worker count can help until another shared resource becomes limiting, such as memory bandwidth, a database pool or a GPU. A process count larger than physical capacity can also add contention. Measure the system boundary before assuming a resource knob scales linearly.</p>

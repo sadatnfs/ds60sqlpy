@@ -8,7 +8,7 @@ Beginner; approximately 120 minutes. Direct prerequisites: `spark-013`. The prep
 
 ## How to run this lesson
 
-Open `spark-014` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-014` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-014.scala) and [PySpark learner](../lessons/spark-014.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-014_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-014_solution.scala) and [PySpark reference](../solutions/spark-014_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -47,7 +47,7 @@ The reference does not write a durable table or claim a transactional publicatio
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -78,20 +78,8 @@ val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 schema = StructType(
     [
@@ -189,7 +177,7 @@ Add a nullable rejection_reason Column using the declared precedence: missing_id
 
 **Expected result/shape:** Source row 11 has unknown_status, row 12 has missing_id, and the other 10 reasons are NULL. All 12 source_row identities remain.
 
-**Verify:** Assert the exact two(source_row, reason) pairs and the unchanged source count 12.
+**Verify:** Assert the exact two (source_row, reason) pairs and the unchanged source count 12.
 
 **Progressive hint:** Build a when/otherwise chain and include an explicit isNull status branch because NULL isin results are unknown.
 
@@ -207,7 +195,7 @@ Return source_row, event_id, team, amount_cents, status only for rows with no re
 
 Return source_row, event_id, team, amount_cents, status, rejection_reason for rejected records, ordered by source_row when inspected. Keep the original values, including the missing event ID.
 
-**Expected result/shape:** Rows are (11, 11, A, 10, mystery, unknown_status) and (12, NULL, A, 5, paid, missing_id). Accepted and quarantined counts sum to 12.
+**Expected result/shape:** Rows are (11, 11, A, 10, mystery, unknown_status) and `(12, NULL, A, 5, paid, missing_id)`. Accepted and quarantined counts sum to 12.
 
 **Verify:** Compare every quarantined field with literal expected rows and check count conservation independently.
 
@@ -217,7 +205,7 @@ Return source_row, event_id, team, amount_cents, status, rejection_reason for re
 
 From accepted records, filter paid and group by team into team, rows, valued, total_cents. Count every event, only nonnull amounts, and the exact Long sum. Preserve a NULL team group and a NULL-only amount group.
 
-**Expected result/shape:** Groups are A:(3,2,200), B:(2,2,25), C:(1,0, NULL), D:(1,1,200), E:(1,1,0), NULL:(1,1,50). Paid metrics are 9 rows,7 valued,475 cents.
+**Expected result/shape:** Groups are `A:(3, 2, 200)`, `B:(2, 2, 25)`, `C:(1, 0, NULL)`, `D:(1, 1, 200)`, `E:(1, 1, 0)`, `NULL:(1, 1, 50)`. Paid metrics are 9 rows, 7 valued, 475 cents.
 
 **Verify:** Assert the full typed canonical group list and the global paid metrics against independent literals.
 
@@ -227,7 +215,7 @@ From accepted records, filter paid and group by team into team, rows, valued, to
 
 Return a paid row-level projection retaining event_id, team, amount_cents. Compare it with the deliberately wrong team/amount distinct projection and explain the lost 100-cent event.
 
-**Expected result/shape:** The correct projection has metrics(9,7,475); the wrong projection has(8,6,375). IDs 1 and 6 must both remain despite equal team/amount values.
+**Expected result/shape:** The correct projection has metrics `(9, 7, 475)`; the wrong projection has `(8, 6, 375)`. IDs 1 and 6 must both remain despite equal team/amount values.
 
 **Verify:** Assert both metric tuples and verify that correct event IDs include 1 and 6 separately.
 
@@ -249,7 +237,7 @@ If raw count becomes 11, check whether COUNT(event_id) was confused with COUNT(*
 
 ## Self-check
 
-Explain the contract of `classified` / `classified` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `classified` / `classified` without reading its solution. Then, from memory, state what Exercise 6 (Gate the SQL report on identity and conservation) must produce: The base 12-row batch passes and matches all six golden groups. Appending `source_row` 13 with a second `event_id` 1 rejects publication instead of choosing a winner. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

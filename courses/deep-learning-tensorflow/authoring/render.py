@@ -67,6 +67,11 @@ def add(id, mental, anatomy, terms, exercises, source, imports="import numpy as 
     )
 
 
+def sentence(text):
+    text = text.strip()
+    return text if text[-1:] in ".?!" else text + "."
+
+
 def write_all(only=None, guides_only=False, markdown_only=False):
     from transfer_exercises import TRANSFER
 
@@ -108,7 +113,11 @@ def write_all(only=None, guides_only=False, markdown_only=False):
             study_method = (
                 f"Read {count} worked reasoning cases. Derive the intermediate quantities and units on paper, then compare the assumptions and conclusions. Text blocks here are evidence tables or written arguments, not programs. Keep unknown evidence distinct from a failed condition and explain what observation would settle it."
                 if reading
-                else "Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. {'Examples B and C change assumptions' if len(worked) == 3 else 'Example B changes an assumption'} that matters to this mechanism. Compare {'the' if len(worked) == 3 else 'both'} observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact."
+                else (
+                    f"Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. {'Examples B and C change assumptions' if len(worked) == 3 else 'Example B changes an assumption'} that matters to this mechanism. Compare {'the' if len(worked) == 3 else 'both'} observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact."
+                    if track == "deep-learning-tensorflow"
+                    else f"Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. {'Examples B and C change assumptions' if len(worked) == 3 else 'Example B changes an assumption'} that matters to this mechanism. Compare {'the' if len(worked) == 3 else 'both'} observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact."
+                )
             )
             code_anatomy = s["anatomy"]
             prompt = f"""Use the checked-in $guide-ds60sqlpy-learning skill for {id}, {p["title"]}.
@@ -118,6 +127,32 @@ give one hint, request output evidence, and ask a fresh retrieval question.
 Keep {prefix}/solutions/ closed until I request comparison or show an attempt.
 Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
 and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions."""
+            tf_track = track == "deep-learning-tensorflow"
+            w = [e["title"] for e in worked]
+            x = [e["title"] for e in exercises]
+            term_list = ", ".join(k for k, v in s["terms"][:3])
+            prediction = (
+                f"Cover the **Expected** line of Example A, {w[0]}, and derive it from the fixture: name the input unit, the intermediate state and the final quantity. Read exercise 6, {x[5]}, and predict its outcome before any code runs: {sentence(exercises[5]['prompt'])} Then restate this finish condition in your own words: {p['verification']} Keep each prediction next to the value you later observe."
+                if tf_track
+                else f"For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: {p['verification']} Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation."
+            )
+            hints = (
+                f"Hint 1: Example {chr(64 + len(w))}, {w[-1]}, changes one assumption of Example A, {w[0]}; name it. Hint 2: exercise 4, {x[3]}, should reach {sentence(exercises[3]['expected'])} Trace backward from that value. Hint 3: exercise 5, {x[4]}, alters one input; say which intermediate moves first. If a step still disagrees, ask for the first wrong step, not a replacement implementation."
+                if tf_track
+                else "First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson."
+            )
+            self_check = (
+                f"Close the guide and rebuild Example {chr(64 + len(w))}, {w[-1]}, from its inputs alone. Predict whether exercise 3, {x[2]}, still passes after one changed input. Explain {term_list} using that fixture, then separate what the code guarantees from what would need new observations about unseen data."
+                if tf_track
+                else f"Close {count} worked examples. Explain {term_list} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model."
+            )
+            next_step = (
+                f"If Example A, {w[0]}, cannot be rebuilt without help, revisit {prereq} first. Otherwise keep your exercise 2 attempt, {x[1]}, as a regression case beside a fresh transfer input, then continue along the course plan."
+                if tf_track
+                else f"Revisit the direct prerequisite {prereq} if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it."
+            )
+            if tf_track and "capstone" in p["title"].lower():
+                next_step += " In a capstone, a failed acceptance condition is a valid no-go decision; state what evidence would reopen it."
             document = f"""# {id}: {p["title"]}
 
 ## Level and prerequisites
@@ -154,7 +189,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: {p["verification"]} Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+{prediction}
 
 ## Exercises
 
@@ -168,15 +203,15 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+{hints}
 
 ## Self-check and retrieval
 
-Close {count} worked examples. Explain {", ".join(k for k, v in s["terms"][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+{self_check}
 
 ## Next step
 
-Revisit the direct prerequisite {prereq} if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+{next_step}
 
 ## Sources and verification status
 
@@ -188,9 +223,14 @@ API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026
 {prompt}
 ```
 """
+            solutions_intro = (
+                f"Open these answers for {p['title']} after your own attempt at Example A, {w[0]}, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test {term_list}. After matching exercise 6, {x[5]}, invent a new input without looking here."
+                if tf_track
+                else "Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer."
+            )
             explanation_doc = f"""# {id}: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+{solutions_intro}
 
 ## Mechanism review
 
@@ -231,7 +271,10 @@ The question is: {e["prompt"]}
                     e["code"], "    "
                 )
             blocks.extend(exercise_blocks[index] for index in reference_order)
-            explanation_doc += "## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
+            if tf_track:
+                explanation_doc += f"## Review after comparison\n\nChange one fixture value in exercise 4, {x[3]}, and predict the new result before running it. Keep the failing version of exercise 5, {x[4]}, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
+            else:
+                explanation_doc += "## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
             (ROOT / guide).write_text(canonical_markdown(document, root=SOURCE_ROOT, path=guide))
             if guides_only:
                 continue

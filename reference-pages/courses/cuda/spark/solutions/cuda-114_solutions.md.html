@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-list-matrix-axes">Exercise 1: List matrix axes<a class="heading-anchor" href="#exercise-1-list-matrix-axes" aria-label="Link to this section">#</a></h3>
 <p>Include Spark Scala Java plugin CUDA architecture driver GPU and OS.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>list matrix axes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> List the compatibility matrix axes: Spark version, Scala binary line, Java version, plugin release, CUDA runtime, host architecture, driver, GPU model and operating system.</p>
+<p><strong>Why it is correct here.</strong> The plugin jar links against Spark and Scala internals and loads native libraries for a host architecture and CUDA. Each axis can independently break loading or execution.</p>
+<p><strong>A plausible wrong approach.</strong> Treating the jar name as proof of compatibility ignores axes the name does not encode, such as the driver or GPU architecture.</p>
+<p><strong>How to verify.</strong> Fill one row of the matrix for the target cluster and confirm each value is recorded from the environment rather than assumed.</p>
 <h3 id="exercise-2-identify-a-scala-mismatch">Exercise 2: Identify a Scala mismatch<a class="heading-anchor" href="#exercise-2-identify-a-scala-mismatch" aria-label="Link to this section">#</a></h3>
 <p>Match the declared binary line.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>identify a Scala mismatch</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Identify a Scala mismatch: a jar built for Scala 2.12 on a Spark distribution built for 2.13 is rejected, as <code>compatible(&#x27;2.13&#x27;, &#x27;2.12&#x27;, &#x27;x86_64&#x27;, &#x27;x86_64&#x27;)</code> returns False.</p>
+<p><strong>Why it is correct here.</strong> Scala binary lines are not compatible with each other, so classes compiled for one may reference methods that do not exist in the other, which shows up as <code>NoSuchMethodError</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Matching only the Spark version number while ignoring the Scala suffix in the jar name leads to runtime linkage errors before any query runs.</p>
+<p><strong>How to verify.</strong> The reference asserts the matching case is accepted and the mismatched case rejected. Read the Scala version from the Spark distribution and the jar&#x27;s artifact suffix.</p>
 <h3 id="exercise-3-distinguish-toolkit-and-driver">Exercise 3: Distinguish toolkit and driver<a class="heading-anchor" href="#exercise-3-distinguish-toolkit-and-driver" aria-label="Link to this section">#</a></h3>
 <p>The driver is a host/runtime capability.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>distinguish toolkit and driver</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Distinguish toolkit and driver: the CUDA toolkit is a build-time and library dependency, while the driver is installed on the host and determines which CUDA runtime versions can run.</p>
+<p><strong>Why it is correct here.</strong> A plugin built with a newer CUDA runtime may require a minimum driver version. Having the toolkit installed does not satisfy a missing or older driver.</p>
+<p><strong>A plausible wrong approach.</strong> Checking <code>nvcc --version</code> and concluding the host is ready tests the compiler, not the driver the executors will use.</p>
+<p><strong>How to verify.</strong> Record the driver version reported by <code>nvidia-smi</code> on each executor host and compare it with the plugin release&#x27;s stated minimum.</p>
 <h3 id="exercise-4-record-artifact-provenance">Exercise 4: Record artifact provenance<a class="heading-anchor" href="#exercise-4-record-artifact-provenance" aria-label="Link to this section">#</a></h3>
 <p>Use release version checksum and primary source.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>record artifact provenance</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Record artifact provenance: the plugin release version, the checksum of the downloaded jar and the primary source URL it came from.</p>
+<p><strong>Why it is correct here.</strong> Provenance lets reviewers confirm the jar is the published artifact and not a modified or mismatched copy.</p>
+<p><strong>A plausible wrong approach.</strong> Copying a jar from a shared folder without a checksum leaves no way to tell which build it is.</p>
+<p><strong>How to verify.</strong> Compute the checksum of the jar on the cluster and compare with the published value.</p>
 <h3 id="exercise-5-design-a-cpu-rollback">Exercise 5: Design a CPU rollback<a class="heading-anchor" href="#exercise-5-design-a-cpu-rollback" aria-label="Link to this section">#</a></h3>
 <p>Keep ordinary Spark environment and query.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a CPU rollback</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a CPU rollback: keep an ordinary Spark configuration without the plugin, plus the same query, so the job can run on CPU if the GPU setup fails.</p>
+<p><strong>Why it is correct here.</strong> The rollback provides both an operational fallback and a semantic reference for comparing GPU results.</p>
+<p><strong>A plausible wrong approach.</strong> Removing CPU configuration once the plugin works means a driver or library failure stops the job entirely.</p>
+<p><strong>How to verify.</strong> Periodically run the rollback configuration and confirm it produces the expected result.</p>
 <h3 id="exercise-6-define-compatibility-acceptance">Exercise 6: Define compatibility acceptance<a class="heading-anchor" href="#exercise-6-define-compatibility-acceptance" aria-label="Link to this section">#</a></h3>
 <p>Require import startup bounded query and expected result on the selected host.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define compatibility acceptance</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define compatibility acceptance as import, executor startup, a bounded query and the expected result, all on the selected host with the recorded versions.</p>
+<p><strong>Why it is correct here.</strong> Each step tests a deeper level of integration. A row in the matrix is accepted only when all steps pass there.</p>
+<p><strong>A plausible wrong approach.</strong> Accepting a host because the Spark session started with the plugin listed skips native library loading on executors and actual query execution.</p>
+<p><strong>How to verify.</strong> Store the result of each step for each row and accept the row only with all four passing.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Illustrative Scala/host-architecture predicate rejects mismatch; not a full compatibility probe.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-114_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -126,7 +126,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Accept the current request result) before changing anything, and confirm its observation: The matching generation updates current state.
 2. Compare Example B (Ignore a superseded result) with Example A and name the first line whose behavior differs. Its observation is: The stale response cannot overwrite the newer value.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An awaited response is not automatically a successful HTTP status.
+3. Before opening the explanation, check your task 3 attempt (Implement a deterministic fake transport returning success and failure values) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

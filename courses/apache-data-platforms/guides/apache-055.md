@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-054`, `apache-051`.
 
+## Key terms
+
+- **Lightweight transaction:** A conditional write, such as UPDATE with IF, that uses a Paxos-based consensus round to compare and set a value within one partition.
+- **Serial consistency:** The consistency level for the consensus phase of a lightweight transaction, separate from the ordinary consistency level of its commit.
+- **Storage Attached Index:** Cassandra 5's index type that stores index data with each SSTable and supports queries on non-key columns.
+- **Selectivity:** The fraction of rows a predicate matches. An index on a column that matches most rows still leaves an expensive distributed query.
+
 ## Conditional invariants and indexed access solve different problems
 
 An ordinary upsert resolves stored versions under the database's write rules.
@@ -77,6 +84,40 @@ coordination semantics and the workload can afford the cost. An index answers a
 different question about access shape. The two cases demonstrate those boundaries
 with real conditions and an actual indexed lookup rather than treating either
 feature as a universal transaction or query optimizer.
+
+## Worked examples
+
+### Compare and set on one partition
+
+```sql
+UPDATE ds60_orders.inventory
+SET available = 6
+WHERE item = 'demo'
+IF available = 7;
+
+UPDATE ds60_orders.inventory
+SET available = 5
+WHERE item = 'demo'
+IF available = 7;
+```
+
+The first statement returns a row with [applied] set to true. The second returns [applied] false along with the current value 6, because the condition no longer holds; Cassandra reports the conflict instead of overwriting it. These lightweight transactions use a Paxos round and cost several times a normal write, so reserve them for the transitions that truly need a guard. They also cover only this partition, so reserving stock and charging a payment still need a separate, idempotent protocol.
+
+### Create and confirm a Storage Attached Index
+
+```sql
+CREATE CUSTOM INDEX IF NOT EXISTS amount_sai
+ON ds60_orders.indexed_orders (amount)
+USING 'StorageAttachedIndex';
+
+SELECT kind, options
+FROM system_schema.indexes
+WHERE keyspace_name = 'ds60_orders'
+  AND table_name = 'indexed_orders'
+  AND index_name = 'amount_sai';
+```
+
+The metadata row should have kind CUSTOM and an options class_name ending in StorageAttachedIndex; the client checks both before trusting any query result. Creating the index starts an asynchronous build, so a query issued at once can fail or miss rows, which is why the client waits until it is queryable. With three fixture rows the index proves only that the API works, since a full scan would be just as fast; judge real use by cardinality, write amplification and query latency on production-sized partitions.
 
 ## Complete worked source
 

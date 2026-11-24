@@ -38,6 +38,12 @@
       "code": "facts <- data.frame(product = c(\"A\", \"B\"), amount = c(10, 20))\nbad_dimension <- data.frame(product = c(\"A\", \"A\", \"B\"), category = c(\"X\", \"Y\", \"Z\"))\njoined <- merge(facts, bad_dimension, by = \"product\", all.x = TRUE)\nstopifnot(nrow(joined) == 3L, sum(joined$amount) == 40)\nstopifnot(anyDuplicated(bad_dimension$product) > 0L)\nprint(joined)\n",
       "explanation": "The A fact appears twice. A duplicate-key guard would reject the dimension before the incorrect total becomes a report.",
       "expected": "Three rows, total 40 instead of 30."
+    },
+    {
+      "title": "An inner merge hides an unmatched fact",
+      "code": "facts <- data.frame(product = c(\"B\", \"A\", \"C\"), amount = c(10, 20, 30))\ndimension <- data.frame(product = c(\"A\", \"B\"), category = c(\"Paper\", \"Home\"))\ninner <- merge(facts, dimension, by = \"product\")\nstopifnot(nrow(inner) == 2L, sum(inner$amount) == 30, identical(inner$product, c(\"A\", \"B\")))\nindex <- match(facts$product, dimension$product)\nstopifnot(identical(index, c(2L, 1L, NA)))\nunmatched <- facts[is.na(index), , drop = FALSE]\nstopifnot(identical(unmatched$product, \"C\"), unmatched$amount == 30)\nprint(unmatched)\n",
+      "explanation": "An inner merge returns only keys present on both sides, so C's amount of 30 vanishes and the total falls from 60 to 30 without a message. merge also sorts by the key, so A now comes before B, unlike the input. match keeps one position per fact row in input order: 2, 1 and NA. The NA marks the unmatched record, and selecting `is.na(index)` lists it for a decision: reject the batch, map C to a declared unknown category, or report it. Comparing the amount total before and after any join catches both dropped and duplicated rows.",
+      "expected": "One unmatched row, product C with amount 30; the inner merge kept 2 rows totaling 30 of the original 60."
     }
   ],
   "exercises": [

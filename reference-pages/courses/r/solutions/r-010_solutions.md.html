@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Count rows and columns in a three-record two-field table.</p>
 <p>nrow is three and ncol is two.</p>
+<p><strong>Approach:</strong> Call <code>nrow(records)</code> and <code>ncol(records)</code>, or <code>dim(records)</code> for both at once.</p>
+<p><strong>Why it holds here:</strong> The starter holds three ids, B, A and C, each with one amount, so the table is three records by two fields.</p>
+<p><strong>Tempting mistake:</strong> Using <code>length(records)</code>. A data frame is a list of columns, so length returns 2, the column count, and a reader expecting a row or cell count gets the wrong number.</p>
+<p><strong>Verify:</strong> <code>dim(records)</code> returns c(3L, 2L) before the fee column is added.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add a derived amount_with_fee column.</p>
 <p>Each row retains its ID and gains amount plus the declared fee.</p>
+<p><strong>Approach:</strong> Assign <code>records$amount_with_fee &lt;- records$amount + 2</code> on the unsorted table.</p>
+<p><strong>Why it holds here:</strong> The addition is vectorized over aligned positions, so each row adds the fee to its own amount: B 22, A 12, C 32.</p>
+<p><strong>Tempting mistake:</strong> Computing the fee from a sorted copy, such as <code>sort(records$amount) + 2</code>, and assigning it back. B would get 12, which is A&#x27;s amount plus the fee.</p>
+<p><strong>Verify:</strong> The reference check <code>identical(records$amount_with_fee, c(22, 12, 32))</code> returns TRUE, and the B row shows 22.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Validate a nonmissing unique ID column.</p>
 <p>Use !anyNA(id) and !anyDuplicated(id).</p>
+<p><strong>Approach:</strong> Require both <code>!anyNA(records$id)</code> and <code>!anyDuplicated(records$id)</code>.</p>
+<p><strong>Why it holds here:</strong> B, A and C are all present and distinct, so both conditions hold. Missing and repeated keys are separate failures, and each needs its own test.</p>
+<p><strong>Tempting mistake:</strong> Checking <code>length(unique(id)) == nrow(records)</code> alone. For c(&quot;A&quot;, NA, &quot;C&quot;) unique keeps NA as a value, so the count is 3 and a missing key passes.</p>
+<p><strong>Verify:</strong> <code>anyDuplicated(records$id)</code> returns 0 on the starter; changing id to c(&quot;B&quot;, &quot;A&quot;, &quot;A&quot;) makes it return 3, the position of the repeat.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose sorting only the amount column in place.</p>
 <p>Sort entire rows with an order index.</p>
+<p><strong>Approach:</strong> Compute <code>order(records$id)</code> once and use it as a row index with <code>drop = FALSE</code>.</p>
+<p><strong>Why it holds here:</strong> The permutation 2, 1, 3 is applied to every column together, so A stays with 10 and B with 20.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>records$amount &lt;- sort(records$amount)</code>. The amounts become 10, 20, 30 against ids B, A, C, so B shows 10 with no error, as Example 3 shows for the id column.</p>
+<p><strong>Verify:</strong> In the sorted table <code>sorted$amount[sorted$id == &quot;A&quot;]</code> returns 10, and the printed row names read 2, 1, 3.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Select zero rows while preserving columns and types.</p>
 <p>The result has zero rows and the original schema.</p>
+<p><strong>Approach:</strong> Index rows with <code>integer(0)</code> and keep <code>drop = FALSE</code>: <code>records[integer(0), , drop = FALSE]</code>.</p>
+<p><strong>Why it holds here:</strong> A zero-length row index selects no rows but every column, so id stays character and both numeric columns stay numeric.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>records[0]</code>. A single index on a data frame selects columns, so the result keeps all three rows and drops every column, the opposite of what the task asks.</p>
+<p><strong>Verify:</strong> <code>nrow(empty)</code> returns 0 and <code>names(empty)</code> shows id, amount and amount_with_fee; str reports <code>chr(0)</code> for id.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Distinguish repeated order IDs from duplicate line IDs.</p>
 <p>A multi-line order can repeat OrderID while each LineID must remain unique.</p>
+<p><strong>Approach:</strong> Test uniqueness on the column that defines the table&#x27;s grain, which is line_id for a lines table.</p>
+<p><strong>Why it holds here:</strong> L1 and L2 are distinct lines that both belong to order O1, so repeated order ids are expected while line ids must not repeat.</p>
+<p><strong>Tempting mistake:</strong> Requiring order_id to be unique, or deduplicating on it. The check rejects a valid two-line order, and deduplication drops L2 and understates the order.</p>
+<p><strong>Verify:</strong> <code>anyDuplicated(lines$order_id)</code> returns 2 while <code>anyDuplicated(lines$line_id)</code> returns 0.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

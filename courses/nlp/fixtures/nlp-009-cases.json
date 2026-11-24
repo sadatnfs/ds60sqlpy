@@ -18,8 +18,8 @@
     },
     {
       "exercise": 4,
-      "task": "Apply thresholds 0.5 and 0.3 to [0.2,0.4,0.8] with >= semantics.",
-      "expected": "Actions [false,false,true] and [false,true,true]."
+      "task": "Apply thresholds 0.5 and 0.3 to [0.2, 0.4, 0.8] with >= semantics.",
+      "expected": "Actions [false, false, true] and [false, true, true]."
     },
     {
       "exercise": 5,

@@ -198,6 +198,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-scale-the-fixture-cautiously">1. Scale the fixture cautiously<a class="heading-anchor" href="#1-scale-the-fixture-cautiously" aria-label="Link to this section">#</a></h3>
 <p>Record input size, engine and elapsed time. Do not extrapolate a tiny fixture into a production memory claim.</p>
+<p><strong>Why it holds here:</strong> Raising the row count while keeping group % 5 still lets you check against a Python formula, for example sum(i % 7 for i in range(100, n)) for the filtered query.</p>
+<p><strong>Plausible wrong approach:</strong> Running a much larger input and recording only elapsed time drops the correctness check and invites claims far beyond the measured size.</p>
+<p><strong>How to verify:</strong> Record n, engine and seconds, assert the streaming total equals the formula, and keep the in-memory and streaming results equal at that size.</p>
 <p><strong>Expected:</strong> The exact result still matches the independent formula.</p>
 <h3 id="2-change-grouping-cardinality">2. Change grouping cardinality<a class="heading-anchor" href="#2-change-grouping-cardinality" aria-label="Link to this section">#</a></h3>
 <p>Explain why group cardinality affects memory. Streaming does not erase the state required to retain a result for each key.</p>
@@ -217,9 +220,15 @@ many <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</
     <span class="syntax-operator">.</span>collect<span class="syntax-punctuation">(</span>engine<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">streaming</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>few<span class="syntax-operator">.</span>height<span class="syntax-punctuation">,</span> many<span class="syntax-operator">.</span>height<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Why it holds here:</strong> Grouping 1000 ids by id % 5 yields 5 groups, while id // 2 yields 500. The engine must hold a partial sum for every group until the input ends.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming streaming keeps memory flat regardless of key count ignores that 500 partial aggregates need 100 times the state of 5.</p>
+<p><strong>How to verify:</strong> Run the answer code and assert heights (5, 500); for a real study vary key cardinality and record peak memory with a process tool.</p>
 <p><strong>Expected:</strong> The result has many more groups.</p>
 <h3 id="3-compare-collect-and-sink">3. Compare collect and sink<a class="heading-anchor" href="#3-compare-collect-and-sink" aria-label="Link to this section">#</a></h3>
 <p>The sink changes how the caller receives output, not the intended values. Keep artifact paths separate from input globs.</p>
+<p><strong>Why it holds here:</strong> sink_parquet writes the result to a file instead of returning it, but the query and its values are the same, so readback sorted by group equals the collected frame.</p>
+<p><strong>Plausible wrong approach:</strong> Writing the sink into the same folder the scan globs can feed result.parquet back into the next run.</p>
+<p><strong>How to verify:</strong> As in example_one, read the sink file, sort by group and assert equality with query.collect(engine=&#x27;streaming&#x27;).</p>
 <p><strong>Expected:</strong> Readback equals the collected result.</p>
 <h3 id="4-include-a-global-sort">4. Include a global sort<a class="heading-anchor" href="#4-include-a-global-sort" aria-label="Link to this section">#</a></h3>
 <p>Measure the query with that requirement included. Removing the sort to obtain a faster number changes the delivered contract.</p>
@@ -234,12 +243,21 @@ ordered <span class="syntax-operator">=</span> <span class="syntax-punctuation">
     <span class="syntax-operator">.</span>collect<span class="syntax-punctuation">(</span>engine<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">streaming</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> ordered<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>to_list<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Why it holds here:</strong> The consumer needs groups in order 0 to 4, so sort(&#x27;group&#x27;) is part of the query and part of what any timing measures.</p>
+<p><strong>Plausible wrong approach:</strong> Timing the query without sort and adding it later reports a faster number for output that does not meet the contract.</p>
+<p><strong>How to verify:</strong> Run the answer code and assert ordered[&#x27;group&#x27;] is [0, 1, 2, 3, 4]; include the sort inside any timing loop.</p>
 <p><strong>Expected:</strong> The result obeys the declared order.</p>
 <h3 id="5-reject-a-false-batch-claim">5. Reject a false batch claim<a class="heading-anchor" href="#5-reject-a-false-batch-claim" aria-label="Link to this section">#</a></h3>
 <p>A two-pass or accumulated-statistic algorithm can implement the global operation. Centering each batch separately produces a different result.</p>
+<p><strong>Why it holds here:</strong> Centering by the full mean needs a value that depends on every row. Example_two in polars-016 shows that batches [1, 2] and [3, 10] give [-0.5, 0.5, -3.5, 3.5] instead of [-3, -2, -1, 6].</p>
+<p><strong>Plausible wrong approach:</strong> Calling the batched version streaming compatible because each batch runs independently confuses executing in batches with computing the intended global result.</p>
+<p><strong>How to verify:</strong> Compute the mean over all rows first, then subtract it; check the two pass output equals the single pass global result.</p>
 <p><strong>Expected:</strong> The answer identifies dependence on global state.</p>
 <h3 id="6-report-limitations">6. Report limitations<a class="heading-anchor" href="#6-report-limitations" aria-label="Link to this section">#</a></h3>
 <p>State the observed inputs, resource configuration and outputs. A maximum supported dataset size requires a separate controlled boundary study.</p>
+<p><strong>Why it holds here:</strong> The fixture supports only this claim: on 1000 rows and this machine the in-memory and streaming engines gave identical sums, here 2702 for ids 100 to 999.</p>
+<p><strong>Plausible wrong approach:</strong> Writing that the pipeline scales to production size extrapolates far beyond 1000 rows without a measured boundary.</p>
+<p><strong>How to verify:</strong> Have someone else read the conclusion and check that every number in it appears in the run&#x27;s recorded inputs or outputs.</p>
 <p><strong>Expected:</strong> The conclusion is bounded to tested sizes and settings.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;polars-015: complete bounded Polars investigation.&quot;&quot;&quot;</span>

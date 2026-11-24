@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Implement the pure scalar rule precisely",
       "input_contract": "ReturnNULL/None unchanged;collapse only space, tab, newline andcarriage return runs, trim ordinary spaces, and translateASCII A-Z to a-z. Preserve otherUnicode code points.",
-      "expected": "All 12 golden outputs, includingcafÉ,İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.",
+      "expected": "All 12 golden outputs, including cafÉ, İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.",
       "verification": "Apply the scalar function to every raw fixture value and compare with all golden pairs."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Reject a plausible but semantically broader implementation",
       "input_contract": "Validate a result against the full golden sequence. Deliberately apply general lowercasing and default trimming without interior-whitespace collapse, and require rejection.",
-      "expected": "The wrong implementation disagrees at least onIDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.",
+      "expected": "The wrong implementation disagrees at least on IDs 4, 5, 6, 9. Python additionally removes the preserved nonbreaking spaces at ID 8.",
       "verification": "Assert named mismatch identities and that the golden validator raises rather than accepting a visually plausible normalization."
     }
   ],

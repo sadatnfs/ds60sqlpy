@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-choose-a-sum-identity">Exercise 1: Choose a sum identity<a class="heading-anchor" href="#exercise-1-choose-a-sum-identity" aria-label="Link to this section">#</a></h3>
 <p>Use zero.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose a sum identity</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Pad inactive lanes of a sum reduction with 0, the additive identity. The reference stores <code>[2, 4, 6, 0]</code> in a four-lane tile and the block sum is 12.</p>
+<p><strong>Why it is correct here.</strong> Adding zero does not change a sum, so the padded lane contributes nothing while still occupying its slot in the tree. Every lane can therefore follow the same reduction steps without branching on validity.</p>
+<p><strong>A plausible wrong approach.</strong> Padding with the value of the last valid element, 6, changes the sum to 18. Such a pad looks harmless because it is in the data range, which is why it passes casual inspection.</p>
+<p><strong>How to verify.</strong> Evaluate <code>sum([2, 4, 6, 0])</code> and confirm it equals <code>sum([2, 4, 6]) = 12</code>. Repeat with a two-element tile padded with two zeros to show the identity holds for any pad count.</p>
 <h3 id="exercise-2-choose-a-minimum-identity">Exercise 2: Choose a minimum identity<a class="heading-anchor" href="#exercise-2-choose-a-minimum-identity" aria-label="Link to this section">#</a></h3>
 <p>Use a sentinel outside the valid domain or carry validity.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose a minimum identity</strong> is qualified there.</p>
+<p><strong>Approach.</strong> For a minimum reduction pad with a value that can never win, such as positive infinity for floats or the dtype maximum for integers, or carry a separate validity flag with each value.</p>
+<p><strong>Why it is correct here.</strong> The pad must be the identity of <code>min</code>. If valid data can legally contain the dtype maximum, that sentinel ties with real data, so an explicit validity flag is safer when the whole domain is possible.</p>
+<p><strong>A plausible wrong approach.</strong> Padding with 0 is the common mistake carried over from sums. For data <code>[2, 4, 6]</code> it reports a minimum of 0, a value not in the input.</p>
+<p><strong>How to verify.</strong> Compute <code>min([2, 4, 6, inf])</code> and confirm 2. Then try an input made entirely of the sentinel value and check that the validity-flag version reports no valid minimum rather than the sentinel.</p>
 <h3 id="exercise-3-trace-barrier-participants">Exercise 3: Trace barrier participants<a class="heading-anchor" href="#exercise-3-trace-barrier-participants" aria-label="Link to this section">#</a></h3>
 <p>All block lanes reach the barrier.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>trace barrier participants</strong> is qualified there.</p>
+<p><strong>Approach.</strong> List every lane of the block, <code>[0, 1, 2, 3]</code>, and mark each one as reaching the barrier, including lane 3, which has no input element.</p>
+<p><strong>Why it is correct here.</strong> <code>cuda.syncthreads()</code> requires every thread in the block to arrive. The reference asserts <code>participants == [0,1,2,3]</code>, which models the rule that an inactive lane still participates in the collective operation.</p>
+<p><strong>A plausible wrong approach.</strong> Listing only lanes 0 to 2 because they hold data treats the barrier as a data operation. On hardware, a barrier not reached by all threads is undefined behavior and can hang or corrupt shared memory.</p>
+<p><strong>How to verify.</strong> Check that the participant list equals <code>range(blockDim)</code> regardless of the input length. A trace for a two-element input with a four-lane block should still show four participants.</p>
 <h3 id="exercise-4-repair-early-return">Exercise 4: Repair early return<a class="heading-anchor" href="#exercise-4-repair-early-return" aria-label="Link to this section">#</a></h3>
 <p>Guard data access instead of participation.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>repair early return</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Replace <code>if i &gt;= n: return</code> with a guarded load: <code>value = x[i] if i &lt; n else 0</code>, store <code>value</code> in shared memory, then let every thread proceed to the barrier and the reduction.</p>
+<p><strong>Why it is correct here.</strong> The guard now protects the memory access, not the control flow. The thread for index 3 never reads <code>x[3]</code>, yet it reaches every <code>syncthreads</code> call and contributes the identity value.</p>
+<p><strong>A plausible wrong approach.</strong> Moving the early return below the first barrier but above the second still leaves later barriers missing a participant. Every barrier after the return is affected, not only the first.</p>
+<p><strong>How to verify.</strong> Read the kernel and confirm no <code>return</code> appears before the last barrier. Run the CPU model with a three-element input and four lanes: the sum must be 12 and all four lanes recorded.</p>
 <h3 id="exercise-5-separate-block-and-grid-scope">Exercise 5: Separate block and grid scope<a class="heading-anchor" href="#exercise-5-separate-block-and-grid-scope" aria-label="Link to this section">#</a></h3>
 <p>Shared memory is per block.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate block and grid scope</strong> is qualified there.</p>
+<p><strong>Approach.</strong> State that a shared-memory array belongs to one block. A result needing data from several blocks requires a second step, such as writing per-block partials to global memory and reducing them in another launch or with atomics.</p>
+<p><strong>Why it is correct here.</strong> Each block gets its own copy of the shared array, and <code>syncthreads</code> synchronizes only that block. Block 0 cannot see block 1&#x27;s tile or wait for block 1 to finish.</p>
+<p><strong>A plausible wrong approach.</strong> Reading another block&#x27;s partial from shared memory assumes a grid-wide shared space. The read returns the current block&#x27;s own data, so the total silently counts one block several times.</p>
+<p><strong>How to verify.</strong> Use a two-block input and show the reduction produces two partials. The final answer equals the sum of the partials only after a separate combination step.</p>
 <h3 id="exercise-6-design-a-nonmultiple-test">Exercise 6: Design a nonmultiple test<a class="heading-anchor" href="#exercise-6-design-a-nonmultiple-test" aria-label="Link to this section">#</a></h3>
 <p>Use n=blocksize+1 with explicit expected output.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a nonmultiple test</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Test with <code>n = blocksize + 1</code>, for example 5 elements and 4-lane blocks, using values whose sum is easy to compute by hand, like <code>[1, 2, 3, 4, 5]</code> with expected total 15.</p>
+<p><strong>Why it is correct here.</strong> This input needs two blocks, one of them almost empty. It exercises the padded lanes, the barrier participation of three inactive lanes, and the combination of two block partials.</p>
+<p><strong>A plausible wrong approach.</strong> Testing only with <code>n = 4</code> or <code>n = 8</code> makes every block full. Bugs in padding or early returns never execute, so the test passes against broken code.</p>
+<p><strong>How to verify.</strong> Write the expected partials explicitly, <code>[10, 5]</code>, and the total 15 before running. A mismatch in the second partial points directly to tail handling.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>All four modeled lanes participate; padded sum is 12.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-076_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

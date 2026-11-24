@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-attachment-from-published-ports">Exercise 1: Distinguish attachment from published ports.<a class="heading-anchor" href="#exercise-1-distinguish-attachment-from-published-ports" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Joining a network and exposing a host socket are different operations.</p>
 <p><strong>Why:</strong> A service can communicate with peers without publishing anything. A published port is an additional host-facing path that deserves separate review.</p>
+<p><strong>Approach:</strong> Separate two settings in the YAML: networks lists which project networks a service joins; ports maps a host socket to the container.</p>
+<p><strong>Why this is correct:</strong> In worked example 1, database joins only backend and has no ports, so api reaches it while the host cannot.</p>
+<p><strong>A plausible wrong approach:</strong> Adding ports to database so api can connect is unnecessary, since they already share backend, and it opens a host path.</p>
+<p><strong>How to verify:</strong> docker compose config shows networks for each service and no ports on database; api can still connect to it.</p>
 <h3 id="exercise-2-predict-a-pure-computation-with-network-none">Exercise 2: Predict a pure computation with network none.<a class="heading-anchor" href="#exercise-2-predict-a-pure-computation-with-network-none" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It succeeds if its files and runtime are already present.</p>
 <p><strong>Why:</strong> Network isolation does not prevent local arithmetic or file reads. It reveals undeclared dependencies when a program unexpectedly tries to download input.</p>
+<p><strong>Approach:</strong> Check whether the program needs anything outside the container: sum([2, 4, 6]) uses only the interpreter in the image.</p>
+<p><strong>Why this is correct:</strong> --network none removes all interfaces except loopback, which does not affect arithmetic, so the run prints 12.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting every container to fail without a network confuses connectivity with computation.</p>
+<p><strong>How to verify:</strong> Worked example 2 prints 12; a variant that calls urllib.request.urlopen on an internet URL fails under the same flag.</p>
 <h3 id="exercise-3-design-a-frontend-backend-attachment-table">Exercise 3: Design a frontend/backend attachment table.<a class="heading-anchor" href="#exercise-3-design-a-frontend-backend-attachment-table" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each service joins only the networks needed by its role.</p>
 <p><strong>Why:</strong> A small explicit table makes unintended paths easier to notice. Avoid putting every component on every network merely for convenience.</p>
+<p><strong>Approach:</strong> List each service with the networks it needs: api on frontend and backend, database on backend only, and backend marked internal.</p>
+<p><strong>Why this is correct:</strong> internal: true stops backend from routing outward, so database gets peers but no internet path.</p>
+<p><strong>A plausible wrong approach:</strong> Putting every service on every network makes the diagram simpler but lets the frontend reach the database directly.</p>
+<p><strong>How to verify:</strong> From a frontend-only container, resolving database fails, while api resolves it.</p>
 <h3 id="exercise-4-diagnose-host-network-mode-used-to-hide-a-mapping-error">Exercise 4: Diagnose host-network mode used to hide a mapping error.<a class="heading-anchor" href="#exercise-4-diagnose-host-network-mode-used-to-hide-a-mapping-error" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Restore the intended isolation and fix the actual address or port.</p>
 <p><strong>Why:</strong> Changing the network mode can mask the symptom while broadening access. Test the original topology’s contract instead.</p>
+<p><strong>Approach:</strong> Revert network_mode: host and return to the bridge model, then locate the real fault in address or port.</p>
+<p><strong>Why this is correct:</strong> Host mode removes isolation and port mapping entirely, so things seem to work while the original fault remains.</p>
+<p><strong>A plausible wrong approach:</strong> Keeping host mode exposes every listener on all host interfaces.</p>
+<p><strong>How to verify:</strong> With the bridge restored and the ports line corrected, the loopback request works and nothing listens on other interfaces.</p>
 <h3 id="exercise-5-explain-why-network-isolation-is-not-authentication">Exercise 5: Explain why network isolation is not authentication.<a class="heading-anchor" href="#exercise-5-explain-why-network-isolation-is-not-authentication" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Reachability policy and application identity answer different questions.</p>
 <p><strong>Why:</strong> An allowed caller may still be unauthorized for an operation. Sensitive services need appropriate request authentication and authorization in addition to network placement.</p>
+<p><strong>Approach:</strong> Ask two questions per request: can the caller reach the service, and is this caller allowed to perform this operation?</p>
+<p><strong>Why this is correct:</strong> Network placement answers only the first. Any process on backend could call database, including a compromised api.</p>
+<p><strong>A plausible wrong approach:</strong> Skipping database credentials because only backend can reach it leaves every backend process with full access.</p>
+<p><strong>How to verify:</strong> Connect from a backend container without credentials; a properly configured service refuses the operation.</p>
 <h3 id="exercise-6-define-outbound-acceptance-for-an-offline-worker">Exercise 6: Define outbound acceptance for an offline worker.<a class="heading-anchor" href="#exercise-6-define-outbound-acceptance-for-an-offline-worker" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Prepared local computation succeeds and no external fetch is required.</p>
 <p><strong>Why:</strong> Offline qualification is about actual inputs and behavior. Merely disconnecting the network does not prove that all future code paths are prepared.</p>
+<p><strong>Approach:</strong> Prepare inputs in the image or a mounted volume, run the worker with --network none, and compare output to the expected result.</p>
+<p><strong>Why this is correct:</strong> If the run succeeds with no network, everything it used was local. That proves this input path only.</p>
+<p><strong>A plausible wrong approach:</strong> Disconnecting once and declaring the worker offline-ready misses code paths, such as an update check, that the test never exercised.</p>
+<p><strong>How to verify:</strong> Record which inputs were tested and that each finished under --network none.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

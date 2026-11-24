@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-identify-the-timing-boundary">Exercise 1: Identify the timing boundary<a class="heading-anchor" href="#exercise-1-identify-the-timing-boundary" aria-label="Link to this section">#</a></h3>
 <p>Completion must be inside the interval when timing finished work.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>identify the timing boundary</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Place the stop point after the completion event, not after the call returns: the operation spans from submission at 2 microseconds to finish at 102 microseconds.</p>
+<p><strong>Why it is correct here.</strong> The launch is asynchronous, so returning at 2 microseconds only means the work was queued. The output exists at 102, so the interval that measures finished work must include it.</p>
+<p><strong>A plausible wrong approach.</strong> Stopping the timer at the return reports 2 microseconds and undercounts by the factor of 51 the reference computes.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>finish_us / submit_us == 51</code>. In real code, place a synchronize or event wait before the stop timestamp and confirm the recorded interval includes it.</p>
 <h3 id="exercise-2-compute-the-median">Exercise 2: Compute the median<a class="heading-anchor" href="#exercise-2-compute-the-median" aria-label="Link to this section">#</a></h3>
 <p>Median is eleven.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute the median</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Sort the five samples <code>[10, 10, 11, 12, 100]</code> and take the middle value, 11.</p>
+<p><strong>Why it is correct here.</strong> With an odd count the median is the third sorted value. The single 100 ms outlier does not move it, which is why the median describes typical completion.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the mean, 28.6 ms, mixes the tail into the center and overstates the typical case by a factor of about 2.6.</p>
+<p><strong>How to verify.</strong> Run the cuda-071 reference: <code>statistics.median(samples) == 11</code> is asserted. Also report the maximum 100 so the tail is not lost.</p>
 <h3 id="exercise-3-add-transfer-cost">Exercise 3: Add transfer cost<a class="heading-anchor" href="#exercise-3-add-transfer-cost" aria-label="Link to this section">#</a></h3>
 <p>Include both transfers for end-to-end latency.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>add transfer cost</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Add both transfer costs to the kernel interval: host-to-device before and device-to-host after, so the end-to-end interval covers every byte the caller needs.</p>
+<p><strong>Why it is correct here.</strong> A caller cannot use a device result until it is on the host. In this chapter&#x27;s 2 to 102 microsecond trace, any copy time is additional end-to-end time.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting only the kernel interval as latency makes a GPU path look faster than a CPU path that includes its own I/O.</p>
+<p><strong>How to verify.</strong> Draw the timeline with upload, kernel and download, and check the timer brackets all three. Label any number as synthetic unless measured on a device.</p>
 <h3 id="exercise-4-separate-first-call-compile-time">Exercise 4: Separate first-call compile time<a class="heading-anchor" href="#exercise-4-separate-first-call-compile-time" aria-label="Link to this section">#</a></h3>
 <p>Report cold and warm distributions separately.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate first-call compile time</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Report the first call and later calls as separate distributions, because the first call can include JIT compilation, module loading and allocation.</p>
+<p><strong>Why it is correct here.</strong> Numba and CuPy compile on first use. Folding that into a warm median hides it or, with few samples, distorts the median.</p>
+<p><strong>A plausible wrong approach.</strong> Discarding the first call without reporting it hides a cost a real user pays at process start.</p>
+<p><strong>How to verify.</strong> Record cold and warm samples in two lists and check the median of the warm list does not include call one.</p>
 <h3 id="exercise-5-design-equal-work-comparison">Exercise 5: Design equal-work comparison<a class="heading-anchor" href="#exercise-5-design-equal-work-comparison" aria-label="Link to this section">#</a></h3>
 <p>Use same data and tolerances.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design equal-work comparison</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Use the same input data, dtype, output and tolerance for both backends, and time the same boundary (end-to-end or kernel-only) on each.</p>
+<p><strong>Why it is correct here.</strong> A comparison is meaningful only when both sides do the same work. Different input sizes or a looser tolerance on one side make the ratio meaningless.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing a float32 GPU run with a float64 CPU run reports a speedup that is partly a precision change.</p>
+<p><strong>How to verify.</strong> Check outputs agree within the stated tolerance before timing. Record the shape, dtype, tolerance and boundary next to every number.</p>
 <h3 id="exercise-6-explain-why-cpu-trace-is-not-a-benchmark">Exercise 6: Explain why CPU trace is not a benchmark<a class="heading-anchor" href="#exercise-6-explain-why-cpu-trace-is-not-a-benchmark" aria-label="Link to this section">#</a></h3>
 <p>The supplied times are invented teaching observations.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain why CPU trace is not a benchmark</strong> is qualified there.</p>
+<p><strong>Approach.</strong> State that the trace numbers in this chapter are invented teaching values used to practice analysis, not measurements of any device.</p>
+<p><strong>Why it is correct here.</strong> The reference script computes a median of a hard-coded list; nothing executes on a GPU. Reporting its output as performance would be fabricated evidence.</p>
+<p><strong>A plausible wrong approach.</strong> Copying the 11 ms median into a report as GPU latency misrepresents a CPU script&#x27;s constant as a hardware result.</p>
+<p><strong>How to verify.</strong> The reference prints <code>CPU trace analysis</code>, which is the correct label. A real benchmark records host, device, versions and raw samples.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Median 11 ms and maximum 100 ms, from synthetic trace data.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-071_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

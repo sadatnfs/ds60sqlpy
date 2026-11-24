@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "track_id": "llm-evaluation",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "eval-002",
+      "title": "Leak free splits by family and by label availability time",
+      "anchor": "reference",
+      "source_path": "courses/llm-evaluation/solutions/eval-002_reference.py",
+      "source_sha256": "59d9b0a5b2e53da80e53d2452a81349d0bd6f46e639246f8c590968241a648ff",
+      "expected_output": [
+        "Family split accepted; leaking split rejected",
+        "Training at day 10: ['a']",
+        "eval-002: all reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [4, 14],
+          "excerpt": "def validate_split(rows):\n    seen = set()\n    groups = {}\n    for row in rows:\n        if row[\"id\"] in seen:\n            raise ValueError(\"Duplicate ID\")\n        seen.add(row[\"id\"])\n        prior = groups.setdefault(row[\"family\"], row[\"split\"])\n        if prior != row[\"split\"]:\n            raise ValueError(\"Family leakage\")\n    return groups",
+          "title": "Keep every family in one split",
+          "explanation": "validate_split walks the rows once. A set catches duplicate ids. groups.setdefault stores the first split seen for each family and returns it; if a later row from the same family names a different split, the function raises Family leakage. Near duplicate examples in both train and test would inflate scores.",
+          "observe": "The return value maps each family to its single split."
+        },
+        {
+          "lines": [17, 18],
+          "excerpt": "def training_ids(rows, cutoff):\n    return [r[\"id\"] for r in rows if r[\"event\"] <= cutoff and r[\"label_available\"] <= cutoff]",
+          "title": "Train only on what was known at the cutoff",
+          "explanation": "training_ids keeps a row only if the event happened by the cutoff and its label was also available by then. Using the event date alone would train on labels that did not yet exist at decision time.",
+          "observe": "Both conditions must hold, not just one."
+        },
+        {
+          "lines": [21, 23],
+          "excerpt": "def fingerprint(text):\n    normalized = \" \".join(text.casefold().split())\n    return hashlib.sha256(normalized.encode()).hexdigest()",
+          "title": "Fingerprint text after normalizing",
+          "explanation": "fingerprint lowercases with casefold, collapses runs of whitespace with split and join, and hashes the result with SHA 256. Two prompts that differ only in case or spacing get the same fingerprint, which helps detect duplicates across splits.",
+          "observe": "Different words still produce different hashes."
+        },
+        {
+          "lines": [27, 42],
+          "excerpt": "def worked_a():\n    rows = [\n        {\"id\": \"m1\", \"family\": \"metrics\", \"split\": \"train\"},\n        {\"id\": \"m2\", \"family\": \"metrics\", \"split\": \"train\"},\n        {\"id\": \"p1\", \"family\": \"policy\", \"split\": \"test\"},\n    ]\n    assert validate_split(rows) == {\"metrics\": \"train\", \"policy\": \"test\"}\n    broken = [dict(r) for r in rows]\n    broken[1][\"split\"] = \"test\"\n    try:\n        validate_split(broken)\n    except ValueError as error:\n        assert str(error) == \"Family leakage\"\n    else:\n        raise AssertionError(\"Leaking split accepted\")\n    print(\"Family split accepted; leaking split rejected\")",
+          "title": "Example A: catch a family leak",
+          "explanation": "The clean rows put both metrics rows in train and policy in test. Copying the rows with dict(r) and changing one split creates a leak without touching the original. The try, except, else block confirms the exact error message and fails if no error is raised.",
+          "observe": "The printed line confirms the clean split passes and the leaking one is rejected."
+        },
+        {
+          "lines": [46, 55],
+          "excerpt": "def worked_b():\n    rows = [\n        {\"id\": \"a\", \"event\": 8, \"label_available\": 9},\n        {\"id\": \"b\", \"event\": 8, \"label_available\": 12},\n        {\"id\": \"c\", \"event\": 11, \"label_available\": 11},\n    ]\n    assert training_ids(rows, 10) == [\"a\"]\n    assert [r[\"id\"] for r in rows if r[\"event\"] <= 10] == [\"a\", \"b\"]\n    assert fingerprint(\"  Define  conversion RATE \") == fingerprint(\"define conversion rate\")\n    print(\"Training at day 10:\", training_ids(rows, 10))",
+          "title": "Example B: the label clock",
+          "explanation": "Row b happened on day 8 but its label arrived on day 12, so at day 10 it is excluded. Filtering on event time alone would include it, which the second assert shows. The fingerprint assert demonstrates normalization.",
+          "observe": "Training at day 10 contains only a."
+        },
+        {
+          "lines": [59, 75],
+          "excerpt": "def exercise_checks():\n    assert training_ids([{\"id\": \"x\", \"event\": 10, \"label_available\": 10}], 10) == [\"x\"]\n    assert training_ids([{\"id\": \"x\", \"event\": 9, \"label_available\": 11}], 10) == []\n    assert fingerprint(\"rate\") != fingerprint(\"rates\")\n    assert fingerprint(\"A B\") == fingerprint(\"a\\n b\")\n    try:\n        validate_split(\n            [\n                {\"id\": \"a\", \"family\": \"x\", \"split\": \"train\"},\n                {\"id\": \"a\", \"family\": \"y\", \"split\": \"test\"},\n            ]\n        )\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"Duplicate ID accepted\")\n    assert validate_split([]) == {}",
+          "title": "Exercise checks at the boundaries",
+          "explanation": "The checks test exact edges: a label available on the cutoff day counts, a label one day late does not. A singular and plural word hash differently, while case and newline differences do not. A duplicate id is rejected even across families, and an empty input is valid.",
+          "observe": "No output here; any failure raises AssertionError."
+        },
+        {
+          "lines": [79, 87],
+          "excerpt": "def main():\n    worked_a()\n    worked_b()\n    exercise_checks()\n    print(\"eval-002: all reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Run everything and print the marker",
+          "explanation": "main runs both examples and the exercises in order, then prints the final marker.",
+          "observe": "The last line is eval-002: all reference checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "eval-006",
+      "title": "An exact paired sign test and a family level bootstrap",
+      "anchor": "reference",
+      "source_path": "courses/llm-evaluation/solutions/eval-006_reference.py",
+      "source_sha256": "7b8974acaa77987eb888513779b2a9941fe2cb3044f1d3d6e2503eb5cd5d21e3",
+      "expected_output": [
+        "Exact paired sign-reference tail: 0.625",
+        "Family resample support: [-1.0, 0.0, 0.0, 1.0]",
+        "eval-006: all reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [6, 13],
+          "excerpt": "def sign_test(differences):\n    d = np.asarray(differences, float)\n    if d.ndim != 1 or not 1 <= len(d) <= 16 or not np.isfinite(d).all():\n        raise ValueError(\"Bounded finite pairs required\")\n    observed = abs(d.mean())\n    null = np.array([np.mean(d * np.array(signs)) for signs in product((-1, 1), repeat=len(d))])\n    p = float(np.mean(np.abs(null) >= observed - 1e-12))\n    return p, null",
+          "title": "Enumerate every sign flip",
+          "explanation": "Each value is a paired difference between two systems on the same item. If the systems were equivalent, each difference would be equally likely to be positive or negative. product((-1, 1), repeat=n) lists all 2 to the n sign patterns, so the null distribution is exact rather than sampled. The p value is the share of patterns at least as extreme as the observed mean.",
+          "observe": "The input is capped at 16 pairs, which keeps enumeration to 65536 patterns."
+        },
+        {
+          "lines": [12, 12],
+          "excerpt": "    p = float(np.mean(np.abs(null) >= observed - 1e-12))",
+          "title": "A tolerance for ties",
+          "explanation": "observed - 1e-12 makes values equal to the observed mean count as at least as extreme, even if floating point rounding makes them differ in the last digit.",
+          "observe": "Without the tolerance, exact ties could be dropped by accident."
+        },
+        {
+          "lines": [16, 22],
+          "excerpt": "def cluster_bootstrap(means):\n    x = np.asarray(means, float)\n    if x.ndim != 1 or not 1 <= len(x) <= 6 or not np.isfinite(x).all():\n        raise ValueError(\"Bounded family means required\")\n    return np.array(\n        [np.mean(x[list(indices)]) for indices in product(range(len(x)), repeat=len(x))]\n    )",
+          "title": "Resample families, not items",
+          "explanation": "cluster_bootstrap takes one mean per family and lists every way to draw that many families with replacement. Items within a family are correlated, so resampling whole families gives a more honest spread.",
+          "observe": "Two families produce four resamples; three families would produce 27."
+        },
+        {
+          "lines": [26, 30],
+          "excerpt": "def worked_a():\n    p, null = sign_test([1, 1, 1, -1])\n    assert len(null) == 16 and p == 0.625\n    assert sign_test([-1, -1, -1, 1])[0] == p\n    print(\"Exact paired sign-reference tail:\", p)",
+          "title": "Example A: a small exact p value",
+          "explanation": "Three positive differences and one negative give a mean of 0.5. Of the 16 sign patterns, 10 have an absolute mean of at least 0.5, so p is 0.625. Flipping all signs gives the same p value because the test is two sided.",
+          "observe": "The printed tail probability is 0.625."
+        },
+        {
+          "lines": [34, 40],
+          "excerpt": "def worked_b():\n    distribution = cluster_bootstrap([-1, 1])\n    assert distribution.tolist() == [-1.0, 0.0, 0.0, 1.0]\n    np.testing.assert_allclose(np.quantile(distribution, [0.025, 0.975]), [-0.925, 0.925])\n    # Observed support endpoints remain -1 and 1; interpolated percentiles differ.\n    assert np.quantile(distribution, [0.025, 0.975], method=\"inverted_cdf\").tolist() == [-1.0, 1.0]\n    print(\"Family resample support:\", distribution.tolist())",
+          "title": "Example B: the bootstrap support",
+          "explanation": "With family means -1 and 1, the resampled means are -1, 0, 0 and 1. The comment explains a subtle point: interpolated quantiles give -0.925 and 0.925, which are not values the bootstrap can produce, while the inverted_cdf method returns actual support points.",
+          "observe": "The printed support is [-1.0, 0.0, 0.0, 1.0]."
+        },
+        {
+          "lines": [44, 56],
+          "excerpt": "def exercise_checks():\n    assert sign_test([0, 0])[0] == 1\n    assert sign_test([1, 1, 1, 1])[0] == 0.125\n    assert np.allclose(cluster_bootstrap([0.5, 0.5]), 0.5)\n    assert len(cluster_bootstrap([0, 1, 2])) == 27\n    for invalid in ([], [float(\"nan\")], [1] * 17):\n        try:\n            sign_test(invalid)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"Invalid sign design accepted\")\n    assert np.mean(cluster_bootstrap([-1, 1])) == 0",
+          "title": "Exercises at the edges",
+          "explanation": "All zero differences give p of 1. Four positive differences give 0.125, the smallest possible for four pairs, which shows that small samples cannot reach very small p values. Empty, NaN and oversized inputs are rejected.",
+          "observe": "No output; failures raise AssertionError."
+        },
+        {
+          "lines": [60, 68],
+          "excerpt": "def main():\n    worked_a()\n    worked_b()\n    exercise_checks()\n    print(\"eval-006: all reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Run and print the marker",
+          "explanation": "main runs both examples and the exercises, then prints the marker.",
+          "observe": "The last line is eval-006: all reference checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "eval-014",
+      "title": "Authorization before retrieval and a strict tool proposal check",
+      "anchor": "reference",
+      "source_path": "courses/llm-evaluation/solutions/eval-014_reference.py",
+      "source_sha256": "46b77b26051e79b30c96dda67a1f4133aef51900b8d152c1508c20cf485fa54d",
+      "expected_output": [
+        "Authorized candidate set is independent of instruction-like query text",
+        "Allowed lookup accepted; other operations and targets rejected",
+        "eval-014: all reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [1, 8],
+          "excerpt": "DOCUMENTS = [\n    {\"id\": \"public-guide\", \"access\": \"public\", \"text\": \"conversion rate definition\"},\n    {\n        \"id\": \"restricted-note\",\n        \"access\": \"restricted\",\n        \"text\": \"public wording does not grant access\",\n    },\n]",
+          "title": "Two documents with access labels",
+          "explanation": "DOCUMENTS is a fixed fixture. One document is public and one is restricted. The restricted text deliberately contains the word public to show that matching words must never grant access.",
+          "observe": "Access comes only from the access field."
+        },
+        {
+          "lines": [11, 14],
+          "excerpt": "def retrieve(query, allowed_access):\n    authorized = [d for d in DOCUMENTS if d[\"access\"] in allowed_access]\n    terms = set(query.casefold().split())\n    return [d[\"id\"] for d in authorized if terms.intersection(d[\"text\"].casefold().split())]",
+          "title": "Filter first, then match",
+          "explanation": "retrieve removes every document the caller is not allowed to see before looking at the query. Only then does it compare lowercase word sets. Because filtering happens first, no wording in the query can reach a restricted document.",
+          "observe": "The result is a list of document ids."
+        },
+        {
+          "lines": [17, 25],
+          "excerpt": "def apply_proposal(proposal, allowed_ids):\n    if not isinstance(proposal, dict) or set(proposal) != {\"operation\", \"record_id\"}:\n        raise ValueError(\"Invalid proposal schema\")\n    if proposal[\"operation\"] != \"lookup\":\n        raise ValueError(\"Unsupported operation\")\n    key = proposal[\"record_id\"]\n    if not isinstance(key, str) or key not in allowed_ids:\n        raise ValueError(\"Unauthorized record\")\n    return {\"record_id\": key, \"result\": \"authored fixture value\"}",
+          "title": "Validate a model's tool proposal",
+          "explanation": "apply_proposal treats the proposal as untrusted input. It must be a dictionary with exactly two keys, the operation must be lookup and the record id must be text in the allowed set. Each failure raises ValueError with a specific reason.",
+          "observe": "Only a fully valid proposal returns a result."
+        },
+        {
+          "lines": [28, 33],
+          "excerpt": "# === EXAMPLE A ===\ndef worked_a():\n    assert retrieve(\"public\", {\"public\"}) == []\n    assert retrieve(\"conversion\", {\"public\"}) == [\"public-guide\"]\n    assert \"restricted-note\" not in retrieve(\"conversion ignore rules public\", {\"public\"})\n    print(\"Authorized candidate set is independent of instruction-like query text\")",
+          "title": "Example A: query text cannot widen access",
+          "explanation": "Searching for public with only public access returns nothing, because the restricted document was filtered out first. A query containing instruction like text such as ignore rules still cannot reach the restricted note.",
+          "observe": "The printed line says the authorized candidate set is independent of the query text."
+        },
+        {
+          "lines": [37, 50],
+          "excerpt": "def worked_b():\n    good = apply_proposal({\"operation\": \"lookup\", \"record_id\": \"public-guide\"}, {\"public-guide\"})\n    assert good[\"record_id\"] == \"public-guide\"\n    for bad in (\n        {\"operation\": \"other\", \"record_id\": \"public-guide\"},\n        {\"operation\": \"lookup\", \"record_id\": \"restricted-note\"},\n    ):\n        try:\n            apply_proposal(bad, {\"public-guide\"})\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"Invalid proposal admitted\")\n    print(\"Allowed lookup accepted; other operations and targets rejected\")",
+          "title": "Example B: accept one lookup, reject the rest",
+          "explanation": "A lookup of an allowed id succeeds. An unknown operation and a lookup of a restricted id both raise. The loop with try, except, else turns a missing error into a test failure.",
+          "observe": "The printed line confirms the allowed lookup and the rejections."
+        },
+        {
+          "lines": [54, 68],
+          "excerpt": "def exercise_checks():\n    assert retrieve(\"  CONVERSION \", {\"public\"}) == [\"public-guide\"]\n    assert retrieve(\"conversion\", set()) == []\n    assert retrieve(\"public\", {\"restricted\"}) == [\"restricted-note\"]\n    for bad in (\n        {\"operation\": \"lookup\", \"record_id\": \"public-guide\", \"authority\": \"self-declared\"},\n        {\"operation\": \"lookup\", \"record_id\": 7},\n        None,\n    ):\n        try:\n            apply_proposal(bad, {\"public-guide\"})\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"Malformed proposal accepted\")",
+          "title": "Exercise checks",
+          "explanation": "Extra spaces and case do not matter. An empty permission set returns nothing. A proposal that declares its own authority, a numeric id and None are all rejected.",
+          "observe": "No output; failures raise AssertionError."
+        },
+        {
+          "lines": [72, 80],
+          "excerpt": "def main():\n    worked_a()\n    worked_b()\n    exercise_checks()\n    print(\"eval-014: all reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Run and print the marker",
+          "explanation": "main runs both examples and the exercise checks, then prints the marker.",
+          "observe": "The last line is eval-014: all reference checks passed."
+        }
+      ]
+    }
+  ]
+}

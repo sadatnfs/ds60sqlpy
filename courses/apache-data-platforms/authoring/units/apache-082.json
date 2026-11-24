@@ -5,6 +5,39 @@
   "minutes": 100,
   "prerequisites": ["apache-038", "apache-050", "apache-062"],
   "concepts": ["end-to-end streaming", "event identity", "sink participation"],
+  "key_terms": [
+    [
+      "End-to-end guarantee",
+      "The delivery claim for a whole Kafka to Flink to Pinot path, which holds only if every source, checkpoint, sink and serving boundary supports it."
+    ],
+    [
+      "Event identity",
+      "A stable business identifier for each event, distinct from the Kafka offset that identifies only its log position."
+    ],
+    [
+      "Sink participation",
+      "Whether a sink takes part in Flink's checkpoint commit protocol, which is required before output can be called exactly once."
+    ],
+    [
+      "Identity ledger",
+      "A finite record of event IDs, keys, timestamps and correction semantics used to reconcile results after a restart or retry."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Deduplicate by event ID before aggregating",
+      "language": "python",
+      "code": "events = [\n    {\"event_id\": \"a\", \"region\": \"east\", \"amount\": 4},\n    {\"event_id\": \"b\", \"region\": \"west\", \"amount\": 9},\n    {\"event_id\": \"a\", \"region\": \"east\", \"amount\": 4},\n]\nseen = {}\nfor event in events:\n    seen.setdefault(event[\"event_id\"], event)\ntotals = {}\nfor event in seen.values():\n    totals[event[\"region\"]] = totals.get(event[\"region\"], 0) + event[\"amount\"]\nprint(totals)",
+      "output": "{'east': 4, 'west': 9}",
+      "interpretation": "The repeated event a stands for a producer retry that Kafka delivered twice. Keyed on event_id, the duplicate is dropped and east stays at 4 instead of 8. Exactly-once settings inside Flink do not remove a duplicate that the producer wrote as two records, so the end-to-end guarantee needs a stable business key somewhere in the path."
+    },
+    {
+      "title": "Consumer offsets as the source position",
+      "language": "bash",
+      "code": "kafka-consumer-groups.sh --bootstrap-server kafka:9092 \\\n  --describe --group <flink-consumer-group>",
+      "interpretation": "The output lists each partition with CURRENT-OFFSET, LOG-END-OFFSET and LAG. Flink stores its real source positions in checkpoints and only commits offsets to Kafka for monitoring, so these numbers can trail what a restore would use. Record both the checkpoint ID and the committed offsets in the receipt, and compare serving row IDs against the source range they claim to cover."
+    }
+  ],
   "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",
   "sources": [
     ["Iceberg reliability and table state", "https://iceberg.apache.org/docs/latest/reliability/"],

@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-006`, `python-08`.
 
 HTML forms and file uploads use representations different from JSON. A form can submit repeated fields, and a multipart request can combine text fields with uploaded byte streams. This chapter parses both through a real Flask client, validates a small CSV contract and observes an actual request-size refusal.
 
+## Key terms
+
+- **multipart/form-data:** A request encoding that splits the body into parts so text fields and uploaded file bytes can travel in one request.
+- **Repeated form field:** A form field name submitted more than once; `request.form.getlist` returns every value instead of only one.
+- **Client-declared metadata:** The filename and content type that accompany an upload; the client supplies them, so they do not prove what the bytes contain.
+- **MAX_CONTENT_LENGTH:** A Flask setting that caps the accepted request-body size, including multipart overhead; a larger request receives 413 Content Too Large.
+- **secure_filename:** A Werkzeug helper that removes path separators and unsafe characters from a client filename; it does not validate content and can return an empty string.
+
 ## Mechanism: names and declared types remain client input
 
 `request.form` is a multidict of parsed text fields. `request.files` contains uploaded-file objects. The upload's filename and content type are supplied by the client; neither proves what the bytes contain or where they belong on disk. The example reads UTF-8 CSV and requires exactly one column named `value`, then converts every value to an integer.
@@ -27,6 +35,27 @@ A small file contains the header `value` and values two and three. Its submitted
 The second request contains a payload larger than the configured request limit. Flask returns 413. The program does not persist a partial file or report a successful upload. Other invalid cases, such as undecodable bytes or the wrong column name, have an explicit controlled 400 path in the handler.
 
 A CSV parser is more reliable than splitting lines and commas manually because quoting and record boundaries have defined rules. Even so, a real import pipeline needs additional limits on rows, columns and field lengths. This example's tiny body bound makes its work small; it is not a universal safe-import implementation for arbitrary archives or spreadsheets.
+
+## Worked example: what secure_filename keeps and removes
+
+```python
+from werkzeug.utils import secure_filename
+
+for name in ["../report.csv", "..\\..\\boot.ini", "my data (v2).csv", "../../", "résumé.csv"]:
+    print(repr(name), "->", repr(secure_filename(name)))
+```
+
+Expected output:
+
+```text
+'../report.csv' -> 'report.csv'
+'..\\..\\boot.ini' -> 'boot.ini'
+'my data (v2).csv' -> 'my_data_v2.csv'
+'../../' -> ''
+'résumé.csv' -> 'resume.csv'
+```
+
+The client controls the uploaded filename, so the lesson never uses it as a path directly. `secure_filename` stripped the parent-directory segments from both the POSIX and Windows-style names, replaced spaces with underscores, dropped the parentheses and transliterated the accented letters to ASCII. The fourth case is the trap: a name made only of separators becomes an empty string, so a handler that blindly joins it onto an upload directory would write to the directory itself. The lesson guards that with `uploaded.filename or "data.csv"`, and production code should also generate its own storage key. Note that a safe name says nothing about content; the CSV contract check is still required.
 
 ## Failure diagnosis
 

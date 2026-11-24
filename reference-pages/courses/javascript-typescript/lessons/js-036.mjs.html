@@ -198,17 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `assert.equal(result.stdout.trim(),</span></span>
 <span class="source-line"><span class="syntax-comment">// &#x27;1&#x27;);` to `assert.equal(result.stdout.trim(), &#x27;2&#x27;);` inside its check. Before running it,</span></span>
 <span class="source-line"><span class="syntax-comment">// predict whether the check still passes and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(result.stdout.trim(), &#x27;1&#x27;)`. Restoring the original line brings back the</span></span>
-<span class="source-line"><span class="syntax-comment">// worked observation: actual child prints 1.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(result.stdout.trim(), &#x27;2&#x27;);`. Restoring `assert.equal(result.stdout.trim(),</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;1&#x27;);` brings back: actual child prints 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Use an explicitly exported subpath: debug a regression</span></span>
 <span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads</span></span>
 <span class="source-line"><span class="syntax-comment">// `console.log(twice(4));`. Run Example B with that line, use the failing check to locate</span></span>
 <span class="source-line"><span class="syntax-comment">// the defect and repair it without changing the check.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(result.stdout.trim(), &#x27;6&#x27;)`; after it the line reads</span></span>
-<span class="source-line"><span class="syntax-comment">// `console.log(twice(3));` again and actual child prints 6.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(result.stdout.trim(), &#x27;6&#x27;)`. Restoring `console.log(twice(3));` brings back:</span></span>
+<span class="source-line"><span class="syntax-comment">// actual child prints 6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Reject an undeclared private path</span></span>
 <span class="source-line"><span class="syntax-comment">// Attempt a package-name import of private.mjs even though the file exists.</span></span>

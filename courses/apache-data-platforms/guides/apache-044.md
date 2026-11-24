@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-039`, `apache-015`, `apache-042`.
 
+## Key terms
+
+- **Catalog protocol:** The interface a client uses to find and commit table metadata, such as a SQL, REST or Hive Metastore catalog, chosen separately from the query engine.
+- **Snapshot selection:** Choosing which committed table state to read, which fixes the exact set of data files behind a result.
+- **Arrow materialization:** Reading a bounded Iceberg scan into an in-memory Arrow table that another engine then registers. It copies data at a fixed snapshot and costs memory.
+- **Table provider:** An engine component that reads a table format directly and can push filters toward storage. DataFusion here receives Arrow data instead of an Iceberg provider.
+- **Cross-engine evidence:** A tested result showing one engine read what another component committed, which open file formats alone do not establish.
+
 ## A catalog protocol and a query engine are separate choices
 
 A catalog tells a client how to find and commit table metadata. A query engine
@@ -77,6 +85,35 @@ Iceberg catalog integration?** No. This path uses PyIceberg for catalog and scan
 then DataFusion for execution over materialized Arrow. The two cases show an
 actual useful cross-library workflow while preserving the distinction between a
 bridge, a direct connector and a remote catalog protocol.
+
+## Worked examples
+
+### Register one snapshot as an engine relation
+
+```python
+from datafusion import SessionContext
+
+first = table.current_snapshot().snapshot_id
+ctx = SessionContext()
+batches = table.scan(snapshot_id=first).to_arrow().to_batches()
+ctx.register_record_batches("original", [batches])
+query = "SELECT region, SUM(amount) AS total FROM original GROUP BY region ORDER BY region"
+print(ctx.sql(query).to_pylist())
+```
+
+Expect east with 11 and west with 9. PyIceberg resolves the snapshot and reads files into Arrow, and DataFusion only sees batches; it has no knowledge of the catalog. That split is useful for small reproducible analyses, but it means the engine cannot push filters into Iceberg planning, so filter in the scan call when the table is large.
+
+### Show the registered relation does not refresh
+
+```python
+table.append(pa.table({"id": [4], "region": ["west"], "amount": [2]}))
+print(ctx.sql(query).to_pylist())
+refreshed = table.scan().to_arrow().to_batches()
+ctx.register_record_batches("refreshed", [refreshed])
+print(ctx.sql(query.replace("original", "refreshed")).to_pylist())
+```
+
+The first print still shows west with 9 because the original relation is a copy of the first snapshot. Only the newly registered relation shows west with 11. This is the intended behavior for a reproducible report, but a dashboard built this way will look frozen. Record the snapshot identifier with every result so a reader knows which commit the numbers describe.
 
 ## Complete worked source
 

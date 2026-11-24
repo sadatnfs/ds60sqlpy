@@ -16,7 +16,7 @@ object Main {
   }
 
   def buildGrouped(source: DataFrame, partitions: Int): DataFrame = {
-    require(partitions >= 1 && partitions <= 16, "Partition budget is1..16")
+    require(partitions >= 1 && partitions <= 16, "Partition budget is 1..16")
     source.sparkSession.conf.set("spark.sql.shuffle.partitions", partitions.toString)
     source.groupBy("key").agg(count(lit(1)).as("n"))
   }

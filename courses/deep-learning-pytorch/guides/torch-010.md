@@ -54,7 +54,7 @@ Subclass Dataset and implement __len__ and__getitem__. A Subset stores a sequenc
 
 ## Trace selection, fitted state and delegated access
 
-The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 from A and B; assessment selects 4, 5, 6, 7 from C and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, account C, value 20. A local batch position zero is not a replacement for the source identity.
+The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 from A and B; assessment selects 4, 5, 6, 7 from C and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus `assessment[0]` returns original identity 4, account C, value 20. A local batch position zero is not a replacement for the source identity.
 
 | Population | Original identities | Values | Mean |
 | --- | --- | --- | --- |
@@ -136,7 +136,7 @@ assert mean.item() == 4
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Group sets are disjoint, the training mean stays 4 even after a held-out value changes to 3200, the frozen transform maps held-out values to 16, 18, 26 and 28, and the alternating row split lets all four groups cross. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Inspect a literal Dataset. Predict exercise 6, Apply the frozen transform, from its prompt alone: Center held-out values with the training mean. Then explain why this finish condition holds: Group sets are disjoint, the training mean stays 4 even after a held-out value changes to 3200, the frozen transform maps held-out values to 16, 18, 26 and 28, and the alternating row split lets all four groups cross. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -172,15 +172,15 @@ If a Subset returns an unexpected identity, distinguish its local index from the
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Select whole groups) alters one assumption of Example A (Inspect a literal Dataset). Hint 2: exercise 4, Perturb only assessment values, should end at training mean unchanged 4; global mean changes. Work backward from it. Hint 3: exercise 5, Expose row-level leakage, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Map-style Dataset, Subset, Split unit using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Fit only training values, from its inputs alone. Predict whether exercise 3, Apply the new frozen transform, survives one changed input. Then explain Map-style Dataset, Subset, Split unit in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-009` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Inspect a literal Dataset) cannot be rebuilt without help, revisit `torch-009` first. Otherwise keep your exercise 2 attempt, Hold out a different pair of groups, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

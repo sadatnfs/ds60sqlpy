@@ -15,5 +15,7 @@ COPY python ./python
 RUN Rscript --vanilla R/compile.R /opt/tmb-project /opt/tmb-models
 ENV TMB_BUILD_DIR=/opt/tmb-models
 RUN Rscript --vanilla tests/acceptance.R
+# Models and dependencies are compiled above as root; the runtime only reads them.
+USER 65534:65534
 ENTRYPOINT ["Rscript", "--vanilla"]
 CMD ["tests/acceptance.R"]

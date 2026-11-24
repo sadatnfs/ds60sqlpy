@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-behavior-with-no-ingress-controller">Exercise 1: Predict behavior with no Ingress controller.<a class="heading-anchor" href="#exercise-1-predict-behavior-with-no-ingress-controller" aria-label="Link to this section">#</a></h3>
 <p>API acceptance is not implementation. Inspect controller availability before debugging backend application code.</p>
 <p><strong>Expected:</strong> The object can exist without any serving proxy.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check whether any Ingress controller watches the Ingress class used by the object.</li>
+<li><strong>Why it is correct:</strong> An Ingress is only configuration; without a controller nothing programs a proxy to serve it.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming a successful apply means routing works confuses object storage with a running proxy.</li>
+<li><strong>How to verify:</strong> The prediction says the object can exist with no serving proxy.</li>
+</ul>
 <h3 id="exercise-2-distinguish-host-and-path-matching">Exercise 2: Distinguish host and path matching.<a class="heading-anchor" href="#exercise-2-distinguish-host-and-path-matching" aria-label="Link to this section">#</a></h3>
 <p>Both participate in routing. A request to the right IP with a different Host header can select another rule.</p>
 <p><strong>Expected:</strong> Host identifies the requested site; path identifies a route within it.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Assign host matching to the requested site name and path matching to the route within that site.</li>
+<li><strong>Why it is correct:</strong> The controller selects a rule by host first and then by path, so each field narrows a different part of the request.</li>
+<li><strong>Plausible wrong approach:</strong> Putting the site name into a path rule makes it match only a literal path segment.</li>
+<li><strong>How to verify:</strong> Host maps to the site and path maps to a route within it.</li>
+</ul>
 <h3 id="exercise-3-draw-the-full-ingress-to-pod-request-path">Exercise 3: Draw the full Ingress-to-Pod request path.<a class="heading-anchor" href="#exercise-3-draw-the-full-ingress-to-pod-request-path" aria-label="Link to this section">#</a></h3>
 <p>The API references the Service, while the controller may proxy directly to derived Pod endpoints or use ClusterIP routing. Name the actual implementation path.</p>
 <p><strong>Expected:</strong> The Service backend reference and the actual configured upstream path are distinguished.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Draw the client, controller proxy, backend Service reference and the upstream the controller actually configured.</li>
+<li><strong>Why it is correct:</strong> Many controllers resolve the Service to Pod endpoints, so the configured upstream can differ from the named Service.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming traffic always passes through the ClusterIP can misplace a fault in a controller that targets Pods.</li>
+<li><strong>How to verify:</strong> The drawing separates the Service backend reference from the configured upstream.</li>
+</ul>
 <h3 id="exercise-4-diagnose-an-app-404-after-a-matched-prefix-route">Exercise 4: Diagnose an app 404 after a matched prefix route.<a class="heading-anchor" href="#exercise-4-diagnose-an-app-404-after-a-matched-prefix-route" aria-label="Link to this section">#</a></h3>
 <p>Inspect rewrite behavior and actual request path. A proxy match only chooses a backend.</p>
 <p><strong>Expected:</strong> The forwarded path may not exist in the application.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare the matched route with the path the application received and the routes it serves.</li>
+<li><strong>Why it is correct:</strong> A Prefix match forwards the full original path unless a rewrite is configured, so the app may not serve it.</li>
+<li><strong>Plausible wrong approach:</strong> Blaming the Ingress for a 404 that the application returned skips reading which component answered.</li>
+<li><strong>How to verify:</strong> The diagnosis shows the forwarded path does not exist in the application.</li>
+</ul>
 <h3 id="exercise-5-explain-why-controller-annotations-are-not-universal">Exercise 5: Explain why controller annotations are not universal.<a class="heading-anchor" href="#exercise-5-explain-why-controller-annotations-are-not-universal" aria-label="Link to this section">#</a></h3>
 <p>Copying annotations from another controller can be ignored or behave differently. Use the prepared implementation documentation.</p>
 <p><strong>Expected:</strong> They belong to a particular implementation contract.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Tie each annotation to the controller that reads it.</li>
+<li><strong>Why it is correct:</strong> Annotations are free-form metadata, and each controller defines its own keys and meanings.</li>
+<li><strong>Plausible wrong approach:</strong> Copying an annotation from another controller&#x27;s docs adds a key that the installed controller ignores.</li>
+<li><strong>How to verify:</strong> The answer says annotations belong to a specific implementation contract.</li>
+</ul>
 <h3 id="exercise-6-compare-ingress-and-a-layer-4-service">Exercise 6: Compare Ingress and a Layer 4 Service.<a class="heading-anchor" href="#exercise-6-compare-ingress-and-a-layer-4-service" aria-label="Link to this section">#</a></h3>
 <p>Choose the mechanism according to the protocol and routing requirement rather than treating both as generic public exposure switches.</p>
-<p><strong>Expected:</strong> Ingress interprets HTTP routing; the Service handles transport endpoint selection.</p></article>
+<p><strong>Expected:</strong> Ingress interprets HTTP routing; the Service handles transport endpoint selection.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Contrast HTTP routing by host and path with Service connection selection by IP and port.</li>
+<li><strong>Why it is correct:</strong> The Ingress proxy reads HTTP requests, while the Service picks a backend when a connection opens.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting a Service to route by path asks Layer 4 to read data it never inspects.</li>
+<li><strong>How to verify:</strong> Ingress handles HTTP routing, and the Service handles transport endpoint selection.</li>
+</ul></article>
   </main>
 </body>
 </html>

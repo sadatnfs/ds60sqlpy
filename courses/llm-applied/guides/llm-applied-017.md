@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-016`, `llm-034`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-016` (Low-rank adaptation: dimensions, gradients and a real update) and `llm-034` (llm-034). They introduce the notation this lesson needs for quantized base and nibble packing.
 
 ## Learning objectives
 
@@ -18,13 +18,13 @@ This chapter deliberately implements a narrower mechanism: symmetric uniform sig
 
 The Methods Desk team wants to reduce the resources required by a larger base model. Quantization replaces floating weights with a smaller set of representable values, usually together with scale or codebook metadata. That substitution changes the function before any adapter is trained. A later improvement must therefore be interpreted relative to both the original base and the quantized base.
 
-The literal example uses a uniform grid with a scale derived from the largest absolute value. It rounds a2-by-2 matrix into signed codes, packs them into bytes and reconstructs approximate float32 values for computation. Each step has a different property: rounding loses numerical information, packing preserves the chosen codes, and dequantization reconstructs the approximation encoded by those codes.
+The literal example uses a uniform grid with a scale derived from the largest absolute value. It rounds a 2-by-2 matrix into signed codes, packs them into bytes and reconstructs approximate float32 values for computation. Each step has a different property: rounding loses numerical information, packing preserves the chosen codes, and dequantization reconstructs the approximation encoded by those codes.
 
 The exact arithmetic below shows that a successful code round trip does not imply unchanged model output. The packed bytes can be perfectly correct while the reconstructed matrix produces a different result. That difference is the expected approximation error to measure before attributing a later task change to adaptation.
 
 ## Outliers explain a basic quantization tradeoff
 
-Consider an illustrative uniform quantizer for weights[0.01,0.02,0.03,10] using the range-7 through 7. A single scale based on the maximum is \(\frac{10}{7}\), about 1.4286. The three small weights round to zero because the grid is too coarse to distinguish them, while the large value uses the extreme code.
+Consider an illustrative uniform quantizer for weights `[0.01, 0.02, 0.03, 10]` using the range-7 through 7. A single scale based on the maximum is \(\frac{10}{7}\), about 1.4286. The three small weights round to zero because the grid is too coarse to distinguish them, while the large value uses the extreme code.
 
 If the first three weights were represented in a separate group, their maximum-based scale would be \(\frac{0.03}{7}\), about 0.004286. They could then be represented much more accurately, at the cost of additional group metadata and a different computation layout. This explains why granularity and scale policy matter. It is an example of uniform quantization reasoning, not an implementation of NF4 or a claim that a particular block size is optimal.
 
@@ -78,25 +78,27 @@ Treat storage format, compute dtype and trainable state as distinct budgets. The
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-017/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `llm-torch-cpu` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-017.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-017.py` in the declared `llm-torch-cpu` profile. *Quantize a fixed matrix*, *Pack and unpack real nibbles* and *Measure dequantization error* need only PyTorch and NumPy and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-017/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Pack and unpack real nibbles* and *Measure dequantization error* reuse the helper and fixture introduced in *Quantize a fixed matrix*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: codes `[[0, -4], [7, -1]]`. Example B should give: Packed bytes `[72, 127]`; round-trip codes exact. Example C should give: reference `[1.9, 2.1]`; finite nonzero approximation error. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
-Use scale=maxabs/7 and integer codes-7..7. Offset each code by 8 to fit a 4-bit nibble, then pack low and high nibbles into one uint8. Unpack with bit masks and shifts, subtract 8, and multiply by the stored scale. The model uses the reconstructed frozen tensor plus a low-rank delta. Only adapterParameters enter the optimizer; packed bytes and scale are immutable fixture state.
+Use scale=maxabs/7 and integer codes-7..7. Offset each code by 8 to fit a 4-bit nibble, then pack low and high nibbles into one uint8. Unpack with bit masks and shifts, subtract 8, and multiply by the stored scale. The model uses the reconstructed frozen tensor plus a low-rank delta. Only adapter parameters enter the optimizer; packed bytes and scale are immutable fixture state.
 
 ## Derive the codes, bytes and forward error
 
-The maximum absolute matrix entry is 1.7, so the uniform scale is \(\frac{1.7}{7}=\frac{17}{70}\), about 0.242857. Dividing the entries by that scale and rounding gives codes[[0, -4], [7, -1]]. The allowed signed range contains 15 values from-7 through 7. Offsetting by eight produces unsigned nibbles[8, 4, 15, 7]; one of the 16 possible nibble values is unused by this chosen symmetric scheme.
+The maximum absolute matrix entry is 1.7, so the uniform scale is \(\frac{1.7}{7}=\frac{17}{70}\), about 0.242857. Dividing the entries by that scale and rounding gives codes `[[0, -4], [7, -1]]`. The allowed signed range contains 15 values from -7 through 7. Offsetting by eight produces unsigned nibbles `[8, 4, 15, 7]`; one of the 16 possible nibble values is unused by this chosen symmetric scheme.
 
 The first packed byte is 8+(4 shifted left by 4)=8+64=72. The second is 15+(7 shifted left by 4)=15+112=127. Unpacking the low four bits and then the high four bits restores those integer codes exactly. This is a lossless representation change of the already quantized integers. The information loss happened earlier when the original floating weights were rounded.
 
-Using ideal decimal arithmetic, the reconstructed matrix is[[0, -34/35], [17/10, -17/70]]. Multiplying by x=[1, -2] gives[68/35, 153/70], about[1.942857, 2.185714]. The original output is[1.9, 2.1], so the errors are[3/70, 6/70], about[0.042857, 0.085714]. Actual float32 operations can differ slightly from these ideal-decimal values, which is why the executable comparison uses explicit tolerances.
+Using ideal decimal arithmetic, the reconstructed matrix is `[[0, -34/35], [17/10, -17/70]]`. Multiplying by x=[1, -2] gives `[68/35, 153/70]`, about `[1.942857, 2.185714]`. The original output is `[1.9, 2.1]`, so the errors are `[3/70, 6/70]`, about `[0.042857, 0.085714]`. Actual float32 operations can differ slightly from these ideal-decimal values, which is why the executable comparison uses explicit tolerances.
 
-Without clipping, nearest-grid rounding has per-weight absolute error at most \(\frac{\mathrm{scale}}{2}\). For a fixed output row, the triangle inequality gives an output error bound of(\(\frac{\mathrm{scale}}{2}\))*sum(abs(x)). Here that is(17/140)*3=51/140, about 0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
+Without clipping, nearest-grid rounding has per-weight absolute error at most \(\frac{\mathrm{scale}}{2}\). For a fixed output row, the triangle inequality gives an output error bound of(\(\frac{\mathrm{scale}}{2}\))*sum(abs(x)). Here that is (17/140)*3=51/140, about 0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
 
-The adapter code uses the stored output-by-input matrix convention: \(Y=X(W+AB)^{\mathsf T}\). A has shape[2, 1] and B[1, 2]. At \(B=0\), the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are 0.1, the first B gradient is \(0.1\cdot \operatorname{sum}(Y)\cdot X\), approximately[0.412857, -0.825714]. The packed codes stay fixed while that differentiable branch changes.
+The adapter code uses the stored output-by-input matrix convention: \(Y=X(W+AB)^{\mathsf T}\). A has shape `[2, 1]` and B[1, 2]. At \(B=0\), the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are 0.1, the first B gradient is \(0.1\cdot \operatorname{sum}(Y)\cdot X\), approximately `[0.412857, -0.825714]`. The packed codes stay fixed while that differentiable branch changes.
 
 The adapter's target is zero output on one input, not the original full-precision output. A falling loss therefore demonstrates optimization of the stated task; it does not prove recovery of the original weight matrix or correction of quantization on other inputs. A rank-one update fitting one vector leaves many unconstrained directions.
 
@@ -130,7 +132,7 @@ codes = np.clip(np.rint(original / scale), -7, 7).astype(np.int8)
 np.testing.assert_array_equal(codes, [[0, -4], [7, -1]])
 ```
 
-**Expected:** codes[[0, -4], [7, -1]].
+**Expected:** codes `[[0, -4], [7, -1]]`.
 
 ### Example B: Pack and unpack real nibbles
 
@@ -147,7 +149,7 @@ np.testing.assert_array_equal(packed, [72, 127])
 np.testing.assert_array_equal(restored_codes, codes)
 ```
 
-**Expected:** packed bytes[72, 127]; round-trip codes exact.
+**Expected:** packed bytes `[72, 127]`; round-trip codes exact.
 
 ### Example C: Measure dequantization error
 
@@ -162,27 +164,30 @@ np.testing.assert_allclose(reference, [1.9, 2.1], atol=1e-6, rtol=0)
 assert np.isfinite(approximate).all() and np.max(np.abs(approximate - reference)) > 0
 ```
 
-**Expected:** reference[1.9, 2.1]; finite nonzero approximation error.
+**Expected:** reference `[1.9, 2.1]`; finite nonzero approximation error.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: codes[[0, -4], [7, -1]]. all four unimplemented claims explicitly False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Pack and unpack real nibbles*, predict its result from the prompt alone: Offset codes by 8, pack adjacent values into two bytes, then unpack. Write the guess beside the stated outcome (packed bytes `[72, 127]`; round-trip codes exact). Then predict how the decisive case, *State what was not measured*, should end: Write a receipt distinguishing uniform 4-bit CPU packing from NF4, double quantization, paged optimizers and GPU memory. For quantized frozen bases, adapter gradients and QLoRA limits, the finish condition is: codes `[[0, -4], [7, -1]]`. All four unimplemented claims explicitly False.
 
 ## Exercises
 
 1. **Quantize a fixed matrix.** Quantize W = [[0.1, -0.9], [1.7, -0.2]] with scale \(\frac{1.7}{7}\) and round-half-to-even.
-   **Expected:** codes[[0, -4], [7, -1]].
-   **Verify:** Save the assertion results for exercise 1, including codes[[0, -4], [7, -1]].
+   **Expected:** codes `[[0, -4], [7, -1]]`.
+   **Verify:** Save the assertion results for exercise 1, including codes `[[0, -4], [7, -1]]`.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Pack and unpack real nibbles.** Offset codes by 8, pack adjacent values into two bytes, then unpack.
-   **Expected:** packed bytes[72, 127]; round-trip codes exact.
-   **Verify:** Save the assertion results for exercise 2, including packed bytes[72, 127]; round-trip codes exact.
+   **Expected:** packed bytes `[72, 127]`; round-trip codes exact.
+   **Verify:** Save the assertion results for exercise 2, including packed bytes `[72, 127]`; round-trip codes exact.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-3. **Measure dequantization error.** Reconstruct float32 weights and compareW@x forx[1, -2] with full precision.
-   **Expected:** reference[1.9, 2.1]; finite nonzero approximation error.
-   **Verify:** Save the assertion results for exercise 3, including reference[1.9, 2.1]; finite nonzero approximation error.
+3. **Measure dequantization error.** Reconstruct float32 weights and compare W@x for x [1, -2] with full precision.
+   **Expected:** reference `[1.9, 2.1]`; finite nonzero approximation error.
+   **Verify:** Save the assertion results for exercise 3, including reference `[1.9, 2.1]`; finite nonzero approximation error.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-4. **Train only a small adapter.** Use frozen dequantizedW, rank 1 A/B and 10SGD updates toward zero output.
+4. **Train only a small adapter.** Use frozen dequantized W, rank 1 A/B and 10SGD updates toward zero output.
    **Expected:** adapter loss decreases; packed base bytes unchanged.
    **Verify:** Save the assertion results for exercise 4, including adapter loss decreases; packed base bytes unchanged.
 
@@ -190,7 +195,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** packed representation 6 bytes; dequantized buffer 16 bytes; overhead excluded.
    **Verify:** Save the assertion results for exercise 5, including packed representation 6 bytes; dequantized buffer 16 bytes; overhead excluded.
 
-6. **State what was not measured.** Write a receipt distinguishing uniform 4-bitCPU packing from NF4, double quantization, paged optimizers and GPU memory.
+6. **State what was not measured.** Write a receipt distinguishing uniform 4-bit CPU packing from NF4, double quantization, paged optimizers and GPU memory.
    **Expected:** all four unimplemented claims explicitly False.
    **Verify:** Save the assertion results for exercise 6, including all four unimplemented claims explicitly False.
 
@@ -202,19 +207,21 @@ If adapter loss falls, identify whether the target was original-model parity or 
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate quantized base and nibble packing for the fixture in *Quantize a fixed matrix*. Hint 2: change one literal in *Pack and unpack real nibbles* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Train only a small adapter*, with its stated result (adapter loss decreases; packed base bytes unchanged). If *State what was not measured* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Quantized base, Nibble packing, Dequantization using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain quantized base, nibble packing and dequantization using *Quantize a fixed matrix*. Recompute its result (codes `[[0, -4], [7, -1]]`) from the inputs. Change one input in *Measure dequantization error* and predict whether the stated result (reference `[1.9, 2.1]`; finite nonzero approximation error) still holds. Say which part of quantized frozen bases, adapter gradients and QLoRA limits the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-016`, `llm-034` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Quantize a fixed matrix* cannot be reconstructed without the solution, revisit `llm-applied-016` (Low-rank adaptation: dimensions, gradients and a real update) and `llm-034` (llm-034). Otherwise keep the six observations from quantized frozen bases, adapter gradients and QLoRA limits and continue to `llm-applied-018` (Compare full and adapter fine-tuning on frozen tasks).
 
 ## Sources and verification status
 
-API and mechanism reference: [QLoRA](https://arxiv.org/abs/2305.14314), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for quantized base: [QLoRA](https://arxiv.org/abs/2305.14314), reviewed 2026-10-22. The fixtures for *Quantize a fixed matrix*, *Pack and unpack real nibbles* and *Measure dequantization error* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

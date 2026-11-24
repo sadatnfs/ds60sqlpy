@@ -1,31 +1,20 @@
 # llm-004: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/llm-004.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
+Use this a count-based next-token baseline reference after your own attempt. The [learner guide](../guides/llm-004.md) keeps the fixture and Expected/Verify contracts for *Trace training counts* to *Keep validation read-only*, six separate actions; any implementation is acceptable if *Reject malformed training data* still fails on that input.
 
-The [executable reference](llm-004_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+`verify()` in the [executable reference](llm-004_solution.py) uses NumPy and literals only; on failure, keep the *Reject malformed training data* input. A pass says nothing beyond these a count-based next-token baseline fixtures, so next explain bigram from memory on a changed fixture. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace training counts
 
-The first document contributes A-to-B and B-to-A. The second contributes A-to-A. In order [A,B,C], these create rows [1,1,0], [1,0,0] and [0,0,0]. Total transitions are three. Concatenating the documents would add a spurious A-to-A boundary transition and change the model. Keep document membership explicit even when the entire fixture fits on one line; a small array can otherwise conceal the same leakage as a large corpus pipeline.
+The first document contributes A-to-B and B-to-A. The second contributes A-to-A. In order [A,B,C], these create rows [1, 1, 0], [1, 0, 0] and [0, 0, 0]. Total transitions are three. Concatenating the documents would add a spurious A-to-A boundary transition and change the model. Keep document membership explicit even when the entire fixture fits on one line; a small array can otherwise conceal the same leakage as a large corpus pipeline.
 
-**Expected:** Counts [[1,1,0],[1,0,0],[0,0,0]], totaling three transitions.
+**Expected:** Counts [[1, 1, 0], [1, 0, 0], [0, 0, 0]], totaling three transitions.
 
 **Verify:** Assert the complete matrix and total count three, not a transition count from concatenated documents.
 
 ## Exercise 2: Construct a smoothed row
 
-Add one to each of the three candidate counts. A becomes [2,2,1], denominator five; B becomes [2,1,1], denominator four; C becomes [1,1,1], denominator three. The resulting rows match the expected fractions and each sums to one. The vocabulary order is part of the contract because an array of correct probabilities in a different token order would score the wrong targets. Do not normalize over every matrix entry at once.
+Add one to each of the three candidate counts. A becomes [2, 2, 1], denominator five; B becomes [2, 1, 1], denominator four; C becomes [1, 1, 1], denominator three. The resulting rows match the expected fractions and each sums to one. The vocabulary order is part of the contract because an array of correct probabilities in a different token order would score the wrong targets. Do not normalize over every matrix entry at once.
 
 **Expected:** Rows \(A=[\frac{2}{5},\frac{2}{5},\frac{1}{5}]\), \(B=[\frac{1}{2},\frac{1}{4},\frac{1}{4}]\) and \(C=[\frac{1}{3},\frac{1}{3},\frac{1}{3}]\).
 
@@ -65,9 +54,7 @@ Context C has no observed transitions, so add-one smoothing yields A probability
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+*Recover smoothed rows* validates and reduces its input in the functions below; the executable file covers all six a count-based next-token baseline exercises. Keep the *Reject malformed training data* assertion and its invalid-input case; never replace them with a default.
 
 ```python
 from __future__ import annotations
@@ -106,9 +93,4 @@ def next_probabilities(counts, context, vocabulary):
 
 Without the table, count transitions in the two documents [C,A] and [A]. State which boundary pair must not appear, then derive the smoothed C row under vocabulary [A,B,C].
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Next, pick a fixture unlike *Recover smoothed rows* to test independent recall, and explain why *Reject malformed training data* rejects its case rather than naming the exception. Any notation works if bigram and its denominator stay explicit; these a count-based next-token baseline checks say nothing about unseen model quality or safety.

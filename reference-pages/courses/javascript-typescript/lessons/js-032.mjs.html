@@ -199,17 +199,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// &#x27;cd&#x27;]), upper, sink);` to `await pipeline(Readable.from([&#x27;ab!&#x27;, &#x27;cd&#x27;]), upper, sink);`.</span></span>
 <span class="source-line"><span class="syntax-comment">// Before running it, predict which check fails and which value it now sees; then run it and</span></span>
 <span class="source-line"><span class="syntax-comment">// restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(output.join(&#x27;&#x27;), &#x27;ABCD&#x27;)`. Restoring the original line brings back the</span></span>
-<span class="source-line"><span class="syntax-comment">// worked observation: ABCD after successful pipeline completion.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(output.join(&#x27;&#x27;),</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;ABCD&#x27;)`. Restoring `await pipeline(Readable.from([&#x27;ab&#x27;, &#x27;cd&#x27;]), upper, sink);` brings</span></span>
+<span class="source-line"><span class="syntax-comment">// back: ABCD after successful pipeline completion.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Observe false write and drain without guessing timing: debug a regression</span></span>
 <span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `highWaterMark: 3,`.</span></span>
 <span class="source-line"><span class="syntax-comment">// Run Example B with that line, use the failing check to locate the defect and repair it</span></span>
 <span class="source-line"><span class="syntax-comment">// without changing the check.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(sink.write(Buffer.from(&#x27;ab&#x27;)), false)`; after it the line reads</span></span>
-<span class="source-line"><span class="syntax-comment">// `highWaterMark: 2,` again and write returns false; drain follows release; stream finishes.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(sink.write(Buffer.from(&#x27;ab&#x27;)), false)`. Restoring `highWaterMark: 2,` brings</span></span>
+<span class="source-line"><span class="syntax-comment">// back: write returns false; drain follows release; stream finishes.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Propagate a producer failure and destroy the sink</span></span>
 <span class="source-line"><span class="syntax-comment">// Use an async source that yields once then throws.</span></span>

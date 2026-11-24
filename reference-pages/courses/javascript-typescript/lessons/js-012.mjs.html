@@ -199,21 +199,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// =&gt; { trace.push(&#x27;reaction&#x27;); return value; });` to `const observed = pending.then(value =&gt;</span></span>
 <span class="source-line"><span class="syntax-comment">// { trace.push(&#x27;reaction!&#x27;); return value; });`. Before running it, predict which check</span></span>
 <span class="source-line"><span class="syntax-comment">// fails and which value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(trace, [&#x27;executor&#x27;, &#x27;sync&#x27;, &#x27;reaction&#x27;])`. Restoring the original line</span></span>
-<span class="source-line"><span class="syntax-comment">// brings back the worked observation: executor, sync, reaction.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(trace,</span></span>
+<span class="source-line"><span class="syntax-comment">// [&#x27;executor&#x27;, &#x27;sync&#x27;, &#x27;reaction&#x27;])`. Restoring `const observed = pending.then(value =&gt; {</span></span>
+<span class="source-line"><span class="syntax-comment">// trace.push(&#x27;reaction&#x27;); return value; });` brings back: executor, sync, reaction.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Compose values and rejection recovery: debug a regression</span></span>
 <span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `.then(value =&gt; value +</span></span>
 <span class="source-line"><span class="syntax-comment">// 2)`. Run Example B with that line, use the failing check to locate the defect and repair</span></span>
 <span class="source-line"><span class="syntax-comment">// it without changing the check.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(result, &#x27;bad value 8&#x27;)`; after it the line reads `.then(value =&gt; value * 2)`</span></span>
-<span class="source-line"><span class="syntax-comment">// again and recovered message is bad value 8.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(result, &#x27;bad value 8&#x27;)`. Restoring `.then(value =&gt; value * 2)` brings back:</span></span>
+<span class="source-line"><span class="syntax-comment">// recovered message is bad value 8.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Preserve input order in Promise.all</span></span>
 <span class="source-line"><span class="syntax-comment">// Resolve the second deferred Promise first, then the first.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: result remains first,second.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: result remains `[&#x27;first&#x27;, &#x27;second&#x27;]`.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 4: Inspect every outcome with allSettled</span></span>
 <span class="source-line"><span class="syntax-comment">// Combine fulfillment 2 with rejection offline.</span></span>
@@ -226,7 +226,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 6: Observe FIFO microtasks before an awaited timer</span></span>
 <span class="source-line"><span class="syntax-comment">// Queue one Promise reaction and one queueMicrotask callback, then await a timer.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: sync,promise,microtask,timer.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: trace `sync`, `promise`, `microtask`, `timer` in that order.</span></span>
 <span class="source-line"></span>
 <span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Implement the six exercises in your saved copy.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></article>

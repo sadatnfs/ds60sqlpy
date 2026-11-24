@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-a-missing-shell-error-in-a-minimal-image">Exercise 1: Predict a missing-shell error in a minimal image.<a class="heading-anchor" href="#exercise-1-predict-a-missing-shell-error-in-a-minimal-image" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It may be expected image content, not an app crash.</p>
 <p><strong>Why:</strong> The diagnostic command needs its own dependency. Do not conclude that the application is broken merely because a familiar tool is absent.</p>
+<p><strong>Approach:</strong> Check whether the image provides sh or bash before reading the error as an app failure.</p>
+<p><strong>Why this is correct:</strong> A minimal image may ship without a shell; exec fails at lookup while server.py keeps serving.</p>
+<p><strong>A plausible wrong approach:</strong> Restarting the app or adding a shell to the release image to fix the error changes the image to suit the diagnostic.</p>
+<p><strong>How to verify:</strong> The health request still succeeds while the shell exec fails, which shows the two are unrelated.</p>
 <h3 id="exercise-2-choose-a-prepared-tool-for-one-http-request">Exercise 2: Choose a prepared tool for one HTTP request.<a class="heading-anchor" href="#exercise-2-choose-a-prepared-tool-for-one-http-request" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Use Python already present in the fixture.</p>
 <p><strong>Why:</strong> Adding a new package is unnecessary for this bounded observation. Reuse a declared runtime while keeping timeout and output limits explicit.</p>
+<p><strong>Approach:</strong> Use the Python interpreter that CMD already relies on to send one request with a 2 second timeout, as in worked example 1.</p>
+<p><strong>Why this is correct:</strong> The fixture&#x27;s base already includes python, so the probe adds nothing and still observes the app&#x27;s own loopback.</p>
+<p><strong>A plausible wrong approach:</strong> Installing curl in the running container adds a package and fails anyway because the root is read-only.</p>
+<p><strong>How to verify:</strong> The command prints the healthz JSON and exits; nothing new appears in the image.</p>
 <h3 id="exercise-3-create-a-vantage-point-diagnosis-table">Exercise 3: Create a vantage-point diagnosis table.<a class="heading-anchor" href="#exercise-3-create-a-vantage-point-diagnosis-table" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Host, peer and app observations with distinct address scopes.</p>
 <p><strong>Why:</strong> The table helps explain why one request works and another fails. It prevents applying a host-network fix to a container-loopback problem.</p>
+<p><strong>Approach:</strong> Fill three rows, host, peer and app, with the address each uses and the result it saw.</p>
+<p><strong>Why this is correct:</strong> Each vantage point has its own address scope, so a pattern such as only peer failing points to DNS or the network.</p>
+<p><strong>A plausible wrong approach:</strong> Changing the host port mapping when only the peer request fails fixes a part that was already working.</p>
+<p><strong>How to verify:</strong> The row that differs points to one layer, and fixing that layer makes all three rows agree.</p>
 <h3 id="exercise-4-diagnose-an-interactive-repair-that-cannot-survive-recreation">Exercise 4: Diagnose an interactive repair that cannot survive recreation.<a class="heading-anchor" href="#exercise-4-diagnose-an-interactive-repair-that-cannot-survive-recreation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The maintained image was never changed.</p>
 <p><strong>Why:</strong> Record the useful finding, then implement the repair in source and rebuild. Treat the altered live container as diagnostic state, not a release artifact.</p>
+<p><strong>Approach:</strong> Write down what the live fix revealed, then make the same change in the Dockerfile or source and rebuild.</p>
+<p><strong>Why this is correct:</strong> Recreation starts from the image, so a live edit is lost; only the rebuilt image carries the fix.</p>
+<p><strong>A plausible wrong approach:</strong> Leaving the hand-fixed container running as the release hides that the image is still broken.</p>
+<p><strong>How to verify:</strong> Recreate from the rebuilt image and confirm the symptom stays gone.</p>
 <h3 id="exercise-5-explain-why-host-filesystem-mounts-are-excessive-for-this-lab">Exercise 5: Explain why host filesystem mounts are excessive for this lab.<a class="heading-anchor" href="#exercise-5-explain-why-host-filesystem-mounts-are-excessive-for-this-lab" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> They expose data unrelated to the app diagnosis.</p>
 <p><strong>Why:</strong> The fixture can be inspected through its own image, logs and volume. Broader mounts change authority without adding necessary evidence.</p>
+<p><strong>Approach:</strong> List what the diagnosis needs: logs, the image&#x27;s files and the study-data volume, all reachable without host mounts.</p>
+<p><strong>Why this is correct:</strong> Mounting the host root or home directory gives the container access unrelated to the app.</p>
+<p><strong>A plausible wrong approach:</strong> Bind-mounting / to look around turns a debugging session into broad host access.</p>
+<p><strong>How to verify:</strong> The diagnosis completes using logs, exec probes and the volume only.</p>
 <h3 id="exercise-6-write-a-repeatable-minimal-image-incident-procedure">Exercise 6: Write a repeatable minimal-image incident procedure.<a class="heading-anchor" href="#exercise-6-write-a-repeatable-minimal-image-incident-procedure" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Preserve artifact, inspect state, run bounded prepared probes and test a source repair.</p>
 <p><strong>Why:</strong> A repeatable procedure works for another learner and preserves the original symptom. It should not depend on tools installed manually during a previous incident.</p>
+<p><strong>Approach:</strong> Write the steps in order: save the image ID and logs, inspect state, run bounded prepared probes, then test a source fix.</p>
+<p><strong>Why this is correct:</strong> Saving evidence first keeps the original symptom, and prepared probes work on any learner&#x27;s machine.</p>
+<p><strong>A plausible wrong approach:</strong> A procedure that begins with installing your favorite tools assumes network access and changes what you inspect.</p>
+<p><strong>How to verify:</strong> Another learner follows it on a fresh copy and reaches the same diagnosis.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

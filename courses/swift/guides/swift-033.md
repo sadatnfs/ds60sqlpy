@@ -124,7 +124,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Send an immutable snapshot) before changing anything, and confirm its observation: The task receives immutable value data and returns 6.
 2. Compare Example B (Return values to the owner) with Example A and name the first line whose behavior differs. Its observation is: The parent owns result aggregation and sorts it deterministically.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Sendable does not mean every operation is cheap or atomic.
+3. Before opening the explanation, check your task 3 attempt (Replace a shared mutable result class with a sendable value result) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

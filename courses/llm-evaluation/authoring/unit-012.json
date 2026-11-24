@@ -8,6 +8,12 @@
     "generation seed",
     "replication"
   ],
+  "key_terms": {
+    "Crossed design": "Evaluating every model with every prompt on a common set of tasks and generation seeds.",
+    "Interaction effect": "The part of a cell mean not explained by model and prompt main effects, here up to 0.1 in size.",
+    "Generation seed": "The random seed for sampling outputs; repeated seeds are not independent samples of the task population.",
+    "System specification": "The full configuration, including prompt, decoding settings, seed, corpus and parser, that a score belongs to."
+  },
   "outcome": "Analyze a crossed prompt/model/seed experiment and distinguish decoding variability from independent task evidence.",
   "verification": "The per-prompt differences are -0.1 and +0.3, the additive reconstruction recovers every cell, equal selection budgets give development scores of 0.9, the seed variance is 0.01, and a malformed axis is rejected.",
   "level": "intermediate",
@@ -20,42 +26,78 @@
       "task": "Calculate candidate minus baseline under each prompt.",
       "expected": "The differences are -0.1 and +0.3.",
       "hint": "Average seeds before comparing aligned cells.",
-      "answer": "An overall favorable result does not imply improvement under every configuration."
+      "answer": "An overall favorable result does not imply improvement under every configuration.",
+      "reasoning": {
+        "approach": "Compute the cell means with `decomposition(fixture())`, then subtract the baseline row from the candidate row: `cells[1] - cells[0]`.",
+        "why": "The cells are `[[0.9, 0.6], [0.8, 0.9]]` with models as rows and prompts as columns. Candidate minus baseline is 0.8 - 0.9 = -0.1 under prompt 1 and 0.9 - 0.6 = +0.3 under prompt 2. The average is +0.1.",
+        "pitfall": "Reporting +0.1 as \"the candidate is better\" is the mistake when the deployment uses prompt 1. The candidate is worse there, and the average hides that because prompt 2 contributes a large gain.",
+        "verify": "Worked case A asserts `np.testing.assert_allclose(cells[1] - cells[0], [-0.1, 0.3])`, and the exercise checks assert the mean difference is 0.1."
+      }
     },
     {
       "title": "Check reconstruction",
       "task": "Recombine grand mean, model, prompt and interaction terms.",
       "expected": "Every observed cell is recovered within floating tolerance.",
       "hint": "Broadcast model effects down rows and prompt effects across columns.",
-      "answer": "This algebraic identity is a useful implementation check, independent of any inferential assumptions."
+      "answer": "This algebraic identity is a useful implementation check, independent of any inferential assumptions.",
+      "reasoning": {
+        "approach": "Add `grand + model[:, None] + prompt[None, :] + interaction` and compare with `cells`.",
+        "why": "The grand mean is 0.8. Model effects are -0.05 and +0.05; prompt effects are +0.05 and -0.05. The interaction is `[[0.1, -0.1], [-0.1, 0.1]]`. For the baseline under prompt 1: 0.8 - 0.05 + 0.05 + 0.1 = 0.9, which is the observed cell.",
+        "pitfall": "Computing interaction with a sign error, for example adding the main effects instead of subtracting, will still produce numbers that look plausible. The reconstruction check is the fastest way to catch it.",
+        "verify": "Worked case A uses `np.testing.assert_allclose(cells, grand + model[:, None] + prompt[None, :] + interaction)`. The exercise checks also confirm each effect vector and each interaction row and column sum to zero."
+      }
     },
     {
       "title": "Change the prompt target",
       "task": "Put all deployment weight on the first prompt.",
       "expected": "The candidate difference becomes-0.1.",
       "hint": "The target distribution is part of the estimand.",
-      "answer": "A fixed-prompt deployment needs evidence for that prompt, not an attractive average over unused alternatives."
+      "answer": "A fixed-prompt deployment needs evidence for that prompt, not an attractive average over unused alternatives.",
+      "reasoning": {
+        "approach": "Use weights 1 and 0 over the two prompts and compute the weighted candidate minus baseline difference.",
+        "why": "With all weight on prompt 1 the difference is simply that column's value, -0.1. The equal-weight +0.1 described a deployment that uses both prompts equally, which this one does not.",
+        "pitfall": "Using the average over prompts because it is the main effect is the mistake. Main effects average over prompts that will not be used, so they do not describe a fixed-prompt deployment when the interaction is nonzero.",
+        "verify": "Compute `(cells[1] - cells[0]) @ [1, 0]` and confirm -0.1. Repeat with `[0, 1]` for +0.3."
+      }
     },
     {
       "title": "Equalize selection budgets",
       "task": "Select the best prompt separately for both models on development data.",
       "expected": "Both selected development scores are 0.9.",
       "hint": "Apply the same procedure to both candidates.",
-      "answer": "A comparison of selection procedures differs from a comparison of one selected system with an untuned mean; final assessment must still be independent."
+      "answer": "A comparison of selection procedures differs from a comparison of one selected system with an untuned mean; final assessment must still be independent.",
+      "reasoning": {
+        "approach": "Give each model the same selection procedure: choose the best prompt per model on development data with `cells.max(axis=1)`.",
+        "why": "Both models reach 0.9 on development: the baseline with prompt 1 and the candidate with prompt 2. Under equal selection budgets the development difference is 0.",
+        "pitfall": "Case B shows the unequal version: tuning the candidate (0.9) and comparing with the baseline's untuned mean (0.75) gives 0.15. That difference measures extra tuning effort, not a better model.",
+        "verify": "Worked case B asserts `fair_development` equals `[0.9, 0.9]` and the mixed-budget difference equals 0.15. Final claims still need an independent test set because both maxima are selected values."
+      }
     },
     {
       "title": "Count seed replication",
       "task": "Compute variance for baseline/prompt 1 across its three authored seeds.",
       "expected": "The sample variance is 0.01.",
       "hint": "Use `ddof=1` for this descriptive sample calculation.",
-      "answer": "This describes the three constructed seed scores. It does not quantify variation across an unseen population of task families."
+      "answer": "This describes the three constructed seed scores. It does not quantify variation across an unseen population of task families.",
+      "reasoning": {
+        "approach": "Take the three baseline seeds under prompt 1, `fixture()[0, 0]` = `[0.8, 0.9, 1.0]`, and compute the sample variance with `ddof=1`.",
+        "why": "The mean is 0.9 and the squared deviations are 0.01, 0 and 0.01, which sum to 0.02. Dividing by n - 1 = 2 gives 0.01. That is the spread across three seeds in one constructed cell.",
+        "pitfall": "Using 0.01 as the uncertainty of the model comparison is the mistake. Seed variation is one source; variation across task families is usually larger and needs its own replication, as in eval-006.",
+        "verify": "The reference asserts `np.isclose(fixture()[0, 0].var(ddof=1), 0.01)`. With `ddof=0` the result would be 0.02 / 3, about 0.0067."
+      }
     },
     {
       "title": "Validate axes",
       "task": "Provide only a two-dimensional matrix to the helper.",
       "expected": "The tensor contract rejects it.",
       "hint": "Every dimension must retain its scientific meaning.",
-      "answer": "Silently averaging an unidentified axis can mix model, prompt and replication factors and invalidate the comparison."
+      "answer": "Silently averaging an unidentified axis can mix model, prompt and replication factors and invalidate the comparison.",
+      "reasoning": {
+        "approach": "Call `decomposition([[1, 2]])`. The array has two dimensions, and the guard `values.ndim != 3` raises.",
+        "why": "The helper needs model, prompt and seed axes in that order. A two-dimensional input could mean model by prompt with one seed, or model by seed with one prompt, and averaging axis 2 would be impossible or meaningless.",
+        "pitfall": "Reshaping automatically, such as adding a trailing axis, would accept the input but would require guessing what each axis means. A wrong guess silently swaps prompt and seed variation.",
+        "verify": "The reference wraps `decomposition([[1, 2]])` in `try` and fails with `Missing tensor axis accepted` if no error is raised. Pass `[[[1, 2]]]` explicitly when you mean one model, one prompt and two seeds."
+      }
     }
   ],
   "sources": [

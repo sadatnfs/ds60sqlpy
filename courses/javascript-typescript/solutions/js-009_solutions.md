@@ -35,7 +35,7 @@ assert.equal(total(order), 250);
 assert.notEqual(order, raw);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(total(order), 250)`. Restoring the original line brings back the worked observation: total 250; fresh accepted object.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(total(order), 250)`. Restoring `const raw = { id: 'A', quantity: 2, priceCents: 125 };` brings back: total 250; fresh accepted object.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(total(order), 250)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -53,7 +53,7 @@ for (const text of ['null', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra"
 }
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.throws(() => validateOrder(JSON.parse(text)), TypeError)`; after it the line reads `for (const text of ['null', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra":true}']) {` again and typeError for each shape violation.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.throws(() => validateOrder(JSON.parse(text)), TypeError)`. Restoring `for (const text of ['null', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra":true}']) {` brings back: typeError for each shape violation.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.throws(() => validateOrder(JSON.parse(text)), TypeError)` for this input.
 

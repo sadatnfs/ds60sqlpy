@@ -14,7 +14,7 @@ final case class Record(id: String, status: String, amount: Long)
 
 Trim an ID token and return Right for nonempty text. Return Left(missing_id) for null, empty or whitespace-only tokens. Do not invent an identifier.
 
-**Expected:** " a1 " gives Right("a1"); null,"" and"  " each give Left("missing_id").
+**Expected:** `" a1 "` gives `Right("a1")`; `null`, `""` and `"  "` each give `Left("missing_id")`.
 
 ```scala
 def parseId(raw: String): Either[String, String] = {
@@ -83,7 +83,7 @@ assert(
 
 Require exactly three pipe-separated fields and compose ID, status, amount validation in that order using a for comprehension. Return Left(malformed_record) for null or wrong field count. Preserve empty trailing fields for validation.
 
-**Expected:** a1|paid|100 becomes Right(Record(a1, paid,100)); a2|paid| becomes invalid_amount; an empty-ID malformed-status record reports missing_id first; two fields report malformed_record.
+**Expected:** `a1|paid|100` becomes `Right(Record(a1, paid, 100))`; `a2|paid|` becomes `invalid_amount`; an empty-ID malformed-status record reports missing_id first; two fields report malformed_record.
 
 ```scala
 def parseRecord(raw: String): Either[String, Record] = {
@@ -112,7 +112,7 @@ assert(parseRecord("a|paid") == Left("malformed_record"))
 
 ### Exercise 5: Retain a complete rejection ledger
 
-Parse every input line and return accepted records plus rejected(position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left.
+Parse every input line and return accepted records plus rejected (position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left.
 
 **Expected:** The six-line fixture has three accepted records and rejections at positions 3,4,5 with missing_id, invalid_amount, unknown_status. Accepted plus rejected equals six.
 

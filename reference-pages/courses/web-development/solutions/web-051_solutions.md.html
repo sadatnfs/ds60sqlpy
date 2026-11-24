@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-051.md</code>.</p>
 <h3 id="exercise-1-explain-what-a-prepared-value-parameter-can-and-cannot-replace">Exercise 1: Explain what a prepared value parameter can and cannot replace.<a class="heading-anchor" href="#exercise-1-explain-what-a-prepared-value-parameter-can-and-cannot-replace" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It represents data values, not arbitrary table names, column names or SQL keywords.</p>
+<p><strong>Approach:</strong> Separate the parts of a query into structure, such as table and column names and keywords, and values that the statement compares or stores.</p>
 <p><strong>Why:</strong> A bound parameter is always a value, so it cannot name a table, a column or an SQL keyword.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>ORDER BY :column</code> and binding a column name fails because the database treats the bound value as a constant, so the sort never changes.</p>
+<p><strong>How to verify:</strong> Binding &#x27;title&#x27; to an ORDER BY placeholder sorts every row by the same constant, so titles are not ordered, while a mapped column name sorts them.</p>
 <h3 id="exercise-2-insert-a-title-containing-an-apostrophe">Exercise 2: Insert a title containing an apostrophe.<a class="heading-anchor" href="#exercise-2-insert-a-title-containing-an-apostrophe" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The stored value round-trips exactly through a bound parameter.</p>
+<p><strong>Approach:</strong> Prepare <code>INSERT INTO notes (title) VALUES (:title)</code>, execute it with the apostrophe title, then select it back by id.</p>
 <p><strong>Why:</strong> The driver sends the value separately from the SQL text, so the apostrophe needs no manual escaping.</p>
+<p><strong>Plausible wrong approach:</strong> Doubling the apostrophe by hand before binding fails because the stored title then contains two apostrophes instead of one.</p>
+<p><strong>How to verify:</strong> The fetched title equals the original string Ada&#x27;s notes exactly, compared with <code>===</code>.</p>
 <h3 id="exercise-3-build-a-local-pdo-note-store-with-prepared-insert-and-lookup">Exercise 3: Build a local PDO note store with prepared insert and lookup.<a class="heading-anchor" href="#exercise-3-build-a-local-pdo-note-store-with-prepared-insert-and-lookup" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The expected record is retrieved and SQL-looking text remains data.</p>
+<p><strong>Approach:</strong> Create the schema in a memory database, insert through a prepared statement, and look up by title with a second prepared statement.</p>
 <p><strong>Why:</strong> Prepared statements keep SQL structure fixed while values vary, so SQL-looking text stays data.</p>
+<p><strong>Plausible wrong approach:</strong> Reusing one statement string built with <code>sprintf</code> for both values fails because the formatted text is concatenation under another name.</p>
+<p><strong>How to verify:</strong> Storing the title <code>&#x27;; DROP TABLE notes; --</code> and fetching it returns that exact text, and the table still exists.</p>
 <h3 id="exercise-4-diagnose-concatenating-an-untrusted-sort-key-into-sql">Exercise 4: Diagnose concatenating an untrusted sort key into SQL.<a class="heading-anchor" href="#exercise-4-diagnose-concatenating-an-untrusted-sort-key-into-sql" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Map the choice through an explicit trusted allowlist rather than treating it as a bindable value.</p>
+<p><strong>Approach:</strong> Map the requested sort name through an array of reviewed column names and fall back to id for anything else.</p>
 <p><strong>Why:</strong> Identifiers cannot be bound, so an allowlist that maps user choices to fixed column names is the safe boundary.</p>
+<p><strong>Plausible wrong approach:</strong> Escaping the sort key with <code>$db-&gt;quote()</code> fails because the result is a quoted string literal, not a column name.</p>
+<p><strong>How to verify:</strong> A request for <code>title; DELETE FROM notes</code> sorts by id, and the row count is unchanged.</p>
 <h3 id="exercise-5-test-an-empty-result-and-an-attack-shaped-title">Exercise 5: Test an empty result and an attack-shaped title.<a class="heading-anchor" href="#exercise-5-test-an-empty-result-and-an-attack-shaped-title" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> No-match behavior is explicit and the table remains intact after storing the title.</p>
+<p><strong>Approach:</strong> Search for a title that does not exist, then store and fetch an attack shaped title, and count rows after each step.</p>
 <p><strong>Why:</strong> fetch returns false for no row, which must be handled, and the attack-shaped title is stored as plain text.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only that no exception occurred fails because an injected condition can return wrong rows without any error.</p>
+<p><strong>How to verify:</strong> The missing title returns an empty array, and the row count rises by exactly one after the insert.</p>
 <h3 id="exercise-6-explain-which-checks-must-be-repeated-when-moving-to-postgresql">Exercise 6: Explain which checks must be repeated when moving to PostgreSQL.<a class="heading-anchor" href="#exercise-6-explain-which-checks-must-be-repeated-when-moving-to-postgresql" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Driver behavior, schema types, SQL syntax, transactions and concurrency need engine-specific integration evidence.</p>
+<p><strong>Approach:</strong> List engine specific behavior the SQLite run never checked: column types, placeholder emulation, SQL syntax and locking.</p>
 <p><strong>Why:</strong> Types, SQL dialect, isolation levels, locking and connection behavior differ, so PostgreSQL needs its own integration tests.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming the same tests prove PostgreSQL behavior fails because SQLite accepts values in columns of any declared type.</p>
+<p><strong>How to verify:</strong> Your list names a PostgreSQL integration test for each item, run against that engine.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-051_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Balance reusable templates with comprehensible ownership and diagnostics.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Composing generic interfaces means combining type constraints, ranges and ownership rules without hiding lifetime requirements. A range parameter can be traversable without being reusable. A returned owning vector is safer for long-lived results than a view over an unknown temporary. Concepts express admissible operations; prose still defines semantics.</p>
+<ul>
+<li><strong>input range:</strong> a range that may support only one pass, so reading an element can consume the source.</li>
+<li><strong>single-pass algorithm:</strong> an algorithm that visits each element once, which keeps it correct for input ranges.</li>
+<li><strong>owning return:</strong> returning a vector with its own storage, which stays valid even when the caller passed a temporary.</li>
+<li><strong>dangling view:</strong> a view whose underlying storage has already been destroyed.</li>
+<li><strong>semantic contract:</strong> the meaning of an operation that a concept cannot express, so prose and tests must state it.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>template&lt;std::ranges::input_range R&gt;</code> allows a single-pass source. Avoid traversing it once to count and again to compute unless you require forward_range. Copying accepted values into vector&lt;int&gt; gives a clear owning result independent of input lifetime.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

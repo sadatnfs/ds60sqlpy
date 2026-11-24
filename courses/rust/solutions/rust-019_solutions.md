@@ -14,13 +14,39 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Draw the valid-use regions of both inputs and the output.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The annotation prevents a caller from using the view after a required owner is gone. The output is a borrowed view of the longer input.
+**Written answer.** `left` and `right` are valid from their `let` lines to the end of the block. The call `longer(&left, &right)` borrows both, and because the signature gives the result the same `'a`, the returned `&str` may be used only while both borrows are valid. Here it is used once, inside the `assert_eq!`, and its region ends there, so both owners stay free afterward.
+
+**Why it is correct.** A single lifetime on all three references asks the compiler for a region inside both inputs' regions. The caller decides where the result is used, and the borrow checker confirms that this use falls within that region.
+
+**Plausible wrong approach.** Drawing the output region as the whole region of `right` because the longer string happens to be `right` ignores that the signature cannot know which input is returned.
+
+**How to verify.** After the assertion add `let view = longer(&left, &right); drop(left); println!("{view}");` and read E0505, cannot move out of `left` because it is borrowed.
 
 ### Task 2: Guided modification
 
 Test the tie policy of longer.
 
-No separate reference answer has been written for this task. Start from Example B: A deliberate owned copy changes the lifetime contract rather than pretending the borrow is static. The independent owned result survives the temporary scope.
+**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file. It uses `longer` from the lesson's helpers, defined in the reference program.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let first = String::from("pear");
+    let second = String::from("plum");
+    let chosen = longer(&first, &second);
+    assert!(std::ptr::eq(chosen, first.as_str()));
+    assert_eq!(longer("fig", "kiwi"), "kiwi");
+    assert_eq!(longer("", ""), "");
+    Ok(())
+}
+```
+
+**Observe:** With two four-byte inputs the result is the very slice of `first`, and a strictly longer right input still wins.
+
+`longer` uses `>=`, so ties return `left`. Comparing text with `assert_eq!` cannot see that, since `pear` and `plum` differ but tie on length; `std::ptr::eq` compares the slice addresses and proves which owner the view borrows.
+
+**Plausible wrong approach.** Testing with `longer("pear", "pear")` and `assert_eq!` passes whichever argument is returned, so it says nothing about the policy.
+
+**How to verify.** Run the block, then change `>=` to `>` in `longer` and the `ptr::eq` assertion fails.
 
 ### Task 3: Independent construction
 
@@ -51,13 +77,41 @@ Only text shares the result's lifetime 'a; prefix gets its own shorter lifetime,
 
 Try returning a local reference and explain why annotations cannot make it valid.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Lifetime names describe relationships, not durations in seconds. Static is not a universal fix. A lifetime annotation cannot rescue a reference to destroyed local storage.
+**Written answer.** The defect is `fn label<'a>() -> &'a str { let local = String::from("draft"); &local }`. It fails with E0515, cannot return reference to local variable `local`: the String is dropped when the function returns, so any reference to it would dangle. The annotation only names a relationship, and nothing the caller passes in owns the data.
+
+**Why it is correct.** Lifetimes are checked, not granted. A returned reference must borrow from something that outlives the call, which means an input or static data, and `local` is neither.
+
+**Plausible wrong approach.** Writing `-> &'static str` instead changes the promise without changing the storage, so it fails with the same E0515.
+
+**How to verify.** Compile the snippet and read E0515. Return `String` instead and it compiles, as Example B does.
 
 ### Task 5: Boundary evidence
 
 Test empty inputs and use after one candidate owner leaves scope.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Return one input view) and Example B (Own a result when lifetime must separate).
+**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `longer` from the lesson's helpers, defined in the reference program.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    assert_eq!(longer("", "x"), "x");
+    assert_eq!(longer("x", ""), "x");
+    let outer = String::from("outer value");
+    let kept = {
+        let inner = String::from("in");
+        longer(&outer, &inner).to_owned()
+    };
+    assert_eq!(kept, "outer value");
+    Ok(())
+}
+```
+
+**Observe:** An empty input loses to any nonempty one on either side, and the owned copy survives after `inner` leaves scope.
+
+Returning `longer(&outer, &inner)` itself from the block is rejected with E0597, `inner` does not live long enough, even though the longer value is `outer`. The signature ties the result to both inputs, so the shorter-lived owner limits it; `to_owned` makes an independent String instead.
+
+**Plausible wrong approach.** Assuming the borrow checker sees at run time that `outer` won and allows the view to escape treats lifetimes as a dynamic property. They are decided from the signature alone.
+
+**How to verify.** Run the block. Remove `.to_owned()` and read E0597 naming `inner`.
 
 ### Task 6: Transfer and justify
 

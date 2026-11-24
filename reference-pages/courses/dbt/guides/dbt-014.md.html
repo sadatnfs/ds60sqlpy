@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Documentation has both structural and semantic parts. A database catalog can identify a column&#x27;s physical type, while a project description explains what the value means. Neither substitutes for the other. A field named total needs a grain, unit, time window and inclusion policy before a consumer can interpret it reliably.</p>
 <p>The first case generates real dbt documentation artifacts after building a mart. The catalog records the observed database column, and the manifest records a declared exposure depending on that mart. An exposure represents a downstream use such as a dashboard or application. It improves lineage and ownership visibility, but it does not prove that an external consumer is currently healthy or actually using the declared version.</p>
 <p>The second case demonstrates a structurally documented but semantically undescribed model. Its integer type is available, yet its description is empty. A documentation build can therefore succeed while important meaning remains absent. Treat generated artifacts as a foundation for review, not an automatic substitute for authored definitions.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>catalog.json:</strong> The artifact written by <code>dbt docs generate</code> that records the columns and types actually found in the database.</li>
+<li><strong>Description:</strong> Human-written meaning for a model or column in YAML, stored in the manifest and shown in generated documentation.</li>
+<li><strong>Exposure:</strong> A YAML declaration of a downstream consumer such as a dashboard, with its type, owner and <code>depends_on</code> references.</li>
+<li><strong>Lineage:</strong> The dependency path from sources through models to exposures, read from the manifest graph.</li>
+<li><strong>Owner:</strong> The person or team an exposure names as accountable for a consumer, so a breaking change has someone to notify.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>docs generate inspects the built project and writes catalog.json alongside manifest.json. Model and column descriptions live in schema metadata. An exposure names its type, owner and ref-based dependencies. The classroom inspects these JSON artifacts locally; it does not start a separate docs web server or claim that arbitrary generated HTML is a trusted worker result.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

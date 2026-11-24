@@ -1,4 +1,4 @@
-"""Regenerate the course, or only its guides while preserving frozen artifacts."""
+"""Regenerate the course, only its guides, or only plan outcomes, preserving frozen artifacts."""
 
 import argparse
 import render
@@ -8,7 +8,11 @@ parser = argparse.ArgumentParser()
 group = parser.add_mutually_exclusive_group()
 group.add_argument("--guides-only", action="store_true")
 group.add_argument("--markdown-only", action="store_true")
+group.add_argument("--outcomes-only", action="store_true")
 arguments = parser.parse_args()
+if arguments.outcomes_only:
+    render.write_outcomes()
+    raise SystemExit(0)
 render.GUIDES_ONLY = arguments.guides_only or arguments.markdown_only
 if not render.GUIDES_ONLY:
     write_plan()

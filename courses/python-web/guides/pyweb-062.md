@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-061`.
 
 The Django branch culminates in a small authenticated notes flow using real models, ModelForms, sessions and CSRF middleware. The program tests successful creation, owner-scoped listing and refused writes, then inspects the actual row count. It keeps password verification and deployment acceptance as separately identified evidence.
 
+## Key terms
+
+- **Owner-scoped list:** A collection query filtered by `request.user`, so each user sees only the notes that user created.
+- **Trusted owner assignment:** Setting the owner from `request.user` after `commit=False`, while an `owner` key in the POST is refused with 400.
+- **CSRF-enforcing client:** A test Client created with `enforce_csrf_checks=True`, so a POST without a token receives 403 as it would in a browser flow.
+- **Row-count check:** Counting stored rows after the requests to prove that refused writes left no record behind.
+
 ## Mechanism: use trusted identity throughout the write
 
 The model stores a title and a foreign key to the user. The ModelForm exposes only title. The view requires an authenticated user, rejects unexpected POST keys, validates the form, constructs the object with commit=False and assigns request.user as owner before saving.
@@ -29,6 +36,27 @@ A POST without the token is refused with 403 before mutation. Another POST inclu
 The explicit unknown-key check complements ModelForm's writable-field list. ModelForms normally ignore undeclared keys; this endpoint chooses a stricter API-like policy and tests it. The title field remains validated by the form rather than by a separate inconsistent string check.
 
 Bob's empty list also illustrates collection authorization. A detail route that checks ownership is insufficient if the collection endpoint returns all rows. Authorization must be consistent across each way of reading or modifying the resource.
+
+## Worked example: a strict key check still sees repeated keys as one
+
+```python
+from urllib.parse import parse_qs
+
+for body in ("title=Private", "title=Private&owner=2", "title=First&title=Second"):
+    fields = parse_qs(body)
+    allowed = set(fields) == {"title"}
+    print(allowed, fields)
+```
+
+Expected output:
+
+```text
+True {'title': ['Private']}
+False {'title': ['Private'], 'owner': ['2']}
+True {'title': ['First', 'Second']}
+```
+
+The lesson's view refuses any body where `set(request.POST) != {"title"}`, which turns a forged `owner` field into a 400 before the form runs. Form data can repeat a key, though, and a set of keys hides that: the third body passes the check with two titles. Django's `QueryDict` returns the last value for `request.POST["title"]`, so `Second` would be saved. If duplicates should be errors, compare `len(request.POST.getlist("title"))` as well.
 
 ## Failure diagnosis and discussion
 

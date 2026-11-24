@@ -6,7 +6,7 @@ Read the [guide](../guides/spark-024.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Measure the key-frequency imbalance
 
-Return ordered(key, n) counts for the fact relation. Derive total population and the hot-key fraction from this ledger.
+Return ordered (key, n) counts for the fact relation. Derive total population and the hot-key fraction from this ledger.
 
 **Expected:** Key 0 has 9000; keys 1..10 each 100. Total 10000 and hot fraction 0.9.
 
@@ -88,7 +88,7 @@ Materializing the same DataFrame lets the reader inspect the final adaptive deci
 
 ### Exercise 4: Split the hot logical key with a deterministic helper
 
-Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. With AQE disabled, compare eight-partition row-load ledgers by key and by(key, salt).
+Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. With AQE disabled, compare eight-partition row-load ledgers by key and by (key, salt).
 
 **Expected:** Hot salt buckets 0..3 each have 2250 rows; cold facts all have salt 0. Both physical ledgers reconcile to 10000, and the unsalted maximum is at least 9000.
 
@@ -117,7 +117,7 @@ The helper divides logical hot-key membership without duplicating facts. Exact b
 
 Expand dimension key 0 to salts 0,1,2,3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key.
 
-**Expected:** 14 dimension rows, with four key 0 variants and ten cold rows. Every(key, salt) pair is unique.
+**Expected:** 14 dimension rows, with four key 0 variants and ten cold rows. Every (key, salt) pair is unique.
 
 ```scala
 def expandDimension(dimension: DataFrame): DataFrame = {
@@ -174,4 +174,6 @@ Projecting away salt restores the declared business schema while the full bag co
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Measure the key-frequency imbalance) is built inside the program, so opening the lesson fetches nothing; it expects: Key 0 has 9000; keys 1..10 each 100. Total 10000 and hot fraction 0.9. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

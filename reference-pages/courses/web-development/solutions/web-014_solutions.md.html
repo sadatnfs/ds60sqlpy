@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-014.md</code>.</p>
 <h3 id="exercise-1-predict-whether-relative-positioning-frees-the-original-space">Exercise 1: Predict whether relative positioning frees the original space.<a class="heading-anchor" href="#exercise-1-predict-whether-relative-positioning-frees-the-original-space" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It does not; the original layout space remains.</p>
+<p><strong>Approach:</strong> Recall that <code>position: relative</code> offsets the painted box but leaves its original slot in normal flow untouched.</p>
 <p><strong>Why:</strong> position: relative offsets the painted box but keeps its original space in normal flow, so neighboring content does not move.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting following siblings to slide up into the gap fails because only <code>absolute</code> or <code>fixed</code> removes an element from flow.</p>
+<p><strong>How to verify:</strong> Apply <code>top: 2rem</code> to the first paragraph; the second paragraph stays put and a gap appears above it.</p>
 <h3 id="exercise-2-turn-a-group-of-inline-links-into-a-block-navigation-list">Exercise 2: Turn a group of inline links into a block navigation list.<a class="heading-anchor" href="#exercise-2-turn-a-group-of-inline-links-into-a-block-navigation-list" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Display changes the arrangement without changing navigation semantics.</p>
+<p><strong>Approach:</strong> Set the <code>ul</code> to <code>display: flex</code> or the links to <code>display: block</code> and keep the list and anchor elements unchanged.</p>
 <p><strong>Why:</strong> display changes only the layout; a list of links inside nav keeps its navigation semantics.</p>
+<p><strong>Plausible wrong approach:</strong> Replacing the list with <code>div</code> elements for easier styling fails because the navigation loses its list item count for assistive technology.</p>
+<p><strong>How to verify:</strong> The links render in the new arrangement and the accessibility tree still shows a list with the same items.</p>
 <h3 id="exercise-3-build-a-card-with-an-intentional-positioned-badge-and-flowing-content">Exercise 3: Build a card with an intentional positioned badge and flowing content.<a class="heading-anchor" href="#exercise-3-build-a-card-with-an-intentional-positioned-badge-and-flowing-content" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Long body text expands the card while the badge stays in its reserved corner.</p>
+<p><strong>Approach:</strong> Make the card <code>position: relative</code>, place the badge absolutely in a corner, and add padding so body text never runs under the badge.</p>
 <p><strong>Why:</strong> The relatively positioned card becomes the containing block for the absolute badge, and the reserved padding keeps text from flowing under it.</p>
+<p><strong>Plausible wrong approach:</strong> Positioning the body text absolutely as well fails because the card then has no in-flow content and collapses to its padding height.</p>
+<p><strong>How to verify:</strong> Add three more sentences; the card grows taller and the badge stays in its corner without covering text.</p>
 <h3 id="exercise-4-diagnose-an-absolute-label-overlapping-enlarged-text">Exercise 4: Diagnose an absolute label overlapping enlarged text.<a class="heading-anchor" href="#exercise-4-diagnose-an-absolute-label-overlapping-enlarged-text" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Provide sufficient reserved space or return the label to normal flow.</p>
+<p><strong>Approach:</strong> Measure the badge&#x27;s size at enlarged text and reserve at least that much padding on the side where it sits.</p>
 <p><strong>Why:</strong> An absolutely positioned element leaves normal flow, so it cannot push text away; reserve space or return the label to the flow.</p>
+<p><strong>Plausible wrong approach:</strong> Shrinking the label&#x27;s font to make it fit fails because the overlap returns at higher zoom and the label becomes hard to read.</p>
+<p><strong>How to verify:</strong> At 200 percent zoom, the badge and the first line of text do not overlap in the inspector.</p>
 <h3 id="exercise-5-add-a-long-paragraph-and-narrow-the-preview">Exercise 5: Add a long paragraph and narrow the preview.<a class="heading-anchor" href="#exercise-5-add-a-long-paragraph-and-narrow-the-preview" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Content remains readable and the badge does not obscure it.</p>
+<p><strong>Approach:</strong> Paste a long paragraph and switch to the narrow preset, reading the card from top to bottom.</p>
 <p><strong>Why:</strong> Normal flow rewraps text as the width shrinks, while a positioned element stays put, so overlap appears at narrow widths.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only the short sample text fails because the badge collision appears when the first line wraps under it.</p>
+<p><strong>How to verify:</strong> At the narrow preset every line of the long paragraph is fully visible beside or below the badge.</p>
 <h3 id="exercise-6-explain-the-containing-block-used-by-an-absolute-element">Exercise 6: Explain the containing block used by an absolute element.<a class="heading-anchor" href="#exercise-6-explain-the-containing-block-used-by-an-absolute-element" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Identify the actual ancestor that establishes it, rather than assuming it is always the viewport.</p>
+<p><strong>Approach:</strong> Walk up from the absolute element to the nearest ancestor whose <code>position</code> is not <code>static</code>, or that has a transform, and use its padding box.</p>
 <p><strong>Why:</strong> An absolutely positioned element is placed against its nearest positioned ancestor, or against the initial containing block when there is none.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming the viewport is always the reference fails as soon as any ancestor has <code>position: relative</code> or a transform.</p>
+<p><strong>How to verify:</strong> Toggling <code>position: relative</code> on the card in developer tools moves the badge between the card corner and the page corner.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-014_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

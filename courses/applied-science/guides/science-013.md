@@ -10,6 +10,14 @@ Define a query or user, an eligible item universe, a relevance horizon and a can
 
 This tutorial uses item sets and Jaccard similarity, \(J(U,V)=|U\cap V|/|U\cup V|\), to make candidate construction inspectable. It is a baseline mechanism, not a claim that set similarity is a production recommendation strategy for every catalog.
 
+## Key terms
+
+- **Candidate generation:** The retrieval stage that selects a manageable set of items from a large universe before a ranker orders them.
+- **Candidate recall:** The share of relevant items present among the first k candidates, |R intersect C_k| / |R|.
+- **Retrieval ceiling:** The limit candidate recall places on any downstream ranker, since a missing item cannot be ranked.
+- **Jaccard similarity:** The size of the intersection of two item sets divided by the size of their union.
+- **Cold start:** A user or item with no history and therefore no neighborhood, requiring an explicit fallback policy.
+
 ## Worked case 1: generate candidates from known history
 
 User a has interacted with i1 and i2. Two neighboring users share one of those items and contribute i3 or i4. The program computes similarity from their sets and adds each neighbor's similarity to unseen candidate items. A deterministic item-ID tie-breaker produces a reproducible order when scores are equal.
@@ -39,6 +47,46 @@ Do not equate a binary historical interaction with preference. A click may refle
 **Why can NDCG look excellent while the system misses useful items?** NDCG computed only over a filtered candidate set can reward a good ordering within that set. It says little about relevant items removed before scoring.
 
 **What should a retrieval report contain?** State query construction, eligibility, time boundaries, candidate size, recall, cold-start coverage and operational constraints. Compare against transparent baselines. The program establishes exact behavior for a tiny candidate mechanism; a larger system needs both scientific evaluation and measured serving evidence.
+
+## Worked example: Co-occurrence candidates, recall ceiling and a cold item
+
+```python
+from collections import Counter
+from itertools import combinations
+
+baskets = [{"a", "b", "c"}, {"a", "b"}, {"b", "c", "d"}, {"a", "c"}, {"c", "d"}]
+pairs = Counter()
+for basket in baskets:
+    for i, j in combinations(sorted(basket), 2):
+        pairs[i, j] += 1
+        pairs[j, i] += 1
+
+
+def candidates(item, k):
+    scored = sorted(((n, j) for (i, j), n in pairs.items() if i == item), reverse=True)
+    return [j for _, j in scored[:k]]
+
+
+held_out = {"a": {"c", "d"}, "d": {"b", "e"}}  # next purchases after the training window
+for item, future in held_out.items():
+    for k in (1, 2):
+        cands = candidates(item, k)
+        recall = len(future & set(cands)) / len(future)
+        print(f"seed {item}, k={k}: candidates {cands}, recall {recall:.2f}")
+print("candidates for new item e:", candidates("e", 2))
+```
+
+Observed output:
+
+```text
+seed a, k=1: candidates ['c'], recall 0.50
+seed a, k=2: candidates ['c', 'b'], recall 0.50
+seed d, k=1: candidates ['c'], recall 0.00
+seed d, k=2: candidates ['c', 'b'], recall 0.50
+candidates for new item e: []
+```
+
+The co-occurrence table counts how often two items share a basket. Item a appears with c twice and with b twice, and the sort breaks the tie toward c, so the single candidate for a is c. Since the held-out future for a is {c, d}, recall is 0.50 at both \(k=1\) and \(k=2\): d never appeared with a in training, so no ranking model applied after this retrieval step could ever recommend it. That 0.50 is a ceiling on any downstream recall. Seed d shows the dependence on \(k\): its strongest neighbor c is not in its future, so recall is 0.00 at \(k=1\) and rises to 0.50 when b is admitted at \(k=2\). Item e has no training history, and the function returns an empty list. That is a correct output, not a bug, but it means the system needs an explicit cold-start rule, such as popular items or content similarity, rather than a silent empty slate.
 
 ## Complete reproducible program
 

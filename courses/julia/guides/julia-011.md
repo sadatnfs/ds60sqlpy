@@ -10,6 +10,14 @@ Design generic operations over owned types and resolve overlapping method signat
 
 Open `julia-011` in `/classroom` with its prepared `julia` runtime. Worked case A (one operation over two shapes) and worked case B (specify an intersection) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-011: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Multiple dispatch:** Julia selects a method using the runtime types of all positional arguments, not only the first one.
+- **Abstract type:** A type that cannot be instantiated and groups concrete types, so one method can serve a whole family of them.
+- **Method specificity:** When several methods apply, Julia calls the one whose signature is more specific than every other applicable signature.
+- **Method ambiguity:** An error raised when two applicable methods are each more specific in a different argument and neither is chosen.
+- **Type piracy:** Adding a method to a function you do not own for argument types you do not own, which can change behavior in unrelated code.
+
 ## A function can have several methods
 
 Julia selects a method using the types of its positional arguments. The selection can depend on several arguments, not only a distinguished receiver object. This makes generic operations convenient when behavior depends on combinations of representations.

@@ -279,7 +279,7 @@
       "runtime": "tensorflow-cpu",
       "outcome": "Carry a padding mask through a small sequence model and loss denominator.",
       "lab": "Use token IDs [2,3,0], where 0 is padding; compare final valid state and masked loss before/after appending padding.",
-      "verification": "The valid-token mask is [true,true,false]; two equal log(2) token losses average to log(2), not 2*log(2)/3.",
+      "verification": "The valid-token mask is [True, True, False]; two equal log(2) token losses average to log(2), not 2*log(2)/3.",
       "concepts": ["Embedding", "padding mask", "sequence state", "valid-token denominator"]
     },
     {

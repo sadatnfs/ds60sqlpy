@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict vapply(list(c(1,2), c(3)), sum, numeric(1)).</p>
 <p>The result is 3,3.</p>
+<p><strong>Approach:</strong> Map <code>sum</code> over the two elements with vapply and a <code>numeric(1)</code> prototype.</p>
+<p><strong>Why it holds here:</strong> The first element sums to 3 and the second is already 3, so the result is the unnamed vector 3, 3; the input list has no names to carry over.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>sum(unlist(...))</code>. That returns 6, one grand total, and loses the per-group structure the task asks for.</p>
+<p><strong>Verify:</strong> <code>identical(vapply(list(c(1, 2), c(3)), sum, numeric(1)), c(3, 3))</code> returns TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add an empty group to a sum mapping.</p>
 <p>The new group total is zero, under that declared policy.</p>
+<p><strong>Approach:</strong> Keep the empty group in the list and map <code>sum</code> as before.</p>
+<p><strong>Why it holds here:</strong> <code>sum(numeric(0))</code> is 0, which fits the numeric(1) prototype, so the empty group gets total 0 under the documented convention.</p>
+<p><strong>Tempting mistake:</strong> Summarizing with <code>max</code>. For the empty group it returns -Inf with a warning, which fits the prototype too, so vapply accepts a value no report should show.</p>
+<p><strong>Verify:</strong> <code>vapply(groups, sum, numeric(1))[[&quot;empty&quot;]]</code> returns 0.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Map count and mean into a list per group.</p>
 <p>Use lapply and explicitly handle all-missing or empty means.</p>
+<p><strong>Approach:</strong> Use lapply with a function that returns <code>list(n = length(x), mean = ...)</code>, branching to NA_real_ when the group is empty.</p>
+<p><strong>Why it holds here:</strong> Each group needs two fields, so a list per group fits. A has mean 1.5, and the empty group gets n 0 with an explicit NA.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>mean(x)</code> without the branch. The empty group gets NaN, which <code>is.na()</code> also accepts, so the check passes while the output suggests an arithmetic fault.</p>
+<p><strong>Verify:</strong> <code>summary$A$mean</code> returns 1.5 and <code>summary$empty$n</code> returns 0.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a mapped function returning two numbers under numeric(1).</p>
 <p>vapply raises an incompatibility instead of changing shape silently.</p>
+<p><strong>Approach:</strong> Run the two-value function under vapply with numeric(1) inside tryCatch and confirm that it stops.</p>
+<p><strong>Why it holds here:</strong> The prototype promises one number per element, and <code>c(x, x)</code> returns two, so vapply raises an error naming the length mismatch.</p>
+<p><strong>Tempting mistake:</strong> Switching to sapply to make the error go away. It returns a two-row matrix, so code that expects one value per group receives a different shape with no message.</p>
+<p><strong>Verify:</strong> In the reference <code>bad</code> returns TRUE because the error handler ran.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Map an empty collection.</p>
 <p>vapply with numeric(1) returns an empty numeric result.</p>
+<p><strong>Approach:</strong> Map over <code>list()</code> with vapply and the same numeric(1) prototype.</p>
+<p><strong>Why it holds here:</strong> There are no elements to call, and the prototype still fixes the type, so the result is numeric(0).</p>
+<p><strong>Tempting mistake:</strong> Using sapply here. As Example 3 shows, it returns an empty list, which fails an <code>is.numeric()</code> check and breaks code that later adds totals.</p>
+<p><strong>Verify:</strong> <code>identical(vapply(list(), sum, numeric(1)), numeric(0))</code> returns TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain why a pipe does not accelerate a computation automatically.</p>
 <p>Measure an actual equivalent workload before making a performance claim.</p>
+<p><strong>Approach:</strong> Show that the piped and nested forms are the same call, and time a realistic workload only if speed matters.</p>
+<p><strong>Why it holds here:</strong> <code>quote()</code> reveals that <code>c(3, 1, 2) |&gt; sort()</code> becomes <code>sort(c(3, 1, 2))</code>, so both versions sort the same three numbers.</p>
+<p><strong>Tempting mistake:</strong> Timing each spelling once on three numbers and reporting the faster one. The difference is noise, and no algorithm changed.</p>
+<p><strong>Verify:</strong> <code>identical(c(3, 1, 2) |&gt; sort() |&gt; head(2), head(sort(c(3, 1, 2)), 2))</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

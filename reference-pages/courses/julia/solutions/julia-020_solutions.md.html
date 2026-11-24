@@ -195,24 +195,58 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-020-explained-reference">julia-020: explained reference<a class="heading-anchor" href="#julia-020-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-020_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Make every random draw come from a named generator such as <code>Xoshiro(42)</code> and compare simulated summaries with exact distribution quantities. Worked example A samples 4000 draws from <code>Normal(2, 3)</code> and judges the sample mean with the scale 3 divided by sqrt(4000). Worked example B compares <code>Binomial(10, 0.2)</code> frequencies with exact masses.</p>
 <h3 id="1-state-the-parameterization">1. State the parameterization<a class="heading-anchor" href="#1-state-the-parameterization" aria-label="Link to this section">#</a></h3>
 <p>A familiar parameter name should be checked against the actual distribution API.</p>
 <p><strong>Expected observation:</strong> The mean is 2 and variance 9.</p>
+<p><strong>Why it holds here:</strong> Distributions.jl parameterizes <code>Normal(μ, σ)</code> by standard deviation, so <code>Normal(2, 3)</code> has mean 2 and variance 9.</p>
+<p><strong>Plausible wrong approach:</strong> Reading the second argument as variance, as some textbooks write N(μ, σ²), predicts variance 3 and a much narrower spread.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>mean(distribution) == 2</code> and <code>var(distribution) == 9</code>.</p>
 <h3 id="2-reproduce-a-sequence">2. Reproduce a sequence<a class="heading-anchor" href="#2-reproduce-a-sequence" aria-label="Link to this section">#</a></h3>
 <p>This demonstrates reproducibility under the current implementation, not a universal cross-version promise.</p>
 <p><strong>Expected observation:</strong> They produce equal arrays in the stated runtime.</p>
+<p><strong>Why it holds here:</strong> Two <code>Xoshiro(42)</code> generators start in the same state, so drawing 4000 values from each yields identical arrays in this runtime.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on the global default generator lets any earlier call elsewhere in the script change the sequence.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>first == second</code>; the reference also asserts <code>rand(Xoshiro(3), 3) == before</code>.</p>
 <h3 id="3-advance-the-generator">3. Advance the generator<a class="heading-anchor" href="#3-advance-the-generator" aria-label="Link to this section">#</a></h3>
 <p>Reusing or recreating a generator defines different sampling procedures.</p>
 <p><strong>Expected observation:</strong> Its state advances and the arrays differ in the fixture.</p>
+<p><strong>Why it holds here:</strong> Each call to <code>rand(generator, 3)</code> advances the same generator, so the second batch continues the stream rather than repeating it.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting the seed to be applied again on every call predicts equal batches and misreads how generator state works.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>before != after</code> for consecutive draws from one <code>Xoshiro(3)</code>.</p>
 <h3 id="4-scale-monte-carlo-work">4. Scale Monte Carlo work<a class="heading-anchor" href="#4-scale-monte-carlo-work" aria-label="Link to this section">#</a></h3>
 <p>An individual realization can still deviate unpredictably; the scaling is a statement about the sampling model.</p>
 <p><strong>Expected observation:</strong> The theoretical mean standard-error scale halves.</p>
+<p><strong>Why it holds here:</strong> The standard error of the mean is σ divided by sqrt(n), so four times the draws multiplies it by 1/2.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting the error to shrink by four confuses variance scaling with standard-error scaling.</p>
+<p><strong>How to verify:</strong> Compute <code>3 / sqrt(4000)</code> and <code>3 / sqrt(16000)</code> and confirm the ratio is exactly 2.</p>
 <h3 id="5-inspect-an-extreme-tail">5. Inspect an extreme tail<a class="heading-anchor" href="#5-inspect-an-extreme-tail" aria-label="Link to this section">#</a></h3>
 <p>Probability APIs have different numerical roles even when algebraic formulas look equivalent.</p>
 <p><strong>Expected observation:</strong> A stable tail API retains a small positive probability.</p>
+<p><strong>Why it holds here:</strong> At z = 10, <code>cdf(Normal(), 10)</code> rounds to 1.0 in <code>Float64</code>, so <code>1 - cdf</code> is 0, while <code>ccdf</code> computes the tiny tail directly.</p>
+<p><strong>Plausible wrong approach:</strong> Taking <code>log(1 - cdf(Normal(), 10))</code> gives negative infinity and breaks any likelihood that uses it.</p>
+<p><strong>How to verify:</strong> Example B checks that <code>ccdf(Normal(), 10.0)</code> lies between the two Mills-ratio bounds and that <code>logccdf</code> is finite.</p>
 <h3 id="6-interpret-the-plot">6. Interpret the plot<a class="heading-anchor" href="#6-interpret-the-plot" aria-label="Link to this section">#</a></h3>
 <p>The chart is a mechanism demonstration and does not establish a real population distribution.</p>
-<p><strong>Expected observation:</strong> Finite simulated frequencies fluctuate around the model probabilities.</p></article>
+<p><strong>Expected observation:</strong> Finite simulated frequencies fluctuate around the model probabilities.</p>
+<p><strong>Why it holds here:</strong> Two thousand draws give empirical frequencies that sum to 1 and scatter around the exact masses, such as <code>pdf(0) = 0.8^10</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Treating a gap between a bar and its marker as a model failure ignores the sampling noise expected at this size.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>sum(empirical) ≈ 1</code> and <code>pdf(distribution, 0) ≈ 0.8^10</code>; compare each gap with sqrt(p(1-p)/2000).</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-020: all reference checks passed</code>:</p>
+<p>Closed forms anchor these checks: the standard normal is symmetric, so its cdf at 0 is 0.5 and its median is 0, and the log density at 0 is minus half of log 2 pi. A negative scale raises <code>DomainError</code>. The generator lines show that consecutive draws from one stream differ, while a fresh <code>Xoshiro(3)</code> reproduces the first three numbers.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> cdf<span class="syntax-punctuation">(</span>Normal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.5</span>
+    <span class="syntax-decorator">@test</span> quantile<span class="syntax-punctuation">(</span>Normal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test</span> logpdf<span class="syntax-punctuation">(</span>Normal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">≈</span> <span class="syntax-operator">-</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-builtin">pi</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-number">2</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">DomainError</span> Normal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    generator <span class="syntax-operator">=</span> Xoshiro<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    before <span class="syntax-operator">=</span> rand<span class="syntax-punctuation">(</span>generator<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    after <span class="syntax-operator">=</span> rand<span class="syntax-punctuation">(</span>generator<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> before <span class="syntax-operator">!=</span> after
+    <span class="syntax-decorator">@test</span> rand<span class="syntax-punctuation">(</span>Xoshiro<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> before
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

@@ -8,6 +8,12 @@
     "exact expectation",
     "reward exploitation"
   ],
+  "key_terms": {
+    "Frozen rollout policy": "A detached copy of the policy probabilities taken at each outer iteration and used for PPO ratios.",
+    "Critic": "A value estimate per context, trained with a weighted squared-error loss alongside the actor.",
+    "Exact expectation": "A surrogate computed by enumerating contexts and actions with their probabilities instead of sampling.",
+    "Reward exploitation": "Gains in the optimized reward that do not reflect the intended behavior, checked against a separate measure."
+  },
   "outcome": "Train a tiny categorical policy with the PPO surrogate and critic loss while testing frozen rollout state, optimization and independent task utility.",
   "verification": "The expectation weights sum to 1, the frozen rollout state is unchanged after updates, the learned probability rows mirror each other, and the proxy-trained policy exceeds 0.9 training reward while task utility stays below 0.1.",
   "level": "advanced",
@@ -20,42 +26,78 @@
       "task": "Sum old-policy weights across both contexts and actions.",
       "expected": "The total is 1.",
       "hint": "Each context contributes probability 0.5.",
-      "answer": "An unweighted average over actions would cease to represent the old-policy expectation once the policy becomes nonuniform."
+      "answer": "An unweighted average over actions would cease to represent the old-policy expectation once the policy becomes nonuniform.",
+      "reasoning": {
+        "approach": "Compute `weights = old / 2` for two contexts with two actions each, then sum all four entries.",
+        "why": "Each context has probability 1 / 2 and each row of `old` sums to 1, so the weights sum to 1 / 2 + 1 / 2 = 1. At the uniform start every weight is 0.25. Weighting by `old` keeps the objective an expectation under the sampling policy as it becomes nonuniform.",
+        "pitfall": "Averaging the surrogate equally over the four actions matches only while the policy is uniform. Once one action has probability 0.9, equal weights would overcount the rare action.",
+        "verify": "The reference asserts `float(weights.sum()) == 1` for the uniform `old`. Inside `fit_policy`, print `weights.sum()` each outer step and confirm 1."
+      }
     },
     {
       "title": "Inspect frozen state",
       "task": "Compare the old probability tensor before and after each inner update.",
       "expected": "It is byte-for-byte numerically unchanged.",
       "hint": "Detach and copy the collector snapshot.",
-      "answer": "Current-policy updates must not move the denominator of their own importance ratio."
+      "answer": "Current-policy updates must not move the denominator of their own importance ratio.",
+      "reasoning": {
+        "approach": "Clone `old` into `frozen` at the start of each outer step and compare them after every inner update with zero tolerance.",
+        "why": "`old` is computed from `logits.detach()`, so optimizer steps on `logits` cannot change it. The comparison with `rtol=0, atol=0` confirms that exactly.",
+        "pitfall": "Writing `old = torch.softmax(logits, dim=-1)` without detach would leave it in the graph, so gradients would flow into the denominator. Exact equality catches both that and accidental in-place edits.",
+        "verify": "`fit_policy` calls `torch.testing.assert_close(old, frozen, rtol=0, atol=0)` after each of the three inner steps."
+      }
     },
     {
       "title": "Separate critic and actor gradients",
       "task": "Explain why the advantage uses detached values.",
       "expected": "The actor cannot improve its objective by changing its baseline through that path.",
       "hint": "The critic is trained by a separate squared-error term.",
-      "answer": "Without this graph boundary the implemented gradient would contain an unintended optimization route."
+      "answer": "Without this graph boundary the implemented gradient would contain an unintended optimization route.",
+      "reasoning": {
+        "approach": "Compute the advantage as `reward - values.detach()[:, None]` so the actor loss treats the baseline as a constant. Train the critic through its own squared-error term.",
+        "why": "If the baseline were not detached, the actor term could push `values` in whichever direction raises the surrogate, not toward predicting reward. The critic would be pulled away from its own target.",
+        "pitfall": "Assuming one combined loss sorts this out automatically is the mistake. Without the detach, the gradient on `values` contains an extra actor path no one intended.",
+        "verify": "`fit_policy` asserts `not advantage.requires_grad`. Removing `.detach()` and comparing the learned `values` shows the difference."
+      }
     },
     {
       "title": "Check symmetry",
       "task": "Swap the two contexts and their useful actions.",
       "expected": "The learned probability rows mirror each other.",
       "hint": "Both start from the same logits and use symmetric rewards.",
-      "answer": "This invariant tests the small environment and update implementation independently of a particular random seed."
+      "answer": "This invariant tests the small environment and update implementation independently of a particular random seed.",
+      "reasoning": {
+        "approach": "Train with rewards `[[1, 0], [0, 1]]` for 12 outer steps and compare row 0 of the learned probabilities with row 1 reversed.",
+        "why": "Context 0 rewards action 0 and context 1 rewards action 1, a mirror image. Initialization, reference and updates are all symmetric, so the learned rows must be mirror images to numerical precision.",
+        "pitfall": "Accepting any final reward above 0.5 as correct would miss a bug that treats contexts differently, such as a wrong reduction axis. Symmetry tests the plumbing directly.",
+        "verify": "The reference asserts `torch.testing.assert_close(probability[0], probability[1].flip(0), atol=1e-12, rtol=1e-12)` and that `final > initial`."
+      }
     },
     {
       "title": "Optimize a bad proxy",
       "task": "Run case B and evaluate the resulting policy under the original task utility.",
       "expected": "Training reward exceeds 0.9 while task utility is below 0.1.",
       "hint": "Keep the evaluation utility outside the optimizer.",
-      "answer": "Correct execution of PPO cannot validate a mistaken or exploitable reward definition."
+      "answer": "Correct execution of PPO cannot validate a mistaken or exploitable reward definition.",
+      "reasoning": {
+        "approach": "Run `fit_policy([[0, 1], [1, 0]])` as in case B, then score the learned policy with the true utility `[[1, 0], [0, 1]]`.",
+        "why": "The proxy rewards the opposite action in each context. PPO maximizes it, reaching proxy reward above 0.9, and the true utility falls below 0.1 because the policy now prefers exactly the wrong actions.",
+        "pitfall": "Reading the rising training reward as evidence the policy improved is the mistake. The optimizer worked correctly; the reward definition was wrong, and only an independent utility shows it.",
+        "verify": "Case B asserts `proxy_final > 0.9 and true_final < 0.1`. This is the same pattern as eval-019's proxy example."
+      }
     },
     {
       "title": "State the scale boundary",
       "task": "List what this actual training run omits from an LLM deployment.",
       "expected": "Tokenization, sampled language rollouts, long-horizon credit, pretrained weights and serving are absent.",
       "hint": "Name the finite state/action representation.",
-      "answer": "The run establishes a small CPU optimization mechanism, not a production language model or a guarantee of safe alignment."
+      "answer": "The run establishes a small CPU optimization mechanism, not a production language model or a guarantee of safe alignment.",
+      "reasoning": {
+        "approach": "List what the run lacks: a tokenizer, sampled text rollouts, multi-step credit over long outputs, pretrained weights, batching on accelerators and serving.",
+        "why": "The model is a 2 by 2 table of logits with two values, trained on exact expected rewards in float64 on CPU. It demonstrates the PPO update mechanics and frozen-state checks, nothing more.",
+        "pitfall": "Calling this an LLM alignment run is the mistake. None of the difficulties of language rollouts, such as noisy reward models or long sequences, are present.",
+        "verify": "`worked_a` asserts the probabilities are on `cpu` and rows sum to 1. A write-up should state the 2 contexts, 2 actions and the step counts."
+      }
     }
   ],
   "sources": [

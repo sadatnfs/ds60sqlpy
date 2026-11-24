@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-what-a-unit-test-cannot-prove-about-packaging">Exercise 1: Predict what a unit test cannot prove about packaging.<a class="heading-anchor" href="#exercise-1-predict-what-a-unit-test-cannot-prove-about-packaging" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Missing image files or a wrong final command can remain undetected.</p>
 <p><strong>Why:</strong> Unit tests may run in a richer host environment. Execute the final image to observe its real dependency and filesystem contract.</p>
+<p><strong>Approach:</strong> Ask where unit tests run: often on the CI host with its own Python, not inside the final image.</p>
+<p><strong>Why this is correct:</strong> A Dockerfile that forgets COPY server.py, or sets the wrong CMD, still passes tests that import the code from the checkout.</p>
+<p><strong>A plausible wrong approach:</strong> Gating release on unit tests alone ships an image that may not start.</p>
+<p><strong>How to verify:</strong> Add a step that runs the built image and requests /healthz; it fails when the image is missing a file.</p>
 <h3 id="exercise-2-separate-source-zip-and-image-artifacts">Exercise 2: Separate source ZIP and image artifacts.<a class="heading-anchor" href="#exercise-2-separate-source-zip-and-image-artifacts" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Source input package versus built executable filesystem.</p>
 <p><strong>Why:</strong> They have different consumers and validation requirements. A clean archive does not establish that the image starts.</p>
+<p><strong>Approach:</strong> Separate the source archive, which developers and builders read, from the image, which an engine runs.</p>
+<p><strong>Why this is correct:</strong> The archive&#x27;s checks cover files and formatting; the image&#x27;s checks cover startup, user and runtime files.</p>
+<p><strong>A plausible wrong approach:</strong> Treating a clean source ZIP as proof the image works skips the stage where packaging errors show up.</p>
+<p><strong>How to verify:</strong> Each artifact has its own receipt: archive hash and checks, image ID and startup results.</p>
 <h3 id="exercise-3-design-a-parallel-test-partition">Exercise 3: Design a parallel test partition.<a class="heading-anchor" href="#exercise-3-design-a-parallel-test-partition" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Independent groups with explicit ownership for shared fixtures.</p>
 <p><strong>Why:</strong> Parallelism is valuable only when tests do not corrupt one another’s state. Preserve required serialization for shared resources.</p>
+<p><strong>Approach:</strong> Group tests so that groups share no project name, volume or port, and keep tests that share state in one group.</p>
+<p><strong>Why this is correct:</strong> Independent groups can run together safely; groups that share study-data or port 18080 would interfere.</p>
+<p><strong>A plausible wrong approach:</strong> Running every test in parallel to save time makes counter assertions fail at random.</p>
+<p><strong>How to verify:</strong> Each group&#x27;s resources carry a unique project name, and repeated parallel runs give the same results.</p>
 <h3 id="exercise-4-diagnose-rebuilding-between-acceptance-and-deployment">Exercise 4: Diagnose rebuilding between acceptance and deployment.<a class="heading-anchor" href="#exercise-4-diagnose-rebuilding-between-acceptance-and-deployment" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The new artifact may not match the tested identity.</p>
 <p><strong>Why:</strong> Mutable dependencies and timestamps can change output. Promote the tested artifact or qualify the newly built one explicitly.</p>
+<p><strong>Approach:</strong> Compare the image ID that passed acceptance with the one deployed after the rebuild.</p>
+<p><strong>Why this is correct:</strong> Unpinned base images or dependencies can change between builds, so the rebuild may differ from what was tested.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming the same source always gives the same image deploys untested content.</p>
+<p><strong>How to verify:</strong> Promote the tested ID directly, or run acceptance again on the rebuilt ID before deploying it.</p>
 <h3 id="exercise-5-explain-cleanup-after-a-failed-ci-job">Exercise 5: Explain cleanup after a failed CI job.<a class="heading-anchor" href="#exercise-5-explain-cleanup-after-a-failed-ci-job" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Remove job-owned runtime resources while retaining bounded diagnostic evidence.</p>
 <p><strong>Why:</strong> Failure should not leave a cluster or volume consuming resources indefinitely. Cleanup must not erase the only failure receipt or affect unrelated projects.</p>
+<p><strong>Approach:</strong> After a failure, save logs and the receipt first, then remove only resources labeled with the job&#x27;s project name.</p>
+<p><strong>Why this is correct:</strong> This keeps the evidence while freeing containers and volumes the job created.</p>
+<p><strong>A plausible wrong approach:</strong> Running a broad prune after each failure deletes the evidence and can remove other projects&#x27; resources.</p>
+<p><strong>How to verify:</strong> The job&#x27;s resources are gone, the logs remain in artifacts, and other projects&#x27; containers are untouched.</p>
 <h3 id="exercise-6-write-a-release-gate-with-honest-limitations">Exercise 6: Write a release gate with honest limitations.<a class="heading-anchor" href="#exercise-6-write-a-release-gate-with-honest-limitations" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Named actual checks on exact artifacts, plus visible skipped surfaces.</p>
 <p><strong>Why:</strong> A gate should report what ran, not infer broad acceptance from static configuration. Different engines and architectures may still require separate qualification.</p>
+<p><strong>Approach:</strong> List each check that ran, the exact image ID it ran on, and the surfaces skipped, such as arm64 or other engines.</p>
+<p><strong>Why this is correct:</strong> Visible skips let readers see what the gate does not cover.</p>
+<p><strong>A plausible wrong approach:</strong> Marking the release fully tested because the config defines many checks conflates defined with executed.</p>
+<p><strong>How to verify:</strong> The gate output shows ran, passed or skipped for each check, with the image ID.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

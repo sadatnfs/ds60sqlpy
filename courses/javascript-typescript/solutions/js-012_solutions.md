@@ -46,7 +46,7 @@ assert.equal(await observed, 3);
 assert.deepEqual(trace, ['executor', 'sync', 'reaction']);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(trace, ['executor', 'sync', 'reaction'])`. Restoring the original line brings back the worked observation: executor, sync, reaction.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(trace, ['executor', 'sync', 'reaction'])`. Restoring `const observed = pending.then(value => { trace.push('reaction'); return value; });` brings back: executor, sync, reaction.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(trace, ['executor', 'sync', 'reaction'])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -68,7 +68,7 @@ const result = await Promise.resolve(4)
 assert.equal(result, 'bad value 8');
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(result, 'bad value 8')`; after it the line reads `.then(value => value * 2)` again and recovered message is bad value 8.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(result, 'bad value 8')`. Restoring `.then(value => value * 2)` brings back: recovered message is bad value 8.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(result, 'bad value 8')` for this input.
 
@@ -93,7 +93,7 @@ resolveFirst('first');
 assert.deepEqual(await result, ['first', 'second']);
 ```
 
-**Expected:** result remains first,second.
+**Expected:** result remains `['first', 'second']`.
 
 **Verify:** Keep a check equivalent to `assert.deepEqual(await result, ['first', 'second'])`. As a control, change `resolveSecond('second');` to `resolveSecond('second!');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
@@ -156,7 +156,7 @@ trace.push('timer');
 assert.deepEqual(trace, ['sync', 'promise', 'microtask', 'timer']);
 ```
 
-**Expected:** sync,promise,microtask,timer.
+**Expected:** trace `sync`, `promise`, `microtask`, `timer` in that order.
 
 **Verify:** Keep a check equivalent to `assert.deepEqual(trace, ['sync', 'promise', 'microtask', 'timer'])`. As a control, change `Promise.resolve().then(() => trace.push('promise'));` to `Promise.resolve().then(() => trace.push('promise!'));`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 

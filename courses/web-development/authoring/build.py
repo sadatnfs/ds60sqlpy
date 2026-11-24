@@ -52,7 +52,76 @@ def specs() -> list[dict]:
     result = payload["chapters"]
     if len(result) != 60 or [item["n"] for item in result] != list(range(1, 61)):
         raise ValueError("Web chapter identities changed unexpectedly")
+    for item in result:
+        check_key_terms(item["n"], item.get("key_terms"))
+        check_reasoning(item["n"], item.get("reasoning"))
+        check_contrast(item["n"], item.get("contrast"))
     return result
+
+
+REASONING_FIELDS = ("approach", "pitfall", "verify")
+CONTRAST_FIELDS = ("heading", "setup", "lang", "code", "reading")
+
+
+def plain_text(n: int, label: str, value: object, *, sentence: bool = True) -> None:
+    """Require non-empty single-line prose without em or en dashes."""
+    if not isinstance(value, str) or not value.strip() or value != value.strip():
+        raise ValueError(f"web-{n:03d} {label} must be non-empty trimmed text")
+    if "\u2014" in value or "\u2013" in value or "\n" in value:
+        raise ValueError(f"web-{n:03d} {label} contains a dash character or line break")
+    if sentence and not value.endswith((".", "?")):
+        raise ValueError(f"web-{n:03d} {label} must be complete sentences")
+
+
+def check_reasoning(n: int, items: object) -> None:
+    """Require approach, plausible wrong approach and verification text for all six tasks."""
+    if not isinstance(items, list) or len(items) != 6:
+        raise ValueError(f"web-{n:03d} needs reasoning for all six exercises")
+    for i, item in enumerate(items, 1):
+        if not isinstance(item, dict) or sorted(item) != sorted(REASONING_FIELDS):
+            raise ValueError(f"web-{n:03d} exercise {i} reasoning needs {REASONING_FIELDS}")
+        for field in REASONING_FIELDS:
+            plain_text(n, f"exercise {i} {field}", item[field])
+        if len(item["pitfall"].split()) < 10 or len(item["verify"].split()) < 8:
+            raise ValueError(f"web-{n:03d} exercise {i} reasoning is too thin to teach")
+
+
+def check_contrast(n: int, item: object) -> None:
+    """Require one lesson-specific contrast case: a runnable snippet and its reading."""
+    if not isinstance(item, dict) or sorted(item) != sorted(CONTRAST_FIELDS):
+        raise ValueError(f"web-{n:03d} contrast needs {CONTRAST_FIELDS}")
+    plain_text(n, "contrast heading", item["heading"], sentence=False)
+    if ":" in item["heading"] or "*" in item["heading"]:
+        raise ValueError(f"web-{n:03d} contrast heading cannot contain ':' or '*'")
+    plain_text(n, "contrast setup", item["setup"])
+    plain_text(n, "contrast reading", item["reading"])
+    if item["lang"] not in {"html", "css", "js", "php", "text", "http", "sh", "sql", "yaml"}:
+        raise ValueError(f"web-{n:03d} contrast lang is not a supported fence language")
+    code = item["code"]
+    if not isinstance(code, str) or not code.strip() or "```" in code:
+        raise ValueError(f"web-{n:03d} contrast code must be a non-empty fenced snippet")
+    if "\u2014" in code or "\u2013" in code:
+        raise ValueError(f"web-{n:03d} contrast code contains a dash character")
+
+
+def check_key_terms(n: int, pairs: object) -> None:
+    """Require 3 to 5 lesson-specific term and definition pairs for the Key terms list."""
+    if not isinstance(pairs, list) or not 3 <= len(pairs) <= 5:
+        raise ValueError(f"web-{n:03d} needs 3 to 5 key_terms")
+    seen: set[str] = set()
+    for pair in pairs:
+        if not (
+            isinstance(pair, list)
+            and len(pair) == 2
+            and all(isinstance(value, str) and value.strip() for value in pair)
+        ):
+            raise ValueError(f"web-{n:03d} key_terms entries must be [term, definition]")
+        term, definition = pair
+        if ":" in term or "*" in term or len(term) > 80 or term.lower() in seen:
+            raise ValueError(f"web-{n:03d} has an invalid or repeated key term: {term!r}")
+        if not definition.endswith("."):
+            raise ValueError(f"web-{n:03d} definition for {term!r} must be a sentence")
+        seen.add(term.lower())
 
 
 def artifacts() -> dict[Path, str]:
@@ -108,6 +177,9 @@ def artifacts() -> dict[Path, str]:
         else:
             execution = f"This lesson is a design worksheet saved as `{source}`. The classroom does not start a server, install packages or control Docker, so a command here is a proposal until you deliberately run it in your own disposable project. The optional lab is `courses/web-development/fixtures/php-http-lab/`; read its README before preparing it and never expose it to the internet. {readme} describes this boundary."
         terms = series(spec["terms"][:3])
+        key_terms = "\n".join(
+            f"- **{term}:** {definition}" for term, definition in spec["key_terms"]
+        )
         text = f"""# {key}: {title}
 
 ## Level and prerequisites
@@ -122,6 +194,10 @@ def artifacts() -> dict[Path, str]:
 
 {spec["mental"]}
 
+### Key terms
+
+{key_terms}
+
 ## Syntax anatomy and mechanism
 
 {spec["anatomy"]}
@@ -135,17 +211,29 @@ def artifacts() -> dict[Path, str]:
         for i, example in enumerate(spec["examples"], 1):
             heading, intro, lang, code, expected = example
             text += f"\n### Worked example {i}: {heading}\n\n{intro}\n\n```{lang}\n{code}\n```\n\n**Expected observation:** {expected}\n"
+        contrast = spec["contrast"]
+        text += (
+            f"\n## Contrast case: {contrast['heading']}\n\n{contrast['setup']}\n\n"
+            f"```{contrast['lang']}\n{contrast['code']}\n```\n\n{contrast['reading']}\n"
+        )
         text += "\n## Six progressive exercises\n"
         if any(answer_task(prompt) for prompt, *_ in tasks):
             text += "\nExercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.\n"
         answers = f"# {key}: explanatory solutions\n\nOpen this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `{guide}`.\n"
-        for i, (prompt, answer, hint, why) in enumerate(tasks, 1):
+        for i, ((prompt, answer, hint, why), reason) in enumerate(
+            zip(tasks, spec["reasoning"], strict=True), 1
+        ):
             text += f"\n### Exercise {i}: {prompt}\n\n"
             label = "Expected answer" if answer_task(prompt) else "Expected evidence"
             if label == "Expected evidence":
                 text += f"**Expected evidence:** {answer}\n\n"
             text += f"**Progressive hint:** {hint}\n"
-            answers += f"\n## Exercise {i}: {prompt}\n\n**{label}:** {answer}\n\n**Why:** {why}\n"
+            answers += (
+                f"\n## Exercise {i}: {prompt}\n\n**{label}:** {answer}\n\n"
+                f"**Approach:** {reason['approach']}\n\n**Why:** {why}\n\n"
+                f"**Plausible wrong approach:** {reason['pitfall']}\n\n"
+                f"**How to verify:** {reason['verify']}\n"
+            )
         text += (
             f"""
 ## Debugging and common mistakes

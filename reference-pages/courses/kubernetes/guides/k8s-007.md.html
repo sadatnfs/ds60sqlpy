@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Labels are key-value metadata used to select sets of objects. A Service uses a selector to identify backing Pods and provides a stable network abstraction over their changing identities. The Service object, its selected Pods and its EndpointSlices are separate resources whose relationships must be observed.</p>
 <p>A ClusterIP Service does not publish an external address or prove that an application is healthy. Its port is the port clients use on the Service, while targetPort identifies the destination port on backing Pods. A named targetPort such as http resolves through the container port declaration. A mismatch can break traffic even when the Service object exists.</p>
 <p>The current browser operation supports the fixed hello Deployment and hello Service. It checks Ready Pod UIDs, unique eligible EndpointSlice Pod UIDs and a new in-cluster version client, then cleans only owned resources. It deliberately permits a wrong selector value as a bounded negative case, which should fail to establish backends rather than silently succeed.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Label:</strong> A key and value pair in object metadata, such as app=hello, used to group and select objects.</li>
+<li><strong>Label selector:</strong> A query over labels that a Service or controller uses to choose its member Pods. A selector that matches nothing leaves a Service without endpoints.</li>
+<li><strong>Service:</strong> A stable name and virtual address that routes traffic to the ready Pods its selector matches.</li>
+<li><strong>ClusterIP:</strong> The default Service type, which gives the Service a virtual IP address reachable from inside the cluster.</li>
+<li><strong>targetPort:</strong> The Service field naming the container port, by number or name, that receives traffic sent to the Service port.</li>
+</ul>
 <h3 id="follow-selection-and-port-mapping">Follow selection and port mapping<a class="heading-anchor" href="#follow-selection-and-port-mapping" aria-label="Link to this section">#</a></h3>
 <p>The Deployment template labels Pods app=hello. The Service selector app=hello selects those labels; changing it to app=wrong selects a different set, usually empty in this owned fixture. The selector is not an owner reference and does not create Pods. The Deployment and Service can therefore be accepted independently while routing is still wrong.</p>
 <p>The admitted Service exposes port 8080 and targetPort http. The container declares name http at containerPort 8080. All three pieces must agree with the actual server listener. A port name is a lookup key, not a second network port. The fixed adapter refuses arbitrary host exposure, NodePort, external endpoints and unbounded port choices.</p>

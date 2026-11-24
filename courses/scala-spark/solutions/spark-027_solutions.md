@@ -31,7 +31,7 @@ The predicate makes unknown-amount retention a policy rather than an accident of
 
 ### Exercise 2: Define an ordered field/type contract
 
-Return ordered(name, simple_type) pairs from the result schema. Compare with entity_id bigint, segment string, doubled bigint.
+Return ordered (name, simple_type) pairs from the result schema. Compare with entity_id bigint, segment string, doubled bigint.
 
 **Expected:** Exactly those three fields in that order. Casting entity_id to string changes the contract even when printed values look alike.
 
@@ -166,8 +166,10 @@ def difference_counts(actual, expected):
 
 The negative control proves that the oracle protects occurrence multiplicity rather than only value membership. There are no new distinct values, so a set comparator would miss the error. Directional bag counts explain the failure as two missing occurrences, which is more useful than a generic mismatch message when diagnosing an accidental DISTINCT or deduplication step.
 
-**Verification evidence:** Assert(0,2), count 5 and the explicit negative-control rejection.
+**Verification evidence:** Assert `(0, 2)`, count 5 and the explicit negative-control rejection.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Transform without collapsing occurrences or unknowns) is built inside the program, so opening the lesson fetches nothing; it expects: Seven rows, known total 130 and one NULL doubled value. The negative entity 6 row is excluded. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

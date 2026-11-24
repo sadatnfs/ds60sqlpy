@@ -83,7 +83,8 @@ not qualify executor dependencies. Stop the session and owned kernel afterward.
 ## Kubernetes route
 
 `Dockerfile.cluster` preserves a reviewed Spark base's Kubernetes entrypoint and
-adds the bounded application. `kubernetes/access.yaml`, `resources.yaml`,
+adds the bounded application, then restates the official image's nonroot UID 185
+as its final `USER`. `kubernetes/access.yaml`, `resources.yaml`,
 `notebook-service.yaml`, `executor-template.yaml` and `network-policy.yaml` are
 reviewable templates. Replace namespace/session placeholders in owned copies.
 Match the actual image UID; the executor template's UID 185 is an explicit

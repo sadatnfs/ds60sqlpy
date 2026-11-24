@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Run independent chunks on the prepared two-thread runtime, combine results deterministically and protect shared state with an explicit lock.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-030</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (partial sums with exclusive local state) and worked case B (protect an intentionally shared counter) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-030: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Threads.@spawn:</strong> A macro that schedules a task on any available thread and returns a task whose result <code>fetch</code> retrieves.</li>
+<li><strong>Race condition:</strong> Unsynchronized access to shared memory by concurrent tasks, at least one of them writing, which can lose updates.</li>
+<li><strong>ReentrantLock:</strong> A lock that serializes access to shared state, released in a <code>finally</code> block or by the <code>lock</code> do-block form.</li>
+<li><strong>Task migration:</strong> A task can resume on a different thread after yielding, so scratch storage indexed by <code>threadid()</code> is unsafe.</li>
+<li><strong>Parallel reduction:</strong> Combining partial results from several tasks, where floating-point regrouping can change the last digits of a sum.</li>
+</ul>
 <h3 id="parallel-work-needs-an-ownership-plan">Parallel work needs an ownership plan<a class="heading-anchor" href="#parallel-work-needs-an-ownership-plan" aria-label="Link to this section">#</a></h3>
 <p>Threads can execute tasks simultaneously and share memory. Shared memory avoids some copying but permits data races when concurrent accesses conflict without synchronization. An increment is conceptually a read, arithmetic operation and write; two tasks can read the same old value and lose an update. The reference does not execute an unsafe race to hope it fails. It tests a design that prevents the conflict.</p>
 <p>The classroom launches Julia with two threads. That describes available scheduling capacity, not a guarantee that two tiny tasks overlap long enough to accelerate a program. Thread overhead can dominate small workloads. BLAS and other native libraries may also have thread pools, so nested parallelism can oversubscribe CPU resources.</p>

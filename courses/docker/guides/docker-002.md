@@ -16,6 +16,14 @@ WSL 2 provides a Linux environment on Windows. The course uses its Ubuntu shell 
 
 The fixture needs a local engine and Compose. Compose is the client-side tool that reads a multi-service application definition. A successful client version print does not prove that the engine is running. Conversely, permission to access an engine grants substantial control over its host environment. Resolve setup through the engine’s documented user configuration rather than making a socket world-writable.
 
+### Key terms
+
+- **Docker client:** The command you type, which sends API requests to an engine rather than running containers itself.
+- **Docker engine:** The daemon that receives client requests and builds images and manages containers on its Linux host or VM.
+- **Docker context:** A named client setting that selects which engine endpoint your commands are sent to.
+- **WSL 2:** The Windows Subsystem for Linux version that provides the Ubuntu shell and Linux environment the course uses on Windows.
+- **`docker info`:** A read-only command that asks the selected engine to report its version, operating system and resource settings.
+
 ## Anatomy and a trace you can follow
 
 `docker context show` prints the selected context name. `docker context inspect NAME` shows its endpoint configuration. `docker info` actually contacts the engine and exposes its server operating-system type and resource configuration. `docker compose version` checks the Compose plugin. Treat errors separately: an absent command, an unreachable daemon, an authorization problem and a Windows-container engine are different conditions.
@@ -90,11 +98,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Reading a successful `docker --version` as proof that the engine is running. Running lab commands while a remote or shared context is selected. Using PowerShell paths on Windows instead of the Ubuntu shell under WSL 2.
 
-Exercise 4 is this chapter's boundary case: Diagnose client success with daemon connection failure. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose client success with daemon connection failure. Run `docker version` and read whether the Server section appears at all; a printed client version alone says nothing about the engine, the selected context or socket permission. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using Docker client, Docker engine, Docker context, WSL 2 and docker info. Reconstruct worked example 2 (Distinguish client from server availability) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Without notes, say which command output proves the client works and which proves the engine answers. Then reconstruct worked example 2 (Distinguish client from server availability) with one different value, predict what changes, and name which of Docker client, Docker engine, Docker context, WSL 2 and docker info the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

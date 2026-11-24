@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-cni-interface-and-network-implementation">Exercise 1: Distinguish CNI interface and network implementation.<a class="heading-anchor" href="#exercise-1-distinguish-cni-interface-and-network-implementation" aria-label="Link to this section">#</a></h3>
 <p>Do not infer packet behavior from the acronym alone. Inspect the installed implementation and configuration.</p>
 <p><strong>Expected:</strong> A plugin contract versus a concrete routing/policy system.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Separate the CNI specification, which defines how a runtime calls a plugin, from the plugin that programs routes and policy.</li>
+<li><strong>Why it is correct:</strong> CNI only standardizes add and delete calls; packet behavior comes from the installed implementation and its config.</li>
+<li><strong>Plausible wrong approach:</strong> Predicting overlay or policy behavior from the word CNI alone skips reading which plugin is installed.</li>
+<li><strong>How to verify:</strong> The answer names a plugin contract on one side and a concrete routing and policy system on the other.</li>
+</ul>
 <h3 id="exercise-2-label-inner-and-outer-addresses">Exercise 2: Label inner and outer addresses.<a class="heading-anchor" href="#exercise-2-label-inner-and-outer-addresses" aria-label="Link to this section">#</a></h3>
 <p>Encapsulation adds a delivery layer. The outer network need not route every Pod address directly.</p>
 <p><strong>Expected:</strong> Pod endpoints inside, node transport endpoints outside in the overlay example.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Label the inner header with Pod addresses and the outer header with node transport addresses.</li>
+<li><strong>Why it is correct:</strong> Encapsulation wraps the Pod packet so the underlay only needs routes between nodes, not to every Pod address.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting the underlay to route Pod addresses directly describes a routed design, not this overlay.</li>
+<li><strong>How to verify:</strong> Inner addresses are Pods, and outer addresses are nodes.</li>
+</ul>
 <h3 id="exercise-3-draw-a-two-node-request-path">Exercise 3: Draw a two-node request path.<a class="heading-anchor" href="#exercise-3-draw-a-two-node-request-path" aria-label="Link to this section">#</a></h3>
 <p>A complete path identifies which component can drop or misroute traffic at each stage.</p>
 <p><strong>Expected:</strong> Pod interfaces, node forwarding and underlay hops are explicit.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Draw source Pod interface, source node forwarding, underlay hops, destination node forwarding and target Pod interface.</li>
+<li><strong>Why it is correct:</strong> Each stage can drop or misroute a packet, so naming them shows where to look when the request fails.</li>
+<li><strong>Plausible wrong approach:</strong> Drawing a single arrow from Pod to Pod hides the node and underlay steps where most faults occur.</li>
+<li><strong>How to verify:</strong> Pod interfaces, node forwarding and underlay hops each appear in the path.</li>
+</ul>
 <h3 id="exercise-4-diagnose-small-request-success-with-large-payload-failure">Exercise 4: Diagnose small-request success with large-payload failure.<a class="heading-anchor" href="#exercise-4-diagnose-small-request-success-with-large-payload-failure" aria-label="Link to this section">#</a></h3>
 <p>Payload-dependent failure differs from a universally missing endpoint. Use bounded tests and implementation-specific evidence.</p>
 <p><strong>Expected:</strong> Investigate MTU and path behavior in addition to app limits.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare which request sizes pass and fail and treat MTU as a hypothesis next to application limits.</li>
+<li><strong>Why it is correct:</strong> Encapsulation adds header bytes, so packets near the MTU can be dropped while small requests still pass.</li>
+<li><strong>Plausible wrong approach:</strong> Concluding the endpoint is missing ignores that small requests succeed on the same path.</li>
+<li><strong>How to verify:</strong> The plan includes an MTU or path check alongside application size limits.</li>
+</ul>
 <h3 id="exercise-5-explain-why-ready-does-not-prove-cross-node-reachability">Exercise 5: Explain why Ready does not prove cross-node reachability.<a class="heading-anchor" href="#exercise-5-explain-why-ready-does-not-prove-cross-node-reachability" aria-label="Link to this section">#</a></h3>
 <p>A healthy local listener can coexist with broken node-to-node networking. Test from the relevant caller.</p>
 <p><strong>Expected:</strong> Readiness may be a local check with a narrower path.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> State what the readiness probe actually exercises and compare it with the cross-node path.</li>
+<li><strong>Why it is correct:</strong> The kubelet probes from the Pod&#x27;s own node, so a Ready Pod says nothing about traffic from other nodes.</li>
+<li><strong>Plausible wrong approach:</strong> Treating Ready as proof any client can reach the Pod would miss a broken node-to-node path.</li>
+<li><strong>How to verify:</strong> The answer says readiness may test a narrower local path and calls for a test from the relevant caller.</li>
+</ul>
 <h3 id="exercise-6-plan-a-cni-specific-qualification-without-replacing-the-plugin">Exercise 6: Plan a CNI-specific qualification without replacing the plugin.<a class="heading-anchor" href="#exercise-6-plan-a-cni-specific-qualification-without-replacing-the-plugin" aria-label="Link to this section">#</a></h3>
 <p>Changing the cluster network is a separate administrative action. A lesson should not perform it as an incidental repair.</p>
-<p><strong>Expected:</strong> Read configuration, state the implementation and run only owned bounded probes.</p></article>
+<p><strong>Expected:</strong> Read configuration, state the implementation and run only owned bounded probes.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the plugin configuration, name the implementation and plan owned bounded probes only.</li>
+<li><strong>Why it is correct:</strong> Replacing or reconfiguring the cluster network is an administrative change that affects every workload.</li>
+<li><strong>Plausible wrong approach:</strong> Reinstalling the CNI to fix a lesson probe would break networking for others on the cluster.</li>
+<li><strong>How to verify:</strong> The plan reads config, names the plugin and runs only owned probes.</li>
+</ul></article>
   </main>
 </body>
 </html>

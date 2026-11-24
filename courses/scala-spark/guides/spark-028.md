@@ -8,7 +8,7 @@ Intermediate; approximately 150 minutes. Direct prerequisites: `spark-027`. The 
 
 ## How to run this lesson
 
-Open `spark-028` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-028` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-028.scala) and [PySpark learner](../lessons/spark-028.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-028_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-028_solution.scala) and [PySpark reference](../solutions/spark-028_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -30,7 +30,7 @@ The [Scala learner](../lessons/spark-028.scala) and [PySpark learner](../lessons
 
 - **Rollback switch:** A controlled choice that restores the prior correct strategy while preserving the same input and output contract.
 
-This capstone starts with a product that is not ready to optimize. The source contains 2002 records:2000 valid fact identities, a missing fact identity and a negative amount. Two hundred accepted facts have unknown amounts. The raw dimension contains two versions for hot key 0, only one marked approved. Joining the raw dimension would multiply 1600 hot facts and make a fast query compute the wrong business relation.
+This capstone starts with a product that is not ready to optimize. The source contains 2002 records: 2000 valid fact identities, a missing fact identity and a negative amount. Two hundred accepted facts have unknown amounts. The raw dimension contains two versions for hot key 0, only one marked approved. Joining the raw dimension would multiply 1600 hot facts and make a fast query compute the wrong business relation.
 
 The first responsibility is to define accepted and rejected populations. Missing identity has precedence over the amount rule, and a negative known amount is rejected. An unknown amount is allowed and retained as NULL. The ledger must keep every source_id so accepted 2000 plus rejected 2 equals raw 2002. Accepted fact IDs are unique, and known amounts number 1800. No fill-with-zero operation is permitted to make completeness look better.
 
@@ -55,7 +55,7 @@ Finally, the strategy switch is set back to the baseline. The rolled-back produc
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -105,20 +105,8 @@ val expectedMetrics = Map(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import BooleanType, LongType, StructField, StructType
 
 spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
 fact_schema = StructType(
@@ -162,13 +150,13 @@ expected_metrics = {
 ```scala
 val predictedRawJoinRows = 1600L * 2L + 400L
 assert(predictedRawJoinRows == 3600L)
-println("Raw dimension multiplicity predicts3600 pairs for2000 accepted facts")
+println("Raw dimension multiplicity predicts 3600 pairs for 2000 accepted facts")
 ```
 
 ```python
 predicted_raw_join_rows = 1600 * 2 + 400
 assert predicted_raw_join_rows == 3600
-print("Raw dimension multiplicity predicts3600 pairs for2000 accepted facts")
+print("Raw dimension multiplicity predicts 3600 pairs for 2000 accepted facts")
 ```
 
 The multiplication is a grain diagnosis before execution strategy enters the discussion. Broadcasting the raw dimension could make these 3600 pairs arrive faster, but it would not turn them into the intended 2000-fact product.
@@ -219,7 +207,7 @@ Keep approved dimension rows, require at most 100 rows and known unique keys, th
 
 Build the ordinary equality join over accepted facts and reviewed dimension, projecting source_id, fact_id, key, amount, factor. Summarize per key with rows, known amounts, total amount and weighted total.
 
-**Expected result/shape:** Key 0:(1600,1440,5755,11510);1:(100,100,401,1203);2:(100,80,321,1284);3:(100,100,398,1990);4:(100,80,321,1926).
+**Expected result/shape:** Key `0:(1600, 1440, 5755, 11510)`; `1:(100, 100, 401, 1203)`; `2:(100, 80, 321, 1284)`; `3:(100, 100, 398, 1990)`; `4:(100, 80, 321, 1926)`.
 
 **Verify:** Assert all five summary tuples and aggregate metrics 2000,2000,1800,7196,17913.
 
@@ -239,7 +227,7 @@ Broadcast the reviewed dimension for the same equality join and projection. Pres
 
 Return version, master, AQE and automatic broadcast threshold as named fields. Attach key frequencies, the baseline/candidate plans and each observed summary-query exchange metric map.
 
-**Expected result/shape:** Spark 4.0.1, local[2], AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
+**Expected result/shape:** Spark 4.0.1, `local[2]`, AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
 
 **Verify:** Assert controlled settings and frequency ledger, then print plans and separately labeled actual metric maps.
 
@@ -261,7 +249,7 @@ Do not optimize a fanout error or replace NULL amounts with zero to simplify a c
 
 ## Self-check
 
-Explain the contract of `classifyFacts` / `classify_facts` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `classifyFacts` / `classify_facts` without reading its solution. Then, from memory, state what Exercise 6 (Roll back execution policy without rolling back data quality) must produce: Both switch positions satisfy the same metric map and bag contract. The disabled position has no `BroadcastHashJoin` under the controlled configuration. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

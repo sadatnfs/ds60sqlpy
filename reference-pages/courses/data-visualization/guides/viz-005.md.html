@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="a-line-connects-an-ordering-assumption">A line connects an ordering assumption<a class="heading-anchor" href="#a-line-connects-an-ordering-assumption" aria-label="Link to this section">#</a></h3>
 <p>Time-series marks need event dates, units and an information boundary. A line implies a meaningful order between observations. Unsorted dates can create a zigzag that is a data-order defect rather than a signal. Missing periods need an explicit gap policy; connecting over a gap can imply unobserved continuity.</p>
 <p>The fixture has observed demand 10 through 15 on January 1 through 6. A forecast frozen after January 6 predicts 16,17,18 for January 7 through 9. Actual later observations are 17,16,19. The plot separates history, frozen forecast and later outcomes using labels, markers and line dashes rather than only color.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Forecast cutoff:</strong> The information boundary after which no observation may inform the forecast, here frozen after January 6.</li>
+<li><strong>Time order:</strong> The sorted sequence of event dates that a connecting line assumes, so unsorted dates draw a zigzag defect rather than a signal.</li>
+<li><strong>Prediction band:</strong> A filled region around forecasts that claims coverage of future outcomes only when it has a probabilistic construction and calibration evidence.</li>
+<li><strong>Data availability:</strong> Which values were known at each date, separating history, the frozen forecast and later outcomes that arrived after the cutoff.</li>
+<li><strong>RMSE:</strong> Root mean squared error, the square root of the average squared forecast error, compared across methods on the same horizon.</li>
+</ul>
 <h3 id="worked-case-evaluate-the-frozen-forecast">Worked case: evaluate the frozen forecast<a class="heading-anchor" href="#worked-case-evaluate-the-frozen-forecast" aria-label="Link to this section">#</a></h3>
 <p>Squared errors are 1,1,1, so RMSE is one demand unit. A last-value forecast of 15 has squared errors 4,1,16, giving RMSE approximately 2.646. Both procedures must be compared on the same horizon and information boundary. Choosing the forecast after seeing later outcomes would invalidate that comparison even if its line looked impressive.</p>
 <p>The reference constructs explicit date strings and a date axis. A date-only series needs a documented timezone interpretation when moved into timestamp data. Do not mix local midnights, UTC instants and categorical date labels without explaining their meaning.</p>

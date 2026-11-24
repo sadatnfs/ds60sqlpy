@@ -127,7 +127,7 @@ else:
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The trace gives z = 2, a = 4, loss 9 and gradient 48, a central difference agrees within 1e-5, and both the leaf mutation and the saved-tensor mutation raise RuntimeError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Trace the chain rule. Predict exercise 6, Recompute after an update, from its prompt alone: Update a scalar under no_grad, then build a fresh quadratic objective and request its derivative. Then explain why this finish condition holds: The trace gives z = 2, a = 4, loss 9 and gradient 48, a central difference agrees within 1e-5, and both the leaf mutation and the saved-tensor mutation raise RuntimeError. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -163,15 +163,15 @@ A leaf-mutation guard and a later saved-value version error describe different f
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Check an independent slope) alters one assumption of Example A (Trace the chain rule). Hint 2: exercise 4, Expose saved-value invalidation, should end at RuntimeError from a changed saved tensor version. Work backward from it. Hint 3: exercise 5, Inspect a ReLU convention, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Autograd graph, Saved tensor, In-place hazard using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Observe a leaf mutation guard, from its inputs alone. Predict whether exercise 3, Update a leaf under no_grad, survives one changed input. Then explain Autograd graph, Saved tensor, In-place hazard in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-005` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Trace the chain rule) cannot be rebuilt without help, revisit `torch-005` first. Otherwise keep your exercise 2 attempt, Check the new slope numerically, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

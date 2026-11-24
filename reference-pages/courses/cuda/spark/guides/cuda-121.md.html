@@ -206,6 +206,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>This explains why duplicate dimension keys can unexpectedly multiply a fact table. A GPU cannot optimize away required output rows. If the application assumes a unique dimension key, validate uniqueness as an input contract. Applying <code>distinct</code> after the join is not a general repair because it can erase legitimate duplicate facts.</p>
 <p>Broadcast avoids redistributing the large side by replicating a suitably small side, but each executor must accommodate that replicated structure and the join&#x27;s live state. A shuffle join moves records to key owners. Skew can make one key dominate both memory and runtime. Inspect maximum and percentile partition sizes, not only average rows per partition.</p>
 <p>AQE may change the chosen join using observed statistics. Record the final executed plan and compare output multiplicity before and after any rewrite. Salting a hot key requires careful duplication or redistribution of the matching side and a proof that every intended pair appears once. Outer joins add unmatched-row/null behavior, making an informal salting recipe particularly risky. Start with the tiny duplicate-key oracle, then expand only after exact semantic parity.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Broadcast join:</strong> A join that replicates the small side to every worker so the large side is not redistributed.</li>
+<li><strong>Shuffle join:</strong> A join that redistributes both sides by key so matching keys meet in the same task.</li>
+<li><strong>Key skew:</strong> Concentration of rows on a few keys, creating oversized partitions and long tasks.</li>
+<li><strong>Duplicate key expansion:</strong> Output growth when duplicate keys on both sides multiply into many matched rows.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Left keys [A, A, B] and right keys [A, A, C] produce four matches for A in an inner join. Expected cardinality is not the minimum of input lengths.</p>
@@ -220,23 +227,47 @@ joined <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">{</span>k <span class="syntax-keyword">for</span> k<span class="syntax-punctuation">,</span> _<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">in</span> joined<span class="syntax-punctuation">}</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU join oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> joined<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Four A matches from two-by-two duplicate keys.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>left</code></td>
+<td><code>[(&#x27;A&#x27;, 1), (&#x27;A&#x27;, 2), (&#x27;B&#x27;, 3)]</code></td>
+</tr>
+<tr>
+<td><code>right</code></td>
+<td><code>[(&#x27;A&#x27;, 10), (&#x27;A&#x27;, 20), (&#x27;C&#x27;, 30)]</code></td>
+</tr>
+<tr>
+<td><code>joined</code></td>
+<td><code>[(&#x27;A&#x27;, 1, 10), (&#x27;A&#x27;, 1, 20), (&#x27;A&#x27;, 2, 10), (&#x27;A&#x27;, 2, 20)]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="scala-and-pyspark-parity-lab">Scala and PySpark parity lab<a class="heading-anchor" href="#scala-and-pyspark-parity-lab" aria-label="Link to this section">#</a></h3>
 <p>Choose <strong>Scala Spark on CPU</strong> or <strong>PySpark on CPU</strong> to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.</p>
 <p>For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-calculate-duplicate-join-output">Exercise 1: Calculate duplicate join output<a class="heading-anchor" href="#exercise-1-calculate-duplicate-join-output" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>calculate duplicate join output</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Expecting the output size to be at most the smaller input underestimates joins with duplicate keys, which can grow much larger than either input.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-add-unmatched-keys">Exercise 2: Add unmatched keys<a class="heading-anchor" href="#exercise-2-add-unmatched-keys" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>add unmatched keys</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using an inner join where unmatched records must be preserved silently drops them. Downstream totals then shrink without any error, which is harder to detect than a failure.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-identify-skew">Exercise 3: Identify skew<a class="heading-anchor" href="#exercise-3-identify-skew" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>identify skew</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the average partition size of about 100 rows hides the 900-row partition.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-broadcast-and-shuffle">Exercise 4: Compare broadcast and shuffle<a class="heading-anchor" href="#exercise-4-compare-broadcast-and-shuffle" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>compare broadcast and shuffle</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Broadcasting a table that is large after a filter misestimate can exhaust executor memory. The driver also collects the broadcast side before sending it, so a too-large table can fail on the driver first.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-safe-rewrite">Exercise 5: Design a safe rewrite<a class="heading-anchor" href="#exercise-5-design-a-safe-rewrite" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design a safe rewrite</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Dropping null keys or deduplicating to reduce skew changes results. Salting only one side without replicating the other loses matches, which reduces output silently rather than raising an error.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-inspect-final-aqe-decision">Exercise 6: Inspect final AQE decision<a class="heading-anchor" href="#exercise-6-inspect-final-aqe-decision" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>inspect final AQE decision</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Citing the pre-execution plan reports a strategy that may not have run. Skew handling in particular appears only in the final plan, so the initial plan cannot show whether a skewed partition was split.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

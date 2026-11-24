@@ -14,13 +14,40 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Draw the owning edges of the recursive list.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: Each node owns the next node and releases that chain through ordinary ownership. Box makes the recursive type have a finite outer size.
+**Written answer.** `list` owns the outer `Node::More(2, ...)`. That node owns a `Box`, which owns the heap node `More(3, ...)`, whose `Box` owns the heap node `End`. Every node has exactly one owner, so the edges form a chain with no sharing. When `list` is dropped, each `Box` drops its node in turn from the head toward `End`.
+
+**Why it is correct.** `Box<Node>` has a fixed size, the size of one pointer, so `Node` has a finite size even though it is recursive. Unique ownership along the chain means cleanup needs no counting.
+
+**Plausible wrong approach.** Drawing `Node::More(i32, Node)` without the `Box` describes an infinitely sized type; the compiler rejects it with E0072, recursive type has infinite size.
+
+**How to verify.** Define `enum Bad { End, More(i32, Bad) }` and read E0072, which suggests inserting indirection such as `Box`.
 
 ### Task 2: Guided modification
 
 Add another node and predict its total.
 
-No separate reference answer has been written for this task. Start from Example B: Upgrade makes absence explicit after the final strong owner is released. The weak reference does not keep the String alive.
+**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file. It uses `Node` from the lesson's helpers, defined in the reference program.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let list = Node::More(
+        1,
+        Box::new(Node::More(2, Box::new(Node::More(3, Box::new(Node::End))))),
+    );
+    assert_eq!(list.total(), 6);
+    let extended = Node::More(10, Box::new(list));
+    assert_eq!(extended.total(), 16);
+    Ok(())
+}
+```
+
+**Observe:** The three-node list totals 6, and prepending a node with 10 totals 16.
+
+`total` adds each value to the total of the rest, so a new node changes the sum by exactly its own value. Prepending moves the whole old list into a new `Box`; nothing is copied, and `list` is no longer usable afterward.
+
+**Plausible wrong approach.** Predicting 10 for the extended list, as if the new head replaced the old one, forgets that `More(10, Box::new(list))` keeps the old nodes as its tail.
+
+**How to verify.** Run the block. Add `list.total()` after `extended` is built and read E0382, use of moved value.
 
 ### Task 3: Independent construction
 
@@ -65,13 +92,44 @@ The parent owns its children with Rc, while each child refers back with Weak, so
 
 Diagnose an Rc cycle that keeps both objects alive.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Memory safety does not guarantee absence of leaks. Deep recursive drops can have stack costs. RefCell moves borrow checking to runtime and remains single-threaded.
+**Written answer.** The defect is two nodes of type `Rc<RefCell<Peer>>` where each holds an `Rc` to the other. Dropping both local handles lowers each strong count from 2 to 1, never to 0, so neither destructor runs and both allocations leak. Make one direction `Weak`, as a child's back-reference to its parent in task 3 does, so the owning edges form a tree.
+
+**Why it is correct.** `Rc` frees its value when the strong count reaches zero, and a cycle of strong edges keeps every count at one or more. Safe Rust prevents use after free, but it does not promise freedom from leaks.
+
+**Plausible wrong approach.** Calling `drop` on both handles explicitly does not help: it releases the same two local references that leaving scope would.
+
+**How to verify.** Keep `let probe = Rc::downgrade(&first);`, drop both handles, and assert `probe.upgrade().is_some()`: the node is still alive.
 
 ### Task 5: Boundary evidence
 
 Test an empty list and upgrading a dead weak reference.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Represent recursion through indirection) and Example B (Observe a weak target disappearing).
+**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `Node` from the lesson's helpers, defined in the reference program.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    assert_eq!(Node::End.total(), 0);
+    let single = Node::More(-4, Box::new(Node::End));
+    assert_eq!(single.total(), -4);
+    let weak = {
+        let owner = std::rc::Rc::new(5);
+        std::rc::Rc::downgrade(&owner)
+    };
+    assert!(weak.upgrade().is_none());
+    assert_eq!(weak.strong_count(), 0);
+    let never: std::rc::Weak<i32> = std::rc::Weak::new();
+    assert!(never.upgrade().is_none());
+    Ok(())
+}
+```
+
+**Observe:** An empty list totals 0 and a single negative node totals -4. A weak reference whose owner left its block upgrades to None with strong count 0, as does a Weak that never pointed anywhere.
+
+`End` is the base case of the recursion, so the empty list needs no special handling. `upgrade` returns an `Option` precisely so that a dead target is an ordinary, checkable outcome rather than a dangling pointer.
+
+**Plausible wrong approach.** Unwrapping `weak.upgrade()` on the assumption that the target is still alive turns a normal absence into a panic.
+
+**How to verify.** Run the block. Move `owner` out of the inner block so it lives longer and the first `is_none` assertion fails.
 
 ### Task 6: Transfer and justify
 

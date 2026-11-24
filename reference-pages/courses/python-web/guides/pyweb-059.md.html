@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-058</code>, <code>python-lang-04</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Django supports asynchronous views and asynchronous ORM operations, but synchronous database calls remain unsafe when invoked directly from an active async context. This chapter tests both the supported async path and an explicit sync bridge, using a file-backed temporary SQLite database shared by the involved threads.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Async view:</strong> A Django view defined with <code>async def</code> that can await operations without blocking the event loop.</li>
+<li><strong>Async ORM method:</strong> A QuerySet method with an <code>a</code> prefix, such as <code>acount()</code>, that runs a supported query safely from async code.</li>
+<li><strong>SynchronousOnlyOperation:</strong> The error Django raises when synchronous ORM code is called directly from a running event loop.</li>
+<li><strong>sync_to_async:</strong> An asgiref adapter that runs a synchronous function in a thread-sensitive worker so async code can await it.</li>
+<li><strong>Thread-sensitive:</strong> Running synchronous calls on one shared thread so database connections stay with the thread that opened them.</li>
+</ul>
 <h3 id="mechanism-protect-thread-sensitive-database-ownership">Mechanism: protect thread-sensitive database ownership<a class="heading-anchor" href="#mechanism-protect-thread-sensitive-database-ownership" aria-label="Link to this section">#</a></h3>
 <p>An async view can await operations that yield control. Django&#x27;s async ORM methods provide an appropriate interface for supported query operations. A synchronous ORM call inside that async context raises SynchronousOnlyOperation rather than silently blocking the event loop under unsafe assumptions.</p>
 <p>Sync_to_async can run a synchronous unit through a controlled thread-sensitive bridge. The unit should own its complete synchronous database work and cleanup, rather than passing live connections or cursors across threads. A transaction requiring synchronous behavior can be enclosed inside such a unit according to the framework&#x27;s documented limits.</p>
@@ -209,6 +217,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Inside the async exercise, a direct synchronous count is expected to raise SynchronousOnlyOperation. The program then calls a small synchronous unit through sync_to_async with thread_sensitive enabled. That unit completes its count and closes the connections it owns in a finally block.</p>
 <p>The refusal is a useful guard, not an error to suppress through a global unsafe setting. Disabling the guard would obscure the ownership problem and could permit concurrent access patterns that the database adapter does not support safely.</p>
 <p>Bridging every tiny attribute access separately can create unnecessary overhead and fragmented transaction boundaries. Group related synchronous work into a coherent unit, return plain results and keep connection/session objects inside their owning context.</p>
+<h3 id="worked-example-a-blocking-call-freezes-every-other-coroutine">Worked example: a blocking call freezes every other coroutine<a class="heading-anchor" href="#worked-example-a-blocking-call-freezes-every-other-coroutine" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> asyncio
+<span class="syntax-keyword">import</span> time
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">blocking_count</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    time<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-number">1</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">run</span><span class="syntax-punctuation">(</span>bridge<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    ticks <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+
+    <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">ticker</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">nonlocal</span> ticks
+        <span class="syntax-keyword">while</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span>
+            ticks <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+
+    task <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>ticker<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    before <span class="syntax-operator">=</span> ticks
+    <span class="syntax-keyword">if</span> bridge<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>to_thread<span class="syntax-punctuation">(</span>blocking_count<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        blocking_count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    during <span class="syntax-operator">=</span> ticks <span class="syntax-operator">-</span> before
+    task<span class="syntax-operator">.</span>cancel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> during
+
+
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>run<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>run<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">0 True</code></pre>
+<p>The ticker coroutine stands in for every other request an async worker is serving. When the 300 millisecond call runs directly on the event loop, the ticker does not advance once, because nothing can run until <code>time.sleep</code> returns. Moved to a thread, the same call leaves the loop free and the ticker keeps counting. A synchronous ORM query is exactly such a blocking call, which is why Django raises <code>SynchronousOnlyOperation</code> when the lesson calls <code>Note.objects.count()</code> inside the async context, and why the sync unit goes through <code>sync_to_async</code> with <code>thread_sensitive=True</code> and closes its own connections afterward.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why does an in-memory SQLite async test report a missing table?</strong> Another thread may have a different connection and therefore a different in-memory database. Use an explicitly shared supported fixture or a file-backed database when that is the intended test.</p>
 <p><strong>Does async automatically make an ORM transaction safe across awaits?</strong> No. Follow the pinned framework&#x27;s transaction support and ownership guidance. A coherent synchronous transaction can be bridged as one unit when appropriate.</p>

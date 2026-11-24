@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-019_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-019-explained-reference">eval-019: explained reference<a class="heading-anchor" href="#eval-019-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-019_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-019_reference.py</code> asserts each answer below, from <em>Add a reward constant</em> to <em>Test independent utility</em>, on the authored KL regularization and reference policy fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Inspect the gradient sum</em> tests.</p>
 <h3 id="1-add-a-reward-constant">1. Add a reward constant<a class="heading-anchor" href="#1-add-a-reward-constant" aria-label="Link to this section">#</a></h3>
 <p>Only relative action rewards influence the finite-policy optimum under a fixed reference.</p>
+<p><strong>Approach.</strong> Compute <code>optimal_policy(q, r, 1)</code> and <code>optimal_policy(q, r + 100, 1)</code> with q = [0.25, 0.75] and r = [1, 0].</p>
+<p><strong>Why it holds for this fixture.</strong> The policy is softmax(log q + r / beta). Adding 100 to every reward adds 100 to every logit, and softmax is unchanged by a common shift. Both calls return the same distribution.</p>
+<p><strong>A tempting wrong approach.</strong> Expecting larger rewards to sharpen the policy is the mistake. Only differences between action rewards matter for which action gains probability.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.testing.assert_allclose(optimal_policy(q, r, 1), optimal_policy(q, r + 100, 1))</code>.</p>
 <p><strong>Expected observation:</strong> The optimal distribution is unchanged.</p>
 <h3 id="2-rescale-reward-and-beta">2. Rescale reward and beta<a class="heading-anchor" href="#2-rescale-reward-and-beta" aria-label="Link to this section">#</a></h3>
 <p>The objective scale changes but the reward-to-regularization tradeoff does not.</p>
+<p><strong>Approach.</strong> Compare <code>optimal_policy(q, r, 1)</code> with <code>optimal_policy(q, 2 * r, 2)</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> The policy uses r / beta, and (2r) / 2 = r. The tradeoff between reward and staying near the reference is unchanged, so the optimum is the same. The objective value itself doubles.</p>
+<p><strong>A tempting wrong approach.</strong> Doubling only the reward without adjusting beta would push the policy further from the reference. Reward scale and beta must be reported together.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.testing.assert_allclose(optimal_policy(q, r, 1), optimal_policy(q, 2 * r, 2))</code>.</p>
 <p><strong>Expected observation:</strong> The optimal distribution is unchanged.</p>
 <h3 id="3-inspect-the-gradient-sum">3. Inspect the gradient sum<a class="heading-anchor" href="#3-inspect-the-gradient-sum" aria-label="Link to this section">#</a></h3>
 <p>This invariance checks the centered gradient through the probability parameterization.</p>
+<p><strong>Approach.</strong> Call <code>logit_gradient([0.2, 0.3], q, r, 1)</code> and sum its components.</p>
+<p><strong>Why it holds for this fixture.</strong> The gradient is p times (direction minus its p-weighted mean). Summing gives the p-weighted mean minus itself, which is 0. Adding the same amount to every logit leaves softmax unchanged, so the objective cannot change in that direction.</p>
+<p><strong>A tempting wrong approach.</strong> A nonzero sum would indicate a bug, most often a missing centering term. Testing only against finite differences at one point could miss it if the step size is large.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>abs(logit_gradient([0.2, 0.3], q, r, 1).sum()) &lt; 1e-12</code>. Case A also compares the gradient against central differences.</p>
 <p><strong>Expected observation:</strong> The sum is approximately zero.</p>
 <h3 id="4-handle-large-rewards">4. Handle large rewards<a class="heading-anchor" href="#4-handle-large-rewards" aria-label="Link to this section">#</a></h3>
 <p>The subtraction preserves normalized ratios while avoiding unnecessary overflow.</p>
+<p><strong>Approach.</strong> Call <code>optimal_policy([0.5, 0.5], [1000, 999], 1)</code>. The logits are log 0.5 + 1000 and log 0.5 + 999.</p>
+<p><strong>Why it holds for this fixture.</strong> <code>softmax</code> subtracts the maximum logit before exponentiating, so it computes exp(0) and exp(-1). The result is about [0.731, 0.269], the same as for rewards [1, 0].</p>
+<p><strong>A tempting wrong approach.</strong> Exponentiating 1000 directly overflows to infinity and the normalized result is <code>nan</code>. This is the same numerical concern as the stable loss in eval-017.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.isfinite(optimal_policy([0.5, 0.5], [1000, 999], 1)).all()</code>.</p>
 <p><strong>Expected observation:</strong> Stable normalization returns finite probabilities.</p>
 <h3 id="5-identify-missing-support">5. Identify missing support<a class="heading-anchor" href="#5-identify-missing-support" aria-label="Link to this section">#</a></h3>
 <p>Adding a probability floor creates another reference distribution and must be treated as a modeling change.</p>
+<p><strong>Approach.</strong> Call <code>optimal_policy([0, 1], [1, 0], 1)</code>. <code>probability_vector</code> requires every reference probability to be strictly positive.</p>
+<p><strong>Why it holds for this fixture.</strong> log 0 is minus infinity, so the KL term is undefined for any policy that gives the action positive probability. The optimum forces it to zero probability no matter how good its reward. The helper rejects the input instead.</p>
+<p><strong>A tempting wrong approach.</strong> Replacing 0 with a small floor such as 1e-6 silently creates a different reference. That changes the objective and should be reported as a modeling choice.</p>
+<p><strong>How to verify.</strong> The reference raises <code>Unsupported action silently smoothed</code> if <code>optimal_policy([0, 1], [1, 0], 1)</code> returns without error.</p>
 <p><strong>Expected observation:</strong> The bounded helper rejects the unsupported objective.</p>
 <h3 id="6-test-independent-utility">6. Test independent utility<a class="heading-anchor" href="#6-test-independent-utility" aria-label="Link to this section">#</a></h3>
 <p>KL regularization can limit distribution change, but it cannot validate the reward model or rule out exploitation of a proxy.</p>
+<p><strong>Approach.</strong> Compute the case B policy with proxy rewards [1, 3], beta 0.2 and q = [0.5, 0.5]. Evaluate both proxy and utility under q and under the optimized policy.</p>
+<p><strong>Why it holds for this fixture.</strong> The logits differ by (3 - 1) / 0.2 = 10, so action 2 gets probability 1 / (1 + exp(-10)), about 0.99995. Proxy reward rises from 2 to nearly 3, while utility [1, -2] falls from -0.5 to nearly -2.</p>
+<p><strong>A tempting wrong approach.</strong> Treating the KL penalty as a safeguard against reward hacking is the mistake. With beta 0.2 it barely restrains the policy, and even a strong penalty cannot tell whether the proxy is right.</p>
+<p><strong>How to verify.</strong> Case B asserts the proxy rose, utility fell and <code>optimized[1] &gt; 0.999</code>. An independent utility measure is required to detect this.</p>
 <p><strong>Expected observation:</strong> Proxy reward rises while independent task utility falls.</p></article>
   </main>
 </body>

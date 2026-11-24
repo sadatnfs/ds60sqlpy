@@ -24,21 +24,21 @@ Read the mechanisms and two worked examples, then complete the [learner workshee
 
 - **Snapshot consistency:** A result representing one defined database state rather than a mixture of independently timed reads.
 
-- **Decimal precision/scale:** The total digits and fractional digits in an exact decimal type, such as numeric(10,2).
+- **Decimal precision/scale:** The total digits and fractional digits in an exact decimal type, such as `numeric(10, 2)`.
 
 - **Timestamp instant:** A point on the time axis, distinct from local wall-clock fields without a zone.
 
 - **Least privilege:** An identity limited to the approved read population and operations, with no unnecessary write or administrative access.
 
-A database handoff adds boundaries that a local DataFrame example can hide:source authorization, driver compatibility, connection concurrency, transaction consistency, type mapping and sensitive-data handling. This chapter reviews those contracts without opening a database. The supplied export and connection options are synthetic reasoning material. The normal classroom Spark profiles do not claim a prepared JDBC connector or a live PostgreSQL target.
+A database handoff adds boundaries that a local DataFrame example can hide: source authorization, driver compatibility, connection concurrency, transaction consistency, type mapping and sensitive-data handling. This chapter reviews those contracts without opening a database. The supplied export and connection options are synthetic reasoning material. The normal classroom Spark profiles do not claim a prepared JDBC connector or a live PostgreSQL target.
 
 Start with row grain and population. The proposed product has one row per event_id in an immutable export_id. It includes only event_id, cents, price, event_time and note, and it is bounded to 5000 rows. The export identity ties schema, count and capture cutoff together. A SELECT against a mutable production table would require additional consistency reasoning; renaming that table as an export would not make it immutable.
 
 ## Trace types before choosing a connector option
 
-Integer cents are a unit-bearing count. Keep them as an exact integer and document the range. Decimal money has separate precision and scale; numeric(10,2) allows ten total digits, including two fractional digits. Converting 12345678.90 to a binary float can lose the exact decimal representation even when a rounded display looks unchanged. A destination schema should reject unsupported range/scale rather than silently changing a business value.
+Integer cents are a unit-bearing count. Keep them as an exact integer and document the range. Decimal money has separate precision and scale; `numeric(10, 2)` allows ten total digits, including two fractional digits. Converting 12345678.90 to a binary float can lose the exact decimal representation even when a rounded display looks unchanged. A destination schema should reject unsupported range/scale rather than silently changing a business value.
 
-A PostgreSQL timestamp with time zone represents an instant. Session settings affect display, and the original offset spelling is not retained as a separate named-zone field. The sample 12:00 at offset-07:00 is 19:00UTC. A timestamp without time zone has different semantics:it may represent local wall time whose interpretation requires a zone and daylight-saving policy. Spark's JDBC timestamp mappings/options must be checked in the exact qualified version; do not assume TimestampType and TimestampNTZType are interchangeable.
+A PostgreSQL timestamp with time zone represents an instant. Session settings affect display, and the original offset spelling is not retained as a separate named-zone field. The sample 12:00 at offset-07:00 is 19:00UTC. A timestamp without time zone has different semantics: it may represent local wall time whose interpretation requires a zone and daylight-saving policy. Spark's JDBC timestamp mappings/options must be checked in the exact qualified version; do not assume TimestampType and TimestampNTZType are interchangeable.
 
 SQLNULL is missingness, not the empty string, zero or the word NULL. Preserve nullability through reads and tests. COUNT(*) and COUNT(note) can differ because the latter excludes NULL. A schema match alone does not show that a driver retained nulls, decimal scale or timestamp meaning, so the acceptance fixture needs exact value checks as well.
 
@@ -62,7 +62,7 @@ The fake options record uses db.invalid and DUMMY_LESSON_ONLY so no real target 
 
 The redaction task uses a small allowlist of operational numeric settings. It does not fetch a secret or test authentication. Source-side privileges should permit only the approved reads. The future acceptance plan must reject writes, exercise cancellation/timeout and confirm connection closure without collecting unrelated user data.
 
-The useful deliverable is a complete mapping and acceptance matrix:what is proposed, what is already known from the synthetic export, and which runtime evidence is absent. The optional SQL quality/testing modules can deepen those controls, but they are not prerequisites for this Spark reading chapter.
+The useful deliverable is a complete mapping and acceptance matrix: what is proposed, what is already known from the synthetic export, and which runtime evidence is absent. The optional SQL quality/testing modules can deepen those controls, but they are not prerequisites for this Spark reading chapter.
 
 ## Worked example / walkthrough
 
@@ -75,7 +75,7 @@ Illustrative partition 1: id >= 5
 Configured lowerBound=0, upperBound=10, numPartitions=2
 ```
 
-Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source rows can be read. To select only [0,10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.
+Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.
 
 ### Worked example 2: Map an exact decimal, instant and missing field
 
@@ -89,7 +89,7 @@ Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source r
 }
 ```
 
-The proposed Spark contract retains cents 125 as bigint, price as decimal(10,2), the event instant as 19:00UTC under the UTC baseline, and note as NULL. This exact-value fixture can falsify a float conversion, timezone reinterpretation or null-to-empty-string shortcut before any large read is approved.
+The proposed Spark contract retains cents 125 as bigint, price as `decimal(10, 2)`, the event instant as 19:00UTC under the UTC baseline, and note as NULL. This exact-value fixture can falsify a float conversion, timezone reinterpretation or null-to-empty-string shortcut before any large read is approved.
 
 ## Exercises
 
@@ -97,9 +97,9 @@ The proposed Spark contract retains cents 125 as bigint, price as decimal(10,2),
 
 Review the fixed approved_export design and state its unique row key, export identity, predicate and maximum row count before any JDBC operation.
 
-**Inputs/evidence:** For spark-040 Exercise 1, Synthetic export_id demo-2026, unique event_id, at most 5000 rows, approved columns event_id, cents, price, event_time, note.
+**Inputs/evidence:** Synthetic export_id demo-2026, unique event_id, at most 5000 rows, approved columns event_id, cents, price, event_time, note.
 
-**Expected result/shape:** For spark-040 Exercise 1, One row per event_id within one immutable export_id; at most 5000 rows and no unbounded collect.
+**Expected result/shape:** One row per event_id within one immutable export_id; at most 5000 rows and no unbounded collect.
 
 **Verify:** Write the row-grain and population contract, plus the count/uniqueness/readback checks that would reject an oversized or duplicate export.
 
@@ -109,9 +109,9 @@ Review the fixed approved_export design and state its unique row key, export ide
 
 Map bigint cents, decimal price, timestamp with time zone and nullable note into the proposed Spark contract.
 
-**Inputs/evidence:** For spark-040 Exercise 2, cents 125;price 12345678.90 as numeric(10,2); event_time 2026-10-23T12:00:00-07:00;note SQLNULL.
+**Inputs/evidence:** `cents` 125; `price` 12345678.90 as `numeric(10,2)`; `event_time` 2026-10-23T12:00:00-07:00; `note` SQL NULL.
 
-**Expected result/shape:** For spark-040 Exercise 2, LongType 125;DecimalType(10,2)12345678.90;the same instant rendered 19:00:00UTC under the baseline; NULL remains missing, not an empty string.
+**Expected result/shape:** `LongType` 125; `DecimalType(10,2)` 12345678.90; the same instant rendered 19:00:00 UTC under the baseline; NULL remains missing, not an empty string.
 
 **Verify:** State source and target type, unit, precision/timezone policy and one rejected conversion for each.
 
@@ -121,9 +121,9 @@ Map bigint cents, decimal price, timestamp with time zone and nullable note into
 
 Predict which IDs can be read when partitionColumn=id, lowerBound 0, upperBound 10, numPartitions 2 are used without a SQL row filter.
 
-**Inputs/evidence:** For spark-040 Exercise 3, IDs [-10,0,5,10,99, NULL]. Illustrative partition predicates:id<5 OR id IS NULL, and id>=5.
+**Inputs/evidence:** IDs `[-10, 0, 5, 10, 99, NULL]`. Illustrative partition predicates: `id<5 OR id IS NULL` and `id>=5`.
 
-**Expected result/shape:** For spark-040 Exercise 3, All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to [0, 10).
+**Expected result/shape:** All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to [0, 10).
 
 **Verify:** Assign each supplied ID to the two predicates and write an explicit SQL filter for the intended population if one is required.
 
@@ -133,9 +133,9 @@ Predict which IDs can be read when partitionColumn=id, lowerBound 0, upperBound 
 
 Design a maximum-two-partition read and explain why separate repeatable-read transactions do not automatically share one snapshot.
 
-**Inputs/evidence:** For spark-040 Exercise 4, Two JDBC partitions;source rows can change;no live snapshot-coordination adapter is provided.
+**Inputs/evidence:** Two JDBC partitions; source rows can change; no live snapshot-coordination adapter is provided.
 
-**Expected result/shape:** For spark-040 Exercise 4, A nominal 2-partition connection bound plus an explicit immutable-export or separately qualified coordinated-snapshot strategy.
+**Expected result/shape:** A nominal 2-partition connection bound plus an explicit immutable-export or separately qualified coordinated-snapshot strategy.
 
 **Verify:** Name connection/time/fetch controls and show how concurrent source updates would otherwise produce a mixed-time result.
 
@@ -145,9 +145,9 @@ Design a maximum-two-partition read and explain why separate repeatable-read tra
 
 Review a fake options record containing a URL, user, password and operational settings. Keep only the approved diagnostic fields.
 
-**Inputs/evidence:** For spark-040 Exercise 5, Synthetic passwordDUMMY_LESSON_ONLY, URL jdbc:postgresql://db.invalid:5432/course, numPartitions 2, fetchsize 1000, queryTimeout 30.
+**Inputs/evidence:** Synthetic password `DUMMY_LESSON_ONLY`, URL `jdbc:postgresql://db.invalid:5432/course`, numPartitions 2, fetchsize 1000, queryTimeout 30.
 
-**Expected result/shape:** For spark-040 Exercise 5, No password, user, URL or credential-bearing connection string in the saved source/evidence;only approved operational settings are retained.
+**Expected result/shape:** No password, user, URL or credential-bearing connection string in the saved source/evidence; only approved operational settings are retained.
 
 **Verify:** Write the exact sanitized object and identify the approved runtime credential source without inventing a real account.
 
@@ -157,9 +157,9 @@ Review a fake options record containing a URL, user, password and operational se
 
 Specify the evidence required before enabling a JDBC profile, including missing-driver, mapping, timeout, cancellation and least-privilege checks.
 
-**Inputs/evidence:** For spark-040 Exercise 6, Current profile bundles no qualified JDBC driver/remote database;synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.
+**Inputs/evidence:** Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.
 
-**Expected result/shape:** For spark-040 Exercise 6, A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.
+**Expected result/shape:** A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.
 
 **Verify:** List positive and negative cases, exact version tuple, source identity, output oracle, connection closure and no-write privileges.
 
@@ -179,7 +179,7 @@ Continue through the [course route](../README.md). Preserve the written assumpti
 
 ## Primary sources and official APIs
 
-- [Spark4.0.1 JDBC options and mappings](https://spark.apache.org/docs/4.0.1/sql-data-sources-jdbc.html)
+- [Spark 4.0.1 JDBC options and mappings](https://spark.apache.org/docs/4.0.1/sql-data-sources-jdbc.html)
 
 - [PostgreSQL17 transaction isolation](https://www.postgresql.org/docs/17/transaction-iso.html)
 

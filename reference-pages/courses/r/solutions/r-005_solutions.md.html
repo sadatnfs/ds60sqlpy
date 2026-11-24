@@ -203,21 +203,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict x[c(2,2,1)] for x=c(4,8).</p>
 <p>The result is 8,8,4.</p>
+<p><strong>Approach:</strong> Read the index vector from left to right; each entry names one position to copy into the result.</p>
+<p><strong>Why it holds here:</strong> In c(4, 8), position 2 holds 8 and position 1 holds 4. The index asks for 2, 2, 1, so the output is 8, 8, 4, and its length equals the index length of three.</p>
+<p><strong>Tempting mistake:</strong> Expecting a set-like answer such as 8, 4 with the repeat removed, or a sorted 4, 8. Indexing never deduplicates or reorders on its own.</p>
+<p><strong>Verify:</strong> The reference asserts <code>identical(c(4, 8)[c(2, 2, 1)], c(8, 8, 4))</code>, and <code>length()</code> of the result returns 3.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Exclude the middle entry of c(2,4,6).</p>
 <p>The result is 2,6.</p>
+<p><strong>Approach:</strong> Use a negative position: <code>c(2, 4, 6)[-2]</code> excludes the second entry and keeps the rest in order.</p>
+<p><strong>Why it holds here:</strong> Position 2 holds 4, so the remaining values are 2 and 6. Exclusion by position does not depend on what the values are.</p>
+<p><strong>Tempting mistake:</strong> Filtering by value with <code>x[x != 4]</code> happens to work here but would drop every 4 if the value repeated. Writing <code>x[-4]</code>, confusing the value with a position, is worse: an out-of-range negative index is ignored, so all three values come back with no error.</p>
+<p><strong>Verify:</strong> <code>print(c(2, 4, 6)[-2])</code> shows <code>[1] 2 6</code>, a result of length 2.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Select and update a validated named value.</p>
 <p>With unique names A, B, updating B changes only that entry.</p>
+<p><strong>Approach:</strong> Validate first, then assign: check <code>!anyDuplicated(names(x))</code> and <code>key %in% names(x)</code>, and only then run <code>x[key] &lt;- 9</code>.</p>
+<p><strong>Why it holds here:</strong> The names A and B are unique and B is present, so exactly one entry is replaced and the vector keeps its length of two.</p>
+<p><strong>Tempting mistake:</strong> Skipping the checks. A typo such as &quot;b&quot; appends a third element, as Example 3 shows. With duplicated names, <code>x[&quot;B&quot;] &lt;- 9</code> would change only the first match and leave the second B untouched.</p>
+<p><strong>Verify:</strong> The reference asserts <code>identical(unname(x), c(1, 9))</code>; <code>length(x)</code> returns 2 after the update.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose mixing c(1,-2) as an index.</p>
 <p>Use one indexing policy, such as c(1,3) or -2.</p>
+<p><strong>Approach:</strong> Pick one indexing policy. To keep the first and third entries use <code>c(1, 3)</code>; to drop the second use <code>-2</code>.</p>
+<p><strong>Why it holds here:</strong> Positive positions retain and negative positions exclude, so <code>c(1, -2)</code> asks two incompatible questions at once. R stops with the message that only 0&#x27;s may be mixed with negative subscripts.</p>
+<p><strong>Tempting mistake:</strong> Assuming R will keep position 1 and drop position 2, or wrapping the call in <code>try()</code> and carrying on with whatever came back. The mixed index never produces a value.</p>
+<p><strong>Verify:</strong> The reference&#x27;s tryCatch returns TRUE for the mixed index, and both <code>c(2, 4, 6)[c(1, 3)]</code> and <code>c(2, 4, 6)[-2]</code> return 2 and 6.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Inspect selection with integer(0).</p>
 <p>The output length is zero.</p>
+<p><strong>Approach:</strong> Index the vector with <code>integer(0)</code> and inspect the length and printed form of the result.</p>
+<p><strong>Why it holds here:</strong> No positions are requested, so nothing is copied. The result keeps the type and, for the named x in the reference, the names attribute, but has no elements.</p>
+<p><strong>Tempting mistake:</strong> Expecting NA or the full vector. Contrast <code>x[NA]</code>: a logical NA is recycled across every position, so it returns NA for each element instead of nothing.</p>
+<p><strong>Verify:</strong> The reference checks <code>length(x[integer(0)]) == 0L</code>, and <code>print()</code> shows <code>named numeric(0)</code>.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain why character names are not a validated join key.</p>
 <p>Check uniqueness and missing names explicitly before keyed alignment.</p>
+<p><strong>Approach:</strong> Before any keyed lookup or update, test names for duplicates and for missing requested keys.</p>
+<p><strong>Why it holds here:</strong> R accepts <code>c(A = 1, A = 2)</code>, and <code>[&quot;A&quot;]</code> returns only the first match, 1. A lookup by name therefore silently ignores the second record, which a real key column would never allow.</p>
+<p><strong>Tempting mistake:</strong> Treating names like a primary key in a table. Nothing enforces uniqueness, and a missing name returns NA rather than an error.</p>
+<p><strong>Verify:</strong> <code>anyDuplicated(c(&quot;A&quot;, &quot;A&quot;))</code> returns 2, the position of the first repeat, so the reference check <code>&gt; 0L</code> is TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

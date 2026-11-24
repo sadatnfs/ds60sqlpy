@@ -224,7 +224,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li><strong>Spark Connect:</strong> A client/server interface transmitting unresolved logical plans and results, with a separate compatibility and API-support boundary from classic embedded Spark.</li>
 </ul>
-<p>The classroom&#x27;s local[2] worker is a specific classic Spark execution boundary. The driver and local task execution share one machine and the prepared process environment. That convenience can conceal assumptions that fail when driver and executors are separated. This lesson makes those assumptions visible before considering any remote deployment. Its diagrams and specification are fixed reasoning inputs, and none is a command to submit.</p>
+<p>The classroom&#x27;s <code>local[2]</code> worker is a specific classic Spark execution boundary. The driver and local task execution share one machine and the prepared process environment. That convenience can conceal assumptions that fail when driver and executors are separated. This lesson makes those assumptions visible before considering any remote deployment. Its diagrams and specification are fixed reasoning inputs, and none is a command to submit.</p>
 <pre class="highlighted-code"><code class="language-mermaid">flowchart LR
   Pad[Saved classroom source] --&gt; Worker[Owned local worker]
   Worker --&gt; Driver[Classic Spark driver]
@@ -282,42 +282,42 @@ Review result: Connect diagnostic path is unimplemented and unqualified</code></
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-assign-responsibilities-in-three-deployment-diagrams">Exercise 1: Assign responsibilities in three deployment diagrams<a class="heading-anchor" href="#exercise-1-assign-responsibilities-in-three-deployment-diagrams" aria-label="Link to this section">#</a></h4>
 <p>Annotate the local, client-mode and cluster-mode diagrams with driver location, executor/task execution, resource allocation and result collection. Explain one failure introduced by moving the driver.</p>
-<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 1, The three diagrams and the proposal stating cluster deploy mode.</p>
-<p><strong>Expected result/shape:</strong> For spark-030 Exercise 1, A role/location table for all three layouts, with collect returning to the driver wherever it runs and resource allocation assigned to the cluster manager.</p>
+<p><strong>Inputs/evidence:</strong> The three diagrams and the proposal stating cluster deploy mode.</p>
+<p><strong>Expected result/shape:</strong> A role/location table for all three layouts, with collect returning to the driver wherever it runs and resource allocation assigned to the cluster manager.</p>
 <p><strong>Verify:</strong> Name every role and trace a collected 30-row result to the actual driver process in each layout; identify the submitting-host-loss or remote-driver-environment failure.</p>
 <p><strong>Progressive hint:</strong> Deploy mode changes driver placement; the cluster manager and executors do not become synonyms for the driver.</p>
 <h4 id="exercise-2-repair-a-driver-only-input-path-assumption">Exercise 2: Repair a driver-only input path assumption<a class="heading-anchor" href="#exercise-2-repair-a-driver-only-input-path-assumption" aria-label="Link to this section">#</a></h4>
 <p>Review the proposed/driver-local/input.parquet path. State the visibility problem and specify a bounded replacement contract without choosing or contacting a real service.</p>
-<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 2, The input path in the sanitized proposal and evidence that the file exists only on the submitting machine.</p>
-<p><strong>Expected result/shape:</strong> For spark-030 Exercise 2, An explicit data-location/distribution contract naming driver and executor visibility, authorization,30-row fixture identity and readback verification.</p>
+<p><strong>Inputs/evidence:</strong> The input path in the sanitized proposal and evidence that the file exists only on the submitting machine.</p>
+<p><strong>Expected result/shape:</strong> An explicit data-location/distribution contract naming driver and executor visibility, authorization,30-row fixture identity and readback verification.</p>
 <p><strong>Verify:</strong> Reject automatic shared-path assumptions and list the exact host/process where existence and content must be checked.</p>
 <p><strong>Progressive hint:</strong> A path string is interpreted in a filesystem namespace; identical spelling does not imply identical storage.</p>
 <h4 id="exercise-3-map-dependencies-to-driver-and-executor-environments">Exercise 3: Map dependencies to driver and executor environments<a class="heading-anchor" href="#exercise-3-map-dependencies-to-driver-and-executor-environments" aria-label="Link to this section">#</a></h4>
 <p>Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.</p>
-<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 3, Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.</p>
-<p><strong>Expected result/shape:</strong> For spark-030 Exercise 3, A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.</p>
+<p><strong>Inputs/evidence:</strong> Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.</p>
+<p><strong>Expected result/shape:</strong> A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.</p>
 <p><strong>Verify:</strong> Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately.</p>
 <p><strong>Progressive hint:</strong> A source archive can distribute modules without supplying an interpreter or native shared libraries.</p>
 <h4 id="exercise-4-review-a-captured-connection-and-a-retrying-task">Exercise 4: Review a captured connection and a retrying task<a class="heading-anchor" href="#exercise-4-review-a-captured-connection-and-a-retrying-task" aria-label="Link to this section">#</a></h4>
 <p>Reject a task closure that captures an open driver database connection and writes one audit row per invocation. Propose separate serialization, lifecycle and idempotency contracts.</p>
-<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 4, An open driver connection captured by a task function and evidence that a failed task can be retried.</p>
-<p><strong>Expected result/shape:</strong> For spark-030 Exercise 4, No connection object serialized from the driver; a defined task-side resource lifecycle if external IO is later authorized, and a stable operation identity preventing duplicate external effects.</p>
+<p><strong>Inputs/evidence:</strong> An open driver connection captured by a task function and evidence that a failed task can be retried.</p>
+<p><strong>Expected result/shape:</strong> No connection object serialized from the driver; a defined task-side resource lifecycle if external IO is later authorized, and a stable operation identity preventing duplicate external effects.</p>
 <p><strong>Verify:</strong> Explain why serializability alone would not guarantee exactly-once writes and name the cleanup and deduplication evidence needed.</p>
 <p><strong>Progressive hint:</strong> Task execution can repeat. Resource process ownership and external-write logical identity are separate issues.</p>
 <h4 id="exercise-5-define-the-connect-adapter-boundary-honestly">Exercise 5: Define the Connect adapter boundary honestly<a class="heading-anchor" href="#exercise-5-define-the-connect-adapter-boundary-honestly" aria-label="Link to this section">#</a></h4>
 <p>Classify which existing classic capabilities can be assumed in a proposed Connect profile, and list the compatibility and lifecycle tests required before exposing it as ready.</p>
-<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 5, The existing _jdf/queryExecution and RDD-based diagnostic helpers, plus the proposed remote logical-plan client.</p>
-<p><strong>Expected result/shape:</strong> For spark-030 Exercise 5, Classic internals are not assumed available; semantic goldens are retained while a separate supported diagnostic/runtime adapter is qualified.</p>
+<p><strong>Inputs/evidence:</strong> The existing _jdf/queryExecution and RDD-based diagnostic helpers, plus the proposed remote logical-plan client.</p>
+<p><strong>Expected result/shape:</strong> Classic internals are not assumed available; semantic goldens are retained while a separate supported diagnostic/runtime adapter is qualified.</p>
 <p><strong>Verify:</strong> List client/server version checks, API support, cancellation, result limits, authentication and cleanup receipts without claiming any already ran.</p>
 <p><strong>Progressive hint:</strong> A server URL does not implement the missing API and lifecycle boundary.</p>
 <h4 id="exercise-6-write-a-reviewable-deployment-acceptance-checklist">Exercise 6: Write a reviewable deployment acceptance checklist<a class="heading-anchor" href="#exercise-6-write-a-reviewable-deployment-acceptance-checklist" aria-label="Link to this section">#</a></h4>
 <p>Turn the sanitized proposal into a go/no-go review record with explicit evidence tiers and rollback ownership. Keep the worksheet read-only.</p>
-<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 6, All previous design findings, the 30-row/schema/digest contract and only an existing local classic runtime receipt.</p>
-<p><strong>Expected result/shape:</strong> For spark-030 Exercise 6, A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness; unresolved path/package/Connect gaps remain explicit.</p>
+<p><strong>Inputs/evidence:</strong> All previous design findings, the 30-row/schema/digest contract and only an existing local classic runtime receipt.</p>
+<p><strong>Expected result/shape:</strong> A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness; unresolved path/package/Connect gaps remain explicit.</p>
 <p><strong>Verify:</strong> Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram or syntax alone.</p>
 <p><strong>Progressive hint:</strong> A checked configuration is useful evidence but is not a completed remote run.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Do not equate local[2] with a two-executor cluster. Do not assume driver files, imports or environment variables are executor-visible. Do not distribute secrets in source archives or captured closures. Do not assume a Scala binary suffix can be changed independently of the selected Spark artifacts. Do not call Connect supported because a classic local transformation worked. Keep proposed architecture, artifact inspection, execution receipts and production acceptance as separate evidence.</p>
+<p>Do not equate <code>local[2]</code> with a two-executor cluster. Do not assume driver files, imports or environment variables are executor-visible. Do not distribute secrets in source archives or captured closures. Do not assume a Scala binary suffix can be changed independently of the selected Spark artifacts. Do not call Connect supported because a classic local transformation worked. Keep proposed architecture, artifact inspection, execution receipts and production acceptance as separate evidence.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the first diagram or type mapping without reading the answer. Trace one failure through its actual process or storage boundary. State which observation would falsify your preferred design, which evidence already exists and which acceptance work remains. A correct vocabulary label alone does not complete the task.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>

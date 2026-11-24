@@ -24,7 +24,7 @@ Each guide ends with an optional prompt for a repository-aware AI tutor that nam
 
 ## Course map
 
-Each chapter states its direct prerequisites and includes two independent worked programs, six varied tasks, hints, a complete reference and explained answers. A chapter number is a stable identifier, not a daily schedule.
+Each chapter states its direct prerequisites and includes at least two independent worked programs, six varied tasks, hints, a complete reference and explained answers. A chapter number is a stable identifier, not a daily schedule.
 
 ### Part 1: Values, vectors and structured data
 

@@ -201,6 +201,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Choose runtime or compile-time work according to observable cost and constraints.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>constexpr permits a function or object to participate in constant evaluation when its inputs and operations allow it. consteval requires a call to be evaluated during compilation. Compile-time computation moves work into the build and can inflate build time or binary size. It is useful for bounded validation rather than unlimited metaprogramming.</p>
+<ul>
+<li><strong><code>constexpr</code>:</strong> allows a function or object to take part in constant evaluation when its inputs and operations allow it.</li>
+<li><strong><code>consteval</code>:</strong> marks an immediate function whose every call must be evaluated during compilation.</li>
+<li><strong>constant evaluation:</strong> computing a value during compilation instead of at run time.</li>
+<li><strong>compile-time budget:</strong> the build time, compiler memory and binary size that compile-time computation adds.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>constexpr int square(int x)</code> can run at compile time or runtime. <code>static_assert(square(4)==16)</code> requires a compile-time Boolean. A consteval function cannot accept an unknown runtime input. Keep table sizes and recursion depths explicit.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

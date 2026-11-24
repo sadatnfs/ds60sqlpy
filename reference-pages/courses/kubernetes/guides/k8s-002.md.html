@@ -242,7 +242,7 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-2-resolve-the-browser-endpoint">Exercise 2: Resolve the browser endpoint<a class="heading-anchor" href="#exercise-2-resolve-the-browser-endpoint" aria-label="Link to this section">#</a></h4>
 <p>Choose the URL endpoint for the stated host mapping.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 2, host 127.0.0.1:8765 forwards to app:8080.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 2, host <code>127.0.0.1:8765</code> forwards to <code>app:8080</code>.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 2, the host browser connects to 127.0.0.1:8765.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 2, trace both sides without changing the application listening port.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -287,7 +287,7 @@ process listens on8080</code></pre>
 <h4 id="exercise-6-transfer-the-client-path">Exercise 6: Transfer the client path<a class="heading-anchor" href="#exercise-6-transfer-the-client-path" aria-label="Link to this section">#</a></h4>
 <p>Choose the endpoint from a client Job inside the owned namespace.</p>
 <p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on 8080; client has its own loopback.</p>
-<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 6, http://hello:8080/version, not host 127.0.0.1:8765.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 6, <code>http://hello:8080/version</code>, not host <code>127.0.0.1:8765</code>.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 6, explain both network namespaces and the Service DNS name.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>

@@ -198,9 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-019</code>, <code>cuda-028</code>, <code>cuda-036</code>, <code>cuda-039</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Implement a two-stage asynchronous copy pipeline with correct tails and explain whether the overlap helped.</p>
 <p>Work through <em>Asynchronous copies, barriers and software pipelines</em> with the concrete cases below. Finish with this evidence: correct tails, synchronization checks and a measured explanation of whether overlap helped. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Within-GPU asynchronous copy mechanisms can move tiles from global to shared storage while other work proceeds, subject to architecture, alignment and API requirements. These are different from host-to-device asynchronous transfers. A producer commits a stage, a consumer waits for its completion, and the stage cannot be overwritten until consumption finishes. Double buffering alternates two storage slots but does not remove these dependencies. Hardware-accelerated paths and fallback behavior must be checked for the exact toolchain and device. Correct tail loading and barrier participation remain essential even when the happy path overlaps efficiently.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>memcpy_async:</strong> A cooperative copy from global to shared memory that can proceed while threads do other work.</li>
+<li><strong>cuda::pipeline:</strong> A libcu++ object that tracks stages of asynchronous copies through acquire, commit, wait and release.</li>
+<li><strong>Asynchronous barrier:</strong> A <code>cuda::barrier</code> that separates arriving from waiting so threads can work between the two.</li>
+<li><strong>Software pipelining:</strong> Overlapping the load of the next tile with computation on the current tile using several buffers.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-056_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-056_cpu.py</code></pre>

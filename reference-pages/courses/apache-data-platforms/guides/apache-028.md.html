@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-028-dependencies-retries-and-idempotent-tasks">apache-028: Dependencies, retries and idempotent tasks<a class="heading-anchor" href="#apache-028-dependencies-retries-and-idempotent-tasks" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-027</code>, <code>apache-006</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Task attempt:</strong> One try at running a task instance. A retry starts a new attempt and does not roll back external effects of the earlier one.</li>
+<li><strong>Retry policy:</strong> The configured number of retries and delay that Airflow applies after a task attempt fails.</li>
+<li><strong>Idempotent partition write:</strong> Writing one deterministic partition per validated day so that repeating the same logical write produces the same output rather than appended duplicates.</li>
+<li><strong>Atomic replacement:</strong> Writing a complete temporary file, flushing it and renaming it over the target path, so readers see either the old file or the new one. It covers one local file, not several systems.</li>
+</ul>
 <h3 id="a-task-attempt-can-fail-after-producing-a-side-effect">A task attempt can fail after producing a side effect<a class="heading-anchor" href="#a-task-attempt-can-fail-after-producing-a-side-effect" aria-label="Link to this section">#</a></h3>
 <p>Airflow retries task instances according to their configured policy. A retry is a new attempt at the task&#x27;s work, not a rollback of every external effect from the earlier attempt. If an attempt writes output and then loses its acknowledgement, a later attempt must avoid creating a duplicate business action. Retry safety belongs in the task&#x27;s data and side-effect contract.</p>
 <p>The workshop writes one deterministic partition per validated day. It creates a complete temporary file, flushes it through the file handle and atomically replaces the partition path. The stored record includes source identity, interval and logical values. Repeating the same logical write yields the same intended output, rather than appending another copy of the same daily rows.</p>

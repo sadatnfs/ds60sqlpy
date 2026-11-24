@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "track_id": "swift",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "swift-009",
+      "title": "Arrays are values: copies, reserved capacity and filtering",
+      "anchor": "reference",
+      "source_path": "courses/swift/solutions/swift-009_solution.swift",
+      "source_sha256": "34665ae9e2318740ff902f1d6e3af56d5d4cfdb46c5df6a4349dbb9acb0d4737",
+      "expected_output": ["swift-009: passed"],
+      "steps": [
+        {
+          "lines": [1, 5],
+          "excerpt": "import Foundation\n\n@main\nstruct LessonMain {\n  static func main() async throws {",
+          "title": "The program entry point",
+          "explanation": "@main marks LessonMain as the place the program starts, and Swift calls its static main function. The worker compiles with -parse-as-library, which is why an explicit @main type is used instead of top-level statements. main is declared async throws so the same shape works for lessons that await or throw. Each do block below is just a scope that keeps its names separate.",
+          "observe": "Nothing is printed until the last line of main."
+        },
+        {
+          "lines": [6, 12],
+          "excerpt": "    do {\n      let original = [1, 2]\n      var changed = original\n      changed.append(3)\n      precondition(original == [1, 2])\n      precondition(changed == [1, 2, 3])\n    }",
+          "title": "Changing a copy leaves the original alone",
+          "explanation": "Swift arrays are value types. var changed = original gives changed its own logical copy, so appending 3 cannot affect original. Behind the scenes Swift uses copy-on-write: both names share one buffer until one of them is mutated, and only then is the buffer copied. precondition stops the program with an error if its condition is false, and it stays active in normal builds.",
+          "observe": "original is still [1, 2] and changed is [1, 2, 3]."
+        },
+        {
+          "lines": [14, 20],
+          "excerpt": "    do {\n      var values: [Int] = []\n      values.reserveCapacity(20)\n      precondition(values.count == 0)\n      values.append(7)\n      precondition(values.count == 1 && values[0] == 7)\n    }",
+          "title": "Capacity is not count",
+          "explanation": "reserveCapacity(20) asks the array to allocate room for at least 20 elements up front, which avoids repeated reallocation when you know roughly how many items are coming. It does not add any elements, so count is still 0. Only append changes count. Reading values[0] is safe here only because the previous check proved there is exactly one element.",
+          "observe": "count goes from 0 to 1 and values[0] is 7."
+        },
+        {
+          "lines": [40, 46],
+          "excerpt": "    do {\n      // Task 3: Independent construction\n      let source = [-1, 2, -3, 4]\n      let positives = source.filter { $0 > 0 }\n      precondition(positives == [2, 4])\n      precondition(source == [-1, 2, -3, 4])\n    }",
+          "title": "filter returns a new array",
+          "explanation": "filter takes a closure and returns a new array with the elements for which it returns true. $0 is shorthand for the closure's first argument. Because filter builds a new value, source is unchanged, which the second precondition confirms. The task 4 and task 5 blocks follow, and when every precondition holds, print writes the result line.",
+          "observe": "positives is [2, 4], source keeps its negatives, and the program prints: swift-009: passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "swift-031",
+      "title": "Actors serialize access to their own state",
+      "anchor": "reference",
+      "source_path": "courses/swift/solutions/swift-031_solution.swift",
+      "source_sha256": "069156745f83950253aea7767ad30b45317ce10a963020dd690f5ea4494965e0",
+      "expected_output": ["swift-031: passed"],
+      "steps": [
+        {
+          "lines": [3, 6],
+          "excerpt": "actor CounterActor {\n  private(set) var value = 0\n  func increment() { value += 1 }\n}",
+          "title": "A counter actor",
+          "explanation": "An actor is a reference type that protects its stored properties: only one task at a time can run code inside it. private(set) lets other code read value but only the actor itself can change it. increment needs no lock, because the actor already guarantees that two increments never overlap.",
+          "observe": "Code outside the actor must use await to call increment or read value."
+        },
+        {
+          "lines": [7, 15],
+          "excerpt": "actor InventoryActor {\n  private(set) var stock: Int\n  init(stock: Int) { self.stock = stock }\n  func reserve(_ amount: Int) -> Bool {\n    guard amount >= 0 && amount <= stock else { return false }\n    stock -= amount\n    return true\n  }\n}",
+          "title": "A check-and-update kept inside one actor method",
+          "explanation": "reserve both checks whether enough stock exists and subtracts it. Because the whole method runs inside the actor without suspending, no other caller can change stock between the guard and the subtraction. guard ... else { return false } is Swift's early exit: the rejection path leaves immediately, and the happy path continues at the outer level.",
+          "observe": "A request for more than the remaining stock, or a negative amount, returns false and leaves stock unchanged."
+        },
+        {
+          "lines": [23, 33],
+          "excerpt": "@main\nstruct LessonMain {\n  static func main() async throws {\n    do {\n      let counter = CounterActor()\n      await withTaskGroup(of: Void.self) { group in\n        for _ in 0..<20 { group.addTask { await counter.increment() } }\n      }\n      let value = await counter.value\n      precondition(value == 20)\n    }",
+          "title": "Twenty concurrent increments",
+          "explanation": "withTaskGroup starts child tasks and waits for all of them before it returns. Each child awaits counter.increment(). Even though the tasks can run in parallel, the actor runs the increments one at a time, so no update is lost. Reading counter.value from outside also needs await, because it has to wait its turn inside the actor.",
+          "observe": "value is exactly 20."
+        },
+        {
+          "lines": [35, 41],
+          "excerpt": "    do {\n      let inventory = InventoryActor(stock: 3)\n      let first = await inventory.reserve(2)\n      let second = await inventory.reserve(2)\n      let remaining = await inventory.stock\n      precondition(first && !second && remaining == 1)\n    }",
+          "title": "The second reservation is refused",
+          "explanation": "Stock starts at 3. The first request for 2 succeeds and leaves 1. The second request for 2 fails the guard. Checking first, second and remaining together shows the full story: one success, one honest refusal, and the correct leftover amount.",
+          "observe": "first is true, second is false and remaining is 1."
+        },
+        {
+          "lines": [61, 79],
+          "excerpt": "    do {\n      // Task 3: Independent construction\n      actor BoundedQueue {\n        private var items: [Int] = []\n        let capacity: Int\n        init(capacity: Int) { self.capacity = capacity }\n        func offer(_ item: Int) -> Bool {\n          guard items.count < capacity else { return false }\n          items.append(item)\n          return true\n        }\n        func take() -> Int? { items.isEmpty ? nil : items.removeFirst() }\n      }\n      let queue = BoundedQueue(capacity: 2)\n      let admitted = [await queue.offer(1), await queue.offer(2), await queue.offer(3)]\n      precondition(admitted == [true, true, false])\n      let first = await queue.take()\n      precondition(first == 1)\n    }",
+          "title": "A bounded queue actor",
+          "explanation": "BoundedQueue is declared inside the do block, which Swift allows for local types. offer refuses new items once capacity is reached instead of growing without limit, which is how backpressure is expressed. take returns an optional Int: nil when empty, otherwise the oldest item via removeFirst. The array literal awaits three offers in order.",
+          "observe": "admitted is [true, true, false], take returns 1, and the program prints: swift-031: passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "swift-033",
+      "title": "Sendable values crossing task boundaries",
+      "anchor": "reference",
+      "source_path": "courses/swift/solutions/swift-033_solution.swift",
+      "source_sha256": "d30b6e9899a92dc66afa32865de2d62ed092a4880f3e2f541e65cc59a07d4228",
+      "expected_output": ["swift-033: passed"],
+      "steps": [
+        {
+          "lines": [3, 6],
+          "excerpt": "struct Snapshot: Sendable {\n  let name: String\n  let quantity: Int\n}",
+          "title": "A Sendable struct",
+          "explanation": "Sendable marks a type as safe to pass between concurrent tasks. A struct whose stored properties are all immutable lets of Sendable types, here String and Int, qualifies automatically, and the compiler checks the claim. The worker compiles in Swift 6 language mode, where passing a non-Sendable value across tasks is a compile error rather than a warning.",
+          "observe": "Snapshot has only let properties, so there is no shared mutable state to protect."
+        },
+        {
+          "lines": [11, 16],
+          "excerpt": "    do {\n      let snapshot = Snapshot(name: \"pear\", quantity: 3)\n      let task = Task { snapshot.quantity * 2 }\n      let result = await task.value\n      precondition(result == 6)\n    }",
+          "title": "Capturing a value in a Task",
+          "explanation": "Task { ... } starts a new unit of concurrent work, and its closure captures snapshot. That capture is allowed because Snapshot is Sendable. await task.value suspends main until the task finishes and then hands back the closure's result.",
+          "observe": "result is 6, twice the quantity of 3."
+        },
+        {
+          "lines": [18, 27],
+          "excerpt": "    do {\n      let result = await withTaskGroup(of: Snapshot.self, returning: [Snapshot].self) { group in\n        group.addTask { Snapshot(name: \"b\", quantity: 2) }\n        group.addTask { Snapshot(name: \"a\", quantity: 1) }\n        var snapshots: [Snapshot] = []\n        for await value in group { snapshots.append(value) }\n        return snapshots.sorted { $0.name < $1.name }\n      }\n      precondition(result.map(\\.name) == [\"a\", \"b\"])\n    }",
+          "title": "Results from a task group arrive in any order",
+          "explanation": "Each child task returns a Snapshot. for await value in group receives results in the order the children finish, which is not guaranteed to match the order they were added. Sorting by name before returning makes the result deterministic, which is the right habit whenever concurrent output feeds a check or a report. map(\\.name) uses a key path to pull out each name.",
+          "observe": "After sorting, the names are a then b on every run."
+        },
+        {
+          "lines": [50, 61],
+          "excerpt": "    do {\n      // Task 3: Independent construction\n      struct Summary: Sendable {\n        let count: Int\n        let total: Int\n      }\n      let summary = await Task { () -> Summary in\n        let values = [2, 3, 4]\n        return Summary(count: values.count, total: values.reduce(0, +))\n      }.value\n      precondition(summary.count == 3 && summary.total == 9)\n    }",
+          "title": "Returning a Sendable summary from a task",
+          "explanation": "Summary is a local Sendable struct. The task closure declares its return type explicitly with () -> Summary, builds an array, and returns its count and total. reduce(0, +) starts at 0 and adds each element. Because Summary is Sendable, the value can safely come back to main.",
+          "observe": "count is 3 and total is 9, and the program prints: swift-033: passed"
+        }
+      ]
+    }
+  ]
+}

@@ -9,6 +9,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["generative model", "conditioning", "likelihood ratio"],
+    "key_terms": {
+      "Generative model": "A probability description of the possible unknown states and of how observations arise under each state.",
+      "Prior": "The probability assigned to each hypothesis before the specified evidence is conditioned on.",
+      "Likelihood ratio": "The probability of the evidence under one hypothesis divided by its probability under another; it multiplies prior odds to give posterior odds.",
+      "Conditional independence": "Independence of two signals given the hypothesis, which is required before their likelihoods may be multiplied as separate evidence."
+    },
+    "worked_examples": [
+      {
+        "title": "Two different detectors, odds form and update order",
+        "language": "python",
+        "code": "prior = 0.02\ndetectors = {\"A\": (0.90, 0.05), \"B\": (0.80, 0.10)}  # (P(alarm | fault), P(alarm | no fault))\n\n\ndef update(p, name):\n    sens, false_alarm = detectors[name]\n    return sens * p / (sens * p + false_alarm * (1 - p))\n\n\nfor order in ((\"A\", \"B\"), (\"B\", \"A\")):\n    p = prior\n    for name in order:\n        p = update(p, name)\n        print(f\"after {name}: P(fault) = {p:.4f}\")\n    print(\"order\", \"\".join(order), \"final\", round(p, 4))\n\nodds = prior / (1 - prior)\nlr = [s / f for s, f in detectors.values()]\npost_odds = odds * lr[0] * lr[1]\nprint(\n    f\"likelihood ratios {lr[0]:.0f} and {lr[1]:.0f}; prior odds {odds:.4f}; posterior odds {post_odds:.4f}\"\n)\nprint(f\"posterior from odds {post_odds / (1 + post_odds):.4f}\")\n",
+        "output": "after A: P(fault) = 0.2687\nafter B: P(fault) = 0.7461\norder AB final 0.7461\nafter B: P(fault) = 0.1404\nafter A: P(fault) = 0.7461\norder BA final 0.7461\nlikelihood ratios 18 and 8; prior odds 0.0204; posterior odds 2.9388\nposterior from odds 0.7461\n",
+        "interpretation": "Detector A alone lifts the fault probability from 0.02 to 0.2687, and detector B alone lifts it only to 0.1404, because A's likelihood ratio is \\(0.90/0.05=18\\) while B's is \\(0.80/0.10=8\\). Taken together, in either order, the answer is the same 0.7461. Order cannot matter when the two alarms are conditionally independent given the fault state, since the joint likelihood is a product and multiplication commutes. The odds form makes this arithmetic transparent: prior odds \\(0.02/0.98=0.0204\\) times \\(18\\times8=144\\) gives posterior odds 2.9388, and \\(2.9388/3.9388=0.7461\\). The product rule is also the assumption to audit. If B merely re-reads A's sensor, its alarm carries no new information once A has fired, and multiplying by 8 a second time would push the probability far above what the evidence supports. Two independent alarms make a fault about three times more likely than not, yet a single strong alarm still leaves roughly a 73 percent chance that the system is healthy."
+      }
+    ],
     "outcome": "Condition a fault hypothesis on detector signals with Bayes' rule and show why a perfectly repeated signal is not independent new evidence.",
     "lab": "Update the fault probability after one signal, then compare a perfectly repeated reading with two conditionally independent signals.",
     "verification": "Reproduce posterior fault probability 0.692 (odds 2.25) after one signal, the same 0.692 for a duplicated reading and 0.953 for two independent signals.",
@@ -26,6 +41,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["logsumexp", "normalization", "quadrature"],
+    "key_terms": {
+      "Log density": "The logarithm of a probability or density, used so products of tiny terms become sums that do not underflow.",
+      "logsumexp": "The stable computation m + log sum exp(a_j - m), with m the largest log weight, of the log of a sum of exponentials.",
+      "Normalization": "Dividing unnormalized masses by their total so they sum or integrate to one under the stated measure.",
+      "Quadrature": "Numerical integration with a grid and weights; an irregular grid requires appropriate quadrature weights.",
+      "Exact oracle": "A conjugate, quadrature or finite-mechanism reference answer used to test a more general inference system."
+    },
+    "worked_examples": [
+      {
+        "title": "Underflow-proof grid posterior for 7000 successes in 10000 trials",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy.special import logsumexp\n\nk, n = 7000, 10000\ntheta = np.linspace(0.0005, 0.9995, 2000)\nlog_like = k * np.log(theta) + (n - k) * np.log1p(-theta)\nprint(f\"largest log likelihood {log_like.max():.1f}\")\n\nnaive = np.exp(log_like)\nprint(\"naive sum of likelihoods:\", naive.sum())\nwith np.errstate(invalid=\"ignore\"):\n    print(\"naive posterior mean:\", (theta * naive).sum() / naive.sum())\n\nw = np.exp(log_like - logsumexp(log_like))\nprint(f\"log-sum-exp posterior mean {w @ theta:.6f}\")\nprint(f\"exact Beta(7001, 3001) mean {(k + 1) / (n + 2):.6f}\")\n",
+        "output": "largest log likelihood -6108.6\nnaive sum of likelihoods: 0.0\nnaive posterior mean: nan\nlog-sum-exp posterior mean 0.699960\nexact Beta(7001, 3001) mean 0.699960\n",
+        "interpretation": "With 10,000 trials the largest log likelihood on the grid is about \\(-6108.6\\), and \\(e^{-6108.6}\\) is far below the smallest positive double, roughly \\(10^{-308}\\). Every term underflows to zero, the naive sum is 0.0 and the posterior mean becomes \\(0/0\\), printed as nan. Nothing is wrong with the model; the failure is purely numerical. Subtracting the log-sum-exp before exponentiating rescales every weight by the same constant, so the largest becomes exactly 1 and the ratios are preserved. The normalized grid mean, 0.699960, matches the exact Beta(7001, 3001) mean \\(7001/10002\\) to six decimals, which is the oracle check that the grid is fine enough. With only 1,000 trials the same naive code would have survived, because \\(e^{-611}\\) is still representable, so a passing test on small data says little about production data. Any computation that multiplies many likelihood terms should carry log densities until the final normalized ratio."
+      }
+    ],
     "outcome": "Normalize posterior weights on the log scale, check grid integration against an exact posterior and recover ratios from log densities that underflow.",
     "lab": "Compare grid-integrated posterior moments with their analytic values, then normalize extreme log weights with log-sum-exp.",
     "verification": "Grid mean and variance match the analytic 1.846 and 0.308, and the stable weights for the extreme log densities are about 0.665, 0.245 and 0.090.",
@@ -46,6 +77,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["conjugacy", "beta-binomial", "predictive variance"],
+    "key_terms": {
+      "Conjugate prior": "A prior whose posterior stays in the same family, such as Beta(a, b) becoming Beta(a + s, b + n - s) after s successes in n Bernoulli trials.",
+      "Posterior predictive distribution": "The sampling model averaged over posterior uncertainty, not the likelihood evaluated at a posterior mean.",
+      "Beta-binomial distribution": "The predictive distribution of future successes when a binomial count is averaged over a beta posterior.",
+      "Double counting": "Conditioning on the same observations twice, which overstates certainty because the duplicates carry no new information."
+    },
+    "worked_examples": [
+      {
+        "title": "Splitting predictive variance for the next five trials",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\n\na, b = 2 + 7, 2 + 3  # Beta(2, 2) prior, 7 successes in 10 trials\nm = 5\npred = stats.betabinom(m, a, b)\nprint(\"P(Y = 0..5):\", pred.pmf(np.arange(m + 1)).round(4))\np_mean = a / (a + b)\np_var = a * b / ((a + b) ** 2 * (a + b + 1))\nwithin = m * (p_mean * (1 - p_mean) - p_var)  # E[m p (1 - p)]\nbetween = m**2 * p_var  # Var(m p)\nprint(f\"predictive mean {pred.mean():.4f}, variance {pred.var():.4f}\")\nprint(\n    f\"E[binomial variance] {within:.4f} + Var[conditional mean] {between:.4f} = {within + between:.4f}\"\n)\nprint(f\"plug-in Binomial(5, {p_mean:.4f}) variance {m * p_mean * (1 - p_mean):.4f}\")\n",
+        "output": "P(Y = 0..5): [0.0147 0.0735 0.1838 0.2889 0.2889 0.1502]\npredictive mean 3.2143, variance 1.4541\nE[binomial variance] 1.0714 + Var[conditional mean] 0.3827 = 1.4541\nplug-in Binomial(5, 0.6429) variance 1.1480\n",
+        "interpretation": "After 7 successes in 10 trials under a Beta(2, 2) prior, the posterior is Beta(9, 5) with mean \\(9/14=0.6429\\). Predicting five new trials, the beta-binomial puts equal mass 0.2889 on three and four successes and keeps 0.0147 on zero. Its variance, 1.4541, splits into two named parts by the law of total variance. The expected binomial variance, \\(E[5p(1-p)]=1.0714\\), is the coin-flip noise that would remain even if \\(p\\) were known. The second part, \\(\\mathrm{Var}(5p)=25\\times0.01531=0.3827\\), is uncertainty about \\(p\\) itself. The plug-in Binomial(5, 0.6429) variance of 1.1480 ignores that second part and understates the spread by about 21 percent. More data shrinks only the parameter term; after thousands of trials the predictive variance would approach \\(5p(1-p)\\), never zero. Duplicating records would shrink the parameter term too, but falsely, since repeated rows carry no new information about \\(p\\)."
+      }
+    ],
     "outcome": "Derive a beta-binomial posterior predictive distribution, separate parameter uncertainty from outcome variance and show how duplicated records overstate certainty.",
     "lab": "Derive the predictive probabilities for five future trials, then duplicate the observed batch and compare posterior variances.",
     "verification": "Posterior mean 0.714 and predictive variance 1.293 against a plug-in 1.020; duplicating the batch shrinks the parameter variance from 0.0136 to 0.0075.",
@@ -66,6 +112,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Jacobian", "constraint", "density"],
+    "key_terms": {
+      "Change of variables": "Re-expressing a distribution in a new coordinate, which preserves probability mass but not density height.",
+      "Jacobian adjustment": "The log absolute derivative of the transformation that must be added to a density written in the new coordinate.",
+      "Inverse logit": "The map from an unconstrained z to a probability theta, with derivative theta(1 - theta).",
+      "Unconstrained coordinate": "A real-valued representation of a constrained parameter that samplers can move through freely."
+    },
+    "worked_examples": [
+      {
+        "title": "Integrating a log-scale density with and without the Jacobian",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import integrate, stats\n\n# sigma = exp(u) with u ~ Normal(0, 1)\ncorrect = lambda s: stats.norm.pdf(np.log(s)) / s\nmissing = lambda s: stats.norm.pdf(np.log(s))\n\nfor name, f in ((\"with 1/sigma\", correct), (\"without Jacobian\", missing)):\n    mass = integrate.quad(f, 0, np.inf)[0]\n    mean = integrate.quad(lambda s: s * f(s), 0, np.inf)[0] / mass\n    print(f\"{name:17s}: total mass {mass:.4f}, mean after renormalizing {mean:.4f}\")\nprint(f\"lognormal mean exp(1/2) = {np.exp(0.5):.4f}; exp(3/2) = {np.exp(1.5):.4f}\")\n",
+        "output": "with 1/sigma     : total mass 1.0000, mean after renormalizing 1.6487\nwithout Jacobian : total mass 1.6487, mean after renormalizing 4.4817\nlognormal mean exp(1/2) = 1.6487; exp(3/2) = 4.4817\n",
+        "interpretation": "Suppose a model samples \\(u\\sim\\mathrm{Normal}(0,1)\\) and uses \\(\\sigma=e^u\\). The density of \\(\\sigma\\) is \\(\\phi(\\log\\sigma)\\cdot|d u/d\\sigma|=\\phi(\\log\\sigma)/\\sigma\\), and the quadrature confirms that it integrates to 1.0000 with mean 1.6487, which is the lognormal mean \\(e^{1/2}\\). Dropping the factor \\(1/\\sigma\\) gives a function with total mass 1.6487, so it is not a density at all. The serious failure is quieter, though. Renormalizing the wrong function does not repair it: the function \\(\\phi(\\log\\sigma)\\) equals \\(\\sigma\\) times the correct density, so after normalization it is a lognormal with location 1 rather than 0, and its mean is \\(e^{3/2}=4.4817\\), almost three times the truth. A sampler working on \\(u\\) would never complain, because both versions are smooth and proper after normalization. Only an independent check, here an exact integral and a known moment, reveals that the wrong distribution is being targeted. The same accounting is needed whenever a parameter is declared on one scale and given a prior on another."
+      }
+    ],
     "outcome": "Change variables in a density with the correct Jacobian and detect the moment error caused by omitting it.",
     "lab": "Verify that a transformed beta density integrates to one, then omit the Jacobian and compare second moments.",
     "verification": "With the Jacobian the transformed density integrates to 1.000 and the second moment is 0.300; omitting it gives 0.333.",
@@ -86,6 +147,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["utility", "posterior risk", "regret"],
+    "key_terms": {
+      "Utility": "A numerical statement of the consequences of an action, here eight units of benefit on success minus a cost of five.",
+      "Posterior expected loss": "The loss of an action averaged over the posterior distribution of the unknown parameter, also called posterior risk.",
+      "Bayes action": "The action that minimizes posterior expected loss, or equivalently maximizes posterior expected utility.",
+      "Regret": "The loss of the chosen action relative to the action that would have been chosen if the parameter were known."
+    },
+    "worked_examples": [
+      {
+        "title": "Three losses, three point estimates from one Beta posterior",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\n\npost = stats.beta(3, 9)\ngrid = np.linspace(0, 1, 20001)\ndens = post.pdf(grid)\ndens /= dens.sum()\n\n\ndef expected(loss, a):\n    return dens @ loss(grid, a)\n\n\ncandidates = np.linspace(0.05, 0.45, 401)\nlosses = {\n    \"squared\": lambda t, a: (t - a) ** 2,\n    \"absolute\": lambda t, a: np.abs(t - a),\n    \"0-1 within 0.005\": lambda t, a: (np.abs(t - a) > 0.005).astype(float),\n}\nfor name, loss in losses.items():\n    vals = np.array([expected(loss, a) for a in candidates])\n    if name.startswith(\"0-1\"):  # exact window mass avoids grid-edge artifacts\n        vals = 1 - (post.cdf(candidates + 0.005) - post.cdf(candidates - 0.005))\n    print(\n        f\"{name:16s}: best action {candidates[vals.argmin()]:.3f}, expected loss {vals.min():.4f}\"\n    )\nprint(f\"mean {post.mean():.3f}, median {post.median():.3f}, mode {(3 - 1) / (3 + 9 - 2):.3f}\")\n",
+        "output": "squared         : best action 0.250, expected loss 0.0144\nabsolute        : best action 0.236, expected loss 0.0961\n0-1 within 0.005: best action 0.200, expected loss 0.9668\nmean 0.250, median 0.236, mode 0.200\n",
+        "interpretation": "One posterior, Beta(3, 9), yields three different best actions because each loss asks a different question. Under squared loss the best report is the posterior mean 0.250, and the minimized expected loss 0.0144 is exactly the posterior variance \\(27/(144\\times13)\\). Under absolute loss the minimizer moves left to the median 0.236, because the right-skewed posterior has a long upper tail that the mean chases and the median ignores. Under a 0-1 loss that pays only for landing within 0.005 of the truth, the best action is the mode 0.200, but its expected loss is 0.9668: even the best single guess is inside that narrow window only about 3 percent of the time. The spread from 0.200 to 0.250 is a fifth of the mean, large enough to change a downstream decision. Reporting \"the posterior estimate\" without naming the loss hides that choice. A defect-rate threshold set from the mode would trigger action more readily than one set from the mean."
+      }
+    ],
     "outcome": "Choose an action by posterior expected utility, contrast it with the posterior probability of benefit and compute each action's expected regret.",
     "lab": "Compute expected net benefit and the probability of positive benefit, then the posterior expected regret of treating and of waiting.",
     "verification": "Expected net benefit 0.714 and probability of benefit 0.781; expected regret 0.137 for treating against 0.852 for waiting selects treatment under the stated utility.",
@@ -101,6 +177,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["MCMC", "autocorrelation", "ESS"],
+    "key_terms": {
+      "Markov chain Monte Carlo": "A procedure that generates dependent states whose stationary distribution is the target under appropriate conditions.",
+      "Metropolis acceptance probability": "min(1, pi(x')/pi(x)) for a symmetric proposal, computed with log densities.",
+      "Autocorrelation": "Correlation between chain states at different lags, which reduces the information in each draw.",
+      "Effective sample size": "The number of independent draws carrying the same Monte Carlo precision as the correlated chain.",
+      "R-hat": "A convergence diagnostic comparing between-chain and within-chain variation; passing it is necessary, not sufficient."
+    },
+    "worked_examples": [
+      {
+        "title": "Effective sample size of an AR(1) chain against theory",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(1)\nn, rho = 20000, 0.9\nx = np.empty(n)\nx[0] = rng.normal()\nfor t in range(1, n):\n    x[t] = rho * x[t - 1] + np.sqrt(1 - rho**2) * rng.normal()\n\nz = x - x.mean()\nacf = np.correlate(z, z, mode=\"full\")[n - 1 :] / (z @ z)\ntau = 1.0\nfor lag in range(1, n - 1, 2):  # Geyer: stop when a pair sum turns negative\n    pair = acf[lag] + acf[lag + 1]\n    if pair < 0:\n        break\n    tau += 2 * pair\nprint(f\"lag-1 autocorrelation {acf[1]:.3f}\")\nprint(f\"estimated ESS {n / tau:.0f}; theory n(1 - rho)/(1 + rho) = {n * (1 - rho) / (1 + rho):.0f}\")\nprint(f\"MCSE of the mean {x.std() / np.sqrt(n / tau):.4f} versus naive {x.std() / np.sqrt(n):.4f}\")\n",
+        "output": "lag-1 autocorrelation 0.896\nestimated ESS 1032; theory n(1 - rho)/(1 + rho) = 1053\nMCSE of the mean 0.0304 versus naive 0.0069\n",
+        "interpretation": "The chain has 20,000 draws, but with lag-1 autocorrelation 0.896 consecutive draws largely repeat each other. Summing autocorrelation pairs until they turn negative, Geyer's rule, gives an integrated autocorrelation time near 19.4 and an effective sample size of 1,032. Theory for an AR(1) with \\(\\rho=0.9\\) gives \\(20000(0.1/1.9)=1053\\), so the estimator is within about 2 percent here. The practical consequence is in the last line: the Monte Carlo standard error of the mean is 0.0304, about 4.4 times the naive 0.0069 that treats every draw as independent. Reporting the naive value would claim three decimals of accuracy that the chain does not have. The ratio \\(\\sqrt{20000/1032}\\approx4.4\\) is the price of correlation. Raising \\(\\rho\\) to 0.99 would cut the theoretical ESS to about 100, so thinning or running longer chains does not change the arithmetic; only better mixing, through a better proposal or reparameterization, does."
+      }
+    ],
     "outcome": "Run a Metropolis sampler, estimate an autocorrelation-adjusted effective sample size and show why 100% acceptance can mean no exploration.",
     "lab": "Run a random-walk Metropolis chain on a standard normal target, then set the proposal scale to zero and compare acceptance, mean and variance.",
     "verification": "The working chain has acceptance about 0.70, lag-one correlation 0.78, an AR(1) effective sample size near 300 and variance near 1; the zero-scale chain accepts every move and has variance 0.",
@@ -122,6 +214,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Hamiltonian", "leapfrog", "NUTS"],
+    "key_terms": {
+      "Hamiltonian": "The total energy H(q, p) = U(q) + K(p), with potential energy minus the log target density and kinetic energy from the momentum.",
+      "Momentum": "An auxiliary variable p paired with position q whose kinetic energy depends on a positive-definite mass matrix.",
+      "Leapfrog integrator": "A half momentum step, a full position step and another half momentum step; it is reversible and volume preserving.",
+      "NUTS": "The No-U-Turn Sampler, which adaptively chooses how long each trajectory runs instead of fixing the number of leapfrog steps."
+    },
+    "worked_examples": [
+      {
+        "title": "Leapfrog stability limit set by the narrowest direction",
+        "language": "python",
+        "code": "import numpy as np\n\nsd = np.array([1.0, 0.1])  # independent Gaussian target, one narrow axis\n\n\ndef energy_error(eps, steps=50):\n    q = np.array([1.0, 0.1])\n    p = np.array([0.5, 0.5])\n    H0 = 0.5 * np.sum((q / sd) ** 2) + 0.5 * p @ p\n    p = p - 0.5 * eps * q / sd**2\n    for i in range(steps):\n        q = q + eps * p\n        if i < steps - 1:\n            p = p - eps * q / sd**2\n    p = p - 0.5 * eps * q / sd**2\n    return 0.5 * np.sum((q / sd) ** 2) + 0.5 * p @ p - H0\n\n\nfor eps in (0.05, 0.15, 0.19, 0.21):\n    print(f\"step {eps:.2f}: eps/sd_min {eps / sd.min():.1f}, energy error {energy_error(eps):.3g}\")\n",
+        "output": "step 0.05: eps/sd_min 0.5, energy error 0.00366\nstep 0.15: eps/sd_min 1.5, energy error -0.00813\nstep 0.19: eps/sd_min 1.9, energy error -0.376\nstep 0.21: eps/sd_min 2.1, energy error 9.83e+25\n",
+        "interpretation": "The target is Gaussian with standard deviations 1 and 0.1. Leapfrog on a Gaussian with frequency \\(\\omega=1/\\mathrm{sd}\\) is stable only when \\(\\epsilon\\omega<2\\), so the narrow direction sets a limit of \\(\\epsilon<0.2\\) no matter how wide the other direction is. Below that limit the energy error stays bounded and small, 0.00366 at \\(\\epsilon=0.05\\) and \\(-0.00813\\) at 0.15, even over 50 steps, which is why HMC can take long trajectories with high acceptance. At 0.19, close to the limit, the error grows to \\(-0.376\\), and the acceptance probability \\(\\min(1,e^{-\\Delta H})\\) would still be acceptable but noisy. At 0.21 the integrator diverges and the energy error is \\(9.83\\times10^{25}\\), so every proposal would be rejected. This is the geometry behind divergences in NUTS: a single narrow direction, such as a hierarchical scale near zero, forces a tiny step everywhere. Rescaling that direction, through a mass matrix or reparameterization, removes the bottleneck."
+      }
+    ],
     "outcome": "Implement leapfrog integration for Hamiltonian Monte Carlo, verify reversibility and energy error, and show how an oversized step destroys acceptance.",
     "lab": "Check leapfrog reversibility and energy error at a small step size, then enlarge the step until the integrator becomes unstable.",
     "verification": "Reversibility error 0 and an energy error near -0.0003 at the small step; the large step produces an enormous energy error and acceptance 0.",
@@ -142,6 +249,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["SBC", "rank", "conditional validation"],
+    "key_terms": {
+      "Simulation-based calibration": "Drawing parameters from the prior, simulating data, running inference and checking the rank of each true parameter among the posterior draws.",
+      "Rank statistic": "The number of posterior draws below the simulated true value, from zero through S, uniform when inference is correct.",
+      "Conditional oracle": "An exact posterior, here mean y/2 and variance .5, that checks inference for each simulated dataset rather than only marginally.",
+      "Prior-only algorithm": "A failed sampler that ignores the data and returns prior draws, yet can produce marginally uniform ranks."
+    },
+    "worked_examples": [
+      {
+        "title": "SBC ranks expose an overconfident posterior",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\n\nrng = np.random.default_rng(8)\nN, L, n = 2000, 19, 5  # replicates, posterior draws, data size\n\n\ndef ranks(scale):\n    out = np.empty(N, int)\n    for r in range(N):\n        theta = rng.normal()  # prior N(0, 1), data y ~ N(theta, 1)\n        y = rng.normal(theta, 1, n)\n        mean, sd = y.sum() / (n + 1), np.sqrt(1 / (n + 1))\n        draws = rng.normal(mean, scale * sd, L)\n        out[r] = np.sum(draws < theta)\n    return out\n\n\nfor label, scale in ((\"correct\", 1.0), (\"sd x 0.6\", 0.6)):\n    counts = np.bincount(ranks(scale) // 4, minlength=5)\n    p = stats.chisquare(counts, f_exp=np.array([4, 4, 4, 4, 4]) / 20 * N).pvalue\n    print(f\"{label:9s}: rank-bin counts {counts}, chi-square p {p:.3g}\")\n",
+        "output": "correct  : rank-bin counts [397 409 385 396 413], chi-square p 0.87\nsd x 0.6 : rank-bin counts [603 241 296 251 609], chi-square p 3.33e-76\n",
+        "interpretation": "Each replicate draws a true \\(\\theta\\) from the prior, simulates five observations and records how many of 19 posterior draws fall below the truth. A correct posterior makes that rank uniform on 0 through 19, so grouping into five bins of four ranks should give about 400 per bin. The correct sampler shows 385 to 413 with chi-square p 0.87. Shrinking the posterior standard deviation to 60 percent of its true value produces 603 and 609 in the outer bins and only 241 to 296 in the middle: the truth falls outside the overconfident draws too often, on both sides, giving the characteristic U shape and p of \\(3.33\\times10^{-76}\\). The shape is diagnostic, not just the p-value. A shifted posterior would pile ranks at one end; an underconfident one would produce a hump in the middle. Two thousand replicates give about 400 expected per bin, so a gap of 200 is unmistakable. With far fewer replicates each bin count is noisier and milder miscalibration can hide, so a passing SBC is evidence only at the resolution it was run."
+      }
+    ],
     "outcome": "Run simulation-based calibration on a conjugate normal model, detect a shifted posterior from its ranks and show that a prior-only algorithm can still pass a rank check.",
     "lab": "Compare rank means for correct, shifted and prior-only inference with 64 posterior draws, then compare their conditional errors.",
     "verification": "Rank means stay near the uniform value 32 for correct (33.0) and prior-only (31.9) inference but fall to 10.6 when shifted; conditional error 0.009 against 0.555 exposes the prior-only algorithm.",
@@ -160,6 +282,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["PyMC", "InferenceData", "posterior predictive"],
+    "key_terms": {
+      "PyMC model context": "The Python block where random variables with declared priors and an observed likelihood are registered into one model.",
+      "InferenceData": "The ArviZ 0.23 result container with named chain and draw dimensions for posterior, predictive and diagnostic groups.",
+      "Divergence": "A Hamiltonian trajectory whose energy error became too large, signaling geometry the sampler may not explore reliably.",
+      "Posterior predictive check": "Simulating replicated outcomes from the fitted model to compare with observed data."
+    },
+    "worked_examples": [
+      {
+        "title": "Split R-hat computed by hand on four chains",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(9)\ngood = rng.normal(0, 1, (4, 500))\nstuck = good.copy()\nstuck[3] += 1.5  # one chain stays in a shifted region\n\n\ndef split_rhat(chains):\n    half = chains.shape[1] // 2\n    s = np.vstack([chains[:, :half], chains[:, half:]])\n    n = s.shape[1]\n    W = s.var(axis=1, ddof=1).mean()\n    B = n * s.mean(axis=1).var(ddof=1)\n    return np.sqrt(((n - 1) / n * W + B / n) / W)\n\n\nfor name, c in ((\"four mixed chains\", good), (\"one shifted chain\", stuck)):\n    print(f\"{name}: split R-hat {split_rhat(c):.3f}, chain means {c.mean(axis=1).round(2)}\")\n",
+        "output": "four mixed chains: split R-hat 0.999, chain means [0.01 0.01 0.05 0.01]\none shifted chain: split R-hat 1.213, chain means [0.01 0.01 0.05 1.51]\n",
+        "interpretation": "Split R-hat divides each of the four chains into halves and compares between-half variance with within-half variance. For four chains drawn from the same standard normal, the chain means are all near zero and R-hat is 0.999, inside any conventional screen. Shifting the fourth chain by 1.5 raises its mean to 1.51 and R-hat to 1.213, well above the 1.01 threshold. The calculation shows why: the within-chain variance is still about 1, but the variance of the eight half-chain means is now dominated by the two halves from the shifted chain, and \\(\\hat R\\) grows with that between-chain term. A chain stuck in a different mode is exactly the failure R-hat exists to catch. Splitting adds protection against a different failure, a single chain that drifts, since its two halves would disagree. R-hat cannot detect four chains that are all stuck in the same wrong region; that requires a reference such as an exact posterior or simulation-based calibration."
+      }
+    ],
     "outcome": "Fit a small PyMC regression, read its R-hat, bulk effective sample size and divergence record against the conventional screen and generate posterior predictive observations.",
     "lab": "Fit the 16-point regression with two short chains, compare the printed diagnostics with the screen, then sample posterior predictive outcomes.",
     "verification": "Intercept and slope means fall within 0.15 and 0.2 of 0.5 and 1.3, the predictive array has shape (2, 120, 16), and rhat_max, bulk_ess_min and divergences are compared with 1.01, 100 per chain and 0.",
@@ -175,6 +312,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["hierarchy", "noncentered", "funnel"],
+    "key_terms": {
+      "Hierarchical model": "A model in which group parameters vary around a population distribution, here theta_j ~ Normal(mu, tau^2).",
+      "Partial pooling": "Shrinking each group estimate toward the population mean by an amount set by its data and the modeled scale tau.",
+      "Noncentered parameterization": "Writing theta_j = mu + tau z_j with standard-normal z_j instead of sampling theta_j directly.",
+      "Funnel geometry": "A posterior whose width in theta shrinks sharply as tau approaches zero, which defeats one fixed step size."
+    },
+    "worked_examples": [
+      {
+        "title": "Marginal posterior of tau on a grid for eight groups",
+        "language": "python",
+        "code": "import numpy as np\n\ny = np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0])\ns = np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0])\ntau = np.linspace(0.01, 40, 4000)\n\n\ndef log_marg(t):  # mu integrated out under a flat prior\n    v = s**2 + t**2\n    V = 1 / np.sum(1 / v)\n    mu = V * np.sum(y / v)\n    return 0.5 * np.log(V) - 0.5 * np.sum(np.log(v)) - 0.5 * np.sum((y - mu) ** 2 / v)\n\n\nlp = np.array([log_marg(t) for t in tau]) + np.log(1 / (1 + (tau / 5) ** 2))  # half-Cauchy(0, 5)\nw = np.exp(lp - lp.max())\nw /= w.sum()\ncdf = np.cumsum(w)\nprint(\n    f\"P(tau < 2 | y) = {cdf[tau < 2][-1]:.3f}; posterior median tau {tau[np.searchsorted(cdf, 0.5)]:.2f}\"\n)\nfor t in (0.5, 2.0, 10.0):\n    print(f\"tau {t:>4}: pooling weight on group 1's own estimate {t**2 / (t**2 + s[0] ** 2):.4f}\")\n",
+        "output": "P(tau < 2 | y) = 0.378; posterior median tau 2.78\ntau  0.5: pooling weight on group 1's own estimate 0.0011\ntau  2.0: pooling weight on group 1's own estimate 0.0175\ntau 10.0: pooling weight on group 1's own estimate 0.3077\n",
+        "interpretation": "Integrating the group mean out analytically leaves a one-dimensional posterior for the between-group scale \\(\\tau\\), which a fine grid can evaluate exactly. Under a half-Cauchy(0, 5) prior these eight groups put 0.378 of the posterior mass below \\(\\tau=2\\), and the median is only 2.78. The data are consistent with very little between-group variation. That matters for computation because of the pooling weights. Group 1's estimate has standard error 15, so its own data receive weight \\(\\tau^2/(\\tau^2+225)\\): 0.0011 at \\(\\tau=0.5\\), 0.0175 at 2 and 0.3077 at 10. In the region the posterior visits often, each group effect is pinned tightly to the common mean, with conditional standard deviation close to \\(\\tau\\) itself. A centered sampler must move \\(\\tau\\) and every group effect together through that narrow neck, which is the funnel. The noncentered form samples standardized deviations whose scale does not change with \\(\\tau\\), so the same posterior becomes much easier to explore."
+      }
+    ],
     "outcome": "Fit centered and noncentered forms of one hierarchy, check group means against a known-hyperparameter shrinkage oracle and compare their diagnostic records.",
     "lab": "Derive the conditional shrinkage oracle, then fit both parameterizations and compare group means, divergences and effective sample sizes.",
     "verification": "The density identity centered + 3 log(tau) = noncentered holds, both fits return finite group means to compare with the oracle (-1.667, 0, 0.962), and each diagnostic record is read against the screen.",
@@ -190,6 +342,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Student-t", "outlier", "robustness"],
+    "key_terms": {
+      "Student-t likelihood": "An observation model with heavier tails than the normal, so one extreme residual has less influence on location.",
+      "Degrees of freedom": "The Student-t parameter controlling tail weight, fixed at four in this example to keep the assumption explicit.",
+      "Tail penalty": "The negative log density assigned to a residual, quadratic for the normal and logarithmic for Student-t.",
+      "Posterior predictive criticism": "Comparing replicated data with observations to find features the model fails to reproduce."
+    },
+    "worked_examples": [
+      {
+        "title": "Moving one outlier: normal versus Student-t posterior means",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\n\nbase = np.array([1.1, 0.9, 1.3, 1.0, 0.8])\nmu = np.linspace(-5, 15, 8001)\n\n\ndef post_mean(data, logpdf):\n    lp = np.array([logpdf(data - m).sum() for m in mu])\n    w = np.exp(lp - lp.max())\n    return w @ mu / w.sum()\n\n\nfor outlier in (2.0, 4.0, 9.0, 30.0):\n    data = np.r_[base, outlier]\n    normal = post_mean(data, lambda r: stats.norm.logpdf(r, scale=0.5))\n    student = post_mean(data, lambda r: stats.t.logpdf(r, df=3, scale=0.5))\n    print(f\"outlier {outlier:>4}: normal mean {normal:.3f}, Student-t mean {student:.3f}\")\n",
+        "output": "outlier  2.0: normal mean 1.183, Student-t mean 1.127\noutlier  4.0: normal mean 1.517, Student-t mean 1.080\noutlier  9.0: normal mean 2.350, Student-t mean 1.042\noutlier 30.0: normal mean 5.850, Student-t mean 1.025\n",
+        "interpretation": "Five observations near 1.0 are joined by one outlier that moves from 2 to 30. Under a normal likelihood with scale 0.5 and a flat prior, the posterior mean is the sample mean, so it follows the outlier linearly: 1.183, 1.517, 2.350 and finally 5.850, a long way from every good observation. The Student-t posterior with 3 degrees of freedom behaves in the opposite way. Its mean is 1.127 when the outlier is at 2 and then falls back toward the bulk, reaching 1.025 when the outlier is at 30. The t density's log penalty grows only logarithmically in the residual, so beyond a few scale units an observation stops pulling. The influence is said to redescend. That is robustness, not deletion: a point at 2 still has some influence, and if half the data sat near 9, the t model would locate the posterior between the two groups or become bimodal. The trajectory is a better diagnostic than any single fit."
+      }
+    ],
     "outcome": "Compare normal and Student-t likelihoods on data with one outlier and show how the tail penalty moves the posterior location.",
     "lab": "Fit both likelihoods to eight central points plus an outlier at 8, then compare posterior locations and each model's log-density penalty for the outlier.",
     "verification": "The Student-t posterior location is closer to zero than the normal one; the outlier costs -32.0 log units under the normal against -7.08 under a Student-t with 4 degrees of freedom.",
@@ -210,6 +377,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["count", "exposure", "negative binomial"],
+    "key_terms": {
+      "Exposure": "The observation opportunity, such as time or population at risk, over which events are counted.",
+      "Poisson rate": "The expected count per unit exposure; the Poisson mean is rate times exposure and equals the variance.",
+      "Overdispersion": "Variance larger than the Poisson mean, which can come from heterogeneity, dependence or misspecification.",
+      "Negative binomial": "A count distribution with conditional variance mu + mu^2/alpha, where alpha is a positive dispersion parameter."
+    },
+    "worked_examples": [
+      {
+        "title": "Negative binomial as a gamma mixture of Poissons",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import integrate, stats\n\nmu, phi = 3.0, 1.5\nnb = stats.nbinom(phi, phi / (phi + mu))\ngamma = stats.gamma(phi, scale=mu / phi)  # rate multiplier with mean mu\n\nfor k in range(4):\n    mix = integrate.quad(lambda lam: stats.poisson.pmf(k, lam) * gamma.pdf(lam), 0, np.inf)[0]\n    print(\n        f\"k={k}: NB pmf {nb.pmf(k):.5f}, integrated Poisson-gamma {mix:.5f}, Poisson {stats.poisson.pmf(k, mu):.5f}\"\n    )\nprint(f\"variance: NB {nb.var():.2f} = mu + mu^2/phi = {mu + mu**2 / phi:.2f}; Poisson {mu:.2f}\")\n",
+        "output": "k=0: NB pmf 0.19245, integrated Poisson-gamma 0.19245, Poisson 0.04979\nk=1: NB pmf 0.19245, integrated Poisson-gamma 0.19245, Poisson 0.14936\nk=2: NB pmf 0.16038, integrated Poisson-gamma 0.16038, Poisson 0.22404\nk=3: NB pmf 0.12474, integrated Poisson-gamma 0.12474, Poisson 0.22404\nvariance: NB 9.00 = mu + mu^2/phi = 9.00; Poisson 3.00\n",
+        "interpretation": "Integrating a Poisson pmf against a gamma distribution for its rate, with mean 3 and shape 1.5, reproduces the negative binomial pmf to five decimals at every count checked. The negative binomial is therefore not an ad hoc fix for overdispersion; it is the predictive distribution of a Poisson whose rate varies across units according to a gamma law. That variation shows in the numbers. The negative binomial assigns 0.19245 to zero counts, almost four times the Poisson's 0.04979 at the same mean, and its variance is \\(3+9/1.5=9\\), three times the Poisson's 3. If observed counts had many zeros and a long right tail, the Poisson would place too little mass on both, and replicated data from a fitted Poisson model would show it immediately. As \\(\\phi\\) grows the gamma concentrates at its mean and the two pmfs converge, so \\(\\phi\\) measures how much extra-Poisson variation the data demand."
+      }
+    ],
     "outcome": "Fit Poisson and negative-binomial count models, compare predictive dispersion with the observed counts and separate an event rate from its exposure.",
     "lab": "Compare predictive means and variances of both models with the observed counts, then check that rate times exposure determines the Poisson mass.",
     "verification": "Observed mean 4.5 and variance 34.1; the negative-binomial predictive variance exceeds the Poisson one, and rate 2 over exposure 3 gives the same log mass for 4 events as rate 4 over exposure 1.5.",
@@ -230,6 +412,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["geometry", "identification", "correlated predictors"],
+    "key_terms": {
+      "Posterior geometry": "The joint shape of the posterior, including correlations that marginal summaries can hide.",
+      "Weak identification": "Little information about a direction in parameter space, such as the difference between two nearly identical slopes.",
+      "Well-determined contrast": "A combination, such as the sum of collinear slopes, that the design measures precisely despite weak individual coefficients.",
+      "Posterior correlation": "Dependence between coefficients in the posterior that can make numerical exploration inefficient."
+    },
+    "worked_examples": [
+      {
+        "title": "Posterior variances of coefficients and contrasts as correlation grows",
+        "language": "python",
+        "code": "import numpy as np\n\nn, sigma = 50, 1.0\nfor r in (0.0, 0.9, 0.99):\n    XtX = n * np.array([[1.0, r], [r, 1.0]])  # standardized predictors, flat prior\n    V = sigma**2 * np.linalg.inv(XtX)\n    sd_b1 = np.sqrt(V[0, 0])\n    sd_sum = np.sqrt(np.array([1, 1]) @ V @ np.array([1, 1]))\n    sd_diff = np.sqrt(np.array([1, -1]) @ V @ np.array([1, -1]))\n    corr = V[0, 1] / V[0, 0]\n    print(\n        f\"r={r}: sd(b1) {sd_b1:.4f}, sd(b1+b2) {sd_sum:.4f}, sd(b1-b2) {sd_diff:.4f}, corr(b1,b2) {corr:.2f}\"\n    )\n",
+        "output": "r=0.0: sd(b1) 0.1414, sd(b1+b2) 0.2000, sd(b1-b2) 0.2000, corr(b1,b2) 0.00\nr=0.9: sd(b1) 0.3244, sd(b1+b2) 0.1451, sd(b1-b2) 0.6325, corr(b1,b2) -0.90\nr=0.99: sd(b1) 1.0025, sd(b1+b2) 0.1418, sd(b1-b2) 2.0000, corr(b1,b2) -0.99\n",
+        "interpretation": "With 50 standardized observations and uncorrelated predictors, each coefficient has posterior standard deviation 0.1414 and both the sum and the difference have 0.2000. As the correlation between predictors rises to 0.99, the individual standard deviations climb to 1.0025, seven times larger, and the posterior correlation of the two coefficients becomes \\(-0.99\\). The difference \\(b_1-b_2\\) is ten times less certain at 2.0000, while the sum's standard deviation actually falls slightly, to 0.1418. The formulas explain the asymmetry: \\(\\mathrm{Var}(b_1+b_2)=2\\sigma^2/(n(1+r))\\) shrinks as \\(r\\) grows, while \\(\\mathrm{Var}(b_1-b_2)=2\\sigma^2/(n(1-r))\\) explodes as \\(1-r\\) goes to zero. The data know very well how much the two predictors together contribute and almost nothing about how to divide it. Reporting the coefficients separately with wide intervals is honest; reporting either as a stable effect would not be. A sampler sees this as a narrow diagonal ridge."
+      }
+    ],
     "outcome": "Derive the exact normal posterior for nearly collinear predictors, compare PyMC coefficient means with it and show that a coefficient sum is far better determined than either coefficient.",
     "lab": "Compute the analytic posterior, fit the same model in PyMC and compare individual coefficient uncertainty with the uncertainty of their sum.",
     "verification": "Sampled coefficient means lie within 0.5 of the analytic posterior; the coefficient correlation is about -0.997 and the posterior SD of the sum (0.037) is far below the individual SDs (about 0.48).",
@@ -250,6 +447,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["LOO", "Pareto k", "evaluation unit"],
+    "key_terms": {
+      "Leave-one-out evaluation": "Scoring each held-out unit by its predictive density under a posterior fitted without that unit.",
+      "ELPD": "The expected log predictive density for new data under a stated evaluation scheme, which LOO estimates and larger values favor.",
+      "PSIS": "Pareto-smoothed importance sampling, which approximates LOO from one full-data posterior instead of refitting.",
+      "Pareto k": "The estimated tail shape of the importance weights; large values flag an unreliable approximation for that unit.",
+      "Evaluation unit": "What is held out, such as a row, user, cluster or time block, which defines the prediction question."
+    },
+    "worked_examples": [
+      {
+        "title": "Raw importance LOO for an ordinary point and an outlier",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\n\nrng = np.random.default_rng(14)\ny = np.array([-0.4, 0.3, 0.1, -0.2, 0.6, 0.0, -0.5, 0.2, 0.4, 8.0])\nn, S = len(y), 4000\ndraws = rng.normal(y.mean(), np.sqrt(1 / n), S)  # exact posterior, flat prior, sigma = 1\n\nfor i in (1, 9):\n    lik = stats.norm.pdf(y[i], draws, 1)\n    w = 1 / lik\n    is_loo = np.log(1 / np.mean(w))\n    rest = np.delete(y, i)\n    exact = stats.norm.logpdf(y[i], rest.mean(), np.sqrt(1 + 1 / (n - 1)))\n    tail = np.sort(w)[-S // 5 :]\n    k_hat = stats.genpareto.fit(tail - tail.min(), floc=0)[0]\n    print(\n        f\"y={y[i]:>4}: IS-LOO {is_loo:.3f}, exact {exact:.3f}, max weight share {w.max() / w.sum():.3f}, tail k {k_hat:.2f}\"\n    )\n",
+        "output": "y= 0.3: IS-LOO -1.141, exact -1.140, max weight share 0.001, tail k 0.09\ny= 8.0: IS-LOO -29.149, exact -29.373, max weight share 0.072, tail k 0.98\n",
+        "interpretation": "For an ordinary observation, 0.3, raw importance sampling with weights \\(1/p(y_i\\mid\\theta^{(s)})\\) recovers the leave-one-out log density, \\(-1.141\\) against an exact \\(-1.140\\). No draw holds more than 0.001 of the weight, and the fitted Pareto tail shape is 0.09. The outlier at 8.0 tells a different story. Removing it moves the posterior noticeably, so the full-data draws rarely visit the region that would predict it well; the largest single weight carries 0.072 of the total, and the tail shape estimate is 0.98, far above the 0.7 level at which PSIS warns that the estimate is unreliable. The point estimate is off by 0.22 nats, \\(-29.149\\) versus the exact \\(-29.373\\), and with an infinite-variance weight distribution it could have been much further off on another seed. The tail shape is therefore a property of the observation and the model together. It says where exact refitting is needed, here for one point out of ten."
+      }
+    ],
     "outcome": "Estimate leave-one-out predictive accuracy with PSIS, compare it with exact refitting and interpret Pareto k against the ArviZ sample-size cutoff.",
     "lab": "Compare PSIS-LOO with exact conjugate refits for a constant and a linear model, then change the predictive unit from single to paired observations.",
     "verification": "Exact LOO favors the linear model, each PSIS error is reported against the exact value, pareto_k_max is compared with the 0.58 cutoff for 240 draws, and the joint two-observation log prediction differs from the product of marginals.",
@@ -275,6 +488,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Bayes action", "predictive uncertainty", "Monte Carlo"],
+    "key_terms": {
+      "Gamma-Poisson posterior": "The conjugate update in which a Gamma(2, 1) prior and five counts summing to 16 give Gamma(18, 6).",
+      "Negative-binomial predictive": "The distribution of future demand obtained by integrating the Poisson likelihood over the gamma posterior.",
+      "Monte Carlo error": "Approximation error from finite sampling that can change the selected action when expected costs are close.",
+      "Decision oracle": "The exact predictive distribution used to verify the optimal quantity instead of trusting a short simulation."
+    },
+    "worked_examples": [
+      {
+        "title": "How flat the expected cost is around the optimal order",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\n\na, b = 2 + 41, 0.1 + 4  # Gamma posterior for a Poisson demand rate\npred = stats.nbinom(a, b / (b + 1))  # posterior predictive demand for one period\nunder, over = 5.0, 1.0\nd = np.arange(0, 60)\npmf = pred.pmf(d)\n\n\ndef cost(q):\n    return pmf @ (under * np.maximum(d - q, 0) + over * np.maximum(q - d, 0))\n\n\nq_star = int(pred.ppf(under / (under + over)))\nprint(f\"predictive mean {pred.mean():.2f}, sd {pred.std():.2f}, optimal order {q_star}\")\nfor q in range(q_star - 3, q_star + 4):\n    print(f\"q={q}: expected cost {cost(q):.4f}, excess {cost(q) - cost(q_star):.4f}\")\n",
+        "output": "predictive mean 10.49, sd 3.61, optimal order 14\nq=11: expected cost 7.7210, excess 2.0012\nq=12: expected cost 6.5275, excess 0.8076\nq=13: expected cost 5.8921, excess 0.1723\nq=14: expected cost 5.7198, excess 0.0000\nq=15: expected cost 5.9108, excess 0.1909\nq=16: expected cost 6.3723, excess 0.6525\nq=17: expected cost 7.0262, excess 1.3063\n",
+        "interpretation": "The gamma posterior for the demand rate gives a negative binomial predictive with mean 10.49 and standard deviation 3.61. With shortage cost 5 and overage cost 1, the critical fractile is \\(5/6=0.833\\), and the predictive quantile is 14, about three and a half units above the mean. The cost table shows how much precision that answer needs. Moving one unit either way costs only 0.17 or 0.19 per period, about 3 percent of the optimum 5.72. Moving three units costs between 1.3 and 2.0. The curve is flat near the optimum and asymmetric farther out, because running short is five times as expensive as overstocking: ordering 11 costs more extra than ordering 17. This flatness decides how much simulation effort is worthwhile. A Monte Carlo approximation that sometimes picks 13 or 15 loses less than 0.2 per period, so a modest number of predictive draws is usually enough, whereas an error that lands on 11 deserves attention. The Monte Carlo standard error should be judged on the cost scale, not on the quantity scale."
+      }
+    ],
     "outcome": "Choose an order quantity from a posterior predictive cost, compare a short-chain simulation decision with the exact oracle and report its Monte Carlo regret.",
     "lab": "Optimize the exact negative-binomial predictive cost, then repeat the decision from sampled rates and simulated demand.",
     "verification": "The analytic posterior rate is 3.0 and the exact cost-minimizing quantity is 4 (expected cost 2.866); the simulated choice is within one unit and its regret and maximum cost error are reported.",
@@ -295,6 +523,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Gaussian process", "kernel", "total variance"],
+    "key_terms": {
+      "Gaussian process": "A prior over functions defined by a mean function and a covariance kernel for any finite set of inputs.",
+      "Exponentiated-quadratic kernel": "A covariance that decays with squared distance between inputs at a rate set by the length scale.",
+      "Conditional predictive variance": "Uncertainty about latent function values given fixed hyperparameters, computed with linear algebra.",
+      "Law of total variance": "Total variance equals the average conditional variance plus the variance of conditional means across hyperparameters."
+    },
+    "worked_examples": [
+      {
+        "title": "GP predictive sd in a data gap and far from the data",
+        "language": "python",
+        "code": "import numpy as np\n\nx = np.array([0.0, 1.0, 2.0, 6.0, 7.0])\nnoise = 0.1\n\n\ndef predictive_sd(x_new, ell, amp=1.0):\n    k = lambda a, b: amp**2 * np.exp(-0.5 * (a[:, None] - b[None, :]) ** 2 / ell**2)\n    K = k(x, x) + noise**2 * np.eye(len(x))\n    ks = k(np.atleast_1d(x_new), x)\n    return np.sqrt(amp**2 - ks @ np.linalg.solve(K, ks.T))[0, 0]\n\n\nfor ell in (0.5, 1.0, 2.0):\n    sds = [predictive_sd(v, ell) for v in (1.0, 4.0, 20.0)]\n    print(f\"lengthscale {ell}: sd at x=1 {sds[0]:.3f}, gap x=4 {sds[1]:.3f}, far x=20 {sds[2]:.3f}\")\n",
+        "output": "lengthscale 0.5: sd at x=1 0.099, gap x=4 1.000, far x=20 1.000\nlengthscale 1.0: sd at x=1 0.099, gap x=4 0.973, far x=20 1.000\nlengthscale 2.0: sd at x=1 0.088, gap x=4 0.373, far x=20 1.000\n",
+        "interpretation": "Five inputs sit at 0, 1, 2, 6 and 7, leaving a gap around 4. At an observed input such as 1, the predictive standard deviation of the latent function is about 0.09 to 0.1 regardless of lengthscale, close to the noise level 0.1. In the gap the lengthscale decides everything. With \\(\\ell=0.5\\) the nearest data are four lengthscales away and the standard deviation returns to the prior amplitude, 1.000. With \\(\\ell=1\\) it is 0.973, and with \\(\\ell=2\\) it falls to 0.373, because a smooth function is strongly constrained by points two units away on each side. Far from all data, at 20, every lengthscale returns to 1.000: the Gaussian process reverts to its prior, and its mean reverts to zero. A conditional analysis at one fixed lengthscale therefore reports a single gap uncertainty that could be 0.37 or 1.0. Integrating over a posterior for \\(\\ell\\) mixes those answers and widens the gap interval accordingly."
+      }
+    ],
     "outcome": "Match PyMC Gaussian-process predictions with a direct covariance calculation and show how integrating over hyperparameters adds between-component variance.",
     "lab": "Compare the PyMC conditional GP mean and covariance with closed-form kernel algebra, then mix two hyperparameter settings.",
     "verification": "PyMC predictions match the direct calculation within 1e-6, and mixing components with means 0 and 2 and variance 0.1 gives total variance 1.1 rather than the conditional 0.1.",
@@ -315,6 +558,21 @@
     "language": "stan",
     "suffix": ".stan",
     "concepts": ["Stan blocks", "normal-normal", "generated quantities"],
+    "key_terms": {
+      "Stan program": "A declaration of a log density over unknowns, compiled by CmdStan into an executable for inference.",
+      "Transformed data block": "A block for constants computed once before sampling, used here because the pad has no separate data input.",
+      "Model block": "The block that adds prior and likelihood terms to the target log density.",
+      "Generated quantities block": "A block evaluated after each draw for predictions, log likelihoods and derived values that do not affect sampling."
+    },
+    "worked_examples": [
+      {
+        "title": "Conjugate oracle, Monte Carlo error and a constant row",
+        "language": "python",
+        "code": "import numpy as np\n\ny = np.array([4.1, 5.3, 3.8, 4.9, 5.6, 4.4])\nsigma, m0, s0 = 1.0, 0.0, 10.0  # matches normal(0, 10) prior, known sigma\nprec = 1 / s0**2 + len(y) / sigma**2\npost_mean = (m0 / s0**2 + y.sum() / sigma**2) / prec\npost_sd = np.sqrt(1 / prec)\nprint(f\"posterior mean {post_mean:.4f}, sd {post_sd:.4f}\")\nfor ess in (100, 400, 1600):\n    print(f\"bulk ESS {ess:>4}: MCSE of mean {post_sd / np.sqrt(ess):.4f}\")\n\nn_obs = np.full((4, 1000), 6.0)  # a transformed-data value copied into every draw\nW = n_obs.var(axis=1, ddof=1).mean()\nwith np.errstate(invalid=\"ignore\", divide=\"ignore\"):\n    print(\"within-chain variance\", W, \"R-hat ratio\", np.sqrt((W + 0.0) / W))\n",
+        "output": "posterior mean 4.6755, sd 0.4079\nbulk ESS  100: MCSE of mean 0.0408\nbulk ESS  400: MCSE of mean 0.0204\nbulk ESS 1600: MCSE of mean 0.0102\nwithin-chain variance 0.0 R-hat ratio nan\n",
+        "interpretation": "This check copies the structure of the unit's Stan program, a normal prior on the mean and a normal likelihood with known scale 1, with a wider normal(0, 10) prior and its own six observations, so the sampled mean has a closed-form target. The six observations summing to 28.1 give precision \\(0.01+6=6.01\\), posterior mean \\(28.1/6.01=4.6755\\) and standard deviation 0.4079. That reference turns diagnostics into checkable claims. With a bulk effective sample size of 400 the Monte Carlo standard error is \\(0.4079/20=0.0204\\), so a reported mean between roughly 4.63 and 4.72 is consistent with the oracle and 4.80 would not be. Quadrupling ESS only halves that error. The last line explains rows in the Stan summary that look broken. A value set in transformed data, like the number of observations, is identical in every draw; its within-chain variance is 0.0, and the R-hat ratio becomes \\(0/0\\), printed as nan. That row is not a convergence failure. It is a constant, and the summary simply has no variability to measure."
+      }
+    ],
     "outcome": "Read the blocks of a Stan program, connect its sampled mean to the conjugate normal posterior and interpret constant versus sampled diagnostic rows.",
     "lab": "Compile and sample the normal-mean model, compare mu with the generated analytic posterior and read the summary rows for constants and for mu.",
     "verification": "posterior_mean 1.905 and posterior_variance 0.190 are constant generated quantities to compare with the sampled mu; mu's R_hat, ESS_bulk and ESS_tail are read against 1.01 and 100 per chain.",
@@ -333,6 +591,21 @@
     "language": "stan",
     "suffix": ".stan",
     "concepts": ["matrix", "type", "posterior prediction"],
+    "key_terms": {
+      "Stan container types": "The distinct scalar, vector, row_vector, matrix and array types that let the compiler reject malformed calculations.",
+      "Design matrix": "The N by K matrix X of predictors, here an intercept column and a covariate column.",
+      "Linear predictor": "The mean vector mu = X beta, whose shape must match the number of observations.",
+      "New mean versus new outcome": "The difference between predicting mu at a new x and predicting an observation that also includes noise."
+    },
+    "worked_examples": [
+      {
+        "title": "Shape contract and two interval widths at a new design row",
+        "language": "python",
+        "code": "import numpy as np\n\nX = np.array([[1, 0.0], [1, 1.0], [1, 2.0], [1, 3.0], [1, 4.0]])\ny = np.array([1.2, 2.1, 2.8, 4.2, 4.9])\nsigma = 0.3  # treat the noise scale as known\nV = sigma**2 * np.linalg.inv(X.T @ X)\nbeta = np.linalg.solve(X.T @ X, X.T @ y)\nprint(\"X\", X.shape, \"beta\", beta.shape, \"X @ beta\", (X @ beta).shape)\nfor x0 in (np.array([1, 2.0]), np.array([1, 8.0])):\n    sd_mean = np.sqrt(x0 @ V @ x0)\n    sd_new = np.sqrt(sd_mean**2 + sigma**2)\n    print(\n        f\"x={x0[1]}: mean {x0 @ beta:.3f}, sd of mean {sd_mean:.3f}, sd of new outcome {sd_new:.3f}\"\n    )\n",
+        "output": "X (5, 2) beta (2,) X @ beta (5,)\nx=2.0: mean 3.040, sd of mean 0.134, sd of new outcome 0.329\nx=8.0: mean 8.740, sd of mean 0.585, sd of new outcome 0.657\n",
+        "interpretation": "The shapes line restates the Stan type contract in NumPy: a matrix with 5 rows and 2 columns times a vector of length 2 returns a vector of length 5, one linear predictor per observation. Declaring those dimensions in Stan makes a mismatch a compile or data error instead of silent broadcasting. With the noise scale held at 0.3, the coefficients have a normal posterior, and two different predictive questions follow. At \\(x=2\\), the center of the design, the mean line is known to within a standard deviation of 0.134, but a new outcome there has standard deviation \\(\\sqrt{0.134^2+0.3^2}=0.329\\), dominated by observation noise. At \\(x=8\\), four units beyond the last observed input, as far again as the data's own range, uncertainty about the line grows to 0.585 and the new-outcome standard deviation to 0.657; extrapolation has made parameter uncertainty the larger part. A Stan generated quantities block that draws normal_rng(mu, sigma) answers the second question, while reporting mu alone answers the first."
+      }
+    ],
     "outcome": "Write a Stan regression with a typed design matrix, follow one observation through the linear predictor and distinguish a new mean from a new outcome.",
     "lab": "Trace one observation through X * beta and the likelihood, then compare the generated new_mean with new_outcome at x = 0.5.",
     "verification": "X has an intercept column and centered x values from -2 to 2, log_lik has one entry per observation, and new_outcome is more dispersed than new_mean because it adds sigma.",
@@ -350,6 +623,21 @@
     "language": "stan",
     "suffix": ".stan",
     "concepts": ["constraint", "Jacobian", "Poisson"],
+    "key_terms": {
+      "Declared constraint": "A bound such as lower=0 that Stan maps to an unconstrained scale while adding the Jacobian automatically.",
+      "Manual transformation": "A parameter written on its own unconstrained scale, such as z with rate exp(z), whose density needs a user-supplied Jacobian.",
+      "Log Jacobian term": "The added log absolute derivative, here z for rate exp(z), that keeps the intended measure on the rate.",
+      "Gamma-Poisson oracle": "The exact Gamma(8, 6) posterior used to confirm that both parameterizations target the same distribution."
+    },
+    "worked_examples": [
+      {
+        "title": "Sampling a log rate with and without the Jacobian term",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\n\ncounts = np.array([3, 5, 2, 2])  # Gamma(2, 1) prior on a Poisson rate\nu = np.linspace(-3, 3, 60001)  # u = log(rate)\nlam = np.exp(u)\nlog_lik = counts.sum() * u - len(counts) * lam\nfor label, jac in ((\"with + u\", u), (\"without\", 0.0)):\n    lp = stats.gamma.logpdf(lam, 2, scale=1) + log_lik + jac\n    w = np.exp(lp - lp.max())\n    w /= w.sum()\n    print(f\"{label:9s}: posterior mean of rate {w @ lam:.4f}\")\nprint(f\"exact Gamma(14, 5) mean {14 / 5:.4f}; Gamma(13, 5) mean {13 / 5:.4f}\")\n",
+        "output": "with + u : posterior mean of rate 2.8000\nwithout  : posterior mean of rate 2.6000\nexact Gamma(14, 5) mean 2.8000; Gamma(13, 5) mean 2.6000\n",
+        "interpretation": "The counts 3, 5, 2 and 2 sum to 12 over four periods. With a Gamma(2, 1) prior on the rate the exact posterior is Gamma(14, 5), mean 2.8. The grid works on \\(u=\\log\\lambda\\), as a manual Stan parameterization would. Adding the log Jacobian \\(\\log|d\\lambda/du|=u\\) reproduces 2.8000 exactly. Dropping it targets a different distribution: the gamma prior evaluated at \\(e^u\\) without the Jacobian corresponds on the rate scale to a density proportional to \\(\\lambda^{2-1}e^{-\\lambda}/\\lambda\\), which is Gamma(1, 1), so the posterior becomes Gamma(13, 5) with mean 2.6000. The error is exactly one unit of prior shape, about 7 percent of the mean, and it would not disappear as the program ran longer. Stan's parser warns about a possible missing Jacobian only in some patterns, such as a nonlinear transform on the left of a sampling statement, so this program would run silently. When the constraint is declared as a lower bound of zero instead, Stan adds this term automatically, which is the safer default."
+      }
+    ],
     "outcome": "Compare a declared positive Poisson rate with a manual log-rate parameterization and add the Jacobian that the manual transform needs.",
     "lab": "Sample lambda and z = log(lambda) in one program, then compare both with the exact gamma posterior.",
     "verification": "Both lambda and lambda_from_z should agree with the exact posterior mean 1.333 and variance 0.222 from generated quantities; removing the + z Jacobian term would shift lambda_from_z.",
@@ -370,6 +658,21 @@
     "language": "stan",
     "suffix": ".stan",
     "concepts": ["partial pooling", "noncentered", "new group"],
+    "key_terms": {
+      "Between-group scale": "The parameter tau describing how much group means vary around the population mean mu.",
+      "Partial pooling": "Combining each group's own data with the population distribution, so small groups borrow more strength.",
+      "Noncentered representation": "theta_j = mu + tau z_j with z_j standard normal, which often helps weakly informed groups.",
+      "New-group prediction": "A draw of a new group mean from Normal(mu, tau), plus observation noise when predicting a new observation."
+    },
+    "worked_examples": [
+      {
+        "title": "Predictive sd for an existing group by sample size and for a new group",
+        "language": "python",
+        "code": "import numpy as np\n\nmu, tau, sigma = 10.0, 2.0, 4.0  # hyperparameters held fixed for clarity\nybar = 14.0\nfor n_j in (1, 5, 50):\n    prec = 1 / tau**2 + n_j / sigma**2\n    mean = (mu / tau**2 + n_j * ybar / sigma**2) / prec\n    sd_theta = np.sqrt(1 / prec)\n    print(\n        f\"existing group, n={n_j:>2}: theta mean {mean:.3f}, sd {sd_theta:.3f}, new-observation sd {np.sqrt(sd_theta**2 + sigma**2):.3f}\"\n    )\nprint(\n    f\"new group: theta mean {mu:.3f}, sd {tau:.3f}, new-observation sd {np.sqrt(tau**2 + sigma**2):.3f}\"\n)\n",
+        "output": "existing group, n= 1: theta mean 10.800, sd 1.789, new-observation sd 4.382\nexisting group, n= 5: theta mean 12.222, sd 1.333, new-observation sd 4.216\nexisting group, n=50: theta mean 13.704, sd 0.544, new-observation sd 4.037\nnew group: theta mean 10.000, sd 2.000, new-observation sd 4.472\n",
+        "interpretation": "Holding the hyperparameters at \\(\\mu=10\\), \\(\\tau=2\\) and \\(\\sigma=4\\) isolates how group size shapes prediction. An existing group whose observed mean is 14 is pulled toward 10 in proportion to how little it has seen. With one observation its effect is estimated at 10.800 with standard deviation 1.789; with five it is 12.222 and 1.333; with fifty it reaches 13.704 and 0.544. Predicting a new observation from that group adds the within-group noise, so the standard deviation runs from 4.382 down to 4.037 and can never fall below \\(\\sigma=4\\). A brand-new group has no data of its own. Its effect is drawn from the population distribution with mean 10 and standard deviation 2, and its next observation has standard deviation \\(\\sqrt{4+16}=4.472\\). The gap between 4.472 and 4.037 is the value of fifty observations from that group. In Stan, the existing-group prediction indexes theta[j], while the new-group prediction must first draw a new effect with normal_rng(mu, tau)."
+      }
+    ],
     "outcome": "Write a noncentered Stan hierarchy with typed group indices and distinguish predictions for an existing group from predictions for a new group.",
     "lab": "Sample the three-group model, then compare known_group_outcome for group 1 with new_group_mean drawn from the population distribution.",
     "verification": "theta equals mu + tau * z in every draw, draws of new_group_mean are more dispersed than draws of theta[1], and tau, mu and theta are read against the diagnostic screen.",
@@ -390,6 +693,21 @@
     "language": "stan",
     "suffix": ".stan",
     "concepts": ["Bernoulli logit", "separation", "prior"],
+    "key_terms": {
+      "Linear predictor": "The log-odds eta_i = alpha + beta x_i, whose inverse logit gives the success probability.",
+      "Bernoulli-logit likelihood": "A Bernoulli density written on the logit scale so the log likelihood is computed stably from eta.",
+      "Complete separation": "Outcomes perfectly split by a covariate, letting the unpenalized likelihood improve as the coefficient grows without bound.",
+      "Prior predictive check": "Simulating outcomes from the priors to review whether coefficient scales are plausible in the units of x."
+    },
+    "worked_examples": [
+      {
+        "title": "Separated data: likelihood climbs forever, the prior stops it",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import optimize\n\nx = np.array([-2.0, -1.0, 1.0, 2.0])\ny = np.array([0, 0, 1, 1])\n\n\ndef loglik(b):\n    eta = b * x\n    return np.sum(y * eta - np.logaddexp(0, eta))\n\n\nfor b in (1, 5, 10, 20):\n    print(f\"beta {b:>2}: log likelihood {loglik(b):.6f}\")\nfor scale in (2.5, 10.0):\n    res = optimize.minimize_scalar(lambda b: -(loglik(b) - 0.5 * (b / scale) ** 2))\n    p = 1 / (1 + np.exp(-res.x))\n    print(f\"normal(0, {scale}) prior: posterior mode {res.x:.3f}, P(y=1 | x=1) {p:.3f}\")\n",
+        "output": "beta  1: log likelihood -0.880379\nbeta  5: log likelihood -0.013521\nbeta 10: log likelihood -0.000091\nbeta 20: log likelihood -0.000000\nnormal(0, 2.5) prior: posterior mode 1.981, P(y=1 | x=1) 0.879\nnormal(0, 10.0) prior: posterior mode 3.945, P(y=1 | x=1) 0.981\n",
+        "interpretation": "The four observations are perfectly separated: every negative \\(x\\) has \\(y=0\\) and every positive \\(x\\) has \\(y=1\\). The log likelihood therefore keeps rising as the slope grows, from \\(-0.880\\) at \\(\\beta=1\\) to \\(-0.0135\\) at 5, \\(-0.00009\\) at 10 and effectively 0 at 20. Its supremum, zero, is never reached by any finite slope, so maximum likelihood has no answer and a sampler with a flat prior would drift toward infinity. Adding a normal(0, 2.5) prior gives the log posterior a finite maximum at \\(\\beta=1.981\\), where the extra likelihood gained by steepening no longer pays for the prior penalty. The fitted probability at \\(x=1\\) is then 0.879. A wider normal(0, 10) prior lets the mode move to 3.945 and the probability to 0.981. With separated data the answer depends visibly on the prior because the likelihood carries no information about the slope's upper end. Reporting that dependence, rather than one fitted number, is the honest summary. A larger sample with some overlap would make both priors agree."
+      }
+    ],
     "outcome": "Fit a Stan Bernoulli-logit model, follow likelihood, fitted probabilities and replicated outcomes, and explain why priors keep coefficients finite under complete separation.",
     "lab": "Sample alpha and beta for the eight-point fixture, read probability, y_rep and probability_at_zero, then reason through a completely separated variant.",
     "verification": "Fitted probabilities rise with x, probability_at_zero equals inv_logit(alpha) in every draw, y_rep holds one binary draw per observation, and beta is read against the diagnostic screen.",
@@ -410,6 +728,22 @@
     "language": "stan",
     "suffix": ".stan",
     "concepts": ["mixture", "log_mix", "label switching"],
+    "key_terms": {
+      "Finite mixture": "A model in which each observation comes from one of several component distributions with mixing weights.",
+      "Marginalization": "Summing over the unobserved component label so the target density stays continuous and differentiable.",
+      "log_mix": "The Stan function that computes the log of a weighted sum of component densities stably from log terms.",
+      "Responsibility": "The posterior probability that an observation belongs to a component, given one parameter draw.",
+      "Label switching": "The symmetry that lets component labels permute across draws unless an ordering or anchored prior sets a convention."
+    },
+    "worked_examples": [
+      {
+        "title": "log_mix stability and label-swap invariance",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy.special import logsumexp\nfrom scipy import stats\n\nnp.set_printoptions(suppress=True)\n\n\ndef log_mix(w, mu1, mu2, y):\n    return logsumexp(\n        [np.log(w) + stats.norm.logpdf(y, mu1, 1), np.log1p(-w) + stats.norm.logpdf(y, mu2, 1)],\n        axis=0,\n    )\n\n\ny = np.array([-1.0, 0.2, 3.9, 60.0])\nwith np.errstate(divide=\"ignore\"):\n    naive = np.log(0.3 * stats.norm.pdf(y, 0, 1) + 0.7 * stats.norm.pdf(y, 4, 1))\nprint(\"naive log density:\", naive.round(3))\nprint(\"log_mix          :\", log_mix(0.3, 0.0, 4.0, y).round(3))\na = log_mix(0.3, 0.0, 4.0, y[:3]).sum()\nb = log_mix(0.7, 4.0, 0.0, y[:3]).sum()\nprint(f\"total log likelihood {a:.4f}; with labels swapped {b:.4f}\")\n",
+        "output": "naive log density: [-2.623 -2.141 -1.28    -inf]\nlog_mix          : [   -2.623    -2.141    -1.28  -1569.276]\ntotal log likelihood -6.0445; with labels swapped -6.0445\n",
+        "interpretation": "For ordinary observations the two lines agree: \\(-2.623\\), \\(-2.141\\) and \\(-1.280\\). At 60 the direct formula exponentiates densities near \\(e^{-1568}\\), both components underflow to zero, and the log of their sum is \\(-\\infty\\). One such point would make the whole log likelihood \\(-\\infty\\) and stop a sampler. log_mix computes the same quantity as a log-sum-exp of the weighted component log densities and returns the finite value \\(-1569.276\\), which correctly says that the point is almost impossible under this mixture without saying it is impossible. The last line shows the label problem. Swapping the component means and replacing the weight 0.3 by 0.7 gives an identical log likelihood, \\(-6.0445\\), so the posterior has two mirror-image modes. If half the chains land in each mode, pooled draws would give means near 2 for both components. Declaring the means as an ordered vector in Stan removes one mirror image without changing any fitted density."
+      }
+    ],
     "outcome": "Fit a marginalized two-component normal mixture in Stan with log_mix, fix the label convention with ordered means and compute observation responsibilities.",
     "lab": "Sample the ordered mixture, then compute each observation's responsibility for the first component and replicate observations.",
     "verification": "mu[1] is below mu[2] by construction, the five negative observations have first-component responsibility near 1 and the five positive ones near 0, and log_lik uses log_mix for every observation.",
@@ -430,6 +764,21 @@
     "language": "stan",
     "suffix": ".stan",
     "concepts": ["AR1", "stationarity", "forecast"],
+    "key_terms": {
+      "AR(1) process": "A model in which y_t = mu + phi(y_(t-1) - mu) plus normal innovation noise.",
+      "Stationarity": "A constant marginal distribution over time, which for AR(1) requires the absolute value of phi to be less than one.",
+      "Innovation scale": "The standard deviation sigma of each new shock, distinct from the stationary standard deviation sigma/sqrt(1 - phi^2).",
+      "Multi-step forecast": "A prediction h steps ahead with conditional mean mu + phi^h(y_N - mu) and variance that accumulates future innovations."
+    },
+    "worked_examples": [
+      {
+        "title": "Closed-form AR(1) forecast variance by horizon",
+        "language": "python",
+        "code": "import numpy as np\n\nphi, sigma, y_T = 0.8, 1.0, 3.0\nstationary = sigma**2 / (1 - phi**2)\nprint(f\"stationary variance of y_1: {stationary:.4f}\")\nfor h in range(1, 6):\n    mean = phi**h * y_T\n    var = sigma**2 * (1 - phi ** (2 * h)) / (1 - phi**2)\n    print(f\"h={h}: conditional mean {mean:.3f}, innovation variance {var:.4f}\")\n\nrng = np.random.default_rng(23)\nsims = np.full(200000, y_T)\nfor _ in range(3):\n    sims = phi * sims + rng.normal(0, sigma, sims.size)\nprint(f\"simulated h=3: mean {sims.mean():.3f}, variance {sims.var():.4f}\")\n",
+        "output": "stationary variance of y_1: 2.7778\nh=1: conditional mean 2.400, innovation variance 1.0000\nh=2: conditional mean 1.920, innovation variance 1.6400\nh=3: conditional mean 1.536, innovation variance 2.0496\nh=4: conditional mean 1.229, innovation variance 2.3117\nh=5: conditional mean 0.983, innovation variance 2.4795\nsimulated h=3: mean 1.537, variance 2.0437\n",
+        "interpretation": "With \\(\\phi=0.8\\) and unit innovations the stationary variance is \\(1/(1-0.64)=2.7778\\). That is the variance the model assigns to the first observation when the series is assumed to have been running long before data collection began, and including it is what the initial-state term in the Stan model does. Forecasting from a last value of 3.0, the conditional mean decays geometrically, \\(3\\times0.8^h\\): 2.400, 1.920, 1.536, 1.229 and 0.983. The innovation variance grows as \\((1-0.64^h)/(1-0.64)\\), from 1.0 at one step to 2.4795 at five, approaching the stationary 2.7778 from below. So the forecast forgets the last value and settles at the unconditional distribution. Simulating 200,000 three-step paths gives mean 1.537 and variance 2.0437, matching the closed form 1.536 and 2.0496 within Monte Carlo error. These numbers hold the parameters fixed. A Bayesian forecast also averages over posterior uncertainty in \\(\\phi\\), which widens long-horizon intervals further, especially when \\(\\phi\\) might be near 1."
+      }
+    ],
     "outcome": "Fit a stationary AR(1) model in Stan including the initial-state distribution and propagate parameter and innovation uncertainty to a three-step forecast.",
     "lab": "Sample mu, phi and sigma, then compare the generated one-step and three-step forecast means, variances and outcomes.",
     "verification": "phi stays inside (-1, 1), horizon_three_variance equals sigma^2 (1 + phi^2 + phi^4) in every draw, and three-step outcomes are more dispersed than one-step outcomes.",
@@ -447,6 +796,21 @@
     "language": "stan",
     "suffix": ".stan",
     "concepts": ["censoring", "left truncation", "Weibull AFT"],
+    "key_terms": {
+      "Weibull AFT model": "A Weibull event-time model whose scale exp(beta_0 + beta_1 x) lets a covariate stretch the time axis.",
+      "Right-censored contribution": "The survival probability beyond the last observed time, used instead of a density when no event was seen.",
+      "Left truncation": "Delayed entry handled by dividing each contribution by the survival probability at the entry time.",
+      "Hazard ratio": "The multiplicative change in hazard per unit of the covariate, which under this Weibull AFT model equals exp(-a beta_1), not exp(beta_1)."
+    },
+    "worked_examples": [
+      {
+        "title": "Weibull AFT contributions for event, censored and truncated records",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import integrate\n\nk, b0, b1 = 1.5, np.log(10.0), 0.4  # shape, log scale intercept, treatment shift\n\n\ndef log_f(t, x):\n    lam = np.exp(b0 + b1 * x)\n    return np.log(k / lam) + (k - 1) * np.log(t / lam) - (t / lam) ** k\n\n\ndef log_S(t, x):\n    return -((t / np.exp(b0 + b1 * x)) ** k)\n\n\nprint(f\"event at 6, control:       {log_f(6.0, 0):.4f}\")\nprint(f\"censored at 12, treated:   {log_S(12.0, 1):.4f}\")\nprint(f\"event at 9, entered at 4:  {log_f(9.0, 0) - log_S(4.0, 0):.4f}\")\nmass = integrate.quad(lambda t: np.exp(log_f(t, 0) - log_S(4.0, 0)), 4.0, np.inf)[0]\nprint(f\"truncated density integrates to {mass:.6f} over t > 4\")\nprint(f\"acceleration factor {np.exp(b1):.4f}, hazard ratio {np.exp(-k * b1):.4f}\")\n",
+        "output": "event at 6, control:       -2.6173\ncensored at 12, treated:   -0.7214\nevent at 9, entered at 4:  -2.5506\ntruncated density integrates to 1.000000 over t > 4\nacceleration factor 1.4918, hazard ratio 0.5488\n",
+        "interpretation": "Each record contributes a different piece of the Weibull model. A control event at time 6 adds the log density, \\(-2.6173\\). A treated subject still event-free at 12 adds only the log survival, \\(-0.7214\\), because all we know is that the event time exceeds 12. A control event at 9 for someone who entered observation at 4 adds the log density minus the log survival at entry, \\(-2.5506\\): people who failed before 4 could never have been enrolled, so the likelihood must condition on surviving to 4. The quadrature check confirms that this conditional density integrates to 1.000000 over times after 4. Omitting the truncation term would treat late entrants as if their early risk had been observed, making early survival look better than it is. The summary line converts the coefficient 0.4 into two scales. On the time scale treatment multiplies survival times by \\(e^{0.4}=1.4918\\); on the hazard scale the same Weibull model implies a hazard ratio of \\(1.4918^{-1.5}=0.5488\\)."
+      }
+    ],
     "outcome": "Write censored and left-truncated Weibull AFT likelihood contributions in Stan and report the acceleration factor, hazard ratio, control median and survival at time six.",
     "lab": "Sample the eight-subject censored survival model, then derive the AFT and hazard interpretations of the covariate coefficient.",
     "verification": "acceleration_factor equals exp(beta[2]) and hazard_ratio equals exp(-shape * beta[2]) in every draw; censored rows contribute survival terms and delayed entries condition on survival to entry.",

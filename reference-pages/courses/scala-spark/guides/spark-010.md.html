@@ -246,27 +246,27 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-establish-a-pure-strict-result">Exercise 1: Establish a pure strict result<a class="heading-anchor" href="#exercise-1-establish-a-pure-strict-result" aria-label="Link to this section">#</a></h4>
 <p>For inputs between-1000000 and 1000000, retain even values and double them in order. Preserve input and duplicates. Reject values outside the bound so Int multiplication is safe.</p>
-<p><strong>Expected result/shape:</strong> Seq(1,2,3,4) becomes Seq(4,8); Seq(0,2,2) becomes Seq(0,4,4); empty remains empty.</p>
+<p><strong>Expected result/shape:</strong> <code>Seq(1, 2, 3, 4)</code> becomes <code>Seq(4, 8)</code>; <code>Seq(0, 2, 2)</code> becomes <code>Seq(0, 4, 4)</code>; empty remains empty.</p>
 <p><strong>Verify:</strong> Assert the exact results, input preservation and the out-of-domain rejection.</p>
 <p><strong>Progressive hint:</strong> Separate the even predicate from the doubling map and validate the domain first.</p>
 <h4 id="exercise-2-locate-the-evaluation-boundary">Exercise 2: Locate the evaluation boundary<a class="heading-anchor" href="#exercise-2-locate-the-evaluation-boundary" aria-label="Link to this section">#</a></h4>
 <p>Return a lazy even-filter/double-map iterator with local trace messages filter: value and map: value. Validate the same numeric domain before construction. The trace should remain empty until consumption.</p>
-<p><strong>Expected result/shape:</strong> Taking one output from 1,2,3,4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4.</p>
+<p><strong>Expected result/shape:</strong> Taking one output from <code>1, 2, 3, 4</code> yields 4 with trace <code>filter:1, filter:2, map:2</code>. Consuming the rest yields 8 and appends <code>filter:3, filter:4, map:4</code>.</p>
 <p><strong>Verify:</strong> Assert the empty initial trace, both exact output pieces and all six messages in order.</p>
 <p><strong>Progressive hint:</strong> Put diagnostic appends inside filter/map lambdas, not in an eager preprocessing loop.</p>
 <h4 id="exercise-3-expose-one-shot-traversal-state">Exercise 3: Expose one-shot traversal state<a class="heading-anchor" href="#exercise-3-expose-one-shot-traversal-state" aria-label="Link to this section">#</a></h4>
 <p>Consume a supplied iterator into a Vector twice and return both results. Do not cache or recreate the iterator inside this function. Explain why this intentionally returns an empty second traversal.</p>
-<p><strong>Expected result/shape:</strong> A fresh iterator over 1,2,3 yields (Vector(1,2,3), Vector.empty). An already empty iterator yields two empty Vectors.</p>
+<p><strong>Expected result/shape:</strong> A fresh iterator over 1,2,3 yields (<code>Vector(1, 2, 3)</code>, Vector.empty). An already empty iterator yields two empty Vectors.</p>
 <p><strong>Verify:</strong> Assert both tuple components and the already-exhausted case.</p>
 <p><strong>Progressive hint:</strong> Call toVector twice on the same iterator reference.</p>
 <h4 id="exercise-4-provide-repeatability-deliberately">Exercise 4: Provide repeatability deliberately<a class="heading-anchor" href="#exercise-4-provide-repeatability-deliberately" aria-label="Link to this section">#</a></h4>
 <p>Return a factory creating a fresh bounded even-filter/double-map iterator on each call. Validate source values once and preserve them. Do not return the same iterator object repeatedly.</p>
-<p><strong>Expected result/shape:</strong> Two factory calls both yield Vector(4,8) for 1,2,3,4, even after the first is exhausted.</p>
+<p><strong>Expected result/shape:</strong> Two factory calls both yield <code>Vector(4, 8)</code> for 1,2,3,4, even after the first is exhausted.</p>
 <p><strong>Verify:</strong> Consume two independently obtained iterators and assert both exact results; verify the immutable source remains unchanged.</p>
 <p><strong>Progressive hint:</strong> Put values.iterator inside the returned zero-argument lambda.</p>
 <h4 id="exercise-5-separate-repeated-delivery-from-logical-identity">Exercise 5: Separate repeated delivery from logical identity<a class="heading-anchor" href="#exercise-5-separate-repeated-delivery-from-logical-identity" aria-label="Link to this section">#</a></h4>
 <p>For bounded nonnegative event amounts and nonblank IDs, compute naive delivered cents over attempts and logical once-per-ID cents when attempts&gt;0. Reject conflicting amounts for one ID and negative attempt counts. This is a pure ledger calculation, not a real sink.</p>
-<p><strong>Expected result/shape:</strong> Records (a,100), (b,50), (a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0); same ID with 100 and 101 is rejected.</p>
+<p><strong>Expected result/shape:</strong> Records <code>(a, 100)</code>, <code>(b, 50)</code>, <code>(a, 100)</code> with two attempts give naive 500, logical 150. Zero attempts gives <code>(0, 0)</code>; same ID with 100 and 101 is rejected.</p>
 <p><strong>Verify:</strong> Assert both totals, the zero-attempt identity and a conflicting-payload failure.</p>
 <p><strong>Progressive hint:</strong> Validate payload consistency per ID, then compare every-delivery summation with one value per identity.</p>
 <h4 id="exercise-6-consume-only-a-declared-bounded-prefix">Exercise 6: Consume only a declared bounded prefix<a class="heading-anchor" href="#exercise-6-consume-only-a-declared-bounded-prefix" aria-label="Link to this section">#</a></h4>

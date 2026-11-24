@@ -222,7 +222,7 @@ add(
         ),
         E(
             "Transfer header validation",
-            "Read the header name,count and compare its exact order.",
+            "Read the header `name,count` and compare its exact order.",
             "The schema order is name then count.",
             r"""v,err:=csv.NewReader(strings.NewReader("name,count\n")).Read();check(err==nil&&len(v)==2&&v[0]=="name"&&v[1]=="count","header contract")""",
             "Matching a set of names is insufficient when later code indexes by position. Either validate order or construct an explicit name-to-index map.",
@@ -470,7 +470,7 @@ add(
 
 add(
     "Channels, buffering and close ownership",
-    """A channel connects producers and consumers with typed communication. An unbuffered send completes when a receiver participates; a buffered channel retains values up to its capacity. Buffering changes backpressure, not ownership of referenced objects sent through the channel. Closing means no more values will be sent. Receivers drain buffered values before observing closure. The producer that knows all sending is finished should own close. A receiver normally must not close the channel merely because it is done reading. Sending after close panics; an operation on a nil channel blocks unless a select chooses another ready case.""",
+    """A channel connects producers and consumers with typed communication. An unbuffered send completes when a receiver participates; a buffered channel retains values up to its capacity. Buffering changes backpressure, not ownership of referenced objects sent through the channel. Closing means no more values will be sent. Receivers drain buffered values before observing closure. The producer that knows all sending is finished should own close. A receiver normally must not close the channel merely because it is done reading. Sending after close panics. A send or receive on a nil channel blocks forever, and a select skips such a case; closing a nil channel panics.""",
     """make(chan int, 2) creates a two-element buffer. value, ok := <-ch distinguishes a delivered value from the zero value after closure. range ch receives until closed and drained. chan<- int restricts a parameter to sending; <-chan int restricts it to receiving. len(ch) is a transient observation rather than a synchronization protocol.""",
     [
         ("Backpressure", "A producer slowing when a consumer cannot accept more."),
@@ -752,7 +752,7 @@ add(
         E(
             "Transfer local construction",
             "Build a result string inside a worker and send the completed value.",
-            "The reader receives ready:3.",
+            "The reader receives `ready:3`.",
             r"""ch:=make(chan string);go func(){ch<-fmt.Sprintf("ready:%d",3)}();check(<-ch=="ready:3","result")""",
             "Keeping construction state local simplifies the argument compared with exposing several partially updated shared fields.",
         ),

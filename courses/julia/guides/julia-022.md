@@ -10,6 +10,14 @@ Differentiate supported numerical functions and validate derivatives while prese
 
 Open `julia-022` in `/classroom` with its prepared `julia` runtime. Worked case A (independent analytic derivatives) and worked case B (a storage mistake blocks differentiation) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-022: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **ForwardDiff:** A forward-mode automatic differentiation package that evaluates ordinary Julia code with dual numbers.
+- **Dual number:** A number carrying a value and derivative parts, so ordinary arithmetic propagates exact derivatives.
+- **Gradient:** The vector of partial derivatives of a scalar function, returned by `ForwardDiff.gradient`.
+- **Jacobian:** The matrix of partial derivatives of a vector-valued function, with one row per output and one column per input.
+- **Generic storage:** Buffers created with `similar` on the input so dual numbers fit, unlike a hard-coded `Float64` buffer that blocks differentiation.
+
 ## Automatic differentiation follows the implemented computation
 
 Forward-mode automatic differentiation propagates derivative information through supported numerical operations. A dual number carries a value and partial information. Arithmetic combines both components according to differentiation rules. This is different from estimating a derivative by subtracting nearby function values or manipulating a symbolic formula.

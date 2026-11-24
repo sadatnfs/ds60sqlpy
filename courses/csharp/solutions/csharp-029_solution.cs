@@ -39,6 +39,14 @@ internal static class Program {
       Check(observed, "failure propagated through await");
     }
     {
+      // Task 2: Guided modification
+      var tasks =
+          new[] { Task.FromResult(5), Task.FromResult(1), Task.FromResult(3) };
+      int[] values = await Task.WhenAll(tasks);
+      Check(values.SequenceEqual(new[] { 5, 1, 3 }), "input order kept");
+      Check(tasks.All(task => task.IsCompletedSuccessfully), "all completed");
+    }
+    {
       // Task 3: Independent construction
       async Task<int> TotalAsync(IEnumerable<Task<int>> parts) {
         int[] values = await Task.WhenAll(parts);
@@ -49,6 +57,22 @@ internal static class Program {
       }
       var parts = new[] { Task.FromResult(2), Task.FromResult(5) };
       Check(await TotalAsync(parts) == 7, "validated total");
+    }
+    {
+      // Task 5: Boundary evidence
+      int[] ok = await Task.WhenAll(Task.FromResult(1), Task.FromResult(2));
+      Check(ok.Sum() == 3, "successful parts combined");
+      var problem = new InvalidOperationException("part failed");
+      var bad = Task.FromException<int>(problem);
+      bool failed = false;
+      try {
+        await Task.WhenAll(Task.FromResult(1), bad);
+      } catch (InvalidOperationException error) {
+        failed = error.Message == "part failed";
+      }
+      Check(failed, "failure propagated through WhenAll");
+      int[] none = await Task.WhenAll(Array.Empty<Task<int>>());
+      Check(none.Length == 0, "empty input completes with no values");
     }
     Console.WriteLine("csharp-029: passed");
     await Task.CompletedTask;

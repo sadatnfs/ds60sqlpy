@@ -14,6 +14,14 @@ Stragglers delay synchronized steps. Worker failure requires a coordinated stop 
 
 
 
+### Key terms
+
+- **Rendezvous:** The startup step in which processes discover each other and agree on ranks and world size.
+- **Tensor parallelism:** Splitting individual layer weights across devices, which requires communication inside each layer.
+- **Pipeline parallelism:** Placing consecutive layer groups on different devices and streaming microbatches through them.
+- **State sharding:** Partitioning parameters, gradients or optimizer state across ranks to reduce per-device memory.
+- **Communication budget:** The time and bandwidth available for collectives relative to compute in each step.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,33 +47,53 @@ print("CPU distributed trace: barrier", max(rank_ms), "ms; checkpoint consistent
 
 **Expected observation:** Barrier 30 ms; mixed-step checkpoint rejected.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `rank_ms` | `[10, 12, 30]` |
+| `steps` | `{'rank0': 10, 'rank1': 11}` |
+| `consistent` | `False` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Compute barrier time
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute barrier time** in the examples above.
+**Trap to avoid:** Reporting the average rank time predicts 17.3 ms and hides 13 ms of idle time per step, which makes adding ranks look more efficient than it is.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Compare parallelism types
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **compare parallelism types** in the examples above.
+**Trap to avoid:** Using data parallelism for a model that does not fit on one device fails immediately, because each replica needs all parameters, gradients and optimizer state.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Diagnose a missing rank
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **diagnose a missing rank** in the examples above.
+**Trap to avoid:** Restarting only the missing rank while the others wait in a collective fails, because the new process does not join the existing communicator state.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Define checkpoint consistency
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **define checkpoint consistency** in the examples above.
+**Trap to avoid:** Accepting each rank's latest file independently produces mixed-step checkpoints whenever a failure occurs during saving.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Budget communication
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **budget communication** in the examples above.
+**Trap to avoid:** Estimating communication from the parameter count without element size or frequency misses that float32 gradients are four bytes and some collectives run several times per step.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design owned-host cleanup
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design owned-host cleanup** in the examples above.
+**Trap to avoid:** Killing every GPU process on a host stops other users' jobs, while deleting the output directory loses valid checkpoints.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

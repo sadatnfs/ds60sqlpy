@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Inspect generated PTX and SASS to explain a selected instruction sequence and validate any change with existing tests.
+
 Work through *PTX, SASS, JIT and inspecting generated code* with the concrete cases below. Finish with this evidence:
 explain a selected instruction sequence and validate any optimization with the existing tests. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 PTX is a virtual instruction language, while SASS describes machine instructions for a particular GPU architecture. The driver or toolchain can translate PTX differently across targets and versions. A fat binary can contain native device images and PTX fallback according to a deliberate policy. JIT can introduce cold-start cost and compatibility constraints. Inspect compiler resource reports and generated code to test a hypothesis, such as unexpected local-memory traffic, before attempting inline assembly. Counting PTX instructions does not directly count executed hardware operations or predict runtime.
+
+### Key terms
+
+- **PTX:** The virtual instruction set that `nvcc` emits before architecture-specific assembly.
+- **SASS:** The native machine instructions that a specific GPU architecture actually executes.
+- **cuobjdump:** A tool that extracts embedded PTX and SASS from compiled binaries.
+- **Resource usage report:** Compiler output from `-Xptxas -v` that lists registers, shared memory and spill bytes per kernel.
 
 ## How to run and study this lesson
 

@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-017</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A browser form needs both field validation and a decision about whether the request is authorized to use the client&#x27;s ambient credentials. CSRF protection addresses one part of that request-origin problem. This chapter uses Flask-WTF and its actual CSRF machinery rather than substituting a manually checked placeholder field.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>CSRF:</strong> Cross-site request forgery: another site causes a browser to send a state-changing request that carries the user&#x27;s ambient credentials.</li>
+<li><strong>Ambient credentials:</strong> Credentials such as cookies that a browser attaches automatically to matching requests regardless of which page initiated them.</li>
+<li><strong>CSRF token:</strong> A session-bound secret rendered into the form and required on submission, which a forging site cannot read; Flask-WTF rejects a missing token with 400.</li>
+<li><strong>hidden_tag():</strong> A Flask-WTF form method that renders the form&#x27;s hidden fields, including the CSRF token.</li>
+<li><strong>Field validator:</strong> A rule such as DataRequired or Length that checks a submitted value, independently of CSRF validation.</li>
+</ul>
 <h3 id="mechanism-a-form-token-participates-in-a-larger-session-contract">Mechanism: a form token participates in a larger session contract<a class="heading-anchor" href="#mechanism-a-form-token-participates-in-a-larger-session-contract" aria-label="Link to this section">#</a></h3>
 <p>The application enables CSRF protection and uses a test-only signing key. The form contains a name field with DataRequired and length validation. Rendering <code>hidden_tag()</code> supplies the framework&#x27;s hidden fields, including the CSRF token. A client must return the appropriate token while retaining the associated session context.</p>
 <p>Field validation and CSRF validation are distinct. A request can contain a valid name but lack a valid token, or it can contain a valid token but an invalid name. Keeping those cases separate makes the public behavior and tests easier to understand.</p>
@@ -208,6 +216,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-case-missing-token-versus-invalid-field">Worked case: missing token versus invalid field<a class="heading-anchor" href="#worked-case-missing-token-versus-invalid-field" aria-label="Link to this section">#</a></h3>
 <p>The next request submits a valid name without a token and receives 400. Another request submits the token but an empty name and also receives 400. Those equal status codes do not mean the failures had the same cause. The example exercises both checks deliberately.</p>
 <p>Testing configurations sometimes disable CSRF to simplify unrelated tests. That can be useful for isolated business logic, but it would invalidate a test claiming to check CSRF. This fixture explicitly leaves the protection enabled and obtains a real token through the application.</p>
+<h3 id="worked-example-a-csrf-token-is-bound-to-one-session">Worked example: a CSRF token is bound to one session<a class="heading-anchor" href="#worked-example-a-csrf-token-is-bound-to-one-session" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
+<span class="syntax-keyword">import</span> hmac
+<span class="syntax-keyword">import</span> secrets
+
+SECRET <span class="syntax-operator">=</span> <span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-string">test-only-csrf-fixture</span><span class="syntax-string">&quot;</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">issue</span><span class="syntax-punctuation">(</span>session<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    session<span class="syntax-operator">.</span>setdefault<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">csrf_raw</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> secrets<span class="syntax-operator">.</span>token_hex<span class="syntax-punctuation">(</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> hmac<span class="syntax-operator">.</span>new<span class="syntax-punctuation">(</span>SECRET<span class="syntax-punctuation">,</span> session<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">csrf_raw</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">accept</span><span class="syntax-punctuation">(</span>session<span class="syntax-punctuation">,</span> submitted<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-string">&quot;</span><span class="syntax-string">csrf_raw</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> session <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> submitted<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-keyword">False</span>
+    <span class="syntax-keyword">return</span> hmac<span class="syntax-operator">.</span>compare_digest<span class="syntax-punctuation">(</span>issue<span class="syntax-punctuation">(</span>session<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> submitted<span class="syntax-punctuation">)</span>
+
+
+victim<span class="syntax-punctuation">,</span> attacker <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+victim_token <span class="syntax-operator">=</span> issue<span class="syntax-punctuation">(</span>victim<span class="syntax-punctuation">)</span>
+attacker_token <span class="syntax-operator">=</span> issue<span class="syntax-punctuation">(</span>attacker<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>accept<span class="syntax-punctuation">(</span>victim<span class="syntax-punctuation">,</span> victim_token<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>accept<span class="syntax-punctuation">(</span>victim<span class="syntax-punctuation">,</span> attacker_token<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>accept<span class="syntax-punctuation">(</span>victim<span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> accept<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> victim_token<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">True
+False
+False False</code></pre>
+<p>This is a simplified model of what Flask-WTF does behind <code>form.hidden_tag()</code>: a random value lives in the signed session cookie and the page embeds a keyed digest of it. The victim&#x27;s own form submission passed. An attacker can load the site and obtain a perfectly valid token, but it is valid only for the attacker&#x27;s session, so replaying it against the victim&#x27;s session failed. A missing token and a session with no stored value were both rejected, matching the lesson&#x27;s 400 for a POST without <code>csrf_token</code>. <code>hmac.compare_digest</code> avoids leaking how many leading characters matched through timing. The real extension also adds an expiry timestamp, so an old token copied from a cached page would eventually be refused even within the same session.</p>
 <h3 id="failure-diagnosis">Failure diagnosis<a class="heading-anchor" href="#failure-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>If a valid-looking token fails, inspect session continuity, signing-key consistency, expiration and the configured field/header name. A token copied from a different session may not satisfy the intended contract. If an entire test suite accepts forms without tokens, inspect its configuration before concluding that CSRF protection works.</p>
 <p>A hidden input is not automatically secret or trustworthy. The browser client can inspect and modify it. Its usefulness comes from the server&#x27;s validation and association with the appropriate context, not from hiding it visually in a form.</p>

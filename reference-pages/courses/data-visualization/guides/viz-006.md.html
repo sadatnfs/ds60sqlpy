@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="preserve-the-pairing">Preserve the pairing<a class="heading-anchor" href="#preserve-the-pairing" aria-label="Link to this section">#</a></h3>
 <p>Two models predict the same eight held-out outcomes 1 through 8. Model A errors are .2,-.2,.5,-.5,.1,-.1,1,-1. Model B errors are .4,-.4,.6,-.6,.2,-.2,1.5,-1.5. A paired comparison follows each user&#x27;s two losses instead of comparing unrelated aggregate distributions.</p>
 <p>The first panel plots observed versus predicted values for both models on the same axes, with an identity line. Circles and squares distinguish models independently of color. The second panel shows each user&#x27;s squared loss under A minus squared loss under B. This decomposition reveals where the average gain originates.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Paired loss difference:</strong> For each held-out record, the loss under model A minus the loss under model B, which keeps both predictions for one user together.</li>
+<li><strong>Identity line:</strong> The reference line where predicted equals observed, so distance from it in the outcome direction shows a residual.</li>
+<li><strong>Shared axes:</strong> Panels that use the same limits and units so that equal visual distances represent equal quantities.</li>
+<li><strong>Subplots:</strong> Several panels in one figure, each with its own axes, used here to show prediction geometry beside per-user loss differences.</li>
+<li><strong>Evaluation grain:</strong> The unit at which losses are computed and compared, here individual held-out users rather than unrelated aggregate distributions.</li>
+</ul>
 <h3 id="worked-case-connect-geometry-and-loss">Worked case: connect geometry and loss<a class="heading-anchor" href="#worked-case-connect-geometry-and-loss" aria-label="Link to this section">#</a></h3>
 <p>A point above the identity line is an overprediction. Distance from that line in the outcome direction is its residual, but squared-loss difference compares two squared residuals. For user u6, A&#x27;s error one gives loss one and B&#x27;s error 1.5 gives loss 2.25, so the paired difference is -1.25.</p>
 <p>All eight differences are negative and their mean is -.3775 squared units. The reference checks this number independently of the drawing. The plot supports a statement about these eight held-out records. It does not establish a population confidence interval, fairness across unseen groups or robustness to future distribution shift.</p>

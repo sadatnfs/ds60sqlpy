@@ -43,7 +43,7 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(flags, { id: true, count: false })`. Restoring the original line brings back the worked observation: id true and count false; a missing flag is a compile error.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(flags, { id: true, count: false })`. Restoring `const flags: Flags<Row> = { id: true, count: false };` brings back: id true and count false; a missing flag is a compile error.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(flags, { id: true, count: false })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -65,7 +65,7 @@ assert.equal(Object.hasOwn(publicRecord, 'secret'), false);
 assert.equal(JSON.stringify(publicRecord), '{"id":"A"}');
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')`; after it the line reads `const full: RecordWithSecret = { id: 'A', secret: 'fixture-only' };` again and typed view still has secret at runtime; explicit projection does not.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')`. Restoring `const full: RecordWithSecret = { id: 'A', secret: 'fixture-only' };` brings back: typed view still has secret at runtime; explicit projection does not.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')` for this input.
 

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Run Compute Sanitizer on a broken fixture, confirm the intended diagnostic and verify that the repair passes numerical tests.
+
 Work through *Compute Sanitizer as evidence, with its limits* with the concrete cases below. Finish with this evidence:
 the broken fixture produces the intended diagnostic, the repair passes that check and numerical tests still pass. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Compute Sanitizer provides several checks with different scopes. Memcheck investigates invalid and misaligned memory accesses; racecheck investigates shared-memory hazards; initcheck investigates uninitialized global-memory reads; synccheck investigates invalid synchronization use. Their observations complement mathematical tests. Instrumentation can be expensive and can change timing, so sanitizer runs are not performance samples. An automated command should select a nonzero error-exitcode, because a tool diagnostic must make the check fail even if the application itself returns success. Never conclude that one clean run proves race freedom for every input or validates unsupported global protocols.
+
+### Key terms
+
+- **Memcheck:** The Compute Sanitizer tool that reports out-of-bounds and misaligned device memory accesses.
+- **Racecheck:** The Compute Sanitizer tool that reports shared-memory data access hazards between threads.
+- **Initcheck:** The Compute Sanitizer tool that reports reads of uninitialized device global memory.
+- **Synccheck:** The Compute Sanitizer tool that reports invalid uses of synchronization primitives such as divergent barriers.
+- **Error exit code:** A sanitizer option that makes the process return nonzero when a diagnostic occurs, so automation fails.
 
 ## How to run and study this lesson
 

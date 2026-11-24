@@ -14,6 +14,13 @@ Use explicit schemas and deterministic ordering for comparison. Floating aggrega
 
 
 
+### Key terms
+
+- **Three-valued logic:** SQL predicate logic in which a comparison can be true, false or unknown when a null is involved.
+- **Null propagation:** The rule that most expressions with a null input return null.
+- **Decimal precision and scale:** The total digits and the digits after the decimal point that a decimal type can hold, which govern rounding and overflow.
+- **Session time zone:** The time zone Spark uses to interpret and display timestamps, which must match for results to compare.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,6 +48,12 @@ print("CPU SQL-semantics oracle: rows 3, nonnull 2, sum 7, decimal 3.30")
 
 **Expected observation:** Rows 3, non-null 2, sum 7 and exact decimal 3.30.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `values` | `[2, None, 5]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Scala and PySpark parity lab
@@ -53,27 +66,39 @@ For external GPU comparison, retain the same relational expressions and expected
 
 ### Exercise 1: Calculate both counts
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **calculate both counts** in the examples above.
+**Trap to avoid:** Treating null as zero gives the same sum but makes `COUNT(value)` 3 and the average 7/3 instead of 3.5, which disagrees with Spark.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Handle all-null aggregate
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **handle all-null aggregate** in the examples above.
+**Trap to avoid:** Returning 0 for the sum of an all-null group makes a group with no data look like a group whose values cancel out.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Compare decimal values
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **compare decimal values** in the examples above.
+**Trap to avoid:** Using float64 for the same values gives `3.3000000000000003`, which fails an exact comparison and suggests a bug that exists only in the test.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Name timestamp timezone
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **name timestamp timezone** in the examples above.
+**Trap to avoid:** Relying on the machine's default timezone gives results that depend on where the job runs. Executors and the driver may also disagree, producing values that differ between stages of one job.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose float tolerances
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **choose float tolerances** in the examples above.
+**Trap to avoid:** Using exact equality for float sums fails on correct results, while using a very loose tolerance passes wrong ones.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design ordered result comparison
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design ordered result comparison** in the examples above.
+**Trap to avoid:** Converting results to sets before comparing removes duplicates and hides a missing or extra row.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

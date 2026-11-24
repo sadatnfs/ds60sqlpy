@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Classify a CUDA failure by its phase and write a bug report around the smallest reproducer.
+
 Work through *A disciplined CUDA error taxonomy* with the concrete cases below. Finish with this evidence:
 a useful bug report that includes the smallest reproducer and the responsible phase. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Debugging starts by placing a failure in its phase. A source error prevents compilation; a missing symbol prevents linking; incompatible device code can prevent loading; invalid launch parameters can reject submission; an illegal access can fail asynchronous execution; and a completed kernel can still calculate the wrong answer. Later CUDA calls may surface an earlier asynchronous failure, so the line reporting an error is not always the line that caused it. Use checked phase boundaries in a debug configuration and retain the earliest meaningful diagnostic. Avoid reinstalling tools before a small reproducer isolates the responsible layer.
+
+### Key terms
+
+- **Sticky error:** An asynchronous device fault, such as an illegal address, that corrupts the context so later CUDA calls keep failing.
+- **Non-sticky error:** An error such as an invalid launch configuration that is reported once and leaves the context usable.
+- **cudaGetLastError:** A runtime call that returns the most recent error and resets non-sticky errors, commonly used right after a launch.
+- **Minimal reproducer:** The smallest program and input that still show a failure, with unrelated work removed.
 
 ## How to run and study this lesson
 

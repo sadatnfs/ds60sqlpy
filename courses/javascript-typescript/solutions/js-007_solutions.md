@@ -40,7 +40,7 @@ assert.equal(map.get(first), 'a');
 assert.equal(map.get(second), 'b');
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(map.get(second), 'b')`. Restoring the original line brings back the worked observation: size 2 and separate values.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(map.get(second), 'b')`. Restoring `[second, 'b'],` brings back: size 2 and separate values.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(map.get(second), 'b')` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -59,7 +59,7 @@ assert.equal(values.has(NaN), true);
 assert.equal(values.has(-0), true);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(values.has(-0), true)`; after it the line reads `assert.equal(values.has(-0), true);` again and size 2: one NaN and one zero.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(values.has(-1), true);`. Restoring `assert.equal(values.has(-0), true);` brings back: size 2: one NaN and one zero.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(values.has(-0), true)` accepts.
 

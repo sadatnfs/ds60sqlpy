@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-070`, `apache-069`.
 
+## Key terms
+
+- **Classification:** An Atlas label, optionally with attributes, attached to entities. Its meaning, owner and review process must be defined outside the string.
+- **Discovery search:** Finding entities by type, classification or attribute through Atlas's search index rather than by GUID.
+- **Index lag:** The delay between a successful mutation and its appearance in search results while direct GUID reads already show it.
+- **Classification propagation:** Atlas's option to pass a classification along lineage to downstream entities.
+- **Enforcement point:** The data-access boundary, such as a query engine authorizer, that must map a classification to a policy for any access to be denied.
+
 ## A classification is metadata with a defined meaning
 
 Atlas classifications label entities and can carry attributes. Examples might
@@ -80,6 +88,36 @@ as sensitive?** Classification and enforcement are separate components unless a
 tested integration connects them. The two cases attach and remove a metadata
 statement while preserving asset identity and requiring independent evidence for
 search and actual data-access effects.
+
+## Worked examples
+
+### Define and attach a review classification
+
+```json
+{
+  "classificationDefs": [
+    {
+      "name": "ds60_<owner>_reviewed",
+      "superTypes": [],
+      "typeVersion": "1.0",
+      "attributeDefs": []
+    }
+  ]
+}
+```
+
+The classification type must exist before any entity can carry it, which is why apply creates missing typedefs first and refuses to alter an existing one with different super types. The curated entity then lists the label under classifications. A classification is a statement that someone reviewed the asset; it does not change who can read the data unless a separate policy engine acts on it.
+
+### Find assets by label, then remove one label
+
+```bash
+curl -s -u "$ATLAS_USER:$ATLAS_PASSWORD" \
+  "$DS60_ATLAS_ENDPOINT/api/atlas/v2/search/basic?classification=ds60_<owner>_reviewed"
+curl -s -X DELETE -u "$ATLAS_USER:$ATLAS_PASSWORD" \
+  "$DS60_ATLAS_ENDPOINT/api/atlas/v2/entity/guid/<curated-guid>/classification/ds60_<owner>_reviewed"
+```
+
+Basic search goes through the search index, so a label attached a moment ago may not appear yet even though reading the entity by GUID already shows it. After the DELETE, the entity should remain ACTIVE with an empty classifications list; only the label is gone. If the entity itself disappears, the wrong endpoint was called. Poll search with a deadline before concluding the index is wrong.
 
 ## Complete worked source
 

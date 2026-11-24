@@ -14,6 +14,13 @@ Spark's row-to-columnar and columnar-to-row transitions can add work around unsu
 
 
 
+### Key terms
+
+- **Columnar batch:** A group of rows stored column by column with the validity and offset structures each column needs.
+- **Apache Arrow:** An interoperable columnar memory format that does not by itself guarantee GPU residency or zero copy.
+- **Validity bitmap:** A bit per row marking whether a value in a nullable column is present.
+- **String offsets:** An integer array giving where each variable-width string starts in the character buffer.
+
 ## Worked examples
 
 ### Worked example 1
@@ -40,33 +47,55 @@ print("CPU columnar ledger:", payload, mask, 7)
 
 **Expected observation:** Fixed payload 8000 bytes, nine-row mask 2 bytes, string characters 7 bytes.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `rows` | `1000` |
+| `itemsize` | `8` |
+| `payload` | `8000` |
+| `mask` | `2` |
+| `strings` | `['a', 'longer', '']` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Count fixed-width payload
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **count fixed-width payload** in the examples above.
+**Trap to avoid:** Counting 1000 values as 4000 bytes by assuming float32 underestimates the transfer by half when the schema says double. Schema inference from CSV or pandas commonly produces double even when the data looks like small decimals.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Count validity bytes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **count validity bytes** in the examples above.
+**Trap to avoid:** Using `9//8 = 1` floors the division and leaves the ninth row without a bit. The ninth row's null state would then be read from whatever byte follows the mask.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain string offsets
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **explain string offsets** in the examples above.
+**Trap to avoid:** Estimating string columns as rows times an average length ignores the offset array and the UTF-8 encoding of multibyte characters.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Locate row-column transitions
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **locate row-column transitions** in the examples above.
+**Trap to avoid:** Assuming the whole query is columnar because the source is a Parquet file ignores row-based operators later in the plan. A Python UDF or an unsupported expression in a later stage forces a conversion back to rows at that point.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Budget transfer payload
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **budget transfer payload** in the examples above.
+**Trap to avoid:** Budgeting only values underestimates both transfer time and peak memory. For string-heavy tables, offsets and variable character data can exceed the numeric payload by a wide margin.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design a conversion parity test
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design a conversion parity test** in the examples above.
+**Trap to avoid:** Comparing only values with nulls replaced by zero erases the distinction the mask exists to keep. A conversion bug that turns nulls into zeros would then pass the test unnoticed.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

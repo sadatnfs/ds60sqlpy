@@ -15,6 +15,8 @@ Check names, types, timestamp field and TTL. A registered view does not prove th
 
 Verify the precise boundary and preserve the request identifier. Different request times can legitimately retrieve different versions.
 
+In the fixture customer 1 has usage 10 at 2024-01-01 and 20 at 2024-01-03, so a request at 2024-01-02 returns 10 and one at 2024-01-04 returns 20. Probe the exact instant 2024-01-03T00:00Z as well and record what your installed Feast returns rather than assuming.
+
 **Expected:** The selected value changes from 10 to 20.
 
 ## 3. Test no history
@@ -26,6 +28,8 @@ Validate unique request keys and left-join retrieval back onto the original requ
 ## 4. Test expiration
 
 Retain the request and an explicit unavailable status. A different TTL is a contract change that needs justification.
+
+The view has ttl=timedelta(days=30). Customer 1's newest row is 2024-01-03, so the request at 2024-03-01 in example_two is 58 days later and comes back null. Compare result.usage.isna().sum() with the 2 reported by the reference.
 
 **Expected:** Its selected feature is unavailable under the policy.
 

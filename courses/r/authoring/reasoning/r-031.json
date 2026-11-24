@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Tracing the selection mask row by row",
+      "body": "The reference computes `net` first and builds the mask from it. For the three input rows:\n\n```text\nrow  id  quantity  price  discount  net  !is.na(net)  net >= 8  keep\n1    L3  2         5      1         9    TRUE         TRUE      TRUE\n2    L1  1         8      0         8    TRUE         TRUE      TRUE\n3    L2  NA        4      0         NA   FALSE        NA        FALSE\n```\n\nThe third row is the one to watch. `NA >= 8` is NA, because an unknown amount may or may not reach the threshold. R evaluates `FALSE & NA` as FALSE, since the result is false whatever the unknown value is, so `keep` contains only TRUE and FALSE. A mask without NA is safe for indexing and for counting: `sum(keep)` is 2 and `sum(!keep)` is 1.\n\nWithout the `!is.na(net)` term, the mask would be TRUE, TRUE, NA. Indexing a data frame with NA returns a row filled with NA and a row name of NA, so the result would have three rows, one of them invented. Ordering happens last, on the two selected rows, which puts L1 before L3 even though L3 came first in the input."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Compute net for every row before filtering: L3 is 2 times 5 minus 1, L1 is 1 times 8 minus 0, and L2 has an unknown quantity.",
+      "why": "That gives 9, 8 and NA. The mask `!is.na(net) & net >= 8` is TRUE, TRUE, FALSE, and sorting the two survivors by id puts L1 with 8 ahead of L3 with 9.",
+      "wrong": "Filtering with `lines[lines$net >= 8, ]`. The NA in the index produces an extra row filled with NA, so the result has three rows and one of them describes no real line.",
+      "verify": "`a$data$id` returns \"L1\" \"L3\", and `a$data$net` returns 8 and 9."
+    },
+    {
+      "approach": "Call `transform_lines(lines, 9)` and keep the comparison as `>=`.",
+      "why": "With threshold 9, L3's net of 9 meets the boundary and L1's net of 8 falls below it. L2 is still unknown, so the mask excludes it for the same reason as before, and one row remains.",
+      "wrong": "Switching to `>` when changing the threshold. Then `9 > 9` is FALSE, L3 is dropped too, and the result is empty, which changes the policy at the boundary instead of just the number.",
+      "verify": "`b$data$id` returns \"L3\", and `b$data$net` returns 9."
+    },
+    {
+      "approach": "Return the selected table together with `nrow(lines)`, `sum(keep)` and `sum(!keep)` from the same mask.",
+      "why": "keep contains no NA because of the `!is.na(net)` term, so both sums are exact counts: 2 retained, 1 excluded, 3 input. Using one mask for the table and the counts keeps them consistent.",
+      "wrong": "Counting exclusions as `sum(lines$net < threshold, na.rm = TRUE)`. That returns 0, because L2's NA is dropped from the count, so the unknown amount disappears from the report.",
+      "verify": "`a$retained + a$excluded == a$input` returns TRUE, with values 2, 1 and 3."
+    },
+    {
+      "approach": "Reorder complete rows with `lines[order(lines$id), ]`, or bring prices in through a join on a validated id, never by sorting one column.",
+      "why": "Sorting the prices 5, 8 and 4 into 4, 5 and 8 would give L3 a net of 2 times 4 minus 1, which is 7, and L1 a net of 5. Neither reaches 8, so the result would be empty instead of L1 and L3.",
+      "wrong": "Calling `sort(lines$price)` before multiplying. Each column keeps its length and type, so the bug produces no error, only wrong records.",
+      "verify": "`transform_lines(lines[c(2, 3, 1), ])$data` returns the same ids and nets as the original call, showing that input order does not matter."
+    },
+    {
+      "approach": "Let the same column selection run on an all FALSE mask, so the result is a zero row data frame with columns id and net.",
+      "why": "With threshold 100 no net qualifies. `lines[keep, c(\"id\", \"net\"), drop = FALSE]` still returns both columns with their types, and ordering zero rows leaves them unchanged.",
+      "wrong": "Returning NULL or `data.frame()` when nothing qualifies. Code that later reads `result$net` gets NULL, and binding this result to another batch fails or loses the columns.",
+      "verify": "`nrow(empty)` returns 0, and `names(empty)` returns \"id\" \"net\"."
+    },
+    {
+      "approach": "Sort by entity, then by time, then by a deterministic tie breaker such as id, and compute each lag within its entity.",
+      "why": "Here ordering is part of the calculation. A lag pairs each row with the one before it, so the result depends on the row order, unlike the sum and the filter above.",
+      "wrong": "Sorting by time only, or computing lags in arrival order. Rows from two entities interleave, so an entity's first row receives the previous entity's last value.",
+      "verify": "Shuffling the input rows and recomputing shows identical lag columns once both runs are sorted by entity, time and tie breaker."
+    }
+  ]
+}

@@ -10,6 +10,14 @@ Combine hand-derived cases, generated inputs and invariants so that a plausible 
 
 Open `julia-028` in `/classroom` with its prepared `julia` runtime. Worked case A (hand-derived and extreme cases) and worked case B (generated metamorphic checks) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-028: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Test standard library:** The `Test` package providing `@test`, `@test_throws` and `@testset` for recording checks and their results.
+- **Property test:** A check that a rule holds across many generated inputs rather than for one hand-picked example.
+- **Metamorphic check:** A test that compares outputs for related inputs, such as confirming that permuting inputs permutes outputs the same way.
+- **Random seed:** A fixed starting value for a random generator, so generated test inputs and any failing case can be reproduced.
+- **Invariant:** A property every valid output must satisfy, such as normalized weights being nonnegative and summing to one.
+
 ## Independent evidence starts with a specification
 
 A function test is useful when its expectation comes from the intended behavior rather than the same implementation copied into a second function. Example tests cover named cases. Property tests describe relations that should hold for a family of inputs. Metamorphic tests change the input in a controlled way and predict how the output must change, which is valuable when a full oracle is difficult to calculate.

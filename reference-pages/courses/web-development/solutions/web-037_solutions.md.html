@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-037.md</code>.</p>
 <h3 id="exercise-1-predict-the-utf-8-byte-length-of">Exercise 1: Predict the UTF-8 byte length of é.<a class="heading-anchor" href="#exercise-1-predict-the-utf-8-byte-length-of" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It occupies two bytes in the supplied source encoding.</p>
+<p><strong>Approach:</strong> Recall that é is encoded in UTF-8 as two bytes, so <code>strlen</code>, which counts bytes, returns 2 for that one visible character.</p>
 <p><strong>Why:</strong> é is U+00E9, which UTF-8 stores as two bytes, so strlen returns 2.</p>
+<p><strong>Plausible wrong approach:</strong> Answering 1 fails because <code>strlen</code> does not count characters, and using that number for limits truncates the text wrongly.</p>
+<p><strong>How to verify:</strong> <code>strlen(&#x27;é&#x27;)</code> prints 2 while <code>mb_strlen(&#x27;é&#x27;, &#x27;UTF-8&#x27;)</code> prints 1.</p>
 <h3 id="exercise-2-encode-a-unicode-label-as-json-with-explicit-error-handling">Exercise 2: Encode a Unicode label as JSON with explicit error handling.<a class="heading-anchor" href="#exercise-2-encode-a-unicode-label-as-json-with-explicit-error-handling" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The output is valid JSON or a visible encoding exception.</p>
+<p><strong>Approach:</strong> Call <code>json_encode</code> with <code>JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE</code> inside a <code>try</code> and catch <code>JsonException</code> to report a failure.</p>
 <p><strong>Why:</strong> Without the flag json_encode returns false on invalid UTF-8; with it, the failure is visible.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only for a false return without the flag fails because callers often concatenate false and print an empty string.</p>
+<p><strong>How to verify:</strong> The output shows {&quot;label&quot;:&quot;café&quot;} with readable é, and invalid input prints the caught exception.</p>
 <h3 id="exercise-3-build-a-text-inspection-report-that-labels-bytes-honestly">Exercise 3: Build a text inspection report that labels bytes honestly.<a class="heading-anchor" href="#exercise-3-build-a-text-inspection-report-that-labels-bytes-honestly" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The program does not present strlen as a count of user-perceived characters.</p>
+<p><strong>Approach:</strong> Print byte length with <code>strlen</code>, code point length with <code>mb_strlen</code>, and label each number with its unit in the report.</p>
 <p><strong>Why:</strong> Labeling each count prevents a byte count from being presented as characters.</p>
+<p><strong>Plausible wrong approach:</strong> Labeling the <code>strlen</code> result as characters fails because accented or emoji labels then report inflated counts.</p>
+<p><strong>How to verify:</strong> For &#x27;café&#x27; the report shows 5 bytes and 4 code points on separate labeled lines.</p>
 <h3 id="exercise-4-diagnose-a-truncated-string-that-splits-a-multibyte-sequence">Exercise 4: Diagnose a truncated string that splits a multibyte sequence.<a class="heading-anchor" href="#exercise-4-diagnose-a-truncated-string-that-splits-a-multibyte-sequence" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Byte slicing can create invalid UTF-8; use a suitable text-aware operation for the intended unit.</p>
+<p><strong>Approach:</strong> Replace <code>substr</code> with <code>mb_substr</code> for character limits, or with <code>mb_strcut</code> when the limit is a byte budget.</p>
 <p><strong>Why:</strong> substr can split a multibyte sequence and produce invalid UTF-8, while mb_strcut moves the cut back to a character boundary.</p>
+<p><strong>Plausible wrong approach:</strong> Trimming the broken byte with <code>rtrim</code> fails because it removes whitespace characters, not partial multibyte sequences.</p>
+<p><strong>How to verify:</strong> The truncated label encodes as JSON without an exception and displays complete characters. <code>mb_check_encoding($short, &#x27;UTF-8&#x27;)</code> returns true for the repaired value and false for the byte slice.</p>
 <h3 id="exercise-5-compare-a-plain-ascii-label-and-a-unicode-label">Exercise 5: Compare a plain ASCII label and a Unicode label.<a class="heading-anchor" href="#exercise-5-compare-a-plain-ascii-label-and-a-unicode-label" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The byte counts differ from intuitive character counts when multibyte data appears.</p>
+<p><strong>Approach:</strong> Print <code>strlen</code> and <code>mb_strlen</code> for &#x27;cafe&#x27; and &#x27;café&#x27; side by side and compare both rows.</p>
 <p><strong>Why:</strong> ASCII characters use one byte each, so the counts match; café differs because é uses two bytes.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only ASCII labels fails because byte and character counts agree there and hide the multibyte problem.</p>
+<p><strong>How to verify:</strong> The ASCII row shows 4 and 4, while the accented row shows 5 and 4. Adding an emoji label shows an even larger gap, with 4 bytes for that single code point.</p>
 <h3 id="exercise-6-explain-validation-normalization-and-output-escaping-separately">Exercise 6: Explain validation, normalization and output escaping separately.<a class="heading-anchor" href="#exercise-6-explain-validation-normalization-and-output-escaping-separately" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Validation checks a contract, normalization chooses an equivalent representation, and escaping protects a destination context.</p>
+<p><strong>Approach:</strong> Assign each step its own purpose: validate that input meets the contract, normalize to one representation, and escape at output for its destination.</p>
 <p><strong>Why:</strong> Validation asks whether the value is allowed, normalization chooses one representation of equivalent text, and escaping makes the value safe for a specific output context.</p>
+<p><strong>Plausible wrong approach:</strong> Running <code>htmlspecialchars</code> on input before storing it fails because the stored text is then wrong for JSON, SQL and plain text.</p>
+<p><strong>How to verify:</strong> Your answer names one concrete function or check for each of the three steps and the stage where it runs.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-037_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

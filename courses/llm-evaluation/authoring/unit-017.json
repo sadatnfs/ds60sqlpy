@@ -8,6 +8,12 @@
     "comparison graph",
     "preference heterogeneity"
   ],
+  "key_terms": {
+    "Bradley-Terry model": "A comparison model in which P(a preferred over b) is the logistic function of the score difference r_a - r_b.",
+    "Pairwise likelihood": "The likelihood of observed preference outcomes, whose loss log(1 + exp(-(r_a - r_b))) is computed stably with logaddexp.",
+    "Offset nonidentifiability": "The fact that adding a constant to all scores within a prompt leaves every preference probability unchanged.",
+    "Comparison graph": "The graph of which responses were compared, whose connectivity limits which score differences are identified."
+  },
   "outcome": "Derive a pairwise reward likelihood, test its invariances and identify what comparison data cannot determine.",
   "verification": "Equal scores give preference probability 0.5 and loss log 2, shifting both rewards changes neither loss nor gradient, reversed counts fit probability 0.25, all-win data has no finite estimate, the loss stays finite at 2000, and a preference cycle has no scalar ordering.",
   "level": "advanced",
@@ -20,42 +26,78 @@
       "task": "Evaluate a positive comparison when both scores are zero.",
       "expected": "Preference probability 0.5 and loss log 2.",
       "hint": "Use the logistic link and softplus form.",
-      "answer": "Equal scores express no preference under the model; observing a chosen response still incurs positive negative log likelihood."
+      "answer": "Equal scores express no preference under the model; observing a chosen response still incurs positive negative log likelihood.",
+      "reasoning": {
+        "approach": "Call `pair_loss([0, 0])`. The score difference is 0, so the loss is `logaddexp(0, 0)`, which is log(1 + 1) = log 2.",
+        "why": "The sigmoid of 0 is 0.5, so the model assigns equal probability to either response being preferred. Observing that the first response was chosen has probability 0.5, and its negative log is log 2, about 0.693.",
+        "pitfall": "Expecting zero loss because the scores are equal is the mistake. Zero loss would require probability 1 for the observed choice; an indifferent model still pays log 2 for every labeled comparison.",
+        "verify": "The reference asserts `np.isclose(pair_loss([0, 0]), np.log(2))`. Compute `sigmoid(0)` and confirm 0.5."
+      }
     },
     {
       "title": "Shift both rewards",
       "task": "Add 100 to both responses.",
       "expected": "Loss and score gradient remain unchanged.",
       "hint": "Only the difference is identified.",
-      "answer": "Pairwise labels cannot determine a common reward offset, including prompt-specific offsets when comparisons stay within prompts."
+      "answer": "Pairwise labels cannot determine a common reward offset, including prompt-specific offsets when comparisons stay within prompts.",
+      "reasoning": {
+        "approach": "Add 100 to both scores and recompute `pair_loss` and `pair_gradient`. Case A uses `[1, -1]` and `[101, 99]`.",
+        "why": "The loss depends only on the difference a - b, which is 2 in both cases. The gradient is `[g, -g]` with g = sigmoid(2) - 1, again a function of the difference only. A common offset leaves every quantity unchanged.",
+        "pitfall": "Reading a learned reward of 101 as better than a reward of 1 from another run is the mistake. Pairwise data cannot pin down the absolute level, so rewards are only comparable within the same comparison.",
+        "verify": "Case A asserts `np.isclose(pair_loss(scores), pair_loss(shifted))`, and the exercise checks assert equal gradients for `[4, 2]` and `[104, 102]`. The gradient components also sum to 0."
+      }
     },
     {
       "title": "Reverse empirical counts",
       "task": "Use one win and three losses.",
       "expected": "The fitted preference probability is 0.25.",
       "hint": "The MLE difference is \\(\\log(\\mathrm{wins}/\\mathrm{losses})\\).",
-      "answer": "Reversing labels changes the sign of the fitted log odds, while finite counts still imply uncertainty."
+      "answer": "Reversing labels changes the sign of the fitted log odds, while finite counts still imply uncertainty.",
+      "reasoning": {
+        "approach": "Call `mle_difference(1, 3)`. The maximum-likelihood score difference is log(wins / losses) = log(1 / 3).",
+        "why": "The sigmoid of log(1 / 3) is (1 / 3) / (1 + 1 / 3) = 0.25, which equals the observed win fraction 1 / 4. Reversing case B's 3 to 1 counts flips the sign of the log odds and gives 0.25 instead of 0.75.",
+        "pitfall": "Reporting 0.25 as the true preference rate is too strong. With four comparisons, many probabilities near 0.25 fit nearly as well; the estimate needs an interval.",
+        "verify": "The reference asserts `np.isclose(sigmoid(mle_difference(1, 3)), 0.25)` and `np.isclose(mle_difference(2, 2), 0)` for balanced counts."
+      }
     },
     {
       "title": "All wins and no losses",
       "task": "Fit an unregularized pair with four wins and zero losses.",
       "expected": "No finite maximum-likelihood difference exists.",
       "hint": "Log odds diverge at a boundary probability.",
-      "answer": "Regularization or a prior can produce a finite estimate, but it changes the model and must be stated."
+      "answer": "Regularization or a prior can produce a finite estimate, but it changes the model and must be stated.",
+      "reasoning": {
+        "approach": "Call `mle_difference(4, 0)`. The function requires both wins and losses to be positive and raises otherwise.",
+        "why": "With four wins and zero losses, the likelihood keeps increasing as the difference grows, approaching 1 without reaching it. There is no finite maximum, so any finite number returned would be arbitrary.",
+        "pitfall": "Plugging in a tiny loss count such as 0.001 to get a finite answer is the mistake if left unstated. That is a form of regularization, and it changes the model; the chosen prior must be reported.",
+        "verify": "The reference wraps `mle_difference(4, 0)` in a try block and raises `Infinite MLE represented as finite` if no error occurs."
+      }
     },
     {
       "title": "Test numerical stability",
       "task": "Use scores-1000 and 1000 for the preferred/rejected pair.",
       "expected": "Loss remains finite at 2000.",
       "hint": "Avoid computing \\(\\log\\sigma(\\delta)\\) naively.",
-      "answer": "Stable softplus arithmetic preserves the large finite loss without underflowing a probability to zero first."
+      "answer": "Stable softplus arithmetic preserves the large finite loss without underflowing a probability to zero first.",
+      "reasoning": {
+        "approach": "Call `pair_loss([-1000, 1000])`. The preferred response has score -1000 and the rejected one 1000, so the difference is -2000.",
+        "why": "The loss is `logaddexp(0, 2000)`, which equals 2000 to machine precision. A naive form, -log(sigmoid(-2000)), would compute a sigmoid that underflows to 0 and then return infinity.",
+        "pitfall": "Computing the probability first and taking its log is the common error. The result is `inf` or `nan`, which then corrupts any average or gradient that includes it.",
+        "verify": "The reference asserts `np.isfinite(pair_loss([-1000, 1000]))` and that the value equals exactly 2000."
+      }
     },
     {
       "title": "Interpret a preference cycle",
       "task": "Observe A>B, B>C and C>A across labels.",
       "expected": "A deterministic scalar ordering cannot satisfy all three.",
       "hint": "Add the three proposed positive score differences.",
-      "answer": "Their sum would need to be positive while algebraically equaling zero. Investigate stochasticity, annotator heterogeneity and multiple criteria."
+      "answer": "Their sum would need to be positive while algebraically equaling zero. Investigate stochasticity, annotator heterogeneity and multiple criteria.",
+      "reasoning": {
+        "approach": "Write the three preferences as scalar inequalities: a > b, b > c and c > a. Sum the implied differences.",
+        "why": "(a - b) + (b - c) + (c - a) = 0, yet each term would need to be positive, so the sum would be positive. No scalar scores satisfy all three; case B shows a = 2, b = 1, c = 0 satisfies two but not c > a.",
+        "pitfall": "Fitting a scalar reward anyway and reporting its order as the true ranking hides the cycle. The cycle may reflect label noise, different annotators or different criteria, and each calls for a different response.",
+        "verify": "Case B asserts that `(a > b) and (b > c) and not (c > a)` for the example scores. Check cycle frequency in the raw labels before fitting."
+      }
     }
   ],
   "sources": [

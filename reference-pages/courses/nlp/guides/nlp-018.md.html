@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Multilingual NLP must distinguish language, script, locale, domain and the individual task. A Latin-script message is not automatically English, a short word can belong to several languages, and one document can mix languages. A system that accepts Unicode text may still tokenize, represent and evaluate some languages poorly. Coverage, efficiency and task quality are separate claims.</p>
 <p>This lesson uses local strings to inspect encoding lengths, normalization effects, a deliberately narrow language-hint rule and subgroup aggregation. It does not download or claim a multilingual language identifier or translation model. The small rule recognizes only a few authored cue words and explicitly abstains when evidence is tied or absent.</p>
 <p>Domain shift can occur within one language as well as across languages. Charge may concern a payment, an electrical battery or an accusation. A model trained on one domain can assign the wrong sense in another while every token is familiar. Evaluate the actual target population and retain uncertainty rather than assuming shared vocabulary implies shared meaning.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Script:</strong> The writing system of a text. A Latin-script message is not automatically English, so script detection and language identification answer different questions.</li>
+<li><strong>Language identification:</strong> Predicting a language label from available evidence, with an explicit abstention or mixed-language policy when evidence is tied or absent.</li>
+<li><strong>Tokenization equity:</strong> Whether languages or writing systems need very different token budgets to express comparable content.</li>
+<li><strong>Case folding:</strong> Aggressive case removal for caseless matching, which maps Straße to strasse and can change code-point length.</li>
+<li><strong>Domain shift:</strong> A change in data distribution or word sense within or across languages, such as charge meaning a payment or a battery state.</li>
+</ul>
 <h3 id="representation-cost-is-not-a-language-quality-metric">Representation cost is not a language-quality metric<a class="heading-anchor" href="#representation-cost-is-not-a-language-quality-metric" aria-label="Link to this section">#</a></h3>
 <p>The string 服务正常 has four Unicode code points and twelve UTF-8 bytes, while whitespace splitting returns one item. None of those counts is a universal count of linguistic words or deployed-model tokens. A model tokenizer may split it differently. Context-window and cost comparisons should use the exact tokenizer and a task-matched amount of information.</p>
 <p>Tokenization equity concerns whether languages or writing systems require very different token budgets to express comparable content. More tokens can reduce available context or increase cost, but a shorter encoding is not by itself better semantic quality. Compare task performance, latency and token budgets together, and avoid treating translation length as a perfect control for meaning.</p>
@@ -238,12 +246,12 @@ macro <span class="syntax-operator">=</span> <span class="syntax-punctuation">(<
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-measure-representation-units">Exercise 1: Measure representation units<a class="heading-anchor" href="#exercise-1-measure-representation-units" aria-label="Link to this section">#</a></h4>
 <p>Count code points, UTF-8 bytes and whitespace segments for the supplied Chinese string.</p>
-<p><strong>Expected:</strong> Counts4,12,1 respectively, with no claim that whitespace identifies linguistic words.</p>
+<p><strong>Expected:</strong> Counts 4, 12, 1 respectively, with no claim that whitespace identifies linguistic words.</p>
 <p><strong>Verify:</strong> Assert len(text) == 4, len(text.encode(&#x27;utf-8&#x27;)) == 12 and len(text.split()) == 1 for the Chinese string.</p>
-<p><strong>Hints:</strong> Use len(text),len(text.encode(&quot;utf-8&quot;)) and len(text.split()) separately.</p>
+<p><strong>Hints:</strong> Use len(text), len(text.encode(&quot;utf-8&quot;)) and len(text.split()) separately.</p>
 <h4 id="exercise-2-retain-ambiguous-language">Exercise 2: Retain ambiguous language<a class="heading-anchor" href="#exercise-2-retain-ambiguous-language" aria-label="Link to this section">#</a></h4>
-<p>Implement the narrow cue rule and test English,Spanish,bank and the mixed cue sentence.</p>
-<p><strong>Expected:</strong> en,es,None,None under the declared cue inventory.</p>
+<p>Implement the narrow cue rule and test English, Spanish, bank and the mixed cue sentence.</p>
+<p><strong>Expected:</strong> en, es, None, None under the declared cue inventory.</p>
 <p><strong>Verify:</strong> Assert the cue rule returns en, es, None and None, abstaining on bank and on the mixed-cue sentence.</p>
 <p><strong>Hints:</strong> Ties and zero evidence should abstain.</p>
 <h4 id="exercise-3-trace-normalization-loss">Exercise 3: Trace normalization loss<a class="heading-anchor" href="#exercise-3-trace-normalization-loss" aria-label="Link to this section">#</a></h4>
@@ -253,12 +261,12 @@ macro <span class="syntax-operator">=</span> <span class="syntax-punctuation">(<
 <p><strong>Hints:</strong> Separate canonical normalization from intentionally deleting marks.</p>
 <h4 id="exercise-4-check-length-changing-case-operations">Exercise 4: Check length-changing case operations<a class="heading-anchor" href="#exercise-4-check-length-changing-case-operations" aria-label="Link to this section">#</a></h4>
 <p>Inspect lowercased İ and casefolded Straße.</p>
-<p><strong>Expected:</strong> i plus combining dot has length2; Straße casefolds to strasse.</p>
+<p><strong>Expected:</strong> i plus combining dot has length 2; Straße casefolds to strasse.</p>
 <p><strong>Verify:</strong> Assert &#x27;İ&#x27;.lower() has length 2 (i plus a combining dot) and &#x27;Straße&#x27;.casefold() == &#x27;strasse&#x27;.</p>
 <p><strong>Hints:</strong> Print repr and code points rather than relying only on appearance.</p>
 <h4 id="exercise-5-report-language-slices">Exercise 5: Report language slices<a class="heading-anchor" href="#exercise-5-report-language-slices" aria-label="Link to this section">#</a></h4>
 <p>Compute pooled and equal-language accuracy from the two sample arrays.</p>
-<p><strong>Expected:</strong> English.9,Spanish.5,pooled5/6,macro.7 with counts10 and2.</p>
+<p><strong>Expected:</strong> English .9, Spanish .5, pooled 5/6, macro .7 with counts 10 and 2.</p>
 <p><strong>Verify:</strong> Assert per-language accuracies 0.9 and 0.5, pooled 5/6 and macro 0.7, and report the counts 10 and 2 beside them.</p>
 <p><strong>Hints:</strong> Choose weights from the target population, then show the slices.</p>
 <h4 id="exercise-6-design-target-domain-evidence">Exercise 6: Design target-domain evidence<a class="heading-anchor" href="#exercise-6-design-target-domain-evidence" aria-label="Link to this section">#</a></h4>

@@ -14,6 +14,14 @@ Boolean expressions introduce another important distinction. A predicate can be 
 
 Imputation is a modeling decision. Replacing missing measurements with zero changes the distribution and may change a group comparison, model score or denominator. The example uses zero only as a clearly declared teaching policy. In real work, preserve a missingness indicator and consider whether missingness itself depends on the outcome, treatment, source system or time.
 
+## Key terms
+
+- **Null:** The Polars marker for a missing value, available in every data type and tracked separately from the values.
+- **NaN:** A floating-point value meaning not a number; it is a present value, so `is_null` is false for it while `is_nan` is true.
+- **Three-valued logic:** Boolean logic with true, false and null, where comparing with null gives null; `filter` keeps only rows whose condition is true.
+- **fill_null:** A method that replaces nulls with a chosen value, such as `fill_null(False)` on a Boolean mask; it does not replace NaN.
+- **Imputation:** Replacing missing values with estimates, which changes later statistics and should be recorded as an explicit policy.
+
 ## Syntax and data contract
 
 is_null and is_nan answer different questions. is_nan can itself return null for an absent input, so fill_null(False) is appropriate when counting actual NaN values. A Boolean expression can be tested directly in filter; fill_null(True) changes which unknown rows are retained. The operators & and | combine row-wise Boolean expressions, while Python and/or are not substitutes for column operations.

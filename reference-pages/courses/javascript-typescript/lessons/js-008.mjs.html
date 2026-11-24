@@ -198,17 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `assert.equal(text.codePointAt(1),</span></span>
 <span class="source-line"><span class="syntax-comment">// 0x1f642);` to `assert.equal(text.codePointAt(2), 0x1f642);` inside its check. Before</span></span>
 <span class="source-line"><span class="syntax-comment">// running it, predict whether the check still passes and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(text.codePointAt(1), 0x1f642)`. Restoring the original line brings back the</span></span>
-<span class="source-line"><span class="syntax-comment">// worked observation: length 3; spread count 2.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(text.codePointAt(2), 0x1f642);`. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(text.codePointAt(1), 0x1f642);` brings back: length 3; spread count 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Compare canonical spellings: debug a regression</span></span>
 <span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `const composed =</span></span>
 <span class="source-line"><span class="syntax-comment">// &#x27;é!&#x27;;`. Run Example B with that line, use the failing check to locate the defect and</span></span>
 <span class="source-line"><span class="syntax-comment">// repair it without changing the check.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(decomposed.normalize(&#x27;NFC&#x27;), composed)`; after it the line reads `const</span></span>
-<span class="source-line"><span class="syntax-comment">// composed = &#x27;é&#x27;;` again and raw strings differ; normalized strings equal.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(decomposed.normalize(&#x27;NFC&#x27;), composed)`. Restoring `const composed = &#x27;é&#x27;;`</span></span>
+<span class="source-line"><span class="syntax-comment">// brings back: raw strings differ; normalized strings equal.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Match a literal regex fragment</span></span>
 <span class="source-line"><span class="syntax-comment">// Escape a.b+ and match it exactly rather than interpreting dot and plus.</span></span>

@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Motion can explain a change, but it can also distract, delay a task or cause discomfort. A transition interpolates between property values when state changes. An animation uses named keyframes over time. Neither should be required to understand essential content. Begin with the static usable state and add restrained motion only when it improves orientation.</p>
 <p>Animating layout-affecting properties can trigger repeated layout work, while transform and opacity often allow more efficient compositing. This is not a guarantee of smooth performance because element size, painting and the device still matter. Measure actual behavior rather than assuming that a property name proves efficiency. Continuous decorative motion rarely helps a reading task.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Transition:</strong> An interpolation from an old to a new property value over a set duration when the value changes, such as on hover.</li>
+<li><strong>Transform:</strong> The property that moves, scales or rotates a box visually without changing the layout of its neighbors.</li>
+<li><strong>Keyframes animation:</strong> An <code>@keyframes</code> rule naming intermediate states, run with the <code>animation</code> property without needing a state change.</li>
+<li><strong>Reduced motion preference:</strong> The <code>prefers-reduced-motion</code> media feature, which reports that a user asked the system to minimize nonessential motion.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Specify the properties to transition instead of transition:all, which can animate unrelated future changes. The prefers-reduced-motion media query lets a page respond to a user&#x27;s preference. A reduced-motion rule can remove movement while retaining a color or outline change. Do not use a tiny but nonzero duration as a universal accessibility strategy; understand the interaction&#x27;s required events and states.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -226,6 +233,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The positional motion is removed for the reduced-motion preference.</p>
+<h3 id="contrast-case-transition-all-animating-an-unrelated-change">Contrast case: transition all animating an unrelated change<a class="heading-anchor" href="#contrast-case-transition-all-animating-an-unrelated-change" aria-label="Link to this section">#</a></h3>
+<p>A later stylesheet change makes the card wider on large screens. Compare what each transition rule does when the media query starts matching.</p>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">card-a</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">transition</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">all</span> <span class="syntax-number">400</span><span class="syntax-keyword">ms</span> <span class="syntax-keyword">ease</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">.</span><span class="syntax-class">card-b</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">transition</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">transform</span> <span class="syntax-number">120</span><span class="syntax-keyword">ms</span> <span class="syntax-keyword">ease</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">@</span><span class="syntax-keyword">media</span> <span class="syntax-operator">(</span><span class="syntax-tag">min-width</span><span class="syntax-operator">:</span> <span class="syntax-tag">48rem</span><span class="syntax-operator">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">card-a</span><span class="syntax-operator">,</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">card-b</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">padding</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>When the viewport crosses 48rem, <code>.card-a</code> animates its padding over 400ms because <code>all</code> includes every animatable property, so text visibly slides and reflows while the reader is trying to look at it. <code>.card-b</code> jumps to the new padding at once and only animates <code>transform</code> for the hover cue. The same surprise happens with color, border or height changes added months later. Listing the intended property keeps future changes instant unless you choose to animate them.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-identify-the-difference-between-a-transition-and-keyframe-animation">Exercise 1: Identify the difference between a transition and keyframe animation.<a class="heading-anchor" href="#exercise-1-identify-the-difference-between-a-transition-and-keyframe-animation" aria-label="Link to this section">#</a></h4>

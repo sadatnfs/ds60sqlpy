@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-calculate-scaled-and-unscaled-values">Exercise 1: Calculate scaled and unscaled values<a class="heading-anchor" href="#exercise-1-calculate-scaled-and-unscaled-values" aria-label="Link to this section">#</a></h3>
 <p>Apply inverse scale exactly once.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate scaled and unscaled values</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Trace the scaled value: a gradient of 0.5 multiplied by scale 1024 becomes 512 during backpropagation, and dividing by 1024 once before the optimizer step restores 0.5.</p>
+<p><strong>Why it is correct here.</strong> Loss scaling multiplies the loss so small gradients stay representable in float16, and every gradient is scaled by the same factor. Unscaling exactly once gives the true gradient.</p>
+<p><strong>A plausible wrong approach.</strong> Unscaling twice, once manually and once by the scaler, produces <code>0.5/1024</code>, an update so small that training appears to stall without any error.</p>
+<p><strong>How to verify.</strong> Compute <code>512/1024 == 0.5</code> by hand. In PyTorch, call <code>scaler.unscale_(optimizer)</code> and inspect <code>p.grad</code> for a known small model, comparing with a float32 run.</p>
 <h3 id="exercise-2-explain-overflow-detection">Exercise 2: Explain overflow detection<a class="heading-anchor" href="#exercise-2-explain-overflow-detection" aria-label="Link to this section">#</a></h3>
 <p>Skip or adjust updates according to the supported scaler when nonfinite.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain overflow detection</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain overflow handling: when scaled gradients contain infinity or NaN, the supported scaler skips the optimizer step and lowers the scale, then raises it again after a run of finite steps.</p>
+<p><strong>Why it is correct here.</strong> A scale large enough to prevent underflow can overflow float16, whose largest finite value is 65504. Skipping the update avoids writing nonfinite values into parameters.</p>
+<p><strong>A plausible wrong approach.</strong> Replacing infinities with zero, or clipping them, so the step can proceed corrupts the update with values unrelated to the true gradient.</p>
+<p><strong>How to verify.</strong> Force an overflow with a very large scale on a tiny model and confirm the parameters are unchanged after the step and the scale decreased.</p>
 <h3 id="exercise-3-place-clipping-correctly">Exercise 3: Place clipping correctly<a class="heading-anchor" href="#exercise-3-place-clipping-correctly" aria-label="Link to this section">#</a></h3>
 <p>Unscale before clipping.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>place clipping correctly</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Unscale before clipping: with gradient 0.5, unscaling 512 gives 0.5, and clipping to threshold 1 leaves 0.5, which is the intended clipped gradient.</p>
+<p><strong>Why it is correct here.</strong> Clipping thresholds are defined in units of the true gradient. The reference computes <code>min(scaled/scale, 1.0) == 0.5</code> for the correct order.</p>
+<p><strong>A plausible wrong approach.</strong> Clipping the scaled 512 to 1 and then unscaling gives <code>1/1024 = 0.0009765625</code>, the wrong value the reference asserts for the reversed order. Training then barely moves.</p>
+<p><strong>How to verify.</strong> Run the reference and confirm both assertions. In code, check that <code>unscale_</code> appears before <code>clip_grad_norm_</code>.</p>
 <h3 id="exercise-4-compare-fp16-and-bf16-concepts">Exercise 4: Compare fp16 and bf16 concepts<a class="heading-anchor" href="#exercise-4-compare-fp16-and-bf16-concepts" aria-label="Link to this section">#</a></h3>
 <p>Their exponent and mantissa allocations differ.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare fp16 and bf16 concepts</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare float16 and bfloat16: float16 has 5 exponent bits and 10 mantissa bits, while bfloat16 has 8 exponent bits, the same as float32, and 7 mantissa bits.</p>
+<p><strong>Why it is correct here.</strong> bfloat16 covers the float32 range, so gradients rarely underflow and loss scaling is usually unnecessary, but it has less precision. float16 is more precise but has a narrow range.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming both 16-bit formats behave the same leads to dropping loss scaling for float16, where small gradients flush to zero.</p>
+<p><strong>How to verify.</strong> Cast <code>1e-8</code> to both types: float16 gives 0, bfloat16 keeps a nonzero value. Cast <code>1 + 2**-9</code>: float16 keeps it, bfloat16 rounds to 1.</p>
 <h3 id="exercise-5-design-a-full-precision-baseline">Exercise 5: Design a full-precision baseline<a class="heading-anchor" href="#exercise-5-design-a-full-precision-baseline" aria-label="Link to this section">#</a></h3>
 <p>Use same initialization batch and loss.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a full-precision baseline</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Run a float32 baseline with the same initialization, batches, loss and number of steps, and compare loss curves and final metrics with the mixed-precision run.</p>
+<p><strong>Why it is correct here.</strong> Only a matched baseline can show whether reduced precision changed the training outcome. Differences in seeds or data order would otherwise be confused with precision effects.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing the mixed-precision run with an older float32 run using a different seed attributes noise to precision.</p>
+<p><strong>How to verify.</strong> Record seed, data order and step count for both runs and require the final loss to fall within an agreed tolerance.</p>
 <h3 id="exercise-6-record-quality-and-throughput-separately">Exercise 6: Record quality and throughput separately<a class="heading-anchor" href="#exercise-6-record-quality-and-throughput-separately" aria-label="Link to this section">#</a></h3>
 <p>A speed improvement cannot excuse numerical failure.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>record quality and throughput separately</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Record quality metrics, such as final loss and validation accuracy, separately from throughput, such as samples per second, for both precision settings.</p>
+<p><strong>Why it is correct here.</strong> Mixed precision can raise throughput while degrading quality. A combined score hides which side changed.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the speedup without the quality comparison can justify a configuration that fails to train properly.</p>
+<p><strong>How to verify.</strong> Present a table with both metrics per configuration, and accept mixed precision only if quality meets the baseline tolerance.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Correct gradient 0.5; incorrect clipping order yields 0.0009765625.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-090_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -231,23 +231,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the all-line quantity alongside revenue.</p>
 <p>Quantity is 17; revenue is 187 USD. Their units differ.</p>
+<p><strong>Why it fits this model:</strong> QuantitySold sums Sales[Quantity] over the same eight unfiltered lines that produce 187, so both measures share one context: 2 + 1 + 2 + 3 + 4 + 1 + 2 + 2 = 17 units beside 187 USD of NetAmount.</p>
+<p><strong>Tempting mistake:</strong> Counting distinct Sales[ProductKey] values returns 3 and COUNTROWS(Sales) returns 8. Neither is a unit total, and placing 17 and 187 in one sum would add units to dollars.</p>
+<p><strong>How to confirm:</strong> <code>DEFINE MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] ) MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] ) EVALUATE ROW ( &quot;Revenue&quot;, [NetRevenue], &quot;Units&quot;, [QuantitySold] )</code> should return 187 and 17 in a single row.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the product question from Notebook to Mug and list the contributing lines.</p>
 <p>S3, S6 and S8 contribute 40 + 20 + 36 = 96.</p>
+<p><strong>Why it fits this model:</strong> Mug is ProductKey 3, and the active one-to-many Product relationship carries that key to Sales, keeping S3 (40), S6 (20) and S8 (36). The worked Notebook case follows the same path through S1, S4 and S7 to reach 67.</p>
+<p><strong>Tempting mistake:</strong> Filtering Product[Category] = &quot;Home&quot; also gives 96 today only because Mug is the sole Home product. It answers a category question and would drift silently once another Home item sells.</p>
+<p><strong>How to confirm:</strong> Run <code>CALCULATETABLE ( VALUES ( Sales[SaleID] ), Product[Product] = &quot;Mug&quot; )</code> and expect exactly S3, S6 and S8, then confirm the revenue row shows 96.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a one-row query that names the output QuantitySold.</p>
 <p>EVALUATE ROW ( &quot;QuantitySold&quot;, SUM ( Sales[Quantity] ) ) gives 17.</p>
+<p><strong>Why it fits this model:</strong> EVALUATE needs a table, so ROW turns one named scalar into a one-row result. SUM(Sales[Quantity]) has no filters here, so it sees all eight lines and returns 17.</p>
+<p><strong>Tempting mistake:</strong> Writing SUMX(Sales, Sales[Quantity] * Sales[UnitPrice]) under the QuantitySold label returns 195, which is gross revenue in dollars, not a count of units.</p>
+<p><strong>How to confirm:</strong> The result has one column named QuantitySold and one value, 17. Add <code>DEFINE MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )</code> to the query and return <code>[QuantitySold]</code> beside it under the same empty filter context: both columns read 17.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a report labeled net profit that displays 187.</p>
 <p>The fixture total is sales after line discounts, before cost, returns and tax. Profit is a different measure.</p>
+<p><strong>Why it fits this model:</strong> NetAmount already subtracts line discounts: gross revenue is 195 and the discounts on S2, S4 and S8 are 1 + 3 + 4 = 8, so 187 is discounted sales. Product cost is a separate column on Product.</p>
+<p><strong>Tempting mistake:</strong> Relabeling 187 as profit ignores UnitCost entirely. Cost on these lines is Notebook 7 x 2, Pen 5 x 1 and Mug 5 x 5, or 44 in total, so a margin before returns and tax would be 143.</p>
+<p><strong>How to confirm:</strong> <code>SUMX ( Sales, Sales[Quantity] * RELATED ( Product[UnitCost] ) )</code> returns 44, and [NetRevenue] minus that cost returns 143 rather than 187.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain what happens in this classroom after editing 187 into a draft comment.</p>
 <p>Only the draft changes. The hand-derived reference table remains bound to the reference file and model.</p>
+<p><strong>Why it fits this model:</strong> The worked result table is tied to the saved reference file and model.json, which are the only inputs that reference-results.json hashes. A comment in a draft is neither.</p>
+<p><strong>Tempting mistake:</strong> Seeing 187 in the reference table after editing the draft and concluding that the draft formula ran. The table did not change because nothing it depends on changed.</p>
+<p><strong>How to confirm:</strong> Compare reference-results.json before and after the edit; its hash and its 187 stay identical, while only the draft file timestamp moves.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Describe the evidence needed to call an exported formula engine-tested.</p>
 <p>Record the actual engine/version, model, filter context, exact submitted source and observed output. Offline comparison supplies none of those execution observations.</p>
+<p><strong>Why it fits this model:</strong> Engine testing is a claim about an execution, so it needs the observations an execution produces: which engine and version, which model file, what filter context, which exact query text and what value came back.</p>
+<p><strong>Tempting mistake:</strong> Treating an offline match of 187 as an engine result. The comparison checks arithmetic against a hand-derived table and never submits the formula to any engine.</p>
+<p><strong>How to confirm:</strong> A complete record reads like: engine and build, retail model, no filters, the exact submitted ROW query and an observed 187. A missing field means the claim is unverified.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

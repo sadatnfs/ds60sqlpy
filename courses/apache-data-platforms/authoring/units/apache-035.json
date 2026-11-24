@@ -5,6 +5,28 @@
   "minutes": 70,
   "prerequisites": ["apache-033", "apache-006"],
   "concepts": ["consumer positions", "committed next offsets", "replay", "rebalance boundaries"],
+  "key_terms": [
+    [
+      "Consumer position",
+      "The offset of the next record a consumer instance will fetch, which advances as it reads."
+    ],
+    [
+      "Committed offset",
+      "The stored offset where a later consumer in the same group resumes. Committing n means the next record to read is n."
+    ],
+    [
+      "At-least-once processing",
+      "Committing an offset only after the record's effect succeeds, so a crash can replay the effect but never skip it."
+    ],
+    [
+      "Manual assignment",
+      "Assigning specific partitions to a consumer without group subscription, which isolates offset behavior from rebalancing."
+    ],
+    [
+      "Rebalance",
+      "The coordinator's reassignment of partitions among group members when a member joins, leaves or fails."
+    ]
+  ],
   "evidence": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad.",
   "sources": [
     ["Kafka design and delivery contracts", "https://kafka.apache.org/44/design/design/"],

@@ -33,7 +33,7 @@ Replace `01` with the chapter number. Optional ecosystems such as PyMC/Stan, XGB
 
 ## Scope and provenance
 
-[source-outline.md](source-outline.md) is an unmodified copy of the original scope outline that defines the book's 40 sections. [manifest.json](manifest.json) records its SHA-256 digest and chapter metadata. [coverage.json](coverage.json) maps each of its 1,005 bold method bullets to a stable `stat-SS-NN` anchor. These IDs follow the original section and bullet order, so similarly named methods in different contexts retain different IDs. Coverage means an explanatory treatment of the named method, not an unsupported claim that one toy calculation validates the entire method family.
+[source-outline.md](source-outline.md) is an unmodified copy of the original scope outline that defines the book's 40 sections. [manifest.json](manifest.json) records its SHA-256 digest and chapter metadata, including the observable learning outcome shown for each chapter. [coverage.json](coverage.json) maps each of its 1,005 bold method bullets to a stable `stat-SS-NN` anchor. These IDs follow the original section and bullet order, so similarly named methods in different contexts retain different IDs. Coverage means an explanatory treatment of the named method, not an unsupported claim that one toy calculation validates the entire method family.
 
 The prose, numerical fixtures and programs are original teaching material. Chapter references link to primary papers, author-maintained books or official API documentation. External reading is optional. Interpret each demonstration within its stated assumptions and distinguish a worked calculation, an estimator's mathematical guarantee, and evidence that a real deployment is useful.
 

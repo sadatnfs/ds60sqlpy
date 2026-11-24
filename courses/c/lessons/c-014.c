@@ -5,18 +5,22 @@ int main(void) {
      Copy worked example 1 into a scratch pad and change `CHECK(parse_int("42",
      &out) && out == 42);` to `CHECK(parse_int("43", &out) && out == 42);`
      inside its CHECK. Before running, predict whether the CHECK still holds and
-     explain why; then restore it. Expected: The changed run stops with `Check
-     failed` at the CHECK on `parse_int("42", &out) && out == 42`. Restoring the
-     original line brings back the worked observation: success is true and
-     output is 42. */
+     explain why; then restore it. Expected: With `CHECK(parse_int("43", &out)
+     && out == 42);` the run stops with `Check failed` at the CHECK on
+     `parse_int("42", &out) && out == 42`, because the "parse a complete
+     integer" case no longer shows that success is true and output is 42.
+     Restoring `CHECK(parse_int("42", &out) && out == 42);` brings that
+     observation back. */
 
   /* Exercise 2: Reject trailing garbage: debug a regression
-     A regression changed one token in worked example 2, so one line now reads
-     `int out = 8;`. Run worked example 2 with that line, use the failing CHECK
-     to locate the defect and repair it without changing the CHECK. Expected:
-     Before the repair the run stops with `Check failed` at the CHECK on
-     `!parse_int("42x", &out) && out == 7`; after it the line reads `int out =
-     7;` again and the call fails and output remains 7. */
+     A regression changed one token in worked example 2, the "reject trailing
+     garbage" case, so one line now reads `int out = 8;`. Run the example with
+     that line, use the failing CHECK to find why the call fails and output
+     remains 7 no longer holds and repair the line without changing the CHECK.
+     Expected: Before the repair the run stops with `Check failed` at the CHECK
+     on `!parse_int("42x", &out) && out == 7`. Once the line reads `int out =
+     7;` again, the "reject trailing garbage" case again shows that the call
+     fails and output remains 7. */
 
   /* Exercise 3: Reject empty input
      Parse an empty string.

@@ -61,11 +61,11 @@ println(label)
 
 Keep three named prices and calculate their total.
 
-**Inputs/evidence:** For spark-002 Exercise 1, 125L, 200L, 75L.
+**Inputs/evidence:** 125L, 200L, 75L.
 
-**Expected result/shape:** For spark-002 Exercise 1, total is 400L.
+**Expected result/shape:** Total is 400L.
 
-**Verify:** For spark-002 Exercise 1, assert total==400L and print the named value.
+**Verify:** Assert total==400L and print the named value.
 
 **Progressive hints:**
 
@@ -77,11 +77,11 @@ Keep three named prices and calculate their total.
 
 Compare Int and Long at a documented boundary.
 
-**Inputs/evidence:** For spark-002 Exercise 2, 2147483647L+1L and an intentionally reviewed Int-only variant.
+**Inputs/evidence:** 2147483647L+1L and an intentionally reviewed Int-only variant.
 
-**Expected result/shape:** For spark-002 Exercise 2, Long result 2147483648L; reject relying on the overflowing Int value as money.
+**Expected result/shape:** Long result 2147483648L; reject relying on the overflowing Int value as money.
 
-**Verify:** For spark-002 Exercise 2, run the Long assertion; explain why the narrower arithmetic is a different contract.
+**Verify:** Run the Long assertion; explain why the narrower arithmetic is a different contract.
 
 **Progressive hints:**
 
@@ -91,13 +91,13 @@ Compare Int and Long at a documented boundary.
 
 ### Exercise 3: Calculate remaining budget
 
-Bind a450L budget and compute remaining cents.
+Bind a `450L` budget and compute remaining cents.
 
-**Inputs/evidence:** For spark-002 Exercise 3, budget 450L, total 400L.
+**Inputs/evidence:** Budget 450L, total 400L.
 
-**Expected result/shape:** For spark-002 Exercise 3, remaining 50L.
+**Expected result/shape:** Remaining 50L.
 
-**Verify:** For spark-002 Exercise 3, assert the difference, not merely the total.
+**Verify:** Assert the difference, not merely the total.
 
 **Progressive hints:**
 
@@ -109,11 +109,11 @@ Bind a450L budget and compute remaining cents.
 
 Use an if expression for the budget label.
 
-**Inputs/evidence:** For spark-002 Exercise 4, remaining 50L, threshold 0L.
+**Inputs/evidence:** Remaining 50L, threshold 0L.
 
-**Expected result/shape:** For spark-002 Exercise 4, String message is within budget.
+**Expected result/shape:** String message is within budget.
 
-**Verify:** For spark-002 Exercise 4, assert the exact String and its nonnegative condition.
+**Verify:** Assert the exact String and its nonnegative condition.
 
 **Progressive hints:**
 
@@ -125,11 +125,11 @@ Use an if expression for the budget label.
 
 Review `val budget=450L; budget=350L` and repair without mutation.
 
-**Inputs/evidence:** For spark-002 Exercise 5, one immutable binding and a proposed reassignment.
+**Inputs/evidence:** One immutable binding and a proposed reassignment.
 
-**Expected result/shape:** For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with 350L.
+**Expected result/shape:** Compile-time rejection; repaired code uses a new name revisedBudget with 350L.
 
-**Verify:** For spark-002 Exercise 5, retain the compiler error category and show the new-name repair; do not include broken code in the final reference.
+**Verify:** Retain the compiler error category and show the new-name repair; do not include broken code in the final reference.
 
 **Progressive hints:**
 
@@ -141,11 +141,11 @@ Review `val budget=450L; budget=350L` and repair without mutation.
 
 Repeat the calculation with 350L and predict the sign.
 
-**Inputs/evidence:** For spark-002 Exercise 6, same 400L basket, new 350L budget.
+**Inputs/evidence:** Same 400L basket, new 350L budget.
 
-**Expected result/shape:** For spark-002 Exercise 6, remaining-50L and over budget label.
+**Expected result/shape:** Remaining-50L and over budget label.
 
-**Verify:** For spark-002 Exercise 6, assert both changed outputs while the original total stays 400L.
+**Verify:** Assert both changed outputs while the original total stays 400L.
 
 **Progressive hints:**
 

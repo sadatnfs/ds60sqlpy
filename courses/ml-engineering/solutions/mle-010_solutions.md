@@ -9,11 +9,15 @@ The executable reference contains the two complete worked cases with assertions.
 
 Retain a stable source identity and the actual submitted configuration. Do not attach a result from another revision without explaining the difference.
 
+Call client.set_tag(run_id, "source_sha256", digest(source_text)) before set_terminated, then read loaded.data.tags back. A tag such as "latest" or a branch name is the plausible mistake: it names a moving pointer, so two runs months apart can carry the same label while running different code.
+
 **Expected:** It identifies the implementation used.
 
 ## 2. Distinguish metadata and artifacts
 
 The local example places both under owned paths, but deployed stores may use separate systems. Verify both when designing retention and recovery.
+
+In example_one the brier value 0.2 lives in tracking.db, a SQLite file, while manifest.json is copied under the experiment's artifact_location. Deleting the artifacts folder leaves get_run() working and the metric intact, yet list_artifacts() then points at bytes that no longer exist. Back up and verify both locations.
 
 **Expected:** The answer separates backend metadata from artifact bytes.
 
@@ -21,11 +25,15 @@ The local example places both under owned paths, but deployed stores may use sep
 
 Retain the reason and subsequent decision. A failed run should not be relabeled successful merely to simplify a dashboard.
 
+Example_two ends with status FAILED and training_loss 0.1 still readable. Calling set_terminated(run_id) with the default status after a later rejection would record FINISHED, and anyone filtering for finished runs would treat a rejected candidate as usable. Assert loaded.info.status == "FAILED" after reloading.
+
 **Expected:** The useful observations remain available.
 
 ## 4. Inspect artifact content
 
 Validate the file and its identity. Tracking provides lineage plumbing; it does not determine whether the contract is correct.
+
+Download evidence/manifest.json with client.download_artifacts into the temporary directory, json.load it, and assert feature_order == ["usage", "tickets", "region"]. Checking only that list_artifacts finds the path proves a file exists, not that its feature order matches what the model expects.
 
 **Expected:** It matches the intended model interface.
 
@@ -33,11 +41,15 @@ Validate the file and its identity. Tracking provides lineage plumbing; it does 
 
 Keep ownership and destination explicit in automation. A real shared tracking service needs separately approved credentials and access controls.
 
+Without tracking_uri and registry_uri, MlflowClient falls back to the MLFLOW_TRACKING_URI environment variable or a local ./mlruns folder. On a machine where that variable points at a shared server, this exercise would write fixture metrics into someone else's workspace. Print client.tracking_uri and confirm it starts with sqlite:/// and the temporary path.
+
 **Expected:** It cannot silently select an external workspace.
 
 ## 6. Plan reproducibility
 
 Record the relevant versions and selection process. Deterministic fixtures support debugging, but not every training system promises bitwise identity.
+
+For the run in example_one that means at least the data digest already in the manifest, the source tag from task 1, the installed MLflow and scikit-learn versions, the random seed, and the threshold 0.5 with how it was chosen.
 
 **Expected:** It includes data, code, dependencies, randomness and procedure.
 

@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "track_id": "web-development",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "web-033",
+      "title": "Integer cents in PHP: guarded arithmetic and exact money display",
+      "anchor": "reference",
+      "source_path": "courses/web-development/solutions/web-033_solution.php",
+      "source_sha256": "4849d1ac16f3528fec8dda676261497eb92b7e170d92e88d29b96dee6112913a",
+      "expected_output": ["3.75", "web-033 reference checks passed"],
+      "steps": [
+        {
+          "lines": [1, 10],
+          "excerpt": "<?php\n\ndeclare(strict_types=1);\n\nfunction check(bool $condition, string $message): void\n{\n  if (!$condition) {\n    throw new RuntimeException($message);\n  }\n}",
+          "title": "Strict types and a small check helper",
+          "explanation": "declare(strict_types=1) must be the first statement in the file. It makes PHP refuse to silently convert arguments, so passing the string '3' where an int is declared raises a TypeError instead of quietly becoming 3. check is a tiny helper that throws a RuntimeException with a message when a condition is false; an uncaught exception stops the script with a nonzero exit code.",
+          "observe": "Any failed check ends the script before the final line is printed."
+        },
+        {
+          "lines": [12, 21],
+          "excerpt": "function totalCents(int $unitCents, int $quantity): int\n{\n  if ($unitCents < 0 || $unitCents > 100000 || $quantity < 0 || $quantity > 1000) {\n    throw new InvalidArgumentException(\"Values outside teaching limits\");\n  }\n  return $unitCents * $quantity;\n}\n$total = totalCents(125, 3);\ncheck($total === 375, \"Wrong total\");\ncheck(totalCents(125, 0) === 0, \"Zero quantity failed\");",
+          "title": "Money as whole cents with input limits",
+          "explanation": "Prices are stored as integer cents, not floats, because floats such as 0.1 cannot be represented exactly and rounding errors add up. totalCents first rejects negative values and anything above the teaching limits; the limits also keep the product far from integer overflow. Then a plain multiplication gives the exact total. The checks confirm 125 cents times 3 is 375 and that a zero quantity gives zero. The triple equals === compares both value and type.",
+          "observe": "The total is the integer 375, not 3.75."
+        },
+        {
+          "lines": [22, 24],
+          "excerpt": "echo intdiv($total, 100) . \".\" . str_pad((string) ($total % 100), 2, \"0\", STR_PAD_LEFT) . \"\\n\";\n\necho \"web-033 reference checks passed\\n\";",
+          "title": "Formatting cents as dollars without floats",
+          "explanation": "intdiv(375, 100) gives the whole dollars, 3. The remainder 375 % 100 gives 75 cents. str_pad adds a leading zero when the cents are a single digit, so 5 cents prints as 05, not 5. The dot operator joins strings. Only the display uses a decimal point; the stored value stays an integer.",
+          "observe": "The script prints 3.75 and then web-033 reference checks passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "web-040",
+      "title": "A PHP value object with constructor validation and readonly properties",
+      "anchor": "reference",
+      "source_path": "courses/web-development/solutions/web-040_solution.php",
+      "source_sha256": "807ae3b37ddf2eec6abb7efa3edeef4af6ebe4b232b0ff83a3020f65e200c4a2",
+      "expected_output": ["CSS: 45 minutes", "web-040 reference checks passed"],
+      "steps": [
+        {
+          "lines": [1, 10],
+          "excerpt": "<?php\n\ndeclare(strict_types=1);\n\nfunction check(bool $condition, string $message): void\n{\n  if (!$condition) {\n    throw new RuntimeException($message);\n  }\n}",
+          "title": "Strict types and the check helper",
+          "explanation": "strict_types makes argument types binding: a constructor that declares int will reject the string '45'. The check helper turns a false condition into a RuntimeException so mistakes stop the script loudly instead of being printed and ignored.",
+          "observe": "Nothing is printed until every check has passed."
+        },
+        {
+          "lines": [12, 24],
+          "excerpt": "final class StudySession\n{\n  public function __construct(public readonly string $topic, public readonly int $minutes)\n  {\n    if (trim($topic) === \"\" || $minutes < 0) {\n      throw new InvalidArgumentException(\"Invalid session\");\n    }\n  }\n  public function label(): string\n  {\n    return $this->topic . \": \" . $this->minutes . \" minutes\";\n  }\n}",
+          "title": "Constructor promotion, readonly and validation",
+          "explanation": "final means no other class can extend StudySession and change its behaviour. Writing public readonly in the constructor parameters is constructor promotion: PHP creates the properties and assigns them automatically. readonly means they can be set once, during construction, and any later assignment throws an Error. The constructor body then rejects a blank topic (trim removes surrounding spaces) or negative minutes, so an invalid object can never exist. label builds a display string from the two properties.",
+          "observe": "Every StudySession that exists has a non-blank topic and minutes of zero or more."
+        },
+        {
+          "lines": [25, 36],
+          "excerpt": "$session = new StudySession(\"CSS\", 45);\ncheck($session->label() === \"CSS: 45 minutes\", \"Label failed\");\n$failed = false;\ntry {\n  new StudySession(\"\", 10);\n} catch (InvalidArgumentException) {\n  $failed = true;\n}\ncheck($failed, \"Empty topic accepted\");\necho $session->label() . \"\\n\";\n\necho \"web-040 reference checks passed\\n\";",
+          "title": "Using the object and proving a rejection",
+          "explanation": "new StudySession('CSS', 45) creates a valid object and its label is checked exactly. The try block then attempts an object with an empty topic. catch (InvalidArgumentException) without a variable name is allowed in PHP 8 when you do not need the exception object. The $failed flag records that the rejection really happened, and check fails the script if it did not. Finally the label and a success line are echoed.",
+          "observe": "The script prints CSS: 45 minutes and then web-040 reference checks passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "web-047",
+      "title": "Server-side form validation that returns errors instead of guessing",
+      "anchor": "reference",
+      "source_path": "courses/web-development/solutions/web-047_solution.php",
+      "source_sha256": "b160016f23e98c0f2ac8c9c0e4b3b9ad2ea12941ed372cea120a25791e2ccf95",
+      "expected_output": [
+        "{\"value\":null,\"errors\":{\"minutes\":\"Use 5 to 120 whole minutes.\"}}",
+        "web-047 reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [12, 17],
+          "excerpt": "enum Topic: string\n{\n  case Html = \"HTML\";\n  case Css = \"CSS\";\n  case Php = \"PHP\";\n}",
+          "title": "A backed enum lists the only allowed topics",
+          "explanation": "An enum declares a fixed set of cases. Because this one is backed by strings, each case has a value such as 'HTML'. Topic::tryFrom($text) returns the matching case or null if the text is not one of the values, and the comparison is exact, so 'html' in lowercase does not match.",
+          "observe": "Only the strings HTML, CSS and PHP map to a topic."
+        },
+        {
+          "lines": [19, 27],
+          "excerpt": "function validatePlan(array $input): array\n{\n  $errors = [];\n  $topic = $input[\"topic\"] ?? null;\n  $minutes = $input[\"minutes\"] ?? null;\n  $choice = is_string($topic) ? Topic::tryFrom($topic) : null;\n  if ($choice === null) {\n    $errors[\"topic\"] = \"Choose HTML, CSS or PHP.\";\n  }",
+          "title": "Read untrusted fields without assuming they exist",
+          "explanation": "Form input arrives as an array that may be missing keys or contain arrays instead of strings. The null coalescing operator ?? returns null instead of a warning when a key is absent. is_string guards tryFrom, because a crafted request such as topic[]=HTML sends an array, and under strict types passing an array would throw a TypeError. Each problem is stored in $errors under its field name so a form can show the message next to the right input.",
+          "observe": "A missing or array-valued topic produces a topic error, not a crash."
+        },
+        {
+          "lines": [28, 35],
+          "excerpt": "  if (\n    !is_string($minutes) ||\n    preg_match('/^[0-9]{1,3}$/D', $minutes) !== 1 ||\n    (int) $minutes < 5 ||\n    (int) $minutes > 120\n  ) {\n    $errors[\"minutes\"] = \"Use 5 to 120 whole minutes.\";\n  }",
+          "title": "Validate minutes as text before converting",
+          "explanation": "The minutes field must be a string of one to three digits. In the regular expression, ^ and $ anchor the whole value and the D modifier stops $ from also matching before a trailing newline, so '30\\n' is rejected. Only after the format check is the text cast with (int), which would otherwise turn '12abc' into 12 without complaint. The range check then requires 5 to 120.",
+          "observe": "Values such as 4, 121, 1e2 or 30 followed by a newline are all rejected."
+        },
+        {
+          "lines": [36, 40],
+          "excerpt": "  return [\n    \"value\" => $errors ? null : [\"topic\" => $choice->value, \"minutes\" => (int) $minutes],\n    \"errors\" => $errors,\n  ];\n}",
+          "title": "Return either a clean value or the errors",
+          "explanation": "The function always returns the same shape: a value and an errors array. An empty array is falsy in PHP, so when there are no errors the value is built from the enum case and the integer minutes; otherwise value is null. Keeping the original input separate from this result is what lets a page redisplay what the user typed together with the messages.",
+          "observe": "value is null whenever errors is not empty."
+        },
+        {
+          "lines": [41, 56],
+          "excerpt": "check(\n  validatePlan([\"topic\" => \"HTML\", \"minutes\" => \"30\"])[\"value\"][\"minutes\"] === 30,\n  \"Valid plan failed\",\n);\ncheck(\n  validatePlan([\"topic\" => [\"HTML\"], \"minutes\" => \"30\"])[\"value\"] === null,\n  \"Array input accepted\",\n);\ncheck(validatePlan([])[\"value\"] === null, \"Missing input accepted\");\ncheck(\n  validatePlan([\"topic\" => \"html\", \"minutes\" => \"30\"])[\"value\"] === null,\n  \"Unknown topic accepted\",\n);\necho json_encode(validatePlan([\"topic\" => \"CSS\", \"minutes\" => \"121\"]), JSON_THROW_ON_ERROR) . \"\\n\";\n\necho \"web-047 reference checks passed\\n\";",
+          "title": "Checks and a JSON view of one rejected submission",
+          "explanation": "The checks cover a valid plan, an array smuggled into topic, a completely empty submission and the wrong letter case. Then a CSS plan with 121 minutes is validated and encoded as JSON. JSON_THROW_ON_ERROR makes json_encode throw instead of returning false if encoding ever fails. The topic is fine, so only the minutes error appears.",
+          "observe": "The JSON line shows value null and a single minutes error, followed by web-047 reference checks passed"
+        }
+      ]
+    }
+  ]
+}

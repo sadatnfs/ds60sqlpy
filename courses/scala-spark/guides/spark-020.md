@@ -8,7 +8,7 @@ Intermediate; approximately 90 minutes. Direct prerequisites: `spark-019`. The p
 
 ## How to run this lesson
 
-Open `spark-020` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-020` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-020.scala) and [PySpark learner](../lessons/spark-020.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-020_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-020_solution.scala) and [PySpark reference](../solutions/spark-020_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -34,7 +34,7 @@ The fixture has 24 rows with identities 0 through 23, four logical key values an
 
 Repartitioning to six partitions requests a new distribution. Repartitioning by key additionally requires equal key values to share a destination partition within that result. Four distinct keys do not imply four occupied partitions, and six requested partitions do not imply six nonempty ones. Hash collisions can place different keys together. A partition index is an execution observation, not a durable business identifier to store in a progress table or use as an entity key.
 
-The worker uses local[2]. That permits two local execution threads, not two total partitions. A stage with six partitions can execute its tasks in waves. Conversely, a one-partition result offers only one partition of work for that stage. Partition count influences scheduling and potential parallelism, but row counts, record sizes, key skew and operators also matter. A 24-row fixture cannot justify a production tuning recommendation or establish meaningful speed differences.
+The worker uses `local[2]`. That permits two local execution threads, not two total partitions. A stage with six partitions can execute its tasks in waves. Conversely, a one-partition result offers only one partition of work for that stage. Partition count influences scheduling and potential parallelism, but row counts, record sizes, key skew and operators also matter. A 24-row fixture cannot justify a production tuning recommendation or establish meaningful speed differences.
 
 Coalesce can combine existing partitions while avoiding a full redistribution. This may be useful when a filtered result has become much smaller, but it can also preserve imbalance and concentrate work. Coalescing the six-partition relation to two returns two partitions here, while asking a four-partition source to coalesce to ten leaves its partition count at four. The lesson checks this behavior with AQE disabled to make the observed boundary clear. Adaptive execution can alter partitioning in other workloads and must be recorded when making comparisons.
 
@@ -51,9 +51,7 @@ Canonical collection is intentionally limited to 24 rows. Production correctness
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 
 val facts =
   spark.range(0L, 24L, 1L, 4).withColumn("key", col("id") % 4L).withColumn("value", col("id") * 10L)
@@ -61,20 +59,7 @@ assert(spark.conf.get("spark.sql.adaptive.enabled") == "false")
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 
 facts = (
     spark.range(0, 24, 1, 4)
@@ -174,7 +159,7 @@ Return a relation sorted within each partition by key ascending, id ascending. I
 
 Order key descending then event identity id ascending and return the first 5 rows. Repeat after several input layouts.
 
-**Expected result/shape:** IDs [3, 7, 11, 15, 19], allkey 3 and values [30, 70, 110, 150, 190]. The final sixthkey 3 row is outside the limit.
+**Expected result/shape:** IDs `[3, 7, 11, 15, 19]`, all with key 3, and values `[30, 70, 110, 150, 190]`. The sixth key 3 row is outside the limit.
 
 **Verify:** Assert all five ordered tuples from original, keyed and coalesced inputs.
 
@@ -186,7 +171,7 @@ Do not equate partitions with executors, worker threads, business groups or outp
 
 ## Self-check
 
-Explain the contract of `canonical` / `canonical` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `canonical` / `canonical` without reading its solution. Then, from memory, state what Exercise 6 (Create a globally ordered bounded preview) must produce: IDs `[3, 7, 11, 15, 19]`, all with key 3, and values `[30, 70, 110, 150, 190]`. The sixth key 3 row is outside the limit. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

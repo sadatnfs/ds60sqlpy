@@ -197,22 +197,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Create a trailing payload: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `unsigned char data[] =</span></span>
-<span class="source-line"><span class="syntax-comment">     {1, 2, 3};` to `unsigned char data[] = {2, 2, 3};`. Before running, predict</span></span>
-<span class="source-line"><span class="syntax-comment">     which CHECK fails and which value it now sees; then run it and restore the</span></span>
-<span class="source-line"><span class="syntax-comment">     original line. Expected: The changed run stops with `Check failed` at the</span></span>
-<span class="source-line"><span class="syntax-comment">     CHECK on `p != NULL &amp;&amp; p-&gt;length == 3 &amp;&amp; p-&gt;data[0] == 1 &amp;&amp; p-&gt;data[2] ==</span></span>
-<span class="source-line"><span class="syntax-comment">     3`. Restoring the original line brings back the worked observation: length</span></span>
-<span class="source-line"><span class="syntax-comment">     and all three bytes are retained. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;create a trailing payload&quot; case, into a scratch</span></span>
+<span class="source-line"><span class="syntax-comment">     pad and change `unsigned char data[] = {1, 2, 3};` to `unsigned char data[]</span></span>
+<span class="source-line"><span class="syntax-comment">     = {2, 2, 3};`. Before running, predict which CHECK fails and which value it</span></span>
+<span class="source-line"><span class="syntax-comment">     sees in place of the worked result (length and all three bytes are</span></span>
+<span class="source-line"><span class="syntax-comment">     retained); then run it and restore the original line. Expected: With</span></span>
+<span class="source-line"><span class="syntax-comment">     `unsigned char data[] = {2, 2, 3};` the run stops with `Check failed` at</span></span>
+<span class="source-line"><span class="syntax-comment">     the CHECK on `p != NULL &amp;&amp; p-&gt;length == 3 &amp;&amp; p-&gt;data[0] == 1 &amp;&amp; p-&gt;data[2]</span></span>
+<span class="source-line"><span class="syntax-comment">     == 3`, because the &quot;create a trailing payload&quot; case no longer shows that</span></span>
+<span class="source-line"><span class="syntax-comment">     length and all three bytes are retained. Restoring `unsigned char data[] =</span></span>
+<span class="source-line"><span class="syntax-comment">     {1, 2, 3};` brings that observation back. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Create an empty packet: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, so one line now reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `struct Packet *p = packet_create(NULL, 1);`. Run worked example 2 with</span></span>
-<span class="source-line"><span class="syntax-comment">     that line, use the failing CHECK to locate the defect and repair it without</span></span>
-<span class="source-line"><span class="syntax-comment">     changing the CHECK. Expected: Before the repair the run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `p != NULL &amp;&amp; p-&gt;length == 0`; after it the line</span></span>
-<span class="source-line"><span class="syntax-comment">     reads `struct Packet *p = packet_create(NULL, 0);` again and the header</span></span>
-<span class="source-line"><span class="syntax-comment">     exists and records zero length. */</span></span>
+<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;create an empty</span></span>
+<span class="source-line"><span class="syntax-comment">     packet&quot; case, so one line now reads `struct Packet *p = packet_create(NULL,</span></span>
+<span class="source-line"><span class="syntax-comment">     1);`. Run the example with that line, use the failing CHECK to find why the</span></span>
+<span class="source-line"><span class="syntax-comment">     header exists and records zero length no longer holds and repair the line</span></span>
+<span class="source-line"><span class="syntax-comment">     without changing the CHECK. Expected: Before the repair the run stops with</span></span>
+<span class="source-line"><span class="syntax-comment">     `Check failed` at the CHECK on `p != NULL &amp;&amp; p-&gt;length == 0`. Once the line</span></span>
+<span class="source-line"><span class="syntax-comment">     reads `struct Packet *p = packet_create(NULL, 0);` again, the &quot;create an</span></span>
+<span class="source-line"><span class="syntax-comment">     empty packet&quot; case again shows that the header exists and records zero</span></span>
+<span class="source-line"><span class="syntax-comment">     length. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Reject total-size overflow</span></span>
 <span class="source-line"><span class="syntax-comment">     Request SIZE_MAX payload bytes.</span></span>

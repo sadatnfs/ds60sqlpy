@@ -2,21 +2,25 @@
 
 int main(void) {
   /* Exercise 1: Find an interior boundary: change one input
-     Copy worked example 1 into a scratch pad and change `int values[] = {2, 4,
-     6, 8};` to `int values[] = {2, 5, 6, 8};`. Before running, predict which
-     CHECK fails and which value it now sees; then run it and restore the
-     original line. Expected: The changed run stops with `Check failed` at the
-     CHECK on `lower_bound(values, 4, 5) == 2`. Restoring the original line
-     brings back the worked observation: the lower-bound index is 2. */
+     Copy worked example 1, the "find an interior boundary" case, into a scratch
+     pad and change `int values[] = {2, 4, 6, 8};` to `int values[] = {2, 5, 6,
+     8};`. Before running, predict which CHECK fails and which value it sees in
+     place of the worked result (the lower-bound index is 2); then run it and
+     restore the original line. Expected: With `int values[] = {2, 5, 6, 8};`
+     the run stops with `Check failed` at the CHECK on `lower_bound(values, 4,
+     5) == 2`, because the "find an interior boundary" case no longer shows that
+     the lower-bound index is 2. Restoring `int values[] = {2, 4, 6, 8};` brings
+     that observation back. */
 
   /* Exercise 2: Find the first duplicate: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2 so that it reads
-     `CHECK(lower_bound(values, 4, 4) == 1);`. Run worked example 2 with that
-     line, explain why the edited CHECK now fails for the same program state,
-     and restore it. Expected: Before the repair the run stops with `Check
-     failed` at the CHECK on `lower_bound(values, 4, 3) == 1`; after it the line
-     reads `CHECK(lower_bound(values, 4, 3) == 1);` again and the index is the
-     first 3 at position 1. */
+     A careless edit changed the CHECK in worked example 2, the "find the first
+     duplicate" case, so that it reads `CHECK(lower_bound(values, 4, 4) == 1);`.
+     Run the example with that line, explain why the edited CHECK now fails even
+     though the program state still means the index is the first 3 at position
+     1, and restore it. Expected: Before the repair the run stops with `Check
+     failed` at the CHECK on `lower_bound(values, 4, 3) == 1`. Once the line
+     reads `CHECK(lower_bound(values, 4, 3) == 1);` again, the "find the first
+     duplicate" case again shows that the index is the first 3 at position 1. */
 
   /* Exercise 3: Handle no larger value
      Search 2, 4, 6 for target 9.

@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "track_id": "javascript-typescript",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "js-005",
+      "title": "Array transformations that leave the input alone, and the copy traps",
+      "anchor": "reference",
+      "source_path": "courses/javascript-typescript/solutions/js-005_solution.mjs",
+      "source_sha256": "3f7b6996a12059b947a012efb30d67a93a9faf528530e24194e54ad1c5465508",
+      "expected_output": ["{\"checks\":6,\"status\":\"passed\"}"],
+      "steps": [
+        {
+          "lines": [1, 10],
+          "excerpt": "import { strict as assert } from \"node:assert\";\n\nexport async function verify() {\n  // Exercise 1: Map and filter without changing input\n  {\n    const original = [1, 2, 3, 4];\n    const result = original.map((value) => value * 2).filter((value) => value > 4);\n    assert.deepEqual(result, [6, 8]);\n    assert.deepEqual(original, [1, 2, 3, 4]);\n  }",
+          "title": "Strict assertions and a map then filter chain",
+          "explanation": "The strict flavour of node:assert makes equal use === and deepEqual compare structure strictly, so 1 and '1' are never treated as the same. Each exercise sits in its own { } block so const names like original can be reused. map returns a new array with each value doubled, then filter returns another new array with only values above 4. Neither method changes original, which the second assertion proves.",
+          "observe": "The result is [6, 8] and original is still [1, 2, 3, 4]."
+        },
+        {
+          "lines": [12, 22],
+          "excerpt": "  // Exercise 2: Supply a reduction identity\n  {\n    assert.equal(\n      [].reduce((sum, value) => sum + value, 0),\n      0,\n    );\n    assert.equal(\n      [1, 2, 3].reduce((sum, value) => sum + value, 0),\n      6,\n    );\n  }",
+          "title": "reduce needs a starting value",
+          "explanation": "reduce folds an array into one value by calling the callback with an accumulator and each element. The second argument, 0, is the initial accumulator. Without it, reduce on an empty array throws a TypeError, and on a non-empty array it silently starts from the first element. Passing 0, the identity for addition, makes the empty case return 0 and the normal case return 6.",
+          "observe": "An empty sum is 0, not an error."
+        },
+        {
+          "lines": [24, 39],
+          "excerpt": "  // Exercise 3: Expose default sort coercion\n  {\n    assert.deepEqual([10, 2, 1].sort(), [1, 10, 2]);\n    assert.deepEqual(\n      [10, 2, 1].sort((a, b) => a - b),\n      [1, 2, 10],\n    );\n  }\n\n  // Exercise 4: Preserve an array while sorting\n  {\n    const original = [3, 1, 2];\n    const sorted = original.toSorted((a, b) => a - b);\n    assert.deepEqual(sorted, [1, 2, 3]);\n    assert.deepEqual(original, [3, 1, 2]);\n  }",
+          "title": "Default sort compares text, and toSorted protects the input",
+          "explanation": "Without a compare function, sort converts elements to strings and orders them by UTF-16 code units, so '10' comes before '2'. A compare function returning a - b gives numeric order: negative means a goes first. sort also reorders the array in place. toSorted, added in newer JavaScript, returns a sorted copy and leaves the original untouched.",
+          "observe": "[10, 2, 1].sort() gives [1, 10, 2]; toSorted leaves [3, 1, 2] as it was."
+        },
+        {
+          "lines": [41, 48],
+          "excerpt": "  // Exercise 5: Expose a shallow copy alias\n  {\n    const original = [{ value: 1 }];\n    const copy = [...original];\n    copy[0].value = 9;\n    assert.equal(original[0].value, 9);\n    assert.notEqual(copy, original);\n  }",
+          "title": "Spread makes a shallow copy",
+          "explanation": "[...original] builds a new array, so copy !== original. The elements are not copied, though: both arrays hold a reference to the same object. Changing copy[0].value therefore changes what original[0] shows too. This is the shallow copy trap that catches many new coders when arrays hold objects.",
+          "observe": "After editing the copy, original[0].value is 9 as well."
+        },
+        {
+          "lines": [50, 62],
+          "excerpt": "  // Exercise 6: Copy records for a specific edit\n  {\n    const original = [{ value: 1 }];\n    const copy = original.map((row) => ({ ...row }));\n    copy[0].value = 9;\n    assert.equal(original[0].value, 1);\n    assert.equal(copy[0].value, 9);\n  }\n\n  return { checks: 6, status: \"passed\" };\n}\n\nconsole.log(JSON.stringify(await verify()));",
+          "title": "Copy each record before editing, then report",
+          "explanation": "map with (row) => ({ ...row }) creates a fresh object for each row, copying its own properties. The parentheses around the braces tell JavaScript the arrow returns an object literal rather than starting a block. Now editing the copy leaves the original record at 1. verify returns a summary object, and the top level await prints it as JSON once every assertion has passed. A failed assertion throws before anything is printed.",
+          "observe": "The program prints {\"checks\":6,\"status\":\"passed\"}"
+        }
+      ]
+    },
+    {
+      "lesson_id": "js-014",
+      "title": "Binary search lower bound, a unique index and a hand-built min-heap",
+      "anchor": "reference",
+      "source_path": "courses/javascript-typescript/solutions/js-014_solution.mjs",
+      "source_sha256": "092aa93009f0c6862d672499b2876be4b6bfa47a4cd30917151c4f494980bef6",
+      "expected_output": ["{\"checks\":6,\"status\":\"passed\"}"],
+      "steps": [
+        {
+          "lines": [3, 13],
+          "excerpt": "function lowerBound(values, target, trace = []) {\n  let low = 0;\n  let high = values.length;\n  while (low < high) {\n    const middle = low + Math.floor((high - low) / 2);\n    trace.push([low, high, middle]);\n    if (values[middle] < target) low = middle + 1;\n    else high = middle;\n  }\n  return low;\n}",
+          "title": "lowerBound finds the first position not less than the target",
+          "explanation": "The search keeps a half-open range [low, high). middle is computed as low + floor((high - low) / 2), which stays in range and avoids large sums. If the middle value is smaller than the target, the answer must be to the right, so low moves past middle; otherwise middle could be the answer, so high moves to it. When low meets high, that index is the first slot where target could be inserted while keeping order. Each step is pushed to trace so the test can see the work.",
+          "observe": "With duplicates the result is the leftmost matching index."
+        },
+        {
+          "lines": [14, 21],
+          "excerpt": "function uniqueIndex(rows) {\n  const index = new Map();\n  for (const row of rows) {\n    if (index.has(row.id)) throw new Error(`duplicate id ${row.id}`);\n    index.set(row.id, row);\n  }\n  return index;\n}",
+          "title": "Building a Map index that refuses duplicate keys",
+          "explanation": "A Map gives fast lookup by key. Before inserting each row, has checks whether the id already exists and throws if so. Without that check, set would silently replace the earlier row and data would be lost without any warning.",
+          "observe": "Two rows with id A raise an Error mentioning duplicate."
+        },
+        {
+          "lines": [22, 35],
+          "excerpt": "class MinHeap {\n  values = [];\n  push(value) {\n    if (!Number.isFinite(value)) throw new TypeError(\"finite value required\");\n    const values = this.values;\n    values.push(value);\n    let index = values.length - 1;\n    while (index > 0) {\n      const parent = Math.floor((index - 1) / 2);\n      if (values[parent] <= values[index]) break;\n      [values[parent], values[index]] = [values[index], values[parent]];\n      index = parent;\n    }\n  }",
+          "title": "Heap push: add at the end, then bubble up",
+          "explanation": "A min-heap stored in an array keeps every parent less than or equal to its children; the parent of index i is at floor((i - 1) / 2). push rejects non-finite numbers such as NaN, because NaN compares false with everything and would break the ordering. The new value goes at the end and swaps upward with its parent while it is smaller. The destructuring assignment swaps two slots in one line.",
+          "observe": "After any push, values[0] is the minimum."
+        },
+        {
+          "lines": [36, 53],
+          "excerpt": "  pop() {\n    const values = this.values;\n    if (values.length === 0) return undefined;\n    const minimum = values[0];\n    const last = values.pop();\n    if (values.length === 0) return minimum;\n    values[0] = last;\n    let index = 0;\n    while (2 * index + 1 < values.length) {\n      let child = 2 * index + 1;\n      if (child + 1 < values.length && values[child + 1] < values[child]) child += 1;\n      if (values[index] <= values[child]) break;\n      [values[index], values[child]] = [values[child], values[index]];\n      index = child;\n    }\n    return minimum;\n  }\n}",
+          "title": "Heap pop: take the root, move the last value down",
+          "explanation": "pop saves the minimum at index 0, removes the last element and places it at the root, then sifts it down. At each level it picks the smaller of the two children (2i + 1 and 2i + 2) and swaps if the parent is larger. An empty heap returns undefined, and a heap of one element returns its only value without sifting.",
+          "observe": "Repeated pops return values in ascending order."
+        },
+        {
+          "lines": [55, 89],
+          "excerpt": "export async function verify() {\n  // Exercise 1: Trace lower bound with duplicates\n  {\n    const trace = [];\n    assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);\n    assert.deepEqual(trace, [\n      [0, 4, 2],\n      [0, 2, 1],\n      [0, 1, 0],\n    ]);\n  }\n\n  // Exercise 2: Use a heap for repeated minimum extraction\n  {\n    const heap = new MinHeap();\n    for (const value of [5, 1, 3, 1]) heap.push(value);\n    assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5]);\n    assert.equal(heap.pop(), undefined);\n  }\n\n  // Exercise 3: Cover empty and outside search boundaries\n  {\n    assert.equal(lowerBound([], 4), 0);\n    assert.equal(lowerBound([2, 4, 6], 1), 0);\n    assert.equal(lowerBound([2, 4, 6], 9), 3);\n  }\n\n  // Exercise 4: Measure comparisons without a timing claim\n  {\n    const values = Array.from({ length: 1024 }, (_, index) => index * 2);\n    const trace = [];\n    assert.equal(lowerBound(values, 1001, trace), 501);\n    assert.ok(trace.length <= 11);\n    assert.equal(values.includes(1001), false);\n  }",
+          "title": "Tracing searches and checking boundaries",
+          "explanation": "Searching for 4 in [1, 4, 4, 8] takes three steps and returns index 1, the first 4. The heap returns duplicates too: 1, 1, 3, 5. Boundary checks cover an empty array and targets below and above every value. On 1024 even numbers, searching for 1001 needs at most 11 comparisons, which is about log2 of 1024 plus one; the lesson counts steps instead of timing them, so the check is deterministic.",
+          "observe": "lowerBound on 1024 values for 1001 returns 501 within 11 steps."
+        },
+        {
+          "lines": [91, 116],
+          "excerpt": "  // Exercise 5: Reject duplicate index keys\n  {\n    const index = uniqueIndex([\n      { id: \"A\", value: 7 },\n      { id: \"B\", value: 9 },\n    ]);\n    assert.equal(index.get(\"A\").value, 7);\n    assert.throws(() => uniqueIndex([{ id: \"A\" }, { id: \"A\" }]), /duplicate/u);\n  }\n\n  // Exercise 6: Check the heap invariant after every update\n  {\n    const heap = new MinHeap();\n    for (const value of [6, 5, 4, 3, 2, 1]) {\n      heap.push(value);\n      for (let index = 1; index < heap.values.length; index += 1) {\n        assert.ok(heap.values[Math.floor((index - 1) / 2)] <= heap.values[index]);\n      }\n    }\n    assert.throws(() => heap.push(NaN), TypeError);\n  }\n\n  return { checks: 6, status: \"passed\" };\n}\n\nconsole.log(JSON.stringify(await verify()));",
+          "title": "Index and heap invariant checks, then the result line",
+          "explanation": "The index finds A's value 7 and rejects a duplicate id. The last exercise pushes descending values, the worst case for bubbling up, and after every push checks the parent rule for every index. Pushing NaN must throw a TypeError. Only when all six blocks pass does verify return and the top level line print the JSON summary.",
+          "observe": "The program prints {\"checks\":6,\"status\":\"passed\"}"
+        }
+      ]
+    },
+    {
+      "lesson_id": "js-035",
+      "title": "Instants, time zones, daylight saving and locale formatting in Node",
+      "anchor": "reference",
+      "source_path": "courses/javascript-typescript/solutions/js-035_solution.mjs",
+      "source_sha256": "1795c26fbd744166d05bf749c3bc6cdbb90d51f5a89dec7d586a934d40265352",
+      "expected_output": ["{\"checks\":6,\"status\":\"passed\"}"],
+      "steps": [
+        {
+          "lines": [3, 12],
+          "excerpt": "function parts(date) {\n  const formatter = new Intl.DateTimeFormat(\"en-US\", {\n    timeZone: \"America/New_York\",\n    hour: \"2-digit\",\n    minute: \"2-digit\",\n    hourCycle: \"h23\",\n    timeZoneName: \"longOffset\",\n  });\n  return Object.fromEntries(formatter.formatToParts(date).map((part) => [part.type, part.value]));\n}",
+          "title": "Reading wall-clock parts for a named zone",
+          "explanation": "A Date holds one instant, milliseconds since 1970 in UTC, with no zone attached. Intl.DateTimeFormat shows that instant as a clock reading in a named IANA zone, here America/New_York. hourCycle h23 gives hours 00 to 23, and timeZoneName longOffset adds text like GMT-05:00. formatToParts returns labelled pieces, which are turned into an object so the code can read .hour or .timeZoneName instead of parsing display text.",
+          "observe": "parts(date) returns an object with hour, minute and timeZoneName."
+        },
+        {
+          "lines": [13, 20],
+          "excerpt": "function calendarDate(text) {\n  if (typeof text !== \"string\" || !/^\\d{4}-\\d{2}-\\d{2}$/u.test(text))\n    throw new RangeError(\"YYYY-MM-DD required\");\n  const date = new Date(text + \"T00:00:00.000Z\");\n  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== text)\n    throw new RangeError(\"invalid calendar date\");\n  return text;\n}",
+          "title": "Strict calendar date validation",
+          "explanation": "The regular expression requires exactly YYYY-MM-DD. JavaScript's Date quietly rolls impossible dates forward, so after parsing at UTC midnight the code formats the date back and compares it with the input. If 2023-02-29 became March 1, the text no longer matches and a RangeError is thrown.",
+          "observe": "Only real calendar days in the exact format are accepted."
+        },
+        {
+          "lines": [22, 38],
+          "excerpt": "export async function verify() {\n  // Exercise 1: Compare offset spellings of one instant\n  {\n    const utc = new Date(\"2024-01-01T00:00:00Z\");\n    const offset = new Date(\"2023-12-31T19:00:00-05:00\");\n    assert.equal(utc.getTime(), offset.getTime());\n    assert.equal(offset.toISOString(), \"2024-01-01T00:00:00.000Z\");\n  }\n\n  // Exercise 2: Observe a spring-forward clock gap\n  {\n    const before = new Date(\"2024-03-10T06:30:00Z\");\n    const after = new Date(\"2024-03-10T07:30:00Z\");\n    assert.equal(parts(before).hour, \"01\");\n    assert.equal(parts(after).hour, \"03\");\n    assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);\n  }",
+          "title": "Same instant, different spellings, and a skipped hour",
+          "explanation": "Midnight UTC and 19:00 at offset -05:00 the previous evening are the same instant, so getTime values match. On 10 March 2024, New York jumps from 02:00 to 03:00 for daylight saving. Two instants one real hour apart therefore read as 01 and 03 on the wall clock. Elapsed time should be measured on instants, never by subtracting clock readings.",
+          "observe": "The wall clock skips hour 02, but the instants differ by exactly 3600000 ms."
+        },
+        {
+          "lines": [40, 56],
+          "excerpt": "  // Exercise 3: Reject impossible or ambiguous calendar text\n  {\n    assert.equal(calendarDate(\"2024-02-29\"), \"2024-02-29\");\n    for (const text of [\"2023-02-29\", \"01/02/2024\", \"2024-13-01\"])\n      assert.throws(() => calendarDate(text), RangeError);\n  }\n\n  // Exercise 4: Distinguish repeated fall-back clock readings\n  {\n    const first = new Date(\"2024-11-03T05:30:00Z\");\n    const second = new Date(\"2024-11-03T06:30:00Z\");\n    assert.equal(parts(first).hour, \"01\");\n    assert.equal(parts(second).hour, \"01\");\n    assert.equal(parts(first).minute, parts(second).minute);\n    assert.notEqual(parts(first).timeZoneName, parts(second).timeZoneName);\n    assert.equal(second.getTime() - first.getTime(), 3600000);\n  }",
+          "title": "Rejected dates and a repeated hour",
+          "explanation": "2024-02-29 is valid because 2024 is a leap year; 2023-02-29, a slash format and month 13 all throw. On 3 November 2024 clocks fall back, so 01:30 happens twice. Both instants show hour 01 and the same minute, and only the offset part differs, -04:00 then -05:00. A local time without an offset is ambiguous on such a day.",
+          "observe": "Identical hour and minute, different timeZoneName, one hour apart."
+        },
+        {
+          "lines": [58, 82],
+          "excerpt": "  // Exercise 5: Inspect locale number parts without parsing display text\n  {\n    const value = 1234.5;\n    const us = new Intl.NumberFormat(\"en-US\").formatToParts(value);\n    const de = new Intl.NumberFormat(\"de-DE\").formatToParts(value);\n    assert.equal(us.find((part) => part.type === \"decimal\").value, \".\");\n    assert.equal(de.find((part) => part.type === \"decimal\").value, \",\");\n    assert.equal(value, 1234.5);\n  }\n\n  // Exercise 6: Reject invalid timestamp and timezone assumptions\n  {\n    const invalid = new Date(\"not an ISO instant\");\n    assert.equal(Number.isNaN(invalid.getTime()), true);\n    assert.throws(() => invalid.toISOString(), RangeError);\n    assert.throws(\n      () => new Intl.DateTimeFormat(\"en-US\", { timeZone: \"Invalid/Nowhere\" }),\n      RangeError,\n    );\n  }\n\n  return { checks: 6, status: \"passed\" };\n}\n\nconsole.log(JSON.stringify(await verify()));",
+          "title": "Locale number parts, invalid inputs and the result line",
+          "explanation": "NumberFormat formatToParts labels the decimal separator, which is a dot in en-US and a comma in de-DE. Formatting is for display; the underlying number 1234.5 never changes. An unparseable string gives an Invalid Date whose time is NaN, and toISOString on it throws. An unknown zone name makes the DateTimeFormat constructor throw a RangeError instead of guessing. These checks rely on Node's built-in ICU time zone data.",
+          "observe": "The program prints {\"checks\":6,\"status\":\"passed\"}"
+        }
+      ]
+    }
+  ]
+}

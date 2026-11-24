@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-review-the-complete-desired-set">Exercise 1: Review the complete desired set<a class="heading-anchor" href="#exercise-1-review-the-complete-desired-set" aria-label="Link to this section">#</a></h3>
 <p>The source graph predicts how data and traffic should flow. It does not supply server-assigned UIDs or prove that controllers acted. Those observations belong in the later receipt.</p>
 <p><strong>Expected:</strong> Two replicas, matching app labels, fixed port chain and both message consumers are identified.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Add the ConfigMap and its two consumers to the k8s-008 source, then trace every reference with the field that creates it.</li>
+<li><strong>Why it is correct:</strong> Selector, configMapKeyRef and volume name are lookups by name or label, while ownership only appears later from the controllers.</li>
+<li><strong>Plausible wrong approach:</strong> Drawing ownerReferences between source objects invents links the YAML cannot contain, because they are written by controllers at runtime.</li>
+<li><strong>How to verify:</strong> Each arrow carries selector, configMapKeyRef or volume name, and two replicas with matching app labels are identified.</li>
+</ul>
 <h3 id="exercise-2-establish-controller-ownership">Exercise 2: Establish controller ownership<a class="heading-anchor" href="#exercise-2-establish-controller-ownership" aria-label="Link to this section">#</a></h3>
 <p>A matching label or raw Pod count is insufficient. The capstone needs the controller graph so unrelated resources cannot satisfy the desired replica claim.</p>
 <p><strong>Expected:</strong> Exactly two owned Ready Pod identities for the intended generation.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Follow the Run result&#x27;s ownership chain from Deployment to current ReplicaSet to each Ready Pod.</li>
+<li><strong>Why it is correct:</strong> Only Pods controlled by the current ReplicaSet count toward this generation&#x27;s desired replicas.</li>
+<li><strong>Plausible wrong approach:</strong> Counting all Pods with app=hello could include an old ReplicaSet&#x27;s Pod or an unrelated one and still show two.</li>
+<li><strong>How to verify:</strong> Exactly two owned Ready Pod UIDs sit under the current ReplicaSet.</li>
+</ul>
 <h3 id="exercise-3-verify-routing-and-values">Exercise 3: Verify routing and values<a class="heading-anchor" href="#exercise-3-verify-routing-and-values" aria-label="Link to this section">#</a></h3>
 <p>The client test closes a different boundary from controller status. It verifies that traffic reaches the expected fixture through the Service and that configuration is visible at the application layer.</p>
 <p><strong>Expected:</strong> UID sets match; version and both message values are exact.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare the endpoint UID set with the owned Ready set, then each response with the fixed version and both message values.</li>
+<li><strong>Why it is correct:</strong> Matching sets show the Service routes only to this Deployment&#x27;s Pods, and exact values show the configuration reached both the environment and volume consumers.</li>
+<li><strong>Plausible wrong approach:</strong> Checking only the version value would pass even if the ConfigMap key were wrong, since version does not depend on the message.</li>
+<li><strong>How to verify:</strong> UID sets are equal and the version and both message values match the contract exactly.</li>
+</ul>
 <h3 id="exercise-4-inject-one-bounded-fault">Exercise 4: Inject one bounded fault<a class="heading-anchor" href="#exercise-4-inject-one-bounded-fault" aria-label="Link to this section">#</a></h3>
 <p>The negative case demonstrates sensitivity to a plausible error. It is useful even when failure is expected, provided the result is not mislabeled as a successful service. Keep runtime phase and cleanup evidence together.</p>
 <p><strong>Expected:</strong> The named check fails within budget and cleanup still targets only owned UIDs.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Pick one admitted fault, such as selector app=wrong, write which check will fail, then Run.</li>
+<li><strong>Why it is correct:</strong> Each fault breaks one link: a wrong selector empties endpoints, a wrong probe path keeps Pods unready and a failing task fails its Job.</li>
+<li><strong>Plausible wrong approach:</strong> Running several faults at once makes it impossible to say which change caused the failed check.</li>
+<li><strong>How to verify:</strong> The failed check matches your written prediction and cleanup lists only this Run&#x27;s UIDs.</li>
+</ul>
 <h3 id="exercise-5-repair-and-compare-a-fresh-run">Exercise 5: Repair and compare a fresh run<a class="heading-anchor" href="#exercise-5-repair-and-compare-a-fresh-run" aria-label="Link to this section">#</a></h3>
 <p>Because the browser cleans every Run, the repaired scenario is a new creation. Comparing the source change and resulting checks explains the mechanism without inventing a stateful transition.</p>
 <p><strong>Expected:</strong> The intended checks pass with new actual resource identities.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Restore the faulted field and submit a new Run, then compare checks and identities with the failed one.</li>
+<li><strong>Why it is correct:</strong> The browser cleans up after every Run, so the repaired Run creates fresh objects and is a new observation.</li>
+<li><strong>Plausible wrong approach:</strong> Describing the repair as patching the earlier Service assumes state that was already deleted.</li>
+<li><strong>How to verify:</strong> Every UID differs between Runs and the previously failing check now passes.</li>
+</ul>
 <h3 id="exercise-6-hand-off-acceptance-and-limits">Exercise 6: Hand off acceptance and limits<a class="heading-anchor" href="#exercise-6-hand-off-acceptance-and-limits" aria-label="Link to this section">#</a></h3>
 <p>A good handoff is reproducible and bounded. It should let the reviewer see why a wrong selector failed and why the repaired service passed, while preserving privacy and avoiding unsupported production or recurrence claims.</p>
 <p><strong>Expected:</strong> Source, nonsecret target identity, controller/backend/client/failure/cleanup evidence and unqualified surfaces are explicit.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Assemble source, target identity without secrets and evidence for each claim, and list the surfaces not qualified.</li>
+<li><strong>Why it is correct:</strong> A second learner can reproduce the reasoning only when each claim points to evidence in the packet itself.</li>
+<li><strong>Plausible wrong approach:</strong> Writing production ready or always available adds claims no bounded Run measured.</li>
+<li><strong>How to verify:</strong> A second learner finds evidence for every claim using the packet alone.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A passed fixture does not establish production capacity, high availability, network policy enforcement or persistence. It proves the observed owned synthetic service contract under the qualified runtime. Written ownership reasoning and the chosen negative case remain part of the learning evidence.</p>
 <p>Do not export private kubeconfigs or fabricate cleanup from a missing browser page. If cleanup cannot be proved, retain the private recovery receipt and identify the remaining object rather than deleting all similarly named resources.</p></article>

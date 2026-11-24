@@ -198,18 +198,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `{ id: &#x27;A&#x27;, quantity: 2, priceCents:</span></span>
 <span class="source-line"><span class="syntax-comment">// 125 },` to `{ id: &#x27;A&#x27;, quantity: 3, priceCents: 125 },`. Before running it, predict which</span></span>
 <span class="source-line"><span class="syntax-comment">// check fails and which value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 })`. Restoring the</span></span>
-<span class="source-line"><span class="syntax-comment">// original line brings back the worked observation: exit 0; stdout is exactly one JSON</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 })`. Restoring `{</span></span>
+<span class="source-line"><span class="syntax-comment">// id: &#x27;A&#x27;, quantity: 2, priceCents: 125 },` brings back: exit 0; stdout is exactly one JSON</span></span>
 <span class="source-line"><span class="syntax-comment">// result with 2 rows and 550 cents; stderr empty.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Reject unknown arguments before consuming data: diagnose an edited check</span></span>
 <span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `assert.equal(result.status,</span></span>
 <span class="source-line"><span class="syntax-comment">// 3);`. Run Example B with that line, explain why the edited check now fails for the same</span></span>
 <span class="source-line"><span class="syntax-comment">// program state, and restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(result.status, 2)`; after it the line reads `assert.equal(result.status,</span></span>
-<span class="source-line"><span class="syntax-comment">// 2);` again and exit 2; stdout empty; stderr includes usage.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(result.status, 3);`. Restoring `assert.equal(result.status, 2);` brings</span></span>
+<span class="source-line"><span class="syntax-comment">// back: exit 2; stdout empty; stderr includes usage.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Report the first invalid row without a partial result</span></span>
 <span class="source-line"><span class="syntax-comment">// Send a valid first row and malformed JSON on line 2.</span></span>

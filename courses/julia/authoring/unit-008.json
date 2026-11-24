@@ -3,6 +3,28 @@
   "title": "Tuples, named records, dictionaries and sets",
   "concepts": ["tuple", "NamedTuple", "dictionary", "set", "key equality"],
   "outcome": "Choose collection representations according to identity, ordering, mutability and lookup needs.",
+  "key_terms": [
+    [
+      "Tuple",
+      "An immutable, fixed-length ordered collection whose element types are part of its own type."
+    ],
+    [
+      "NamedTuple",
+      "An immutable tuple with named fields, such as `(id = 7, score = 0.5)`, read with field syntax like `row.score`."
+    ],
+    [
+      "Dict",
+      "A hash table that maps keys to values and whose iteration order is unspecified, so reports should sort keys explicitly."
+    ],
+    [
+      "Key equality",
+      "Dictionaries and sets match keys with `isequal` and `hash`, so `1` and `1.0` select the same entry."
+    ],
+    [
+      "Set",
+      "An unordered collection of distinct elements that uses the same equality and hashing rules as dictionary keys."
+    ]
+  ],
   "level": "beginner",
   "minutes": 90,
   "prerequisites": ["julia-004", "julia-007"],
@@ -11,48 +33,68 @@
     ["Named tuples and functions", "https://docs.julialang.org/en/v1/manual/functions/"]
   ],
   "figure": 0,
+  "approach": "Pick each container for the question it answers. Tuples hold fixed positional fields, named tuples label them, a count dictionary keeps multiplicity that a `Set` drops, `haskey` separates absence from a stored zero, and dictionary keys follow `isequal`. Presentation order is imposed with `sort`, never inherited from hashing.",
   "exercises": [
     {
       "title": "Make one tuple element",
       "task": "Represent a single integer as a tuple.",
       "expected": "Use `(7,)`, including its comma.",
       "hint": "Parentheses alone group an expression.",
-      "answer": "The tuple syntax distinguishes a one-field collection from the scalar value."
+      "answer": "The tuple syntax distinguishes a one-field collection from the scalar value.",
+      "why": "`(7,)` is a one-element tuple; the trailing comma is what makes it a tuple, since `(7)` is just the integer 7.",
+      "wrong": "Writing `(7)` and calling `length` returns 1 by accident for an integer, hiding that the value is not a collection.",
+      "verify": "Check `typeof((7,)) == Tuple{Int}` and `typeof((7)) == Int`."
     },
     {
       "title": "Name a returned record",
       "task": "Return an ID, score and eligibility field.",
       "expected": "Callers can access fields by their names.",
       "hint": "Prefer explicit semantic labels to remembered positions.",
-      "answer": "The representation makes a small fixed schema inspectable."
+      "answer": "The representation makes a small fixed schema inspectable.",
+      "why": "Returning `(id = 1, score = 0.8, eligible = true)` lets callers write `result.score` instead of remembering that score is second.",
+      "wrong": "Returning a plain tuple and reading `result[2]` breaks silently if a field is later inserted before score.",
+      "verify": "Access each field by name and assert `keys(result) == (:id, :score, :eligible)`."
     },
     {
       "title": "Preserve multiplicity",
       "task": "Count the labels `a`, `b`, `b` before converting them to a set.",
       "expected": "Counts are 1 and 2 while the set has two distinct labels.",
       "hint": "Frequency and membership are different questions.",
-      "answer": "Deduplication intentionally discards multiplicity and can change a scientific denominator."
+      "answer": "Deduplication intentionally discards multiplicity and can change a scientific denominator.",
+      "why": "Counting `a`, `b`, `b` gives `a => 1` and `b => 2`, while `Set([\"a\", \"b\", \"b\"])` keeps only two members.",
+      "wrong": "Converting to a set first and then counting reports one of each label, which halves the weight of `b`.",
+      "verify": "Assert the count dictionary has `b => 2` and `length(Set(labels)) == 2`."
     },
     {
       "title": "Control presentation order",
       "task": "Print a dictionary in an explicitly sorted key order.",
       "expected": "The report follows the chosen ordering rule.",
       "hint": "Do not depend on traversal order.",
-      "answer": "Stable presentation requires an explicit contract rather than an incidental implementation order."
+      "answer": "Stable presentation requires an explicit contract rather than an incidental implementation order.",
+      "why": "Iterating `sort(collect(keys(d)))` gives a fixed order regardless of how the dictionary hashed its keys.",
+      "wrong": "Printing `d` directly and pasting it into a report assumes insertion order, which `Dict` does not promise.",
+      "verify": "Print the report twice with differently built dictionaries holding the same pairs and compare the transcripts."
     },
     {
       "title": "Separate absent and zero",
       "task": "Compare a present zero-valued key with an absent key.",
       "expected": "haskey distinguishes them.",
       "hint": "A default value can conceal missingness.",
-      "answer": "Only use an absent-to-zero convention when the measurement contract justifies it."
+      "answer": "Only use an absent-to-zero convention when the measurement contract justifies it.",
+      "why": "`Dict(\"a\" => 0)` stores a real zero for `a`, while `b` is absent, so `haskey` gives true and false.",
+      "wrong": "Reading with `get(values, key, 0)` reports both as 0 and loses the difference between measured zero and no record.",
+      "verify": "The reference checks `haskey`, `get(values, \"b\", -1) == -1` and `@test_throws KeyError values[\"b\"]`."
     },
     {
       "title": "Inspect special keys",
       "task": "Use NaN and both signed zeros as dictionary keys.",
       "expected": "NaN is retrievable and the signed zeros remain distinct in this fixture.",
       "hint": "Use the data-key equality contract.",
-      "answer": "Dictionary equality semantics should match the application meaning of the keys."
+      "answer": "Dictionary equality semantics should match the application meaning of the keys.",
+      "why": "Keys use `isequal`, so `NaN` finds itself and `0.0` and `-0.0` are different keys, leaving three entries.",
+      "wrong": "Expecting `==` semantics predicts that NaN cannot be retrieved and that the signed zeros collapse into two entries.",
+      "verify": "The reference asserts `special[NaN] == \"present\"` and `length(special) == 3`."
     }
-  ]
+  ],
+  "checks_note": "Lookup behavior differs by method. `haskey` asks without failing, `get` supplies the fallback -1, and direct indexing of a missing key raises `KeyError`, which is the right signal when the key must exist. The `special` dictionary uses `isequal` for keys, so NaN finds itself and `0.0` and `-0.0` stay separate entries, giving length 3. Code that compares keys with `==` would merge the zeros and lose NaN."
 }

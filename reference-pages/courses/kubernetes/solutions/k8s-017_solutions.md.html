@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-map-each-control">Exercise 1: Map each control<a class="heading-anchor" href="#exercise-1-map-each-control" aria-label="Link to this section">#</a></h3>
 <p>The controls reduce different attack or error surfaces. Understanding their roles helps diagnose a legitimate application permission issue without removing every restriction.</p>
 <p><strong>Expected:</strong> Each field is connected to its specific mechanism rather than one generic secure label.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Pair each securityContext field with the specific path it closes.</li>
+<li><strong>Why it is correct:</strong> runAsNonRoot blocks UID 0, dropped capabilities remove kernel privileges, allowPrivilegeEscalation false blocks setuid gains, seccomp limits syscalls and readOnlyRootFilesystem blocks image writes.</li>
+<li><strong>Plausible wrong approach:</strong> Labeling all five as generic hardening hides that, for example, dropping capabilities does nothing to stop writes to the root filesystem.</li>
+<li><strong>How to verify:</strong> Five fields map to five different attack paths.</li>
+</ul>
 <h3 id="exercise-2-run-the-allowed-baseline">Exercise 2: Run the allowed baseline<a class="heading-anchor" href="#exercise-2-run-the-allowed-baseline" aria-label="Link to this section">#</a></h3>
 <p>The app proves its bounded workload checks. A runtime UID claim needs a dedicated observed field or fixed fixture result, not merely the YAML value. Do not broaden that receipt into a host-isolation guarantee.</p>
 <p><strong>Expected:</strong> Accepted source, observed workload readiness and owned cleanup are recorded.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run the unchanged nonroot source and keep configured and observed identity in separate rows.</li>
+<li><strong>Why it is correct:</strong> The manifest states runAsUser, but only a host readback shows the identity the process actually ran with.</li>
+<li><strong>Plausible wrong approach:</strong> Copying runAsUser from the YAML into the observed row reports configuration as if it were runtime evidence.</li>
+<li><strong>How to verify:</strong> Accepted source, readiness, cleanup and two identity rows with distinct sources are recorded.</li>
+</ul>
 <h3 id="exercise-3-reject-a-privileged-mutation">Exercise 3: Reject a privileged mutation<a class="heading-anchor" href="#exercise-3-reject-a-privileged-mutation" aria-label="Link to this section">#</a></h3>
 <p>The course protects the operation at source admission. This is a valid negative result even though no privileged process ran. Preserve the phase rather than inventing a server rejection event.</p>
 <p><strong>Expected:</strong> The course parser refuses the source before any cluster request. Under Pod Security Admission, privileged: true violates the Baseline level and allowPrivilegeEscalation: true violates the Restricted level.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Change one field in a scratch copy and submit it to the course parser.</li>
+<li><strong>Why it is correct:</strong> The parser refuses either field locally, and Pod Security marks privileged true as a Baseline violation and allowPrivilegeEscalation true as a Restricted violation.</li>
+<li><strong>Plausible wrong approach:</strong> Claiming Baseline would reject allowPrivilegeEscalation true misplaces that control, since only Restricted forbids it.</li>
+<li><strong>How to verify:</strong> A refusal message exists, no create receipt exists and the matching Pod Security level is named.</li>
+</ul>
 <h3 id="exercise-4-reject-host-access">Exercise 4: Reject host access<a class="heading-anchor" href="#exercise-4-reject-host-access" aria-label="Link to this section">#</a></h3>
 <p>A secure-looking container context does not neutralize a host namespace or mount. The parser rejects those requests rather than trusting a learner to choose a harmless path.</p>
 <p><strong>Expected:</strong> hostPath volumes, hostNetwork and hostPID violate the Baseline standard, so a namespace enforcing baseline or restricted rejects them at admission; the classroom parser rejects them even earlier.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Classify hostPath, hostNetwork and hostPID against the Pod Security Standards controls.</li>
+<li><strong>Why it is correct:</strong> All three expose the node: hostPath reaches its filesystem, hostNetwork its network stack and hostPID its process table, so Baseline forbids each.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming only Restricted blocks host access would let a baseline namespace admit them, which it does not.</li>
+<li><strong>How to verify:</strong> Each variant cites its control and Baseline as the lowest forbidding level.</li>
+</ul>
 <h3 id="exercise-5-observe-a-host-policy-separately">Exercise 5: Observe a host policy separately<a class="heading-anchor" href="#exercise-5-observe-a-host-policy-separately" aria-label="Link to this section">#</a></h3>
 <p>The host capability must establish the admission configuration. A successful or denied API request then provides evidence about that policy under the current target. The worker receives no permission to relabel the namespace or install policy.</p>
 <p><strong>Expected:</strong> Policy version, namespace UID and actual admission reason accompany the result.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the enforce and enforce-version labels first, then send one allowed and one denied request.</li>
+<li><strong>Why it is correct:</strong> Admission depends on the namespace&#x27;s enforced level and version, so the result is meaningful only alongside those labels.</li>
+<li><strong>Plausible wrong approach:</strong> Reporting a denial without the namespace labels cannot show which policy produced it.</li>
+<li><strong>How to verify:</strong> Labels, namespace UID and the API server&#x27;s denial reason are recorded together.</li>
+</ul>
 <h3 id="exercise-6-write-a-bounded-threat-statement">Exercise 6: Write a bounded threat statement<a class="heading-anchor" href="#exercise-6-write-a-bounded-threat-statement" aria-label="Link to this section">#</a></h3>
 <p>A useful security explanation names mechanisms and limits. It should distinguish desired configuration, admission, container runtime behavior and application authorization rather than collapse them into an unsupported safe/unsafe binary.</p>
 <p><strong>Expected:</strong> For example, RBAC controls API access while network policy or application auth addresses different paths.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name what the fixed controls limit and one threat outside them with its control.</li>
+<li><strong>Why it is correct:</strong> The securityContext limits what the container process can do on the node, not which API calls or network peers it can reach.</li>
+<li><strong>Plausible wrong approach:</strong> Calling the workload secure overall implies coverage of API access and network paths these fields never touch.</li>
+<li><strong>How to verify:</strong> The statement names one uncovered threat and the separate control, such as RBAC or a NetworkPolicy.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A read-only filesystem is not a ban on all writes when writable volumes exist. Nonroot is not an authorization policy for another namespace. RBAC does not govern every packet sent by a workload. A container shares a node kernel and is not automatically a separate virtual machine.</p>
 <p>State which control rejects which behavior and what remains untested. If a negative source is refused locally, do not claim that a kernel-level action was attempted or blocked at runtime. The evidence level is part of the security explanation.</p></article>

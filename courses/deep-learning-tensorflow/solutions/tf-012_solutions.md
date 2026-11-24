@@ -1,6 +1,6 @@
 # tf-012: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for Capstone: an auditable tiny regressor after your own attempt at Example A, Freeze six records, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Baseline, Holdout, Evidence report. After matching exercise 6, Reject a false conclusion, invent a new input without looking here.
 
 ## Mechanism review
 
@@ -131,4 +131,4 @@ assert report["test_ids"] == [4, 5] and "do not establish" in report["limitation
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one fixture value in exercise 4, Open the holdout once, and predict the new result before running it. Keep the failing version of exercise 5, Preserve arithmetic evidence, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

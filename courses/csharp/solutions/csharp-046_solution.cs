@@ -35,6 +35,28 @@ internal static class Program {
       Check(missing is null, "C# 14 null-conditional assignment");
       Check("\e" == "\u001b", "C# 13 escape sequence");
     }
+    {
+      // Task 2: Guided modification
+      List<int> none = [];
+      int[] empty = [];
+      Check(none.Count == 0 && empty.Length == 0, "both empty");
+      Check(empty.GetType() == typeof(int[]), "target decides the type");
+      none.Add(1);
+      Check(none.Count == 1, "the empty list is a new mutable list");
+      IEnumerable<int> view = [];
+      Check(!view.Any(), "interface target is also empty");
+    }
+    {
+      // Task 5: Boundary evidence
+      int[] nothing = [];
+      List<int> spread = [..nothing];
+      Check(spread.Count == 0, "empty spread adds nothing");
+      List<int> mixed = [0, ..nothing, 9];
+      Check(mixed.SequenceEqual(new[] { 0, 9 }), "neighbors kept");
+      var zero = new Scale(0);
+      Check(zero.Apply(5) == 0, "zero scaling");
+      Check(zero.Apply(int.MaxValue) == 0, "zero cannot overflow");
+    }
     Console.WriteLine("csharp-046: passed");
     await Task.CompletedTask;
   }

@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-prepare-the-capability-and-ownership-packet">Exercise 1: Prepare the capability and ownership packet<a class="heading-anchor" href="#exercise-1-prepare-the-capability-and-ownership-packet" aria-label="Link to this section">#</a></h3>
 <p>The packet prevents execution assumptions from being hidden in prose. A CRD, controller, policy, metrics path or storage driver must actually exist under the declared host contract before its live outcome can be claimed.</p>
 <p><strong>Expected:</strong> Every requested live action has a qualified capability or an explicit unavailable row.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Map each requested live action to a capability receipt or an unavailable row, with versions, source hashes and owned identities.</li>
+<li><strong>Why it is correct:</strong> Every later gate depends on a named capability, so an unlisted one leaves that gate unsupported.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the storage and CNI from capstone 2 still apply skips the receipt for this scenario.</li>
+<li><strong>How to verify:</strong> Every action has a receipt or an unavailable row.</li>
+</ul>
 <h3 id="exercise-2-defend-desired-state-and-admission">Exercise 2: Defend desired state and admission<a class="heading-anchor" href="#exercise-2-defend-desired-state-and-admission" aria-label="Link to this section">#</a></h3>
 <p>This makes each control interpretable. A local parser rejection is useful but cannot stand in for server policy enforcement, while an accepted custom resource still requires a functioning controller before it produces a workload.</p>
 <p><strong>Expected:</strong> Schema, authorization and admission conclusions remain separate.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record schema, authorization and admission outcomes as three separate rows with evidence.</li>
+<li><strong>Why it is correct:</strong> Each layer rejects for different reasons, so a single pass or fail hides which control acted.</li>
+<li><strong>Plausible wrong approach:</strong> Reporting one denial as proof that all three layers work conflates them.</li>
+<li><strong>How to verify:</strong> Three rows exist, each with its own permitted and denied evidence.</li>
+</ul>
 <h3 id="exercise-3-prove-owned-convergence-and-release-behavior">Exercise 3: Prove owned convergence and release behavior<a class="heading-anchor" href="#exercise-3-prove-owned-convergence-and-release-behavior" aria-label="Link to this section">#</a></h3>
 <p>The joined evidence rules out several false positives, such as stale readiness or a response from the wrong backend. The finite sample remains bounded evidence and does not establish an exact traffic ratio or unlimited reliability.</p>
 <p><strong>Expected:</strong> Current-generation owned resources serve the expected marker through the intended route.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Build one table joining parent generation, child owner UID, readiness and application samples.</li>
+<li><strong>Why it is correct:</strong> Convergence is proven only when current-generation children owned by the parent are Ready and serve the marker.</li>
+<li><strong>Plausible wrong approach:</strong> Accepting a ready child without checking its owner UID could count a leftover from an earlier parent.</li>
+<li><strong>How to verify:</strong> Each row links generation, owner UID, readiness and the sampled marker.</li>
+</ul>
 <h3 id="exercise-4-investigate-one-bounded-incident">Exercise 4: Investigate one bounded incident<a class="heading-anchor" href="#exercise-4-investigate-one-bounded-incident" aria-label="Link to this section">#</a></h3>
 <p>The investigation should show why the repair follows from observations. Restarting or deleting broadly would make it harder to distinguish the cause and could violate the owned scope even if the symptom temporarily disappeared.</p>
 <p><strong>Expected:</strong> Timestamped causal explanation with exact target and cancellation/restore behavior.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Inject one fault and timestamp baseline, fault, symptom, repair and post-repair response.</li>
+<li><strong>Why it is correct:</strong> One fault with ordered timestamps lets the symptom be attributed to it.</li>
+<li><strong>Plausible wrong approach:</strong> Injecting a second fault mid-investigation makes the causal chain ambiguous.</li>
+<li><strong>How to verify:</strong> One fault appears, and all five timestamps are present.</li>
+</ul>
 <h3 id="exercise-5-measure-service-and-data-recovery">Exercise 5: Measure service and data recovery<a class="heading-anchor" href="#exercise-5-measure-service-and-data-recovery" aria-label="Link to this section">#</a></h3>
 <p>The recovery packet must reject a serving application with the wrong restored marker. It should also state the immutable synthetic-data assumptions so the reviewer does not mistake the exercise for a transactional database recovery proof.</p>
 <p><strong>Expected:</strong> Independent service/data gates and recomputable source timestamps/hashes.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Apply the stated RTO and RPO definitions and the missing-data negative control.</li>
+<li><strong>Why it is correct:</strong> Separate service and data gates show when each recovered, and recorded inputs let a reviewer recompute both.</li>
+<li><strong>Plausible wrong approach:</strong> Reporting only service recovery time hides a failed data gate.</li>
+<li><strong>How to verify:</strong> Both values recompute from recorded timestamps and hashes, and the negative control fails as expected.</li>
+</ul>
 <h3 id="exercise-6-complete-cleanup-and-review-limits">Exercise 6: Complete cleanup and review limits<a class="heading-anchor" href="#exercise-6-complete-cleanup-and-review-limits" aria-label="Link to this section">#</a></h3>
 <p>The final handoff should make the environment lifecycle auditable and retain only permitted synthetic evidence. A concise limitation statement is part of technical accuracy, because the tested platform slice is smaller than a production Kubernetes reliability or security guarantee.</p>
 <p><strong>Expected:</strong> No unrelated resources removed; missing or failed gates remain visible.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Collect cleanup receipts with UIDs and keep failed or unknown gates in the review.</li>
+<li><strong>Why it is correct:</strong> UID-aware cleanup removes only owned resources, and visible failures keep the review honest.</li>
+<li><strong>Plausible wrong approach:</strong> Removing failed rows from the final report makes the release look fully qualified.</li>
+<li><strong>How to verify:</strong> Every cleanup row has a UID, and failed or unknown rows remain.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Cleanup removes only resources owned by the lease and recorded operation, using UID-aware checks. Retained claims or backups need an explicit policy and protected location. The host releases its exclusive cluster only after finalizers, finite Jobs and data-retention decisions are resolved. A cleanup failure is an outcome to report, not a line to omit.</p>
 <p>The final review distinguishes source correctness, offline examples, API acceptance, controller convergence, application/data behavior and lifecycle cleanup. It states the exact versions, architecture and finite observations. A small synthetic capstone does not prove production HA, arbitrary-code isolation, exactly-once external side effects or reliable recurring operation.</p>

@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "track_id": "statistics-ml",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "statistics-006",
+      "title": "How a join can silently double revenue, and how pooled rates can reverse",
+      "anchor": "reference",
+      "source_path": "courses/statistics-ml/examples/chapter_06.py",
+      "source_sha256": "e90aa887f849e1ec73b914ea455606d7373cb2277050318eeb17853c95148a6d",
+      "expected_output": ["Original revenue: 30 incorrect post-join sum: 40", "ECDF(2): 0.75"],
+      "steps": [
+        {
+          "lines": [1, 2],
+          "excerpt": "import numpy as np\nimport pandas as pd",
+          "title": "Two data libraries",
+          "explanation": "NumPy gives fast arrays and vectorized arithmetic; pandas gives labeled tables called DataFrames. The example uses pandas for the join problem, where column names matter, and NumPy for the rate comparison, where only numbers matter.",
+          "observe": "Only these two imports are needed. Nothing is downloaded or read from disk."
+        },
+        {
+          "lines": [5, 9],
+          "excerpt": "def join_cardinality():\n    orders = pd.DataFrame({\"order\": [1, 2], \"revenue\": [10, 20]})\n    lines = pd.DataFrame({\"order\": [1, 1, 2], \"item\": [\"a\", \"b\", \"c\"]})\n    joined = orders.merge(lines, on=\"order\", validate=\"one_to_many\")\n    assert joined.revenue.sum() == 40 and orders.revenue.sum() == 30",
+          "title": "Build two tables and join them",
+          "explanation": "orders has one row per order with its revenue. lines has one row per item, so order 1 appears twice. merge on the order column copies each order row once for every matching item. The validate argument tells pandas the shape you expect: one_to_many means each order may match many lines. The assert then shows the trap: the joined revenue sums to 40 while the true total is 30, because order 1's revenue of 10 was counted twice.",
+          "observe": "joined has three rows. Its revenue column holds 10, 10 and 20, so summing it after the join overstates revenue."
+        },
+        {
+          "lines": [10, 15],
+          "excerpt": "    try:\n        orders.merge(lines, on=\"order\", validate=\"one_to_one\")\n    except pd.errors.MergeError:\n        pass\n    else:\n        raise AssertionError(\"Cardinality violation was not detected\")",
+          "title": "Ask pandas to refuse a wrong assumption",
+          "explanation": "This block asks for one_to_one, which is false here. pandas raises MergeError instead of producing a silently wrong table. The try, except, else pattern makes the check explicit: catching the error is the expected path, and reaching else means the guard failed, so the code raises an AssertionError.",
+          "observe": "Nothing is printed by this block. Its job is to prove that validate catches a cardinality mistake before any numbers are summed."
+        },
+        {
+          "lines": [16, 18],
+          "excerpt": "    print(\n        \"Original revenue:\", orders.revenue.sum(), \"incorrect post-join sum:\", joined.revenue.sum()\n    )",
+          "title": "Print both totals side by side",
+          "explanation": "print with several arguments separates them with spaces. Printing the correct total next to the inflated one makes the cost of a careless join visible in a single line.",
+          "observe": "The first output line reads: Original revenue: 30 incorrect post-join sum: 40"
+        },
+        {
+          "lines": [21, 25],
+          "excerpt": "def composition_and_ecdf():\n    a_success, a_count = np.array([9, 20]), np.array([10, 100])\n    b_success, b_count = np.array([80, 1]), np.array([100, 10])\n    assert np.all(a_success / a_count > b_success / b_count)\n    assert a_success.sum() / a_count.sum() < b_success.sum() / b_count.sum()",
+          "title": "Simpson's paradox in four numbers",
+          "explanation": "Each array holds successes and counts for two groups. Dividing elementwise gives each group's success rate. The first assert checks that A beats B inside every group. The second shows that after pooling, A loses to B. The reversal happens because A has most of its cases in the hard group and B has most of its cases in the easy group.",
+          "observe": "Watch the order of operations: rates are compared per group first, then pooled totals are divided once."
+        },
+        {
+          "lines": [26, 35],
+          "excerpt": "    x = np.array([1.0, 1.0, 2.0, 9.0])\n    assert np.mean(x <= 2) == 0.75\n    print(\"Within-group A rates:\", a_success / a_count, \"B rates:\", b_success / b_count)\n    print(\n        \"Pooled A/B:\",\n        a_success.sum() / a_count.sum(),\n        b_success.sum() / b_count.sum(),\n        \"ECDF(2):\",\n        0.75,\n    )",
+          "title": "An empirical CDF value and the summary lines",
+          "explanation": "x <= 2 produces an array of True and False values. np.mean treats True as 1, so the mean is the fraction of observations at or below 2, which is the empirical CDF at 2. Three of the four values qualify, giving 0.75. The two print calls then report the per group rates and the pooled rates.",
+          "observe": "The last line ends with ECDF(2): 0.75. The pooled rates on that line are long decimals because they are plain divisions."
+        },
+        {
+          "lines": [38, 44],
+          "excerpt": "def main():\n    join_cardinality()\n    composition_and_ecdf()\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Run both demonstrations from main",
+          "explanation": "main calls the two functions in order. The if __name__ == \"__main__\" guard means the functions run only when the file is executed directly, not when another module imports it.",
+          "observe": "Three lines are printed in total: one from the join demonstration and two from the rate demonstration."
+        }
+      ]
+    },
+    {
+      "lesson_id": "statistics-013",
+      "title": "Factorial designs, blocked randomization and a sample size calculation",
+      "anchor": "reference",
+      "source_path": "courses/statistics-ml/examples/chapter_13.py",
+      "source_sha256": "3ac5d935e2df998941b4fad1434c38bcbbfb3666f99cd4f63c056c870d0090c8",
+      "expected_output": [
+        "C and AB are identical: True",
+        "Treated per block: [2, 2, 2, 2]",
+        "Approximate per-arm n: 63 half effect: 252"
+      ],
+      "steps": [
+        {
+          "lines": [1, 3],
+          "excerpt": "import numpy as np\nfrom itertools import product\nfrom scipy.stats import norm",
+          "title": "Imports for design and power",
+          "explanation": "product from itertools generates every combination of factor levels. norm from scipy.stats provides normal quantiles, which the sample size formula needs.",
+          "observe": "Three imports: NumPy for arrays, product for the design grid and norm for quantiles."
+        },
+        {
+          "lines": [6, 13],
+          "excerpt": "def factorial_and_alias():\n    ab = np.array(list(product([-1.0, 1.0], repeat=2)))\n    a, b = ab.T\n    design = np.column_stack([np.ones(4), a, b, a * b])\n    y = 10 + 2 * a + 3 * b + 4 * a * b\n    beta = np.linalg.solve(design, y)\n    assert np.allclose(beta, [10, 2, 3, 4])\n    assert np.isclose(y[a == 1].mean() - y[a == -1].mean(), 4)",
+          "title": "A 2 by 2 factorial design solved exactly",
+          "explanation": "product([-1, 1], repeat=2) lists the four runs of a two factor experiment with levels coded as -1 and 1. The design matrix has an intercept, the two main effects and their product, the interaction. With four runs and four columns, np.linalg.solve recovers the coefficients exactly. The second assert shows that the main effect of a, measured as a difference of means, equals twice its coded coefficient.",
+          "observe": "beta holds 10, 2, 3 and 4, matching the formula used to build y."
+        },
+        {
+          "lines": [14, 17],
+          "excerpt": "    c = a * b\n    alias = np.column_stack([np.ones(4), a, b, c, a * b])\n    assert np.linalg.matrix_rank(alias) == 4 and alias.shape[1] == 5\n    print(\"Factorial coefficients:\", beta, \"C and AB are identical:\", np.array_equal(c, a * b))",
+          "title": "Aliasing: two columns that cannot be told apart",
+          "explanation": "Here a new factor c is defined as a times b. Adding both c and the a times b interaction gives five columns but only rank 4, so the data cannot separate c from the interaction. This is what an alias means in a fractional design. The printed check compares the two columns with np.array_equal.",
+          "observe": "The first output line ends with C and AB are identical: True"
+        },
+        {
+          "lines": [20, 28],
+          "excerpt": "def blocked_assignment():\n    rng = np.random.default_rng(13)\n    blocks = np.repeat(np.arange(4), 4)\n    treatment = np.zeros(16, dtype=int)\n    for block in np.unique(blocks):\n        rows = np.flatnonzero(blocks == block)\n        treatment[rng.choice(rows, 2, replace=False)] = 1\n    assert all(treatment[blocks == b].sum() == 2 for b in range(4))\n    print(\"Treated per block:\", [int(treatment[blocks == b].sum()) for b in range(4)])",
+          "title": "Blocked randomization with a fixed seed",
+          "explanation": "Sixteen units sit in four blocks of four. Inside each block, rng.choice picks exactly two rows without replacement to treat. A seeded generator makes the choice repeatable. The assert confirms the design property that matters: each block has exactly two treated units, so block differences cannot masquerade as treatment effects.",
+          "observe": "The output line is Treated per block: [2, 2, 2, 2]. Which units were chosen can change with the seed, but the counts never do."
+        },
+        {
+          "lines": [31, 36],
+          "excerpt": "def sample_size():\n    sigma, delta = 2.0, 1.0\n    n = 2 * sigma**2 * (norm.ppf(0.975) + norm.ppf(0.8)) ** 2 / delta**2\n    half_effect = 2 * sigma**2 * (norm.ppf(0.975) + norm.ppf(0.8)) ** 2 / (delta / 2) ** 2\n    assert np.isclose(half_effect, 4 * n)\n    print(\"Approximate per-arm n:\", int(np.ceil(n)), \"half effect:\", int(np.ceil(half_effect)))",
+          "title": "How sample size grows when the effect shrinks",
+          "explanation": "The standard two sample formula uses the 97.5 percent quantile for a two sided 5 percent test and the 80 percent quantile for power. Halving the effect size divides by a quarter as large a squared difference, so the required n grows by a factor of four. np.ceil rounds up because you cannot recruit a fraction of a person.",
+          "observe": "The output reads Approximate per-arm n: 63 half effect: 252, and 252 is exactly four times 63."
+        },
+        {
+          "lines": [39, 46],
+          "excerpt": "def main():\n    factorial_and_alias()\n    blocked_assignment()\n    sample_size()\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "main runs the three ideas in order",
+          "explanation": "Each function prints one line, so the output order matches the call order here.",
+          "observe": "Three lines are printed: factorial, blocking, then sample size."
+        }
+      ]
+    },
+    {
+      "lesson_id": "statistics-023",
+      "title": "Conformal ranks, covariate shift weights and selective prediction",
+      "anchor": "reference",
+      "source_path": "courses/statistics-ml/examples/chapter_23.py",
+      "source_sha256": "2018b27c71f4a4acc850c7734b0d247b085bfd0f4e0497cd76285c08216244fa",
+      "expected_output": [
+        "Calibration n/k/q: 19 18 18.0",
+        "Accepted fraction: 0.5 accepted empirical error: 0.0 all-case error: 0.5"
+      ],
+      "steps": [
+        {
+          "lines": [4, 10],
+          "excerpt": "def conformal_rank():\n    scores = np.arange(1.0, 20.0)\n    alpha = 0.1\n    n = len(scores)\n    k = int(np.ceil((n + 1) * (1 - alpha)))\n    q = np.sort(scores)[k - 1] if k <= n else np.inf\n    assert k == 18 and q == 18",
+          "title": "The conformal quantile from a rank",
+          "explanation": "split conformal prediction sorts calibration scores and picks the k th smallest, where k is the ceiling of (n + 1) times (1 minus alpha). With 19 scores and alpha 0.1, k is 18, so the threshold q is the 18th score. The plus one accounts for the new point, which is why conformal coverage holds in finite samples rather than only approximately.",
+          "observe": "k is 18 and q is 18.0. If k ever exceeded n, the code would fall back to infinity, meaning no finite threshold is safe."
+        },
+        {
+          "lines": [11, 21],
+          "excerpt": "    possible_new_scores = np.arange(0.5, 20.0, 1.0)\n    rank_coverage = np.mean(possible_new_scores <= q)\n    assert rank_coverage == 0.9\n    print(\n        \"Calibration n/k/q:\",\n        n,\n        k,\n        q,\n        \"coverage over illustrative equally likely ranks:\",\n        rank_coverage,\n    )",
+          "title": "Checking coverage over equally likely ranks",
+          "explanation": "possible_new_scores stands in for where a new score could fall among the calibration scores. The fraction at or below q is exactly 0.9, which matches the target 1 minus alpha. The print call spreads its arguments over several lines for readability; it still writes one output line.",
+          "observe": "The first output line starts with Calibration n/k/q: 19 18 18.0"
+        },
+        {
+          "lines": [24, 34],
+          "excerpt": "def shift_weighting():\n    source = np.array([0.8, 0.2])\n    target = np.array([0.2, 0.8])\n    outcome = np.array([1.0, 9.0])\n    weights = target / source\n    target_mean = np.sum(source * weights * outcome)\n    assert np.isclose(target_mean, target @ outcome) and np.isclose(target_mean, 7.4)\n    assert np.isclose(source @ outcome, 2.6)\n    print(\n        \"Source mean:\", source @ outcome, \"target reweighted mean:\", target_mean, \"ratios:\", weights\n    )",
+          "title": "Reweighting for covariate shift",
+          "explanation": "The source and target arrays describe how often two kinds of cases appear before and after a shift. Each weight is target probability over source probability. Multiplying source frequencies by the weights recreates the target mix, so a reweighted average estimates the target mean without collecting new outcomes. The asserts check both means against direct calculations.",
+          "observe": "The weights are 0.25 and 4, and the reweighted mean moves from 2.6 to 7.4."
+        },
+        {
+          "lines": [37, 43],
+          "excerpt": "def selective_prediction():\n    confidence = np.array([0.55, 0.6, 0.8, 0.95])\n    error = np.array([1.0, 1.0, 0.0, 0.0])\n    accepted = confidence >= 0.8\n    coverage = accepted.mean()\n    risk = error[accepted].mean()\n    assert coverage == 0.5 and risk == 0 and error.mean() == 0.5",
+          "title": "Selective prediction: answer only when confident",
+          "explanation": "accepted is a boolean mask for predictions with confidence at least 0.8. Its mean is the coverage, the share of cases the model answers. Indexing error with the mask gives the error rate on answered cases only. Abstaining on the two low confidence cases removes every mistake, at the cost of answering half the time.",
+          "observe": "coverage is 0.5, risk on accepted cases is 0.0 and error over all cases is 0.5."
+        },
+        {
+          "lines": [44, 51],
+          "excerpt": "    print(\n        \"Accepted fraction:\",\n        coverage,\n        \"accepted empirical error:\",\n        risk,\n        \"all-case error:\",\n        error.mean(),\n    )",
+          "title": "Report the tradeoff",
+          "explanation": "The print call puts coverage and both error rates on one line, so a reader sees what abstention bought and what it cost.",
+          "observe": "The last line reads Accepted fraction: 0.5 accepted empirical error: 0.0 all-case error: 0.5"
+        },
+        {
+          "lines": [54, 61],
+          "excerpt": "def main():\n    conformal_rank()\n    shift_weighting()\n    selective_prediction()\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "main and the script guard",
+          "explanation": "main calls the three demonstrations in the order of the chapter. Each assert inside them must pass before its print runs, so a printed line means its check succeeded.",
+          "observe": "Three output lines appear, one per demonstration."
+        }
+      ]
+    }
+  ]
+}

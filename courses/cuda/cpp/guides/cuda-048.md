@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Build a CSR matrix and decide whether sparse storage pays off after conversion, reuse and row distribution.
+
 Work through *cuSPARSE and sparsity as a data structure* with the concrete cases below. Finish with this evidence:
 correct result and a reasoned choice considering conversion, reuse and distribution. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Sparse storage represents selected entries and their coordinates instead of storing every zero. Compressed sparse row, CSR, stores row offsets, column indices and values. Row offsets delimit each row's entries; the final offset equals the stored-entry count. Specify index base, sortedness and duplicate handling. A sparse multiply can save arithmetic and storage but introduces indirect reads and uneven row work. Conversion and preprocessing costs matter, especially for one-shot operations. Arbitrary sparsity is different from structured sparsity supported by certain hardware/library modes.
+
+### Key terms
+
+- **CSR format:** Compressed sparse row storage made of values, column indices and row offsets.
+- **Row offsets:** An array of length rows+1 whose consecutive entries bound each row's range of stored nonzeros.
+- **Sparsity:** The fraction of matrix entries that are zero, which alone does not decide whether sparse storage is faster.
+- **SpMV:** Sparse matrix-vector multiplication, often limited by irregular memory access and row length imbalance.
 
 ## Mathematical contract
 

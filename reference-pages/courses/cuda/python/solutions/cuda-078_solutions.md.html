@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-trace-a-lost-update">Exercise 1: Trace a lost update<a class="heading-anchor" href="#exercise-1-trace-a-lost-update" aria-label="Link to this section">#</a></h3>
 <p>Two readers can overwrite one another.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>trace a lost update</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Trace two threads incrementing bin 0, which holds 2: both read 2, both compute 3, both store 3. The final count is 3, although two updates happened.</p>
+<p><strong>Why it is correct here.</strong> A non-atomic increment is a read, an add and a write. If both reads happen before either write, the second write overwrites the first with the same value, and one increment disappears.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming the two writes collide in a visible way, raising an error or producing a garbled value, is incorrect. The lost update produces a plausible number, which is why it escapes notice.</p>
+<p><strong>How to verify.</strong> Write the interleaving as a table of read, add and write steps per thread. The final value must be 3, while an atomic or serial version gives 4.</p>
 <h3 id="exercise-2-compute-a-skewed-histogram">Exercise 2: Compute a skewed histogram<a class="heading-anchor" href="#exercise-2-compute-a-skewed-histogram" aria-label="Link to this section">#</a></h3>
 <p>Six zeros yield count 6 in bin 0.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute a skewed histogram</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute the histogram of <code>[0, 0, 0, 0, 0, 0]</code> with three bins: bin 0 holds 6 and the others hold 0.</p>
+<p><strong>Why it is correct here.</strong> Every update targets bin 0, so this input is the worst case for contention. Correctness is easy to state, while performance depends on serialization at one counter.</p>
+<p><strong>A plausible wrong approach.</strong> Using the uniform data <code>[0, 1, 2, 0, 1, 2]</code> as the contention test spreads updates evenly and measures the friendliest case instead.</p>
+<p><strong>How to verify.</strong> Run the reference loop on the six zeros and assert <code>bins == [6, 0, 0]</code>. The total of the bins must equal the input length, 6.</p>
 <h3 id="exercise-3-merge-partials">Exercise 3: Merge partials<a class="heading-anchor" href="#exercise-3-merge-partials" aria-label="Link to this section">#</a></h3>
 <p>Add corresponding bins.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>merge partials</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Merge per-block histograms by adding matching bins: <code>[2, 1, 0] + [0, 0, 3]</code> gives <code>[2, 1, 3]</code>.</p>
+<p><strong>Why it is correct here.</strong> Each partial counts a disjoint subset of the input, so the full count for a bin is the sum of the partial counts. The reference asserts the merged list equals the direct histogram.</p>
+<p><strong>A plausible wrong approach.</strong> Concatenating the partials or taking the bin-wise maximum produces wrong totals. The maximum here gives <code>[2, 1, 3]</code> by coincidence, so test with overlapping partials such as <code>[1, 1, 0]</code> and <code>[1, 0, 3]</code>.</p>
+<p><strong>How to verify.</strong> Use <code>zip(left, right, strict=True)</code> so different bin counts raise an error. Check that the sum of the merged bins equals the input length.</p>
 <h3 id="exercise-4-count-private-storage">Exercise 4: Count private storage<a class="heading-anchor" href="#exercise-4-count-private-storage" aria-label="Link to this section">#</a></h3>
 <p>Partials times bins times counter width.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count private storage</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute private storage as partials times bins times counter width. For 1024 block partials, 256 bins and 4-byte counters, that is <code>1024*256*4 = 1048576</code> bytes.</p>
+<p><strong>Why it is correct here.</strong> Privatization trades memory for reduced contention, since every partial needs a full copy of the bins. The cost grows linearly with each factor.</p>
+<p><strong>A plausible wrong approach.</strong> Counting only bins times width, 1 KiB here, ignores that each partial owns its own copy and underestimates memory by a factor of the partial count.</p>
+<p><strong>How to verify.</strong> Recompute the product and confirm 1 MiB. Then halve the number of partials and confirm the bytes halve.</p>
 <h3 id="exercise-5-explain-floating-atomic-order">Exercise 5: Explain floating atomic order<a class="heading-anchor" href="#exercise-5-explain-floating-atomic-order" aria-label="Link to this section">#</a></h3>
 <p>Atomicity does not fix addition order.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain floating atomic order</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain that <code>atomic.add</code> on a float accumulator makes each addition indivisible but leaves the order of additions to the scheduler, so rounding may differ between runs.</p>
+<p><strong>Why it is correct here.</strong> Floating addition is not associative. Different arrival orders round at different points, so atomic sums are correct within rounding but not bitwise reproducible.</p>
+<p><strong>A plausible wrong approach.</strong> Expecting atomics to give the same bits as a sequential CPU sum confuses race-freedom with order. No update is lost, but the order is still free.</p>
+<p><strong>How to verify.</strong> Sum values of very different magnitudes atomically several times and compare the last bits. Integer counters give identical results every time.</p>
 <h3 id="exercise-6-specify-completion-before-reading">Exercise 6: Specify completion before reading<a class="heading-anchor" href="#exercise-6-specify-completion-before-reading" aria-label="Link to this section">#</a></h3>
 <p>Wait for all updates and merges before host retrieval.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>specify completion before reading</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Before reading bins on the host, wait for the histogram kernel and the merge to finish, for example with <code>cuda.synchronize()</code> or an implicit synchronization in a device-to-host copy on the same stream.</p>
+<p><strong>Why it is correct here.</strong> Launches are asynchronous. Reading the bins before the merge completes can return partial counts.</p>
+<p><strong>A plausible wrong approach.</strong> Reading after only the histogram kernel ignores the merge step, so the host sees one block&#x27;s partial instead of the total.</p>
+<p><strong>How to verify.</strong> Assert that the copied bins sum to the input length. A smaller total signals that the read happened before all updates completed.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Histogram bins [2,1,3].</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-078_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

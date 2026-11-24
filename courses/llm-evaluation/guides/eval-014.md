@@ -8,7 +8,7 @@ Build bounded adversarial and invariance tests while enforcing authorization ind
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-014`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-014` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for robustness, access policy and adversarial evaluation in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about metamorphic testing and access policy: Formatting changes keep the authorized result public-guide, removing authorization returns no document, extra authority fields fail the exact schema, an unsafe intermediate action is recorded as a policy failure, and unknown cases stay unknown and go to review. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Define the boundary being tested
 
@@ -17,6 +17,13 @@ A robustness test changes an input condition and observes whether a required pro
 Security requirements are different from average task quality. A research assistant must not obtain access merely because a document or generated tool proposal claims to be authorized. Authority should come from trusted metadata and the caller's permissions. Retrieved text is data for the task. It is not an instruction channel for granting new rights.
 
 The examples use public and restricted synthetic fixture records. They do not inspect real credentials, make network requests or execute shell commands. Their purpose is to make an authorization invariant and a bounded proposal validator executable. A system that passes these small checks has demonstrated only the named cases, not universal resistance to adversarial prompting.
+
+## Key terms
+
+- **Metamorphic relation:** A specified relation between input changes and required output behavior, such as preserving an answer under reformatting.
+- **Authorization invariant:** A rule that access comes from trusted metadata and caller permissions, never from content claims.
+- **Indirect prompt injection:** Instruction-like text in retrieved data or tool proposals that attempts to change the system's behavior or permissions.
+- **Untrusted data:** Retrieved or user-supplied text treated as content for the task rather than as an instruction channel.
 
 ## Worked case A: authorization before content matching
 

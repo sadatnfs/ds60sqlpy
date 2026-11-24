@@ -4,3 +4,5 @@ ARG SPARK_BASE
 FROM ${SPARK_BASE}
 COPY app/kubernetes_job.py /opt/spark/work-dir/kubernetes_job.py
 COPY kubernetes/executor-template.yaml /opt/spark/work-dir/executor-template.yaml
+# Restate the official image's nonroot spark UID; the executor template runs as 185.
+USER 185

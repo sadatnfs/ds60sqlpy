@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Inference evaluates a trained model without performing optimizer updates, but framework mode still matters. Dropout and normalization can change behavior between training and evaluation. PyTorch eval and inference_mode address different concerns: module behavior versus autograd bookkeeping. TensorFlow calls need explicit inference behavior where the layer contract uses training, and exported signatures need shape and dtype definitions.</p>
 <p>Latency per request, batch throughput, tail latency, cold start and memory are separate metrics. A large batch can improve items per second while making an interactive request wait longer. Measure output materialization when a response must be sent to a CPU client. Include model loading and compilation in a separate cold-start result instead of hiding them in warmup.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Evaluation mode:</strong> The <code>model.eval()</code> setting that switches layers such as dropout and batch normalization to inference behavior.</li>
+<li><strong>Inference mode:</strong> A PyTorch context that disables gradient tracking and version counters to reduce inference overhead.</li>
+<li><strong>Throughput:</strong> Samples or requests completed per unit time, often improved by batching.</li>
+<li><strong>Request latency:</strong> Time from receiving one request to returning its answer, which batching can increase.</li>
+<li><strong>Cold start:</strong> The cost of the first request, including loading, compilation and allocation before steady state.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A batch of 32 completes in 8 ms, giving 4000 items per second. That does not imply a single request has 0.25 ms latency when queueing and execution require the whole 8 ms.</p>
@@ -214,6 +222,28 @@ amortized <span class="syntax-operator">=</span> seconds <span class="syntax-ope
 <span class="syntax-keyword">assert</span> amortized <span class="syntax-operator">==</span> <span class="syntax-number">0.00025</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU serving model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> throughput<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">items/s; batch latency</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> seconds<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> 4000 items/s with 8 ms batch latency, not 0.25 ms request latency.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>batch</code></td>
+<td><code>32</code></td>
+</tr>
+<tr>
+<td><code>seconds</code></td>
+<td><code>0.008</code></td>
+</tr>
+<tr>
+<td><code>throughput</code></td>
+<td><code>4000.0</code></td>
+</tr>
+<tr>
+<td><code>amortized</code></td>
+<td><code>0.00025</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -226,17 +256,23 @@ amortized <span class="syntax-operator">=</span> seconds <span class="syntax-ope
 <p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-throughput">Exercise 1: Compute throughput<a class="heading-anchor" href="#exercise-1-compute-throughput" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute throughput</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Dividing by the time until the batch was enqueued rather than completed inflates throughput, because GPU work is asynchronous and the enqueue returns almost immediately.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-separate-per-item-cost-and-request-latency">Exercise 2: Separate per-item cost and request latency<a class="heading-anchor" href="#exercise-2-separate-per-item-cost-and-request-latency" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>separate per-item cost and request latency</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting 0.25 ms as request latency promises response times that no request experiences, and service level objectives built on it will fail.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-set-both-pytorch-inference-controls">Exercise 3: Set both PyTorch inference controls<a class="heading-anchor" href="#exercise-3-set-both-pytorch-inference-controls" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>set both PyTorch inference controls</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using only <code>torch.no_grad()</code> keeps dropout active, so predictions vary between calls, and batch normalization keeps updating running statistics.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-specify-tensorflow-training-behavior">Exercise 4: Specify TensorFlow training behavior<a class="heading-anchor" href="#exercise-4-specify-tensorflow-training-behavior" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>specify TensorFlow training behavior</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming <code>model.predict</code> and <code>model(x)</code> behave the same in every custom layer is risky when a layer reads <code>training</code> differently.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-measure-cold-start">Exercise 5: Measure cold start<a class="heading-anchor" href="#exercise-5-measure-cold-start" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>measure cold start</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Averaging cold start into steady-state latency hides a multi-second first response. Autoscaling services start new replicas often, so cold start can affect many users.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-test-an-exported-signature-boundary">Exercise 6: Test an exported signature boundary<a class="heading-anchor" href="#exercise-6-test-an-exported-signature-boundary" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>test an exported signature boundary</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Letting the runtime cast silently makes accepted inputs ambiguous. A float64 request cast to float32 loses precision without anyone noticing.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

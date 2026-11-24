@@ -1,6 +1,6 @@
 # llm-applied-022: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for structured tools for extraction, aggregation and data-science work only after attempting *Execute a bounded grouped mean* through *Refuse an unsupported causal interpretation*. A discrepancy in *Reject an arbitrary operation* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-022_solution.py` runs the assertions; this page explains why they test tool proposal and dispatcher.
 
 ## Mechanism review
 
@@ -18,19 +18,19 @@ Separate extraction, computation and explanation. An extraction proposal becomes
 
 ## Reading the implementation
 
-The tool request has exactly operation, group_by and value fields. Allowed values aregroup_mean, group and value. Input rows haveid, group, value with unique IDs and at most20 records. Rejectbool even though it is anint subclass. Group values with a dictionary, then emit sorted rows containing group, count, mean. Keep the tool result separate from any prose proposal and verify quoted numbers against it.
+The tool request has exactly operation, group_by and value fields. Allowed values are group_mean, group and value. Input rows have id, group, value with unique IDs and at most 20 records. Reject bool even though it is an int subclass. Group values with a dictionary, then emit sorted rows containing group, count, mean. Keep the tool result separate from any prose proposal and verify quoted numbers against it.
 
 ## Trace a typed tool from proposal to descriptive result
 
 The accepted request is exactly operation=group_mean, group_by=group, value=value. An extra query field or operation=run_sql is rejected rather than interpreted. The dispatcher therefore selects a fixed implementation; it does not execute model-generated source code. The literal rows are already in memory, so this example makes no claim about authenticating a database connection or binding SQL parameters in a live engine.
 
-The input grain is one identified observation per row. The output grain is one row per group, carrying count and mean. For A values1, 3, the sum is four, count two and mean two. B has value ten, count one and mean ten. The descriptive difference B minus A is eight. The output preserves the different sample counts instead of presenting both means as equally supported by data.
+The input grain is one identified observation per row. The output grain is one row per group, carrying count and mean. For A values 1, 3, the sum is four, count two and mean two. B has value ten, count one and mean ten. The descriptive difference B minus A is eight. The output preserves the different sample counts instead of presenting both means as equally supported by data.
 
-Aggregation can change meaning. The overall observation mean is(1+3+10)/3=14/3. Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
+Aggregation can change meaning. The overall observation mean is (1+3+10)/3=14/3. Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
 
-Finite input checks alone do not prevent intermediate overflow. With values[1e308, 1e308], ordinary floating summation can become infinity before division by two, although the mathematical mean is1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.
+Finite input checks alone do not prevent intermediate overflow. With values `[1e308, 1e308]`, ordinary floating summation can become infinity before division by two, although the mathematical mean is 1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.
 
-For the two large equal values, scaled values are[1, 1], their mean is one and the output is1e308. For equal opposite values, the scaled terms cancel to zero. This is an arithmetic stability improvement, not a guarantee of exactness for every representable combination; rounding and underflow remain part of floating-point computation. Use an explicitly different numeric representation if the task requires exact monetary units or exact decimal rounding rules.
+For the two large equal values, scaled values are `[1, 1]`, their mean is one and the output is 1e308. For equal opposite values, the scaled terms cancel to zero. This is an arithmetic stability improvement, not a guarantee of exactness for every representable combination; rounding and underflow remain part of floating-point computation. Use an explicitly different numeric representation if the task requires exact monetary units or exact decimal rounding rules.
 
 Missing values and booleans are rejected under this strict policy. Dropping None would change count and potentially bias the result; accepting True as one would conflate logical and measured data. A different missingness policy may be appropriate for another task, but it should have its own output count, denominator and explanation. Duplicate IDs are also a data-quality failure because repeated observations would change weights.
 
@@ -48,7 +48,7 @@ Finally, group membership is not a treatment-assignment design. The difference e
 
 ## Exercise 1: Execute a bounded grouped mean
 
-The question is: Use rows A1, A3, B10 and the admittedgroup_mean request.
+The question is: Use rows A1, A3, B10 and the admitted group_mean request.
 
 The output grain is one row per group. Counts remain beside means so a one-record group does not look as well supported as a larger group.
 
@@ -112,13 +112,13 @@ huge[1]["value"] = -1e308
 assert dispatch(request, huge)[0]["mean"] == 0.0
 ```
 
-**Expected:** invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.
+**Expected:** invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0.
 
-**Verify:** Compare the computed values or written argument with invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.
+**Verify:** Compare the computed values or written argument with invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0.
 
 ## Exercise 4: Enforce identity and work limits
 
-The question is: Duplicatea1, then supply21 unique rows.
+The question is: Duplicatea 1, then supply 21 unique rows.
 
 Repeated records can bias aggregates, and unbounded inputs can exceed a tool budget. Both checks occur before the grouped calculation.
 
@@ -139,7 +139,7 @@ for bad_rows in [rows + [dict(rows[0])], too_many]:
 
 ## Exercise 5: Verify an explanation against the artifact
 
-The question is: Check a proposed sentence saying groupAmean2 against the result; reject a proposedmean20.
+The question is: Check a proposed sentence saying group A mean 2 against the result; reject a proposed mean 20.
 
 The explanation stage should consume the computed artifact as its numerical source. A fluent but different number is an output-validation failure.
 
@@ -173,4 +173,4 @@ assert report["group_means"] and not report["causal_effect_established"]
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Reject invalid numeric values* and predict how the result changes before checking it; the unchanged inputs give: invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0. Keep the original *Refuse an unsupported causal interpretation* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

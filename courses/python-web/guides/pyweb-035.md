@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-034`.
 
 Clients need stable error semantics, but an exception's internal text is rarely an appropriate public contract. This chapter defines a small problem-response shape for invalid input, a known resource conflict and an unexpected server failure. It verifies both HTTP status and response content using real FastAPI exception handlers.
 
+## Key terms
+
+- **Problem details:** A JSON error representation with type, title, status and instance fields, sent with the media type `application/problem+json`.
+- **Problem type:** A stable identifier, here a URN, that names a class of problem so clients can branch on it instead of on message wording.
+- **Exception handler:** A function registered with `app.exception_handler` that converts one exception class into a controlled HTTP response.
+- **RequestValidationError:** The FastAPI exception raised for invalid input, mapped here to 422 with safe field locations.
+- **Unexpected defect:** An unhandled internal exception, answered with a generic 500 while detailed diagnostics stay in controlled internal logs.
+
 ## Mechanism: classify failures before serializing them
 
 A problem response contains a type identifier, human-readable title, status and instance. The type identifies a class of problem rather than a particular stack trace. Additional fields can describe safe validation locations or machine-readable codes. The response uses `application/problem+json` so callers can recognize the representation.
@@ -29,6 +37,57 @@ An amount below the schema's lower bound fails request validation. The custom ha
 TestClient is configured to observe error responses rather than reraising server exceptions. This is intentional for the public-contract case. Developer tests can also retain the default reraising mode when they need the original traceback. Choosing one observation mode does not make the other behavior disappear.
 
 Validation errors can contain sensitive inputs, especially for passwords, tokens or uploaded metadata. A generic dump of the framework exception may disclose them. Build the public error representation from an explicit allowlist and keep diagnostic collection proportionate to the operational need.
+
+## Worked example: problem details from Starlette exception handlers
+
+```python
+from starlette.applications import Starlette
+from starlette.exceptions import HTTPException
+from starlette.responses import JSONResponse
+from starlette.routing import Route
+from starlette.testclient import TestClient
+
+
+def problem(request, status, title):
+    body = {"type": "about:blank", "title": title, "status": status, "instance": request.url.path}
+    return JSONResponse(body, status_code=status, media_type="application/problem+json")
+
+
+async def http_error(request, exc):
+    return problem(request, exc.status_code, exc.detail)
+
+
+async def crash(request, exc):
+    return problem(request, 500, "Internal server error")
+
+
+async def missing_order(request):
+    raise HTTPException(404, "Order not found")
+
+
+async def report(request):
+    raise ZeroDivisionError("secret ledger total")
+
+
+app = Starlette(
+    routes=[Route("/orders/9", missing_order), Route("/report", report)],
+    exception_handlers={HTTPException: http_error, Exception: crash},
+)
+with TestClient(app, raise_server_exceptions=False) as client:
+    for path in ("/orders/9", "/report", "/nowhere"):
+        response = client.get(path)
+        print(response.status_code, response.headers["content-type"], response.json()["title"])
+```
+
+Expected output:
+
+```text
+404 application/problem+json Order not found
+500 application/problem+json Internal server error
+404 application/problem+json Not Found
+```
+
+FastAPI's `exception_handler` decorator registers handlers on the Starlette layer shown here. The third path is the instructive one: no route raised anything, yet the router's own 404 also came back as problem JSON, because the router raises the same `HTTPException` class that the handler catches. The `ZeroDivisionError` text never reaches the client; the catch-all handler replaced it with a generic title while the full traceback stays available to server logs.
 
 ## Failure diagnosis and discussion
 

@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A model artifact is a bundle of fitted state and its interface contract. The feature order, units, preprocessing, dependencies and validation evidence matter alongside the estimator. A consumer should verify compatibility and artifact identity before loading or using it.</p>
 <p>The first case serializes a model created by this same program, verifies its exact bytes, reloads it and compares predictions. It then logs the artifact through MLflow, creates a real registered-model version and links a candidate alias to that version. This establishes actual local registry behavior, not a production promotion policy.</p>
 <p>Serialized Python objects can execute code when loaded. The example loads only its own newly written trusted artifact. A hash checks integrity relative to a trusted expected value; it does not make an attacker-provided model and attacker-provided hash safe. The longer-lived service project uses a bounded JSON model representation to avoid arbitrary object deserialization at that serving boundary.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Model artifact:</strong> A serialized bundle of fitted state together with its interface contract: feature order, units, preprocessing and dependencies.</li>
+<li><strong>Artifact integrity:</strong> Agreement between an artifact&#x27;s SHA256 digest and a trusted expected value. It detects changed bytes but does not make an untrusted file safe.</li>
+<li><strong>Model registry:</strong> The MLflow store of named models whose numbered versions each link to a logged artifact and its run.</li>
+<li><strong>Alias:</strong> A movable name such as candidate that points to one registered model version. Setting it does not accept or deploy the model.</li>
+<li><strong>Trusted serialization:</strong> Loading joblib or pickle files only from a trusted source, because deserializing Python objects can execute arbitrary code.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>joblib writes and reads the program&#x27;s own trusted fitted pipeline. A manifest retains feature order and SHA256. MLflow create_model_version links the artifact to its run, while set_registered_model_alias and get_model_version_by_alias exercise actual version resolution. A candidate alias is a label, not automatic acceptance or deployment.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-018`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-018` (Compare full and adapter fine-tuning on frozen tasks). They introduce the notation this lesson needs for preference margin and dpo-style loss.
 
 ## Learning objectives
 
@@ -76,9 +76,11 @@ Keep the reference policy fixed under the declared experiment, and preserve resp
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-019/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `llm-torch-cpu` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-019.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-019.py` in the declared `llm-torch-cpu` profile. *Calculate the equal-margin loss*, *Inspect the preference gradient* and *Perform an actual update* need only PyTorch and NumPy and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-019/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Inspect the preference gradient* and *Perform an actual update* reuse the helper and fixture introduced in *Calculate the equal-margin loss*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Loss log 2. Example B should give: Gradient -0.25. Example C should give: Difference 0.05; loss below \(\log(2)\). Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -88,13 +90,13 @@ Represent the policy log-probability difference as a trainable scalar for the sm
 
 Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is \(z=\beta\cdot (d-r)\), and the loss is \(\log(1+\exp(-z))\), implemented through softplus for numerical stability. Its derivative with respect to d is \(-\beta\operatorname{sigmoid}(-z)\). The second derivative is \({\beta}^{2}\cdot \sigma(z)\cdot \sigma(-z)\), nonnegative, so this scalar loss is convex in d for a fixed reference.
 
-At \(d=r=0\) and beta 0.5, the loss is log2, about 0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is \(0.25\cdot 0.25=0.0625\). SGD with learning rate 0.2 moves d to \(0-0.2\cdot (-0.25)=0.05\). The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
+At \(d=r=0\) and beta 0.5, the loss is log2, about 0.693147. The derivative is -0.5*0.5=-0.25, and the curvature is \(0.25\cdot 0.25=0.0625\). SGD with learning rate 0.2 moves d to \(0-0.2\cdot (-0.25)=0.05\). The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
 
 A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
 
 In a language model, a response log probability is normally assembled from token-level conditional log probabilities under a declared response mask. Summing them and averaging by response length are different scoring rules. Prompt tokens, end markers, truncation and chosen/rejected identities must be handled consistently for both policy and reference. Otherwise the margin can reward a formatting or length artifact instead of the intended preference.
 
-Reversing a preference means reversing the corresponding chosen-minus-rejected comparisons. At the symmetric zero-reference fixture, the derivative changes from-0.25 to+0.25. In a nonzero-reference case, swapping only a label string while leaving score orientation unchanged would not define the intended opposite comparison. Preserve both response records and their model scores rather than manipulating an anonymous scalar after the fact.
+Reversing a preference means reversing the corresponding chosen-minus-rejected comparisons. At the symmetric zero-reference fixture, the derivative changes from -0.25 to +0.25. In a nonzero-reference case, swapping only a label string while leaving score orientation unchanged would not define the intended opposite comparison. Preserve both response records and their model scores rather than manipulating an anonymous scalar after the fact.
 
 The full DPO formulation connects offline preference comparisons to a reference-regularized policy objective. That theoretical relationship is broader than this scalar probe, which does not train a complete language model. Likewise, the example does not train a reward model or run online reinforcement learning. [Direct Preference Optimization](https://arxiv.org/abs/2305.18290).
 
@@ -138,7 +140,7 @@ loss.backward()
 np.testing.assert_allclose(difference.grad.item(), -0.25, atol=1e-12, rtol=0)
 ```
 
-**Expected:** gradient-.25.
+**Expected:** gradient -0.25.
 
 ### Example C: Perform an actual update
 
@@ -152,25 +154,28 @@ np.testing.assert_allclose(difference.item(), 0.05, atol=1e-12, rtol=0)
 assert after.item() < loss.item()
 ```
 
-**Expected:** difference.05; loss below \(\log(2)\).
+**Expected:** difference 0.05; loss below \(\log(2)\).
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: loss log 2. offline update True; reward_model_trained False; online_rl False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Inspect the preference gradient*, predict its result from the prompt alone: Backpropagate the equal-margin loss. Write the guess beside the stated outcome (gradient -0.25). Then predict how the decisive case, *Name the unexecuted RLHF machinery*, should end: Create an execution receipt distinguishing the scalar offline update from reward-model training and online policy optimization. For preference optimization, DPO and the RLHF distinction, the finish condition is: Loss log 2. Offline update True; reward_model_trained False; online_rl False.
 
 ## Exercises
 
 1. **Calculate the equal-margin loss.** Set policy difference 0, reference difference 0, beta.5.
    **Expected:** loss log 2.
    **Verify:** Save the assertion results for exercise 1, including loss log 2.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Inspect the preference gradient.** Backpropagate the equal-margin loss.
-   **Expected:** gradient-.25.
-   **Verify:** Save the assertion results for exercise 2, including gradient-.25.
+   **Expected:** gradient -0.25.
+   **Verify:** Save the assertion results for exercise 2, including gradient -0.25.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Perform an actual update.** Take SGD at 0.2 on the scalar policy difference and recompute the loss.
-   **Expected:** difference.05; loss below \(\log(2)\).
-   **Verify:** Save the assertion results for exercise 3, including difference.05; loss below \(\log(2)\).
+   **Expected:** difference 0.05; loss below \(\log(2)\).
+   **Verify:** Save the assertion results for exercise 3, including difference 0.05; loss below \(\log(2)\).
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Reverse the preference.** At zero policy difference, reverse the chosen/rejected orientation and inspect the gradient.
    **Expected:** gradient+.25.
@@ -192,19 +197,21 @@ If preference metrics improve while factual support declines, inspect the labels
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate preference margin and dpo-style loss for the fixture in *Calculate the equal-margin loss*. Hint 2: change one literal in *Inspect the preference gradient* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Reverse the preference*, with its stated result (gradient+.25). If *Name the unexecuted RLHF machinery* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Preference margin, DPO-style loss, Reference policy using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain preference margin, dpo-style loss and reference policy using *Calculate the equal-margin loss*. Recompute its result (loss log 2) from the inputs. Change one input in *Perform an actual update* and predict whether the stated result (difference 0.05; loss below \(\log(2)\)) still holds. Say which part of preference optimization, DPO and the RLHF distinction the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-018` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Calculate the equal-margin loss* cannot be reconstructed without the solution, revisit `llm-applied-018` (Compare full and adapter fine-tuning on frozen tasks). Otherwise keep the six observations from preference optimization, DPO and the RLHF distinction and continue to `llm-applied-020` (Fine-tuning embeddings and a small reranker).
 
 ## Sources and verification status
 
-API and mechanism reference: [Direct Preference Optimization](https://arxiv.org/abs/2305.18290), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for preference margin: [Direct Preference Optimization](https://arxiv.org/abs/2305.18290), reviewed 2026-10-22. The fixtures for *Calculate the equal-margin loss*, *Inspect the preference gradient* and *Perform an actual update* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

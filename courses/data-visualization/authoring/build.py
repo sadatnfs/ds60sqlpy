@@ -12,6 +12,13 @@ BASE = Path(__file__).resolve().parents[1]
 ROOT = BASE.parents[1]
 
 UNITS = json.loads((BASE / "authoring" / "units.json").read_text(encoding="utf-8"))
+REASONING = json.loads((BASE / "authoring" / "reasoning.json").read_text(encoding="utf-8"))
+REASONING_LABELS = {
+    "approach": "Approach",
+    "correct": "Why it is correct",
+    "wrong": "A plausible wrong approach",
+    "verify": "How to verify",
+}
 
 
 def write(path, text):
@@ -224,7 +231,36 @@ def exercise_titles(text):
     return titles
 
 
+def key_terms(text, key):
+    """Require 3 to 5 distinct, defined Key terms bullets in each directly authored guide."""
+    section = re.search(r"^#{2,3} Key terms\n\n((?:- .+\n)+)", text, flags=re.M)
+    assert section, f"{key}: missing Key terms section"
+    terms = re.findall(r"^- \*\*(.+?):\*\* (.+)$", section.group(1), flags=re.M)
+    names = [name for name, _ in terms]
+    assert 3 <= len(terms) <= 5, (key, names)
+    assert len(set(names)) == len(names), (key, names)
+    for name, definition in terms:
+        assert len(definition.split()) >= 6 and definition.endswith("."), (key, name)
+        assert not re.search("[\u2013\u2014]", name + definition), (key, name)
+    return names
+
+
+def reasoning_text(key):
+    """Render the four-part solution reasoning authored in reasoning.json."""
+    entry = REASONING.get(key)
+    assert isinstance(entry, dict), f"{key}: missing solution reasoning"
+    assert set(entry) == set(REASONING_LABELS), (key, sorted(entry))
+    parts = []
+    for field, label in REASONING_LABELS.items():
+        body = entry[field].strip()
+        assert len(body.split()) >= 20, (key, field)
+        assert not re.search("[\u2013\u2014]", body), (key, field)
+        parts.append(f"**{label}.** {body}")
+    return "\n\n".join(parts)
+
+
 def build():
+    assert set(REASONING) == {f"viz-{n:03d}" for n in range(1, len(UNITS) + 1)}, sorted(REASONING)
     plan, admission, inventory = [], [], []
     browser = (BASE / "authoring" / "browser_cases.js").read_text()
     for number, (title, level, prerequisites, concepts, outcome, fixture, answers) in enumerate(
@@ -347,6 +383,7 @@ console.log("Fixture loaded; derive the figure and its checks from the guide tas
         )
         for index, answer in enumerate(answers, 1):
             solution += f"\n## Exercise {index}\n\n{answer}\n"
+        solution += f"\n## Solution reasoning\n\n{reasoning_text(key)}\n"
         solution += (
             "\n## Complete references and evidence\n\n"
             f"[Python reference](../references/{key}.py) and "
@@ -359,6 +396,7 @@ console.log("Fixture loaded; derive the figure and its checks from the guide tas
         write(ROOT / explanation, solution)
         path = ROOT / guide
         text = path.read_text()
+        key_terms(text, key)
         heading, body = text.split("\n", 1)
         text = f"# {key}: {title}\n" + body
         if ANATOMY_START in text:

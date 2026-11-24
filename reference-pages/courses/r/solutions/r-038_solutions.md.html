@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Identify the denominator for P(A given alert).</p>
 <p>The denominator is 40 in the supplied table.</p>
+<p><strong>Approach:</strong> Restrict to the alerted records first: the yes column, then divide A&#x27;s alerted count by that column total.</p>
+<p><strong>Why it holds here:</strong> The yes column holds 30 A records and 10 B records, so the denominator is 40 and P(A given alert) is 30/40 = 0.75.</p>
+<p><strong>Tempting mistake:</strong> Dividing by A&#x27;s row total of 100, which gives 0.3, the probability of an alert given A, or by all 200 records, which gives 0.15, the joint probability.</p>
+<p><strong>Verify:</strong> <code>sum(counts[, 1])</code> returns 40, and <code>counts[1, 1] / sum(counts[, 1])</code> returns 0.75.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the A base rate to 0.2 with alert rates unchanged.</p>
 <p>P(alert)=0.14 and P(A given alert)=3/7.</p>
+<p><strong>Approach:</strong> Recompute the total alert probability with the new base rate, then apply Bayes&#x27; rule.</p>
+<p><strong>Why it holds here:</strong> With P(A) = 0.2, P(alert) is 0.3 times 0.2 plus 0.1 times 0.8, which is 0.06 + 0.08 = 0.14. The posterior is 0.06/0.14 = 3/7, about 0.429.</p>
+<p><strong>Tempting mistake:</strong> Keeping the old P(alert) of 0.2. That gives 0.06/0.2 = 0.3, which mixes the new base rate with the old alert mix and matches no consistent population.</p>
+<p><strong>Verify:</strong> <code>isTRUE(all.equal(p_alert, 0.14))</code> and <code>isTRUE(all.equal(0.3 * p_a / p_alert, 3 / 7))</code> both return TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct joint probabilities from the count table.</p>
 <p>The four cells sum to one.</p>
+<p><strong>Approach:</strong> Divide every cell by the grand total of 200 so that the four cells form one joint distribution.</p>
+<p><strong>Why it holds here:</strong> The matrix is filled by row, so the cells are A yes 30, A no 70, B yes 10 and B no 90. Divided by 200 they become 0.15, 0.35, 0.05 and 0.45, which add to 1.</p>
+<p><strong>Tempting mistake:</strong> Using <code>prop.table(counts, 1)</code>, which divides by row totals. Each row then sums to one and the four cells sum to 2, so the result is two conditional distributions, not a joint one.</p>
+<p><strong>Verify:</strong> <code>isTRUE(all.equal(sum(joint), 1))</code> returns TRUE, and <code>joint[1, 1]</code> returns 0.15.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose swapping P(alert given A) with P(A given alert).</p>
 <p>Keep event and conditioning event explicit in names and denominators.</p>
+<p><strong>Approach:</strong> Name each quantity by its event and its condition, such as alert_given_a, and compute it with the matching denominator.</p>
+<p><strong>Why it holds here:</strong> In this table the two directions differ by a factor of 2.5: 0.3 conditions on segment A, 0.75 conditions on the alert. Names and denominators that state the condition keep them from being swapped.</p>
+<p><strong>Tempting mistake:</strong> Writing that 75 percent of A records trigger an alert. Only 30 of A&#x27;s 100 records did; 75 percent is A&#x27;s share of the 40 alerts.</p>
+<p><strong>Verify:</strong> <code>conditional(30, 100) != conditional(30, 40)</code> returns TRUE, since the two calls return 0.3 and 0.75.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Handle a conditioning event with zero count.</p>
 <p>Return a missing result or reject the query under a stated policy.</p>
+<p><strong>Approach:</strong> Check the conditioning count before dividing and return NA_real_ when it is zero.</p>
+<p><strong>Why it holds here:</strong> A segment with no records has no alert rate; there is nothing to condition on. In R, 0/0 is NaN and 30/0 is Inf, and neither is a probability.</p>
+<p><strong>Tempting mistake:</strong> Returning 0 for an empty segment. That would claim the segment never alerts when it has simply not been observed, and averaging it with other segments would pull rates down.</p>
+<p><strong>Verify:</strong> <code>is.na(conditional(0, 0))</code> returns TRUE, while <code>conditional(30, 100)</code> returns 0.3.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain the limit of exporting these proportions to a new population.</p>
 <p>Assess sampling, base rates and stable conditional mechanisms before generalizing.</p>
+<p><strong>Approach:</strong> Before applying these proportions elsewhere, check how the 200 records were sampled and what the target population&#x27;s base rate is.</p>
+<p><strong>Why it holds here:</strong> Here A and B have 100 records each. If the new population is 5 percent A, the same alert rates give P(A given alert) of about 0.136, not 0.75, and the alert rates themselves may differ if the alert rule or behavior differs.</p>
+<p><strong>Tempting mistake:</strong> Applying 0.75 to the new population as though the share of A were a fixed property of alerts.</p>
+<p><strong>Verify:</strong> Computing <code>0.3 * 0.05 / (0.3 * 0.05 + 0.1 * 0.95)</code> returns about 0.136.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

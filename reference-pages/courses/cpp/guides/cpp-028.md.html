@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Ship an installable library with robust parsing and an independent consumer.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A reusable record library separates stable data contracts from user-interface code. Packaging declares headers and link targets. Compatibility tests protect callers from accidental changes. The capstone combines strict parsing, named errors, ownership and exact integer output with an auditable fixture ledger.</p>
+<ul>
+<li><strong>reusable record library:</strong> a library whose data contract and parser are separate from user-interface and I/O code.</li>
+<li><strong>public contract:</strong> the headers, types and behavior that callers rely on.</li>
+<li><strong>owning result:</strong> a returned <code>Record</code> that holds its own id and cents values, so it stays valid after the input string is destroyed.</li>
+<li><strong>packaging:</strong> declaring the headers and link targets that consumers use.</li>
+<li><strong>compatibility test:</strong> a test that protects callers from accidental changes to the library contract.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Keep parse_record independent of files and terminals. A library caller supplies a string_view and receives an owned result or named rejection. A host project is required to exercise a library target and consumer link; the browser demonstrates the same value-level core in one file.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
@@ -208,7 +215,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="designing-and-consuming-a-reusable-parser-library">Designing and consuming a reusable parser library<a class="heading-anchor" href="#designing-and-consuming-a-reusable-parser-library" aria-label="Link to this section">#</a></h3>
 <p>A reusable library separates its public contract from implementation and from the application&#x27;s I/O policy. The record parser accepts one string_view and returns an owning Record or rejection. The caller decides where raw text came from and whether a rejected row aborts a batch. This separation lets the parser be tested without a terminal, file or cluster and keeps its lifetime reasoning small.</p>
 <p>The public Record owns integer id and cents values. It does not retain a view into the input, so a successful result survives after the caller&#x27;s raw string is destroyed. The parser still borrows the input while reading it. A library that returned views into a temporary normalization buffer would violate that lifetime contract even if its ordinary example happened to print correct values.</p>
-<p>The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture 7, 125x rejects a plausible permissive parser that accepts a numeric prefix. Valid 0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.</p>
+<p>The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture <code>7,125x</code> rejects a plausible permissive parser that accepts a numeric prefix. Valid 0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.</p>
 <p>The real record-library fixture contains a public header, implementation, independent consumer and CMake target. Building the consumer against that target tests whether the header declares everything it needs and whether the implementation is actually linked. A combined single-file source cannot expose a missing exported include path or omitted library object in the same way.</p>
 <p>Installation/export is another boundary. A local install tree should let a fresh consumer find the documented package/target without relying on the original source directory. The host exercise records configure, build, install and consumer results separately. The browser&#x27;s one-main.cpp run is still useful for parser behavior, but it does not execute that packaging workflow.</p>
 <p>A library release also needs a stability policy. Changing the accepted grammar, error representation or ownership behavior can break callers even when the function name stays the same. Document format/version changes and keep an independent consumer test. A package that compiles but silently accepts malformed suffixes is not a successful release under this contract.</p>
@@ -294,7 +301,7 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>o
 <p><strong>Verify:</strong> Check your grammar against <code>parse_record(&quot;7,125&quot;)</code> succeeding and <code>parse_record(&quot;7,125x&quot;)</code> failing, and state that the returned <code>Record</code> holds copied ints, not views into the input.</p>
 <p><strong>Progressive hints:</strong> Consumers need semantic rules beyond signatures.</p>
 <h4 id="exercise-2-build-independent-fixture">Exercise 2: Build independent fixture<a class="heading-anchor" href="#exercise-2-build-independent-fixture" aria-label="Link to this section">#</a></h4>
-<p>Use [7, 125; 0, 0; 7, 125x; 7, -1] as four records.</p>
+<p>Use <code>7,125</code>, <code>0,0</code>, <code>7,125x</code> and <code>7,-1</code> as four records.</p>
 <p><strong>Expected result/shape:</strong> Two accepted and two rejected.</p>
 <p><strong>Verify:</strong> Assert <code>parse_record</code> succeeds for <code>&quot;7,125&quot;</code> and <code>&quot;0,0&quot;</code> and returns an empty optional for <code>&quot;7,125x&quot;</code> and <code>&quot;7,-1&quot;</code>.</p>
 <p><strong>Progressive hints:</strong> Expected results are hand-written independently.</p>
@@ -305,7 +312,7 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>o
 <p><strong>Progressive hints:</strong> A single-file worker cannot establish packaging.</p>
 <h4 id="exercise-4-inject-a-regression">Exercise 4: Inject a regression<a class="heading-anchor" href="#exercise-4-inject-a-regression" aria-label="Link to this section">#</a></h4>
 <p>Remove the full-consumption check in a scratch implementation.</p>
-<p><strong>Expected result/shape:</strong> 7, 125x must fail the golden test.</p>
+<p><strong>Expected result/shape:</strong> <code>7,125x</code> must fail the golden test.</p>
 <p><strong>Verify:</strong> Run Worked example 2&#x27;s <code>assert(!parse_record(&quot;7,125x&quot;))</code> against the scratch version and confirm it aborts; restoring the full-consumption check makes it pass.</p>
 <p><strong>Progressive hints:</strong> A plausible parsing shortcut is the negative control.</p>
 <h4 id="exercise-5-check-boundary-ownership">Exercise 5: Check boundary ownership<a class="heading-anchor" href="#exercise-5-check-boundary-ownership" aria-label="Link to this section">#</a></h4>

@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Validate the generated skewed fixture",
       "input_contract": "Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.",
-      "expected": "Exact population tuple 20000,20000,100,199990000;key 0 count 16040, other keys 40.",
+      "expected": "Exact population tuple (20000, 20000, 100, 199990000);key 0 count 16040, other keys 40.",
       "verification": "Compare aggregate counts and the independent formula 16000+4000/100."
     },
     {

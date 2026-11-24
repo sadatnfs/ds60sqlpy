@@ -2,22 +2,27 @@
 
 int main(void) {
   /* Exercise 1: Guard a formerly unsafe index: change one input
-     Copy worked example 1 into a scratch pad and change `int values[] = {2, 4,
-     6}, out = 0;` to `int values[] = {2, 4, 7}, out = 0;`. Before running,
-     predict which CHECK fails and which value it now sees; then run it and
-     restore the original line. Expected: The changed run stops with `Check
-     failed` at the CHECK on `at_index(values, 3, 2, &out) && out == 6`.
-     Restoring the original line brings back the worked observation: the value 6
-     is returned. */
+     Copy worked example 1, the "guard a formerly unsafe index" case, into a
+     scratch pad and change `int values[] = {2, 4, 6}, out = 0;` to `int
+     values[] = {2, 4, 7}, out = 0;`. Before running, predict which CHECK fails
+     and which value it sees in place of the worked result (the value 6 is
+     returned); then run it and restore the original line. Expected: With `int
+     values[] = {2, 4, 7}, out = 0;` the run stops with `Check failed` at the
+     CHECK on `at_index(values, 3, 2, &out) && out == 6`, because the "guard a
+     formerly unsafe index" case no longer shows that the value 6 is returned.
+     Restoring `int values[] = {2, 4, 6}, out = 0;` brings that observation
+     back. */
 
   /* Exercise 2: Reject the one-past index: debug a regression
-     A regression changed one token in worked example 2, so one line now reads
-     `int values[] = {2, 4, 6}, out = 10;`. Run worked example 2 with that line,
-     use the failing CHECK to locate the defect and repair it without changing
-     the CHECK. Expected: Before the repair the run stops with `Check failed` at
-     the CHECK on `!at_index(values, 3, 3, &out) && out == 9`; after it the line
-     reads `int values[] = {2, 4, 6}, out = 9;` again and the operation fails
-     and output remains 9. */
+     A regression changed one token in worked example 2, the "reject the
+     one-past index" case, so one line now reads `int values[] = {2, 4, 6}, out
+     = 10;`. Run the example with that line, use the failing CHECK to find why
+     the operation fails and output remains 9 no longer holds and repair the
+     line without changing the CHECK. Expected: Before the repair the run stops
+     with `Check failed` at the CHECK on `!at_index(values, 3, 3, &out) && out
+     == 9`. Once the line reads `int values[] = {2, 4, 6}, out = 9;` again, the
+     "reject the one-past index" case again shows that the operation fails and
+     output remains 9. */
 
   /* Exercise 3: Reject an empty view
      Request index zero from an empty logical view.

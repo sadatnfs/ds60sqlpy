@@ -112,7 +112,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Count a linear search) before changing anything, and confirm its observation: The last-element search performs four comparisons.
 2. Compare Example B (Build a reusable membership index) with Example A and name the first line whose behavior differs. Its observation is: The index preserves four identities and answers membership.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Big-O is a growth model, not an elapsed-time promise.
+3. Before opening the explanation, check your task 3 attempt (Compare repeated array scans with one built Set under the same identity policy) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

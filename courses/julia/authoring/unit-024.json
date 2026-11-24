@@ -3,6 +3,28 @@
   "title": "Numerical methods, stability and error contracts",
   "concepts": ["Euler method", "stability", "bisection", "quadrature", "error budget"],
   "outcome": "Compare explicit numerical approximations with known solutions and distinguish stability, positivity, residuals and position error.",
+  "key_terms": [
+    [
+      "Euler method",
+      "An explicit time stepper that advances a differential equation using the current slope, so decay multiplies each step by one minus lambda dt."
+    ],
+    [
+      "Stability",
+      "Keeping the Euler multiplier no larger than one in magnitude, which is a different condition from preserving positivity."
+    ],
+    [
+      "Bisection",
+      "A root finder that halves a bracket whose endpoints have opposite signs, so the bracket width bounds the remaining error."
+    ],
+    [
+      "Trapezoidal quadrature",
+      "Approximating an integral by summing trapezoids under the curve, with error shrinking as the spacing shrinks for smooth integrands."
+    ],
+    [
+      "Error budget",
+      "An accounting of discretization, rounding and tolerance errors that states which source limits the final answer."
+    ]
+  ],
   "level": "advanced",
   "minutes": 150,
   "prerequisites": ["julia-019", "julia-020", "julia-023"],
@@ -11,48 +33,67 @@
     ["Existing scientific numerical foundations", "../../../courses/jax/README.md"]
   ],
   "figure": 1,
+  "approach": "Compare each approximation with something known exactly. `euler_decay` applies the update `(1 - rate*step) * value` and returns the time grid and path; `bisect` requires a finite sign-changing bracket and a positive iteration budget, then halves the interval until the half-width is within `tolerance`. The trapezoidal rule integrates `x^2` on the interval from 0 to 1, whose exact value is 1/3.",
   "exercises": [
     {
       "title": "Refine the time step",
       "task": "Compare Euler with 4 and 20 steps for rate 1.",
       "expected": "The fine final value is closer to `exp(-1)`.",
       "hint": "Use the analytic solution as an independent reference.",
-      "answer": "This checks the stated smooth problem and does not imply that every refinement improves every numerical task."
+      "answer": "This checks the stated smooth problem and does not imply that every refinement improves every numerical task.",
+      "why": "With rate 1, 4 steps give (3/4)^4 = 0.31640625 and 20 steps give (19/20)^20, which is closer to exp(-1).",
+      "wrong": "Assuming any refinement must help without measuring the error against exp(-1) misses cases where rounding or instability dominates.",
+      "verify": "Example A asserts `coarse[end] == (3/4)^4` and that the fine error is smaller than the coarse error."
     },
     {
       "title": "Inspect the complete path",
       "task": "Use rate 3 with 2 Euler steps.",
       "expected": "The path includes a negative intermediate value.",
       "hint": "Stability and positivity have different requirements.",
-      "answer": "A positive final value alone can hide an unphysical intermediate state."
+      "answer": "A positive final value alone can hide an unphysical intermediate state.",
+      "why": "Rate 3 with step 1/2 gives the factor 1 - 1.5 = -0.5, so the path is `[1, -0.5, 0.25]` and passes through a negative value.",
+      "wrong": "Inspecting only the final 0.25 suggests a sensible decay and hides the negative concentration in the middle.",
+      "verify": "Example A asserts `alternating == [1, -0.5, 0.25]` and `unstable == [1, -2]` for one step."
     },
     {
       "title": "Require a root bracket",
       "task": "Try x squared plus 1 on the bracket from -1 to 1.",
       "expected": "The helper rejects the absent sign change.",
       "hint": "The bracketing invariant must hold before iteration.",
-      "answer": "A numerical routine cannot create a real root where the stated evidence does not support one."
+      "answer": "A numerical routine cannot create a real root where the stated evidence does not support one.",
+      "why": "`x^2 + 1` equals 2 at both -1 and 1, so the signs match and `bisect` throws `ArgumentError` before iterating.",
+      "wrong": "Iterating anyway on the midpoint returns some number in the interval that is not a root of a function with no real root.",
+      "verify": "Example B asserts `@test_throws ArgumentError bisect(x -> x^2+1, -1.0, 1.0)`."
     },
     {
       "title": "Bound the iteration budget",
       "task": "Allow only one bisection iteration for square-root 2.",
       "expected": "The helper reports budget exhaustion.",
       "hint": "Do not label the last iterate converged automatically.",
-      "answer": "A stopped computation needs a clear termination reason and evidence about its remaining error."
+      "answer": "A stopped computation needs a clear termination reason and evidence about its remaining error.",
+      "why": "With `maxiter = 1`, the half-width of 1 after one step is far above the tolerance, so the loop ends and `error` raises.",
+      "wrong": "Returning the last midpoint as if it were converged hides that the accuracy target was never reached.",
+      "verify": "Example B asserts `@test_throws ErrorException bisect(x -> x^2-2, 0.0, 2.0; maxiter = 1)`."
     },
     {
       "title": "Compare quadrature resolution",
       "task": "Integrate x squared using the two trapezoidal grids.",
       "expected": "The refined approximation is closer to 1/3.",
       "hint": "Keep the function and interval unchanged.",
-      "answer": "A known integral helps separate discretization error from implementation errors."
+      "answer": "A known integral helps separate discretization error from implementation errors.",
+      "why": "The coarse grid with step 0.5 gives 0.375, and the step 0.1 grid gives a value closer to 1/3.",
+      "wrong": "Changing the interval or function between the two runs makes the comparison meaningless as a test of grid size.",
+      "verify": "The reference asserts `coarse == 0.375` and `abs(fine-1/3) < abs(coarse-1/3)`."
     },
     {
       "title": "Name tolerance units",
       "task": "Compare a root-position tolerance with a function residual.",
       "expected": "They have different units and meanings.",
       "hint": "The derivative scale connects them only under additional conditions.",
-      "answer": "A small residual alone does not always imply a small position error in an ill-conditioned problem."
+      "answer": "A small residual alone does not always imply a small position error in an ill-conditioned problem.",
+      "why": "A position tolerance is measured in x, while a residual is measured in f; near sqrt(2) they are linked by the slope f'(x) = 2x.",
+      "wrong": "Using a tiny residual as proof of a tiny position error fails for flat functions, where small residuals allow large position errors.",
+      "verify": "Example B checks both `abs(root-sqrt(2)) <= 1e-10` and `abs(root^2-2) < 1e-8`; report each with its unit."
     }
   ]
 }

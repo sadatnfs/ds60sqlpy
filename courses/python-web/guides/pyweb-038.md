@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-037`.
 
 Authentication establishes who is calling. Authorization determines what that caller may do to a particular resource. This chapter separates permission scopes from tenant and owner predicates, demonstrating why a broadly capable token must not grant access to another tenant's object.
 
+## Key terms
+
+- **Authorization:** Deciding what an identified caller may do to a particular resource, which is separate from authenticating who the caller is.
+- **Scope:** A permission for a class of operation, such as writing notes, carried by a credential and checked by the endpoint.
+- **SecurityScopes:** The FastAPI object that passes the scopes an endpoint requires into the dependency that checks the credential.
+- **Tenant boundary:** The separation of one customer or workspace's data from another's, enforced in the lookup even for a caller with the right scope.
+- **Ownership predicate:** A query condition that limits results to objects the caller owns, so an object outside that scope behaves as missing.
+
 ## Mechanism: combine operation and resource checks
 
 A scope expresses permission for a class of operation, such as writing notes. A role often groups permissions for an organizational function. A tenant boundary separates customer or workspace data. Ownership identifies the principal responsible for a particular object. These dimensions can overlap, but none should be assumed to imply all the others.
@@ -29,6 +37,28 @@ An unknown credential receives 401 because identity is not established. The owne
 The 404 policy avoids revealing whether another tenant's identifier exists. Some APIs use 403 under a different disclosure policy; the choice must be consistent and documented. What matters here is that the operation has no unauthorized side effect and that the tests exercise all three boundaries.
 
 A numerical identifier is not an authorization secret. Sequential or guessable IDs can be perfectly acceptable when every access is scoped correctly. Replacing them with random IDs can reduce enumeration convenience, but it does not repair a missing ownership predicate.
+
+## Worked example: checking scopes as a set, not as a substring
+
+```python
+granted_claim = "notes:read notes:write-drafts"
+required = "notes:write"
+
+print(required in granted_claim)
+print(required in granted_claim.split())
+granted = set(granted_claim.split())
+print({"notes:read"} <= granted, {"notes:read", "notes:write"} <= granted)
+```
+
+Expected output:
+
+```text
+True
+False
+True False
+```
+
+An OAuth access token usually carries its scopes as one space separated string. Testing `required in granted_claim` searches characters, so `notes:write` matched inside `notes:write-drafts` and a draft-only token would pass a full write check. Splitting the claim into tokens and comparing sets fixes it, which is exactly what the lesson's `authorize` dependency does with `issubset`. Even a correct scope check only says what kind of action the token may attempt; the ownership and tenant comparison inside `update` still decides which note it may touch.
 
 ## Failure diagnosis and discussion
 

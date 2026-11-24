@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-parse-the-components-of-an-image-reference">Exercise 1: Parse the components of an image reference.<a class="heading-anchor" href="#exercise-1-parse-the-components-of-an-image-reference" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Registry, repository, optional tag and optional digest.</p>
 <p><strong>Why:</strong> The registry location and image identity should be unambiguous before any authenticated operation. A familiar short tag can hide a different destination.</p>
+<p><strong>Approach:</strong> Split a reference into registry host, repository path, optional tag after a colon and optional digest after @sha256.</p>
+<p><strong>Why this is correct:</strong> A short name like ds60-docker-study:local has no registry part, and the client fills in a default when talking to one.</p>
+<p><strong>A plausible wrong approach:</strong> Pushing a short name assuming it goes to your own registry may target the default public registry.</p>
+<p><strong>How to verify:</strong> Write out the fully qualified reference before any push and compare it with the intended destination.</p>
 <h3 id="exercise-2-predict-whether-adding-a-local-tag-uploads-bytes">Exercise 2: Predict whether adding a local tag uploads bytes.<a class="heading-anchor" href="#exercise-2-predict-whether-adding-a-local-tag-uploads-bytes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> No; local naming and registry publication are separate.</p>
 <p><strong>Why:</strong> This separation lets you prepare and inspect an artifact without distributing it. Publication requires its own intentional command and authorization.</p>
+<p><strong>Approach:</strong> Trace docker tag: it adds another name for the same image ID in the local store.</p>
+<p><strong>Why this is correct:</strong> No network call happens; publishing needs a separate docker push, with credentials, to a registry.</p>
+<p><strong>A plausible wrong approach:</strong> Avoiding tags out of worry about publishing loses a useful way to name a candidate for inspection.</p>
+<p><strong>How to verify:</strong> The image inspect command in worked example 1 shows the new name, and the registry has no copy until a push.</p>
 <h3 id="exercise-3-design-a-release-identity-record">Exercise 3: Design a release identity record.<a class="heading-anchor" href="#exercise-3-design-a-release-identity-record" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Source revision, immutable image identity, platform and tested behavior.</p>
 <p><strong>Why:</strong> The record should join source and runtime evidence. A tag alone cannot preserve that relationship if it is later moved.</p>
+<p><strong>Approach:</strong> Fill each field from a separate source: the revision from version control, the digest from the registry, the platform from inspect and acceptance from a test receipt.</p>
+<p><strong>Why this is correct:</strong> Linking these fields shows which source produced which image and that this image passed which test.</p>
+<p><strong>A plausible wrong approach:</strong> Recording only a release tag cannot tie evidence to content once the tag moves.</p>
+<p><strong>How to verify:</strong> Each field in the JSON record can be checked independently, and placeholder values mark it unqualified.</p>
 <h3 id="exercise-4-diagnose-an-overwritten-mutable-release-tag">Exercise 4: Diagnose an overwritten mutable release tag.<a class="heading-anchor" href="#exercise-4-diagnose-an-overwritten-mutable-release-tag" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Compare recorded digest with the currently resolved artifact.</p>
 <p><strong>Why:</strong> The same label can name different content. Resolve the exact identity before concluding that earlier acceptance evidence applies.</p>
+<p><strong>Approach:</strong> Resolve the tag&#x27;s current digest and compare it with the one recorded at acceptance.</p>
+<p><strong>Why this is correct:</strong> If they differ, the tag now names other content and the earlier test results do not apply to it.</p>
+<p><strong>A plausible wrong approach:</strong> Trusting the tag because the name matches applies evidence to an image that was never tested.</p>
+<p><strong>How to verify:</strong> Deploy by the recorded digest; it pulls the accepted content regardless of where the tag points now.</p>
 <h3 id="exercise-5-explain-why-credentials-do-not-belong-in-the-build-context">Exercise 5: Explain why credentials do not belong in the build context.<a class="heading-anchor" href="#exercise-5-explain-why-credentials-do-not-belong-in-the-build-context" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> They can be transferred, layered or logged beyond the intended lifetime.</p>
 <p><strong>Why:</strong> Registry access is an operation credential, not application source. Use a reviewed credential channel and avoid printing values during diagnostics.</p>
+<p><strong>Approach:</strong> Keep registry credentials in the client&#x27;s credential store or a secret mount, never in files under the build context.</p>
+<p><strong>Why this is correct:</strong> Files in the context are sent to the builder and can be copied into layers or printed in logs.</p>
+<p><strong>A plausible wrong approach:</strong> Relying on .dockerignore alone fails if a COPY . line or a renamed file slips past the pattern.</p>
+<p><strong>How to verify:</strong> Search the context and the image&#x27;s files for credential files; none appear, and pushes still authenticate.</p>
 <h3 id="exercise-6-describe-a-safe-publication-review-without-performing-it">Exercise 6: Describe a safe publication review without performing it.<a class="heading-anchor" href="#exercise-6-describe-a-safe-publication-review-without-performing-it" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Explicit destination, visibility, immutable artifact and rollback plan.</p>
 <p><strong>Why:</strong> A reviewable proposal is concrete enough to approve. It should not upload a different artifact later or silently change repository visibility.</p>
+<p><strong>Approach:</strong> Write the proposal with the full registry destination, visibility, the digest to push and how to revert.</p>
+<p><strong>Why this is correct:</strong> Naming the digest ensures what is published equals what was reviewed, not whatever the tag points to later.</p>
+<p><strong>A plausible wrong approach:</strong> Approving publish the latest build lets a different image ship than the one reviewed.</p>
+<p><strong>How to verify:</strong> A reviewer can match the digest in the proposal with the accepted record before any push is approved.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

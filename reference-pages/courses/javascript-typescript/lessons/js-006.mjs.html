@@ -199,17 +199,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// &#x27;name&#x27;), true);` to `assert.equal(Object.hasOwn(child, &#x27;name!&#x27;), true);` inside its check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Before running it, predict whether the check still passes and explain why; then restore</span></span>
 <span class="source-line"><span class="syntax-comment">// it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(Object.hasOwn(child, &#x27;name&#x27;), true)`. Restoring the original line brings</span></span>
-<span class="source-line"><span class="syntax-comment">// back the worked observation: kind found by in but not hasOwn; name is own.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(Object.hasOwn(child, &#x27;name!&#x27;), true);`. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(Object.hasOwn(child, &#x27;name&#x27;), true);` brings back: kind found by in but not</span></span>
+<span class="source-line"><span class="syntax-comment">// hasOwn; name is own.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Copy only own enumerable fields: diagnose an edited check</span></span>
 <span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.deepEqual(Object.keys(copy), [&#x27;name!&#x27;]);`. Run Example B with that line, explain</span></span>
 <span class="source-line"><span class="syntax-comment">// why the edited check now fails for the same program state, and restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(Object.keys(copy), [&#x27;name&#x27;])`; after it the line reads</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(Object.keys(copy), [&#x27;name&#x27;]);` again and only name copied.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(Object.keys(copy), [&#x27;name!&#x27;]);`. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(Object.keys(copy), [&#x27;name&#x27;]);` brings back: only name copied.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Use destructuring defaults carefully</span></span>
 <span class="source-line"><span class="syntax-comment">// Read missing count and explicit null count with default 0.</span></span>

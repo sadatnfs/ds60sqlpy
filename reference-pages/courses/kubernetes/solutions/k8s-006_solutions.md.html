@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-draw-ownership">Exercise 1: Draw ownership<a class="heading-anchor" href="#exercise-1-draw-ownership" aria-label="Link to this section">#</a></h3>
 <p>Labels select sets but do not prove controller ownership. The graph distinguishes the application replicas from unrelated Pods that happen to share a label. Each link should come from actual readback in a live exercise or be labeled synthetic here.</p>
 <p><strong>Expected:</strong> A UID-linked graph connects exactly two owned Pods to the intended Deployment.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Walk ownerReferences upward from each Pod to its ReplicaSet and from that ReplicaSet to the Deployment, recording UIDs at each hop.</li>
+<li><strong>Why it is correct:</strong> The <code>controller: true</code> reference is set by the ReplicaSet controller itself, so a UID chain proves ownership in a way a shared app label cannot.</li>
+<li><strong>Plausible wrong approach:</strong> Drawing the graph from <code>app=hello</code> labels would include any unrelated Pod carrying that label and overstate the replica set.</li>
+<li><strong>How to verify:</strong> Exactly two Pods link through one ReplicaSet UID to the intended Deployment UID, and every arrow cites the UID it follows.</li>
+</ul>
 <h3 id="exercise-2-compare-generation-evidence">Exercise 2: Compare generation evidence<a class="heading-anchor" href="#exercise-2-compare-generation-evidence" aria-label="Link to this section">#</a></h3>
 <p>The controller can report a healthy prior state while a new spec is waiting to reconcile. A verifier should require the relevant generation relationship and updated counts before claiming the current change succeeded.</p>
 <p><strong>Expected:</strong> Latest desired state not yet confirmed observed.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare metadata.generation 4 with status.observedGeneration 3 before reading readyReplicas.</li>
+<li><strong>Why it is correct:</strong> The API server bumps generation on every spec change, and the Deployment controller copies it to observedGeneration only after processing, so 3 means spec 4 is unprocessed.</li>
+<li><strong>Plausible wrong approach:</strong> Accepting readyReplicas 2 as success reports the health of the generation 3 template, which may differ from the spec you just applied.</li>
+<li><strong>How to verify:</strong> The conclusion cites observedGeneration below generation and states the latest desired state is not yet observed.</li>
+</ul>
 <h3 id="exercise-3-establish-a-fresh-baseline">Exercise 3: Establish a fresh baseline<a class="heading-anchor" href="#exercise-3-establish-a-fresh-baseline" aria-label="Link to this section">#</a></h3>
 <p>The browser creates a new bounded baseline and then cleans it. Its receipt supports the checks it performed. The human explanation must not replace actual server-assigned UIDs with the fixture&#x27;s illustrative identifiers.</p>
 <p><strong>Expected:</strong> Two Ready owned Pod UIDs and cleanup evidence, with a new Run identity.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Edit only spec.replicas from 1 to 2, then Run and read the result as a new baseline rather than a change to an old one.</li>
+<li><strong>Why it is correct:</strong> The ReplicaSet controller creates one additional Pod to meet the count of 2, and the browser operation records its own Run identity and cleanup.</li>
+<li><strong>Plausible wrong approach:</strong> Reusing the fixture&#x27;s illustrative Pod names as evidence would make the result look valid without any server-assigned UID behind it.</li>
+<li><strong>How to verify:</strong> The result lists two distinct Ready Pod UIDs and a cleanup entry carrying this Run&#x27;s identity.</li>
+</ul>
 <h3 id="exercise-4-rehearse-scoped-pod-replacement">Exercise 4: Rehearse scoped Pod replacement<a class="heading-anchor" href="#exercise-4-rehearse-scoped-pod-replacement" aria-label="Link to this section">#</a></h3>
 <p>The replacement is caused by the ReplicaSet restoring desired replicas. It is not a new Deployment or necessarily a new template revision. The operation must use UID-aware targeting and preserve unrelated objects.</p>
 <p><strong>Expected:</strong> Pod set changes from {pod-1, pod-2} to {pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Delete exactly one recorded Pod by UID precondition, then wait a bounded time for the ReplicaSet to restore the count.</li>
+<li><strong>Why it is correct:</strong> The ReplicaSet still wants two replicas, so it creates a new Pod from the unchanged template while the Deployment generation stays the same.</li>
+<li><strong>Plausible wrong approach:</strong> Deleting by label selector could remove both Pods or an unrelated one, and rolling the Deployment would wrongly create a new ReplicaSet revision.</li>
+<li><strong>How to verify:</strong> The packet shows the Deployment UID and generation unchanged, one Pod UID removed and one new UID added.</li>
+</ul>
 <h3 id="exercise-5-reject-a-count-only-shortcut">Exercise 5: Reject a count-only shortcut<a class="heading-anchor" href="#exercise-5-reject-a-count-only-shortcut" aria-label="Link to this section">#</a></h3>
 <p>An unrelated Pod cannot satisfy this Deployment&#x27;s desired replica contract. This negative case demonstrates why counting labels or phase values without ownership can produce a false success.</p>
 <p><strong>Expected:</strong> Raw count 2 but owned Ready count 1, so acceptance fails.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Filter the list to Pods whose controller ownerReference resolves to the intended ReplicaSet UID, then count Ready ones.</li>
+<li><strong>Why it is correct:</strong> The foreign Pod belongs to a different controller, so it cannot satisfy this ReplicaSet&#x27;s replica contract even though its labels and phase match.</li>
+<li><strong>Plausible wrong approach:</strong> Counting <code>app=hello</code> Pods in phase Running returns 2 and passes a broken Deployment that actually has only one owned replica.</li>
+<li><strong>How to verify:</strong> Owned Ready count is 1 against a raw list length of 2, so acceptance fails.</li>
+</ul>
 <h3 id="exercise-6-separate-recovery-from-availability">Exercise 6: Separate recovery from availability<a class="heading-anchor" href="#exercise-6-separate-recovery-from-availability" aria-label="Link to this section">#</a></h3>
 <p>The control loop may restore the final desired count after a period of reduced capacity. A client trace can establish observed continuity for its sampled requests, while a final Pod snapshot cannot. Finite samples still do not prove a universal SLA.</p>
 <p><strong>Expected:</strong> A bounded client timeline and error counts are required beyond final Ready replicas.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Separate the final status snapshot from a time series of client requests sampled during the replacement window.</li>
+<li><strong>Why it is correct:</strong> The Deployment status reports only the end state, while capacity was reduced between deletion and the new Pod becoming Ready.</li>
+<li><strong>Plausible wrong approach:</strong> Citing readyReplicas 2 afterward as proof that no request failed assumes continuity the status field never measured.</li>
+<li><strong>How to verify:</strong> Name the client timeline with timestamps, outcomes and error counts as the measurement no Deployment status field can provide.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Two Running Pods can both be unready, and a matching label can belong to a different controller. A stale status count can describe an older generation. Inspect ownerReferences and UIDs before interpreting counts, and preserve a negative fixture with a foreign Pod UID so a count-only checker is visibly inadequate.</p>
 <p>A one-shot Run&#x27;s final cleanup is separate from the deliberate replacement exercise. Do not claim that a Pod observed in a later Run is the replacement of a Pod from an already cleaned-up earlier Run; the Deployment itself may also be a new object.</p></article>

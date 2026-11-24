@@ -19,7 +19,7 @@
         "SFT",
         "Task contract"
       ],
-      "outcome": "A subject assistant is a system that helps someone perform a bounded task using a defined body of knowledge.",
+      "outcome": "Route each subject-assistant request to prompting, retrieval, a deterministic tool or fine-tuning, and write a measurable task contract with a held-out family split.",
       "lab": "Describe a request for the current conversion-rate definition requiring a citation.",
       "verification": "route retrieval; reason current cited evidence. contract has exact fields, an abstention policy and a family split."
     },
@@ -38,7 +38,7 @@
         "Provenance span",
         "Abstention"
       ],
-      "outcome": "Structured extraction turns text into typed records, but valid JSON is only the first boundary.",
+      "outcome": "Validate extracted data-science records against type, semantic and provenance checks, rejecting impossible counts and keeping missing values distinct from zero.",
       "lab": "Validate visits 10, purchases 3 and assignment_unit account.",
       "verification": "conversion rate 0.3. invalid unit rejected; account remains explicit."
     },
@@ -57,7 +57,7 @@
         "Few-shot example",
         "Injection boundary"
       ],
-      "outcome": "Prompt engineering defines a task and the information presented to a model.",
+      "outcome": "Build a versioned prompt artifact that keeps untrusted evidence as data, reserves response capacity within a context budget and isolates evaluation examples.",
       "lab": "Build a prompt with one metric evidence item and a conversion-rate question.",
       "verification": "separate instruction, evidence and question fields, with template subject-v1. ValueError before context selection."
     },
@@ -76,7 +76,7 @@
         "Document family",
         "Scope"
       ],
-      "outcome": "A domain corpus is a versioned dataset.",
+      "outcome": "Build a versioned corpus manifest with source permissions and content hashes, select active versions explicitly and detect family leakage between training and test data.",
       "lab": "Add source=course-authored, permission=course-fixture and SHA256 to each local document.",
       "verification": "6 complete records; all hashes contain 64 characters. attack text remains data; restricted record remains restricted."
     },
@@ -95,7 +95,7 @@
         "Source offset",
         "Context budget"
       ],
-      "outcome": "Chunking divides documents into retrieval units.",
+      "outcome": "Split documents into overlapping chunks whose start and end offsets reproduce the cited source text, and measure the duplication that overlap adds.",
       "lab": "Chunk one two three four five six seven with size 3 and overlap 1.",
       "verification": "chunks one two three, three four five and five six seven. empty list for empty text; one short chunk for the two-token source."
     },
@@ -114,7 +114,7 @@
         "IDF",
         "BM25"
       ],
-      "outcome": "Lexical retrieval ranks documents using observed terms.",
+      "outcome": "Compute BM25 scores from term frequency, inverse document frequency and length normalization, and rank a small corpus with deterministic ties.",
       "lab": "Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization.",
       "verification": "a ranks first with a positive score; the other scores are 0. empty result for no documents; finite zero score for an empty document."
     },
@@ -133,7 +133,7 @@
         "Embedding space",
         "Semantic retrieval"
       ],
-      "outcome": "Embedding retrieval maps queries and documents to vectors and compares their geometry.",
+      "outcome": "Rank documents by cosine similarity between embedding vectors, reject zero or incompatible vectors, and show where geometric rank fails to establish relevance.",
       "lab": "Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5, 0].",
       "verification": "purchase ranks first, mixed second, geometry last. top-ranked ID wrong is outside the authored relevant set."
     },
@@ -152,7 +152,7 @@
         "Reranker",
         "Candidate recall"
       ],
-      "outcome": "Hybrid retrieval combines complementary candidate generators.",
+      "outcome": "Combine lexical and dense rankings with reciprocal rank fusion, rerank a bounded candidate set and measure the candidate-recall ceiling.",
       "lab": "Fuse lexical[a, b, c] and dense[b, d, a] with constant 60.",
       "verification": "b ranks first, a second. ValueError for nonpositive constant; TypeError for non-string ID."
     },
@@ -171,7 +171,7 @@
         "Policy fingerprint",
         "Cache partition"
       ],
-      "outcome": "Access-controlled retrieval must prevent unauthorized material from entering candidate selection, answer context, caches and logs.",
+      "outcome": "Enforce access-scope filters before retrieval scoring so restricted documents never reach answer context, cache keys or traces.",
       "lab": "Give a public-only request the six-document corpus and inspect admitted IDs.",
       "verification": "private-v1 absent before ranking. trace contains only public document IDs."
     },
@@ -190,7 +190,7 @@
         "Bridge evidence",
         "Stopping rule"
       ],
-      "outcome": "Query rewriting can translate a user's phrasing into terms that a retriever understands.",
+      "outcome": "Rewrite queries with a controlled synonym rule and follow linked evidence within a declared hop budget without crossing authorization boundaries.",
       "lab": "Rewritebuy rate usingbuy->purchase while preserving the original question.",
       "verification": "rewrittenpurchase rate; original unchanged. restricted document never appears."
     },
@@ -209,7 +209,7 @@
         "Entailment",
         "Abstention policy"
       ],
-      "outcome": "Grounded answering requires a connection between each substantive claim and supporting evidence.",
+      "outcome": "Map each answer claim to a cited, version-bound evidence span, and abstain when no admitted source supports it.",
       "lab": "Answer the conversion-definition question from the metric document and its first sentence.",
       "verification": "status answered; one claim; citation slices the exact sentence. rate.3 with input counts preserved."
     },
@@ -228,7 +228,7 @@
         "Oracle-context control",
         "Failure taxonomy"
       ],
-      "outcome": "A RAG evaluation should identify where the pipeline failed.",
+      "outcome": "Evaluate retrieval recall, reciprocal rank and answer support separately, and use oracle-context controls to locate where a pipeline failed.",
       "lab": "Use relevant IDs a, c and retrieved b, c, a.",
       "verification": "recall 1; reciprocal rank 0.5. duplicate ID detected."
     },
@@ -247,7 +247,7 @@
         "Bootstrap estimate",
         "Selective accuracy"
       ],
-      "outcome": "Reliability comparisons require an explicit unit of independence.",
+      "outcome": "Compare two assistants with paired, family-level bootstrap uncertainty, report coverage alongside answered accuracy and block severe boundary failures.",
       "lab": "Use system A errors q1=0, q2=0, q3=1 and B q1=1, q2=1, q3=0.",
       "verification": "differences[-1, -1, 1] by sortedID. test-based selection rejected."
     },
@@ -266,7 +266,7 @@
         "Chat template",
         "Training denominator"
       ],
-      "outcome": "Supervised fine-tuning data specifies the behavior a model is asked to imitate.",
+      "outcome": "Construct supervised fine-tuning records with answer-only target masks, detect destructive truncation and keep example families disjoint across splits.",
       "lab": "Use prompt IDs[1, 2] and answer IDs[5, 6, 3].",
       "verification": "inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets. record excluded despite valid token arrays."
     },
@@ -286,7 +286,7 @@
         "Forgetting",
         "Held-out transfer"
       ],
-      "outcome": "Full supervised fine-tuning updates all trainable model parameters on governed target examples.",
+      "outcome": "Train a tiny causal decoder with full supervised fine-tuning on masked answer targets, then evaluate a frozen held-out prompt and record an honest receipt.",
       "lab": "Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.",
       "verification": "inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says 20 updates, 4 active training targets and no natural-language competence claim."
     },
@@ -306,7 +306,7 @@
         "Frozen base",
         "Merged inference"
       ],
-      "outcome": "Low-rank adaptation, or LoRA, freezes a base linear weight and learns an additive update represented by two smaller matrices.",
+      "outcome": "Implement a LoRA update on a frozen linear weight, count its stored parameters, take an adapter-only gradient step and verify the merged weight.",
       "lab": "Construct W=I8, A=ones(8, 2)/8, B=zeros(2, 8), rank 2 and alpha 4, then count stored entries.",
       "verification": "64 base entries, 32 trainable adapter entries and scale 2. The actual update has rank 1, within the configured bound 2; alpha 4 gives twice the alpha-2 delta."
     },
@@ -326,7 +326,7 @@
         "Dequantization",
         "QLoRA boundary"
       ],
-      "outcome": "QLoRA combines a quantized frozen base with trainable low-rank adapters, allowing gradients to flow through computations involving the dequantized base into adapter parameters.",
+      "outcome": "Apply 4-bit quantization to a frozen base matrix, pack and dequantize its codes, train only a low-rank adapter and account for storage honestly.",
       "lab": "QuantizeW[[.1, -.9], [1.7, -.2]] with scale 1.7/7 andnearest-even rounding.",
       "verification": "codes[[0, -4], [7, -1]]. all four unimplemented claims explicitly False."
     },
@@ -345,7 +345,7 @@
         "Frozen-state proof",
         "Task transfer metric"
       ],
-      "outcome": "A fair adaptation comparison starts both candidates from the same base state and uses the same training examples, target masks and held-out tasks.",
+      "outcome": "Compare full and adapter fine-tuning from one cloned base under fixed update budgets, prove base preservation and evaluate the same frozen held-out task.",
       "lab": "Create a seed 31 decoder and copy its state into full and adapted candidates.",
       "verification": "all initial base parameters equal. adapter 96 entries; 20 updates each; scope literal-token task."
     },
@@ -364,7 +364,7 @@
         "Reference policy",
         "RLHF distinction"
       ],
-      "outcome": "Preference optimization uses labels describing which of two responses is preferred.",
+      "outcome": "Compute a DPO-style preference loss and its gradient from policy and reference margins, and distinguish that offline update from a complete RLHF workflow.",
       "lab": "Set policy difference 0, reference difference 0, beta.5.",
       "verification": "loss log 2. offline update True; reward_model_trained False; online_rl False."
     },
@@ -383,7 +383,7 @@
         "False negative",
         "Pairwise reranker"
       ],
-      "outcome": "Embedding and reranker fine-tuning adapts retrieval behavior rather than only answer generation.",
+      "outcome": "Train a query projection with a contrastive objective and a small pairwise reranker, then check held-out scores and detect false-negative identities.",
       "lab": "Use queries and documents equal to the 2-by-2 identity matrix, with positive labels 0, 1.",
       "verification": "score shape(2, 2); one positive per query. actual gradient updates True; pretrained_semantic_encoder False."
     },
@@ -402,7 +402,7 @@
         "Chat-template alignment",
         "Completion-only loss"
       ],
-      "outcome": "A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights, tokenizer files, chat templates, library versions, artifact licenses and larger resource needs.",
+      "outcome": "Inspect an optional pretrained-model recipe, tracing pinned revision, license, chat-template boundaries and trainer labels before any offline training run.",
       "lab": "Read the supplied model manifest and identify model ID, revision and license note before any download.",
       "verification": "exact 40-character revision and Apache-2.0 card note are present. pretrained execution unverified; no generated success receipt."
     },
@@ -421,7 +421,7 @@
         "Deterministic analysis artifact",
         "Interpretation boundary"
       ],
-      "outcome": "An LLM can help propose data-science operations, but the application should execute only typed, bounded operations whose semantics are understood.",
+      "outcome": "Dispatch only typed, bounded data-science tool requests, reject invalid values and excess work, and verify generated explanations against computed results.",
       "lab": "Use rows A1, A3, B10 and the admittedgroup_mean request.",
       "verification": "A count 2 mean 2; B count 1 mean 10. descriptive statistic available; causal claim not established."
     },
@@ -440,7 +440,7 @@
         "Work budget",
         "Safe trace"
       ],
-      "outcome": "A production-oriented domain assistant needs controls around the model as well as a good prompt.",
+      "outcome": "Enforce freshness, call-budget and allowlisted-trace controls around a domain assistant, using an injected UTC clock and abstaining on stale evidence.",
       "lab": "Use fixed UTC now 2026-10-22 and a document published one day earlier under a two-day limit.",
       "verification": "fresh True. answer admission False; reason stale evidence."
     },
@@ -461,7 +461,7 @@
         "Acceptance gate",
         "Subject-assistant artifact"
       ],
-      "outcome": "A subject-assistant capstone should demonstrate an entire evidence path: task admission, authorized retrieval, versioned source selection, grounded output, deterministic data-science computation and independent evaluation.",
+      "outcome": "Assemble an end-to-end subject assistant that enforces access, grounds or abstains, computes results deterministically and passes a bounded acceptance evaluation.",
       "lab": "Ask the public assistant forconversion_definition.",
       "verification": "answered with metric-v1 citation and source text. local_fixture_pass True; production_go no-go."
     }

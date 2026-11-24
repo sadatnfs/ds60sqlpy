@@ -1,12 +1,12 @@
 # llm-applied-019: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for preference optimization, DPO and the RLHF distinction only after attempting *Calculate the equal-margin loss* through *Name the unexecuted RLHF machinery*. A discrepancy in *Inspect the preference gradient* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-019_solution.py` runs the assertions; this page explains why they test preference margin and dpo-style loss.
 
 ## Mechanism review
 
 Preference optimization uses labels describing which of two responses is preferred. A DPO-style objective compares the policy chosen-versus-rejected log-probability advantage with the same advantage under a fixed reference policy, then applies a logistic loss scaled by beta. Equal adjusted margins give loss log 2. The objective can be differentiated directly from offline preference pairs without running an online reinforcement-learning environment.
 
-RLHF is a broader family of workflows in which human feedback informs a reward or preference signal and a policy optimization procedure. A reward model and an online policy update introduce additional state, exploration and reward-hacking risks. This chapter performs a real scalar PyTorch update on a DPO-style preference margin and contrasts its evidence with an RLHF workflow. It does not claim to train a reward model, execute onlineRL, or establish factuality. A preferred answer can still be unsupported or wrong if the preference labels reward style over truth.
+RLHF is a broader family of workflows in which human feedback informs a reward or preference signal and a policy optimization procedure. A reward model and an online policy update introduce additional state, exploration and reward-hacking risks. This chapter performs a real scalar PyTorch update on a DPO-style preference margin and contrasts its evidence with an RLHF workflow. It does not claim to train a reward model, execute online RL, or establish factuality. A preferred answer can still be unsupported or wrong if the preference labels reward style over truth.
 
 **Preference margin:** The policy advantage adjusted by a reference-policy advantage.
 
@@ -24,13 +24,13 @@ Represent the policy log-probability difference as a trainable scalar for the sm
 
 Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is \(z=\beta\cdot (d-r)\), and the loss is \(\log(1+\exp(-z))\), implemented through softplus for numerical stability. Its derivative with respect to d is \(-\beta\operatorname{sigmoid}(-z)\). The second derivative is \({\beta}^{2}\cdot \sigma(z)\cdot \sigma(-z)\), nonnegative, so this scalar loss is convex in d for a fixed reference.
 
-At \(d=r=0\) and beta 0.5, the loss is log2, about0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is 0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to0-0.2*(-0.25)=0.05. The new adjusted margin is 0.025 and the loss is about0.680725. This is an actual scalar gradient update in the reference.
+At \(d=r=0\) and beta 0.5, the loss is log2, about 0.693147. The derivative is -0.5*0.5=-0.25, and the curvature is 0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to 0-0.2*(-0.25)=0.05. The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
 
 A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
 
 In a language model, a response log probability is normally assembled from token-level conditional log probabilities under a declared response mask. Summing them and averaging by response length are different scoring rules. Prompt tokens, end markers, truncation and chosen/rejected identities must be handled consistently for both policy and reference. Otherwise the margin can reward a formatting or length artifact instead of the intended preference.
 
-Reversing a preference means reversing the corresponding chosen-minus-rejected comparisons. At the symmetric zero-reference fixture, the derivative changes from-0.25 to+0.25. In a nonzero-reference case, swapping only a label string while leaving score orientation unchanged would not define the intended opposite comparison. Preserve both response records and their model scores rather than manipulating an anonymous scalar after the fact.
+Reversing a preference means reversing the corresponding chosen-minus-rejected comparisons. At the symmetric zero-reference fixture, the derivative changes from -0.25 to +0.25. In a nonzero-reference case, swapping only a label string while leaving score orientation unchanged would not define the intended opposite comparison. Preserve both response records and their model scores rather than manipulating an anonymous scalar after the fact.
 
 The full DPO formulation connects offline preference comparisons to a reference-regularized policy objective. That theoretical relationship is broader than this scalar probe, which does not train a complete language model. Likewise, the example does not train a reward model or run online reinforcement learning. [Direct Preference Optimization](https://arxiv.org/abs/2305.18290).
 
@@ -73,13 +73,13 @@ loss.backward()
 np.testing.assert_allclose(difference.grad.item(), -0.25, atol=1e-12, rtol=0)
 ```
 
-**Expected:** gradient-.25.
+**Expected:** gradient -0.25.
 
-**Verify:** Compare the computed values or written argument with gradient-.25.
+**Verify:** Compare the computed values or written argument with gradient -0.25.
 
 ## Exercise 3: Perform an actual update
 
-The question is: TakeSGD.2 on the scalar policy difference and recompute the loss.
+The question is: Take SGD at 0.2 on the scalar policy difference and recompute the loss.
 
 The reference remains fixed while the policy margin changes. A smaller loss demonstrates agreement with the supplied preference label, not independent answer quality.
 
@@ -91,9 +91,9 @@ np.testing.assert_allclose(difference.item(), 0.05, atol=1e-12, rtol=0)
 assert after.item() < loss.item()
 ```
 
-**Expected:** difference.05; loss belowlog2.
+**Expected:** difference 0.05; loss below log(2).
 
-**Verify:** Compare the computed values or written argument with difference.05; loss belowlog2.
+**Verify:** Compare the computed values or written argument with difference 0.05; loss below log(2).
 
 ## Exercise 4: Reverse the preference
 
@@ -127,9 +127,9 @@ answer = {
 assert answer["preferred"] and not answer["source_supported"]
 ```
 
-**Expected:** preferenceTrue; source_supportedFalse; not accepted as a grounded answer.
+**Expected:** preference True; source_supported False; not accepted as a grounded answer.
 
-**Verify:** Compare the computed values or written argument with preferenceTrue; source_supportedFalse; not accepted as a grounded answer.
+**Verify:** Compare the computed values or written argument with preference True; source_supported False; not accepted as a grounded answer.
 
 ## Exercise 6: Name the unexecuted RLHF machinery
 
@@ -157,4 +157,4 @@ assert (
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Perform an actual update* and predict how the result changes before checking it; the unchanged inputs give: difference 0.05; loss below log(2). Keep the original *Name the unexecuted RLHF machinery* failure beside the repaired result; a missing PyTorch and NumPy runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

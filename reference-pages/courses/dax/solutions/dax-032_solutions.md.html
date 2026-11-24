@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict YTD at January 2, 2025.</p>
 <p>YTD is 27.</p>
+<p><strong>Why it fits this model:</strong> DATESYTD returns January 1 through the latest date in context. On 2025-01-02 that is two dates, and only S4 sold, so YTD is 27.</p>
+<p><strong>Tempting mistake:</strong> Accumulating from the first calendar date, 2024-01-01, counts all of 2024 as well and returns 64 + 27 = 91, a running total, not year to date.</p>
+<p><strong>How to confirm:</strong> Under &#x27;Date&#x27;[Date] = DATE(2025, 1, 2), CurrentDay and YTD both return 27.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the February anchor to February 2.</p>
 <p>YTD falls from 123 to 87.</p>
+<p><strong>Why it fits this model:</strong> Moving the anchor back one day drops S8&#x27;s 36, ordered February 3, so YTD becomes 123 - 36 = 87, and CurrentDay becomes S7&#x27;s 20.</p>
+<p><strong>Tempting mistake:</strong> Anchoring by month (Year 2025, MonthNumber 2) lets DATESYTD run to February 28 and return 123 for any February day, which hides the change.</p>
+<p><strong>How to confirm:</strong> Under DATE(2025, 2, 2), expect CurrentDay 20 and YTD 87.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a YTD audit ledger.</p>
 <p>For February 3: Gregorian January 1 through February 3, OrderDate role, S4..S8, amount 123.</p>
+<p><strong>Why it fits this model:</strong> The ledger names the calendar, role, date span and lines: Gregorian year, OrderDate, 2025-01-01 through 2025-02-03, S4 27, S5 20, S6 20, S7 20 and S8 36, which add to 123.</p>
+<p><strong>Tempting mistake:</strong> Building the ledger from ShipDate drops S8, shipped February 4, and adds to 87, which no longer matches the measure it is supposed to audit.</p>
+<p><strong>How to confirm:</strong> The listed amounts add to case B&#x27;s YTD of 123.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose current-day revenue multiplied by elapsed days.</p>
 <p>It estimates a different quantity and does not reproduce the observed sum over the actual YTD date set.</p>
+<p><strong>Why it fits this model:</strong> YTD sums observed sales over its date set. February 3 is day 34 of 2025, and actual sales over those 34 days are 123.</p>
+<p><strong>Tempting mistake:</strong> Multiplying CurrentDay 36 by 34 elapsed days gives 1224, about ten times the real value, because it treats one day&#x27;s sales as a daily rate.</p>
+<p><strong>How to confirm:</strong> 36 x 34 = 1224 against the observed 123; the two answer different questions.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain a YTD result after the declared data watermark.</p>
 <p>Label the result as based on data available through the watermark; do not imply full coverage through a later requested anchor.</p>
+<p><strong>Why it fits this model:</strong> After 2025-02-28 nothing is observed. At an anchor of March 15, 2025 DATESYTD still returns 123, the same as at February 28, because March days have no data.</p>
+<p><strong>Tempting mistake:</strong> Labeling 123 as YTD through March 15 implies a March with zero sales, when March was never observed.</p>
+<p><strong>How to confirm:</strong> YTD at 2025-03-15 equals YTD at 2025-02-28 (123). The label should say data through February 28, 2025.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the pattern to shipped revenue.</p>
 <p>Use an explicitly selected shipment relationship and reconcile shipment dates within the same YTD interval.</p>
+<p><strong>Why it fits this model:</strong> Shipped YTD keeps the same January 1 to February 3 interval but activates the ShipDate relationship. That keeps S4, S5, S6 and S7 and drops S8, shipped February 4: 87.</p>
+<p><strong>Tempting mistake:</strong> Leaving the order relationship active returns 123, which counts S8 as shipped one day early.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( [NetRevenue], DATESYTD ( &#x27;Date&#x27;[Date] ), USERELATIONSHIP ( Sales[ShipDate], &#x27;Date&#x27;[Date] ) )</code> returns 87 at February 3 and 123 at February 4.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-002_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Draw four SM boxes and a grid of ten blocks. Under the deliberately simplified assumption of one resident block per SM, the grid needs at least three waves: four, four and two blocks. This is an occupancy illustration, not a runtime prediction. Real residency depends on registers, shared memory, threads and architectural limits.</p>
+<p><strong>Approach:</strong> Assign ten blocks to four SM boxes one at a time under the stated one-resident-block rule and count rounds until every block has run.</p>
+<p><strong>Why it is correct:</strong> With at most four blocks running at once, ten blocks need ceil(10 / 4) = 3 rounds: four, four, then two.</p>
+<p><strong>A plausible wrong approach:</strong> Reading the drawing as a timing forecast fails because real residency per SM depends on registers, shared memory and thread limits.</p>
+<p><strong>How to verify:</strong> The reference asserts ceil(10 / 4) == 3 and prints simplified_waves 3; redraw with five SMs and expect two waves.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A block with 100 threads occupies four warps. The last warp contains four valid program threads and 28 unused lane positions. A kernel with 100 blocks does not require 10,000 physical arithmetic units. Scheduling reuses execution resources over time. Do not build a dependency that assumes block 0 finishes first.</p>
+<p><strong>Approach:</strong> Divide 100 threads by the warp width of 32 with ceiling division, then count valid lanes in the final warp.</p>
+<p><strong>Why it is correct:</strong> Warps are allocated whole, so 96 threads fill three warps and the remaining 4 threads occupy a fourth with 28 idle lanes.</p>
+<p><strong>A plausible wrong approach:</strong> Using floor division gives three warps and silently drops threads 96 to 99, which then never compute their outputs.</p>
+<p><strong>How to verify:</strong> Check ceil(100 / 32) == 4 from the reference output and verify 100 - 3 * 32 = 4 active lanes in the last warp.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Ceiling division by 32 yields one, one and two warps. The second warp in the last case has one program thread.</p>
+<p><strong>Approach:</strong> Apply ceil(n / 32) to each block size 31, 32 and 33 and note which lanes are populated in each warp.</p>
+<p><strong>Why it is correct:</strong> Hardware groups threads into 32-lane warps, so 31 and 32 both fit one warp while 33 spills a single thread into a second.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming 33 threads costs barely more than 32 hides that the second warp still occupies a whole scheduling slot for one lane.</p>
+<p><strong>How to verify:</strong> The reference asserts the list [1, 1, 2] for these sizes; confirm with 64 and 65 giving 2 and 3.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Record device model and compute capability from device properties separately from compiler/toolkit, driver and framework versions.</p>
+<p><strong>Approach:</strong> Query device properties for model name and major.minor compute capability, and record nvcc, driver and framework versions in separate fields.</p>
+<p><strong>Why it is correct:</strong> Compute capability describes the silicon&#x27;s feature set while toolkit 12.x describes the compiler; one machine can mix many valid pairs.</p>
+<p><strong>A plausible wrong approach:</strong> Copying the toolkit string into the capability field makes an inventory claim, for example 12.4, that no GPU actually reports.</p>
+<p><strong>How to verify:</strong> Compare the recorded capability against the device query output and confirm the toolkit field matches nvcc --version independently.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Yes. The drawing ignores resource pressure, uneven duration and scheduling effects; it establishes a simplified lower bound only.</p>
+<p><strong>Approach:</strong> List the ignored effects in the drawing: register and shared memory pressure, blocks with unequal runtimes and scheduler order.</p>
+<p><strong>Why it is correct:</strong> If a large block uses too many registers, an SM may hold zero additional blocks, and long blocks delay later ones.</p>
+<p><strong>A plausible wrong approach:</strong> Treating three waves as an exact count would wrongly reject a measured run that shows a staggered fourth group.</p>
+<p><strong>How to verify:</strong> Change the model so one SM is unavailable; ceil(10 / 3) = 4 shows the bound is a lower bound only.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Data starts in host storage, is transferred to device allocation, and loads feed SM registers or shared memory. Returned output needs an explicit or framework-managed dependency and transfer.</p>
+<p><strong>Approach:</strong> Trace the 2 MiB array from pageable or pinned host memory, through a copy engine, into a device allocation, then into registers or shared memory.</p>
+<p><strong>Why it is correct:</strong> Each hop is a distinct memory space with its own ownership; the SM can only load what the device allocation already holds.</p>
+<p><strong>A plausible wrong approach:</strong> Passing the host pointer straight to a kernel assumes unified addressing makes host data resident; without managed memory that is an illegal access.</p>
+<p><strong>How to verify:</strong> Draw the path with explicit copy calls and confirm the returned buffer is copied back only after the kernel completes.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-002_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

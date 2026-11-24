@@ -111,7 +111,7 @@ assert torch.equal(torch.flip(flipped, dims=(-1,)), image)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Max pooling gives 4 and average 2.5, the flip gives rows [3, 1] and [4, 2] and round-trips exactly, lowering pixel 1 to 0 keeps max 4 but average becomes 2.25, and the label maps left to right and back. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Compare local reductions. Predict exercise 6, Transform directional labels consistently, from its prompt alone: Map left to right under horizontal reflection and check the inverse. Then explain why this finish condition holds: Max pooling gives 4 and average 2.5, the flip gives rows [3, 1] and [4, 2] and round-trips exactly, lowering pixel 1 to 0 keeps max 4 but average becomes 2.25, and the label maps left to right and back. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -147,15 +147,15 @@ When augmentation improves a score suspiciously, inspect source-family leakage a
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Inspect a horizontal flip) alters one assumption of Example A (Compare local reductions). Hint 2: exercise 4, Expose discarded information, should end at max still 4; average 2.25. Work backward from it. Hint 3: exercise 5, Keep evaluation transforms deterministic, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Pooling, Augmentation, Label invariance using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Check the round trip, from its inputs alone. Predict whether exercise 3, Pool a 4-by-4 map, survives one changed input. Then explain Pooling, Augmentation, Label invariance in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-019` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Compare local reductions) cannot be rebuilt without help, revisit `torch-019` first. Otherwise keep your exercise 2 attempt, Flip the height axis instead, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

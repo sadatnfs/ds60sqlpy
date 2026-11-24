@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-build-a-parameter-ledger">Exercise 1: Build a parameter ledger<a class="heading-anchor" href="#exercise-1-build-a-parameter-ledger" aria-label="Link to this section">#</a></h3>
 <p>Count each actual array and its dtype.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>build a parameter ledger</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Build a ledger of training state for 1000 float32 parameters: parameters, gradients and two Adam moment arrays, four arrays of <code>1000*4</code> bytes, for 16000 bytes total.</p>
+<p><strong>Why it is correct here.</strong> Each tensor that exists during training gets its own line with element count and itemsize. Adam keeps first and second moments per parameter, which doubles state beyond parameters and gradients.</p>
+<p><strong>A plausible wrong approach.</strong> Counting parameters only, 4000 bytes, underestimates training memory by four times for this optimizer.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>state_bytes == 16000</code>. In PyTorch, sum <code>numel()*element_size()</code> over parameters, gradients and optimizer state and compare.</p>
 <h3 id="exercise-2-add-activation-bytes">Exercise 2: Add activation bytes<a class="heading-anchor" href="#exercise-2-add-activation-bytes" aria-label="Link to this section">#</a></h3>
 <p>Use batch times elements per example times itemsize.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>add activation bytes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Add saved activations as batch times elements per example times itemsize: <code>8*128*4 = 4096</code> bytes for one saved tensor of 128 float32 values per example.</p>
+<p><strong>Why it is correct here.</strong> Autograd saves intermediate values for the backward pass, and their size scales with batch size. The reference adds two such tensors: <code>16000 + 2*4096 = 24192</code> bytes.</p>
+<p><strong>A plausible wrong approach.</strong> Ignoring activations because they are temporary misses that they live from forward until backward, which is when memory peaks.</p>
+<p><strong>How to verify.</strong> Assert the 24192 total from the reference, then double the batch to 16 and confirm the activation portion doubles to 8192 bytes per tensor.</p>
 <h3 id="exercise-3-separate-reserve-and-live-usage">Exercise 3: Separate reserve and live usage<a class="heading-anchor" href="#exercise-3-separate-reserve-and-live-usage" aria-label="Link to this section">#</a></h3>
 <p>Reserved includes reusable storage.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate reserve and live usage</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Distinguish reserved memory from allocated memory: <code>torch.cuda.memory_allocated</code> counts bytes held by live tensors, while <code>memory_reserved</code> also counts free blocks the caching allocator keeps.</p>
+<p><strong>Why it is correct here.</strong> The allocator keeps freed blocks for reuse to avoid expensive device allocations, so reserved bytes can stay high after tensors are freed.</p>
+<p><strong>A plausible wrong approach.</strong> Reading the reserved number in a monitoring tool and concluding tensors are leaking confuses cache with live usage. Tools such as <code>nvidia-smi</code> report the reserved total, so they show this inflated number.</p>
+<p><strong>How to verify.</strong> Allocate and delete a large tensor, then show allocated memory returns to its prior value while reserved memory stays higher.</p>
 <h3 id="exercise-4-diagnose-a-retained-graph">Exercise 4: Diagnose a retained graph<a class="heading-anchor" href="#exercise-4-diagnose-a-retained-graph" aria-label="Link to this section">#</a></h3>
 <p>Store detached scalar summaries when appropriate.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>diagnose a retained graph</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Diagnose a retained graph: storing <code>losses.append(loss)</code> each step keeps each step&#x27;s autograd graph alive. Store <code>loss.item()</code> or <code>loss.detach()</code> instead.</p>
+<p><strong>Why it is correct here.</strong> A loss tensor that requires grad references its graph and saved activations. Keeping one per step grows memory linearly with step count, independent of batch size.</p>
+<p><strong>A plausible wrong approach.</strong> Blaming a fixed-size growth per step on fragmentation or the allocator leads to tuning allocator settings that do not fix the reference leak.</p>
+<p><strong>How to verify.</strong> Track allocated memory per step with both versions. The detached version stays flat, while the retained version rises each step.</p>
 <h3 id="exercise-5-explain-memory-growth">Exercise 5: Explain memory growth<a class="heading-anchor" href="#exercise-5-explain-memory-growth" aria-label="Link to this section">#</a></h3>
 <p>It changes allocation policy not required live bytes.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain memory growth</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain that allowing memory growth in a framework changes how memory is reserved from the device, incrementally rather than all at once, but does not change the bytes the model needs at peak.</p>
+<p><strong>Why it is correct here.</strong> Growth settings affect allocation policy and sharing with other processes. If the peak live bytes exceed the device, growth only delays the out-of-memory error.</p>
+<p><strong>A plausible wrong approach.</strong> Turning growth on to fix an out-of-memory error treats a policy as a capacity increase.</p>
+<p><strong>How to verify.</strong> Compare the peak allocated bytes with growth on and off for the same step. They should match.</p>
 <h3 id="exercise-6-design-a-safe-batch-size-experiment">Exercise 6: Design a safe batch-size experiment<a class="heading-anchor" href="#exercise-6-design-a-safe-batch-size-experiment" aria-label="Link to this section">#</a></h3>
 <p>Use small fixed upper bounds and stop before exhausting hardware.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a safe batch-size experiment</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a batch-size experiment that steps through small fixed sizes such as 8, 16 and 32, records peak memory for each and stops well before the device limit.</p>
+<p><strong>Why it is correct here.</strong> Peak memory grows roughly linearly with batch size, so a few points allow extrapolation. Bounded steps avoid crashing a shared GPU.</p>
+<p><strong>A plausible wrong approach.</strong> Doubling until the program crashes uses an out-of-memory error as the measurement and can disrupt other users.</p>
+<p><strong>How to verify.</strong> Fit peak memory against batch size from the recorded points and check the slope matches the activation ledger.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>State 16000 bytes and activation 4096 bytes for the example.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-089_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

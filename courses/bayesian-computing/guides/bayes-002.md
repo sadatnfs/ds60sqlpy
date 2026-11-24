@@ -15,6 +15,14 @@ w_j=\exp\{a_j-\operatorname{logsumexp}(a)\},\qquad
 
 where \(m=\max_j a_j\). Subtracting a common constant does not change the normalized masses. This identity supplies a useful implementation test and avoids attempting to exponentiate values at their original scale.
 
+## Key terms
+
+- **Log density:** The logarithm of a probability or density, used so products of tiny terms become sums that do not underflow.
+- **logsumexp:** The stable computation m + log sum exp(a_j - m), with m the largest log weight, of the log of a sum of exponentials.
+- **Normalization:** Dividing unnormalized masses by their total so they sum or integrate to one under the stated measure.
+- **Quadrature:** Numerical integration with a grid and weights; an irregular grid requires appropriate quadrature weights.
+- **Exact oracle:** A conjugate, quadrature or finite-mechanism reference answer used to test a more general inference system.
+
 ## Worked case 1: compare numerical integration with an exact posterior
 
 The prior mean is normal with mean zero and variance four. Three independent observations 1,2,3 have known variance one around that unknown mean. Combining precision gives posterior variance \((1/4+3)^{-1}=4/13\) and posterior mean \((4/13)(1+2+3)=24/13\).
@@ -46,6 +54,39 @@ Units matter in density calculations. A normal standard deviation is not a varia
 **Why not assert only that weights sum to one?** Almost any finite set of positive numbers can be normalized. The analytic posterior moments, shift invariance and extreme-value case check different aspects of the intended model and implementation.
 
 **Does a close grid result prove a future complex model correct?** No. It qualifies this numerical contract. The practice of building independent reference cases transfers to more complex work, while each new likelihood and geometry requires its own review.
+
+## Worked example: Underflow-proof grid posterior for 7000 successes in 10000 trials
+
+```python
+import numpy as np
+from scipy.special import logsumexp
+
+k, n = 7000, 10000
+theta = np.linspace(0.0005, 0.9995, 2000)
+log_like = k * np.log(theta) + (n - k) * np.log1p(-theta)
+print(f"largest log likelihood {log_like.max():.1f}")
+
+naive = np.exp(log_like)
+print("naive sum of likelihoods:", naive.sum())
+with np.errstate(invalid="ignore"):
+    print("naive posterior mean:", (theta * naive).sum() / naive.sum())
+
+w = np.exp(log_like - logsumexp(log_like))
+print(f"log-sum-exp posterior mean {w @ theta:.6f}")
+print(f"exact Beta(7001, 3001) mean {(k + 1) / (n + 2):.6f}")
+```
+
+Observed output:
+
+```text
+largest log likelihood -6108.6
+naive sum of likelihoods: 0.0
+naive posterior mean: nan
+log-sum-exp posterior mean 0.699960
+exact Beta(7001, 3001) mean 0.699960
+```
+
+With 10,000 trials the largest log likelihood on the grid is about \(-6108.6\), and \(e^{-6108.6}\) is far below the smallest positive double, roughly \(10^{-308}\). Every term underflows to zero, the naive sum is 0.0 and the posterior mean becomes \(0/0\), printed as nan. Nothing is wrong with the model; the failure is purely numerical. Subtracting the log-sum-exp before exponentiating rescales every weight by the same constant, so the largest becomes exactly 1 and the ratios are preserved. The normalized grid mean, 0.699960, matches the exact Beta(7001, 3001) mean \(7001/10002\) to six decimals, which is the oracle check that the grid is fine enough. With only 1,000 trials the same naive code would have survived, because \(e^{-611}\) is still representable, so a passing test on small data says little about production data. Any computation that multiplies many likelihood terms should carry log densities until the final normalized ratio.
 
 ## Complete reproducible program
 

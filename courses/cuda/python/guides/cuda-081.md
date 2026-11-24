@@ -23,6 +23,14 @@ For modern DLPack object interchange, read the producer's `__dlpack__` and `__dl
 Autograd adds a fourth agreement: the computation graph. Sharing a tensor's storage with another library does not by itself add that library's arithmetic to the first framework's differentiation graph. A forward output may be numerically perfect while the gradient is absent or wrong. The test sequence is therefore storage/value parity, deliberate alias mutation, lifetime safety, non-default stream behavior, and then independent gradient behavior if gradients are part of the objective.
 
 
+### Key terms
+
+- **Zero-copy alias:** A view in another library that shares the same device buffer, so writes through one are visible through the other.
+- **Explicit copy:** A new buffer with its own storage, independent of later changes to the original.
+- **DLPack:** A tensor exchange protocol that passes a pointer, shape, strides, dtype and device between libraries without copying.
+- **Ownership lifetime:** The rule that the original buffer must stay alive while any alias still references it.
+- **Autograd boundary:** The point where a tensor leaves the framework's gradient tracking, so operations in another library are not differentiated.
+
 ## Worked examples
 
 ### Worked example 1
@@ -49,33 +57,53 @@ print("CPU alias reference:", owner, copied)
 
 **Expected observation:** Alias changes to 9 while copied value remains 1.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `owner` | `[9, 2, 3]` |
+| `alias` | `[9, 2, 3]` |
+| `copied` | `[1, 2, 3]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Distinguish copy and alias
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **distinguish copy and alias** in the examples above.
+**Trap to avoid:** Assuming any transfer between libraries copies data leads to surprises when a zero-copy exchange like DLPack shares storage and a later in-place edit changes both arrays.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Trace owner lifetime
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **trace owner lifetime** in the examples above.
+**Trap to avoid:** Deleting the original tensor right after the exchange to save memory assumes the consumer holds a copy.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Describe metadata requirements
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **describe metadata requirements** in the examples above.
+**Trap to avoid:** Passing only the pointer and the shape forces the consumer to guess dtype and layout.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain missing autograd edges
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain missing autograd edges** in the examples above.
+**Trap to avoid:** Assuming a forward result that matches means gradients are also correct conflates two different checks.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Name stream readiness evidence
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **name stream readiness evidence** in the examples above.
+**Trap to avoid:** Relying on the host call having returned treats Python completion as device completion.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design mutation tests
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design mutation tests** in the examples above.
+**Trap to avoid:** Writing from both libraries at once to see what happens produces a race whose outcome proves nothing.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

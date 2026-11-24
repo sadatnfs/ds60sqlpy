@@ -31,11 +31,25 @@ Filter on the stated condition and retain identity. Counting all addresses would
 
 **Expected:** Only the endpoint referencing pod-a.
 
+**Solution reasoning**
+
+- **Approach:** Read each endpoint's conditions.ready field in the slice and keep only those marked true.
+- **Why it is correct:** Only ready endpoints receive new connections, and in the fixture only the endpoint referencing pod-a is ready.
+- **Plausible wrong approach:** Counting every endpoint listed in the slice would include backends that are not eligible for traffic.
+- **How to verify:** The ready set contains exactly the endpoint referencing pod-a.
+
 ## Exercise 2: Aggregate endpoints across two slices.
 
 Large Services can be split across slices. A first-item assumption loses backends.
 
 **Expected:** The result includes every relevant slice without duplicate identities.
+
+**Solution reasoning**
+
+- **Approach:** Select every EndpointSlice carrying the Service's kubernetes.io/service-name label and merge their endpoints.
+- **Why it is correct:** A Service can be split across several slices, so reading only one gives a partial backend set.
+- **Plausible wrong approach:** Reading the first slice returned, or concatenating without deduplicating by target reference, gives a wrong count.
+- **How to verify:** The merged list covers all relevant slices with no repeated Pod identity.
 
 ## Exercise 3: Join eligible endpoint references to current Pod UIDs.
 
@@ -43,11 +57,25 @@ The UID relation is stronger than a familiar name or IP. It supports replacement
 
 **Expected:** Every accepted backend belongs to the intended current workload.
 
+**Solution reasoning**
+
+- **Approach:** Match each eligible endpoint's targetRef UID against the UIDs of the current Pods.
+- **Why it is correct:** A Pod name can be reused by a replacement, while the UID identifies the exact object the endpoint points to.
+- **Plausible wrong approach:** Joining on Pod name alone could accept a stale reference to a deleted Pod with the same name.
+- **How to verify:** Every accepted backend UID belongs to a current Pod of the intended workload.
+
 ## Exercise 4: Diagnose Running but no ready endpoints.
 
 The process exists, but eligibility has not been established. Recreating the Service is not automatically the right repair.
 
 **Expected:** Inspect readiness and selector/controller observations.
+
+**Solution reasoning**
+
+- **Approach:** Check the Pod's Ready condition and readiness probe, then compare its labels with the Service selector.
+- **Why it is correct:** Running only means containers started; a failing readiness probe or a selector mismatch keeps the Pod out of ready endpoints.
+- **Plausible wrong approach:** Restarting the Pod because it is Running but unused repeats startup without finding the failing check.
+- **How to verify:** The diagnosis names the readiness result and the selector match status.
 
 ## Exercise 5: Explain terminating and serving conditions carefully.
 
@@ -55,8 +83,22 @@ Traffic handling can depend on policy and implementation. State the exact condit
 
 **Expected:** They inform draining behavior and are not identical Boolean synonyms.
 
+**Solution reasoning**
+
+- **Approach:** Describe terminating as the Pod being deleted and serving as whether it still passes readiness.
+- **Why it is correct:** During graceful shutdown an endpoint can be terminating yet still serving, which lets proxies drain existing traffic.
+- **Plausible wrong approach:** Treating terminating as a synonym for not ready would discard a backend that can still finish in-flight work.
+- **How to verify:** The answer keeps the two conditions separate and ties them to draining.
+
 ## Exercise 6: Prove a replacement backend is actually used.
 
 Control-plane readiness is necessary evidence but does not alone prove the client reached that backend.
 
 **Expected:** New UID eligibility plus a fresh source-bound application response.
+
+**Solution reasoning**
+
+- **Approach:** Confirm the new Pod's UID is an eligible endpoint, then send a fresh request that reports its serving identity.
+- **Why it is correct:** Endpoint eligibility shows the proxy may choose the Pod, and a response bound to its identity shows it actually did.
+- **Plausible wrong approach:** A successful response alone could come from an older backend that is still eligible.
+- **How to verify:** The record pairs the new UID in the ready set with a fresh response from that UID.

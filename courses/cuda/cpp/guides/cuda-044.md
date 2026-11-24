@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Build a bounded streaming compute core that keeps memory within budget and reports latency separately from throughput.
+
 Work through *Second capstone: a streaming numerical service core* with the concrete cases below. Finish with this evidence:
 all outputs match, no chunk is dropped or reused early, memory stays within the budget, and the report separates request latency from throughput. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A streaming compute service needs bounded ownership and backpressure before it needs more streams. Backpressure means producers stop or reject work when the system cannot safely accept another item. A slot moves through states such as free, filling, computing, copying and consumed. Reuse is allowed only after the final consumer completes. Cancellation stops admission and cleans up according to actual completion state; it does not magically cancel every submitted device instruction. This capstone is a bounded local pipeline, not a new network server inside the classroom worker.
+
+### Key terms
+
+- **Backpressure:** Refusing or delaying new requests when all buffers are busy, so memory use stays bounded.
+- **Slot state machine:** A fixed set of buffer slots, each moving through explicit states such as free, uploading, computing and draining.
+- **Request latency:** The time from accepting one request until its result is returned.
+- **Memory budget:** The declared maximum device and pinned host memory the service may hold at once.
 
 ## How to run and study this lesson
 

@@ -145,7 +145,7 @@ The browser source creates the fixed hello Deployment so the controller produces
     [
         (
             "Trace image selection to process observation",
-            """The manifest selects ds60sqlpy-k8s-fixture:0.2.0 and Never. The host qualification receipt must record the actual image identity and preload on each eligible node. If the image is absent under Never, the kubelet reports an image-availability failure instead of automatically pulling it. A locally present tag alone is weaker evidence than a recorded content identity.
+            """The manifest selects `ds60sqlpy-k8s-fixture:0.2.0` and `Never`. The host qualification receipt must record the actual image identity and preload on each eligible node. If the image is absent under Never, the kubelet reports an image-availability failure instead of automatically pulling it. A locally present tag alone is weaker evidence than a recorded content identity.
 
 The fixed command starts the fixture server on container port 8080. Declaring containerPort documents the port; it does not publish a host port or create a Service. The Pod has no service-account token mount, runs as a fixed nonroot UID and has a read-only root filesystem with dropped capabilities. Those settings are part of the admitted workload contract.
 

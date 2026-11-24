@@ -16,6 +16,14 @@ Artifact promotion means moving an already tested immutable artifact through del
 
 Parallel test jobs can reduce elapsed time, but shared fixtures must remain isolated or intentionally serialized. A database test that resets a shared schema cannot be blindly sharded with another writer. The classroom’s grouped suites reflect this principle, while ordinary runtime groups use disposable projects.
 
+### Key terms
+
+- **Continuous integration:** Running repeatable checks automatically whenever source changes.
+- **CI test stage:** A pipeline step that tests the built image itself, beyond the source tests that ran earlier.
+- **Image promotion:** Artifact promotion for containers, moving one already tested immutable image through delivery stages instead of rebuilding different bytes for each.
+- **Immutable digest:** The content identity that links the tested image to the deployed one.
+- **Parallel jobs:** Pipeline jobs that run at the same time and need isolated or deliberately serialized shared fixtures.
+
 ## Anatomy and a trace you can follow
 
 A useful pipeline has fast static checks, bounded unit tests, image build, real runtime failure/timeout checks and application acceptance. Store small structured receipts and bounded logs. Always execute cleanup for resources the job owns, including on failures, while preserving evidence needed to diagnose the failure.
@@ -97,11 +105,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Rebuilding the image after tests and deploying an untested artifact. Letting parallel jobs share one fixture. Hiding skipped checks behind a green summary.
 
-Exercise 4 is this chapter's boundary case: Diagnose rebuilding between acceptance and deployment. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose rebuilding between acceptance and deployment. Compare the digest that passed acceptance with the digest being deployed; if they differ, the acceptance result does not yet apply. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using continuous integration, test stage, artifact promotion and immutable digest. Reconstruct worked example 2 (Define a source-bound receipt) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Recall the receipt fields and say which one ties the test result to the exact artifact. Then reconstruct worked example 2 (Define a source-bound receipt) with one different value, predict what changes, and name which of continuous integration, test stage, artifact promotion and immutable digest the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

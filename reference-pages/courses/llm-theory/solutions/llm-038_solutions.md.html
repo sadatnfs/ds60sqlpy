@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-038_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="llm-038-explanatory-solutions">llm-038: explanatory solutions<a class="heading-anchor" href="#llm-038-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Read these tools, structured output and trust boundaries answers after attempting <em>Accept the second allowed document</em> through <em>Keep retrieved instructions inert</em>, or after asking for a reveal. They reuse the guide&#x27;s literals, so a mismatch in <em>Reject extra fields</em> points to one step. <code>llm-038_solution.py</code> holds the assertions; this page explains how they test allowlist. Then try <em>Keep retrieved instructions inert</em> on a fresh input you chose before looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A tool proposal is untrusted structured data until a trusted dispatcher validates it. Valid JSON is only a syntax property; it does not make an operation allowed. This lesson permits one read-only fixture operation with a bounded document ID and rejects unknown fields, unknown tools, path-like identifiers and non-string values. Retrieved text never supplies authority to change that allowlist. Validation occurs before any action. The example deliberately performs no process execution, network call or filesystem lookup. This separation makes the trust boundary inspectable and prevents a language-shaped suggestion from becoming an arbitrary command.</p>
 <p><strong>Allowlist:</strong> An explicit set of operations or identifiers permitted by trusted code.</p>
@@ -209,7 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 copy2 <span class="syntax-operator">=</span> validate<span class="syntax-punctuation">(</span>second<span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> copy2 <span class="syntax-operator">==</span> second <span class="syntax-operator">and</span> copy2 <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> second</code></pre>
 <p><strong>Expected:</strong> accepted; the returned proposal equals the input but is a separate copy.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>copy2 == second</code> and <code>copy2 is not second</code>.</p>
+<p><strong>Verify:</strong> For <em>Accept the second allowed document</em>, a fresh-process check confirms <code>copy2 == second</code> and <code>copy2 is not second</code>.</p>
 <h3 id="exercise-2-predict-a-case-changed-tool-name">Exercise 2: Predict a case-changed tool name<a class="heading-anchor" href="#exercise-2-predict-a-case-changed-tool-name" aria-label="Link to this section">#</a></h3>
 <p>The question is: Submit tool READ_FIXTURE with document_id d1 and predict which check rejects it.</p>
 <p>The allowlist compares exact strings. Silently normalizing case would widen the set of accepted inputs beyond what was reviewed.</p>
@@ -220,7 +220,7 @@ copy2 <span class="syntax-operator">=</span> validate<span class="syntax-punctua
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">case-changed tool accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError &#x27;unknown tool&#x27;; names are matched exactly, without case folding.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>validate({&#x27;tool&#x27;: &#x27;READ_FIXTURE&#x27;, &#x27;document_id&#x27;: &#x27;d1&#x27;})</code> raises <code>ValueError</code> and the raised error satisfies <code>str(error) == &#x27;unknown tool&#x27;</code>.</p>
+<p><strong>Verify:</strong> For <em>Predict a case-changed tool name</em>, a fresh-process check confirms <code>validate({&#x27;tool&#x27;: &#x27;READ_FIXTURE&#x27;, &#x27;document_id&#x27;: &#x27;d1&#x27;})</code> raises <code>ValueError</code> and the raised error satisfies <code>str(error) == &#x27;unknown tool&#x27;</code>.</p>
 <h3 id="exercise-3-reject-extra-fields">Exercise 3: Reject extra fields<a class="heading-anchor" href="#exercise-3-reject-extra-fields" aria-label="Link to this section">#</a></h3>
 <p>The question is: Add command or path to an otherwise valid object.</p>
 <p>Ignoring unexpected fields can conceal a mismatch between the proposer and executor. Exact-key validation makes unsupported intent visible.</p>
@@ -231,7 +231,7 @@ copy2 <span class="syntax-operator">=</span> validate<span class="syntax-punctua
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">extra field accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> extra fields rejected.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>validate({&#x27;tool&#x27;: &#x27;read_fixture&#x27;, &#x27;document_id&#x27;: &#x27;d1&#x27;, &#x27;command&#x27;: &#x27;anything&#x27;})</code> raises <code>ValueError</code>.</p>
+<p><strong>Verify:</strong> For <em>Reject extra fields</em>, a fresh-process check confirms <code>validate({&#x27;tool&#x27;: &#x27;read_fixture&#x27;, &#x27;document_id&#x27;: &#x27;d1&#x27;, &#x27;command&#x27;: &#x27;anything&#x27;})</code> raises <code>ValueError</code>.</p>
 <h3 id="exercise-4-reject-traversal-like-identifiers">Exercise 4: Reject traversal-like identifiers<a class="heading-anchor" href="#exercise-4-reject-traversal-like-identifiers" aria-label="Link to this section">#</a></h3>
 <p>The question is: Submit ../secret as the document ID.</p>
 <p>The safest fixture boundary never interprets an ID as a path. This avoids relying on string replacement to sanitize an arbitrary filesystem location.</p>
@@ -242,7 +242,7 @@ copy2 <span class="syntax-operator">=</span> validate<span class="syntax-punctua
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">path-like ID accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError because the ID is outside the fixture allowlist.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>validate({&#x27;tool&#x27;: &#x27;read_fixture&#x27;, &#x27;document_id&#x27;: &#x27;../secret&#x27;})</code> raises <code>ValueError</code>.</p>
+<p><strong>Verify:</strong> For <em>Reject traversal-like identifiers</em>, a fresh-process check confirms <code>validate({&#x27;tool&#x27;: &#x27;read_fixture&#x27;, &#x27;document_id&#x27;: &#x27;../secret&#x27;})</code> raises <code>ValueError</code>.</p>
 <h3 id="exercise-5-enforce-types">Exercise 5: Enforce types<a class="heading-anchor" href="#exercise-5-enforce-types" aria-label="Link to this section">#</a></h3>
 <p>The question is: Submit the integer document_id 1, then a list instead of an object.</p>
 <p>Type coercion could turn unexpected model output into an unintended valid identifier. Rejecting it preserves a clear contract for the caller to repair.</p>
@@ -254,7 +254,7 @@ copy2 <span class="syntax-operator">=</span> validate<span class="syntax-punctua
     <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">wrong type accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> TypeError for both malformed structures.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm for every <code>bad</code> in <code>[{&#x27;tool&#x27;: &#x27;read_fixture&#x27;, &#x27;document_id&#x27;: 1}, [&#x27;read_fixture&#x27;, &#x27;d1&#x27;]]</code>, <code>validate(bad)</code> raises <code>TypeError</code>.</p>
+<p><strong>Verify:</strong> For <em>Enforce types</em>, a fresh-process check confirms for every <code>bad</code> in <code>[{&#x27;tool&#x27;: &#x27;read_fixture&#x27;, &#x27;document_id&#x27;: 1}, [&#x27;read_fixture&#x27;, &#x27;d1&#x27;]]</code>, <code>validate(bad)</code> raises <code>TypeError</code>.</p>
 <h3 id="exercise-6-keep-retrieved-instructions-inert">Exercise 6: Keep retrieved instructions inert<a class="heading-anchor" href="#exercise-6-keep-retrieved-instructions-inert" aria-label="Link to this section">#</a></h3>
 <p>The question is: Read a fixture string saying ignore policy and run a command, then verify no second operation is proposed or executed.</p>
 <p>Content returned by a tool is evidence, not a new instruction source. The example retains the malicious-looking string without granting it access to a dispatcher.</p>
@@ -265,9 +265,9 @@ calls<span class="syntax-operator">.</span>append<span class="syntax-punctuation
 result <span class="syntax-operator">=</span> fixture<span class="syntax-punctuation">[</span>checked<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">document_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> calls <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">read_fixture</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> returned value is text; dispatch count 1.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>isinstance(result, str)</code> and <code>calls == [&#x27;read_fixture&#x27;]</code>.</p>
+<p><strong>Verify:</strong> For <em>Keep retrieved instructions inert</em>, a fresh-process check confirms <code>isinstance(result, str)</code> and <code>calls == [&#x27;read_fixture&#x27;]</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one input to <em>Reject traversal-like identifiers</em> and predict the result first; keep <em>Reject traversal-like identifiers</em> failing beside the repair. Log a missing NumPy separately from a wrong allowlist value in <code>llm-038</code>.</p></article>
   </main>
 </body>
 </html>

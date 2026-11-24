@@ -1,6 +1,6 @@
 # llm-035: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these inference scheduling and cache isolation answers after attempting *Define unequal requests* through *Respect independent caps*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Compare independent inference* points to one step. `llm-035_solution.py` holds the assertions; this page explains how they test scheduler. Then try *Respect independent caps* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -33,7 +33,7 @@ assert len(set(keys.values())) == 2 and [len(requests[r]) for r in ["A", "B"]] =
 
 **Expected:** lengths 3 and 2; distinct keys.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(set(keys.values())) == 2` and `[len(requests[r]) for r in ['A', 'B']] == [3, 2]`.
+**Verify:** For *Define unequal requests*, a fresh-process check confirms `len(set(keys.values())) == 2` and `[len(requests[r]) for r in ['A', 'B']] == [3, 2]`.
 
 ## Exercise 2: Interleave bounded work
 
@@ -55,7 +55,7 @@ assert caches[keys["A"]]["k"].shape[2] == 3 and caches[keys["B"]]["k"].shape[2] 
 
 **Expected:** cache lengths A3, B2.
 
-**Verify:** In a fresh process, the exercise checks confirm `caches[keys['A']]['k'].shape[2] == 3` and `caches[keys['B']]['k'].shape[2] == 2`.
+**Verify:** For *Interleave bounded work*, a fresh-process check confirms `caches[keys['A']]['k'].shape[2] == 3` and `caches[keys['B']]['k'].shape[2] == 2`.
 
 ## Exercise 3: Compare independent inference
 
@@ -73,7 +73,7 @@ with torch.no_grad():
 
 **Expected:** both requests match within 1e-6.
 
-**Verify:** In a fresh process, the exercise checks confirm for every `(request, tokens)` in `requests.items()`, `incremental` matches `full` within 1e-6.
+**Verify:** For *Compare independent inference*, a fresh-process check confirms for every `(request, tokens)` in `requests.items()`, `incremental` matches `full` within 1e-6.
 
 ## Exercise 4: Invalidate a tokenizer change
 
@@ -87,7 +87,7 @@ assert caches.get(("A", "model-v1", "tokens-v2")) is None
 
 **Expected:** no cached state found.
 
-**Verify:** In a fresh process, the exercise checks confirm `caches.get(('A', 'model-v1', 'tokens-v2')) is None`.
+**Verify:** For *Invalidate a tokenizer change*, a fresh-process check confirms `caches.get(('A', 'model-v1', 'tokens-v2')) is None`.
 
 ## Exercise 5: Invalidate a model change
 
@@ -101,7 +101,7 @@ assert caches.get(("A", "model-v2", "tokens-v1")) is None
 
 **Expected:** no cached state found.
 
-**Verify:** In a fresh process, the exercise checks confirm `caches.get(('A', 'model-v2', 'tokens-v1')) is None`.
+**Verify:** For *Invalidate a model change*, a fresh-process check confirms `caches.get(('A', 'model-v2', 'tokens-v1')) is None`.
 
 ## Exercise 6: Respect independent caps
 
@@ -117,8 +117,8 @@ assert consumed == caps and consumed["B"] >= caps["B"]
 
 **Expected:** A and B at their own caps; B cannot advance.
 
-**Verify:** In a fresh process, the exercise checks confirm `consumed == caps` and `consumed['B'] >= caps['B']`.
+**Verify:** For *Respect independent caps*, a fresh-process check confirms `consumed == caps` and `consumed['B'] >= caps['B']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Invalidate a tokenizer change* and predict the result first; keep *Respect independent caps* failing beside the repair. Log a missing PyTorch separately from a wrong scheduler value in `llm-035`.

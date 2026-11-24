@@ -1427,7 +1427,7 @@
         "backup consistency",
         "recovery"
       ],
-      "outcome": "Understand graph storage, search indexes and backup consistency",
+      "outcome": "Distinguish search index lag from missing graph data and verify Atlas entities survive a restart",
       "lab": "Read worked case A (\"retain entities and lineage through restart\") and worked case B (\"distinguish index lag from missing graph data\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
     },

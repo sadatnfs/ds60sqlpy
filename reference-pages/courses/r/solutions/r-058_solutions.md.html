@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Attach stable observation IDs independently of x/y coordinates.</p>
 <p>Each trace retains the IDs belonging to its points even when the data is grouped.</p>
 <p><strong>Expected evidence:</strong> Correct point-associated IDs.</p>
+<p><strong>Approach:</strong> Loop over the groups A and B, subset d for each, and add a trace with customdata = ~id so every point carries its own ID.</p>
+<p><strong>Why it holds here:</strong> Within the B trace the first point is B1, but it is the third row of d. Attaching the ID as data on the point keeps that link no matter how the rows were split into traces.</p>
+<p><strong>Tempting mistake:</strong> Recovering the ID from the hovered point&#x27;s position. Position 0 in the B trace would look up row 1 of d and report A1 for a point that is really B1.</p>
+<p><strong>Verify:</strong> <code>as.character(b$x$data[[1]]$customdata)</code> returns &quot;A1&quot;, &quot;A2&quot;, and the same expression for trace 2 returns &quot;B1&quot;, &quot;B2&quot;.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Define a hover template with labels and units.</p>
 <p>The template identifies ID, input and measured value rather than presenting anonymous numbers.</p>
 <p><strong>Expected evidence:</strong> Readable field contract.</p>
+<p><strong>Approach:</strong> Write a hovertemplate that names each field: ID from customdata, Input from x, Value from y, and the group name in the extra box.</p>
+<p><strong>Why it holds here:</strong> Each point has an x of 1 or 2 and a y from 2 to 6. Labeling the fields tells the reader that 6 is the measured value for B2 at input 2, not an anonymous pair.</p>
+<p><strong>Tempting mistake:</strong> Keeping the default hover, which shows bare coordinates such as (2, 6) with the trace name. The ID that the table and any follow up depend on never appears.</p>
+<p><strong>Verify:</strong> <code>grepl(&quot;%{customdata}&quot;, b$x$data[[1]]$hovertemplate, fixed = TRUE)</code> returns TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Encode All and Group A visibility buttons for two known traces.</p>
 <p>All uses TRUE/TRUE and Group A uses TRUE/FALSE.</p>
 <p><strong>Expected evidence:</strong> Correct button argument vectors.</p>
+<p><strong>Approach:</strong> Define the All groups button with visible TRUE, TRUE and the Group A button with TRUE, FALSE, matching the order in which the loop added the traces.</p>
+<p><strong>Why it holds here:</strong> The loop runs over c(&quot;A&quot;, &quot;B&quot;), so trace 1 is A and trace 2 is B. restyle applies the visibility list by position, so TRUE, FALSE shows A and hides B.</p>
+<p><strong>Tempting mistake:</strong> Changing the loop to unique(d$group) after the data are reordered, or to c(&quot;B&quot;, &quot;A&quot;), while keeping the buttons. The Group A button would then show group B, and the specification would still look valid.</p>
+<p><strong>Verify:</strong> <code>unlist(b$x$layout$updatemenus[[1]]$buttons[[2]]$args[[2]])</code> returns TRUE, FALSE, and <code>b$x$data[[1]]$name</code> returns &quot;A&quot;.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a global mean label that remains unchanged when a view hides one group.</p>
 <p>A visibility toggle does not automatically recompute the mean. Label it as the full-data mean or implement an explicit selection-dependent calculation.</p>
 <p><strong>Expected evidence:</strong> Denominator/selection semantics clarified.</p>
+<p><strong>Approach:</strong> Name a fixed statistic by its denominator, for example Mean of all four points, or make the button also update the label with a group specific value.</p>
+<p><strong>Why it holds here:</strong> The y values sum to 15, so the overall mean is 3.75. Group A alone has 2 and 3 with mean 2.5. A restyle button only hides traces and never recomputes the label.</p>
+<p><strong>Tempting mistake:</strong> Placing a label Mean: 3.75 on the figure. In the Group A view it then overstates the visible mean by 1.25 while appearing to describe what is shown.</p>
+<p><strong>Verify:</strong> <code>mean(d$y)</code> returns 3.75 and <code>mean(d$y[d$group == &quot;A&quot;])</code> returns 2.5.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Provide a non-hover-dependent table or summary.</p>
 <p>A small printed table preserves the core information without requiring pointer interaction.</p>
 <p><strong>Expected evidence:</strong> Static alternative supplied.</p>
+<p><strong>Approach:</strong> Print d next to the figure so the IDs, groups, inputs and values are readable without a pointer.</p>
+<p><strong>Why it holds here:</strong> Four rows are small enough to show in full, and the table gives keyboard, touch and screen reader users the same ID to value pairs that hover offers to mouse users.</p>
+<p><strong>Tempting mistake:</strong> Offering only the hover text, or printing just the two group means. The first hides the IDs from anyone who cannot hover, and the second drops the individual records the figure is about.</p>
+<p><strong>Verify:</strong> <code>print(d)</code> shows four rows with IDs A1, A2, B1 and B2 and their values 2, 3, 4 and 6.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain what remains unverified after inspecting the figure specification in R.</p>
 <p>Clicking, keyboard use, hover readability, resizing and assistive-technology behavior require actual browser checks.</p>
 <p><strong>Expected evidence:</strong> No unsupported interaction-success claim.</p>
+<p><strong>Approach:</strong> List the checks the R build cannot perform and assign them to a browser review: clicking each button, keyboard access, hover legibility, resizing and screen reader output.</p>
+<p><strong>Why it holds here:</strong> The build proves the customdata vectors, the template text and the TRUE, FALSE argument. It does not run plotly.js, so it cannot show whether the buttons overlap the legend on a narrow screen or receive keyboard focus.</p>
+<p><strong>Tempting mistake:</strong> Reporting the controls as working because their argument vectors are correct. Correct arguments describe the intent, and only an observed click confirms the effect.</p>
+<p><strong>Verify:</strong> A browser session shows the Group A button hiding B1 and B2, and the page remains usable at a narrow width.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

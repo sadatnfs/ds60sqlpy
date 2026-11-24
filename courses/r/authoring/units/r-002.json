@@ -38,6 +38,12 @@
       "code": "decimal <- 0.1 + 0.2\nstopifnot(isTRUE(all.equal(decimal, 0.3, tolerance = 1e-12)))\nstopifnot(17 %/% 5 == 3, 17 %% 5 == 2)\nprint(c(decimal = decimal, groups = 17 %/% 5, remainder = 17 %% 5))\n",
       "explanation": "The decimal check allows a tiny representation error. Grouping uses exact small integer arithmetic and keeps quotient separate from remainder.",
       "expected": "Approximately 0.3; three groups and two remaining."
+    },
+    {
+      "title": "Exact equality on a decimal sum fails",
+      "code": "total <- 0.1 + 0.2\nexact <- total == 0.3\nclose <- isTRUE(all.equal(total, 0.3, tolerance = 1e-12))\nprint(c(exact = exact, close = close))\nprint(total - 0.3)\nstopifnot(!exact, close)\n",
+      "explanation": "Neither 0.1 nor 0.2 has an exact binary double representation, so their sum lands one tiny step above the double nearest 0.3. The second print exposes that gap directly: roughly 5.55e-17, far below anything an invoice or a measurement could care about. The == test reports FALSE because it compares bits, while all.equal with a stated tolerance of 1e-12 accepts the representation error. If you replaced 0.1 and 0.2 with 1 and 2, both checks would be TRUE, because small whole numbers are stored exactly.",
+      "expected": "exact FALSE, close TRUE, and a difference of about 5.551115e-17."
     }
   ],
   "exercises": [

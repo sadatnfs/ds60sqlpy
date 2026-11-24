@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-063`.
 
+## Key terms
+
+- **Storage descriptor:** The Metastore record that ties a table's columns to a file format, input and output classes, SerDe and location.
+- **SerDe:** Serializer and deserializer, the component that translates between stored bytes and Hive column values.
+- **Partition registration:** Adding a partition value and its location to the Metastore, for example with ALTER TABLE ADD PARTITION. Creating a directory alone does not register it.
+- **Physical schema:** The column names and types actually written in the Parquet files, which must stay compatible with the catalog's declared types.
+
 ## A table schema interprets physical bytes
 
 Hive's storage descriptor connects logical columns with a file format, input and
@@ -76,6 +83,52 @@ when their evidence has been retained.
 rows?** The catalog may not register it, may point elsewhere, or may interpret
 its contents differently. The two cases connect logical registration to physical
 schema and location, without treating file discovery as a transactional commit.
+
+## Worked examples
+
+### Generate the Parquet file for one day
+
+```python
+import pyarrow as pa
+import pyarrow.parquet as pq
+
+table = pa.table(
+    {
+        "id": pa.array([1, 2, 3], pa.int32()),
+        "region": ["east", "west", "east"],
+        "amount": pa.array([4, 9, 7], pa.int32()),
+    }
+)
+sink = pa.BufferOutputStream()
+pq.write_table(table, sink)
+print(pq.read_schema(pa.BufferReader(sink.getvalue())))
+```
+
+```text
+id: int32
+region: string
+amount: int32
+```
+
+The printed schema shows id and amount as int32 and region as string, which match INT and STRING in the Hive declaration. The day column is absent on purpose: Hive derives it from the directory name day=2026-01-01, not from the file. If the file were written with int64 columns, a reader expecting INT can fail or convert depending on the engine version, which is why the schema should be inspected before blaming the query.
+
+### Project from the registered day
+
+```sql
+SELECT
+  region,
+  SUM(amount)
+FROM
+  ds60.orders
+WHERE
+  day = '2026-01-01'
+GROUP BY
+  region
+ORDER BY
+  region;
+```
+
+From explain.sql, this should return east 11 and west 9. The EXPLAIN version of the same query shows the partition filter applied before the scan, so only one directory is read. Two different failures look alike here: a missing partition returns zero rows with no error, while a wrong column type in a separately named table produces a reader error or nulls. Record which one you saw before changing anything, because the fixes are different.
 
 ## Complete worked source
 

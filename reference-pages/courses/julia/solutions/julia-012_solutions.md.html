@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-012-explained-reference">julia-012: explained reference<a class="heading-anchor" href="#julia-012-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-012_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>typed_total</code> is parametric in <code>T&lt;:Real</code> and starts from <code>zero(T)</code>, so integers, rationals, <code>Float32</code> and <code>BigInt</code> keep their own representation. Parametric containers are invariant, so <code>Vector{Float64}</code> is not a <code>Vector{Real}</code>; the signature <code>AbstractVector{&lt;:Real}</code> expresses the intended family instead.</p>
 <h3 id="1-preserve-a-rational">1. Preserve a rational<a class="heading-anchor" href="#1-preserve-a-rational" aria-label="Link to this section">#</a></h3>
 <p>A hardcoded floating accumulator would change the representation contract.</p>
 <p><strong>Expected observation:</strong> The result is exactly 1//1.</p>
+<p><strong>Why it holds here:</strong> With <code>T = Rational{Int}</code>, the accumulator starts at <code>0//1</code> and adds 1//3 and 2//3 exactly to get <code>1//1</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Initializing <code>total = 0.0</code> converts the sum to <code>Float64</code>, so the result is approximately 1.0 and no longer rational.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>typed_total([1//3, 2//3]) == 1//1</code>; also check <code>typeof</code> of the result is <code>Rational{Int}</code>.</p>
 <h3 id="2-handle-an-empty-concrete-vector">2. Handle an empty concrete vector<a class="heading-anchor" href="#2-handle-an-empty-concrete-vector" aria-label="Link to this section">#</a></h3>
 <p>This empty-input policy is valid for this additive operation, not every statistic.</p>
 <p><strong>Expected observation:</strong> The explicit additive identity is 0.</p>
+<p><strong>Why it holds here:</strong> <code>Int[]</code> still has element type <code>Int</code>, so <code>zero(Int)</code> is returned without the loop running, giving 0.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>values[1]</code> as the initial total fails on an empty vector, and applying the same identity idea to a mean would be wrong.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>typed_total(Int[]) == 0</code>.</p>
 <h3 id="3-inspect-invariance">3. Inspect invariance<a class="heading-anchor" href="#3-inspect-invariance" aria-label="Link to this section">#</a></h3>
 <p>The two vector types have different representation and mutation contracts.</p>
 <p><strong>Expected observation:</strong> It is not.</p>
+<p><strong>Why it holds here:</strong> Invariance means <code>Vector{Float64} &lt;: Vector{Real}</code> is false, since a <code>Vector{Real}</code> could store any real and a <code>Float64</code> vector cannot.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming covariance, as with Python type hints for read-only sequences, predicts true and leads to signatures that reject float vectors.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>!(Vector{Float64} &lt;: Vector{Real})</code> and <code>Vector{Float64} &lt;: AbstractVector{&lt;:Real}</code>.</p>
 <h3 id="4-accept-a-useful-family">4. Accept a useful family<a class="heading-anchor" href="#4-accept-a-useful-family" aria-label="Link to this section">#</a></h3>
 <p>A suitable signature can preserve generic behavior and avoid unnecessary restrictions.</p>
 <p><strong>Expected observation:</strong> Concrete real vectors can be accepted.</p>
+<p><strong>Why it holds here:</strong> <code>accepts_reals(values::AbstractVector{&lt;:Real})</code> accepts <code>[1//2]</code> because <code>Rational{Int}</code> is a subtype of <code>Real</code>, returning its length 1.</p>
+<p><strong>Plausible wrong approach:</strong> Annotating the parameter as <code>Vector{Real}</code> rejects nearly all concrete vectors, forcing callers to convert data first.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>accepts_reals([1//2]) == 1</code>.</p>
 <h3 id="5-reject-unrelated-elements">5. Reject unrelated elements<a class="heading-anchor" href="#5-reject-unrelated-elements" aria-label="Link to this section">#</a></h3>
 <p>Broadening a signature requires defining the corresponding arithmetic or behavior.</p>
 <p><strong>Expected observation:</strong> A MethodError occurs.</p>
+<p><strong>Why it holds here:</strong> <code>String</code> is not a subtype of <code>Real</code>, so no method matches a string vector and Julia raises <code>MethodError</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Widening the signature to <code>AbstractVector</code> makes the call succeed until <code>+</code> or <code>zero</code> fails deeper inside.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>@test_throws MethodError accepts_reals([&quot;text&quot;])</code>.</p>
 <h3 id="6-connect-to-differentiation">6. Connect to differentiation<a class="heading-anchor" href="#6-connect-to-differentiation" aria-label="Link to this section">#</a></h3>
 <p>Generic arithmetic is needed for methods such as forward-mode differentiation, subject to their own supported-operation contract.</p>
-<p><strong>Expected observation:</strong> It may discard or reject another numeric representation.</p></article>
+<p><strong>Expected observation:</strong> It may discard or reject another numeric representation.</p>
+<p><strong>Why it holds here:</strong> Forward-mode automatic differentiation passes dual numbers through the same arithmetic, and a <code>zeros(Float64, n)</code> buffer cannot hold them.</p>
+<p><strong>Plausible wrong approach:</strong> Hardcoding <code>Float64</code> output storage either throws on dual inputs or strips their derivative part, making the gradient wrong or absent.</p>
+<p><strong>How to verify:</strong> Show <code>typed_total(Float32[1, 2]) isa Float32</code> and <code>typed_total(BigInt[1, 2]) == 3</code> from the reference as evidence that generic code preserves type.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-012: all reference checks passed</code>:</p>
+<p><code>typed_total(Float32[1, 2]) isa Float32</code> shows that starting from <code>zero(eltype(values))</code> keeps the element type, and the <code>BigInt</code> case shows the same code serving arbitrary precision. <code>accepts_reals</code> takes a rational and rejects text by dispatch, because <code>String</code> is not a <code>Real</code>. The two concreteness lines separate an abstract container type, <code>AbstractVector{Float64}</code>, which suits signatures, from <code>Vector{Float64}</code>, which suits stored fields. Together these lines cover the three questions the lesson asks of every signature: what result type comes back, which argument types are accepted, and which are refused before any work starts. A version that started the total at the integer literal 0 would return <code>Float64</code> for <code>Float32</code> input after promotion, or keep <code>Int</code> where a <code>BigInt</code> sum was needed.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> typed_total<span class="syntax-punctuation">(</span><span class="syntax-keyword">Float32</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">isa</span> <span class="syntax-keyword">Float32</span>
+    <span class="syntax-decorator">@test</span> typed_total<span class="syntax-punctuation">(</span><span class="syntax-keyword">BigInt</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> accepts_reals<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-operator">//</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">MethodError</span> accepts_reals<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-operator">!</span>isconcretetype<span class="syntax-punctuation">(</span><span class="syntax-keyword">AbstractVector</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">Float64</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> isconcretetype<span class="syntax-punctuation">(</span><span class="syntax-keyword">Vector</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">Float64</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

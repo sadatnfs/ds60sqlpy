@@ -9,6 +9,8 @@ The executable reference contains the two complete worked cases with assertions.
 
 Record the new source history and its identity. Retrospective conclusions depend on which version of history is being used.
 
+Moving record 2 to known_at 4 (or 5) makes it pass both conditions at cutoff 5, and because select() keeps the latest event_at, 999 replaces 10. The answer code asserts [select(5), select(9)] == [999, 30]; cutoff 9 still returns 30 because event 8 is newer. Editing value instead of known_at would test nothing about eligibility. Keep the old record list too, since a model trained on the first history saw 10, not 999.
+
 ```python
 records = [
     {"id": 1, "event_at": 2, "known_at": 3, "value": 10},
@@ -31,6 +33,8 @@ assert [select(5), select(9)] == [999, 30]
 
 A transaction or ingestion watermark may require a stricter operational rule. State and test that rule explicitly.
 
+The second snippet sets known_at to 5 with cutoff 5 and expects ids [1, 2]. If the filter used known_at < cutoff, id 2 would drop and the list would be [1]; that stricter rule is right when a value written at second 5 may not be readable by a query at second 5. Pick one operator, write it into the contract, and add an assertion at exactly the boundary so a later refactor cannot change it silently.
+
 ```python
 records = [
     {"id": 1, "event_at": 2, "known_at": 3, "value": 10},
@@ -47,6 +51,8 @@ assert [r["id"] for r in valid] == [1, 2]
 ## 3. Change the training cutoff
 
 Recompute the eligible identifiers and report them. Training and evaluation should retain the cutoff that produced their cohorts.
+
+At cutoff 181 the candidate rows are ids 0 to 80 (81 rows) and maturity requires id + 104 <= 181, so ids 0 to 77 qualify: 78 mature rows, with 78, 79 and 80 still waiting. The answer code checks that exactly id 77 joins. A common mistake is to filter only on cutoff < training_cutoff, which returns 81 rows and treats three unknown labels as observed.
 
 ```python
 # Uses dataset() from main.py.
@@ -66,17 +72,23 @@ assert cohorts[181] - cohorts[180] == {77}
 
 Examples include later resolution, future aggregate and final status. Verify availability against system behavior, not the label chosen by a data author.
 
+In this dataset label_available_at itself is the clearest example: it is computed as cutoff + 4 and is never known at cutoff. A field like a count of tickets in the four hours after the decision would leak the same way. Verify a candidate by asserting its availability column is <= cutoff for every training row.
+
 **Expected:** The answer explains when it becomes available.
 
 ## 5. Preserve missing outcomes
 
 Wait for maturity or use an explicit censoring/selection model. Keep label coverage visible in monitoring.
 
+With cutoff 180, ids 77, 78 and 79 have labels arriving at 181, 182 and 183. Filling them with 0 would add three negatives to a fixture whose positive rate is about 0.48, biasing the newest period downward exactly where drift would first appear. Report 77 labeled and 3 pending instead.
+
 **Expected:** The answer separates unknown from negative.
 
 ## 6. Transfer to timestamps
 
 Avoid naive/local-time ambiguity and test boundary timestamps. Preserve event and availability columns separately.
+
+Convert by anchoring hour 0 to a UTC instant and adding pd.to_timedelta(hours, "h"); compare tz-aware columns only. Verify that the mature cohort at the converted training cutoff is still 77 rows. Mixing naive and aware timestamps raises in pandas, and localizing to a zone with daylight saving can shift a boundary by an hour.
 
 **Expected:** The same eligibility decisions are retained.
 

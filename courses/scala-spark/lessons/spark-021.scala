@@ -64,7 +64,7 @@ object Main {
       locally {
         assert(input.count() == 12L)
         assert(input.columns.toSeq == Seq("id", "group_id", "amount", "unused_payload"))
-        println("Owned Parquet fixture has four stored columns and12 rows")
+        println("Owned Parquet fixture has four stored columns and 12 rows")
       }
       locally {
         val rows = spark.sql(projectionQuery).orderBy("id").collect()

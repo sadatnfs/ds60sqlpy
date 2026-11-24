@@ -8,7 +8,7 @@ Intermediate; approximately 105 minutes. Direct prerequisites: `spark-025`. The 
 
 ## How to run this lesson
 
-Open `spark-026` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-026` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-026.scala) and [PySpark learner](../lessons/spark-026.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-026_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-026_solution.scala) and [PySpark reference](../solutions/spark-026_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -55,7 +55,7 @@ Arrow and pandas UDFs are an optional extension, not imported or executed by the
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -99,20 +99,8 @@ val expected = Seq(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 import re
 
 schema = StructType(
@@ -184,7 +172,7 @@ val row = spark
   )
   .first()
 assert(row.getBoolean(0) && !row.getBoolean(1) && !row.getBoolean(2))
-println("Missing,empty and literal null text are distinct")
+println("Missing, empty and literal null text are distinct")
 ```
 
 ```python
@@ -192,7 +180,7 @@ row = spark.sql(
     "SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing"
 ).first()
 assert tuple(row) == (True, False, False)
-print("Missing,empty and literal null text are distinct")
+print("Missing, empty and literal null text are distinct")
 ```
 
 NULL is absence of a known value, not a special spelling stored in every string column. The fixture keeps missing, empty and text categories separate so a normalizer cannot silently replace one with another and still pass.
@@ -265,7 +253,7 @@ Do not claim that all whitespace classes or lowercasing functions have identical
 
 ## Self-check
 
-Explain the contract of `normalizeLabel` / `normalize_label` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `normalizeLabel` / `normalize_label` without reading its solution. Then, from memory, state what Exercise 6 (Reject a plausible but semantically broader implementation) must produce: The wrong implementation disagrees at least on IDs 4, 5, 6, 9. Python additionally removes the preserved nonbreaking spaces at ID 8. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

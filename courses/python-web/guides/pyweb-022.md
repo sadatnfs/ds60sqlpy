@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-021`.
 
 Caching can avoid transferring an unchanged representation, but it must respect privacy and consistency. An ETag is a validator associated with a representation. This chapter computes one from fixed JSON bytes, tests a conditional request and contrasts a publicly cacheable resource with a private account response.
 
+## Key terms
+
+- **ETag:** A validator string that identifies one specific version of a representation, here a hash of the fixed JSON bytes.
+- **If-None-Match:** A request header carrying an ETag the client already holds, asking the server to send the body only if the representation has changed.
+- **304 Not Modified:** A response without a body telling the client that its stored representation is still current.
+- **Cache-Control:** The header that states reuse policy, such as `public, max-age=60` for shared caching or `private, no-store` for an account response.
+- **Strong validator:** An ETag that changes whenever the representation's bytes change, so a match means the stored bytes are identical.
+
 ## Mechanism: a validator describes a representation
 
 The resource's byte string is hashed to produce a strong ETag. The response supplies that validator and a public max-age policy. `make_conditional` examines the incoming request and can return 304 when the client's validator matches.
@@ -27,6 +35,45 @@ Conditional requests can reduce transfer cost, but they do not necessarily elimi
 The account fixture returns `Cache-Control: private, no-store`. The program checks the exact declaration instead of applying the public resource's policy everywhere. This matters because shared intermediary caches can serve responses to multiple clients under their configured rules.
 
 A cache key must also account for relevant representation differences. Language, content negotiation, authorization scope and query filters can affect the result. A convenient key that omits one of those dimensions can return a valid representation to the wrong request.
+
+## Worked example: Last-Modified as a second validator
+
+```python
+from datetime import datetime, timezone
+
+from flask import Flask, Response, request
+
+app = Flask(__name__)
+changed_at = datetime(2026, 3, 1, 12, 0, tzinfo=timezone.utc)
+
+
+@app.get("/report")
+def report():
+    response = Response(b"quarterly totals", mimetype="text/plain")
+    response.last_modified = changed_at
+    response.cache_control.max_age = 0
+    response.cache_control.must_revalidate = True
+    return response.make_conditional(request)
+
+
+client = app.test_client()
+first = client.get("/report")
+print(first.status_code, first.headers["Last-Modified"])
+same = client.get("/report", headers={"If-Modified-Since": first.headers["Last-Modified"]})
+older = client.get("/report", headers={"If-Modified-Since": "Sat, 28 Feb 2026 00:00:00 GMT"})
+print(same.status_code, len(same.data), older.status_code, len(older.data))
+print(first.headers["Cache-Control"])
+```
+
+Expected output:
+
+```text
+200 Sun, 01 Mar 2026 12:00:00 GMT
+304 0 200 16
+max-age=0, must-revalidate
+```
+
+The server sent a timestamp validator instead of the lesson's ETag. A client that echoed the same date in `If-Modified-Since` got 304 with an empty body, while a client whose copy dated from February received the full 16 bytes. The `max-age=0, must-revalidate` policy says the response may be stored but must be checked on every use, so the savings come from small 304 responses rather than from skipping requests, unlike the lesson's `max-age=60` resource. Timestamps have one-second resolution: two edits within the same second would share a Last-Modified value and a client could keep the stale copy, which is why an ETag derived from the exact bytes is the stronger validator when both are available.
 
 ## Failure diagnosis
 

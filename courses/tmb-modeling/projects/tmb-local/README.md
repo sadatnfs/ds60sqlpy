@@ -34,7 +34,9 @@ before publishing an optional combined runtime; this project does not publish it
 docker run --rm --network none --cpus 2 --memory 3g --read-only --tmpfs /tmp:rw,size=256m ds60-tmb-local:lesson
 ```
 
-This executes actual compiled-model acceptance. It checks Gaussian normalization,
+This executes actual compiled-model acceptance as the unprivileged `nobody`
+account (UID 65534) on a read-only root filesystem; the models and R packages
+were compiled during the build and are only read here. It checks Gaussian normalization,
 analytic and numerical gradients, known ML estimates, regression, exact Gaussian
 latent integration, AR1 covariance, count/censor terms, nonlinear and panel fits,
 curvature, sdreport and one/two-thread OpenMP parity. It does not claim browser,

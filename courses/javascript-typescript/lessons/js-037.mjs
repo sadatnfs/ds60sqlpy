@@ -3,17 +3,17 @@
 // Copy Example A into a scratch `main.mjs` and change `let attempts = 0;` to `let attempts =
 // 1;`. Before running it, predict which check fails and which value it now sees; then run it
 // and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.deepEqual(waits, [50, 100])`. Restoring the original line brings back the worked
-// observation: three attempts; delays 50 and 100; result ready.
+// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(waits, [50,
+// 100])`. Restoring `let attempts = 0;` brings back: three attempts; delays 50 and 100;
+// result ready.
 
 // Exercise 2: Stop on permanent failure and on exhausted attempts: diagnose an edited check
 // A careless edit changed a check in Example B so that it reads `async () => { transient -=
 // 1`. Run Example B with that line, explain why the edited check now fails for the same
 // program state, and restore it.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.equal(transient, 3)`; after it the line reads `async () => { transient += 1` again
-// and permanent attempted once; transient attempted three times and still rejects.
+// Expected: Before the repair the run fails with an `AssertionError` at `async () => {
+// transient -= 1`. Restoring `async () => { transient += 1` brings back: permanent attempted
+// once; transient attempted three times and still rejects.
 
 // Exercise 3: Reuse a completed idempotent result
 // Submit the same key and payload twice to the local store.

@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Predict the total of Series(values=c(3,7),unit=&quot;ms&quot;).</p>
 <p>series_total returns c(ms=10).</p>
 <p><strong>Expected evidence:</strong> Named total ms=10.</p>
+<p><strong>Approach:</strong> Construct <code>Series(values = c(3, 7), unit = &quot;ms&quot;)</code> and call <code>series_total(x)</code>. The generic dispatches on x and finds the method registered with <code>S7::method(series_total, Series)</code>.</p>
+<p><strong>Why it holds here:</strong> The values are finite and the unit is one nonempty string, so the validator returns NULL and construction succeeds. The method sums 3 and 7 and names the result with the unit, giving c(ms = 10).</p>
+<p><strong>Tempting mistake:</strong> Computing <code>sum(x@values)</code> outside the generic. The number is right, but the unit name is lost, so a later comparison with a named total fails and the reader no longer knows the scale.</p>
+<p><strong>Verify:</strong> <code>identical(series_total(x), c(ms = 10))</code> returns TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Join that Series to a five-millisecond Series.</p>
 <p>The result contains c(3,7,5), has unit ms and total 15.</p>
 <p><strong>Expected evidence:</strong> Three values and total 15.</p>
+<p><strong>Approach:</strong> Call <code>join_series(x, Series(values = 5, unit = &quot;ms&quot;))</code>. The generic dispatches on both arguments and the list(Series, Series) method checks units before building a new Series.</p>
+<p><strong>Why it holds here:</strong> Both units are ms, so the values are concatenated in argument order as 3, 7 and 5, and the total is 15. x itself still holds 3 and 7, because the method returns a new object.</p>
+<p><strong>Tempting mistake:</strong> Passing a bare 5 as the second argument. No method is registered for a Series paired with a plain number, so S7 stops instead of guessing that 5 is in milliseconds.</p>
+<p><strong>Verify:</strong> <code>y@values</code> returns 3, 7, 5, and <code>series_total(y)</code> returns c(ms = 15).</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Add a series_count generic returning the number of observations.</p>
 <p>S7::new_generic(&quot;series_count&quot;,&quot;x&quot;) and S7::method(series_count,Series) &lt;- function(x) length(x@values) return 3L for the joined value.</p>
 <p><strong>Expected evidence:</strong> An integer count 3L.</p>
+<p><strong>Approach:</strong> Create the generic with <code>S7::new_generic(&quot;series_count&quot;, &quot;x&quot;)</code> and register <code>S7::method(series_count, Series) &lt;- function(x) length(x@values)</code>.</p>
+<p><strong>Why it holds here:</strong> The generic dispatches on x alone. S7 validates whenever a Series is constructed or a property is set, so the method can trust its input, and length returns the integer 3L for the joined series.</p>
+<p><strong>Tempting mistake:</strong> Returning <code>as.numeric(length(x@values))</code>. It prints 3, but the value is double, so <code>identical(series_count(y), 3L)</code> is FALSE and the stated integer contract is broken.</p>
+<p><strong>Verify:</strong> <code>identical(series_count(y), 3L)</code> returns TRUE, and <code>series_count(empty)</code> returns 0L.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a validator returning TRUE on success.</p>
 <p>The S7 validator must return NULL on success. TRUE belongs to the S4 validity convention taught in r-022.</p>
 <p><strong>Expected evidence:</strong> Use the correct S7 success result.</p>
+<p><strong>Approach:</strong> End the S7 validator with <code>if (length(problems)) problems else NULL</code>, returning NULL when the object is valid and a character vector of problems otherwise.</p>
+<p><strong>Why it holds here:</strong> S7 reads NULL as valid and any character result as a list of problems. The S4 validity function in r-022 returns TRUE on success, and the two conventions look alike but are not interchangeable.</p>
+<p><strong>Tempting mistake:</strong> Copying the S4 ending <code>else TRUE</code>. S7 stops with a message saying the validator must return NULL or a character, not &lt;logical&gt;, so construction fails for perfectly valid inputs such as 3 and 7 in ms.</p>
+<p><strong>Verify:</strong> <code>Series(values = c(3, 7), unit = &quot;ms&quot;)</code> returns a Series without error when the validator ends with <code>else NULL</code>.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Test invalid property replacement and verify retained state.</p>
 <p>Replacing unit with character(0) fails; the previous &quot;ms&quot; unit remains.</p>
 <p><strong>Expected evidence:</strong> Error plus unchanged property.</p>
+<p><strong>Approach:</strong> Run <code>x@unit &lt;- character(0)</code> inside a handler expecting &quot;nonempty string&quot;, then read <code>x@unit</code> again.</p>
+<p><strong>Why it holds here:</strong> S7 runs the validator whenever a property is replaced. character(0) has the right class, but the validator rejects it, and because the assignment fails, x keeps its previous unit.</p>
+<p><strong>Tempting mistake:</strong> Assuming S7 behaves like the S4 class in r-022, where <code>@&lt;-</code> skips validity. Skipping this test would leave the most important difference between the two systems unchecked.</p>
+<p><strong>Verify:</strong> The handler returns a message containing &quot;unit must be one nonempty string&quot;, and <code>x@unit</code> still returns &quot;ms&quot;.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain why @ access does not make an S7 object an S4 object.</p>
 <p>Use the public S7 interface and explicit adapters rather than assuming S4 slot introspection or methods apply.</p>
 <p><strong>Expected evidence:</strong> No inferred cross-system inheritance.</p>
+<p><strong>Approach:</strong> Work with a Series through its S7 constructor, properties and generics, and write an explicit adapter when S4 code needs the same data.</p>
+<p><strong>Why it holds here:</strong> <code>@</code> is shared syntax, but S7 resolves it through its own property system. S4 methods such as combine_measure from r-022 are registered for FormalMeasure, so they have no method for a Series.</p>
+<p><strong>Tempting mistake:</strong> Passing a Series to combine_measure because both objects answer <code>@values</code>. Dispatch fails, and if it did not, the S4 validity rules would never have been checked for this object.</p>
+<p><strong>Verify:</strong> <code>S7::S7_inherits(x, Series)</code> returns TRUE, and <code>class(x)</code> shows &quot;Series&quot; and &quot;S7_object&quot;, not FormalMeasure.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

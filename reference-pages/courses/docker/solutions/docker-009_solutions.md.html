@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-label-every-component-of-the-mapping">Exercise 1: Label every component of the mapping.<a class="heading-anchor" href="#exercise-1-label-every-component-of-the-mapping" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Host loopback, host port 18080 and container port 8080.</p>
 <p><strong>Why:</strong> The three values occupy different positions. Reversing the ports can create a listening mapping that still points at the wrong internal endpoint.</p>
-<h3 id="exercise-2-predict-whether-localhost-18080-inside-app-reaches-the-host-browser-endpoint">Exercise 2: Predict whether localhost:18080 inside app reaches the host browser endpoint.<a class="heading-anchor" href="#exercise-2-predict-whether-localhost-18080-inside-app-reaches-the-host-browser-endpoint" aria-label="Link to this section">#</a></h3>
+<p><strong>Approach:</strong> Split &quot;127.0.0.1:18080:8080&quot; at its colons from left to right: host IP, host port, then container port.</p>
+<p><strong>Why this is correct:</strong> The fixture&#x27;s server binds port 8080 inside the container, and the host side is fixed to loopback on 18080, so a browser on the same machine is the only intended client.</p>
+<p><strong>A plausible wrong approach:</strong> Writing &quot;127.0.0.1:8080:18080&quot; still opens a host listener but forwards traffic to container port 18080, where nothing listens.</p>
+<p><strong>How to verify:</strong> docker compose port app 8080 prints 127.0.0.1:18080, and a request to that host address returns the fixture JSON.</p>
+<h3 id="exercise-2-predict-whether-localhost-18080-inside-app-reaches-the-host-browser-endpoint">Exercise 2: Predict whether <code>localhost:18080</code> inside app reaches the host browser endpoint.<a class="heading-anchor" href="#exercise-2-predict-whether-localhost-18080-inside-app-reaches-the-host-browser-endpoint" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It refers to app container loopback and normally fails.</p>
 <p><strong>Why:</strong> Loopback is relative to the caller namespace. A hostname that works in the browser does not automatically name the same machine from a container.</p>
+<p><strong>Approach:</strong> Locate the caller: a command run through docker compose exec app has its own network namespace and its own loopback interface.</p>
+<p><strong>Why this is correct:</strong> Inside app, 127.0.0.1 is the container itself, where only port 8080 listens. Port 18080 exists only on the host side of the mapping.</p>
+<p><strong>A plausible wrong approach:</strong> Copying the browser URL into a health probe or a sibling client produces connection refused and looks like a broken server.</p>
+<p><strong>How to verify:</strong> From inside app, a python urllib request to 127.0.0.1:8080/healthz succeeds while 127.0.0.1:18080 is refused.</p>
 <h3 id="exercise-3-draw-a-host-browser-request-path">Exercise 3: Draw a host browser request path.<a class="heading-anchor" href="#exercise-3-draw-a-host-browser-request-path" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Browser, host socket mapping, container interface and app listener.</p>
 <p><strong>Why:</strong> Each hop has a separate observable condition. The drawing should show where port translation happens and which process actually handles the request.</p>
+<p><strong>Approach:</strong> Draw four hops: the browser connects to 127.0.0.1:18080, the engine forwards it to the container, and server.py&#x27;s listener on 0.0.0.0:8080 handles it.</p>
+<p><strong>Why this is correct:</strong> Port translation happens once, at the published mapping. After that the request reaches the container interface and the Handler class chooses the response.</p>
+<p><strong>A plausible wrong approach:</strong> Drawing the browser connecting straight to container port 8080 hides the mapping, so a missing ports: entry would be impossible to locate on the diagram.</p>
+<p><strong>How to verify:</strong> Annotate each hop with its check: the port listing, container state, the app logs showing the request line, and the JSON body.</p>
 <h3 id="exercise-4-diagnose-a-server-bound-to-container-127-0-0-1-only">Exercise 4: Diagnose a server bound to container 127.0.0.1 only.<a class="heading-anchor" href="#exercise-4-diagnose-a-server-bound-to-container-127-0-0-1-only" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It may answer locally but not through the published mapping.</p>
 <p><strong>Why:</strong> The mapping targets the container’s reachable interface. Changing the host port cannot fix an application that does not listen on that interface.</p>
+<p><strong>Approach:</strong> Compare the listener address with the mapping target: a server that binds 127.0.0.1:8080 inside the container listens only on the container&#x27;s loopback.</p>
+<p><strong>Why this is correct:</strong> Published traffic arrives on the container&#x27;s network interface, not on its loopback. The fixture avoids this by binding 0.0.0.0 in LocalServer.</p>
+<p><strong>A plausible wrong approach:</strong> Changing 18080 to another host port cannot help, because every mapping delivers traffic to the same interface where the app is absent.</p>
+<p><strong>How to verify:</strong> A probe from inside the container to 127.0.0.1:8080 works while the host request fails; after binding 0.0.0.0, both succeed.</p>
 <h3 id="exercise-5-distinguish-connection-refused-from-http-404">Exercise 5: Distinguish connection refused from HTTP 404.<a class="heading-anchor" href="#exercise-5-distinguish-connection-refused-from-http-404" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Transport failure versus application routing result.</p>
 <p><strong>Why:</strong> A 404 establishes that an HTTP exchange happened. A refused connection occurs earlier, so inspect listeners and mappings before changing application URL handlers.</p>
+<p><strong>Approach:</strong> Ask whether an HTTP response came back at all. A refused connection fails at TCP; a 404 is a complete response from the server.</p>
+<p><strong>Why this is correct:</strong> The fixture returns {&quot;error&quot;: &quot;unknown route&quot;} with status 404 for unknown paths, which proves the mapping and listener worked.</p>
+<p><strong>A plausible wrong approach:</strong> Rewriting URL handlers after connection refused changes code the request never reached, while the real fault is a missing mapping or listener.</p>
+<p><strong>How to verify:</strong> curl -i http://127.0.0.1:18080/nope prints an HTTP/1.0 404 status line, while a request to an unmapped port reports connection refused.</p>
 <h3 id="exercise-6-choose-public-and-internal-endpoints-for-a-two-service-app">Exercise 6: Choose public and internal endpoints for a two-service app.<a class="heading-anchor" href="#exercise-6-choose-public-and-internal-endpoints-for-a-two-service-app" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Only the user-facing service gets a deliberate published port.</p>
 <p><strong>Why:</strong> Internal services can use Compose DNS without host publication. Avoiding unnecessary published ports simplifies the network and reduces accidental exposure.</p>
+<p><strong>Approach:</strong> Publish only the user-facing web service on loopback and let the internal service talk over the project network by its service name.</p>
+<p><strong>Why this is correct:</strong> Compose DNS resolves service names on the project network, as the client service does with <code>http://app:8080/</code>, so internal traffic needs no host port.</p>
+<p><strong>A plausible wrong approach:</strong> Publishing the database on 0.0.0.0 to make debugging easy exposes it to anyone who can reach the host on that port.</p>
+<p><strong>How to verify:</strong> docker compose ps shows a port column only for the web service, and the web service still reaches the internal one by name.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

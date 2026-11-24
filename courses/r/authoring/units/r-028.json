@@ -29,7 +29,7 @@
       "definition": "An on.exit action that releases a function-owned resource on ordinary return or error."
     }
   ],
-  "anatomy": "makePSOCKcluster(2L,master=\"127.0.0.1\",rscript_args=\"--vanilla\") starts exactly two local fresh R workers. parLapply(cluster,tasks,fun) maps a self-contained function. on.exit(stopCluster(cluster),add=TRUE) belongs immediately after successful construction. nextRNGStream supplies the next L'Ecuyer stream; each task installs its own complete .Random.seed before drawing.",
+  "anatomy": "`makePSOCKcluster(2L, master = \"127.0.0.1\", rscript_args = \"--vanilla\")` starts exactly two local fresh R workers. `parLapply(cluster, tasks, fun)` maps a self-contained function. `on.exit(stopCluster(cluster), add = TRUE)` belongs immediately after successful construction. `nextRNGStream` supplies the next L'Ecuyer stream; each task installs its own complete `.Random.seed` before drawing.",
   "worked_examples": [
     {
       "title": "Compare a deterministic parallel result with a serial reference",

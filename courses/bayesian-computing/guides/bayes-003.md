@@ -10,6 +10,13 @@ The prior's concentration controls how much it favors particular probability ran
 
 Posterior prediction averages the sampling model over posterior uncertainty. It is not generally equivalent to inserting a posterior mean into the likelihood. The distinction matters for tail probabilities, uncertainty and decisions.
 
+## Key terms
+
+- **Conjugate prior:** A prior whose posterior stays in the same family, such as Beta(a, b) becoming Beta(a + s, b + n - s) after s successes in n Bernoulli trials.
+- **Posterior predictive distribution:** The sampling model averaged over posterior uncertainty, not the likelihood evaluated at a posterior mean.
+- **Beta-binomial distribution:** The predictive distribution of future successes when a binomial count is averaged over a beta posterior.
+- **Double counting:** Conditioning on the same observations twice, which overstates certainty because the duplicates carry no new information.
+
 ## Worked case 1: derive the beta-binomial prediction
 
 A Beta(2,2) prior and eight successes in ten trials produce a Beta(10,4) posterior. For \(K\) successes in five future trials, the integrated probability is
@@ -51,6 +58,38 @@ Small exact models are valuable because their full probability distributions can
 **Is plug-in prediction always unacceptable?** It can be a useful approximation when parameter uncertainty is negligible for the decision. The approximation should be assessed rather than assumed. Here the exact distribution exposes the omitted variance directly.
 
 **What does conjugacy buy us?** It provides an analytic posterior and a clear numerical oracle. It does not validate independent trials, stable probabilities, correct record counts or the relevance of the future prediction target.
+
+## Worked example: Splitting predictive variance for the next five trials
+
+```python
+import numpy as np
+from scipy import stats
+
+a, b = 2 + 7, 2 + 3  # Beta(2, 2) prior, 7 successes in 10 trials
+m = 5
+pred = stats.betabinom(m, a, b)
+print("P(Y = 0..5):", pred.pmf(np.arange(m + 1)).round(4))
+p_mean = a / (a + b)
+p_var = a * b / ((a + b) ** 2 * (a + b + 1))
+within = m * (p_mean * (1 - p_mean) - p_var)  # E[m p (1 - p)]
+between = m**2 * p_var  # Var(m p)
+print(f"predictive mean {pred.mean():.4f}, variance {pred.var():.4f}")
+print(
+    f"E[binomial variance] {within:.4f} + Var[conditional mean] {between:.4f} = {within + between:.4f}"
+)
+print(f"plug-in Binomial(5, {p_mean:.4f}) variance {m * p_mean * (1 - p_mean):.4f}")
+```
+
+Observed output:
+
+```text
+P(Y = 0..5): [0.0147 0.0735 0.1838 0.2889 0.2889 0.1502]
+predictive mean 3.2143, variance 1.4541
+E[binomial variance] 1.0714 + Var[conditional mean] 0.3827 = 1.4541
+plug-in Binomial(5, 0.6429) variance 1.1480
+```
+
+After 7 successes in 10 trials under a Beta(2, 2) prior, the posterior is Beta(9, 5) with mean \(9/14=0.6429\). Predicting five new trials, the beta-binomial puts equal mass 0.2889 on three and four successes and keeps 0.0147 on zero. Its variance, 1.4541, splits into two named parts by the law of total variance. The expected binomial variance, \(E[5p(1-p)]=1.0714\), is the coin-flip noise that would remain even if \(p\) were known. The second part, \(\mathrm{Var}(5p)=25\times0.01531=0.3827\), is uncertainty about \(p\) itself. The plug-in Binomial(5, 0.6429) variance of 1.1480 ignores that second part and understates the spread by about 21 percent. More data shrinks only the parameter term; after thousands of trials the predictive variance would approach \(5p(1-p)\), never zero. Duplicating records would shrink the parameter term too, but falsely, since repeated rows carry no new information about \(p\).
 
 ## Complete reproducible program
 

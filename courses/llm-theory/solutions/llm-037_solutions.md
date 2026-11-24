@@ -1,6 +1,6 @@
 # llm-037: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these evaluate retrieval and answers separately answers after attempting *Classify five new cases* through *Preserve question identity*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Attach a claim span* points to one step. `llm-037_solution.py` holds the assertions; this page explains how they test retrieval miss. Then try *Preserve question identity* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -38,7 +38,7 @@ assert (
 
 **Expected:** 2 retrieval misses, 1 unsupported answer, 1 abstention that was not appropriate and 1 correct answer.
 
-**Verify:** In a fresh process, the exercise checks confirm `sum((r['miss'] for r in rows2)) == 2`, `sum((r['unsupported'] for r in rows2)) == 1`, `sum((r['abstain'] for r in rows2)) == 1` and `sum((r['abstain'] and r['correct'] for r in rows2)) == 0`.
+**Verify:** For *Classify five new cases*, a fresh-process check confirms `sum((r['miss'] for r in rows2)) == 2`, `sum((r['unsupported'] for r in rows2)) == 1`, `sum((r['abstain'] for r in rows2)) == 1` and `sum((r['abstain'] and r['correct'] for r in rows2)) == 0`.
 
 ## Exercise 2: Predict coverage and answered accuracy
 
@@ -54,7 +54,7 @@ assert sum(r["correct"] for r in answered) / len(answered) == 0.25
 
 **Expected:** coverage 0.8; answered accuracy 0.25.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(answered) / len(rows2) == 0.8` and `sum((r['correct'] for r in answered)) / len(answered) == 0.25`.
+**Verify:** For *Predict coverage and answered accuracy*, a fresh-process check confirms `len(answered) / len(rows2) == 0.8` and `sum((r['correct'] for r in answered)) / len(answered) == 0.25`.
 
 ## Exercise 3: Attach a claim span
 
@@ -70,7 +70,7 @@ assert claim["span"] in text
 
 **Expected:** span appears verbatim and supports the stated claim.
 
-**Verify:** In a fresh process, the exercise checks confirm `claim['span'] in text`.
+**Verify:** For *Attach a claim span*, a fresh-process check confirms `claim['span'] in text`.
 
 ## Exercise 4: Reject a misleading citation
 
@@ -86,7 +86,7 @@ assert claim["document"] in evidence and "10kg" not in evidence["d1"]
 
 **Expected:** citation exists but claim unsupported.
 
-**Verify:** In a fresh process, the exercise checks confirm `claim['document'] in evidence` and `'10kg' not in evidence['d1']`.
+**Verify:** For *Reject a misleading citation*, a fresh-process check confirms `claim['document'] in evidence` and `'10kg' not in evidence['d1']`.
 
 ## Exercise 5: Use an oracle-context control
 
@@ -101,7 +101,7 @@ assert control["oracle_context"] and not control["retrieval_miss"]
 
 **Expected:** retrieval miss removed; answer outcome measured separately.
 
-**Verify:** In a fresh process, the exercise checks confirm `control['oracle_context']` and `not control['retrieval_miss']`.
+**Verify:** For *Use an oracle-context control*, a fresh-process check confirms `control['oracle_context']` and `not control['retrieval_miss']`.
 
 ## Exercise 6: Preserve question identity
 
@@ -118,8 +118,8 @@ assert len(bad) != len(set(bad))
 
 **Expected:** one row per question; duplicate q1 detected.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(ids) == len(set(ids))` and `len(bad) != len(set(bad))`.
+**Verify:** For *Preserve question identity*, a fresh-process check confirms `len(ids) == len(set(ids))` and `len(bad) != len(set(bad))`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Reject a misleading citation* and predict the result first; keep *Preserve question identity* failing beside the repair. Log a missing NumPy separately from a wrong retrieval miss value in `llm-037`.

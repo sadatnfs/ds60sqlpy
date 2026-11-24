@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-017_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="torch-017-explanatory-solutions">torch-017: explanatory solutions<a class="heading-anchor" href="#torch-017-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers only after attempting Dropout, regularization, train and eval modes yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Calculate two penalties, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Regularization penalty, Dropout mode, Weight decay. After a pass, choose a new input for exercise 6, Keep mode separate from gradients, without looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Regularization and training mode affect different parts of the experiment. An explicit L1orL2penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.</p>
 <p>The fixture uses weights 1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.</p>
@@ -303,7 +303,7 @@ observed<span class="syntax-operator">.</span>sum<span class="syntax-punctuation
 <p><strong>Expected:</strong> output still requires grad; backward gives ones.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>observed.requires_grad</code> and <code>torch.equal(differentiable.grad, torch.ones(3))</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Repeat exercise 4, Separate data and penalty terms, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Differentiate the explicit penalty, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
   </main>
 </body>
 </html>

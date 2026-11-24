@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-a-tree-by-hand">Exercise 1: Compute a tree by hand<a class="heading-anchor" href="#exercise-1-compute-a-tree-by-hand" aria-label="Link to this section">#</a></h3>
 <p>Combine pairs and carry the leftover value.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute a tree by hand</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute the pair tree for <code>[1, 2, 3, 4, 5]</code> by hand: level one gives <code>[3, 7, 5]</code> with 5 carried, level two gives <code>[10, 5]</code>, level three gives <code>[15]</code>.</p>
+<p><strong>Why it is correct here.</strong> The reference loop sums slices <code>items[i:i+2]</code>, so an odd element forms a one-item slice and passes to the next level. Each level halves the count, rounding up, until one value remains.</p>
+<p><strong>A plausible wrong approach.</strong> Pairing only <code>range(0, len(items) - 1, 2)</code> drops the odd element at each odd level. For this input the result becomes 10 and the error looks small enough to mistake for rounding.</p>
+<p><strong>How to verify.</strong> Write each level and confirm the sum is preserved at every step: 15, 15, 15. The reference asserts <code>items == [15]</code>.</p>
 <h3 id="exercise-2-test-the-odd-tail">Exercise 2: Test the odd tail<a class="heading-anchor" href="#exercise-2-test-the-odd-tail" aria-label="Link to this section">#</a></h3>
 <p>The fifth value must survive.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>test the odd tail</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Add a test whose last element is distinctive, such as <code>[1, 2, 3, 4, 5]</code>, and assert the result is 15, not 10.</p>
+<p><strong>Why it is correct here.</strong> Ignoring the tail removes exactly the fifth value, so the faulty total differs by 5. A large, exact gap with integer inputs is an indexing bug; rounding errors cannot produce it.</p>
+<p><strong>A plausible wrong approach.</strong> Using a tolerance like <code>abs(result - 15) &lt; 10</code> would accept 10. Picking tolerances that wide hides structural bugs inside numerical noise.</p>
+<p><strong>How to verify.</strong> Compare with exact equality, since integer sums are exact in floating point at this size. Repeat with seven elements to check that two carry steps also work.</p>
 <h3 id="exercise-3-construct-cancellation">Exercise 3: Construct cancellation<a class="heading-anchor" href="#exercise-3-construct-cancellation" aria-label="Link to this section">#</a></h3>
 <p>Use large opposite signs plus a small residual.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>construct cancellation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Use <code>[1e16, 1.0, -1e16]</code>: a left-to-right float64 sum computes <code>1e16 + 1.0</code>, which rounds back to <code>1e16</code>, then subtracts to 0, while <code>math.fsum</code> returns 1.0.</p>
+<p><strong>Why it is correct here.</strong> Doubles have 53 bits of mantissa, so near <code>1e16</code> the spacing between representable numbers is 2. Adding 1 is lost in rounding. The true sum is 1, which fsum tracks exactly with extra partials.</p>
+<p><strong>A plausible wrong approach.</strong> Using <code>[1.0, 2.0, 3.0]</code> as the cancellation test shows nothing, since every order gives 6 exactly. A test needs magnitudes far enough apart to exceed the mantissa.</p>
+<p><strong>How to verify.</strong> Assert <code>sum(values) == 0.0</code> and <code>math.fsum(values) == 1.0</code> on standard IEEE doubles. The reference asserts the fsum result.</p>
 <h3 id="exercise-4-choose-absolute-and-relative-tolerance">Exercise 4: Choose absolute and relative tolerance<a class="heading-anchor" href="#exercise-4-choose-absolute-and-relative-tolerance" aria-label="Link to this section">#</a></h3>
 <p>Near zero needs meaningful absolute tolerance.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose absolute and relative tolerance</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare GPU and CPU sums with <code>abs(a - b) &lt;= atol + rtol * abs(b)</code>, choosing <code>rtol</code> from the dtype and the number of terms and an <code>atol</code> that reflects the scale of the inputs when the expected value is near zero.</p>
+<p><strong>Why it is correct here.</strong> Relative tolerance scales with the expected value. When cancellation makes the expected result 1 or 0 while the terms are about 1e16, rounding error is proportional to the terms, so only an absolute term sized to them is meaningful.</p>
+<p><strong>A plausible wrong approach.</strong> Using relative tolerance alone with an expected value of 0 requires exact equality. Any reordering then fails, even though both answers are within normal rounding of the large terms.</p>
+<p><strong>How to verify.</strong> Compute the bound for the cancellation input and confirm 0 and 1 both fit when <code>atol</code> reflects the term magnitude. Confirm an indexing error like 10 versus 15 still falls outside.</p>
 <h3 id="exercise-5-compare-atomics-with-staged-reduction">Exercise 5: Compare atomics with staged reduction<a class="heading-anchor" href="#exercise-5-compare-atomics-with-staged-reduction" aria-label="Link to this section">#</a></h3>
 <p>Atomics trade simplicity for contention and order.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare atomics with staged reduction</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Contrast <code>cuda.atomic.add</code> on one global accumulator with a staged reduction: per-block shared-memory trees followed by a final pass over block partials.</p>
+<p><strong>Why it is correct here.</strong> Atomics are short to write, but every thread serializes on one address, and the order of floating additions depends on scheduling. A staged tree has fixed pairing within each block and far fewer global updates.</p>
+<p><strong>A plausible wrong approach.</strong> Claiming the atomic version is deterministic because each update is indivisible confuses atomicity with order. Each addition is safe, but the sequence of additions still varies.</p>
+<p><strong>How to verify.</strong> For integer inputs both must give the identical total. For float32 inputs, run the atomic version several times and look for differences in the last bits, while the staged version with a fixed launch stays stable.</p>
 <h3 id="exercise-6-explain-deterministic-settings-limits">Exercise 6: Explain deterministic settings limits<a class="heading-anchor" href="#exercise-6-explain-deterministic-settings-limits" aria-label="Link to this section">#</a></h3>
 <p>Repeatability does not imply cross-hardware identical arithmetic.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain deterministic settings limits</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain that deterministic library settings fix the order of operations for one configuration, but changing GPU model, library version or launch configuration may still change the floating-point result.</p>
+<p><strong>Why it is correct here.</strong> Determinism guarantees repeatable results on the same software, hardware and inputs. Different hardware can choose different kernels, block counts or fused multiply-add usage, which changes rounding.</p>
+<p><strong>A plausible wrong approach.</strong> Treating a deterministic flag as a promise of identical results across machines leads to bit-exact comparisons between environments that fail for legitimate reasons.</p>
+<p><strong>How to verify.</strong> Record the environment with each result. Expect bit-identical answers only within one environment, and use a tolerance when comparing across environments.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Accurate cancellation sum 1 and tail-preserving sum 15.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-077_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

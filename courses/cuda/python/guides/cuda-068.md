@@ -14,6 +14,13 @@ For squared distances, expanding \((x-y)^2\) gives \(x^2+y^2-2xy\). The expanded
 
 
 
+### Key terms
+
+- **Broadcasting:** A rule that stretches size-one or missing axes so arrays of different shapes combine elementwise without copying.
+- **Reduction axis:** The axis that an operation such as sum or max collapses, removing that dimension from the result.
+- **Pairwise temporary:** An intermediate array of size m by n created when two vectors are broadcast against each other, which can exhaust device memory.
+- **Catastrophic cancellation:** Loss of significant digits when subtracting two nearly equal floating-point numbers, as in the expanded squared-distance formula.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,6 +48,17 @@ print("CPU array reference:", centered, distance)
 
 **Expected observation:** Centered columns and distance 25.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `rows` | `[[1.0, 3.0], [3.0, 7.0]]` |
+| `means` | `[2.0, 5.0]` |
+| `centered` | `[[-1.0, -2.0], [1.0, 2.0]]` |
+| `x` | `[1, 2]` |
+| `y` | `[4, 6]` |
+| `distance` | `25` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Optional NVIDIA CUDA lab
@@ -67,27 +85,39 @@ print("CUDA centered features:", cp.asnumpy(centered).tolist())
 
 ### Exercise 1: Compute centered columns
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute centered columns** in the examples above.
+**Trap to avoid:** Subtracting row means instead is tempting because they are also 2 and 5 here, a coincidence of this data. Broadcasting them down the wrong axis gives `[[-1,1],[-2,2]]`; the shapes still match, so no error appears, and the columns no longer sum to zero.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Add a constant feature
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **add a constant feature** in the examples above.
+**Trap to avoid:** Dividing by the column standard deviation after centering, as in standardization, divides zero by zero for this column and produces NaN that spreads into later steps.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Implement distance directly
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **implement distance directly** in the examples above.
+**Trap to avoid:** Taking a square root and reporting 5 answers a different question. The chapter defines squared distance, and mixing the two breaks comparisons against the reference.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain expanded-form cancellation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain expanded-form cancellation** in the examples above.
+**Trap to avoid:** Concluding that the expanded form is safe because the small worked example matches is the trap. Exact agreement on tiny integers says nothing about inputs where the squared norms dominate.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Count a pairwise temporary
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **count a pairwise temporary** in the examples above.
+**Trap to avoid:** Counting only the output `N*M` elements underestimates peak memory by a factor of D. The allocation fails or swaps even though the result itself would fit.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Choose a library baseline
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **choose a library baseline** in the examples above.
+**Trap to avoid:** Starting with a raw kernel for centering means writing reduction, broadcasting and tail handling by hand, with no reference to tell whether a wrong column mean is a kernel bug or a math bug.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A Python user-defined function can express logic that is not available as a native expression. Crossing that boundary can add interpreter overhead, reduce optimization opportunities and introduce hidden state. The right question is whether the extra flexibility is required by the problem and whether its semantics remain valid under the execution strategy.</p>
 <p>A return dtype is part of the function contract. It helps the engine reason about downstream operations and avoids relying on accidental inference from an early value. A pure function returns a result from its inputs without depending on mutable external state, time, random global draws or side effects. This is especially important when an engine can evaluate a function in more than one batch or order.</p>
 <p>Batch equivalence is stronger than purity alone. Subtracting the mean of each batch is deterministic and pure, but does not equal subtracting the mean of the complete dataset. A streamable declaration must be justified by the operation, not used as a performance switch. The worked counterexample shows two different answers from the same values.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>UDF:</strong> A user-defined Python function applied to data, which the query optimizer cannot inspect.</li>
+<li><strong>map_elements:</strong> A method that calls a Python function for values one at a time; it is slower than a native expression and blocks optimization.</li>
+<li><strong>return_dtype:</strong> The declared output type of a UDF, so Polars does not have to infer the type from the results.</li>
+<li><strong>Pure function:</strong> A function whose output depends only on its input, with no hidden state or side effects.</li>
+<li><strong>Batch equivalence:</strong> A batch function must give the same result however rows are split; a mean taken per batch differs from the global mean.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>map_elements calls a Python function for values and should declare return_dtype. Compare it with the corresponding native expression before choosing the more expensive interface. The batched counterexample uses ordinary Python arithmetic to expose a semantic issue independently of any query optimizer. A real map_batches adapter additionally needs its output schema and optimization assumptions to be correct.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

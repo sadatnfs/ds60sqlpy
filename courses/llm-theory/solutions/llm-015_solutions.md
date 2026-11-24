@@ -1,6 +1,6 @@
 # llm-015: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these pyTorch tensors and automatic gradients answers after attempting *Derive a scalar gradient* through *Check an embedding table*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Observe accumulation* points to one step. `llm-015_solution.py` holds the assertions; this page explains how they test autograd. Then try *Check an embedding table* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -31,7 +31,7 @@ assert w.grad.item() == -4 and loss.item() == 4
 
 **Expected:** gradient -4 and loss 4.
 
-**Verify:** In a fresh process, the exercise checks confirm `w.grad.item() == -4` and `loss.item() == 4`.
+**Verify:** For *Derive a scalar gradient*, a fresh-process check confirms `w.grad.item() == -4` and `loss.item() == 4`.
 
 ## Exercise 2: Compare finite differences
 
@@ -47,7 +47,7 @@ np.testing.assert_allclose(numeric, -4, atol=1e-10, rtol=0)
 
 **Expected:** finite difference approximately -4 within 1e-10.
 
-**Verify:** In a fresh process, the exercise checks confirm `numeric` matches `-4` within 1e-10.
+**Verify:** For *Compare finite differences*, a fresh-process check confirms `numeric` matches `-4` within 1e-10.
 
 ## Exercise 3: Observe accumulation
 
@@ -62,7 +62,7 @@ assert w.grad.item() == -8
 
 **Expected:** stored gradient becomes -8.
 
-**Verify:** In a fresh process, the exercise checks confirm `w.grad.item() == -8`.
+**Verify:** For *Observe accumulation*, a fresh-process check confirms `w.grad.item() == -8`.
 
 ## Exercise 4: Clear gradient state
 
@@ -78,7 +78,7 @@ assert w.grad.item() == -4
 
 **Expected:** gradient returns to -4.
 
-**Verify:** In a fresh process, the exercise checks confirm `w.grad.item() == -4`.
+**Verify:** For *Clear gradient state*, a fresh-process check confirms `w.grad.item() == -4`.
 
 ## Exercise 5: Inspect detachment
 
@@ -93,7 +93,7 @@ assert detached.item() == 0 and detached.requires_grad is False
 
 **Expected:** same value 0; requires_gradFalse.
 
-**Verify:** In a fresh process, the exercise checks confirm `detached.item() == 0` and `detached.requires_grad is False`.
+**Verify:** For *Inspect detachment*, a fresh-process check confirms `detached.item() == 0` and `detached.requires_grad is False`.
 
 ## Exercise 6: Check an embedding table
 
@@ -111,8 +111,8 @@ np.testing.assert_array_equal(out.detach().numpy(), [[2, 2], [1, 0], [2, 2]])
 
 **Expected:** shape (3, 2); rows 0 and 2 both [2, 2].
 
-**Verify:** In a fresh process, the exercise checks confirm `tuple(out.shape) == (3, 2)` and `out.detach().numpy()` equals `[[2, 2], [1, 0], [2, 2]]`.
+**Verify:** For *Check an embedding table*, a fresh-process check confirms `tuple(out.shape) == (3, 2)` and `out.detach().numpy()` equals `[[2, 2], [1, 0], [2, 2]]`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Clear gradient state* and predict the result first; keep *Inspect detachment* failing beside the repair. Log a missing PyTorch separately from a wrong autograd value in `llm-015`.

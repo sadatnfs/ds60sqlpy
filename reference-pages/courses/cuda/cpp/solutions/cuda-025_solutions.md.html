@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-025_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A misspelled identifier in main.cu produces a compiler error before any device work. Fixing bounds checks cannot help until the file compiles. Record the diagnostic with source line and build command, and rerun the smallest compilation step.</p>
+<p><strong>Approach:</strong> Classify the misspelled identifier as a compile failure and fix it at the reported source line.</p>
+<p><strong>Why it is correct:</strong> No device code exists until compilation succeeds, so runtime checks are irrelevant.</p>
+<p><strong>A plausible wrong approach:</strong> Adding bounds checks in the kernel cannot help a file that never builds.</p>
+<p><strong>How to verify:</strong> Rerun only the compile command for main.cu and confirm it exits zero.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A launch is accepted but a checked synchronization reports an illegal memory access. Now examine ownership and bounds near that launch. If synchronization succeeds and one output is wrong, inspect arithmetic, layout or uninitialized data instead. These outcomes require different next experiments.</p>
+<p><strong>Approach:</strong> Treat an illegal access at a checked synchronization as an execution failure tied to the preceding launch.</p>
+<p><strong>Why it is correct:</strong> Launch acceptance only means the configuration was valid; the fault appears when work completes.</p>
+<p><strong>A plausible wrong approach:</strong> Blaming the synchronize call itself sends you to inspect the wrong line of host code.</p>
+<p><strong>How to verify:</strong> Check indices near that kernel&#x27;s bounds and rerun with a sanitizer to name the bad address.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Host linking failed; provide the helper definition or link the correct object/library before investigating GPU execution.</p>
+<p><strong>Approach:</strong> Classify an undefined reference to a host helper as a link failure.</p>
+<p><strong>Why it is correct:</strong> The compiler accepted a declaration, but the linker found no definition in the inputs.</p>
+<p><strong>A plausible wrong approach:</strong> Recompiling with different GPU architecture flags changes nothing about a missing host symbol.</p>
+<p><strong>How to verify:</strong> Add the defining object or library to the link line and confirm the binary is produced.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>It narrows which launch caused an asynchronous error, but changes scheduling and performance. Remove unnecessary synchronization after the dependency bug is repaired.</p>
+<p><strong>Approach:</strong> Insert checked synchronization after each stage while localizing, then remove the extras.</p>
+<p><strong>Why it is correct:</strong> Errors from asynchronous launches surface later, and a sync after each stage pins the culprit.</p>
+<p><strong>A plausible wrong approach:</strong> Leaving every synchronization in production serializes stages that could overlap.</p>
+<p><strong>How to verify:</strong> After the fix, rerun with syncs removed and confirm results and error checks still pass.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>The required runtime is unavailable; the numerical test did not execute and must not pass.</p>
+<p><strong>Approach:</strong> Report the test as not run or skipped with a no-device reason.</p>
+<p><strong>Why it is correct:</strong> No kernel executed, so no numerical claim was tested.</p>
+<p><strong>A plausible wrong approach:</strong> Counting it as passed hides that the GPU path has never been exercised.</p>
+<p><strong>How to verify:</strong> Run the suite on a machine without a GPU and confirm it reports skipped, not passed.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Include source revision, exact shape/dtype/data generator, expected and observed values, launch geometry, device/software identity and smallest failing index.</p>
+<p><strong>Approach:</strong> List revision, shape, dtype, data generator, expected and observed values, launch geometry and first failing index.</p>
+<p><strong>Why it is correct:</strong> Shape dependence means another engineer needs the exact shape and geometry to reproduce it.</p>
+<p><strong>A plausible wrong approach:</strong> Writing only &#x27;wrong answer on large inputs&#x27; gives no reproducer and no index to inspect.</p>
+<p><strong>How to verify:</strong> Ask a colleague to reproduce from the report alone and confirm they see the same index.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-025_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

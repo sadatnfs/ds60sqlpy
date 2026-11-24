@@ -8,7 +8,7 @@ Perform actual CPU gradient updates on a tiny reward predictor and expose a leng
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-018`, and use its `llm-torch-cpu` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-018` under **LLM evaluation and alignment** in `/classroom`; its `llm-torch-cpu` profile runs each worked program for train and audit a small reward model in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about PyTorch reward model and pairwise training: The analytic and autograd initial gradients match in float64, a reversed comparison flips the margin sign, the trained model weights length above both evidence features, and the final-state loss differs from the last pre-update loss. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## What this model learns
 
@@ -17,6 +17,13 @@ This unit trains an actual PyTorch linear reward model with three input features
 For a pair of feature vectors, the model receives their difference \(d_i=f(x,a)-f(x,b)\). Its logit is \(w^{\mathsf T}d_i\). Binary cross entropy on that logit corresponds to the Bradley-Terry likelihood from the previous unit. Soft labels of one half are used here as an explicit convention for authored tie examples. They do not claim to model every kind of indifference.
 
 The loss adds a small squared-weight penalty. This controls the scale of a separable fit and makes the finite training problem more stable. The reported loss belongs to the final recomputed weights, not to the pre-update state from the last loop iteration. Every fit starts from zero weights, uses float64 arithmetic and a fixed number of CPU steps.
+
+## Key terms
+
+- **Linear reward model:** A PyTorch model whose logit is w^T d for the feature difference d between two responses.
+- **Binary cross entropy:** The loss on that logit that matches the Bradley-Terry likelihood, with soft labels of one half for ties.
+- **Shortcut learning:** Fitting a spurious feature, such as response length, that predicts preferences in training but not the intended quality.
+- **Held-out preference:** A comparison not used in training, used to check that the learned margin generalizes.
 
 ## Worked case A: a length-balanced training design
 

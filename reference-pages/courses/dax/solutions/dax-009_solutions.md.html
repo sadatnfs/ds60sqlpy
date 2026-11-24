@@ -242,23 +242,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict S4&#x27;s stored NetAmount after selecting South.</p>
 <p>It remains 27 in the data, but S4 is not eligible for the South measure result.</p>
+<p><strong>Why it fits this model:</strong> A filter only decides which rows a measure can see. Selecting South keeps S3 (40), S6 (20) and S7 (20) for 80, and S4 still stores 27 because Ada is in North.</p>
+<p><strong>Tempting mistake:</strong> A calculated column that rewrites S4 to 0 whenever the region is not South would make stored data depend on one slicer, and North would lose 27 of its 107.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( [NetRevenue], Customer[Region] = &quot;South&quot; )</code> returns 80, while <code>CALCULATE ( SUM ( Sales[NetAmount] ), Sales[SaleID] = &quot;S4&quot; )</code> with no region filter still returns 27.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the case B year to 2024.</p>
 <p>Revenue is 24 and quantity is 3.</p>
+<p><strong>Why it fits this model:</strong> In 2024 the only North lines are Ada&#x27;s S1 (20) and S2 (4), so revenue is 24 and quantity is 3. Both filters must hold at once, so Bo&#x27;s S3 is excluded.</p>
+<p><strong>Tempting mistake:</strong> Changing the year but also dropping the region filter returns 64 and 5, because Bo&#x27;s 40 USD Mug line from order 102 joins the result.</p>
+<p><strong>How to confirm:</strong> The 2024 row reads 24 and 3. Adding the 2025 row (83 and 9) gives the North totals of 107 and 12.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a calculated-column expression for a line&#x27;s gross amount.</p>
 <p>Sales[Quantity] * Sales[UnitPrice] is the expression; its values would be stored per row if added as a calculated column externally.</p>
+<p><strong>Why it fits this model:</strong> A calculated column evaluates per Sales row, so S1 gets 2 x 10 = 20 and S2 gets 1 x 5 = 5. S2&#x27;s stored NetAmount is 4 because its 1 USD discount is already removed.</p>
+<p><strong>Tempting mistake:</strong> A measure written as SUM(Sales[Quantity]) * SUM(Sales[UnitPrice]) multiplies totals, 17 x 100 = 1,700, instead of summing row products.</p>
+<p><strong>How to confirm:</strong> Summing the gross column, or running <code>SUMX ( Sales, Sales[Quantity] * Sales[UnitPrice] )</code>, returns 195, and 195 minus 8 of discounts equals 187.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose storing a region-wide total on every sales line and summing it later.</p>
 <p>The total would be counted once per line. Use a context-dependent measure or model a separate aggregate fact with its own grain.</p>
+<p><strong>Why it fits this model:</strong> North has five lines: Ada&#x27;s S1, S2 and S4 and Cy&#x27;s S5 and S8. A measure filtered to North returns 107 once, whatever grain the visual uses.</p>
+<p><strong>Tempting mistake:</strong> Writing 107 onto each North line and summing it gives 5 x 107 = 535, five times the real revenue, and the multiple would change as lines are added.</p>
+<p><strong>How to confirm:</strong> Under North, SUM of the stored column returns 535 while <code>CALCULATE ( [NetRevenue], Customer[Region] = &quot;North&quot; )</code> returns 107.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why a measure cannot serve as a stable product-category key.</p>
 <p>Use a column with a declared domain and grain for relationships or category membership.</p>
+<p><strong>Why it fits this model:</strong> Product[Category] is a stored column with the members Paper, Home and Travel. Bag stays in Travel even with no sales, so relationships and slicers have a fixed domain.</p>
+<p><strong>Tempting mistake:</strong> Deriving a category from a measure such as revenue over 50 makes membership move with filters: Mug is 96 overall but 36 under North, so its category would flip with the region slicer.</p>
+<p><strong>How to confirm:</strong> <code>VALUES ( Product[Category] )</code> returns three rows under any Customer filter, while the Mug revenue changes from 96 to 36.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Choose a lifetime for a sales-band label that must reflect refreshed row values.</p>
 <p>A processed row classification may be a calculated column or upstream attribute; a dynamic threshold over selected totals requires a measure/table expression.</p>
+<p><strong>Why it fits this model:</strong> A band from the row itself, such as NetAmount of at least 30 for S3 and S8, may be stored and recomputed at refresh. A share of the selected total depends on the filter, so it must be a measure.</p>
+<p><strong>Tempting mistake:</strong> A column storing NetAmount divided by the refresh total gives S8 36 / 187, about 0.193, and keeps it under North, where S8&#x27;s real share is 36 / 107, about 0.336.</p>
+<p><strong>How to confirm:</strong> Under North the measure returns about 0.336 for S8 and about 0.193 with no filter; the column shows 0.193 in both views.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

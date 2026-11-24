@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Loop over the groups A and B, subset d for each, and add a trace with customdata = ~id so every point carries its own ID.",
+      "why": "Within the B trace the first point is B1, but it is the third row of d. Attaching the ID as data on the point keeps that link no matter how the rows were split into traces.",
+      "wrong": "Recovering the ID from the hovered point's position. Position 0 in the B trace would look up row 1 of d and report A1 for a point that is really B1.",
+      "verify": "`as.character(b$x$data[[1]]$customdata)` returns \"A1\", \"A2\", and the same expression for trace 2 returns \"B1\", \"B2\"."
+    },
+    {
+      "approach": "Write a hovertemplate that names each field: ID from customdata, Input from x, Value from y, and the group name in the extra box.",
+      "why": "Each point has an x of 1 or 2 and a y from 2 to 6. Labeling the fields tells the reader that 6 is the measured value for B2 at input 2, not an anonymous pair.",
+      "wrong": "Keeping the default hover, which shows bare coordinates such as (2, 6) with the trace name. The ID that the table and any follow up depend on never appears.",
+      "verify": "`grepl(\"%{customdata}\", b$x$data[[1]]$hovertemplate, fixed = TRUE)` returns TRUE."
+    },
+    {
+      "approach": "Define the All groups button with visible TRUE, TRUE and the Group A button with TRUE, FALSE, matching the order in which the loop added the traces.",
+      "why": "The loop runs over c(\"A\", \"B\"), so trace 1 is A and trace 2 is B. restyle applies the visibility list by position, so TRUE, FALSE shows A and hides B.",
+      "wrong": "Changing the loop to unique(d$group) after the data are reordered, or to c(\"B\", \"A\"), while keeping the buttons. The Group A button would then show group B, and the specification would still look valid.",
+      "verify": "`unlist(b$x$layout$updatemenus[[1]]$buttons[[2]]$args[[2]])` returns TRUE, FALSE, and `b$x$data[[1]]$name` returns \"A\"."
+    },
+    {
+      "approach": "Name a fixed statistic by its denominator, for example Mean of all four points, or make the button also update the label with a group specific value.",
+      "why": "The y values sum to 15, so the overall mean is 3.75. Group A alone has 2 and 3 with mean 2.5. A restyle button only hides traces and never recomputes the label.",
+      "wrong": "Placing a label Mean: 3.75 on the figure. In the Group A view it then overstates the visible mean by 1.25 while appearing to describe what is shown.",
+      "verify": "`mean(d$y)` returns 3.75 and `mean(d$y[d$group == \"A\"])` returns 2.5."
+    },
+    {
+      "approach": "Print d next to the figure so the IDs, groups, inputs and values are readable without a pointer.",
+      "why": "Four rows are small enough to show in full, and the table gives keyboard, touch and screen reader users the same ID to value pairs that hover offers to mouse users.",
+      "wrong": "Offering only the hover text, or printing just the two group means. The first hides the IDs from anyone who cannot hover, and the second drops the individual records the figure is about.",
+      "verify": "`print(d)` shows four rows with IDs A1, A2, B1 and B2 and their values 2, 3, 4 and 6."
+    },
+    {
+      "approach": "List the checks the R build cannot perform and assign them to a browser review: clicking each button, keyboard access, hover legibility, resizing and screen reader output.",
+      "why": "The build proves the customdata vectors, the template text and the TRUE, FALSE argument. It does not run plotly.js, so it cannot show whether the buttons overlap the legend on a narrow screen or receive keyboard focus.",
+      "wrong": "Reporting the controls as working because their argument vectors are correct. Correct arguments describe the intent, and only an observed click confirms the effect.",
+      "verify": "A browser session shows the Group A button hiding B1 and B2, and the page remains usable at a narrow width."
+    }
+  ]
+}

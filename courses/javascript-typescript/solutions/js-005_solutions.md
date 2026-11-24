@@ -35,7 +35,7 @@ assert.deepEqual(result, [6, 8]);
 assert.deepEqual(original, [1, 2, 3, 4]);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(original, [1, 2, 3, 4])`. Restoring the original line brings back the worked observation: 6, 8; original array unchanged.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(original, [1, 2, 3, 4])`. Restoring `const original = [1, 2, 3, 4];` brings back: 6, 8; original array unchanged.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(original, [1, 2, 3, 4])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -58,7 +58,7 @@ assert.equal(
 );
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6)`; after it the line reads `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6);` again and 0 and 6.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal([1, 2, 3].reduce((sum, value) => sum - value, 0), 6);`. Restoring `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6);` brings back: 0 and 6.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6)` accepts.
 

@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "track_id": "rust",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "rust-008",
+      "title": "Moving a String, cloning it, and passing ownership through a function",
+      "anchor": "reference",
+      "source_path": "courses/rust/solutions/rust-008_solution.rs",
+      "source_sha256": "e7440dea1e609ed9b4a6e6556067cbd64b5b669b3f801f3d06113a8a4abb2fcb",
+      "expected_output": ["rust-008: passed"],
+      "steps": [
+        {
+          "lines": [1, 7],
+          "excerpt": "fn main() -> Result<(), Box<dyn std::error::Error>> {\n    {\n        let first = String::from(\"pear\");\n        let second = first;\n        assert_eq!(second, \"pear\");\n        // Using first here would be a compile error: ownership moved.\n    }",
+          "title": "Assignment moves a String",
+          "explanation": "main returns a Result so later lessons can use the ? operator; here it always returns Ok. A String owns a buffer on the heap. let second = first; does not copy that buffer: it moves ownership to second, and the compiler marks first as unusable. This is how Rust guarantees that exactly one owner frees the memory. The comment points out that any later use of first would be rejected at compile time, not at run time.",
+          "observe": "second holds pear. The moved-from first cannot be read again, and the program still compiles because it is never read."
+        },
+        {
+          "lines": [9, 15],
+          "excerpt": "    {\n        let first = String::from(\"pear\");\n        let mut second = first.clone();\n        second.push('s');\n        assert_eq!(first, \"pear\");\n        assert_eq!(second, \"pears\");\n    }",
+          "title": "clone makes a second, independent owner",
+          "explanation": "When you really need two copies, clone allocates a new buffer and copies the bytes. second is declared mut because push changes it; Rust variables are immutable unless you say otherwise. Pushing 's' onto second leaves first untouched, because they no longer share any memory. Cloning costs an allocation, so Rust makes you write it explicitly.",
+          "observe": "first is still pear while second is pears."
+        },
+        {
+          "lines": [17, 22],
+          "excerpt": "    {\n        // Task 3: Independent construction\n        fn shout(mut text: String) -> String {\n            text.push('!');\n            text\n        }",
+          "title": "A function that takes ownership and gives it back",
+          "explanation": "shout takes text: String by value, so calling it moves the caller's String into the function. Writing mut text in the parameter list lets the function change its own copy of the binding. It appends '!' and returns text, which moves ownership back out to the caller. The last expression of a block without a semicolon is its return value.",
+          "observe": "No clone is needed: the same heap buffer travels in and out of the function."
+        },
+        {
+          "lines": [23, 26],
+          "excerpt": "        let original = String::from(\"ready\");\n        let louder = shout(original);\n        assert_eq!(louder, \"ready!\");\n    }",
+          "title": "The caller receives the result",
+          "explanation": "original is moved into shout, and the returned String is bound to louder. After this call original is no longer usable, exactly as in the first block. assert_eq! compares the two values and panics with both of them shown if they differ, so a wrong answer stops the program before the success line.",
+          "observe": "louder is ready!, so the assertion holds."
+        },
+        {
+          "lines": [28, 43],
+          "excerpt": "    {\n        // Task 5: Boundary evidence\n        let count = 5_i32;\n        let copied = count;\n        assert_eq!(count + copied, 10);\n        let name = String::from(\"pear\");\n        let address = name.as_ptr();\n        let moved = name;\n        assert_eq!(moved.as_ptr(), address);\n        let cloned = moved.clone();\n        assert_ne!(cloned.as_ptr(), address);\n        assert_eq!(moved, cloned);\n    }\n    println!(\"rust-008: passed\");\n    Ok(())\n}",
+          "title": "Copy, move and clone at the boundary",
+          "explanation": "An i32 is Copy, so count is still usable after copied is made from it. Moving the String into moved keeps the same heap buffer, so its pointer equals the saved address, while clone allocates a new buffer with a different pointer and equal contents. Once every block has run without a failed assertion, the program prints its line and returns Ok(()).",
+          "observe": "The program prints: rust-008: passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "rust-020",
+      "title": "Lazy iterator chains that only run when collected",
+      "anchor": "reference",
+      "source_path": "courses/rust/solutions/rust-020_solution.rs",
+      "source_sha256": "43ab4925646b171ab2dccdb806b5393bdb3957f5dc1ddd0220c76a64e37a4be3",
+      "expected_output": ["rust-020: passed"],
+      "steps": [
+        {
+          "lines": [1, 12],
+          "excerpt": "fn main() -> Result<(), Box<dyn std::error::Error>> {\n    {\n        let values = vec![1, 2, 3, 4];\n        let result: Vec<_> = values\n            .iter()\n            .copied()\n            .filter(|value| value % 2 == 0)\n            .map(|value| value * 10)\n            .collect();\n        assert_eq!(result, vec![20, 40]);\n        assert_eq!(values.len(), 4);\n    }",
+          "title": "filter and map, then collect",
+          "explanation": "values.iter() borrows the vector and yields references; copied() turns each &i32 into a plain i32 so the closures work with numbers. filter keeps even values and map multiplies by ten. None of these adapters does any work yet: iterators in Rust are lazy, and collect is the consumer that pulls each item through the chain. The type annotation Vec<_> tells collect what to build and lets the compiler infer the element type.",
+          "observe": "result is [20, 40], and values still has 4 elements because iter() only borrowed it."
+        },
+        {
+          "lines": [14, 19],
+          "excerpt": "    {\n        let mut iterator = [2, 3].into_iter();\n        assert_eq!(iterator.next(), Some(2));\n        assert_eq!(iterator.next(), Some(3));\n        assert_eq!(iterator.next(), None);\n    }",
+          "title": "next one item at a time",
+          "explanation": "into_iter on an array yields its values by value. Calling next by hand shows what every for loop does behind the scenes: each call returns Some(item) until the iterator is exhausted, and then returns None. The iterator must be mut because next advances its internal position.",
+          "observe": "The calls return Some(2), Some(3), then None."
+        },
+        {
+          "lines": [21, 32],
+          "excerpt": "    {\n        // Task 3: Independent construction\n        fn upper_names(names: &[&str]) -> Vec<String> {\n            names.iter().map(|name| name.to_uppercase()).collect()\n        }\n        let names = [\"pear\", \"fig\"];\n        assert_eq!(upper_names(&names), vec![\"PEAR\", \"FIG\"]);\n        assert_eq!(names, [\"pear\", \"fig\"]);\n    }\n    println!(\"rust-020: passed\");\n    Ok(())\n}",
+          "title": "A function that borrows a slice and returns new Strings",
+          "explanation": "upper_names takes &[&str], a borrowed slice of string slices, so the caller keeps ownership of its array. map builds a new owned String for each name with to_uppercase, and collect gathers them into a Vec<String> whose type comes from the return type. The final check confirms the original names were not changed.",
+          "observe": "The function returns PEAR and FIG, names still holds pear and fig, and the program prints: rust-020: passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "rust-034",
+      "title": "A justified unsafe block next to safe slices and slice patterns",
+      "anchor": "reference",
+      "source_path": "courses/rust/solutions/rust-034_solution.rs",
+      "source_sha256": "c0a84104fc444870f9e2a672ac6dad5dbb23812d3bde1c4c4a704bfc7dfde4e7",
+      "expected_output": ["rust-034: passed"],
+      "steps": [
+        {
+          "lines": [1, 8],
+          "excerpt": "fn main() -> Result<(), Box<dyn std::error::Error>> {\n    {\n        let values = [2_i32, 3, 4];\n        let pointer = values.as_ptr();\n        // SAFETY: pointer comes from this live initialized array; length is exact; no mutation overlaps.\n        let view = unsafe { std::slice::from_raw_parts(pointer, values.len()) };\n        assert_eq!(view, &[2, 3, 4]);\n    }",
+          "title": "Building a slice from a raw pointer",
+          "explanation": "as_ptr returns a raw pointer to the array's first element. std::slice::from_raw_parts turns a pointer and a length into a slice, but the compiler cannot check that the pointer is valid or the length is right, so the call must sit inside an unsafe block. The SAFETY comment states the facts that make it sound: the array is alive and initialized, the length is exact and nothing mutates it meanwhile. unsafe does not turn off the borrow checker; it only lets you make promises the compiler cannot verify.",
+          "observe": "view equals [2, 3, 4]. If the length were larger than the array, the program would have undefined behavior, which is why the comment matters."
+        },
+        {
+          "lines": [10, 14],
+          "excerpt": "    {\n        let values = [2, 3, 4];\n        let view = &values[..];\n        assert_eq!(view.iter().sum::<i32>(), 9);\n    }",
+          "title": "The safe way to get the same view",
+          "explanation": "&values[..] produces the same kind of slice with no unsafe code at all, and the compiler checks its lifetime. Prefer this whenever you can. Reserve raw pointers for real boundaries such as foreign functions. The turbofish sum::<i32>() names the result type, which sum cannot infer by itself here.",
+          "observe": "The sum of the slice is 9."
+        },
+        {
+          "lines": [16, 26],
+          "excerpt": "    {\n        // Task 2: Guided modification\n        let values = [2_i32, 3, 4, 5];\n        let pointer = values.as_ptr();\n        let length = 2;\n        assert!(length <= values.len());\n        // SAFETY: pointer comes from this live initialized array, and length 2 stays within its 4 elements.\n        let view = unsafe { std::slice::from_raw_parts(pointer, length) };\n        assert_eq!(view, &[2, 3]);\n        assert_eq!(view, &values[..length]);\n    }",
+          "title": "A shorter view over a longer array",
+          "explanation": "The pointer still comes from a live, initialized array, but the requested length is 2 out of 4 elements. The assert! checks the bound before the unsafe call, and the SAFETY comment states why the call is sound. Comparing the view with the safe slice &values[..length] confirms both describe the same two elements.",
+          "observe": "view holds 2 and 3, the same elements as &values[..2]."
+        },
+        {
+          "lines": [28, 37],
+          "excerpt": "    {\n        // Task 3: Independent construction\n        /// Returns the first two values, or None when fewer than two exist.\n        /// Never reads past the end of the slice and never panics.\n        fn first_two(values: &[i32]) -> Option<(i32, i32)> {\n            match values {\n                [first, second, ..] => Some((*first, *second)),\n                _ => None,\n            }\n        }",
+          "title": "A slice pattern instead of indexing",
+          "explanation": "first_two matches on the shape of the slice. The pattern [first, second, ..] only matches when there are at least two elements, and .. stands for any remaining ones. The wildcard arm _ handles every shorter slice, so the match is exhaustive and the function cannot index past the end or panic. *first copies the i32 out of the reference the pattern binds.",
+          "observe": "The doc comments describe the contract: None for fewer than two values, never a panic."
+        },
+        {
+          "lines": [38, 40],
+          "excerpt": "        assert_eq!(first_two(&[4, 5, 6]), Some((4, 5)));\n        assert_eq!(first_two(&[4]), None);\n    }",
+          "title": "Checking both outcomes",
+          "explanation": "A three element slice yields Some((4, 5)), and a one element slice yields None. Testing the short case is what proves the fallback arm works.",
+          "observe": "Both assertions hold, so first_two returns a pair or None and never panics."
+        },
+        {
+          "lines": [42, 61],
+          "excerpt": "    {\n        // Task 5: Boundary evidence\n        let empty: [u64; 0] = [];\n        let pointer = empty.as_ptr();\n        assert!(!pointer.is_null() && pointer.is_aligned());\n        // SAFETY: a zero-length slice needs only a non-null, aligned pointer, which as_ptr provides.\n        let view = unsafe { std::slice::from_raw_parts(pointer, 0) };\n        assert!(view.is_empty());\n        let dangling = std::ptr::NonNull::<u64>::dangling();\n        // SAFETY: NonNull::dangling is non-null and aligned, which is all a zero-length slice requires.\n        let also_empty = unsafe { std::slice::from_raw_parts(dangling.as_ptr(), 0) };\n        assert_eq!(also_empty.len(), 0);\n        let bytes = [0_u8; 16];\n        let start = bytes.as_ptr().cast::<u64>();\n        let next = bytes.as_ptr().wrapping_add(1).cast::<u64>();\n        assert!(!(start.is_aligned() && next.is_aligned()));\n    }\n    println!(\"rust-034: passed\");\n    Ok(())\n}",
+          "title": "Zero-length slices and alignment",
+          "explanation": "A zero-length slice reads no memory, so it only needs a non-null, aligned pointer: as_ptr on an empty array and NonNull::dangling both qualify. A pointer one byte into a byte array is not aligned for u64, which is the property from_raw_parts would require for any nonzero length. After every block passes, the program prints its line and returns Ok(()).",
+          "observe": "The program prints: rust-034: passed"
+        }
+      ]
+    }
+  ]
+}

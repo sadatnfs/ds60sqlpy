@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a two-stage block reduction with correct tails and a justified floating-point tolerance.
+
 Work through *Parallel reductions and the order of arithmetic* with the concrete cases below. Finish with this evidence:
 correct tails and a justified tolerance, with no assumption of a fixed block completion order. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A reduction combines values with an operation and identity. A tree reduces dependency depth compared with a serial chain, but it changes floating-point addition order. A block reduction usually first writes one partial per block; another launch combines those partials. This creates a real cross-block dependency without an unsafe grid-wide spin barrier. Tail threads contribute the identity, such as zero for addition. For a maximum, zero is not a neutral value if all inputs are negative. Define empty input explicitly and retain a higher-accuracy CPU oracle for floating-point work.
+
+### Key terms
+
+- **Identity element:** A value that leaves the result unchanged, such as zero for a sum or negative infinity for a maximum.
+- **Tree reduction:** A reduction that combines pairs in rounds, cutting dependency depth to about log2(n).
+- **Block partial sum:** The per-block value that a second stage combines into the final answer.
+- **Associativity:** The property that grouping does not change a result, which real addition has but floating-point addition only approximates.
 
 ## Mathematical contract
 

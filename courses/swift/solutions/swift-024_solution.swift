@@ -23,6 +23,39 @@ struct LessonMain {
     }
 
     do {
+      // Task 1: Predict and explain
+      let manager = FileManager.default
+      func useOwnedDirectory() throws -> URL {
+        let root = manager.temporaryDirectory.appendingPathComponent(
+          UUID().uuidString, isDirectory: true)
+        try manager.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? manager.removeItem(at: root) }
+        let file = root.appendingPathComponent("trace.txt")
+        try Data("used".utf8).write(to: file)
+        precondition(manager.fileExists(atPath: file.path))
+        return root
+      }
+      let root = try useOwnedDirectory()
+      precondition(!manager.fileExists(atPath: root.path))
+    }
+
+    do {
+      // Task 2: Guided modification
+      let manager = FileManager.default
+      let root = manager.temporaryDirectory.appendingPathComponent(
+        UUID().uuidString, isDirectory: true)
+      try manager.createDirectory(at: root, withIntermediateDirectories: true)
+      defer { try? manager.removeItem(at: root) }
+      let first = root.appendingPathComponent("a.txt")
+      let second = root.appendingPathComponent("b.txt")
+      try Data("alpha".utf8).write(to: first)
+      try Data("beta".utf8).write(to: second)
+      let firstText = try String(contentsOf: first, encoding: .utf8)
+      let secondText = try String(contentsOf: second, encoding: .utf8)
+      precondition(firstText == "alpha" && secondText == "beta")
+    }
+
+    do {
       // Task 3: Independent construction
       struct Stock: Codable, Equatable {
         let name: String
@@ -38,6 +71,24 @@ struct LessonMain {
       try JSONEncoder().encode(saved).write(to: file)
       let restored = try JSONDecoder().decode(Stock.self, from: Data(contentsOf: file))
       precondition(restored == saved && restored.quantity >= 0)
+    }
+
+    do {
+      // Task 5: Boundary evidence
+      let manager = FileManager.default
+      let root = manager.temporaryDirectory.appendingPathComponent(
+        UUID().uuidString, isDirectory: true)
+      try manager.createDirectory(at: root, withIntermediateDirectories: true)
+      defer { try? manager.removeItem(at: root) }
+      let blank = root.appendingPathComponent("blank.bin")
+      try Data().write(to: blank)
+      let blankBytes = try Data(contentsOf: blank)
+      precondition(blankBytes.isEmpty)
+      var missingFailed = false
+      do { _ = try Data(contentsOf: root.appendingPathComponent("absent.bin")) } catch {
+        missingFailed = true
+      }
+      precondition(missingFailed)
     }
     print("swift-024: passed")
   }

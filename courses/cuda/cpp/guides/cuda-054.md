@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement tiled attention with online softmax that matches the reference and report memory use and supported masks.
+
 Work through *Attention and memory-aware algorithm design* with the concrete cases below. Finish with this evidence:
 agreement with the reference and a memory/time report that states supported shapes and masks. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Scaled dot-product attention forms scores from queries and keys, normalizes each score row with softmax and combines values using those weights. Materializing the entire score matrix costs storage proportional to sequence length squared. Tiling can avoid retaining that large intermediate by maintaining an online maximum, normalization sum and weighted output accumulator. When a new tile raises the maximum, rescale earlier accumulators before combining them. Masking and training's backward needs add contracts. A tiny educational online algorithm demonstrates memory-aware mathematics; it is not a production replacement for specialized attention libraries.
+
+### Key terms
+
+- **Scaled dot-product attention:** The operation that divides query-key dot products by the square root of the key width, applies softmax and uses the resulting weights to average the values.
+- **Online softmax:** Computing softmax over tiles while updating a running maximum and denominator, so the full score row is never stored.
+- **Attention mask:** A rule that excludes key positions, such as future tokens in causal attention, before normalization.
+- **Quadratic memory:** Memory that grows with sequence length squared when the full score matrix is materialized.
 
 ## Mathematical contract
 

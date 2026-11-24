@@ -231,23 +231,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict Home revenue in North.</p>
 <p>Only S8 remains, so revenue is 36.</p>
+<p><strong>Why it fits this model:</strong> Product[Category] = &quot;Home&quot; keeps only ProductKey 3, and Customer[Region] = &quot;North&quot; keeps keys 10 and 30. Each filter flows down its own active relationship, and Sales keeps only rows that pass both, which leaves S8.</p>
+<p><strong>Tempting mistake:</strong> CALCULATE ( [NetRevenue], ALL ( Customer ), Product[Category] = &quot;Home&quot; ) on a North row returns 96, because ALL removes the region filter that should restrict the Mug lines.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATETABLE ( VALUES ( Sales[SaleID] ), Product[Category] = &quot;Home&quot;, Customer[Region] = &quot;North&quot; )</code> should list S8 alone, worth 36.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change Paper to Home while leaving North selected.</p>
 <p>The customer filter remains; the result is 36 rather than all-Home revenue 96.</p>
+<p><strong>Why it fits this model:</strong> Filters on Product and on Customer are independent, so replacing Paper with Home changes only the product side. The North customer filter stays and still removes Bo&#x27;s Mug lines S3 and S6.</p>
+<p><strong>Tempting mistake:</strong> Reading the Home figure from a card that has no region filter shows 96 and silently drops the North condition that the question still carries.</p>
+<p><strong>How to confirm:</strong> Paper in North (71) plus Home in North (36) should equal North revenue: S1, S2, S4, S5 and S8 give 107.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Draw the two paths that meet at Sales.</p>
 <p>Product.ProductKey -&gt; Sales.ProductKey and Customer.CustomerKey -&gt; Sales.CustomerKey, each one-to-many and active.</p>
+<p><strong>Why it fits this model:</strong> Each dimension sits on the one side of a single-direction relationship and filters Sales on the many side. Product and Customer meet at Sales but never filter each other.</p>
+<p><strong>Tempting mistake:</strong> Drawing an arrow from Product through Sales into Customer. That would mean a Paper filter shrinks the Customer table, which single-direction relationships do not do.</p>
+<p><strong>How to confirm:</strong> Under Product[Category] = &quot;Paper&quot;, COUNTROWS(Customer) still returns 4, while DISTINCTCOUNT(Sales[CustomerKey]) returns 3 for customers 10, 20 and 30.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a report that adds 91 and 107 to represent Paper-and-North revenue.</p>
 <p>91 + 107 counts the overlap twice and includes other rows. The intersection revenue is 71.</p>
+<p><strong>Why it fits this model:</strong> Paper rows (S1, S2, S4, S5, S7) and North rows (S1, S2, S4, S5, S8) share four lines worth 71. The question asks for that intersection, which one CALCULATE with both filters returns.</p>
+<p><strong>Tempting mistake:</strong> Adding 91 and 107 to get 198 counts the shared 71 twice and also includes Paper sales to Bo and Mug sales to Cy, neither of which is Paper in the North.</p>
+<p><strong>How to confirm:</strong> The union is 91 + 107 - 71 = 127, and the intersection query returns 71; neither equals 198.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Predict a selection of West customers.</p>
 <p>SUM over the empty eligible set is BLANK, not evidence of a missing West dimension row.</p>
+<p><strong>Why it fits this model:</strong> Customer[Region] = &quot;West&quot; keeps Di, key 40, but no Sales row carries key 40. SUM over zero eligible rows returns BLANK, which means no sales, not a missing dimension member.</p>
+<p><strong>Tempting mistake:</strong> Wrapping the measure as [NetRevenue] + 0 to show zero. It turns every empty combination, such as Bag in the West, into a visible row and erases the difference between no activity and a zero amount.</p>
+<p><strong>How to confirm:</strong> Under the West filter, COUNTROWS(Customer) returns 1, COUNTROWS(Sales) returns BLANK and ISBLANK([NetRevenue]) returns TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain how an event-time customer region requirement changes the model.</p>
 <p>Use a documented historical key or event-time classification. Repeatedly changing a current Region label can rewrite historical report membership.</p>
+<p><strong>Why it fits this model:</strong> Region is a current attribute on a single Customer row. If Bo moved from South to North, every Bo line (S3, S6 and S7, worth 80) would move into North history, including 2024.</p>
+<p><strong>Tempting mistake:</strong> Editing Customer[Region] in place for the move. North 2024 revenue would jump from 24 to 64, rewriting a year that has already been reported.</p>
+<p><strong>How to confirm:</strong> With a historical key or an event-time region on Sales, North 2024 should stay at 24 (S1 and S2) after the change, while new sales follow the new region.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

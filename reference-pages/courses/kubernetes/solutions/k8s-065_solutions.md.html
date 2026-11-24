@@ -204,22 +204,64 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-identify-mesh-control-and-data-planes">Exercise 1: Identify mesh control and data planes.<a class="heading-anchor" href="#exercise-1-identify-mesh-control-and-data-planes" aria-label="Link to this section">#</a></h3>
 <p>Their failures and evidence differ. A healthy control process does not prove every proxy has applied current policy.</p>
 <p><strong>Expected:</strong> Configuration/identity distribution versus actual traffic handling.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Assign configuration and identity distribution to the control plane and traffic handling to the data plane proxies.</li>
+<li><strong>Why it is correct:</strong> The control plane pushes config and certificates, while sidecar or node proxies carry requests.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting the control plane to carry requests misplaces where traffic failures occur.</li>
+<li><strong>How to verify:</strong> The answer separates distribution from traffic handling.</li>
+</ul>
 <h3 id="exercise-2-distinguish-mtls-and-business-authorization">Exercise 2: Distinguish mTLS and business authorization.<a class="heading-anchor" href="#exercise-2-distinguish-mtls-and-business-authorization" aria-label="Link to this section">#</a></h3>
 <p>Keep the policy layers explicit. Encryption and authentication do not replace application access decisions.</p>
 <p><strong>Expected:</strong> Peer identity versus permission for a domain-specific action.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Contrast mTLS, which proves which workload is calling, with authorization for a specific business action.</li>
+<li><strong>Why it is correct:</strong> Knowing the peer&#x27;s identity does not say whether that peer may perform an operation such as a refund.</li>
+<li><strong>Plausible wrong approach:</strong> Treating mTLS as full authorization lets any authenticated service call any endpoint.</li>
+<li><strong>How to verify:</strong> The answer separates peer identity from action permission.</li>
+</ul>
 <h3 id="exercise-3-draw-a-two-cluster-request-path">Exercise 3: Draw a two-cluster request path.<a class="heading-anchor" href="#exercise-3-draw-a-two-cluster-request-path" aria-label="Link to this section">#</a></h3>
 <p>The diagram should expose new failure domains rather than drawing one seamless arrow.</p>
 <p><strong>Expected:</strong> Discovery, inter-cluster route, trust and application hops are named.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Draw discovery, the inter-cluster route, trust establishment and the application hop.</li>
+<li><strong>Why it is correct:</strong> Each hop has its own owner and failure mode, from discovery records to cross-cluster certificates.</li>
+<li><strong>Plausible wrong approach:</strong> Drawing one arrow between clusters hides the trust and route steps.</li>
+<li><strong>How to verify:</strong> All four hops are named.</li>
+</ul>
 <h3 id="exercise-4-diagnose-retry-amplification">Exercise 4: Diagnose retry amplification.<a class="heading-anchor" href="#exercise-4-diagnose-retry-amplification" aria-label="Link to this section">#</a></h3>
 <p>Set bounded policies with operation safety in mind. More retries can worsen an overloaded dependency.</p>
 <p><strong>Expected:</strong> Uncoordinated retry budgets multiply attempts and load.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Multiply retry counts across each layer that retries to find the worst-case attempts.</li>
+<li><strong>Why it is correct:</strong> Three layers retrying three times can send 27 attempts for one request, adding load to a struggling backend.</li>
+<li><strong>Plausible wrong approach:</strong> Adding retries at every layer to improve reliability multiplies load during an outage.</li>
+<li><strong>How to verify:</strong> The answer shows uncoordinated budgets multiplying attempts.</li>
+</ul>
 <h3 id="exercise-5-explain-overlapping-cidr-risk-across-clusters">Exercise 5: Explain overlapping CIDR risk across clusters.<a class="heading-anchor" href="#exercise-5-explain-overlapping-cidr-risk-across-clusters" aria-label="Link to this section">#</a></h3>
 <p>Cluster-local addresses are not automatically globally unique. Network planning remains necessary.</p>
 <p><strong>Expected:</strong> Address routing can become ambiguous without a deliberate connectivity design.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Show that if two clusters share a Pod CIDR, one address can mean two different Pods.</li>
+<li><strong>Why it is correct:</strong> Routers and proxies cannot tell which cluster an overlapping address belongs to without translation.</li>
+<li><strong>Plausible wrong approach:</strong> Connecting clusters with default CIDRs assumes ranges are unique when they may match.</li>
+<li><strong>How to verify:</strong> The answer says routing can become ambiguous without a deliberate design.</li>
+</ul>
 <h3 id="exercise-6-defend-whether-a-mesh-is-justified-for-a-workload">Exercise 6: Defend whether a mesh is justified for a workload.<a class="heading-anchor" href="#exercise-6-defend-whether-a-mesh-is-justified-for-a-workload" aria-label="Link to this section">#</a></h3>
 <p>Choose architecture from requirements. Adding infrastructure is not proof of maturity or reliability.</p>
 <p>In the retry example, three means three total attempts at each layer, including the initial attempt. With three client attempts and up to three proxy attempts for each, the upstream can see nine attempts. A setting called retries may instead exclude the initial attempt, so inspect its exact definition. For non-idempotent operations, coordinated budgets alone are insufficient; use an operation identity or an outcome-reconciliation protocol to avoid duplicate effects.</p>
-<p><strong>Expected:</strong> Name required capabilities, operational cost and simpler alternatives.</p></article>
+<p><strong>Expected:</strong> Name required capabilities, operational cost and simpler alternatives.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List required capabilities, the operational cost of the mesh and simpler alternatives.</li>
+<li><strong>Why it is correct:</strong> A mesh adds proxies, certificates and upgrades, which are justified only by capabilities the workload needs.</li>
+<li><strong>Plausible wrong approach:</strong> Adopting a mesh because it is popular adds cost without a named need.</li>
+<li><strong>How to verify:</strong> The decision names capabilities, cost and alternatives.</li>
+</ul></article>
   </main>
 </body>
 </html>

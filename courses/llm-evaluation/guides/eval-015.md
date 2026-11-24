@@ -8,7 +8,7 @@ Monitor mature cohorts and service behavior without confusing delayed outcomes o
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-015`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-015` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for monitoring, delayed labels and online experiments in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about label delay and distribution shift: Immature labels give accuracy 1 at coverage 0.5 while the mature cohort gives accuracy 0.5 at coverage 1; identical distributions have JS divergence 0 and disjoint support log 2; an alert triggers a composition and coverage check before any degradation claim. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Monitoring observes a changing process
 
@@ -17,6 +17,14 @@ A deployed assistant receives a changing mix of requests, permissions, documents
 Fast labels can be selected labels. Easy successful requests may receive immediate confirmation, while difficult failures are investigated later. Reporting correctness only among currently labeled items can make early performance look favorable even when the full cohort will not be. A mature-cohort rule can compare outcomes after a common follow-up window, but its assumptions must match the actual label process.
 
 Distribution shift and quality degradation are also distinct. An input histogram can change without altering conditional task performance. Quality can deteriorate with an unchanged coarse histogram if the model or an unmonitored feature changes. Use drift measures as diagnostic signals alongside outcome, coverage, latency and critical-error measurements.
+
+## Key terms
+
+- **Label delay:** The lag between an event and the arrival of its label, which can make early observed accuracy look favorable.
+- **Mature cohort:** A group of requests compared after a common follow-up window so delayed labels have arrived.
+- **Distribution shift:** A change in the input or label distribution, which is distinct from a change in conditional task quality.
+- **Jensen-Shannon divergence:** A symmetric, bounded divergence between two distributions used as a drift diagnostic.
+- **Randomization unit:** The entity assigned to treatment in an online experiment, such as a user rather than a request.
 
 ## Worked case A: the same cohort changes as labels arrive
 
@@ -179,7 +187,7 @@ Compare a histogram to itself.
 
 ### 4. Disjoint support
 
-Compare[1,0] with[0,1] using natural logarithms.
+Compare `[1, 0]` with `[0, 1]` using natural logarithms.
 
 **Expected:** JS divergence is log 2.
 

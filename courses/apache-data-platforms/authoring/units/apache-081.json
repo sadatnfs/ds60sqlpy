@@ -5,6 +5,43 @@
   "minutes": 100,
   "prerequisites": ["apache-020", "apache-044"],
   "concepts": ["versioned batch", "source identity", "Arrow materialization"],
+  "key_terms": [
+    [
+      "Batch lakehouse",
+      "A path combining Parquet files, an Iceberg table commit and a query engine to publish a reproducible batch result."
+    ],
+    [
+      "Snapshot identifier",
+      "The Iceberg snapshot ID that fixes exactly which data files a batch result read."
+    ],
+    [
+      "Source identity",
+      "The recorded fixture, schema, catalog and table identities that bind a result to its exact inputs."
+    ],
+    [
+      "Arrow bridge",
+      "Materializing a selected snapshot as an Arrow table for DataFusion. It does not prove that a direct Spark or Iceberg connector ran."
+    ],
+    [
+      "Identity dossier",
+      "The receipt pairing source, snapshot, reader versions and exact result so another contributor can reproduce and check the batch."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Run the batch into a new output directory",
+      "language": "bash",
+      "code": "cd work/integration\nbash run.sh batch batch-1\ncat .workshop/batch-1/receipt.json",
+      "interpretation": "run.sh refuses an output name that already exists, so each run leaves a separate receipt. The receipt lists two snapshot IDs, the original totals east 11 and west 9, and current totals east 11 and west 11 after the correction row. A second run must use batch-2; reusing a name would overwrite evidence that a reviewer may still need."
+    },
+    {
+      "title": "A content digest for the declared input",
+      "language": "python",
+      "code": "import hashlib\nimport json\n\nrows = [\n    {\"id\": 1, \"region\": \"east\", \"amount\": 4},\n    {\"id\": 2, \"region\": \"west\", \"amount\": 9},\n    {\"id\": 3, \"region\": \"east\", \"amount\": 7},\n]\nencoded = json.dumps(rows, sort_keys=True, separators=(\",\", \":\")).encode()\nprint(hashlib.sha256(encoded).hexdigest()[:16])",
+      "output": "fe0fffef33dcfb0d",
+      "interpretation": "This mirrors logical_digest in batch_snapshot.py. Sorting keys and fixing separators makes the digest depend on values, not on formatting, so two runs over the same logical input agree even if the file layout differs. If a later batch reports a different source digest while claiming the same input, someone changed the data and the comparison between runs is invalid."
+    }
+  ],
   "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",
   "sources": [
     ["Iceberg reliability and table state", "https://iceberg.apache.org/docs/latest/reliability/"],

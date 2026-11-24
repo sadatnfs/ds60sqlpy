@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-039_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="llm-039-explanatory-solutions">llm-039: explanatory solutions<a class="heading-anchor" href="#llm-039-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Read these robustness, fairness and finite safety evidence answers after attempting <em>Compare uneven denominators</em> through <em>Write a finite claim</em>, or after asking for a reveal. They reuse the guide&#x27;s literals, so a mismatch in <em>Analyze a counterfactual pair</em> points to one step. <code>llm-039_solution.py</code> holds the assertions; this page explains how they test counterfactual pair. Then try <em>Write a finite claim</em> on a fresh input you chose before looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Finite robustness and safety evaluations describe observed behavior on specified cases. They cannot prove that every possible future input is safe. Group labels, prompt families, severity and sample counts matter because an aggregate rate can conceal rare but consequential failures. Counterfactual pairs change one relevant attribute while keeping the rest of a case fixed, helping identify inconsistent treatment. A pair is useful only if the expected behavior is justified for the task. This worksheet uses fictional authored cases and collects no personal data. Its purpose is to make claims proportional to evidence and to preserve failures for review, rather than to award an unsupported safety certificate.</p>
 <p><strong>Counterfactual pair:</strong> Two cases differing in a controlled attribute.</p>
@@ -254,7 +254,7 @@ Next evidence: investigate the failure and evaluate additional independent famil
 <p><strong>Expected:</strong> conclusion rejects a universal safety guarantee.</p>
 <p><strong>Verify:</strong> Check that the conclusion mentions the one severe failure, the untested group C and the no-go decision, and that it limits the claim to this finite suite.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one input to <em>Handle an untested group</em> and predict the result first; keep <em>Write a finite claim</em> failing beside the repair. Log a missing the Python standard library separately from a wrong counterfactual pair value in <code>llm-039</code>.</p></article>
   </main>
 </body>
 </html>

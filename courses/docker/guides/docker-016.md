@@ -16,6 +16,14 @@ Copying a binary is not proof that it is self-contained. Dynamically linked prog
 
 Multi-stage design is about an explicit artifact contract. Define what the build produces, what tests validate it, what the final image needs and how the final image is exercised. The runtime test must execute the final stage, because tests in the builder can pass using files or tools absent from the shipped stage.
 
+### Key terms
+
+- **Multi-stage build:** A Dockerfile with more than one `FROM` instruction, where each stage has its own filesystem and configuration.
+- **Builder stage:** A stage that holds the compilers, tools and tests needed to produce an artifact but not to run it.
+- **`COPY --from`:** The instruction form that copies a chosen artifact from an earlier stage into the current one.
+- **Final stage:** The shipped runtime image, which should contain only what the artifact needs to start and run.
+- **Target stage:** A named stage selected with the `--target` build option, which deliberately stops the build there for debugging or testing.
+
 ## Anatomy and a trace you can follow
 
 Name stages with `AS build`, then use `COPY --from=build /path /destination`. The source path refers to that stage’s filesystem, not the local host. `--target` deliberately stops at a named stage for debugging or testing. Do not accidentally distribute a debug stage containing credentials or development-only files.
@@ -95,11 +103,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Testing only in the builder stage and shipping a runtime that lacks a library. Building the wrong `--target`. Assuming a small image is automatically patched and unprivileged.
 
-Exercise 4 is this chapter's boundary case: Diagnose an accidentally shipped debug target. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an accidentally shipped debug target. Read the `--target` flag and the final stage name in the build command, then list the shipped image's files to see which stage produced it. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using multi-stage build, build stage, COPY --from, runtime image and --target. Reconstruct worked example 2 (Distinguish builder and final tests) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. List what the final stage copies from the builder and what it deliberately leaves behind. Then reconstruct worked example 2 (Distinguish builder and final tests) with one different value, predict what changes, and name which of multi-stage build, build stage, COPY --from, runtime image and --target the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

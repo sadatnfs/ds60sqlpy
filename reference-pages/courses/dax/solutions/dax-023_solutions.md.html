@@ -245,23 +245,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Derive the pooled ratio as a weighted average of the two category ratios.</p>
 <p>(19.2 <em> 5 + (91/12) </em> 12) / 17 = 11.</p>
+<p><strong>Why it fits this model:</strong> The pooled ratio weights each category&#x27;s ratio by its units: Home 19.2 x 5 = 96 and Paper (91 / 12) x 12 = 91, so 187 / 17 = 11.</p>
+<p><strong>Tempting mistake:</strong> A simple mean of 19.2 and about 7.583 is about 13.39. That gives Home&#x27;s five units as much weight as Paper&#x27;s twelve.</p>
+<p><strong>How to confirm:</strong> The weighted formula returns 11, which matches PooledNetPerUnit in case B.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Filter the model to Paper only.</p>
 <p>The pooled ratio and sum of category ratios both equal 91/12. This restricted test does not establish general equivalence.</p>
+<p><strong>Why it fits this model:</strong> Under Paper only one category contributes, so DIVIDE over the total and SUMX over one category both give 91 / 12, about 7.583.</p>
+<p><strong>Tempting mistake:</strong> Concluding from this match that the sum of ratios is a valid total is the error. With both categories present they differ: 11 against about 26.78.</p>
+<p><strong>How to confirm:</strong> Under Paper both measures return about 7.5833; with no filter they return 11 and about 26.7833.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a separately named equal-category average.</p>
 <p>AVERAGEX(VALUES(Product[Category]),DIVIDE([NetRevenue],[QuantitySold])) averages the two nonblank ratios equally; label it accordingly.</p>
+<p><strong>Why it fits this model:</strong> AVERAGEX over VALUES(Product[Category]) gives each category equal weight. Travel&#x27;s ratio is BLANK and skipped, so the result is (19.2 + 7.583) / 2, about 13.39.</p>
+<p><strong>Tempting mistake:</strong> Adding a third argument of 0 to DIVIDE turns Travel into a 0 and drags the average to about 8.93, as if Travel had sold units for free.</p>
+<p><strong>How to confirm:</strong> Expect about 13.3917 under a name such as Equal Category Net Per Unit, shown beside the pooled 11.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose changing a distinct-customer total to SUMX over categories.</p>
 <p>That counts customer-category memberships rather than unique customers. A matching visual row sum does not preserve the metric.</p>
+<p><strong>Why it fits this model:</strong> DISTINCTCOUNT(Sales[CustomerKey]) evaluated at the total counts Ada, Bo and Cy once each, 3, even though Bo and Cy appear in both categories.</p>
+<p><strong>Tempting mistake:</strong> SUMX over categories adds Paper&#x27;s 3 and Home&#x27;s 2 and returns 5. The visual total may match the sum of rows, but the measure now counts customer-category pairs.</p>
+<p><strong>How to confirm:</strong> The grand total of the distinct measure is 3, while the SUMX version is 5.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why Travel is absent from the first table.</p>
 <p>SUMMARIZECOLUMNS omits that all-blank result row. A SELECTCOLUMNS projection or zero-filled measure can have different row-retention behavior.</p>
+<p><strong>Why it fits this model:</strong> Travel has only Bag, which has no sales, so Revenue, Units and NetPerUnit are all BLANK and SUMMARIZECOLUMNS drops the row.</p>
+<p><strong>Tempting mistake:</strong> Adding COALESCE(..., 0) to make Travel appear changes the measures, so Travel now shows 0 revenue and 0 units, which looks like an observed outcome.</p>
+<p><strong>How to confirm:</strong> The case returns two rows. <code>ADDCOLUMNS ( VALUES ( Product[Category] ), &quot;Revenue&quot;, [NetRevenue] )</code> returns three, with Travel BLANK.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer total reasoning to inventory at month end.</p>
 <p>The total over time should use the intended closing or average-balance definition, not sum all snapshots.</p>
+<p><strong>Why it fits this model:</strong> A stock balance adds across products but not across dates. A closing-balance total over a quarter should take the last snapshot, not the sum.</p>
+<p><strong>Tempting mistake:</strong> If Notebook held 10 units on January 31 and 6 on February 28, summing snapshots reports 16 units in stock, which never existed on any day.</p>
+<p><strong>How to confirm:</strong> A closing-balance measure over both months returns 6, and an average balance returns 8; the sum, 16, matches neither.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

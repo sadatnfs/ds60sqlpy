@@ -30,7 +30,7 @@ Read the mechanisms and two worked examples, then complete the [learner workshee
 
 - **Spark Connect:** A client/server interface transmitting unresolved logical plans and results, with a separate compatibility and API-support boundary from classic embedded Spark.
 
-The classroom's local[2] worker is a specific classic Spark execution boundary. The driver and local task execution share one machine and the prepared process environment. That convenience can conceal assumptions that fail when driver and executors are separated. This lesson makes those assumptions visible before considering any remote deployment. Its diagrams and specification are fixed reasoning inputs, and none is a command to submit.
+The classroom's `local[2]` worker is a specific classic Spark execution boundary. The driver and local task execution share one machine and the prepared process environment. That convenience can conceal assumptions that fail when driver and executors are separated. This lesson makes those assumptions visible before considering any remote deployment. Its diagrams and specification are fixed reasoning inputs, and none is a command to submit.
 
 ```mermaid
 flowchart LR
@@ -123,9 +123,9 @@ The logical transformation may have a supported Connect equivalent while the int
 
 Annotate the local, client-mode and cluster-mode diagrams with driver location, executor/task execution, resource allocation and result collection. Explain one failure introduced by moving the driver.
 
-**Inputs/evidence:** For spark-030 Exercise 1, The three diagrams and the proposal stating cluster deploy mode.
+**Inputs/evidence:** The three diagrams and the proposal stating cluster deploy mode.
 
-**Expected result/shape:** For spark-030 Exercise 1, A role/location table for all three layouts, with collect returning to the driver wherever it runs and resource allocation assigned to the cluster manager.
+**Expected result/shape:** A role/location table for all three layouts, with collect returning to the driver wherever it runs and resource allocation assigned to the cluster manager.
 
 **Verify:** Name every role and trace a collected 30-row result to the actual driver process in each layout; identify the submitting-host-loss or remote-driver-environment failure.
 
@@ -135,9 +135,9 @@ Annotate the local, client-mode and cluster-mode diagrams with driver location, 
 
 Review the proposed/driver-local/input.parquet path. State the visibility problem and specify a bounded replacement contract without choosing or contacting a real service.
 
-**Inputs/evidence:** For spark-030 Exercise 2, The input path in the sanitized proposal and evidence that the file exists only on the submitting machine.
+**Inputs/evidence:** The input path in the sanitized proposal and evidence that the file exists only on the submitting machine.
 
-**Expected result/shape:** For spark-030 Exercise 2, An explicit data-location/distribution contract naming driver and executor visibility, authorization,30-row fixture identity and readback verification.
+**Expected result/shape:** An explicit data-location/distribution contract naming driver and executor visibility, authorization,30-row fixture identity and readback verification.
 
 **Verify:** Reject automatic shared-path assumptions and list the exact host/process where existence and content must be checked.
 
@@ -147,9 +147,9 @@ Review the proposed/driver-local/input.parquet path. State the visibility proble
 
 Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.
 
-**Inputs/evidence:** For spark-030 Exercise 3, Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.
+**Inputs/evidence:** Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.
 
-**Expected result/shape:** For spark-030 Exercise 3, A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.
+**Expected result/shape:** A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.
 
 **Verify:** Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately.
 
@@ -159,9 +159,9 @@ Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothet
 
 Reject a task closure that captures an open driver database connection and writes one audit row per invocation. Propose separate serialization, lifecycle and idempotency contracts.
 
-**Inputs/evidence:** For spark-030 Exercise 4, An open driver connection captured by a task function and evidence that a failed task can be retried.
+**Inputs/evidence:** An open driver connection captured by a task function and evidence that a failed task can be retried.
 
-**Expected result/shape:** For spark-030 Exercise 4, No connection object serialized from the driver; a defined task-side resource lifecycle if external IO is later authorized, and a stable operation identity preventing duplicate external effects.
+**Expected result/shape:** No connection object serialized from the driver; a defined task-side resource lifecycle if external IO is later authorized, and a stable operation identity preventing duplicate external effects.
 
 **Verify:** Explain why serializability alone would not guarantee exactly-once writes and name the cleanup and deduplication evidence needed.
 
@@ -171,9 +171,9 @@ Reject a task closure that captures an open driver database connection and write
 
 Classify which existing classic capabilities can be assumed in a proposed Connect profile, and list the compatibility and lifecycle tests required before exposing it as ready.
 
-**Inputs/evidence:** For spark-030 Exercise 5, The existing _jdf/queryExecution and RDD-based diagnostic helpers, plus the proposed remote logical-plan client.
+**Inputs/evidence:** The existing _jdf/queryExecution and RDD-based diagnostic helpers, plus the proposed remote logical-plan client.
 
-**Expected result/shape:** For spark-030 Exercise 5, Classic internals are not assumed available; semantic goldens are retained while a separate supported diagnostic/runtime adapter is qualified.
+**Expected result/shape:** Classic internals are not assumed available; semantic goldens are retained while a separate supported diagnostic/runtime adapter is qualified.
 
 **Verify:** List client/server version checks, API support, cancellation, result limits, authentication and cleanup receipts without claiming any already ran.
 
@@ -183,9 +183,9 @@ Classify which existing classic capabilities can be assumed in a proposed Connec
 
 Turn the sanitized proposal into a go/no-go review record with explicit evidence tiers and rollback ownership. Keep the worksheet read-only.
 
-**Inputs/evidence:** For spark-030 Exercise 6, All previous design findings, the 30-row/schema/digest contract and only an existing local classic runtime receipt.
+**Inputs/evidence:** All previous design findings, the 30-row/schema/digest contract and only an existing local classic runtime receipt.
 
-**Expected result/shape:** For spark-030 Exercise 6, A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness; unresolved path/package/Connect gaps remain explicit.
+**Expected result/shape:** A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness; unresolved path/package/Connect gaps remain explicit.
 
 **Verify:** Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram or syntax alone.
 
@@ -193,7 +193,7 @@ Turn the sanitized proposal into a go/no-go review record with explicit evidence
 
 ## Common pitfalls
 
-Do not equate local[2] with a two-executor cluster. Do not assume driver files, imports or environment variables are executor-visible. Do not distribute secrets in source archives or captured closures. Do not assume a Scala binary suffix can be changed independently of the selected Spark artifacts. Do not call Connect supported because a classic local transformation worked. Keep proposed architecture, artifact inspection, execution receipts and production acceptance as separate evidence.
+Do not equate `local[2]` with a two-executor cluster. Do not assume driver files, imports or environment variables are executor-visible. Do not distribute secrets in source archives or captured closures. Do not assume a Scala binary suffix can be changed independently of the selected Spark artifacts. Do not call Connect supported because a classic local transformation worked. Keep proposed architecture, artifact inspection, execution receipts and production acceptance as separate evidence.
 
 ## Self-check
 

@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict squares for c(1,3).</p>
 <p>The output is 1,9.</p>
+<p><strong>Approach:</strong> Trace the reference square function: i = 1 writes 1^2 into position 1, and i = 2 writes 3^2 into position 2 of the preallocated output.</p>
+<p><strong>Why it holds here:</strong> <code>numeric(length(x))</code> creates two slots, and each iteration fills exactly one, so the result is 1, 9.</p>
+<p><strong>Tempting mistake:</strong> Mixing preallocation with appending, as in <code>out &lt;- c(out, x[[i]]^2)</code>. The two starting zeros stay in front and the result is 0, 0, 1, 9.</p>
+<p><strong>Verify:</strong> <code>square(c(1, 3))</code> returns c(1, 9) with length 2.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Use an empty input with seq_along.</p>
 <p>No iterations occur and the output is numeric(0).</p>
+<p><strong>Approach:</strong> Call <code>square(numeric(0))</code> and let <code>seq_along</code> decide the iterations.</p>
+<p><strong>Why it holds here:</strong> An empty input has zero valid positions, so <code>seq_along</code> is integer(0), the body never runs, and the preallocated <code>numeric(0)</code> is returned unchanged.</p>
+<p><strong>Tempting mistake:</strong> Adding a guard that returns NULL for empty input. NULL is not numeric(0), so callers that check type or combine results get a different object than for any other input.</p>
+<p><strong>Verify:</strong> <code>identical(square(numeric(0)), numeric(0))</code> returns TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a loop summing only positive values.</p>
 <p>For -2,3,4 the total is seven.</p>
+<p><strong>Approach:</strong> Set <code>total &lt;- 0</code> before the loop and add each value only when <code>value &gt; 0</code>.</p>
+<p><strong>Why it holds here:</strong> -2 fails the test and is skipped, then 3 and 4 are added, so total goes 0, 3, 7 as the trace table shows.</p>
+<p><strong>Tempting mistake:</strong> Initializing total inside the loop. It resets on every pass, so after the last value total is 4, the contribution of a single element.</p>
+<p><strong>Verify:</strong> After the loop <code>total</code> returns 7, matching the reference check.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose 1:length(x) on empty x.</p>
 <p>It produces 1,0 rather than no indices.</p>
+<p><strong>Approach:</strong> Evaluate <code>1:length(numeric(0))</code> on its own before running any loop that uses it.</p>
+<p><strong>Why it holds here:</strong> length is 0, and the colon operator counts down when the end is below the start, so 1:0 is the two indices 1 and 0.</p>
+<p><strong>Tempting mistake:</strong> Assuming 1:0 is an empty range. Example 3 shows the result: the loop runs twice and returns one NA from an input with no values.</p>
+<p><strong>Verify:</strong> <code>identical(1:0, c(1L, 0L))</code> returns TRUE, and <code>square_bad(numeric(0))</code> prints <code>[1] NA</code>.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Bound a while loop that may not converge.</p>
 <p>A maximum iteration count prevents unbounded work but is not convergence evidence.</p>
+<p><strong>Approach:</strong> Combine the state test with a step bound in the condition, increment steps on each pass, and test the state again after the loop.</p>
+<p><strong>Why it holds here:</strong> Halving 20 gives 10, 5 and 2.5, so the state rule ends the loop after 3 passes, well inside the bound of 10.</p>
+<p><strong>Tempting mistake:</strong> Treating any exit as convergence. If the update never brought state below 3, the loop would stop at 10 steps and the code would still report success.</p>
+<p><strong>Verify:</strong> <code>steps</code> returns 3 and <code>state</code> is 2.5, and the separate <code>state &lt;= 3</code> check shows which rule ended the loop.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Compare a clear loop with a vectorized equivalent.</p>
 <p>Equivalent ordinary cases do not remove the need to test missingness and boundary policies.</p>
+<p><strong>Approach:</strong> Compare the loop with <code>x^2</code> using <code>identical()</code> on ordinary, empty and missing inputs.</p>
+<p><strong>Why it holds here:</strong> Both forms return doubles 1, 9 for c(1, 3), and <code>numeric(0)^2</code> is numeric(0), so identical holds in each case.</p>
+<p><strong>Tempting mistake:</strong> Comparing with <code>all(a == b)</code>. For c(1, NA) both forms give 1, NA, but <code>==</code> yields TRUE, NA and <code>all()</code> returns NA, so stopifnot fails on two equal results.</p>
+<p><strong>Verify:</strong> <code>identical(square(c(1, NA)), c(1, NA)^2)</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 4 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

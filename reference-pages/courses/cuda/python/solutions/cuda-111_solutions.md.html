@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-calculate-arithmetic-intensity">Exercise 1: Calculate arithmetic intensity<a class="heading-anchor" href="#exercise-1-calculate-arithmetic-intensity" aria-label="Link to this section">#</a></h3>
 <p>Divide operations by bytes.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate arithmetic intensity</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Calculate arithmetic intensity: 4096 operations over 8192 bytes moved gives 0.5 operations per byte, as the reference asserts.</p>
+<p><strong>Why it is correct here.</strong> Arithmetic intensity compares work with data movement. At 0.5 operations per byte, the kernel needs memory bandwidth far more than compute throughput on typical GPUs.</p>
+<p><strong>A plausible wrong approach.</strong> Dividing bytes by operations gives 2 and inverts the conclusion, suggesting the kernel is compute-heavy.</p>
+<p><strong>How to verify.</strong> Recompute from element counts and element size in the code, then compare with profiler-measured operations and DRAM bytes.</p>
 <h3 id="exercise-2-count-eliminated-bytes">Exercise 2: Count eliminated bytes<a class="heading-anchor" href="#exercise-2-count-eliminated-bytes" aria-label="Link to this section">#</a></h3>
 <p>Count both avoided write and read.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count eliminated bytes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Count eliminated bytes from fusion: an intermediate of 1024 float32 values is 4096 bytes, and fusion avoids both writing and reading it, saving 8192 bytes.</p>
+<p><strong>Why it is correct here.</strong> Without fusion the first kernel writes the intermediate to global memory and the second reads it back. Fusion keeps the value in registers, so both transfers disappear.</p>
+<p><strong>A plausible wrong approach.</strong> Counting only the avoided write gives 4096 bytes and underestimates the saving by half.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>saved == 8192</code>. Compare DRAM bytes in the profiler before and after fusion.</p>
 <h3 id="exercise-3-name-a-profiler-counter">Exercise 3: Name a profiler counter<a class="heading-anchor" href="#exercise-3-name-a-profiler-counter" aria-label="Link to this section">#</a></h3>
 <p>Choose a relevant measured traffic or stall metric.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>name a profiler counter</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Name a relevant profiler counter, such as DRAM bytes read and written or the memory-throughput percentage, since the hypothesis is about memory traffic.</p>
+<p><strong>Why it is correct here.</strong> A counter tied to the hypothesis can confirm or reject it. If DRAM bytes do not fall after fusion, the expected saving did not happen.</p>
+<p><strong>A plausible wrong approach.</strong> Using only total kernel time cannot separate fewer bytes from other effects. Time can also change because of clock variation or a different compiled instruction mix, so a timing-only comparison leaves the mechanism unknown.</p>
+<p><strong>How to verify.</strong> Collect the counter for both versions on the same shape, record the values with the profiler version, and compare them.</p>
 <h3 id="exercise-4-design-one-controlled-change">Exercise 4: Design one controlled change<a class="heading-anchor" href="#exercise-4-design-one-controlled-change" aria-label="Link to this section">#</a></h3>
 <p>Keep all other settings fixed.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design one controlled change</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design one controlled change: apply fusion while keeping the shape, dtype, launch configuration rules, warm-up and timing method fixed.</p>
+<p><strong>Why it is correct here.</strong> Changing one factor attributes any difference in time or counters to that change. Repeating each configuration several times also shows whether the difference exceeds normal run-to-run variation.</p>
+<p><strong>A plausible wrong approach.</strong> Applying fusion and a new block size together leaves the source of a speedup ambiguous. If one change helps and the other hurts, the combined result may even show no difference and hide both effects.</p>
+<p><strong>How to verify.</strong> Diff the two configurations and confirm that only the fusion setting differs.</p>
 <h3 id="exercise-5-test-a-boundary-shape">Exercise 5: Test a boundary shape<a class="heading-anchor" href="#exercise-5-test-a-boundary-shape" aria-label="Link to this section">#</a></h3>
 <p>Use a nonmultiple and a tiny case.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>test a boundary shape</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Test a boundary shape such as 1023 elements, not a multiple of the block size, and a tiny case such as 1 element.</p>
+<p><strong>Why it is correct here.</strong> Fused kernels combine index logic from both stages, so bounds checks are a common source of errors. Odd sizes exercise partial blocks.</p>
+<p><strong>A plausible wrong approach.</strong> Testing only 1024 elements misses an off-by-one bounds check that writes past the end on 1023.</p>
+<p><strong>How to verify.</strong> Compare outputs with the unfused reference for both shapes and use a guard region to detect stray writes.</p>
 <h3 id="exercise-6-explain-a-failed-optimization">Exercise 6: Explain a failed optimization<a class="heading-anchor" href="#exercise-6-explain-a-failed-optimization" aria-label="Link to this section">#</a></h3>
 <p>Relate observed resource use and timing to the rejected hypothesis.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain a failed optimization</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain a failed optimization: if fusion raises register use so occupancy falls, throughput may drop even though DRAM bytes fell, and the hypothesis that traffic limited performance is rejected for that shape.</p>
+<p><strong>Why it is correct here.</strong> Profiler evidence shows which resource changed. Fewer bytes with lower occupancy suggests latency hiding, not bandwidth, became the limit.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the fused version as an improvement because bytes fell ignores the measured timing. The bytes counter confirms the mechanism worked, but the goal was throughput, and that goal was not met for this shape.</p>
+<p><strong>How to verify.</strong> Record registers per thread, achieved occupancy, DRAM bytes and time for both versions, then decide from all four.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Intensity 0.5 and hypothetical 8192 bytes removable traffic.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-111_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -46,7 +46,7 @@ await withService(async (context) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(await created.json(), { id: 'A', value: 2 })`. Restoring the original line brings back the worked observation: 201 created; subsequent 200 list contains exactly A.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(await created.json(), { id: 'A', value: 2 })`. Restoring `JSON.stringify({ id: 'A', value: 2 })` brings back: 201 created; subsequent 200 list contains exactly A.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(await created.json(), { id: 'A', value: 2 })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -69,7 +69,7 @@ await withService(async (context) => {
 });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(await (await request(context, '/items')).json(), [])`; after it the line reads `assert.deepEqual(await (await request(context, '/items')).json(), []);` again and both 400; list remains empty.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(await (await request(context, '/items!')).json(), []);`. Restoring `assert.deepEqual(await (await request(context, '/items')).json(), []);` brings back: both 400; list remains empty.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(await (await request(context, '/items')).json(), [])` accepts.
 

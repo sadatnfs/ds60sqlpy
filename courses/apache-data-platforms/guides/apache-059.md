@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-058`, `apache-057`.
 
+## Key terms
+
+- **Forward index:** The per-column structure that retrieves a document's value, the baseline for every column.
+- **Dictionary encoding:** Mapping each distinct column value to a compact integer identifier that other index structures can reference.
+- **Inverted index:** A structure mapping each value to the documents containing it, which speeds equality filters on moderately selective columns.
+- **Range index:** A structure that speeds interval predicates such as amount between two values.
+- **Sorted column:** A column by which a segment's rows are physically ordered, so a filter on it can locate a contiguous document range.
+
 ## Indexes exchange preparation and storage for query work
 
 A Pinot segment can contain several indexes serving different access patterns.
@@ -107,6 +115,38 @@ It may be unselective, absent from old segments, unused by the selected plan or
 irrelevant to the bottleneck. The two cases first preserve result equality and
 then inspect physical work, making performance a measured claim instead of a
 property inferred from configuration syntax.
+
+## Worked examples
+
+### Index declarations in the table config
+
+```json
+{
+  "tableIndexConfig": {
+    "invertedIndexColumns": ["region"],
+    "rangeIndexColumns": ["amount"]
+  }
+}
+```
+
+From table.json, the inverted index maps each region value to the matching document IDs, and the range index supports comparisons on amount. Both are built when the segment is created, so adding one to an existing table needs a segment reload before it takes effect. A config that lists an index is a request, not proof; confirm it in the segment metadata from the controller before claiming that a query used it.
+
+### An equality and range filter together
+
+```sql
+SELECT
+  id
+FROM
+  ds60_orders
+WHERE
+  region = 'east'
+  AND amount >= 5
+ORDER BY
+  id
+LIMIT 10
+```
+
+The expected result is the single ID 3, because ID 1 is in east but has amount 4. Run EXPLAIN PLAN FOR on the same statement to see which filter operators Pinot chose; an inverted index filter on region and a range filter on amount should appear instead of a full scan. With three rows, timing differences are noise, so compare plans and docs-scanned counts on two separately named tables before arguing about speed.
 
 ## Complete worked source
 

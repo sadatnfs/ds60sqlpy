@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-038`, `apache-056`, `apache-062`.
 
+## Key terms
+
+- **Game day:** A planned exercise that injects one named failure and checks recovery against an independent observation.
+- **Failure injection:** Deliberately causing a specific failure, such as a process restart, in an owned workshop only.
+- **Ownership label:** A random marker the course launchers verify before acting, so experiments never touch unrelated containers or volumes.
+- **Reconciliation:** Reading existing state after an unknown outcome to decide whether a further write is needed, instead of replaying blindly.
+
 ## A recovery exercise starts with a specific failure claim
 
 A game day is useful when it names the failure being injected, the state expected
@@ -74,6 +81,32 @@ It may check only process availability, regenerate the fixture or connect to a
 different project. These cases require exact lifecycle identities, read-only
 state comparison and a controlled typed configuration failure before declaring
 the selected recovery boundary passed.
+
+## Worked examples
+
+### Diff two identity receipts
+
+```python
+before = {"container": "c1", "image": "sha256:aa", "rows": [1, 2, 3]}
+after = {"container": "c2", "image": "sha256:aa", "rows": [1, 2, 3]}
+print({key: (before[key], after[key]) for key in before if before[key] != after[key]})
+```
+
+```text
+{'container': ('c1', 'c2')}
+```
+
+Only the container changed, which is the expected signature of a replacement over retained volumes. The same image and rows show that state and software survived. After a plain resume the dictionary should be empty. Any change in rows is the failure the exercise is looking for, so it should be written down before anything is reinitialized.
+
+### Break one setting in a disposable copy
+
+```bash
+cp -R work/hive work/hive-broken
+cd work/hive-broken
+bash run.sh verify-schema
+```
+
+Change exactly one value in the copy, such as the metastore database name in conf/hive-site.xml, and record the typed failure that verify-schema or start produces. Changing several things at once makes the error impossible to attribute. The original project stays untouched, so recovery means deleting the copy, not repairing the reference.
 
 ## Complete worked source
 

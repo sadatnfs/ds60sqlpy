@@ -23,7 +23,7 @@ def with_parsed(frame):
 
 try_cast makes conversion failure a data value instead of an exception, which is useful only if the failed rows remain identifiable. The original amount_text is retained alongside the parsed Long. The complete pair list catches whitespace, zero, missingness, malformed text, overflow and signed-value behavior separately. A count-only check would not establish any of those semantics.
 
-**Verification evidence:** Compare all eight(event_id, parsed_amount) pairs and the field type with literals.
+**Verification evidence:** Compare all eight (event_id, parsed_amount) pairs and the field type with literals.
 
 ### Exercise 2: Classify missing versus rejected tokens
 
@@ -60,7 +60,7 @@ The branch order preserves source provenance. If parsed NULL were checked first,
 
 Retain valid and missing statuses, then return event_id and parsed_amount aliased as amount_cents. Reject only malformed/overflowing nonnull tokens at this stage.
 
-**Expected:** IDs [1, 2, 3, 4, 7, 8] remain with amounts [100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170.
+**Expected:** IDs [1, 2, 3, 4, 7, 8] remain with amounts [100, 0, 25, NULL, -5, 50]. There are 6 rows,5 known values and total 170.
 
 ```scala
 def acceptedProjection(frame: DataFrame): DataFrame = {
@@ -156,4 +156,6 @@ The domain rule is applied after conversion and retains its own rejected populat
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Add an explicit tolerant parse column) is built inside the program, so opening the lesson fetches nothing; it expects: Ordered parsed values are `100, 0, 25, NULL, NULL, NULL, -5, 50`. The output parsed type is bigint. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

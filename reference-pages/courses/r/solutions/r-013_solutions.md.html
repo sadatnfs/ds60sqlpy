@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict make_multiplier(4)(2).</p>
 <p>The result is eight.</p>
+<p><strong>Approach:</strong> Read the call in two stages: <code>make_multiplier(4)</code> returns a function with factor 4, and <code>(2)</code> calls that function.</p>
+<p><strong>Why it holds here:</strong> The returned function computes x times its captured factor, so 2 times 4 is 8.</p>
+<p><strong>Tempting mistake:</strong> Rewriting it as <code>make_multiplier(4, 2)</code>. The factory takes one argument, so R stops with an unused argument error instead of returning 8.</p>
+<p><strong>Verify:</strong> <code>make_multiplier(4)(2)</code> returns 8.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Create two factories with different factors.</p>
 <p>Their outputs remain independently configured.</p>
+<p><strong>Approach:</strong> Build <code>a &lt;- make_multiplier(2)</code> and <code>b &lt;- make_multiplier(3)</code> as two separate calls.</p>
+<p><strong>Why it holds here:</strong> Each call creates a fresh environment, so a holds factor 2 and b holds factor 3, and neither reads a global setting.</p>
+<p><strong>Tempting mistake:</strong> Using one function that reads a global <code>factor</code> variable. Setting it to 3 for b also changes a, so a(5) becomes 15.</p>
+<p><strong>Verify:</strong> <code>a(5)</code> returns 10 and <code>b(5)</code> returns 15; <code>environment(a)$factor</code> shows 2.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Capture a threshold at construction time.</p>
 <p>Later caller rebinding does not change the captured threshold.</p>
+<p><strong>Approach:</strong> Call <code>force(threshold)</code> in make_threshold before returning the predicate.</p>
+<p><strong>Why it holds here:</strong> The caller sets t to 10, builds the predicate and then sets t to 100. Forcing fixes 10 at construction, so 20 counts as meeting the threshold.</p>
+<p><strong>Tempting mistake:</strong> Leaving out force. The promise is first evaluated when predicate(20) runs, when t is already 100, so the result is FALSE.</p>
+<p><strong>Verify:</strong> <code>predicate(20)</code> returns TRUE, which the reference checks.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a lazy factory changing after caller configuration changes.</p>
 <p>Force the argument when fixed configuration is intended.</p>
+<p><strong>Approach:</strong> Trace lazy_factory: v is 2 at construction, becomes 5, and <code>lazy(3)</code> is the first call that reads factor. Fix it by forcing the argument.</p>
+<p><strong>Why it holds here:</strong> The promise reads v only on first use, so it sees 5 and returns 15 rather than the intended 6.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>lazy(3)</code> once before changing v. That does evaluate the promise and fix it at 2, but the result now depends on call order, which any refactor can break.</p>
+<p><strong>Verify:</strong> The reference <code>lazy(3)</code> returns 15; the forced <code>fixed(3)</code> from Example 2 returns 6.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Reject an invalid scalar configuration before returning a closure.</p>
 <p>No partially configured function is returned for missing or nonfinite input.</p>
+<p><strong>Approach:</strong> Force the factor, then check numeric, length one and finite before building the closure.</p>
+<p><strong>Why it holds here:</strong> <code>NA_real_</code> is numeric and has length 1, so only <code>is.finite()</code> rejects it. Checking at construction reports the problem where the configuration was set.</p>
+<p><strong>Tempting mistake:</strong> Deferring the check to the inner function or skipping it. <code>make_multiplier(NA_real_)(2)</code> would then return NA, and the error, if any, appears far from the bad setting.</p>
+<p><strong>Verify:</strong> In the reference <code>bad</code> returns TRUE, and <code>is.finite(NA_real_)</code> returns FALSE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain why hidden global mutation complicates a model pipeline.</p>
 <p>Prefer explicit inputs or documented captured state with reset and reproducibility rules.</p>
+<p><strong>Approach:</strong> Pass configuration as arguments or capture it with force, and avoid <code>&lt;&lt;-</code> updates that change behavior between calls.</p>
+<p><strong>Why it holds here:</strong> This lesson already shows a hidden dependency: <code>lazy(3)</code> returned 15 or 6 depending on code that ran between definition and use.</p>
+<p><strong>Tempting mistake:</strong> A closure that increments a counter with <code>&lt;&lt;-</code> to label runs. Rerunning a pipeline in the same session gives different labels than a fresh session, so results cannot be reproduced.</p>
+<p><strong>Verify:</strong> Calling <code>fixed(3)</code> before and after <code>rate &lt;- 5</code> returns 6 both times.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Containers in the same Pod share a network namespace. They can communicate through localhost and share the Pod’s port space. Containers in different Pods normally have different network namespaces and Pod addresses. This makes a Pod a unit of co-location and shared networking rather than merely a label grouping unrelated containers.</p>
 <p>Loopback always refers to the caller’s network namespace. A sidecar in the same Pod can reach an application bound to 127.0.0.1:8080. A different Pod cannot reach that listener through the first Pod’s loopback address. To accept traffic on the Pod interface, the application generally listens on an appropriate non-loopback address, often 0.0.0.0 for IPv4.</p>
 <p>A sidecar is a supporting container associated with an application Pod. It may proxy traffic, collect logs or perform another bounded role. Co-location introduces shared fate, startup and shutdown ordering, resource competition and port conflicts. A sidecar is not automatically a separate security or availability boundary.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Shared network namespace:</strong> All containers in a Pod share one network namespace, so they share an IP address and one port space.</li>
+<li><strong>Loopback address:</strong> 127.0.0.1 or ::1, which reaches only processes in the same network namespace, such as another container in the same Pod.</li>
+<li><strong>Sidecar container:</strong> A helper container, such as a proxy, that runs in the same Pod as the application and shares its network namespace.</li>
+<li><strong>Port conflict:</strong> Two containers in one Pod trying to bind the same address and port, so the second bind fails.</li>
+<li><strong>Non-loopback listener:</strong> A process listening on an address other than loopback, often 0.0.0.0 for IPv4, so traffic from outside the Pod can reach it.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>The containerPort field documents a container’s intended port and can supply a name used elsewhere. It does not start a listener. Two containers in one Pod cannot both bind the same address/port combination independently. Their filesystem namespaces can still differ even though networking is shared.</p>
 <p>An emptyDir volume is one way to share files within a Pod, but it is not implied by shared networking and does not survive Pod replacement. Keep the network and storage contracts distinct when explaining a sidecar design.</p>

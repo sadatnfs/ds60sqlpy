@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="torch-022-explanatory-solutions">torch-022: explanatory solutions<a class="heading-anchor" href="#torch-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers only after attempting Attention, transformer masks and information boundaries yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Compute uniform causal mixtures, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests SDPA, Mask polarity, Prefix invariance. After a pass, choose a new input for exercise 6, Keep inference dropout disabled, without looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Attention forms weighted combinations of value vectors using query-key comparisons. A causal decoder restricts each query to current and earlier positions. PyTorch&#x27;s functional scaled_dot_product_attention uses boolean True for allowed positions, while other attention APIs such as Multihead Attention key_padding_mask use True for ignored keys. Mask polarity belongs to the exact parameter contract, not to the framework name.</p>
 <p>The functional API also applies dropout according to its <code>dropout_p</code> argument; calling an enclosing <code>module.eval</code> does not automatically change an explicit nonzero probability. For an evaluation oracle, pass <code>dropout_p=0</code>. Equal queries and keys make legal scores uniform, so the expected outputs are prefix means. Nonuniform scores and future-only perturbations add stronger checks than causal-looking triangles alone.</p>
@@ -388,7 +388,7 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <p><strong>Expected:</strong> repeated evaluation matches.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>again</code> matches <code>out</code> exactly.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Repeat exercise 4, Reject an all-masked row, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Translate mask polarity explicitly, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
   </main>
 </body>
 </html>

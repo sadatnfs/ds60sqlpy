@@ -23,6 +23,29 @@ struct LessonMain {
     }
 
     do {
+      // Task 1: Predict and explain
+      let values = await withTaskGroup(of: Int.self, returning: [Int].self) { group in
+        for value in [1, 2, 3] { group.addTask { value * 2 } }
+        var owned: [Int] = []
+        for await result in group { owned.append(result) }
+        return owned
+      }
+      precondition(values.count == 3 && values.sorted() == [2, 4, 6])
+    }
+
+    do {
+      // Task 2: Guided modification
+      let inputs = [3, 1, 2]
+      let ordered = await withTaskGroup(of: (Int, Int).self, returning: [Int].self) { group in
+        for (index, value) in inputs.enumerated() { group.addTask { (index, value * 2) } }
+        var pairs: [(Int, Int)] = []
+        for await pair in group { pairs.append(pair) }
+        return pairs.sorted { $0.0 < $1.0 }.map { $0.1 }
+      }
+      precondition(ordered == [6, 2, 4])
+    }
+
+    do {
       // Task 3: Independent construction
       let inputs = [1, 2, 3, 4, 5]
       let (results, peak) = await withTaskGroup(
@@ -53,6 +76,45 @@ struct LessonMain {
         return (collected.sorted(), peak)
       }
       precondition(results == [10, 20, 30, 40, 50] && peak == 2)
+    }
+
+    do {
+      // Task 4: Diagnose a defect
+      let doubled = await withTaskGroup(of: Int.self, returning: [Int].self) { group in
+        for value in [4, 5] { group.addTask { value * 2 } }
+        var results: [Int] = []
+        for await result in group { results.append(result) }
+        return results.sorted()
+      }
+      precondition(doubled == [8, 10])
+    }
+
+    do {
+      // Task 5: Boundary evidence
+      enum ChildError: Error { case failed }
+      let empty = try await withThrowingTaskGroup(of: Int.self, returning: Int.self) { group in
+        var total = 0
+        for try await value in group { total += value }
+        return total
+      }
+      precondition(empty == 0)
+      var failed = false
+      do {
+        _ = try await withThrowingTaskGroup(of: Int.self, returning: Int.self) { group in
+          for value in [1, 2, 3] {
+            group.addTask {
+              if value == 2 { throw ChildError.failed }
+              return value
+            }
+          }
+          var total = 0
+          for try await value in group { total += value }
+          return total
+        }
+      } catch ChildError.failed {
+        failed = true
+      }
+      precondition(failed)
     }
     print("swift-029: passed")
   }

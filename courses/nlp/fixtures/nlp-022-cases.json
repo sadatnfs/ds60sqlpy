@@ -19,12 +19,12 @@
     {
       "exercise": 4,
       "task": "Fuse the two supplied rankings with k=60.",
-      "expected": "b first with score1/62+1/61; duplicate IDs in one ranking rejected."
+      "expected": "b first with score 1/62+1/61; duplicate IDs in one ranking rejected."
     },
     {
       "exercise": 5,
       "task": "Evaluate [d2,d0,d1] using the declared graded relevance.",
-      "expected": "MRR.5 and nDCG=(7/log2(3)+3/2)/(7+3/log2(3))."
+      "expected": "MRR .5 and nDCG=(7/log2(3)+3/2)/(7+3/log2(3))."
     },
     {
       "exercise": 6,

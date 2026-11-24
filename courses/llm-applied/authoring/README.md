@@ -22,6 +22,16 @@ python courses/llm-applied/authoring/build.py --guides-only
 
 This mode skips the plan writer, manifest writes, learner/reference writes and review-matrix writes. The ordinary build also includes the textbook narratives, but should be used only when intentionally regenerating the whole course. `textbook_protected_artifacts.json` records 73 frozen files, including both course manifests, and 97 pre-existing fences. The focused test checks every byte/hash. Earlier runtime receipts retain their historical full-guide hashes; their executed-program hashes remain exact after this prose edition. `textbook_parity_receipt.json` records the final verification.
 
+## Plan outcomes
+
+`outcomes.py` holds each lesson's learner-facing outcome: one sentence that starts with an observable action verb and names what the learner does in that lesson's exercises. The classroom lesson header shows it, and the renderer checks it with the shared `outcome_issue` rule from `scripts/build_coverage_matrix.py`. After editing an outcome, update only the plan:
+
+```text
+python courses/llm-applied/authoring/build.py --outcomes-only
+```
+
+This mode rewrites only the `outcome` fields in `track.json` and leaves guides, manifests, programs and review ledgers untouched. Because `track.json` is a frozen display-metadata file, record the new file hash in its `curriculum/presentation-parity.json` binding with a `presentation_history` entry, as [validation](../../../docs/validation.md) describes; its protected non-prose metadata hash must not change.
+
 ## Unified classroom presentation
 
 Author mathematical expressions with explicit LaTeX `\( ... \)` and standalone

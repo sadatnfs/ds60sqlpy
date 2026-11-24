@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A value has a type that influences allowed operations and comparison behavior. PHP provides integers, floating-point numbers, strings, booleans, arrays, objects and null among its types. Null commonly represents absence, but its meaning belongs to the application&#x27;s contract. Zero, an empty string and false are different values and should not be casually treated as interchangeable missing data.</p>
 <p>Loose comparison can coerce values before comparison; strict comparison checks both type and value. The string &#x27;0&#x27; and integer 0 may look similar when printed but are different under strict equality. A form normally supplies strings, so validation and explicit conversion are necessary before treating them as trusted numeric data. Strict typing at function boundaries does not validate arbitrary request arrays.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Scalar type:</strong> One of PHP&#x27;s single-value types, <code>int</code>, <code>float</code>, <code>string</code> and <code>bool</code>.</li>
+<li><strong>Strict comparison:</strong> The <code>===</code> operator, which is true only when both the value and the type match, unlike the converting <code>==</code>.</li>
+<li><strong>Null:</strong> The value that represents absence; a nullable type such as <code>?int</code> accepts an integer or null.</li>
+<li><strong>Null coalescing operator:</strong> The <code>??</code> operator, which returns its left side when that is set and not null, and its right side otherwise.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use <code>===</code> and <code>!==</code> when type distinctions are part of the contract. <code>get_debug_type</code> helps inspect the type. The null-coalescing operator <code>??</code> supplies a default for an absent or null value, while <code>array_key_exists</code> can distinguish a present null entry from a missing key. Floating-point values approximate many decimal fractions, so financial examples later use integer minor units.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -218,6 +225,16 @@ var_export($text === $number);</code></pre>
 var_export(array_key_exists(&#x27;note&#x27;, $record));
 var_export($record[&#x27;note&#x27;] ?? &#x27;No note&#x27;);</code></pre>
 <p><strong>Expected observation:</strong> The key exists, but the coalescing expression uses the fallback.</p>
+<h3 id="contrast-case-loose-equality-between-strings-and-other-types">Contrast case: loose equality between strings and other types<a class="heading-anchor" href="#contrast-case-loose-equality-between-strings-and-other-types" aria-label="Link to this section">#</a></h3>
+<p>Each comparison below prints true with <code>==</code>. Rewrite each with <code>===</code> and compare the results.</p>
+<pre class="highlighted-code"><code class="language-php">var_export(&#x27;1e1&#x27; == &#x27;10&#x27;);  // two numeric strings
+echo &quot;\n&quot;;
+var_export(&#x27;0&#x27; == false);
+echo &quot;\n&quot;;
+var_export(&#x27;&#x27; == null);
+echo &quot;\n&quot;;
+var_export(&#x27;1e1&#x27; === &#x27;10&#x27;);</code></pre>
+<p>Loose equality converts operands first. Two numeric strings are compared as numbers, so <code>&#x27;1e1&#x27;</code> and <code>&#x27;10&#x27;</code> are equal because both mean ten. The string <code>&#x27;0&#x27;</code> converts to false, and an empty string loosely equals null. With <code>===</code> all of these are false because the types or exact string contents differ, which is what the last line prints. If a role code or an identifier is checked with <code>==</code>, a different spelling can pass, so validation code in this course uses strict comparison after deliberate conversion.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-strict-equality-for-0-0-and-false">Exercise 1: Predict strict equality for &#x27;0&#x27;, 0 and false.<a class="heading-anchor" href="#exercise-1-predict-strict-equality-for-0-0-and-false" aria-label="Link to this section">#</a></h4>

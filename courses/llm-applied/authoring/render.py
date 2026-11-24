@@ -6,11 +6,12 @@ ROOT = Path(__file__).resolve().parents[3]
 SOURCE_ROOT = ROOT
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
+from outcomes import OUTCOMES  # noqa: E402
+
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
 
 SPECS = {}
 GUIDES_ONLY = False
-DEFAULT_DIAGNOSIS = "When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result."
 
 
 def ex(title, prompt, expected, code, why):
@@ -209,6 +210,239 @@ def polish_textbook_prose(document):
     return "".join(part if part.startswith(("```", "`", "](")) else clean(part) for part in pieces)
 
 
+SPACING_WORDS = (
+    "is|are|to|from|of|a|by|with|mean|coverage|gives|becomes|equals|about|approximately|"
+    "accuracy|has|in|at|and|or|reports|produces|yields|rate|margin|score|loss"
+)
+
+
+def space_prose(document):
+    """Separate words glued to numbers, lists and shapes in Markdown prose only."""
+
+    def clean(part):
+        for old, new in {
+            "compareW@x forx[": "compare W@x for x [",
+            "“test,false,internal traffic”": "`test,false,internal traffic`",
+            "by sortedID": "by sorted ID",
+            "authorizedanswercitesprivate": "authorized answer cites private",
+            "raisesRuntimeError": "raises `RuntimeError`",
+            "4-bitCPU": "4-bit CPU",
+            "groupAmean 2": "group A mean 2",
+            "errorA-errorB": "error A minus error B",
+            "adapterParameters": "adapter parameters",
+            "Documentb receives": "Document b receives",
+            "whilea receives": "while a receives",
+            "candidatesa, b": "candidates a, b",
+            "score ofb as": "score of b as",
+            "For tf1, 2, 10": "For tf values 1, 2 and 10",
+            "columns account_type,eligible": "columns `account_type`, `eligible`",
+            "inputs=sequence[:-1] and targets=sequence[1:]": "`inputs=sequence[:-1]` and `targets=sequence[1:]`",
+        }.items():
+            part = part.replace(old, new)
+        part = re.sub(
+            r"Assignq ?1, q2 to ?family ?F and ?q ?3 to ?G",
+            "Assign q1 and q2 to family F and q3 to G",
+            part,
+        )
+        part = re.sub(
+            r"\b(for|and)(comet_period|restricted_threshold|score_matrix)\b", r"\1 `\2`", part
+        )
+        part = re.sub(
+            r"\b(to)?(family|favors|update|dequantized)([A-Z])\b",
+            lambda m: (m.group(1) + " " if m.group(1) else "") + m.group(2) + " " + m.group(3),
+            part,
+        )
+        part = re.sub(r"\b(coverage|is|are|of|at)\.(\d)", r"\1 0.\2", part)
+        part = re.sub(
+            rf"\b({SPACING_WORDS})(?=[-+]?\d+(?:\.\d+)?(?![A-Za-z\d]))",
+            r"\1 ",
+            part,
+        )
+        part = re.sub(r"\b([a-z]{2,})\[(-?\d+), ?(-?\d+)\)", r"\1 \\([\2, \3)\\)", part)
+        part = re.sub(
+            r"\b([A-Za-z]{2,}) ?(\[[-+\d.,/ \[\]eNa]*(?:\d|NaN)\]+)",
+            lambda m: m.group(1) + " `" + re.sub(r",(?=\S)", ", ", m.group(2)) + "`",
+            part,
+        )
+        part = re.sub(r"\b([a-z]{2,}) ?\[([a-z](?:, ?[a-z])+)\]", r"\1 `[\2]`", part)
+        part = re.sub(r"\b(is|are)\((?=-?\d)", r"\1 (", part)
+        part = re.sub(r"\bshape\((\d+(?:, ?\d+)*)\)", r"shape `(\1)`", part)
+        part = re.sub(r"\b([A-Za-z]{3,}):(\d)", r"\1: \2", part)
+        part = re.sub(r"\b([a-z]{3,}),(?=[a-z]{3,}\b)", r"\1, ", part)
+        return part.replace("`test, false, internal traffic`", "`test,false,internal traffic`")
+
+    pieces = re.split(
+        r"(```[\s\S]*?```|`[^`\n]*`|\]\([^\n]*?\)|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])", document
+    )
+    return "".join(
+        part if part.startswith(("```", "`", "](", "\\(", "\\[")) else clean(part)
+        for part in pieces
+    )
+
+
+def authored_outcome(id):
+    """Return the lesson's authored outcome after the shared observable-verb check."""
+    from scripts.build_coverage_matrix import outcome_issue
+
+    outcome = OUTCOMES[id]
+    issue = outcome_issue(outcome)
+    assert issue is None, f"{id} outcome {issue}"
+    return outcome
+
+
+def write_outcomes():
+    """Update only plan outcomes, preserving every other track.json value."""
+    path = ROOT / "courses" / "llm-applied" / "track.json"
+    plan = json.loads(path.read_text())
+    ids = [p["id"] for p in plan["lessons"]]
+    assert sorted(ids) == sorted(OUTCOMES), "outcomes.py must cover every planned lesson"
+    for p in plan["lessons"]:
+        p["outcome"] = authored_outcome(p["id"])
+    path.write_text(json.dumps(plan, indent=2) + "\n")
+    print("Updated", len(ids), "plan outcomes")
+
+
+def sentence(text):
+    """Return a fragment as a sentence with a capital initial and a final period."""
+    text = text.strip()
+    if not text:
+        return text
+    if re.fullmatch(r"[a-z]+[,;:]?", text.split()[0]):
+        text = text[0].upper() + text[1:]
+    return text if text.endswith((".", "?", "!")) else text + "."
+
+
+def lesson_prose(id, p, s, plan, reading, learner, solution):
+    """Build the guide and explanation paragraphs from this lesson's own fixtures."""
+    titles = {x["id"]: x["title"] for x in plan["lessons"]}
+    order = [x["id"] for x in plan["lessons"]]
+    ex = s["exercises"]
+    a, b, c, last = ex[0], ex[1], ex[2], ex[-1]
+    t = [k for k, v in s["terms"]]
+    topic = p["title"].removeprefix("Capstone: ")
+    topic = topic[0].lower() + topic[1:]
+    finish = sentence(a["expected"]) + " " + sentence(last["expected"])
+    blob = s["imports"] + s["helper"] + "".join(e["code"] for e in ex)
+    if "torch" in blob:
+        stack = "PyTorch" + (" and NumPy" if "np." in blob else "")
+    elif "np." in blob:
+        stack = "NumPy"
+    else:
+        stack = "the Python standard library"
+    prereqs = p["prerequisites"]
+    named = [f"`{q}` ({titles.get(q, q)})" for q in prereqs]
+    named = ", ".join(named[:-1]) + " and " + named[-1] if len(named) > 1 else "".join(named)
+    later = order[order.index(id) + 1 :]
+    capstone = not later
+    out = {}
+    out["level"] = f"{p['level'].capitalize()}; approximately {p['minutes']} minutes. " + (
+        "Direct prerequisites: "
+        + named
+        + f". They introduce the notation this lesson needs for {t[0].lower()} and {t[1].lower()}."
+        if prereqs
+        else f"No prerequisite lesson; {t[0].lower()} and {t[1].lower()} are defined below."
+    )
+    if reading:
+        out["runtime"] = (
+            f"Use the reading worksheet `{learner}`. *{a['title']}*, *{b['title']}* and "
+            f"*{c['title']}* are text cases; no execution or model download is required."
+        )
+    else:
+        out["runtime"] = (
+            f"Run `{learner}` in the declared `{p['runtime']}` profile. *{a['title']}*, "
+            f"*{b['title']}* and *{c['title']}* need only {stack} and literal fixtures.\n\n"
+            f"Copy it to `.learning/expansion/{id}/` or the saved pad before editing; "
+            "nothing is installed or downloaded."
+        )
+    if reading:
+        out["study"] = (
+            f"Read *{a['title']}*, *{b['title']}* and *{c['title']}* in order, writing the assumptions and "
+            f"conclusion for each. Compare them with the stated observations, beginning with "
+            f"{sentence(a['expected'])} Then answer the six cases, ending with *{last['title']}*. "
+            "These are text cases, not programs to execute. The optional pretrained recipe is a "
+            "separate, deliberately prepared execution path; reading this chapter does not run or "
+            "qualify it."
+        )
+    else:
+        out["study"] = (
+            f"Run Examples A to C in one scratch file: *{b['title']}* and "
+            f"*{c['title']}* reuse the helper and fixture introduced in "
+            f"*{a['title']}*. Before running Example A, write its intermediate "
+            f"quantities by hand and predict the result. It should give: {sentence(a['expected'])} "
+            f"Example B should give: {sentence(b['expected'])} Example C should give: "
+            f"{sentence(c['expected'])} Use the tolerance in each assertion; counts, "
+            "identities and decisions must match exactly."
+        )
+    out["prediction"] = (
+        f"Before reading the code for *{b['title']}*, predict its result from the prompt alone: "
+        f"{sentence(b['prompt'])} Write the guess beside the stated outcome ({b['expected'].rstrip('.')}). "
+        f"Then predict how the decisive case, *{last['title']}*, should end: "
+        f"{sentence(last['prompt'])} For {topic}, the finish condition is: {finish}"
+    )
+    out["hints"] = (
+        f"Hint 1: restate {t[0].lower()} and {t[1].lower()} for the fixture in "
+        f"*{a['title']}*. Hint 2: change one literal in *{b['title']}* and note which "
+        f"intermediate value moves. Hint 3: compare your fourth exercise, *{ex[3]['title']}*, "
+        f"with its stated result ({ex[3]['expected'].rstrip('.')}). If *{last['title']}* "
+        "accepts an input it should reject, look for the missing check rather than widening a tolerance."
+    )
+    out["self"] = (
+        f"Close the examples and explain {', '.join(x.lower() for x in t[:2])} and {t[2].lower()} using "
+        f"*{a['title']}*. Recompute its result ({a['expected'].rstrip('.')}) from the inputs. "
+        f"Change one input in *{c['title']}* and predict whether "
+        f"the stated result ({c['expected'].rstrip('.')}) still holds. Say which part of {topic} the code "
+        "guarantees and which part would need new observations."
+    )
+    back = "revisit " + named if prereqs else "reread the vocabulary section"
+    out["next"] = f"If *{a['title']}* cannot be reconstructed without the solution, {back}. " + (
+        f"Otherwise keep the six observations from {topic} and continue to "
+        f"`{later[0]}` ({titles[later[0]]})."
+        if not capstone
+        else f"As the capstone, a failed *{last['title']}* check is a valid no-go "
+        "decision; state which evidence would reopen it."
+    )
+    out["sources"] = (
+        f"Reference for {t[0].lower()}: [{s['source'][0]}]({s['source'][1]}), reviewed 2026-10-22. "
+        f"The fixtures for *{a['title']}*, *{b['title']}* and "
+        f"*{c['title']}* and the six exercises are original course material.\n\n"
+        "Execution gates are described in [validation](../../../docs/validation.md); "
+        "CI artifacts show which checks ran for each revision."
+    )
+    out["diagnosis"] = (
+        f"When a result in {topic} disagrees, find the first intermediate value that departs "
+        "from the explanation, checking shapes and identities before aggregates. "
+        f"*{last['title']}* is the decisive failure case and should end with: "
+        f"{sentence(last['expected'])} If your version accepts that input, a validation step is "
+        f"missing; do not edit the expected text. *{ex[4]['title']}* should give: "
+        f"{sentence(ex[4]['expected'])} If the {stack} runtime is unavailable, record the code as "
+        "unverified."
+    )
+    out["intro"] = (
+        f"Open these answers for {topic} only after attempting *{a['title']}* through "
+        f"*{last['title']}*. A discrepancy in *{b['title']}* can be traced to one "
+        "step because the inputs match the guide. "
+        + (
+            f"`{solution}` runs the assertions; this page explains why they test "
+            f"{t[0].lower()} and {t[1].lower()}."
+            if not reading
+            else f"This page explains why each answer tests {t[0].lower()} and {t[1].lower()}."
+        )
+    )
+    out["review"] = (
+        f"Change one literal in *{c['title']}* and predict how the result changes before "
+        f"checking it; the unchanged inputs give: {c['expected'].rstrip('.')}. Keep the original "
+        f"*{last['title']}* failure beside the repaired result; a missing {stack} runtime "
+        "is not a failing assertion. No solution downloads data, calls an online model or "
+        "changes a database."
+    )
+    out["transfer"] = [
+        f"This repeats Example {chr(65 + n)}; reproduce it closed-book, then change one literal "
+        f"and predict the new result before running it."
+        for n in range(3)
+    ]
+    return out
+
+
 def write_all(only=None, guides_only=False, markdown_only=False):
     for track in ["llm-applied"]:
         base = ROOT / "courses" / track
@@ -225,7 +459,7 @@ def write_all(only=None, guides_only=False, markdown_only=False):
             for exercise in s["exercises"]:
                 for field in ["prompt", "expected", "why"]:
                     exercise[field] = polish(exercise[field])
-            p["outcome"] = s["mental"].split(".")[0] + "."
+            p["outcome"] = authored_outcome(id)
             p["lab"] = s["exercises"][0]["prompt"]
             p["verification"] = s["exercises"][0]["expected"] + " " + s["exercises"][-1]["expected"]
             p["concepts"] = [k for k, v in s["terms"]]
@@ -237,25 +471,19 @@ def write_all(only=None, guides_only=False, markdown_only=False):
             solution = f"{prefix}/solutions/{id}_solution.py"
             explanation = f"{prefix}/solutions/{id}_solutions.md"
             prereq = ", ".join(f"`{q}`" for q in p["prerequisites"])
+            prose = lesson_prose(id, p, s, plan, reading, learner, solution)
             terms = "\n\n".join(f"**{k}:** {v}" for k, v in s["terms"])
             exercise_text = "\n\n".join(
                 f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Save the {('reasoning table' if reading else 'assertion results')} for exercise {n}, including {e['expected']}"
+                + (f"\n   **Transfer:** {prose['transfer'][n - 1]}" if n <= 3 else "")
                 for n, e in enumerate(s["exercises"], 1)
             )
             examples = "\n\n".join(
                 f"### Example {chr(65 + n)}: {e['title']}\n\n{e['why']}\n\n```{'text' if reading else 'python'}\n{(s['imports'] + chr(10) + s['helper'] + chr(10)) if not reading and n == 0 else ''}{e['code']}\n```\n\n**Expected:** {e['expected']}"
                 for n, e in enumerate(s["exercises"][:3])
             )
-            runtime = (
-                "Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required."
-                if reading
-                else f"Use a prepared `{p['runtime']}` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/{id}/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `{p['runtime']}` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `{learner}` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies."
-            )
-            study_guidance = (
-                "Read the three worked cases in order and write the assumptions, intermediate reasoning and conclusion for each one. These are text cases, not programs to execute. Compare your written interpretation with the stated expected observations, then answer the six exercises in your saved worksheet. A correct argument must state its evidence boundary; source presence does not establish a model run. The optional pretrained recipe is a separate, deliberately prepared execution path with its own artifacts and receipts. Reading this chapter does not run or qualify that recipe."
-                if reading
-                else "Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact."
-            )
+            runtime = prose["runtime"]
+            study_guidance = prose["study"]
             code_anatomy = s["anatomy"]
             purpose = s.get("textbook_mental", s["mental"])
             overview = s.get(
@@ -278,7 +506,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 ## Level and prerequisites
 
-{p["level"].capitalize()}; approximately {p["minutes"]} minutes. Direct prerequisites: {prereq}. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+{prose["level"]}
 
 ## Learning objectives
 
@@ -314,7 +542,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: {p["verification"]} Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+{prose["prediction"]}
 
 ## Exercises
 
@@ -322,23 +550,23 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-{s.get("diagnosis", DEFAULT_DIAGNOSIS)}
+{s.get("diagnosis", prose["diagnosis"])}
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+{prose["hints"]}
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain {", ".join(k for k, v in s["terms"][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+{prose["self"]}
 
 ## Next step
 
-Revisit the direct prerequisite {prereq} if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+{prose["next"]}
 
 ## Sources and verification status
 
-API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+{prose["sources"]}
 
 {s.get("appendix", "")}
 
@@ -350,7 +578,7 @@ API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026
 """
             explanation_doc = f"""# {id}: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+{prose["intro"]}
 
 ## Mechanism review
 
@@ -383,14 +611,20 @@ The question is: {e["prompt"]}
                 blocks.append(
                     f"    # Exercise {n}: {e['title']}\n" + textwrap.indent(e["code"], "    ")
                 )
-            explanation_doc += "## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
+            explanation_doc += "## Review after comparison\n\n" + prose["review"] + "\n"
             (ROOT / guide).write_text(
-                canonical_markdown(polish_textbook_prose(document), root=SOURCE_ROOT, path=guide)
+                canonical_markdown(
+                    space_prose(polish_textbook_prose(document)), root=SOURCE_ROOT, path=guide
+                )
             )
             if guides_only:
                 continue
             (ROOT / explanation).write_text(
-                canonical_markdown(explanation_doc, root=SOURCE_ROOT, path=explanation)
+                canonical_markdown(
+                    space_prose(polish_textbook_prose(explanation_doc)),
+                    root=SOURCE_ROOT,
+                    path=explanation,
+                )
             )
             if markdown_only:
                 continue

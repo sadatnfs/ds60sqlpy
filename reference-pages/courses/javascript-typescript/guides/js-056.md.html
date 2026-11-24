@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An interaction connects a user action to application state. D3 event handlers receive the event and the datum associated with the selected node. Pointer position is measured in a coordinate space; using page coordinates as SVG data values mixes two spaces and often produces misplaced tooltips or selections.</p>
 <p>A tooltip is supplemental information, not the only place essential values should exist. A pointer-only tooltip excludes keyboard and some touch users. Provide focusable controls or an alternative data list, and keep a visible summary. Use text insertion so a data label containing markup characters remains text.</p>
 <p>Native HTML buttons provide keyboard activation behavior. Making every SVG circle act like a button requires deliberate semantics, focus and key handling. For a small chart, a parallel list of native buttons can offer a simpler accessible route to selecting each datum.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Event handler:</strong> A listener registered with <code>selection.on(type, listener)</code>. D3 calls it with the DOM event and the datum bound to the node.</li>
+<li><strong>Pointer coordinates:</strong> The <code>[x, y]</code> pair returned by <code>d3.pointer(event, node)</code>, measured in the given node&#x27;s coordinate system so SVG scaling is accounted for, unlike page coordinates.</li>
+<li><strong>Tooltip:</strong> A small supplemental label shown near a mark on hover or focus. Essential values must also be available without it.</li>
+<li><strong>Keyboard focus:</strong> The element that currently receives key presses. Native buttons are focusable and activate with Enter or Space without extra code.</li>
+<li><strong>Text insertion:</strong> Setting content with <code>.text()</code> or <code>textContent</code>, so markup characters in a data label appear literally instead of being parsed as HTML.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>d3.pointer(event, node)</code> returns coordinates relative to the chosen node. A handler can update a selected ID and a text summary. Do not retain the event object as long-term application state; retain the meaningful data selection instead.</p>
 <p>The reference draws circles and creates native buttons beneath the SVG. Both pointer and keyboard activation reach the same select function. It programmatically activates one button for a deterministic check, while the learner must still perform the real keyboard navigation.</p>

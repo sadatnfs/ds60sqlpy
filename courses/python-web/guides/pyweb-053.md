@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-052`.
 
 Authentication combines credential verification with a session that identifies later requests. Django supplies password hashing, authentication backends and session integration, but the application must still connect those pieces correctly. This chapter runs a real password check, login, authenticated request and logout against migrated temporary tables.
 
+## Key terms
+
+- **Password hasher:** The configured algorithm Django uses in `create_user` to store a salted hash instead of the original password.
+- **authenticate():** The function that asks the configured backends to verify credentials and returns a user only when they are accepted.
+- **login():** The function that records an authenticated user in the session so later requests are identified.
+- **AuthenticationMiddleware:** Middleware that rebuilds `request.user` from the session; it must run after SessionMiddleware.
+- **logout():** The function that flushes the session so later requests from the same client are anonymous again.
+
 ## Mechanism: verify a credential, then establish session identity
 
 Create_user hashes the password using the configured password hasher. The stored value is not the original password. Authenticate asks the configured backend to verify the submitted credentials and return a user when allowed. Login records the authenticated user in the session; AuthenticationMiddleware reconstructs request.user on later requests.
@@ -29,6 +37,40 @@ A wrong password returns a generic authentication refusal and does not establish
 A response saying logged out is insufficient if the server still accepts the old session context. Conversely, clearing only a display variable in the frontend does not revoke the server session. The relevant boundary is the framework's session state and how later requests are interpreted.
 
 Password hashing is deliberately computationally costly. Do not replace it with a plain hash or plaintext comparison for production performance. Test fixtures can choose controlled settings, but should clearly distinguish those settings from the deployed security policy.
+
+## Worked example: what a stored PBKDF2 password contains
+
+```python
+import base64
+import hashlib
+import hmac
+
+
+def encode(password, salt, iterations=1000):
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), iterations)
+    return f"pbkdf2_sha256${iterations}${salt}${base64.b64encode(digest).decode()}"
+
+
+def verify(password, stored):
+    _, iterations, salt, _ = stored.split("$")
+    return hmac.compare_digest(encode(password, salt, int(iterations)), stored)
+
+
+stored = encode("synthetic password", "fixedsalt")
+print(stored.split("$")[:3])
+print(verify("synthetic password", stored), verify("wrong", stored))
+print(encode("synthetic password", "othersalt") == stored)
+```
+
+Expected output:
+
+```text
+['pbkdf2_sha256', '1000', 'fixedsalt']
+True False
+False
+```
+
+The string has the same four dollar separated parts Django writes to `auth_user.password`: algorithm, iteration count, salt and digest. Because the count and salt travel with the hash, `check_password` can recompute the digest for any stored row, and Django can rehash on a successful login when its default iteration count rises. The last line shows why a per-user salt matters: the same password gives a different value, so equal hashes do not reveal equal passwords. The 1000 iterations here keep the example fast; Django's real default is far higher, which is why the lesson's settings swap in one explicit hasher.
 
 ## Failure diagnosis and discussion
 

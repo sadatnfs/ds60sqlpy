@@ -5,6 +5,28 @@
   "minutes": 75,
   "prerequisites": ["apache-020", "apache-014"],
   "concepts": ["scheduler", "executor", "plan serialization", "embedded control"],
+  "key_terms": [
+    [
+      "Ballista",
+      "The Apache DataFusion subproject that executes DataFusion query plans across a scheduler and executor processes."
+    ],
+    [
+      "Scheduler",
+      "The Ballista process that receives a client's query, divides its plan into stages and tasks, and assigns the tasks to executors."
+    ],
+    [
+      "Executor",
+      "A Ballista process that runs assigned tasks, scanning input and producing intermediate shuffle output or final batches."
+    ],
+    [
+      "Plan serialization",
+      "Encoding a query plan so the client, scheduler and executors can exchange it. A custom expression or provider without a registered codec cannot be shipped."
+    ],
+    [
+      "Version contract",
+      "The exact supported pairing of the released Ballista 54.1.0 package with DataFusion 54, kept separate from the classroom DataFusion 55 profile."
+    ]
+  ],
   "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
   "sources": [
     [

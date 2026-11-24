@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-077`, `apache-075`.
 
+## Key terms
+
+- **Bearer token:** A credential in the profile file that grants access to anyone who holds it, so it must never appear in notebooks, receipts or screenshots.
+- **Credential rotation:** Issuing a new token to a recipient and retiring the old one, with any overlap period stated explicitly.
+- **Revocation:** Withdrawing a recipient's access to new control requests. It does not recall already issued URLs or data already downloaded.
+- **Credential boundary:** The scope a credential covers, separating control requests, issued file URLs, cached metadata and downloaded copies.
+
 ## A recipient profile carries authority
 
 A sharing profile combines an endpoint with credentials and versioned profile
@@ -77,6 +84,31 @@ can reject future control requests under that provider's rules; already issued
 URLs and downloaded data can have different lifetimes. The two cases establish
 a controlled credential path and then measure the specific revocation boundary
 instead of claiming universal erasure.
+
+## Worked examples
+
+### Shape of a recipient profile
+
+```json
+{
+  "shareCredentialsVersion": 1,
+  "endpoint": "https://sharing.example.com/delta-sharing",
+  "bearerToken": "<fixture-only-token>",
+  "expirationTime": "2026-01-02T00:00:00Z"
+}
+```
+
+Anyone holding this file can read every table in the shares it grants, so treat it like a password: store it untracked, give it a short expiration and never paste it into tickets. The client rejects profiles with an unexpected credentials version, an empty token or extra structure, and it never echoes the token in errors. The endpoint and expiry shown are illustrative.
+
+### What rotation does and does not revoke
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  -H "Authorization: Bearer $OLD_RECIPIENT_TOKEN" \
+  "$SHARING_ENDPOINT/shares?maxResults=1"
+```
+
+After rotating the fixture credential, this call with the old token should return 401 or 403, which shows that new control requests are blocked. It does not invalidate presigned file URLs already handed out; those stay valid until preSignedUrlTimeoutSeconds expires, which is 60 in the example config. Files already downloaded cannot be recalled at all, so revocation is a forward-looking control, and short URL lifetimes are what limit the exposure window.
 
 ## Complete worked source
 

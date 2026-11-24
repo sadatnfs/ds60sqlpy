@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A simulator reproduces selected semantics to help inspect indexing and values without requiring the actual device. It usually does not reproduce warp scheduling, memory transactions, concurrent timing, occupancy or all synchronization defects. A serialized execution can hide a race that real concurrent threads expose. Passing a simulator therefore belongs to a different evidence category from passing hardware execution.</p>
 <p>Keep a validation ladder: mathematical reference, CPU mapping model, compiler acceptance, real-device output, diagnostic tooling and repeated stress cases. The simulator is useful early in that ladder, especially for small inputs you can inspect by hand. Do not generate invented GPU names, bandwidth or throughput from simulator output. If a feature is unsupported by the chosen simulator, state that instead of changing the algorithm silently.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>CUDA simulator:</strong> An interpreter that runs kernel code on the CPU for debugging, without real GPU timing or memory behavior.</li>
+<li><strong>Data race:</strong> Unsynchronized accesses to the same address by several threads where at least one access is a write.</li>
+<li><strong>Serialized execution:</strong> Running threads one at a time, which can hide races that would appear under true parallel execution.</li>
+<li><strong>Validation ladder:</strong> A sequence of checks from simulator to CPU oracle to real hardware, where each step catches a different class of error.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A CPU loop visiting all valid indices proves the intended index formula covers the array. It does not prove the GPU compiler generated a correct program for the target architecture.</p>
@@ -215,20 +222,44 @@ lost_update <span class="syntax-operator">=</span> <span class="syntax-builtin">
 <span class="syntax-keyword">assert</span> serial_counter <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">and</span> lost_update <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU race illustration:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> serial_counter<span class="syntax-punctuation">,</span> lost_update<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Serial count 2 versus a possible lost-update count 1.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>serial_counter</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>parallel_reads</code></td>
+<td><code>[0, 0]</code></td>
+</tr>
+<tr>
+<td><code>lost_update</code></td>
+<td><code>1</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-classify-a-cpu-result">Exercise 1: Classify a CPU result<a class="heading-anchor" href="#exercise-1-classify-a-cpu-result" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>classify a CPU result</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calling the result GPU verified because the same Python source was used assumes the compiled device code behaves like the interpreter.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-construct-a-race-hidden-by-serialization">Exercise 2: Construct a race hidden by serialization<a class="heading-anchor" href="#exercise-2-construct-a-race-hidden-by-serialization" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>construct a race hidden by serialization</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Concluding the kernel needs no atomics because the simulator printed the right count treats a serial schedule as representative of every parallel schedule.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-name-an-unsupported-feature">Exercise 3: Name an unsupported feature<a class="heading-anchor" href="#exercise-3-name-an-unsupported-feature" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>name an unsupported feature</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming anything that runs in the simulator runs identically on hardware ignores that the simulator interprets kernels in Python.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-the-validation-ladder">Exercise 4: Design the validation ladder<a class="heading-anchor" href="#exercise-4-design-the-validation-ladder" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>design the validation ladder</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Collapsing the ladder into a single pass/fail end-to-end test hides where a failure came from.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-choose-a-tiny-debugging-input">Exercise 5: Choose a tiny debugging input<a class="heading-anchor" href="#exercise-5-choose-a-tiny-debugging-input" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>choose a tiny debugging input</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Debugging with a million random elements makes a single wrong index hard to find. A size that is a multiple of the block hides tail bugs.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-write-an-honest-evidence-label">Exercise 6: Write an honest evidence label<a class="heading-anchor" href="#exercise-6-write-an-honest-evidence-label" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>write an honest evidence label</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing only verified or tests pass gives no executor and invites the reader to assume GPU coverage.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

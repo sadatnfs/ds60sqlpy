@@ -76,7 +76,7 @@ def main():
         aggregate_query = "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
         assert input_frame.count() == 12
         assert input_frame.columns == ["id", "group_id", "amount", "unused_payload"]
-        print("Owned Parquet fixture has four stored columns and12 rows")
+        print("Owned Parquet fixture has four stored columns and 12 rows")
         rows = spark.sql(projection_query).orderBy("id").collect()
         assert len(rows) == 9 and rows[0][0] == 3 and rows[-1][0] == 11
         spark.sql("EXPLAIN FORMATTED " + projection_query).show(truncate=False)

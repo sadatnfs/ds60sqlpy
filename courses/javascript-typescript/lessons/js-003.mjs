@@ -5,18 +5,17 @@
 // `assert.deepEqual([Boolean(1), Boolean(''), Boolean([]), Boolean({})], [false, false,
 // true, true]);` inside its check. Before running it, predict whether the check still passes
 // and explain why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at the check
+// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual([Boolean(1),
+// Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);`. Restoring
 // `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false,
-// true, true])`. Restoring the original line brings back the worked observation: false,
-// false, true, true.
+// true, true]);` brings back: false, false, true, true.
 
 // Exercise 2: Preserve a valid zero with nullish fallback: diagnose an edited check
 // A careless edit changed a check in Example B so that it reads `assert.equal(null ?? 11,
 // 10);`. Run Example B with that line, explain why the edited check now fails for the same
 // program state, and restore it.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.equal(null ?? 10, 10)`; after it the line reads `assert.equal(null ?? 10, 10);`
-// again and 10, 0, 10.
+// Expected: Before the repair the run fails with an `AssertionError` at `assert.equal(null
+// ?? 11, 10);`. Restoring `assert.equal(null ?? 10, 10);` brings back: 10, 0, 10.
 
 // Exercise 3: Trace a prefix sum
 // Sum 2, 4, 6 and record the accumulator after each iteration.

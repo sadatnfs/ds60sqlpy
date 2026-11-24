@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="go-025-explained-solutions">go-025: explained solutions<a class="heading-anchor" href="#go-025-explained-solutions" aria-label="Link to this section">#</a></h2>
 <p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
-<p>A channel connects producers and consumers with typed communication. An unbuffered send completes when a receiver participates; a buffered channel retains values up to its capacity. Buffering changes backpressure, not ownership of referenced objects sent through the channel. Closing means no more values will be sent. Receivers drain buffered values before observing closure. The producer that knows all sending is finished should own close. A receiver normally must not close the channel merely because it is done reading. Sending after close panics; an operation on a nil channel blocks unless a select chooses another ready case.</p>
+<p>A channel connects producers and consumers with typed communication. An unbuffered send completes when a receiver participates; a buffered channel retains values up to its capacity. Buffering changes backpressure, not ownership of referenced objects sent through the channel. Closing means no more values will be sent. Receivers drain buffered values before observing closure. The producer that knows all sending is finished should own close. A receiver normally must not close the channel merely because it is done reading. Sending after close panics. A send or receive on a nil channel blocks forever, and a select skips such a case; closing a nil channel panics.</p>
 <p>make(chan int, 2) creates a two-element buffer. value, ok := &lt;-ch distinguishes a delivered value from the zero value after closure. range ch receives until closed and drained. chan&lt;- int restricts a parameter to sending; &lt;-chan int restricts it to receiving. len(ch) is a transient observation rather than a synchronization protocol.</p>
 <h3 id="1-drain-before-iteration-ends-change-one-input">1. Drain before iteration ends: change one input<a class="heading-anchor" href="#1-drain-before-iteration-ends-change-one-input" aria-label="Link to this section">#</a></h3>
 <p>Copy worked example 1 into a scratch pad and change <code>ch &lt;- 2</code> to <code>ch &lt;- 3</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
@@ -212,6 +212,10 @@ sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;drain&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The changed run panics with <code>drain</code> because <code>sum == 5</code> no longer holds. Restoring the original line brings back the worked observation: both values arrive and the sum is 5.</p>
 <p>Close does not erase buffered values. Iteration ends after those values have been received.</p>
+<p><strong>Approach.</strong> Trace the edited sends: the buffer of capacity 2 now holds 3 and 3, <code>close</code> marks the channel finished, and <code>range</code> receives both values before it stops.</p>
+<p><strong>Why it holds here.</strong> Both sends complete without a receiver because the buffer has room for two, and close keeps buffered values, so the sum is 6 and the check <code>sum == 5</code> panics with <code>drain</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Predicting a deadlock because nothing receives during the sends, or a zero sum because close discards the buffer. Capacity 2 lets both sends finish, and <code>range</code> drains buffered values before it observes the close.</p>
+<p><strong>Verify.</strong> Print <code>sum</code> and see 6 before the panic. As a separate experiment, delete <code>close(ch)</code>: the loop drains both values and then the runtime stops with <code>fatal error: all goroutines are asleep - deadlock!</code>.</p>
 <h3 id="2-distinguish-zero-from-closed-debug-a-regression">2. Distinguish zero from closed: debug a regression<a class="heading-anchor" href="#2-distinguish-zero-from-closed-debug-a-regression" aria-label="Link to this section">#</a></h3>
 <p>A regression changed one token in worked example 2, so one line now reads <code>ch &lt;- 1</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
 <p>The unchanged code is worked example 2:</p>
@@ -223,6 +227,10 @@ b<span class="syntax-punctuation">,</span> okB <span class="syntax-operator">:=<
 check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> okA <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-punctuation">!</span>okB<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;closed presence&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Before the repair the program panics with <code>closed presence</code>; after it the line reads <code>ch &lt;- 0</code> again and the first zero has ok true; the second has ok false.</p>
 <p>Value equality cannot distinguish a delivered zero from the post-closure zero. The boolean carries completion information.</p>
+<p><strong>Approach.</strong> Use the two-result receive to read the regressed state: the first receive yields 1 with <code>okA</code> true and the second yields the zero value with <code>okB</code> false.</p>
+<p><strong>Why it holds here.</strong> The check requires the delivered value to be 0, so 1 fails <code>a == 0</code> and panics with <code>closed presence</code>. Sending 0 again makes both received values zero while <code>ok</code> still separates them.</p>
+<p><strong>A plausible wrong approach.</strong> Testing completion with <code>b == 0</code> instead of <code>okB</code>. With the original program both <code>a</code> and <code>b</code> are 0, so value comparison cannot tell a delivered zero from the closed channel&#x27;s zero.</p>
+<p><strong>Verify.</strong> Print <code>a, okA, b, okB</code>: the regression shows <code>1 true 0 false</code> and the repair shows <code>0 true 0 false</code>.</p>
 <h3 id="3-use-sender-ownership">3. Use sender ownership<a class="heading-anchor" href="#3-use-sender-ownership" aria-label="Link to this section">#</a></h3>
 <p>Run a producer sending 1 and 2 before closing output.</p>
 <pre class="highlighted-code"><code class="language-go">ch <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span>
@@ -234,6 +242,10 @@ count <span class="syntax-operator">:=</span> <span class="syntax-number">0</spa
 check<span class="syntax-punctuation">(</span>count <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;producer close&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The consumer receives exactly two values.</p>
 <p>The producer knows all sends are finished. A receiver closing early could race with a later send.</p>
+<p><strong>Approach.</strong> Let <code>produce</code> own the channel: it sends 1 and 2 on the unbuffered channel and its deferred <code>close</code> runs after the last send, which ends the consumer&#x27;s <code>range</code>.</p>
+<p><strong>Why it holds here.</strong> Each unbuffered send waits for the receive, so both values arrive in order, and the close happens only after the producer has finished sending, so <code>count</code> is exactly 2.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving out the <code>defer close(out)</code> in <code>produce</code>. The consumer receives two values and then waits forever on an open channel with no sender, and the runtime reports <code>fatal error: all goroutines are asleep - deadlock!</code>.</p>
+<p><strong>Verify.</strong> Collect the values into a slice and print it to see <code>[1 2]</code> with <code>count</code> 2. Closing from <code>main</code> before the producer finishes instead produces <code>panic: send on closed channel</code>.</p>
 <h3 id="4-inspect-bounded-buffering">4. Inspect bounded buffering<a class="heading-anchor" href="#4-inspect-bounded-buffering" aria-label="Link to this section">#</a></h3>
 <p>Fill a channel of capacity two without a receiver.</p>
 <pre class="highlighted-code"><code class="language-go">ch <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
@@ -244,6 +256,10 @@ check<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</
 <span class="syntax-operator">&lt;-</span>ch</code></pre>
 <p><strong>Expected:</strong> Its buffered length is two.</p>
 <p>This sequential fixture has an exact count. Concurrent length checks cannot prove a later send will be nonblocking.</p>
+<p><strong>Approach.</strong> Send 4 and 5 into a channel of capacity 2 with no receiver, then read <code>len</code> and <code>cap</code> before draining.</p>
+<p><strong>Why it holds here.</strong> Two sends fit the buffer, so neither blocks; <code>len(ch)</code> reports the two queued values and <code>cap(ch)</code> the fixed capacity 2.</p>
+<p><strong>A plausible wrong approach.</strong> Adding a third send <code>ch &lt;- 6</code> before the receives. The buffer is full and no goroutine receives, so <code>main</code> blocks forever and the run ends with the all goroutines are asleep deadlock error.</p>
+<p><strong>Verify.</strong> Print <code>len(ch), cap(ch)</code> before and after the two receives and see <code>2 2</code>, then <code>0 2</code>.</p>
 <h3 id="5-disable-a-nil-select-arm">5. Disable a nil select arm<a class="heading-anchor" href="#5-disable-a-nil-select-arm" aria-label="Link to this section">#</a></h3>
 <p>Select between nil and a ready closed channel.</p>
 <pre class="highlighted-code"><code class="language-go"><span class="syntax-keyword">var</span> disabled <span class="syntax-operator">&lt;-</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">int</span>
@@ -259,6 +275,10 @@ selected <span class="syntax-operator">:=</span> <span class="syntax-keyword">fa
 check<span class="syntax-punctuation">(</span>selected<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;nil arm&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Only the ready arm can proceed.</p>
 <p>Nil can deliberately disable an unneeded select case. It does not signal completion like a closed channel.</p>
+<p><strong>Approach.</strong> Use a nil receive channel as the disabled arm and a closed <code>ready</code> channel as the live one.</p>
+<p><strong>Why it holds here.</strong> A receive from a nil channel never proceeds, so <code>select</code> can only choose <code>&lt;-ready</code>, which is immediately ready because the channel is closed. <code>selected</code> becomes true every run.</p>
+<p><strong>A plausible wrong approach.</strong> Disabling the arm with a closed channel instead of nil. A closed channel is always ready, <code>select</code> picks uniformly at random among ready arms, and about half the runs panic with <code>nil selected</code>.</p>
+<p><strong>Verify.</strong> Run the case several times and it always passes. In the closed-channel version, repeated runs may succeed or panic with <code>nil selected</code> unpredictably.</p>
 <h3 id="6-transfer-independent-message-storage">6. Transfer independent message storage<a class="heading-anchor" href="#6-transfer-independent-message-storage" aria-label="Link to this section">#</a></h3>
 <p>Send a copied slice, then mutate its original.</p>
 <pre class="highlighted-code"><code class="language-go">original <span class="syntax-operator">:=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span>
@@ -269,8 +289,12 @@ received <span class="syntax-operator">:=</span> <span class="syntax-operator">&
 check<span class="syntax-punctuation">(</span>received<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;copy&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The received copy stays 1.</p>
 <p>A channel sends the slice descriptor. The explicit copy establishes independent storage before communication.</p>
+<p><strong>Approach.</strong> Copy the slice with <code>append([]int(nil), original...)</code> before sending it, then mutate <code>original</code>.</p>
+<p><strong>Why it holds here.</strong> The copy has its own backing array, so <code>original[0] = 9</code> changes only the original, and the received slice still holds 1.</p>
+<p><strong>A plausible wrong approach.</strong> Sending <code>original</code> directly. The channel copies only the slice header, which points at the same backing array, so the later write makes <code>received[0]</code> 9 and the check panics with <code>copy</code>.</p>
+<p><strong>Verify.</strong> Print <code>received, original</code> and see <code>[1] [9]</code>; with the direct send the output is <code>[9] [9]</code>.</p>
 <h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+<p>Write <code>squares(n int, out chan&lt;- int)</code> that sends 1, 4, up to n*n and closes <code>out</code>, and sum its output with <code>range</code>. Check <code>squares(3)</code> totals 14, <code>squares(0)</code> totals 0 because the range ends at once, and a channel of capacity 3 holds all three values before the consumer starts. Explain which run deadlocks if the producer forgets to close.</p></article>
   </main>
 </body>
 </html>

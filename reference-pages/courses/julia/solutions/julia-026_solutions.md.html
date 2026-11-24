@@ -195,24 +195,57 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-026-explained-reference">julia-026: explained reference<a class="heading-anchor" href="#julia-026-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-026_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>affine!</code> validates before it writes: the matrix width must equal the input length, the matrix height must equal the destination and bias lengths, and <code>Base.mightalias</code> must find no shared storage between the destination and any input. Only then does <code>mul!</code> overwrite the destination and <code>.+=</code> add the bias, so a rejected call leaves the output untouched.</p>
 <h3 id="1-trace-a-matrix-step">1. Trace a matrix step<a class="heading-anchor" href="#1-trace-a-matrix-step" aria-label="Link to this section">#</a></h3>
 <p>The products <code>[10, 12]</code> plus <code>[1, -1]</code> give <code>[11, 11]</code>.</p>
 <p><strong>Expected observation:</strong> The final vector is <code>[11, 11]</code>.</p>
+<p><strong>Why it holds here:</strong> With <code>[2 1; 0 3]</code> and input <code>[3, 4]</code>, the products are 6 + 4 = 10 and 0 + 12 = 12, and adding <code>[1, -1]</code> gives <code>[11, 11]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Multiplying column by column with the input transposed gives different entries and hides the row and column meaning.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>destination == [11, 11]</code> and that <code>affine!</code> returns the same object with <code>===</code>.</p>
 <h3 id="2-repeat-with-new-inputs">2. Repeat with new inputs<a class="heading-anchor" href="#2-repeat-with-new-inputs" aria-label="Link to this section">#</a></h3>
 <p>Multiplication overwrites both entries before adding the bias.</p>
 <p><strong>Expected observation:</strong> The new vector is <code>[5, 5]</code>.</p>
+<p><strong>Why it holds here:</strong> For input <code>[1, 2]</code> the products are 4 and 6, and adding the bias gives <code>[5, 5]</code>, fully replacing the earlier <code>[11, 11]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Accumulating into the destination with <code>+=</code> instead of <code>mul!</code> would add the new products to the old output.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>destination == [5, 5]</code> after the second call.</p>
 <h3 id="3-debug-a-width-mismatch">3. Debug a width mismatch<a class="heading-anchor" href="#3-debug-a-width-mismatch" aria-label="Link to this section">#</a></h3>
 <p>The declared matrix width must equal input length; validation preserves the previous output here.</p>
 <p><strong>Expected observation:</strong> DimensionMismatch occurs before output mutation.</p>
+<p><strong>Why it holds here:</strong> A 2 by 3 matrix needs an input of length 3, so the first check throws <code>DimensionMismatch</code> before <code>mul!</code> runs.</p>
+<p><strong>Plausible wrong approach:</strong> Validating after the multiplication could leave the destination half written when the error is raised.</p>
+<p><strong>How to verify:</strong> The reference fills the output with 7, makes the bad call and asserts <code>output == [7, 7]</code> afterward.</p>
 <h3 id="4-find-view-overlap">4. Find view overlap<a class="heading-anchor" href="#4-find-view-overlap" aria-label="Link to this section">#</a></h3>
 <p>The rejection uses mightalias, which conservatively checks possible shared storage.</p>
 <p><strong>Expected observation:</strong> They may address the same parent elements.</p>
+<p><strong>Why it holds here:</strong> <code>view(storage, 1:2)</code> and <code>view(storage, 2:3)</code> are different objects that both include <code>storage[2]</code>, so writing one changes what the other reads.</p>
+<p><strong>Plausible wrong approach:</strong> Checking <code>destination !== input</code> passes for two distinct views and misses the shared element.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>@test_throws ArgumentError</code> for these views and that <code>storage == snapshot</code> after the rejection.</p>
 <h3 id="5-design-scratch-ownership">5. Design scratch ownership<a class="heading-anchor" href="#5-design-scratch-ownership" aria-label="Link to this section">#</a></h3>
 <p>A scratch buffer can preserve the original input, but its owner and lifetime must be explicit.</p>
 <p><strong>Expected observation:</strong> Use a documented private scratch copy before mutation.</p>
+<p><strong>Why it holds here:</strong> Copying the possibly overlapping input into an owned scratch buffer before writing removes the shared read and write.</p>
+<p><strong>Plausible wrong approach:</strong> Sharing one global scratch buffer among concurrent callers trades an aliasing bug for a race.</p>
+<p><strong>How to verify:</strong> Document who owns the scratch buffer, then test an overlapping call against the result computed on separate copies.</p>
 <h3 id="6-evaluate-a-speed-claim">6. Evaluate a speed claim<a class="heading-anchor" href="#6-evaluate-a-speed-claim" aria-label="Link to this section">#</a></h3>
 <p>Allocation is one measurement. End-to-end timing and correctness remain necessary.</p>
-<p><strong>Expected observation:</strong> Access patterns, dispatch and workload sizes also matter.</p></article>
+<p><strong>Expected observation:</strong> Access patterns, dispatch and workload sizes also matter.</p>
+<p><strong>Why it holds here:</strong> Views can have strided access, and a call with fewer allocated bytes can still run slower on a different access pattern or size.</p>
+<p><strong>Plausible wrong approach:</strong> Treating <code>@allocated</code> returning a small number as a speedup claim skips the timing and correctness checks.</p>
+<p><strong>How to verify:</strong> Compare correct results first, then time warmed calls at several sizes and record bytes and seconds together.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-026: all reference checks passed</code>:</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    output <span class="syntax-operator">=</span> fill<span class="syntax-punctuation">(</span><span class="syntax-number">7.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">DimensionMismatch</span> affine!<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span> ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> output <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> affine!<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span> <span class="syntax-keyword">Matrix</span><span class="syntax-punctuation">{</span><span class="syntax-keyword">Float64</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">(</span>I<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ones<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> output<span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> affine!<span class="syntax-punctuation">(</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">;</span> <span class="syntax-number">3.0</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span>
+    original <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span>
+    separate <span class="syntax-operator">=</span> copy<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">)</span>
+    separate<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">9</span>
+    <span class="syntax-decorator">@test</span> original <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

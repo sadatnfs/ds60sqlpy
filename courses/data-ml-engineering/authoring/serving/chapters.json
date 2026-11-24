@@ -8,6 +8,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["request identity", "validation", "authentication", "idempotency"],
+    "key_terms": [
+      {
+        "term": "Admission response",
+        "definition": "The reply confirming that the server retained a request's identity and accepted responsibility for its bounded execution, not that output exists."
+      },
+      {
+        "term": "Canonical JSON",
+        "definition": "JSON with sorted object keys and consistent separators, whose SHA-256 digest identifies the exact accepted data."
+      },
+      {
+        "term": "Idempotency key",
+        "definition": "A key binding one logical submission to one accepted payload, so a retry returns the existing request and changed content is a conflict."
+      },
+      {
+        "term": "Unknown outcome",
+        "definition": "The client's position when a network failure hides the response, so it cannot tell whether the server accepted the request."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Validating a generation request before it becomes a job",
+        "language": "python",
+        "code": "from pydantic import BaseModel, ConfigDict, Field, ValidationError\n\n\nclass GenerateRequest(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\", strict=True)\n    prompt: str = Field(min_length=1, max_length=2000)\n    max_new_tokens: int = Field(ge=1, le=256)\n\n\nfor body in (\n    {\"prompt\": \"hi\", \"max_new_tokens\": 16},\n    {\"prompt\": \"hi\", \"max_new_tokens\": 100000},\n    {\"prompt\": \"\", \"max_new_tokens\": 16, \"temperature\": 2},\n):\n    try:\n        job = GenerateRequest.model_validate(body)\n        print(\"admitted:\", job.model_dump())\n    except ValidationError as error:\n        print(\"422:\", [(e[\"loc\"][0], e[\"type\"]) for e in error.errors()])\n",
+        "output": "admitted: {'prompt': 'hi', 'max_new_tokens': 16}\n422: [('max_new_tokens', 'less_than_equal')]\n422: [('prompt', 'string_too_short'), ('temperature', 'extra_forbidden')]\n",
+        "interpretation": "The first body passes and becomes a job with 16 new tokens. The second asks for 100000 tokens and fails with less_than_equal before any queue slot or GPU memory is reserved. The third has two independent problems, an empty prompt and an undeclared temperature field, and both appear in the same 422 response. Rejecting unknown fields matters for an inference API: a client that believes it set temperature to 2 would otherwise get default sampling with no warning. The limits in the model are part of the capacity contract and should match what the scheduler can actually admit."
+      }
+    ],
     "outcome": "Trace a source-bound accepted request and reconcile unknown creation outcomes without duplicate execution.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-057.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-057.py",
@@ -27,6 +54,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["byte BPE", "merge ranking", "UTF-8", "token budgets"],
+    "key_terms": [
+      {
+        "term": "Code point",
+        "definition": "The Unicode number that identifies one abstract character component."
+      },
+      {
+        "term": "Grapheme cluster",
+        "definition": "What a reader perceives as one displayed character, which may contain several code points."
+      },
+      {
+        "term": "Byte-pair encoding",
+        "definition": "A tokenizer trained by repeatedly replacing the most frequent adjacent pair, starting from all 256 bytes, with a new symbol."
+      },
+      {
+        "term": "Incremental UTF-8 decoding",
+        "definition": "Decoding a byte stream while holding back incomplete multibyte sequences until their remaining bytes arrive."
+      },
+      {
+        "term": "Token budget",
+        "definition": "A request limit counted in model positions after encoding, never estimated from a characters-per-token ratio."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Characters, UTF-8 bytes and a split in the middle of a character",
+        "language": "python",
+        "code": "for text in (\"route\", \"café\", \"東京\", \"📦\"):\n    data = text.encode(\"utf-8\")\n    print(repr(text), \"chars\", len(text), \"bytes\", len(data), list(data[:4]))\npacked = \"📦\".encode(\"utf-8\")\nprint(\"first two bytes decoded:\", packed[:2].decode(\"utf-8\", errors=\"replace\"))\ntry:\n    packed[:2].decode(\"utf-8\")\nexcept UnicodeDecodeError as error:\n    print(\"strict decode:\", error.reason)\n",
+        "output": "'route' chars 5 bytes 5 [114, 111, 117, 116]\n'café' chars 4 bytes 5 [99, 97, 102, 195]\n'東京' chars 2 bytes 6 [230, 157, 177, 228]\n'📦' chars 1 bytes 4 [240, 159, 147, 166]\nfirst two bytes decoded: �\nstrict decode: unexpected end of data\n",
+        "interpretation": "ASCII text like route uses one byte per character, but café needs 5 bytes for 4 characters, the two Japanese characters need 6 bytes, and the package emoji needs 4 bytes for a single character. A limit stated in characters and a limit stated in bytes are therefore different limits. Cutting the emoji after two bytes leaves an incomplete sequence: lenient decoding shows a replacement character, and strict decoding fails with \"unexpected end of data\". Byte-level tokenizers can produce tokens that end in the middle of a character, which is why the text boundary needs its own handling."
+      }
+    ],
     "outcome": "Apply exact byte-BPE merges and decode UTF-8 correctly across arbitrary byte boundaries.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-058.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-058.py",
@@ -54,6 +112,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["token embeddings", "positions", "retrieval embeddings"],
+    "key_terms": [
+      {
+        "term": "Token embedding",
+        "definition": "The learned vector for a token ID, obtained by looking up one row of the embedding matrix."
+      },
+      {
+        "term": "Position table",
+        "definition": "A learned table of vectors, one per model position, added to token embeddings so the model can distinguish order."
+      },
+      {
+        "term": "Mean pooling",
+        "definition": "Averaging token vectors into one vector, which discards their order, so differently ordered sequences can match exactly."
+      },
+      {
+        "term": "Retrieval representation",
+        "definition": "A document or query vector from a separately trained retrieval encoder, distinct from the generator's token embedding table."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Cosine similarity ignores length; dot product does not",
+        "language": "python",
+        "code": "import numpy as np\n\nquery = np.array([1.0, 1.0, 0.0])\ndocuments = {\n    \"short\": np.array([1.0, 1.0, 0.0]),\n    \"long\": np.array([3.0, 2.0, 2.0]),\n    \"other\": np.array([0.0, 0.2, 1.0]),\n}\nfor name, vector in documents.items():\n    dot = float(query @ vector)\n    cosine = dot / float(np.linalg.norm(query) * np.linalg.norm(vector))\n    print(name, \"dot\", round(dot, 3), \"cosine\", round(cosine, 3))\n",
+        "output": "short dot 2.0 cosine 1.0\nlong dot 5.0 cosine 0.857\nother dot 0.2 cosine 0.139\n",
+        "interpretation": "The short document points in exactly the query's direction, so its cosine similarity is 1.0, but its dot product is only 2.0. The long document has larger values, which raises its dot product to 5.0 even though its cosine of 0.857 says it is less aligned. The unrelated document scores low on both. A retrieval index has to use the same similarity the embedding model was trained for. Many indexes normalize vectors once at insert time so that a fast dot product search returns cosine rankings."
+      }
+    ],
     "outcome": "Separate token lookup and position encoding from a retrieval representation and its evaluation.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-059.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-059.py",
@@ -85,6 +170,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["safe checkpoints", "hash validation", "startup readiness"],
+    "key_terms": [
+      {
+        "term": "NPZ checkpoint",
+        "definition": "A NumPy archive of named float32 arrays loaded with pickle disabled, so loading the weights cannot execute code."
+      },
+      {
+        "term": "Hash-bound manifest",
+        "definition": "A manifest that binds the checkpoint and tokenizer files with cryptographic hashes, so a changed byte sequence is rejected."
+      },
+      {
+        "term": "Shape validation",
+        "definition": "Confirming that the loaded parameter names equal the expected set and that each tensor has its declared shape and dtype."
+      },
+      {
+        "term": "Readiness",
+        "definition": "The state, reached only after validation, loading, device placement and a functional warm-up, in which a server reports that it can accept inference."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Pickle runs code on load; a plain array format does not",
+        "language": "python",
+        "code": "import io\nimport pickle\n\nimport numpy as np\n\n\nclass Payload:\n    def __reduce__(self):\n        return (print, (\"code ran during load\",))\n\n\nprint(\"pickle.loads returned:\", pickle.loads(pickle.dumps(Payload())))\nbuffer = io.BytesIO()\nnp.save(buffer, np.arange(4, dtype=np.float32))\nbuffer.seek(0)\nprint(\"np.load allow_pickle=False:\", np.load(buffer, allow_pickle=False))\nbuffer = io.BytesIO()\nnp.save(buffer, np.array([Payload()], dtype=object))\nbuffer.seek(0)\ntry:\n    np.load(buffer, allow_pickle=False)\nexcept ValueError as error:\n    print(\"object array refused:\", error)\n",
+        "output": "code ran during load\npickle.loads returned: None\nnp.load allow_pickle=False: [0. 1. 2. 3.]\nobject array refused: Object arrays cannot be loaded when allow_pickle=False\n",
+        "interpretation": "Unpickling the payload printed \"code ran during load\" and returned None, so the file chose which function to call and with what argument. A real attacker would call something far worse than print. np.save with a plain float32 array writes only a header and raw numbers, and np.load with allow_pickle=False reads it back as [0. 1. 2. 3.]. When the saved array holds Python objects, the same safe load refuses it. A serving process should load checkpoints in a format that cannot carry code, such as safetensors, and check the file hash before loading."
+      }
+    ],
     "outcome": "Reject changed or incompatible checkpoint tensors before readiness and explain startup-only loading.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-060.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-060.py",
@@ -108,6 +220,33 @@
     "runtime_profile": "llm-torch-cpu",
     "language": "python",
     "concepts": ["CPU placement", "transfer bounds", "precision", "KV bytes"],
+    "key_terms": [
+      {
+        "term": "Device placement",
+        "definition": "Choosing where weights and request tensors live and compute, which affects memory capacity, transfer paths and kernel availability."
+      },
+      {
+        "term": "Resident weights",
+        "definition": "Model parameters validated and placed on a device once, then kept there for many requests."
+      },
+      {
+        "term": "Transfer accounting",
+        "definition": "Estimating a transfer as at least its bytes divided by sustained useful bandwidth, before synchronization and protocol overhead."
+      },
+      {
+        "term": "Dtype policy",
+        "definition": "The storage and accumulation data types, such as float32, float16 or bfloat16, which set range, precision and bytes per value."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Weight memory per precision and float16 range limits",
+        "language": "python",
+        "code": "import numpy as np\n\nparameters = 7_000_000_000\nfor dtype in (np.float32, np.float16, np.int8):\n    gigabytes = parameters * np.dtype(dtype).itemsize / 1e9\n    print(np.dtype(dtype).name, \"bytes/param\", np.dtype(dtype).itemsize, \"weights GB\", gigabytes)\nvalues = np.array([1e-8, 0.1, 70000.0], dtype=np.float32)\nprint(\"float16:\", values.astype(np.float16))\nprint(\"float16 spacing at 2048:\", np.spacing(np.float16(2048)))\n",
+        "output": "float32 bytes/param 4 weights GB 28.0\nfloat16 bytes/param 2 weights GB 14.0\nint8 bytes/param 1 weights GB 7.0\nfloat16: [0.  0.1 inf]\nfloat16 spacing at 2048: 2.0\n",
+        "interpretation": "A model with 7 billion parameters needs 28 GB for its weights in float32, 14 GB in float16 and 7 GB in int8, before any activations or KV cache. float16 is not a free halving: 1e-8 rounds to 0, 70000 exceeds the largest float16 value and becomes inf, and near 2048 the representable numbers are 2 apart. Training values that fall outside this range need loss scaling or bfloat16, which keeps float32's range with less precision. The memory budget should list each tensor's dtype explicitly, not assume one dtype for the whole model."
+      }
+    ],
     "outcome": "Verify actual CPU placement and calculate bounded weight-transfer and KV-memory estimates.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-061.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-061.py",
@@ -131,6 +270,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["admission control", "FIFO", "reservation ownership", "Little law"],
+    "key_terms": [
+      {
+        "term": "Admission policy",
+        "definition": "An explicit rule for accepting, queueing or rejecting a request before work starts, based on active requests and reserved positions."
+      },
+      {
+        "term": "Head-of-line blocking",
+        "definition": "A long request at the front of a FIFO queue delaying the shorter requests behind it."
+      },
+      {
+        "term": "Token reservation",
+        "definition": "Reserving a request's prompt positions plus its allowed continuation at admission, which bounds potential cache growth."
+      },
+      {
+        "term": "Reservation release",
+        "definition": "Returning reserved capacity exactly once when a request finishes, fails or is cancelled."
+      },
+      {
+        "term": "Request-count limit",
+        "definition": "A cap on the number of active requests, which protects a different resource than a token reservation or storage limit."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A bounded queue rejects early instead of timing out late",
+        "language": "python",
+        "code": "import asyncio\n\n\nasync def main():\n    queue = asyncio.Queue(maxsize=2)\n    outcomes = []\n    for request in range(5):\n        try:\n            queue.put_nowait(request)\n            outcomes.append((request, \"queued\"))\n        except asyncio.QueueFull:\n            outcomes.append((request, \"429\"))\n    print(outcomes)\n    print(\"queue depth:\", queue.qsize())\n\n\nasyncio.run(main())\n",
+        "output": "[(0, 'queued'), (1, 'queued'), (2, '429'), (3, '429'), (4, '429')]\nqueue depth: 2\n",
+        "interpretation": "With room for 2 waiting requests, requests 0 and 1 are queued and 2 through 4 receive an immediate 429. The client learns within microseconds that it should back off or try another replica. An unbounded queue would have accepted all five and let the later ones wait until their callers timed out, after spending memory and possibly compute on them. The right maximum comes from the latency target: if each job takes about a second and the objective is three seconds, a queue much deeper than a few jobs per worker cannot meet it."
+      }
+    ],
     "outcome": "Enforce request and token reservations and explain FIFO waiting under changed service durations.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-062.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-062.py",
@@ -150,6 +320,33 @@
     "runtime_profile": "llm-torch-cpu",
     "language": "python",
     "concepts": ["prefill", "causal masks", "cached decoding", "numerical equivalence"],
+    "key_terms": [
+      {
+        "term": "Prefill",
+        "definition": "The first serving pass, which processes the whole prompt, fills the cache and produces logits for the final position."
+      },
+      {
+        "term": "KV cache",
+        "definition": "Stored key and value tensors for earlier tokens, so each decoding step attends to them without recomputing them."
+      },
+      {
+        "term": "Causal mask",
+        "definition": "A mask that prevents each position from attending to later positions."
+      },
+      {
+        "term": "Cached attention",
+        "definition": "Attention for one new query against stored keys and values, which must agree with full causal attention within a small floating-point tolerance."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A cached decode step matches full recomputation",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(7)\nd = 4\nWq, Wk, Wv = (rng.normal(size=(d, d)) for _ in range(3))\nx = rng.normal(size=(5, d))\n\n\ndef attend(q, K, V):\n    scores = K @ q / np.sqrt(d)\n    weights = np.exp(scores - scores.max())\n    return weights / weights.sum() @ V\n\n\nfull = [attend(x[t] @ Wq, x[: t + 1] @ Wk, x[: t + 1] @ Wv) for t in range(5)]\nK_cache, V_cache, cached = [], [], []\nfor t in range(5):\n    K_cache.append(x[t] @ Wk)\n    V_cache.append(x[t] @ Wv)\n    cached.append(attend(x[t] @ Wq, np.array(K_cache), np.array(V_cache)))\nprint(\"cached equals full:\", np.allclose(full, cached, atol=1e-12))\nleaky = attend(x[1] @ Wq, x @ Wk, x @ Wv)\nprint(\"step 1 without causal mask differs by:\", round(float(np.max(np.abs(leaky - full[1]))), 4))\n",
+        "output": "cached equals full: True\nstep 1 without causal mask differs by: 0.9104\n",
+        "interpretation": "This numpy model computes single-head attention two ways. Recomputing keys and values for the whole prefix at every step and appending one new key and value to a cache give the same outputs within floating-point tolerance, which is the property a KV cache must preserve. The cache saves work because earlier keys and values never change. The last line shows what happens when step 1 is allowed to see all five positions: its output moves by 0.9104, because it now attends to tokens that have not been generated yet."
+      }
+    ],
     "outcome": "Verify actual cached attention against full-prefix logits and an independent causal formula.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-063.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-063.py",
@@ -177,6 +374,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["temperature", "top-k", "random state", "stopping"],
+    "key_terms": [
+      {
+        "term": "Logits",
+        "definition": "The unnormalized scores a model outputs for each vocabulary token."
+      },
+      {
+        "term": "Temperature",
+        "definition": "A positive divisor applied to logits before softmax, where smaller values sharpen the distribution; zero is a separate greedy branch."
+      },
+      {
+        "term": "Top-k sampling",
+        "definition": "Sampling only among the k highest-scoring tokens."
+      },
+      {
+        "term": "EOS token",
+        "definition": "A token ID learned during training whose sampling ends the sequence, recorded separately from a token limit or stop string."
+      },
+      {
+        "term": "Stop string",
+        "definition": "A text sequence that ends generation, which must be detected even when it spans two streamed chunks."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Temperature and top-k reshape the same logits",
+        "language": "python",
+        "code": "import numpy as np\n\nlogits = np.array([2.0, 1.0, 0.5, -1.0])\n\n\ndef probabilities(temperature, top_k=None):\n    scaled = logits / temperature\n    if top_k is not None:\n        cutoff = np.sort(scaled)[-top_k]\n        scaled = np.where(scaled >= cutoff, scaled, -np.inf)\n    exp = np.exp(scaled - scaled.max())\n    return np.round(exp / exp.sum(), 3)\n\n\nfor temperature, top_k in ((1.0, None), (0.5, None), (2.0, None), (1.0, 2)):\n    print(\"T\", temperature, \"top_k\", top_k, probabilities(temperature, top_k))\n",
+        "output": "T 1.0 top_k None [0.609 0.224 0.136 0.03 ]\nT 0.5 top_k None [0.842 0.114 0.042 0.002]\nT 2.0 top_k None [0.434 0.263 0.205 0.097]\nT 1.0 top_k 2 [0.731 0.269 0.    0.   ]\n",
+        "interpretation": "At temperature 1.0 the top token has probability 0.609. Halving the temperature sharpens the distribution to 0.842, and doubling it flattens it to 0.434 while the least likely token rises from 0.03 to 0.097. Top-k with k=2 removes the last two tokens entirely and renormalizes the remaining two to 0.731 and 0.269. Temperature changes how strongly the model's preferences are followed, while top-k removes options outright. Logging both settings with each response is necessary to explain why two runs with the same prompt produced different text."
+      }
+    ],
     "outcome": "Derive sampling distributions and enforce stop strings across output boundaries.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-064.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-064.py",
@@ -204,6 +432,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["dynamic batching", "fairness", "padding", "continuous scheduling"],
+    "key_terms": [
+      {
+        "term": "Static batch",
+        "definition": "A group of requests formed before running, which keeps tensor shapes simple but makes short requests wait for the whole batch."
+      },
+      {
+        "term": "Dynamic batching",
+        "definition": "Waiting for arriving requests until a count, token budget or maximum waiting interval is reached, then running them together."
+      },
+      {
+        "term": "Continuous batching",
+        "definition": "Admitting or retiring requests between decode iterations instead of waiting for an entire initial batch to finish."
+      },
+      {
+        "term": "Padding",
+        "definition": "Filler positions added so sequences of different lengths fit one tensor shape."
+      },
+      {
+        "term": "Length bucketing",
+        "definition": "Grouping requests of similar length to reduce padding, at the risk of delaying a rare length."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Static batching waits for the longest request",
+        "language": "python",
+        "code": "lengths = [2, 8, 3, 2]\nstatic_steps = max(lengths)\nstatic_finish = [static_steps] * len(lengths)\nslots, waiting, running, step, finish = 2, list(enumerate(lengths)), {}, 0, {}\nwhile waiting or running:\n    while waiting and len(running) < slots:\n        index, remaining = waiting.pop(0)\n        running[index] = remaining\n    step += 1\n    for index in list(running):\n        running[index] -= 1\n        if running[index] == 0:\n            finish[index] = step\n            del running[index]\nprint(\"static batch of 4, finish steps:\", static_finish)\nprint(\"continuous with 2 slots, finish steps:\", [finish[i] for i in range(len(lengths))])\n",
+        "output": "static batch of 4, finish steps: [8, 8, 8, 8]\ncontinuous with 2 slots, finish steps: [2, 8, 5, 7]\n",
+        "interpretation": "In a static batch of four, every request finishes at step 8 because the batch runs until the 8-token request is done, so the two 2-token requests wait six extra steps. With two slots and continuous scheduling, request 0 finishes at step 2, freeing a slot for request 2, which finishes at step 5; request 3 then finishes at 7, and request 1 still finishes at 8. Short requests no longer pay for long ones. A request that arrives behind several long ones can still wait, so fairness needs its own rule, such as a limit on queue time."
+      }
+    ],
     "outcome": "Compare latency/fairness and padding tradeoffs without confusing scheduler simulation with runtime throughput.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-065.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-065.py",
@@ -227,6 +486,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["strides", "fusion", "online softmax", "kernel evidence"],
+    "key_terms": [
+      {
+        "term": "Strides",
+        "definition": "How far to move in storage, in bytes or elements depending on the API, when advancing an index along each dimension."
+      },
+      {
+        "term": "View",
+        "definition": "An array that reuses another array's storage with a different shape or strides, as a transpose often does."
+      },
+      {
+        "term": "Kernel",
+        "definition": "An implementation that performs a tensor operation on a processor, distinct from the mathematical operation itself."
+      },
+      {
+        "term": "Fusion",
+        "definition": "Combining compatible operations in one kernel or execution region to reduce intermediate reads, writes and launch overhead."
+      },
+      {
+        "term": "Tiled softmax",
+        "definition": "Processing attention scores in blocks while keeping a running maximum, normalizer and weighted numerator, rescaling them to get the exact result."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A transpose is a view until something needs contiguous memory",
+        "language": "python",
+        "code": "import numpy as np\n\nx = np.arange(12, dtype=np.float32).reshape(3, 4)\nt = x.T\nprint(\"x strides\", x.strides, \"contiguous\", x.flags[\"C_CONTIGUOUS\"])\nprint(\n    \"x.T strides\",\n    t.strides,\n    \"contiguous\",\n    t.flags[\"C_CONTIGUOUS\"],\n    \"shares memory\",\n    np.shares_memory(x, t),\n)\ncopy = np.ascontiguousarray(t)\nprint(\"copy strides\", copy.strides, \"shares memory\", np.shares_memory(x, copy))\nx[0, 1] = 99\nprint(\"view sees change:\", t[1, 0], \"copy sees change:\", copy[1, 0])\n",
+        "output": "x strides (16, 4) contiguous True\nx.T strides (4, 16) contiguous False shares memory True\ncopy strides (12, 4) shares memory False\nview sees change: 99.0 copy sees change: 1.0\n",
+        "interpretation": "The 3 by 4 float32 array moves 16 bytes to the next row and 4 bytes to the next column. Its transpose swaps the strides to (4, 16) and shares the same memory, so creating it copied nothing. np.ascontiguousarray makes a real copy with row-major strides (12, 4). Changing x[0, 1] to 99 shows up in the view and not in the copy. Many fused kernels require contiguous inputs, so an innocent transpose before such a kernel can add a hidden copy; profiling should show where these copies happen."
+      }
+    ],
     "outcome": "Inspect physical tensor strides and derive stable tiled softmax before interpreting kernel evidence.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-066.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-066.py",
@@ -254,6 +544,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["KV pages", "fragmentation", "prefix sharing", "copy-on-write"],
+    "key_terms": [
+      {
+        "term": "KV memory",
+        "definition": "Raw cache storage for one sequence, equal to two times the product of layers, KV heads, head width, cached tokens and bytes per element."
+      },
+      {
+        "term": "Paged cache",
+        "definition": "A cache divided into fixed-size blocks, with a page table mapping each request's logical blocks to physical storage."
+      },
+      {
+        "term": "Fragmentation",
+        "definition": "Free memory split into pieces too small or scattered for a new allocation, a cost of growing contiguous caches."
+      },
+      {
+        "term": "Shared prefix",
+        "definition": "Cache blocks for a common prompt prefix used by several requests, tracked with a reference count and kept immutable."
+      },
+      {
+        "term": "Copy-on-write",
+        "definition": "Allocating a private copy of a partially filled shared page before one branch appends to it, leaving the shared content unchanged."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Fixed reservations versus pages for the same requests",
+        "language": "python",
+        "code": "import math\n\nmax_tokens, page = 2048, 16\nactual = [120, 300, 45, 900]\nreserved = max_tokens * len(actual)\npaged = sum(math.ceil(n / page) * page for n in actual)\nprint(\"tokens used:\", sum(actual))\nprint(\"reserved slots:\", reserved, \"utilization\", round(sum(actual) / reserved, 3))\nprint(\"paged slots:\", paged, \"utilization\", round(sum(actual) / paged, 3))\nshared_prefix = 96\nprint(\n    \"pages saved by sharing a\",\n    shared_prefix,\n    \"token prefix across 4 requests:\",\n    3 * shared_prefix // page,\n)\n",
+        "output": "tokens used: 1365\nreserved slots: 8192 utilization 0.167\npaged slots: 1392 utilization 0.981\npages saved by sharing a 96 token prefix across 4 requests: 18\n",
+        "interpretation": "Four requests use 1365 tokens of KV cache in total. Reserving the maximum of 2048 positions for each one sets aside 8192 slots, so only 16.7 percent of the reserved memory holds real data. Allocating 16-token pages on demand needs 1392 slots, 98.1 percent used, and the waste is at most one partial page per request. If all four requests start with the same 96-token system prompt, sharing those pages saves 18 pages. Shared pages need reference counts so that one request finishing does not free pages others still read."
+      }
+    ],
     "outcome": "Calculate page fragmentation and preserve shared prefix state through copy-on-write.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-067.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-067.py",
@@ -277,6 +598,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["quantization error", "speculative acceptance", "residual distribution"],
+    "key_terms": [
+      {
+        "term": "Symmetric quantization",
+        "definition": "Mapping weights to signed integers with a scale and no zero-point offset, here the row maximum absolute value divided by 127."
+      },
+      {
+        "term": "Per-row scale",
+        "definition": "A separate quantization scale for each weight row, chosen so that the row's largest magnitude fits the signed code range."
+      },
+      {
+        "term": "Speculative decoding",
+        "definition": "A draft model proposes tokens that the target model accepts with probability equal to the smaller of one and p divided by q."
+      },
+      {
+        "term": "Residual distribution",
+        "definition": "The normalized positive part of p minus q, sampled when a draft token is rejected."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Symmetric int8 quantization error and an outlier",
+        "language": "python",
+        "code": "import numpy as np\n\n\ndef roundtrip(w):\n    scale = np.abs(w).max() / 127\n    q = np.clip(np.round(w / scale), -127, 127).astype(np.int8)\n    return q.astype(np.float32) * scale, scale\n\n\nweights = np.array([0.01, -0.02, 0.03, 0.015], dtype=np.float32)\nwith_outlier = np.append(weights, 4.0).astype(np.float32)\nfor name, w in ((\"plain\", weights), (\"outlier\", with_outlier)):\n    restored, scale = roundtrip(w)\n    print(\n        name,\n        \"scale\",\n        round(float(scale), 5),\n        \"restored\",\n        np.round(restored[:4], 4),\n        \"max error\",\n        round(float(np.max(np.abs(restored[:4] - w[:4]))), 4),\n    )\n",
+        "output": "plain scale 0.00024 restored [ 0.0099 -0.0201  0.03    0.0151] max error 0.0001\noutlier scale 0.0315 restored [ 0.     -0.0315  0.0315  0.    ] max error 0.015\n",
+        "interpretation": "For the four small weights, the largest magnitude sets a scale of 0.00024, and every value comes back within 0.0001. Adding a single weight of 4.0 raises the scale to 0.0315, so 0.01 and 0.015 now round to 0, while -0.02 and 0.03 both become one step of 0.0315. The maximum error on the original four weights grows to 0.015, half the size of the weights themselves. This is why quantization schemes use per-channel or per-group scales and handle outliers separately. Accuracy should be measured on the task, since a single summary error does not show which weights were lost."
+      }
+    ],
     "outcome": "Bound quantization error and prove a speculative acceptance correction reconstructs its target distribution.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-068.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-068.py",
@@ -304,6 +652,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["SSE framing", "UTF-8", "backpressure", "cursor readback"],
+    "key_terms": [
+      {
+        "term": "Server-Sent Events",
+        "definition": "An HTTP streaming format in which each application event is a group of lines ended by an empty line."
+      },
+      {
+        "term": "Incremental UTF-8 parser",
+        "definition": "A parser that accepts bytes in arbitrary network chunks, holds incomplete characters and emits only complete events."
+      },
+      {
+        "term": "Backpressure",
+        "definition": "Making a producer wait or apply an explicit failure policy when a consumer is slow; the project cancels if an event cannot be enqueued within a timeout."
+      },
+      {
+        "term": "Cursor readback",
+        "definition": "Retrieving retained events with IDs greater than the client's cursor, which reads data and does not continue generation."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Streaming UTF-8 bytes with an incremental decoder",
+        "language": "python",
+        "code": "import codecs\n\nchunks = [\n    \"Liefer\".encode(),\n    \"ung \".encode(),\n    \"ü\".encode()[:1],\n    \"ü\".encode()[1:] + \" 📦\".encode()[:3],\n    \" 📦\".encode()[3:],\n]\nnaive = [c.decode(\"utf-8\", errors=\"replace\") for c in chunks]\ndecoder = codecs.getincrementaldecoder(\"utf-8\")()\nincremental = [decoder.decode(c) for c in chunks] + [decoder.decode(b\"\", final=True)]\nprint(\"chunk sizes:\", [len(c) for c in chunks])\nprint(\"naive:\", naive)\nprint(\"incremental:\", incremental)\nprint(\"events:\", \"\".join(f\"data: {part}\\n\\n\" for part in incremental if part).count(\"data:\"))\n",
+        "output": "chunk sizes: [6, 4, 1, 4, 2]\nnaive: ['Liefer', 'ung ', '�', '� �', '��']\nincremental: ['Liefer', 'ung ', '', 'ü ', '📦', '']\nevents: 4\n",
+        "interpretation": "The network splits the text into chunks of 6, 4, 1, 4 and 2 bytes. The third chunk holds only the first byte of ü, and the emoji is split across the last two chunks. Decoding each chunk separately produces replacement characters in three places, and those are what the client would display. The incremental decoder keeps incomplete bytes until the rest arrive, returning an empty string for the third chunk, then ü followed by a space, then the emoji. Skipping empty results gives four SSE events whose concatenation is the original text."
+      }
+    ],
     "outcome": "Parse exact SSE across arbitrary network chunks and read retained event suffixes without generation.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-069.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-069.py",
@@ -323,6 +698,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["cooperative cancellation", "terminal errors", "durable recovery"],
+    "key_terms": [
+      {
+        "term": "Terminal state",
+        "definition": "A final request state, such as completed, cancelled or error, that never transitions back to running."
+      },
+      {
+        "term": "Cooperative cancellation",
+        "definition": "Cancellation recorded as a flag that the compute loop checks between steps, stopping work at the next safe boundary."
+      },
+      {
+        "term": "Idempotent cleanup",
+        "definition": "Releasing a request's cache and reservation only after the running step returns, so a repeated completion call releases nothing more."
+      },
+      {
+        "term": "Interrupted record",
+        "definition": "A request with an unfinished event sequence after restart, to which recovery appends an explicit interruption error without generating again."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Retrying a half-streamed generation replays tokens",
+        "language": "python",
+        "code": "tokens = [\"The\", \" parcel\", \" is\", \" delayed\", \".\"]\ndelivered = tokens[:3]\nnaive_retry = delivered + tokens\nresume_after = len(delivered)\nresumed = delivered + tokens[resume_after:]\nprint(\"client saw before disconnect:\", \"\".join(delivered))\nprint(\"blind retry:\", \"\".join(naive_retry))\nprint(\"resume from event\", resume_after, \":\", \"\".join(resumed))\n",
+        "output": "client saw before disconnect: The parcel is\nblind retry: The parcel isThe parcel is delayed.\nresume from event 3 : The parcel is delayed.\n",
+        "interpretation": "The client had already shown \"The parcel is\" when the connection dropped. Retrying the whole request appends a full new generation, so the reader sees the first three tokens twice. Even with greedy decoding the second generation might differ, and with sampling it almost certainly would. Numbering events lets the client ask to resume after event 3, which requires the server to keep the finished generation for a short time. If the server cannot do that, the honest response is an error saying the stream was interrupted, not a silent restart."
+      }
+    ],
     "outcome": "Preserve resource ownership during cancellation and mark interrupted requests without replay.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-070.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-070.py",
@@ -342,6 +744,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["TTFT", "TPOT", "percentiles", "profiling"],
+    "key_terms": [
+      {
+        "term": "Queue delay",
+        "definition": "The time between a request's arrival and the start of its service."
+      },
+      {
+        "term": "Time to first token",
+        "definition": "The time until the first generated token, measured from a named observation point such as arrival or admission."
+      },
+      {
+        "term": "TPOT",
+        "definition": "Time per output token after the first, equal to completion time minus first-token time divided by the output token count minus one."
+      },
+      {
+        "term": "Percentile",
+        "definition": "The value below which a given share of observations falls, such as 95th percentile latency."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Time to first token and per-token latency from one trace",
+        "language": "python",
+        "code": "import statistics\n\ntraces = {\n    \"short\": [0.20, 0.25, 0.30, 0.35],\n    \"long_prompt\": [1.40, 1.45, 1.50, 1.55, 1.60],\n    \"slow_decode\": [0.22, 0.42, 0.62, 0.82],\n}\nfor name, times in traces.items():\n    ttft = times[0]\n    gaps = [b - a for a, b in zip(times, times[1:])]\n    print(\n        name, \"TTFT\", ttft, \"mean inter-token\", round(statistics.mean(gaps), 3), \"total\", times[-1]\n    )\nall_ttft = sorted(t[0] for t in traces.values())\nprint(\"median TTFT\", statistics.median(all_ttft), \"max TTFT\", all_ttft[-1])\n",
+        "output": "short TTFT 0.2 mean inter-token 0.05 total 0.35\nlong_prompt TTFT 1.4 mean inter-token 0.05 total 1.6\nslow_decode TTFT 0.22 mean inter-token 0.2 total 0.82\nmedian TTFT 0.22 max TTFT 1.4\n",
+        "interpretation": "The long-prompt trace has a time to first token of 1.4 seconds but streams later tokens every 0.05 seconds, the same as the short trace. Its delay is in prefill. The slow-decode trace starts quickly at 0.22 seconds and then takes 0.2 seconds per token, a decode problem. Total latency alone would rank these as 1.6 and 0.82 seconds and hide which phase to fix. Across the three traces the median first-token time is 0.22 while the maximum is 1.4, so reporting the median alone would hide the slow prompt."
+      }
+    ],
     "outcome": "Define latency denominators and distinguish compute, wall time, cohort composition and actual profiling evidence.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-071.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-071.py",
@@ -369,6 +798,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["release evidence", "Docker lifecycle", "diagnosis", "capstone memo"],
+    "key_terms": [
+      {
+        "term": "Release decision",
+        "definition": "A defended choice to ship or hold a service, backed by invalid-input, capacity, cancellation, error and exact readback evidence plus stated limits."
+      },
+      {
+        "term": "Decision memo",
+        "definition": "A short document linking each release category to actual reports, hashes and observations, with explicit limitations."
+      },
+      {
+        "term": "Docker lifecycle",
+        "definition": "The explicit commands that build an image, run a container and stop it, while mounted state rather than the container preserves service data."
+      },
+      {
+        "term": "Leaked capacity",
+        "definition": "Reserved capacity that is never released, such as after cancellation, even though generated results look correct."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A release gate that fails on a single missing measurement",
+        "language": "python",
+        "code": "gates = {\"p95_ttft_s\": (\"<=\", 1.0), \"error_rate\": (\"<=\", 0.01), \"eval_pass_rate\": (\">=\", 0.95)}\ncandidates = {\n    \"v7\": {\"p95_ttft_s\": 0.8, \"error_rate\": 0.004, \"eval_pass_rate\": 0.96},\n    \"v8\": {\"p95_ttft_s\": 0.6, \"error_rate\": 0.002},\n}\nfor name, measured in candidates.items():\n    results = {}\n    for metric, (op, limit) in gates.items():\n        value = measured.get(metric)\n        results[metric] = (\n            \"missing\" if value is None else (value <= limit if op == \"<=\" else value >= limit)\n        )\n    decision = \"release\" if all(r is True for r in results.values()) else \"hold\"\n    print(name, results, decision)\n",
+        "output": "v7 {'p95_ttft_s': True, 'error_rate': True, 'eval_pass_rate': True} release\nv8 {'p95_ttft_s': True, 'error_rate': True, 'eval_pass_rate': 'missing'} hold\n",
+        "interpretation": "v7 meets all three gates and is released. v8 has better latency and a lower error rate, but its evaluation pass rate was never recorded, and the gate marks that metric as missing and holds the release. Treating a missing value as a pass would let a candidate skip evaluation entirely by not running it. The decision also records which metrics passed, so a reviewer can see that v8 needs only the missing evaluation run, not a full investigation. The thresholds belong in a reviewed file, so that they cannot change between candidates."
+      }
+    ],
     "outcome": "Operate the complete local service and defend a source-bound CPU release decision with explicit limits.",
     "guide_source": "courses/data-ml-engineering/authoring/serving/chapters/dme-072.md",
     "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-072.py",

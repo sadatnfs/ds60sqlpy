@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Trace the dispatch on both arguments: x and y are FormalMeasure objects, so the (FormalMeasure, FormalMeasure) method runs, validates both, compares units and builds a new object from `c(x@values, y@values)`.",
+      "why": "Both units are \"ms\", so the method concatenates the observations in argument order, 1, 3 and then 5, and the new object passes validity again on construction.",
+      "wrong": "Expecting arithmetic. `c(1, 3) + 5` recycles the 5 and gives 6 and 8, but combine_measure joins observations; it never adds them.",
+      "verify": "`z@values` returns 1, 3, 5, and `z@unit` returns \"ms\"."
+    },
+    {
+      "approach": "Build `seconds <- new(\"FormalMeasure\", values = 2, unit = \"s\")` and call `combine_measure(x, seconds)` inside a handler that expects \"incompatible units\".",
+      "why": "Both arguments are still FormalMeasure objects, so the same method is selected; dispatch looks at classes, not slot contents. The `identical(x@unit, y@unit)` check inside the method is what rejects ms against s.",
+      "wrong": "Expecting dispatch to choose another method or to convert. Without the unit check the result would be 1, 3 and 2 labeled ms, treating two seconds as two milliseconds, an error by a factor of 1000.",
+      "verify": "`tryCatch(combine_measure(x, seconds), error = conditionMessage)` returns \"incompatible units\"."
+    },
+    {
+      "approach": "Call `new(\"FormalMeasure\", values = Inf, unit = \"ms\")` and capture the error message.",
+      "why": "The slot type is numeric and Inf is numeric, so the slot check passes. new() then runs the function registered with setValidity, which finds a nonfinite value and returns its message, so construction stops.",
+      "wrong": "Relying on `slots = c(values = \"numeric\")` as the guard. Inf, negative Inf and NaN are all numeric, so a type-only class would accept them and every later total would be infinite or NaN.",
+      "verify": "The captured message contains \"values must be a finite vector\" after the invalid class prefix."
+    },
+    {
+      "approach": "After a direct slot assignment, call `validObject(broken)` before the object leaves the code that changed it, and prefer a replacement function that validates for callers.",
+      "why": "`@<-` checks only that the new value has the slot's class. character(0) is character, so the assignment succeeds, and only the validity function notices that the unit is not one string.",
+      "wrong": "Assuming `@<-` runs validity. Code that reads `broken@unit` without validating gets a zero-length value, and `paste(2, broken@unit)` quietly returns \"2 \" with the unit missing.",
+      "verify": "`tryCatch(validObject(broken), error = conditionMessage)` returns a message containing \"unit must be one nonempty string\"."
+    },
+    {
+      "approach": "Call `combine_measure(x, 2)` on its own and assert its specific message, separately from the unit mismatch test.",
+      "why": "The signature (FormalMeasure, numeric) matches exactly, so that method runs and stops with \"numeric input has no declared unit\". It is a different branch from the mismatch check, so it needs its own test.",
+      "wrong": "Treating the bare 2 as milliseconds because x is in ms. If that method were missing, dispatch would fail with a missing method error, and a test that matched any error would pass for the wrong reason.",
+      "verify": "`tryCatch(combine_measure(x, 2), error = conditionMessage)` returns \"numeric input has no declared unit\"."
+    },
+    {
+      "approach": "Write `to_ms()` to validate its input, require unit \"s\", multiply the values by 1000 and construct a new FormalMeasure with unit \"ms\".",
+      "why": "A conversion must change values and unit together. Building a new object runs validity again, and the input is never modified, so 2 seconds becomes 2000 ms while seconds still holds 2 and \"s\".",
+      "wrong": "Changing only the unit with `seconds@unit <- \"ms\"`. That relabels 2 as 2 ms, wrong by a factor of 1000, and the same mistake repeats if a ms object is converted without the unit check.",
+      "verify": "`to_ms(seconds)@values` returns 2000, `seconds@values` still returns 2, and `to_ms(x)` stops with \"conversion requires seconds\"."
+    }
+  ]
+}

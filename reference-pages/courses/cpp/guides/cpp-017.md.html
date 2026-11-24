@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Select optional, variant or an exception according to the caller&#x27;s information needs.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>optional represents either one value or absence. variant represents one of several named alternatives, useful for distinguishing error reasons. An exception transfers control to a matching catch boundary. Choose errors-as-values for expected input rejection and exceptions for exceptional failures that callers cannot usefully ignore.</p>
+<ul>
+<li><strong><code>std::optional</code>:</strong> holds either one value or absence, without a detailed error reason.</li>
+<li><strong><code>std::variant</code>:</strong> holds exactly one of several alternative types, such as an int or a <code>ParseError</code>.</li>
+<li><strong><code>holds_alternative</code>:</strong> checks which alternative a variant currently holds before the caller extracts a value.</li>
+<li><strong>exception:</strong> transfers control to a matching catch handler and unwinds the intermediate scopes.</li>
+<li><strong>errors as values:</strong> returning failure inside the result type for expected rejections such as invalid input.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>std::get_if&lt;T&gt;(&amp;result)</code> returns a pointer only when the variant holds T. This makes the branch explicit without interpreting an ordinary value such as zero as failure. Catch only the exception types a boundary can explain or translate.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

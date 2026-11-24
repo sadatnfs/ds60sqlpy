@@ -17,6 +17,12 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[3]
 BASE = Path("courses/llm-evaluation")
 HERE = ROOT / BASE / "authoring"
+REASONING = {
+    "approach": "Approach.",
+    "why": "Why it holds for this fixture.",
+    "pitfall": "A tempting wrong approach.",
+    "verify": "How to verify.",
+}
 
 
 def specifications() -> list[dict[str, Any]]:
@@ -31,15 +37,30 @@ def specifications() -> list[dict[str, Any]]:
         if len(row["exercises"]) != 6 or len({e["title"] for e in row["exercises"]}) != 6:
             raise ValueError("Six distinct practice tasks are required.")
         for task in row["exercises"]:
-            if set(task) != {"title", "task", "expected", "hint", "answer"} or not all(
+            if set(task) != {"title", "task", "expected", "hint", "answer", "reasoning"} or not all(
                 task.values()
             ):
                 raise ValueError("Practice needs task, expected observation, hint and explanation.")
+            reasoning = task["reasoning"]
+            if set(reasoning) != set(REASONING) or any(
+                not text or set(text) & set("\u2013\u2014") for text in reasoning.values()
+            ):
+                raise ValueError(
+                    "Solution reasoning needs approach, check, pitfall and verification."
+                )
         body = (HERE / "chapters" / f"eval-{row['number']:03}.md").read_text("utf-8")
         if body.count("{{WORKED_A}}") != 1 or body.count("{{WORKED_B}}") != 1:
             raise ValueError("Each chapter needs two complete worked programs.")
         if len(re.findall(r"\b\w+\b", body)) < 450:
             raise ValueError("A chapter needs a substantive original explanation.")
+        if body.count("\n## Worked case A") != 1:
+            raise ValueError("Key terms precede the single first worked case.")
+        terms = row["key_terms"]
+        if not 3 <= len(terms) <= 5 or any(
+            not term or not text or set(term) & set(":*") or set(term + text) & set("\u2013\u2014")
+            for term, text in terms.items()
+        ):
+            raise ValueError("Each unit needs three to five plain key terms.")
     return rows
 
 
@@ -127,9 +148,15 @@ def artifacts() -> dict[str, str]:
         prefix = BASE.as_posix()
         source = formatted[key + "_reference.py"]
         guide = (HERE / "chapters" / f"{key}.md").read_text("utf-8")
+        glossary = "\n".join(f"- **{t}:** {d}" for t, d in row["key_terms"].items())
+        guide = guide.replace(
+            "\n## Worked case A", "\n## Key terms\n\n" + glossary + "\n\n## Worked case A", 1
+        )
         guide = guide.replace(
             "{{WORKED_A}}", "```python\n" + formatted[key + "_worked_a.py"] + "```"
         ).replace("{{WORKED_B}}", "```python\n" + formatted[key + "_worked_b.py"] + "```")
+        concepts = " and ".join(row["concepts"][:2])
+        tasks = [e["title"] for e in row["exercises"]]
         intro = (
             f"# {key}: {row['title']}\n\n## Starting point and outcome\n\n"
             f"{row['level'].title()}; approximately {row['minutes']} minutes. "
@@ -139,31 +166,20 @@ def artifacts() -> dict[str, str]:
             + row["outcome"]
             + "\n\n## Classroom execution\n\n"
             + (
-                f"Choose **LLM evaluation and alignment** in `/classroom`, open `{key}`, "
-                f"and use its `{row['runtime']}` profile. "
-            )
-            + (
-                "A Run starts a fresh Python process. Both worked programs "
-                "below include their own setup and can be copied in full. "
-                "Save your draft first. "
-            )
-            + (
-                "The examples use small authored fixtures and explicit "
-                "numerical checks. Process success establishes those checks, "
-                "not population validity, safety certification or "
-                "natural-language competence. "
-            )
-            + (
-                "Code and notes persist; temporary program files do not. No "
-                "network call or model download is needed.\n\n"
+                f"Open `{key}` under **LLM evaluation and alignment** in `/classroom`; its "
+                f"`{row['runtime']}` profile runs each worked program for {row['title'].lower()} "
+                "in a fresh Python process, so save your draft before a Run. "
+                f"The checks prove only what the authored fixture shows about {concepts}: "
+                f"{row['verification']} They do not certify population validity, safety "
+                "or natural-language competence, and nothing is downloaded.\n\n"
             )
         )
         guide = intro + guide + "\n\n## Six investigations\n\n"
         explanation = [
             f"# {key}: explained reference\n\n"
-            f"The full reference is `{key}_reference.py`. "
-            "Its assertions check the specific authored inputs. "
-            "Read the assumptions and counterexamples before transferring a result.\n"
+            f"`{key}_reference.py` asserts each answer below, from *{tasks[0]}* to "
+            f"*{tasks[5]}*, on the authored {concepts} fixture only. Before applying a "
+            f"conclusion to other data, recheck the assumption that *{tasks[2]}* tests.\n"
         ]
         for n, e in enumerate(row["exercises"], 1):
             guide += (
@@ -172,7 +188,10 @@ def artifacts() -> dict[str, str]:
             )
             explanation.append(
                 f"## {n}. {e['title']}\n\n{e['answer']}\n\n"
-                f"**Expected observation:** {e['expected']}\n"
+                + "".join(
+                    f"**{label}** {e['reasoning'][field]}\n\n" for field, label in REASONING.items()
+                )
+                + f"**Expected observation:** {e['expected']}\n"
             )
         guide += (
             "## Primary references\n\n"
@@ -182,14 +201,12 @@ def artifacts() -> dict[str, str]:
         has_plot = key + "_plotly_reference.py" in formatted
         if has_plot:
             guide += (
-                "\n## Interactive figure variant\n\nSelect **Interactive "
-                "Plotly** in the lesson variant control. Its complete program"
-                " uses the same authored inputs to draw the corresponding "
-                "risk, calibration or policy curve. The captured figure "
-                "retains a description and exact data table, and its JSON can"
-                " be downloaded. Hovering a point does not create new "
-                "statistical evidence. The default numerical reference "
-                "remains separately saved.\n"
+                "\n## Interactive figure variant\n\n"
+                f"The {concepts} curve for {row['title'].lower()} is drawn from the same "
+                "authored inputs when you pick **Interactive Plotly** in the variant control. "
+                f"Hover values add nothing beyond the *{tasks[0]}* numbers; the saved figure "
+                "keeps a description, its exact data table and downloadable JSON, beside the "
+                "separately saved numerical reference.\n"
             )
         prerequisites = ", ".join(row["prerequisites"]) or "none"
         guide = guide.rstrip("\n") + (

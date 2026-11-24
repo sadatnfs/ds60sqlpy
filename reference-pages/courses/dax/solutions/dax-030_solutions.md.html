@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the revenue for both audiences selected together.</p>
 <p>The keys are 10, 20, 30, and the unique population totals 187 rather than 267.</p>
+<p><strong>Why it fits this model:</strong> VALUES over GroupMembership[CustomerKey] returns each customer once. Selecting both audiences yields {10, 20, 30}, and TREATAS sends that set to Customer: 51 + 80 + 56 = 187.</p>
+<p><strong>Tempting mistake:</strong> Adding the two audience totals, 131 + 136, gives 267 and counts Bo&#x27;s 80 twice, even though only 187 USD exists.</p>
+<p><strong>How to confirm:</strong> With both audiences selected AudienceRevenue is 187, and COUNTROWS(VALUES(GroupMembership[CustomerKey])) is 3 while the bridge has 4 rows.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add Di to Newsletter without adding a sale.</p>
 <p>The selected customer population increases, but Newsletter revenue remains 131 because Di has no sales.</p>
+<p><strong>Why it fits this model:</strong> Membership and revenue are separate measures. Adding Di (key 40) gives Newsletter three members, while revenue stays 131 because Di has no sales.</p>
+<p><strong>Tempting mistake:</strong> Treating revenue as a check on membership loads. Unchanged revenue looks like the load failed, and revenue per member silently falls from 65.5 to about 43.67.</p>
+<p><strong>How to confirm:</strong> Under Newsletter, distinct members read 3 and AudienceRevenue 131.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a reconciliation for the two audience totals.</p>
 <p>131 + 136 - 80 = 187 for the union of these two audiences.</p>
+<p><strong>Why it fits this model:</strong> Inclusion and exclusion: Newsletter 131 plus Prospects 136, minus the overlap, which is Bo alone at 80, equals the union, 187.</p>
+<p><strong>Tempting mistake:</strong> Subtracting the overlap count, 1, instead of the overlap revenue leaves 266, which mixes customers with USD.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( [NetRevenue], Customer[CustomerKey] = 20 )</code> returns 80, and 131 + 136 - 80 equals the both-audience result, 187.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a membership table with duplicate group/customer pairs.</p>
 <p>Reject or repair duplicate membership rows. VALUES may hide them for this measure, but other counts or iterators could still overcount.</p>
+<p><strong>Why it fits this model:</strong> The bridge&#x27;s grain is one row per group and customer. A second (1, 10) row breaks that grain. VALUES hides it here, so Newsletter revenue still reads 131.</p>
+<p><strong>Tempting mistake:</strong> Accepting the duplicate because the revenue test passes. COUNTROWS(GroupMembership) under Newsletter becomes 3 instead of 2, and a SUMX over bridge rows gives 51 + 51 + 80 = 182.</p>
+<p><strong>How to confirm:</strong> Compare COUNTROWS(GroupMembership) with <code>COUNTROWS ( SUMMARIZE ( GroupMembership, GroupMembership[GroupKey], GroupMembership[CustomerKey] ) )</code>; any difference is a load defect.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why this mapping is not proof of row-level security.</p>
 <p>A real security rule must be enforced by the engine under tested identities and relationship behavior; this is an analytical selection only.</p>
+<p><strong>Why it fits this model:</strong> The audience mapping is a CALCULATE argument in a query. RawRevenue stays 187 under each audience because Audience filters only the bridge.</p>
+<p><strong>Tempting mistake:</strong> Calling the TREATAS measure a security rule. A user who drops the Audience filter or writes another measure on Sales sees 187, all customers.</p>
+<p><strong>How to confirm:</strong> Without the audience filter AudienceRevenue is 187. Real protection needs an engine role, tested under each identity.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the design to patients enrolled in multiple programs.</p>
 <p>Model membership at program/patient grain, report overlap explicitly and choose unique-patient versus membership-weighted denominators deliberately.</p>
+<p><strong>Why it fits this model:</strong> Programs work like audiences: one row per program and patient, unique counts for reach and pair counts for workload. Using the audience data as a stand-in, Bo is in two groups.</p>
+<p><strong>Tempting mistake:</strong> Summing per-program patient counts, 2 + 2 = 4, as unique patients double-counts the overlap; the true count is 3.</p>
+<p><strong>How to confirm:</strong> Distinct patients across both programs should equal the sum of program counts minus the overlap: 2 + 2 - 1 = 3.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

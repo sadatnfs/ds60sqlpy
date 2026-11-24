@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Check the query meaning before its execution plan",
       "input_contract": "Execute the projection query and return ordered(id, doubled) tuples. Compare all nine rows with the literal rule id 3..11, doubled=20*id.",
-      "expected": "Nine tuples from(3,60) through(11,220), with no missing or extra identities.",
+      "expected": "Nine tuples from (3, 60) through (11, 220), with no missing or extra identities.",
       "verification": "Assert the complete tuple list, not only the first/last rows or a printed plan."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Compare equivalent query forms with separate semantic and plan evidence",
       "input_contract": "Execute a nested projection/filter form of the direct query and compare its exact rows. Capture its extended plan and return a bounded receipt containing Spark version, ANSI, AQE and shuffle partition settings.",
-      "expected": "The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSItrue, AQEfalse, shuffle partitions 2. Both extended plans expose an optimized stage.",
+      "expected": "The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage.",
       "verification": "Assert full output parity with the literal oracle and exact controlled settings;do not assert whole-plan byte equality or faster execution."
     }
   ],

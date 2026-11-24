@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Kubernetes schedules pods onto nodes; an installed and configured device plugin advertises GPU resources to that scheduler. Spark&#x27;s driver requests executors, and Spark&#x27;s own resource discovery must agree with what each executor container can access. These are different layers. A pod resource limit alone does not prove the selected image, driver and native libraries can execute the Spark GPU plugin.</p>
 <p>This is a manual external lab for a named disposable cluster and namespace. Never use ambient kubeconfig or expose a driver service publicly by convenience. Define service accounts, image provenance, node selection, resource limits, storage and cleanup before creating workloads. Docker Desktop on a Mac is useful for the CPU classroom, but it does not manufacture an NVIDIA GPU for Kubernetes. Observe pod placement and actual device visibility before a bounded query.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Pod:</strong> The smallest Kubernetes scheduling unit, holding one or more containers.</li>
+<li><strong>Device plugin:</strong> A Kubernetes component that advertises node GPUs as schedulable resources.</li>
+<li><strong>Resource discovery script:</strong> A script Spark runs in each executor to report the GPU addresses that container can access.</li>
+<li><strong>Namespace:</strong> A Kubernetes scope that isolates names and permissions for a named, owned environment.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A cluster can have three nodes but only one advertising a compatible GPU. A GPU executor must land on the eligible node and see the assigned resource inside its container.</p>
@@ -212,20 +219,36 @@ eligible <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <span class="syntax-keyword">assert</span> eligible <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">gpu-node</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU scheduling worksheet:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> eligible<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Only the illustrative GPU node is eligible; no cluster operation occurs.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>eligible</code></td>
+<td><code>[&#x27;gpu-node&#x27;]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-draw-scheduler-layers">Exercise 1: Draw scheduler layers<a class="heading-anchor" href="#exercise-1-draw-scheduler-layers" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>draw scheduler layers</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Debugging Spark task settings when executors never started confuses the two layers, since the problem sits at pod placement.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-name-ownership-boundaries">Exercise 2: Name ownership boundaries<a class="heading-anchor" href="#exercise-2-name-ownership-boundaries" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>name ownership boundaries</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Running in the default namespace without labels mixes lab resources with others, making safe cleanup impossible. It also makes the cluster context easy to get wrong, so commands meant for a lab cluster can reach a shared one.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-diagnose-pending-executors">Exercise 3: Diagnose Pending executors<a class="heading-anchor" href="#exercise-3-diagnose-pending-executors" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>diagnose Pending executors</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Changing Spark code or increasing memory without reading events addresses the wrong layer. Raising executor memory can even make placement harder, since larger requests fit on fewer nodes.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-verify-device-visibility">Exercise 4: Verify device visibility<a class="heading-anchor" href="#exercise-4-verify-device-visibility" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>verify device visibility</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming visibility because the node has a GPU misses runtime misconfiguration that leaves the container without the device. The executor would then start and the plugin would fail at initialization, or the job would run entirely on CPU.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-private-networking">Exercise 5: Design private networking<a class="heading-anchor" href="#exercise-5-design-private-networking" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design private networking</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Exposing the driver UI with a public load balancer for convenience makes job data reachable from outside. Query plans and configuration can include paths, table names and connection details.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-write-scoped-cleanup">Exercise 6: Write scoped cleanup<a class="heading-anchor" href="#exercise-6-write-scoped-cleanup" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>write scoped cleanup</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Deleting by broad name patterns or whole namespaces you did not create can remove unrelated work. Deleting before saving logs also destroys the evidence needed to explain a failed run.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

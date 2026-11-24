@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the net amount if each line&#x27;s discount is subtracted twice.</p>
 <p>The incorrect total would be 195 - 16 = 179.</p>
+<p><strong>Why it fits this model:</strong> Discount is a currency amount per line, so each line is Quantity x UnitPrice minus Discount, once. The discounts are S2 1, S4 3 and S8 4, which add to 8.</p>
+<p><strong>Tempting mistake:</strong> Subtracting SUM(Sales[Discount]) again after a SUMX that already subtracted it removes 16 and returns 179.</p>
+<p><strong>How to confirm:</strong> Net is 187, and S8 alone checks as 2 x 20 - 4 = 36.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Filter to Blue before calculating gross and net.</p>
 <p>Gross is 170 and net is 163; blue-line discounts total 7.</p>
+<p><strong>Why it fits this model:</strong> Blue keeps Notebook and Mug, lines S1, S3, S4, S6, S7 and S8. Their gross is 170, their discounts are S4 3 and S8 4, and net is 163.</p>
+<p><strong>Tempting mistake:</strong> Treating Discount as a rate, Quantity x UnitPrice x (1 - Discount), turns S4 into 30 x (1 - 3) = -60 and S8 into -120, which are impossible line amounts.</p>
+<p><strong>How to confirm:</strong> Under Blue expect Gross 170 and Net 163; the difference, 7, equals the Blue discounts.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a customer-level average revenue for customers with sales.</p>
 <p>AVERAGEX(Customer,[NetRevenue]) averages 51, 80, 56 and excludes Di&#x27;s BLANK, yielding 187/3.</p>
+<p><strong>Why it fits this model:</strong> AVERAGEX over Customer transitions each row, so it averages Ada 51, Bo 80 and Cy 56. Di&#x27;s BLANK is skipped, which gives 187 / 3, about 62.33.</p>
+<p><strong>Tempting mistake:</strong> DIVIDE([NetRevenue], COUNTROWS(Customer)) counts Di and returns 46.75. AVERAGE(Sales[NetAmount]) gives 23.375, which is revenue per line, not per customer.</p>
+<p><strong>How to confirm:</strong> Expect about 62.33, and a matching DIVIDE ( [NetRevenue], DISTINCTCOUNT ( Sales[CustomerKey] ) ).</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose calling the mean product revenue an average unit price.</p>
 <p>AVERAGEX(Product,[NetRevenue]) is USD per contributing product. Net unit price is 187/17 = 11.</p>
+<p><strong>Why it fits this model:</strong> AVERAGEX(Product, [NetRevenue]) divides 187 by three selling products, so it is 62.33 USD per product. A unit price divides revenue by units: 187 / 17 = 11.</p>
+<p><strong>Tempting mistake:</strong> Labeling 62.33 an average unit price overstates it more than five times, since its denominator counts products, not the 17 units sold.</p>
+<p><strong>How to confirm:</strong> <code>DIVIDE ( [NetRevenue], SUM ( Sales[Quantity] ) )</code> returns 11, while the product average stays about 62.33.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain what adding another unsold catalog product does to the two averages.</p>
 <p>The nonblank average stays 187/3; the zero-filled catalog average becomes 187/5.</p>
+<p><strong>Why it fits this model:</strong> AVERAGEX skips BLANK, so a new unsold product changes nothing in the nonblank average, 187 / 3. COALESCE turns it into a 0, so the catalog average becomes 187 / 5 = 37.4.</p>
+<p><strong>Tempting mistake:</strong> Expecting both averages to stay put misses that the zero-filled version counts every catalog member, as it already does for Bag (187 / 4 = 46.75).</p>
+<p><strong>How to confirm:</strong> Today the results are about 62.33 and 46.75. With one more unsold product expect about 62.33 and 37.4.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the choice to average regional performance.</p>
 <p>An equal-region average and a pooled customer-weighted rate answer different questions; state the estimand before selecting the iterator.</p>
+<p><strong>Why it fits this model:</strong> Decide what gets equal weight. Regions give North 107 and South 80 (average 93.5). Customers give 187 / 3, about 62.33.</p>
+<p><strong>Tempting mistake:</strong> Averaging per-region customer averages, North (51 + 56) / 2 = 53.5 and South 80, gives 66.75 and presents it as the average customer, which favors Bo.</p>
+<p><strong>How to confirm:</strong> AVERAGEX over regions of [NetRevenue] returns 93.5, and AVERAGEX over Customer returns about 62.33; label each for what it weights.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

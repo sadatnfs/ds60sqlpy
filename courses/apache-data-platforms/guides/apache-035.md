@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-033`, `apache-006`.
 
+## Key terms
+
+- **Consumer position:** The offset of the next record a consumer instance will fetch, which advances as it reads.
+- **Committed offset:** The stored offset where a later consumer in the same group resumes. Committing n means the next record to read is n.
+- **At-least-once processing:** Committing an offset only after the record's effect succeeds, so a crash can replay the effect but never skip it.
+- **Manual assignment:** Assigning specific partitions to a consumer without group subscription, which isolates offset behavior from rebalancing.
+- **Rebalance:** The coordinator's reassignment of partitions among group members when a member joins, leaves or fails.
+
 ## A consumer position and a committed offset are different state
 
 A consumer advances its current position while fetching records. Its committed

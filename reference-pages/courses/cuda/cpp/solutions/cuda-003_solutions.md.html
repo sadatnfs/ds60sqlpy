@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-003_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A shell reports <code>nvcc: command not found</code>, while an already installed framework executes a tensor operation on a GPU. This is possible because the framework can run precompiled kernels without the developer compiler. Building a new CUDA extension has a different dependency contract from running the existing tensor operator.</p>
+<p><strong>Approach:</strong> Separate two capabilities: running prebuilt framework kernels, which needs a driver and runtime libraries, and compiling new kernels, which needs nvcc.</p>
+<p><strong>Why it is correct:</strong> Framework wheels ship compiled device code and runtime libraries, so a tensor operation can execute on a machine with no compiler installed.</p>
+<p><strong>A plausible wrong approach:</strong> Concluding the GPU is broken because nvcc is missing confuses the compile dependency with the execute dependency.</p>
+<p><strong>How to verify:</strong> Run the existing tensor operation and record its device, then separately attempt an extension build and record the missing compiler.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A container contains nvcc and compiles a program, but <code>cudaGetDeviceCount</code> reports no available device. Editing the kernel cannot repair absent hardware access. Inspect host support, driver and deliberate container GPU exposure. The compiler result remains valid compilation evidence; record execution as unavailable instead of silently presenting a CPU result as CUDA success.</p>
+<p><strong>Approach:</strong> Record the successful compilation as build evidence, then diagnose device visibility from the zero device count before touching any source.</p>
+<p><strong>Why it is correct:</strong> cudaGetDeviceCount returning no devices depends on host driver and container exposure, which no change to kernel code can alter.</p>
+<p><strong>A plausible wrong approach:</strong> Rewriting the kernel or adding a CPU fallback that prints success hides the missing hardware and produces a false GPU claim.</p>
+<p><strong>How to verify:</strong> Check host driver presence and the container&#x27;s GPU exposure flags; device count must become nonzero before execution evidence exists.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Application calls runtime; runtime uses the kernel driver; the driver controls the GPU. Libraries and framework dispatch can add intermediate layers.</p>
+<p><strong>Approach:</strong> Order calls from the top: application code calls the runtime, the runtime calls into the kernel driver, and the driver controls the device.</p>
+<p><strong>Why it is correct:</strong> Each layer only talks to its neighbor, so a missing driver blocks the runtime regardless of how correct the application is.</p>
+<p><strong>A plausible wrong approach:</strong> Placing the runtime below the driver suggests the runtime can reach hardware directly, which would make driver diagnostics pointless.</p>
+<p><strong>How to verify:</strong> Draw the stack and annotate where a framework dispatch layer inserts itself between the application and the runtime.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Preserve the exact allocation status and requested bytes. Check device visibility, compatibility and available memory rather than treating management visibility as a successful compute test.</p>
+<p><strong>Approach:</strong> Capture the allocation&#x27;s error code and byte request, then check visible devices, driver and runtime compatibility, and free memory.</p>
+<p><strong>Why it is correct:</strong> A management tool can list a device without proving the compute context can allocate, so the failing call holds the evidence.</p>
+<p><strong>A plausible wrong approach:</strong> Retrying the allocation in a loop without reading its status discards the error and can mask an out-of-memory condition.</p>
+<p><strong>How to verify:</strong> Retry with a small, known-safe request; success narrows the cause to size or pressure, failure points to compatibility.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>The layer diagrams, diagnostic classification and CPU models. A Linux container on that Mac does not create an NVIDIA CUDA device.</p>
+<p><strong>Approach:</strong> Complete layer diagrams, classify the diagnostic scenarios and run the CPU models, labeling all of it as reading or CPU evidence.</p>
+<p><strong>Why it is correct:</strong> Apple hardware has no NVIDIA device, so no container or virtual machine on it can expose a CUDA device.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming Docker on the Mac passes a GPU through treats container packaging as hardware access, which it never provides.</p>
+<p><strong>How to verify:</strong> Run the CPU reference and confirm it prints the compilation-only message rather than any device result.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Use &#x27;CUDA compilation available; GPU execution not verified&#x27;. Keep hardware, driver access and actual allocation/execution observations separate.</p>
+<p><strong>Approach:</strong> Write a label that states what was observed, compilation, and what was not observed, execution, in separate explicit fields.</p>
+<p><strong>Why it is correct:</strong> A build-only machine can produce binaries yet has never allocated or launched, so execution remains unverified by construction.</p>
+<p><strong>A plausible wrong approach:</strong> Labeling the machine CUDA-ready merges two claims and lets a reader assume kernels have produced validated results there.</p>
+<p><strong>How to verify:</strong> The reference asserts compiler is true and kernel_validated is false; the label must keep those values distinguishable.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-003_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

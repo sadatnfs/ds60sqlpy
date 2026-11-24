@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Reading the design matrix",
+      "body": "`model.matrix(~group)` for the starter values A, B, A with declared levels A, B and C:\n\n```text\nrow   (Intercept)   groupB   groupC\n1     1             0        0\n2     1             1        0\n3     1             0        0\n```\n\nA has no column of its own. It is the baseline, so the intercept describes A and a groupB coefficient would be the difference between B and A, not the mean of B. The groupC column is all zeros because no row has C. A linear model fitted on these rows would report NA for groupC, since a column of zeros carries no information.\n\nAfter `relevel(group, ref = \"B\")` the columns change:\n\n```text\nrow   (Intercept)   groupA   groupC\n1     1             1        0\n2     1             0        0\n3     1             1        0\n```\n\nThe fitted values would be identical, but every coefficient now has a different meaning, which is why the column names must be checked before any coefficient is explained."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Build `factor(c(\"5\", \"9\"))` and apply `as.numeric()` to it.",
+      "why": "The default levels are the sorted labels \"5\" and \"9\", and as.numeric returns each value's level position, so the result is 1, 2.",
+      "wrong": "Expecting 5 and 9. Those are the labels; recovering them needs `as.numeric(as.character(x))`, as Example 1 shows.",
+      "verify": "`identical(as.numeric(factor(c(\"5\", \"9\"))), c(1, 2))` returns TRUE."
+    },
+    {
+      "approach": "Call `relevel(group, ref = \"B\")` with the exact declared label.",
+      "why": "B is one of the declared levels, so relevel moves it to the front and keeps A and C. Models then compare other groups with B.",
+      "wrong": "Rebuilding with `factor(group, levels = \"B\")`. B moves first, but A and C are no longer levels, so both A rows become NA.",
+      "verify": "`levels(relevel(group, ref = \"B\"))` returns \"B\", \"A\", \"C\"."
+    },
+    {
+      "approach": "Declare C in `levels` when the factor is created, then call `table(group)`.",
+      "why": "The starter holds A twice and B once. Because C is declared, the table lists it with 0, showing that C was considered and had no rows.",
+      "wrong": "Creating the factor without a levels argument. The table shows only A and B, so a reader cannot tell whether C was absent or never part of the design.",
+      "verify": "`unname(table(group)[\"C\"])` returns 0."
+    },
+    {
+      "approach": "Keep low, medium and high as an ordered factor and choose an encoding that matches what is known about the gaps.",
+      "why": "The order is known, but nothing says medium sits halfway between low and high. `as.integer()` on the reference values gives 1 and 3, which are positions, not distances.",
+      "wrong": "Feeding the codes into a model as a number. That assumes the step from low to medium equals the step from medium to high; default polynomial contrasts for ordered factors make the same equal-spacing assumption.",
+      "verify": "`as.integer(ordered_group)` returns 1 and 3, and `is.ordered(ordered_group)` returns TRUE."
+    },
+    {
+      "approach": "Detect labels that turned into NA by comparing the raw text with the factor, and report them before analysis.",
+      "why": "\"D\" is not among A, B and C, so the factor value is NA and no warning appears. Example 3 shows how lowercase b fails the same way.",
+      "wrong": "Counting with a plain `table()`. NA rows are left out, so the totals shrink and nobody sees why.",
+      "verify": "`is.na(unknown)` returns TRUE, and `table(..., useNA = \"ifany\")` shows the NA count."
+    },
+    {
+      "approach": "Print `colnames(model.matrix(~group))` and the column sums before describing any coefficient.",
+      "why": "The columns are the intercept, groupB and groupC, so A is the baseline. groupC sums to 0 because no row has C.",
+      "wrong": "Describing the groupB coefficient as the average for B. It is B minus A, and the groupC estimate cannot be computed at all.",
+      "verify": "`colnames(design)` returns \"(Intercept)\", \"groupB\", \"groupC\", and `colSums(design)` shows 3, 1 and 0."
+    }
+  ]
+}

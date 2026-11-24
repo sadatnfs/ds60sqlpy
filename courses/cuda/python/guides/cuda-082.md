@@ -23,6 +23,14 @@ The host can also accidentally serialize the graph. Calling `.item()`, `.get()` 
 Allocator reuse is the subtle companion to stream ordering. A library may know the allocation was used on its own stream but not that an external consumer still reads it. Use that library's documented external-stream or allocation-recording protocol. Do not solve this by keeping arbitrary global references forever: that trades a race for a memory leak. The acceptance test uses two non-default streams, repeated bounded inputs with distinct values, explicit producer/consumer ordering and a final comparison against the CPU oracle.
 
 
+### Key terms
+
+- **Stream:** An ordered queue of device work; operations in one stream run in issue order.
+- **CUDA event:** A marker recorded in a stream that other streams or the host can wait on.
+- **Stream wait:** A device-side dependency that makes one stream wait for an event without blocking the host.
+- **Host synchronization:** A CPU wait for device work to finish, which blocks Python and removes overlap.
+- **Cross-stream storage reuse:** Reuse of a freed block by the caching allocator while another stream may still use it, which is unsafe unless the block is recorded with that stream.
+
 ## Worked examples
 
 ### Worked example 1
@@ -49,33 +57,54 @@ print("CPU dependency model: ordered pipeline accepted; premature download rejec
 
 **Expected observation:** Valid dependency order accepted; premature download rejected.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `edges` | `[('upload', 'transform'), ('transform', 'download')]` |
+| `order` | `['upload', 'transform', 'download']` |
+| `positions` | `{'upload': 0, 'transform': 1, 'download': 2}` |
+| `bad` | `['download', 'upload', 'transform']` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Draw the dependency graph
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **draw the dependency graph** in the examples above.
+**Trap to avoid:** Drawing edges from code order instead of data flow invents dependencies between unrelated work and hides real ones crossing library calls.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Locate a missing wait
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **locate a missing wait** in the examples above.
+**Trap to avoid:** Assuming the host Python call to A finishing means A's kernel finished confuses queuing with completion.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate host wait and stream wait
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **separate host wait and stream wait** in the examples above.
+**Trap to avoid:** Using a host synchronize everywhere fixes correctness but serializes host and device.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Trace storage reuse
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **trace storage reuse** in the examples above.
+**Trap to avoid:** Freeing a buffer as soon as the host is done with its Python object assumes device work is done too.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design non-default stream test
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design non-default stream test** in the examples above.
+**Trap to avoid:** Testing only on the default stream passes even with the wait removed.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain why global synchronization can mask bugs
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **explain why global synchronization can mask bugs** in the examples above.
+**Trap to avoid:** Treating a correct result with global waits as proof that dependencies are complete hides the missing event.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

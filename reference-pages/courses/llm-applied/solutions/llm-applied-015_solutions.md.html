@@ -194,29 +194,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-015_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="llm-applied-015-explanatory-solutions">llm-applied-015: explanatory solutions<a class="heading-anchor" href="#llm-applied-015-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers for full supervised fine-tuning of a tiny causal decoder only after attempting <em>Build an explicit SFT batch</em> through <em>Write an honest adaptation receipt</em>. A discrepancy in <em>Measure the initial state</em> can be traced to one step because the inputs match the guide. <code>courses/llm-applied/solutions/llm-applied-015_solution.py</code> runs the assertions; this page explains why they test full sft and answer-only objective.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Full supervised fine-tuning updates all trainable model parameters on governed target examples. The operation can change representations, attention and output behavior together, which offers flexibility but also risks overfitting and forgetting. A working training loop is not evidence that a subject assistant has learned current facts or become reliable. The task data, mask, objective, optimizer and evaluation split define what the update actually means.</p>
-<p>This chapter performs real CPU gradient updates on the course&#x27;s small causal decoder. It has a literal vocabulary of 16 token IDs, width32, two attention heads and one block. The tokens stand for authored prompt and answer symbols, not natural-language competence. Two training sequences teach a simple answer pattern; a separately identified held-out prompt tests a small transfer case. We update every parameter for exactly20 steps and report training and held-out loss separately. No pretrained weights, external corpus or hosted model is used. The point is to make the mechanics, evidence and limitations of full SFT visible before using a larger stack.</p>
+<p>This chapter performs real CPU gradient updates on the course&#x27;s small causal decoder. It has a literal vocabulary of 16 token IDs, width 32, two attention heads and one block. The tokens stand for authored prompt and answer symbols, not natural-language competence. Two training sequences teach a simple answer pattern; a separately identified held-out prompt tests a small transfer case. We update every parameter for exactly 20 steps and report training and held-out loss separately. No pretrained weights, external corpus or hosted model is used. The point is to make the mechanics, evidence and limitations of full SFT visible before using a larger stack.</p>
 <p><strong>Full SFT:</strong> Updating all trainable model parameters on supervised examples.</p>
 <p><strong>Answer-only objective:</strong> Loss over answer targets while prompt tokens remain context.</p>
 <p><strong>Forgetting:</strong> Loss of previously useful behavior after adaptation.</p>
 <p><strong>Held-out transfer:</strong> Behavior on records excluded from fitting and selection.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Construct shifted inputs and answer-only labels, using-100 for the prompt-prediction position. Set a local seed before model creation. Adam receives all model parameters. Each step clears gradients, calculates logits, flattens the batch/time axes for cross entropy, backpropagates and applies one update. A detached clone records initial state. Evaluation usesmodel.eval andtorch.no_grad, then calculates the same active-target objective on held-out IDs.</p>
+<p>Construct shifted inputs and answer-only labels, using-100 for the prompt-prediction position. Set a local seed before model creation. Adam receives all model parameters. Each step clears gradients, calculates logits, flattens the batch/time axes for cross entropy, backpropagates and applies one update. A detached clone records initial state. Evaluation uses model.eval and torch.no_grad, then calculates the same active-target objective on held-out IDs.</p>
 <h3 id="trace-the-full-sft-state-and-objective">Trace the full-SFT state and objective<a class="heading-anchor" href="#trace-the-full-sft-state-and-objective" aria-label="Link to this section">#</a></h3>
-<p>The model uses vocabulary16, width32, two attention heads and context capacity32. For a training batch with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">B=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">T=3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span></span></span></span>, token and position embeddings combine into[2, 3, 32]. The QKV projection produces[2, 3, 96], then each component becomes[2, 2, 3, 16] after splitting into two heads. Attention scores have shape[2, 2, 3, 3], with a causal allowed-position relation. The output logits return to[2, 3, 16].</p>
+<p>The model uses vocabulary 16, width 32, two attention heads and context capacity 32. For a training batch with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">B=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">T=3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span></span></span></span>, token and position embeddings combine into <code>[2, 3, 32]</code>. The QKV projection produces <code>[2, 3, 96]</code>, then each component becomes <code>[2, 2, 3, 16]</code> after splitting into two heads. Attention scores have shape <code>[2, 2, 3, 3]</code>, with a causal allowed-position relation. The output logits return to <code>[2, 3, 16]</code>.</p>
 <p>The trainable parameter ledger is explicit:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Component</th>
 <th>Entries</th>
 </tr></thead><tbody>
 <tr>
-<td>Token embedding16×32</td>
+<td>Token embedding 16×32</td>
 <td>512</td>
 </tr>
 <tr>
-<td>Position embedding32×32</td>
+<td>Position embedding 32×32</td>
 <td>1024</td>
 </tr>
 <tr>
@@ -224,19 +224,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>128</td>
 </tr>
 <tr>
-<td>Bias-free QKV32×96</td>
+<td>Bias-free QKV 32×96</td>
 <td>3072</td>
 </tr>
 <tr>
-<td>Bias-free attention projection32×32</td>
+<td>Bias-free attention projection 32×32</td>
 <td>1024</td>
 </tr>
 <tr>
-<td>Feed-forward32→64→32 including biases</td>
+<td>Feed-forward 32→64→32 including biases</td>
 <td>4192</td>
 </tr>
 <tr>
-<td>Bias-free vocabulary projection32×16</td>
+<td>Bias-free vocabulary projection 32×16</td>
 <td>512</td>
 </tr>
 <tr>
@@ -245,17 +245,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 </tbody></table></div>
 <p>No weights are tied in this decoder. Parameter count does not equal total training memory: gradients, Adam moment state, activations and temporary attention tensors contribute separately. The CPU example does not measure GPU peak allocation or optimizer sharding.</p>
-<p>The two sequences yield four active targets:5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability1/16 and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is(1/16-1)/4=-15/64, and every other class gradient is1/64. The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder&#x27;s internal state.</p>
-<p>Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a20-entry curve records states before updates1 through20: its final element describes the model after19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.</p>
+<p>The two sequences yield four active targets: 5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability 1/16 and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is (1/16-1)/4=-15/64, and every other class gradient is 1/64. The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder&#x27;s internal state.</p>
+<p>Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a 20-entry curve records states before updates 1 through 20: its final element describes the model after 19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.</p>
 <p>The objective is teacher-forced next-token cross entropy. It conditions each position on the supplied prefix, including previous true answer tokens. Autoregressive generation instead conditions later positions on its own earlier outputs. A lower teacher-forced loss does not guarantee exact generated answers or correct stopping behavior. The lesson deliberately evaluates token loss and parameter changes; it does not silently substitute them for a generation-quality test.</p>
-<p>The held-out sequence[7, 2, 5, 3] changes the first prompt token while preserving the second prompt token 2 and the answer[5, 3]. A model could succeed by learning a shortcut from token 2 to5 and then to3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.</p>
+<p>The held-out sequence <code>[7, 2, 5, 3]</code> changes the first prompt token while preserving the second prompt token 2 and the answer <code>[5, 3]</code>. A model could succeed by learning a shortcut from token 2 to 5 and then to 3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.</p>
 <p>The decoder returns a detached key/value cache, but this training objective discards it and uses full uncached sequences. Reusing that detached cache across training segments would change the gradient boundary. Treat it as an inference facility unless a separate truncated-training objective is explicitly designed and tested.</p>
 <h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
 <p><strong>What proves that full-model optimization occurred?</strong> The optimizer receives all trainable parameters, updates actually run, losses are observed and an embedding parameter changes. This establishes a concrete update path, not that every scalar must change on every batch.</p>
 <p><strong>Why recompute final loss?</strong> The last logged training loss precedes the last optimizer step. A final-state comparison needs a fresh forward evaluation after all declared updates.</p>
 <p><strong>Why can held-out token loss improve without domain competence?</strong> The task may share a simple token shortcut, and teacher forcing differs from free generation. The fixture contains literal IDs and one visible transfer case, so broader claims require different evidence.</p>
 <h3 id="exercise-1-build-an-explicit-sft-batch">Exercise 1: Build an explicit SFT batch<a class="heading-anchor" href="#exercise-1-build-an-explicit-sft-batch" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.</p>
+<p>The question is: Use sequences <code>[1, 2, 5, 3]</code> and <code>[1, 4, 6, 3]</code>, masking the first shifted target.</p>
 <p>The first answer token is still supervised. The mask excludes predicting the prompt continuation, not the role of the prompt as conditioning context.</p>
 <pre class="highlighted-code"><code class="language-python">torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">23</span><span class="syntax-punctuation">)</span>
 model <span class="syntax-operator">=</span> TinyDecoder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
@@ -268,8 +268,8 @@ labels<span class="syntax-punctuation">[</span><span class="syntax-punctuation">
     <span class="syntax-operator">and</span> labels<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
     <span class="syntax-operator">and</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>labels <span class="syntax-operator">!=</span> <span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span>
 <span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.</p>
+<p><strong>Expected:</strong> inputs shape <code>(2, 3)</code>; labels <code>[[-100, 5, 3], [-100, 6, 3]]</code>; 4 active targets.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with inputs shape <code>(2, 3)</code>; labels <code>[[-100, 5, 3], [-100, 6, 3]]</code>; 4 active targets.</p>
 <h3 id="exercise-2-measure-the-initial-state">Exercise 2: Measure the initial state<a class="heading-anchor" href="#exercise-2-measure-the-initial-state" aria-label="Link to this section">#</a></h3>
 <p>The question is: Calculate initial training loss and a held-out prompt loss before any update; count trainable parameters.</p>
 <p>The held-out baseline is recorded before fitting, but it is not used to choose the update count. The fixed count defines the experiment in advance.</p>
@@ -285,10 +285,10 @@ count <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</s
     <span class="syntax-operator">and</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span> count <span class="syntax-operator">&lt;</span> <span class="syntax-number">50000</span>
     <span class="syntax-operator">and</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>requires_grad <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> both losses finite; all model parameters trainable; count below50000.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with both losses finite; all model parameters trainable; count below50000.</p>
+<p><strong>Expected:</strong> both losses finite; all model parameters trainable; count below 50000.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with both losses finite; all model parameters trainable; count below 50000.</p>
 <h3 id="exercise-3-perform-actual-full-fine-tuning">Exercise 3: Perform actual full fine-tuning<a class="heading-anchor" href="#exercise-3-perform-actual-full-fine-tuning" aria-label="Link to this section">#</a></h3>
-<p>The question is: Run20 Adam updates atlearningrate.01, clearing gradients each time.</p>
+<p>The question is: Run 20 Adam updates at learning rate 0.01, clearing gradients each time.</p>
 <p>Checking an embedding parameter demonstrates that the update reaches more than the final output layer. A loss curve alone could be misleading if it came from a different object or cached tensor.</p>
 <pre class="highlighted-code"><code class="language-python">before <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>token<span class="syntax-operator">.</span>weight<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span>
@@ -315,7 +315,7 @@ F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuat
 <p><strong>Expected:</strong> ignored prompt positions have zero gradient; answer positions do not.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ignored prompt positions have zero gradient; answer positions do not.</p>
 <h3 id="exercise-5-evaluate-the-frozen-held-out-prompt">Exercise 5: Evaluate the frozen held-out prompt<a class="heading-anchor" href="#exercise-5-evaluate-the-frozen-held-out-prompt" aria-label="Link to this section">#</a></h3>
-<p>The question is: After the declared20 updates, evaluate the held-out sequence without another optimizer step.</p>
+<p>The question is: After the declared 20 updates, evaluate the held-out sequence without another optimizer step.</p>
 <p>A held-out score may improve or worsen. The lesson reports the observation rather than requiring a favorable result that could encourage test-driven tuning.</p>
 <pre class="highlighted-code"><code class="language-python">model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 saved <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>output<span class="syntax-operator">.</span>weight<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
@@ -349,7 +349,7 @@ saved <span class="syntax-operator">=</span> model<span class="syntax-operator">
 <p><strong>Expected:</strong> receipt says 20 updates, 4 active training targets and no natural-language competence claim.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with receipt says 20 updates, 4 active training targets and no natural-language competence claim.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one literal in <em>Perform actual full fine-tuning</em> and predict how the result changes before checking it; the unchanged inputs give: 20 finite losses; training loss decreases; an embedding parameter changes. Keep the original <em>Write an honest adaptation receipt</em> failure beside the repaired result; a missing PyTorch and NumPy runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.</p></article>
   </main>
 </body>
 </html>

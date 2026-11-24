@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-identify-destination-scope">Exercise 1: Identify destination scope<a class="heading-anchor" href="#exercise-1-identify-destination-scope" aria-label="Link to this section">#</a></h3>
 <p>The policy applies to selected destination Pods in its namespace. It does not automatically isolate all namespace egress or unrelated applications.</p>
 <p><strong>Expected:</strong> app=hello destinations, Ingress only.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read spec.podSelector for the destination and spec.policyTypes for direction, ignoring the from peers.</li>
+<li><strong>Why it is correct:</strong> podSelector app=hello chooses which Pods the policy isolates, and policyTypes Ingress means only inbound traffic to them is affected.</li>
+<li><strong>Plausible wrong approach:</strong> Reading the client labels under ingress from as the selected Pods would isolate the callers instead of hello.</li>
+<li><strong>How to verify:</strong> The answer names app=hello Pods and Ingress only, with no Egress.</li>
+</ul>
 <h3 id="exercise-2-explain-additive-rules">Exercise 2: Explain additive rules<a class="heading-anchor" href="#exercise-2-explain-additive-rules" aria-label="Link to this section">#</a></h3>
 <p>NetworkPolicy is not a first-match firewall rule list. The empty ingress policy establishes isolation, but another matching policy can add allowed traffic. The source structure should be reviewed as a set.</p>
 <p><strong>Expected:</strong> The explicit matching allow remains effective; there is no ordered deny override.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List every policy that selects hello and take the union of their allowed sources.</li>
+<li><strong>Why it is correct:</strong> NetworkPolicies are additive allow lists; once any policy isolates a Pod, traffic is allowed if any selecting policy permits it.</li>
+<li><strong>Plausible wrong approach:</strong> Treating deny-ingress as a rule that overrides allow-client imagines a priority order the API does not define.</li>
+<li><strong>How to verify:</strong> The allowed set equals allow-client&#x27;s sources, and no field orders the policies.</li>
+</ul>
 <h3 id="exercise-3-check-peer-selector-logic">Exercise 3: Check peer selector logic<a class="heading-anchor" href="#exercise-3-check-peer-selector-logic" aria-label="Link to this section">#</a></h3>
 <p>A formatting change can broaden the eligible sources. This is a concrete reason to inspect rendered manifests and test a denied control client rather than trust a policy name.</p>
 <p><strong>Expected:</strong> One peer means conjunction; separate entries mean alternatives.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Count the list items under from and read each item&#x27;s selectors together.</li>
+<li><strong>Why it is correct:</strong> Selectors inside one item must all match, while separate items are alternatives, so the indentation of one dash changes AND to OR.</li>
+<li><strong>Plausible wrong approach:</strong> Reading two separate items as one combined requirement would predict a deny for traffic that one item alone allows.</li>
+<li><strong>How to verify:</strong> One item with two selectors is AND, and two items are OR.</li>
+</ul>
 <h3 id="exercise-4-establish-pre-policy-controls">Exercise 4: Establish pre-policy controls<a class="heading-anchor" href="#exercise-4-establish-pre-policy-controls" aria-label="Link to this section">#</a></h3>
 <p>The baseline distinguishes policy effects from an already broken service or wrong port. Use bounded requests and retain actual identities rather than copying the synthetic matrix.</p>
 <p><strong>Expected:</strong> Both paths succeed with the expected payload and target receipt.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Send both approved client requests before any policy exists and keep caller, payload and target receipt.</li>
+<li><strong>Why it is correct:</strong> Without a pre-policy success, a later failure could come from the backend rather than from enforcement.</li>
+<li><strong>Plausible wrong approach:</strong> Applying the policy first and testing only afterward leaves no control to compare against.</li>
+<li><strong>How to verify:</strong> Both requests succeed with the expected payload before enforcement.</li>
+</ul>
 <h3 id="exercise-5-verify-the-allowed-denied-change">Exercise 5: Verify the allowed/denied change<a class="heading-anchor" href="#exercise-5-verify-the-allowed-denied-change" aria-label="Link to this section">#</a></h3>
 <p>The paired control supports the intended traffic boundary. A policy object with no enforcement or an application outage affecting both clients does not satisfy the contract.</p>
 <p><strong>Expected:</strong> Permitted path succeeds; other path fails within its deadline.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Repeat the same two requests with the same callers and deadline after applying the policies.</li>
+<li><strong>Why it is correct:</strong> With only policy state changed, a new failure on the unpermitted path can be attributed to enforcement by the CNI.</li>
+<li><strong>Plausible wrong approach:</strong> Testing on a cluster whose CNI does not enforce NetworkPolicy would show both paths succeeding and suggest the policy is wrong.</li>
+<li><strong>How to verify:</strong> The permitted path succeeds and the other fails within its deadline.</li>
+</ul>
 <h3 id="exercise-6-state-limits-and-cleanup">Exercise 6: State limits and cleanup<a class="heading-anchor" href="#exercise-6-state-limits-and-cleanup" aria-label="Link to this section">#</a></h3>
 <p>The handoff should identify the CNI and tested traffic tuple. Cleanup must preserve unrelated policies and namespace settings, and a finite result should not be generalized into complete multitenant isolation.</p>
 <p><strong>Expected:</strong> Only owned policy resources are cleaned; protocols, hosts and capabilities outside the test remain unclaimed.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record policy and client UIDs and state the protocol and namespace the claim covers.</li>
+<li><strong>Why it is correct:</strong> The test only exercised the listed callers and port, so the isolation claim cannot extend to other protocols or hosts.</li>
+<li><strong>Plausible wrong approach:</strong> Writing that hello is isolated from everything generalizes from two requests to all traffic.</li>
+<li><strong>How to verify:</strong> Cleanup lists only owned UIDs, and the claim states its protocol and namespace.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>NetworkPolicy governs supported network behavior under the implementation&#x27;s semantics. It is not application authentication, Secret authorization or a virtual-machine boundary. Host/node traffic and implementation-specific behavior need separate understanding.</p>
 <p>A passed two-client test proves the observed allowed/denied paths, not every possible protocol or source. Report the exact labels, port, direction and target identities. Leave the live row unavailable when the CNI has not been qualified.</p></article>

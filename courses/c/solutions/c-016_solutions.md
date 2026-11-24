@@ -1,6 +1,6 @@
 # c-016: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-016_solution.c`, implements all six cases, from the "push into an empty vector" case to the "transfer reserve failure atomicity" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -21,13 +21,13 @@ CHECK(v.len == 2 && v.data[0] == 3 && v.data[1] == 5);
 vector_destroy(&v);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `v.len == 2 && v.data[0] == 3 && v.data[1] == 5`. Restoring the original line brings back the worked observation: length is 2 and values are retained.
+**Expected:** With `CHECK(vector_push(&v, 4) && vector_push(&v, 5));` the run stops with `Check failed` at the CHECK on `v.len == 2 && v.data[0] == 3 && v.data[1] == 5`, because the "push into an empty vector" case no longer shows that length is 2 and values are retained. Restoring `CHECK(vector_push(&v, 3) && vector_push(&v, 5));` brings that observation back.
 
 The zero state is a usable empty vector. Growth happens before the first write.
 
 ## Exercise 2: Reserve without adding elements: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(v.cap > 8 && v.len == 0);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+A careless edit changed the CHECK in worked example 2, the "reserve without adding elements" case, so that it reads `CHECK(v.cap > 8 && v.len == 0);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means capacity is at least eight while length stays zero, and restore it.
 
 The unchanged code is worked example 2:
 
@@ -38,7 +38,7 @@ CHECK(v.cap >= 8 && v.len == 0);
 vector_destroy(&v);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `v.cap >= 8 && v.len == 0`; after it the line reads `CHECK(v.cap >= 8 && v.len == 0);` again and capacity is at least eight while length stays zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `v.cap >= 8 && v.len == 0`. Once the line reads `CHECK(v.cap >= 8 && v.len == 0);` again, the "reserve without adding elements" case again shows that capacity is at least eight while length stays zero.
 
 Reservation is storage preparation, not logical insertion. Treating capacity as length would expose uninitialized elements.
 
@@ -108,4 +108,4 @@ Arithmetic rejection happens before realloc. This deterministic case tests state
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer reserve failure atomicity" case to your own c-016 source. Explain why every access in `vector_reserve` or `vector_push` or `vector_pop` stays within a live object and each owned resource is released. An expected length failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "reserve without adding elements" case apart from ordinary output: the fixture proves its stated length, capacity and reallocation assumptions, not universal safety.

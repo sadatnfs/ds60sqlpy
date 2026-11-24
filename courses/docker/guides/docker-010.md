@@ -16,6 +16,14 @@ An exit status is a small integer returned when a process ends. Zero conventiona
 
 The most effective beginner troubleshooting habit is to preserve evidence before changing state. Record the exact image, container state, recent bounded logs and a minimal failing request. Restarting repeatedly can destroy the first useful symptom, and dumping an entire environment can expose credentials unrelated to the problem.
 
+### Key terms
+
+- **Standard streams:** The standard output and standard error channels a process writes to, which Docker's logging driver captures.
+- **Container logs:** The captured stream output for one container, which has bounded retention and is not a database.
+- **Exit status:** The small integer a process returns when it ends, where zero conventionally means success.
+- **Container state:** The engine's record of whether a container is created, running, restarting or exited, plus its exit code.
+- **Events:** The engine's time-ordered stream of lifecycle notices such as create, start, die and stop.
+
 ## Anatomy and a trace you can follow
 
 `docker compose logs --tail 30 app` asks for a bounded recent stream for the project service. `docker compose ps -a` shows lifecycle state. `docker inspect` provides structured fields for a named container; use format selections when you need just exit status or OOMKilled. `docker events` observes lifecycle events but is not a substitute for application request tracing.
@@ -90,11 +98,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Restarting a failing container before saving its logs and exit status. Reading the whole log history instead of a bounded tail. Logging tokens or request bodies to make debugging easier.
 
-Exercise 4 is this chapter's boundary case: Diagnose a running container that returns errors. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a running container that returns errors. Send one request to the application and read its status code and log line; a container STATUS of Up only reports that the main process exists. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using standard streams, container logs, exit status, container state and events. Reconstruct worked example 2 (Compare successful and failing short programs) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Recall which exit code each program produced and which log line identified the failure. Then reconstruct worked example 2 (Compare successful and failing short programs) with one different value, predict what changes, and name which of standard streams, container logs, exit status, container state and events the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

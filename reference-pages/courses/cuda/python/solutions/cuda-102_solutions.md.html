@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-derive-cache-bytes">Exercise 1: Derive cache bytes<a class="heading-anchor" href="#exercise-1-derive-cache-bytes" aria-label="Link to this section">#</a></h3>
 <p>Multiply two for keys and values then all dimensions and width.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>derive cache bytes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Multiply two, for keys and values, by layers, batch, sequence, KV heads, head dimension and element width: <code>2*2*1*16*4*8*2 = 4096</code> bytes.</p>
+<p><strong>Why it is correct here.</strong> Each layer stores one key and one value vector per KV head per position. The product counts every stored element, then multiplies by 2 bytes for float16.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving out the factor two for keys and values gives 2048 bytes and underestimates the cache by half.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>cache == 4096</code>. Compare with the sizes of the cache tensors in a framework.</p>
 <h3 id="exercise-2-double-the-sequence">Exercise 2: Double the sequence<a class="heading-anchor" href="#exercise-2-double-the-sequence" aria-label="Link to this section">#</a></h3>
 <p>Cache grows linearly in stored positions.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>double the sequence</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Double the sequence to 32: the cache becomes 8192 bytes, as the reference asserts.</p>
+<p><strong>Why it is correct here.</strong> Cache size is linear in stored positions. Weights are unchanged, so the cache grows into a larger share of memory as context lengthens.</p>
+<p><strong>A plausible wrong approach.</strong> Lowering weight precision to reduce memory does nothing for this term, since the cache precision is set separately.</p>
+<p><strong>How to verify.</strong> Recompute with sequence 64 and confirm 16384 bytes, doubling again.</p>
 <h3 id="exercise-3-distinguish-query-and-kv-heads">Exercise 3: Distinguish query and KV heads<a class="heading-anchor" href="#exercise-3-distinguish-query-and-kv-heads" aria-label="Link to this section">#</a></h3>
 <p>Use the model actual KV layout.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>distinguish query and KV heads</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Use the model&#x27;s actual KV head count, which can be smaller than the query head count in grouped-query attention, such as 4 KV heads shared by 16 query heads.</p>
+<p><strong>Why it is correct here.</strong> Only KV heads are cached. Using the query head count overestimates the cache by the grouping factor.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming KV heads equal attention heads for every model gives a 4 times overestimate here.</p>
+<p><strong>How to verify.</strong> Read <code>num_key_value_heads</code> from the model configuration and check the cache tensor shapes. The KV head dimension of the cached key tensor should equal that configured value, not the query head count.</p>
 <h3 id="exercise-4-compare-cached-logits">Exercise 4: Compare cached logits<a class="heading-anchor" href="#exercise-4-compare-cached-logits" aria-label="Link to this section">#</a></h3>
 <p>Compare each bounded step within tolerance.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare cached logits</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare cached and uncached generation step by step: compute logits for each new token with the cache and by recomputing the full prefix, and compare within tolerance.</p>
+<p><strong>Why it is correct here.</strong> Caching should change cost, not results. A per-step comparison localizes a mismatch to the first step where positions or masks diverge.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing only the final generated text hides small differences that alter sampling later. A wrong position offset in the cache can produce plausible text for many tokens before the output visibly drifts.</p>
+<p><strong>How to verify.</strong> Use greedy decoding for a bounded number of steps and assert each logits vector agrees.</p>
 <h3 id="exercise-5-separate-prefill-and-decode-timing">Exercise 5: Separate prefill and decode timing<a class="heading-anchor" href="#exercise-5-separate-prefill-and-decode-timing" aria-label="Link to this section">#</a></h3>
 <p>They stress different operation shapes.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate prefill and decode timing</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate prefill timing, which processes the whole prompt at once, from decode timing, which generates one token per step using the cache.</p>
+<p><strong>Why it is correct here.</strong> Prefill is large matrix work, while decode is small and often memory-bound, reading the full cache each step.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting a single tokens-per-second number mixes two regimes. A long prompt with short output looks very different from a short prompt with long output under one combined number.</p>
+<p><strong>How to verify.</strong> Report time to first token and per-token decode time separately. Record prompt length and output length beside each number, since both affect the cache read per step.</p>
 <h3 id="exercise-6-label-fake-versus-real-quantization">Exercise 6: Label fake versus real quantization<a class="heading-anchor" href="#exercise-6-label-fake-versus-real-quantization" aria-label="Link to this section">#</a></h3>
 <p>A rounding simulation is not a deployed quantized kernel.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>label fake versus real quantization</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Label fake quantization, which rounds values to a lower precision and dequantizes them in float, separately from a real quantized kernel that computes with low-precision integers.</p>
+<p><strong>Why it is correct here.</strong> Fake quantization estimates accuracy effects but does not reduce memory traffic or compute time.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting speed or memory gains from a simulation claims benefits only a deployed kernel can show. Memory can even rise under simulation, because both the original float weights and rounding scales may be held.</p>
+<p><strong>How to verify.</strong> State in each result whether quantization was simulated or executed, and which kernel ran.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>4096 bytes, doubling to 8192 at twice the sequence length.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-102_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

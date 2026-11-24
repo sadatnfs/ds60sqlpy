@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Test invariants across more than hand-picked examples while preserving a reproducible failure.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A property describes a relation that should hold across many inputs. A golden fixture supplies independently chosen expected values. A corpus retains useful edge and failure cases. Bounded fuzzing explores a finite input budget and saves the exact failing case so a defect can be reproduced.</p>
+<ul>
+<li><strong>property:</strong> a relation that should hold across many inputs, such as reversing twice returning the original sequence.</li>
+<li><strong>metamorphic property:</strong> a property relating the outputs of several executions without a handwritten expected value for each input.</li>
+<li><strong>golden fixture:</strong> input paired with independently chosen expected values.</li>
+<li><strong>corpus:</strong> a retained set of useful edge and failure inputs.</li>
+<li><strong>bounded fuzzing:</strong> exploring generated inputs within a finite budget and saving the exact failing case for reproduction.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Enumerate a small deterministic domain before adding randomness. Checking reverse(reverse(xs))==xs tests a law; also compare a known reversal to avoid a function that does nothing passing the law. A fixed seed helps reproducibility but does not make a fuzz run exhaustive.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

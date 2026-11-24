@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-032`.
 
 Two different problems often appear as duplicate requests. Competing clients can overwrite each other's updates, while a retry can repeat a command whose first result was lost. This chapter handles them separately with a resource version and an idempotency key, using real atomic SQL operations.
 
+## Key terms
+
+- **Optimistic concurrency:** Letting clients read freely but applying an update only if the resource's version still matches the version the client observed.
+- **If-Match:** A precondition header carrying the observed version; this service returns 428 when it is missing and 412 Precondition Failed when it is stale.
+- **Conditional update:** A single SQL UPDATE whose WHERE clause checks the version, so the database evaluates the check and the write together.
+- **Idempotency key:** A client-chosen identifier for one logical command, stored with the input and outcome so a retry returns the original result.
+- **409 Conflict:** The response here when an idempotency key is reused with different input, which is refused instead of running a new command.
+
 ## Mechanism: compare versions and identify commands
 
 Optimistic concurrency attaches a version to a resource representation. A client submits the version it observed, commonly through an If-Match precondition. The update changes the row only if its current version still matches. The database evaluates the predicate and mutation together, preventing a gap between checking and writing.
@@ -29,6 +37,39 @@ The second case submits a command with an idempotency key, then repeats it. The 
 The fixture uses BEGIN IMMEDIATE to make its SQLite write ownership explicit. This is not a universal PostgreSQL recipe. A PostgreSQL implementation can use unique constraints, transaction retries and suitable locking or upsert semantics, but must preserve the same command/result invariant.
 
 An idempotency record also needs a retention policy. Deleting it too soon can turn an old retry into a new effect. Keeping all keys forever without bounds creates another operational problem. The correct window depends on the client retry contract and the cost of duplicate effects.
+
+## Worked example: two writers holding the same ETag
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE items(id INTEGER PRIMARY KEY, title TEXT, version INTEGER)")
+db.execute("INSERT INTO items VALUES (1, 'initial', 1)")
+
+
+def patch(title, if_match):
+    version = int(if_match.strip('"').removeprefix("v"))
+    changed = db.execute(
+        "UPDATE items SET title=?, version=version+1 WHERE id=1 AND version=?",
+        (title, version),
+    )
+    return 200 if changed.rowcount == 1 else 412
+
+
+etag = '"v{}"'.format(db.execute("SELECT version FROM items").fetchone()[0])
+print(etag, patch("from alice", etag), patch("from bob", etag))
+print(db.execute("SELECT title, version FROM items").fetchone())
+```
+
+Expected output:
+
+```text
+"v1" 200 412
+('from alice', 2)
+```
+
+Alice and Bob both read the item while it was at version 1 and both sent that validator back in `If-Match`. The version test lives inside the `UPDATE` itself, so the check and the write happen atomically: Alice's statement matched one row and bumped the version, and Bob's identical statement matched zero rows. Reading the version in Python and then updating in a second statement would leave a window where both writers pass the check, and Bob would silently overwrite Alice.
 
 ## Failure diagnosis and discussion
 

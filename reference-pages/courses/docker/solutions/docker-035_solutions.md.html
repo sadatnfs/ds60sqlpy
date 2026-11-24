@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-compare-total-image-size-and-incremental-transfer">Exercise 1: Compare total image size and incremental transfer.<a class="heading-anchor" href="#exercise-1-compare-total-image-size-and-incremental-transfer" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Shared cached layers can reduce new transferred bytes.</p>
 <p><strong>Why:</strong> A displayed size is not a complete network-cost estimate. Record cache state and the actual transfer path.</p>
+<p><strong>Approach:</strong> Separate the size reported by image inspect from the bytes actually downloaded when some layers are already cached.</p>
+<p><strong>Why this is correct:</strong> If the <code>python:3.12-slim</code> layers are already local, a new fixture build transfers only its small layers.</p>
+<p><strong>A plausible wrong approach:</strong> Estimating download cost from the full reported size overstates transfer for machines with the base cached.</p>
+<p><strong>How to verify:</strong> Record which layers were present before the pull and the bytes transferred.</p>
 <h3 id="exercise-2-predict-why-runtime-package-installation-hurts-startup">Exercise 2: Predict why runtime package installation hurts startup.<a class="heading-anchor" href="#exercise-2-predict-why-runtime-package-installation-hurts-startup" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It adds network and dependency work to every run.</p>
 <p><strong>Why:</strong> It also makes behavior depend on current repositories. Prepare declared dependencies in the image and keep startup focused on application initialization.</p>
+<p><strong>Approach:</strong> Count what a pip install at startup adds: network fetches, dependency resolution and file writes on every run.</p>
+<p><strong>Why this is correct:</strong> Startup now depends on a package index being reachable and serving the same versions.</p>
+<p><strong>A plausible wrong approach:</strong> Installing at startup to keep the image small makes each start slower and can fail offline.</p>
+<p><strong>How to verify:</strong> Compare readiness time and offline behavior for an image with the packages built in against one installing at start.</p>
 <h3 id="exercise-3-design-a-readiness-latency-measurement">Exercise 3: Design a readiness latency measurement.<a class="heading-anchor" href="#exercise-3-design-a-readiness-latency-measurement" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Fixed image, known cache condition and repeated bounded readiness timing.</p>
 <p><strong>Why:</strong> Measure the same event each time. Process creation alone is weaker than useful app readiness.</p>
+<p><strong>Approach:</strong> Time from container create to the first healthy /healthz response, using the same image and cache state, repeated several times.</p>
+<p><strong>Why this is correct:</strong> Readiness is what users wait for; process start alone misses server setup.</p>
+<p><strong>A plausible wrong approach:</strong> Timing only docker run returning measures container creation, not when the app can answer.</p>
+<p><strong>How to verify:</strong> The record lists image ID, cache state and each repeated timing.</p>
 <h3 id="exercise-4-diagnose-a-size-optimization-that-breaks-https">Exercise 4: Diagnose a size optimization that breaks HTTPS.<a class="heading-anchor" href="#exercise-4-diagnose-a-size-optimization-that-breaks-https" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A required runtime asset may have been removed.</p>
 <p><strong>Why:</strong> Correctness comes first. Restore the dependency and identify safer size reductions with final-image acceptance.</p>
+<p><strong>Approach:</strong> Check whether the slimmer image dropped CA certificates or similar files that TLS clients need.</p>
+<p><strong>Why this is correct:</strong> Correct behavior outranks size, so a smaller image that fails HTTPS is a regression.</p>
+<p><strong>A plausible wrong approach:</strong> Disabling certificate checks to make the request work trades a security control for fewer bytes.</p>
+<p><strong>How to verify:</strong> Restore the missing file, rerun the HTTPS request in the final image, and look for other reductions.</p>
 <h3 id="exercise-5-explain-why-broad-pruning-is-not-an-acceptable-benchmark-setup">Exercise 5: Explain why broad pruning is not an acceptable benchmark setup.<a class="heading-anchor" href="#exercise-5-explain-why-broad-pruning-is-not-an-acceptable-benchmark-setup" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It destroys shared caches and may affect unrelated work.</p>
 <p><strong>Why:</strong> Use a disposable environment when cold-cache behavior matters. A performance experiment should not damage a user’s engine state.</p>
+<p><strong>Approach:</strong> Run cold-cache measurements on a separate engine or VM, not after pruning the learner&#x27;s shared engine.</p>
+<p><strong>Why this is correct:</strong> Pruning removes caches and images other projects rely on, which is damage unrelated to the experiment.</p>
+<p><strong>A plausible wrong approach:</strong> Running docker system prune -a before each timing run costs everyone else their cached images.</p>
+<p><strong>How to verify:</strong> The cold run happens in a disposable environment, and the main engine&#x27;s image list is unchanged.</p>
 <h3 id="exercise-6-write-an-optimization-recommendation-with-evidence">Exercise 6: Write an optimization recommendation with evidence.<a class="heading-anchor" href="#exercise-6-write-an-optimization-recommendation-with-evidence" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Measured bottleneck, bounded change, correctness recheck and actual improvement.</p>
 <p><strong>Why:</strong> A useful recommendation ties the change to the intended user experience. Avoid equating smaller bytes with universally better runtime behavior.</p>
+<p><strong>Approach:</strong> Name the measured bottleneck, the one change made, the correctness recheck and the measured gain.</p>
+<p><strong>Why this is correct:</strong> Tying the change to a measured user delay shows why the change was worth it.</p>
+<p><strong>A plausible wrong approach:</strong> Recommending the smallest possible base because smaller is faster skips the measurement.</p>
+<p><strong>How to verify:</strong> The recommendation cites before and after timings for the same event and a passing acceptance run.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

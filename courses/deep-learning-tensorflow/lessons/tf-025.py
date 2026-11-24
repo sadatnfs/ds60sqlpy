@@ -21,7 +21,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: duplicate positive/negative identity is flagged.
 
 # Exercise 5: Observe temperature
-# Compare softmax[1, 0] at temperatures 1 and 0.5.
+# Compare `softmax([1, 0])` at temperatures 1 and 0.5.
 # Expected: positive probability increases at 0.5; ranking stays 0 first.
 
 # Exercise 6: Reject undefined cosine

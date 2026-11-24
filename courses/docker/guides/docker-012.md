@@ -16,6 +16,14 @@ Compose can wait for a dependency to become healthy before starting a dependent 
 
 A useful health endpoint checks enough to represent readiness without performing expensive or destructive work. It should not mutate learner data or require a public internet service to declare a local classroom ready. Its failure should point to the missing capability, not trigger an unbounded retry loop.
 
+### Key terms
+
+- **Health check:** A small command the engine runs on a schedule to classify a container as starting, healthy or unhealthy.
+- **Readiness:** The point where an application can do the work a dependent component needs, which is stronger than its process existing.
+- **`depends_on`:** The Compose setting that orders service startup and can wait for a named condition on a dependency.
+- **`service_healthy`:** A `depends_on` condition that waits until the dependency's health check reports healthy before starting the dependent.
+- **Startup order:** The sequence in which Compose starts services, which helps initialization but does not guarantee later availability.
+
 ## Anatomy and a trace you can follow
 
 The fixture’s health command uses Python’s standard-library HTTP client to request its own loopback `/healthz` endpoint with a timeout. `interval`, `timeout`, `retries` and `start_period` control repeated observations. The health command runs inside the container, so its loopback is the app’s loopback. An image can also declare a default check with the Dockerfile instruction `HEALTHCHECK --interval=5s --timeout=3s CMD ["python", "-c", "..."]`; a Compose `healthcheck` overrides the image's values for that service.
@@ -101,11 +109,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Using a check that only proves a process exists. Making the health check call an external service, so the local app looks unhealthy when the internet is down. Expecting `depends_on` to keep a dependency available after startup.
 
-Exercise 4 is this chapter's boundary case: Diagnose a healthy app with a broken host mapping. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a healthy app with a broken host mapping. Run the healthcheck command from inside the container and the browser request from the host, then compare the two paths hop by hop. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using health check, readiness, depends_on, service_healthy and startup order. Reconstruct worked example 2 (Express a dependency condition) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Say what `condition: service_healthy` waits for and what it cannot promise about a host browser request. Then reconstruct worked example 2 (Express a dependency condition) with one different value, predict what changes, and name which of health check, readiness, depends_on, service_healthy and startup order the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Report unified memory behavior tied to queried device capabilities and observed page migration.
+
 Work through *Unified memory, residency and migration* with the concrete cases below. Finish with this evidence:
 correctness and a report tied to actual memory capabilities and observed movement. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Unified virtual addressing concerns address-space organization; managed memory provides an allocation model whose residency and migration are managed under supported platform rules. Neither term promises uniform access cost. First touch can trigger movement, alternating host/device access can cause repeated migration, and prefetch is a placement hint with its own ordering requirements. Coherent systems, discrete GPUs and WSL can have different capabilities. Query support and use the selected platform's documented contract. A single pointer does not erase the need to reason about which processor owns useful work at each phase.
+
+### Key terms
+
+- **Managed memory:** An allocation from `cudaMallocManaged` that both host and device can address through one pointer.
+- **Page migration:** Moving memory pages between host and device on demand, which costs time the first time each page is touched.
+- **Prefetch:** A `cudaMemPrefetchAsync` hint that moves pages to a processor before they are needed.
+- **Unified virtual addressing:** One virtual address space shared by host and devices so a pointer value identifies its memory.
 
 ## How to run and study this lesson
 

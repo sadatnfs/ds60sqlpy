@@ -88,6 +88,18 @@ def first_sentence(text):
     return text.split(". ")[0].rstrip(".") + "."
 
 
+def reasoning(answer):
+    """The optional correctness, wrong-approach and verification paragraphs of one answer."""
+    parts = []
+    if answer.get("why"):
+        parts.append(f"**Why it is correct.** {answer['why']}")
+    if answer.get("wrong"):
+        parts.append(f"**Plausible wrong approach.** {answer['wrong']}")
+    if answer.get("verify"):
+        parts.append(f"**How to verify.** {answer['verify']}")
+    return "".join(f"\n\n{part}" for part in parts)
+
+
 def answer_text(number, task, spec, identity):
     """The explanation for one task: its reference answer or an honest pointer."""
     answer = ANSWERS.get(number, {}).get(task)
@@ -113,14 +125,14 @@ def answer_text(number, task, spec, identity):
             f"**Reference answer.** The same statements run as the `Task {task}` block of the "
             f"reference program; here they are wrapped in `main` as a complete file.{uses}\n\n"
             f"```{LANGUAGE}\n{wrapped}\n```\n\n"
-            f"**Observe:** {answer['observe']}\n\n{answer['explain']}"
+            f"**Observe:** {answer['observe']}\n\n{answer['explain']}" + reasoning(answer)
         )
     if answer:
-        return f"**Written answer.** {answer['explain']}"
+        return f"**Written answer.** {answer['explain']}" + reasoning(answer)
     a, b = spec["a"], spec["b"]
     return {
-        1: f"No separate reference answer has been written for this task. Example A is the evidence to compare with: {a[3]} {a[2]}",
-        2: f"No separate reference answer has been written for this task. Start from Example B: {b[3]} {b[2]}",
+        1: f"No reference answer has been written for this task yet. Check your trace against whichever guided example exercises the same mechanism: Example A ({a[0]}) or Example B ({b[0]}).",
+        2: f"No reference answer has been written for this task yet. Start from the guided example this task modifies, Example A ({a[0]}) or Example B ({b[0]}), and keep its original checks passing.",
         3: f"No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **{spec['terms'][0][0]}** and the lesson notes.",
         4: f"No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: {spec['pitfalls']}",
         5: f"No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A ({a[0]}) and Example B ({b[0]}).",

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-derive-fitted-means">Exercise 1: Derive fitted means<a class="heading-anchor" href="#exercise-1-derive-fitted-means" aria-label="Link to this section">#</a></h3>
 <p>Means are [2,3].</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>derive fitted means</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute the column means of <code>[[1, 2], [3, 4]]</code>: column 0 averages <code>(1+3)/2 = 2</code> and column 1 averages <code>(2+4)/2 = 3</code>, so the means are <code>[2, 3]</code>.</p>
+<p><strong>Why it is correct here.</strong> Fitting is a reduction along rows for each column. The reference computes <code>sum(row[c] for row in rows)/len(rows)</code> per column, giving exactly <code>[2, 3]</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Averaging along columns, the per-row means, gives <code>[1.5, 3.5]</code> and centers the wrong axis.</p>
+<p><strong>How to verify.</strong> Assert <code>means == [2, 3]</code>. On a GPU, <code>cupy.mean(X, axis=0)</code> should match after transfer.</p>
 <h3 id="exercise-2-score-the-centered-rows">Exercise 2: Score the centered rows<a class="heading-anchor" href="#exercise-2-score-the-centered-rows" aria-label="Link to this section">#</a></h3>
 <p>Scores are [-1,1].</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>score the centered rows</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Center each row by subtracting the means, giving <code>[[-1, -1], [1, 1]]</code>, then score with weights <code>[2, -1]</code>: <code>2*(-1) + (-1)*(-1) = -1</code> and <code>2*1 + (-1)*1 = 1</code>.</p>
+<p><strong>Why it is correct here.</strong> Scoring is a dot product of each centered row with the weights. The reference zips each centered row with the weights and asserts <code>scores == [-1, 1]</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Scoring the raw rows gives <code>[0, 2]</code>, which skips the fitted transformation.</p>
+<p><strong>How to verify.</strong> Assert the scores in the reference, and check that the GPU version uses the same means array as the training fit.</p>
 <h3 id="exercise-3-add-a-constant-column">Exercise 3: Add a constant column<a class="heading-anchor" href="#exercise-3-add-a-constant-column" aria-label="Link to this section">#</a></h3>
 <p>Center to zero and define scale policy.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>add a constant column</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Add a constant column such as <code>[5, 5]</code>: its mean is 5 and centering produces zeros. State a scale policy, for example leave the column unscaled or drop it, because its standard deviation is 0.</p>
+<p><strong>Why it is correct here.</strong> Centering is well defined for a constant, but dividing by a zero standard deviation produces NaN or infinity.</p>
+<p><strong>A plausible wrong approach.</strong> Dividing by the standard deviation without a check fills the column with NaN, which spreads into the scores.</p>
+<p><strong>How to verify.</strong> Run the pipeline with a constant column and assert the output has no NaN and the column handling matches the stated policy.</p>
 <h3 id="exercise-4-draw-owners-and-waits">Exercise 4: Draw owners and waits<a class="heading-anchor" href="#exercise-4-draw-owners-and-waits" aria-label="Link to this section">#</a></h3>
 <p>Include producer and final-consumer lifetimes.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>draw owners and waits</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Draw owners and waits: the training array owns the fitted means, the scoring step reads those means and the input batch, and the output buffer must stay alive until the final copy to host completes.</p>
+<p><strong>Why it is correct here.</strong> Each buffer has a producer and a final consumer. Without an explicit wait, the host might read scores before the scoring kernel finishes.</p>
+<p><strong>A plausible wrong approach.</strong> Drawing only the computation steps without owners loses track of when buffers can be freed.</p>
+<p><strong>How to verify.</strong> Annotate each edge with the event or synchronization that orders it, and check that every buffer&#x27;s release comes after its last consumer.</p>
 <h3 id="exercise-5-design-train-validation-separation">Exercise 5: Design train-validation separation<a class="heading-anchor" href="#exercise-5-design-train-validation-separation" aria-label="Link to this section">#</a></h3>
 <p>Fit only on the training subset.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design train-validation separation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Fit the means only on the training subset and reuse those means for validation rows, never recomputing them on the validation data.</p>
+<p><strong>Why it is correct here.</strong> Recomputing means on validation data changes the transformation and leaks information about the evaluation set into preprocessing.</p>
+<p><strong>A plausible wrong approach.</strong> Fitting on the concatenated train and validation data is a subtler leak with the same effect: validation scores look better than they would on truly unseen rows.</p>
+<p><strong>How to verify.</strong> Store the fitted means as an explicit object, then confirm validation centering uses them by testing a validation row with a known expected value.</p>
 <h3 id="exercise-6-write-the-capstone-acceptance-report">Exercise 6: Write the capstone acceptance report<a class="heading-anchor" href="#exercise-6-write-the-capstone-acceptance-report" aria-label="Link to this section">#</a></h3>
 <p>Report values tolerances timing boundaries and unsupported cases.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>write the capstone acceptance report</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write the acceptance report with the computed values, tolerances, the timing method and boundaries such as whether transfers are included, plus unsupported cases like constant columns.</p>
+<p><strong>Why it is correct here.</strong> A capstone result is useful only if a reader can see what was checked and what was not.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting a single speedup number leaves out correctness and the scope of the claim, so readers cannot tell whether transfers were timed or whether the means were reused.</p>
+<p><strong>How to verify.</strong> Check each report field against the pipeline tests. Mark device timings not attempted if no GPU ran.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Fitted means [2,3] and scores [-1,1].</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-086_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Aggregation changes the grain of a table. An order-level frame becomes a customer-level frame when rows are grouped by customer and reduced to one result per customer. Every non-key output must describe how values inside the group are combined. A sum, a mean and a row count encode different questions; a plausible number does not establish that the question matches the decision.</p>
 <p>Rates require particular care. If source rows contain successes and trials, the pooled rate is total successes divided by total trials. Averaging row-level rates gives equal weight to each row, even when one row contains one trial and another contains ninety-nine. The first example makes that difference large enough to inspect by hand. The two calculations are both mathematically defined, but they estimate different weighted quantities.</p>
 <p>Missing values also affect denominators. pl.len counts group rows, while count on a column counts non-null values. A group with one row and no observed measurement should not be described as an observed zero. Preserve counts beside estimates so a later reader can distinguish a small group, an empty measurement set and a genuine zero outcome.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>group_by and agg:</strong> The pair that partitions rows by key columns and returns one row per group from the named aggregation expressions.</li>
+<li><strong>Weighted rate:</strong> Total numerator divided by total denominator after aggregation, which weights each group by its denominator.</li>
+<li><strong>Average of rates:</strong> The unweighted mean of per-group rates, which gives a small group the same weight as a large one.</li>
+<li><strong>Row count:</strong> The number of rows in a group from <code>pl.len()</code>, including rows whose values are null.</li>
+<li><strong>Observed count:</strong> The number of non-null values in a column from <code>count()</code>, which can be smaller than the row count.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>group_by defines the grouping keys and agg names the reductions. Sort the final result when row order is part of a comparison or published artifact. Compute a ratio after aggregating its numerator and denominator; this keeps their relationship visible. Give counts explicit names such as rows and observed rather than using one ambiguous n for all purposes.</p>
 <h3 id="mathematical-interpretation">Mathematical interpretation<a class="heading-anchor" href="#mathematical-interpretation" aria-label="Link to this section">#</a></h3>

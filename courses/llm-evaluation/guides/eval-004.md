@@ -8,7 +8,7 @@ Calculate agreement with the correct marginals, explain prevalence effects, and 
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-004`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-004` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for agreement, prevalence and adjudication uncertainty in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about Cohen kappa and weighted agreement: The confusion table is [[2, 0], [1, 1]]; perfect agreement gives kappa 1 and complete disagreement -1; the single-category case is rejected as undefined; and the sample still has two families when the dependence unit changes. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Agreement has several denominators
 
@@ -24,6 +24,13 @@ p_e=\sum_c p_{A,c}p_{B,c}.
 The correction defines a reference model. It does not mean that people literally guess independently according to their observed marginals. A large kappa is evidence about agreement under that convention, not proof that the labels represent the intended scientific construct.
 
 If both reviewers assign the same category to every item, observed agreement is one and the denominator is zero. Kappa is undefined in that degenerate table. Returning one would conceal the absence of variation; returning zero would invent disagreement. The program raises an explicit error and reports the raw agreement separately.
+
+## Key terms
+
+- **Observed agreement:** The fraction of paired labels on which two annotators assign the same category.
+- **Cohen kappa:** (p_o - p_e)/(1 - p_e), agreement corrected by the agreement implied by the two empirical marginal label frequencies.
+- **Prevalence:** The marginal frequency of each category, which changes expected agreement and therefore kappa even at fixed raw agreement.
+- **Degenerate table:** A table where both annotators use one category for every item, making kappa undefined rather than one or zero.
 
 ## Worked case A: calculate the complete table
 

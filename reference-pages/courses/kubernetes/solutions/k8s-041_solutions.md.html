@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-define-start-and-finish">Exercise 1: Define start and finish<a class="heading-anchor" href="#exercise-1-define-start-and-finish" aria-label="Link to this section">#</a></h3>
 <p>The duration has meaning only relative to its milestones. Changing start from failure to detection after the drill can make the reported recovery seem faster without changing the system behavior, so definitions must remain explicit.</p>
 <p><strong>Expected:</strong> A fixed start definition and application+data finish predicate.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write the start event and a finish predicate with both an application and a data check before reading the timeline.</li>
+<li><strong>Why it is correct:</strong> Defining endpoints first prevents choosing them after seeing which gives the best number.</li>
+<li><strong>Plausible wrong approach:</strong> Ending recovery when Pods are Ready ignores whether the data is correct.</li>
+<li><strong>How to verify:</strong> Both definitions exist before the timeline is read, and finish includes application and data.</li>
+</ul>
 <h3 id="exercise-2-compute-observed-recovery-time">Exercise 2: Compute observed recovery time<a class="heading-anchor" href="#exercise-2-compute-observed-recovery-time" aria-label="Link to this section">#</a></h3>
 <p>The elapsed time includes all required restoration and verification work in this definition. A Pod-ready milestone at 40 seconds is useful diagnostic detail but cannot substitute for the later complete acceptance time.</p>
 <p><strong>Expected:</strong> 90 seconds, compared with target 120 seconds.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Subtract 12:00:00Z from 12:01:30Z in seconds.</li>
+<li><strong>Why it is correct:</strong> One minute and thirty seconds is 90 seconds, which meets the 120 second target.</li>
+<li><strong>Plausible wrong approach:</strong> Using a local timezone for one value and UTC for the other shifts the result by hours.</li>
+<li><strong>How to verify:</strong> The answer is 90 seconds against a 120 second target.</li>
+</ul>
 <h3 id="exercise-3-compute-the-data-loss-boundary">Exercise 3: Compute the data-loss boundary<a class="heading-anchor" href="#exercise-3-compute-the-data-loss-boundary" aria-label="Link to this section">#</a></h3>
 <p>This metric describes the represented marker timeline. It does not infer record counts or transactional consistency. The report must state how each timestamp relates to durable application data.</p>
 <p><strong>Expected:</strong> 20 seconds, compared with target 30 seconds.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Subtract restored point 11:59:30Z from source point 11:59:50Z.</li>
+<li><strong>Why it is correct:</strong> Twenty seconds of writes are missing, which is within the 30 second recovery point objective.</li>
+<li><strong>Plausible wrong approach:</strong> Subtracting from the interruption time measures something other than lost data.</li>
+<li><strong>How to verify:</strong> The answer is 20 seconds against a 30 second target.</li>
+</ul>
 <h3 id="exercise-4-run-the-missing-step-negative">Exercise 4: Run the missing-step negative<a class="heading-anchor" href="#exercise-4-run-the-missing-step-negative" aria-label="Link to this section">#</a></h3>
 <p>The negative control catches a runbook that prematurely records success. It is especially important because a responding application can be serving empty, old or incorrect data while looking operationally healthy.</p>
 <p><strong>Expected:</strong> Recovery finish remains false.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Evaluate service_ok AND data_ok AND Pod_ready.</li>
+<li><strong>Why it is correct:</strong> With data_ok false, the AND is false regardless of the other inputs.</li>
+<li><strong>Plausible wrong approach:</strong> Counting two of three as mostly recovered replaces the predicate with a vote.</li>
+<li><strong>How to verify:</strong> Finish evaluates to false.</li>
+</ul>
 <h3 id="exercise-5-review-clocks-and-evidence">Exercise 5: Review clocks and evidence<a class="heading-anchor" href="#exercise-5-review-clocks-and-evidence" aria-label="Link to this section">#</a></h3>
 <p>The evidence packet should allow another person to recompute the result and understand uncertainty. Missing clock synchronization or ambiguous durability definitions should be reported rather than hidden behind precise-looking numbers.</p>
 <p><strong>Expected:</strong> Every measurement is traceable without exporting sensitive backup contents.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> For each milestone, record clock source, timezone, backup reference, marker hash and host receipt.</li>
+<li><strong>Why it is correct:</strong> Durations are only valid if both timestamps come from comparable clocks and each milestone points to its evidence.</li>
+<li><strong>Plausible wrong approach:</strong> Mixing a learner laptop clock with a host clock adds unknown skew to the result.</li>
+<li><strong>How to verify:</strong> Each milestone names its clock source and timezone, and no backup contents are exported.</li>
+</ul>
 <h3 id="exercise-6-write-the-objective-conclusion">Exercise 6: Write the objective conclusion<a class="heading-anchor" href="#exercise-6-write-the-objective-conclusion" aria-label="Link to this section">#</a></h3>
 <p>A useful conclusion explains whether the stated objective was met under the tested conditions and what prevented broader claims. It also records cleanup and any retained synthetic backup material so the drill is operationally complete.</p>
 <p><strong>Expected:</strong> A bounded drill conclusion with no universal recovery guarantee.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Report target, observed value, failed controls and untested conditions.</li>
+<li><strong>Why it is correct:</strong> A drill shows one result under its conditions, and the failed data gate must stay visible.</li>
+<li><strong>Plausible wrong approach:</strong> Writing that recovery meets objectives omits the failed check and the untested scenarios.</li>
+<li><strong>How to verify:</strong> All four items appear, and there is no universal recovery guarantee.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Meeting an objective once is a useful rehearsal result, not a guarantee that every future incident will recover within the same duration. Report the tested fault, data size, environment and operator procedure. Repeatability and broader failure coverage require additional independent drills.</p>
 <p>Do not export private backups or credentials to make the evidence packet self-contained. The packet can include synthetic marker hashes, timestamps, operation receipts and protected backup references while leaving sensitive payloads under the host&#x27;s access and retention policy.</p></article>

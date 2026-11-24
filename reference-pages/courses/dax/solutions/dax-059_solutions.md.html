@@ -261,23 +261,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the treatment exposure-event count after another U3 event.</p>
 <p>Events become 3, distinct exposed units stay 1, assignments stay 2 and the assigned-unit conversion rate stays 1.</p>
+<p><strong>Why it fits this model:</strong> Assignments define the denominator. Exposure events can repeat, so a new U3 event adds an event and nothing else.</p>
+<p><strong>Tempting mistake:</strong> Using COUNTROWS(Exposures) as the denominator. With 3 events, Treatment&#x27;s rate would become 2 / 3 instead of 1.</p>
+<p><strong>How to confirm:</strong> Treatment shows Assigned 2, Converted 2, ExposedUnits 1, ExposureEvents 3 and AssignedUnitRate 1.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Remove U4 merely because no exposure is recorded.</p>
 <p>Do not silently remove it from an intention-to-treat denominator. Any alternative exposure-based analysis needs its own justified design and labeling.</p>
+<p><strong>Why it fits this model:</strong> The intention-to-treat estimand counts every assigned unit. U4 was assigned to Treatment and converted, whether or not an exposure was recorded.</p>
+<p><strong>Tempting mistake:</strong> Dropping U4 because it has no exposure. Treatment&#x27;s rate stays 1 (1 / 1), which hides that the denominator went from 2 to 1.</p>
+<p><strong>How to confirm:</strong> Keep Treatment at 2 assigned and 2 converted; label any exposure-based analysis separately with its own design.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write the quality matrix needed before interpreting the arm contrast.</p>
 <p>Check one assignment per unit, stable arm membership, outcome coverage, duplicate exposures, timing, eligibility and the provenance of any supplied uncertainty summary.</p>
+<p><strong>Why it fits this model:</strong> Before reading Treatment 1 and Control 0.5, check that each unit has one assignment, one outcome and clean events.</p>
+<p><strong>Tempting mistake:</strong> Checking only the rate column. That misses that U3 has two exposure events and U4 has none.</p>
+<p><strong>How to confirm:</strong> COUNTROWS(Assignments) = DISTINCTCOUNT(Assignments[UnitID]) = 4, 4 outcome rows, exposure events per unit (U3 has 2), and the provenance of the Wilson summary.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose claiming statistical certainty because Treatment&#x27;s observed rate is 1.</p>
 <p>The supplied Wilson lower bound is about 0.3424; the population rate is not known to equal 1, and study validity needs additional evidence.</p>
+<p><strong>Why it fits this model:</strong> With n = 2, an observed rate of 1 is consistent with much lower true rates.</p>
+<p><strong>Tempting mistake:</strong> Reporting &quot;100 percent conversion&quot; as certain. The supplied interval says otherwise.</p>
+<p><strong>How to confirm:</strong> Report Treatment as 1 with a Wilson interval of about 0.342 to 1, and Control as 0.5 with about 0.095 to 0.905.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why comparing arm interval overlap is not a complete treatment-effect test.</p>
 <p>Use an appropriate difference/ratio analysis with assumptions and multiplicity/sequential considerations; marginal intervals are not a substitute.</p>
+<p><strong>Why it fits this model:</strong> The question is about the difference between arms, which has its own sampling distribution.</p>
+<p><strong>Tempting mistake:</strong> Reading the overlap of 0.095 to 0.905 and 0.342 to 1 as &quot;no effect&quot;, or a lack of overlap as significance.</p>
+<p><strong>How to confirm:</strong> Compute an interval for the 0.5 difference with a stated method; with two units per arm it will be wide.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Connect this report to the cohort model.</p>
 <p>Report cohort age/coverage, retain eligible units and separate unobserved follow-up from failures before comparing groups.</p>
+<p><strong>Why it fits this model:</strong> Cohorts need the same care: members come from CohortMember, and follow-up depends on how long the cohort has been observed.</p>
+<p><strong>Tempting mistake:</strong> Scoring the 202502 cohort&#x27;s month-one retention as 0 of 2. March 2025 is after the February 28 observation end.</p>
+<p><strong>How to confirm:</strong> Month zero: 202501 is 2 of 2 (A1, A3) and 202502 is 1 of 2 (A4). Month one: 202501 is 1 of 2 (A2), and 202502 is unobserved.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

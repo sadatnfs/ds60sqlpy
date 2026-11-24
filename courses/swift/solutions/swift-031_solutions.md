@@ -14,13 +14,37 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Identify every actor-isolated read and write.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The actor owns mutation, while child tasks send requests rather than sharing a writable integer. All twenty increments are retained.
+**Reference answer.** It runs as the `Task 1` block of the reference program.
+
+```swift
+let inventory = InventoryActor(stock: 3)
+let before = await inventory.stock
+let reserved = await inventory.reserve(1)
+let after = await inventory.stock
+precondition(before == 3 && reserved && after == 2)
+```
+
+**Observe:** The outside reads of stock and the reserve call each need await, and stock goes from 3 to 2.
+
+stock is actor-isolated, so every outside read is an await; inside reserve, the guard read and the subtraction run on the actor without suspension, forming one serialized step.
 
 ### Task 2: Guided modification
 
 Add a read-only snapshot method returning a value type.
 
-No separate reference answer has been written for this task. Start from Example B: The check and update contain no suspension, preserving the invariant as one actor operation. The second reservation is rejected without making stock negative.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+let inventory = InventoryActor(stock: 3)
+let before = await inventory.snapshot()
+_ = await inventory.reserve(2)
+let after = await inventory.snapshot()
+precondition(before == StockSnapshot(stock: 3) && after.stock == 1)
+```
+
+**Observe:** The snapshot taken before the reservation still says 3, and a later one says 1.
+
+snapshot returns a Sendable value copy, so the caller holds a stable record that later actor changes cannot alter.
 
 ### Task 3: Independent construction
 
@@ -55,19 +79,65 @@ The actor serializes every offer and take, so the capacity check and the append 
 
 Diagnose checking stock, awaiting another operation and then subtracting without revalidation.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Actors do not make all multi-step workflows transactional. Await inside an invariant-sensitive operation is a reentrancy boundary. Do not use unchecked Sendable merely to silence a real ownership diagnostic.
+**Reference answer.** It runs as the `Task 4` block of the reference program.
+
+```swift
+actor SplitInventory {
+  private(set) var stock = 2
+  func canReserve(_ amount: Int) -> Bool { amount <= stock }
+  func subtract(_ amount: Int) { stock -= amount }
+}
+let split = SplitInventory()
+let firstCheck = await split.canReserve(2)
+let secondCheck = await split.canReserve(2)
+await split.subtract(2)
+await split.subtract(2)
+let leftover = await split.stock
+precondition(firstCheck && secondCheck && leftover == -2)
+let safe = InventoryActor(stock: 2)
+let one = await safe.reserve(2)
+let two = await safe.reserve(2)
+precondition(one && !two)
+```
+
+**Observe:** Two callers both pass the separate check and stock falls to -2; InventoryActor rejects the second reservation.
+
+Each actor call is serialized, but the await between check and subtract lets other work interleave. Keeping the check and the write in one actor method with no await inside removes the gap.
 
 ### Task 5: Boundary evidence
 
 Test zero and excess reservations.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Serialize increments) and Example B (Keep a reservation atomic within the actor).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+let inventory = InventoryActor(stock: 3)
+let zero = await inventory.reserve(0)
+let excess = await inventory.reserve(4)
+let exact = await inventory.reserve(3)
+let remaining = await inventory.stock
+precondition(zero && !excess && exact && remaining == 0)
+```
+
+**Observe:** Reserving 0 succeeds, 4 is refused, and exactly 3 succeeds and leaves 0.
+
+The guard admits amounts from 0 through stock inclusive, so only the excess request fails and it changes nothing.
 
 ### Task 6: Transfer and justify
 
 Design a reservation state machine for an operation requiring external I/O before commitment.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Actor isolation**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Implement a bounded actor-owned queue with explicit admission) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** `CounterActor` owns an integer and twenty child tasks each await `increment()`. `InventoryActor` performs its whole check-and-subtract inside one synchronous actor method. Example B reserves 2 twice from stock 3. The task 3 answer is an actor-owned queue with explicit admission.
+
+**Why it is correct.** Actor methods run one at a time on the actor's executor, so twenty increments produce exactly 20 with no lost updates. `reserve` contains no `await`, so no other call can run between the guard and the subtraction: the first request leaves 1 and the second is refused because 2 exceeds 1. In task 3 two offers are admitted, the third is refused, and the first item taken is 1.
+
+**A plausible wrong approach.** Splitting reservation into `let ok = await inventory.canReserve(2)` followed by `await inventory.subtract(2)` reintroduces the race task 4 describes: two callers can both see stock 3 and both subtract, leaving -1. Each call is isolated, but the two-step workflow is not.
+
+**How to verify.** Change the counter to a plain class shared by the twenty tasks in a scratch pad and read the Swift 6 diagnostic about sending a non-Sendable value. For task 5, reserve 0 (succeeds, stock unchanged) and reserve 4 from 3 (refused).
 
 ## Mechanism and diagnostic reasoning
 

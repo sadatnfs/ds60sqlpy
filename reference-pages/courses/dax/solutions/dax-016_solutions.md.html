@@ -233,23 +233,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict case A with Color = Red.</p>
 <p>Red and key 2 agree, so revenue is 24.</p>
+<p><strong>Why it fits this model:</strong> MAX(Product[ProductKey]) is evaluated in the incoming Paper context, so it returns 2. Red with key 2 leaves Pen, whose revenue is 24.</p>
+<p><strong>Tempting mistake:</strong> Taking 24 as proof that the filters ran from left to right overlooks that Pen is both the incoming maximum and the only Red Paper product.</p>
+<p><strong>How to confirm:</strong> The row reads IncomingMaxKey 2 and Revenue 24, from S2 (4) and S5 (20).</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Predict case B with Color = Red.</p>
 <p>The inner maximum is 2 and revenue is 24; this fixture would hide the sequencing difference if only Red were tested.</p>
+<p><strong>Why it fits this model:</strong> The outer Red filter is applied first, so the inner MAX sees only Pen and returns 2. Revenue is 24, the same as case A with Red.</p>
+<p><strong>Tempting mistake:</strong> Assuming the outer Red replaces Paper confuses the columns. Color and Category differ, so Paper stays, though here both readings happen to give Pen.</p>
+<p><strong>How to confirm:</strong> Inside the outer Red context COUNTROWS(Product) is 1 and MAX(Product[ProductKey]) is 2, so revenue is 24.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a context ledger for each sibling expression.</p>
 <p>Start Paper {1,2}; bind maximum 2; form Blue; combine key 2 with Blue; identify the empty intersection.</p>
+<p><strong>Why it fits this model:</strong> Ledger: Paper gives keys {1, 2}; MAX bound there is 2; Blue gives {1, 3}; key 2 gives {2}. Their intersection with Paper is empty.</p>
+<p><strong>Tempting mistake:</strong> A ledger written in argument order, applying Blue before computing MAX, binds key 1 and predicts Notebook&#x27;s 67, which is case B&#x27;s answer, not case A&#x27;s.</p>
+<p><strong>How to confirm:</strong> Case A returns IncomingMaxKey 2 and Revenue BLANK, which matches the empty intersection.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose testing only the Red variant and declaring equivalence.</p>
 <p>Blue distinguishes the two evaluation orders, returning BLANK versus 67.</p>
+<p><strong>Why it fits this model:</strong> Red returns 24 under both forms, so it cannot show which order is used. Blue can: the incoming maximum stays 2 in case A, while the nested inner MAX sees {1} in case B.</p>
+<p><strong>Tempting mistake:</strong> Declaring the forms equivalent after one passing Red test treats agreement on one input as proof for all inputs.</p>
+<p><strong>How to confirm:</strong> Run both forms with Blue and expect BLANK for case A and 67 for case B.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why a variable bound before the outer modifier can reintroduce the bug.</p>
 <p>Capturing max key 2 before Blue preserves 2 even inside the nested calculation.</p>
+<p><strong>Why it fits this model:</strong> A variable is evaluated where it is defined. <code>VAR K = MAX ( Product[ProductKey] )</code> under Paper binds 2 before the outer Blue filter exists.</p>
+<p><strong>Tempting mistake:</strong> Moving the MAX into a variable to tidy case B brings back the bug, because the inner filter then uses the stored 2 rather than the key under Blue.</p>
+<p><strong>How to confirm:</strong> The variable version returns BLANK under Paper, while the nested form with MAX inline returns 67.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the principle to selecting the last eligible period.</p>
 <p>Define the population whose maximum period is needed, then evaluate the maximum in that context. Do not assume sibling arguments form a procedural pipeline.</p>
+<p><strong>Why it fits this model:</strong> Find the last Paper sale date inside the Paper filter. Paper&#x27;s last order is S7 on 2025-02-02, worth 20.</p>
+<p><strong>Tempting mistake:</strong> Computing MAX(Sales[OrderDate]) as a sibling of the Paper filter evaluates it over all sales, which gives 2025-02-03, the date of the Mug line S8, so the result is BLANK.</p>
+<p><strong>How to confirm:</strong> Nested as <code>CALCULATE ( CALCULATE ( [NetRevenue], &#x27;Date&#x27;[Date] = MAX ( Sales[OrderDate] ) ), Product[Category] = &quot;Paper&quot; )</code>, expect 20.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

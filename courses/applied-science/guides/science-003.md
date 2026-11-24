@@ -14,6 +14,13 @@ This tutorial uses a deliberately simple additive model. Let an omitted binary v
 
 The expression requires an additive, constant confounder effect and an appropriate interpretation of the prevalence contrast. It is not a universal correction for arbitrary nonlinear models, multiple confounders or time-varying treatment. Its simplicity makes the assumption visible rather than making it universally valid.
 
+## Key terms
+
+- **Sensitivity analysis:** A study of how much a specified, interpretable violation of an assumption would change a conclusion.
+- **Omitted-variable contribution:** In the additive model, the bias gamma times delta p created by an unmeasured binary variable that shifts outcomes by gamma and differs in prevalence by delta p.
+- **Tipping point:** The combination of sensitivity parameters at which the adjusted effect reaches zero or a decision reverses.
+- **Negative-control outcome:** An outcome the treatment cannot plausibly cause but that shares confounding or measurement bias with the main outcome, so an association with it signals bias.
+
 ## Worked case 1: locate a tipping point
 
 The observed contrast is three. The program evaluates four prevalence differences and four confounder effects. If the prevalence difference is .5 and the confounder effect is six, the adjusted scenario is zero. A prevalence difference of .75 with the same strength reverses the sign. Zero prevalence imbalance leaves the observed contrast unchanged, providing an independent boundary check.
@@ -43,6 +50,37 @@ A useful visualization would put prevalence imbalance and confounder effect on t
 **Does robustness across several regressions establish causality?** It can show stability under those specifications. If every specification shares the same invalid adjustment set, that stability can coexist with substantial bias.
 
 **What is a responsible conclusion here?** Report the observed result, the scenarios that change the decision, and the substantive case for or against those scenarios. The code verifies the stated arithmetic. It does not tell us which hidden-confounding scenario describes an external population.
+
+## Worked example: E-value tipping point and a negative-control outcome
+
+```python
+import numpy as np
+
+rr_obs = 1.8
+e_value = rr_obs + np.sqrt(rr_obs * (rr_obs - 1))
+print(f"E-value for RR {rr_obs}: {e_value:.3f}")
+
+# Bias factor of a binary confounder with exposure association rr_eu and outcome rr_ud.
+for rr_eu, rr_ud in [(1.5, 1.5), (2.0, 2.0), (3.0, 3.0)]:
+    bias = rr_eu * rr_ud / (rr_eu + rr_ud - 1)
+    print(f"RR_EU={rr_eu}, RR_UD={rr_ud}: bias factor {bias:.3f}, adjusted RR {rr_obs / bias:.3f}")
+
+# Negative-control outcome: exposure cannot cause it, so any association is bias.
+nc_exposed, nc_unexposed = 26 / 200, 20 / 200
+print(f"negative-control RR: {nc_exposed / nc_unexposed:.2f}")
+```
+
+Observed output:
+
+```text
+E-value for RR 1.8: 3.000
+RR_EU=1.5, RR_UD=1.5: bias factor 1.125, adjusted RR 1.600
+RR_EU=2.0, RR_UD=2.0: bias factor 1.333, adjusted RR 1.350
+RR_EU=3.0, RR_UD=3.0: bias factor 1.800, adjusted RR 1.000
+negative-control RR: 1.30
+```
+
+An observed risk ratio of 1.8 has an E-value of \(1.8+\sqrt{1.8\times0.8}=3.0\): an unmeasured confounder would need risk-ratio associations of 3 with both exposure and outcome to move the estimate to the null. The grid shows the path. Associations of 1.5 each produce a bias factor of \(2.25/2=1.125\) and leave an adjusted ratio of 1.6, associations of 2 each leave 1.35, and only the pair (3, 3) reaches the bias factor 1.8 that cancels the effect. The grid is silent about whether such a confounder exists. The negative-control outcome adds evidence the grid cannot: 26 events among 200 exposed people versus 20 among 200 unexposed gives a ratio of 1.30 for an outcome the exposure cannot cause. That number says roughly a 1.3-fold bias is already present, so a confounder strong enough to push 1.8 down to about 1.4 is not hypothetical. If the negative-control ratio had been 1.0, the same E-value would have been more reassuring.
 
 ## Complete reproducible program
 

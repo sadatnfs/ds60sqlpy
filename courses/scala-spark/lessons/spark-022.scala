@@ -50,13 +50,13 @@ object Main {
       locally {
         assert(source.count() == 20000L && source.rdd.getNumPartitions == 4)
         assert(source.select("key").distinct().count() == 1000L)
-        println("Input:20000 rows,1000 keys,4 partitions,local[2]")
+        println("Input: 20000 rows, 1000 keys, 4 partitions, local[2]")
       }
       locally {
         val partialUpper = 4L * 1000L
         assert(partialUpper == 4000L && partialUpper < 20000L)
         println(
-          "Local partial aggregation can reduce occurrences before redistribution;this is a model"
+          "Local partial aggregation can reduce occurrences before redistribution; this is a model"
         )
       }
       println("spark-022: worked examples passed; six task implementations remain")

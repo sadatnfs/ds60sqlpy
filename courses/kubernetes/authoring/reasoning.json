@@ -1,0 +1,2282 @@
+{
+  "k8s-004": [
+    {
+      "approach": "Split the read into who asks, which server and namespace, which API group and resource, which object name and which verb.",
+      "why": "Authorization in this lesson is evaluated per request tuple, so `get` on `deployments.apps/hello` in the leased namespace is a different question from the same verb in another namespace.",
+      "pitfall": "Writing only `hello` and `get` omits the caller and namespace, so the record could describe a read against an ambient context the lease never authorized.",
+      "verify": "The tuple must translate field by field into one `kubectl auth can-i get deployments.apps/hello` command with explicit kubeconfig, context and namespace flags."
+    },
+    {
+      "approach": "Match each of the three requests against the Role rules, requiring verb, resource and resourceNames to agree within a single rule.",
+      "why": "The example Role names `hello` under `resourceNames` with only `get`, so a list of all Deployments has no matching rule, and Namespaces are cluster-scoped and cannot be granted by a namespaced Role at all.",
+      "pitfall": "Assuming `get` on one Deployment implies `list` treats verbs as a hierarchy, but RBAC verbs are independent strings and list returns every object, including ones the name restriction excludes.",
+      "verify": "Exactly one of the three requests (get hello) should have a fully matching rule; the other two should have none."
+    },
+    {
+      "approach": "Compare `metadata.uid` from the ns-1 receipt with the uid in the ns-2 readback before looking at any other field.",
+      "why": "A namespace UID is assigned by the API server at creation, so a deleted and recreated namespace keeps its name and labels but receives a new UID.",
+      "pitfall": "Accepting the readback because the name and owner label both match would let a stale receipt act on a replacement namespace that another process may now own.",
+      "verify": "The two UIDs differ, so the decision is refuse; changing the label or name in your notes must not flip that answer."
+    },
+    {
+      "approach": "Ask the server about one permitted own-namespace action and one action the identity should lack, such as listing Secrets or reading Nodes, under the explicit lease.",
+      "why": "Only the server's answer for this identity at this time reflects every binding that applies, which the single Role file cannot show.",
+      "pitfall": "Recording the Role YAML as the result skips the observation, and pasting the kubeconfig to prove the identity would leak the credential the exercise is meant to protect.",
+      "verify": "Each row names verb, resource and namespace with the server's yes or no, and a text search of the record finds no token or certificate data."
+    },
+    {
+      "approach": "Resolve the binding's scope first (namespace lesson-a), then check each requested resource against the rules of the `view` ClusterRole.",
+      "why": "A RoleBinding confines whatever role it references to its own namespace, and the built-in `view` role lists Pods but omits Secrets.",
+      "pitfall": "Reading `ClusterRole` in the roleRef as cluster-wide access would wrongly allow Pods in lesson-b; that scope only comes from a ClusterRoleBinding.",
+      "verify": "Expect allowed, denied, denied for Pods in lesson-a, Pods in lesson-b and Secrets in lesson-a, matching `kubectl auth can-i` with `--as` and explicit `--namespace`."
+    },
+    {
+      "approach": "Treat the Role as one input to a union of all bindings that reference the identity, its groups and any ServiceAccount it uses.",
+      "why": "Kubernetes RBAC is purely additive with no deny rules, so another RoleBinding or a ClusterRoleBinding to a group can add permissions this file never mentions.",
+      "pitfall": "Concluding least privilege from the narrow Role alone ignores group bindings such as a ClusterRoleBinding for `system:authenticated`, which could grant far more.",
+      "verify": "Name at least one binding outside the file that could widen access and cite `kubectl auth can-i --list` in the leased namespace as the effective set."
+    }
+  ],
+  "k8s-005": [
+    {
+      "approach": "Read the container block of the starter field by field: image, imagePullPolicy, command and the first ports entry.",
+      "why": "These four fields fully determine which preloaded image tag the kubelet may use, that it must not pull, which fixture process starts and which port name later objects can reference.",
+      "pitfall": "Quoting the lesson title or guessing from the file name skips the YAML, and would miss that `Never` forbids a registry pull rather than merely preferring a cache.",
+      "verify": "Each answer cites an exact path under `spec.template.spec.containers[0]` and reads 0.2.0, Never, the fixed server command and 8080 named http."
+    },
+    {
+      "approach": "Classify phase and readiness as separate signals, then change only the readinessProbe path from /missing back to /ready.",
+      "why": "The fixture server keeps running when /missing returns an error, so the phase stays Running while the Ready condition stays False until the probe succeeds.",
+      "pitfall": "Calling the first Run a crash would send you to the command or image, yet restartCount stays unchanged because a readiness failure never restarts the container.",
+      "verify": "The first result names the failed readiness check, and the second Run reports the Ready condition True for a new Pod."
+    },
+    {
+      "approach": "Place each failure on the timeline: broker admission before any API object, or kubelet image handling after the Pod is accepted and scheduled.",
+      "why": "An unapproved image is refused by the broker allowlist, while ErrImageNeverPull appears only when an accepted Pod with pull policy Never lands on a node lacking the image.",
+      "pitfall": "Rebuilding application code treats both as runtime crashes, but in neither case did the container process start, so code changes cannot help.",
+      "verify": "State object created no and process started no for the broker case, object created yes and process started no for ErrImageNeverPull."
+    },
+    {
+      "approach": "Attach Pod UID, container name and restartCount to the bounded excerpt before interpreting the line.",
+      "why": "Pod names repeat across replacements and `--previous` can return output from an earlier container instance, so only those three fields pin the line to one process.",
+      "pitfall": "Copying the newest lines by Pod name could mix output from a replaced Pod with the same generated name pattern, or a previous container after a restart.",
+      "verify": "A second reader finds the same UID, container name and restartCount in a readback; the excerpt contains no secrets or unrelated workloads."
+    },
+    {
+      "approach": "Compare metadata.uid first and only then interpret restartCount within one Pod.",
+      "why": "restartCount counts kubelet restarts of a container inside one Pod object, while a new UID means a controller created a different Pod with a fresh count of 0.",
+      "pitfall": "Reading the drop from 1 to 0 as a counter reset inside one Pod hides the replacement and the loss of that Pod's emptyDir data.",
+      "verify": "Same UID with count 1 is a container restart; different UID with count 0 is a new Pod instance."
+    },
+    {
+      "approach": "List what this source creates (a Deployment and its Pods only) and map each claim to a named check in the Run result.",
+      "why": "The Deployment-only starter has no Service, so the run can observe controller ownership, Ready Pod identities and cleanup but no Service routing or client response.",
+      "pitfall": "Borrowing a Service success line from k8s-008 would claim traffic evidence for an object that this manifest never creates.",
+      "verify": "Every sentence in your statement points to a check name, and any Service or client claim without one is deleted."
+    }
+  ],
+  "k8s-006": [
+    {
+      "approach": "Walk ownerReferences upward from each Pod to its ReplicaSet and from that ReplicaSet to the Deployment, recording UIDs at each hop.",
+      "why": "The `controller: true` reference is set by the ReplicaSet controller itself, so a UID chain proves ownership in a way a shared app label cannot.",
+      "pitfall": "Drawing the graph from `app=hello` labels would include any unrelated Pod carrying that label and overstate the replica set.",
+      "verify": "Exactly two Pods link through one ReplicaSet UID to the intended Deployment UID, and every arrow cites the UID it follows."
+    },
+    {
+      "approach": "Compare metadata.generation 4 with status.observedGeneration 3 before reading readyReplicas.",
+      "why": "The API server bumps generation on every spec change, and the Deployment controller copies it to observedGeneration only after processing, so 3 means spec 4 is unprocessed.",
+      "pitfall": "Accepting readyReplicas 2 as success reports the health of the generation 3 template, which may differ from the spec you just applied.",
+      "verify": "The conclusion cites observedGeneration below generation and states the latest desired state is not yet observed."
+    },
+    {
+      "approach": "Edit only spec.replicas from 1 to 2, then Run and read the result as a new baseline rather than a change to an old one.",
+      "why": "The ReplicaSet controller creates one additional Pod to meet the count of 2, and the browser operation records its own Run identity and cleanup.",
+      "pitfall": "Reusing the fixture's illustrative Pod names as evidence would make the result look valid without any server-assigned UID behind it.",
+      "verify": "The result lists two distinct Ready Pod UIDs and a cleanup entry carrying this Run's identity."
+    },
+    {
+      "approach": "Delete exactly one recorded Pod by UID precondition, then wait a bounded time for the ReplicaSet to restore the count.",
+      "why": "The ReplicaSet still wants two replicas, so it creates a new Pod from the unchanged template while the Deployment generation stays the same.",
+      "pitfall": "Deleting by label selector could remove both Pods or an unrelated one, and rolling the Deployment would wrongly create a new ReplicaSet revision.",
+      "verify": "The packet shows the Deployment UID and generation unchanged, one Pod UID removed and one new UID added."
+    },
+    {
+      "approach": "Filter the list to Pods whose controller ownerReference resolves to the intended ReplicaSet UID, then count Ready ones.",
+      "why": "The foreign Pod belongs to a different controller, so it cannot satisfy this ReplicaSet's replica contract even though its labels and phase match.",
+      "pitfall": "Counting `app=hello` Pods in phase Running returns 2 and passes a broken Deployment that actually has only one owned replica.",
+      "verify": "Owned Ready count is 1 against a raw list length of 2, so acceptance fails."
+    },
+    {
+      "approach": "Separate the final status snapshot from a time series of client requests sampled during the replacement window.",
+      "why": "The Deployment status reports only the end state, while capacity was reduced between deletion and the new Pod becoming Ready.",
+      "pitfall": "Citing readyReplicas 2 afterward as proof that no request failed assumes continuity the status field never measured.",
+      "verify": "Name the client timeline with timestamps, outcomes and error counts as the measurement no Deployment status field can provide."
+    }
+  ],
+  "k8s-007": [
+    {
+      "approach": "Compare each key and value in the Service spec.selector with the labels in the Deployment Pod template, treating the selector as a set query.",
+      "why": "A Service selects every Pod in its namespace whose labels contain all selector pairs, so app=hello matches the template label and app=wrong matches nothing in this manifest.",
+      "pitfall": "Checking only that a Service named hello exists misses the selector entirely; the object is accepted with app=wrong and simply has zero endpoints.",
+      "verify": "Key and value agree exactly for app=hello; for app=wrong the value differs, so the intended set is empty."
+    },
+    {
+      "approach": "Follow the chain from the Service port to targetPort, then resolve the name `http` against the container ports list.",
+      "why": "A string targetPort is looked up by name on each selected container, and this container declares `http` once as containerPort 8080.",
+      "pitfall": "Assuming targetPort must equal port numerically would break as soon as the Service port changes, and a misspelled port name still creates a valid Service that routes nowhere.",
+      "verify": "The chain reads 8080 to `http` to 8080, and `http` appears exactly once in the container ports list."
+    },
+    {
+      "approach": "Collect every targetRef.uid from the four EndpointSlice entries and reduce them to a set before comparing with the owned Ready Pods.",
+      "why": "The same Pod can appear in more than one slice or once per IP family, so only distinct UIDs measure distinct backends.",
+      "pitfall": "Counting endpoint rows reports four backends and would also hide a foreign UID among them.",
+      "verify": "The set holds exactly two UIDs, and it equals the owned Ready Pod UIDs recorded independently."
+    },
+    {
+      "approach": "Run the starter with selector app=wrong unchanged, keep its failure record, then restore app=hello and submit a separate Run.",
+      "why": "No Pod carries app=wrong, so the Service never gains a ready endpoint and the bounded backend check fails before the client step.",
+      "pitfall": "Editing the selector and rerunning without first recording the failure loses the negative evidence, and treating the second Run as a patch of the first ignores that each Run creates and deletes its own Service.",
+      "verify": "The record shows the exact app=wrong selector, the failed check name and cleanup, then a separate passing Run with new UIDs."
+    },
+    {
+      "approach": "Check that the client Job's UID belongs to this Run, then compare its output with the `/version` payload contract.",
+      "why": "The client Pod resolves the Service name and receives the fixture response only if selector, port chain and readiness all line up.",
+      "pitfall": "Accepting Job completion alone would pass a client that called `/ready`, which proves probe health, not the version payload.",
+      "verify": "Job and Pod ownership match this Run, exit status is 0 and the output equals ds60-fixture-v1."
+    },
+    {
+      "approach": "Specify a new Service name with its own receipt and repeat the selector, port, backend and client checks against that object only.",
+      "why": "A distinct owned receipt and UID-aware cleanup keep the experiment from mutating the shared `hello` Service or another learner's objects.",
+      "pitfall": "Editing the hello Service selector in place to test the idea would change the baseline other checks depend on and cannot be undone by UID.",
+      "verify": "The design names its own Service, its own receipt and a UID-scoped delete, and never edits hello."
+    }
+  ],
+  "k8s-009": [
+    {
+      "approach": "Trace hello-config and key message into both consumers: the configMapKeyRef env entry and the lesson-config volume mounted at /config.",
+      "why": "The env entry and the volume both name the same ConfigMap and key, while the volume name links the Pod volume to a read-only container mount.",
+      "pitfall": "Matching only the ConfigMap name would miss a wrong key, which leaves the env var unresolved and blocks container start even though the object exists.",
+      "verify": "Every reference resolves inside the manifest and the projected file path is /config/message with readOnly true."
+    },
+    {
+      "approach": "Add the ConfigMap, the DS60_MESSAGE reference and the read-only volume, then Run under a fresh contract-2 lease.",
+      "why": "The fixed client calls `/message` for the environment path and `/file-message` for the mounted path, so both consumers must return reviewer.",
+      "pitfall": "Treating a Ready Pod as success ignores that readiness only checks `/ready` and says nothing about which configuration either path loaded.",
+      "verify": "The result shows three passing checks for `/version`, `/message` and `/file-message` plus cleanup of the ConfigMap, Deployment and Service."
+    },
+    {
+      "approach": "Hold the process fixed and ask what reads the environment and when.",
+      "why": "The kubelet resolves configMapKeyRef once when the container starts, so the running process keeps hello after the ConfigMap changes.",
+      "pitfall": "Expecting `/message` to switch to reviewer after an edit assumes live environment updates, which Kubernetes never performs for a running process.",
+      "verify": "Pod UID and restartCount are unchanged, and the environment value stays hello until a new process starts."
+    },
+    {
+      "approach": "Record three observations with timestamps: the ConfigMap value from the API, the bytes in /config/message and the application's HTTP answer.",
+      "why": "Volume projections are refreshed by the kubelet on its own sync cycle, and the fixture rereads the file per request, so each stage can lag the previous one.",
+      "pitfall": "Assuming the file updates immediately or on a fixed delay would turn a guess into a transcript; any timing claim must come from an owned observation.",
+      "verify": "Each record cites its source and time, and absent the host capability the record stays labeled synthetic."
+    },
+    {
+      "approach": "Add one unsupported field at a time in a scratch copy and Run each, then restore the approved source.",
+      "why": "The broker allowlist refuses secretKeyRef, hostPath, subPath and arbitrary env before any API request, so no object is created.",
+      "pitfall": "Describing a refusal as a ConfigMap error blames the cluster for a rejection the course adapter produced before submission.",
+      "verify": "Each refusal message is recorded with no create receipt, and the restored source still passes the parse step."
+    },
+    {
+      "approach": "Write before and after rows with ConfigMap UID and resourceVersion, Pod UIDs and the routes observed, plus the source to restore.",
+      "why": "Because env values bind at start, a release needs new Pods, and rollback needs the exact prior ConfigMap content and fresh Pods consuming it.",
+      "pitfall": "Deleting objects by name to roll back cannot tell an old Pod from a replacement and leaves no evidence that the old message is served again.",
+      "verify": "A reviewer can roll back using only the recorded UIDs, resourceVersion and restored source, then confirm `/message` returns the old value."
+    }
+  ],
+  "k8s-010": [
+    {
+      "approach": "Read requests and limits as two mappings, note they start equal at 100m and 64Mi, then edit only the requests to 10m and 16Mi.",
+      "why": "The scheduler and ResourceQuota sum requests, while the kubelet and runtime enforce limits, so lowering requests changes placement but keeps the same ceiling.",
+      "pitfall": "Lowering limits instead would tighten the runtime ceiling and risk an OOM kill at 16Mi without changing anything the scheduler sees.",
+      "verify": "The edited source shows requests 10m/16Mi and limits 100m/64Mi, and the scheduler is named as the requests reader."
+    },
+    {
+      "approach": "Multiply each request by spec.replicas, then expand 64Mi with powers of two.",
+      "why": "Two replicas at 10m and 16Mi request 20m and 32Mi, and 64 times 1,048,576 is 67,108,864 bytes.",
+      "pitfall": "Using decimal megabytes gives 64,000,000 bytes, which disagrees with the Mi suffix and with the offline check.",
+      "verify": "The numbers match the assertions in the offline check script exactly."
+    },
+    {
+      "approach": "Set request 200m and limit 100m in a scratch source and submit it.",
+      "why": "A request above its limit is invalid, and the course broker refuses it before any API call, so no Pod is created or scheduled.",
+      "pitfall": "Reading the refusal as a scheduling failure assumes the Pod reached the scheduler, but no object exists to schedule.",
+      "verify": "The result shows the refusal text and no created resource UID."
+    },
+    {
+      "approach": "Ask first whether the Pod object was admitted, then whether spec.nodeName was set.",
+      "why": "A Forbidden exceeded quota error comes from admission before the Pod exists, while Pending with FailedScheduling means the Pod exists but no node fits its requests.",
+      "pitfall": "Reading container logs for either record finds nothing, because in neither case did a container start.",
+      "verify": "Quota maps to admission with no object; FailedScheduling maps to an admitted Pod with empty nodeName."
+    },
+    {
+      "approach": "Look for reason OOMKilled in state.terminated or lastState.terminated before interpreting exit code 137.",
+      "why": "OOMKilled is set when the container exceeded its memory limit, whereas 137 only says the process received SIGKILL, which several causes produce.",
+      "pitfall": "Calling every 137 an OOM kill and raising the memory limit could hide a liveness kill or an external termination.",
+      "verify": "Only the record carrying reason OOMKilled is classified as memory enforcement; the bare 137 stays unconfirmed."
+    },
+    {
+      "approach": "Choose one failure record, change exactly one field that addresses its mechanism and state acceptance in terms of the failed stage.",
+      "why": "A quota failure clears when requests fit the quota, a scheduling failure when a node can fit the request, and an OOM kill when usage stays under the limit.",
+      "pitfall": "Raising every request and limit at once may make the Pod Ready but cannot show which change fixed it and may exceed the namespace budget.",
+      "verify": "The diff touches one field and acceptance names admission, placement or termination reason as the observed recovery."
+    }
+  ],
+  "k8s-011": [
+    {
+      "approach": "Read completions and parallelism from spec, restartPolicy from the Pod template, then backoffLimit and activeDeadlineSeconds, and edit the last two.",
+      "why": "The starter needs one success, runs one Pod at a time, never restarts in place, allows one retry and stops at 30 seconds; the edit sets backoffLimit 0 and 20 seconds.",
+      "pitfall": "Setting restartPolicy to OnFailure to remove retries moves restarts into the Pod rather than removing them.",
+      "verify": "Quoted values read 1, 1, Never, 0 and 20 seconds from your edited YAML."
+    },
+    {
+      "approach": "Run the success outcome and compare the output ledger against the expected values field by field.",
+      "why": "The fixed task is deterministic, so a correct run prints accepted 3, rejected 2 and total 35 and exits 0.",
+      "pitfall": "Trusting the Complete condition without reading the ledger could accept a task that exited 0 with wrong totals.",
+      "verify": "Ledger fields match exactly and the task Pod's controller ownerReference is this Run's Job UID."
+    },
+    {
+      "approach": "Change only the outcome value to failure and Run it.",
+      "why": "The manifest is still valid and the container starts, so the Job controller records a nonzero exit and marks the Job Failed when backoff is exhausted.",
+      "pitfall": "Treating Failed as a manifest problem sends you to the YAML, yet the API accepted it and the container ran.",
+      "verify": "The Job condition is Failed, the container exit code is nonzero and cleanup names the same Job UID."
+    },
+    {
+      "approach": "Count new Pods per backoffLimit value, keeping restartPolicy Never in mind.",
+      "why": "With Never, each failed attempt is a separate Pod, so backoffLimit 0 allows one Pod and backoffLimit 1 allows up to two.",
+      "pitfall": "Reading Never as no retries at all confuses kubelet restarts within a Pod with Job controller retries across Pods.",
+      "verify": "Expect at most one task Pod at backoffLimit 0 and at most two at backoffLimit 1, with restartCount staying 0 in each."
+    },
+    {
+      "approach": "Read schedule, timeZone, suspend, concurrencyPolicy and startingDeadlineSeconds from the fixture and state each effect.",
+      "why": "The five-minute schedule in UTC is defined, but suspend true stops new Jobs from being created, and existing Jobs keep running.",
+      "pitfall": "Assuming suspend deletes active Jobs or proves past runs would mistake a future scheduling switch for cleanup or history.",
+      "verify": "Each field is named with its effect and the conclusion says no new Job starts while suspended."
+    },
+    {
+      "approach": "Give each logical unit of work a stable key and publish its effect through a check that rejects a key already committed.",
+      "why": "The Job controller may start a second Pod after an attempt that already wrote its effect, so the sink must dedupe on the key.",
+      "pitfall": "Relying on backoffLimit 0 to prevent duplicates fails because a node loss or deadline can still yield a second Pod.",
+      "verify": "Simulate a crash after the write and before the acknowledgment; the retry finds the key and publishes nothing new."
+    }
+  ],
+  "k8s-012": [
+    {
+      "approach": "Lay out the five boundaries as a dependency chain and, for each case, stop at the first boundary with no supporting evidence.",
+      "why": "Each stage needs the previous one: a container cannot start before the Pod is scheduled, and a client response needs a Ready endpoint first.",
+      "pitfall": "Opening application logs first for every case fails for case A, where the container was never created and there are no logs to read.",
+      "verify": "Each case has one first failed boundary and every later boundary is marked not reached."
+    },
+    {
+      "approach": "Read the configMapKeyRef in the Pod spec and check that the named ConfigMap and key exist in the same namespace.",
+      "why": "A missing ConfigMap or key stops the kubelet at container configuration with CreateContainerConfigError, before any process runs.",
+      "pitfall": "Calling case A a crash and raising restart tolerance changes nothing, because restartCount stays 0 and no process ever exited.",
+      "verify": "The check quotes the ConfigMap name and key exactly as the spec does and needs no application log."
+    },
+    {
+      "approach": "Change only readinessProbe.httpGet.path from /missing to /ready and predict the two confirming observations.",
+      "why": "The fixture serves 200 on /ready and 404 on /missing, so the process runs normally but stays unready until the probe path is fixed.",
+      "pitfall": "Editing the Service selector or resource limits leaves the 404 untouched, so the Pod remains NotReady and the client still gets no endpoint.",
+      "verify": "A new Run shows the Ready condition True and a successful client response, with one field changed."
+    },
+    {
+      "approach": "Read the Job's terminal condition together with the task container's terminated exit code.",
+      "why": "Exit code 2 from a started container with condition Failed means the task itself reported failure, not the controller or the image.",
+      "pitfall": "Raising backoffLimit retries the same deterministic input, so every attempt exits 2 and the Job still fails, only later.",
+      "verify": "The record cites Failed and exit 2 together, and shows neither DeadlineExceeded nor an image waiting reason."
+    },
+    {
+      "approach": "Write four rows for one case: what you observed, what you inferred, the one change you made and the condition that would accept it.",
+      "why": "Separating observation from hypothesis lets a reviewer see which field or log line supported each step and which belief was later disproved.",
+      "pitfall": "Rewriting the timeline after the fix to show only the successful step erases the failed hypothesis that ruled out a cause.",
+      "verify": "Every row cites an object UID and a bounded field or line, and synthetic rows are labeled."
+    },
+    {
+      "approach": "List the check that failed originally plus the end-to-end client result, then the UIDs you created and nothing else.",
+      "why": "Recovery is proven at the layer that broke, and cleanup is safe only against identities you recorded at creation.",
+      "pitfall": "Deleting every object labeled app=hello would remove same-name replacements or another learner's objects the run never created.",
+      "verify": "Post-repair checks pass, and the delete list matches the creation record UID for UID."
+    }
+  ],
+  "k8s-013": [
+    {
+      "approach": "Diff revision A against B and classify each changed path as inside or outside spec.template.",
+      "why": "The Deployment controller hashes only the Pod template, so a changed template annotation creates a new ReplicaSet while the Deployment name and UID stay the same.",
+      "pitfall": "Treating a changed spec.replicas or a Deployment-level annotation as a new revision would expect a ReplicaSet that never appears.",
+      "verify": "Every change in the B example falls under spec.template, so one new pod-template-hash is expected."
+    },
+    {
+      "approach": "Group Pods by ownerReference to their ReplicaSet and count Ready Pods per pod-template-hash.",
+      "why": "At generation 5 the old ReplicaSet still holds Ready Pods that serve traffic while the candidate's Pods fail readiness.",
+      "pitfall": "Accepting the aggregate readyReplicas count would call the rollout healthy while every Ready Pod still runs revision A.",
+      "verify": "The candidate hash has zero or too few Ready Pods, so B is incomplete."
+    },
+    {
+      "approach": "Write the gate as named conditions with a single deadline: observedGeneration, updatedReplicas, candidate ready count and the application marker.",
+      "why": "Together these show the controller processed the spec, the new template is fully replaced and the served response belongs to B.",
+      "pitfall": "Waiting with no deadline lets a stalled rollout block the lease, and accepting on Available alone ignores which version is available.",
+      "verify": "Each condition maps to one readback or request and reports its own failure when the deadline passes."
+    },
+    {
+      "approach": "Pick revert or fix explicitly, apply it as a new change and reobserve generation and marker.",
+      "why": "Both choices bump metadata.generation, so success needs observedGeneration to catch up and the served marker to match the chosen source.",
+      "pitfall": "Reporting the rollout undo command as the outcome describes the request, not whether the controller converged.",
+      "verify": "observedGeneration equals the new generation and the response marker matches the restored or fixed source."
+    },
+    {
+      "approach": "List both image digests, the manifests that reference them and a response that differs between the two binaries.",
+      "why": "Only digests pin exact artifacts, and a version endpoint that returns different values per binary proves which one served the request.",
+      "pitfall": "Changing a message in one image and calling it a version roll proves configuration, not a binary change.",
+      "verify": "The plan names two digests and a response check that distinguishes them."
+    },
+    {
+      "approach": "Describe periodic client requests during the rollout with interval, per-request version and error tallies.",
+      "why": "Only sampled requests show which revision answered and whether any failed while old and new Pods coexisted.",
+      "pitfall": "Quoting the final rollout status as zero downtime claims continuity no snapshot recorded.",
+      "verify": "The answer names interval, per-sample result and error count, and makes no universal uptime claim."
+    }
+  ],
+  "k8s-014": [
+    {
+      "approach": "Add the ConfigMap and its two consumers to the k8s-008 source, then trace every reference with the field that creates it.",
+      "why": "Selector, configMapKeyRef and volume name are lookups by name or label, while ownership only appears later from the controllers.",
+      "pitfall": "Drawing ownerReferences between source objects invents links the YAML cannot contain, because they are written by controllers at runtime.",
+      "verify": "Each arrow carries selector, configMapKeyRef or volume name, and two replicas with matching app labels are identified."
+    },
+    {
+      "approach": "Follow the Run result's ownership chain from Deployment to current ReplicaSet to each Ready Pod.",
+      "why": "Only Pods controlled by the current ReplicaSet count toward this generation's desired replicas.",
+      "pitfall": "Counting all Pods with app=hello could include an old ReplicaSet's Pod or an unrelated one and still show two.",
+      "verify": "Exactly two owned Ready Pod UIDs sit under the current ReplicaSet."
+    },
+    {
+      "approach": "Compare the endpoint UID set with the owned Ready set, then each response with the fixed version and both message values.",
+      "why": "Matching sets show the Service routes only to this Deployment's Pods, and exact values show the configuration reached both the environment and volume consumers.",
+      "pitfall": "Checking only the version value would pass even if the ConfigMap key were wrong, since version does not depend on the message.",
+      "verify": "UID sets are equal and the version and both message values match the contract exactly."
+    },
+    {
+      "approach": "Pick one admitted fault, such as selector app=wrong, write which check will fail, then Run.",
+      "why": "Each fault breaks one link: a wrong selector empties endpoints, a wrong probe path keeps Pods unready and a failing task fails its Job.",
+      "pitfall": "Running several faults at once makes it impossible to say which change caused the failed check.",
+      "verify": "The failed check matches your written prediction and cleanup lists only this Run's UIDs."
+    },
+    {
+      "approach": "Restore the faulted field and submit a new Run, then compare checks and identities with the failed one.",
+      "why": "The browser cleans up after every Run, so the repaired Run creates fresh objects and is a new observation.",
+      "pitfall": "Describing the repair as patching the earlier Service assumes state that was already deleted.",
+      "verify": "Every UID differs between Runs and the previously failing check now passes."
+    },
+    {
+      "approach": "Assemble source, target identity without secrets and evidence for each claim, and list the surfaces not qualified.",
+      "why": "A second learner can reproduce the reasoning only when each claim points to evidence in the packet itself.",
+      "pitfall": "Writing production ready or always available adds claims no bounded Run measured.",
+      "verify": "A second learner finds evidence for every claim using the packet alone."
+    }
+  ],
+  "k8s-015": [
+    {
+      "approach": "For each probe, name the component that acts on failure and the action it takes.",
+      "why": "Startup failure past its threshold kills the container, readiness failure removes the Pod from endpoints and liveness failure restarts the container.",
+      "pitfall": "Treating all three as one health flag would predict a restart for a readiness failure, which never restarts anything.",
+      "verify": "Three different actions are listed: gate later probes, withhold traffic, restart."
+    },
+    {
+      "approach": "Add the delay variable and both probes, compute the startup budget, then Run.",
+      "why": "The startupProbe allows 1 times 10 equals 10 seconds, more than the 3-second delay, and liveness only begins after startup succeeds.",
+      "pitfall": "Putting failureThreshold 2 on the startupProbe would give 2 seconds, so the kubelet would kill the container before /startup ever succeeds.",
+      "verify": "Configured budget 10 seconds exceeds delay 3, and observed times are reported separately."
+    },
+    {
+      "approach": "Classify case A as a readiness failure and list the recovery evidence it would need.",
+      "why": "Readiness failure only removes the Pod from EndpointSlices; the container keeps running with the same restartCount.",
+      "pitfall": "Expecting a restart and waiting for restartCount to change watches the wrong field.",
+      "verify": "The answer cites a Ready condition change and an endpoint or client observation, not a restart."
+    },
+    {
+      "approach": "Compare Pod UID and restartCount between the two case B records.",
+      "why": "A liveness failure makes the kubelet restart the container inside the same Pod, so UID stays and restartCount increases.",
+      "pitfall": "Calling it a replacement would expect a new UID and a reset count, neither of which appears.",
+      "verify": "UID is identical and restartCount went up by at least one."
+    },
+    {
+      "approach": "Change one probe path to /missing in a scratch copy, Run it and record what the bounded result actually shows.",
+      "why": "/missing returns 404, so a startup or liveness probe on it fails, but how many restarts or how long depends on timing you must observe.",
+      "pitfall": "Writing a fixed failure time from periodSeconds alone invents a measurement the result never contained.",
+      "verify": "The record holds the actual Run outcome and cleanup and no unobserved timing."
+    },
+    {
+      "approach": "Reserve liveness for states a restart fixes, such as a deadlock, and route dependency outages to readiness or degraded responses.",
+      "why": "Restarting every caller during a database outage adds cold starts without restoring the dependency.",
+      "pitfall": "Making liveness call the downstream dependency would restart every replica at once during that outage.",
+      "verify": "The policy restarts only for repairable local failures and changes readiness or behavior for dependency loss."
+    }
+  ],
+  "k8s-016": [
+    {
+      "approach": "Read the Pod spec's initContainers list, then containers, and mark prepare as a gate in front of read.",
+      "why": "The kubelet runs init containers to completion one at a time and starts application containers only after every init container exits 0.",
+      "pitfall": "Expecting prepare and read to start together, like two entries in containers, predicts that read may find no file yet.",
+      "verify": "initContainerStatuses shows prepare terminated with exit 0 before read appears running in containerStatuses."
+    },
+    {
+      "approach": "Follow the name work from spec.volumes to the volumeMounts of both prepare and read.",
+      "why": "An emptyDir is created once per Pod, so every mount that references the same volume name sees the same directory at /work.",
+      "pitfall": "Assuming each container gets its own copy because its filesystem is separate would predict read finds nothing the init container wrote.",
+      "verify": "One emptyDir named work exists, and both mounts reference that name with mountPath /work."
+    },
+    {
+      "approach": "Run the teacher fixture once and compare Pod UID, marker and restartCount across both application attempts.",
+      "why": "A container restart happens inside the same Pod, so the emptyDir and the marker written by prepare survive while restartCount increments.",
+      "pitfall": "Expecting prepare to rerun and write a new marker treats a container restart as a Pod restart.",
+      "verify": "Pod UID and marker match across attempts, and only restartCount changed."
+    },
+    {
+      "approach": "Delete only the recorded owned Pod through the host capability and read the replacement.",
+      "why": "A new Pod gets a new UID and a new emptyDir, so prepare runs again and writes a fresh marker.",
+      "pitfall": "Expecting the old marker to persist assumes emptyDir lives outside the Pod, which it does not.",
+      "verify": "UID and marker both differ, and the old marker is nowhere in the new record."
+    },
+    {
+      "approach": "Start with prepare's state and reason, then name the single mount or permission fix.",
+      "why": "If an init container fails, the kubelet never starts the application container, so read's absence follows from prepare.",
+      "pitfall": "Debugging the read container as a second fault chases a container that never started and has no logs.",
+      "verify": "The init state shows the failure reason, and the proposed repair touches one mount or permission."
+    },
+    {
+      "approach": "Name Pod deletion as the end of the marker and point to a PersistentVolumeClaim and a separate backup as the later contracts.",
+      "why": "emptyDir is removed when the Pod leaves its node, so nothing written there survives replacement, and no copy exists elsewhere.",
+      "pitfall": "Calling the shared file persistent because it survived a container restart confuses container lifetime with Pod lifetime.",
+      "verify": "The answer names Pod deletion and a later storage or backup mechanism that would survive it."
+    }
+  ],
+  "k8s-017": [
+    {
+      "approach": "Pair each securityContext field with the specific path it closes.",
+      "why": "runAsNonRoot blocks UID 0, dropped capabilities remove kernel privileges, allowPrivilegeEscalation false blocks setuid gains, seccomp limits syscalls and readOnlyRootFilesystem blocks image writes.",
+      "pitfall": "Labeling all five as generic hardening hides that, for example, dropping capabilities does nothing to stop writes to the root filesystem.",
+      "verify": "Five fields map to five different attack paths."
+    },
+    {
+      "approach": "Run the unchanged nonroot source and keep configured and observed identity in separate rows.",
+      "why": "The manifest states runAsUser, but only a host readback shows the identity the process actually ran with.",
+      "pitfall": "Copying runAsUser from the YAML into the observed row reports configuration as if it were runtime evidence.",
+      "verify": "Accepted source, readiness, cleanup and two identity rows with distinct sources are recorded."
+    },
+    {
+      "approach": "Change one field in a scratch copy and submit it to the course parser.",
+      "why": "The parser refuses either field locally, and Pod Security marks privileged true as a Baseline violation and allowPrivilegeEscalation true as a Restricted violation.",
+      "pitfall": "Claiming Baseline would reject allowPrivilegeEscalation true misplaces that control, since only Restricted forbids it.",
+      "verify": "A refusal message exists, no create receipt exists and the matching Pod Security level is named."
+    },
+    {
+      "approach": "Classify hostPath, hostNetwork and hostPID against the Pod Security Standards controls.",
+      "why": "All three expose the node: hostPath reaches its filesystem, hostNetwork its network stack and hostPID its process table, so Baseline forbids each.",
+      "pitfall": "Assuming only Restricted blocks host access would let a baseline namespace admit them, which it does not.",
+      "verify": "Each variant cites its control and Baseline as the lowest forbidding level."
+    },
+    {
+      "approach": "Read the enforce and enforce-version labels first, then send one allowed and one denied request.",
+      "why": "Admission depends on the namespace's enforced level and version, so the result is meaningful only alongside those labels.",
+      "pitfall": "Reporting a denial without the namespace labels cannot show which policy produced it.",
+      "verify": "Labels, namespace UID and the API server's denial reason are recorded together."
+    },
+    {
+      "approach": "Name what the fixed controls limit and one threat outside them with its control.",
+      "why": "The securityContext limits what the container process can do on the node, not which API calls or network peers it can reach.",
+      "pitfall": "Calling the workload secure overall implies coverage of API access and network paths these fields never touch.",
+      "verify": "The statement names one uncovered threat and the separate control, such as RBAC or a NetworkPolicy."
+    }
+  ],
+  "k8s-018": [
+    {
+      "approach": "Write the full ServiceAccount username and keep it apart from token bytes and Role rules.",
+      "why": "The identity is just a namespaced name; the token proves it and the Role defines what it may do.",
+      "pitfall": "Pasting the mounted token to show identity leaks a credential without adding anything the name does not already say.",
+      "verify": "The record reads system:serviceaccount:<namespace>:<name> and contains no token text."
+    },
+    {
+      "approach": "Read the RoleBinding namespace and the subject namespace as two separate fields.",
+      "why": "A RoleBinding grants its Role only within its own metadata.namespace, while the subject namespace just identifies which ServiceAccount.",
+      "pitfall": "Assuming the grant follows the subject's namespace would predict access where the binding does not exist.",
+      "verify": "The binding namespace is named as the limit on the grant."
+    },
+    {
+      "approach": "For each of the five rows, look for a Role rule matching verb, resource and namespace.",
+      "why": "RBAC is additive and default deny, so only own-namespace Pod get and list match a rule and everything else is denied.",
+      "pitfall": "Assuming list on pods implies read on secrets treats resources as a hierarchy RBAC does not have.",
+      "verify": "Pod reads in the bound namespace are allowed, and every other row is denied for lack of a rule."
+    },
+    {
+      "approach": "Find automountServiceAccountToken false in the Pod source and confirm it in a host readback.",
+      "why": "With automount disabled, the ServiceAccount admission plugin does not add the projected kube-api-access volume, so no token is mounted.",
+      "pitfall": "Removing the RoleBinding and calling the workload tokenless still leaves a mounted token that authenticates.",
+      "verify": "The readback shows automount false and no kube-api-access volume."
+    },
+    {
+      "approach": "Order the steps: guard refuses, release the exact owned session, then prepare a fresh one just before Run.",
+      "why": "An expired lease must not authorize a request, and a fresh session restores a bounded target without using leftover credentials.",
+      "pitfall": "Falling back to the default kubeconfig context would send the Run to whatever cluster that context points at.",
+      "verify": "No step reuses the expired lease or an ambient context."
+    },
+    {
+      "approach": "Record kubectl auth can-i results under the owned receipt with identity, target, verb, resource, result and time.",
+      "why": "can-i asks the API server's authorizer, so a yes or no is an actual decision for that identity at that time.",
+      "pitfall": "Inferring results from the Role YAML alone ignores other bindings that might also grant access.",
+      "verify": "Each row carries its source and time, and no credential text appears."
+    }
+  ],
+  "k8s-019": [
+    {
+      "approach": "Base64-decode only the supplied value and re-encode the result to compare.",
+      "why": "Base64 is a reversible encoding, so a correct decode re-encodes to the exact original bytes.",
+      "pitfall": "Trimming or adding a trailing newline before encoding changes the bytes and the round trip no longer matches.",
+      "verify": "Decoded text is DUMMY_LESSON_ONLY and its encoding equals the supplied value byte for byte."
+    },
+    {
+      "approach": "List encoding, RBAC, encryption at rest, TLS transport and application handling with the threat each one addresses.",
+      "why": "These act at different points: who can read the object, how etcd stores it, how bytes travel and what the process does with them.",
+      "pitfall": "Treating base64 as protection gives it a threat it never stops, since anyone can decode it.",
+      "verify": "Five distinct mechanisms appear, and base64 is paired with no threat."
+    },
+    {
+      "approach": "Check direct Secret reads and arbitrary Secret mounts against the worker contract.",
+      "why": "The normal worker is not granted Secret access, so both attempts fall outside the operation by design.",
+      "pitfall": "Requesting a broader role to make the test pass would change the contract the exercise is checking.",
+      "verify": "Both attempts are classified as outside the contract, and no extra permission is requested."
+    },
+    {
+      "approach": "Assign environment, projected file and application output to three separate observations.",
+      "why": "Environment variables are fixed at container start, while the kubelet can refresh a mounted Secret file, so A and B can coexist.",
+      "pitfall": "Expecting the environment variable to change to B assumes the kubelet rewrites a running process's environment.",
+      "verify": "Environment shows A, file is observed separately and output depends on whether the app rereads the file."
+    },
+    {
+      "approach": "Keep identities, access outcomes, reload behavior and synthetic equality checks, and no real values.",
+      "why": "A reviewer can confirm the mechanism worked from outcomes and synthetic comparisons without seeing any credential.",
+      "pitfall": "Saving the mounted file to prove the test ran stores secret material in the evidence record.",
+      "verify": "Every retained field is an identity, an outcome or a synthetic value."
+    },
+    {
+      "approach": "List the synthetic Secret and workload UIDs from the creation record and delete only those.",
+      "why": "Deleting by recorded UID cannot remove another learner's or a same-name object, and leaves worker permissions untouched.",
+      "pitfall": "Deleting every Secret in the namespace would remove objects this fixture never created.",
+      "verify": "Each deleted UID appears in the creation record, and worker permissions are unchanged."
+    }
+  ],
+  "k8s-020": [
+    {
+      "approach": "Write the six layers in request order with one observation each.",
+      "why": "Each layer can fail on its own, so a layer without an observation leaves a gap in the diagnosis.",
+      "pitfall": "Starting with HTTP alone and calling a timeout a DNS problem skips four layers of evidence.",
+      "verify": "Each layer names its observation, from resolver answer to HTTP body."
+    },
+    {
+      "approach": "Add the Service with selector app=hello, port 8080 named http and targetPort http, then Run both objects.",
+      "why": "targetPort http resolves to the container port named http, and the selector picks the Deployment's Pods as endpoints.",
+      "pitfall": "Setting targetPort to a name the container does not define leaves endpoints with no usable port.",
+      "verify": "The result shows the owned backend identity check and an exact `/version` body."
+    },
+    {
+      "approach": "Treat NXDOMAIN as a naming fault and check the name, namespace and resolver search path first.",
+      "why": "NXDOMAIN means the resolver found no record, so the request never reached any Service or Pod.",
+      "pitfall": "Restarting backends after NXDOMAIN changes nothing the resolver uses.",
+      "verify": "The next check concerns name, namespace or resolver configuration only."
+    },
+    {
+      "approach": "List missing ready endpoints, wrong port mapping and policy drop as open hypotheses with their discriminating observations.",
+      "why": "Resolution succeeded, so the fault lies between Service and Pod, and several causes produce the same timeout.",
+      "pitfall": "Blaming NetworkPolicy without checking EndpointSlices could miss that no Pod was ready.",
+      "verify": "The answer names the observation, such as empty EndpointSlices, that separates endpoint loss from a policy drop."
+    },
+    {
+      "approach": "Read each response's status and body against the expected route and version.",
+      "why": "Any HTTP response proves DNS, Service, endpoint and port worked; 404 isolates the path and a wrong version isolates the application.",
+      "pitfall": "Treating both as network failures ignores that a response arrived at all.",
+      "verify": "Each case names the layers it proves and the status or body field that differs."
+    },
+    {
+      "approach": "Write the target, allowed client, timeout, expected failing layer and cleanup before running.",
+      "why": "Naming the failing layer in advance makes the result a test rather than a search, and the timeout keeps it bounded.",
+      "pitfall": "Running an open cross-namespace probe without a named capability touches objects outside your lease.",
+      "verify": "The design names capability, target, timeout, expected layer and cleanup."
+    }
+  ],
+  "k8s-021": [
+    {
+      "approach": "Read spec.podSelector for the destination and spec.policyTypes for direction, ignoring the from peers.",
+      "why": "podSelector app=hello chooses which Pods the policy isolates, and policyTypes Ingress means only inbound traffic to them is affected.",
+      "pitfall": "Reading the client labels under ingress from as the selected Pods would isolate the callers instead of hello.",
+      "verify": "The answer names app=hello Pods and Ingress only, with no Egress."
+    },
+    {
+      "approach": "List every policy that selects hello and take the union of their allowed sources.",
+      "why": "NetworkPolicies are additive allow lists; once any policy isolates a Pod, traffic is allowed if any selecting policy permits it.",
+      "pitfall": "Treating deny-ingress as a rule that overrides allow-client imagines a priority order the API does not define.",
+      "verify": "The allowed set equals allow-client's sources, and no field orders the policies."
+    },
+    {
+      "approach": "Count the list items under from and read each item's selectors together.",
+      "why": "Selectors inside one item must all match, while separate items are alternatives, so the indentation of one dash changes AND to OR.",
+      "pitfall": "Reading two separate items as one combined requirement would predict a deny for traffic that one item alone allows.",
+      "verify": "One item with two selectors is AND, and two items are OR."
+    },
+    {
+      "approach": "Send both approved client requests before any policy exists and keep caller, payload and target receipt.",
+      "why": "Without a pre-policy success, a later failure could come from the backend rather than from enforcement.",
+      "pitfall": "Applying the policy first and testing only afterward leaves no control to compare against.",
+      "verify": "Both requests succeed with the expected payload before enforcement."
+    },
+    {
+      "approach": "Repeat the same two requests with the same callers and deadline after applying the policies.",
+      "why": "With only policy state changed, a new failure on the unpermitted path can be attributed to enforcement by the CNI.",
+      "pitfall": "Testing on a cluster whose CNI does not enforce NetworkPolicy would show both paths succeeding and suggest the policy is wrong.",
+      "verify": "The permitted path succeeds and the other fails within its deadline."
+    },
+    {
+      "approach": "Record policy and client UIDs and state the protocol and namespace the claim covers.",
+      "why": "The test only exercised the listed callers and port, so the isolation claim cannot extend to other protocols or hosts.",
+      "pitfall": "Writing that hello is isolated from everything generalizes from two requests to all traffic.",
+      "verify": "Cleanup lists only owned UIDs, and the claim states its protocol and namespace."
+    }
+  ],
+  "k8s-022": [
+    {
+      "approach": "Follow volumeClaimTemplates name data to the volumeMounts entry and storageClassName to the class.",
+      "why": "The StatefulSet creates one claim per ordinal from the template, and the mount with the same name places it at /data.",
+      "pitfall": "Adding a separate PersistentVolumeClaim and referencing it from the Pod template would make all replicas share one claim.",
+      "verify": "Each link cites a field: template name, mountPath /data and storageClassName."
+    },
+    {
+      "approach": "Run the writer once with exclusive create and record claim UID, PV name and SHA-256.",
+      "why": "Exclusive create fails if the marker already exists, so a second run cannot silently overwrite the initial data.",
+      "pitfall": "Writing with plain overwrite would hide an accidental second run behind a new hash.",
+      "verify": "One receipt holds claim UID, bound PV and marker hash."
+    },
+    {
+      "approach": "Delete only the recorded Pod and compare UID, ordinal name and claim before and after.",
+      "why": "The StatefulSet recreates the same ordinal name and reattaches the same claim, while the Pod gets a new UID.",
+      "pitfall": "Scaling the StatefulSet down and up to replace the Pod changes more than one Pod and is not the minimal operation.",
+      "verify": "Only the Pod UID changed; name and claim binding are the same."
+    },
+    {
+      "approach": "Run only the read-only reader and hash the marker it reads.",
+      "why": "If the claim was reattached, the bytes are unchanged and the hash equals h1.",
+      "pitfall": "Running the writer again to check the file would recreate the evidence you are trying to verify.",
+      "verify": "The reader hash equals the recorded initialization hash, with live values kept separate."
+    },
+    {
+      "approach": "For each deletion, name the deleted object and the policy that decides what happens next.",
+      "why": "StatefulSet claim retention governs the PVC when the StatefulSet or replicas are removed, and the PV reclaim policy governs the volume when the claim is deleted.",
+      "pitfall": "Calling Retain a backup ignores that the data still lives on one volume with no independent copy.",
+      "verify": "Each deletion cites claim retention or PV reclaim, and retention is distinguished from backup."
+    },
+    {
+      "approach": "Read PVC events and binding status, then check the StorageClass provisioner, capacity and topology.",
+      "why": "A Pending claim means no volume was bound, and the event usually names the missing class, capacity or zone.",
+      "pitfall": "Deleting and recreating the claim discards the evidence and returns to the same Pending state.",
+      "verify": "The check uses class, events or binding status and leaves the claim in place."
+    }
+  ],
+  "k8s-023": [
+    {
+      "approach": "Mark each object's scope and manager, from GatewayClass down to Pods.",
+      "why": "GatewayClass is cluster scoped and tied to a controller, the Gateway is the platform listener and the HTTPRoute, Service and Pods belong to the application.",
+      "pitfall": "Drawing the HTTPRoute as owning the Gateway reverses the parentRefs direction, where the route attaches to the listener.",
+      "verify": "Each object shows scope and manager: controller, platform owner or application team."
+    },
+    {
+      "approach": "Read hostnames, matches path, parentRefs and backendRefs directly from the HTTPRoute.",
+      "why": "These fields fully declare the route: lesson.example.test with prefix /version on lesson-gateway forwards to Service hello port 8080.",
+      "pitfall": "Taking the backend port from the container port instead of backendRefs would cite 8080 by coincidence rather than from the route.",
+      "verify": "Four values are quoted from their fields."
+    },
+    {
+      "approach": "Compare each parent's Accepted and ResolvedRefs observedGeneration with the route's generation.",
+      "why": "Conditions are reported per parent, and only those at the current generation describe the current spec.",
+      "pitfall": "Reading a True condition from an older generation would accept a route the controller has not yet seen.",
+      "verify": "Each condition's observedGeneration equals metadata.generation for its named parent."
+    },
+    {
+      "approach": "Send /version and an unmatched path with Host lesson.example.test and record status and body.",
+      "why": "Only requests matching hostname and prefix reach hello; others get the Gateway's no-route response.",
+      "pitfall": "Omitting the Host header would fail both requests on hostname, hiding whether the path match works.",
+      "verify": "/version returns the expected version, and the unmatched path never reaches hello."
+    },
+    {
+      "approach": "Verify with the supplied CA and expected hostname, then repeat with a mismatched identity.",
+      "why": "Certificate verification checks both chain and name, so the wrong identity must fail at the TLS layer.",
+      "pitfall": "Passing an insecure flag makes the mismatch succeed and proves nothing about the certificate.",
+      "verify": "The valid case succeeds, and the wrong identity fails verification without bypass."
+    },
+    {
+      "approach": "List what the Ingress fixture needs, an ingressClassName and its controller, and the exact route UIDs to clean up.",
+      "why": "Ingress and Gateway are separate APIs served by separate controllers, so one being ready says nothing about the other.",
+      "pitfall": "Converting the HTTPRoute fields into an Ingress and assuming the same behavior ignores differences such as path match types.",
+      "verify": "The list names class and controller, and cleanup cites exact UIDs."
+    }
+  ],
+  "k8s-024": [
+    {
+      "approach": "Open the base and both overlay kustomization.yaml files and point to resources and replicas.",
+      "why": "The base supplies one Deployment, and each overlay's replicas entry sets 1 for dev and 2 for test.",
+      "pitfall": "Editing replicas in the base would change both environments and erase the difference the overlays express.",
+      "verify": "Each claim cites a resources or replicas entry in a named file."
+    },
+    {
+      "approach": "Run the pinned renderer, record its version and compare output with the expected JSON structurally.",
+      "why": "Structural comparison ignores key order and formatting, so only real field differences remain.",
+      "pitfall": "Comparing text by eye can miss a changed value or report reordered keys as a change.",
+      "verify": "The version is recorded, and the structural comparison is clean or the tool is marked unavailable."
+    },
+    {
+      "approach": "Diff the dev and test renders and list every differing path.",
+      "why": "The overlays only change replicas, so any other differing path reveals an unintended transform.",
+      "pitfall": "Checking only that replicas differs would miss an extra label or image change.",
+      "verify": "spec.replicas is the only differing path."
+    },
+    {
+      "approach": "Read managedFields for the contested field and name both managers with UID and resourceVersion.",
+      "why": "Server-side apply records an owner per field, so a conflict shows two managers with competing intent for one path.",
+      "pitfall": "Forcing conflicts takes ownership silently and the other manager may revert the field later.",
+      "verify": "Both managers are named, and the conflict is reported rather than forced."
+    },
+    {
+      "approach": "Check the rendered namespace and image against the course allowlist before any apply.",
+      "why": "A local render only proves the YAML is well formed; the course review decides whether the output may be applied.",
+      "pitfall": "Treating a successful render as approval would apply a resource into another namespace or with an unapproved image.",
+      "verify": "The escaping render is refused before apply."
+    },
+    {
+      "approach": "Record overlay source, renderer version, rendered hash, diff and any apply readback as separate items.",
+      "why": "With source and tool version, a reviewer can regenerate the same hash and tell render evidence from cluster evidence.",
+      "pitfall": "Saving only the apply output loses the link back to which overlay and renderer produced it.",
+      "verify": "A reviewer reproduces the rendered hash from the recorded overlay and version."
+    }
+  ],
+  "k8s-025": [
+    {
+      "approach": "List Chart.yaml, values.yaml, values.schema.json, the single template and the expected output, and compare with a directory listing.",
+      "why": "A chart with no dependencies, hooks or CRDs renders only what its one template declares.",
+      "pitfall": "Inventorying from Chart.yaml alone misses a crds directory or a hook template that could install extra resources.",
+      "verify": "The listing matches: no charts or crds directory and exactly one template."
+    },
+    {
+      "approach": "Record helm version and diff helm template output against expected-default.json structurally.",
+      "why": "helm template renders locally without contacting a cluster, so the output reflects only chart and default values.",
+      "pitfall": "Using helm install to see the output sends resources to a cluster before review.",
+      "verify": "One Deployment with replicas 1 and the approved image, or the tool marked unavailable."
+    },
+    {
+      "approach": "Render with replicas 2 and diff the full object against the default.",
+      "why": "The template only reads replicas from values, so the override should change exactly one path.",
+      "pitfall": "Checking replicas alone would not detect a template that also changes labels with the value.",
+      "verify": "spec.replicas is the only changed path."
+    },
+    {
+      "approach": "Render each invalid scratch values file and record the schema rule that rejects it.",
+      "why": "Helm validates values against values.schema.json before rendering, so out-of-range, unapproved or unknown values fail locally.",
+      "pitfall": "Removing the schema to make the render succeed disables the check the exercise relies on.",
+      "verify": "Each file fails with a named schema rule, before any cluster operation."
+    },
+    {
+      "approach": "Search the render for helm.sh/hook annotations and any kind other than Deployment.",
+      "why": "Hooks run outside normal install ordering, and cluster-scoped kinds exceed the worker's namespaced permissions.",
+      "pitfall": "Installing and checking afterward lets a hook run before anyone reviewed it.",
+      "verify": "Any hook or extra kind is flagged and the render is not installed."
+    },
+    {
+      "approach": "Record chart hash, values hash, renderer version and full diff, and keep apply evidence separate.",
+      "why": "Hashes and the version pin every input, so a reviewer can reproduce the render offline.",
+      "pitfall": "Recording only the release name ties the review to cluster state rather than reproducible inputs.",
+      "verify": "A reviewer reproduces the render from the hashes and version without a cluster."
+    }
+  ],
+  "k8s-026": [
+    {
+      "approach": "Contrast replicas 2 on the Deployment with the DaemonSet's one Pod per eligible node.",
+      "why": "A Deployment's count is fixed by spec.replicas, while a DaemonSet's desired count follows how many nodes pass its placement rules.",
+      "pitfall": "Expecting the DaemonSet to honor a replicas field misreads its spec, which has none.",
+      "verify": "On three nodes with two eligible, the Deployment yields 2 Pods and the DaemonSet yields 2, for different reasons."
+    },
+    {
+      "approach": "Check zone=a against each node's labels one at a time.",
+      "why": "A nodeSelector requires an exact key and value match, so only nodes labeled zone=a pass.",
+      "pitfall": "Treating a node with zone=b as close enough, or one missing the key as a wildcard, admits node-b wrongly.",
+      "verify": "node-a yes, node-b no, node-c yes."
+    },
+    {
+      "approach": "For node-a and node-c, compare each node's taints with the Pod's tolerations.",
+      "why": "A NoSchedule taint repels any Pod lacking a matching toleration, so node-c with the dedicated taint drops out.",
+      "pitfall": "Assuming DaemonSets ignore all taints overgeneralizes; their automatic tolerations cover node condition taints, not a custom dedicated taint.",
+      "verify": "Only node-a remains after both checks."
+    },
+    {
+      "approach": "Compare desiredNumberScheduled, numberReady and each Pod's nodeName with your predicted node list.",
+      "why": "The DaemonSet controller computes desired placement itself, so its status and Pod nodeNames show whether reality matches your model.",
+      "pitfall": "Checking only numberReady equals desiredNumberScheduled could pass even if the controller chose nodes you did not predict.",
+      "verify": "Pod nodeNames match the predicted nodes, or a specific condition explains each difference."
+    },
+    {
+      "approach": "Replace the taint removal with a capability request or an unavailable placement report.",
+      "why": "Node taints are shared cluster configuration, and removing one changes scheduling for every workload, not just this lab.",
+      "pitfall": "Running kubectl taint with a trailing minus to make the Pod land edits a Node the learner does not own.",
+      "verify": "The proposal modifies no Node and names the request or report used instead."
+    },
+    {
+      "approach": "Delete the DaemonSet by recorded UID and confirm its child Pods go with it.",
+      "why": "Child Pods carry an ownerReference to the DaemonSet, so garbage collection removes them while node labels and taints stay as they were.",
+      "pitfall": "Deleting Pods by label app could remove another agent's Pods, and the DaemonSet would just recreate its own.",
+      "verify": "Owned UIDs are gone, and node labels and taints match the pre-run record."
+    }
+  ],
+  "k8s-027": [
+    {
+      "approach": "Write the SLI definition: which requests count, what counts as success, the window and the unit.",
+      "why": "A definition precise enough to recount the five rows gives the same numerator and denominator to anyone who applies it.",
+      "pitfall": "Saying the service was mostly fine gives no rule another person could apply to the ledger.",
+      "verify": "Recounting the five rows yields the same two numbers."
+    },
+    {
+      "approach": "Count one 500 and four 200 among five eligible requests and divide each by five.",
+      "why": "Under a rule that 5xx is an error, one of five is 0.2 errors and four of five is 0.8 success.",
+      "pitfall": "Dividing by the four successful requests gives an error ratio of 0.25 and a denominator that excludes failures.",
+      "verify": "The two fractions are 0.2 and 0.8, and they sum to one."
+    },
+    {
+      "approach": "Sort the five latencies and take rank ceil(q times n) for each quantile.",
+      "why": "With n of 5, p50 uses rank 3 and p95 uses rank 5, so p95 is the largest of the five samples.",
+      "pitfall": "Interpolating between ranks gives values that never appeared in the data and differ from the stated method.",
+      "verify": "p50 is the third sorted value and p95 the fifth, matching 30 ms and 100 ms."
+    },
+    {
+      "approach": "Note that 3 is lower than 120 and check for a process restart between the readings.",
+      "why": "Counters only increase within one process, so a drop after a restart is a reset, not negative traffic.",
+      "pitfall": "Subtracting to report minus 117 requests treats a reset as real traffic.",
+      "verify": "The record names the reset and uses only the evidence available for each interval."
+    },
+    {
+      "approach": "Record the metrics API error text next to the successful client result.",
+      "why": "A missing metrics API means usage was not measured, which is different from a measured zero.",
+      "pitfall": "Writing CPU 0 for the namespace converts an unavailable reading into a false measurement.",
+      "verify": "The record contains the error or condition text and a separate passing client check."
+    },
+    {
+      "approach": "Pair one controller fact with one application metric, add a hypothesis and one reversible next check.",
+      "why": "Together they connect what Kubernetes reported with what clients experienced, within a stated window and with object UIDs.",
+      "pitfall": "Proposing a rollback as the next step makes the diagnosis irreversible before the hypothesis is tested.",
+      "verify": "Units, window, UIDs and a reversible next check are all present."
+    }
+  ],
+  "k8s-028": [
+    {
+      "approach": "List storage class, CNI policy support, renderer, image and owned target with a host receipt or unavailable for each.",
+      "why": "Each acceptance gate depends on one of these, so an unproven capability makes its gate untestable.",
+      "pitfall": "Inferring NetworkPolicy support from the presence of a policy manifest tells you nothing about the CNI.",
+      "verify": "Every row points to a receipt or reads unavailable."
+    },
+    {
+      "approach": "Capture the application response, marker hash and both client paths before the change, each with its source.",
+      "why": "A baseline taken before the change lets every later gate compare like with like.",
+      "pitfall": "Capturing baselines after the change cannot show whether the change altered them.",
+      "verify": "Each baseline names a request, a hash or a client path and predates the change."
+    },
+    {
+      "approach": "Diff the full rendered output against the approved object list across kinds, namespaces, images, hooks and security fields.",
+      "why": "The render is what will be applied, so a review of values alone could miss an added hook or a changed securityContext.",
+      "pitfall": "Reviewing only the values diff assumes the templates turn values into exactly the expected fields.",
+      "verify": "No unexpected kind, namespace, image, hook or security change appears."
+    },
+    {
+      "approach": "Write the boundary you expect to fail, apply the wrong probe path and compare with the first gate that fails.",
+      "why": "A wrong readiness path keeps the new Pods unready, so the rollout gate should fail while data and policy stay unchanged.",
+      "pitfall": "Applying the fault together with a policy change makes it impossible to tell which caused the failure.",
+      "verify": "The first failing gate matches the prediction, and no unrelated object changed."
+    },
+    {
+      "approach": "Restore the reviewed probe, reread the marker with the reader and repeat both client paths.",
+      "why": "Recovery must restore the application without touching the claim, so the hash stays h1 and policy outcomes repeat the baseline.",
+      "pitfall": "Running the writer during recovery to be safe could change the marker and hide data loss.",
+      "verify": "Hash equals h1, and the allowed and denied paths match the baseline."
+    },
+    {
+      "approach": "List removed UIDs and, separately, whether the PVC was retained and what reclaim applies.",
+      "why": "Workload cleanup and data retention are separate decisions, and the claim may outlive the StatefulSet by policy.",
+      "pitfall": "Saying everything was cleaned up hides whether the PVC and its bytes still exist.",
+      "verify": "Removed UIDs and the PVC retention decision are recorded separately from cluster release."
+    }
+  ],
+  "k8s-029": [
+    {
+      "approach": "Read spec.scope in the CRD and metadata.namespace in the instance.",
+      "why": "A CustomResourceDefinition is itself cluster scoped, while its scope field decides that LessonReport instances live in namespaces.",
+      "pitfall": "Assuming the CRD is namespaced because its instances are confuses the registration with the objects it registers.",
+      "verify": "CRD is cluster scoped, and hello-report has a namespace."
+    },
+    {
+      "approach": "Find each value in spec.group, spec.versions name, spec.names.kind, spec.names.plural and the instance metadata.name.",
+      "why": "Group and version form the API path, kind is the type in YAML, plural is the URL segment and metadata.name names one object.",
+      "pitfall": "Using the kind LessonReport in a URL instead of the plural lessonreports addresses a resource that does not exist.",
+      "verify": "Five values come from five distinct fields."
+    },
+    {
+      "approach": "Check each candidate against required, type and range separately.",
+      "why": "Structural schemas reject a string where an integer is required, a value outside the range and a missing required field.",
+      "pitfall": "Expecting string 2 to be coerced to an integer assumes conversion the API server does not perform.",
+      "verify": "Only integer 1 with an allowed message passes."
+    },
+    {
+      "approach": "Send the replcias typo with a named field validation mode and read the object back.",
+      "why": "Depending on the mode, the server rejects the unknown field or prunes it, and in neither case is replicas set.",
+      "pitfall": "Assuming the typo was stored as intent because the request succeeded ignores pruning.",
+      "verify": "The readback is compared with the request, and the validation mode is recorded."
+    },
+    {
+      "approach": "Compare metadata.generation 7 with status.observedGeneration 6 before reading ready.",
+      "why": "The status describes generation 6, so ready true says nothing yet about the spec at generation 7.",
+      "pitfall": "Accepting ready true as current trusts a status that predates the latest change.",
+      "verify": "Generation 7 is reported as not yet reconciled."
+    },
+    {
+      "approach": "Separate instance deletion by name and UID from CRD removal as a host operation.",
+      "why": "Deleting the CRD deletes every instance of that type cluster wide, which exceeds learner scope.",
+      "pitfall": "Running kubectl delete crd to clean up after one instance removes all LessonReports everywhere.",
+      "verify": "Learner steps touch only the instance, and CRD removal is listed as a host step."
+    }
+  ],
+  "k8s-030": [
+    {
+      "approach": "Check whether the child exists, then compare its owner UID, then its configuration.",
+      "why": "Ownership decides whether the controller may act at all, so a foreign child is refused before any comparison of fields.",
+      "pitfall": "Comparing configuration first would update a foreign child that only happens to share a name.",
+      "verify": "Absent creates, owned equal is no op, owned different updates and foreign refuses."
+    },
+    {
+      "approach": "Replay the same desired state three times and count create calls and children.",
+      "why": "An idempotent reconcile creates once, and later passes find an owned equal child and do nothing.",
+      "pitfall": "A reconcile that creates on every pass ends with three children for one desired object.",
+      "verify": "One create, two no ops and one child."
+    },
+    {
+      "approach": "Change desired replicas from 1 to 2 and read observed state after each decision.",
+      "why": "The first pass sees owned different and updates; the next sees owned equal and does nothing.",
+      "pitfall": "Updating on every pass regardless of observed state never settles and floods the API.",
+      "verify": "Update then no op, with the second decision following the first's effect."
+    },
+    {
+      "approach": "Compare the old child's owner reference UID with the new parent's UID.",
+      "why": "Ownership is by UID, so a recreated parent with the same name does not own the old child.",
+      "pitfall": "Matching on parent name would adopt a child that belongs to a deleted object.",
+      "verify": "The UIDs differ, so the old child is foreign."
+    },
+    {
+      "approach": "Classify each case by whether retrying the same request unchanged could succeed.",
+      "why": "Transient API errors can clear on retry with backoff, while invalid input fails the same way until intent changes.",
+      "pitfall": "Retrying an invalid value with backoff loops forever without progress.",
+      "verify": "Backoff applies to the transient case, corrected intent to invalid input, and stale status does not pass."
+    },
+    {
+      "approach": "Remove lesson.cleanup only after the external cleanup succeeds, leaving other.cleanup.",
+      "why": "Each finalizer marks one owner's obligation, and the object is deleted only when the list is empty.",
+      "pitfall": "Clearing the whole finalizer list skips other.cleanup's obligation and deletes the object early.",
+      "verify": "After success only lesson.cleanup is gone; after failure the list is unchanged."
+    }
+  ],
+  "k8s-031": [
+    {
+      "approach": "Order authentication, authorization, admission and persistence, and stop at the first step that rejects.",
+      "why": "Admission runs only for requests that were already authenticated and authorized, so an earlier refusal means the policy never evaluated.",
+      "pitfall": "Citing a 403 Forbidden as proof the admission policy works confuses an RBAC denial with a policy denial.",
+      "verify": "The sequence runs in that order and ends at the first rejecting step."
+    },
+    {
+      "approach": "Read matchConstraints and the binding namespace selector together and list each matched value.",
+      "why": "The policy matches apps/v1 deployments on CREATE and UPDATE, and the binding narrows it to namespaces carrying the owned label.",
+      "pitfall": "Expecting it to cover Pods created directly ignores that resourceRules name deployments only.",
+      "verify": "The list shows apps, v1, deployments, CREATE, UPDATE and the labeled namespace."
+    },
+    {
+      "approach": "Evaluate the image check one container at a time and combine with all.",
+      "why": "all returns true only when every element satisfies the predicate, so one unapproved image makes the whole expression false.",
+      "pitfall": "Using exists instead of all would accept the mixed list because one approved image is enough.",
+      "verify": "Approved only gives true and the mixed list gives false."
+    },
+    {
+      "approach": "Change only the image to an unapproved one, submit through the qualified path and read the Deployment back.",
+      "why": "A ValidatingAdmissionPolicy denial stops the request before persistence, so the stored revision stays the same.",
+      "pitfall": "Judging success by a missing new Pod could also come from a failed rollout of an accepted change.",
+      "verify": "The message names the policy, and the readback shows the previous revision."
+    },
+    {
+      "approach": "Submit the approved source through the same path and record acceptance apart from any readiness result.",
+      "why": "A positive control shows the policy admits valid input, so the earlier denial came from the image and not a broken path.",
+      "pitfall": "Treating acceptance as application success skips the separate readiness and client checks.",
+      "verify": "Acceptance is recorded, and readiness or client results appear as separate rows."
+    },
+    {
+      "approach": "Name fields the policy does not inspect, such as image digest signature and securityContext, and delete only host-owned UIDs.",
+      "why": "The expression reads image strings only, so signatures and other workload kinds remain outside its scope.",
+      "pitfall": "Claiming that all workloads are now verified extends the policy to resources and properties it never matched.",
+      "verify": "Two uncovered fields are listed, and teardown names only the policy and binding UIDs."
+    }
+  ],
+  "k8s-032": [
+    {
+      "approach": "Apply app=hello to each of the three Pods' labels.",
+      "why": "A PodDisruptionBudget counts only Pods its selector matches, so the unrelated Pod has no effect on the budget.",
+      "pitfall": "Counting all three Pods in the namespace would overstate healthy Pods and allow an eviction the budget should block.",
+      "verify": "Exactly the two hello Pods are selected."
+    },
+    {
+      "approach": "Subtract minAvailable 1 from healthy counts 2, 1 and 0 and floor at zero.",
+      "why": "Allowed disruptions are the healthy Pods above the minimum, which can never be negative.",
+      "pitfall": "Reporting minus 1 for zero healthy Pods suggests a debt the API does not track.",
+      "verify": "The results are 1, 0 and 0."
+    },
+    {
+      "approach": "Call the Eviction API with one selected healthy Pod and keep the response and the Pod's UID.",
+      "why": "With allowed disruptions 0, the API server refuses the eviction with 429 and names the blocking budget.",
+      "pitfall": "Using kubectl delete pod to test the budget bypasses the Eviction API, and the PDB does not block it.",
+      "verify": "A 429 names the intended PDB, and the Pod UID is unchanged."
+    },
+    {
+      "approach": "With two healthy replicas, request one owned eviction and track the replacement.",
+      "why": "Allowed disruptions are 1, so one eviction succeeds and the Deployment creates a replacement that must become Ready.",
+      "pitfall": "Stopping at the successful eviction ignores whether capacity returned for clients.",
+      "verify": "The record shows the evicted UID, the replacement UID with Ready time and one successful request."
+    },
+    {
+      "approach": "Read the Pending Pod's FailedScheduling event and name the single reported condition.",
+      "why": "The scheduler states why no node fit, such as insufficient CPU, unmatched affinity or a volume zone conflict.",
+      "pitfall": "Lowering the PDB minimum to unblock maintenance does nothing for a Pod that cannot be scheduled.",
+      "verify": "One named condition from the event explains the Pending state."
+    },
+    {
+      "approach": "Limit the claim to voluntary eviction and set spec.unschedulable back to its recorded value.",
+      "why": "A PDB only governs the Eviction API, so direct deletion and node failure are outside what was tested.",
+      "pitfall": "Saying the budget guarantees one replica always ignores node loss, which no PDB prevents.",
+      "verify": "The claim names voluntary eviction only, and the node's unschedulable field matches the original."
+    }
+  ],
+  "k8s-033": [
+    {
+      "approach": "Divide 50m usage by each Pod's CPU request and convert to percent.",
+      "why": "HPA utilization is measured against requests, so 50m over 100m is 50 percent and over 200m is 25 percent.",
+      "pitfall": "Dividing by the limit gives a lower utilization and a smaller scaling recommendation.",
+      "verify": "The two results are 50 percent and 25 percent."
+    },
+    {
+      "approach": "Compute current times observed over target, then take the ceiling.",
+      "why": "1 times 80 over 50 is 1.6, rounded up to 2; 2 times 20 over 50 is 0.8, rounded up to 1.",
+      "pitfall": "Rounding to the nearest integer would give 2 and 1 here but fails for values like 1.2, where the HPA rounds up to 2.",
+      "verify": "The unclipped recommendations are 2 and 1."
+    },
+    {
+      "approach": "Compute 1 times 200 over 50 and compare with maxReplicas.",
+      "why": "The ideal is 4, but the HPA clamps to maxReplicas 2, so the workload may stay overloaded.",
+      "pitfall": "Reading 2 replicas at maximum as sufficient capacity assumes the cap matched the load.",
+      "verify": "Ideal 4, capped 2, and the answer says capacity is unproven."
+    },
+    {
+      "approach": "Read the ScalingActive condition and its reason, then investigate the metrics path.",
+      "why": "When the metric is unavailable the HPA cannot compute a recommendation and leaves replicas unchanged.",
+      "pitfall": "Treating the missing metric as zero load would predict a scale down that does not happen.",
+      "verify": "The condition reason is quoted, and no value is invented for the metric."
+    },
+    {
+      "approach": "Tabulate sample time, desired replicas, ready replicas and request result during the fixed load.",
+      "why": "Desired changes when the HPA reacts and ready changes later when Pods pass readiness, so both are needed.",
+      "pitfall": "Quoting the exact second scaling occurred claims precision the sampling interval cannot provide.",
+      "verify": "Each row falls inside the declared range and deadline."
+    },
+    {
+      "approach": "Quote the scale down stabilization window from behavior and confirm the load process stopped.",
+      "why": "The HPA keeps the highest recommendation over the window, so replicas fall only after it passes.",
+      "pitfall": "Calling the slow scale down a bug ignores the configured window that causes it.",
+      "verify": "The window value is quoted, the load end is recorded and no production sizing is claimed."
+    }
+  ],
+  "k8s-034": [
+    {
+      "approach": "Request `/version` and `/message` from each Deployment and compare each route separately.",
+      "why": "Both Deployments run the same image, so version matches while the message from configuration differs.",
+      "pitfall": "Using one route for both comparisons cannot separate a binary change from a configuration change.",
+      "verify": "Version is equal across both, and message differs."
+    },
+    {
+      "approach": "Compare every selector pair with each Deployment's Pod template labels.",
+      "why": "A Service selects Pods whose labels contain every selector pair, so the candidate's differing label excludes it.",
+      "pitfall": "Matching on app alone would put the candidate behind the stable Service.",
+      "verify": "Stable matches all pairs, and the candidate fails at least one."
+    },
+    {
+      "approach": "Fix the expected marker, sample count, maximum error count and per-request deadline before release.",
+      "why": "Response-level thresholds can fail even when every replica is Ready, which is the gap they are meant to cover.",
+      "pitfall": "Using Ready replicas as the gate passes a candidate that serves wrong content.",
+      "verify": "The gate has numbers and can fail with every replica Ready."
+    },
+    {
+      "approach": "Count all four attempts, treating the TIMEOUT as an error, against the gate.",
+      "why": "The fourth request exceeded the declared deadline, so only three valid responses arrived and the zero error rule fails; promotion stops.",
+      "pitfall": "Waiting past the deadline until the fourth reviewer response arrives would let the sample pass by changing the declared rule.",
+      "verify": "The gate fails with one timed-out attempt, and no promotion happens."
+    },
+    {
+      "approach": "Apply the host selector repair and send four samples through the same Service.",
+      "why": "The Service object is kept, so its UID is unchanged while the selector again points only at stable Pods.",
+      "pitfall": "Deleting and recreating the Service changes its UID and loses the identity the check relies on.",
+      "verify": "UID matches the original, and four samples return the stable marker."
+    },
+    {
+      "approach": "Explain why one stable and one candidate replica do not mean half the requests each.",
+      "why": "kube-proxy picks a backend per connection, and keep-alive or a short sample can skew the split.",
+      "pitfall": "Reporting exactly 50 percent traffic from replica counts claims a ratio no sample measured.",
+      "verify": "The answer names a mechanism such as connection reuse or sample size."
+    }
+  ],
+  "k8s-035": [
+    {
+      "approach": "State what happens to hello-config, u1 and rv-A when the object is deleted and recreated.",
+      "why": "The name is reused, a new UID is assigned and resourceVersion is an opaque token that changes on every write.",
+      "pitfall": "Comparing resourceVersion values as numbers to decide which is newer relies on a format the API does not promise.",
+      "verify": "Name stays, UID changes and resourceVersion changes."
+    },
+    {
+      "approach": "Send an update carrying rv-A against stored rv-B and read the object afterward.",
+      "why": "An update with a stale resourceVersion fails with 409 Conflict and does not modify the stored object.",
+      "pitfall": "Retrying the same request blindly repeats the conflict because rv-A is still stale.",
+      "verify": "The stored object still shows rv-B and its original data."
+    },
+    {
+      "approach": "Reread at rv-B, reapply only the message edit and send it with a retry limit.",
+      "why": "The new request carries the current version and the fields another writer changed, so the update does not undo their work.",
+      "pitfall": "Removing resourceVersion to force the write overwrites whatever changed since rv-A.",
+      "verify": "The request carries rv-B, preserves unrelated fields and has a retry cap."
+    },
+    {
+      "approach": "Compare the reread UID u2 with the recorded u1 before writing.",
+      "why": "A different UID means the object was replaced, so the lease's expectations no longer apply.",
+      "pitfall": "Writing because the name still matches would modify an object the lease never covered.",
+      "verify": "UIDs differ, and the mutation is refused."
+    },
+    {
+      "approach": "After 410 Gone, replace the cache with the fresh list and resume watching from its resourceVersion.",
+      "why": "An expired resourceVersion cannot be resumed, so a new list is the only consistent starting point.",
+      "pitfall": "Restarting the watch from the old version returns 410 again and never recovers.",
+      "verify": "The cache holds the u2 snapshot, and the watch starts from the list token."
+    },
+    {
+      "approach": "Treat the bookmark as progress only and dedupe the repeated MODIFIED event by resourceVersion.",
+      "why": "A bookmark carries a version with no object change, and a duplicate event describes state already handled.",
+      "pitfall": "Calling the external service for each MODIFIED event repeats side effects on redelivery.",
+      "verify": "The bookmark updates progress, and the duplicate causes no second effect."
+    }
+  ],
+  "k8s-036": [
+    {
+      "approach": "List each item, where its bytes live and which backup captures them.",
+      "why": "API objects live in etcd and appear in a control plane snapshot, while the marker lives on the volume and needs a data backup.",
+      "pitfall": "Assuming an etcd snapshot includes PVC contents restores the claim object with no data behind it.",
+      "verify": "Two sources and two restore checks are named."
+    },
+    {
+      "approach": "Compute SHA-256 of the fixed and changed marker and compare each with the reference digest.",
+      "why": "Any byte change produces a different digest, so only the unchanged marker matches.",
+      "pitfall": "Comparing file sizes would pass a same-length change.",
+      "verify": "The fixed marker matches the reference, and the changed one does not."
+    },
+    {
+      "approach": "State what makes the immutable marker easy to back up and name a live database property it lacks.",
+      "why": "A file that never changes has no in-flight writes, so a copy at any moment is consistent.",
+      "pitfall": "Treating a file copy of a running database as consistent ignores open transactions and unflushed pages.",
+      "verify": "The answer names a property such as concurrent writes and makes no database consistency claim."
+    },
+    {
+      "approach": "Evaluate the API gate and data gate separately and combine with AND.",
+      "why": "Restored objects with wrong data are not a recovery, so both gates must pass.",
+      "pitfall": "Reporting partial success because objects returned hides that the data is wrong.",
+      "verify": "API passes, data fails and overall recovery fails."
+    },
+    {
+      "approach": "Mark snapshots and credentials private and allow only bounded metadata and synthetic checksums in progress.",
+      "why": "Snapshots contain every Secret in the cluster, so sharing one exposes credentials beyond this lesson.",
+      "pitfall": "Attaching the snapshot as proof of backup publishes all stored Secrets.",
+      "verify": "Each item is classified, and no snapshot or secret is shareable."
+    },
+    {
+      "approach": "Name the dedicated source and destination and list exact identities for disposal.",
+      "why": "Restoring into a shared cluster could overwrite objects owned by others, and exact identities bound the cleanup.",
+      "pitfall": "Restoring into the current kubeconfig context targets whatever cluster happens to be active.",
+      "verify": "The destination is dedicated and owned, and disposal names exact identities."
+    }
+  ],
+  "k8s-037": [
+    {
+      "approach": "Record exact versions for API server, node image, kubelet, kubectl, controllers, CSI driver and CNI.",
+      "why": "Behavior differs across versions, and the skew policy says kubelet must not be newer than the API server and kubectl stays within one minor version.",
+      "pitfall": "Writing latest or the minor line only cannot reproduce the stack once a new patch ships.",
+      "verify": "Every component has an exact version, and kubelet and kubectl fall inside the supported skew."
+    },
+    {
+      "approach": "List each apiVersion and kind from the manifests, then check each against the destination server.",
+      "why": "A server serves only the API versions it has enabled, so a removed beta version fails there even if it worked on the source.",
+      "pitfall": "Checking manifests against the source cluster proves nothing about the destination's served versions.",
+      "verify": "Each row is marked accepted or missing from the destination's api-resources or dry run."
+    },
+    {
+      "approach": "Read destination B's API row and controller row separately.",
+      "why": "Serving the API means objects are stored, but without the controller nothing reconciles them.",
+      "pitfall": "Accepting B because the API dry run passed would deploy objects that never act.",
+      "verify": "B is not accepted, and the controller capability is listed as missing."
+    },
+    {
+      "approach": "Compare the destination marker hash with the independently captured source hash.",
+      "why": "The marker hash checks that data was copied correctly, which a working `/version` response does not show.",
+      "pitfall": "Accepting promotion because `/version` responds shows only that the binary runs, not that the data arrived intact.",
+      "verify": "A mismatch is recorded, and promotion is blocked."
+    },
+    {
+      "approach": "State the retention window for the source and which destination writes a reversal would discard.",
+      "why": "Once the destination accepts writes, switching back loses them unless they are copied, and this immutable fixture has none.",
+      "pitfall": "Releasing the source immediately after cutover removes the only fallback during the window.",
+      "verify": "The answer names the window and the writes a rollback would lose."
+    },
+    {
+      "approach": "Name the tested versions and workload gates and list untested plugins and failure modes.",
+      "why": "A rehearsal on a fresh cluster says nothing about upgrading nodes in place or surviving control plane failure.",
+      "pitfall": "Calling the platform upgrade ready generalizes from one replacement rehearsal to every upgrade path.",
+      "verify": "The conclusion names exact versions and lists what was not tested."
+    }
+  ],
+  "k8s-038": [
+    {
+      "approach": "Separate payload, signature, public key and expected digest, and note where the key came from.",
+      "why": "A signature only means something if the verifying key was obtained independently of the artifact.",
+      "pitfall": "Taking the public key from the same bundle as the payload lets an attacker supply both.",
+      "verify": "Four roles are listed, and the key has an independent source."
+    },
+    {
+      "approach": "Hash the original and changed byte sequences with the declared algorithm.",
+      "why": "A cryptographic hash changes completely when any byte changes, so the two digests differ.",
+      "pitfall": "Comparing visible text could miss a whitespace or encoding change.",
+      "verify": "The two digests differ, and only the original matches the expected one."
+    },
+    {
+      "approach": "Run the qualified CLI against attestation.json with the fixed key and signature, recording tool and exit.",
+      "why": "Exit 0 with a success message means the signature matches the payload bytes under that key.",
+      "pitfall": "Treating any output text as success ignores a nonzero exit hidden behind a warning.",
+      "verify": "Command, exit 0 and tool version are recorded."
+    },
+    {
+      "approach": "Repeat the exact command against attestation-tampered.json.",
+      "why": "The changed payload no longer matches the signature, so verification fails with a nonzero exit.",
+      "pitfall": "Regenerating the signature for the tampered file makes it verify and erases the negative control.",
+      "verify": "Only the payload changed, and the run exits nonzero."
+    },
+    {
+      "approach": "Compare the subject digest inside the signed statement with artifactB's actual digest.",
+      "why": "The signature binds the statement, and the statement names artifactA's digest, so it says nothing about B.",
+      "pitfall": "Accepting B because the signature verifies ignores what the signed statement is about.",
+      "verify": "The subject digest differs from artifactB's digest."
+    },
+    {
+      "approach": "List what this local RSA check cannot prove: registry provenance, cluster admission and identity of a real image.",
+      "why": "The check verifies one file locally; a cluster enforces nothing unless an admission policy checks images.",
+      "pitfall": "Claiming images are now verified at deploy time assumes an admission controller that was never configured.",
+      "verify": "The list names all three limits."
+    }
+  ],
+  "k8s-039": [
+    {
+      "approach": "Name learner, host operator and unrelated tenant, their capabilities and each asset's owner.",
+      "why": "Threats come from what each actor can do, so explicit capabilities show which paths need controls.",
+      "pitfall": "Writing that the cluster is secure names no actor and gives nothing to test.",
+      "verify": "Each actor lists capabilities, and each asset has an owner."
+    },
+    {
+      "approach": "Map each of the six fields to the closed schema or ownership rule that rejects it.",
+      "why": "The parser accepts only known fields and owned values, so each adversarial field fails a specific rule.",
+      "pitfall": "Relying on Pod Security alone misses the foreign namespace and foreign ServiceAccount, which it does not check.",
+      "verify": "Every field cites one rejecting rule."
+    },
+    {
+      "approach": "Check learner-visible files for tokens, container engine sockets and kubeconfig paths.",
+      "why": "Any of these would let a learner call the API or the engine directly and bypass the bounded operation API.",
+      "pitfall": "Hiding the kubeconfig with file permissions while leaving its path in an artifact still points to it.",
+      "verify": "No credential, socket or kubeconfig path appears."
+    },
+    {
+      "approach": "Name the dimension each control limits.",
+      "why": "CPU limits cap compute per container, quota caps object counts and requests per namespace, deadlines cap time and NetworkPolicy caps traffic.",
+      "pitfall": "Expecting quota to stop network scanning gives it a traffic role it does not have.",
+      "verify": "Four controls map to compute, object count, time and traffic."
+    },
+    {
+      "approach": "Compare the found object's UID and nonce with the receipt before deleting.",
+      "why": "A same-name object with a different UID was created by someone else, so deleting it would harm another tenant.",
+      "pitfall": "Deleting by name because it matches the expected name removes the foreign object.",
+      "verify": "The foreign object is kept, and cleanup reports the mismatch."
+    },
+    {
+      "approach": "Write the isolation statement with trusted host assumptions, qualified controls and untested threats.",
+      "why": "Containers share a kernel, so namespace controls do not equal virtual machine separation.",
+      "pitfall": "Claiming tenants are fully isolated implies protection from kernel exploits nobody tested.",
+      "verify": "Untested threats are listed, and no VM-equivalent claim is made."
+    }
+  ],
+  "k8s-040": [
+    {
+      "approach": "Capture selector, Pod label, endpoint count and a successful request before the fault.",
+      "why": "A healthy baseline makes a later zero endpoint count meaningful as a change.",
+      "pitfall": "Starting evidence after the fault leaves no record of what worked.",
+      "verify": "The baseline has a successful request and the pre-change endpoint count."
+    },
+    {
+      "approach": "For crash, selector mismatch and targetPort mismatch, name the observation that would differ.",
+      "why": "A crash raises restartCount, a selector mismatch empties endpoints with Pods still Ready, and a targetPort mismatch keeps endpoints but refuses connections.",
+      "pitfall": "Restarting the Pods to see what happens tests none of the three and destroys evidence.",
+      "verify": "Each hypothesis has one distinguishing observation."
+    },
+    {
+      "approach": "Find the selector change time and the first observation of its effect separately.",
+      "why": "The selector changed at 10 and zero endpoints appeared at 15 while readiness stayed 1, which points at selection.",
+      "pitfall": "Reading readiness 1 as healthy service ignores that no endpoint selects the Ready Pod.",
+      "verify": "Change at 10, first supporting observation at 15."
+    },
+    {
+      "approach": "Read the Service UID and resourceVersion, then restore the verified selector with that precondition.",
+      "why": "The precondition makes the write fail if svc-1 was replaced or changed since the read.",
+      "pitfall": "Applying the old manifest unconditionally would overwrite a replacement Service.",
+      "verify": "svc-1 is repaired, and a replaced UID causes refusal."
+    },
+    {
+      "approach": "Read the endpoint list and a Service response after the repair, each timestamped.",
+      "why": "One endpoint and the expected payload show selection and the application both recovered.",
+      "pitfall": "Checking only the selector field confirms the write, not that traffic flows.",
+      "verify": "One endpoint and the expected payload appear with timestamps."
+    },
+    {
+      "approach": "Summarize cause, evidence, repair, preserved state and what remains uncertain.",
+      "why": "A bounded packet lets reviewers check each claim and see what was not ruled out.",
+      "pitfall": "Concluding the service is now resilient generalizes one repaired fault to all faults.",
+      "verify": "The packet contains all five parts and no broad resilience claim."
+    }
+  ],
+  "k8s-041": [
+    {
+      "approach": "Write the start event and a finish predicate with both an application and a data check before reading the timeline.",
+      "why": "Defining endpoints first prevents choosing them after seeing which gives the best number.",
+      "pitfall": "Ending recovery when Pods are Ready ignores whether the data is correct.",
+      "verify": "Both definitions exist before the timeline is read, and finish includes application and data."
+    },
+    {
+      "approach": "Subtract 12:00:00Z from 12:01:30Z in seconds.",
+      "why": "One minute and thirty seconds is 90 seconds, which meets the 120 second target.",
+      "pitfall": "Using a local timezone for one value and UTC for the other shifts the result by hours.",
+      "verify": "The answer is 90 seconds against a 120 second target."
+    },
+    {
+      "approach": "Subtract restored point 11:59:30Z from source point 11:59:50Z.",
+      "why": "Twenty seconds of writes are missing, which is within the 30 second recovery point objective.",
+      "pitfall": "Subtracting from the interruption time measures something other than lost data.",
+      "verify": "The answer is 20 seconds against a 30 second target."
+    },
+    {
+      "approach": "Evaluate service_ok AND data_ok AND Pod_ready.",
+      "why": "With data_ok false, the AND is false regardless of the other inputs.",
+      "pitfall": "Counting two of three as mostly recovered replaces the predicate with a vote.",
+      "verify": "Finish evaluates to false."
+    },
+    {
+      "approach": "For each milestone, record clock source, timezone, backup reference, marker hash and host receipt.",
+      "why": "Durations are only valid if both timestamps come from comparable clocks and each milestone points to its evidence.",
+      "pitfall": "Mixing a learner laptop clock with a host clock adds unknown skew to the result.",
+      "verify": "Each milestone names its clock source and timezone, and no backup contents are exported."
+    },
+    {
+      "approach": "Report target, observed value, failed controls and untested conditions.",
+      "why": "A drill shows one result under its conditions, and the failed data gate must stay visible.",
+      "pitfall": "Writing that recovery meets objectives omits the failed check and the untested scenarios.",
+      "verify": "All four items appear, and there is no universal recovery guarantee."
+    }
+  ],
+  "k8s-042": [
+    {
+      "approach": "Map each requested live action to a capability receipt or an unavailable row, with versions, source hashes and owned identities.",
+      "why": "Every later gate depends on a named capability, so an unlisted one leaves that gate unsupported.",
+      "pitfall": "Assuming the storage and CNI from capstone 2 still apply skips the receipt for this scenario.",
+      "verify": "Every action has a receipt or an unavailable row."
+    },
+    {
+      "approach": "Record schema, authorization and admission outcomes as three separate rows with evidence.",
+      "why": "Each layer rejects for different reasons, so a single pass or fail hides which control acted.",
+      "pitfall": "Reporting one denial as proof that all three layers work conflates them.",
+      "verify": "Three rows exist, each with its own permitted and denied evidence."
+    },
+    {
+      "approach": "Build one table joining parent generation, child owner UID, readiness and application samples.",
+      "why": "Convergence is proven only when current-generation children owned by the parent are Ready and serve the marker.",
+      "pitfall": "Accepting a ready child without checking its owner UID could count a leftover from an earlier parent.",
+      "verify": "Each row links generation, owner UID, readiness and the sampled marker."
+    },
+    {
+      "approach": "Inject one fault and timestamp baseline, fault, symptom, repair and post-repair response.",
+      "why": "One fault with ordered timestamps lets the symptom be attributed to it.",
+      "pitfall": "Injecting a second fault mid-investigation makes the causal chain ambiguous.",
+      "verify": "One fault appears, and all five timestamps are present."
+    },
+    {
+      "approach": "Apply the stated RTO and RPO definitions and the missing-data negative control.",
+      "why": "Separate service and data gates show when each recovered, and recorded inputs let a reviewer recompute both.",
+      "pitfall": "Reporting only service recovery time hides a failed data gate.",
+      "verify": "Both values recompute from recorded timestamps and hashes, and the negative control fails as expected."
+    },
+    {
+      "approach": "Collect cleanup receipts with UIDs and keep failed or unknown gates in the review.",
+      "why": "UID-aware cleanup removes only owned resources, and visible failures keep the review honest.",
+      "pitfall": "Removing failed rows from the final report makes the release look fully qualified.",
+      "verify": "Every cleanup row has a UID, and failed or unknown rows remain."
+    }
+  ],
+  "k8s-043": [
+    {
+      "approach": "Assign each address by the object that reports it: Node status addresses, Pod status podIP and the Service spec clusterIP.",
+      "why": "Each address comes from a different allocator, so its role is fixed by where it is recorded, not by what its digits look like.",
+      "pitfall": "Guessing roles from a familiar private prefix such as 10.x fails because node, Pod and Service ranges can all use private space.",
+      "verify": "Exactly one address is labeled node, one Pod and one virtual Service, each traced to the field that reported it."
+    },
+    {
+      "approach": "Compare the Pod's UID and podIP with the Service's clusterIP before and after the Pod is replaced.",
+      "why": "A replacement Pod is a new object with a new UID and usually a new IP, while the Service object and its clusterIP are untouched.",
+      "pitfall": "Hardcoding the old Pod IP in a client works until the first replacement and then sends traffic to an address that may belong to nothing.",
+      "verify": "The prediction lists Pod UID and IP as changeable and the Service clusterIP as stable."
+    },
+    {
+      "approach": "Draw the client calling the Service on port 80 and the request arriving at the Pod listener on 8080.",
+      "why": "The Service port is what clients dial, while targetPort names where the container actually listens, and kube-proxy rewrites one to the other.",
+      "pitfall": "Assuming the Pod must also listen on 80 because the Service does would misplace the listener and leave targetPort pointing at nothing.",
+      "verify": "The drawing labels port 80 on the Service side and 8080 on the Pod side."
+    },
+    {
+      "approach": "Explain that the ClusterIP exists only in rules programmed on cluster nodes and name the provisioned access path instead.",
+      "why": "kube-proxy or the CNI implements the virtual IP on nodes, so a host outside the cluster usually has no route to it.",
+      "pitfall": "Debugging the Service selector because the browser times out treats a host routing gap as a backend fault.",
+      "verify": "The answer says the host may lack a route and points to the explicitly provisioned access path."
+    },
+    {
+      "approach": "Contrast a node's own address with the address a cloud load balancer publishes.",
+      "why": "Nodes often have only private addresses, and a public load balancer is a separate endpoint with its own routing and firewall rules.",
+      "pitfall": "Assuming a node IP is publicly reachable because a LoadBalancer Service exists merges two endpoints that may have different policies.",
+      "verify": "The answer treats them as different infrastructure endpoints with separate policies."
+    },
+    {
+      "approach": "Record the serving Pod UID alongside the response when replacement evidence is required.",
+      "why": "The Service keeps answering across replacements, so a 200 shows Service continuity but not which Pod produced it.",
+      "pitfall": "Treating two identical 200 responses as proof the same Pod served both ignores that the backend can change behind the Service.",
+      "verify": "The record pairs each response with its backend UID, keeping continuity and identity separate."
+    }
+  ],
+  "k8s-044": [
+    {
+      "approach": "Apply the /16 mask to 10.244.1.7 and compare the network bits with 10.244.0.0.",
+      "why": "A /16 fixes the first two octets, and 10.244 matches, so the address is inside the range regardless of the last two octets.",
+      "pitfall": "Comparing strings, such as checking that both start with 10.244.0, would wrongly reject 10.244.1.7.",
+      "verify": "Membership is true, with no claim yet that the address is allocated or reachable."
+    },
+    {
+      "approach": "Count varying bits for each prefix length: 16 for /16 and 8 for /24.",
+      "why": "More fixed prefix bits leave fewer host bits, so a /24 holds 256 addresses and a /16 holds 65536.",
+      "pitfall": "Reading the larger number 24 as the larger network reverses the relationship.",
+      "verify": "The /24 is identified as the smaller, more specific network."
+    },
+    {
+      "approach": "List node, Pod and Service ranges together with host and VPN ranges, and check each pair for overlap.",
+      "why": "A caller routes through its own host and VPN networks first, so an overlap there can capture traffic before it reaches the cluster.",
+      "pitfall": "Checking only the three cluster ranges against each other misses a VPN range that shadows the Pod CIDR.",
+      "verify": "Every pair in the table, including host and VPN ranges, is shown not to overlap."
+    },
+    {
+      "approach": "Trace the caller's route lookup for a Pod address and find the first hop that leaves the intended path.",
+      "why": "When a VPN route overlaps the Pod range, the host may prefer it, so packets leave toward the VPN before the cluster sees them.",
+      "pitfall": "Editing the Service selector cannot change which route the host chose for the destination address.",
+      "verify": "The answer names the overlapping VPN route as the first wrong next hop."
+    },
+    {
+      "approach": "Separate the address count of a /24 from how many addresses the allocator will hand out.",
+      "why": "Network and broadcast addresses, gateway reservations and per-node block sizes reduce or partition what can be assigned to Pods.",
+      "pitfall": "Planning for 256 Pods per /24 assumes every address is assignable, which no implementation guarantees.",
+      "verify": "The answer names at least one reservation or allocation rule that reduces usable endpoints."
+    },
+    {
+      "approach": "Choose node, Pod and Service ranges for the second cluster that avoid the first cluster's and the host's ranges.",
+      "why": "Both clusters share one host routing table, so overlapping ranges make destinations ambiguous on that host.",
+      "pitfall": "Copying the first cluster's defaults for convenience creates identical ranges and routes that conflict.",
+      "verify": "Every range in the new plan is distinct from the first cluster and the host networks."
+    }
+  ],
+  "k8s-045": [
+    {
+      "approach": "Note that containers in one Pod share a single network namespace and therefore one loopback interface.",
+      "why": "The sidecar's request to localhost reaches the app's listener because both run inside the same Pod network namespace.",
+      "pitfall": "Assuming each container has its own loopback would predict the sidecar cannot reach a loopback-only app, which is wrong.",
+      "verify": "The prediction says the sidecar reaches the app over localhost."
+    },
+    {
+      "approach": "Note that the client Pod has its own network namespace and therefore its own loopback.",
+      "why": "localhost in the client Pod refers to that Pod, so a request there never leaves it to reach the target.",
+      "pitfall": "Copying a same-Pod localhost URL into another Pod's config changes its meaning silently.",
+      "verify": "The prediction says the client reaches its own Pod, and the fix names the target Pod or Service address."
+    },
+    {
+      "approach": "List each container's listener with address and port and check for duplicates in the shared space.",
+      "why": "All containers share one port space, so two listeners must differ in port or bind address.",
+      "pitfall": "Assigning the same port per container because each has its own image ignores the shared namespace.",
+      "verify": "Each listener has a distinct address and port pair."
+    },
+    {
+      "approach": "Identify that both containers try to bind the same socket in one network namespace.",
+      "why": "Only one process can bind 0.0.0.0:8080 there, so the second fails with an address in use error.",
+      "pitfall": "Expecting each container to get its own 8080 assumes a separate network namespace per container.",
+      "verify": "The answer names the shared socket conflict and assigns distinct ports."
+    },
+    {
+      "approach": "Contrast the containerPort field in the spec with the port the process actually opens.",
+      "why": "containerPort is declarative metadata and does not open or restrict any socket, so the process can listen elsewhere.",
+      "pitfall": "Trusting containerPort to prove the app listens on 8080 skips observing the process.",
+      "verify": "The answer labels one as metadata and the other as observed process behavior."
+    },
+    {
+      "approach": "Weigh lifecycle, scaling, networking and failure isolation for the helper.",
+      "why": "A sidecar shares the Pod's lifecycle and network, which suits a tightly coupled proxy but prevents scaling it independently.",
+      "pitfall": "Putting every helper in a sidecar to save Services couples their failures and replica counts to the app.",
+      "verify": "The decision cites at least lifecycle, scaling, networking and failure as factors."
+    }
+  ],
+  "k8s-046": [
+    {
+      "approach": "Separate the CNI specification, which defines how a runtime calls a plugin, from the plugin that programs routes and policy.",
+      "why": "CNI only standardizes add and delete calls; packet behavior comes from the installed implementation and its config.",
+      "pitfall": "Predicting overlay or policy behavior from the word CNI alone skips reading which plugin is installed.",
+      "verify": "The answer names a plugin contract on one side and a concrete routing and policy system on the other."
+    },
+    {
+      "approach": "Label the inner header with Pod addresses and the outer header with node transport addresses.",
+      "why": "Encapsulation wraps the Pod packet so the underlay only needs routes between nodes, not to every Pod address.",
+      "pitfall": "Expecting the underlay to route Pod addresses directly describes a routed design, not this overlay.",
+      "verify": "Inner addresses are Pods, and outer addresses are nodes."
+    },
+    {
+      "approach": "Draw source Pod interface, source node forwarding, underlay hops, destination node forwarding and target Pod interface.",
+      "why": "Each stage can drop or misroute a packet, so naming them shows where to look when the request fails.",
+      "pitfall": "Drawing a single arrow from Pod to Pod hides the node and underlay steps where most faults occur.",
+      "verify": "Pod interfaces, node forwarding and underlay hops each appear in the path."
+    },
+    {
+      "approach": "Compare which request sizes pass and fail and treat MTU as a hypothesis next to application limits.",
+      "why": "Encapsulation adds header bytes, so packets near the MTU can be dropped while small requests still pass.",
+      "pitfall": "Concluding the endpoint is missing ignores that small requests succeed on the same path.",
+      "verify": "The plan includes an MTU or path check alongside application size limits."
+    },
+    {
+      "approach": "State what the readiness probe actually exercises and compare it with the cross-node path.",
+      "why": "The kubelet probes from the Pod's own node, so a Ready Pod says nothing about traffic from other nodes.",
+      "pitfall": "Treating Ready as proof any client can reach the Pod would miss a broken node-to-node path.",
+      "verify": "The answer says readiness may test a narrower local path and calls for a test from the relevant caller."
+    },
+    {
+      "approach": "Read the plugin configuration, name the implementation and plan owned bounded probes only.",
+      "why": "Replacing or reconfiguring the cluster network is an administrative change that affects every workload.",
+      "pitfall": "Reinstalling the CNI to fix a lesson probe would break networking for others on the cluster.",
+      "verify": "The plan reads config, names the plugin and runs only owned probes."
+    }
+  ],
+  "k8s-047": [
+    {
+      "approach": "Read port 80 from the Service and targetPort 8080 as the backend listener.",
+      "why": "Clients connect to the Service port, and kube-proxy forwards to the Pod's targetPort, so the two values belong to different sides.",
+      "pitfall": "Expecting the client to dial 8080 on the ClusterIP uses the backend port on the frontend side.",
+      "verify": "The answer gives client 80 and backend 8080."
+    },
+    {
+      "approach": "Change only the selector to a label no Pod carries and read the EndpointSlices.",
+      "why": "The EndpointSlice controller lists only Pods matching the selector, so the set becomes empty while the Service stays valid.",
+      "pitfall": "Expecting the API server to reject the Service would miss that selectors are not checked against existing Pods.",
+      "verify": "The endpoint set is empty, and the Service object still exists."
+    },
+    {
+      "approach": "Name the caller, the ClusterIP destination, the endpoint kube-proxy selected and the Pod listener.",
+      "why": "kube-proxy picks one ready endpoint per new connection and rewrites the destination to that Pod and port.",
+      "pitfall": "Saying the Service sends traffic to the Deployment skips the per-connection endpoint choice.",
+      "verify": "All four elements of the connection path are named."
+    },
+    {
+      "approach": "Check the selector against Pod labels, then check readiness of the matched Pods.",
+      "why": "A ClusterIP with no ready endpoints has nowhere to send connections, whichever external path reaches it.",
+      "pitfall": "Adding a LoadBalancer Service gives another entry point to the same empty backend set.",
+      "verify": "The diagnosis starts at selector matches and readiness."
+    },
+    {
+      "approach": "Explain that a Service forwards by IP and port and never reads the HTTP request.",
+      "why": "Layer 4 selection happens at connection setup, before any URL path is sent, so path rules need an HTTP-aware proxy.",
+      "pitfall": "Adding paths to the Service spec has nowhere to go, because the Service API has no field for them.",
+      "verify": "The answer points to an Ingress or Gateway style proxy for path routing."
+    },
+    {
+      "approach": "Have clients use the Service name, and record backend UIDs when replacement evidence is needed.",
+      "why": "The Service name and ClusterIP stay fixed while Pods behind them are replaced.",
+      "pitfall": "Treating stable access as proof one Pod handled every request ignores that backends can change.",
+      "verify": "Clients use Service discovery, and backend UIDs are recorded separately."
+    }
+  ],
+  "k8s-048": [
+    {
+      "approach": "Expand the short name using the caller Pod's resolv.conf search list.",
+      "why": "The first search entry is the caller's own namespace, so a short name resolves there first.",
+      "pitfall": "Assuming short names search every namespace would find the study Service from anywhere.",
+      "verify": "The prediction says the lookup may target the caller's namespace, and the fix uses a qualified name."
+    },
+    {
+      "approach": "Identify the cluster domain suffix as configurable and read it from the environment.",
+      "why": "The kubelet's clusterDomain sets the suffix, and cluster.local is only a common default.",
+      "pitfall": "Hardcoding cluster.local in clients breaks on clusters that chose another domain.",
+      "verify": "The answer names the cluster domain as configurable and labels cluster.local as an example."
+    },
+    {
+      "approach": "Draw DNS lookup, TCP connection and HTTP response as three phases with their own evidence.",
+      "why": "A name can resolve while the connection or the application fails, so each phase needs its own observation.",
+      "pitfall": "Calling the service healthy because DNS returned an address overclaims from the first phase.",
+      "verify": "Three phases each have distinct evidence."
+    },
+    {
+      "approach": "Compare success by IP with failure by name and focus on resolution.",
+      "why": "Since the IP works, the listener and path are fine, and the fault lies in resolver config, DNS reachability or a policy blocking DNS.",
+      "pitfall": "Changing the application port fixes nothing that resolution depends on.",
+      "verify": "The next checks are resolver configuration, DNS reachability and policy."
+    },
+    {
+      "approach": "Separate a ClusterIP Service from a headless Service when explaining stale behavior.",
+      "why": "A ClusterIP name keeps resolving to one virtual IP, so only long-lived connections stick; headless names return Pod IPs that clients may cache.",
+      "pitfall": "Rapidly recreating DNS records without checking client caching adds changes and obscures the cause.",
+      "verify": "The answer covers both Service types and names client lifecycle or resolver caching as the evidence."
+    },
+    {
+      "approach": "Specify a qualified name, bounded resolution and connection timeouts and reconnect that respects retry safety.",
+      "why": "Discovery and connection can fail briefly, and a bounded retry recovers without repeating unsafe operations.",
+      "pitfall": "Retrying every failed request without limit can duplicate a non-idempotent write.",
+      "verify": "The design lists namespace and domain, bounded timeouts and safe reconnects."
+    }
+  ],
+  "k8s-049": [
+    {
+      "approach": "Read each endpoint's conditions.ready field in the slice and keep only those marked true.",
+      "why": "Only ready endpoints receive new connections, and in the fixture only the endpoint referencing pod-a is ready.",
+      "pitfall": "Counting every endpoint listed in the slice would include backends that are not eligible for traffic.",
+      "verify": "The ready set contains exactly the endpoint referencing pod-a."
+    },
+    {
+      "approach": "Select every EndpointSlice carrying the Service's kubernetes.io/service-name label and merge their endpoints.",
+      "why": "A Service can be split across several slices, so reading only one gives a partial backend set.",
+      "pitfall": "Reading the first slice returned, or concatenating without deduplicating by target reference, gives a wrong count.",
+      "verify": "The merged list covers all relevant slices with no repeated Pod identity."
+    },
+    {
+      "approach": "Match each eligible endpoint's targetRef UID against the UIDs of the current Pods.",
+      "why": "A Pod name can be reused by a replacement, while the UID identifies the exact object the endpoint points to.",
+      "pitfall": "Joining on Pod name alone could accept a stale reference to a deleted Pod with the same name.",
+      "verify": "Every accepted backend UID belongs to a current Pod of the intended workload."
+    },
+    {
+      "approach": "Check the Pod's Ready condition and readiness probe, then compare its labels with the Service selector.",
+      "why": "Running only means containers started; a failing readiness probe or a selector mismatch keeps the Pod out of ready endpoints.",
+      "pitfall": "Restarting the Pod because it is Running but unused repeats startup without finding the failing check.",
+      "verify": "The diagnosis names the readiness result and the selector match status."
+    },
+    {
+      "approach": "Describe terminating as the Pod being deleted and serving as whether it still passes readiness.",
+      "why": "During graceful shutdown an endpoint can be terminating yet still serving, which lets proxies drain existing traffic.",
+      "pitfall": "Treating terminating as a synonym for not ready would discard a backend that can still finish in-flight work.",
+      "verify": "The answer keeps the two conditions separate and ties them to draining."
+    },
+    {
+      "approach": "Confirm the new Pod's UID is an eligible endpoint, then send a fresh request that reports its serving identity.",
+      "why": "Endpoint eligibility shows the proxy may choose the Pod, and a response bound to its identity shows it actually did.",
+      "pitfall": "A successful response alone could come from an older backend that is still eligible.",
+      "verify": "The record pairs the new UID in the ready set with a fresh response from that UID."
+    }
+  ],
+  "k8s-051": [
+    {
+      "approach": "Map port to the ClusterIP listener, targetPort to the container listener and nodePort to the port opened on every node.",
+      "why": "Each field sits at a different hop: 80 on the Service, 8080 in the Pod and 30080 on the node.",
+      "pitfall": "Setting all three to the same number hides which hop each one controls and makes faults hard to place.",
+      "verify": "80, 8080 and 30080 are each tied to their own position in the path."
+    },
+    {
+      "approach": "Check whether any public route reaches the node's address before predicting reachability.",
+      "why": "NodePort only opens a port on node addresses; if those are private, no public client can route to them.",
+      "pitfall": "Assuming that allocating a nodePort makes the Service public skips the network the client must cross.",
+      "verify": "The prediction says no public route is implied."
+    },
+    {
+      "approach": "Draw the host, any VM or node container, the node port, kube-proxy forwarding and the Pod listener.",
+      "why": "Local engines often run nodes inside a VM or container, which adds a boundary the host must route or map into.",
+      "pitfall": "Drawing the host directly reaching the nodePort ignores that boundary and its port mapping.",
+      "verify": "The drawing includes the VM or node-container boundary when the environment has one."
+    },
+    {
+      "approach": "Test whether the host can reach the node address and whether any port mapping exists before checking selectors.",
+      "why": "A timeout before the node means the packet never reached kube-proxy, so the Service and Pods were never involved.",
+      "pitfall": "Editing Pod selectors cannot fix traffic that never arrives at the node.",
+      "verify": "The first checks are the host or VM route and the port mapping."
+    },
+    {
+      "approach": "Read the API server's service node port range setting instead of assuming 30000 to 32767.",
+      "why": "That range is the common default but is set per cluster through an API server flag.",
+      "pitfall": "Hardcoding a nodePort from the default range can be rejected on a cluster with a different range.",
+      "verify": "The answer calls the range configurable and the default an example."
+    },
+    {
+      "approach": "Contrast a cluster-wide NodePort with a kubectl port-forward bound to 127.0.0.1 on one machine.",
+      "why": "NodePort persists on every node through kube-proxy, while port-forward is a client session tunneled through the API server.",
+      "pitfall": "Treating them as interchangeable leads to sharing a port-forward address that only works on the local machine.",
+      "verify": "The comparison covers scope, lifetime and routing mechanism."
+    }
+  ],
+  "k8s-052": [
+    {
+      "approach": "Expect the Service to be created with no external address in status.loadBalancer.",
+      "why": "Only a cloud controller or local load balancer implementation fills that status, and an unsupported cluster has none.",
+      "pitfall": "Waiting for an external IP to appear assumes infrastructure that the local cluster does not have.",
+      "verify": "The prediction says the external entrypoint may stay unprovisioned."
+    },
+    {
+      "approach": "Separate the controller that watches the Service from the infrastructure it creates.",
+      "why": "The controller reconciles the desired Service into provider resources, and those resources carry the real traffic.",
+      "pitfall": "Expecting the API server itself to provision a load balancer skips the controller that does the work.",
+      "verify": "The answer gives reconciliation to the controller and routing to the provisioned infrastructure."
+    },
+    {
+      "approach": "Draw one path through node ports and another that targets Pod IPs directly.",
+      "why": "Implementations differ: some send traffic to nodes first, while others route straight to Pod addresses.",
+      "pitfall": "Assuming the node-backed path for every provider can misplace health checks and source address behavior.",
+      "verify": "Both paths are drawn, and the implementation choice is stated."
+    },
+    {
+      "approach": "Check the listener, provider health checks, backend route and app behavior in that order.",
+      "why": "An assigned address proves only that provisioning happened, not that backends pass checks or the app answers.",
+      "pitfall": "Recreating the Service because the address exists but fails discards evidence and may change the address.",
+      "verify": "The diagnosis covers listener, health checks, backend route and app."
+    },
+    {
+      "approach": "Compare what the provider health check probes with what the readiness probe checks.",
+      "why": "The load balancer may check a node port or path while Kubernetes readiness tests the container, so results can differ.",
+      "pitfall": "Assuming a healthy target means a ready Pod merges two checks run by different systems.",
+      "verify": "The answer names both checks and says they can disagree."
+    },
+    {
+      "approach": "Name the implementation, list owned resources, set a cost and cleanup boundary and require a real request.",
+      "why": "Cloud load balancers cost money and outlive a lesson if not removed, while local ones may behave differently.",
+      "pitfall": "Running the cloud path without a cleanup step can leave billed resources behind.",
+      "verify": "The plan has a named implementation, owned resources, cleanup and request evidence."
+    }
+  ],
+  "k8s-053": [
+    {
+      "approach": "Check whether any Ingress controller watches the Ingress class used by the object.",
+      "why": "An Ingress is only configuration; without a controller nothing programs a proxy to serve it.",
+      "pitfall": "Assuming a successful apply means routing works confuses object storage with a running proxy.",
+      "verify": "The prediction says the object can exist with no serving proxy."
+    },
+    {
+      "approach": "Assign host matching to the requested site name and path matching to the route within that site.",
+      "why": "The controller selects a rule by host first and then by path, so each field narrows a different part of the request.",
+      "pitfall": "Putting the site name into a path rule makes it match only a literal path segment.",
+      "verify": "Host maps to the site and path maps to a route within it."
+    },
+    {
+      "approach": "Draw the client, controller proxy, backend Service reference and the upstream the controller actually configured.",
+      "why": "Many controllers resolve the Service to Pod endpoints, so the configured upstream can differ from the named Service.",
+      "pitfall": "Assuming traffic always passes through the ClusterIP can misplace a fault in a controller that targets Pods.",
+      "verify": "The drawing separates the Service backend reference from the configured upstream."
+    },
+    {
+      "approach": "Compare the matched route with the path the application received and the routes it serves.",
+      "why": "A Prefix match forwards the full original path unless a rewrite is configured, so the app may not serve it.",
+      "pitfall": "Blaming the Ingress for a 404 that the application returned skips reading which component answered.",
+      "verify": "The diagnosis shows the forwarded path does not exist in the application."
+    },
+    {
+      "approach": "Tie each annotation to the controller that reads it.",
+      "why": "Annotations are free-form metadata, and each controller defines its own keys and meanings.",
+      "pitfall": "Copying an annotation from another controller's docs adds a key that the installed controller ignores.",
+      "verify": "The answer says annotations belong to a specific implementation contract."
+    },
+    {
+      "approach": "Contrast HTTP routing by host and path with Service connection selection by IP and port.",
+      "why": "The Ingress proxy reads HTTP requests, while the Service picks a backend when a connection opens.",
+      "pitfall": "Expecting a Service to route by path asks Layer 4 to read data it never inspects.",
+      "verify": "Ingress handles HTTP routing, and the Service handles transport endpoint selection."
+    }
+  ],
+  "k8s-054": [
+    {
+      "approach": "Map GatewayClass to the implementation, Gateway to listeners and HTTPRoute to application routing rules.",
+      "why": "Each resource is meant for a different owner: platform, cluster operator and application team.",
+      "pitfall": "Treating Gateway as the routing rule set merges listener ownership with route intent.",
+      "verify": "Class, gateway and route each get their role."
+    },
+    {
+      "approach": "Expect the route to stay detached when its parentRef names a missing or unavailable Gateway.",
+      "why": "A route attaches only after a matching parent accepts it, so no traffic path is built.",
+      "pitfall": "Assuming the rules apply once the route exists ignores the attachment step.",
+      "verify": "The prediction says the intended path is not established."
+    },
+    {
+      "approach": "Set the listener's allowedRoutes and the route's parentRef so both name the intended namespaces and kinds.",
+      "why": "Attachment needs both sides to agree, which lets the Gateway owner limit who can bind to a listener.",
+      "pitfall": "Allowing routes from all namespaces lets unrelated teams attach to the listener.",
+      "verify": "allowedRoutes and parentRef agree on the intended owner."
+    },
+    {
+      "approach": "Read the condition's reason, then check backend names, kinds and any needed ReferenceGrant.",
+      "why": "ResolvedRefs is false when a backend does not exist or a cross-namespace reference lacks authorization.",
+      "pitfall": "Restarting the gateway controller does not create a missing backend or grant.",
+      "verify": "The diagnosis checks backend identity and reference authorization."
+    },
+    {
+      "approach": "Write a ReferenceGrant in the target namespace naming one source kind and namespace and one target kind.",
+      "why": "The grant is opt-in and owned by the target namespace, so a narrow grant limits who can reference its objects.",
+      "pitfall": "Granting all kinds or every namespace exposes more targets than the route needs.",
+      "verify": "Only the intended source can reference the intended target kind."
+    },
+    {
+      "approach": "List API support, controller support, Accepted and ResolvedRefs conditions, a reachable listener and an app response.",
+      "why": "Each item proves a different layer, from installed CRDs to a working backend.",
+      "pitfall": "Stopping at an Accepted condition skips proof that requests reach the app.",
+      "verify": "The plan has evidence for every layer, ending with the expected response."
+    }
+  ],
+  "k8s-055": [
+    {
+      "approach": "Check that the requested DNS name appears in the certificate's subject alternative names.",
+      "why": "Clients validate the name they asked for against the certificate, regardless of which IP answered.",
+      "pitfall": "Assuming the right IP is enough ignores that hostname verification is name based.",
+      "verify": "The prediction says the requested name must match the certificate identity."
+    },
+    {
+      "approach": "Find the component that holds the private key and decrypts the client's TLS session.",
+      "why": "Termination happens where the key lives, such as the Ingress proxy, and traffic beyond it may be plain or re-encrypted.",
+      "pitfall": "Assuming the app terminates TLS because the client sees HTTPS can be wrong when a proxy holds the key.",
+      "verify": "The answer names the decrypting component."
+    },
+    {
+      "approach": "Record host names, issuer, validity dates, SAN entries and Secret name, leaving out key bytes.",
+      "why": "This metadata is enough to check identity and expiry without exposing what an attacker would need.",
+      "pitfall": "Pasting the full Secret YAML into notes copies the private key with it.",
+      "verify": "The record has names, certificate metadata and status, with no key bytes."
+    },
+    {
+      "approach": "Classify a handshake failure as identity validation and a 404 as an HTTP response from a routed component.",
+      "why": "A certificate mismatch stops the connection before any HTTP request, while a 404 means routing ran.",
+      "pitfall": "Fixing routes to cure a certificate error changes a layer that was never reached.",
+      "verify": "The two failures are diagnosed at different layers."
+    },
+    {
+      "approach": "Decode a Secret value with base64 to show anyone with read access gets the plaintext.",
+      "why": "Base64 is a reversible encoding, so protection must come from RBAC and encryption at rest.",
+      "pitfall": "Treating encoded Secret data as encrypted encourages wider read access than intended.",
+      "verify": "The answer calls the encoding reversible and not confidential."
+    },
+    {
+      "approach": "State the identity clients validate at the proxy and the identity the proxy validates upstream.",
+      "why": "Each hop is a separate TLS session with its own certificate and trust settings.",
+      "pitfall": "Securing only the client hop and assuming the upstream is trusted leaves the second hop unverified.",
+      "verify": "Both client-facing and upstream identities are written down."
+    }
+  ],
+  "k8s-056": [
+    {
+      "approach": "Label DNAT as rewriting the destination and SNAT as rewriting the source of a packet.",
+      "why": "kube-proxy uses DNAT to turn a Service address into a Pod address, while SNAT hides the original caller behind another address.",
+      "pitfall": "Calling every translation NAT without saying which field changed hides why the backend sees a different peer.",
+      "verify": "The answer pairs DNAT with destination rewrite and SNAT with source rewrite."
+    },
+    {
+      "approach": "Predict the peer address the backend records after the source is rewritten.",
+      "why": "With SNAT the backend sees the node or proxy that rewrote the packet, not the original client.",
+      "pitfall": "Logging the peer address as the client IP after SNAT attributes every request to the node.",
+      "verify": "The prediction says the peer can be a node or proxy address."
+    },
+    {
+      "approach": "Write the source and destination address and port before and after the translation point.",
+      "why": "Naming all four fields on both sides shows exactly which values one rewrite changed.",
+      "pitfall": "Recording only destination addresses hides a source rewrite that changes what the backend logs.",
+      "verify": "Both tuples are written out with addresses and ports."
+    },
+    {
+      "approach": "Check whether the node receiving traffic has a local endpoint under externalTrafficPolicy Local.",
+      "why": "Local policy only forwards to endpoints on the same node, so a node without one drops or fails health checks for that traffic.",
+      "pitfall": "Scaling the Deployment without checking placement may still leave that node with no endpoint.",
+      "verify": "The diagnosis names endpoint locality and upstream health check selection."
+    },
+    {
+      "approach": "State that any client can send X-Forwarded-For with any value.",
+      "why": "Only a trusted proxy that strips or overwrites the header makes its value meaningful.",
+      "pitfall": "Using the first header value as the client address lets a caller choose its own identity.",
+      "verify": "The answer requires a trusted proxy boundary that sanitizes the header."
+    },
+    {
+      "approach": "Use a known caller over a documented path, recording the transport peer and any trusted header.",
+      "why": "Comparing what the backend sees with the known source shows whether translation or a proxy changed it.",
+      "pitfall": "Testing from an unknown source leaves nothing to compare the recorded address against.",
+      "verify": "The test record has the caller, path, transport peer and trusted header evidence."
+    }
+  ],
+  "k8s-057": [
+    {
+      "approach": "Note that a headless Service sets clusterIP None, so its DNS name returns backend Pod addresses.",
+      "why": "With no virtual IP to return, cluster DNS publishes one record per ready endpoint.",
+      "pitfall": "Expecting one stable virtual IP from a headless name applies ClusterIP behavior to the wrong type.",
+      "verify": "The prediction says discovery returns individual backend addresses."
+    },
+    {
+      "approach": "Contrast the stable StatefulSet Pod name such as web-0 with the Pod UID that changes on replacement.",
+      "why": "The controller recreates a deleted Pod with the same ordinal name but as a new object with a new UID.",
+      "pitfall": "Treating the name as proof the same instance survived misses that the process and UID are new.",
+      "verify": "The answer says a stable name can refer to a replacement."
+    },
+    {
+      "approach": "Draw resolving peer names, confirming each peer's identity and then running the application protocol.",
+      "why": "DNS only supplies addresses, so the application still has to verify who it reached before joining.",
+      "pitfall": "Joining the first address DNS returns without confirming identity can form a cluster with the wrong peer.",
+      "verify": "The sequence has resolution, identity confirmation and protocol steps."
+    },
+    {
+      "approach": "Show that the client receives several addresses and must choose and connect itself.",
+      "why": "No kube-proxy virtual IP sits in front of a headless Service, so balancing depends on client logic.",
+      "pitfall": "Assuming headless DNS spreads load evenly ignores client caching and address order.",
+      "verify": "The answer gives address selection and connection behavior to the client."
+    },
+    {
+      "approach": "Explain that publishNotReadyAddresses publishes endpoints in DNS before they pass readiness.",
+      "why": "Peers need to find each other during bootstrap, before any of them is ready for normal traffic.",
+      "pitfall": "Enabling it on a Service used by ordinary clients can send them to Pods not ready to serve.",
+      "verify": "The answer says discovery may include peers not ready for normal serving."
+    },
+    {
+      "approach": "Check the ordinal name, the new UID, the bound PersistentVolumeClaim and a data read from the app.",
+      "why": "A StatefulSet reattaches the same claim to the replacement, so data should survive while the UID changes.",
+      "pitfall": "Checking only that web-0 exists again misses a wrong or empty volume.",
+      "verify": "The record covers logical identity, new UID, intended volume and an application data result."
+    }
+  ],
+  "k8s-058": [
+    {
+      "approach": "Evaluate the namespaceSelector and podSelector in one peer entry as both required.",
+      "why": "Two selectors in the same from item are combined with AND, so a Pod in the wrong namespace fails even with role tester.",
+      "pitfall": "Reading them as OR would admit any tester Pod from any namespace.",
+      "verify": "The prediction says the caller does not match."
+    },
+    {
+      "approach": "Compare two list items in from with one item holding both selectors.",
+      "why": "Separate items are alternatives combined with OR, while one item with both selectors narrows to callers matching both.",
+      "pitfall": "A single dash in the YAML decides the meaning, so misplacing it silently widens or narrows access.",
+      "verify": "The answer says separate entries create alternatives and combined selectors narrow one peer."
+    },
+    {
+      "approach": "Write rows of caller namespace, Pod labels, target port and expected allow or deny result.",
+      "why": "Policy decisions depend on all three inputs, so a matrix shows every case the rules must handle.",
+      "pitfall": "Listing only allowed callers leaves the denied cases untested.",
+      "verify": "Each row names namespace, labels, port and result."
+    },
+    {
+      "approach": "Check whether the CNI enforces NetworkPolicy, then look for another policy allowing the flow.",
+      "why": "The API accepts policy objects even when nothing enforces them, and allow rules from several policies add together.",
+      "pitfall": "Editing the policy repeatedly when no enforcer exists will never change traffic.",
+      "verify": "The diagnosis names the enforcing implementation and other allow rules."
+    },
+    {
+      "approach": "Explain that a Pod's allowed traffic is the union of all policies selecting it.",
+      "why": "Policies only add allows, and none can deny what another one permits.",
+      "pitfall": "Adding a narrower policy to restrict a broad one has no effect.",
+      "verify": "The answer says multiple policies can broaden the permitted set."
+    },
+    {
+      "approach": "Run one owned flow that should pass and one that should fail, naming the enforcing CNI.",
+      "why": "An allowed flow alone cannot show isolation, because everything passes without enforcement.",
+      "pitfall": "Testing only the allowed flow passes on a cluster with no enforcement at all.",
+      "verify": "Both outcomes are observed under a named CNI."
+    }
+  ],
+  "k8s-059": [
+    {
+      "approach": "Note that policyTypes includes Egress and the egress list is empty for the selected Pods.",
+      "why": "Once a policy selects Pods for egress, only listed rules allow outgoing traffic, and an empty list allows none.",
+      "pitfall": "Reading an empty list as no restriction gets the meaning backward.",
+      "verify": "The prediction says it contributes no allowed outgoing flows."
+    },
+    {
+      "approach": "Add the cluster DNS Pods or Service and port 53 over UDP and TCP to the dependency map.",
+      "why": "Name lookups happen before any request, so blocking DNS breaks every named call.",
+      "pitfall": "Allowing only UDP 53 can break large responses that fall back to TCP.",
+      "verify": "The map names the resolver destination with both UDP and TCP."
+    },
+    {
+      "approach": "Permit only the internal and external flows the workload needs, each with destination and port.",
+      "why": "A minimal list limits what a compromised Pod can reach while keeping required calls working.",
+      "pitfall": "Allowing all egress to simplify testing removes the control the policy was meant to add.",
+      "verify": "Every allowed flow in the matrix is named and required."
+    },
+    {
+      "approach": "Check DNS egress rules and the Pod's resolver before checking the destination.",
+      "why": "If the IP works, the path to the service is open, which points to blocked or failed name resolution.",
+      "pitfall": "Opening egress to the destination again fixes nothing when the lookup fails.",
+      "verify": "The first checks are DNS egress and resolver behavior."
+    },
+    {
+      "approach": "Explain that ipBlock matches addresses, not names.",
+      "why": "A hostname can resolve to changing or shared addresses, so a CIDR may miss new ones or include other services.",
+      "pitfall": "Using a CIDR from one lookup as a permanent hostname allow can break later or overreach.",
+      "verify": "The answer says addresses may not be stable or exclusive."
+    },
+    {
+      "approach": "Record the CNI, the source address observed at the destination and one allowed and one denied case.",
+      "why": "NAT can change the source the external side sees, so observed addresses explain matching results.",
+      "pitfall": "Testing only an allowed destination cannot show the policy denies anything.",
+      "verify": "The record has implementation, observed addresses and both outcomes."
+    }
+  ],
+  "k8s-060": [
+    {
+      "approach": "Compare ipFamilyPolicy RequireDualStack with a cluster that has only one address family.",
+      "why": "RequireDualStack demands addresses from both families, which a single-stack cluster cannot allocate.",
+      "pitfall": "Expecting a silent fallback to one family confuses RequireDualStack with PreferDualStack.",
+      "verify": "The prediction says the requirement cannot be satisfied."
+    },
+    {
+      "approach": "Match A records to IPv4 addresses and AAAA records to IPv6 addresses.",
+      "why": "Clients request each record type separately, so one family can resolve while the other is missing.",
+      "pitfall": "Checking only A records hides a missing IPv6 address.",
+      "verify": "The answer pairs A with IPv4 and AAAA with IPv6."
+    },
+    {
+      "approach": "Build rows for DNS, Service clusterIPs, endpoints, policy and app response, with one column per family.",
+      "why": "Each layer can work for one family and fail for the other, so both need separate evidence.",
+      "pitfall": "One passing IPv4 test cannot show the IPv6 path works.",
+      "verify": "Every row has evidence for both families."
+    },
+    {
+      "approach": "Check the IPv6 route, the app's IPv6 listener, IPv6 endpoints and IPv6 policy rules.",
+      "why": "IPv4 success proves only the IPv4 path, and an app bound to IPv4 alone times out over IPv6.",
+      "pitfall": "Blaming the Service because IPv4 works skips the family-specific layers.",
+      "verify": "The diagnosis covers route, listener, endpoints and policy for IPv6."
+    },
+    {
+      "approach": "Wrap an IPv6 address in brackets before adding a colon and port in a URL.",
+      "why": "IPv6 addresses contain colons, so brackets show where the address ends and the port starts.",
+      "pitfall": "Writing the address without brackets makes the last group look like a port.",
+      "verify": "The answer shows the bracketed form and why it is needed."
+    },
+    {
+      "approach": "Compare each intended allow and deny rule against observations for both families.",
+      "why": "A policy written with IPv4 CIDRs alone may leave IPv6 traffic unrestricted.",
+      "pitfall": "Testing denial only over IPv4 can miss an open IPv6 path.",
+      "verify": "Rules and observations cover IPv4 and IPv6."
+    }
+  ],
+  "k8s-062": [
+    {
+      "approach": "Trace a failing readinessProbe to the Pod's Ready condition and its endpoint state.",
+      "why": "Readiness failure removes the Pod from ready endpoints for new traffic, and only liveness failure restarts containers.",
+      "pitfall": "Expecting a restart after readiness failure confuses it with a liveness probe.",
+      "verify": "The prediction says eligibility changes without a required restart."
+    },
+    {
+      "approach": "Measure initialization and set startupProbe failureThreshold times periodSeconds to cover it with a margin.",
+      "why": "The startup probe holds off liveness checks until the app starts, without stretching normal request deadlines.",
+      "pitfall": "Raising liveness initialDelaySeconds a lot slows detection of real hangs for the Pod's lifetime.",
+      "verify": "The window is bounded by measurement, and request deadlines stay separate."
+    },
+    {
+      "approach": "Order the steps as become unready, stop new work, drain in-flight work and exit before terminationGracePeriodSeconds.",
+      "why": "After SIGTERM the kubelet waits for the grace period and then kills the container, so draining must finish first.",
+      "pitfall": "Exiting on SIGTERM drops in-flight requests, while ignoring it ends in a forced kill.",
+      "verify": "The timeline ends before forced termination."
+    },
+    {
+      "approach": "Identify which ReplicaSet served each response and check the new ReplicaSet's readiness.",
+      "why": "A rolling update keeps old Pods serving while new ones fail readiness, so 200s can come from the old revision.",
+      "pitfall": "Treating 200 responses as rollout success ignores which revision answered.",
+      "verify": "The answer names the serving revision and new-revision readiness separately."
+    },
+    {
+      "approach": "Show that a liveness probe that calls the database restarts the app whenever the database is down.",
+      "why": "Restarting the client does not repair the dependency and adds load as restarted Pods reconnect.",
+      "pitfall": "Checking dependencies in liveness to be thorough turns one outage into a restart loop.",
+      "verify": "The answer says it restarts healthy clients without fixing the dependency."
+    },
+    {
+      "approach": "Require that the new revision is ready, expected responses succeed and old Pods drain and are removed.",
+      "why": "Each condition shows a different part of a clean rollout, from readiness to cleanup.",
+      "pitfall": "Stopping at rollout status complete skips response evidence and leftover old resources.",
+      "verify": "The acceptance record covers readiness, responses and cleanup."
+    }
+  ],
+  "k8s-063": [
+    {
+      "approach": "Pair kubectl events with lifecycle questions, logs with messages, metrics with trends and traces with request paths.",
+      "why": "Each signal records a different thing, so the question decides which one can answer it.",
+      "pitfall": "Searching logs for a scheduling failure misses that the scheduler reports it as an event.",
+      "verify": "Each of the four signals is matched to its diagnostic question."
+    },
+    {
+      "approach": "Set start and end timestamps around the incident and record the Pod names and UIDs involved.",
+      "why": "Events expire and Pods are replaced, so a window tied to retained identities keeps evidence comparable.",
+      "pitfall": "Querying the last hour with no fixed bounds mixes unrelated activity into the result.",
+      "verify": "The window has explicit timestamps and the identities that existed within it."
+    },
+    {
+      "approach": "Link one request ID to its service, status, duration and the revision of the serving workload.",
+      "why": "A shared ID lets log lines, spans and metrics describe the same request instead of nearby ones.",
+      "pitfall": "Joining records by timestamp alone can pair a slow request with a different request's error.",
+      "verify": "Every field in the packet is linked to the request ID and revision."
+    },
+    {
+      "approach": "Split the measured latency into DNS, connection, queueing and handler time before choosing a cause.",
+      "why": "A high total can come from any phase, and CPU only explains the handler part.",
+      "pitfall": "Raising CPU limits because latency rose may change nothing if the delay is in DNS or queueing.",
+      "verify": "The answer breaks latency into phases with evidence for each."
+    },
+    {
+      "approach": "Show that each unique label value creates a new time series in the metrics store.",
+      "why": "Labels such as request ID or user ID have no bound, so series count, memory and cost grow without limit.",
+      "pitfall": "Adding a per-request label to make metrics searchable turns them into an unbounded store.",
+      "verify": "The answer ties unbounded label values to growing metric state and cost."
+    },
+    {
+      "approach": "Exclude credentials and private payloads, bound retention and keep fields such as request ID and revision.",
+      "why": "Correlation needs identifiers, not content, so useful debugging does not require sensitive data.",
+      "pitfall": "Logging full request bodies for convenience can capture tokens and personal data.",
+      "verify": "The plan lists excluded data, a retention limit and the correlation fields kept."
+    }
+  ],
+  "k8s-064": [
+    {
+      "approach": "Order the checks as DNS, route, transport, optional TLS, proxy or app route and response body.",
+      "why": "Each step depends on the one before it, so the first failing rung locates the fault.",
+      "pitfall": "Starting at the response body skips earlier layers that may have already failed.",
+      "verify": "The ladder lists all six rungs in order."
+    },
+    {
+      "approach": "Treat a refusal as reaching a host with no listener, and a timeout as no answer from anywhere along the path.",
+      "why": "A refused connection means something replied, while a timeout can come from routing, policy or a dropped packet.",
+      "pitfall": "Treating both errors the same discards the information that a refusal narrows the search.",
+      "verify": "Refusal narrows the cause, and timeout stays broad."
+    },
+    {
+      "approach": "Write selector, targetPort and data plane hypotheses, each with its own deciding evidence.",
+      "why": "Endpoints show selector matches, a direct Pod request tests targetPort and node rules test the data plane.",
+      "pitfall": "Checking one hypothesis and fixing it without testing the others can leave the real fault in place.",
+      "verify": "Each hypothesis has a distinct check."
+    },
+    {
+      "approach": "Look only at the layers the external path adds: listener, external routing and TLS.",
+      "why": "Internal success shows the Service and Pods work, so the fault must sit in the added external layers.",
+      "pitfall": "Debugging the backend after internal success repeats checks that already passed.",
+      "verify": "The diagnosis is limited to external listener, routing and TLS."
+    },
+    {
+      "approach": "Require a fresh receipt tied to the current revision, namespace and caller path.",
+      "why": "An older success may have come from a different revision, namespace or route than the one in question.",
+      "pitfall": "Reusing yesterday's passing check as current evidence can hide a regression.",
+      "verify": "The receipt has a current timestamp and matches revision, namespace and caller."
+    },
+    {
+      "approach": "Introduce one controlled fault, record the failure, apply one targeted fix and recheck the invariant.",
+      "why": "A single fault keeps cause and effect clear, and the recheck proves the fix restored the invariant.",
+      "pitfall": "Changing several settings at once makes it unclear which change fixed the failure.",
+      "verify": "The record shows one fault, its preserved failure, the repair and a passing recheck."
+    }
+  ],
+  "k8s-065": [
+    {
+      "approach": "Assign configuration and identity distribution to the control plane and traffic handling to the data plane proxies.",
+      "why": "The control plane pushes config and certificates, while sidecar or node proxies carry requests.",
+      "pitfall": "Expecting the control plane to carry requests misplaces where traffic failures occur.",
+      "verify": "The answer separates distribution from traffic handling."
+    },
+    {
+      "approach": "Contrast mTLS, which proves which workload is calling, with authorization for a specific business action.",
+      "why": "Knowing the peer's identity does not say whether that peer may perform an operation such as a refund.",
+      "pitfall": "Treating mTLS as full authorization lets any authenticated service call any endpoint.",
+      "verify": "The answer separates peer identity from action permission."
+    },
+    {
+      "approach": "Draw discovery, the inter-cluster route, trust establishment and the application hop.",
+      "why": "Each hop has its own owner and failure mode, from discovery records to cross-cluster certificates.",
+      "pitfall": "Drawing one arrow between clusters hides the trust and route steps.",
+      "verify": "All four hops are named."
+    },
+    {
+      "approach": "Multiply retry counts across each layer that retries to find the worst-case attempts.",
+      "why": "Three layers retrying three times can send 27 attempts for one request, adding load to a struggling backend.",
+      "pitfall": "Adding retries at every layer to improve reliability multiplies load during an outage.",
+      "verify": "The answer shows uncoordinated budgets multiplying attempts."
+    },
+    {
+      "approach": "Show that if two clusters share a Pod CIDR, one address can mean two different Pods.",
+      "why": "Routers and proxies cannot tell which cluster an overlapping address belongs to without translation.",
+      "pitfall": "Connecting clusters with default CIDRs assumes ranges are unique when they may match.",
+      "verify": "The answer says routing can become ambiguous without a deliberate design."
+    },
+    {
+      "approach": "List required capabilities, the operational cost of the mesh and simpler alternatives.",
+      "why": "A mesh adds proxies, certificates and upgrades, which are justified only by capabilities the workload needs.",
+      "pitfall": "Adopting a mesh because it is popular adds cost without a named need.",
+      "verify": "The decision names capabilities, cost and alternatives."
+    }
+  ],
+  "k8s-066": [
+    {
+      "approach": "Name the caller, destination address and port and responsible component at every hop.",
+      "why": "Each hop can rewrite addresses or ports, so naming them shows where a mismatch would occur.",
+      "pitfall": "Describing the path as client to app hides the Service, proxy and Pod hops.",
+      "verify": "Every hop has caller, destination and component."
+    },
+    {
+      "approach": "Mark which controllers, policy enforcement, dual-stack support and external routing the lab really has.",
+      "why": "Lessons can only verify capabilities that are present, so missing ones must be labeled.",
+      "pitfall": "Assuming a LoadBalancer or policy enforcer exists leads to claims nothing tested.",
+      "verify": "Each capability is marked available or unavailable."
+    },
+    {
+      "approach": "Assemble the diagram, manifests, ownership ledger, checks and limitations so they agree.",
+      "why": "Each part must describe the same resources and ports, or the packet contradicts itself.",
+      "pitfall": "Updating manifests without the diagram leaves reviewers checking a different system.",
+      "verify": "The parts are consistent with each other."
+    },
+    {
+      "approach": "Walk the path until the Service targetPort no longer matches the container listener, then fix that field.",
+      "why": "The first incorrect mapping is the fault, and a fresh request after the fix proves repair.",
+      "pitfall": "Changing the container port and the Service together can hide which side was wrong.",
+      "verify": "The fix touches one field, and a new request succeeds."
+    },
+    {
+      "approach": "Run one flow the policy allows and one owned flow it denies, under a named enforcing CNI.",
+      "why": "Only the denied result shows enforcement, since allowed traffic also passes without any policy.",
+      "pitfall": "Testing only the allowed flow proves nothing on a CNI that ignores policies.",
+      "verify": "The allowed flow succeeds and the denied flow fails."
+    },
+    {
+      "approach": "Explain mechanisms, present current results, list untested platforms and describe scoped cleanup.",
+      "why": "Clear limits let readers know which claims are proven here and which still need testing.",
+      "pitfall": "Presenting local lab results as valid for every cloud platform overclaims.",
+      "verify": "The explanation covers mechanisms, results, untested platforms and cleanup."
+    }
+  ]
+}

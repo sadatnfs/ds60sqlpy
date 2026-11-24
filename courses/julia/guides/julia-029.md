@@ -10,6 +10,14 @@ Build a bounded producer-consumer pipeline, join its work and explain how asynch
 
 Open `julia-029` in `/classroom` with its prepared `julia` runtime. Worked case A (stream squares through a small buffer) and worked case B (make failure observable) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-029: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Task:** A lightweight unit of concurrent work that runs until it finishes or waits, then lets other tasks proceed.
+- **Channel:** A typed queue between tasks with a capacity, where `put!` adds an item and `take!` removes one.
+- **Backpressure:** A full channel makes `put!` wait until a consumer takes an item, so a fast producer cannot queue unlimited records.
+- **Channel closure:** Closing a channel tells consumers that no more values will arrive, so iteration ends after the buffered values are consumed.
+- **Failure propagation:** The `@sync` block waits for its tasks and throws a `CompositeException` when any of them fails, so errors are not lost.
+
 ## Concurrency describes progress, not a speed guarantee
 
 A task is a schedulable unit of Julia work. Several tasks can make progress by yielding while waiting for data or another operation. Asynchronous execution is useful when a workflow has waiting points, but it does not automatically make a CPU loop parallel. The next unit uses thread scheduling explicitly. Keep the distinction visible when discussing throughput.

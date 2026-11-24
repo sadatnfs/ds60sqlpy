@@ -23,6 +23,13 @@ cuDF's local dataframe API works within a process and uses GPU columnar algorith
 The practical beginner sequence is CPU semantic oracle, ordinary Scala and PySpark query, logical/physical plan reading, then optional GPU plugin qualification. The same schema and expected rows carry through all four steps. This lets a learner on any CPU-only machine complete the reasoning and programming foundation without pretending that a container acquired NVIDIA hardware.
 
 
+### Key terms
+
+- **RAPIDS:** An ecosystem of GPU data-science libraries that includes cuDF.
+- **cuDF plugin for Apache Spark:** The plugin, formerly named RAPIDS Accelerator for Apache Spark, that replaces supported Spark SQL operators with GPU implementations.
+- **Physical plan:** The concrete operators Spark selects to execute a query, where the plugin substitutes GPU operators.
+- **Opaque UDF:** A user-defined function whose body Spark cannot inspect, so the plugin cannot translate it into GPU operators.
+
 ## Worked examples
 
 ### Worked example 1
@@ -48,6 +55,15 @@ print("CPU Spark semantic oracle:", sorted(totals.items()))
 
 **Expected observation:** Grouped totals A 6 and B 14; no GPU execution claimed.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `rows` | `[('A', 2), ('A', 4), ('B', 6), ('B', 8)]` |
+| `totals` | `{'A': 6, 'B': 14}` |
+| `key` | `'B'` |
+| `value` | `8` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Scala and PySpark parity lab
@@ -60,27 +76,39 @@ For external GPU comparison, retain the same relational expressions and expected
 
 ### Exercise 1: Classify four execution layers
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **classify four execution layers** in the examples above.
+**Trap to avoid:** Calling the whole pipeline GPU-accelerated because one layer uses the GPU hides the layers that still run on CPU and the transfers between them, which often dominate.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Explain cuDF versus plugin
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **explain cuDF versus plugin** in the examples above.
+**Trap to avoid:** Assuming installing cuDF on executors accelerates Spark SQL confuses the two, since without the plugin configured Spark never routes operators to cuDF.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Identify an opaque UDF
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **identify an opaque UDF** in the examples above.
+**Trap to avoid:** Assuming a UDF runs on the GPU because surrounding operators do ignores the boundary, and the measured time then includes conversions the plan does not advertise.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Write equivalent Scala and PySpark expressions
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **write equivalent Scala and PySpark expressions** in the examples above.
+**Trap to avoid:** Writing the PySpark version with a Python loop over collected rows changes where the work happens and loses the equivalence, even if the totals match.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Define CPU-only progress
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **define CPU-only progress** in the examples above.
+**Trap to avoid:** Reporting a CPU run as evidence that the GPU path works confuses semantic parity with accelerated execution.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: List real GPU evidence
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **list real GPU evidence** in the examples above.
+**Trap to avoid:** Presenting only a configuration file as GPU evidence shows intent but not execution.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

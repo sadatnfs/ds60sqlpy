@@ -1,6 +1,6 @@
 # llm-031: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these instruction tuning and loss masks answers after attempting *Align the target mask* through *Refuse missing answers*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Compare loss sums* points to one step. `llm-031_solution.py` holds the assertions; this page explains how they test instruction tuning. Then try *Refuse missing answers* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -31,7 +31,7 @@ assert targets.tolist() == [[2, 5, 6, 3]] and int(answer.sum()) == 3
 
 **Expected:** targets [2, 5, 6, 3]; mask [False, True, True, True].
 
-**Verify:** In a fresh process, the exercise checks confirm `targets.tolist() == [[2, 5, 6, 3]]` and `int(answer.sum()) == 3`.
+**Verify:** For *Align the target mask*, a fresh-process check confirms `targets.tolist() == [[2, 5, 6, 3]]` and `int(answer.sum()) == 3`.
 
 ## Exercise 2: Compute answer-only loss
 
@@ -48,7 +48,7 @@ np.testing.assert_allclose(loss.item(), np.log(8), atol=1e-6, rtol=0)
 
 **Expected:** 3 active targets; mean \(\log 8\).
 
-**Verify:** In a fresh process, the exercise checks confirm `loss.item()` matches `np.log(8)` within 1e-6.
+**Verify:** For *Compute answer-only loss*, a fresh-process check confirms `loss.item()` matches `np.log(8)` within 1e-6.
 
 ## Exercise 3: Compare loss sums
 
@@ -68,7 +68,7 @@ np.testing.assert_allclose(
 
 **Expected:** 4 log 8 versus 3 log 8.
 
-**Verify:** In a fresh process, the exercise checks confirm `[full.item(), answer_sum.item()]` matches `[4 * np.log(8), 3 * np.log(8)]` within 1e-6.
+**Verify:** For *Compare loss sums*, a fresh-process check confirms `[full.item(), answer_sum.item()]` matches `[4 * np.log(8), 3 * np.log(8)]` within 1e-6.
 
 ## Exercise 4: Inspect ignored gradients
 
@@ -86,7 +86,7 @@ assert (
 
 **Expected:** first-position gradient all zero; answer gradients nonzero.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.count_nonzero(v.grad[:, 0]).item() == 0` and `torch.count_nonzero(v.grad[:, 1:]).item() > 0`.
+**Verify:** For *Inspect ignored gradients*, a fresh-process check confirms `torch.count_nonzero(v.grad[:, 0]).item() == 0` and `torch.count_nonzero(v.grad[:, 1:]).item() > 0`.
 
 ## Exercise 5: Detect template leakage
 
@@ -101,7 +101,7 @@ assert {family["p1"]} & {family["p2"]} == {"T"}
 
 **Expected:** family intersection T.
 
-**Verify:** In a fresh process, the exercise checks confirm `{family['p1']} & {family['p2']} == {'T'}`.
+**Verify:** For *Detect template leakage*, a fresh-process check confirms `{family['p1']} & {family['p2']} == {'T'}`.
 
 ## Exercise 6: Refuse missing answers
 
@@ -122,8 +122,8 @@ else:
 
 **Expected:** no active answer targets; explicit ValueError.
 
-**Verify:** In a fresh process, the exercise checks confirm `int(empty.sum()) != 0`.
+**Verify:** For *Refuse missing answers*, a fresh-process check confirms `int(empty.sum()) != 0`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Inspect ignored gradients* and predict the result first; keep *Refuse missing answers* failing beside the repair. Log a missing PyTorch separately from a wrong instruction tuning value in `llm-031`.

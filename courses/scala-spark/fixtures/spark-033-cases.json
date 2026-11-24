@@ -19,7 +19,7 @@
     {
       "exercise": 3,
       "title": "Execute accepted and quarantine branches with separate checkpoints",
-      "input_contract": "Run both first-phase branches with AvailableNow:deduplicated records to accepted-output and missing-ID records to quarantine-output. Use distinct checkpoints and bounded await/stop scopes.",
+      "input_contract": "Run both first-phase branches with AvailableNow: deduplicated records to accepted-output and missing-ID records to quarantine-output. Use distinct checkpoints and bounded await/stop scopes.",
       "expected": "Accepted(e1, delivery 1,10),(e2, delivery 2,10);quarantine(delivery 3, NULL, missing_event_id). The raw source has 3 rows;prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.",
       "verification": "Assert both exact output populations, branch metrics 2/1 and an independent raw batch-source count 3."
     },
@@ -41,12 +41,12 @@
       "exercise": 6,
       "title": "Reconcile deliveries, quarantine, replay suppression and business totals",
       "input_contract": "Read the six source deliveries once as a bounded batch and compare them with both sinks. Return source deliveries, known-ID deliveries, quarantine rows, accepted rows including advancer, and business total.",
-      "expected": "Ledger(6,5,1,4,30). One known-ID delivery is suppressed as an in-horizon replay;three distinct equal-valued business events remain.",
+      "expected": "Ledger(6, 5, 1, 4, 30). One known-ID delivery is suppressed as an in-horizon replay;three distinct equal-valued business events remain.",
       "verification": "Assert the complete ledger and six unique delivery IDs;confirm no active queries remain before cleanup."
     }
   ],
   "golden": {
-    "branch_metric_scope": "PreparedSpark4.0.1 reports scan rows after branch filters;raw deliveries are independently counted.",
+    "branch_metric_scope": "Prepared Spark 4.0.1 reports scan rows after branch filters; raw deliveries are independently counted.",
     "reported_inputs_by_phase": {
       "accepted": [2, 2, 1],
       "quarantine": [1, 0, 0]

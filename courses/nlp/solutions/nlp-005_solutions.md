@@ -48,7 +48,7 @@ A surface form is the observed spelling, such as saw. A lemma is a dictionary-li
 
 ## Mechanism review and counterexample
 
-A dependency representation links each token to a head token, with a root marking the main organizing predicate under a chosen annotation scheme. For tokens [I,saw,her], heads [1,-1,1] attach I and her to saw, which is the root. Indices refer to token positions, and -1 is the explicit root sentinel in this lesson.
+A dependency representation links each token to a head token, with a root marking the main organizing predicate under a chosen annotation scheme. For tokens [I, saw, her], heads [1, -1, 1] attach I and her to saw, which is the root. Indices refer to token positions, and -1 is the explicit root sentinel in this lesson.
 
 A structural validator checks legal indices, exactly one root and absence of cycles. Following each head chain should eventually reach -1. These conditions establish that the array forms one rooted tree. They do not establish that the attachments or relation labels are linguistically correct. Heads [1,-1,0] also form a tree but attach her to I, which is not the intended analysis of this sentence.
 

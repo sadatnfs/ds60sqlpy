@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-017`, `apache-018`, `apache-019`.
 
+## Key terms
+
+- **Embedded engine:** A query engine linked into an application process that provides analytical operators without a separate query server.
+- **Fixed query API:** A narrow request interface, here an allowlisted region and a bounded row limit, that never accepts table names, paths or SQL text from callers.
+- **Allowlist:** An explicit set of permitted request values. Anything outside it is rejected before a query is planned or executed.
+- **Resource limits:** Independent bounds on input, computation and output. A SQL LIMIT bounds returned rows but not scanned input, join state, sort work or execution time.
+- **Source digest:** The SHA256 of the canonical source rows reported with each result. It identifies which bytes produced the answer but does not prove authorization or scientific validity.
+
 ## Embedding an engine is an application-design decision
 
 An embedded engine gives a program analytical operators without a separate query
@@ -79,6 +87,55 @@ not define data authorization, allowed operations, computation cost, output size
 or state isolation. The two cases implement a deliberately narrow interface and
 show exactly what it admits and rejects, without presenting it as an unrestricted
 production query service.
+
+## Worked examples
+
+### Validate a request before creating a session
+
+```python
+QUERIES = {"east", "west"}
+
+
+def validate(request: object) -> dict:
+    if type(request) is not dict or set(request) != {"region", "limit"}:
+        raise ValueError("Expected exactly region and limit")
+    if request["region"] not in QUERIES:
+        raise ValueError("Unapproved region")
+    if type(request["limit"]) is not int or not 1 <= request["limit"] <= 3:
+        raise ValueError("Limit must be an integer from one to three")
+    return request
+
+
+for candidate in [{"region": "east", "limit": 2}, {"region": "east", "limit": True}]:
+    try:
+        print("accepted", validate(candidate))
+    except ValueError as error:
+        print("rejected", error)
+```
+
+```text
+accepted {'region': 'east', 'limit': 2}
+rejected Limit must be an integer from one to three
+```
+
+The first request passes and the second fails even though True compares equal to 1 in Python, because the check uses an exact type test rather than isinstance. Rejecting before a session exists means a malformed request costs no engine memory and leaves no partial receipt. Keep the approved query text on the server keyed by region; never splice a caller string into SQL.
+
+### Fingerprint the source in each response
+
+```python
+import hashlib
+import json
+
+SOURCE = [{"id": 1, "region": "east", "amount": 4}, {"id": 3, "region": "east", "amount": 7}]
+canonical = json.dumps(SOURCE, sort_keys=True, separators=(",", ":"))
+print(hashlib.sha256(canonical.encode()).hexdigest()[:16])
+```
+
+```text
+20b72396464bd58e
+```
+
+The digest prefix is stable for this exact source and changes if any value, key or row changes, so two responses can be compared for source identity without shipping the data. Sorting keys and fixing separators matters: the default JSON separators or a different key order would produce a different hash for the same facts. Include the full digest in real responses; the prefix here only keeps the output short.
 
 ## Complete worked source
 

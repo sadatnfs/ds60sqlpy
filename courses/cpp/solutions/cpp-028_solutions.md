@@ -17,7 +17,7 @@ A reusable library separates its public contract from implementation and from th
 
 The public Record owns integer id and cents values. It does not retain a view into the input, so a successful result survives after the caller's raw string is destroyed. The parser still borrows the input while reading it. A library that returned views into a temporary normalization buffer would violate that lifetime contract even if its ordinary example happened to print correct values.
 
-The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture 7, 125x rejects a plausible permissive parser that accepts a numeric prefix. Valid 0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.
+The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture `7,125x` rejects a plausible permissive parser that accepts a numeric prefix. Valid 0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.
 
 The real record-library fixture contains a public header, implementation, independent consumer and CMake target. Building the consumer against that target tests whether the header declares everything it needs and whether the implementation is actually linked. A combined single-file source cannot expose a missing exported include path or omitted library object in the same way.
 
@@ -59,7 +59,7 @@ Document parse_record input grammar and result ownership.
 
 ## Exercise 2: Build independent fixture
 
-Use [7, 125; 0, 0; 7, 125x; 7, -1] as four records.
+Use `7,125`, `0,0`, `7,125x` and `7,-1` as four records.
 
 **Expected:** Two accepted and two rejected.
 
@@ -81,7 +81,7 @@ Split header, implementation and CLI into the host project.
 
 Remove the full-consumption check in a scratch implementation.
 
-**Expected:** 7, 125x must fail the golden test.
+**Expected:** `7,125x` must fail the golden test.
 
 **Reasoning:** A plausible parsing shortcut is the negative control.
 

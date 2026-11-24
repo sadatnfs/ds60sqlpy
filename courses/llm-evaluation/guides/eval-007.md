@@ -8,7 +8,7 @@ Prespecify a family of comparisons and monitoring times, calculate conservative 
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-007`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-007` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for multiplicity and sequential release decisions in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about familywise error and Bonferroni: A single comparison at the threshold rejects the null under the declared non-strict rule, none of three equal findings crosses the Bonferroni threshold, an overspent monitoring plan and an unknown result are rejected, and significance alone does not mandate deployment. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## A collection of tests is one decision procedure
 
@@ -23,6 +23,13 @@ P\left(\bigcup_{j=1}^{m}E_j\right)\leq\sum_{j=1}^{m}P(E_j).
 If each fixed analysis uses a valid p-value under its null and thresholds \(\alpha_j\) have a prespecified sum at most \(\alpha\), this controls the probability of at least one false rejection in that family. Independence is not required for the bound. Validity of the individual tests is still required: adjustment does not repair data leakage, a wrong sampling unit or a post-hoc hypothesis invented from the final labels.
 
 A threshold-crossing event is also different from a decision to deploy. An improvement too small to matter can be statistically detectable, while an uncertain critical-risk condition may still block a release. Retain effect sizes, practical margins, uncertainty and operational gates separately.
+
+## Key terms
+
+- **Familywise error rate:** The probability of at least one false rejection among all tests in a declared family.
+- **Bonferroni allocation:** Testing each of m hypotheses at alpha/m, which controls the familywise error rate by the union bound.
+- **Alpha spending:** Allocating the error budget across planned interim analyses in advance.
+- **Optional stopping:** Ending data collection when results look favorable, which inflates error unless the procedure accounts for it.
 
 ## Worked case A: three opportunities for a false alarm
 

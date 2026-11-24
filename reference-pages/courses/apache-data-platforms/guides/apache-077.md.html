@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-077-snapshots-predicates-and-consistency">apache-077: Snapshots, predicates and consistency<a class="heading-anchor" href="#apache-077-snapshots-predicates-and-consistency" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-076</code>, <code>apache-075</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Table version:</strong> A specific committed state of a shared Delta table. Requesting it pins the result so later commits do not change the answer.</li>
+<li><strong>Predicate hint:</strong> A filter the client sends so the server may skip files. The server can ignore it, so the client must still apply the full filter.</li>
+<li><strong>History sharing:</strong> A provider option that makes earlier table versions readable, still subject to the table&#x27;s retention rules.</li>
+<li><strong>Result identity:</strong> The recorded table, version, schema and row values that let a later read be compared with the original one.</li>
+</ul>
 <h3 id="reproducibility-requires-selecting-a-table-state">Reproducibility requires selecting a table state<a class="heading-anchor" href="#reproducibility-requires-selecting-a-table-state" aria-label="Link to this section">#</a></h3>
 <p>A mutable table name identifies a logical object whose current contents can change. A version-pinned request identifies a selected table state under the server&#x27;s supported protocol and retention rules. Saving only the name and query text is insufficient when a later read can observe additional commits. Record table identity, selected version, schema and result identity together.</p>
 <p>Predicate hints can help a server reduce eligible files or other work. They are not automatically an authorization policy or a complete row-level filter. The recipient must preserve SQL/predicate correctness according to its supported reader semantics. An optimization hint that the server ignores should not make a correct client return unfiltered business results.</p>
@@ -211,6 +218,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Inspect requested/returned version, history policy, retention, schema, predicate representation and recipient filtering behavior. Distinguish unsupported history from missing files and distinguish ignored hints from incorrect client filtering. Keep retries bound to the intended table state when reproducibility matters.</p>
 <p><strong>Interview discussion: does a predicate hint guarantee row-level security?</strong> No. It is part of query optimization unless the actual protocol/deployment explicitly provides a tested policy guarantee. These cases separate fixed-state reproducibility from file pruning and final row correctness.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="query-the-table-at-a-pinned-version">Query the table at a pinned version<a class="heading-anchor" href="#query-the-table-at-a-pinned-version" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash">curl -s -H <span class="syntax-string">&quot;</span><span class="syntax-string">Authorization: Bearer </span>$RECIPIENT_TOKEN<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  -H <span class="syntax-string">&quot;Content-Type: application/json&quot;</span> <span class="syntax-string">\</span>
+  -d <span class="syntax-string">&#x27;{&quot;version&quot;: 0, &quot;predicateHints&quot;: []}&#x27;</span> <span class="syntax-string">\</span>
+  <span class="syntax-string">&quot;</span>$SHARING_ENDPOINT<span class="syntax-string">/shares/ds60_fixture/schemas/tutorial/tables/orders/query</span><span class="syntax-string">&quot;</span></code></pre>
+<p>The response is newline-delimited JSON: a protocol line, a metaData line and one file line per data file, each with a short-lived presigned URL. The delta-table-version response header must equal 0, or the reader cannot claim it saw the pinned state. Two reads at version 0 return the same files; a read without a version follows the latest commit and can change between calls, which is why reproducible reports always pin.</p>
+<h4 id="predicate-hints-do-not-filter-rows">Predicate hints do not filter rows<a class="heading-anchor" href="#predicate-hints-do-not-filter-rows" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">&quot;version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;predicateHints&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;region = &#x27;east&#x27;&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>A server may use hints to skip files whose statistics cannot match, but it is allowed to ignore them, and the reference configuration sets evaluatePredicateHints to false. The client must therefore apply the filter itself after reading. If a recipient relied on hints to hide west rows, it would receive them anyway, so hints are an optimization and never an access boundary.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="delta-sharing-apache-077-prepared-command-notebook">Delta Sharing apache-077 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-077-prepared-command-notebook" aria-label="Link to this section">#</a></h2>

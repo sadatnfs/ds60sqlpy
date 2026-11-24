@@ -15,6 +15,14 @@ L(\lambda)=\prod_i\lambda^{\delta_i}\exp(-\lambda t_i),
 
 The numerator counts observed events and the denominator counts exposure time. A formula based only on the average recorded duration incorrectly treats every censoring time as a failure.
 
+## Key terms
+
+- **Right censoring:** Follow-up that ends at c before an event, contributing the survival probability S(c) = P(T > c) rather than a density.
+- **Exposure time:** Total observed follow-up; for an exponential model the rate MLE is observed events divided by exposure.
+- **Weibull shape:** The parameter k in cumulative hazard (t/s)^k that lets the hazard rise or fall over time.
+- **Accelerated failure time:** A model in which a covariate multiplies the time scale, so every survival quantile shifts by the same time ratio.
+- **Time ratio:** The factor e^(b_1) by which a binary covariate stretches every quantile of the survival distribution in an AFT model.
+
 ## Worked case 1: use the actual event indicators
 
 The five observed durations are 1,2,4,5,8, with events only at 1,2 and 5. There are three events and 20 exposure units, so the exponential rate estimate is .15. Treating all five durations as event times gives .25. The program checks both values and keeps the naive estimate explicitly labeled as a contrasting incorrect analysis.
@@ -48,6 +56,48 @@ The example has five observations and only three events. It is designed to verif
 **Does censoring mean that the missing event time can be imputed by the follow-up duration?** No. The observed information is an inequality. Treating the lower bound as an exact event systematically changes the likelihood.
 
 **Can a lower AIC compensate for an incorrect censoring mechanism?** It compares fitted predictive descriptions under the likelihoods supplied. It cannot validate the observation process or the causal meaning of a covariate. A well-defined likelihood starts with correct data semantics.
+
+## Worked example: Weibull fit with right-censoring and a time ratio
+
+```python
+import numpy as np
+from scipy import optimize
+
+t = np.array([2.0, 3.0, 5.0, 6.0, 8.0, 4.0, 7.0, 9.0, 12.0, 15.0])
+d = np.array([1, 1, 1, 0, 1, 1, 1, 0, 1, 0])
+x = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
+
+
+def nll(par, d=d):
+    b0, b1, log_k = par
+    k = np.exp(log_k)
+    scale = np.exp(b0 + b1 * x)
+    z = (t / scale) ** k
+    log_f = np.log(k) - np.log(scale) + (k - 1) * np.log(t / scale) - z
+    return -np.sum(d * log_f - (1 - d) * z)
+
+
+fit = optimize.minimize(nll, [1.0, 0.0, 0.0], method="BFGS")
+b0, b1, log_k = fit.x
+print(f"converged {fit.success}, -loglik {fit.fun:.4f}")
+print(f"shape k {np.exp(log_k):.3f}, time ratio exp(b1) {np.exp(b1):.3f}")
+print(f"median time x=0: {np.exp(b0) * np.log(2) ** (1 / np.exp(log_k)):.3f}")
+print(f"median time x=1: {np.exp(b0 + b1) * np.log(2) ** (1 / np.exp(log_k)):.3f}")
+wrong = optimize.minimize(nll, [1.0, 0.0, 0.0], args=(np.ones(10),), method="BFGS")
+print(f"censored times treated as events: time ratio {np.exp(wrong.x[1]):.3f}")
+```
+
+Observed output:
+
+```text
+converged True, -loglik 20.4439
+shape k 2.076, time ratio exp(b1) 2.217
+median time x=0: 4.932
+median time x=1: 10.934
+censored times treated as events: time ratio 1.921
+```
+
+The censored model converges with shape \(k=2.076\), an increasing hazard, and a time ratio of 2.217 for the \(x=1\) group. On the accelerated failure time scale that ratio stretches the whole survival curve: the fitted median moves from 4.932 to 10.934 and \(10.934/4.932=2.217\). The interpretation is a statement about time, not about hazard: members of the second group take about 2.2 times as long to reach any survival quantile. The wrong fit, which counts the three censored times as events, shrinks the time ratio to 1.921. Two of those three observations, the follow-ups ending at 9 and 15, belong to the \(x=1\) group, so treating them as failures pretends that group failed earlier than the data show, while only the censored time 6 shortens the \(x=0\) group. The censoring term \(-(t/\lambda)^k\) uses only the survival probability up to the censoring time, and dropping it biases the comparison toward no difference.
 
 ## Complete reproducible program
 

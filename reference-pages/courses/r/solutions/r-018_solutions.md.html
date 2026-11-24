@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the date after 2024-02-28.</p>
 <p>It is 2024-02-29.</p>
+<p><strong>Approach:</strong> Parse the first starter value with <code>as.Date()</code> and add 1. Date arithmetic counts whole calendar days, so no time of day or zone is involved.</p>
+<p><strong>Why it holds here:</strong> 2024 is divisible by 4 and is not a century year, so February has 29 days. One day after 2024-02-28 is therefore 2024-02-29, and the starter&#x27;s second value, 2024-03-01, is two days after the first rather than one.</p>
+<p><strong>Tempting mistake:</strong> Incrementing the day field of the string and rolling over to March after day 28. That produces 2024-03-01 and silently drops leap day, which is exactly the boundary this input was chosen to test.</p>
+<p><strong>Verify:</strong> <code>format(as.Date(&quot;2024-02-28&quot;) + 1)</code> returns &quot;2024-02-29&quot;, and <code>as.numeric(as.Date(dates[2]) - as.Date(dates[1]))</code> returns 2.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add two hours to a declared UTC instant.</p>
 <p>The instant advances 7200 seconds.</p>
+<p><strong>Approach:</strong> Parse the timestamp with an explicit format and <code>tz = &quot;UTC&quot;</code>, then add 7200, because arithmetic on POSIXct values is in seconds.</p>
+<p><strong>Why it holds here:</strong> UTC never shifts for daylight saving, so two clock hours and two elapsed hours agree for this instant. 12:00 becomes 14:00 on the same date, and difftime reports the gap in the unit that was asked for rather than one R picks.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>instant + 2</code> to mean two hours. POSIXct counts seconds, so the result is 12:00:02, a value that looks almost unchanged when printed to the minute and is easy to miss in review.</p>
+<p><strong>Verify:</strong> <code>as.numeric(difftime(instant + 7200, instant, units = &quot;hours&quot;))</code> returns 2, and <code>format(instant + 7200, &quot;%H:%M&quot;, tz = &quot;UTC&quot;)</code> shows &quot;14:00&quot;.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Parse an explicit ISO calendar date.</p>
 <p>as.Date(&quot;2025-01-15&quot;) retains the calendar date.</p>
+<p><strong>Approach:</strong> Parse &quot;2025-01-15&quot; with <code>as.Date()</code> and keep it as a Date, since the source records a day and no time of day.</p>
+<p><strong>Why it holds here:</strong> A Date carries no zone, so it prints as 2025-01-15 in every session and on every machine. Its arithmetic is in days, which is what a due date or a reporting day needs.</p>
+<p><strong>Tempting mistake:</strong> Storing the day as <code>as.POSIXct(&quot;2025-01-15&quot;, tz = &quot;UTC&quot;)</code>. That invents a midnight UTC time, and formatting it for New York shows 2025-01-14 19:00, moving the record to the previous day.</p>
+<p><strong>Verify:</strong> <code>inherits(as.Date(&quot;2025-01-15&quot;), &quot;Date&quot;)</code> returns TRUE, and <code>format(as.Date(&quot;2025-01-15&quot;))</code> returns &quot;2025-01-15&quot;.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a local timestamp with no zone near a daylight-saving change.</p>
 <p>Require the source zone and a defined resolution/rejection policy.</p>
+<p><strong>Approach:</strong> Ask the data owner for the source zone, then check whether each label falls in the skipped spring hour or the repeated autumn hour and apply a written policy: reject, or choose the earlier or later offset.</p>
+<p><strong>Why it holds here:</strong> In New York the labels 02:00 to 02:59 never occurred on 2025-03-09, and 01:00 to 01:59 occurred twice on 2025-11-02, first as EDT and then as EST. A bare &quot;2025-11-02 01:30&quot; therefore names two instants one hour apart, and nothing in the text says which.</p>
+<p><strong>Tempting mistake:</strong> Parsing without tz. R then uses the session zone, so the same file yields different instants on a laptop set to UTC and on a server set to New York, and a nonexistent label may become NA or shift depending on the platform.</p>
+<p><strong>Verify:</strong> <code>format(as.POSIXct(c(&quot;2025-11-02 05:30&quot;, &quot;2025-11-02 06:30&quot;), tz = &quot;UTC&quot;), &quot;%H:%M %Z&quot;, tz = &quot;America/New_York&quot;)</code> shows &quot;01:30 EDT&quot; and &quot;01:30 EST&quot;, one label for two instants.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Detect invalid date text.</p>
 <p>A failed parse is missing and should be counted or rejected.</p>
+<p><strong>Approach:</strong> Parse with an explicit format, then count results that are NA where the raw text was not, and stop or report those rows before any date arithmetic.</p>
+<p><strong>Why it holds here:</strong> With a format supplied, <code>as.Date(&quot;not-a-date&quot;, format = &quot;%Y-%m-%d&quot;)</code> returns NA and raises no error, so the program keeps running unless the result is inspected. The NA would later vanish from a grouped count or make a range NA.</p>
+<p><strong>Tempting mistake:</strong> Relying on as.Date to fail loudly. Without a format it stops only when the first non-missing value matches no default format; if an earlier row parses, later bad rows quietly become NA, and with a format no row ever errors.</p>
+<p><strong>Verify:</strong> <code>is.na(as.Date(&quot;not-a-date&quot;, format = &quot;%Y-%m-%d&quot;))</code> returns TRUE, and <code>sum(is.na(parsed) &amp; !is.na(raw))</code> shows how many rows failed.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Separate business-date grouping from event ordering.</p>
 <p>Keep both representations with their meanings stated.</p>
+<p><strong>Approach:</strong> Keep the UTC instant as the canonical column for ordering, and derive a separate business date with <code>as.Date(instant, tz = &quot;America/New_York&quot;)</code> for grouping and labels.</p>
+<p><strong>Why it holds here:</strong> The reference instant, 12:00 UTC, is 07:00 in New York on the same date, but an order at 02:00 UTC on January 16 belongs to the store&#x27;s January 15. Ordering uses the stored seconds, which no display zone changes, so both columns can coexist without conflict.</p>
+<p><strong>Tempting mistake:</strong> Sorting by the formatted local clock text. On 2025-11-02 an event at 01:45 EDT happened before one at 01:15 EST, yet the strings sort 01:15 first, reversing the true order.</p>
+<p><strong>Verify:</strong> <code>as.Date(as.POSIXct(&quot;2025-01-16 02:00&quot;, tz = &quot;UTC&quot;), tz = &quot;America/New_York&quot;)</code> returns 2025-01-15, and <code>as.numeric(instant + 1) &gt; as.numeric(instant)</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

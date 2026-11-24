@@ -199,18 +199,42 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-033_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A synthetic kernel reads 400 useful bytes but causes 1,600 transferred bytes because of its access pattern. Useful-to-transferred ratio is 0.25. A high DRAM traffic counter does not imply useful data processing is efficient. Compare address patterns and a corrected layout before blaming arithmetic capacity.</p>
+<p><strong>Approach:</strong> Divide 400 useful bytes by 1,600 transferred bytes.</p>
+<p><strong>Why it is correct:</strong> Only a quarter of moved bytes do useful work, so the access pattern wastes bandwidth.</p>
+<p><strong>A plausible wrong approach:</strong> Reading high DRAM throughput as efficient processing ignores that most bytes are unused.</p>
+<p><strong>How to verify:</strong> The reference asserts useful / transferred == 0.25.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>Two kernels show 50% and 75% occupancy, yet times are 2 and 3 ms. Occupancy alone cannot rank them. The second may do more instructions, spill registers or repeat loads. Keep both correctness and selected counters with the timings, and state which causal explanation remains a hypothesis.</p>
+<p><strong>Approach:</strong> Rank by measured time and use occupancy only to explain differences.</p>
+<p><strong>Why it is correct:</strong> The 75 percent kernel takes 3 ms against 2 ms, so occupancy did not predict speed.</p>
+<p><strong>A plausible wrong approach:</strong> Picking the higher-occupancy kernel as faster contradicts the measured times.</p>
+<p><strong>How to verify:</strong> Keep correctness checks and counters next to each timing.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>60 GB/s in decimal units. State useful-byte accounting separately from measured hardware traffic.</p>
+<p><strong>Approach:</strong> Divide 12,000,000 bytes by 0.0002 seconds.</p>
+<p><strong>Why it is correct:</strong> That is 6e10 bytes per second, or 60 GB/s in decimal units.</p>
+<p><strong>A plausible wrong approach:</strong> Using binary units here gives about 55.9 GiB/s and a mismatched label.</p>
+<p><strong>How to verify:</strong> The reference asserts 12_000_000 / 0.0002 == 60_000_000_000.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Collection and replay can perturb cache state, scheduling and overhead. Keep instrumented evidence separate from normal benchmark samples.</p>
+<p><strong>Approach:</strong> Keep profiler-collected numbers separate from ordinary timing samples.</p>
+<p><strong>Why it is correct:</strong> Counter replay reruns kernels and perturbs caches and timing.</p>
+<p><strong>A plausible wrong approach:</strong> Quoting a kernel time from an instrumented replay as normal runtime overstates cost.</p>
+<p><strong>How to verify:</strong> Time the same kernel without the profiler and compare.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Record profiling capability as unavailable; use correctness, host/device timing and address reasoning without inventing counters.</p>
+<p><strong>Approach:</strong> Record counters as unavailable and use timing and address reasoning.</p>
+<p><strong>Why it is correct:</strong> Missing permissions or hardware means no counter values exist.</p>
+<p><strong>A plausible wrong approach:</strong> Estimating counter values and presenting them as measured fabricates evidence.</p>
+<p><strong>How to verify:</strong> State the capability check result next to the analysis.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Compare equal useful work, map lane addresses, collect relevant memory metrics if permitted and test a contiguous alternative while preserving output.</p>
+<p><strong>Approach:</strong> Map lane addresses for the strided read and compare with a contiguous version of equal work.</p>
+<p><strong>Why it is correct:</strong> Address mapping predicts wasted bytes that memory metrics can confirm.</p>
+<p><strong>A plausible wrong approach:</strong> Comparing a strided kernel with a contiguous one doing less work credits layout for reduced work.</p>
+<p><strong>How to verify:</strong> Confirm both produce identical outputs before comparing metrics.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-033_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The complete CPU model is <a href="../references/cuda-033_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide&#x27;s model leaves for you to derive: <code>assert 12_000_000 / 0.0002 == 60_000_000_000</code>. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
 <p>Compare equal useful work, map lane addresses, collect relevant memory metrics if permitted and test a contiguous alternative while preserving output.</p>
 <p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>

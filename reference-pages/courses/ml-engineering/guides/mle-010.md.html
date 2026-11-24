@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Experiment tracking records how a result was produced. Parameters describe choices, metrics describe measured outcomes, tags provide context and artifacts retain files such as contracts or model cards. The tracking record is useful only when those entries refer to the same actual run and source/data versions.</p>
 <p>This lesson uses the actual MLflow client with an explicitly local SQLite backend and local artifact directory. It starts no tracking server and selects no ambient cloud workspace. The first case records a metric and a feature/data manifest, then reads both back through MLflow. The second records a failed run that still contains a measured training loss.</p>
 <p>A retained metric is not proof that the complete workflow succeeded. Failures can occur after useful observations were produced. Keep the terminal status and the evidence that justified it. Similarly, an artifact named model-card does not establish that someone reviewed its contents; the fields and acceptance decision need their own contract.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Run:</strong> One recorded execution in an MLflow experiment, with its own identity, parameters, metrics, tags, artifacts and terminal status.</li>
+<li><strong>Parameter:</strong> A logged input choice for a run, such as a hyperparameter or data version, recorded with log_param.</li>
+<li><strong>Metric:</strong> A logged measured outcome such as a training loss, recorded with log_metric and confirmed by reading the run back with get_run.</li>
+<li><strong>Artifact:</strong> A file stored with a run, such as a feature manifest or model card, attached with log_artifact and confirmed with list_artifacts.</li>
+<li><strong>Run status:</strong> The terminal state recorded by set_terminated, such as FINISHED or FAILED, which is separate from whether useful metrics were logged.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>MlflowClient receives explicit local tracking and registry URIs. create_experiment defines an owned experiment and artifact location, create_run obtains its identity, and log_param/log_metric/log_artifact attach evidence. set_terminated records the final status. get_run and list_artifacts establish actual stored readback rather than assuming a logging call was sufficient.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

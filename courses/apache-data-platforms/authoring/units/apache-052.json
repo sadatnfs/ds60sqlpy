@@ -5,6 +5,42 @@
   "minutes": 75,
   "prerequisites": ["apache-051"],
   "concepts": ["write timestamp", "commitlog", "memtable", "SSTable"],
+  "key_terms": [
+    [
+      "Commitlog",
+      "An append-only log on each node that records a write before it is applied in memory, so it can be replayed after a restart."
+    ],
+    [
+      "Memtable",
+      "The mutable in-memory structure that holds recent writes for a table until it is flushed to disk."
+    ],
+    [
+      "SSTable",
+      "An immutable sorted string table file written when a memtable flushes. Reads may merge several SSTables and the memtable."
+    ],
+    [
+      "Write timestamp",
+      "The timestamp attached to each written cell. When versions of the same cell conflict, the one with the highest timestamp wins."
+    ],
+    [
+      "Bloom filter",
+      "A per-SSTable probabilistic structure that can prove a partition key is absent but can return false positives, so a possible match still needs a read."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Competing writes with explicit timestamps",
+      "language": "sql",
+      "code": "INSERT INTO ds60_orders.clocked (key, value)\nVALUES ('demo', 'initial')\nUSING TIMESTAMP 1700000000000000;\n\nUPDATE ds60_orders.clocked USING TIMESTAMP 1700000000000010\nSET value = 'newest'\nWHERE key = 'demo';\n\nUPDATE ds60_orders.clocked USING TIMESTAMP 1700000000000005\nSET value = 'stale'\nWHERE key = 'demo';\n\nSELECT value\nFROM ds60_orders.clocked\nWHERE key = 'demo';",
+      "interpretation": "The final SELECT returns newest even though stale was written last, because Cassandra resolves each cell by its write timestamp in microseconds and not by arrival order. This is why client clock skew matters: a writer whose clock runs ahead can silently win against later, correct updates. The client in the project raises an AssertionError if this rule ever changes, which makes the check repeatable after restarts."
+    },
+    {
+      "title": "A clustering range inside one partition",
+      "language": "sql",
+      "code": "SELECT\n  order_id,\n  amount\nFROM\n  ds60_orders.by_customer\nWHERE\n  customer_id = 'c1'\n  AND day_bucket = '2026-01-01'\n  AND ordered_at >= '2026-01-01 00:00:02';",
+      "interpretation": "The illustrative customer and day values follow the shape of the by_customer table, whose partition key is customer_id plus day_bucket and whose rows are ordered by ordered_at descending. The partition key routes the read to one replica set, and the clustering range then reads a contiguous slice inside that partition. Remove the partition key and Cassandra refuses the query unless ALLOW FILTERING is added, which turns a targeted read into a scan; that refusal is a design signal, not an error to suppress."
+    }
+  ],
   "evidence": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project.",
   "sources": [
     [

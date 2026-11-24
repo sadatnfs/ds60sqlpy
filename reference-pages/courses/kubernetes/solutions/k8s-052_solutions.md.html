@@ -204,22 +204,64 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-a-loadbalancer-service-on-an-unsupported-local-cluster">Exercise 1: Predict a LoadBalancer Service on an unsupported local cluster.<a class="heading-anchor" href="#exercise-1-predict-a-loadbalancer-service-on-an-unsupported-local-cluster" aria-label="Link to this section">#</a></h3>
 <p>The API type needs an implementation. Do not fabricate a public IP or change to an unrelated cluster.</p>
 <p><strong>Expected:</strong> The requested external entrypoint may remain unprovisioned.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Expect the Service to be created with no external address in status.loadBalancer.</li>
+<li><strong>Why it is correct:</strong> Only a cloud controller or local load balancer implementation fills that status, and an unsupported cluster has none.</li>
+<li><strong>Plausible wrong approach:</strong> Waiting for an external IP to appear assumes infrastructure that the local cluster does not have.</li>
+<li><strong>How to verify:</strong> The prediction says the external entrypoint may stay unprovisioned.</li>
+</ul>
 <h3 id="exercise-2-name-the-controller-and-infrastructure-responsibilities">Exercise 2: Name the controller and infrastructure responsibilities.<a class="heading-anchor" href="#exercise-2-name-the-controller-and-infrastructure-responsibilities" aria-label="Link to this section">#</a></h3>
 <p>Kubernetes desired state and provider operations are linked but distinct systems with separate failures.</p>
 <p><strong>Expected:</strong> Reconcile the request and provision actual routing resources.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Separate the controller that watches the Service from the infrastructure it creates.</li>
+<li><strong>Why it is correct:</strong> The controller reconciles the desired Service into provider resources, and those resources carry the real traffic.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting the API server itself to provision a load balancer skips the controller that does the work.</li>
+<li><strong>How to verify:</strong> The answer gives reconciliation to the controller and routing to the provisioned infrastructure.</li>
+</ul>
 <h3 id="exercise-3-draw-both-node-backed-and-direct-pod-conceptual-paths">Exercise 3: Draw both node-backed and direct-Pod conceptual paths.<a class="heading-anchor" href="#exercise-3-draw-both-node-backed-and-direct-pod-conceptual-paths" aria-label="Link to this section">#</a></h3>
 <p>Different load balancers use different backend models. Qualification must match the actual installed design.</p>
 <p><strong>Expected:</strong> The implementation choice is explicit rather than assumed.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Draw one path through node ports and another that targets Pod IPs directly.</li>
+<li><strong>Why it is correct:</strong> Implementations differ: some send traffic to nodes first, while others route straight to Pod addresses.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the node-backed path for every provider can misplace health checks and source address behavior.</li>
+<li><strong>How to verify:</strong> Both paths are drawn, and the implementation choice is stated.</li>
+</ul>
 <h3 id="exercise-4-diagnose-assigned-address-with-no-successful-requests">Exercise 4: Diagnose assigned address with no successful requests.<a class="heading-anchor" href="#exercise-4-diagnose-assigned-address-with-no-successful-requests" aria-label="Link to this section">#</a></h3>
 <p>A status field is one checkpoint. Continue through the actual request path instead of declaring the service healthy.</p>
 <p><strong>Expected:</strong> Inspect listener, health checks, backend route and app behavior.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check the listener, provider health checks, backend route and app behavior in that order.</li>
+<li><strong>Why it is correct:</strong> An assigned address proves only that provisioning happened, not that backends pass checks or the app answers.</li>
+<li><strong>Plausible wrong approach:</strong> Recreating the Service because the address exists but fails discards evidence and may change the address.</li>
+<li><strong>How to verify:</strong> The diagnosis covers listener, health checks, backend route and app.</li>
+</ul>
 <h3 id="exercise-5-explain-load-balancer-health-versus-pod-readiness">Exercise 5: Explain load-balancer health versus Pod readiness.<a class="heading-anchor" href="#exercise-5-explain-load-balancer-health-versus-pod-readiness" aria-label="Link to this section">#</a></h3>
 <p>A node health check may not prove the intended application response. Correlate the layers.</p>
 <p><strong>Expected:</strong> Infrastructure health and Kubernetes endpoint eligibility can test different things.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare what the provider health check probes with what the readiness probe checks.</li>
+<li><strong>Why it is correct:</strong> The load balancer may check a node port or path while Kubernetes readiness tests the container, so results can differ.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming a healthy target means a ready Pod merges two checks run by different systems.</li>
+<li><strong>How to verify:</strong> The answer names both checks and says they can disagree.</li>
+</ul>
 <h3 id="exercise-6-plan-a-local-versus-cloud-qualification">Exercise 6: Plan a local versus cloud qualification.<a class="heading-anchor" href="#exercise-6-plan-a-local-versus-cloud-qualification" aria-label="Link to this section">#</a></h3>
 <p>Cloud provisioning is not a free side effect of reading a tutorial. Keep ownership and cleanup explicit before any live experiment.</p>
 <p>For example, a provider quota or controller permission error can prevent address allocation while the internal app remains healthy. Conversely, an allocated address can exist with failing backend health checks. Keep controller reconciliation, provider infrastructure and application evidence in separate rows. This prevents restarting a healthy Pod to repair an unrelated provisioning failure or mistaking a released address for a valid rollback target.</p>
-<p><strong>Expected:</strong> Named implementation, owned resources, cost/cleanup boundary and real request evidence.</p></article>
+<p><strong>Expected:</strong> Named implementation, owned resources, cost/cleanup boundary and real request evidence.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name the implementation, list owned resources, set a cost and cleanup boundary and require a real request.</li>
+<li><strong>Why it is correct:</strong> Cloud load balancers cost money and outlive a lesson if not removed, while local ones may behave differently.</li>
+<li><strong>Plausible wrong approach:</strong> Running the cloud path without a cleanup step can leave billed resources behind.</li>
+<li><strong>How to verify:</strong> The plan has a named implementation, owned resources, cleanup and request evidence.</li>
+</ul></article>
   </main>
 </body>
 </html>

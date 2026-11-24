@@ -9,11 +9,15 @@ The executable reference contains the two complete worked cases with assertions.
 
 State whether the maximum is inclusive. Keep the boundary test with the policy so future changes are visible.
 
+With decision at 2024-01-05 the ages become 172,800 and 345,600 seconds. The first equals max_age exactly and is accepted only because the comparison is <=; switching to < would reject it. The second is stale either way. Assert [True, False] again so the boundary is pinned.
+
 **Expected:** The first value reaches the boundary and the second remains stale.
 
 ## 2. Reject future metadata
 
 A negative age is not evidence of very fresh data. Investigate clock skew or an incorrect timestamp definition.
+
+Set the decision to 2024-01-02 while customer 1's epoch is 2024-01-03: its age is -86,400. The 0 <= age term rejects it. Keeping only age <= max_age would accept a value from the future as the freshest feature in the batch.
 
 **Expected:** The age check rejects it.
 
@@ -26,6 +30,8 @@ Keep the timestamp that the policy actually measures. Changing only publication 
 ## 4. Handle missing entities
 
 Use a declared fallback, abstention or failure. Record coverage and avoid comparing scores from different missingness policies without explanation.
+
+Ask for customer_id 3. Feast returns None for usage and feature_epoch, and decision - int(None) raises TypeError, so the reference's age line is itself a missing-entity detector, only an unfriendly one. Check for None first and return an explicit "unavailable" decision; do not substitute epoch 0, which would yield an age of about 54 years and hide the cause.
 
 **Expected:** Missing inputs do not silently become observed zeros.
 

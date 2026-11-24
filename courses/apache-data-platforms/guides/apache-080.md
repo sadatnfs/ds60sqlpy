@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-079`, `apache-075`.
 
+## Key terms
+
+- **Share configuration:** The server's declaration of shares, schemas and tables, which must survive a process replacement separately from the table storage.
+- **Version-pinned retry:** Repeating a read for the same table version, which is safe because the read does not change the provider's table.
+- **Object-store signer:** The server component that creates pre-signed URLs for a supported cloud store. A local file URI is not an interchangeable replacement.
+- **Failure diagnosis:** Classifying an outage as service, configuration, storage or network unavailability before choosing a recovery action.
+
 ## Service restart, table durability and recipient recovery differ
 
 A sharing deployment has server software, share configuration, recipient policy
@@ -77,6 +84,28 @@ service recovery?** Its configuration or referenced table files can still be
 wrong or unavailable. These cases require unchanged versioned data after
 replacement and distinguish a failed data plane from a failed control service
 without hiding either behind a generic restart flag.
+
+## Worked examples
+
+### Compare the shared table across a server replacement
+
+```bash
+cd work/delta-sharing
+bash run.sh check
+bash run.sh check
+```
+
+Run check before and after the reference server is resumed or replaced. Both receipts should report version 0 and the same three rows, because the table lives in object storage and the server only reads it. The server itself holds no table data, so replacing it is cheap; what must survive is the configuration naming shares and table locations, plus the storage the location points to.
+
+### Unavailable server versus missing file
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  -H "Authorization: Bearer $RECIPIENT_TOKEN" \
+  "$SHARING_ENDPOINT/shares?maxResults=1"
+```
+
+A connection error or 503 here means the server is down; recipient credentials and the table may both be fine. If this listing succeeds but a later presigned URL returns 404, the server is up but a data file was removed from storage, often by an aggressive VACUUM on the source table. These need different owners: platform operations for the first, the table owner for the second.
 
 ## Complete worked source
 

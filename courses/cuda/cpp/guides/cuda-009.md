@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Write CPU reference tests for a pointer-and-size interface and explain the lifetime of each buffer.
+
 Work through *C++ essentials specifically needed at the GPU boundary* with the concrete cases below. Finish with this evidence:
 CPU reference tests and a lifetime explanation. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A pointer identifies storage; a size defines the range your function may use. Pair them explicitly. A const input pointer prevents writes through that pointer, but it does not establish unique ownership or guarantee that another alias cannot modify storage. A vector owns contiguous elements and can lend its data pointer while it remains alive and does not reallocate. A device function cannot generally use an ordinary host vector object because its implementation, allocator and storage belong to the host environment. Use plain element buffers and explicit shape metadata at the boundary, with deliberate integer-width choices for address arithmetic.
+
+### Key terms
+
+- **RAII:** Resource Acquisition Is Initialization, a C++ idiom that ties releasing a resource to an owning object's destructor.
+- **Const pointer parameter:** A parameter such as `const float*` that forbids writes through that pointer but does not stop other aliases from writing.
+- **size_t:** An unsigned integer type wide enough to hold the size of any object, used for element counts and byte sizes.
+- **Dangling pointer:** A pointer that still holds an address after its storage was freed or reallocated, so dereferencing it is undefined behavior.
 
 ## How to run and study this lesson
 

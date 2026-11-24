@@ -35,6 +35,14 @@ internal static class Program {
       Check(Import(Array.Empty<string>()).Counts.Count == 0, "empty input");
     }
     {
+      // Task 2: Guided modification
+      var totals = Import(new[] { "pear,2", "apple,3", "pear,4", "apple,5" });
+      Check(totals.Rejected == 0, "duplicate line accepted");
+      Check(totals.Counts["apple"] == 8, "predicted apple total");
+      Check(totals.Counts["pear"] == 6, "pear unchanged");
+      Check(totals.Counts.Count == 2, "no new key");
+    }
+    {
       // Task 3: Independent construction
       var result = Import(new[] { "pear,2", "apple,3", "bad", "pear,1" });
       var comparer = StringComparer.Ordinal;
@@ -46,6 +54,18 @@ internal static class Program {
       lines.Add($"rejected: {result.Rejected}");
       string report = string.Join("\n", lines);
       Check(report == "apple: 3\npear: 3\nrejected: 1", "sorted report");
+    }
+    {
+      // Task 5: Boundary evidence
+      var blank = Import(new[] { ",3", "  ,3" });
+      Check(blank.Rejected == 2, "empty and blank names rejected");
+      Check(blank.Counts.Count == 0, "no entry for a blank name");
+      var extra = Import(new[] { "pear,2,box" });
+      Check(extra.Rejected == 1, "extra field rejected");
+      var zero = Import(new[] { "pear,0" });
+      Check(zero.Rejected == 0 && zero.Counts["pear"] == 0, "zero accepted");
+      var none = Import(Array.Empty<string>());
+      Check(none.Rejected == 0 && none.Counts.Count == 0, "empty input");
     }
     Console.WriteLine("csharp-016: passed");
     await Task.CompletedTask;

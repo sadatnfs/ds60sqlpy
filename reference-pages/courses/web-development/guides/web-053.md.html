@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Authentication answers who the application believes is making a request. Authorization answers whether that identity may perform this action on this object. A record id in a URL is a locator, not proof of permission. A hidden owner field, disabled button or filtered interface cannot enforce access because the client can alter all of them.</p>
 <p>Apply authorization on every relevant server operation, including reads, updates, deletion and exports. Scope queries by trusted identity or enforce an explicit policy before returning data. Deny by default when a required identity or permission is missing. Error behavior should avoid disclosing another user&#x27;s sensitive record while still providing useful recovery for legitimate users.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Authorization:</strong> Deciding whether the current user may perform a specific action on a specific resource, after authentication says who they are.</li>
+<li><strong>Ownership check:</strong> Confirming that the requested record belongs to the current user, often by including the user&#x27;s ID in the query.</li>
+<li><strong>Least privilege:</strong> Granting each user or component only the permissions its task requires.</li>
+<li><strong>Object-level access:</strong> Checking permission for each individual record, so changing an ID in a request cannot expose another user&#x27;s data.</li>
+<li><strong>Deny by default:</strong> Rejecting any request that no rule explicitly allows.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The reference receives a trusted synthetic actor id as a separate parameter from the requested record id. A query includes both record id and owner id as bound values. The fake actor is a test fixture, not a login implementation. A real adapter must obtain it from a verified session or credential and must not copy it from a form field.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -220,6 +228,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A requested object is untrusted input; actor identity has a different origin.</p>
 <pre class="highlighted-code"><code class="language-php">$title = loadOwnedNote($db, $trustedActorId, $requestedNoteId);</code></pre>
 <p><strong>Expected observation:</strong> The API makes the trust distinction visible.</p>
+<h3 id="contrast-case-a-lookup-scoped-by-id-alone">Contrast case: a lookup scoped by id alone<a class="heading-anchor" href="#contrast-case-a-lookup-scoped-by-id-alone" aria-label="Link to this section">#</a></h3>
+<p>Actor 7 owns note 10. Actor 8 owns note 11. Actor 7 changes the id in the URL from 10 to 11.</p>
+<pre class="highlighted-code"><code class="language-php">// id only
+$stmt = $db-&gt;prepare(&#x27;SELECT title FROM notes WHERE id = :id&#x27;);
+$stmt-&gt;execute([&#x27;id&#x27; =&gt; 11]);
+
+// id and owner
+$stmt = $db-&gt;prepare(
+  &#x27;SELECT title FROM notes WHERE id = :id AND owner_id = :actor_id&#x27;
+);
+$stmt-&gt;execute([&#x27;id&#x27; =&gt; 11, &#x27;actor_id&#x27; =&gt; 7]);</code></pre>
+<p>Both statements are prepared and immune to injection, yet the first returns actor 8&#x27;s title to actor 7. Prepared statements protect query structure, not access policy. The second statement includes the trusted actor id in the predicate, so the database returns no row for a note owned by someone else. The application then answers as if the note does not exist, which avoids confirming that id 11 belongs to another account.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-why-knowing-a-record-id-is-not-sufficient-permission">Exercise 1: Explain why knowing a record id is not sufficient permission.<a class="heading-anchor" href="#exercise-1-explain-why-knowing-a-record-id-is-not-sufficient-permission" aria-label="Link to this section">#</a></h4>

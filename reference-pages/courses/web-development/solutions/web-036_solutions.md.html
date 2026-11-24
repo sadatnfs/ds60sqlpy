@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-036.md</code>.</p>
 <h3 id="exercise-1-explain-the-difference-between-returning-and-echoing-a-value">Exercise 1: Explain the difference between returning and echoing a value.<a class="heading-anchor" href="#exercise-1-explain-the-difference-between-returning-and-echoing-a-value" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Returning supplies data to the caller; echo writes output as a side effect.</p>
+<p><strong>Approach:</strong> Ask where the value ends up: <code>return</code> hands it to the calling expression, while <code>echo</code> writes to output and the caller receives nothing.</p>
 <p><strong>Why:</strong> return hands a value back for further computation, while echo only writes output, which callers and tests cannot reuse.</p>
+<p><strong>Plausible wrong approach:</strong> Saying the echoed text can be stored in a variable fails because the function returns null and the text has already been printed.</p>
+<p><strong>How to verify:</strong> <code>var_dump(label(30))</code> for the echo version shows the text and then NULL, not the string.</p>
 <h3 id="exercise-2-add-a-value-range-guard-to-a-typed-function">Exercise 2: Add a value-range guard to a typed function.<a class="heading-anchor" href="#exercise-2-add-a-value-range-guard-to-a-typed-function" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The function rejects invalid integers even though they satisfy the declared type.</p>
+<p><strong>Approach:</strong> Keep the <code>int</code> parameter type and add <code>if ($minutes &lt; 0) throw new InvalidArgumentException(...)</code> before the calculation.</p>
 <p><strong>Why:</strong> A type declaration accepts every int, so range rules need explicit checks.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on the <code>int</code> type alone fails because -5 is a valid integer and passes the type check.</p>
+<p><strong>How to verify:</strong> Calling the function with -5 raises the exception, while 0 and 45 return results. The exception message names the rejected value, so the caller can show a precise correction.</p>
 <h3 id="exercise-3-build-reusable-duration-calculation-and-display-functions">Exercise 3: Build reusable duration calculation and display functions.<a class="heading-anchor" href="#exercise-3-build-reusable-duration-calculation-and-display-functions" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Calculations can be tested without capturing output, then formatted at the boundary.</p>
+<p><strong>Approach:</strong> Write <code>totalMinutes(array $sessions): int</code> for arithmetic and <code>formatMinutes(int $minutes): string</code> for display, and call echo only in the main script.</p>
 <p><strong>Why:</strong> Pure functions can be tested by comparing return values, and formatting happens once at the output boundary.</p>
+<p><strong>Plausible wrong approach:</strong> Putting <code>echo</code> inside <code>totalMinutes</code> fails because tests then need output capture and cannot simply compare returned integers.</p>
+<p><strong>How to verify:</strong> A test compares <code>totalMinutes([20, 30])</code> with 50, and only the final script line prints anything.</p>
 <h3 id="exercise-4-diagnose-a-result-depending-on-an-undocumented-global">Exercise 4: Diagnose a result depending on an undocumented global.<a class="heading-anchor" href="#exercise-4-diagnose-a-result-depending-on-an-undocumented-global" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Pass the dependency explicitly or isolate the stateful boundary.</p>
+<p><strong>Approach:</strong> Search the function body for <code>global</code> or <code>$GLOBALS</code>, then add that dependency as a parameter and pass it from the caller.</p>
 <p><strong>Why:</strong> Hidden globals make results depend on outside state; passing values explicitly makes the function predictable.</p>
+<p><strong>Plausible wrong approach:</strong> Setting the global before every call fails because a forgotten setup step silently changes results in unrelated code.</p>
+<p><strong>How to verify:</strong> The function now gives the same result for the same arguments, whatever global variables exist. Running the function twice with different global values set no longer changes its output.</p>
 <h3 id="exercise-5-test-zero-a-normal-value-and-a-negative-input">Exercise 5: Test zero, a normal value and a negative input.<a class="heading-anchor" href="#exercise-5-test-zero-a-normal-value-and-a-negative-input" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each follows the stated contract and the failure is intentional.</p>
+<p><strong>Approach:</strong> Call the function with 0, 45 and -1 in sequence, catching the expected exception only for the negative case.</p>
 <p><strong>Why:</strong> Zero and a normal value follow the contract, and -1 must raise the declared exception.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only 45 fails because the boundary at 0 and the error path are where contracts usually break.</p>
+<p><strong>How to verify:</strong> The outputs are 0, 90 and one InvalidArgumentException message, matching the documented contract.</p>
 <h3 id="exercise-6-explain-when-a-closure-improves-a-transformation">Exercise 6: Explain when a closure improves a transformation.<a class="heading-anchor" href="#exercise-6-explain-when-a-closure-improves-a-transformation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A short callback can express a local operation while keeping its inputs and captured context clear.</p>
+<p><strong>Approach:</strong> Use a short arrow function when the operation is local to one <code>array_map</code> call and reads naturally inline.</p>
 <p><strong>Why:</strong> An arrow function suits a short, local operation and captures outer variables by value automatically.</p>
+<p><strong>Plausible wrong approach:</strong> Writing a long closure that captures many outer variables fails because its real inputs are hidden and hard to test.</p>
+<p><strong>How to verify:</strong> The arrow function <code>fn(int $value): int =&gt; $value * 2</code> maps [10, 20] to [20, 40]. The original input array still holds [10, 20] after the call, because <code>array_map</code> returns a new array.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-036_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

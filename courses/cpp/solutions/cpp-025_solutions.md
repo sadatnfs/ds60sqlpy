@@ -59,7 +59,7 @@ Explain index 2 into vector size 2.
 
 ## Exercise 2: Use checked access
 
-Compare at(2) with the contract of operator[2].
+Compare at(2) with the contract of `operator[](2)`.
 
 **Expected:** at throws; unchecked invalid access is undefined behavior.
 

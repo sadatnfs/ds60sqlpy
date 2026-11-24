@@ -1,6 +1,6 @@
 # torch-034: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting Robustness, privacy and evidence beyond a score yourself. They reuse the guide's literal inputs, starting from Example A, Count group errors, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Subgroup denominator, Robustness condition, Finite safety evidence. After a pass, choose a new input for exercise 6, Write a bounded card, without looking.
 
 ## Mechanism review
 
@@ -34,7 +34,7 @@ The perturbation rule here is f(x)=1 when \(x\ge 0\). Starting at one, the shift
 
 A different application might model these shifts as measurement noise while the latent class remains fixed. That is a different target policy and needs its own oracle. For this simple sign rule, perturbations with magnitude strictly below one cannot cross from the starting point to the negative side. That analytic statement is local to this scalar rule and declared perturbation set; it is not evidence that an arbitrary neural classifier is robust to all small changes.
 
-Severity is another independent axis. Nine minor passes and one severe failure yield a90% overall pass rate. If the predeclared release rule blocks on any severe failure, the correct decision remains no-go. Choosing a favorable aggregate after observing the severe failure changes the decision policy. Preserve case-level identity, severity and the actual failed condition so a summary cannot erase it.
+Severity is another independent axis. Nine minor passes and one severe failure yield a 90% overall pass rate. If the predeclared release rule blocks on any severe failure, the correct decision remains no-go. Choosing a favorable aggregate after observing the severe failure changes the decision policy. Preserve case-level identity, severity and the actual failed condition so a summary cannot erase it.
 
 Privacy is not established by removing names from an example or by obtaining a good accuracy score. Differential privacy describes a randomized mechanism's output behavior under a defined change to a dataset. Its guarantee depends on the neighboring-dataset unit, privacy parameters and the mechanism/accounting assumptions. Record-level adjacency and person-level adjacency are different promises when a person contributes multiple rows. Clipping, noise, sampling and repeated releases require a coherent analysis; this chapter implements none of them. [NIST SP 800-226](https://csrc.nist.gov/pubs/sp/800/226/final) discusses evaluation of such guarantees and implementation hazards.
 
@@ -152,4 +152,4 @@ assert card["unique_units"] == 3 and not card["differential_privacy_established"
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Keep severe failures visible, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Represent an untested group, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

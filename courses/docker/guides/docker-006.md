@@ -16,6 +16,14 @@ A Dockerfile can accidentally copy too much with `COPY . .`. Even if a later ins
 
 The fixture keeps its context tiny: server source, Dockerfile, Compose definition and ignore rules. Learner notes and progress live outside the source image. Different builders can run remotely, so context minimization also makes it easier to know which files leave your machine when building against a selected endpoint.
 
+### Key terms
+
+- **Build context:** The set of files a builder may read during a build, usually the directory passed to the build command.
+- **.dockerignore:** A file of patterns that removes matching paths from the build context before the builder receives it.
+- **Ignore pattern:** One line in .dockerignore, such as a directory name or glob, that excludes matching paths.
+- **Layer history:** The stored record of each image layer, which can keep a file even after a later instruction deletes it.
+- **Explicit COPY:** Copying only named files instead of the whole context, so every file in the image has a known reason to be there.
+
 ## Anatomy and a trace you can follow
 
 Ignore patterns are evaluated relative to the build context root with Go's filepath.Match rules, where `*` never crosses a `/`. A pattern such as `.env` or `*.log` therefore excludes only files at the root; `**/.env` and `**/*.log` match at any depth because `**` spans any number of directories. Negated patterns can include an otherwise ignored path, and ordering can matter. Use a simple allowlist or a short reviewed exclude list for a small teaching project. Do not assume `.gitignore` automatically controls Docker build inputs.
@@ -93,11 +101,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Writing `.env` or `*.log` and expecting nested files to be excluded; only `**/` patterns match at any depth. Assuming `.gitignore` controls the build context. Using `COPY . .` and deleting a secret in a later step.
 
-Exercise 4 is this chapter's boundary case: Explain why deleting a secret in a later layer is insufficient. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Explain why deleting a secret in a later layer is insufficient. Use `docker history` on the image to list every layer with its size; a later `rm` step does not remove the earlier `COPY` layer from that list. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using build context, .dockerignore, ignore patterns, layer history and explicit COPY. Reconstruct worked example 2 (Prefer explicit source copying) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Name two files from the fixture directory that should never reach the build context, and the ignore rule that excludes each. Then reconstruct worked example 2 (Prefer explicit source copying) with one different value, predict what changes, and name which of build context, .dockerignore, ignore patterns, layer history and explicit COPY the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

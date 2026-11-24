@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-create-tile-boundaries">Exercise 1: Create tile boundaries<a class="heading-anchor" href="#exercise-1-create-tile-boundaries" aria-label="Link to this section">#</a></h3>
 <p>Use half-open intervals.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>create tile boundaries</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Create tile boundaries as half-open intervals <code>[start, min(start + tile, n))</code> with <code>start</code> stepping by 4 from 0: for <code>n = 10</code> this yields <code>[0..3]</code>, <code>[4..7]</code> and <code>[8, 9]</code>.</p>
+<p><strong>Why it is correct here.</strong> Half-open intervals tile the index range without overlap or gaps, because each tile ends exactly where the next begins. The <code>min</code> call caps the last tile at <code>n</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Using closed intervals <code>[start, start + tile]</code> makes adjacent tiles share an element, so index 4 is processed twice and a sum reduction double counts it.</p>
+<p><strong>How to verify.</strong> The reference asserts the three tiles and that their flattened concatenation equals <code>list(range(10))</code>, which checks both coverage and the absence of duplicates.</p>
 <h3 id="exercise-2-mask-a-final-tile">Exercise 2: Mask a final tile<a class="heading-anchor" href="#exercise-2-mask-a-final-tile" aria-label="Link to this section">#</a></h3>
 <p>Guard both input and output.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>mask a final tile</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Mask the final tile: the third tile has lanes for offsets 8 through 11, of which only 8 and 9 are valid, so loads and stores both take a mask <code>offsets &lt; n</code>.</p>
+<p><strong>Why it is correct here.</strong> A tile DSL operates on fixed-size tiles, so lanes beyond the array exist in the computation. Masking the load prevents reading past the buffer, and masking the store prevents writing past it.</p>
+<p><strong>A plausible wrong approach.</strong> Masking only the store still issues out-of-bounds loads, which can fault or read unrelated memory, and an unmasked reduction then includes garbage values.</p>
+<p><strong>How to verify.</strong> Run with <code>n = 10</code> and a tile of 4, fill a guard region after the output with a sentinel, and confirm the sentinel is untouched and outputs match the reference.</p>
 <h3 id="exercise-3-compare-thread-and-tile-abstractions">Exercise 3: Compare thread and tile abstractions<a class="heading-anchor" href="#exercise-3-compare-thread-and-tile-abstractions" aria-label="Link to this section">#</a></h3>
 <p>The compiler owns more mapping decisions in a tile DSL.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare thread and tile abstractions</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare abstractions: in thread-level CUDA the programmer maps each thread to elements and manages shared memory, while in a tile DSL the programmer writes operations on whole tiles and the compiler decides thread mapping, vectorization and staging.</p>
+<p><strong>Why it is correct here.</strong> The tile model moves decisions such as which thread loads which element into the compiler. That reduces code for common patterns but limits control when the compiler&#x27;s choice is poor.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming a tile kernel behaves like a thread kernel with the same block size misreads the model, since a tile program instance is not a single thread.</p>
+<p><strong>How to verify.</strong> Write the same vector add in both styles and list which decisions appear explicitly in each source, such as index computation and bounds checks.</p>
 <h3 id="exercise-4-state-compiler-requirements">Exercise 4: State compiler requirements<a class="heading-anchor" href="#exercise-4-state-compiler-requirements" aria-label="Link to this section">#</a></h3>
 <p>Record exact release and supported architecture.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>state compiler requirements</strong> is qualified there.</p>
+<p><strong>Approach.</strong> State compiler requirements: record the exact DSL release, the backend compiler version it needs and the supported GPU architectures, since tile DSLs change quickly.</p>
+<p><strong>Why it is correct here.</strong> Tile DSLs often support only recent architectures and change their APIs between releases. Without recorded versions a kernel that compiled once may not compile later.</p>
+<p><strong>A plausible wrong approach.</strong> Writing that the kernel requires a recent version gives no way to reproduce the build.</p>
+<p><strong>How to verify.</strong> Put pinned versions in the lesson&#x27;s requirements and check them at the start of the GPU run, failing with a clear message when they do not match.</p>
 <h3 id="exercise-5-design-a-library-comparison">Exercise 5: Design a library comparison<a class="heading-anchor" href="#exercise-5-design-a-library-comparison" aria-label="Link to this section">#</a></h3>
 <p>Match data shape dtype and timing boundary.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a library comparison</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a comparison against a library routine with the same data shape, dtype and timing boundary, such as both including or both excluding the first compile.</p>
+<p><strong>Why it is correct here.</strong> Tile DSL kernels usually compile on first call. If one side includes compilation and the other does not, the comparison measures setup rather than execution.</p>
+<p><strong>A plausible wrong approach.</strong> Timing the DSL kernel once against a warmed library call reports the DSL as much slower purely because of compilation.</p>
+<p><strong>How to verify.</strong> Report the first-call time and the steady-state median separately for both implementations, and check outputs agree before comparing times.</p>
 <h3 id="exercise-6-explain-a-resource-tradeoff">Exercise 6: Explain a resource tradeoff<a class="heading-anchor" href="#exercise-6-explain-a-resource-tradeoff" aria-label="Link to this section">#</a></h3>
 <p>Larger tiles can increase live state and reduce concurrency.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain a resource tradeoff</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain the resource tradeoff of larger tiles: they can increase reuse of loaded data but hold more values in registers or shared memory, which can reduce how many tile instances run concurrently.</p>
+<p><strong>Why it is correct here.</strong> Concurrency hides memory latency. If larger tiles reduce occupancy enough, the reuse gain can be outweighed, so the net effect depends on the device and shape.</p>
+<p><strong>A plausible wrong approach.</strong> Concluding that larger tiles are always faster because they reuse more data predicts a direction that only device evidence can establish.</p>
+<p><strong>How to verify.</strong> Measure several tile sizes on the target device and record register usage and achieved occupancy beside timings.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Three tiles cover ten elements exactly once.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-106_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Call model.matrix on the fitted object, confirm a 5 by 2 shape with a column of ones, and multiply it by coef(fit).",
+      "why": "With x = 0:4 and y = 1, 3, 4, 7, 8, the centered cross products sum to 18 and the squared x deviations to 10, so the slope is 1.8 and the intercept is 4.6 minus 3.6, which is 1. X times (1, 1.8) gives 1, 2.8, 4.6, 6.4 and 8.2, which are exactly the fitted values.",
+      "wrong": "Building the matrix from x alone, which amounts to `lm(y ~ x - 1)`. That forces the line through the origin and gives a slope of 64/30, about 2.13, so the products no longer match fitted(fit).",
+      "verify": "`identical(dim(X), c(5L, 2L))` returns TRUE, and the largest gap between `X %*% coef(fit)` and `fitted(fit)` returns a value below 1e-10."
+    },
+    {
+      "approach": "Pass data.frame(x = 5) to predict and report the value together with the training range of x.",
+      "why": "1 + 1.8 times 5 is 10. The training x values stop at 4, so this point is one step outside the data, and its leverage, 1/5 + (5 - 2)^2 / 10 = 1.1, is more than five times the 0.2 at the center.",
+      "wrong": "Presenting 10 with the same confidence as a fitted value inside 0 to 4. Nothing in five points shows that the straight line continues past x = 4.",
+      "verify": "`predict(fit, data.frame(x = 5))` returns 10 within the 1e-10 tolerance, and `range(d$x)` returns 0 and 4."
+    },
+    {
+      "approach": "Set the group factor levels to A then B, fit y ~ x * group and read each coefficient as a difference from A.",
+      "why": "Group A follows 1 + 2x and group B follows 4 + x, so with A as reference the intercept is 1, the x slope is 2, groupB is 4 - 1 = 3 and x:groupB is 1 - 2 = -1. Both lines are exact, so the fit recovers them with no residual.",
+      "wrong": "Reading groupB = 3 as B's intercept or x:groupB = -1 as B's slope. B's intercept is 1 + 3 = 4 and its slope is 2 - 1 = 1, so the raw coefficients are offsets.",
+      "verify": "The largest gap between `unname(coef(interaction))` and c(1, 2, 3, -1) returns a value below 1e-10."
+    },
+    {
+      "approach": "Add double_x = 2 * x, fit y ~ x + double_x, and compare the QR rank of its design with its column count.",
+      "why": "The design has 3 columns, intercept, x and double_x, but double_x is an exact multiple of x, so the rank is 2. lm keeps x with slope 1.8, reports NA for double_x and returns the same five fitted values as the simple fit.",
+      "wrong": "Reading the NA as evidence that double_x has no effect on y. It only means the data cannot split one slope between two copies of the same column; keeping double_x instead of x would give a coefficient of 0.9.",
+      "verify": "`qr(model.matrix(aliased))$rank` returns 2 against 3 columns, and `anyNA(coef(aliased))` returns TRUE."
+    },
+    {
+      "approach": "Compute crossprod(X, residuals(fit)) and check both entries against a small tolerance.",
+      "why": "The residuals are 0, 0.2, -0.6, 0.6 and -0.2. The first entry sums them to 0 and the second weights them by x, 0.2 - 1.2 + 1.8 - 0.8 = 0. These are the least squares normal equations, so they hold for any data fitted this way.",
+      "wrong": "Treating the zero products as evidence that the errors are independent or normally distributed. Testing them with `== 0` is a second trap, because floating point sums can leave values near 1e-16.",
+      "verify": "`max(abs(crossprod(X, residuals(fit))))` returns a value below 1e-10."
+    },
+    {
+      "approach": "Request both intervals at the same point, x = 2, and compare their widths.",
+      "why": "Both are centered on 4.6. The residual variance is 0.8 / 3, and the leverage at x = 2 is 0.2, so the mean has standard error sqrt(0.8 / 15), about 0.23, while a new response has sqrt(0.32), about 0.57. With qt(0.975, 3) about 3.18, the widths are about 1.47 and 3.60.",
+      "wrong": "Comparing the prediction interval at x = 5 with the confidence interval at x = 2. The larger leverage at 5 widens any interval there, so the comparison mixes location with target.",
+      "verify": "`diff(pi[1, c(\"lwr\", \"upr\")]) > diff(ci[1, c(\"lwr\", \"upr\")])` returns TRUE, and both `fit` columns show 4.6."
+    }
+  ]
+}

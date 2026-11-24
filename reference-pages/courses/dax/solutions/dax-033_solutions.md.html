@@ -239,23 +239,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict current revenue through January 5, 2025.</p>
 <p>It is 67; the selected current interval now contains all January fixture sales.</p>
+<p><strong>Why it fits this model:</strong> The current window January 1 to 5, 2025 holds S4, S5 and S6, all of January 2025&#x27;s sales, so current revenue is 67. The shifted window January 1 to 5, 2024 holds S1 to S3, 64.</p>
+<p><strong>Tempting mistake:</strong> Assuming the as-of window must stay below the full month and expecting growth to stay negative. These five days already contain every January sale in the fixture.</p>
+<p><strong>How to confirm:</strong> Through January 5: Current 67, Prior 64 and Growth 0.046875, the same as case A.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add a hypothetical prior-year sale on January 20.</p>
 <p>Only the first case&#x27;s prior denominator changes; the two comparison windows must stay distinct.</p>
+<p><strong>Why it fits this model:</strong> A hypothetical 10 USD sale on January 20, 2024 falls inside case A&#x27;s full prior January but outside case B&#x27;s January 1 to 3 window.</p>
+<p><strong>Tempting mistake:</strong> Changing both comparisons, or dividing case B&#x27;s 47 by the new full-month 74, mixes a three-day window with a full month.</p>
+<p><strong>How to confirm:</strong> Case A becomes 67 against 74, about -0.095; case B stays 47 against 64, -0.265625.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a metric title that exposes the as-of boundary.</p>
 <p>For example: Order revenue, January 1-3 versus the same dates last year, data available through the stated watermark.</p>
+<p><strong>Why it fits this model:</strong> The title should give both windows and the role: &quot;Order revenue, January 1 to 3, 2025 vs the same dates in 2024 (47 vs 64), data through 2025-02-28&quot;.</p>
+<p><strong>Tempting mistake:</strong> A title such as &quot;January growth -26.6%&quot; invites comparison with full January, which grew 4.7 percent.</p>
+<p><strong>How to confirm:</strong> The dates in the title match the DATESBETWEEN arguments, and the values read 47 and 64.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose selecting a period merely because it makes growth positive.</p>
 <p>That is outcome-driven selection. State and retain a defensible completeness policy before inspecting the effect.</p>
+<p><strong>Why it fits this model:</strong> Here the window decides the sign: January 1 to 3 gives -0.2656 and full January +0.0469. A policy fixed before looking, such as complete months only, selects case A.</p>
+<p><strong>Tempting mistake:</strong> Picking whichever window gives a positive number reports 4.7 percent growth because it looks good, then quietly switches windows next month when the sign changes.</p>
+<p><strong>How to confirm:</strong> Write the policy first, then confirm that it yields case A&#x27;s 67 against 64 whatever the result.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain a zero prior revenue denominator.</p>
 <p>Report the absolute difference and an explicit undefined or special-case growth policy rather than silently dividing by zero.</p>
+<p><strong>Why it fits this model:</strong> February 2024 has no sales, so the prior period for February 2025 is BLANK, and DIVIDE returns BLANK growth instead of an error.</p>
+<p><strong>Tempting mistake:</strong> Coalescing the prior to 0 and displaying growth as 0 percent, or as infinite, suggests flat or unlimited growth where no prior revenue existed.</p>
+<p><strong>How to confirm:</strong> Under Year 2025 and MonthNumber 2, Current is 56, Prior BLANK and Growth BLANK. Report the absolute change, 56, under an explicit new-period label.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the issue to experiment cohorts enrolled at different times.</p>
 <p>Compare the same observation age or explicitly model differing follow-up; calendar-month labels alone do not make cohorts comparable.</p>
+<p><strong>Why it fits this model:</strong> Compare at equal follow-up. Each customer&#x27;s first month gives Ada 24 (January 2024), Bo 40 (January 2024) and Cy 20 (January 2025).</p>
+<p><strong>Tempting mistake:</strong> Comparing lifetime totals, Ada 51 and Bo 80 against Cy 56, sets about 14 months of follow-up against 2 months for Cy, all within data through 2025-02-28.</p>
+<p><strong>How to confirm:</strong> Revenue in the month of each first order should give 24, 40 and 20; any total over unequal follow-up must say so in its label.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

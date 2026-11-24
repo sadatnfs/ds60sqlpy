@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A brush lets a user choose a spatial interval or rectangle. The brush selection is expressed in display coordinates. The analytical selection is usually expressed in data values or record IDs. Convert between those spaces explicitly and decide which boundary values count as selected.</p>
 <p>Linked views share application state: selecting a range in one chart changes the records or emphasis in another. If each chart keeps an unrelated hidden selection, the dashboard can contradict itself. A small state object and a pure filter function make coordination easier to inspect.</p>
 <p>A drag gesture is not an accessible interface by itself. Provide a reset and a keyboard-friendly way to choose a meaningful preset or numeric interval. Show the selected range and count as text so the effect is understandable without interpreting color alone.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Brush:</strong> A <code>d3.brushX</code> interaction that lets a user drag out a horizontal interval. Its event selection is a pair of pixel coordinates, or null when cleared.</li>
+<li><strong>Selection range:</strong> The brushed pixel interval converted to data values with <code>x.invert</code>, together with a stated policy for whether boundary values count as selected.</li>
+<li><strong>Linked view:</strong> A second chart or list that reacts to the same selection, such as a record list that updates when the brush moves.</li>
+<li><strong>Shared state:</strong> One object holding the current selection that every view reads, so coordinated views cannot contradict each other.</li>
+<li><strong>Brush move:</strong> Setting a brush extent from code with <code>brush.move</code>, which drives presets and resets through the same path as a drag.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>d3.brushX()</code> defines a horizontal brush with an explicit extent. Its event selection is null when cleared, otherwise a pair of pixel coordinates. Use <code>x.invert</code> to recover data values. Handle null as an intentional full or empty selection according to the documented policy.</p>
 <p>The reference uses inclusive data bounds and a preset range from 2 to 4. It calls the same brush move path used by interaction, then asserts selected IDs. Programmatic movement proves state wiring; manual pointer and keyboard checks remain separate.</p>

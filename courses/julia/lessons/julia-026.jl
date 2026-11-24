@@ -33,7 +33,7 @@ worked_a()
 
 # Task 1: Compute the two entries before running the first case.
 # Task 2: Reuse the destination for input[1,2].
-# Task 3: Pass a2-by -3 matrix and a length 2 input.
+# Task 3: Pass a 2-by-3 matrix and a length 2 input.
 # Task 4: Explain why two different view objects can be unsafe.
 # Task 5: Describe a safe interface for repeated calls that must permit overlapping
 # inputs.

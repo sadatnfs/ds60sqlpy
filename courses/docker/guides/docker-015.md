@@ -16,6 +16,14 @@ A secret mount reduces accidental persistence but does not make arbitrary build 
 
 Build-time network access is an external dependency. Prefer locked public inputs for the default teaching build. The fixture has no package downloads beyond its base image. This chapter uses a synthetic secret string in a separate scratch build and never needs a real registry credential.
 
+### Key terms
+
+- **BuildKit:** The modern Docker build engine that runs a build graph, reuses cached results and provides special mounts to steps.
+- **Cache mount:** A directory mounted into one build step that keeps reusable downloads between builds without adding them to a layer.
+- **Secret mount:** A file mounted into one build step that exposes sensitive input without copying it into an image layer.
+- **Build secret:** Sensitive build input supplied with the `--secret` option, never through `ARG`, `ENV`, a source file or a command URL.
+- **Cold build:** A build with no reusable cache, which shows the full cost of every step and every external download.
+
 ## Anatomy and a trace you can follow
 
 A Dockerfile RUN mount exists only for that build operation. `type=cache` selects a persistent builder cache directory. `type=secret,id=demo` selects a separately supplied secret. Read a secret only at its declared path, and do not echo its bytes. `required=true` causes a missing input to fail clearly. Supply the value from the host with `docker build --secret id=demo,src=./demo-secret.txt .` or `--secret id=demo,env=DEMO_SECRET`; the step reads it at `/run/secrets/demo`.
@@ -89,11 +97,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Passing a password with `--build-arg` or `ENV`. Printing or copying a mounted secret into an image file. Treating the cache mount as the only copy of a dependency.
 
-Exercise 4 is this chapter's boundary case: Diagnose a secret copied into an output file. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a secret copied into an output file. Search the build output and the final image layers for the secret value's location, not the value itself, before blaming the secret mount option. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using BuildKit, cache mount, secret mount, --secret and cold build. Reconstruct worked example 2 (Require a synthetic build secret without printing it) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Explain where the secret is visible during a `RUN --mount=type=secret` step and where it must not appear afterward. Then reconstruct worked example 2 (Require a synthetic build secret without printing it) with one different value, predict what changes, and name which of BuildKit, cache mount, secret mount, --secret and cold build the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

@@ -1,6 +1,6 @@
 # llm-028: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these capstone: train and audit a tiny transformer answers after attempting *Freeze corpus identity* through *Record model identity and limits*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Fit the count baseline* points to one step. `llm-028_solution.py` holds the assertions; this page explains how they test capstone evidence. Then try *Record model identity and limits* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -34,7 +34,7 @@ assert len(docs) == 2 and len(held) - 1 == 3 and len(digest) == 64
 
 **Expected:** train 2 documents; holdout 1; context 3.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(docs) == 2`, `len(held) - 1 == 3` and `len(digest) == 64`.
+**Verify:** For *Freeze corpus identity*, a fresh-process check confirms `len(docs) == 2`, `len(held) - 1 == 3` and `len(digest) == 64`.
 
 ## Exercise 2: Train a bounded decoder
 
@@ -64,7 +64,7 @@ assert (
 
 **Expected:** 20 finite losses; parameter count below 50000.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(curve) == 20`, `np.isfinite(curve).all()` and `sum((p.numel() for p in model.parameters())) < 50000`.
+**Verify:** For *Train a bounded decoder*, a fresh-process check confirms `len(curve) == 20`, `np.isfinite(curve).all()` and `sum((p.numel() for p in model.parameters())) < 50000`.
 
 ## Exercise 3: Fit the count baseline
 
@@ -84,7 +84,7 @@ np.testing.assert_allclose(prob.sum(1), 1, atol=1e-12, rtol=0)
 
 **Expected:** total 6 observed transitions; every row sums 1.
 
-**Verify:** In a fresh process, the exercise checks confirm `counts.sum() == 6` and `prob.sum(1)` matches `1` within 1e-12.
+**Verify:** For *Fit the count baseline*, a fresh-process check confirms `counts.sum() == 6` and `prob.sum(1)` matches `1` within 1e-12.
 
 ## Exercise 4: Score one frozen holdout
 
@@ -104,7 +104,7 @@ assert np.isfinite([neural, baseline]).all() and len(held) - 1 == 3
 
 **Expected:** both finite; denominator 3; no required winner.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.isfinite([neural, baseline]).all()` and `len(held) - 1 == 3`.
+**Verify:** For *Score one frozen holdout*, a fresh-process check confirms `np.isfinite([neural, baseline]).all()` and `len(held) - 1 == 3`.
 
 ## Exercise 5: Retest causality after training
 
@@ -121,7 +121,7 @@ torch.testing.assert_close(prefix, full[:, :2], atol=1e-6, rtol=0)
 
 **Expected:** prefix agreement within 1e-6.
 
-**Verify:** In a fresh process, the exercise checks confirm `prefix` matches `full[:, :2]` within 1e-6.
+**Verify:** For *Retest causality after training*, a fresh-process check confirms `prefix` matches `full[:, :2]` within 1e-6.
 
 ## Exercise 6: Record model identity and limits
 
@@ -147,8 +147,8 @@ assert len(model_hash) == 64 and report["targets"] == 3 and report["updates"] ==
 
 **Expected:** two 64-character hashes and explicit tiny-corpus limitation.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(model_hash) == 64`, `report['targets'] == 3` and `report['updates'] == 20`.
+**Verify:** For *Record model identity and limits*, a fresh-process check confirms `len(model_hash) == 64`, `report['targets'] == 3` and `report['updates'] == 20`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Score one frozen holdout* and predict the result first; keep *Retest causality after training* failing beside the repair. Log a missing PyTorch separately from a wrong capstone evidence value in `llm-028`.

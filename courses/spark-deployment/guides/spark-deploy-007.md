@@ -35,6 +35,14 @@ driver:
   depends_on: [master, worker-a, worker-b]
 ```
 
+## Key terms
+
+- **Bind address:** The value of spark.driver.bindAddress, which selects the local interfaces the driver listens on.
+- **Advertised address:** The value of spark.driver.host, which other processes use to call back to the driver.
+- **Service-name DNS:** Compose name resolution, such as driver or notebook, that works only inside the shared network.
+- **Callback path:** The connection an executor opens to the driver after allocation, which can fail even when the master URL is correct.
+- **Published port:** A host mapping for connections that originate outside the network; master RPC and worker data ports are never published.
+
 ## Worked case A: trace the working two-way path
 
 ```text
@@ -58,6 +66,62 @@ driver HTTP UI: reachable from host
 ```
 
 These observations are mutually consistent. Each executor's loopback belongs to its own network namespace. The minimal correction is a reachable advertised driver address with a matching listener, not publishing every port or setting an arbitrary longer timeout. Reproduce the failure only in an owned test, retain its diagnostic and restore the valid configuration before running acceptance.
+
+## Worked example: flagging an advertisement that only works from the driver
+
+```python
+import ipaddress
+
+
+def review(conf):
+    host = conf["spark.driver.host"]
+    bind = conf.get("spark.driver.bindAddress", host)
+    findings = []
+    try:
+        address = ipaddress.ip_address(host)
+        if address.is_loopback:
+            findings.append("advertised loopback: each executor would call itself")
+        elif address.is_private:
+            findings.append("literal private IP: valid only if every executor can route to it")
+    except ValueError:
+        findings.append(f"name {host!r}: resolve it from an executor, not from the driver")
+    if bind not in ("0.0.0.0", host):
+        findings.append(f"bind {bind} may not listen on the interface behind {host}")
+    return findings
+
+
+print(review({"spark.driver.host": "driver", "spark.driver.bindAddress": "0.0.0.0"}))
+print(review({"spark.driver.host": "127.0.0.1", "spark.driver.bindAddress": "0.0.0.0"}))
+print(review({"spark.driver.host": "192.168.1.20", "spark.driver.bindAddress": "127.0.0.1"}))
+```
+
+Output from running the block above:
+
+```text
+["name 'driver': resolve it from an executor, not from the driver"]
+['advertised loopback: each executor would call itself']
+['literal private IP: valid only if every executor can route to it', 'bind 127.0.0.1 may not listen on the interface behind 192.168.1.20']
+```
+
+The three calls cover the configurations this chapter keeps returning to. The workshop pair, host `driver` with bind `0.0.0.0`, produces only a reminder: a service name is meaningful inside the Compose network, so the lookup that matters is the one an executor performs, not the one the driver performs on itself. The second call reproduces Worked case B, where `127.0.0.1` is advertised; every executor would dial its own loopback and get connection refused on 39000 even though the master happily allocated workers. The third call stacks two faults: a literal 192.168.1.20 advertisement that only works if every worker host routes to that LAN, plus a bind of 127.0.0.1 that would not accept connections arriving on that interface at all. The checker is deliberately static. It cannot prove reachability, and it never opens a socket, so its job is to stop an obviously wrong pair of settings before a submission wastes an allocation and leaves a confusing executor log behind.
+
+## Worked example: testing name, route and listener from an executor container
+
+```bash
+PROJECT=OWNED_COMPOSE_PROJECT
+docker compose -p "$PROJECT" exec -T worker-a getent hosts driver
+docker compose -p "$PROJECT" exec -T worker-a python3 -c '
+import socket
+for port in (39000, 39001):
+    try:
+        socket.create_connection(("driver", port), timeout=3).close()
+        print(port, "listener reachable from worker-a")
+    except OSError as error:
+        print(port, "failed:", error)
+'
+```
+
+This sequence runs the diagnosis in the order the chapter recommends, but from worker-a, which is where the executor callback actually originates. `getent hosts driver` answers the name question using the same resolver the executor JVM would use. The inline Python then attempts TCP connections to 39000 and 39001, the fixed driver RPC and block manager ports, so a refusal on one and success on the other points at a single listener rather than at DNS. No output is printed here because it depends on a live Compose project that this page cannot run; `OWNED_COMPOSE_PROJECT` must be the project name that `lab.py` created, never a guess at someone else's stack. A connect from the host terminal would test a different network namespace entirely and could succeed while executors still fail. Keep the command, its origin container and the printed lines in the incident notes, then restore the valid configuration before acceptance if the probe was part of a deliberate failure rehearsal.
 
 ## Diagnose and transfer
 

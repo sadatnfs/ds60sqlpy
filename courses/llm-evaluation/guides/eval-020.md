@@ -8,7 +8,7 @@ Derive the DPO loss from a regularized preference model and distinguish sequence
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-020`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-020` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for direct preference optimization from ratios to gradients in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about DPO and reference log probability: At the reference policy the loss is log 2 with derivative -1, the preferred-action probabilities for the three beta values are 0.9, 0.75 and about 0.634, and the sequence-sum and mean-token margins have opposite signs. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Connect the preference model to a policy
 
@@ -23,6 +23,13 @@ m_\theta=\log\frac{\pi_\theta(y_w\mid x)}{\pi_{\mathrm{ref}}(y_w\mid x)}
 \]
 
 This derivation depends on its preference and regularization assumptions. It does not mean that every preference dataset obeys them, or that a trained policy becomes a calibrated judge of factual correctness. DPO avoids a separately fitted reward predictor in this objective; it still uses response likelihoods, preference labels and a reference model.
+
+## Key terms
+
+- **DPO:** Direct Preference Optimization, which fits a policy to preferences with loss -log sigma(beta m) using a frozen reference.
+- **Implicit reward:** The scaled log ratio of policy to reference probability for a response, whose context constant cancels in comparisons.
+- **Log-ratio margin:** The chosen-response log ratio minus the rejected-response log ratio, zero when policy equals reference.
+- **Beta parameter:** The strength of the implied KL regularization, which scales the margin inside the logistic loss.
 
 ## Worked case A: loss and derivative at the reference
 
@@ -164,7 +171,7 @@ Use beta 2 and zero reference-relative log-odds shift.
 
 ### 3. Compare beta optima
 
-Fit a3:1 preference ratio with beta 0.5,1 and 2 under a uniform reference.
+Fit a 3:1 preference ratio with beta 0.5, 1 and 2 under a uniform reference.
 
 **Expected:** Preferred-action probabilities are 0.9,0.75 and approximately 0.634.
 

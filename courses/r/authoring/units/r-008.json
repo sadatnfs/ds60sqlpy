@@ -38,6 +38,12 @@
       "code": "a <- matrix(c(2, 0, 0, 4), nrow = 2)\nb <- c(6, 8)\nsolution <- solve(a, b)\nstopifnot(isTRUE(all.equal(solution, c(3, 2))))\nstopifnot(max(abs(a %*% solution - b)) < 1e-12)\nstopifnot(is.matrix(a[, 1, drop = FALSE]), is.null(dim(a[, 1])))\nprint(solution)\n",
       "explanation": "The residual checks the solved equation. The extraction comparison shows why a one-column matrix needs an explicit shape policy.",
       "expected": "Solution 3,2; residual below tolerance."
+    },
+    {
+      "title": "Elementwise product in place of a matrix product",
+      "code": "design <- cbind(1, c(3, 4))\nbeta <- c(2, 3)\nright <- design %*% beta\nwrong <- design * beta\nprint(wrong)\nstopifnot(identical(as.numeric(right), c(11, 14)))\nstopifnot(identical(dim(wrong), c(2L, 2L)), identical(rowSums(wrong), c(8, 15)))\n",
+      "explanation": "The * operator multiplies cell by cell and recycles beta down the columns, so the first row is scaled by 2 and the second row by 3. The intercept and slope end up attached to observations instead of features. R raises no error because four cells are a multiple of two. Even summing each row of the wrong result gives 8 and 15 rather than the predictions 11 and 14. The matrix product pairs each column with its coefficient, which is why a check that ncol(design) equals length(beta) belongs before %*%.",
+      "expected": "wrong prints rows 2 6 and 3 12; right gives 11 and 14."
     }
   ],
   "exercises": [

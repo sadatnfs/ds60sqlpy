@@ -1,6 +1,6 @@
 # llm-032: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these low-rank adaptation without a package download answers after attempting *Count adapter parameters* through *Bound the update rank*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Differentiate the first objective* points to one step. `llm-032_solution.py` holds the assertions; this page explains how they test low-rank update. Then try *Bound the update rank* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -32,7 +32,7 @@ assert a.numel() + b.numel() == 32 and w.numel() == 64
 
 **Expected:** adapter 32 parameters versus base64.
 
-**Verify:** In a fresh process, the exercise checks confirm `a.numel() + b.numel() == 32` and `w.numel() == 64`.
+**Verify:** For *Count adapter parameters*, a fresh-process check confirms `a.numel() + b.numel() == 32` and `w.numel() == 64`.
 
 ## Exercise 2: Check zero initial delta
 
@@ -49,7 +49,7 @@ assert torch.equal(initial, x @ w)
 
 **Expected:** both equal ones(1, 8).
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.equal(delta, torch.zeros((8, 8)))` and `torch.equal(initial, x @ w)`.
+**Verify:** For *Check zero initial delta*, a fresh-process check confirms `torch.equal(delta, torch.zeros((8, 8)))` and `torch.equal(initial, x @ w)`.
 
 ## Exercise 3: Differentiate the first objective
 
@@ -66,7 +66,7 @@ assert torch.count_nonzero(a.grad).item() == 0 and torch.count_nonzero(b.grad).i
 
 **Expected:** A gradient zero; B gradient nonzero.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.count_nonzero(a.grad).item() == 0` and `torch.count_nonzero(b.grad).item() > 0`.
+**Verify:** For *Differentiate the first objective*, a fresh-process check confirms `torch.count_nonzero(a.grad).item() == 0` and `torch.count_nonzero(b.grad).item() > 0`.
 
 ## Exercise 4: Update only the adapter
 
@@ -83,7 +83,7 @@ assert not torch.equal(b, before_b) and torch.equal(w, saved)
 
 **Expected:** B changes; W remains exactly equal.
 
-**Verify:** In a fresh process, the exercise checks confirm `not torch.equal(b, before_b)` and `torch.equal(w, saved)`.
+**Verify:** For *Update only the adapter*, a fresh-process check confirms `not torch.equal(b, before_b)` and `torch.equal(w, saved)`.
 
 ## Exercise 5: Observe the changed function
 
@@ -98,7 +98,7 @@ assert after.item() < loss.item()
 
 **Expected:** loss decreases for this fixture.
 
-**Verify:** In a fresh process, the exercise checks confirm `after.item() < loss.item()`.
+**Verify:** For *Observe the changed function*, a fresh-process check confirms `after.item() < loss.item()`.
 
 ## Exercise 6: Bound the update rank
 
@@ -112,8 +112,8 @@ assert int(torch.linalg.matrix_rank((a @ b).detach())) <= 2
 
 **Expected:** rank at most 2.
 
-**Verify:** In a fresh process, the exercise checks confirm `int(torch.linalg.matrix_rank((a @ b).detach())) <= 2`.
+**Verify:** For *Bound the update rank*, a fresh-process check confirms `int(torch.linalg.matrix_rank((a @ b).detach())) <= 2`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Update only the adapter* and predict the result first; keep *Observe the changed function* failing beside the repair. Log a missing PyTorch separately from a wrong low-rank update value in `llm-032`.

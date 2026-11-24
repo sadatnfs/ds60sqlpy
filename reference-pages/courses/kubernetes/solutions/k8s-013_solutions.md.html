@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-identify-a-template-change">Exercise 1: Identify a template change<a class="heading-anchor" href="#exercise-1-identify-a-template-change" aria-label="Link to this section">#</a></h3>
 <p>A template change drives a new ReplicaSet. The synthetic marker is configuration evidence, not a new image identity. The host operation must preserve the same Deployment instance to demonstrate a rollout rather than two independent creates.</p>
 <p><strong>Expected:</strong> Pod-template content changes while Deployment name/UID can remain fixed in a stateful lab.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Diff revision A against B and classify each changed path as inside or outside spec.template.</li>
+<li><strong>Why it is correct:</strong> The Deployment controller hashes only the Pod template, so a changed template annotation creates a new ReplicaSet while the Deployment name and UID stay the same.</li>
+<li><strong>Plausible wrong approach:</strong> Treating a changed spec.replicas or a Deployment-level annotation as a new revision would expect a ReplicaSet that never appears.</li>
+<li><strong>How to verify:</strong> Every change in the B example falls under spec.template, so one new pod-template-hash is expected.</li>
+</ul>
 <h3 id="exercise-2-interpret-mixed-replicas">Exercise 2: Interpret mixed replicas<a class="heading-anchor" href="#exercise-2-interpret-mixed-replicas" aria-label="Link to this section">#</a></h3>
 <p>Counts can mix old and new revisions. An independent client can still reach old Pods while the desired candidate is failing readiness. Acceptance must name the intended version and its owned Ready population.</p>
 <p><strong>Expected:</strong> Candidate B incomplete despite aggregate ready traffic.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Group Pods by ownerReference to their ReplicaSet and count Ready Pods per pod-template-hash.</li>
+<li><strong>Why it is correct:</strong> At generation 5 the old ReplicaSet still holds Ready Pods that serve traffic while the candidate&#x27;s Pods fail readiness.</li>
+<li><strong>Plausible wrong approach:</strong> Accepting the aggregate readyReplicas count would call the rollout healthy while every Ready Pod still runs revision A.</li>
+<li><strong>How to verify:</strong> The candidate hash has zero or too few Ready Pods, so B is incomplete.</li>
+</ul>
 <h3 id="exercise-3-define-a-failure-gate">Exercise 3: Define a failure gate<a class="heading-anchor" href="#exercise-3-define-a-failure-gate" aria-label="Link to this section">#</a></h3>
 <p>The gate prevents indefinite waiting and avoids treating a partial rollout as success. It should preserve diagnostic evidence before recovery and remain within the lease and cleanup budget.</p>
 <p><strong>Expected:</strong> Generation observed, desired updated/ready candidate counts and expected application marker are required.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write the gate as named conditions with a single deadline: observedGeneration, updatedReplicas, candidate ready count and the application marker.</li>
+<li><strong>Why it is correct:</strong> Together these show the controller processed the spec, the new template is fully replaced and the served response belongs to B.</li>
+<li><strong>Plausible wrong approach:</strong> Waiting with no deadline lets a stalled rollout block the lease, and accepting on Available alone ignores which version is available.</li>
+<li><strong>How to verify:</strong> Each condition maps to one readback or request and reports its own failure when the deadline passes.</li>
+</ul>
 <h3 id="exercise-4-recover-the-desired-source">Exercise 4: Recover the desired source<a class="heading-anchor" href="#exercise-4-recover-the-desired-source" aria-label="Link to this section">#</a></h3>
 <p>Recovery is another controlled change. The report should say whether it reverted or fixed the candidate, and show the new observation rather than only the command used to request it.</p>
 <p><strong>Expected:</strong> A new generation converges to the selected intent; source and observed marker agree.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Pick revert or fix explicitly, apply it as a new change and reobserve generation and marker.</li>
+<li><strong>Why it is correct:</strong> Both choices bump metadata.generation, so success needs observedGeneration to catch up and the served marker to match the chosen source.</li>
+<li><strong>Plausible wrong approach:</strong> Reporting the rollout undo command as the outcome describes the request, not whether the controller converged.</li>
+<li><strong>How to verify:</strong> observedGeneration equals the new generation and the response marker matches the restored or fixed source.</li>
+</ul>
 <h3 id="exercise-5-plan-a-genuine-image-version-rehearsal">Exercise 5: Plan a genuine image-version rehearsal<a class="heading-anchor" href="#exercise-5-plan-a-genuine-image-version-rehearsal" aria-label="Link to this section">#</a></h3>
 <p>The host must provide both exact artifacts before the live rehearsal. The learner should not substitute an arbitrary registry tag or infer provenance from a version string. Keep this acceptance row unavailable if those artifacts are absent.</p>
 <p><strong>Expected:</strong> Two qualified preloaded image digests, compatible manifests and an application-version response check.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List both image digests, the manifests that reference them and a response that differs between the two binaries.</li>
+<li><strong>Why it is correct:</strong> Only digests pin exact artifacts, and a version endpoint that returns different values per binary proves which one served the request.</li>
+<li><strong>Plausible wrong approach:</strong> Changing a message in one image and calling it a version roll proves configuration, not a binary change.</li>
+<li><strong>How to verify:</strong> The plan names two digests and a response check that distinguishes them.</li>
+</ul>
 <h3 id="exercise-6-separate-final-state-from-availability">Exercise 6: Separate final state from availability<a class="heading-anchor" href="#exercise-6-separate-final-state-from-availability" aria-label="Link to this section">#</a></h3>
 <p>A bounded client trace can show what its sampled requests experienced. It complements the controller proof and can reveal old-version traffic during a stalled rollout. It does not establish behavior for all clients or an entire production load profile.</p>
 <p><strong>Expected:</strong> Observed version/error samples over the transition, with no universal uptime or exact-ratio claim.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Describe periodic client requests during the rollout with interval, per-request version and error tallies.</li>
+<li><strong>Why it is correct:</strong> Only sampled requests show which revision answered and whether any failed while old and new Pods coexisted.</li>
+<li><strong>Plausible wrong approach:</strong> Quoting the final rollout status as zero downtime claims continuity no snapshot recorded.</li>
+<li><strong>How to verify:</strong> The answer names interval, per-sample result and error count, and makes no universal uptime claim.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>The single approved image can expose hello/reviewer as synthetic message markers, but that is a configuration revision rather than a different binary image. A two-image rollout needs its own provenance and preload receipt. Likewise, a few successful requests do not establish exact traffic percentages or uninterrupted availability.</p>
 <p>Do not describe two cleaned-up browser Runs as one live rollout. The host worksheet must show the same Deployment UID across the state transition and the intended candidate identity in the final response.</p></article>

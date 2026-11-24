@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-020`.
 
 A download endpoint must select files within its intended storage boundary. This chapter creates an owned temporary download directory and a separate synthetic file outside it. It verifies a valid download, a parent-directory traversal attempt and an outside-pointing symbolic link without touching any real private user file.
 
+## Key terms
+
+- **Path traversal:** An attack that uses segments such as `..` or symbolic links to reach files outside the intended directory.
+- **Canonical path:** An absolute path with symbolic links and `..` segments resolved, obtained here with `Path.resolve()`.
+- **Storage root:** The owned directory that every served file must stay inside; it must itself be resolved before candidates are compared with it.
+- **send_file:** Flask's helper for sending a file's bytes as a response, called only after the resolved path passes the boundary check.
+- **Time-of-check/time-of-use:** A race in which the filesystem changes between validating a path and opening it, so the checked file is not the served file.
+
 ## Mechanism: compare canonical paths against a canonical root
 
 The trusted parent directory is resolved first. The handler resolves the requested candidate and requires it to remain relative to the owned download directory before calling `send_file`. It also requires an ordinary file. This separates the URL input from the final filesystem object the application intends to serve.
@@ -27,6 +35,36 @@ The example uses a filename route to make the boundary visible. A larger applica
 The request for `../private.txt` resolves outside the allowed directory and receives 404. A file inside the allowed directory that is a symbolic link to that same outside target is also refused. Both cases exercise actual path resolution, rather than simply checking whether the submitted text contains a suspicious substring.
 
 A normalized path containing an earlier `..` segment can still end inside the allowed root; the application's contract should define whether that syntax is allowed. Here the decisive boundary is the resolved file location. It is not a general claim that every dot-containing path string is rejected.
+
+## Worked example: why a string prefix check is not a path boundary
+
+```python
+from pathlib import PurePosixPath
+
+root = PurePosixPath("/srv/uploads")
+candidates = [
+    "/srv/uploads/report.txt",
+    "/srv/uploads_old/secret.txt",
+    "/srv/uploads/../private.txt",
+]
+for raw in candidates:
+    path = PurePosixPath(raw)
+    print(
+        raw,
+        str(path).startswith(str(root)),
+        path.is_relative_to(root),
+    )
+```
+
+Expected output:
+
+```text
+/srv/uploads/report.txt True True
+/srv/uploads_old/secret.txt True False
+/srv/uploads/../private.txt True True
+```
+
+The second row shows the classic bug: `/srv/uploads_old` begins with the characters `/srv/uploads`, so a `startswith` check accepts a sibling directory. `is_relative_to` compares whole path components and correctly rejects it. The third row shows the limit of pure path objects: they do not interpret `..`, so even `is_relative_to` says the unresolved path is inside the root. That is why the lesson calls `resolve(strict=True)` first, which collapses `..`, follows symbolic links such as `linked.txt` and requires the file to exist, and only then checks containment. Checking before resolving, or resolving without the containment check, each leaves one of the lesson's two 404 cases open.
 
 ## Failure diagnosis
 

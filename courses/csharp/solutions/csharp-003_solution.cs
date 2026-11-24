@@ -41,6 +41,18 @@ internal static class Program {
             "away midpoint");
     }
     {
+      // Task 2: Guided modification
+      bool overflowed = false;
+      try {
+        int small = int.MinValue;
+        _ = checked(small - 1);
+      } catch (OverflowException) {
+        overflowed = true;
+      }
+      Check(overflowed, "minimum minus one rejected");
+      Check(checked(-100 - 20) == -120, "normal subtraction");
+    }
+    {
       // Task 3: Independent construction
       decimal[] prices = { 19.99m, 5.01m, 0.35m };
       decimal subtotal = prices.Sum();
@@ -49,6 +61,17 @@ internal static class Program {
       Check(subtotal == 25.35m, "exact decimal subtotal");
       Check(tax == 2.091375m, "unrounded tax");
       Check(payable == 27.44m, "rounded only at the end");
+    }
+    {
+      // Task 5: Boundary evidence
+      var even = MidpointRounding.ToEven;
+      var away = MidpointRounding.AwayFromZero;
+      Check(Math.Round(2.344m, 2, even) == 2.34m, "below, even");
+      Check(Math.Round(2.344m, 2, away) == 2.34m, "below, away");
+      Check(Math.Round(2.345m, 2, even) == 2.34m, "midpoint, even");
+      Check(Math.Round(2.345m, 2, away) == 2.35m, "midpoint, away");
+      Check(Math.Round(2.346m, 2, even) == 2.35m, "above, even");
+      Check(Math.Round(2.346m, 2, away) == 2.35m, "above, away");
     }
     Console.WriteLine("csharp-003: passed");
     await Task.CompletedTask;

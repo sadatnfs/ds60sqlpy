@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A selection is a group of DOM nodes, not a copy of their HTML. A data join relates an array of records to selected nodes. Records without corresponding nodes enter; nodes with corresponding records update; surplus nodes exit. This makes repeated rendering a reconciliation operation rather than an instruction to append duplicates forever.</p>
 <p>The selector describes the nodes you intend to manage. <code>selectAll(&#x27;circle&#x27;)</code> can begin empty; the subsequent data join creates the required nodes. <code>join(&#x27;circle&#x27;)</code> handles the common enter/update/exit case. Attribute callbacks then assign geometry from each bound record.</p>
 <p>A render function should produce the intended state when called again. Calling append for every record on every update leaves stale marks and inflates counts. Start with a small sequence, such as three values followed by two, and verify both node count and attributes after the second render.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Data join:</strong> The operation <code>selection.data(values)</code> that pairs an array of records with selected nodes so each node can be created, updated or removed to match the data.</li>
+<li><strong>Enter:</strong> The part of a join holding records that have no matching node yet; <code>join</code> creates one new element for each of them.</li>
+<li><strong>Update:</strong> The part of a join holding existing nodes that matched a record; they keep their element and receive the new bound datum.</li>
+<li><strong>Exit:</strong> The part of a join holding existing nodes with no matching record; the default <code>join</code> removes them so stale marks do not accumulate.</li>
+<li><strong>Bound datum:</strong> The record attached to a node by a join, passed as <code>d</code> to attribute callbacks along with the group index <code>i</code>.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>selection.data(values).join(&#x27;circle&#x27;)</code> binds the current values and returns the merged entered/updated selection. Without a key, matching is by index within a group. This can be correct when positions are identities, but the next lesson shows why stable entity IDs often need keys.</p>
 <p>An attribute callback <code>(d, i) =&gt; ...</code> receives the record as d and its current group index as i. Returning undefined for a required coordinate can remove or invalidate the intended attribute. Inspect the derived values before blaming SVG rendering.</p>

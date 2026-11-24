@@ -14,6 +14,13 @@ Separate semantic smoke fixtures from performance datasets. Tiny data is excelle
 
 
 
+### Key terms
+
+- **Partition coalescing:** AQE merging small shuffle partitions after measuring their actual sizes.
+- **Skew join handling:** AQE splitting oversized partitions so one key does not dominate a join stage.
+- **Partition count:** The number of partitions, which sets task granularity, scheduler overhead and memory per task.
+- **Startup-dominated run:** A run on tiny data whose time is mostly fixed setup, which is unsuitable for performance claims.
+
 ## Worked examples
 
 ### Worked example 1
@@ -38,33 +45,51 @@ print("CPU benchmark worksheet: unmatched cache comparison rejected")
 
 **Expected observation:** Partition averages 10000 and 100000; unmatched cache states rejected.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `rows` | `1000000` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Calculate partition averages
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **calculate partition averages** in the examples above.
+**Trap to avoid:** Reducing partitions to cut scheduling overhead without checking per-task memory can turn a working job into a spilling one.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Explain skew beyond averages
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **explain skew beyond averages** in the examples above.
+**Trap to avoid:** Reporting only the average leaves skew invisible. Adding partitions does not fix skew either, because a hot key still lands in one partition however many there are.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Capture final AQE plan
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **capture final AQE plan** in the examples above.
+**Trap to avoid:** Reporting partition counts from the pre-execution plan can describe a configuration AQE changed. Coalescing may reduce 200 shuffle partitions to a handful, which changes per-task memory considerably.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Define cache policy
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **define cache policy** in the examples above.
+**Trap to avoid:** Comparing those runs reports a speedup partly caused by the cache, as the reference rejects for unmatched cache states.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose semantic and performance fixtures
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **choose semantic and performance fixtures** in the examples above.
+**Trap to avoid:** Reporting performance from the tiny correctness fixture gives timings that say nothing about production scale. At a few rows, Spark job scheduling dominates and both backends look the same, or the GPU looks slower.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Separate estimated and observed speedup
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **separate estimated and observed speedup** in the examples above.
+**Trap to avoid:** Writing an estimated 3 times speedup into a report as achieved presents unverified data as fact. Readers then plan hardware purchases or migrations around a number nobody measured.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

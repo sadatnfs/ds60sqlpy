@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-list-compatibility-axes">Exercise 1: List compatibility axes<a class="heading-anchor" href="#exercise-1-list-compatibility-axes" aria-label="Link to this section">#</a></h3>
 <p>Python framework compiler toolkit OS architecture and driver.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>list compatibility axes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> List compatibility axes for a custom operator: Python version, framework version and ABI, compiler, CUDA toolkit, operating system, host architecture, driver and device targets.</p>
+<p><strong>Why it is correct here.</strong> A compiled extension links against framework internals and CUDA runtime libraries. A mismatch on any axis can prevent loading or cause a failure at the first kernel launch.</p>
+<p><strong>A plausible wrong approach.</strong> Recording only the Python version suggests one wheel works everywhere that Python runs, while a framework ABI change alone can break the import.</p>
+<p><strong>How to verify.</strong> The reference asserts the manifest keys equal the required set and that <code>driver</code> is absent from the build ledger, since the driver belongs to the runtime environment.</p>
 <h3 id="exercise-2-separate-import-and-execution">Exercise 2: Separate import and execution<a class="heading-anchor" href="#exercise-2-separate-import-and-execution" aria-label="Link to this section">#</a></h3>
 <p>Only real kernel work tests the device path.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate import and execution</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate import from execution: importing proves the host shared library loaded, while only launching a real kernel on the device tests that compatible device code exists.</p>
+<p><strong>Why it is correct here.</strong> Device code is selected at the first launch. A package built without code for the device architecture imports cleanly and then fails with a no-kernel-image error.</p>
+<p><strong>A plausible wrong approach.</strong> Treating a successful import as proof of portability passes packages that cannot run any kernel on the target GPU.</p>
+<p><strong>How to verify.</strong> Add a smoke test that runs the operator on a small tensor on the device and compares with a CPU reference.</p>
 <h3 id="exercise-3-explain-native-code-versus-intermediate-code">Exercise 3: Explain native code versus intermediate code<a class="heading-anchor" href="#exercise-3-explain-native-code-versus-intermediate-code" aria-label="Link to this section">#</a></h3>
 <p>Their portability rules differ.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain native code versus intermediate code</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain native device code versus intermediate code: native binaries for an architecture run only on compatible devices, while embedded PTX can be compiled by the driver for newer architectures.</p>
+<p><strong>Why it is correct here.</strong> Including PTX for the newest targeted architecture lets future GPUs load the kernel through driver compilation, at the cost of a first-launch delay.</p>
+<p><strong>A plausible wrong approach.</strong> Shipping native code only for the build machine&#x27;s GPU makes the package fail on any older or newer architecture.</p>
+<p><strong>How to verify.</strong> Inspect the binary&#x27;s embedded architectures with <code>cuobjdump --list-elf</code> and <code>--list-ptx</code> and compare with the declared device targets.</p>
 <h3 id="exercise-4-design-a-build-ledger">Exercise 4: Design a build ledger<a class="heading-anchor" href="#exercise-4-design-a-build-ledger" aria-label="Link to this section">#</a></h3>
 <p>Record inputs versions hashes and flags in a reviewed recipe.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a build ledger</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a build ledger that records source revision, toolkit and compiler versions, framework version, architecture flags and output hashes in a reviewed build recipe.</p>
+<p><strong>Why it is correct here.</strong> A ledger allows rebuilding the same artifact and explains why two builds differ. Hashes tie a distributed file to the recorded inputs.</p>
+<p><strong>A plausible wrong approach.</strong> Building from a developer machine without recording flags yields an artifact nobody can reproduce or audit.</p>
+<p><strong>How to verify.</strong> Rebuild from the ledger and compare the resulting hash, or explain any difference by a recorded input change.</p>
 <h3 id="exercise-5-test-unsupported-dtype">Exercise 5: Test unsupported dtype<a class="heading-anchor" href="#exercise-5-test-unsupported-dtype" aria-label="Link to this section">#</a></h3>
 <p>Reject with a clear contract error.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>test unsupported dtype</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Test an unsupported dtype, such as float64 for an operator implemented only for float32, and require a clear contract error before any kernel launch.</p>
+<p><strong>Why it is correct here.</strong> Passing unsupported types to a kernel can reinterpret bytes as the wrong type and return plausible but wrong numbers.</p>
+<p><strong>A plausible wrong approach.</strong> Silently casting to float32 hides precision loss and gives callers a different result from what they requested.</p>
+<p><strong>How to verify.</strong> Call the operator with float64 and assert the error message names the supported types.</p>
 <h3 id="exercise-6-define-a-package-release-gate">Exercise 6: Define a package release gate<a class="heading-anchor" href="#exercise-6-define-a-package-release-gate" aria-label="Link to this section">#</a></h3>
 <p>Require functional tests in every declared supported environment.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define a package release gate</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define a release gate requiring functional tests in every declared supported environment, so each combination of framework, toolkit and device target in the matrix runs the smoke and correctness tests.</p>
+<p><strong>Why it is correct here.</strong> The compatibility matrix is a claim, and only tests in each environment support it. A gate stops a release with untested combinations.</p>
+<p><strong>A plausible wrong approach.</strong> Testing one environment and declaring the whole matrix supported presents untested claims as verified.</p>
+<p><strong>How to verify.</strong> Store test results per environment with the release and reject it if any declared row lacks a passing result.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Build ledger completeness does not establish runtime driver or GPU acceptance.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-110_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -39,9 +39,9 @@ expectIllegalArgument(artifactCoordinate("bad/name", "2.13", "4.0.1"))
 
 ### Exercise 2: Keep execution local and bounded
 
-Accept exactly local[2] as the course master and reject remote addresses, local[*] and null. Return the accepted value without starting a session.
+Accept exactly `local[2]` as the course master and reject remote addresses, `local[*]` and null. Return the accepted value without starting a session.
 
-**Expected:** local[2] passes; local[*], spark://example:7077 and null raise IllegalArgumentException.
+**Expected:** `local[2]` passes; `local[*]`, `spark://example:7077` and null raise IllegalArgumentException.
 
 ```scala
 def localMaster(value: String): String = {

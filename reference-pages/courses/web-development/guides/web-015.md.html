@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Flexbox distributes space among items primarily along one axis. The main axis follows flex-direction, while the cross axis is perpendicular. justify-content distributes available space along the main axis; align-items aligns items along the cross axis. The names do not permanently mean horizontal and vertical because direction can change.</p>
 <p>Flexible items have a basis and rules for growing or shrinking. A row of long labels may overflow if wrapping is disabled or if an item&#x27;s automatic minimum size prevents shrinking. <code>min-inline-size:0</code> is often useful for a flex child that must allow its text to wrap or truncate deliberately. Flexbox is a layout tool, not permission to reorder content into a confusing keyboard sequence.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Flex container:</strong> An element with <code>display: flex</code> whose direct children become flex items laid out along one axis.</li>
+<li><strong>Main axis:</strong> The direction in which a flex container places its items, set by <code>flex-direction</code>.</li>
+<li><strong>Cross axis:</strong> The axis perpendicular to the main axis, along which <code>align-items</code> positions the items.</li>
+<li><strong>Flex basis:</strong> An item&#x27;s starting size along the main axis before free space is distributed or taken away.</li>
+<li><strong>Flex wrap:</strong> The <code>flex-wrap: wrap</code> setting that moves items onto new lines instead of shrinking or overflowing.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use display:flex, gap and flex-wrap:wrap for a simple responsive group. <code>flex: 1 1 12rem</code> gives an initial basis and permits growth and shrinkage. Set <code>align-items:stretch</code> when equal cross-axis size supports the component. Keep DOM order aligned with intended reading and focus order rather than using order to create a contradictory visual sequence.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -228,6 +236,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">min-inline-size</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Cards share available space and can wrap.</p>
+<h3 id="contrast-case-a-flex-item-that-refuses-to-shrink">Contrast case: a flex item that refuses to shrink<a class="heading-anchor" href="#contrast-case-a-flex-item-that-refuses-to-shrink" aria-label="Link to this section">#</a></h3>
+<p>A card contains one long unbroken identifier. Compare the card before and after setting a minimum size.</p>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">cards</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">flex</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">gap</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">.</span><span class="syntax-class">card</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">flex</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span> <span class="syntax-number">1</span> <span class="syntax-number">12</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-comment">/* repair */</span>
+<span class="syntax-punctuation">.</span><span class="syntax-class">card</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">min-inline-size</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">overflow-wrap</span><span class="syntax-punctuation">:</span> anywhere<span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>Flex items default to <code>min-width: auto</code>, which in practice means they cannot shrink below their longest unbreakable content. A 60-character identifier therefore forces its card wider than the shared space, and the row overflows the container even though <code>flex-shrink</code> is 1. Setting <code>min-inline-size: 0</code> removes that floor, and <code>overflow-wrap: anywhere</code> lets the identifier break so the card can actually use the narrower width. Remove only the first repair line and you will see the card still overflow, because the wrap rule alone cannot beat the automatic minimum.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-name-the-axes-for-flex-direction-column">Exercise 1: Name the axes for flex-direction:column.<a class="heading-anchor" href="#exercise-1-name-the-axes-for-flex-direction-column" aria-label="Link to this section">#</a></h4>

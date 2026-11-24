@@ -155,7 +155,7 @@ assert len(manifest["weight_sha256"]) == 64 and manifest["schema"]["width"] == 1
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Holdout error beats the training-mean baseline error of 26, the child reproduces holdout predictions within 1e-12, a zeroed hash makes the child exit nonzero with a mismatch diagnostic, and the record states a production no-go. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Freeze the scalar experiment. Predict exercise 6, Record a bounded decision and cleanup, from its prompt alone: Record local parity pass, holdout count 2, previous artifact v1 and production no-go, then remove owned files. Then explain why this finish condition holds: Holdout error beats the training-mean baseline error of 26, the child reproduces holdout predictions within 1e-12, a zeroed hash makes the child exit nonzero with a mismatch diagnostic, and the record states a production no-go. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -191,15 +191,15 @@ If a release record marks an unexecuted checkpoint or rollback test true, replac
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Train within a declared budget) alters one assumption of Example A (Freeze the scalar experiment). Hint 2: exercise 4, Verify fresh-process prediction parity, should end at predictions match within 1e-12. Work backward from it. Hint 3: exercise 5, Make a corrupted artifact fail, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Release bundle, Integrity gate, Fresh-process inference using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Build the owned release bundle, from its inputs alone. Predict whether exercise 3, Hash bytes deterministically, survives one changed input. Then explain Release bundle, Integrity gate, Fresh-process inference in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-035` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Freeze the scalar experiment) cannot be rebuilt without help, revisit `torch-035` first. Otherwise keep your exercise 2 attempt, Predict a ten-step weight, as a regression case alongside a fresh transfer input, then continue along the course plan. In a capstone, a failed acceptance condition is a valid no-go decision; state what evidence would reopen it.
 
 ## Sources and verification status
 

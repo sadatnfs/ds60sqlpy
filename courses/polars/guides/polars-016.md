@@ -14,6 +14,14 @@ A return dtype is part of the function contract. It helps the engine reason abou
 
 Batch equivalence is stronger than purity alone. Subtracting the mean of each batch is deterministic and pure, but does not equal subtracting the mean of the complete dataset. A streamable declaration must be justified by the operation, not used as a performance switch. The worked counterexample shows two different answers from the same values.
 
+## Key terms
+
+- **UDF:** A user-defined Python function applied to data, which the query optimizer cannot inspect.
+- **map_elements:** A method that calls a Python function for values one at a time; it is slower than a native expression and blocks optimization.
+- **return_dtype:** The declared output type of a UDF, so Polars does not have to infer the type from the results.
+- **Pure function:** A function whose output depends only on its input, with no hidden state or side effects.
+- **Batch equivalence:** A batch function must give the same result however rows are split; a mean taken per batch differs from the global mean.
+
 ## Syntax and data contract
 
 map_elements calls a Python function for values and should declare return_dtype. Compare it with the corresponding native expression before choosing the more expensive interface. The batched counterexample uses ordinary Python arithmetic to expose a semantic issue independently of any query optimizer. A real map_batches adapter additionally needs its output schema and optimization assumptions to be correct.

@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-041.md) and attempt one language first. The [Sc
 
 Record Spark, Scala binary and patch, JDK major and patch, Python version and optional PyArrow distribution version without installing anything.
 
-**Expected:** Spark 4.0.1, Scala 2.13 family, JDK 17;actual patch strings and explicit not-installed Arrow when absent.
+**Expected:** Spark 4.0.1, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent.
 
 ```scala
 def versionReceipt(spark: SparkSession): Map[String, String] = {
@@ -29,7 +29,7 @@ The receipt describes the runtime actually executing the tests. Scala probes the
 
 Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
-**Expected:** 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90;instant 19:00UTC.
+**Expected:** 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90; instant 19:00UTC.
 
 ```scala
 def goldenMetrics(frame: DataFrame): Seq[Long] = {
@@ -55,7 +55,7 @@ The fixture catches a migration that drops duplicate occurrences, replaces NULL 
 
 Run the baseline ID-only deduplication query, then reject a request to change its state keys to id, cents while retaining that checkpoint.
 
-**Expected:** Baseline output 1:100,2:200;preflight rejects changed keys before starting a new query.
+**Expected:** Baseline output 1:100,2:200; preflight rejects changed keys before starting a new query.
 
 ```scala
 def requireCompatible(oldKeys: Seq[String], newKeys: Seq[String]): Unit = {
@@ -153,4 +153,6 @@ The gate keeps missing evidence visible. Only the current Spark 4.0.1 stack is e
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Capture the actual runtime tuple) is built inside the program, so opening the lesson fetches nothing; it expects: Spark 4.0.1, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

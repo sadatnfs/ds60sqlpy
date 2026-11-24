@@ -10,6 +10,14 @@ Inspect syntax without evaluating untrusted text, implement a hygienic single-ev
 
 Open `julia-031` in `/classroom` with its prepared `julia` runtime. Worked case A (inspect and expand a bounded expression) and worked case B (count bytes through the actual C library) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-031: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Expr:** The data structure for parsed Julia code, with a head symbol and a list of arguments, produced by quoting or `Meta.parse`.
+- **Macro hygiene:** Macro expansion renames the macro's local variables, and `esc` marks code that must resolve in the caller's scope.
+- **Single evaluation:** A macro binds each argument expression to a local once before reuse, so side effects are not repeated.
+- **ccall:** The built-in call into a compiled C function, whose declared argument and return types must match the C ABI signature.
+- **Cstring:** A `ccall` argument type that passes a zero-terminated pointer to a string's UTF-8 bytes, so C `strlen` counts bytes.
+
 ## Code can be represented as data
 
 Julia represents many syntax forms as expressions. Quoting `:(1 + 2)` constructs a representation instead of immediately adding. `Meta.parse` converts a source string into syntax, but parsing alone does not validate its safety or intended meaning. Evaluating arbitrary parsed input can execute arbitrary program behavior. Configuration and learner records should remain data with a defined schema.

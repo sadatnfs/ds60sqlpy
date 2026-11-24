@@ -1,6 +1,6 @@
 # llm-025: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these memory and compute without a GPU answers after attempting *Count scores for a larger configuration* through *State exclusions*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Compare element precision* points to one step. `llm-025_solution.py` holds the assertions; this page explains how they test quadratic growth. Then try *State exclusions* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -29,7 +29,7 @@ assert scores_big == 32768 and scores_big * 4 == 131072
 
 **Expected:** 32768 score elements; 131072 bytes (128 KiB).
 
-**Verify:** In a fresh process, the exercise checks confirm `scores_big == 32768` and `scores_big * 4 == 131072`.
+**Verify:** For *Count scores for a larger configuration*, a fresh-process check confirms `scores_big == 32768` and `scores_big * 4 == 131072`.
 
 ## Exercise 2: Predict cache growth with depth and context
 
@@ -45,7 +45,7 @@ assert (1 * 2 * 96 * 96) // (1 * 2 * 48 * 48) == 4
 
 **Expected:** 36864 and 73728 cache bytes; the cache doubles while score elements quadruple.
 
-**Verify:** In a fresh process, the exercise checks confirm `cache3 == [36864, 73728]`; `cache3[1] == 2 * cache3[0]` and `1 * 2 * 96 * 96 // (1 * 2 * 48 * 48) == 4`.
+**Verify:** For *Predict cache growth with depth and context*, a fresh-process check confirms `cache3 == [36864, 73728]`; `cache3[1] == 2 * cache3[0]` and `1 * 2 * 96 * 96 // (1 * 2 * 48 * 48) == 4`.
 
 ## Exercise 3: Compare element precision
 
@@ -60,7 +60,7 @@ assert 2 * 1 * 1 * 2 * 32 * 16 * 4 == 8192
 
 **Expected:** 4096 versus 8192 bytes.
 
-**Verify:** In a fresh process, the exercise checks confirm `2 * 1 * 1 * 2 * 32 * 16 * 2 == 4096` and `2 * 1 * 1 * 2 * 32 * 16 * 4 == 8192`.
+**Verify:** For *Compare element precision*, a fresh-process check confirms `2 * 1 * 1 * 2 * 32 * 16 * 2 == 4096` and `2 * 1 * 1 * 2 * 32 * 16 * 4 == 8192`.
 
 ## Exercise 4: Scale batch size
 
@@ -74,7 +74,7 @@ assert 2 * 1 * 3 * 2 * 32 * 16 * 4 == 24576
 
 **Expected:** 24576 raw cache bytes.
 
-**Verify:** In a fresh process, the exercise checks confirm `2 * 1 * 3 * 2 * 32 * 16 * 4 == 24576`.
+**Verify:** For *Scale batch size*, a fresh-process check confirms `2 * 1 * 3 * 2 * 32 * 16 * 4 == 24576`.
 
 ## Exercise 5: Preserve total width
 
@@ -88,7 +88,7 @@ assert 2 * 4 * 32 * 8 * 4 == 2 * 2 * 32 * 16 * 4
 
 **Expected:** equal raw cache bytes for the same context.
 
-**Verify:** In a fresh process, the exercise checks confirm `2 * 4 * 32 * 8 * 4 == 2 * 2 * 32 * 16 * 4`.
+**Verify:** For *Preserve total width*, a fresh-process check confirms `2 * 4 * 32 * 8 * 4 == 2 * 2 * 32 * 16 * 4`.
 
 ## Exercise 6: State exclusions
 
@@ -107,8 +107,8 @@ assert len(estimate["excludes"]) == 3 and not estimate["measured_peak"]
 
 **Expected:** record identifies parameters, temporary tensors, allocator overhead as excluded.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(estimate['excludes']) == 3` and `not estimate['measured_peak']`.
+**Verify:** For *State exclusions*, a fresh-process check confirms `len(estimate['excludes']) == 3` and `not estimate['measured_peak']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Scale batch size* and predict the result first; keep *Preserve total width* failing beside the repair. Log a missing NumPy separately from a wrong quadratic growth value in `llm-025`.

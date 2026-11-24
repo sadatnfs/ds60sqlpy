@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-010`.
 
+## Key terms
+
+- **Record batch:** A set of equal-length Arrow columns sharing one schema, representing one batch of rows.
+- **Chunked array:** A column made of several contiguous array pieces. Chunk boundaries reflect storage or arrival history, not customer groups, file partitions or transactions.
+- **Compute kernel:** A native, typed Arrow function such as filter, greater or sum that processes whole arrays instead of looping over Python values.
+- **Null policy:** How a kernel treats missing inputs. A comparison with null yields null, and a filter must state whether a null selection drops the row or emits a null slot.
+- **Explicit fill:** Replacing nulls with a stated value, as fill_null does, before computing, so the business choice about missing data is visible in the code.
+
 ## The mechanism
 
 A record batch contains equal-length columns for one batch of rows. A table can
@@ -81,6 +89,46 @@ both. Variance needs a suitable combined state and numerical care. Exact median
 cannot generally be recovered from one median per partition. Chunked arrays
 provide a small local setting in which to prove the same algebraic distinction
 before reasoning about a distributed aggregation plan.
+
+## Worked examples
+
+### Merge chunk means from sums and counts
+
+```python
+import pyarrow as pa
+import pyarrow.compute as pc
+
+values = pa.chunked_array([[4], [None, 8, 2, 6]], type=pa.int64())
+naive = sum(pc.mean(chunk).as_py() for chunk in values.chunks) / values.num_chunks
+sums = sum(pc.sum(chunk).as_py() for chunk in values.chunks)
+counts = sum(len(chunk) - chunk.null_count for chunk in values.chunks)
+print(naive, sums / counts, pc.mean(values).as_py())
+```
+
+```text
+4.666666666666666 5.0 5.0
+```
+
+Averaging the two chunk means gives about 4.67, while merging sums and counts gives 5, matching the compute kernel on the whole chunked array. The naive version weights a one-row chunk the same as a four-row chunk. Any custom code that combines partial aggregates across chunks, files or partitions has the same trap, so test it with deliberately unequal chunk sizes.
+
+### Keep unknown filter results visible
+
+```python
+import pyarrow as pa
+import pyarrow.compute as pc
+
+values = pa.chunked_array([[4, None, 8], [2, 6]], type=pa.int64())
+mask = pc.greater(values, 5)
+print(pc.filter(values, mask).to_pylist())
+print(pc.filter(values, mask, null_selection_behavior="emit_null").to_pylist())
+```
+
+```text
+[8, 6]
+[None, 8, 6]
+```
+
+The default filter drops the null comparison result along with the false ones, leaving 8 and 6. With emit_null, the unknown row stays as a null so a reviewer can see that one measurement could not be classified. Use the second form when building exception reports, because silently dropping unknown rows makes a filtered count look more certain than the data allows.
 
 ## Complete worked source
 

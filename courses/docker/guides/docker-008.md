@@ -16,6 +16,14 @@ A Compose `.env` file commonly supplies values used when Compose renders its mod
 
 Treat configuration as data with validation. A missing value should produce a clear startup error or documented default. A string containing `false` is still a nonempty string in many languages. Numeric ports and timeouts need parsing and bounds. Secrets should not be casually placed in versioned files or printed by a diagnostic command.
 
+### Key terms
+
+- **Environment variable:** A named string value supplied to a process, which the application must parse and validate itself.
+- **`ENTRYPOINT`:** The Dockerfile instruction that sets the executable a container runs, with `CMD` supplying its default arguments.
+- **Compose interpolation:** Substitution of variable references, often from a `.env` file, while Compose renders its model before containers start.
+- **`env_file`:** A service setting that injects the variables from a named file into that service's container environment.
+- **Configuration validation:** Parsing and bounds checking settings at startup, so a missing or malformed value fails with a clear error.
+
 ## Anatomy and a trace you can follow
 
 The fixture reads `APP_MESSAGE` and serves it in a JSON field. Compose explicitly sets the value. A source-only message edit changes the image; an environment edit changes runtime configuration and usually requires container recreation to take effect. An image environment value is a default which runtime options can override.
@@ -93,11 +101,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Expecting every `.env` value to appear inside the container. Restarting a container after changing its environment instead of recreating it. Overriding `--entrypoint` and expecting the image's `CMD` to still apply.
 
-Exercise 4 is this chapter's boundary case: Diagnose an exec array containing literal $PORT. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an exec array containing literal $PORT. Print the argument vector the program actually received, and compare the exec array with the shell form, before adding a shell wrapper to the command. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using environment variables, ENTRYPOINT, CMD, Compose interpolation and configuration validation. Reconstruct worked example 2 (Read one explicit variable) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Explain from memory why `restart` keeps the old environment while recreating the service applies the new value. Then reconstruct worked example 2 (Read one explicit variable) with one different value, predict what changes, and name which of environment variables, ENTRYPOINT, CMD, Compose interpolation and configuration validation the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

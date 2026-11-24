@@ -4,8 +4,19 @@
 framework labels, stages, runtime surfaces and primary references. Chapters and
 complete finite programs live in `chapters/` and `programs/`. The subject generator
 publishes guides, examples and manifests only after every unit has substantive
-prose, two worked cases and its full source. Run `python authoring/build.py`, then
-its `--check` mode, from the course directory.
+prose, two worked cases and its full source. Each unit's `key_terms` object holds 3
+to 5 lesson-specific terms with one-sentence definitions; the generator validates
+them and renders a Key terms section after the guide's starting-point section.
+Each unit's `worked_examples` list holds at least one object with a `title`,
+`code` (a list of Python source lines that must parse), an optional `output` (the
+exact stdout lines, rendered as an expected-output block) and an `interpretation`
+of at least 40 words that explains what the result shows in that lesson. Titles
+must be unique within a lesson and code must not repeat across lessons. Snippets
+are small, runnable and consistent with the lesson's program; when the lesson's
+framework is not needed to show the point, prefer the standard library or a
+lighter equivalent and say which framework behavior it mirrors. The generator
+renders them as Worked example sections after the last worked case.
+Run `python authoring/build.py`, then its `--check` mode, from the course directory.
 
 The intended route has shared HTTP/browser foundations followed by independently
 navigable Flask, FastAPI and Django branches, then cross-framework engineering

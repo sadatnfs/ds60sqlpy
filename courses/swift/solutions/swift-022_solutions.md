@@ -14,13 +14,43 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Draw strong and weak arrows in both examples.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The example observes a controlled ownership boundary without retaining the target accidentally. The weak observer becomes nil after the last strong reference is removed.
+**Reference answer.** It runs as the `Task 1` block of the reference program.
+
+```swift
+var parent: Parent? = Parent()
+var child: Child? = Child()
+parent?.child = child
+child?.parent = parent
+weak var childObserver = child
+child = nil
+precondition(childObserver != nil)
+parent = nil
+precondition(childObserver == nil)
+```
+
+**Observe:** The child survives losing its local variable while the parent still holds it, and disappears once the parent is gone.
+
+The arrow from Parent.child is strong, so it keeps the child alive; the arrow from Child.parent is weak, so nothing keeps the parent alive after parent = nil, and the child follows.
 
 ### Task 2: Guided modification
 
 Add a temporary second strong owner and predict when the weak observer clears.
 
-No separate reference answer has been written for this task. Start from Example B: The weak back-reference breaks the ownership cycle while preserving navigation when the parent exists. The child survives independently without retaining its parent.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+var owner: Owner? = Owner()
+var second: Owner? = owner
+weak var observer = owner
+owner = nil
+precondition(observer != nil && second != nil)
+second = nil
+precondition(observer == nil)
+```
+
+**Observe:** The observer survives clearing owner because second still holds the object, and clears when second is set to nil.
+
+A weak reference becomes nil only after the last strong reference goes away, so the second owner delays deallocation until it is released.
 
 ### Task 3: Independent construction
 
@@ -54,19 +84,73 @@ The downloader does not own its delegate, so it cannot keep the listener alive o
 
 Diagnose an object retaining a closure that strongly captures the same object.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Weak is not a general replacement for ownership. A local strong binding can extend lifetime during observation. ARC does not cancel asynchronous work or close external resources automatically.
+**Reference answer.** It runs as the `Task 4` block of the reference program.
+
+```swift
+final class Ticker {
+  var count = 0
+  var onTick: (() -> Void)?
+  func startStrong() { onTick = { self.count += 1 } }
+  func startWeak() { onTick = { [weak self] in self?.count += 1 } }
+}
+var leaky: Ticker? = Ticker()
+leaky?.startStrong()
+weak var leakObserver = leaky
+leaky = nil
+precondition(leakObserver != nil)
+leakObserver?.onTick = nil
+precondition(leakObserver == nil)
+var fixed: Ticker? = Ticker()
+fixed?.startWeak()
+weak var fixedObserver = fixed
+fixed = nil
+precondition(fixedObserver == nil)
+```
+
+**Observe:** The strongly capturing ticker outlives its variable until onTick is cleared; the weakly capturing ticker is freed immediately.
+
+The object owns the closure and the closure owns self, forming a cycle ARC cannot break; [weak self] removes the closure's strong arrow.
 
 ### Task 5: Boundary evidence
 
 Test a callback after its weak owner has disappeared.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Observe weak lifetime) and Example B (Break a parent-child cycle).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+final class Screen {
+  var shown: [String] = []
+}
+var screen: Screen? = Screen()
+let show = { [weak screen] (text: String) -> Bool in
+  guard let screen else { return false }
+  screen.shown.append(text)
+  return true
+}
+precondition(show("first") && screen?.shown == ["first"])
+screen = nil
+precondition(!show("late"))
+```
+
+**Observe:** The callback delivers first while the screen exists and returns false for late after it is gone.
+
+The capture list holds the screen weakly, so a late callback finds nil and reports that nothing was delivered instead of reviving or crashing.
 
 ### Task 6: Transfer and justify
 
 Choose weak or unowned for a relationship and justify the lifetime guarantee required.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **ARC**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Design a weak delegate relationship) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** Example A holds an `Owner` in an optional strong variable and also in a `weak var`, then removes the strong reference. Example B links a `Parent` and a `Child` where the child's back-reference is `weak`, then drops the only external strong reference to the parent. The task 3 answer designs a weak delegate that receives a finished message.
+
+**Why it is correct.** ARC frees an object when its strong count reaches zero. In Example A the weak variable does not count, so setting `owner = nil` frees the object and the weak variable becomes nil. In Example B the parent strongly holds the child but the child only weakly holds the parent, so releasing `parent` frees it and `child.parent` reads nil while the child stays alive through `let child`.
+
+**A plausible wrong approach.** Declaring `Child.parent` as a strong `var` creates a cycle: parent holds child and child holds parent, so after `parent = nil` neither is freed and `observed == nil` fails. A local `let keep = parent` placed before the release would also keep the parent alive and make the same check fail.
+
+**How to verify.** Remove `weak` from `Child.parent` in a scratch pad and confirm the check fails. For task 3, the listener receives finished, and after it is released the weak delegate becomes nil and `finish()` does nothing.
 
 ## Mechanism and diagnostic reasoning
 

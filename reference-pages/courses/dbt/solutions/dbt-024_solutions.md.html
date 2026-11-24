@@ -198,21 +198,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-identify-the-owner">1. Identify the owner<a class="heading-anchor" href="#1-identify-the-owner" aria-label="Link to this section">#</a></h3>
 <p>Use ownership to route review and incidents. A declared owner does not prove someone has acknowledged or fulfilled the responsibility.</p>
+<p><strong>Why it holds here:</strong> Groups commerce and analysis each declare an owner, and each model names its group in config.</p>
+<p><strong>Plausible wrong approach:</strong> Taking the owner field as proof that someone is on call ignores that it is only a declaration.</p>
+<p><strong>How to verify:</strong> Read the manifest&#x27;s groups section and the model&#x27;s group config and expect Classroom team for commerce.</p>
 <p><strong>Expected:</strong> Responsibility is explicitly declared.</p>
 <h3 id="2-change-access-deliberately">2. Change access deliberately<a class="heading-anchor" href="#2-change-access-deliberately" aria-label="Link to this section">#</a></h3>
 <p>Review schema, semantics, support and migration obligations before broadening access. Public within dbt is not synonymous with public on the internet.</p>
+<p><strong>Why it holds here:</strong> internal is private to commerce, so the cross-group consumer fails. Making internal public allows the reference.</p>
+<p><strong>Plausible wrong approach:</strong> Making a model public without reviewing its schema and support exposes an unstable interface to other teams.</p>
+<p><strong>How to verify:</strong> Change internal&#x27;s access to public, run build for the cross-group case, and expect consumer to return 42.</p>
 <p><strong>Expected:</strong> The reference policy changes explicitly.</p>
 <h3 id="3-test-database-visibility">3. Test database visibility<a class="heading-anchor" href="#3-test-database-visibility" aria-label="Link to this section">#</a></h3>
 <p>Use actual grants and identity controls in a deployed environment. Do not advertise model access metadata as row/column authorization.</p>
+<p><strong>Why it holds here:</strong> Model access only governs ref() in dbt. DuckDB still lets anyone with the file query internal directly.</p>
+<p><strong>Plausible wrong approach:</strong> Advertising private access as a security control misleads users into thinking the data is protected.</p>
+<p><strong>How to verify:</strong> Run select value from internal in DuckDB directly and expect 41.</p>
 <p><strong>Expected:</strong> It remains readable here.</p>
 <h3 id="4-define-a-sensitive-field-boundary">4. Define a sensitive field boundary<a class="heading-anchor" href="#4-define-a-sensitive-field-boundary" aria-label="Link to this section">#</a></h3>
 <p>Use an appropriate governed model, grants or service boundary and test it with the intended identity. This lesson does not configure external permissions.</p>
+<p><strong>Why it holds here:</strong> A restricted column needs database grants, masking, or a separate service, tested with the intended user.</p>
+<p><strong>Plausible wrong approach:</strong> Marking the model private in dbt does not hide the column from database queries.</p>
+<p><strong>How to verify:</strong> Describe the grant or masking rule and how you would test it with a restricted identity.</p>
 <p><strong>Expected:</strong> The answer includes a real authorization mechanism.</p>
 <h3 id="5-plan-a-dependency-change">5. Plan a dependency change<a class="heading-anchor" href="#5-plan-a-dependency-change" aria-label="Link to this section">#</a></h3>
 <p>Publish a documented stable model, validate consumers and retire internal references under a clear policy. Avoid silently changing their meaning.</p>
+<p><strong>Why it holds here:</strong> Consumers move from internal to a documented public model, validated before internal references are removed.</p>
+<p><strong>Plausible wrong approach:</strong> Changing internal&#x27;s meaning in place breaks readers without warning.</p>
+<p><strong>How to verify:</strong> Create the public model, run consumers against it, and confirm their outputs match before retiring the old reference.</p>
 <p><strong>Expected:</strong> The plan identifies versions and acceptance checks.</p>
 <h3 id="6-audit-the-claim">6. Audit the claim<a class="heading-anchor" href="#6-audit-the-claim" aria-label="Link to this section">#</a></h3>
 <p>Record accepted/rejected dependencies and observed direct SQL access. Name the external controls that require their own configuration and tests.</p>
+<p><strong>Why it holds here:</strong> These two cases show that dbt accepts a same-group reference and rejects a cross-group reference to a private model.</p>
+<p><strong>Plausible wrong approach:</strong> Claiming the cases prove data is protected overstates them, since direct SQL still works.</p>
+<p><strong>How to verify:</strong> Write the claim and check it against the build results: example_one passes, example_two fails, and direct SQL reads internal.</p>
 <p><strong>Expected:</strong> They establish local dbt reference-policy behavior.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;dbt-024: complete local dbt project investigation.&quot;&quot;&quot;</span>

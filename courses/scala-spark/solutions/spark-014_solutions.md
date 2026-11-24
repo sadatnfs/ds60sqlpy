@@ -38,7 +38,7 @@ def classified(frame):
 
 Classification adds evidence while preserving the source relation. The explicit NULL-status test prevents three-valued logic from letting an unknown status fall through as valid. The chain defines one reproducible first reason when defects overlap. Unknown amount is not a negative amount and remains permitted, so the classifier does not invent a value merely to simplify aggregation.
 
-**Verification evidence:** Assert the exact two(source_row, reason) pairs and the unchanged source count 12.
+**Verification evidence:** Assert the exact two (source_row, reason) pairs and the unchanged source count 12.
 
 ### Exercise 2: Create the accepted event relation
 
@@ -71,7 +71,7 @@ The accepted relation represents source validity, not paid-revenue eligibility. 
 
 Return source_row, event_id, team, amount_cents, status, rejection_reason for rejected records, ordered by source_row when inspected. Keep the original values, including the missing event ID.
 
-**Expected:** Rows are (11, 11, A, 10, mystery, unknown_status) and (12, NULL, A, 5, paid, missing_id). Accepted and quarantined counts sum to 12.
+**Expected:** Rows are (11, 11, A, 10, mystery, unknown_status) and `(12, NULL, A, 5, paid, missing_id)`. Accepted and quarantined counts sum to 12.
 
 ```scala
 def quarantine(frame: DataFrame): DataFrame = {
@@ -98,7 +98,7 @@ A reason without the original record is often insufficient for diagnosis. The qu
 
 From accepted records, filter paid and group by team into team, rows, valued, total_cents. Count every event, only nonnull amounts, and the exact Long sum. Preserve a NULL team group and a NULL-only amount group.
 
-**Expected:** Groups are A:(3,2,200), B:(2,2,25), C:(1,0, NULL), D:(1,1,200), E:(1,1,0), NULL:(1,1,50). Paid metrics are 9 rows,7 valued,475 cents.
+**Expected:** Groups are `A:(3, 2, 200)`, `B:(2, 2, 25)`, `C:(1, 0, NULL)`, `D:(1, 1, 200)`, `E:(1, 1, 0)`, `NULL:(1, 1, 50)`. Paid metrics are 9 rows, 7 valued, 475 cents.
 
 ```scala
 def summarizePaid(frame: DataFrame): DataFrame = {
@@ -134,7 +134,7 @@ The three measures answer different questions: event volume, observed-value volu
 
 Return a paid row-level projection retaining event_id, team, amount_cents. Compare it with the deliberately wrong team/amount distinct projection and explain the lost 100-cent event.
 
-**Expected:** The correct projection has metrics(9,7,475); the wrong projection has(8,6,375). IDs 1 and 6 must both remain despite equal team/amount values.
+**Expected:** The correct projection has metrics `(9, 7, 475)`; the wrong projection has `(8, 6, 375)`. IDs 1 and 6 must both remain despite equal team/amount values.
 
 ```scala
 def paidProjection(frame: DataFrame): DataFrame = {
@@ -209,4 +209,6 @@ The final gate validates the occurrence and event grains before presenting a rep
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Classify defects without dropping source occurrences) is built inside the program, so opening the lesson fetches nothing; it expects: Source row 11 has `unknown_status`, row 12 has `missing_id`, and the other 10 reasons are NULL. All 12 `source_row` identities remain. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

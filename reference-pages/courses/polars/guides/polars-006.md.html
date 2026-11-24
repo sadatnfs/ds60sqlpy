@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A join matches records using keys; it does not verify that the key represents the intended relationship. A fact table may have many orders for one customer, while a customer dimension should have one row per customer for a many-to-one enrichment. Duplicating a dimension key causes every matching fact to repeat. The result can still look plausible and contain no nulls while its total is inflated.</p>
 <p>Declare the expected cardinality where the API supports it, then independently reconcile row counts and additive quantities. The validate=&quot;m:1&quot; contract says the left side may contain repeated keys and the right side must have unique matching keys. This protects one part of the data model; it does not prove that region is correct or that the dimension represents the correct historical version.</p>
 <p>Semi and anti joins answer membership questions. A semi join keeps matching left rows without appending right-side columns. An anti join keeps unmatched left rows. These are useful for eligibility and quarantine logic because a membership test should not accidentally multiply facts. Null-key matching is a separate policy: a missing customer identifier is not automatically the same entity as another missing identifier.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Join cardinality:</strong> The expected match pattern between keys, such as many-to-one, which decides whether a join can multiply rows.</li>
+<li><strong>validate:</strong> The join argument, such as <code>validate=&quot;m:1&quot;</code>, that raises an error when right-side keys are not unique as declared.</li>
+<li><strong>Fanout:</strong> Row multiplication when a key matches more than one row on the other side, which inflates additive totals.</li>
+<li><strong>Semi join and anti join:</strong> Joins that keep the left rows with at least one match, or with no match, returning left columns only and never duplicating rows.</li>
+<li><strong>nulls_equal:</strong> The join option that lets null keys match each other; by default a null key matches nothing.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>join takes a key, join type and optional cardinality validation. A left join preserves unmatched left rows, but may multiply matched rows if right keys repeat. semi and anti return left columns only. nulls_equal=True deliberately allows missing keys to match; use it only when that semantics is justified. Sort by a stable identifier before comparing output records.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

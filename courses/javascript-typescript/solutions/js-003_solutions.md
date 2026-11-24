@@ -18,7 +18,7 @@ Loops need an initial state, an invariant and a termination condition. A prefix 
 
 ## Reading the implementation
 
-Use if for a branch, for...of for values, and indexed for when positions matter. The expression left&&right evaluates right only when left is truthy; left||right uses right only when left is falsy. Neither necessarily returns a Boolean. The expression value??fallback preserves 0, false and empty string. A loop condition i<array.length excludes the invalid index length.
+Use if for a branch, for...of for values, and indexed for when positions matter. The expression `left && right` evaluates right only when left is truthy; `left || right` uses right only when left is falsy. Neither necessarily returns a Boolean. The expression value??fallback preserves 0, false and empty string. A loop condition i<array.length excludes the invalid index length.
 
 ## Exercise 1: Compare false and truthy containers: predict an edited check
 
@@ -32,7 +32,7 @@ The unchanged code is the exercise block of Example A:
 assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true])`. Restoring the original line brings back the worked observation: false, false, true, true.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual([Boolean(1), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);`. Restoring `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` brings back: false, false, true, true.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true])` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -50,7 +50,7 @@ assert.equal(0 ?? 10, 0);
 assert.equal(null ?? 10, 10);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(null ?? 10, 10)`; after it the line reads `assert.equal(null ?? 10, 10);` again and 10, 0, 10.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(null ?? 11, 10);`. Restoring `assert.equal(null ?? 10, 10);` brings back: 10, 0, 10.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(null ?? 10, 10)` accepts.
 

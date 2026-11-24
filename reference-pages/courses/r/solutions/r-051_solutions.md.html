@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Draw the five paired observations with labeled axes.</p>
 <p>A scatterplot establishes the coordinate system and identifies the measured quantities.</p>
 <p><strong>Expected evidence:</strong> One labeled base plot.</p>
+<p><strong>Approach:</strong> Call plot on d$x and d$y with xlab, ylab and main set, so the high level call opens the page and fixes the coordinates.</p>
+<p><strong>Why it holds here:</strong> The five pairs (0, 0) through (4, 8) are the measured quantities, and naming the axes Input value and Response value tells a reader which is which before any rule is drawn.</p>
+<p><strong>Tempting mistake:</strong> Starting with points or abline on a fresh device. Low level functions need an existing plot, so R stops with plot.new has not been called yet.</p>
+<p><strong>Verify:</strong> <code>all(d$y == 2 * d$x)</code> returns TRUE, and the device shows five filled points with both axis titles.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Overlay the rule y=2x without starting another plot.</p>
 <p>The overlay shares the established axes and passes through the authored points.</p>
 <p><strong>Expected evidence:</strong> Correct shared-coordinate overlay.</p>
+<p><strong>Approach:</strong> Add the rule with abline(a = 0, b = 2) on the same plot.</p>
+<p><strong>Why it holds here:</strong> abline draws in the coordinates plot already set, so the line from (0, 0) to (4, 8) passes through every observed pair. That agreement is visible because the data were generated as y = 2x.</p>
+<p><strong>Tempting mistake:</strong> Drawing the rule with a second plot call such as <code>plot(d$x, 2 * d$x, type = &quot;l&quot;)</code>. That opens a new page, so the points disappear and the line is never compared with them.</p>
+<p><strong>Verify:</strong> The device shows one line passing through all five points on a single panel.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Set and inspect exact limits 0:4 and 0:8.</p>
 <p>With xaxs/yaxs set to i, par(&quot;usr&quot;) matches the four declared bounds.</p>
 <p><strong>Expected evidence:</strong> Expected coordinate limits.</p>
+<p><strong>Approach:</strong> Pass xlim = c(0, 4), ylim = c(0, 8) together with xaxs = &quot;i&quot; and yaxs = &quot;i&quot;, then read par(&quot;usr&quot;).</p>
+<p><strong>Why it holds here:</strong> The &quot;i&quot; style uses the limits exactly, so the plotting region runs from 0 to 4 across and 0 to 8 up, which is what the coordinate check expects.</p>
+<p><strong>Tempting mistake:</strong> Setting the limits but keeping the default &quot;r&quot; style. R then pads each range by 4 percent, so usr becomes about -0.16 to 4.16 and -0.32 to 8.32, and an exact comparison fails.</p>
+<p><strong>Verify:</strong> <code>max(abs(par(&quot;usr&quot;) - c(0, 4, 0, 8))) &lt; 1e-12</code> returns TRUE.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose connecting unsorted rows in a time-series line.</p>
 <p>lines follows supplied order. Sort by the declared time variable or use an appropriate grouping/order rule before implying a trajectory.</p>
 <p><strong>Expected evidence:</strong> Ordering defect and repair identified.</p>
+<p><strong>Approach:</strong> Order the rows by time with <code>unsorted[order(unsorted$time), ]</code> before passing them to lines.</p>
+<p><strong>Why it holds here:</strong> lines joins points in the order supplied. The rows arrive as times 3, 1 and 2, so the path would run from time 3 back to 1 and then forward to 2, which is not a trajectory.</p>
+<p><strong>Tempting mistake:</strong> Trusting the picture to reveal the problem. These three values sit exactly on value = 10 times time, so the backtracking path overlaps itself and looks like a clean line; only the order check exposes it.</p>
+<p><strong>Verify:</strong> <code>ordered$time</code> returns 1, 2, 3 and <code>ordered$value</code> returns 10, 20, 30.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Create, close and validate an owned PNG tempfile.</p>
 <p>The file has a valid PNG signature and is removed by scoped cleanup; unrelated devices remain owned by their callers.</p>
 <p><strong>Expected evidence:</strong> Actual file evidence and scoped cleanup.</p>
+<p><strong>Approach:</strong> Open png on a tempfile, record its device number, register cleanup with on.exit, draw, call dev.off, and only then read the first 8 bytes.</p>
+<p><strong>Why it holds here:</strong> The PNG is complete only after dev.off. Its first bytes, 137 80 78 71 13 10 26 10, mark a real PNG file, and the cleanup closes the owned device only if it is still current before removing the file.</p>
+<p><strong>Tempting mistake:</strong> Reading the bytes before dev.off, which can find an empty or partial file, or cleaning up with graphics.off, which also closes devices the caller opened.</p>
+<p><strong>Verify:</strong> <code>readBin(path, &quot;raw&quot;, n = 8)</code> returns the 8 signature bytes inside the function, and <code>file.exists(removed)</code> returns FALSE afterward.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Distinguish numerical, file and browser evidence for the graphic.</p>
 <p>Data assertions check values, signature checks file structure, and a browser inspection checks delivery/readability. None automatically substitutes for the others.</p>
 <p><strong>Expected evidence:</strong> Three evidence layers stated.</p>
+<p><strong>Approach:</strong> List the three checks separately: assertions on d, the signature and size of the PNG file, and a browser view of the delivered figure.</p>
+<p><strong>Why it holds here:</strong> The assertions confirm y = 2x and the coordinate range. The signature confirms the file is a PNG. Neither says whether the axis labels are legible or the line color is distinguishable on the page.</p>
+<p><strong>Tempting mistake:</strong> Treating a clean Rscript exit as proof that the figure works for students. The script can pass while labels overlap or the image fails to load in the classroom.</p>
+<p><strong>Verify:</strong> Running the reference prints r-051 reference checks passed, and a separate browser screenshot shows the labels readable.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

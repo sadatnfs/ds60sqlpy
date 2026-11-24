@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An as-of join matches a record to a nearby key value rather than requiring exact equality. For historical features, a backward match can select the latest recorded feature at or before a request time. A forward match can select future information. The direction is therefore a scientific and deployment assumption, not a cosmetic option.</p>
 <p>A time key must be ordered within the relevant entity. A tolerance can prevent an old feature from being used beyond its permitted age. These controls still do not automatically establish what information was available when the prediction was made. A record may describe an old event but arrive much later. Reconstructing past decisions requires both event time and known/available time when late data or revisions are possible.</p>
 <p>The second case uses a deliberately small candidate join to demonstrate the two-clock rule. It is inspectable, but a large unrestricted join can be expensive. The goal is to establish correct semantics first, then design an indexed or versioned implementation that preserves them. A feature-store product must be evaluated against this contract rather than assumed to solve every form of historical leakage.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>join_asof:</strong> A join that matches each left row to the nearest right row by a sorted key instead of requiring equal keys.</li>
+<li><strong>Backward strategy:</strong> The as-of rule that takes the last right row whose key is at or before the left key, so no later row is used.</li>
+<li><strong>Tolerance:</strong> The largest allowed distance between matched keys; when the nearest eligible right row is farther away, the result is null.</li>
+<li><strong>Availability time:</strong> When a value became known; matching on it rather than event time keeps facts out until they were knowable.</li>
+<li><strong>Leakage:</strong> A feature that uses information not available at the prediction cutoff, which inflates measured accuracy.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>join_asof uses sorted keys, a strategy and optional tolerance. For a backward lookup, verify that the matched feature time does not exceed the request cutoff. For bitemporal selection, filter candidates by both event&lt;=cutoff and known&lt;=cutoff, then choose the latest eligible version using a complete tie-break rule. Preserve requests with no eligible feature under an explicit missing-value policy.</p>
 <h3 id="mathematical-interpretation">Mathematical interpretation<a class="heading-anchor" href="#mathematical-interpretation" aria-label="Link to this section">#</a></h3>

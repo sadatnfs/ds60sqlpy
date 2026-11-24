@@ -66,7 +66,7 @@ Tagging errors can propagate into lemmatization and relation extraction. If the 
         ),
         (
             "Dependency trees and what a validator can prove",
-            """A dependency representation links each token to a head token, with a root marking the main organizing predicate under a chosen annotation scheme. For tokens [I,saw,her], heads [1,-1,1] attach I and her to saw, which is the root. Indices refer to token positions, and -1 is the explicit root sentinel in this lesson.
+            """A dependency representation links each token to a head token, with a root marking the main organizing predicate under a chosen annotation scheme. For tokens [I, saw, her], heads [1, -1, 1] attach I and her to saw, which is the root. Indices refer to token positions, and -1 is the explicit root sentinel in this lesson.
 
 A structural validator checks legal indices, exactly one root and absence of cycles. Following each head chain should eventually reach -1. These conditions establish that the array forms one rooted tree. They do not establish that the attachments or relation labels are linguistically correct. Heads [1,-1,0] also form a tree but attach her to I, which is not the intended analysis of this sentence.
 
@@ -76,7 +76,7 @@ The distinction matters for learned parsers and language-model-generated structu
     [
         (
             "One form, two lemmas",
-            """The pair (saw,VERB) maps to see, while (saw,NOUN) maps to saw. The word alone is insufficient for this table. Store surface, POS and lemma together so the normalization can be audited. A default lowercased fallback means no covered transformation was found, not that a lexicon has confirmed the lemma.""",
+            """The pair (saw, VERB) maps to see, while (saw, NOUN) maps to saw. The word alone is insufficient for this table. Store surface, POS and lemma together so the normalization can be audited. A default lowercased fallback means no covered transformation was found, not that a lexicon has confirmed the lemma.""",
         ),
         (
             "A minimal-pair rule and its failure",
@@ -222,7 +222,7 @@ The implementation learns real conditional count distributions with additive smo
             "From sequence probability to conditional counts",
             """The chain rule writes p(x_1,...,x_T,EOS) as the product of conditional probabilities given the full preceding history. The bigram approximation replaces that history with only the last token. Each sentence begins at BOS and ends with a predicted EOS event. Counts reset at sentence boundaries so the end of one document does not become context for the next.
 
-Without smoothing, maximum-likelihood probability is C(context,word)/C(context). An unseen continuation receives zero probability, which makes an entire sequence probability zero. Additive smoothing with alpha>0 uses (C(context,word)+alpha)/(C(context)+alpha*V). It allocates some probability to every vocabulary item. Larger alpha moves a row closer to uniform, while very small alpha stays near empirical counts.
+Without smoothing, maximum-likelihood probability is C(context, word)/C(context). An unseen continuation receives zero probability, which makes an entire sequence probability zero. Additive smoothing with alpha>0 uses (C(context, word)+alpha)/(C(context)+alpha*V). It allocates some probability to every vocabulary item. Larger alpha moves a row closer to uniform, while very small alpha stays near empirical counts.
 
 The unknown token provides a fixed destination for unseen evaluation words. It is included during training even though this tiny corpus has no observed unknown events. A more realistic pipeline may replace rare training words with UNK before counting. That policy changes its learned probability and should be selected without inspecting the final evaluation corpus.""",
         ),
@@ -281,7 +281,7 @@ A bigram can capture local preferences but loses longer context. We do not asser
         ),
         (
             "Prove normalization",
-            "Sum probabilities over the frozen vocabulary for BOS,we,like and UNK.",
+            "Sum probabilities over the frozen vocabulary for BOS, we, like and UNK.",
             "Each row sums to one within numerical tolerance.",
             "An unseen context has zero counts and a uniform smoothed row.",
             "The additive numerator sums to the observed row total plus alpha*V, exactly matching the denominator. This invariant catches vocabulary and denominator errors. It also verifies the declared unseen-context behavior rather than relying on one plausible sentence score.",
@@ -366,7 +366,7 @@ This lesson derives the exact smoothing and normalization convention used by a r
             "Derive the chosen weighting convention",
             """Let n be the number of training documents and df_j the number containing term j. With smooth_idf=True, the implementation used here assigns idf_j=log((1+n)/(1+df_j))+1. The natural logarithm and final plus one matter. Raw term frequency multiplies that weight by the count tf_ij; optional sublinear frequency instead uses 1+log(tf_ij) for positive counts.
 
-The two training documents are tea tea cup and coffee cup. Sorted vocabulary order is [coffee,cup,tea]. Coffee and tea each occur in one document, while cup occurs in both. Thus the rare-term weight a is log(3/2)+1, and cup has weight one. Before normalization the rows are [0,1,2a] and [a,1,0].
+The two training documents are tea tea cup and coffee cup. Sorted vocabulary order is [coffee, cup, tea]. Coffee and tea each occur in one document, while cup occurs in both. Thus the rare-term weight a is log(3/2)+1, and cup has weight one. Before normalization the rows are [0, 1, 2a] and [a, 1, 0].
 
 L2 normalization divides each nonzero row by its Euclidean norm. It removes overall magnitude from cosine comparisons while retaining relative term weighting. The first row norm is sqrt(1+4a^2). A repeated term still changes direction relative to other terms, so normalization does not erase every effect of document length or repetition.""",
         ),
@@ -390,7 +390,7 @@ The reference checks raw counts, IDF values, normalized vectors, cosine, subline
     [
         (
             "Compute DF and IDF",
-            """For the two authored documents, df(coffee)=1, df(cup)=2 and df(tea)=1. With the chosen smoothed formula, IDF is [a,1,a] where a=log(1.5)+1, about 1.40547. Counting the two tea occurrences as df=2 would incorrectly reduce its IDF.""",
+            """For the two authored documents, df(coffee)=1, df(cup)=2 and df(tea)=1. With the chosen smoothed formula, IDF is [a, 1, a] where a=log(1.5)+1, about 1.40547. Counting the two tea occurrences as df=2 would incorrectly reduce its IDF.""",
         ),
         (
             "Normalize and retrieve",
@@ -405,7 +405,7 @@ The reference checks raw counts, IDF values, normalized vectors, cosine, subline
         (
             "Count documents, not occurrences",
             "Calculate DF for the three sorted terms from the two-document corpus.",
-            "[1,2,1] for [coffee,cup,tea].",
+            "[1, 2, 1] for [coffee, cup, tea].",
             "Each document contributes at most one to a term's DF.",
             "Tea appears twice but only in one document, so its document frequency is one. Cup appears once in each of two documents, so its DF is two. This distinction is the basis for the IDF weighting and is independent of the raw within-document counts.",
         ),
@@ -502,7 +502,7 @@ def main():
     _,ll2,lp2=manual_nb(X,Y,prior=[.9,.1])
     changed=posterior(probe,ll2,lp2)
     assert changed[0,0]>changed[0,1]
-    # Fixed vocabulary [urgent,thanks] cannot represent absent not.
+    # Fixed vocabulary [urgent, thanks] cannot represent absent not.
     urgent=np.array([1.,0.]);not_urgent=np.array([1.,0.])
     assert np.array_equal(posterior(urgent,ll,lp),posterior(not_urgent,ll,lp))
     assert np.isclose(np.exp(ll[0]).sum(),1.) and np.isclose(np.exp(ll[1]).sum(),1.)
@@ -515,7 +515,7 @@ author(
     8,
     """Multinomial Naive Bayes is a compact probabilistic baseline for nonnegative text counts. It models the class prior and the distribution of token events within each class, then combines those pieces with Bayes\' rule. Its conditional-independence assumption is strong, but the resulting classifier can be useful even when the language is not actually generated independently word by word.
 
-The feature order is [urgent,thanks]. Four documents have count rows [2,1],[1,0],[0,2],[0,1] and labels [1,1,0,0]. We derive the fitted probabilities by hand and compare them with a real scikit-learn MultinomialNB. This establishes implementation parity on a known fixture, not a claim of calibrated confidence or deployment accuracy.
+The feature order is [urgent, thanks]. Four documents have count rows [2, 1], [1, 0], [0, 2], [0, 1] and labels [1, 1, 0, 0]. We derive the fitted probabilities by hand and compare them with a real scikit-learn MultinomialNB. This establishes implementation parity on a known fixture, not a claim of calibrated confidence or deployment accuracy.
 
 Separate the prior probability of a class from the likelihood of tokens under that class. A word can favor an urgent class while a strong nonurgent prior still makes the posterior nonurgent. Class imbalance and the target population therefore matter to the decision, not just the presence of a distinctive keyword.""",
     [
@@ -562,7 +562,7 @@ Changing the class prior to [0.9,0.1] flips the stated urgent-only probe toward 
         (
             "Aggregate by class",
             "Calculate the two class-by-feature count rows and document priors.",
-            "Counts [[0,3],[3,1]] in class order[0,1]; priors [.5,.5].",
+            "Counts [[0, 3], [3, 1]] in class order [0, 1]; priors [.5, .5].",
             "Count documents for priors and tokens for likelihoods.",
             "The class-zero documents contain three thanks events and no urgent events. Class one contains three urgent and one thanks. Each class contains two documents, so the prior is balanced despite unequal total token counts. Keeping those units separate is essential to the model.",
         ),
@@ -576,7 +576,7 @@ Changing the class prior to [0.9,0.1] flips the stated urgent-only probe toward 
         (
             "Compute stable posteriors",
             "Score probe [1,0] in log space and normalize with logsumexp.",
-            "Posterior [3/13,10/13] for classes[0,1].",
+            "Posterior [3/13, 10/13] for classes [0, 1].",
             "Start from log prior and add count-weighted log likelihoods.",
             "The two unnormalized weights are 0.1 and one-third. Their sum is 13/30, giving the stated fractions. Logsumexp computes the same normalization without underflow. Matching one argmax alone would miss a wrong probability scale, so compare the full vector.",
         ),

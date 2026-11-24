@@ -18,6 +18,13 @@ For a deterministic policy \(d\), a path receives weight only when its observed 
 
 The exact conditional history must match the assumed assignment process. In a richer problem, omitting relevant prior variables from either denominator can invalidate the weighting argument. Sequential exchangeability, positivity and consistency remain identification assumptions, not numerical validations.
 
+## Key terms
+
+- **Target trial:** A specification of the randomized trial an observational analysis emulates, aligning eligibility, treatment assignment and the start of follow-up.
+- **Time zero:** The moment follow-up begins; it must coincide with eligibility and assignment so no group receives guaranteed survival time.
+- **Immortal time:** Follow-up during which the outcome cannot occur for a group by construction, such as time a person must survive to be classified as treated.
+- **Sequential inverse-probability weight:** A weight for a policy-consistent path equal to one over the product of the conditional probabilities of its observed actions.
+
 ## Worked case 1: verify the policy value by exact summation
 
 The program enumerates all eight possible treatment/intermediate-state paths. Each row contains its population probability, observed actions, outcome and the two assignment probabilities. It multiplies the inverse-probability score by the path's known population mass, so this is an exact expectation rather than a noisy sample average.
@@ -45,6 +52,54 @@ The finite example contains no estimation error. In observational analysis, assi
 **Does successful balance after weighting prove sequential exchangeability?** It supports balance of measured histories under the fitted procedure. Unmeasured determinants of treatment and outcome can remain, and an incorrectly aligned time zero can invalidate the design before weighting begins.
 
 **Why store availability time in a scientific dataset?** It permits reconstruction of the information available at a historical decision. Without it, an apparently prospective model may unknowingly use a revised or future record. The same principle connects causal emulation, forecasting and production feature engineering.
+
+## Worked example: Exact sequential IPW equals the enumerated policy value
+
+```python
+from itertools import product
+
+p_l0 = 0.4  # P(L0 = 1)
+
+
+def p_a0(l0):
+    return 0.7 if l0 else 0.3  # P(A0 = 1 | L0)
+
+
+def p_l1(l0, a0):
+    return 0.2 + 0.4 * l0 - 0.1 * a0
+
+
+def p_a1(l1):
+    return 0.6 if l1 else 0.5
+
+
+def y(l0, a0, l1, a1):
+    return 5 + l0 + 2 * a0 + 3 * l1 - 2 * a1 + 4 * a1 * l1
+
+
+policy = lambda l: l  # treat exactly when the current covariate is 1
+direct, ipw = 0.0, 0.0
+for l0, a0, l1, a1 in product((0, 1), repeat=4):
+    pl0 = p_l0 if l0 else 1 - p_l0
+    pa0 = p_a0(l0) if a0 else 1 - p_a0(l0)
+    pl1 = p_l1(l0, a0) if l1 else 1 - p_l1(l0, a0)
+    pa1 = p_a1(l1) if a1 else 1 - p_a1(l1)
+    follows = (a0 == policy(l0)) and (a1 == policy(l1))
+    ipw += pl0 * pa0 * pl1 * pa1 * follows * y(l0, a0, l1, a1) / (pa0 * pa1)
+    if follows:
+        direct += pl0 * pl1 * y(l0, a0, l1, a1)
+print(f"g-formula value {direct:.4f}")
+print(f"IPW value       {ipw:.4f}")
+```
+
+Observed output:
+
+```text
+g-formula value 7.8000
+IPW value       7.8000
+```
+
+The loop enumerates all sixteen histories of \((L_0, A_0, L_1, A_1)\), so nothing here is sampled. The direct g-formula keeps only histories the policy would produce and multiplies the covariate probabilities, never the treatment probabilities. The IPW sum multiplies the full observed-data probability of each history and then divides by \(P(A_0)P(A_1)\) for the actions actually taken; those treatment factors cancel exactly, which is why both lines print 7.8000. This identity is the core of sequential weighting. It requires every policy-consistent action to have positive probability: if \(P(A_1=1\mid L_1=1)\) were 0, some histories would carry an infinite weight and the IPW line would fail even though the g-formula could still be written down. Time zero matters too. The weight for \(A_1\) uses only \(L_1\), information measured before the second decision; adding a variable recorded after \(A_1\) to that denominator would break the cancellation and the two numbers would disagree.
 
 ## Complete reproducible program
 

@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-044_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>With capacity two, submit chunks A and B. Chunk C waits until a slot becomes free. If A finishes compute but its output is still downloading, A&#x27;s slot is not yet free. A correct queue can process arbitrary many chunks with constant bounded storage by reusing only completed slots.</p>
+<p><strong>Approach:</strong> Admit chunks A and B into two slots, and hold C until a slot reaches the free state.</p>
+<p><strong>Why it is correct:</strong> A slot is free only after its output download and host consumption complete, not after compute.</p>
+<p><strong>A plausible wrong approach:</strong> Freeing A&#x27;s slot when its kernel finishes lets C&#x27;s upload overwrite output still downloading.</p>
+<p><strong>How to verify:</strong> The reference doubles [[1, 2], [3], [], [4, 5]] to [[2, 4], [6], [], [8, 10]]; match each chunk&#x27;s output.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A synchronous pipeline has 7 ms latency per chunk. A pipelined version can deliver later chunks every 3 ms while the first still takes roughly 7 ms in the ideal model. Throughput and first-result latency are distinct objectives; reporting only the inter-result interval hides the user&#x27;s wait.</p>
+<p><strong>Approach:</strong> Report first-result latency of about 7 ms and steady interval of about 3 ms separately.</p>
+<p><strong>Why it is correct:</strong> Pipelining raises throughput while the first chunk still passes through every stage.</p>
+<p><strong>A plausible wrong approach:</strong> Quoting 3 ms as the latency of each request hides the 7 ms a single caller waits.</p>
+<p><strong>How to verify:</strong> Measure time to first output and time between outputs on a GPU.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Free to filling to computing to copying to consumed to free, with explicit completion conditions and rejection of reuse from intermediate states.</p>
+<p><strong>Approach:</strong> Write free, filling, computing, copying, consumed, free with a completion condition per arrow.</p>
+<p><strong>Why it is correct:</strong> Each arrow requires the prior stage to finish, which prevents early reuse.</p>
+<p><strong>A plausible wrong approach:</strong> Allowing computing to return to free skips copying and consumption.</p>
+<p><strong>How to verify:</strong> The reference asserts computing comes before consumed in the lifecycle list.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Outstanding operations may still access them. Stop new admission, establish supported completion/cleanup and preserve the original cancellation record.</p>
+<p><strong>Approach:</strong> Stop admission, wait for or cancel outstanding work through supported calls, then free.</p>
+<p><strong>Why it is correct:</strong> Queued copies or kernels may still touch the buffers.</p>
+<p><strong>A plausible wrong approach:</strong> Freeing immediately on cancel leaves in-flight operations reading released memory.</p>
+<p><strong>How to verify:</strong> Cancel mid-stream under a sanitizer and confirm no invalid access and a kept record.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Produce the explicitly defined empty result without occupying expensive work unnecessarily, preserving sequence/order bookkeeping.</p>
+<p><strong>Approach:</strong> Return an empty result for the empty chunk without launching, keeping its sequence slot.</p>
+<p><strong>Why it is correct:</strong> The output list must still align one-to-one with inputs.</p>
+<p><strong>A plausible wrong approach:</strong> Dropping the empty chunk shifts every later output to the wrong input.</p>
+<p><strong>How to verify:</strong> The reference keeps [] at position 2 in the results.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Every input chunk has exactly one matching output, no early slot reuse, bounded memory, correct tails, cancellation diagnostics and a baseline comparison.</p>
+<p><strong>Approach:</strong> Check one output per chunk, no early reuse, bounded memory, tails, cancellation and a baseline.</p>
+<p><strong>Why it is correct:</strong> These properties make the service correct before any timing matters.</p>
+<p><strong>A plausible wrong approach:</strong> Accepting the capstone on throughput alone skips the failures users would notice.</p>
+<p><strong>How to verify:</strong> Run long and short chunk streams and assert each property.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-044_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

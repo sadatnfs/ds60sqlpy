@@ -204,22 +204,64 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-name-the-roles-of-class-gateway-and-route">Exercise 1: Name the roles of class, gateway and route.<a class="heading-anchor" href="#exercise-1-name-the-roles-of-class-gateway-and-route" aria-label="Link to this section">#</a></h3>
 <p>The separation makes ownership explicit. It does not eliminate the need for a controller.</p>
 <p><strong>Expected:</strong> Implementation class, listener/entrypoint and application routing intent.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Map GatewayClass to the implementation, Gateway to listeners and HTTPRoute to application routing rules.</li>
+<li><strong>Why it is correct:</strong> Each resource is meant for a different owner: platform, cluster operator and application team.</li>
+<li><strong>Plausible wrong approach:</strong> Treating Gateway as the routing rule set merges listener ownership with route intent.</li>
+<li><strong>How to verify:</strong> Class, gateway and route each get their role.</li>
+</ul>
 <h3 id="exercise-2-predict-a-route-with-an-unavailable-parent">Exercise 2: Predict a route with an unavailable parent.<a class="heading-anchor" href="#exercise-2-predict-a-route-with-an-unavailable-parent" aria-label="Link to this section">#</a></h3>
 <p>A syntactically valid parentRef is not evidence that the parent exists or accepts the route.</p>
 <p><strong>Expected:</strong> It cannot establish the intended attached traffic path.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Expect the route to stay detached when its parentRef names a missing or unavailable Gateway.</li>
+<li><strong>Why it is correct:</strong> A route attaches only after a matching parent accepts it, so no traffic path is built.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the rules apply once the route exists ignores the attachment step.</li>
+<li><strong>How to verify:</strong> The prediction says the intended path is not established.</li>
+</ul>
 <h3 id="exercise-3-design-a-route-attachment-boundary">Exercise 3: Design a route attachment boundary.<a class="heading-anchor" href="#exercise-3-design-a-route-attachment-boundary" aria-label="Link to this section">#</a></h3>
 <p>The platform should define who can attach routes rather than assuming every namespace may publish through a shared listener.</p>
 <p><strong>Expected:</strong> Listener allowedRoutes and route parentRef agree on intended ownership.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Set the listener&#x27;s allowedRoutes and the route&#x27;s parentRef so both name the intended namespaces and kinds.</li>
+<li><strong>Why it is correct:</strong> Attachment needs both sides to agree, which lets the Gateway owner limit who can bind to a listener.</li>
+<li><strong>Plausible wrong approach:</strong> Allowing routes from all namespaces lets unrelated teams attach to the listener.</li>
+<li><strong>How to verify:</strong> allowedRoutes and parentRef agree on the intended owner.</li>
+</ul>
 <h3 id="exercise-4-diagnose-resolvedrefs-false">Exercise 4: Diagnose ResolvedRefs=False.<a class="heading-anchor" href="#exercise-4-diagnose-resolvedrefs-false" aria-label="Link to this section">#</a></h3>
 <p>Do not bypass the condition by granting broad cluster permissions. Repair the exact intended reference.</p>
 <p><strong>Expected:</strong> Inspect backend identity and required reference authorization.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the condition&#x27;s reason, then check backend names, kinds and any needed ReferenceGrant.</li>
+<li><strong>Why it is correct:</strong> ResolvedRefs is false when a backend does not exist or a cross-namespace reference lacks authorization.</li>
+<li><strong>Plausible wrong approach:</strong> Restarting the gateway controller does not create a missing backend or grant.</li>
+<li><strong>How to verify:</strong> The diagnosis checks backend identity and reference authorization.</li>
+</ul>
 <h3 id="exercise-5-explain-a-narrow-cross-namespace-grant">Exercise 5: Explain a narrow cross-namespace grant.<a class="heading-anchor" href="#exercise-5-explain-a-narrow-cross-namespace-grant" aria-label="Link to this section">#</a></h3>
 <p>The grant is an authorization relationship. Keep it as small as the application requirement.</p>
 <p><strong>Expected:</strong> Only the intended source kind/namespace can reference the intended target kind.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write a ReferenceGrant in the target namespace naming one source kind and namespace and one target kind.</li>
+<li><strong>Why it is correct:</strong> The grant is opt-in and owned by the target namespace, so a narrow grant limits who can reference its objects.</li>
+<li><strong>Plausible wrong approach:</strong> Granting all kinds or every namespace exposes more targets than the route needs.</li>
+<li><strong>How to verify:</strong> Only the intended source can reference the intended target kind.</li>
+</ul>
 <h3 id="exercise-6-plan-gateway-acceptance-evidence">Exercise 6: Plan Gateway acceptance evidence.<a class="heading-anchor" href="#exercise-6-plan-gateway-acceptance-evidence" aria-label="Link to this section">#</a></h3>
 <p>A complete claim follows configuration through data-plane behavior. Status alone is not an end-to-end test.</p>
 <p>A useful counterexample is an accepted route whose backend reference remains unresolved. Attachment permission has passed, but the intended upstream still cannot be configured. Inspect the exact namespace, kind, name and port, then any required narrow ReferenceGrant. After correcting the reference, verify both its status and a real request with the intended hostname and path instead of assuming one condition implies every later stage.</p>
-<p><strong>Expected:</strong> API/controller support, conditions, listener reachability and expected app response.</p></article>
+<p><strong>Expected:</strong> API/controller support, conditions, listener reachability and expected app response.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List API support, controller support, Accepted and ResolvedRefs conditions, a reachable listener and an app response.</li>
+<li><strong>Why it is correct:</strong> Each item proves a different layer, from installed CRDs to a working backend.</li>
+<li><strong>Plausible wrong approach:</strong> Stopping at an Accepted condition skips proof that requests reach the app.</li>
+<li><strong>How to verify:</strong> The plan has evidence for every layer, ending with the expected response.</li>
+</ul></article>
   </main>
 </body>
 </html>

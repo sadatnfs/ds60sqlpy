@@ -38,6 +38,12 @@
       "code": "chunks <- list(c(1, NA_real_), c(3, 5), c(NA_real_))\nstate <- c(observed = 0, missing = 0, total = 0)\nfor (chunk in chunks) {\n  valid <- !is.na(chunk)\n  state <- state + c(observed = sum(valid), missing = sum(!valid), total = sum(chunk[valid]))\n}\nstopifnot(state[[\"observed\"]] == 3, state[[\"missing\"]] == 2, state[[\"total\"]] == 9)\nprint(state)\n",
       "explanation": "Each input entry contributes to either observed or missing count. The total uses only observed measurements under the declared policy.",
       "expected": "Observed 3, missing 2, total 9."
+    },
+    {
+      "title": "Averaging chunk rates depends on the boundaries",
+      "code": "chunks <- list(c(1, NA_real_), c(3, 5), c(NA_real_))\nregrouped <- list(c(1, NA_real_, 3), c(5, NA_real_))\nmean_of_rates <- function(chunks) mean(vapply(chunks, function(x) mean(is.na(x)), numeric(1)))\npooled_rate <- function(chunks) {\n  state <- c(missing = 0, rows = 0)\n  for (chunk in chunks) state <- state + c(missing = sum(is.na(chunk)), rows = length(chunk))\n  state[[\"missing\"]] / state[[\"rows\"]]\n}\nstopifnot(mean_of_rates(chunks) == 0.5, isTRUE(all.equal(mean_of_rates(regrouped), 5 / 12)))\nstopifnot(pooled_rate(chunks) == 0.4, pooled_rate(regrouped) == 0.4)\nprint(c(mean_of_rates = mean_of_rates(chunks), pooled = pooled_rate(chunks)))\n",
+      "explanation": "The three chunks have missing rates of one half, zero and one, which average to 0.5. The data contain 2 missing values among 5, a rate of 0.4. Averaging rates weights the single value chunk the same as the two value chunks, and the answer moves when the same five values are split differently: one third and one half average to 5/12. Accumulating the missing count and the row count, then dividing once, gives 0.4 for any boundaries. A missing rate is a mean of indicators, so it follows the same rule as any other mean: merge numerator and denominator, not ratios.",
+      "expected": "mean_of_rates 0.5 and pooled 0.4; after regrouping the first becomes about 0.417 while the pooled rate stays 0.4."
     }
   ],
   "exercises": [

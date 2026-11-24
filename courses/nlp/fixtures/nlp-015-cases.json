@@ -14,11 +14,11 @@
     {
       "exercise": 3,
       "task": "Fit the tiny logistic head on four pooled contextual fixtures.",
-      "expected": "Loss decreases from log2 to below.1 and training predictions [0,1,0,1]."
+      "expected": "Loss decreases from log 2 to below .1 and training predictions [0, 1, 0, 1]."
     },
     {
       "exercise": 4,
-      "task": "Compute tagging cross-entropy with labels[0,-100,1,-100].",
+      "task": "Compute tagging cross-entropy with labels [0, -100, 1, -100].",
       "expected": "Loss log(1+exp(-2)); changing ignored logits does not alter it."
     },
     {

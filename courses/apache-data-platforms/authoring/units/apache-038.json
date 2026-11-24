@@ -5,6 +5,28 @@
   "minutes": 70,
   "prerequisites": ["apache-033", "apache-035", "apache-036"],
   "concepts": ["KRaft", "advertised listeners", "retained logs", "operational evidence"],
+  "key_terms": [
+    [
+      "KRaft controller",
+      "A Kafka node role that manages cluster metadata through Kafka's own quorum. Kafka 4.x runs only in KRaft mode."
+    ],
+    [
+      "process.roles",
+      "The setting that assigns broker, controller or both roles to a node. The workshop runs both in one process, so it has no high availability."
+    ],
+    [
+      "Bootstrap address",
+      "The first endpoint a client contacts to fetch cluster metadata, after which it connects to the partition leaders that metadata names."
+    ],
+    [
+      "Advertised listener",
+      "The address a broker returns to clients in metadata. Advertising localhost to a client in another container makes that client connect to itself."
+    ],
+    [
+      "Cluster identity",
+      "The saved cluster identifier that must match the retained metadata and log volume. The startup script refuses a mismatched volume instead of formatting it."
+    ]
+  ],
   "evidence": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad.",
   "sources": [
     ["Kafka design and delivery contracts", "https://kafka.apache.org/44/design/design/"],

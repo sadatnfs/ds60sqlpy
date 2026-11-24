@@ -50,13 +50,16 @@ def add(
     )
 
 
-def program(s, blocks):
+def program(s, blocks, success=None):
+    """Assemble Main.java; ``success`` appends one fixed stdout line after all checks."""
+    final = "" if success is None else f'\n        System.out.println("{success}");'
     return (
         s["imports"]
         + "\n\npublic class Main {\n"
         + textwrap.indent(s["helper"], "    ")
         + "\n    public static void main(String[] args) throws Exception {\n"
         + textwrap.indent("\n\n".join(blocks), "        ")
+        + final
         + "\n    }\n}\n"
     )
 
@@ -426,7 +429,7 @@ Run the complete reference with assertions enabled, then return to your own impl
 """
         for path, text in [
             (guide, guide_text),
-            (solution, program(s, code_blocks)),
+            (solution, program(s, code_blocks, s.get("success"))),
             (explanation, explanation_text),
         ]:
             if path.endswith(".md"):

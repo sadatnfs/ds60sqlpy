@@ -4,18 +4,18 @@
 // Date('2024-01-01T00:00:00Z');` to `const utc = new Date('2025-01-01T00:00:00Z');`. Before
 // running it, predict which check fails and which value it now sees; then run it and restore
 // the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.equal(utc.getTime(), offset.getTime())`. Restoring the original line brings back
-// the worked observation: equal timestamps and UTC ISO output.
+// Expected: The changed run fails with an `AssertionError` at `assert.equal(utc.getTime(),
+// offset.getTime())`. Restoring `const utc = new Date('2024-01-01T00:00:00Z');` brings back:
+// equal timestamps and UTC ISO output.
 
 // Exercise 2: Observe a spring-forward clock gap: diagnose an edited check
 // A careless edit changed a check in Example B so that it reads
 // `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Run Example B with
 // that line, explain why the edited check now fails for the same program state, and restore
 // it.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000)`; after it the line
-// reads `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` again and local
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Restoring
+// `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` brings back: local
 // hour changes from 01 to 03 while elapsed time is one hour.
 
 // Exercise 3: Reject impossible or ambiguous calendar text

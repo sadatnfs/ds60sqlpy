@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Recover the design matrix for y~x on the five-row fixture.</p>
 <p>The first column is all ones and the second is x; multiplying by coefficients reconstructs fitted values.</p>
 <p><strong>Expected evidence:</strong> Shape 5-by 2 and exact prediction reconstruction.</p>
+<p><strong>Approach:</strong> Call model.matrix on the fitted object, confirm a 5 by 2 shape with a column of ones, and multiply it by coef(fit).</p>
+<p><strong>Why it holds here:</strong> With x = 0:4 and y = 1, 3, 4, 7, 8, the centered cross products sum to 18 and the squared x deviations to 10, so the slope is 1.8 and the intercept is 4.6 minus 3.6, which is 1. X times (1, 1.8) gives 1, 2.8, 4.6, 6.4 and 8.2, which are exactly the fitted values.</p>
+<p><strong>Tempting mistake:</strong> Building the matrix from x alone, which amounts to <code>lm(y ~ x - 1)</code>. That forces the line through the origin and gives a slope of 64/30, about 2.13, so the products no longer match fitted(fit).</p>
+<p><strong>Verify:</strong> <code>identical(dim(X), c(5L, 2L))</code> returns TRUE, and the largest gap between <code>X %*% coef(fit)</code> and <code>fitted(fit)</code> returns a value below 1e-10.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Predict at x=5 and label its support relative to training.</p>
 <p>The fitted value is 10; this is extrapolation beyond the observed predictor range.</p>
 <p><strong>Expected evidence:</strong> Prediction 10 with an explicit extrapolation qualification.</p>
+<p><strong>Approach:</strong> Pass data.frame(x = 5) to predict and report the value together with the training range of x.</p>
+<p><strong>Why it holds here:</strong> 1 + 1.8 times 5 is 10. The training x values stop at 4, so this point is one step outside the data, and its leverage, 1/5 + (5 - 2)^2 / 10 = 1.1, is more than five times the 0.2 at the center.</p>
+<p><strong>Tempting mistake:</strong> Presenting 10 with the same confidence as a fitted value inside 0 to 4. Nothing in five points shows that the straight line continues past x = 4.</p>
+<p><strong>Verify:</strong> <code>predict(fit, data.frame(x = 5))</code> returns 10 within the 1e-10 tolerance, and <code>range(d$x)</code> returns 0 and 4.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Fit y~x*group to two exact group lines A:1+2x and B:4+x.</p>
 <p>Coefficients are intercept 1, x = 2, group B coefficient 3 and interaction-1 under the declared reference coding.</p>
 <p><strong>Expected evidence:</strong> Correct group-specific slopes 2 and 1.</p>
+<p><strong>Approach:</strong> Set the group factor levels to A then B, fit y ~ x * group and read each coefficient as a difference from A.</p>
+<p><strong>Why it holds here:</strong> Group A follows 1 + 2x and group B follows 4 + x, so with A as reference the intercept is 1, the x slope is 2, groupB is 4 - 1 = 3 and x:groupB is 1 - 2 = -1. Both lines are exact, so the fit recovers them with no residual.</p>
+<p><strong>Tempting mistake:</strong> Reading groupB = 3 as B&#x27;s intercept or x:groupB = -1 as B&#x27;s slope. B&#x27;s intercept is 1 + 3 = 4 and its slope is 2 - 1 = 1, so the raw coefficients are offsets.</p>
+<p><strong>Verify:</strong> The largest gap between <code>unname(coef(interaction))</code> and c(1, 2, 3, -1) returns a value below 1e-10.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Add double_x=2*x and diagnose y~x+double_x.</p>
 <p>The design is rank deficient and at least one coefficient is aliased; fitted values do not identify both slopes uniquely.</p>
 <p><strong>Expected evidence:</strong> Rank below column count and an NA coefficient.</p>
+<p><strong>Approach:</strong> Add double_x = 2 * x, fit y ~ x + double_x, and compare the QR rank of its design with its column count.</p>
+<p><strong>Why it holds here:</strong> The design has 3 columns, intercept, x and double_x, but double_x is an exact multiple of x, so the rank is 2. lm keeps x with slope 1.8, reports NA for double_x and returns the same five fitted values as the simple fit.</p>
+<p><strong>Tempting mistake:</strong> Reading the NA as evidence that double_x has no effect on y. It only means the data cannot split one slope between two copies of the same column; keeping double_x instead of x would give a coefficient of 0.9.</p>
+<p><strong>Verify:</strong> <code>qr(model.matrix(aliased))$rank</code> returns 2 against 3 columns, and <code>anyNA(coef(aliased))</code> returns TRUE.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Check residual orthogonality for the simple fit.</p>
 <p>The result is approximately zero for the fitted least-squares projection. It is not a proof of independent errors.</p>
 <p><strong>Expected evidence:</strong> Two near-zero normal-equation residuals.</p>
+<p><strong>Approach:</strong> Compute crossprod(X, residuals(fit)) and check both entries against a small tolerance.</p>
+<p><strong>Why it holds here:</strong> The residuals are 0, 0.2, -0.6, 0.6 and -0.2. The first entry sums them to 0 and the second weights them by x, 0.2 - 1.2 + 1.8 - 0.8 = 0. These are the least squares normal equations, so they hold for any data fitted this way.</p>
+<p><strong>Tempting mistake:</strong> Treating the zero products as evidence that the errors are independent or normally distributed. Testing them with <code>== 0</code> is a second trap, because floating point sums can leave values near 1e-16.</p>
+<p><strong>Verify:</strong> <code>max(abs(crossprod(X, residuals(fit))))</code> returns a value below 1e-10.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain why the prediction interval is wider than the mean confidence interval.</p>
 <p>A new response includes residual outcome variation; uncertainty in its mean alone omits that variation.</p>
 <p><strong>Expected evidence:</strong> Correct target distinction and matched-point comparison.</p>
+<p><strong>Approach:</strong> Request both intervals at the same point, x = 2, and compare their widths.</p>
+<p><strong>Why it holds here:</strong> Both are centered on 4.6. The residual variance is 0.8 / 3, and the leverage at x = 2 is 0.2, so the mean has standard error sqrt(0.8 / 15), about 0.23, while a new response has sqrt(0.32), about 0.57. With qt(0.975, 3) about 3.18, the widths are about 1.47 and 3.60.</p>
+<p><strong>Tempting mistake:</strong> Comparing the prediction interval at x = 5 with the confidence interval at x = 2. The larger leverage at 5 widens any interval there, so the comparison mixes location with target.</p>
+<p><strong>Verify:</strong> <code>diff(pi[1, c(&quot;lwr&quot;, &quot;upr&quot;)]) &gt; diff(ci[1, c(&quot;lwr&quot;, &quot;upr&quot;)])</code> returns TRUE, and both <code>fit</code> columns show 4.6.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 7 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

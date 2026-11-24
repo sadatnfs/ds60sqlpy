@@ -39,7 +39,7 @@ assert.equal(utc.getTime(), offset.getTime());
 assert.equal(offset.toISOString(), '2024-01-01T00:00:00.000Z');
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(utc.getTime(), offset.getTime())`. Restoring the original line brings back the worked observation: equal timestamps and UTC ISO output.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(utc.getTime(), offset.getTime())`. Restoring `const utc = new Date('2024-01-01T00:00:00Z');` brings back: equal timestamps and UTC ISO output.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(utc.getTime(), offset.getTime())` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -59,7 +59,7 @@ assert.equal(parts(after).hour, '03');
 assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000)`; after it the line reads `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` again and local hour changes from 01 to 03 while elapsed time is one hour.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Restoring `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` brings back: local hour changes from 01 to 03 while elapsed time is one hour.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000)` accepts.
 

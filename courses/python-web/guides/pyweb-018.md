@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-017`.
 
 A browser form needs both field validation and a decision about whether the request is authorized to use the client's ambient credentials. CSRF protection addresses one part of that request-origin problem. This chapter uses Flask-WTF and its actual CSRF machinery rather than substituting a manually checked placeholder field.
 
+## Key terms
+
+- **CSRF:** Cross-site request forgery: another site causes a browser to send a state-changing request that carries the user's ambient credentials.
+- **Ambient credentials:** Credentials such as cookies that a browser attaches automatically to matching requests regardless of which page initiated them.
+- **CSRF token:** A session-bound secret rendered into the form and required on submission, which a forging site cannot read; Flask-WTF rejects a missing token with 400.
+- **hidden_tag():** A Flask-WTF form method that renders the form's hidden fields, including the CSRF token.
+- **Field validator:** A rule such as DataRequired or Length that checks a submitted value, independently of CSRF validation.
+
 ## Mechanism: a form token participates in a larger session contract
 
 The application enables CSRF protection and uses a test-only signing key. The form contains a name field with DataRequired and length validation. Rendering `hidden_tag()` supplies the framework's hidden fields, including the CSRF token. A client must return the appropriate token while retaining the associated session context.
@@ -27,6 +35,45 @@ For real deployments, the signing key, cookie settings, token lifetime and origi
 The next request submits a valid name without a token and receives 400. Another request submits the token but an empty name and also receives 400. Those equal status codes do not mean the failures had the same cause. The example exercises both checks deliberately.
 
 Testing configurations sometimes disable CSRF to simplify unrelated tests. That can be useful for isolated business logic, but it would invalidate a test claiming to check CSRF. This fixture explicitly leaves the protection enabled and obtains a real token through the application.
+
+## Worked example: a CSRF token is bound to one session
+
+```python
+import hashlib
+import hmac
+import secrets
+
+SECRET = b"test-only-csrf-fixture"
+
+
+def issue(session):
+    session.setdefault("csrf_raw", secrets.token_hex(16))
+    return hmac.new(SECRET, session["csrf_raw"].encode(), hashlib.sha256).hexdigest()
+
+
+def accept(session, submitted):
+    if "csrf_raw" not in session or not submitted:
+        return False
+    return hmac.compare_digest(issue(session), submitted)
+
+
+victim, attacker = {}, {}
+victim_token = issue(victim)
+attacker_token = issue(attacker)
+print(accept(victim, victim_token))
+print(accept(victim, attacker_token))
+print(accept(victim, None), accept({}, victim_token))
+```
+
+Expected output:
+
+```text
+True
+False
+False False
+```
+
+This is a simplified model of what Flask-WTF does behind `form.hidden_tag()`: a random value lives in the signed session cookie and the page embeds a keyed digest of it. The victim's own form submission passed. An attacker can load the site and obtain a perfectly valid token, but it is valid only for the attacker's session, so replaying it against the victim's session failed. A missing token and a session with no stored value were both rejected, matching the lesson's 400 for a POST without `csrf_token`. `hmac.compare_digest` avoids leaking how many leading characters matched through timing. The real extension also adds an expiry timestamp, so an old token copied from a cached page would eventually be refused even within the same session.
 
 ## Failure diagnosis
 

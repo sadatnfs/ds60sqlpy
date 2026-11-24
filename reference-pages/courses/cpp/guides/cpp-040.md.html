@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Treat input lengths, paths and external effects as part of correctness.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Hardening means enforcing explicit bounds before processing untrusted-shaped input. Path validation distinguishes a user-supplied identifier from a filesystem path. Resource limits cap input length, row count and execution work. A parser may be memory-safe yet still accept dangerous locations or consume unreasonable resources.</p>
+<ul>
+<li><strong>hardening:</strong> enforcing explicit bounds before processing input of untrusted shape.</li>
+<li><strong>identifier grammar:</strong> a narrow character and length policy, such as accepting <code>batch_7</code>, that keeps user input from being interpreted as a path.</li>
+<li><strong>path traversal:</strong> using separators or parent references such as <code>../secret</code> to reach locations outside an intended directory.</li>
+<li><strong>resource budget:</strong> a cap on input bytes, record count and field length that is enforced while reading, before expensive work.</li>
+<li><strong>gated publication:</strong> writing a report only after the accepted and rejected accounting meets the declared policy.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Treat identifiers as an allowlisted alphabet instead of joining arbitrary user paths. Check string length before parsing. Lexical rejection of slash, backslash and dot-dot is not sufficient to secure a general filesystem browser against symlinks; this exercise deliberately accepts only a narrow filename identifier.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

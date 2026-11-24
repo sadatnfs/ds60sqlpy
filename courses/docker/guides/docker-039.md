@@ -16,6 +16,14 @@ The Open Container Initiative, or OCI, defines specifications for image and runt
 
 The shared Linux kernel remains an important trust boundary. A container is not a separate guest kernel by default. Kernel vulnerabilities, privileged configuration and host mounts can affect isolation. Rootless mode and least privilege reduce specific risks but do not turn every process into a harmless mathematical function.
 
+### Key terms
+
+- **Namespace:** A kernel feature that changes which operating-system objects, such as processes or mounts, a process can see.
+- **cgroup:** A kernel group of processes used for resource accounting and limits.
+- **OCI:** The Open Container Initiative, which defines image and runtime specifications for interoperability.
+- **OCI runtime:** The low-level program that creates a container process from a bundle according to the OCI runtime specification.
+- **containerd:** The container manager that Docker tooling can use to pull images and supervise containers through an OCI runtime.
+
 ## Anatomy and a trace you can follow
 
 Trace a launch as client request, engine configuration, runtime setup of namespaces and cgroups, filesystem mounts, then the application process. A process still makes ordinary system calls. Its view and allowed operations depend on the setup around it.
@@ -87,11 +95,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Believing each container has its own kernel. Changing kernel or cgroup settings to match an example. Assuming every OCI runtime behaves identically.
 
-Exercise 4 is this chapter's boundary case: Diagnose a missing cgroup path from an example. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a missing cgroup path from an example. Record the host's cgroup version and mount layout, then map the example's path onto it without changing kernel or boot settings. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using namespaces, cgroups, OCI runtime and container runtime. Reconstruct worked example 2 (Separate isolation and accounting) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Match network namespace, mount namespace, cgroup and OCI runtime to what each isolates or controls. Then reconstruct worked example 2 (Separate isolation and accounting) with one different value, predict what changes, and name which of namespaces, cgroups, OCI runtime and container runtime the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

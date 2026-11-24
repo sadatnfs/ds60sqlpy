@@ -69,6 +69,12 @@ def units():
     return [json.loads(path.read_text()) for path in sorted((HERE / "units").glob("r-*.json"))]
 
 
+def reasoning(key):
+    "Per-lesson solution reasoning and extra guide sections, kept beside the unit schema."
+    path = HERE / "reasoning" / f"{key}.json"
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
 def draws_figures(unit):
     for code in [unit["reference"], *[e["code"] for e in unit["worked_examples"]]]:
         if BASE_PLOT.search(code):
@@ -147,18 +153,20 @@ def guide(unit, successors=()):
             example["explanation"],
             "",
         ]
+    for section in reasoning(key).get("guide_sections", []):
+        text += [f"## {section['heading']}", "", section["body"].strip(), ""]
     text += ["## Practice with evidence", ""]
     labels = ["Predict", "Modify", "Construct", "Diagnose", "Check a boundary", "Transfer"]
     for number, task in enumerate(unit["exercises"], 1):
         text += [f"### Exercise {number}: {labels[number - 1]}", "", task["prompt"], ""]
     text += ["## Progressive hints", ""]
     text += [f"{i}. {task['hint']}" for i, task in enumerate(unit["exercises"], 1)]
-    worked = "\n\n".join(e["explanation"].strip() for e in unit["worked_examples"])
+    worked = {e["explanation"].strip() for e in unit["worked_examples"]}
     review = (
         "The reference applies the reasoning explained under the worked examples above; "
         f"the [explained answers](../solutions/{key}_solutions.md) add an answer for each "
         "exercise."
-        if unit["solution_explanation"].strip() == worked
+        if set(unit["solution_explanation"].strip().split("\n\n")) <= worked
         else unit["solution_explanation"]
     )
     text += ["", "## Reference review", "", review, "", "## Primary references", ""]
@@ -204,6 +212,7 @@ def guide(unit, successors=()):
 
 def solution(unit):
     key = unit["id"]
+    steps = reasoning(key).get("exercises", [])
     text = [
         f"# {key}: reference reasoning",
         "",
@@ -231,6 +240,18 @@ def solution(unit):
         ]
         if task["expected"].strip() != task["answer"].strip():
             text += [f"**Expected evidence:** {task['expected']}", ""]
+        if i <= len(steps):
+            step = steps[i - 1]
+            text += [
+                f"**Approach:** {step['approach']}",
+                "",
+                f"**Why it holds here:** {step['why']}",
+                "",
+                f"**Tempting mistake:** {step['wrong']}",
+                "",
+                f"**Verify:** {step['verify']}",
+                "",
+            ]
     text += [
         "## What the checks establish",
         "",
@@ -296,7 +317,7 @@ def readme(records):
         "",
         (
             "Each chapter states its direct prerequisites and "
-            "includes two independent worked programs, six varied "
+            "includes at least two independent worked programs, six varied "
             "tasks, hints, a complete reference and explained "
             "answers. A chapter number is a stable identifier, not "
             "a daily schedule."

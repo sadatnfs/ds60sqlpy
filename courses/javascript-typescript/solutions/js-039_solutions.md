@@ -38,7 +38,7 @@ const completed = transition(started, { type: 'complete', value: 7 });
 assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 })`. Restoring the original line brings back the worked observation: succeeded with attempt 1 and value 7.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 })`. Restoring `const completed = transition(started, { type: 'complete', value: 7 });` brings back: succeeded with attempt 1 and value 7.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -56,7 +56,7 @@ assert.throws(() => transition(queued, { type: 'complete', value: 7 }), /invalid
 assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' })`; after it the line reads `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' });` again and invalid transition error; original remains queued.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(queued, { id: 'A', attempt: 1, kind: 'queued' });`. Restoring `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' });` brings back: invalid transition error; original remains queued.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' })` accepts.
 

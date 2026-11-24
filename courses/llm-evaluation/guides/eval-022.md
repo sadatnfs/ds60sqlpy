@@ -8,15 +8,22 @@ Train a tiny categorical policy with the PPO surrogate and critic loss while tes
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-022`, and use its `llm-torch-cpu` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-022` under **LLM evaluation and alignment** in `/classroom`; its `llm-torch-cpu` profile runs each worked program for actual cpu ppo updates on a finite contextual policy in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about PyTorch PPO and frozen rollout policy: The expectation weights sum to 1, the frozen rollout state is unchanged after updates, the learned probability rows mirror each other, and the proxy-trained policy exceeds 0.9 training reward while task utility stays below 0.1. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## A small real optimization experiment
 
-This unit performs actual PyTorch forward, backward and optimizer steps. The policy has two contexts and two actions per context. Its trainable logits form a2-by -2 table, and its critic has one value per context. The environment terminates after one action, so returns equal immediate rewards and no temporal trace is needed. This isolates PPO's objective from the GAE boundary issues studied previously.
+This unit performs actual PyTorch forward, backward and optimizer steps. The policy has two contexts and two actions per context. Its trainable logits form a 2-by-2 table, and its critic has one value per context. The environment terminates after one action, so returns equal immediate rewards and no temporal trace is needed. This isolates PPO's objective from the GAE boundary issues studied previously.
 
 The rollout distribution is enumerated exactly. Both contexts have probability one half, and each action is weighted by the frozen old policy's probability. This computes the surrogate expectation without sampling noise. It is not a claim that a real language-model action space can be enumerated, nor a simulation of token generation. The advantage of the reduction is that every weight, reward and update can be inspected.
 
 At the start of each outer iteration, the code copies the current policy probabilities into a detached old snapshot. It then makes three optimizer steps against that snapshot. The reference policy remains uniform throughout training and supplies a separate KL penalty. Those two distributions serve different purposes even when they happen to match at initialization.
+
+## Key terms
+
+- **Frozen rollout policy:** A detached copy of the policy probabilities taken at each outer iteration and used for PPO ratios.
+- **Critic:** A value estimate per context, trained with a weighted squared-error loss alongside the actor.
+- **Exact expectation:** A surrogate computed by enumerating contexts and actions with their probabilities instead of sampling.
+- **Reward exploitation:** Gains in the optimized reward that do not reflect the intended behavior, checked against a separate measure.
 
 ## Worked case A: improve the declared task reward
 

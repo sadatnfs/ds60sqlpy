@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Materialization and publication are different actions. A model relation may exist even when later tests fail. If consumers must not see invalid data, they need an accepted-output boundary that is updated only after the required evidence passes. A successful SQL statement is insufficient for that decision.</p>
 <p>The example builds a candidate relation with key tests and publishes a small JSON output only when the complete invocation and relevant statuses pass. The bad fixture still materializes two rows, but no published file is created. The program checks both facts so it cannot confuse detection with transactional rollback.</p>
 <p>This is a local publication gate, not a distributed transaction across a warehouse and an object store. A real deployment needs atomic pointer or version selection, ownership, retry behavior and recovery after uncertain outcomes. The lesson establishes the decision rule and evidence boundary that those mechanisms must implement.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Candidate relation:</strong> A relation built by the current run that consumers must not rely on until its checks pass.</li>
+<li><strong>Publication gate:</strong> The rule that writes the accepted output only when the invocation succeeds and every relevant run_results status passes.</li>
+<li><strong>Accepted artifact:</strong> The consumer-facing output that passed the gate; a failed candidate leaves it unchanged.</li>
+<li><strong>Publication receipt:</strong> A record of the data, schema, source version and checks that justified accepting an artifact.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Check result.success and the relevant run_results statuses before writing the accepted output. Keep the candidate relation separate from the consumer-facing artifact. A publication receipt should identify the data, schema, source version and checks that justified acceptance. A stale successful artifact must not qualify a new candidate.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

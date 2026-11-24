@@ -10,6 +10,14 @@ Run a complete Julia script, trace bindings and distinguish a computed value fro
 
 Open `julia-001` in `/classroom` with its prepared `julia` runtime. Worked case A (trace a calculation) and worked case B (rebinding a scalar) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-001: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Script:** A `main.jl` file that Julia runs from top to bottom in a fresh process, so no state survives from an earlier run.
+- **Binding:** An association between a name and a value, so reassigning the name points it at a new value without changing the old one.
+- **Expression value:** The result an expression returns, which a script shows only when the program prints it, unlike the REPL that echoes each result.
+- **Type:** The concrete kind of a value, such as `Int64` or `String`, reported by `typeof` and attached to values rather than to names.
+- **Just-in-time compilation:** Julia compiles a method for the argument types of its first call, so that call can be slower than later calls.
+
 ## The execution model
 
 Julia evaluates expressions to values. A value has a type, such as an integer, floating-point number or string. A name is a binding to a value. Assignment changes that binding; it is not a mathematical equation that must remain true after later assignments. This distinction is the first tool for explaining what a program actually did.

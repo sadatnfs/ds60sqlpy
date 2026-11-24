@@ -14,6 +14,14 @@ Conversion and relabeling are different operations. Converting a known instant i
 
 Windows also need a boundary convention. A half-open interval includes its start and excludes its end. Adjacent periods can then share a boundary without counting the same event twice. This is a useful convention for daily metrics, feature windows and incremental processing, but the scientific question still determines which clock and which cutoff should be used.
 
+## Key terms
+
+- **UTC instant:** A point in time stored in Coordinated Universal Time, which has no daylight saving jumps, so elapsed time is exact.
+- **dt.convert_time_zone:** A method that shows the same instant in another time zone; the instant itself does not change.
+- **Wall clock time:** Local time as read on a clock, where a daylight saving change can skip or repeat an hour.
+- **Half-open interval:** An interval that includes its start and excludes its end, so adjacent intervals never count a boundary event twice.
+- **str.to_datetime:** The method that parses text into a Datetime column, here with `time_zone="UTC"` fixing its zone.
+
 ## Syntax and data contract
 
 str.to_datetime parses the source timestamp, time_zone="UTC" fixes its timezone representation, and dt.convert_time_zone produces a different display of the same instant. Filtering uses an explicit start comparison and a strict end comparison. Keep timezone-aware Python datetime objects at these boundaries; comparing naive and aware timestamps should not be treated as a harmless coercion.

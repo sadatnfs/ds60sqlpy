@@ -33,7 +33,7 @@ A batch row changes the number of observations, not the feature width or the par
 
 ## Exercise 3: Reject incompatible features
 
-Require X and W to be rank-two arrays, nonempty on their declared axes, and X.shape[1] equal to W.shape[0]. The supplied (2,3) and (2,1) operands disagree on three versus two input features, so raise ValueError with that mismatch before computing @. Do not transpose X merely to suppress the error. The observation and feature roles would change, and the resulting arithmetic would answer a different question.
+Require X and W to be rank-two arrays, nonempty on their declared axes, and `X.shape[1]` equal to `W.shape[0]`. The supplied (2, 3) and (2, 1) operands disagree on three versus two input features, so raise ValueError with that mismatch before computing @. Do not transpose X merely to suppress the error. The observation and feature roles would change, and the resulting arithmetic would answer a different question.
 
 **Expected:** A ValueError explains the input-feature mismatch before a matrix product is attempted.
 

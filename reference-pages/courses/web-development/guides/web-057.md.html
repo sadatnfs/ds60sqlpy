@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>The earlier PHP pads isolated language and application logic. A real HTTP lab adds a browser, request headers, cookies, server process and persistent storage. Each boundary introduces behavior that a pure function cannot prove. The maintained optional fixture runs a local PHP development server in its own Linux container and binds its published port to host loopback. It is a learning server, not an internet deployment.</p>
 <p>The fixture stores synthetic notes under an anonymous browser session. That demonstrates session continuity and separation, not verified user identity. A session cookie carries an identifier; the server stores the session and a random owner key. Prepared statements store notes in SQLite. A form includes a CSRF token, the server validates it before writing, and successful POST handling redirects to a GET page. Source, database and session state have distinct lifetimes.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>HTTP integration test:</strong> A test that sends real HTTP requests to a running application and checks status, headers, body and stored state.</li>
+<li><strong>Cookie jar:</strong> The client-side store that keeps cookies from responses and sends them back on later requests, as a browser does.</li>
+<li><strong>Session storage:</strong> Where the server keeps session data between requests, such as files or a database, keyed by the session identifier.</li>
+<li><strong>Redirect:</strong> A 3xx response whose <code>Location</code> header tells the client where to go next, such as 303 after a successful POST.</li>
+<li><strong>Persistent volume:</strong> Docker-managed storage that keeps the lab&#x27;s data when its container is removed and recreated.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Read the fixture README and copy the lab into an ignored learner directory before editing. Its Compose project name is ds60-web-study and its loopback port is 18088. Inspect whether those names belong to existing work before starting. The fixture builds only when you deliberately run the documented command. It does not mount the Docker socket, contact the classroom database or expose a public port. Named volumes retain notes and sessions across container replacement; removing those volumes is a separate reset.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -217,6 +225,21 @@ curl --fail http://127.0.0.1:18088/health</code></pre>
 POST /notes with valid token -&gt; 303 Location: /
 GET / -&gt; stored synthetic note</code></pre>
 <p><strong>Expected observation:</strong> The POST and follow-up GET are separate requests.</p>
+<h3 id="contrast-case-answering-a-post-with-a-page-instead-of-a-redirect">Contrast case: answering a POST with a page instead of a redirect<a class="heading-anchor" href="#contrast-case-answering-a-post-with-a-page-instead-of-a-redirect" aria-label="Link to this section">#</a></h3>
+<p>Compare two ways the lab could answer a valid note submission, then think about what pressing reload does afterward.</p>
+<pre class="highlighted-code"><code class="language-http"><span class="syntax-function">POST</span> /notes <span class="syntax-keyword">HTTP</span><span class="syntax-operator">/</span><span class="syntax-number">1.1</span>
+<span class="syntax-attribute">Host</span><span class="syntax-operator">:</span> 127.0.0.1:18088
+
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+
+(the notes page)
+
+---
+
+HTTP/1.1 303 See Other
+Location: /</code></pre>
+<p>With the 200 answer the page on screen is the result of the POST, so reloading it asks the browser to send the POST again, which would store a second copy of the note. With the 303 answer the browser follows the Location header with a new GET request, and reloading repeats only that GET. The lab uses the 303 form. You can confirm which one the server sends by reading the status in the network panel or with curl, rather than assuming it from the PHP source.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-draw-the-lifecycle-from-browser-cookie-to-server-session-to-stored-note">Exercise 1: Draw the lifecycle from browser cookie to server session to stored note.<a class="heading-anchor" href="#exercise-1-draw-the-lifecycle-from-browser-cookie-to-server-session-to-stored-note" aria-label="Link to this section">#</a></h4>

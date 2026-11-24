@@ -1,6 +1,6 @@
 # llm-applied-003: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for prompt and context engineering with measurable boundaries only after attempting *Construct a prompt artifact* through *Reject an impossible budget*. A discrepancy in *Preserve untrusted text as data* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-003_solution.py` runs the assertions; this page explains why they test prompt template and context budget.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ Build a prompt as separate instruction, evidence and question fields before seri
 
 Let C be a model's allowed context budget, I instruction tokens, Q question tokens, H chat-template and tool-schema overhead, R reserved response capacity and E selected evidence tokens. A complete allocation must satisfy \(I+Q+H+R+E\le C\) under the intended tokenizer and serving contract. A whitespace word count is a different unit. The fixture deliberately models only \(E\le C-R\) so its arithmetic is inspectable.
 
-With total12 and reserve 4, the evidence allowance is eight whitespace units. The first item costs five and is admitted. The second costs four; 5+4 would exceed eight, so it is omitted. Used evidence is five and unused allowance is three. Returning only five used units is correct under a whole-item policy. It is not evidence that the policy maximizes evidence utility or uses every possible unit.
+With total 12 and reserve 4, the evidence allowance is eight whitespace units. The first item costs five and is admitted. The second costs four; 5+4 would exceed eight, so it is omitted. Used evidence is five and unused allowance is three. Returning only five used units is correct under a whole-item policy. It is not evidence that the policy maximizes evidence utility or uses every possible unit.
 
 The allocator scans all items in their provided order and admits a fitting item. It does not stop at the first oversized item, and it does not solve a knapsack optimization. For a budget of six, item A with cost four and utility four can block later items B and C, each with cost three and utility three. A-first greedy selection returns utility four, while choosing B and C gives utility six. This is an analytic extension of the allocator, not a new measured retrieval result. If item order is the chosen ranking policy, that tradeoff should be declared.
 
@@ -32,7 +32,7 @@ Utility itself can be nonadditive. Two passages may be useful only together when
 
 Serialization and authority are separate. JSON encoding keeps an embedded quote or newline inside a string value instead of corrupting the artifact structure. A model reading that string can still respond to its semantic content. The test that AUTHORIZED_OPERATIONS remains unchanged proves the local Python constant was not modified; no model is invoked in that example, and no adversarial-model resistance is measured. Enforcement belongs in the application component that decides which operation can actually run.
 
-The intended chat format is also part of the model interface. Role/content objects are converted into token sequences with model-specific control tokens, so a tokenizer and template need compatible identities. The versioned Transformers documentation shows that different chat models can require different formatting despite related base architectures. The offline fixture does not execute that tokenizer; the optional pretrained recipe later validates the actual format. [Transformers4.57.1 chat templates](https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating).
+The intended chat format is also part of the model interface. Role/content objects are converted into token sequences with model-specific control tokens, so a tokenizer and template need compatible identities. The versioned Transformers documentation shows that different chat models can require different formatting despite related base architectures. The offline fixture does not execute that tokenizer; the optional pretrained recipe later validates the actual format. [Transformers 4.57.1 chat templates](https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating).
 
 Prompt changes consume evaluation information even without gradient updates. If a failure on final question family B motivates adding a B demonstration, B has entered system selection. Renaming the prompt file does not restore independence. Use a development set for revision, a validation policy for comparison and a separately retained final assessment when a fresh generalization claim is needed.
 
@@ -98,9 +98,9 @@ selected, used = select_context(items, 12, 4)
 assert [x["id"] for x in selected] == ["a"] and used == 5
 ```
 
-**Expected:** first item selected; second omitted; used5 of 8 available units.
+**Expected:** first item selected; second omitted; used 5 of 8 available units.
 
-**Verify:** Compare the computed values or written argument with first item selected; second omitted; used5 of 8 available units.
+**Verify:** Compare the computed values or written argument with first item selected; second omitted; used 5 of 8 available units.
 
 ## Exercise 4: Version prompt changes
 
@@ -122,7 +122,7 @@ assert digest(changed) != before
 
 ## Exercise 5: Keep evaluation examples isolated
 
-The question is: Place demonstration familyA in prompt selection and final familyB in assessment; inject a familyB example and detect the intersection.
+The question is: Place demonstration family A in prompt selection and final family B in assessment; inject a family B example and detect the intersection.
 
 Few-shot examples are part of the system configuration. Including a final-test answer in the prompt contaminates the comparison even though no weights were updated.
 
@@ -158,4 +158,4 @@ else:
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Reserve response capacity* and predict how the result changes before checking it; the unchanged inputs give: first item selected; second omitted; used 5 of 8 available units. Keep the original *Reject an impossible budget* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

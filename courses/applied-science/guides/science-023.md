@@ -14,6 +14,13 @@ For a linear model \(y=X\beta+\epsilon\), the design matrix's rank determines wh
 
 The code uses a linear solve. The penalty can stabilize prediction, but it introduces shrinkage and depends on feature scaling. A unique penalized solution is a consequence of the optimization problem, not proof that each predictor has a separate causal interpretation.
 
+## Key terms
+
+- **Identification:** Whether the data and assumptions determine a unique value of a target quantity.
+- **Minimum-norm interpolation:** The least-squares solution with the smallest coefficient norm, which can fit training data exactly when p > n.
+- **Ridge regression:** Least squares with a quadratic penalty lambda times the squared coefficient norm, well-posed for every positive lambda.
+- **Estimable combination:** A function of coefficients the data determine, such as the sum of two duplicated predictors' coefficients.
+
 ## Worked case 1: interpolation does not establish generalization
 
 The synthetic design has 20 observations and 40 predictors, with signal in only the first three coordinates. A minimum-norm least-squares solution interpolates the training outcomes to numerical precision. Its ability to reproduce the observed labels is therefore a weak criterion for selecting a predictive procedure.
@@ -43,6 +50,47 @@ High-dimensional inference after variable selection requires additional methods 
 **Can ridge make a singular scientific question identifiable?** It makes a specified penalized optimization problem well-posed. Scientific identification still depends on the information and assumptions supporting the target. The distinction is visible in the duplicated-column example.
 
 **Why not report only test error and ignore coefficients?** That may be appropriate for a bounded prediction task. If a decision requires explanations, transport, causal effects or feature interventions, the instability and meaning of coefficients become relevant again. Define the use before deciding which model properties matter.
+
+## Worked example: Minimum-norm interpolation and a duplicated predictor
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(3)
+n, p = 6, 20
+beta = np.zeros(p)
+beta[0] = 2.0
+X = rng.normal(size=(n, p))
+y = X @ beta + rng.normal(0, 0.5, n)
+Xt = rng.normal(size=(200, p))
+yt = Xt @ beta + rng.normal(0, 0.5, 200)
+b = np.linalg.pinv(X) @ y
+print(
+    f"train RMSE {np.sqrt(np.mean((X @ b - y) ** 2)):.2e}, test RMSE {np.sqrt(np.mean((Xt @ b - yt) ** 2)):.3f}"
+)
+print(
+    f"test RMSE of the true beta {np.sqrt(np.mean((Xt @ beta - yt) ** 2)):.3f}; of zero {np.sqrt(np.mean(yt**2)):.3f}"
+)
+
+x = rng.normal(size=30)
+D = np.column_stack([x, x])
+yd = 3 * x
+for lam in (0.01, 1.0, 10.0):
+    coef = np.linalg.solve(D.T @ D + lam * np.eye(2), D.T @ yd)
+    print(f"ridge lambda {lam}: coefficients {coef.round(4)}, sum {coef.sum():.4f}")
+```
+
+Observed output:
+
+```text
+train RMSE 1.62e-15, test RMSE 1.763
+test RMSE of the true beta 0.482; of zero 2.130
+ridge lambda 0.01: coefficients [1.4998 1.4998], sum 2.9996
+ridge lambda 1.0: coefficients [1.48 1.48], sum 2.9600
+ridge lambda 10.0: coefficients [1.3216 1.3216], sum 2.6431
+```
+
+With six observations and twenty predictors, the minimum-norm least-squares solution fits the training data to \(10^{-15}\), machine precision. On 200 new points its RMSE is 1.763, worse than the true coefficients at 0.482 and barely better than predicting zero at 2.130. A perfect training fit was guaranteed by the dimensions, so it carries no information about generalization; only held-out data revealed the problem. The second part isolates identification. When two columns are identical, any coefficients \((b_1,b_2)\) with \(b_1+b_2=3\) produce the same fitted values, so the data identify only the sum. Ridge resolves the tie by splitting the sum evenly, 1.4998 each at \(\lambda=0.01\). Increasing \(\lambda\) shrinks the sum itself, to 2.96 at 1 and 2.643 at 10. Reporting 1.48, half of the \(\lambda=1\) sum, as the effect of the first predictor would be a statement about the penalty, not the data. The same split appears whenever predictors are nearly collinear.
 
 ## Complete reproducible program
 

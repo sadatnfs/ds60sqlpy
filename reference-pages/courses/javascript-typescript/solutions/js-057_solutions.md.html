@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>d3.brushX()</code> defines a horizontal brush with an explicit extent. Its event selection is null when cleared, otherwise a pair of pixel coordinates. Use <code>x.invert</code> to recover data values. Handle null as an intentional full or empty selection according to the documented policy.</p>
 <p>The reference uses inclusive data bounds and a preset range from 2 to 4. It calls the same brush move path used by interaction, then asserts selected IDs. Programmatic movement proves state wiring; manual pointer and keyboard checks remain separate.</p>
 <h3 id="exercise-1-predict-the-selected-values-for-range-2-4">Exercise 1: Predict the selected values for range 2..4.<a class="heading-anchor" href="#exercise-1-predict-the-selected-values-for-range-2-4" aria-label="Link to this section">#</a></h3>
-<p>Boundary policy is part of the analytical contract. Test exact endpoints instead of relying on visual proximity.</p>
+<p>Boundary policy is part of the analytical contract. Test exact endpoints instead of relying on visual proximity. Brushing from x(2) = 230 to x(4) = 410 and inverting gives roughly 2 and 4; the filter uses <code>d.x &gt;= range[0] - 1e-9</code> and <code>d.x &lt;= range[1] + 1e-9</code>, so 2, 3 and 4 are selected. Without the tolerance, floating-point inversion could return 2.0000000001 and drop the 2. The reference checks the ids join to &quot;2,3,4&quot;.</p>
 <p><strong>Expected:</strong> Values 2, 3, 4 under inclusive bounds.</p>
 <h3 id="exercise-2-clear-the-brush">Exercise 2: Clear the brush.<a class="heading-anchor" href="#exercise-2-clear-the-brush" aria-label="Link to this section">#</a></h3>
-<p>Null is an intentional state, not an error to ignore. Stale filters are a common linked-view bug.</p>
+<p>Null is an intentional state, not an error to ignore. Stale filters are a common linked-view bug. Clearing gives event.selection null, so range is undefined and selected falls back to all five rows. Leaving selected as the last brushed set would keep stale filters. Press &quot;Reset selection&quot; and confirm the status lists 1 through 5.</p>
 <p><strong>Expected:</strong> The full dataset returns under the stated policy.</p>
 <h3 id="exercise-3-link-a-brush-to-a-textual-record-list">Exercise 3: Link a brush to a textual record list.<a class="heading-anchor" href="#exercise-3-link-a-brush-to-a-textual-record-list" aria-label="Link to this section">#</a></h3>
-<p>Both views should derive from one selection state so they cannot drift independently.</p>
+<p>Both views should derive from one selection state so they cannot drift independently. One selected array drives both the circle fill and the status text &quot;Selected: 2, 3, 4&quot;. Updating fill in the brush handler and text in a separate click handler would let them disagree. Compare the blue circles against the listed ids.</p>
 <p><strong>Expected:</strong> The list and visual selection describe the same IDs.</p>
 <h3 id="exercise-4-diagnose-filtering-with-raw-pixels-against-data-values">Exercise 4: Diagnose filtering with raw pixels against data values.<a class="heading-anchor" href="#exercise-4-diagnose-filtering-with-raw-pixels-against-data-values" aria-label="Link to this section">#</a></h3>
-<p>Invert through the same scale that positioned the marks. Changing chart size then remains meaningful.</p>
+<p>Invert through the same scale that positioned the marks. Changing chart size then remains meaningful. Filtering d.x &gt;= 230 compares data values 1 to 5 with pixels, so nothing matches. Apply x.invert to the selection first, as the reference does.</p>
 <p><strong>Expected:</strong> The coordinate spaces were mixed.</p>
 <h3 id="exercise-5-add-a-keyboard-accessible-preset-and-reset">Exercise 5: Add a keyboard-accessible preset and reset.<a class="heading-anchor" href="#exercise-5-add-a-keyboard-accessible-preset-and-reset" aria-label="Link to this section">#</a></h3>
-<p>The alternative should preserve the actual analytical action, not merely display a decorative button.</p>
+<p>The alternative should preserve the actual analytical action, not merely display a decorative button. &quot;Select 2 through 4&quot; calls brush.move with [x(2), x(4)], the same path as dragging, so keyboard users reach identical state. Tab to it and press Enter. The status text should then read &quot;Selected: 2, 3, 4&quot;.</p>
 <p><strong>Expected:</strong> Native controls reach the same state update as brushing.</p>
 <h3 id="exercise-6-design-a-two-chart-coordination-rule">Exercise 6: Design a two-chart coordination rule.<a class="heading-anchor" href="#exercise-6-design-a-two-chart-coordination-rule" aria-label="Link to this section">#</a></h3>
-<p>Keep data filtering and rendering separate. This makes interactions testable without depending on exact pixel appearance.</p>
+<p>Keep data filtering and rendering separate. This makes interactions testable without depending on exact pixel appearance. A second chart should read the same set of selected ids rather than run its own filter; verify both show &quot;2,3,4&quot; after one brush. Write the selection logic as a pure function from a range to ids so it can be unit tested without a browser.</p>
 <p><strong>Expected:</strong> One shared selected-ID set drives both views.</p></article>
   </main>
 </body>

@@ -9,6 +9,12 @@ The executable reference contains the two complete worked cases with assertions.
 
 Do not count fixture generation as query execution unless that is the workflow under evaluation. Record the filesystem and cache conditions where relevant.
 
+**Why it holds here:** Writing the fixture to Parquet is setup; reading it with scan_parquet is part of the query. Timing them separately shows how much of the number is file reading.
+
+**Plausible wrong approach:** Starting the timer before the frame is built adds Python list creation for 20,000 rows to a number reported as query time.
+
+**How to verify:** Report setup seconds, scan plus query seconds and query only seconds as separate lines, each with the file size and whether the file was freshly written.
+
 **Expected:** The report identifies what was included.
 
 ## 2. Vary scale
@@ -23,6 +29,12 @@ for size in (20_000, 200_000):
     answer = frame.lazy().filter(pl.col("x") > 50).select(pl.col("x").sum()).collect().item()
     assert answer == sum(i % 101 for i in range(size) if i % 101 > 50)
 ```
+
+**Why it holds here:** Both sizes compare against a plain Python sum: 747450 for 20,000 rows and 7474500 for 200,000 rows, because each block of 101 values contributes the same amount.
+
+**Plausible wrong approach:** Reporting only the two timings and calling the ratio linear scaling turns two points without a correctness check into a growth claim.
+
+**How to verify:** Run the answer code so both assertions pass, then record time per row at each size and state that two points do not establish a curve.
 
 **Expected:** Answers remain correct at both sizes.
 
@@ -50,11 +62,23 @@ report = {"raw_seconds": timings, "median_seconds": median(timings)}
 assert len(report["raw_seconds"]) == 5
 ```
 
+**Why it holds here:** Keeping all five raw timings shows spread; the median summarizes them without hiding a slow first run caused by warmup or caching.
+
+**Plausible wrong approach:** Reporting only the minimum picks the luckiest run and makes the query look faster than a typical execution.
+
+**How to verify:** Run the answer code, then check len(raw_seconds) == 5 and that median_seconds lies between min and max of the raw list.
+
 **Expected:** The raw repetitions and a summary are available.
 
 ## 4. Avoid a false memory claim
 
 Use an appropriate process-level measurement for a peak claim, and specify whether shared buffers and child processes are counted.
+
+**Why it holds here:** estimated_size reports the bytes of the frame's buffers, about the fixture data, not the process peak during a query, which includes temporaries, the Python runtime and allocator overhead.
+
+**Plausible wrong approach:** Quoting fixture_bytes from example_one as memory use understates the peak and says nothing about the query's intermediate state.
+
+**How to verify:** Measure process peak with a tool such as resource.getrusage before and after the query, and report it beside estimated_size with their definitions.
 
 **Expected:** The answer names temporary and runtime overhead.
 
@@ -62,11 +86,23 @@ Use an appropriate process-level measurement for a peak claim, and specify wheth
 
 Removing sort changes the delivered contract. If order is unnecessary, document that decision and compare multiset equality instead.
 
+**Why it holds here:** If both consumers require rows sorted, the sort belongs in both timed queries. Example_two shows a shuffled frame equals the sorted one only after sorting.
+
+**Plausible wrong approach:** Dropping the sort from one query makes it look faster while it delivers a sequence like the shuffled one, which fails an ordered consumer.
+
+**How to verify:** Include sort in both timings and assert each output equals its sorted version; if order truly is irrelevant, compare with sort applied before equality.
+
 **Expected:** Both timings include the required order.
 
 ## 6. Write a bounded conclusion
 
 State the measured result and uncertainty. A claim about production throughput needs representative data, concurrency, failure behavior and service-level requirements.
+
+**Why it holds here:** The benchmark shows the filtered sum 747450 on 20,000 rows with the in-memory engine and a median time on this machine; nothing about other data or concurrency.
+
+**Plausible wrong approach:** Stating rows per second as a production throughput figure ignores the representative data, concurrency and failure handling such a claim needs.
+
+**How to verify:** Check the conclusion names the row count, engine, Polars version and whether I/O was included, and that it claims nothing outside those settings.
 
 **Expected:** It names data size, engine, version and measurement scope.
 

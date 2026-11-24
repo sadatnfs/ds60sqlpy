@@ -10,6 +10,14 @@ Trace finite iteration and scope rules while using explicit empty-input and inde
 
 Open `julia-005` in `/classroom` with its prepared `julia` runtime. Worked case A (accumulate inside a function) and worked case B (transform and filter explicitly) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-005: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Range:** A lazy arithmetic sequence such as `1:n` that stores its start, step and stop instead of every element.
+- **Comprehension:** Bracketed loop syntax such as `[x^2 for x in xs]` that eagerly builds a new array from an iteration.
+- **Generator:** Parenthesized loop syntax such as `(x^2 for x in xs)` that produces values on demand, so a reduction needs no intermediate array.
+- **Soft scope:** The rule governing assignment to a global name inside a top-level loop, which behaves differently in a script file than in the REPL.
+- **Function scope:** Variables assigned inside a function body are local to each call, which keeps an accumulator free of global ambiguity.
+
 ## Iteration follows a collection contract
 
 A loop visits values supplied by an iterable. A range can describe many values without storing a full array, while a comprehension constructs a collection from an iteration rule. A generator can feed a reduction without first materializing every result. These choices affect representation and memory, not just syntax.

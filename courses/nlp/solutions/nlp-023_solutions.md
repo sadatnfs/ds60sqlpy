@@ -4,9 +4,9 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 ## Exercise 1: Filter permission and freshness
 
-The result excludes both stale and unauthorized evidence. A production system must obtain identity and time from trusted inputs and preserve why a source was excluded. Relevance scoring should run only inside the permitted corpus rather than override the access decision.
+The result excludes both stale and unauthorized evidence. A production system must obtain identity and time from trusted inputs and preserve why a source was excluded. Relevance scoring should run only inside the permitted corpus rather than override the access decision. Ranking first and filtering afterwards could leak a stale version into intermediate results. Verify that an unknown role and time 30 both return an empty list.
 
-**Expected:** Only policy version 2 for ops; unknown role and expired time30 yield no records.
+**Expected:** Only policy version 2 for ops; unknown role and expired time 30 yield no records.
 
 ## Exercise 2: Fingerprint content reproducibly
 
@@ -16,15 +16,15 @@ The hash identifies the exact canonical bytes used by the system. It does not ce
 
 ## Exercise 3: Measure a defined drift
 
-The distance measures probability mass redistribution under the fixed categories. It is not a performance score or a causal explanation. Input validation prevents meaningless normalization from creating a plausible-looking alert statistic.
+The distance measures probability mass redistribution under the fixed categories. It is not a performance score or a causal explanation. Input validation prevents meaningless normalization from creating a plausible-looking alert statistic. Normalizing a zero-total vector would divide by zero and could produce a plausible alert from nothing. Assert .3 for the fixture and that each invalid vector raises.
 
-**Expected:** Distance.3; negative,nonfinite or zero-total count vectors are rejected.
+**Expected:** Distance .3; negative, nonfinite or zero-total count vectors are rejected.
 
 ## Exercise 4: Respect label maturity
 
-Unknown is not the negative class. Mature-case performance may still be selected or unrepresentative if label delay depends on outcome, so retain cohort information and avoid claiming complete deployment accuracy from the available subset.
+Unknown is not the negative class. Mature-case performance may still be selected or unrepresentative if label delay depends on outcome, so retain cohort information and avoid claiming complete deployment accuracy from the available subset. Filling unknown labels with 0 would drop accuracy for reasons unrelated to the model.
 
-**Expected:** Two mature cases with accuracy1; all-unknown returns count0 and no accuracy.
+**Expected:** Two mature cases with accuracy 1; all-unknown returns count 0 and no accuracy.
 
 ## Exercise 5: Treat external text as data
 
@@ -36,7 +36,7 @@ The fixture demonstrates separation of data from control and a narrow pattern tr
 
 If the current policy is absent from the index, changing model weights may not address the problem. A useful runbook names the affected snapshot, a bounded check and a success condition such as the correct permitted version entering retrieval. Preserve user data and original incident evidence during recovery.
 
-**Expected:** A concrete record distinguishes observed failure,hypothesis,authorized action and verified recovery.
+**Expected:** A concrete record distinguishes observed failure, hypothesis, authorized action and verified recovery.
 
 ## Transfer and limits
 

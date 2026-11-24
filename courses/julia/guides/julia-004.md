@@ -10,6 +10,13 @@ Write explicit Boolean decisions and select equality semantics appropriate to nu
 
 Open `julia-004` in `/classroom` with its prepared `julia` runtime. Worked case A (guard a computation) and worked case B (NaN and signed zero) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-004: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Short-circuit evaluation:** The `&&` and `||` operators evaluate their right operand only when the left operand does not already decide the result.
+- **Identity comparison:** The `===` operator asks whether two values are indistinguishable, so it separates `0.0` from `-0.0` while `==` does not.
+- **isequal:** An equality designed for dictionary keys and sorting that treats `NaN` as equal to itself and distinguishes signed zeros.
+- **Missing condition:** A comparison involving `missing` returns `missing`, which is not a `Bool` and therefore cannot drive an `if` branch.
+
 ## A condition needs a Boolean
 
 Julia conditions use Boolean values. An integer count or an arbitrary object is not automatically treated as true merely because it is nonzero or nonempty. This forces a decision rule to say what it means: compare a count to zero, test whether a collection is empty, or apply a named predicate.
@@ -83,6 +90,8 @@ A short-circuit guard should state an invariant. For example, check that a colle
 ## Diagnose a decision rule
 
 Trace the predicate, the chosen branch and any side effects. A returned zero can be a real numeric result, whereas `nothing` can mean that no valid result was produced. Tests should distinguish those states. Comparing strings or floating values also requires the appropriate representation and tolerance policy from earlier units.
+
+A quick check is to list each input class and the branch you expect it to take: an ordinary value, zero, a negative denominator, NaN and an empty collection. Then run each one and compare. A branch that no test reaches is a decision nobody has verified.
 
 Avoid relying on an implementation accident such as one container's current ordering or one numeric type's conversion rules. Express the condition needed by the algorithm. A clear predicate makes failures easier to explain and makes later changes to data representations less likely to alter behavior silently.
 

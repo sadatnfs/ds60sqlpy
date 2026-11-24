@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-calculate-request-relative-utilization">Exercise 1: Calculate request-relative utilization<a class="heading-anchor" href="#exercise-1-calculate-request-relative-utilization" aria-label="Link to this section">#</a></h3>
 <p>The same measured CPU use can lead to different utilization ratios when requests change. This explains why tuning requests changes both scheduling commitments and autoscaling behavior, and why units must be recorded.</p>
 <p><strong>Expected:</strong> 50 percent and 25 percent respectively.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Divide 50m usage by each Pod&#x27;s CPU request and convert to percent.</li>
+<li><strong>Why it is correct:</strong> HPA utilization is measured against requests, so 50m over 100m is 50 percent and over 200m is 25 percent.</li>
+<li><strong>Plausible wrong approach:</strong> Dividing by the limit gives a lower utilization and a smaller scaling recommendation.</li>
+<li><strong>How to verify:</strong> The two results are 50 percent and 25 percent.</li>
+</ul>
 <h3 id="exercise-2-apply-the-ideal-formula">Exercise 2: Apply the ideal formula<a class="heading-anchor" href="#exercise-2-apply-the-ideal-formula" aria-label="Link to this section">#</a></h3>
 <p>The proportional model scales count according to the demand ratio. It is useful for understanding the direction and approximate magnitude, while controller safeguards and incomplete measurements can alter the actual action.</p>
 <p><strong>Expected:</strong> Unclipped recommendations 2 and 1.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compute current times observed over target, then take the ceiling.</li>
+<li><strong>Why it is correct:</strong> 1 times 80 over 50 is 1.6, rounded up to 2; 2 times 20 over 50 is 0.8, rounded up to 1.</li>
+<li><strong>Plausible wrong approach:</strong> Rounding to the nearest integer would give 2 and 1 here but fails for values like 1.2, where the HPA rounds up to 2.</li>
+<li><strong>How to verify:</strong> The unclipped recommendations are 2 and 1.</li>
+</ul>
 <h3 id="exercise-3-recognize-saturation-at-the-maximum">Exercise 3: Recognize saturation at the maximum<a class="heading-anchor" href="#exercise-3-recognize-saturation-at-the-maximum" aria-label="Link to this section">#</a></h3>
 <p>The HPA can be operating exactly as configured while failing to meet latency or throughput needs. Report the bound and observed application performance instead of equating a stable count with success.</p>
 <p><strong>Expected:</strong> Ideal 4, configured maximum 2; capacity adequacy remains unproven.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compute 1 times 200 over 50 and compare with maxReplicas.</li>
+<li><strong>Why it is correct:</strong> The ideal is 4, but the HPA clamps to maxReplicas 2, so the workload may stay overloaded.</li>
+<li><strong>Plausible wrong approach:</strong> Reading 2 replicas at maximum as sufficient capacity assumes the cap matched the load.</li>
+<li><strong>How to verify:</strong> Ideal 4, capped 2, and the answer says capacity is unproven.</li>
+</ul>
 <h3 id="exercise-4-diagnose-missing-metrics">Exercise 4: Diagnose missing metrics<a class="heading-anchor" href="#exercise-4-diagnose-missing-metrics" aria-label="Link to this section">#</a></h3>
 <p>The denominator requests and the metrics supply must both be valid. The appropriate response is to inspect the declared host capability and conditions, not to fabricate a low-utilization sample or widen the learner credential.</p>
 <p><strong>Expected:</strong> Unknown load, with a qualified metrics-path investigation.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the ScalingActive condition and its reason, then investigate the metrics path.</li>
+<li><strong>Why it is correct:</strong> When the metric is unavailable the HPA cannot compute a recommendation and leaves replicas unchanged.</li>
+<li><strong>Plausible wrong approach:</strong> Treating the missing metric as zero load would predict a scale down that does not happen.</li>
+<li><strong>How to verify:</strong> The condition reason is quoted, and no value is invented for the metric.</li>
+</ul>
 <h3 id="exercise-5-observe-a-bounded-live-step">Exercise 5: Observe a bounded live step<a class="heading-anchor" href="#exercise-5-observe-a-bounded-live-step" aria-label="Link to this section">#</a></h3>
 <p>The observation chain exposes delays and failures. A desired count of 2 with only one ready Pod is incomplete capacity expansion, and a load generator reaching its own limit can also distort interpretation.</p>
 <p><strong>Expected:</strong> Timestamped transitions within declared ranges and deadline, not an exact scaling second.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Tabulate sample time, desired replicas, ready replicas and request result during the fixed load.</li>
+<li><strong>Why it is correct:</strong> Desired changes when the HPA reacts and ready changes later when Pods pass readiness, so both are needed.</li>
+<li><strong>Plausible wrong approach:</strong> Quoting the exact second scaling occurred claims precision the sampling interval cannot provide.</li>
+<li><strong>How to verify:</strong> Each row falls inside the declared range and deadline.</li>
+</ul>
 <h3 id="exercise-6-explain-stabilization-and-stop">Exercise 6: Explain stabilization and stop<a class="heading-anchor" href="#exercise-6-explain-stabilization-and-stop" aria-label="Link to this section">#</a></h3>
 <p>Stabilization deliberately avoids reacting to every temporary dip. The final packet should preserve metrics freshness, bounded workload settings and application evidence so another reader can understand the scope of the observed behavior.</p>
 <p><strong>Expected:</strong> Reasoned delay explanation and confirmed load termination; no production sizing claim.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Quote the scale down stabilization window from behavior and confirm the load process stopped.</li>
+<li><strong>Why it is correct:</strong> The HPA keeps the highest recommendation over the window, so replicas fall only after it passes.</li>
+<li><strong>Plausible wrong approach:</strong> Calling the slow scale down a bug ignores the configured window that causes it.</li>
+<li><strong>How to verify:</strong> The window value is quoted, the load end is recorded and no production sizing is claimed.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Use the host-provided fixed load duration, request concurrency and stop limit in an exclusive lease. Record metrics API health, per-Pod requests, sample timestamps and HPA conditions. Define a permissible range and deadline rather than an exact transition second. Stop if the load exceeds the lesson resource budget or the target identity changes.</p>
 <p>If metrics are missing, preserve the unavailable condition and fix the qualified measurement path. Do not report zero utilization, remove resource requests to silence a warning or install a metrics component from the learner pad. A single successful scaling step does not establish production sizing, cost efficiency or stability under all workloads.</p></article>

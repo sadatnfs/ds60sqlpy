@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-043_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A synthetic pipeline spends 20 microseconds submitting each ordinary iteration. Graph replay reduces this to 5 microseconds, but setup costs 300 microseconds. Ignoring other equal costs, break-even is more than twenty repeats. At exactly twenty, the submission savings merely repay setup.</p>
+<p><strong>Approach:</strong> Divide 300 microseconds of setup by 15 microseconds saved per replay.</p>
+<p><strong>Why it is correct:</strong> Break-even is 20 replays, so 21 replays give 300 + 105 = 405 against 420 ordinary.</p>
+<p><strong>A plausible wrong approach:</strong> Comparing one replay at 5 microseconds with one ordinary iteration at 20 ignores the setup.</p>
+<p><strong>How to verify:</strong> The reference asserts break_even == 20 and that 21 replays cost less than 21 ordinary iterations.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A graph contains fill, affine transform and download nodes with dependencies. Replay uses the same valid storage but new input contents. Changing the input shape beyond allocation capacity is not just a new value; rebuild or perform a supported update after validating all node contracts.</p>
+<p><strong>Approach:</strong> Update input contents in place for replay and rebuild the graph when the shape exceeds capacity.</p>
+<p><strong>Why it is correct:</strong> Graph nodes bake in addresses and sizes, so contents can change but capacity cannot grow.</p>
+<p><strong>A plausible wrong approach:</strong> Writing a larger input into the captured buffer overruns the allocation the nodes reference.</p>
+<p><strong>How to verify:</strong> Replay with new values and same shape, then with a larger shape, and confirm a rebuild occurs.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Sixty repeats repay setup; more than sixty are needed for a strict improvement under the simplified model.</p>
+<p><strong>Approach:</strong> Divide 600 microseconds by 10 microseconds saved per replay.</p>
+<p><strong>Why it is correct:</strong> Sixty replays repay setup, and the sixty-first makes the graph strictly cheaper.</p>
+<p><strong>A plausible wrong approach:</strong> Halving the earlier answer because savings doubled ignores that setup doubled too.</p>
+<p><strong>How to verify:</strong> Compute 600 / 10 and check 600 + 61 <em> r &lt; 61 </em> o for the stated costs.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>The graph retains an address dependency, not an owning copy of the data. Keep the allocation alive for all executions or update/rebuild safely.</p>
+<p><strong>Approach:</strong> Keep the temporary buffer alive for every replay or rebuild the graph with a new buffer.</p>
+<p><strong>Why it is correct:</strong> The graph stores the buffer&#x27;s address, not a copy of its data.</p>
+<p><strong>A plausible wrong approach:</strong> Reallocating a new buffer at the same size does not update the address held by the graph.</p>
+<p><strong>How to verify:</strong> Run replays under a sanitizer after freeing and confirm an invalid access appears.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Setup may dominate; compare the ordinary launch path under the same end-to-end contract.</p>
+<p><strong>Approach:</strong> Use ordinary launches for a single run and compare end-to-end.</p>
+<p><strong>Why it is correct:</strong> Setup cost is never repaid with one execution.</p>
+<p><strong>A plausible wrong approach:</strong> Capturing anyway because graphs are faster per replay adds pure overhead.</p>
+<p><strong>How to verify:</strong> Time one ordinary run against setup plus one replay.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Fixed-shape repeated inference may benefit, but validate shapes, memory addresses, dynamic operations and framework support before capture or replay.</p>
+<p><strong>Approach:</strong> Capture only fixed-shape inference after checking addresses, dynamic operations and framework support.</p>
+<p><strong>Why it is correct:</strong> Graphs replay fixed work, so dynamic shapes or allocations break the captured plan.</p>
+<p><strong>A plausible wrong approach:</strong> Capturing a model with data-dependent control flow freezes one path for all inputs.</p>
+<p><strong>How to verify:</strong> Validate outputs across several inputs of the captured shape against eager runs.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-043_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

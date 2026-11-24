@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A time series associates measurements with times. A JavaScript Date represents an instant, while formatting can use local time or UTC. If the lesson uses UTC dates, use UTC parsing, scales and formatting consistently so a chart does not shift a day in another time zone.</p>
 <p>A line connects observations in the supplied order. D3 does not automatically sort your records by time. Connecting unsorted points can produce a zigzag that implies a path the data never took. Sorting a copy preserves the source order when other code owns the original data.</p>
 <p>Missing intervals deserve visible treatment. A line generator’s defined predicate can break a path at missing observations. Connecting across a long outage can imply continuous measurement when none exists. Explain whether a gap means missing data, no activity or a deliberate sampling interval.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>UTC:</strong> Coordinated Universal Time. Using UTC parsing, scales and formatting together keeps a date from shifting a day when the viewer is in another time zone.</li>
+<li><strong>Time scale:</strong> A <code>d3.scaleUtc</code> mapping from Date instants to positions whose ticks fall on calendar boundaries.</li>
+<li><strong>Line generator:</strong> A <code>d3.line</code> function that turns an ordered array of records into SVG path data through x and y accessors. It connects points in the order supplied, so records must be sorted by time first.</li>
+<li><strong>Defined predicate:</strong> The <code>.defined</code> accessor of a line generator; records for which it returns false break the path into separate segments.</li>
+<li><strong>Missing interval:</strong> A stretch of time with no valid observation, shown as a visible gap rather than a line that implies continuous measurement.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>d3.scaleUtc</code> maps instants to x positions. A line generator uses x and y accessors to produce an SVG path string. <code>.defined(d =&gt; Number.isFinite(d.value))</code> controls which records form continuous segments. Set <code>fill: none</code> for an ordinary line so the path is not treated as a filled polygon.</p>
 <p>A null value must be rejected explicitly because <code>Number(null)</code> becomes zero. Sorting and missingness policies are data decisions, not merely chart styling. The reference checks ordering and the number of separate path segments in a small fixture.</p>

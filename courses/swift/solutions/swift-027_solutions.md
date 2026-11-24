@@ -1,6 +1,6 @@
 # swift-027: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-027_solution.swift](swift-027_solution.swift). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-027_solution.swift](swift-027_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -14,37 +14,100 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Name a wrong implementation rejected by each fixture.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: Literal expected results are derived from the domain rule rather than a duplicated implementation. Normal and boundary values satisfy the clamp contract.
+**Reference answer.** It runs as the `Task 1` block of the reference program.
+
+```swift
+let cases = [(-2, 0), (0, 0), (3, 3)]
+func passes(_ candidate: (Int) -> Int) -> Bool {
+  cases.allSatisfy { candidate($0.0) == $0.1 }
+}
+precondition(passes { max(0, $0) })
+precondition(!passes { $0 })
+precondition(!passes { abs($0) })
+precondition(!passes { _ in 0 })
+```
+
+**Observe:** The real clamp passes, identity and abs fail on -2, and always-zero fails on 3.
+
+Each fixture earns its place by rejecting some wrong implementation: the negative row catches missing clamping or sign flipping, and the positive row catches a constant result.
 
 ### Task 2: Guided modification
 
 Add the minimum Int case without unsafe negation.
 
-No separate reference answer has been written for this task. Start from Example B: A property adds evidence while the boundary example remains decisive. The zero case catches the wrong default and clamping is idempotent.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+precondition(max(0, Int.min) == 0)
+precondition(Int.min.magnitude == UInt(Int.max) + 1)
+precondition(Int.min.addingReportingOverflow(-1).overflow)
+```
+
+**Observe:** Clamping Int.min gives 0, and its magnitude is one more than Int.max.
+
+max(0, Int.min) never negates, so it is safe; -Int.min or abs(Int.min) would trap because the positive value does not fit in Int.
 
 ### Task 3: Independent construction
 
-Add a real JourneyCore test for rejected negative quantity.
+Add a real JourneyCore test that rejects a blank item title.
 
-No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Oracle** and the lesson notes.
+**Written answer.** Add this method to PlanTests: func testBlankTitleIsRejected() throws { XCTAssertThrowsError(try StudyItem(id: "two", title: "   ")) { error in XCTAssertEqual(error as? PlanError, .invalidItem) } }. In the reference copy, swift test then reported Executed 5 tests, with 0 failures. The test fails if the initializer stops trimming whitespace or reports a different error.
 
 ### Task 4: Diagnose a defect
 
 Diagnose a test comparing the same function call on both sides.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Random tests need reproducible seeds and an oracle. A test that catches its own precondition failure is not valid verification. Avoid narrow elapsed-time assertions on shared machines.
+**Reference answer.** It runs as the `Task 4` block of the reference program.
+
+```swift
+func wrongClamp(_ value: Int) -> Int { value <= 0 ? 1 : value }
+precondition(wrongClamp(0) == wrongClamp(0))
+precondition(wrongClamp(0) != 0)
+```
+
+**Observe:** Comparing wrongClamp(0) with itself passes, while comparing it with the literal 0 exposes the defect.
+
+A test whose two sides call the same code can never fail, so it proves nothing; the expected side must come from an independent oracle such as a literal derived from the rule.
 
 ### Task 5: Boundary evidence
 
 Test empty, duplicate and malformed inputs separately.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Check independently derived cases) and Example B (Catch a plausible wrong boundary).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+func clampAll(_ texts: [String]) -> [Int]? {
+  var result: [Int] = []
+  for text in texts {
+    guard let value = Int(text) else { return nil }
+    result.append(max(0, value))
+  }
+  return result
+}
+precondition(clampAll([]) == [])
+precondition(clampAll(["-1", "-1"]) == [0, 0])
+precondition(clampAll(["2", "x"]) == nil)
+```
+
+**Observe:** Empty input gives [], duplicates keep both entries as [0, 0], and a malformed entry makes the whole result nil.
+
+Separate checks name separate contracts: empty is not an error, duplicates are preserved rather than merged, and malformed text is rejected rather than clamped.
 
 ### Task 6: Transfer and justify
 
 Create a verification plan distinguishing unit, package, UI and device evidence.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Oracle**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Add a real JourneyCore test that rejects a blank item title) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** Example A checks a clamp-at-zero rule, `max(0, input)`, against a table of inputs and literal expected outputs: -2 to 0, 0 to 0 and 3 to 3. Example B writes a deliberately wrong clamp that returns 1 for zero and shows the table would catch it, then checks that clamping twice equals clamping once.
+
+**Why it is correct.** The expected values in the table come from the rule itself, not from calling the function, so they are an independent oracle. The zero row is decisive: the wrong function returns 1 there while the rule requires 0. Idempotence holds because `max(0, -4)` is 0 and `max(0, 0)` is still 0, giving a property check that covers more than one input.
+
+**A plausible wrong approach.** Writing `precondition(max(0, x) == max(0, x))` always passes, because both sides call the same code; it would accept the wrong clamp too. This self-comparison is task 4's defect. Testing only -2 and 3 would also pass the wrong implementation, since it only misbehaves at zero.
+
+**How to verify.** Replace `max(0, input)` in the table loop with `wrong(input)` and confirm the zero row fails. For task 2, add `(Int.min, 0)` and confirm it passes without negating `Int.min`, which would overflow. Run the JourneyCore test separately with `swift test` and record its output.
 
 ## Mechanism and diagnostic reasoning
 

@@ -122,7 +122,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Round-trip a value model) before changing anything, and confirm its observation: The modeled fields round-trip through JSON.
 2. Compare Example B (Reject a decoded domain violation) with Example A and name the first line whose behavior differs. Its observation is: Valid JSON can still describe an invalid item.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: JSON key order is not a semantic equality rule.
+3. Before opening the explanation, check your task 3 attempt (Write a decoder that validates before returning a trusted item) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

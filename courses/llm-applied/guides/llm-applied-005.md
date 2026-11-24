@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-004`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-004` (Corpus provenance, versions and evaluation isolation). They introduce the notation this lesson needs for chunk and overlap.
 
 ## Learning objectives
 
@@ -34,7 +34,7 @@ This suggests evaluating chunking at the claim level. For a formula question, la
 
 ## Tables and headings need an explicit representation
 
-Suppose a table contains columns account_type,eligible and reason. A row containing “test,false,internal traffic” is hard to interpret if retrieved without its column labels. A structure-aware representation can attach those labels to the row or preserve a small table region. If the representation repeats labels for retrieval, keep a separate link to the original source span so the generated text is not falsely presented as a verbatim quote.
+Suppose a table contains columns `account_type`, `eligible` and reason. A row containing `test,false,internal traffic` is hard to interpret if retrieved without its column labels. A structure-aware representation can attach those labels to the row or preserve a small table region. If the representation repeats labels for retrieval, keep a separate link to the original source span so the generated text is not falsely presented as a verbatim quote.
 
 Headings have a similar role. The sentence “Use account-level resampling” under “Repeated visits within accounts” has a more specific meaning than the same sentence in isolation. A chunk can carry the heading as metadata or expanded context. Repeating the heading into every indexed chunk also changes lexical frequencies and embedding inputs, so it becomes part of the retrieval policy rather than a neutral display choice.
 
@@ -78,9 +78,11 @@ Keep a chunk's original-source identity and its representation for retrieval sep
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-005/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-005.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-005.py` in the declared `python-core` profile. *Split a fixed document*, *Verify citation offsets* and *Preserve unusual whitespace* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-005/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Verify citation offsets* and *Preserve unusual whitespace* reuse the helper and fixture introduced in *Split a fixed document*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Chunks one two three, three four five and five six seven. Example B should give: Every source slice equals the stored chunk text. Example C should give: First chunk retains the double space; second chunk is gamma. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -90,7 +92,7 @@ re.finditer over non-whitespace spans records exact start/end offsets in the ori
 
 Let a nonempty document have n whitespace-token spans, window size s and overlap o, with \(0\le o<s\). The advance is \(d=s-o\). The first chunk covers up to s spans; further chunks begin at d, 2d and so on until one reaches the end. For this helper, the number of chunks is one when \(n\le s\) and otherwise \(1+\left\lceil \frac{n-s}{d}\right\rceil\). Empty input produces zero chunks under the declared policy.
 
-For \(n=7\), \(s=3\), \(o=1\), \(d=2\) and the chunk count is \(1+\left\lceil \frac{4}{2}\right\rceil=3\). The span-index groups are[0, 1, 2], [2, 3, 4], [4, 5, 6]. Stored token occurrences total nine while unique source positions total seven. Positions 2 and 4 are repeated once. The redundancy ratio for this finite fixture is \(\frac{9}{7}\), about 1.286; it is not nine independent observations supporting the answer.
+For \(n=7\), \(s=3\), \(o=1\), \(d=2\) and the chunk count is \(1+\left\lceil \frac{4}{2}\right\rceil=3\). The span-index groups are `[0, 1, 2], [2, 3, 4], [4, 5, 6]`. Stored token occurrences total nine while unique source positions total seven. Positions 2 and 4 are repeated once. The redundancy ratio for this finite fixture is \(\frac{9}{7}\), about 1.286; it is not nine independent observations supporting the answer.
 
 For a long uniform document with full windows, stored token occurrences per newly covered position approach \(\frac{s}{s-o}\). Overlap near the window size can therefore create a large storage and retrieval cost. At \(s=100\), \(o=90\), the advance is ten and the interior duplication factor approaches ten. That arithmetic does not prove an optimal overlap policy; it identifies a cost to measure beside evidence recall.
 
@@ -176,21 +178,24 @@ assert pieces[0]["text"] == "alpha  beta" and pieces[1]["text"] == "gamma"
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: chunks one two three, three four five and five six seven. empty list for empty text; one short chunk for the two-token source. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Verify citation offsets*, predict its result from the prompt alone: For every chunk, slice the original text using its start and end offsets. Write the guess beside the stated outcome (every source slice equals the stored chunk text). Then predict how the decisive case, *Handle empty and short sources*, should end: Chunk empty text and a two-token string with size 5. For chunking, overlap, offsets and context budgets, the finish condition is: Chunks one two three, three four five and five six seven. Empty list for empty text; one short chunk for the two-token source.
 
 ## Exercises
 
 1. **Split a fixed document.** Chunk one two three four five six seven with size 3 and overlap 1.
    **Expected:** chunks one two three, three four five and five six seven.
    **Verify:** Save the assertion results for exercise 1, including chunks one two three, three four five and five six seven.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Verify citation offsets.** For every chunk, slice the original text using its start and end offsets.
    **Expected:** every source slice equals the stored chunk text.
    **Verify:** Save the assertion results for exercise 2, including every source slice equals the stored chunk text.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Preserve unusual whitespace.** Chunk alpha, two spaces, beta, a newline and gamma with size 2 and overlap 0.
    **Expected:** first chunk retains the double space; second chunk is gamma.
    **Verify:** Save the assertion results for exercise 3, including first chunk retains the double space; second chunk is gamma.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Measure overlap duplication.** Count total stored chunk token occurrences versus original source token positions in the first fixture.
    **Expected:** 9 stored token occurrences versus 7 source positions.
@@ -212,19 +217,21 @@ If retrieval returns many near-identical passages, deduplicate by source spans o
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate chunk and overlap for the fixture in *Split a fixed document*. Hint 2: change one literal in *Verify citation offsets* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Measure overlap duplication*, with its stated result (9 stored token occurrences versus 7 source positions). If *Handle empty and short sources* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Chunk, Overlap, Source offset using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain chunk, overlap and source offset using *Split a fixed document*. Recompute its result (chunks one two three, three four five and five six seven) from the inputs. Change one input in *Preserve unusual whitespace* and predict whether the stated result (first chunk retains the double space; second chunk is gamma) still holds. Say which part of chunking, overlap, offsets and context budgets the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-004` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Split a fixed document* cannot be reconstructed without the solution, revisit `llm-applied-004` (Corpus provenance, versions and evaluation isolation). Otherwise keep the six observations from chunking, overlap, offsets and context budgets and continue to `llm-applied-006` (Lexical retrieval and BM25 from first principles).
 
 ## Sources and verification status
 
-API and mechanism reference: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for chunk: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixtures for *Split a fixed document*, *Verify citation offsets* and *Preserve unusual whitespace* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

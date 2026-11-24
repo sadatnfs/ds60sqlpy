@@ -14,6 +14,13 @@ Record artifacts by version and checksum and keep a known CPU baseline. Do not c
 
 
 
+### Key terms
+
+- **Support matrix:** The published combinations of Spark, Scala, Java, CUDA, driver and GPU architecture that a plugin release was tested on.
+- **Scala binary version:** The Scala major and minor line, such as 2.12 or 2.13, that a jar was compiled against and must match.
+- **CUDA native-library variant:** The plugin jar build that bundles native libraries for a specific CUDA major version.
+- **Artifact checksum:** A recorded hash that proves which exact jar was deployed.
+
 ## Worked examples
 
 ### Worked example 1
@@ -46,27 +53,39 @@ Treat printed timing values as synthetic whenever the program says model, fixtur
 
 ### Exercise 1: List matrix axes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **list matrix axes** in the examples above.
+**Trap to avoid:** Treating the jar name as proof of compatibility ignores axes the name does not encode, such as the driver or GPU architecture.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Identify a Scala mismatch
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **identify a Scala mismatch** in the examples above.
+**Trap to avoid:** Matching only the Spark version number while ignoring the Scala suffix in the jar name leads to runtime linkage errors before any query runs.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Distinguish toolkit and driver
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **distinguish toolkit and driver** in the examples above.
+**Trap to avoid:** Checking `nvcc --version` and concluding the host is ready tests the compiler, not the driver the executors will use.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Record artifact provenance
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **record artifact provenance** in the examples above.
+**Trap to avoid:** Copying a jar from a shared folder without a checksum leaves no way to tell which build it is.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a CPU rollback
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design a CPU rollback** in the examples above.
+**Trap to avoid:** Removing CPU configuration once the plugin works means a driver or library failure stops the job entirely.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Define compatibility acceptance
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **define compatibility acceptance** in the examples above.
+**Trap to avoid:** Accepting a host because the Spark session started with the plugin listed skips native library loading on executors and actual query execution.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

@@ -201,18 +201,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// count: false };` to `const flags: Flags&lt;Row&gt; = { id: false, count: false };`. Before</span></span>
 <span class="source-line"><span class="syntax-comment">// running it, predict which check fails and which value it now sees; then run it and restore</span></span>
 <span class="source-line"><span class="syntax-comment">// the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(flags, { id: true, count: false })`. Restoring the original line brings</span></span>
-<span class="source-line"><span class="syntax-comment">// back the worked observation: id true and count false; a missing flag is a compile error.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(flags, { id:</span></span>
+<span class="source-line"><span class="syntax-comment">// true, count: false })`. Restoring `const flags: Flags&lt;Row&gt; = { id: true, count: false };`</span></span>
+<span class="source-line"><span class="syntax-comment">// brings back: id true and count false; a missing flag is a compile error.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Prove Omit does not remove runtime secrets: debug a regression</span></span>
 <span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `const full:</span></span>
 <span class="source-line"><span class="syntax-comment">// RecordWithSecret = { id: &#x27;A!&#x27;, secret: &#x27;fixture-only&#x27; };`. Run Example B with that line,</span></span>
 <span class="source-line"><span class="syntax-comment">// use the failing check to locate the defect and repair it without changing the check.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(JSON.stringify(publicRecord), &#x27;{&quot;id&quot;:&quot;A&quot;}&#x27;)`; after it the line reads `const</span></span>
-<span class="source-line"><span class="syntax-comment">// full: RecordWithSecret = { id: &#x27;A&#x27;, secret: &#x27;fixture-only&#x27; };` again and typed view still</span></span>
-<span class="source-line"><span class="syntax-comment">// has secret at runtime; explicit projection does not.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(JSON.stringify(publicRecord), &#x27;{&quot;id&quot;:&quot;A&quot;}&#x27;)`. Restoring `const full:</span></span>
+<span class="source-line"><span class="syntax-comment">// RecordWithSecret = { id: &#x27;A&#x27;, secret: &#x27;fixture-only&#x27; };` brings back: typed view still has</span></span>
+<span class="source-line"><span class="syntax-comment">// secret at runtime; explicit projection does not.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Compare distributed and whole-union array types</span></span>
 <span class="source-line"><span class="syntax-comment">// Define both conditional utilities and demonstrate their different assignment behavior.</span></span>

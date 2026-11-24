@@ -10,6 +10,14 @@ Parse and export bounded CSV data using explicit types and missingness rules rat
 
 Open `julia-017` in `/classroom` with its prepared `julia` runtime. Worked case A (retain identifiers and missing values) and worked case B (reject malformed typed input and preserve quoting) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-017: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Schema:** The expected column names and element types of a file, declared up front instead of inferred from whatever rows appear.
+- **Strict parsing:** Reading with `strict = true` so a malformed field raises an error instead of quietly becoming `missing`.
+- **Identifier column:** A code such as an account number that must be read as a `String`, because numeric parsing drops leading zeros.
+- **Round trip:** Writing a table and reading it back to confirm that names, types and values survive serialization unchanged.
+- **IOBuffer:** An in-memory stream that stands in for a file, so literal CSV text can be parsed without touching the disk.
+
 ## A text file is not yet a typed table
 
 CSV represents delimited text. A reader must interpret headers, quoting, missing-value markers and data types. Those choices are part of a schema contract. An identifier that looks numeric may need to remain text, because parsing it as an integer can discard leading zeros that are meaningful to identity.

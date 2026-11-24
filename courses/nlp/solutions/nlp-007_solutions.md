@@ -6,7 +6,7 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 Tea appears twice but only in one document, so its document frequency is one. Cup appears once in each of two documents, so its DF is two. This distinction is the basis for the IDF weighting and is independent of the raw within-document counts.
 
-**Expected:** [1,2,1] for [coffee,cup,tea].
+**Expected:** [1, 2, 1] for [coffee, cup, tea].
 
 ## Exercise 2: Match the IDF formula
 

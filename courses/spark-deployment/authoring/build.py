@@ -23,6 +23,9 @@ INCLUDE = re.compile(
     re.M,
 )
 CASE = re.compile(r"^## Worked case (\w+): (.+)$", re.M)
+EXAMPLE_LANGUAGES = {"python", "bash", "yaml", "ini", "dockerfile", "sql", "text"}
+EXAMPLE_FIELDS = {"title", "language", "code", "output", "interpretation"}
+GUIDE_WORDS = re.compile(r"\b[\w'-]+\b")
 
 
 def ruff_adapter(source, language, suffix, root):
@@ -107,11 +110,65 @@ def excerpt(match):
     return f"From [`{relative}`](../{relative}):\n\n```{match['language']}\n{body}\n```"
 
 
+def key_terms_block(unit):
+    """Render the unit's authored vocabulary as a Key terms section."""
+    terms = unit.get("key_terms", [])
+    names = [term for term, _ in terms]
+    if not 3 <= len(terms) <= 5 or len(set(names)) != len(names):
+        raise ValueError(f"{unit['id']} needs three to five distinct key terms")
+    for term, definition in terms:
+        if not term.strip() or not definition.strip():
+            raise ValueError(f"{unit['id']} has an empty key term")
+        if "\u2014" in term + definition or "\u2013" in term + definition:
+            raise ValueError(f"{unit['id']} key terms must not use em or en dashes")
+    return "## Key terms\n\n" + "\n".join(f"- **{t}:** {d}" for t, d in terms) + "\n\n"
+
+
+def worked_examples_block(unit, titles, codes):
+    """Validate and render the unit's worked examples as guide sections.
+
+    ``output`` is optional and must be text observed by running the block itself.
+    """
+    key = unit["id"]
+    examples = unit.get("worked_examples", [])
+    if not examples:
+        raise ValueError(f"{key} needs at least one worked example")
+    sections = []
+    for example in examples:
+        if set(example) - EXAMPLE_FIELDS or not EXAMPLE_FIELDS - {"output"} <= set(example):
+            raise ValueError(f"{key} worked examples need exactly the documented fields")
+        title, code = example["title"].strip(), example["code"].strip("\n")
+        language, note = example["language"], example["interpretation"].strip()
+        output = example.get("output", "").strip("\n")
+        if not title or not code.strip() or language not in EXAMPLE_LANGUAGES:
+            raise ValueError(f"{key} has an empty or unsupported worked example")
+        if title.lower() in titles or code in codes:
+            raise ValueError(f"{key} repeats a worked example title or program: {title}")
+        titles.add(title.lower())
+        codes.add(code)
+        if any(d in "".join(example.values()) for d in ("\u2014", "\u2013")):
+            raise ValueError(f"{key} worked examples must not use em or en dashes")
+        if "```" in code + output:
+            raise ValueError(f"{key} worked example text cannot contain a fence")
+        if "\n" in note or len(note.split()) < 40 or not note.endswith("."):
+            raise ValueError(f"{key} interpretation must be one paragraph of 40+ words")
+        if language == "python":
+            ast.parse(code, filename=f"{key} worked example")
+        observed = f"Output from running the block above:\n\n```text\n{output}\n```\n\n"
+        sections.append(
+            f"## Worked example: {title}\n\n```{language}\n{code}\n```\n\n"
+            + (observed if output else "")
+            + note
+        )
+    return "\n\n".join(sections) + "\n\n"
+
+
 def outputs():
     units = json.loads((BASE / "authoring/units.json").read_text())
     if [row["id"] for row in units] != [f"spark-deploy-{i:03d}" for i in range(1, 19)]:
         raise ValueError("Preserve the eighteen stable deployment lesson identities")
     result = {}
+    titles, codes = set(), set()
     plan = []
     admitted = []
     for number, unit in enumerate(units, 1):
@@ -135,11 +192,21 @@ def outputs():
         if "<!-- include:" in body:
             raise ValueError(f"{unit['id']} has a malformed include marker")
         cases = " and ".join(f'worked case {k} ("{t.strip()}")' for k, t in CASE.findall(body))
+        first_case = body.index("## Worked case")
+        body = body[:first_case] + key_terms_block(unit) + body[first_case:]
+        marker = "## Diagnose and transfer"
+        if body.count(marker) != 1:
+            raise ValueError(f"{unit['id']} needs one Diagnose and transfer section")
+        split = body.index(marker)
+        body = body[:split] + worked_examples_block(unit, titles, codes) + body[split:]
         guide = header + body + "\n"
+        fences = sum(line.startswith("```") for line in guide.splitlines())
+        if fences < 4 or len(GUIDE_WORDS.findall(guide)) < 1050:
+            raise ValueError(f"{unit['id']} guide needs two code blocks and 1050 words")
         result[BASE / "guides" / (unit["id"] + ".md")] = guide
         result[BASE / "lessons" / (unit["id"] + ".md")] = guide
         plan.append(
-            unit
+            {k: v for k, v in unit.items() if k not in {"key_terms", "worked_examples"}}
             | {
                 "runtime": "reading",
                 "lab": (

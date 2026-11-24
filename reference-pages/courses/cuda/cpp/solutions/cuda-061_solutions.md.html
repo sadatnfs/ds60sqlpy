@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-061_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A three-file design has include/transform.hpp declaring a host launch function, src/transform.cu defining its kernel and launch wrapper, and src/main.cpp building fixtures and validating output. The caller sees an ordinary host interface, while the implementation owns its CUDA dependencies.</p>
+<p><strong>Approach:</strong> Declare the host launch function in include/transform.hpp, define kernel and launcher in src/transform.cu, and validate fixtures in src/main.cpp.</p>
+<p><strong>Why it is correct:</strong> main.cpp sees only an ordinary host function, so it compiles with a host compiler and never touches kernel syntax.</p>
+<p><strong>A plausible wrong approach:</strong> Putting the kernel declaration with triple-angle launch syntax in the header forces every includer to be compiled by nvcc.</p>
+<p><strong>How to verify:</strong> The reference asserts the four-entry project layout; also build and confirm main.cpp compiles as plain C++.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>An undefined host launch function usually means its object was not linked or its declaration/definition disagree. An unresolved device function in another .cu file concerns device compilation/linking. These failures occur before mathematical validation and require different build fixes.</p>
+<p><strong>Approach:</strong> Check that the object defining the launcher is linked and that declaration and definition signatures match.</p>
+<p><strong>Why it is correct:</strong> An undefined host symbol is a link problem, separate from device-code linking errors.</p>
+<p><strong>A plausible wrong approach:</strong> Rewriting kernel math to fix a link error changes code that was never the cause.</p>
+<p><strong>How to verify:</strong> Run the linker with verbose output and confirm the symbol resolves.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Keep authored files in the project root/src/include and generated files under a separate build directory; never confuse generated binaries with maintained source.</p>
+<p><strong>Approach:</strong> Keep sources in src and include, and put generated files in a separate build directory.</p>
+<p><strong>Why it is correct:</strong> Separating them prevents committing or editing generated binaries.</p>
+<p><strong>A plausible wrong approach:</strong> Building in the source tree mixes artifacts with maintained files.</p>
+<p><strong>How to verify:</strong> Delete the build directory and confirm a clean rebuild works.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Build flags are reviewed execution policy, not arbitrary learner-controlled manifest commands. A prepared project can document its own deliberate external build configuration.</p>
+<p><strong>Approach:</strong> Set architecture targets in the reviewed build configuration, not from lesson metadata arguments.</p>
+<p><strong>Why it is correct:</strong> Build flags are execution policy that should be reviewed.</p>
+<p><strong>A plausible wrong approach:</strong> Accepting flags from learner-controlled manifests lets arbitrary commands into builds.</p>
+<p><strong>How to verify:</strong> Confirm the build ignores architecture flags supplied in metadata.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Configuration generation only. Compilation, linking and runtime tests remain separate steps.</p>
+<p><strong>Approach:</strong> Treat a successful configure as proof that generation worked, then run build and tests.</p>
+<p><strong>Why it is correct:</strong> Configuring does not compile or link anything.</p>
+<p><strong>A plausible wrong approach:</strong> Calling the project working after configure skips compile errors.</p>
+<p><strong>How to verify:</strong> Run the build and tests after configure and check each status.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Keep CPU reference/unit tests, CUDA compile checks and actual device numerical/sanitizer tests distinct with explicit unavailable reasons.</p>
+<p><strong>Approach:</strong> Separate CPU reference tests, CUDA compile checks and device numerical and sanitizer tests.</p>
+<p><strong>Why it is correct:</strong> Each runs in different environments with different requirements.</p>
+<p><strong>A plausible wrong approach:</strong> Combining them means a missing GPU fails every test.</p>
+<p><strong>How to verify:</strong> Run on a CPU-only machine and confirm device tests report unavailable.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-061_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

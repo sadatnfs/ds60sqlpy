@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Monitoring observes a running system under incomplete information. Predictions and operational events can arrive immediately, while outcomes may arrive much later. A quality metric computed from whichever labels happen to be available can describe a selected population. Report label maturity and coverage before interpreting the number.</p>
 <p>The first case has four predictions but only two mature outcomes at cutoff 5. It computes Brier loss on those two and reports the coverage explicitly. It does not replace the unknown outcomes with negatives. A real analysis should also investigate whether label delay depends on the outcome, entity or intervention.</p>
 <p>The second case separates covariate shift from service latency and predictive quality. A large distributional difference is a signal to investigate, not proof that model accuracy changed. A p95 latency from five samples is an observed summary with limited precision, not a service-level guarantee. Monitoring should identify the population, time window, denominator and response for every signal.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Monitoring population:</strong> The predictions, time window and denominator that a monitoring signal describes, stated before its value is interpreted.</li>
+<li><strong>Label coverage:</strong> The share of predictions whose outcomes are mature at the monitoring cutoff, here two of four, reported alongside the quality metric.</li>
+<li><strong>Selective label availability:</strong> Early outcomes can differ systematically from late ones, so a metric on currently available labels may describe a selected population.</li>
+<li><strong>Covariate shift:</strong> A change in the input distribution, measured here with a two-sample Kolmogorov-Smirnov statistic. It calls for investigation but does not prove lower accuracy.</li>
+<li><strong>p95 latency:</strong> The 95th percentile of observed response times under an explicit quantile method; five samples give only an imprecise summary.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Filter labels by their availability time, retain prediction identities and calculate coverage against the original prediction population. The example uses an actual two-sample KS statistic for a deliberately separated numeric fixture. Latency uses an explicit quantile method. The real service project keeps only a bounded number of process latency samples and labels that scope in its API.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

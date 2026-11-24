@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the eager call when the caller selects Paper.</p>
 <p>It receives 91. The deferred Blue expression retains Paper and returns 67.</p>
+<p><strong>Why it fits this model:</strong> A VAL parameter is computed in the caller&#x27;s context before the body runs. Under Paper that value is 91. The EXPR version is evaluated inside CALCULATE, which replaces the Color filter with Blue and keeps Category Paper.</p>
+<p><strong>Tempting mistake:</strong> Expecting the deferred call to return 163 as in case A. The Paper filter is still there, so only Notebook is Blue and Paper.</p>
+<p><strong>How to confirm:</strong> Under Product[Category] = &quot;Paper&quot;, EagerValue is 91 and DeferredExpression 67.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Replace the body&#x27;s plain Blue filter by KEEPFILTERS(Blue).</p>
 <p>For a Red caller the deferred expression would be BLANK; the eager scalar would remain 24 because it was already computed.</p>
+<p><strong>Why it fits this model:</strong> KEEPFILTERS intersects Blue with the caller&#x27;s filters instead of replacing them. For a Red caller, Red and Blue have nothing in common.</p>
+<p><strong>Tempting mistake:</strong> Assuming KEEPFILTERS also affects the VAL function. Its argument, 24, was already computed before the body ran.</p>
+<p><strong>How to confirm:</strong> Under Color = &quot;Red&quot;, the KEEPFILTERS EXPR version returns BLANK and the VAL version still returns 24.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write documentation warning callers about context changes.</p>
 <p>State that the EXPR function reevaluates its numeric argument under a Blue Color replacement while preserving unrelated filters.</p>
+<p><strong>Why it fits this model:</strong> The documentation should say that BlueExpression re-evaluates its argument with Product[Color] replaced by Blue and other Product filters kept.</p>
+<p><strong>Tempting mistake:</strong> Documenting it as &quot;returns Blue revenue&quot;. A Paper caller gets 67, not 163, which surprises anyone who read the short label.</p>
+<p><strong>How to confirm:</strong> Run the documented examples: no filter 163, Red caller 163, Paper caller 67.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose changing a VAL parameter to EXPR as a purely performance refactor.</p>
 <p>It is a semantic change and requires result comparison across caller filters and row contexts.</p>
+<p><strong>Why it fits this model:</strong> Changing VAL to EXPR changes meaning. The same written call is evaluated in the function&#x27;s context instead of the caller&#x27;s.</p>
+<p><strong>Tempting mistake:</strong> Treating the change as a performance refactor. For a Red caller the result moves from 24 to 163.</p>
+<p><strong>How to confirm:</strong> Compare both modes across callers before shipping: unfiltered 187 versus 163, Red 24 versus 163, Paper 91 versus 67.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why this lesson does not validate an arbitrary row-context caller.</p>
 <p>Deferred arguments have documented context-inheritance rules; add explicit iterator and reference-parameter cases before relying on another calling pattern.</p>
+<p><strong>Why it fits this model:</strong> Both cases use filter context only. With a row context, for example inside ADDCOLUMNS over Product names, the argument picks up each row through context transition, which these cases do not cover.</p>
+<p><strong>Tempting mistake:</strong> Concluding from cases A and B that BlueExpression behaves the same inside any iterator.</p>
+<p><strong>How to confirm:</strong> Add an iterator case, such as ADDCOLUMNS(VALUES(Product[ProductName]), ...), with expected values for each product before relying on it.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the distinction to a reusable period-selection UDF.</p>
 <p>Use an appropriately declared deferred expression/reference when period context must change, and document compatibility and evaluation scope.</p>
+<p><strong>Why it fits this model:</strong> Shifting periods needs the deferred form, because a VAL argument arrives as one number. Under January 2025 that number is 67 and cannot be moved to January 2024.</p>
+<p><strong>Tempting mistake:</strong> Declaring the measure parameter as VAL in a prior-period UDF. <code>CALCULATE ( amount, SAMEPERIODLASTYEAR ( &#x27;Date&#x27;[Date] ) )</code> in the body still returns 67.</p>
+<p><strong>How to confirm:</strong> With an EXPR argument, the function returns 64 under January 2025, the January 2024 value.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

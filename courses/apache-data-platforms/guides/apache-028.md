@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-027`, `apache-006`.
 
+## Key terms
+
+- **Task attempt:** One try at running a task instance. A retry starts a new attempt and does not roll back external effects of the earlier one.
+- **Retry policy:** The configured number of retries and delay that Airflow applies after a task attempt fails.
+- **Idempotent partition write:** Writing one deterministic partition per validated day so that repeating the same logical write produces the same output rather than appended duplicates.
+- **Atomic replacement:** Writing a complete temporary file, flushing it and renaming it over the target path, so readers see either the old file or the new one. It covers one local file, not several systems.
+
 ## A task attempt can fail after producing a side effect
 
 Airflow retries task instances according to their configured policy. A retry is

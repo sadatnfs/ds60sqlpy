@@ -1,19 +1,8 @@
 # llm-001: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/llm-001.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
+Use this language-model claims and evaluation units reference after your own attempt. The [learner guide](../guides/llm-001.md) keeps the fixture and Expected/Verify contracts for *Classify six claims* to *Transfer to a new family balance*, six separate actions; any implementation is acceptable if *Detect repeated evidence* still fails on that input.
 
-The [executable reference](llm-001_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+`verify()` in the [executable reference](llm-001_solution.py) uses the Python standard library and literals only; on failure, keep the *Detect repeated evidence* input. A pass says nothing beyond these language-model claims and evaluation units fixtures, so next explain mechanism claim from memory on a changed fixture. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.
 
 ## Exercise 1: Classify six claims
 
@@ -25,7 +14,7 @@ A fixed mask blocking later keys and a score matrix having one row per query are
 
 ## Exercise 2: Compute two accuracies
 
-The record-weighted calculation averages [1,1,0], giving \(\frac{2}{3}\). Family A has mean 1 and family B has mean 0; equal-family weighting gives \(\frac{1}{2}\). These are different weighting rules over the same records. A reviewer needs both the table and the chosen policy to understand the report. Selecting whichever average makes a system look better after seeing results would be a form of evaluation selection, not a neutral change of formatting.
+The record-weighted calculation averages [1, 1, 0], giving \(\frac{2}{3}\). Family A has mean 1 and family B has mean 0; equal-family weighting gives \(\frac{1}{2}\). These are different weighting rules over the same records. A reviewer needs both the table and the chosen policy to understand the report. Selecting whichever average makes a system look better after seeing results would be a form of evaluation selection, not a neutral change of formatting.
 
 **Expected:** Record-weighted \(\frac{2}{3}\) and equal-family \(\frac{1}{2}\).
 
@@ -65,9 +54,7 @@ Three correct records from family A and one incorrect record from B give \(\frac
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+*One table, two declared units* validates and reduces its input in the functions below; the executable file covers all six language-model claims and evaluation units exercises. Keep the *Detect repeated evidence* assertion and its invalid-input case; never replace them with a default.
 
 ```python
 from __future__ import annotations
@@ -98,9 +85,4 @@ def evaluate(rows):
 
 Without the examples, distinguish a mechanism claim from an empirical claim using one new sentence each. Then explain how a family-weighted metric can differ from a record-weighted one without either calculation being arithmetically wrong.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Next, pick a fixture unlike *One table, two declared units* to test independent recall, and explain why *Detect repeated evidence* rejects its case rather than naming the exception. Any notation works if mechanism claim and its denominator stay explicit; these language-model claims and evaluation units checks say nothing about unseen model quality or safety.

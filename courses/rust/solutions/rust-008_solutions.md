@@ -14,13 +14,25 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Draw ownership before and after the move.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The reference intentionally does not compile an invalid old-binding access; the practice task asks the learner to inspect that diagnostic separately. The new binding owns the text.
+**Written answer.** Before the move, `first` owns a heap buffer holding `pear`. After `let second = first;`, `second` owns that same buffer and `first` is moved-from: it may not be read, and it will not be dropped. At the end of the block only `second` frees the buffer.
+
+**Why it is correct.** A `String` is a pointer, length and capacity triple that owns its allocation. Assignment copies the triple and transfers ownership, so exactly one owner remains and the buffer is freed exactly once.
+
+**Plausible wrong approach.** Drawing two arrows to the buffer, one from each name, describes a double free waiting to happen. Drawing two buffers describes `clone`, which Example B does explicitly.
+
+**How to verify.** Record `let address = first.as_ptr();` before the move and assert `second.as_ptr() == address` after it: the bytes did not move, only ownership did.
 
 ### Task 2: Guided modification
 
 Temporarily read first after its move and preserve the compiler diagnostic.
 
-No separate reference answer has been written for this task. Start from Example B: The explicit clone makes the allocation and independent ownership decision visible. The cloned String can change independently.
+**Written answer.** Add `assert_eq!(first, "pear");` after `let second = first;`. rustc rejects it with E0382, borrow of moved value: `first`. The diagnostic marks `let second = first;` as `value moved here` and the new line as `value borrowed here after move`, notes that `String` does not implement the `Copy` trait, and suggests `first.clone()`.
+
+**Why it is correct.** After a move the compiler treats `first` as uninitialized, so any read, even a borrow inside `assert_eq!`, is refused at compile time. No program is built, so no runtime check is reached.
+
+**Plausible wrong approach.** Accepting the suggested `.clone()` reflexively makes the error disappear but changes the design to two buffers; if only reading was needed, borrowing with `let second = &first;` is the honest fix.
+
+**How to verify.** Save the full E0382 text in your notes, then delete the temporary line; the reference compiles and `rust-008: passed` prints.
 
 ### Task 3: Independent construction
 
@@ -49,13 +61,43 @@ Taking String by value transfers ownership into the function, which may mutate i
 
 Diagnose adding clones everywhere instead of choosing a borrowed interface.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Clone does not universally mean deep copy. A move can be optimized without changing its ownership semantics. Compiler rejection of a use-after-move is useful evidence, not an obstacle to suppress.
+**Written answer.** The defect is a reader written as `fn count_p(text: String) -> usize` and called as `count_p(name.clone())` at every site because the caller still needs `name`. Each call allocates and copies the whole buffer just to read it. Change the signature to `fn count_p(text: &str) -> usize` and call `count_p(&name)`.
+
+**Why it is correct.** The function only reads, so a shared borrow states its real requirement. The caller keeps ownership, nothing is copied, and literals can be passed without allocating.
+
+**Plausible wrong approach.** Removing the clones but keeping `text: String` makes the second call E0382, because the first call moved `name`; the clones were hiding a wrong interface, not a missing copy.
+
+**How to verify.** After the change, assert `count_p(&name) == count_p(&name)` twice in a row and that `name` is still the original text, with no `.clone()` anywhere in the file.
 
 ### Task 5: Boundary evidence
 
 Compare String movement with copying an i32.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Move ownership to a new binding) and Example B (Clone only when two owners are needed).
+**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let count = 5_i32;
+    let copied = count;
+    assert_eq!(count + copied, 10);
+    let name = String::from("pear");
+    let address = name.as_ptr();
+    let moved = name;
+    assert_eq!(moved.as_ptr(), address);
+    let cloned = moved.clone();
+    assert_ne!(cloned.as_ptr(), address);
+    assert_eq!(moved, cloned);
+    Ok(())
+}
+```
+
+**Observe:** After copying, both i32 bindings are usable and sum to 10; the moved String keeps its original buffer address, while the clone has a new address with equal contents.
+
+`i32` is `Copy`, so `count` stays valid after assignment. Moving the `String` copies only its pointer, length and capacity, so the heap address is unchanged, whereas `clone` allocates a separate buffer holding the same bytes.
+
+**Plausible wrong approach.** Assuming `let moved = name;` copies the text predicts a new address after the move; the address equality check shows it does not.
+
+**How to verify.** Run the block. Add `assert_eq!(name, "pear");` after the move and compilation fails with E0382, while the equivalent read of `count` compiles.
 
 ### Task 6: Transfer and justify
 

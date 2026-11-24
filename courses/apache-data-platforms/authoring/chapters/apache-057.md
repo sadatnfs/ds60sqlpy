@@ -43,7 +43,7 @@ before deciding whether an explicit recovery action is safe.
 
 ## Worked case B: a broker query crosses the serving topology
 
-The client sends SQL to broker:8099, not directly to a data file. The broker
+The client sends SQL to `broker:8099`, not directly to a data file. The broker
 routes work to the assigned serving instance and combines the result. The project
 also reads controller segment and instance metadata so the result can be tied
 to the actual serving topology. A query against an unknown column must return

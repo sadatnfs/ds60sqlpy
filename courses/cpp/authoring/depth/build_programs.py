@@ -79,12 +79,28 @@ def format_definition(code):
     return output.strip()
 
 
+def unused_helpers(definitions, body):
+    """Whether the definitions are plain helper functions that this example never calls."""
+    if re.search(r"\b(struct|class|using|enum|template|namespace)\b", definitions):
+        return False
+    names = set(re.findall(r"\b(\w+)\s*\([^()]*\)\s*(?:const\s*)?\{", definitions))
+    names -= {"if", "for", "while", "switch", "catch"}
+    return bool(names) and not any(re.search(rf"\b{name}\b", body) for name in names)
+
+
 for record in json.loads(INPUT.read_text()):
     n = record["number"]
     for index, body in enumerate(record["program_bodies"], 1):
         main = body + f'\nstd::cout << "cpp-{n:03d} example {index} checks passed\\n";\nreturn 0;'
         defs = format_definition(record["definitions"])
-        content = defs + "\nint main() {\n" + textwrap.indent(main, "    ") + "\n}\n"
+        if unused_helpers(record["definitions"], body):
+            defs = ""
+        content = (
+            (defs + "\n" if defs else "")
+            + "int main() {\n"
+            + textwrap.indent(main, "    ")
+            + "\n}\n"
+        )
         headers = [
             name for name, patterns in HEADERS.items() if any(p in content for p in patterns)
         ]

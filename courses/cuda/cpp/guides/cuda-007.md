@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Build a units-correct roofline estimate and design an experiment that could disprove it.
+
 Work through *From elapsed time to a performance model* with the concrete cases below. Finish with this evidence:
 a units-correct model and an experiment that could disprove it. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Arithmetic intensity measures operations per byte of data movement under an explicitly stated memory model. A roofline estimate limits performance by the smaller of arithmetic capacity and bandwidth times intensity. It is an upper bound, not a timer. Vector addition reads two float32 values and writes one for one addition, giving roughly one operation per twelve useful bytes before cache and transaction effects. Matrix multiplication can reuse each loaded value many times; tiling increases reuse but consumes working storage. Launch cost, transfer cost, dependency stalls and imperfect access patterns can keep measured work far below either bound.
+
+### Key terms
+
+- **Arithmetic intensity:** Operations performed per byte moved under a stated memory model, measured in FLOP per byte.
+- **Roofline model:** An upper bound on performance set by the smaller of peak arithmetic rate and bandwidth times arithmetic intensity.
+- **Memory bandwidth:** The maximum rate at which data moves between memory and the processors, in bytes per second.
+- **Launch overhead:** The fixed host and device cost of submitting a kernel, which dominates very small workloads.
 
 ## Mathematical contract
 

@@ -120,5 +120,6 @@ public class Main {
       overflow = true;
     }
     assert overflow && overflowAudit.isEmpty();
+    System.out.println("java-034: all six exercises passed");
   }
 }

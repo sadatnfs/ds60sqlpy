@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-044.md</code>.</p>
 <h3 id="exercise-1-classify-a-pure-function-check-and-a-real-database-transaction-check">Exercise 1: Classify a pure-function check and a real database transaction check.<a class="heading-anchor" href="#exercise-1-classify-a-pure-function-check-and-a-real-database-transaction-check" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The first is unit evidence; the second is integration evidence.</p>
+<p><strong>Approach:</strong> Ask what each check needs: the pure function needs only inputs and outputs, while the transaction check needs a real database and its rules.</p>
 <p><strong>Why:</strong> A pure function check is unit evidence, while a real transaction exercises the database and is integration evidence.</p>
+<p><strong>Plausible wrong approach:</strong> Calling the database check a unit test fails because its result depends on schema, driver and connection behavior outside the function.</p>
+<p><strong>How to verify:</strong> The pure check runs with no database file present, while the transaction check fails if the database is missing.</p>
 <h3 id="exercise-2-add-an-empty-input-test-with-an-explicit-expected-result">Exercise 2: Add an empty-input test with an explicit expected result.<a class="heading-anchor" href="#exercise-2-add-an-empty-input-test-with-an-explicit-expected-result" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The test records the domain policy rather than guessing from the implementation.</p>
+<p><strong>Approach:</strong> Decide the domain rule for an empty list first, such as a total of 0, then add <code>check(totalMinutes([]) === 0, ...)</code>.</p>
 <p><strong>Why:</strong> Writing the expectation first records the domain policy instead of copying whatever the implementation returns.</p>
+<p><strong>Plausible wrong approach:</strong> Running the function and copying whatever it returns into the expected value fails because the test then records current behavior, bugs included.</p>
+<p><strong>How to verify:</strong> The test names 0 because the policy says so, and it fails if the function returns null.</p>
 <h3 id="exercise-3-create-a-test-table-for-a-bounded-study-duration-function">Exercise 3: Create a test table for a bounded study-duration function.<a class="heading-anchor" href="#exercise-3-create-a-test-table-for-a-bounded-study-duration-function" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Normal, zero, invalid and boundary cases have independently justified outcomes.</p>
+<p><strong>Approach:</strong> List normal, zero, boundary and invalid inputs in a table with an expected result each, worked out by hand before running.</p>
 <p><strong>Why:</strong> A table with independently justified outcomes catches more defects than examples chosen to match the code.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only [20, 30] fails because boundaries and invalid input, where bugs cluster, are never exercised.</p>
+<p><strong>How to verify:</strong> The table has at least one row for each category, and every row passes against the reference.</p>
 <h3 id="exercise-4-diagnose-a-test-that-catches-the-wrong-exception-as-success">Exercise 4: Diagnose a test that catches the wrong exception as success.<a class="heading-anchor" href="#exercise-4-diagnose-a-test-that-catches-the-wrong-exception-as-success" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Catch the declared exception narrowly and let unexpected failures remain failures.</p>
+<p><strong>Approach:</strong> Replace <code>catch (Exception)</code> with <code>catch (InvalidArgumentException)</code> so unrelated exceptions escape and fail the run.</p>
 <p><strong>Why:</strong> A broad catch turns any failure into a pass, so the test must catch only the declared exception.</p>
+<p><strong>Plausible wrong approach:</strong> Adding a message string check inside the broad catch fails because messages change often while the exception type is the real contract.</p>
+<p><strong>How to verify:</strong> Throwing a <code>RuntimeException</code> inside the function now fails the run instead of setting <code>$rejected</code>.</p>
 <h3 id="exercise-5-temporarily-introduce-a-known-bug-in-a-learner-copy">Exercise 5: Temporarily introduce a known bug in a learner copy.<a class="heading-anchor" href="#exercise-5-temporarily-introduce-a-known-bug-in-a-learner-copy" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A meaningful test fails for the intended reason, then passes after the repair.</p>
+<p><strong>Approach:</strong> Change <code>&gt;= 0</code> to <code>&gt; 0</code> in a learner copy, run the tests, confirm the zero case fails, then restore the original.</p>
 <p><strong>Why:</strong> A test is meaningful when it fails for the injected bug and passes again after the fix.</p>
+<p><strong>Plausible wrong approach:</strong> Introducing a bug that no test covers and seeing all tests pass fails as evidence, because it only shows a gap.</p>
+<p><strong>How to verify:</strong> The failing test names the zero case, and it passes again once the comparison is restored.</p>
 <h3 id="exercise-6-explain-why-a-passing-reference-is-not-a-bug-free-guarantee">Exercise 6: Explain why a passing reference is not a bug-free guarantee.<a class="heading-anchor" href="#exercise-6-explain-why-a-passing-reference-is-not-a-bug-free-guarantee" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It qualifies the tested contract and cases; untested integration and environment behavior remain separate.</p>
+<p><strong>Approach:</strong> Name what the reference run covers, the listed cases in the CLI worker, and what it does not, such as HTTP and storage.</p>
 <p><strong>Why:</strong> A passing reference covers only its cases and environment; integration, configuration and other inputs remain unverified.</p>
+<p><strong>Plausible wrong approach:</strong> Calling the code bug free because the reference passes fails because untested inputs and environments may still break it.</p>
+<p><strong>How to verify:</strong> Your answer lists at least two behaviors the current tests never exercise. Each listed behavior is paired with the kind of test that would cover it.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-044_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

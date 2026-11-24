@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-022.md</code>.</p>
 <h3 id="exercise-1-predict-the-layer-winner-for-normal-declarations">Exercise 1: Predict the layer winner for normal declarations.<a class="heading-anchor" href="#exercise-1-predict-the-layer-winner-for-normal-declarations" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A later declared layer outranks an earlier one before specificity is compared.</p>
+<p><strong>Approach:</strong> Compare the layer order declared in the first <code>@layer</code> statement first, and only compare specificity for declarations that share a layer.</p>
 <p><strong>Why:</strong> For normal declarations, a later layer beats an earlier one regardless of selector specificity.</p>
+<p><strong>Plausible wrong approach:</strong> Choosing the rule with the more specific selector fails because a later layer wins over an earlier one no matter how specific the earlier selector is.</p>
+<p><strong>How to verify:</strong> Give the base rule an id selector; the component color still wins, and the Styles panel strikes through the base declaration.</p>
 <h3 id="exercise-2-move-a-component-s-rules-into-one-named-layer">Exercise 2: Move a component&#x27;s rules into one named layer.<a class="heading-anchor" href="#exercise-2-move-a-component-s-rules-into-one-named-layer" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Its styling responsibility is grouped and discoverable.</p>
+<p><strong>Approach:</strong> Gather the <code>.note</code> rule and its nested <code>&amp;:hover</code> state into one <code>@layer components</code> block and delete the scattered copies.</p>
 <p><strong>Why:</strong> Grouping the rules by responsibility makes their priority predictable and easy to find.</p>
+<p><strong>Plausible wrong approach:</strong> Leaving the hover rule unlayered at the bottom of the file fails because it now outranks utilities and becomes impossible to override cleanly.</p>
+<p><strong>How to verify:</strong> Searching the stylesheet for <code>.note</code> finds one block, and hovering a note still underlines it.</p>
 <h3 id="exercise-3-build-a-small-layered-stylesheet-with-base-component-and-utility-rules">Exercise 3: Build a small layered stylesheet with base, component and utility rules.<a class="heading-anchor" href="#exercise-3-build-a-small-layered-stylesheet-with-base-component-and-utility-rules" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The intended overrides work without escalating ids or important flags.</p>
+<p><strong>Approach:</strong> Declare the order once, put element defaults in base, components in components, and single-purpose helpers such as <code>.text-muted</code> in utilities.</p>
 <p><strong>Why:</strong> Layer order resolves conflicts, so you do not need ids or !important to make a utility win.</p>
+<p><strong>Plausible wrong approach:</strong> Fixing an override by adding <code>!important</code> to a utility fails because important declarations reverse layer order and make later reasoning harder.</p>
+<p><strong>How to verify:</strong> Adding <code>.text-muted</code> to a note changes its color to #475569 with no <code>!important</code> and no id selector anywhere.</p>
 <h3 id="exercise-4-diagnose-an-unlayered-rule-unexpectedly-beating-layered-normal-rules">Exercise 4: Diagnose an unlayered rule unexpectedly beating layered normal rules.<a class="heading-anchor" href="#exercise-4-diagnose-an-unlayered-rule-unexpectedly-beating-layered-normal-rules" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Unlayered normal author declarations have higher layer priority.</p>
+<p><strong>Approach:</strong> Search the stylesheet for rules outside any <code>@layer</code> block, especially late quick fixes, and move each into the layer that matches its role.</p>
 <p><strong>Why:</strong> Unlayered normal declarations beat all layered normal declarations, which surprises authors who expect source order to decide.</p>
+<p><strong>Plausible wrong approach:</strong> Raising the component selector&#x27;s specificity fails because the unlayered rule wins before specificity is even compared.</p>
+<p><strong>How to verify:</strong> Once the quick fix lives in base, the component color appears and the Styles panel shows the unlayered rule gone.</p>
 <h3 id="exercise-5-place-the-component-under-a-different-parent">Exercise 5: Place the component under a different parent.<a class="heading-anchor" href="#exercise-5-place-the-component-under-a-different-parent" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Its behavior does not rely on an accidental deep ancestor selector.</p>
+<p><strong>Approach:</strong> Move the card&#x27;s markup from the main column into an aside and check that every component style still applies in the new place.</p>
 <p><strong>Why:</strong> A selector tied to a deep ancestor chain breaks when the component moves, while a component class keeps working.</p>
+<p><strong>Plausible wrong approach:</strong> Writing selectors like <code>main section .card p</code> fails because the component then loses its styles the moment it moves outside that ancestry.</p>
+<p><strong>How to verify:</strong> The card renders identically inside the aside, and its matched rules list only component class selectors.</p>
 <h3 id="exercise-6-explain-why-important-declarations-complicate-layer-reasoning">Exercise 6: Explain why important declarations complicate layer reasoning.<a class="heading-anchor" href="#exercise-6-explain-why-important-declarations-complicate-layer-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Important layer ordering is reversed, so the normal ordering intuition no longer applies.</p>
+<p><strong>Approach:</strong> Recall that for important declarations the layer ranking flips, so an earlier layer&#x27;s <code>!important</code> beats a later layer&#x27;s <code>!important</code>.</p>
 <p><strong>Why:</strong> For important declarations the layer order reverses, so an earlier layer wins, the opposite of normal declarations.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming important rules simply follow the normal later-wins order fails because base <code>!important</code> would then be expected to lose, which it does not.</p>
+<p><strong>How to verify:</strong> Mark the same property important in base and utilities; the base value wins, which matches the reversed order.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-022_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

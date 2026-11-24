@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A treemap divides a rectangular area into nested regions whose areas represent nonnegative values. It is useful for part-to-whole structure when many categories must fit in a compact view. Exact comparisons are harder than aligned position or length, so a table or labels should support precise reading.</p>
 <p>Hierarchy sums need a clear grain. If a parent value already includes its children and you also sum the children, the total can be double-counted. A common input supplies values only at leaves and uses hierarchy.sum to aggregate upward. Missing or negative values require an explicit policy.</p>
 <p>Padding and rounding change visible rectangle area, so pixel area may not exactly preserve ratios in tiny charts. This is a rendering tradeoff, not a reason to claim numerical precision from a treemap. The reference checks the hierarchy’s numeric total and nonnegative geometry separately.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Treemap:</strong> A layout that divides a rectangle into nested tiles whose areas are proportional to nonnegative values in a hierarchy.</li>
+<li><strong>Hierarchical sum:</strong> The <code>node.sum(accessor)</code> operation that sets each node&#x27;s value to its own accessor result plus the values of all its descendants. Supplying values only at leaves avoids double counting.</li>
+<li><strong>Tile bounds:</strong> The <code>x0</code>, <code>y0</code>, <code>x1</code> and <code>y1</code> fields a treemap layout adds to each node, so width is <code>x1 - x0</code> and height is <code>y1 - y0</code>.</li>
+<li><strong>Padding:</strong> Space reserved between tiles by the layout. It improves readability but means pixel areas no longer match value ratios exactly.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Create the hierarchy, call <code>.sum(d =&gt; d.value || 0)</code> only under a validated nonnegative-value contract, then apply a treemap layout. Each leaf receives x0,y0,x1,y1 bounds. Width is x1-x0 and height is y1-y0.</p>
 <p>Sort deliberately if stable ordering matters. Updating values can substantially rearrange a treemap, making entity tracking difficult. Use stable keys and consider whether a bar chart would better serve the comparison task.</p>

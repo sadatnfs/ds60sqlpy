@@ -397,14 +397,14 @@ multiplicity; neither replaces the other for arbitrary data. The non-null ID
 assertion makes the identity contract explicit instead of trusting a printed
 schema as a data-quality test.
 
-**Inputs/evidence:** For spark-013 Exercise 1, use the seven-row main fixture,
+**Inputs/evidence:** Use the seven-row main fixture,
 `raw` and your retained/excluded event-ID lists.
 
-**Expected result/shape:** For spark-013 Exercise 1, input IDs are
+**Expected result/shape:** Input IDs are
 `[1, 2, 3, 4, 5, 6, 7]`; paid IDs are `[1, 2, 3, 4, 6, 7]`; excluded IDs are
 `[5]`. The raw count and distinct-ID count both equal 7.
 
-**Verify:** For spark-013 Exercise 1, assert the exact sorted ID lists and both
+**Verify:** Assert the exact sorted ID lists and both
 raw counts; assert `paid.count() == 6` and retain `event_id` in the paid schema.
 
 ### Exercise 2: three metrics answer three questions
@@ -414,14 +414,14 @@ measures observed cents. They cannot be substituted for one another. Raw total
 400 includes the void event's 150 cents. The paid total 250 includes both A/100
 events. Missing amounts affect `valued` without deleting their events.
 
-**Inputs/evidence:** For spark-013 Exercise 2, use the raw and paid DataFrames
+**Inputs/evidence:** Use the raw and paid DataFrames
 and named count/sum aggregate fields.
 
-**Expected result/shape:** For spark-013 Exercise 2, raw metrics are
+**Expected result/shape:** Raw metrics are
 `(7, 5, 400)` and paid metrics are `(6, 4, 250)` in the field order
 `(rows, valued, total_cents)`.
 
-**Verify:** For spark-013 Exercise 2, assert both exact tuples and explain the
+**Verify:** Assert both exact tuples and explain the
 100-cent contributions of IDs 1 and 6 and the absent contributions of IDs 2 and 7.
 
 ### Exercise 3: NULL is a meaningful result
@@ -432,13 +432,13 @@ void event. C's only amount is missing, so its sum is NULL. ID 4 contributes
 makes a tuple-by-tuple test meaningful. It does not permanently sort an input
 DataFrame or guarantee unrelated future actions share a physical order.
 
-**Inputs/evidence:** For spark-013 Exercise 3, use paid events and a four-column
+**Inputs/evidence:** Use paid events and a four-column
 canonical summary, with an explicit NULL-aware final order.
 
-**Expected result/shape:** For spark-013 Exercise 3, ordered tuples are
+**Expected result/shape:** Ordered tuples are
 `[("A", 3, 2, 200), ("B", 1, 1, 0), ("C", 1, 0, NULL), (NULL, 1, 1, 50)]`.
 
-**Verify:** For spark-013 Exercise 3, compare all four tuples with a hand-written
+**Verify:** Compare all four tuples with a hand-written
 golden list, checking the NULL sum for C separately from the observed zero for B.
 
 ### Exercise 4: filtering keeps TRUE, not unknown
@@ -449,14 +449,14 @@ these rows, so none pass the filter. NULL-safe equality has a defined matching
 case for two NULLs, retaining the missing team at ID 4. The ordinary-equality
 query is deliberately included as a diagnostic counterexample.
 
-**Inputs/evidence:** For spark-013 Exercise 4, use paid events and five sorted
+**Inputs/evidence:** Use paid events and five sorted
 ID lists from missing-amount, zero, missing-team, ordinary-NULL-equality and
 NULL-safe-team predicates.
 
-**Expected result/shape:** For spark-013 Exercise 4, the lists are `[2, 7]`,
+**Expected result/shape:** The lists are `[2, 7]`,
 `[3]`, `[4]`, `[]` and `[4]`, respectively.
 
-**Verify:** For spark-013 Exercise 4, assert the five lists exactly; explain
+**Verify:** Assert the five lists exactly; explain
 that an unknown ordinary comparison is not TRUE and zero is an observed value.
 
 ### Exercise 5: projection can erase the evidence needed to deduplicate
@@ -467,14 +467,14 @@ seven raw events. The bad shortcut first removes `event_id`, making paid events
 repartitioning moves the original rows without changing their logical values or
 multiplicities. Only compare its result after the same final ordering contract.
 
-**Inputs/evidence:** For spark-013 Exercise 5, compare the original paid bag,
+**Inputs/evidence:** Compare the original paid bag,
 the two-column distinct projection and a correctly summarized repartitioned bag.
 
-**Expected result/shape:** For spark-013 Exercise 5, the distinct projection
+**Expected result/shape:** The distinct projection
 has 5 rows and totals 150 cents; the original bag has 6 rows and totals 250 cents.
 Repartitioning preserves the four golden group tuples from Exercise 3.
 
-**Verify:** For spark-013 Exercise 5, assert both count/total pairs and the full
+**Verify:** Assert both count/total pairs and the full
 canonical summary after repartitioning; identify IDs 1 and 6 as the legitimate
 pair collapsed by the projection-plus-distinct shortcut.
 
@@ -488,14 +488,14 @@ inputs, while the exact type contract prevents a stringified money result from
 passing only because its display looks plausible.
 [Spark SQL and DataFrames](https://spark.apache.org/docs/4.2.0/sql-programming-guide.html).
 
-**Inputs/evidence:** For spark-013 Exercise 6, use the four golden group tuples,
+**Inputs/evidence:** Use the four golden group tuples,
 a SQL temporary view, paired API results and the raw/paid/excluded ledger.
 
-**Expected result/shape:** For spark-013 Exercise 6, every implementation has
+**Expected result/shape:** Every implementation has
 columns `team:string`, `rows:long`, `valued:long`, `total_cents:long`, the same
 four canonical tuples, and a count ledger `7 = 6 + 1` with paid total 250 cents.
 
-**Verify:** For spark-013 Exercise 6, assert names, data types, complete tuples
+**Verify:** Assert names, data types, complete tuples
 and the ledger against independent literals; keep both language assertions in
 the evidence packet and explain why two implementations can share the same bug.
 

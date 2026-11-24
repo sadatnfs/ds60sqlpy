@@ -1,6 +1,6 @@
 # llm-011: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these multiple heads, residuals and a decoder block answers after attempting *Split and rejoin* through *Detect a wrong rejoin*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Use a tokenwise nonlinear block* points to one step. `llm-011_solution.py` holds the assertions; this page explains how they test attention head. Then try *Detect a wrong rejoin* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -34,7 +34,7 @@ With rows [0, 1, 2, 3] and [4, 5, 6, 7], head zero contains [[0, 1], [4, 5]], wh
 
 The batched multiplication Q_h \({K_{h}}^{T}\) produces [H, T, T], one query-by-key matrix for each head. The normalization axis is the final key axis. For a width-two head the scale is \(\sqrt{2}\), and a causal Boolean triangle [T, T] broadcasts across the head axis. Multiplying weights [H, T, T] by V [H, T, 2] returns [H, T, 2]. Rejoining produces [T, 4], preserving the width needed by a residual path.
 
-For the three-token identity-projection fixture, head zero contains [1, 0], [0, 1], [1, 1], while head one contains [1, 1], [1, 0], [0, 1]. At query row one, the causal mask permits keys zero and one. Head zero has scores \([0,\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{1+a},\frac{a}{1+a}]\) with \(a=\exp(\frac{1}{\sqrt{2}})\). Head one has equal allowed scores \([\frac{1}{\sqrt{2}},\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{2},\frac{1}{2}]\). Their mixtures are therefore approximately [0.33023845, 0.66976155] and exactly [1, 0.5]. Concatenation gives [0.33023845, 0.66976155, 1, 0.5] before any learned output projection.
+For the three-token identity-projection fixture, head zero contains [1, 0], [0, 1], [1, 1], while head one contains [1, 1], [1, 0], [0, 1]. At query row one, the causal mask permits keys zero and one. Head zero has scores \([0,\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{1+a},\frac{a}{1+a}]\) with \(a=\exp(\frac{1}{\sqrt{2}})\). Head one has equal allowed scores \([\frac{1}{\sqrt{2}},\frac{1}{\sqrt{2}}]\) and weights [1/2, 1/2]. Their mixtures are therefore approximately [0.33023845, 0.66976155] and exactly [1, 0.5]. Concatenation gives [0.33023845, 0.66976155, 1, 0.5] before any learned output projection.
 
 ### Residual and feed-forward equations
 
@@ -44,7 +44,7 @@ A usual feed-forward branch has F(x_t)=activation(x_t W1+b1) W2+b2, using the sa
 
 ## Exercise 1: Split and rejoin
 
-The question is: Split \(X=[[0,1,2,3],[4,5,6,7]]\) into two heads, inspect membership, then invert the layout.
+The question is: Split X=[[0, 1, 2, 3], [4, 5, 6, 7]] into two heads, inspect membership, then invert the layout.
 
 Axis membership is the actual contract. Here every dimension has size two, so shape checks alone cannot distinguish a correct transpose from an incorrect one. Exact element placement supplies the missing evidence.
 
@@ -59,7 +59,7 @@ assert heads.shape == (2, 2, 2)
 
 **Expected:** head zero is [[0, 1], [4, 5]], head one is [[2, 3], [6, 7]], and rejoining restores X exactly.
 
-**Verify:** In a fresh process, the exercise checks confirm `heads[0]` equals `[[0, 1], [4, 5]]`; `heads[1]` equals `[[2, 3], [6, 7]]`; `join_heads(heads)` equals `values` and `heads.shape == (2, 2, 2)`.
+**Verify:** For *Split and rejoin*, a fresh-process check confirms `heads[0]` equals `[[0, 1], [4, 5]]`; `heads[1]` equals `[[2, 3], [6, 7]]`; `join_heads(heads)` equals `values` and `heads.shape == (2, 2, 2)`.
 
 ## Exercise 2: Calculate a residual
 
@@ -79,7 +79,7 @@ assert residual.shape == values.shape
 
 **Expected:** 2X gives 3X, zero branch gives X, and branch -X gives zero; all retain the same shape.
 
-**Verify:** In a fresh process, the exercise checks confirm `residual` equals `3 * values`, `values + np.zeros_like(values)` equals `values`, `values + -values` equals `np.zeros_like(values)` and `residual.shape == values.shape`.
+**Verify:** For *Calculate a residual*, a fresh-process check confirms `residual` equals `3 * values`, `values + np.zeros_like(values)` equals `values`, `values + -values` equals `np.zeros_like(values)` and `residual.shape == values.shape`.
 
 ## Exercise 3: Use a tokenwise nonlinear block
 
@@ -98,7 +98,7 @@ np.testing.assert_array_equal(tokenwise_feed_forward(changed)[0], output[0])
 
 **Expected:** first output [0, 0, 0, 1]; changing the second token does not change the first output.
 
-**Verify:** In a fresh process, the exercise checks confirm `output[0]` equals `[0, 0, 0, 1]` and `tokenwise_feed_forward(changed)[0]` equals `output[0]`.
+**Verify:** For *Use a tokenwise nonlinear block*, a fresh-process check confirms `output[0]` equals `[0, 0, 0, 1]` and `tokenwise_feed_forward(changed)[0]` equals `output[0]`.
 
 ## Exercise 4: Test actual head mixtures and causal prefixes
 
@@ -121,7 +121,7 @@ for length in [1, 2, 3]:
 
 **Expected:** head distributions differ as derived, row-one output is \([\frac{1}{1+a},\frac{a}{1+a},1,0.5]\), and every prefix matches.
 
-**Verify:** In a fresh process, the exercise checks confirm `weights[0, 1, :2]` matches `[1 / (1 + a), a / (1 + a)]` within 1e-12; `weights[1, 1, :2]` matches `[0.5, 0.5]` within 1e-12; `weights[:, 1, 2]` equals `[0, 0]`; `output[1]` matches `[1 / (1 + a), a / (1 + a), 1, 0.5]` within 1e-12 and 1 further check.
+**Verify:** For *Test actual head mixtures and causal prefixes*, a fresh-process check confirms `weights[0, 1, :2]` matches `[1 / (1 + a), a / (1 + a)]` within 1e-12; `weights[1, 1, :2]` matches `[0.5, 0.5]` within 1e-12; `weights[:, 1, 2]` equals `[0, 0]`; `output[1]` matches `[1 / (1 + a), a / (1 + a), 1, 0.5]` within 1e-12 and 1 further check.
 
 ## Exercise 5: Reject an indivisible width
 
@@ -141,7 +141,7 @@ for values, count in [(np.zeros((2, 5)), 2), (np.zeros((2, 4)), 0), (np.zeros((0
 
 **Expected:** each invalid layout raises ValueError before reshape.
 
-**Verify:** In a fresh process, the exercise checks confirm for every `(values, count)` in `[(np.zeros((2, 5)), 2), (np.zeros((2, 4)), 0), (np.zeros((0, 4)), 2)]`, `split_heads(values, count)` raises `ValueError`.
+**Verify:** For *Reject an indivisible width*, a fresh-process check confirms for every `(values, count)` in `[(np.zeros((2, 5)), 2), (np.zeros((2, 4)), 0), (np.zeros((0, 4)), 2)]`, `split_heads(values, count)` raises `ValueError`.
 
 ## Exercise 6: Detect a wrong rejoin
 
@@ -161,8 +161,8 @@ np.testing.assert_array_equal(join_heads(heads), values)
 
 **Expected:** the wrong [2, 4] result differs despite matching shape; the inverse operation restores X.
 
-**Verify:** In a fresh process, the exercise checks confirm `wrong` equals `[[0, 1, 4, 5], [2, 3, 6, 7]]`; `wrong.shape == values.shape`; `not np.array_equal(wrong, values)` and `join_heads(heads)` equals `values`.
+**Verify:** For *Detect a wrong rejoin*, a fresh-process check confirms `wrong` equals `[[0, 1, 4, 5], [2, 3, 6, 7]]`; `wrong.shape == values.shape`; `not np.array_equal(wrong, values)` and `join_heads(heads)` equals `values`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Test actual head mixtures and causal prefixes* and predict the result first; keep *Reject an indivisible width* failing beside the repair. Log a missing NumPy separately from a wrong attention head value in `llm-011`.

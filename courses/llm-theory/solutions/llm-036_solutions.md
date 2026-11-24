@@ -1,6 +1,6 @@
 # llm-036: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these retrieval: what RAG changes and what it cannot supply answers after attempting *Rank a different query* through *Separate retrieval and truth*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Handle missing evidence* points to one step. `llm-036_solution.py` holds the assertions; this page explains how they test retrieval. Then try *Separate retrieval and truth* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -28,7 +28,7 @@ assert rank("has sides", docs, 3) == ["d1", "d4", "d5"]
 
 **Expected:** top 3 IDs d1, d4, d5: two tied overlaps ordered by ID, then the single overlap.
 
-**Verify:** In a fresh process, the exercise checks confirm `rank('has sides', docs, 3) == ['d1', 'd4', 'd5']`.
+**Verify:** For *Rank a different query*, a fresh-process check confirms `rank('has sides', docs, 3) == ['d1', 'd4', 'd5']`.
 
 ## Exercise 2: Measure recall with a tie-filled slot
 
@@ -46,7 +46,7 @@ assert len(set(top) & relevant2) / len(relevant2) == 0.5
 
 **Expected:** ranking d3, d1; recall 0.5 at both 1 and 2.
 
-**Verify:** In a fresh process, the exercise checks confirm `top == ['d3', 'd1']`; `len(set(rank('round circle', docs, 1)) & relevant2) / len(relevant2) == 0.5` and `len(set(top) & relevant2) / len(relevant2) == 0.5`.
+**Verify:** For *Measure recall with a tie-filled slot*, a fresh-process check confirms `top == ['d3', 'd1']`; `len(set(rank('round circle', docs, 1)) & relevant2) / len(relevant2) == 0.5` and `len(set(top) & relevant2) / len(relevant2) == 0.5`.
 
 ## Exercise 3: Handle missing evidence
 
@@ -62,7 +62,7 @@ assert answer is None
 
 **Expected:** abstain; relevant set empty.
 
-**Verify:** In a fresh process, the exercise checks confirm `answer is None`.
+**Verify:** For *Handle missing evidence*, a fresh-process check confirms `answer is None`.
 
 ## Exercise 4: Treat retrieved instructions as data
 
@@ -79,7 +79,7 @@ assert record["action"] is None
 
 **Expected:** document d6 returned; no action executed.
 
-**Verify:** In a fresh process, the exercise checks confirm `chosen == ['d6']` and `record['action'] is None`.
+**Verify:** For *Treat retrieved instructions as data*, a fresh-process check confirms `chosen == ['d6']` and `record['action'] is None`.
 
 ## Exercise 5: Keep deterministic ties
 
@@ -93,7 +93,7 @@ assert rank("absent", docs, 3) == ["d1", "d2", "d3"]
 
 **Expected:** d1, d2, d3 under ID ordering.
 
-**Verify:** In a fresh process, the exercise checks confirm `rank('absent', docs, 3) == ['d1', 'd2', 'd3']`.
+**Verify:** For *Keep deterministic ties*, a fresh-process check confirms `rank('absent', docs, 3) == ['d1', 'd2', 'd3']`.
 
 ## Exercise 6: Separate retrieval and truth
 
@@ -112,8 +112,8 @@ assert record["retrieval_has_relevant"] and not record["all_claims_supported"]
 
 **Expected:** retrieval pass True; answer support False.
 
-**Verify:** In a fresh process, the exercise checks confirm `record['retrieval_has_relevant']` and `not record['all_claims_supported']`.
+**Verify:** For *Separate retrieval and truth*, a fresh-process check confirms `record['retrieval_has_relevant']` and `not record['all_claims_supported']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Treat retrieved instructions as data* and predict the result first; keep *Keep deterministic ties* failing beside the repair. Log a missing NumPy separately from a wrong retrieval value in `llm-036`.

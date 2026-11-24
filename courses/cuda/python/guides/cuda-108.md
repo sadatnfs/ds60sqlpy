@@ -14,6 +14,14 @@ Preserve null semantics, category mappings and row identity when converting a da
 
 
 
+### Key terms
+
+- **cuDF:** A GPU dataframe library from RAPIDS with a pandas-like API and columnar storage.
+- **Validity mask:** A per-column bitmap that marks which entries are null.
+- **Columnar storage:** Storing each column contiguously so vectorized operations read only the columns they need.
+- **Category mapping:** The table that maps categorical codes to labels, which must match between data sets for codes to mean the same thing.
+- **Row identity:** A stable key that tracks each record through joins, filters and sorts.
+
 ## Worked examples
 
 ### Worked example 1
@@ -43,33 +51,55 @@ print("CPU dataframe oracle:", totals, counts)
 
 **Expected observation:** Grouped sums A 2, B 5 and row count A 2.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `rows` | `[('A', 2), ('A', None), ('B', 5)]` |
+| `totals` | `{'A': 2, 'B': 5}` |
+| `counts` | `{'A': 2, 'B': 1}` |
+| `key` | `'B'` |
+| `value` | `5` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Compute grouped sums
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute grouped sums** in the examples above.
+**Trap to avoid:** Treating the null as an error and dropping group A entirely, or failing the whole aggregation, contradicts the stated skip-null rule.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Distinguish null and zero
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **distinguish null and zero** in the examples above.
+**Trap to avoid:** Filling nulls with zero before aggregation silently changes averages and counts, which then disagree with reports computed by a SQL engine that skips nulls.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Define category mapping
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **define category mapping** in the examples above.
+**Trap to avoid:** Fitting category codes independently in each partition assigns code 0 to whatever category appears first there, so the same code means different things to the model.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Preserve row identity
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **preserve row identity** in the examples above.
+**Trap to avoid:** Matching rows by position after a join or a GPU to CPU conversion can attach predictions to the wrong records.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Count conversion bytes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **count conversion bytes** in the examples above.
+**Trap to avoid:** Counting only the numeric values misses null masks, string offsets and temporary converted copies.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Distinguish cuDF from Spark acceleration
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **distinguish cuDF from Spark acceleration** in the examples above.
+**Trap to avoid:** Assuming a Spark job uses the GPU because cuDF is installed confuses a library with a plugin that needs its own configuration.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

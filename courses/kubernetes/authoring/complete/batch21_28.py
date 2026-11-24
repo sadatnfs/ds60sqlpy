@@ -330,7 +330,7 @@ author(
 
 This host lab requires a preinstalled qualified Gateway controller, a host-owned Gateway named lesson-gateway, an owned Service backend and a loopback-only listener. A synthetic TLS case also needs a verified local trust chain and hostname. The normal browser adapter provides none of those cluster/controller operations and does not accept Gateway or Ingress resources.
 
-The real HTTPRoute example matches host lesson.example.test and path prefix /version, then forwards to hello:8080. It leaves other paths unmatched. The Ingress comparison is a separate fixture with its own ingressClassName; do not assume the two APIs are interpreted by the same controller or apply both to an unreviewed listener.""",
+The real HTTPRoute example matches host lesson.example.test and path prefix /version, then forwards to `hello:8080`. It leaves other paths unmatched. The Ingress comparison is a separate fixture with its own ingressClassName; do not assume the two APIs are interpreted by the same controller or apply both to an unreviewed listener.""",
     [
         (
             "Follow Gateway ownership and route status",
@@ -359,7 +359,7 @@ Keep listener ownership and cleanup separate from the namespaced route. The lear
         (
             "Read the HTTPRoute",
             "```yaml\n" + yaml.safe_dump(route, sort_keys=False) + "```",
-            "The route attaches to lesson-gateway for lesson.example.test and forwards /version to hello:8080.",
+            "The route attaches to lesson-gateway for lesson.example.test and forwards `/version` to `hello:8080`.",
         ),
         (
             "Compare accepted and delivered",
@@ -874,7 +874,7 @@ The chapter uses an authored request ledger and optional host-provided namespace
     [
         (
             "Define denominators and latency conventions",
-            """The five synthetic requests have statuses 200, 200, 500, 200, 200 and latencies 10, 20, 30, 40, 100 milliseconds. The error fraction is \\(1/5=0.2\\). If success means the expected application result rather than merely a 2xx status, the numerator needs that additional validation.
+            """The five synthetic requests have statuses `[200, 200, 500, 200, 200]` and latencies `[10, 20, 30, 40, 100]` milliseconds. The error fraction is \\(1/5=0.2\\). If success means the expected application result rather than merely a 2xx status, the numerator needs that additional validation.
 
 Quantiles depend on the calculation convention. The example uses empirical nearest rank: sort values and choose position \\(\\lceil qn\\rceil\\), with one-based positions. The all-request p50 is 30ms and p95 is 100ms. Restricting to successful requests changes the sample and its quantiles, so state the filter.
 

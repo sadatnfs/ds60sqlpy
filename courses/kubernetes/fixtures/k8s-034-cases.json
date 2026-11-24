@@ -21,8 +21,8 @@
     },
     {
       "exercise": 4,
-      "task": "Evaluate reviewer, reviewer, ERROR, reviewer against the four-response gate.",
-      "expected": "Failure with one error; do not proceed to promotion."
+      "task": "Evaluate a new candidate sample, reviewer, reviewer, reviewer, TIMEOUT, where the fourth request ran past the declared deadline, against the four-response gate.",
+      "expected": "Failure: only three valid responses arrived within the deadline; do not proceed to promotion."
     },
     {
       "exercise": 5,

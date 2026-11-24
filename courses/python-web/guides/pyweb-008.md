@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-007`.
 
 A cookie is a value a server asks a client to retain and send on later matching requests. A session mechanism can use that value to recognize application state. Flask's default session stores signed data in a client cookie. This chapter observes a valid round trip and a deliberately corrupted signature.
 
+## Key terms
+
+- **Cookie:** A named value a server asks the client to store and send back on later requests that match its domain and path.
+- **Signed session cookie:** Flask's default session storage, which serializes session data into a cookie and attaches a signature made with the secret key.
+- **Tamper detection:** Verifying the signature when a cookie returns so that a modified value is rejected and the request starts with an empty session.
+- **Signing versus encryption:** A signature protects integrity, while encryption protects confidentiality; signed Flask session data remains readable by the client.
+- **Cookie attributes:** Flags such as Secure, HttpOnly and SameSite that ask browsers to limit transport, script access and cross-site sending, respectively.
+
 ## Mechanism: integrity, confidentiality and client policy differ
 
 A signature lets the server detect changes made without the signing key. It does not automatically hide the contents from the client. Sensitive information should not be placed into a readable session cookie merely because it is signed. The example stores only a small visit count and uses an explicitly test-only key.
@@ -27,6 +35,36 @@ For a deployed application, choose a strong secret outside source code, keep it 
 The program reads its own fixture cookie, appends text and sends it back. The signature no longer verifies. Flask treats the request as a fresh anonymous session, and the state endpoint reports zero visits. This endpoint allows anonymous access, so zero is an expected application response rather than an authentication success.
 
 A protected endpoint should separately require an authenticated identity. An empty session after tampering must not accidentally grant a default administrator role. Keep authentication defaults explicit and conservative instead of interpreting a missing field as a privileged state.
+
+## Worked example: a signed cookie is readable but not forgeable
+
+```python
+import base64
+import json
+
+from itsdangerous import BadSignature, URLSafeTimedSerializer
+
+signer = URLSafeTimedSerializer("test-only-cookie-fixture", salt="cookie-session")
+token = signer.dumps({"visits": 1})
+payload = token.split(".")[0]
+print(json.loads(base64.urlsafe_b64decode(payload + "==")))
+print(signer.loads(token))
+forged = base64.urlsafe_b64encode(b'{"visits":99}').decode().rstrip("=")
+try:
+    signer.loads(forged + token[len(payload) :])
+except BadSignature:
+    print("forged value rejected")
+```
+
+Expected output:
+
+```text
+{'visits': 1}
+{'visits': 1}
+forged value rejected
+```
+
+This uses the same signer configuration Flask's default session interface uses (salt `cookie-session`), so it shows what the lesson's `session` cookie really contains. Anyone holding the cookie decoded `{'visits': 1}` without the secret: signing gives integrity, not confidentiality, so never put a password or private note in it. Replacing the payload with `{"visits":99}` while keeping the old signature raised `BadSignature`, which is why the tampered cookie in the lesson fell back to `visits` 0. If an attacker learned `SECRET_KEY`, they could sign arbitrary values, so the key belongs in configuration, not in source control.
 
 ## Failure diagnosis
 

@@ -70,11 +70,12 @@ def main():
         original_shuffle = spark.conf.get("spark.sql.shuffle.partitions")
         assert source.count() == 20000 and source.rdd.getNumPartitions() == 4
         assert source.select("key").distinct().count() == 1000
-        print("Input:20000 rows,1000 keys,4 partitions,local[2]")
+        print("Input: 20000 rows, 1000 keys, 4 partitions, local[2]")
         partial_upper = 4 * 1000
         assert partial_upper == 4000 and partial_upper < 20000
         print(
-            "Local partial aggregation can reduce occurrences before redistribution;this is a model"
+            "Local partial aggregation can reduce occurrences before redistribution; "
+            "this is a model"
         )
         print("spark-022: worked examples passed; six task implementations remain")
     finally:

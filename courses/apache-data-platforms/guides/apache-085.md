@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-080`, `apache-081`, `apache-084`.
 
+## Key terms
+
+- **Data product:** A shared dataset with a defined meaning, schema, identity, freshness, retention and access contract.
+- **Consumer contract:** The provider's promises about schema, versions and compatibility that a recipient can rely on.
+- **Consumer receipt:** The recipient's record of table identity, version, schema, row identity and releases, with no bearer tokens or signed URLs.
+- **Revocation scope:** The set of capabilities that revoking a recipient actually removes, as opposed to data or URLs it already holds.
+
 ## A shared product needs a consumer contract
 
 A versioned data product specifies the meaning and shape of data, who can access
@@ -74,6 +81,39 @@ product?** A clearly scoped schema/state/access/retention contract supported by
 actual compatible reads and denial tests. These cases publish one finite version
 and then measure recipient/revocation boundaries without confusing protocol
 access with control over every downloaded copy.
+
+## Worked examples
+
+### The consumer contract for version 0
+
+```json
+{
+  "share": "ds60_fixture",
+  "schema": "tutorial",
+  "table": "orders",
+  "version": 0
+}
+```
+
+This fixture-contract.json is what a consumer can rely on: a named table at a fixed version with columns id, region and amount. The client checks the exact rows against an oracle after reading. Publishing a new version is a separate, announced change; consumers that pinned 0 keep their results until they choose to move.
+
+### Bound the data a recipient will download
+
+```python
+import pyarrow as pa
+import pyarrow.parquet as pq
+
+sink = pa.BufferOutputStream()
+pq.write_table(pa.table({"id": [1, 2, 3], "region": ["east", "west", "east"]}), sink)
+metadata = pq.ParquetFile(pa.BufferReader(sink.getvalue())).metadata
+print(metadata.num_rows, metadata.num_columns, metadata.num_row_groups)
+```
+
+```text
+3 2 1
+```
+
+The Delta Sharing client reads each file footer and rejects files with too many rows, columns, row groups or metadata bytes before it materializes anything. Here the footer reports three rows, two columns and one row group. Checking footers first protects the recipient from a provider that publishes a much larger file than the contract promised.
 
 ## Complete worked source
 

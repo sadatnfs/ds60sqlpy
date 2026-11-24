@@ -14,6 +14,13 @@ Privatization reduces contention by building per-block or per-warp partial histo
 
 
 
+### Key terms
+
+- **Atomic operation:** A read-modify-write that the hardware completes as one indivisible step, so concurrent updates are not lost.
+- **Lost update:** A race in which two threads read the same old value and one thread's write overwrites the other.
+- **Privatization:** Giving each block its own partial result, usually in shared memory, then merging the partials with fewer global atomics.
+- **Contention:** Many threads updating the same address at once, which serializes atomics and reduces throughput.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,33 +48,56 @@ print("CPU histogram oracle:", bins)
 
 **Expected observation:** Histogram bins [2,1,3].
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `values` | `[0, 0, 1, 2, 2, 2]` |
+| `bins` | `[2, 1, 3]` |
+| `value` | `2` |
+| `left` | `[2, 1, 0]` |
+| `right` | `[0, 0, 3]` |
+| `merged` | `[2, 1, 3]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Trace a lost update
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **trace a lost update** in the examples above.
+**Trap to avoid:** Assuming the two writes collide in a visible way, raising an error or producing a garbled value, is incorrect. The lost update produces a plausible number, which is why it escapes notice.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Compute a skewed histogram
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **compute a skewed histogram** in the examples above.
+**Trap to avoid:** Using the uniform data `[0, 1, 2, 0, 1, 2]` as the contention test spreads updates evenly and measures the friendliest case instead.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Merge partials
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **merge partials** in the examples above.
+**Trap to avoid:** Concatenating the partials or taking the bin-wise maximum produces wrong totals. The maximum here gives `[2, 1, 3]` by coincidence, so test with overlapping partials such as `[1, 1, 0]` and `[1, 0, 3]`.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Count private storage
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **count private storage** in the examples above.
+**Trap to avoid:** Counting only bins times width, 1 KiB here, ignores that each partial owns its own copy and underestimates memory by a factor of the partial count.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain floating atomic order
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **explain floating atomic order** in the examples above.
+**Trap to avoid:** Expecting atomics to give the same bits as a sequential CPU sum confuses race-freedom with order. No update is lost, but the order is still free.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Specify completion before reading
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **specify completion before reading** in the examples above.
+**Trap to avoid:** Reading after only the histogram kernel ignores the merge step, so the host sees one block's partial instead of the total.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

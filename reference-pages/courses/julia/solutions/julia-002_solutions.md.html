@@ -195,24 +195,54 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-002-explained-reference">julia-002: explained reference<a class="heading-anchor" href="#julia-002-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-002_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Pick the numeric type from the question being asked. Integer division and remainder use <code>div</code> and <code>rem</code>; exact ratios use <code>Rational</code>; values past <code>typemax(Int)</code> need <code>BigInt</code> before the operation; and floating-point checks use tolerances tied to units. Every conversion that cannot hold its value should fail loudly rather than wrap.</p>
 <h3 id="1-retain-a-remainder">1. Retain a remainder<a class="heading-anchor" href="#1-retain-a-remainder" aria-label="Link to this section">#</a></h3>
 <p>Integer division answers another question from floating-point division.</p>
 <p><strong>Expected observation:</strong> The integer quotient is 3 and remainder 1.</p>
+<p><strong>Why it holds here:</strong> Seven equals 2 times 3 plus 1, so <code>div(7, 2)</code> returns 3 and <code>rem(7, 2)</code> returns 1, both as integers.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>7 / 2</code> and truncating the float answers a different question; it returns 3.5 and loses the remainder unless it is recomputed separately.</p>
+<p><strong>How to verify:</strong> Assert <code>div(7, 2) == 3</code> and <code>rem(7, 2) == 1</code>; the reference already checks <code>rem(7, 2) == 1</code>.</p>
 <h3 id="2-reject-a-narrowing-conversion">2. Reject a narrowing conversion<a class="heading-anchor" href="#2-reject-a-narrowing-conversion" aria-label="Link to this section">#</a></h3>
 <p>A constructor conversion that cannot represent the value must not be confused with wrapping arithmetic.</p>
 <p><strong>Expected observation:</strong> The conversion raises InexactError.</p>
+<p><strong>Why it holds here:</strong> <code>Int8</code> covers -128 through 127, so the constructor <code>Int8(128)</code> has no exact result and throws <code>InexactError</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting -128 confuses conversion with wrapping arithmetic; <code>typemax(Int8) + Int8(1)</code> wraps, but a checked constructor refuses an unrepresentable value.</p>
+<p><strong>How to verify:</strong> Use <code>@test_throws InexactError Int8(128)</code> as the reference does, then confirm <code>Int8(127)</code> succeeds.</p>
 <h3 id="3-keep-an-exact-ratio">3. Keep an exact ratio<a class="heading-anchor" href="#3-keep-an-exact-ratio" aria-label="Link to this section">#</a></h3>
 <p>This preserves the intended ratio instead of first rounding decimal-looking binary floats.</p>
 <p><strong>Expected observation:</strong> The result equals 3//10 exactly.</p>
+<p><strong>Why it holds here:</strong> <code>1//10 + 2//10</code> is computed as integer numerators over a common denominator, giving <code>3//10</code> with no rounding at any step.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>0.1 + 0.2</code> and comparing with <code>0.3</code> fails, because both decimals are rounded binary floats and the sum is <code>0.30000000000000004</code>.</p>
+<p><strong>How to verify:</strong> Check <code>1//10 + 2//10 == 3//10</code> and, for contrast, <code>0.1 + 0.2 == 0.3</code>, which is false.</p>
 <h3 id="4-choose-a-precision">4. Choose a precision<a class="heading-anchor" href="#4-choose-a-precision" aria-label="Link to this section">#</a></h3>
 <p>More precision changes representation cost and error; it does not validate the model.</p>
 <p><strong>Expected observation:</strong> Their types are Float32 and Float64.</p>
+<p><strong>Why it holds here:</strong> The suffix <code>f0</code> makes <code>1.0f0</code> a <code>Float32</code>; plain <code>1.0</code> is <code>Float64</code>, with roughly 7 versus 16 significant decimal digits.</p>
+<p><strong>Plausible wrong approach:</strong> Treating the two literals as the same value with different spelling ignores precision; <code>eps(1.0f0)</code> is about 1.2e-7 while <code>eps(1.0)</code> is about 2.2e-16.</p>
+<p><strong>How to verify:</strong> Print <code>typeof(1.0f0)</code> and <code>typeof(1.0)</code>; the reference asserts <code>typeof(1.0f0) == Float32</code>.</p>
 <h3 id="5-check-a-large-integer">5. Check a large integer<a class="heading-anchor" href="#5-check-a-large-integer" aria-label="Link to this section">#</a></h3>
 <p>Converting a wrapped machine result afterward cannot reconstruct the lost value.</p>
 <p><strong>Expected observation:</strong> The mathematical integer is retained beyond the machine Int range.</p>
+<p><strong>Why it holds here:</strong> <code>BigInt(2)^100</code> promotes before multiplying, so the exact 31-digit value survives; machine <code>2^100</code> wraps modulo 2 to the 64 and yields 0.</p>
+<p><strong>Plausible wrong approach:</strong> Computing <code>2^100</code> first and calling <code>BigInt</code> on the result gives <code>BigInt(0)</code>, since the overflow happened before the conversion.</p>
+<p><strong>How to verify:</strong> Assert <code>BigInt(2)^100 &gt; typemax(Int)</code> as the reference does, and print <code>2^100</code> beside it to see the wrapped 0.</p>
 <h3 id="6-explain-a-tolerance">6. Explain a tolerance<a class="heading-anchor" href="#6-explain-a-tolerance" aria-label="Link to this section">#</a></h3>
 <p>Representation, conditioning and algorithmic error inform a tolerance; passing an arbitrary bound proves little.</p>
-<p><strong>Expected observation:</strong> The bound uses that quantity units and required accuracy.</p></article>
+<p><strong>Expected observation:</strong> The bound uses that quantity units and required accuracy.</p>
+<p><strong>Why it holds here:</strong> A measured length in meters with a stated 1 millimeter requirement justifies an absolute tolerance of 0.001, tied to units rather than to float precision alone.</p>
+<p><strong>Plausible wrong approach:</strong> Raising <code>atol</code> until a failing comparison passes hides whether the error came from representation, conditioning or a wrong formula.</p>
+<p><strong>How to verify:</strong> Write the tolerance next to its unit and source, then confirm <code>isapprox(x, y; atol = 0.001)</code> fails for a deliberately perturbed value.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-002: all reference checks passed</code>:</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> rem<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-number">2</span><span class="syntax-operator">//</span><span class="syntax-number">4</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-operator">//</span><span class="syntax-number">2</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-keyword">BigInt</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">^</span><span class="syntax-number">100</span> <span class="syntax-operator">&gt;</span> typemax<span class="syntax-punctuation">(</span><span class="syntax-keyword">Int</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">InexactError</span> <span class="syntax-keyword">Int8</span><span class="syntax-punctuation">(</span><span class="syntax-number">128</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> typeof<span class="syntax-punctuation">(</span><span class="syntax-number">1.0f0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-keyword">Float32</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-operator">!</span>isfinite<span class="syntax-punctuation">(</span><span class="syntax-builtin">Inf</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

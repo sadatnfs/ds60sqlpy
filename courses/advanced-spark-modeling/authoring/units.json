@@ -10,6 +10,28 @@
     "suffix": ".py",
     "concepts": ["driver", "executor", "partition", "action"],
     "outcome": "Trace one objective evaluation across the driver and partitions and show that repartitioning does not redefine the model.",
+    "key_terms": [
+      [
+        "Driver",
+        "The process that owns the Spark session, builds query expressions, submits jobs and receives small results such as one objective value."
+      ],
+      [
+        "Executor",
+        "A worker process that runs tasks on partitions and returns partial results; it does not own the optimizer's control flow."
+      ],
+      [
+        "Partition",
+        "A physical slice of the records at one stage. It is not a scientifically meaningful group such as a person, country or time series."
+      ],
+      [
+        "Action",
+        "An operation such as collect, count or first that requests a result and therefore triggers execution of the lazy query."
+      ],
+      [
+        "Task",
+        "One stage's work evaluated on one partition; a thread can process several tasks over time."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -19,6 +41,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "partition summaries for spark.range(0, 12, 1, 3)",
+        "language": "python",
+        "code": "def slices(n, parts):\n    \"\"\"Contiguous slices, the layout spark.range uses for its input partitions.\"\"\"\n    return [list(range(n * p // parts, n * (p + 1) // parts)) for p in range(parts)]\n\n\nfor parts in (1, 2, 3):\n    partials = [(len(s), sum(x * x for x in s)) for s in slices(12, parts)]\n    merged = (sum(n for n, _ in partials), sum(v for _, v in partials))\n    print(parts, partials, \"->\", merged)\n\nlost = slices(12, 3)[:2]\nprint(\"one task result dropped ->\", (sum(map(len, lost)), sum(x * x for s in lost for x in s)))",
+        "output": "1 [(12, 506)] -> (12, 506)\n2 [(6, 55), (6, 451)] -> (12, 506)\n3 [(4, 14), (4, 126), (4, 366)] -> (12, 506)\none task result dropped -> (8, 140)",
+        "interpretation": "This plain Python trace imitates what each task returns for the chapter's twelve integers: a pair holding a row count and a partial sum of squares. With three input slices the partials are `(4, 14)`, `(4, 126)` and `(4, 366)`, and adding the pairs component by component gives `(12, 506)` for every layout. The last line shows why the count travels with the loss: if the third task's result were lost, the driver would receive 140 instead of 506, and only n = 8 instead of 12 reveals that the population changed rather than the model. In Spark the same pairs are the partial aggregation states of count and sum, merged after the exchange before first() returns one row to the driver."
+      }
     ]
   },
   {
@@ -32,6 +63,28 @@
     "suffix": ".py",
     "concepts": ["conditional", "independence", "likelihood", "gradient"],
     "outcome": "Derive and check a partition-additive objective and identify a shared latent variable that invalidates a naive split.",
+    "key_terms": [
+      [
+        "Conditional independence",
+        "The assumption that, given the parameters and observed design, the joint density factors into a product of per-row densities."
+      ],
+      [
+        "Additive objective",
+        "A negative log likelihood equal to a sum of row contributions, so the sums over disjoint partitions add up to the global value."
+      ],
+      [
+        "Partition sum",
+        "The total of row contributions within one disjoint index set. Summing all partition sums reproduces the objective; averaging them does not."
+      ],
+      [
+        "Gradient additivity",
+        "The finite-sum rule that the global gradient equals the sum of partition gradients when every partition uses the same parameter vector."
+      ],
+      [
+        "Shared latent variable",
+        "An unobserved quantity, such as a random intercept, common to several observations. It couples their likelihood and invalidates a naive row split."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -41,6 +94,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "dropping the normalizer when sigma is estimated",
+        "language": "python",
+        "code": "import math\n\nvalues = [-1.0, 0.5, 2.0, 4.0]\nmu = 1.5\nsquares = math.fsum((y - mu) ** 2 for y in values)\nfor sigma in (1.0, 2.0, 4.0, 16.0):\n    full = len(values) * 0.5 * math.log(2 * math.pi * sigma**2) + squares / (2 * sigma**2)\n    shortcut = squares / (2 * sigma**2)\n    print(f\"sigma={sigma:5.1f}  full NLL={full:8.4f}  without log term={shortcut:7.4f}\")",
+        "output": "sigma=  1.0  full NLL= 10.5508  without log term= 6.8750\nsigma=  2.0  full NLL=  8.1671  without log term= 1.7188\nsigma=  4.0  full NLL=  9.6506  without log term= 0.4297\nsigma= 16.0  full NLL= 14.7930  without log term= 0.0269",
+        "interpretation": "Both columns evaluate the four fixture values at mu = 1.5, where the squared residuals sum to 14.0. The full normalized negative log likelihood is smallest near sigma = 2, close to the maximum likelihood scale sqrt(14/4), about 1.87. The column that drops the log(2 pi sigma squared) terms keeps falling as sigma grows and would send an optimizer toward an infinitely wide Gaussian. With sigma held fixed, as in worked case 1, both columns differ by a constant and share a minimizer in mu, which is exactly why the shortcut survives unnoticed until the scale becomes a parameter. In Spark the fix is one extra literal term per row, not a different aggregation."
+      }
     ]
   },
   {
@@ -54,6 +116,28 @@
     "suffix": ".py",
     "concepts": ["grouped", "MLE", "pooling", "sufficient", "statistics"],
     "outcome": "Fit separate Gaussian means and distinguish them from the pooled maximum-likelihood estimate when group sizes differ.",
+    "key_terms": [
+      [
+        "Independent group fit",
+        "Separate optimizations that give each group its own parameter, so the output contains one fitted model per group."
+      ],
+      [
+        "Pooled MLE",
+        "The single common-mean estimate, total sum divided by total count, which equals the count-weighted average of group means under equal variance."
+      ],
+      [
+        "Sufficient statistics",
+        "Small summaries, here each group's count and sum, from which the estimate can be reconstructed without raw rows."
+      ],
+      [
+        "Unweighted mean of group means",
+        "An equal-group descriptive average that differs from the pooled MLE whenever group sizes differ."
+      ],
+      [
+        "Estimand",
+        "The quantity a procedure is meant to estimate. Naming it prevents calling different numbers the same distributed average."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -63,6 +147,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "pooling group summaries with pandas as a stand-in for groupBy",
+        "language": "python",
+        "code": "import pandas as pd\n\na = [1.0, 3.0]\nb = [8.0, 10.0, 10.0, 12.0, 9.0, 11.0]\nfor label, rows in ((\"original\", b), (\"B doubled\", b + b)):\n    frame = pd.DataFrame({\"group\": [\"A\"] * len(a) + [\"B\"] * len(rows), \"y\": a + rows})\n    g = frame.groupby(\"group\")[\"y\"].agg(n=\"count\", total=\"sum\", mean=\"mean\")\n    pooled = g[\"total\"].sum() / g[\"n\"].sum()\n    print(label, g.to_dict(\"index\"), \"pooled\", round(pooled, 4), \"avg\", g[\"mean\"].mean())",
+        "output": "original {'A': {'n': 2, 'total': 4.0, 'mean': 2.0}, 'B': {'n': 6, 'total': 60.0, 'mean': 10.0}} pooled 8.0 avg 6.0\nB doubled {'A': {'n': 2, 'total': 4.0, 'mean': 2.0}, 'B': {'n': 12, 'total': 120.0, 'mean': 10.0}} pooled 8.8571 avg 6.0",
+        "interpretation": "This uses pandas because PySpark is not installed in the authoring environment; groupby with count, sum and mean mirrors the chapter's groupBy aggregation row for row. In the original data the per-group means are 2 and 10, the pooled common mean built only from n and total is 64 / 8 = 8, and the average of group means is 6. Doubling B moves the pooled estimate to 124 / 14, about 8.857, while the average of means stays at 6 because each group still counts once. The Spark version replaces the pandas call with frame.groupBy('group').agg(F.count('*'), F.sum('y')) and combines the two summary columns on the driver in the same way."
+      }
     ]
   },
   {
@@ -76,6 +169,28 @@
     "suffix": ".py",
     "concepts": ["skew", "group", "materialization", "shuffle", "memory"],
     "outcome": "Measure group sizes before an independent fit and replace unsafe group materialization with bounded sufficient statistics.",
+    "key_terms": [
+      [
+        "Data skew",
+        "An uneven key distribution in which one hot group holds far more rows than the others and dominates memory."
+      ],
+      [
+        "Whole-group materialization",
+        "Loading every row of one key into a single process, as a grouped pandas function expects."
+      ],
+      [
+        "Shuffle",
+        "The exchange that brings equal keys together. It spreads different groups across partitions but cannot split one group."
+      ],
+      [
+        "Arrow record batch",
+        "A unit of columnar transfer between the JVM and Python. Its configured size is not a maximum group size."
+      ],
+      [
+        "Memory lower bound",
+        "The raw dense size of a group, eight bytes per float64 value times rows times columns, which is a planning floor rather than a measured peak."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -85,6 +200,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "checking the squared-sum shortcut on the hot group",
+        "language": "python",
+        "code": "hot = [float(i) for i in range(16)]\nn, s, q = len(hot), sum(hot), sum(y * y for y in hot)\nfor mu in (0.0, 7.5, 10.0):\n    direct = sum((y - mu) ** 2 for y in hot)\n    from_state = q - 2 * mu * s + n * mu**2\n    print(f\"mu={mu:4.1f} direct={direct:7.1f} state={from_state:7.1f}\")\n\nrows, features, budget_mib = 2_000_000, 50, 512\npayload_mib = rows * features * 8 / 2**20\nprint(f\"state=(n={n}, s={s}, q={q}); raw payload {payload_mib:.0f} MiB vs {budget_mib} MiB\")",
+        "output": "mu= 0.0 direct= 1240.0 state= 1240.0\nmu= 7.5 direct=  340.0 state=  340.0\nmu=10.0 direct=  440.0 state=  440.0\nstate=(n=16, s=120.0, q=1240.0); raw payload 763 MiB vs 512 MiB",
+        "interpretation": "The sixteen hot values 0 through 15 reduce to the fixed state n = 16, s = 120 and q = 1240, and the identity q - 2 mu s + n mu squared reproduces the direct squared error at every trial mean, including the minimum of 340 at mu = 7.5. A group of two million rows would carry the same three numbers, while materializing it for a whole-group function needs at least 763 MiB of float64 payload, already above the illustrative 512 MiB budget before any copy. If the model needed a robust loss such as absolute error, no three-number state would reproduce it, and the admission decision about the hot key would return."
+      }
     ]
   },
   {
@@ -98,6 +222,28 @@
     "suffix": ".py",
     "concepts": ["softplus", "logistic", "likelihood", "weights"],
     "outcome": "Evaluate a stable normalized logistic objective with Spark SQL and compare extreme-score and imbalance cases to a serial oracle.",
+    "key_terms": [
+      [
+        "Logit",
+        "The linear predictor z, an intercept plus a slope times the feature, whose sigmoid gives the success probability."
+      ],
+      [
+        "Softplus",
+        "The function max(z, 0) + log1p(exp(-|z|)), a stable form of log(1 + exp(z)) that never exponentiates a positive argument."
+      ],
+      [
+        "Stable Bernoulli loss",
+        "The row contribution softplus(z) - y z. It equals the negative log likelihood but avoids taking the logarithm of a rounded zero."
+      ],
+      [
+        "Column expression",
+        "A Spark description of work that is planned and evaluated by an action, not an array of values held on the driver."
+      ],
+      [
+        "Observation weight",
+        "A nonnegative multiplier on each contribution whose meaning, such as frequency, survey or importance weight, must be declared."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -107,6 +253,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "naive and stable Bernoulli losses at extreme logits",
+        "language": "python",
+        "code": "import math\n\n\ndef naive(z, y):\n    try:\n        p = 1 / (1 + math.exp(-z))\n        return f\"{-(y * math.log(p) + (1 - y) * math.log(1 - p)):.6g}\"\n    except (OverflowError, ValueError) as error:\n        return type(error).__name__\n\n\ndef stable(z, y):\n    return max(z, 0.0) + math.log1p(math.exp(-abs(z))) - y * z\n\n\nfor z, y in [(-1000.0, 0.0), (1000.0, 1.0), (40.0, 1.0), (40.0, 0.0), (-2.0, 1.0)]:\n    print(f\"z={z:7.1f} y={y:.0f} naive={naive(z, y)!s:>13} stable={stable(z, y):.6g}\")",
+        "output": "z=-1000.0 y=0 naive=OverflowError stable=0\nz= 1000.0 y=1 naive=   ValueError stable=0\nz=   40.0 y=1 naive=   ValueError stable=0\nz=   40.0 y=0 naive=   ValueError stable=40\nz=   -2.0 y=1 naive=      2.12693 stable=2.12693",
+        "interpretation": "The naive formula forms a probability first, so z = -1000 overflows in exp and z = 1000 rounds p to exactly 1.0, after which log(1 - p) fails even though the label is one and only log(p) is needed. Even the moderate logit z = 40 breaks it: exp(-40) is about 4.2e-18, below the spacing of doubles near 1, so p is exactly 1.0 and the zero-label loss of 40 cannot be computed at all. The stable softplus form stays finite and correct for all five rows, including the -2, label one row whose loss 2.12693 carries weight two in the chapter's fixture. Spark's greatest, abs, exp and log1p column functions build the same stable expression."
+      }
     ]
   },
   {
@@ -120,6 +275,28 @@
     "suffix": ".py",
     "concepts": ["gradient", "Hessian", "feature", "order", "aggregation"],
     "outcome": "Compute correctly ordered logistic loss and gradient summaries and detect invalid feature or label contracts.",
+    "key_terms": [
+      [
+        "Residual",
+        "The per-row quantity p minus y whose sums, alone and multiplied by the feature, form the logistic gradient."
+      ],
+      [
+        "Gradient summary",
+        "The gradient components returned in the same aggregate record as the count and loss, so all are evaluated at one parameter vector."
+      ],
+      [
+        "Hessian component",
+        "A curvature entry such as the sum of p(1 - p) for the intercept, which is always nonnegative for this unpenalized model."
+      ],
+      [
+        "Feature order",
+        "The fixed position of the implicit intercept and each feature column that the summary and the driver must agree on."
+      ],
+      [
+        "Central finite difference",
+        "An independent derivative check that divides L(b + h) - L(b - h) by 2h and compares it with the analytic gradient within a tolerance."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -129,6 +306,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "full Hessian and a swapped-gradient check",
+        "language": "python",
+        "code": "import math\n\nrows = [(-2.0, 0.0), (-1.0, 1.0), (0.0, 0.0), (1.0, 1.0), (3.0, 1.0)]\nb0, b1 = 0.2, -0.4\ng = [0.0, 0.0]\nh = [[0.0, 0.0], [0.0, 0.0]]\nfor x, y in rows:\n    p = 1 / (1 + math.exp(-(b0 + b1 * x)))\n    for j, fj in enumerate((1.0, x)):\n        g[j] += (p - y) * fj\n        for k, fk in enumerate((1.0, x)):\n            h[j][k] += p * (1 - p) * fj * fk\nprint(\"gradient\", [round(v, 6) for v in g])\nprint(\"hessian\", [[round(v, 6) for v in r] for r in h])\nprint(\"swapped vector passes a length check:\", len(g[::-1]) == len(g))",
+        "output": "gradient [-0.354344, -3.850783]\nhessian [[1.117041, 0.215344], [0.215344, 3.032256]]\nswapped vector passes a length check: True",
+        "interpretation": "At intercept 0.2 and slope -0.4 the five rows give a gradient of about (-0.354, -3.851): the slope coordinate is much larger because the features -2 and 3 multiply the residuals, which is why the chapter's finite-difference oracle can expose a swap that a length check cannot. The Hessian entry H00 is the sum of p(1 - p), about 1.117, and every diagonal entry is positive as the theory requires. In Spark each of the five distinct entries becomes one more F.sum term in the same agg call, so the driver still receives one small row. Adding a third feature would grow the summary to three gradient and six Hessian entries."
+      }
     ]
   },
   {
@@ -142,6 +328,28 @@
     "suffix": ".py",
     "concepts": ["Newton", "line", "search", "action", "broadcast"],
     "outcome": "Fit a small shared logistic model through repeated Spark actions and explain why a stale expression cannot supply the next gradient.",
+    "key_terms": [
+      [
+        "Newton update",
+        "The driver-side step that subtracts the gradient divided by the curvature from the current beta, using values from one evaluation."
+      ],
+      [
+        "Evaluation history",
+        "A record that binds each beta, loss and gradient to the same Spark action, showing how many evaluations occurred."
+      ],
+      [
+        "Stale expression",
+        "A previously built Column whose literals still hold an old beta, so it evaluates the wrong objective after the Python variable changes."
+      ],
+      [
+        "Cache",
+        "A request to keep the fixture for reuse across actions. The first action materializes it, and unpersist in a finally block releases it."
+      ],
+      [
+        "Damping or line search",
+        "A step-acceptance safeguard that shortens a Newton step when tiny curvature near saturation would produce a huge move."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -151,6 +359,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "Newton history and a stale literal",
+        "language": "python",
+        "code": "import math\n\nlabels = [0.0, 0.0, 1.0, 1.0, 1.0]\nn, s = len(labels), sum(labels)\n\n\ndef summary(beta):\n    p = 1 / (1 + math.exp(-beta))\n    return n * p - s, n * p * (1 - p)\n\n\nfor stale in (False, True):\n    beta, frozen = 0.0, summary(0.0)\n    trace = []\n    for _ in range(4):\n        g, h = frozen if stale else summary(beta)\n        beta -= g / h\n        trace.append(round(beta, 6))\n    print(\"stale\" if stale else \"fresh\", trace, \"true gradient\", f\"{summary(beta)[0]:.2e}\")",
+        "output": "fresh [0.4, 0.405462, 0.405465, 0.405465] true gradient -8.88e-16\nstale [0.4, 0.8, 1.2, 1.6] true gradient 1.16e+00",
+        "interpretation": "The fresh loop recomputes the gradient and curvature at every new beta, the role played by rebuilding SQL literals before each agg action, and reaches 0.405465, the closed-form log(0.6 / 0.4), within four steps. The stale loop reuses the summary first computed at beta = 0, just as a cached Column carrying old literals would, so it adds the same step of 0.4 every iteration and walks past the optimum to 1.6. Its own frozen gradient would never signal a problem; only evaluating the true gradient at the reported beta, about 1.16, exposes it. With one success out of five the stale walk would head the other way."
+      }
     ]
   },
   {
@@ -164,6 +381,28 @@
     "suffix": ".py",
     "concepts": ["floating", "point", "weighted", "mean", "regularization"],
     "outcome": "Prove the difference between global sums and averages of partition means and apply a model penalty exactly once.",
+    "key_terms": [
+      [
+        "Count and sum merge",
+        "The partition summary of row count and loss total, combined by addition so the global mean is total sum over total count."
+      ],
+      [
+        "Average of partition means",
+        "An equal-influence average of each partition's mean that matches the global mean only in special cases such as equal sizes."
+      ],
+      [
+        "Identity summary",
+        "The pair (0, 0) that an empty partition contributes, avoiding a division by zero."
+      ],
+      [
+        "Ridge penalty",
+        "The regularization term lambda times the squared parameter norm over two, added once to the model objective after reduction."
+      ],
+      [
+        "Floating-point rounding",
+        "The order-dependent error in machine addition that makes reductions agree only within a stated tolerance."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -173,6 +412,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "summation order across partition layouts",
+        "language": "python",
+        "code": "import math\nfrom functools import reduce\nfrom operator import add\n\nterms = [1e16, 1.0, -1e16, 1.0]\nlayouts = {\"one partition\": [terms], \"split after 1.0\": [terms[:2], terms[2:]]}\nlayouts[\"reordered\"] = [[1e16, -1e16], [1.0, 1.0]]\nfor name, parts in layouts.items():\n    partials = [reduce(add, p, 0.0) for p in parts]\n    merged = reduce(add, partials, 0.0)\n    print(f\"{name:16} partials={partials} merged={merged} fsum={math.fsum(terms)}\")\n\nsummaries = [(1, 1.0), (3, 9.0)]\npenalty = 0.5 * 2.0**2 / 2\nprint(\"ridge once:\", sum(s for _, s in summaries) + penalty)\nprint(\"ridge per partition:\", sum(s + penalty for _, s in summaries))",
+        "output": "one partition    partials=[1.0] merged=1.0 fsum=2.0\nsplit after 1.0  partials=[1e+16, -1e+16] merged=0.0 fsum=2.0\nreordered        partials=[0.0, 2.0] merged=2.0 fsum=2.0\nridge once: 11.0\nridge per partition: 12.0",
+        "interpretation": "The four terms sum to 2 exactly, but the merged double-precision result depends on which values land in the same partition. The left fold with operator.add mimics Spark's sequential double accumulation (Python 3.12's built-in sum compensates and would hide the effect): one ordered pass returns 1.0, a split after the first 1.0 returns 0.0, and grouping the large values together returns 2.0. math.fsum gives 2.0 because it sees every original term, which a merge of rounded partials cannot. The last two lines repeat the chapter's ridge case with lambda 0.5 and beta 2: adding the penalty once after the merge gives 11, while adding it inside each of the two partition summaries gives 12, and a third partition would make it 13."
+      }
     ]
   },
   {
@@ -186,6 +434,28 @@
     "suffix": ".py",
     "concepts": ["retry", "idempotence", "task", "attempts", "side", "effects"],
     "outcome": "Separate Spark result aggregation from external writes and construct a retry-safe summary contract.",
+    "key_terms": [
+      [
+        "Task attempt",
+        "One execution of a task. Failure recovery or speculation can create several attempts for the same logical partition."
+      ],
+      [
+        "Pure task",
+        "A task that maps immutable inputs and parameters to a summary without external effects, so Spark can safely select one successful result."
+      ],
+      [
+        "External side effect",
+        "A write, counter increment or message outside Spark's result protocol that a retried attempt may repeat."
+      ],
+      [
+        "Idempotent write",
+        "A write keyed by data version, parameter version and logical chunk identity, so an identical retry is accepted once and conflicting content is rejected."
+      ],
+      [
+        "Logical chunk identity",
+        "A durable key for a unit of input that survives repartitioning, unlike a physical partition number."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -195,6 +465,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "a physical partition number used as a durable key",
+        "language": "python",
+        "code": "import math\n\n\ndef reconcile(attempts):\n    accepted = {}\n    for identity, value in attempts:\n        if identity in accepted and accepted[identity] != value:\n            raise ValueError(f\"conflict for {identity}: {accepted[identity]} vs {value}\")\n        accepted[identity] = value\n    return accepted\n\n\ndata = [1.0, 2.0, 3.0, 4.0]\ntwo = [data[:2], data[2:]]\nthree = [data[:1], data[1:3], data[3:]]\nsummary = lambda part: {\"count\": len(part), \"sum\": math.fsum(part)}  # noqa: E731\nattempts = [((\"v1\", \"beta=0.5\", p), summary(part)) for p, part in enumerate(two)]\nattempts += [((\"v1\", \"beta=0.5\", p), summary(part)) for p, part in enumerate(two)]\nprint(reconcile(attempts))\nattempts += [((\"v1\", \"beta=0.5\", p), summary(part)) for p, part in enumerate(three)]\ntry:\n    reconcile(attempts)\nexcept ValueError as error:\n    print(error)",
+        "output": "{('v1', 'beta=0.5', 0): {'count': 2, 'sum': 3.0}, ('v1', 'beta=0.5', 1): {'count': 2, 'sum': 7.0}}\nconflict for ('v1', 'beta=0.5', 0): {'count': 2, 'sum': 3.0} vs {'count': 1, 'sum': 1.0}",
+        "interpretation": "The first reconciliation accepts the duplicated delivery of the two-partition plan because each identity maps to identical content, leaving totals of 4 rows and 10.0. The second call adds results computed after repartitioning the same four values into three slices. Partition 0 now holds only the value 1.0, so the key (v1, beta=0.5, 0) arrives with count 1 instead of 2 and reconciliation refuses it. Nothing was corrupted: the key was wrong, because a physical partition index is only meaningful within one fixed plan. Adding a plan hash or a logical chunk ID derived from the data to the identity makes the two layouts distinct."
+      }
     ]
   },
   {
@@ -208,6 +487,28 @@
     "suffix": ".py",
     "concepts": ["nonlinear", "regression", "Gaussian", "MLE", "parameter", "transforms"],
     "outcome": "Fit a shared exponential-decay model with explicit scale, analytic gradients and distributed objective evaluations.",
+    "key_terms": [
+      [
+        "Exponential-decay model",
+        "The mean a exp(-b t) + c with independent Gaussian errors, nonlinear in the decay rate b but linear in a and c."
+      ],
+      [
+        "Profiling",
+        "Replacing parameters that have closed-form optima, here a, c and the variance, by their optimal values for each candidate rate."
+      ],
+      [
+        "Normal equations",
+        "The two-by-two linear system, built from six Spark sums, that the driver solves for a and c at a fixed rate."
+      ],
+      [
+        "Variance MLE",
+        "The maximum-likelihood variance SSE/n, which differs from the unbiased estimator SSE/(n - 2)."
+      ],
+      [
+        "Profile likelihood",
+        "The objective n[log(2 pi SSE/n) + 1]/2 that keeps the variance normalization while searching over the rate grid."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -217,6 +518,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "profile loss on a finer rate grid with numpy",
+        "language": "python",
+        "code": "import numpy as np\n\nt = np.arange(8.0)\ny = 2 * np.exp(-0.4 * t) + 0.5 + np.array([0.02, -0.01, 0.01, -0.02, 0.02, -0.01, 0.01, -0.02])\n\n\ndef profile(rate, times=t, obs=y):\n    design = np.column_stack([np.exp(-rate * times), np.ones_like(times)])\n    coef, *_ = np.linalg.lstsq(design, obs, rcond=None)\n    sse = float(np.sum((obs - design @ coef) ** 2))\n    return coef, len(obs) / 2 * (np.log(2 * np.pi * sse / len(obs)) + 1)\n\n\nfor rate in (0.2, 0.3, 0.36, 0.38, 0.4, 0.42, 0.44, 0.5, 0.6):\n    (a, c), loss = profile(rate)\n    print(f\"rate={rate:.2f} a={a:.4f} c={c:.4f} loss={loss:9.4f}\")\n\nflat = np.column_stack([np.exp(-0.4 * np.zeros(8)), np.ones(8)])\nprint(\"determinant with all times zero:\", np.linalg.det(flat.T @ flat))",
+        "output": "rate=0.20 a=2.4762 c=-0.1354 loss=  -6.3891\nrate=0.30 a=2.1515 c=0.2839 loss= -11.8780\nrate=0.36 a=2.0601 c=0.4234 loss= -17.8257\nrate=0.38 a=2.0380 c=0.4601 loss= -20.5180\nrate=0.40 a=2.0187 c=0.4932 loss= -22.3932\nrate=0.42 a=2.0019 c=0.5231 loss= -21.3877\nrate=0.44 a=1.9871 c=0.5503 loss= -18.8881\nrate=0.50 a=1.9516 c=0.6188 loss= -13.1043\nrate=0.60 a=1.9100 c=0.7026 loss=  -8.1779\ndeterminant with all times zero: 0.0",
+        "interpretation": "Using numpy least squares in place of the Spark cross join, the same eight decay observations are profiled over a grid that is finer around the truth. The profile loss bottoms out at rate 0.40 with value about -22.39, amplitude 2.0187 and baseline 0.4932, and the neighbors 0.38 and 0.42 are only about 1.9 and 1.0 loss units worse, while 0.2 is about 16 units worse. That asymmetry is the shape information the chapter asks the reader to inspect in the Spark output. Adding four rates to the Spark grid would add thirty-two cross join rows, not a new algorithm. The last line confirms the identifiability failure: with every time at zero the two design columns are identical and the Gram determinant is exactly 0.0."
+      }
     ]
   },
   {
@@ -230,6 +540,28 @@
     "suffix": ".py",
     "concepts": ["covariance", "coupling", "quadratic", "form", "determinant"],
     "outcome": "Calculate the omitted covariance and normalization terms in an invalid independent partition approximation.",
+    "key_terms": [
+      [
+        "Covariance coupling",
+        "Dependence between observations expressed through a covariance matrix, which prevents a row-wise factorization of the likelihood."
+      ],
+      [
+        "Quadratic form",
+        "The term (y1^2 - 2 rho y1 y2 + y2^2) / (2(1 - rho^2)) whose cross product cannot be split into separate functions of each coordinate."
+      ],
+      [
+        "Log determinant",
+        "The normalization term one half log(1 - rho^2) that depends on rho and must stay in the objective."
+      ],
+      [
+        "Positive definiteness",
+        "The requirement, here |rho| < 1, that makes the covariance matrix valid and the density finite."
+      ],
+      [
+        "Indivisible unit",
+        "The smallest set of observations, here a complete pair, across which independence holds and partition sums remain valid."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -239,6 +571,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "joint and marginal pair losses across correlations",
+        "language": "python",
+        "code": "import math\n\n\ndef pair_nll(y1, y2, rho):\n    quad = (y1 * y1 - 2 * rho * y1 * y2 + y2 * y2) / (2 * (1 - rho * rho))\n    return math.log(2 * math.pi) + 0.5 * math.log1p(-rho * rho) + quad\n\n\npairs = [(1.0, 1.0), (-1.0, -0.5), (0.2, -0.3)]\nfor rho in (0.0, 0.5, 0.8, 0.95):\n    joint = [pair_nll(a, b, rho) for a, b in pairs]\n    print(f\"rho={rho:.2f} per pair={[round(v, 4) for v in joint]} total={math.fsum(joint):.4f}\")\nprint(\"independent marginals:\", round(math.fsum(pair_nll(a, b, 0.0) for a, b in pairs), 4))\nprint(\n    \"discordant pair dropped at 0.8:\",\n    round(math.fsum(pair_nll(a, b, 0.8) for a, b in pairs[:2]), 4),\n)",
+        "output": "rho=0.00 per pair=[2.8379, 2.4629, 1.9029] total=7.2036\nrho=0.50 per pair=[2.3607, 2.194, 1.8207] total=6.3754\nrho=0.80 per pair=[1.8826, 1.9521, 1.6409] total=5.4756\nrho=0.95 per pair=[1.1867, 2.2124, 1.9252] total=5.3243\nindependent marginals: 7.2036\ndiscordant pair dropped at 0.8: 3.8347",
+        "interpretation": "These pure Python evaluations repeat the chapter's three pairs at several correlations. At rho 0 the joint total, 7.2036, equals the independent-marginal total exactly, which is the limiting-case check from the first worked case. At rho 0.8 the joint total falls to 5.4756, so an implementation that silently ignored the cross term would overstate the loss by about 1.73 at the same declared parameter. Raising rho to 0.95 helps the concordant pair (1, 1) but hurts (-1, -0.5) and the discordant (0.2, -0.3), showing that each pair responds to the correlation differently. The final line shows the coverage trap: dropping the unmatched-looking third pair lowers the total to 3.8347, which looks like a better fit but only measures fewer rows."
+      }
     ]
   },
   {
@@ -252,6 +593,28 @@
     "suffix": ".py",
     "concepts": ["AR1", "boundary", "state", "stationary", "density"],
     "outcome": "Preserve every lag edge and initial-state term when evaluating an AR1 likelihood across data partitions.",
+    "key_terms": [
+      [
+        "AR(1) process",
+        "A series in which each value equals phi times the previous value plus independent Gaussian noise."
+      ],
+      [
+        "Stationary initial density",
+        "The distribution of the first value, normal with variance sigma^2/(1 - phi^2), which the likelihood must include once per series."
+      ],
+      [
+        "Transition term",
+        "The one-step contribution for y_t given y_(t-1) that every later row supplies."
+      ],
+      [
+        "Window specification",
+        "A Spark specification that partitions by the logical series key and orders by time so lag returns the true previous value."
+      ],
+      [
+        "Lag edge",
+        "The link between adjacent observations that must stay inside one ordered series; an arbitrary physical partition boundary must not cut it."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -261,6 +624,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "complete, chunk-reset and conditional AR(1) losses",
+        "language": "python",
+        "code": "import math\n\nphi, sigma = 0.7, 0.5\nseries = {\"a\": [1.0, 0.9, 0.6, 0.5], \"b\": [-1.0, -0.7, -0.2, 0.1]}\nstationary_var = sigma**2 / (1 - phi**2)\n\n\ndef initial(y):\n    return 0.5 * (math.log(2 * math.pi * stationary_var) + y * y / stationary_var)\n\n\ndef transitions(values):\n    return [\n        0.5 * (math.log(2 * math.pi * sigma**2) + (cur - phi * prev) ** 2 / sigma**2)\n        for prev, cur in zip(values, values[1:])\n    ]\n\n\ndef complete(values):\n    return initial(values[0]) + math.fsum(transitions(values))\n\n\nprint(\"stationary variance\", round(stationary_var, 6))\nprint(\"complete\", round(math.fsum(complete(v) for v in series.values()), 6))\nprint(\n    \"reset at t=2\", round(math.fsum(complete(v[:2]) + complete(v[2:]) for v in series.values()), 6)\n)\nprint(\"conditional\", round(math.fsum(math.fsum(transitions(v)) for v in series.values()), 6))\nprint(\"a shuffled\", round(complete([0.6, 1.0, 0.5, 0.9]), 6), \"vs\", round(complete(series[\"a\"]), 6))",
+        "output": "stationary variance 0.490196\ncomplete 4.897675\nreset at t=2 5.80902\nconditional 1.732748\na shuffled 2.964838 vs 2.354438",
+        "interpretation": "This plain Python calculation uses the chapter's two series with phi 0.7 and sigma 0.5, so the stationary initial variance is 0.25 / 0.51, about 0.4902. The complete-series loss is 4.897675, the value Spark must reproduce with F.lag over a window partitioned by series and ordered by t. Restarting each series at t = 2 gives 5.80902 because two transition terms are replaced with stationary initial terms. The conditional likelihood, 1.732748, drops both initial densities on purpose and is a different declared objective. Shuffling series a changes its loss from 2.354438 to 2.964838, which is why an ordering column and a tie policy belong in the window specification rather than relying on row arrival order."
+      }
     ]
   },
   {
@@ -274,6 +646,28 @@
     "suffix": ".scala",
     "concepts": ["Aggregator", "encoder", "monoid", "weighted", "moments"],
     "outcome": "Implement a typed weighted-statistics Aggregator and verify zero, merge and partition invariance with an empty-input policy.",
+    "key_terms": [
+      [
+        "Aggregator",
+        "A typed Spark interface with input, buffer and output types and the zero, reduce, merge and finish methods."
+      ],
+      [
+        "Monoid",
+        "A collection with an associative combine operation and an identity element, which lets partial results merge in any tree shape."
+      ],
+      [
+        "Merge law",
+        "The rule that merging buffers (n1, s1) and (n2, s2) yields (n1 + n2, s1 + s2) regardless of partition boundaries."
+      ],
+      [
+        "Encoder",
+        "The description of how JVM objects become Spark's internal representation for buffers and outputs."
+      ],
+      [
+        "Empty-input policy",
+        "The declared output when no observations arrive, which the identity buffer must support without dividing by zero."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 typed aggregate API",
@@ -283,6 +677,15 @@
         "Spark 4.0.1 SQL null semantics",
         "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "exhaustive merge checks for the count and sum buffer",
+        "language": "python",
+        "code": "from itertools import combinations\n\nvalues = [1.0, 3.0, 3.0, 3.0]\nzero = (0, 0.0)\n\n\ndef reduce_rows(rows):\n    return (len(rows), sum(rows))\n\n\ndef merge(a, b):\n    return (a[0] + b[0], a[1] + b[1])\n\n\ndef merge_means(a, b):\n    means = [s / n for n, s in (a, b) if n]\n    return (a[0] + b[0], sum(means) / len(means) * (a[0] + b[0]) if means else 0.0)\n\n\nresults = {\"merge\": set(), \"merge_means\": set()}\nfor cut1, cut2 in combinations(range(len(values) + 1), 2):\n    parts = [values[:cut1], values[cut1:cut2], values[cut2:]]\n    for name, fn in ((\"merge\", merge), (\"merge_means\", merge_means)):\n        acc = zero\n        for part in parts:\n            acc = fn(acc, reduce_rows(part))\n        results[name].add(acc)\nprint({name: sorted(found) for name, found in results.items()})\nprint(\"identity:\", merge(zero, (4, 10.0)) == (4, 10.0), \"empty:\", reduce_rows([]))",
+        "output": "{'merge': [(4, 10.0)], 'merge_means': [(4, 8.0), (4, 10.0), (4, 10.666666666666668), (4, 11.0)]}\nidentity: True empty: (0, 0)",
+        "interpretation": "This Python model of the typed buffer enumerates every way to cut the four observations 1, 3, 3, 3 into three ordered chunks, including empty ones, and folds the reduced chunks with each merge function. The correct merge of counts and sums reaches the same buffer, (4, 10.0), for all ten splits, so the final mean is 2.5 wherever the partition boundaries fall. The faulty merge, which averages chunk means and rescales, produces four different totals between 8 and 11 depending on the split. A single Dataset run would show only one of those values, which is the reason the chapter tests merge directly. The last line checks that the zero buffer is a true identity and that an empty chunk reduces to (0, 0) without dividing."
+      }
     ]
   },
   {
@@ -296,6 +699,28 @@
     "suffix": ".scala",
     "concepts": ["UDAF", "SQL", "null", "weights", "encoders"],
     "outcome": "Register a typed aggregate for SQL and test its null, invalid-weight and zero-weight behavior against built-in sums.",
+    "key_terms": [
+      [
+        "UDAF registration",
+        "Wrapping a typed Aggregator with udaf and registering it so SQL callers can invoke it by name without knowing the Scala implementation."
+      ],
+      [
+        "Accepted set",
+        "The rows whose value and weight are both present and finite and whose weight is nonnegative; only these enter the weighted sums."
+      ],
+      [
+        "Weighted mean",
+        "The sum of w times x over the accepted set divided by the sum of accepted weights."
+      ],
+      [
+        "Auditable struct",
+        "A result that keeps rows seen, rows accepted, total weight and weighted sum so a caller can inspect exclusions before dividing."
+      ],
+      [
+        "Zero-weight row",
+        "An accepted observation that contributes to neither numerator nor denominator, which differs from a missing row."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 typed aggregate API",
@@ -305,6 +730,15 @@
         "Spark 4.0.1 SQL null semantics",
         "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "the weighted mean contract in DuckDB SQL",
+        "language": "python",
+        "code": "import duckdb\n\ncon = duckdb.connect()\ncon.execute(\"CREATE TABLE obs(v DOUBLE, w DOUBLE)\")\ncon.execute(\"INSERT INTO obs VALUES (2, 1), (10, 3), (NULL, 2), (9, -1)\")\nquery = \"\"\"\nSELECT count(*) AS seen,\n       count(*) FILTER (WHERE v IS NOT NULL AND w > 0) AS accepted,\n       sum(w) FILTER (WHERE v IS NOT NULL AND w > 0) AS total_weight,\n       sum(v * w) FILTER (WHERE v IS NOT NULL AND w > 0) AS weighted_sum\nFROM obs\n\"\"\"\nseen, accepted, weight, total = con.execute(query).fetchone()\nprint(seen, accepted, weight, total, total / weight if weight else None)\nprint(\"naive sum(v*w)/sum(w):\", con.execute(\"SELECT sum(v * w) / sum(w) FROM obs\").fetchone()[0])\ncon.execute(\"DELETE FROM obs WHERE v IS NOT NULL\")\nprint(con.execute(query).fetchone())",
+        "output": "4 2 4.0 32.0 8.0\nnaive sum(v*w)/sum(w): 4.6\n(1, 0, None, None)",
+        "interpretation": "DuckDB stands in for Spark SQL here; the FILTER clauses express the same accepted-row rule the Scala aggregator enforces, a non-null value with a positive weight. On the chapter's fixture the query reports four rows seen, two accepted, total weight 4 and weighted sum 32, so the mean of 8.0 is returned together with its exclusion counts. The naive ratio of sum(v * w) to sum(w) gives 4.6 because SQL's sum skips the null product but still counts that row's weight of 2 and also includes the -1 weight. After removing every non-null value, the summary is (1, 0, None, None): one row seen, none accepted and no denominator, so the caller must decide how to represent an undefined mean."
+      }
     ]
   },
   {
@@ -318,6 +752,28 @@
     "suffix": ".scala",
     "concepts": ["UDF", "optimizer", "null", "semantics", "softplus"],
     "outcome": "Implement equivalent stable likelihood contributions with SQL expressions and a typed Scala UDF and interpret their plans.",
+    "key_terms": [
+      [
+        "User-defined function (UDF)",
+        "A callable implementation of a scalar operation whose internal logic is generally opaque to SQL algebraic rewrites."
+      ],
+      [
+        "Native column expression",
+        "An expression tree, such as col(\"x\") * col(\"x\"), that Catalyst understands and can analyze and optimize."
+      ],
+      [
+        "Null semantics",
+        "The deliberate rule for null inputs; here both native multiplication and the boxed UDF propagate null rather than treating it as zero."
+      ],
+      [
+        "Boxed Double",
+        "The java.lang.Double type used in the UDF signature so a null input can be observed and returned."
+      ],
+      [
+        "Language boundary",
+        "The cost and visibility change when work leaves Catalyst, larger for a Python UDF that crosses a process and serialization boundary."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 typed aggregate API",
@@ -327,6 +783,14 @@
         "Spark 4.0.1 SQL null semantics",
         "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "native softplus and square without a UDF",
+        "language": "python",
+        "code": "from pyspark.sql import functions as F\n\ndf = spark.createDataFrame([(-1000.0,), (0.0,), (1000.0,), (None,)], \"z double\")\nsoftplus = F.greatest(F.col(\"z\"), F.lit(0.0)) + F.log1p(F.exp(-F.abs(F.col(\"z\"))))\nout = df.select(\"z\", (F.col(\"z\") * F.col(\"z\")).alias(\"square\"), softplus.alias(\"softplus\"))\nout.explain(\"extended\")\nout.show()",
+        "interpretation": "This PySpark sketch carries no output because Spark is not installed in the authoring environment; the chapter's Scala program supplies the checked results. The square column is an ordinary multiplication, so a null z yields null rather than an exception or a zero, the same contract the custom square function had to match. The softplus column composes greatest, log1p, exp and abs, all native expressions, so the optimizer can see each operation in the analyzed and optimized plans printed by explain. Expected values follow from the algebra: about 0 for z = -1000, log 2 or roughly 0.6931 for z = 0, and exactly 1000 for z = 1000 because exp(-1000) underflows harmlessly inside log1p."
+      }
     ]
   },
   {
@@ -340,12 +804,42 @@
     "suffix": ".scala",
     "concepts": ["Transformer", "Param", "persistence", "schema"],
     "outcome": "Build a schema-checked feature Transformer whose declared parameters survive a save and fresh load.",
+    "key_terms": [
+      [
+        "Transformer",
+        "A pipeline stage that applies an already specified operation to a DataFrame without learning from data."
+      ],
+      [
+        "Param",
+        "Named, validated stage state, such as the DoubleParam offset, owned by the stage UID and included in persistence."
+      ],
+      [
+        "UID",
+        "The unique identifier that distinguishes one stage's parameter ownership within a pipeline."
+      ],
+      [
+        "transformSchema",
+        "The method that checks the input column type and rejects an output-column collision before any data is replaced."
+      ],
+      [
+        "Default params persistence",
+        "The DefaultParamsWritable and DefaultParamsReadable pattern that saves and reloads a stage whose state is entirely supported Params."
+      ]
+    ],
     "sources": [
       ["Spark 4.0.1 ML pipeline contract", "https://spark.apache.org/docs/4.0.1/ml-pipeline.html"],
       [
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "pipeline round trip and a collision check for Shift",
+        "language": "scala",
+        "code": "import org.apache.spark.ml.{Pipeline, PipelineModel}\nimport java.nio.file.Files\n\nval shift = new Shift().setInputCol(\"x\").setOutputCol(\"x_shifted\").setAmount(3.0)\nval data = Seq(Some(1.0), Some(2.0), None).toDF(\"x\")\nval fitted = new Pipeline().setStages(Array(shift)).fit(data)\nval dir = Files.createTempDirectory(\"shift-pipeline\").resolve(\"model\").toString\nfitted.write.save(dir)\nval restored = PipelineModel.load(dir)\nassert(restored.stages.head.uid == shift.uid)\nassert(restored.transform(data).collect().toSeq == fitted.transform(data).collect().toSeq)\n\nval clash = Seq((1.0, 99.0)).toDF(\"x\", \"x_shifted\")\nval rejected = scala.util.Try(restored.transform(clash))\nassert(rejected.failed.get.isInstanceOf[IllegalArgumentException])",
+        "interpretation": "This Scala fragment, shown without output because no Spark runtime is available while authoring, extends the chapter's save and restore case from a bare stage to a fitted PipelineModel, which is how a reusable transformer usually ships. Saving the pipeline writes the Shift stage's DefaultParamsWritable metadata, including the amount of 3.0, the column names and the UID, and PipelineModel.load reconstructs the stage through the companion object's DefaultParamsReadable. The two assertions compare the restored UID and the transformed rows, where the null input must still map to null. The final Try reproduces the second worked case after restoration: a frame that already has x_shifted must fail transformSchema with IllegalArgumentException, so a loaded model keeps the same collision guard as a fresh one."
+      }
     ]
   },
   {
@@ -359,12 +853,40 @@
     "suffix": ".scala",
     "concepts": ["Estimator", "Model", "training", "transform", "leakage"],
     "outcome": "Implement a training-only mean Estimator and evaluate its immutable fitted Model on held-out data.",
+    "key_terms": [
+      [
+        "Estimator",
+        "A pipeline stage whose fit method consumes training data and returns a fitted Model."
+      ],
+      [
+        "Fitted Model",
+        "A Transformer that carries learned state, here the training mean, and applies it without recomputing it."
+      ],
+      [
+        "Data leakage",
+        "Using evaluation data to compute preprocessing statistics, which makes held-out results look better than they should."
+      ],
+      [
+        "Frozen state",
+        "The learned scalar stored as a Param on the model so every later transform uses the same training value."
+      ],
+      ["Parent link", "The setParent call that records which Estimator produced a fitted Model."]
+    ],
     "sources": [
       ["Spark 4.0.1 ML pipeline contract", "https://spark.apache.org/docs/4.0.1/ml-pipeline.html"],
       [
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "fold-local centering against a global center",
+        "language": "python",
+        "code": "import numpy as np\n\ntrain, test = np.array([1.0, 2.0, 3.0]), np.array([10.0, 12.0])\ncenter = train.mean()\nprint(\"persisted center\", center, \"test transformed\", test - center)\nprint(\"refit on test\", test - test.mean())\n\nvalues = np.array([1.0, 2.0, 3.0, 10.0, 12.0, 14.0])\nfolds = [np.array([0, 1, 2]), np.array([3, 4, 5])]\nglobal_center = values.mean()\nfor k, held_out in enumerate(folds):\n    fit_rows = np.setdiff1d(np.arange(len(values)), held_out)\n    fold_center = values[fit_rows].mean()\n    print(f\"fold {k}: fold center {fold_center:.1f}, global center {global_center:.1f}\")",
+        "output": "persisted center 2.0 test transformed [ 8. 10.]\nrefit on test [-1.  1.]\nfold 0: fold center 12.0, global center 7.0\nfold 1: fold center 2.0, global center 7.0",
+        "interpretation": "This numpy sketch replays the chapter's centering numbers outside Spark. The persisted training mean of 2.0 maps the test values 10 and 12 to 8 and 10, which keeps the distribution shift visible, while refitting on the test rows forces them to -1 and 1 and hides it. The fold loop shows the cross-validation version of the same leak on six values. A center computed once over all rows is 7.0, but when the first three values are held out the training fold's mean is 12.0, and when the last three are held out it is 2.0. Precomputing 7.0 would give each held-out fold information from its own rows, which is why the CenterEstimator belongs inside the pipeline that CrossValidator refits per fold."
+      }
     ]
   },
   {
@@ -378,6 +900,28 @@
     "suffix": ".md",
     "concepts": ["Arrow", "pandas", "batch", "schema", "null"],
     "outcome": "Use an explicitly prepared mapInPandas project and audit batch-size invariance without mistaking a batch for a group.",
+    "key_terms": [
+      [
+        "Arrow",
+        "A columnar interchange format that Spark uses to transfer data efficiently between the JVM and Python."
+      ],
+      [
+        "mapInPandas",
+        "A Spark function that passes an iterator of pandas DataFrames from each partition to Python and expects frames matching a declared output schema."
+      ],
+      [
+        "Batch summary",
+        "The count, loss sum and gradient sum one batch returns; summing batch summaries yields the partition summary."
+      ],
+      [
+        "Statistical group",
+        "A set defined by the model, such as one patient's observations, which need not align with a partition or a batch."
+      ],
+      [
+        "Schema conversion",
+        "The type mapping for nullable integers, timestamps, strings and floats across the Arrow boundary, which can change values if mismatched."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 Arrow and pandas guide",
@@ -387,6 +931,15 @@
         "Spark 4.0.1 SQL programming guide",
         "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "a mapInPandas function that consumes every batch",
+        "language": "python",
+        "code": "import pandas as pd\n\n\ndef summarize(batches):\n    for batch in batches:\n        yield pd.DataFrame(\n            {\"n\": [len(batch)], \"total\": [batch[\"y\"].sum()], \"ids\": [len(set(batch[\"id\"]))]}\n        )\n\n\ndef first_batch_only(batches):\n    batch = next(batches)\n    yield pd.DataFrame(\n        {\"n\": [len(batch)], \"total\": [batch[\"y\"].sum()], \"ids\": [len(set(batch[\"id\"]))]}\n    )\n\n\nframe = pd.DataFrame({\"id\": [11, 12, 13, 14, 15], \"y\": [1.0, 3.0, 3.0, 3.0, 5.0]})\nfor sizes in ([2, 2, 1], [5], [1, 1, 1, 1, 1]):\n    starts = [sum(sizes[:i]) for i in range(len(sizes))]\n    for fn in (summarize, first_batch_only):\n        batches = iter([frame.iloc[s : s + size] for s, size in zip(starts, sizes)])\n        out = pd.concat(fn(batches))\n        n, total = int(out[\"n\"].sum()), out[\"total\"].sum()\n        print(sizes, fn.__name__, \"rows\", n, \"mean\", total / n)",
+        "output": "[2, 2, 1] summarize rows 5 mean 3.0\n[2, 2, 1] first_batch_only rows 2 mean 2.0\n[5] summarize rows 5 mean 3.0\n[5] first_batch_only rows 5 mean 3.0\n[1, 1, 1, 1, 1] summarize rows 5 mean 3.0\n[1, 1, 1, 1, 1] first_batch_only rows 1 mean 1.0",
+        "interpretation": "This runs the function bodies with pandas only, feeding them an iterator of slices the way mapInPandas feeds Arrow batches, so it shows the iterator contract rather than Spark transport. The reference values 1, 3, 3, 3 and 5 have mean 3.0. The correct function yields one summary per batch and reaches 5 rows and mean 3.0 under all three layouts. The buggy function that calls next once looks perfect when everything fits in a single batch of five, reports 2 rows and mean 2.0 with batches of 2, 2 and 1, and reports 1 row with single-row batches. Lowering spark.sql.execution.arrow.maxRecordsPerBatch in a test is therefore the cheapest way to force the multi-batch layout that exposes it."
+      }
     ]
   },
   {
@@ -400,6 +953,28 @@
     "suffix": ".scala",
     "concepts": ["Catalyst", "plan", "AQE", "semantics"],
     "outcome": "Capture all three planning layers and prove result equivalence before interpreting an optimizer or AQE change.",
+    "key_terms": [
+      [
+        "Analyzed plan",
+        "The logical plan after names, types and functions are resolved against the catalog and schema."
+      ],
+      [
+        "Optimized plan",
+        "The logical plan after Catalyst applies semantics-preserving rewrites such as expression simplification or filter movement."
+      ],
+      [
+        "Physical plan",
+        "The selected executable operators and distribution strategy, including scans, shuffles and exchanges."
+      ],
+      [
+        "Adaptive query execution (AQE)",
+        "Runtime adaptation that can change parts of the physical execution; the fixture disables it for an easier comparison."
+      ],
+      [
+        "Result equivalence",
+        "Evidence from an actual action that two plans return the same values, which a plan printout alone cannot provide."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 SQL performance tuning",
@@ -409,6 +984,14 @@
         "Spark 4.0.1 Catalyst expression source",
         "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "the same plans from PySpark",
+        "language": "python",
+        "code": "from pyspark.sql import functions as F\nfrom pyspark.sql.types import DoubleType\n\nbase = spark.range(0, 12).where(F.col(\"id\") < 4)\nnative = base.select((F.col(\"id\").cast(\"double\") + 1).alias(\"x\"))\nplus_one = F.udf(lambda v: float(v) + 1.0, DoubleType())\nwrapped = base.select(plus_one(\"id\").alias(\"x\"))\n\nnative.explain(\"extended\")\nwrapped.explain(\"extended\")\nassert native.orderBy(\"x\").collect() == wrapped.orderBy(\"x\").collect()",
+        "interpretation": "This PySpark version of the chapter's Scala queries has no printed output because PySpark is not installed in the authoring environment, and plan text varies with the session. The native query should show the filter id < 4 and a cast plus addition that Catalyst can see. The Python UDF adds a different boundary from the Scala closure: rows are shipped to a Python worker, and the physical plan gains a BatchEvalPython or ArrowEvalPython node. Both queries must still return 1.0, 2.0, 3.0 and 4.0, compared after an explicit orderBy rather than relying on collection order. Matching results say nothing about relative speed on twelve rows, so the explain output is evidence about visibility only."
+      }
     ]
   },
   {
@@ -422,6 +1005,28 @@
     "suffix": ".scala",
     "concepts": ["whole", "stage", "codegen", "UDF", "interpreted"],
     "outcome": "Inspect code-generation boundaries and verify that codegen settings preserve the same null-aware numerical result.",
+    "key_terms": [
+      [
+        "Whole-stage code generation",
+        "Fusing adjacent supported physical operators into one generated JVM function to reduce interpretation and virtual-call overhead."
+      ],
+      [
+        "Codegen boundary",
+        "A point where an unsupported expression or operator stops fusion and introduces a separate stage or fallback path."
+      ],
+      [
+        "spark.sql.codegen.wholeStage",
+        "The configuration that enables or disables whole-stage fusion for a query without removing every generated projection."
+      ],
+      [
+        "Interpreted evaluation",
+        "Evaluating an expression through its eval method rather than generated code; it must give the same null-aware result."
+      ],
+      [
+        "Semantic equivalence",
+        "The requirement that generated and non-fused execution return identical values, nulls and errors for the same query."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 SQL performance tuning",
@@ -431,6 +1036,15 @@
         "Spark 4.0.1 Catalyst expression source",
         "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "where square plus one stops fitting in a long",
+        "language": "python",
+        "code": "import math\n\nimport numpy as np\n\nprint([x * x + 1 for x in range(10)])\nlimit = 2**63 - 1\nedge = math.isqrt(limit - 1)\nprint(\"largest safe x:\", edge, \"x*x+1 =\", edge * edge + 1)\nwith np.errstate(over=\"ignore\"):\n    wrapped = np.array([edge, edge + 1], dtype=np.int64) ** 2 + 1\nprint(\"int64 results:\", wrapped.tolist())",
+        "output": "[1, 2, 5, 10, 17, 26, 37, 50, 65, 82]\nlargest safe x: 3037000499 x*x+1 = 9223372030926249002\nint64 results: [9223372030926249002, -9223372036709301615]",
+        "interpretation": "Python integers and a numpy int64 array stand in for Spark's LongType here. The first line matches the chapter's expected values for 0 through 9, ending at 82. The largest x for which x squared plus one still fits below 2 to the 63rd minus 1 is 3037000499, giving 9223372030926249002. One step larger, the int64 computation silently wraps to a large negative number. Spark 4.0.1 enables ANSI mode by default and raises an arithmetic overflow error instead, while setting spark.sql.ansi.enabled to false restores the legacy wraparound that numpy shows. That is the overflow contract the chapter says must be declared before the generated-code fixture can be trusted for larger inputs."
+      }
     ]
   },
   {
@@ -444,6 +1058,28 @@
     "suffix": ".md",
     "concepts": ["SparkSessionExtensions", "injection", "lifecycle"],
     "outcome": "Compile an owned Spark4.0.1 extension and prove that it is installed when the session is constructed.",
+    "key_terms": [
+      [
+        "SparkSessionExtensions",
+        "Spark's hook for injecting functions and query rules into a session; it carries no source or binary compatibility guarantee."
+      ],
+      [
+        "Function builder",
+        "A registered entry that binds a SQL identifier, expression metadata and a builder that checks arity and constructs an expression node."
+      ],
+      [
+        "Initialization order",
+        "The contract that extensions are attached with withExtensions before getOrCreate, not added after queries have been analyzed."
+      ],
+      [
+        "Version pinning",
+        "Compiling against the exact Spark, Scala and JDK versions of the prepared image, here Spark 4.0.1, Scala 2.13 and JDK 17."
+      ],
+      [
+        "Extension JAR",
+        "The packaged classes that must reach both the driver and every executor with compatible dependencies."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 extension API",
@@ -453,6 +1089,14 @@
         "Spark 4.0.1 Catalyst expression source",
         "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "three SQL calls that fail at different stages",
+        "language": "sql",
+        "code": "-- session started with spark.sql.extensions=ds60.spark.TeachingExtensions\nSELECT teaching_softplus(CAST(z AS DOUBLE)) AS sp\nFROM VALUES (-1000), (0), (1000), (NULL) AS t(z);\n\nSELECT teaching_softplus(1);            -- resolved name, rejected by the type check\nSELECT teaching_softplus(1D, 2D);       -- rejected by the builder's arity require\nSELECT teaching_softplus_v2(1D);        -- unresolved routine, no builder registered\nDESCRIBE FUNCTION EXTENDED teaching_softplus;",
+        "interpretation": "These statements are meant for a spark-sql shell started with the TeachingExtensions class on the classpath and named in spark.sql.extensions; they are not executed here, so no result grid is shown. The first query casts every input to DOUBLE and should return roughly 0, 0.6931, 1000 and NULL. The next three calls each fail at a different point of the lifecycle. The INTEGER literal finds the registered builder but fails checkInputDataTypes during analysis. The two-argument call never builds a node because the builder's require rejects the argument list. The misspelled name fails even earlier with an unresolved routine error, which no expression code can affect. DESCRIBE FUNCTION EXTENDED confirms that the injected documentation entry is what the session actually loaded."
+      }
     ]
   },
   {
@@ -466,6 +1110,28 @@
     "suffix": ".md",
     "concepts": ["UnaryExpression", "eval", "doGenCode", "type", "check"],
     "outcome": "Implement a stable softplus expression with matching interpreted and generated-code behavior, type and null checks.",
+    "key_terms": [
+      [
+        "Catalyst expression",
+        "A node in Spark's expression tree that declares its input contract, output type, null behavior, evaluation and child replacement."
+      ],
+      [
+        "UnaryExpression",
+        "The base class for a node with one child that supplies null-propagation structure."
+      ],
+      [
+        "nullSafeEval",
+        "The interpreted evaluation method that receives a nonnull input value and computes the function."
+      ],
+      [
+        "doGenCode",
+        "The method that emits Java source implementing the same function inside the engine's null-handling scaffold."
+      ],
+      [
+        "withNewChildInternal",
+        "The method that returns a copy of the node with a rewritten child so tree transformations preserve its behavior."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 extension API",
@@ -475,6 +1141,15 @@
         "Spark 4.0.1 Catalyst expression source",
         "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "the value table against a naive formula",
+        "language": "python",
+        "code": "import math\n\n\ndef stable(z):\n    if z is None:\n        return None\n    return max(z, 0.0) + math.log1p(math.exp(-abs(z)))\n\n\ndef naive(z):\n    try:\n        return math.log(1.0 + math.exp(z))\n    except OverflowError:\n        return \"OverflowError\"\n\n\nfor z in (-1000.0, -40.0, 0.0, 40.0, 1000.0, None):\n    print(z, stable(z), naive(z) if z is not None else \"TypeError avoided\")\nprint(\"log(2) =\", math.log(2.0))",
+        "output": "-1000.0 0.0 0.0\n-40.0 4.248354255291589e-18 0.0\n0.0 0.6931471805599453 0.6931471805599453\n40.0 40.0 40.0\n1000.0 1000.0 OverflowError\nNone None TypeError avoided\nlog(2) = 0.6931471805599453",
+        "interpretation": "This plain Python check reproduces the value table outside the JVM. The stable expression returns 0.0 at -1000, exactly log(2) at the origin, 40.0 and 1000.0 at the large positive inputs, and None for a missing value, matching every row the Catalyst probe asserts. The naive log(1 + exp(z)) agrees at the origin and at 40 but overflows at 1000, and at -40 it returns 0.0 where the stable form keeps about 4.25e-18 because exp(-40) is lost when added to 1.0. The doGenCode fragment must reproduce the stable branch structure, not the naive one, because a generated Java Math.exp would overflow to Infinity in the same place."
+      }
     ]
   },
   {
@@ -488,6 +1163,28 @@
     "suffix": ".md",
     "concepts": ["Rule", "logical", "plan", "rewrite", "idempotence"],
     "outcome": "Prove and test one narrow idempotent integer rewrite while rejecting unsafe rewrites involving randomness or floating arithmetic.",
+    "key_terms": [
+      [
+        "Optimizer rule",
+        "A transformation that replaces an expression tree with another that must preserve meaning for every supported input."
+      ],
+      [
+        "Idempotent clamp",
+        "The identity c(c(x)) = c(x) for c(x) = max(x, 0), which holds for every signed 64-bit integer and for null."
+      ],
+      [
+        "Restricted pattern",
+        "A match on the exact node shape ClipCount(ClipCount(inner)) rather than any function with a similar name."
+      ],
+      [
+        "Rule termination",
+        "The property that repeated rule application stops, here because each rewrite removes one clamp node."
+      ],
+      [
+        "Unsafe floating-point rewrite",
+        "A tempting algebraic simplification that can change results for signed zero, NaN, overflow or exceptions."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 extension API",
@@ -497,6 +1194,15 @@
         "Spark 4.0.1 Catalyst expression source",
         "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "checking the clamp identity and a tempting float rewrite",
+        "language": "python",
+        "code": "import math\n\n\ndef clip(x):\n    return None if x is None else max(x, 0)\n\n\nedges = [-(2**63), -1, 0, 1, 2**63 - 1, None]\nprint([clip(x) for x in edges])\nprint(\"idempotent on edges:\", all(clip(clip(x)) == clip(x) for x in edges))\n\nx = -0.0\nprint(\"x + 0.0 =\", x + 0.0, \"but x =\", x)\nprint(\"copysign tells them apart:\", math.copysign(1.0, x + 0.0), math.copysign(1.0, x))",
+        "output": "[0, 0, 0, 1, 9223372036854775807, None]\nidempotent on edges: True\nx + 0.0 = 0.0 but x = -0.0\ncopysign tells them apart: 1.0 -1.0",
+        "interpretation": "Python's unbounded integers stand in for BIGINT here, with the minimum and maximum long written out explicitly. Clamping the six boundary inputs yields 0, 0, 0, 1, 9223372036854775807 and None, and applying the clamp twice changes nothing, the same structural fact the optimizer rule relies on when it removes the outer ClipCount. Because max only compares and selects, no input in that range can overflow. The last two lines show why the chapter warns against rewriting x + 0.0 to x for doubles: adding positive zero to negative zero produces positive zero, and copysign reports 1.0 for the sum but -1.0 for the original, so the two expressions are observably different under IEEE arithmetic."
+      }
     ]
   },
   {
@@ -510,6 +1216,28 @@
     "suffix": ".scala",
     "concepts": ["dual", "numbers", "forward", "AD", "chain", "rule"],
     "outcome": "Propagate a scalar derivative through a tiny original dual-number algebra and aggregate it against an analytic gradient.",
+    "key_terms": [
+      [
+        "Automatic differentiation",
+        "Applying the chain rule to a computation built from supported primitives, without perturbing inputs as finite differences do."
+      ],
+      [
+        "Forward mode",
+        "The AD mode that propagates one directional derivative alongside each value as the computation runs."
+      ],
+      [
+        "Dual number",
+        "A pair a + b epsilon with epsilon squared equal to zero, where a is the value and b is the tangent."
+      ],
+      [
+        "Tangent seed",
+        "The initial derivative component of the input, such as one for the derivative with respect to x."
+      ],
+      [
+        "Reverse mode",
+        "The AD mode that records a tape and propagates adjoints backward, often cheaper with many parameters and one scalar output."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 extension API",
@@ -519,6 +1247,15 @@
         "Spark 4.0.1 Catalyst expression source",
         "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "a Python Dual with a broken product rule",
+        "language": "python",
+        "code": "import math\nfrom dataclasses import dataclass\n\n\n@dataclass(frozen=True)\nclass Dual:\n    value: float\n    tangent: float\n\n    def __add__(self, b):\n        return Dual(self.value + b.value, self.tangent + b.tangent)\n\n    def __mul__(self, b):\n        return Dual(self.value * b.value, self.tangent * b.value + self.value * b.tangent)\n\n    def exp(self):\n        e = math.exp(self.value)\n        return Dual(e, e * self.tangent)\n\n\nclass HalfProduct(Dual):\n    def __mul__(self, b):\n        return HalfProduct(self.value * b.value, self.tangent * b.value)\n\n\nfor kind in (Dual, HalfProduct):\n    out = [(x, (lambda d: d * d + d.exp())(kind(x, 1.0)).tangent) for x in (-1.0, 0.0, 1.0)]\n    print(kind.__name__, [(x, round(t, 6)) for x, t in out])\nprint(\"analytic\", [round(2 * x + math.exp(x), 6) for x in (-1.0, 0.0, 1.0)])\nd = Dual(1.0, 2.0)\nprint(\"direction 2 at x=1:\", round((d * d + d.exp()).tangent, 6), round(2 * (2 + math.e), 6))",
+        "output": "Dual [(-1.0, -1.632121), (0.0, 1.0), (1.0, 4.718282)]\nHalfProduct [(-1.0, -0.632121), (0.0, 1.0), (1.0, 3.718282)]\nanalytic [-1.632121, 1.0, 4.718282]\ndirection 2 at x=1: 9.436564 9.436564",
+        "interpretation": "The Python Dual mirrors the Scala case class line for line, so its tangents for f(x) = x squared plus e to the x can be compared with the analytic derivative 2x + e to the x. At -1, 0 and 1 the correct class returns -1.632121, 1.0 and 4.718282, matching the analytic list exactly. The HalfProduct variant keeps only the first product-rule term, so the square contributes x instead of 2x and every tangent away from zero is off by x. At x = 0 both versions agree, which is why a test at the origin alone would pass the defect. With the seed tangent 2 at x = 1 the result is 9.436564, twice the unit-direction derivative."
+      }
     ]
   },
   {
@@ -532,6 +1269,28 @@
     "suffix": ".scala",
     "concepts": ["reverse", "AD", "join", "multiplicity", "shuffle", "adjoint"],
     "outcome": "Use join multiplicity to show that a row derivative needs relational semantics and that Catalyst supplies no general global reverse-mode tape.",
+    "key_terms": [
+      [
+        "Analytic gradient",
+        "The hand-derived derivative formula, here the sum of x times (theta x - 1), evaluated by Spark at a fixed theta."
+      ],
+      [
+        "Numeric summary",
+        "The ordinary doubles a Spark action returns; they carry no distributed operator graph or backward schedule."
+      ],
+      [
+        "Detached scalar",
+        "A collected value wrapped in a new tensor; it is a fresh leaf unrelated to the Spark feature data."
+      ],
+      [
+        "Partition-local AD",
+        "Computing derivatives with a local AD engine inside each task before returning numeric gradients for the driver to sum."
+      ],
+      [
+        "Global tape",
+        "A single differentiation record over an entire query, which Spark does not keep across joins, sorts, retries and materialization."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 extension API",
@@ -541,6 +1300,15 @@
         "Spark 4.0.1 Catalyst expression source",
         "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "re-evaluating the squared loss along a descent path",
+        "language": "python",
+        "code": "features = [1.0, 2.0, 4.0]\n\n\ndef summary(theta):\n    loss = sum((theta * x - 1.0) ** 2 / 2 for x in features)\n    grad = sum((theta * x - 1.0) * x for x in features)\n    return loss, grad\n\n\ntheta, frozen = 0.5, summary(0.5)\nprint(\"theta=0.5\", frozen)\nfor step in range(3):\n    loss, grad = summary(theta)\n    theta -= grad / 21.0\n    print(f\"step {step}: theta={theta:.6f} loss={summary(theta)[0]:.6f}\")\nprint(\n    \"frozen gradient reused at theta=0.6 would still say\",\n    frozen[1],\n    \"but truth is\",\n    summary(0.6)[1],\n)",
+        "output": "theta=0.5 (0.625, 3.5)\nstep 0: theta=0.333333 loss=0.333333\nstep 1: theta=0.333333 loss=0.333333\nstep 2: theta=0.333333 loss=0.333333\nfrozen gradient reused at theta=0.6 would still say 3.5 but truth is 5.6",
+        "interpretation": "This plain Python trace reproduces the chapter's fixture: at theta 0.5 the loss is 0.625 and the gradient is 3.5. The squared loss is quadratic in theta with curvature equal to the sum of squared features, 1 + 4 + 16 = 21, so a step of gradient divided by 21 lands on the exact minimizer 1/3 in one move, where the loss is 1/3 as well. Later steps change nothing because the freshly evaluated gradient is zero there. The last line is the frozen-evaluation failure from the second worked case: the collected gradient remains 3.5, while re-evaluating at 0.6 gives 5.6, so a loop that keeps the old number would step in the wrong amount."
+      }
     ]
   },
   {
@@ -554,6 +1322,28 @@
     "suffix": ".md",
     "concepts": ["ABI", "Python", "JVM", "Torch", "Arrow", "environment"],
     "outcome": "Verify a combined project environment and make process, package, data and memory boundaries explicit before training.",
+    "key_terms": [
+      [
+        "Combined environment",
+        "One prepared image in which Spark, PyTorch, SciPy, pandas and Arrow are installed together and visible to every worker."
+      ],
+      [
+        "SparkObjective",
+        "The integration class that distributes an immutable parameter vector and returns detached loss and gradient summaries per evaluation."
+      ],
+      [
+        "Reduction setting",
+        "The declared choice between summed and weighted-mean loss, where the mean divides global sums by the global accepted weight."
+      ],
+      [
+        "L-BFGS-B",
+        "A bounded quasi-Newton optimizer that the driver helper runs on the combined Spark objective and gradient."
+      ],
+      [
+        "Projected gradient",
+        "The gradient after removing components blocked by active bounds; it measures stationarity for a constrained optimum."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 TorchDistributor implementation",
@@ -563,6 +1353,15 @@
         "PyTorch 2.9 distributed data parallel",
         "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "sum and weighted-mean reductions over unequal partitions",
+        "language": "python",
+        "code": "partitions = [{\"n\": 1, \"loss\": 0.7, \"grad\": 1.0}, {\"n\": 3, \"loss\": 2.4, \"grad\": 9.0}]\nn = sum(p[\"n\"] for p in partitions)\ntotal_grad = sum(p[\"grad\"] for p in partitions)\nprint(\"reduction=sum           grad\", total_grad)\nprint(\"reduction=weighted_mean grad\", total_grad / n)\nprint(\n    \"mean of local means      grad\", sum(p[\"grad\"] / p[\"n\"] for p in partitions) / len(partitions)\n)\n\nmerged = [{\"n\": 4, \"loss\": 3.1, \"grad\": 10.0}]\nfor layout in (partitions, merged):\n    print(\n        len(layout), \"partition(s) ->\", sum(p[\"grad\"] for p in layout) / sum(p[\"n\"] for p in layout)\n    )",
+        "output": "reduction=sum           grad 10.0\nreduction=weighted_mean grad 2.5\nmean of local means      grad 2.0\n2 partition(s) -> 2.5\n1 partition(s) -> 2.5",
+        "interpretation": "The numbers are the chapter's two-partition fixture: gradient sums 1 and 9 over counts 1 and 3, with illustrative loss sums attached. A sum reduction returns 10, and dividing by the total accepted count of 4 gives the weighted-mean gradient 2.5. Averaging the two partitions' local means gives 2.0 and is the scaling error the weighted_mean contract must exclude. The second loop checks layout invariance: merging both partitions into one record of count 4 and gradient 10 gives 2.5 again. A receipt that records only the reduced gradient could not distinguish these cases later, which is why the count and reduction name belong in the record alongside the parameter vector."
+      }
     ]
   },
   {
@@ -576,6 +1375,28 @@
     "suffix": ".md",
     "concepts": ["TorchDistributor", "launcher", "rank", "process"],
     "outcome": "Launch a fixed CPU function through the pinned public TorchDistributor.run interface and retain actual rank and result evidence.",
+    "key_terms": [
+      [
+        "TorchDistributor",
+        "A Spark utility that launches a PyTorch training function or script through the public run entrypoint."
+      ],
+      [
+        "Training function",
+        "The launched code that owns model construction, initialization, data loading, loss reduction, optimizer steps and result serialization."
+      ],
+      [
+        "World size",
+        "The actual number of Torch processes in the run, recorded separately from the Spark topology."
+      ],
+      [
+        "Local mode",
+        "A TorchDistributor setting that runs on the driver host. It is independent of whether Spark itself runs on one host."
+      ],
+      [
+        "Private helper",
+        "A leading-underscore function in Spark source that is not a supported public API for a course contract."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 TorchDistributor implementation",
@@ -585,6 +1406,14 @@
         "PyTorch 2.9 distributed data parallel",
         "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "passing a data path, not a DataFrame, to TorchDistributor",
+        "language": "python",
+        "code": "from pyspark.ml.torch.distributor import TorchDistributor\n\nshard_dir = \"/data/ds60/fixtures/likelihood-v1\"\n(\n    spark.range(0, 1000)\n    .selectExpr(\"id\", \"rand(7) AS x\", \"CAST(rand(11) > 0.5 AS DOUBLE) AS y\")\n    .write.mode(\"overwrite\")\n    .parquet(shard_dir)\n)\n\n\ndef train(path):\n    import pandas as pd\n\n    frame = pd.read_parquet(path)\n    return {\"rows\": len(frame), \"unique_ids\": int(frame[\"id\"].nunique())}\n\n\nevidence = TorchDistributor(num_processes=1, local_mode=True, use_gpu=False).run(train, shard_dir)\nassert evidence == {\"rows\": 1000, \"unique_ids\": 1000}",
+        "interpretation": "This sketch, shown without output because neither PySpark nor torch is installed in the authoring environment, makes data delivery explicit. The driver writes a fixed thousand-row table to a Parquet directory, and the launched function receives only that path string and reads the files itself. Nothing from the driver's DataFrame object crosses into the training process. The returned dictionary is ordinary serializable evidence, and the assertion checks row coverage and unique IDs rather than merely the absence of an exception. With num_processes=1 and local_mode=True this is the one-process baseline the chapter describes; raising the process count would also require deciding how ranks split the Parquet files."
+      }
     ]
   },
   {
@@ -598,6 +1427,28 @@
     "suffix": ".md",
     "concepts": ["DDP", "allreduce", "uneven", "inputs", "sampler"],
     "outcome": "Derive the correct DDP reduction scale for uneven row counts and require an exact no-duplicate/no-drop data audit.",
+    "key_terms": [
+      [
+        "DistributedDataParallel (DDP)",
+        "A PyTorch wrapper that averages gradients across ranks after each backward pass."
+      ],
+      [
+        "Rank",
+        "One process in the synchronized group, holding a local count and a local summed gradient."
+      ],
+      [
+        "Rank averaging",
+        "The DDP default that averages per-rank mean gradients; it equals the observation mean only when local counts are equal."
+      ],
+      [
+        "Global-mean scaling",
+        "Backpropagating each rank's summed loss multiplied by R/N so rank averaging yields the true global mean gradient."
+      ],
+      [
+        "Sampler padding",
+        "Duplicate indices a distributed sampler may add to equalize rank sizes, which silently changes the training target."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 TorchDistributor implementation",
@@ -607,6 +1458,15 @@
         "PyTorch 2.9 distributed data parallel",
         "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "padding and dropping in a distributed sampler",
+        "language": "python",
+        "code": "import math\n\n\ndef assignments(n, ranks, drop_last):\n    ids = list(range(n))\n    if drop_last:\n        per_rank = n // ranks\n        ids = ids[: per_rank * ranks]\n    else:\n        per_rank = math.ceil(n / ranks)\n        ids += ids[: per_rank * ranks - n]\n    return [ids[r::ranks] for r in range(ranks)]\n\n\nfor drop_last in (False, True):\n    parts = assignments(5, 2, drop_last)\n    seen = [i for part in parts for i in part]\n    duplicates = sorted({i for i in seen if seen.count(i) > 1})\n    missing = sorted(set(range(5)) - set(seen))\n    print(f\"drop_last={drop_last}: {parts} duplicates={duplicates} missing={missing}\")",
+        "output": "drop_last=False: [[0, 2, 4], [1, 3, 0]] duplicates=[0] missing=[]\ndrop_last=True: [[0, 2], [1, 3]] duplicates=[] missing=[4]",
+        "interpretation": "This reimplements the padding and dropping arithmetic of PyTorch's DistributedSampler without shuffling, because torch is not installed here; it is not output from the library itself. With five IDs and two ranks, padding extends the list to six by repeating ID 0, so rank 1 receives 1, 3 and 0, and observation 0 contributes twice to the epoch. With drop_last enabled each rank receives two IDs and ID 4 is never seen. Both layouts give equal-length ranks, which is what the collective needs, and neither is an exact pass over five observations. Printing duplicates and missing IDs per epoch is the audit the sharding case records."
+      }
     ]
   },
   {
@@ -620,6 +1480,28 @@
     "suffix": ".md",
     "concepts": ["Lightning", "DDP", "accumulation", "checkpoint"],
     "outcome": "Compare Lightning and plain Torch on the same objective, initialization, shard policy and optimizer-step definition.",
+    "key_terms": [
+      [
+        "LightningModule",
+        "The class that defines forward computation, training_step and optimizer configuration."
+      ],
+      [
+        "Trainer",
+        "The Lightning object that controls the loop, device placement, precision and strategy."
+      ],
+      [
+        "Process topology",
+        "The single agreed layout of ranks and devices, created by exactly one launcher."
+      ],
+      [
+        "Nested launch",
+        "A launched process that spawns another full set of processes, causing oversubscription, conflicting rendezvous or duplicate training."
+      ],
+      [
+        "Metric reduction",
+        "The separate rule for combining logged metrics across ranks; averaging rank means is not an observation-weighted metric."
+      ]
+    ],
     "sources": [
       ["Lightning Trainer", "https://lightning.ai/docs/pytorch/stable/common/trainer.html"],
       [
@@ -630,6 +1512,15 @@
         "PyTorch 2.9 distributed sampler",
         "https://docs.pytorch.org/docs/2.9/data.html#torch.utils.data.distributed.DistributedSampler"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "counting processes and weighting logged rank losses",
+        "language": "python",
+        "code": "def process_tree(outer_ranks, devices_per_trainer, trainer_spawns):\n    inner = devices_per_trainer if trainer_spawns else 1\n    return outer_ranks * inner\n\n\nprint(\"one topology owner:\", process_tree(2, 2, trainer_spawns=False))\nprint(\"Trainer also spawns:\", process_tree(2, 2, trainer_spawns=True))\n\nrank_logs = [{\"rank\": 0, \"count\": 3, \"mean_loss\": 0.40}, {\"rank\": 1, \"count\": 2, \"mean_loss\": 0.90}]\nunweighted = sum(r[\"mean_loss\"] for r in rank_logs) / len(rank_logs)\nweighted = sum(r[\"mean_loss\"] * r[\"count\"] for r in rank_logs) / sum(r[\"count\"] for r in rank_logs)\nprint(f\"rank-mean of means {unweighted:.2f}, observation-weighted {weighted:.2f}\")",
+        "output": "one topology owner: 2\nTrainer also spawns: 4\nrank-mean of means 0.65, observation-weighted 0.60",
+        "interpretation": "The first two lines show the duplicated topology from the chapter: two Spark barrier ranks that each let a Lightning Trainer spawn two device processes produce four processes, while only two exist when the Spark rank is the sole topology owner. The second line shows why logged losses need counts. Rank 0 averaged 0.40 over three rows and rank 1 averaged 0.90 over two, so averaging the two means reports 0.65, whereas the observation weighted epoch loss is 0.60. Log the count beside every per rank mean before combining them."
+      }
     ]
   },
   {
@@ -643,6 +1534,28 @@
     "suffix": ".md",
     "concepts": ["checkpoint", "sharding", "replay", "epoch"],
     "outcome": "Design a bounded restart contract that preserves sample identity, optimizer state and epoch reshuffling without silent data replay.",
+    "key_terms": [
+      [
+        "Durable shard",
+        "A persistent unit identified by dataset version, schema, feature order, ID range, row count and checksum."
+      ],
+      [
+        "Epoch definition",
+        "The declared meaning of an epoch, such as one exact pass, a fixed step count or a weighted resampling schedule."
+      ],
+      [
+        "Coverage audit",
+        "The check that processed IDs union to the dataset with no duplicates for an exact once-per-epoch claim."
+      ],
+      [
+        "Restart checkpoint",
+        "Saved model weights, optimizer moments, scheduler, random-number state, epoch and sampler position needed to resume a run."
+      ],
+      [
+        "Exact resume",
+        "A narrow claim that a restarted run reproduces the original trajectory, which world-size changes can break."
+      ]
+    ],
     "sources": [
       ["Lightning Trainer", "https://lightning.ai/docs/pytorch/stable/common/trainer.html"],
       [
@@ -653,6 +1566,15 @@
         "PyTorch 2.9 distributed sampler",
         "https://docs.pytorch.org/docs/2.9/data.html#torch.utils.data.distributed.DistributedSampler"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "resuming momentum SGD with and without optimizer state",
+        "language": "python",
+        "code": "targets = [0.0, 1.0, 2.0, 3.0, 4.0]\n\n\ndef epoch(w, velocity, lr=0.1, beta=0.9):\n    for y in targets:\n        velocity = beta * velocity + (w - y)\n        w -= lr * velocity\n    return w, velocity\n\n\nw, v = 0.0, 0.0\nfor _ in range(4):\n    w, v = epoch(w, v)\nreference = w\n\nw, v = 0.0, 0.0\nfor _ in range(2):\n    w, v = epoch(w, v)\nsaved = {\"w\": w, \"velocity\": v, \"epoch\": 2}\nfull, weights_only = (saved[\"w\"], saved[\"velocity\"]), (saved[\"w\"], 0.0)\nfor name, (w, v) in ((\"full state\", full), (\"weights only\", weights_only)):\n    for _ in range(2):\n        w, v = epoch(w, v)\n    print(f\"{name:12} w={w:.6f} difference={w - reference:+.2e}\")",
+        "output": "full state   w=1.354499 difference=+0.00e+00\nweights only w=1.398017 difference=+4.35e-02",
+        "interpretation": "Four epochs of momentum SGD on the five targets end at w = 1.354499. Resuming from epoch 2 with the saved weight and the saved velocity reproduces that value exactly, a difference of zero. Restoring only the weight and silently restarting the velocity at zero lands at 1.398017, about 0.0435 away, even though the run raises no error and the loss still decreases. That is the checkpoint gap the lesson describes: optimizer moments, scheduler position, RNG state and sampler position belong in the checkpoint alongside the weights."
+      }
     ]
   },
   {
@@ -666,6 +1588,28 @@
     "suffix": ".md",
     "concepts": ["TMB", "Spark", "groups", "R", "isolation"],
     "outcome": "Dispatch independent TMB fits for whole groups with bounded process isolation and compare each result to a serial fit.",
+    "key_terms": [
+      [
+        "TMB",
+        "Template Model Builder, which evaluates a C++ objective and its automatic derivatives through R."
+      ],
+      [
+        "MakeADFun",
+        "The TMB constructor that returns objective and gradient functions tied to native state in one loaded model."
+      ],
+      [
+        "Process-local state",
+        "Native pointers and AD tapes that must be created in the worker process that evaluates them, never serialized from the driver."
+      ],
+      [
+        "Independent group fits",
+        "Separate minimizations with distinct parameters per group, producing many fitted models rather than one shared fit."
+      ],
+      [
+        "Failure contract",
+        "The defined behavior for invalid inputs and subprocess errors, checked by the project's failure-contracts case."
+      ]
+    ],
     "sources": [
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
@@ -673,6 +1617,15 @@
         "Spark 4.0.1 programming guide",
         "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "per-group fits that keep failed groups visible",
+        "language": "python",
+        "code": "import pandas as pd\n\nframe = pd.DataFrame(\n    {\n        \"group\": [\"A\"] * 2 + [\"B\"] * 6 + [\"C\"],\n        \"y\": [1.0, 3.0, 8.0, 10.0, 10.0, 12.0, 9.0, 11.0, 5.0],\n    }\n)\n\n\ndef fit_group(name, rows):\n    n = len(rows)\n    mean = rows[\"y\"].mean()\n    variance = ((rows[\"y\"] - mean) ** 2).mean()\n    if variance <= 0:\n        return pd.DataFrame(\n            [{\"group\": name, \"n\": n, \"mu\": None, \"sigma2\": None, \"status\": \"degenerate scale\"}]\n        )\n    return pd.DataFrame([{\"group\": name, \"n\": n, \"mu\": mean, \"sigma2\": variance, \"status\": \"ok\"}])\n\n\nfits = pd.concat(fit_group(name, rows) for name, rows in frame.groupby(\"group\"))\nprint(fits.to_string(index=False))",
+        "output": "group  n   mu   sigma2           status\n    A  2  2.0 1.000000               ok\n    B  6 10.0 1.666667               ok\n    C  1  NaN      NaN degenerate scale",
+        "interpretation": "The pandas groupby stands in for a Spark grouped map such as applyInPandas, and the output was produced locally with pandas. Group A recovers mean 2 and variance 1, group B recovers mean 10 and variance 1.666667, and group C, which holds a single row, gets an explicit degenerate scale row with NaN estimates instead of disappearing. Keeping the failed group as a row means a downstream count of nine observations across three groups still reconciles, and a reviewer can see which group needs a different model."
+      }
     ]
   },
   {
@@ -686,6 +1639,28 @@
     "suffix": ".md",
     "concepts": ["native", "library", "ABI", "architecture", "artifact"],
     "outcome": "Bind a compiled model to its C++ source, architecture and R/TMB ABI and reject stale or incompatible libraries before fitting.",
+    "key_terms": [
+      [
+        "Application binary interface (ABI)",
+        "The machine architecture, operating-system conventions, calling conventions and library compatibility a compiled artifact depends on."
+      ],
+      [
+        "Shared library",
+        "The compiled TMB model loaded into R at run time, which works only on a compatible platform."
+      ],
+      [
+        "Preparation environment",
+        "The controlled image where the model is compiled once to match the execution environment."
+      ],
+      [
+        "Compatibility key",
+        "The source hash plus compiler version and flags, R and TMB versions, architecture and image identity that together identify a build."
+      ],
+      [
+        "Per-task compilation",
+        "Compiling inside every task, which is expensive and can race on shared filenames."
+      ]
+    ],
     "sources": [
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
@@ -693,6 +1668,15 @@
         "Spark 4.0.1 programming guide",
         "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "reading the target architecture from an ELF header",
+        "language": "python",
+        "code": "import struct\n\nMACHINES = {62: \"x86_64 (AMD64)\", 183: \"aarch64 (ARM64)\"}\n\n\ndef elf_machine(header: bytes) -> str:\n    if header[:4] != b\"\\x7fELF\":\n        raise ValueError(\"not an ELF shared object\")\n    order = \"<\" if header[5] == 1 else \">\"\n    (machine,) = struct.unpack(order + \"H\", header[18:20])\n    return MACHINES.get(machine, f\"unknown e_machine {machine}\")\n\n\ndef fake_header(machine):\n    return b\"\\x7fELF\" + bytes([2, 1, 1]) + bytes(9) + struct.pack(\"<HH\", 3, machine)\n\n\nfor machine in (62, 183):\n    print(elf_machine(fake_header(machine)))\ntry:\n    elf_machine(b\"#!/bin/sh\\n\" + bytes(10))\nexcept ValueError as error:\n    print(\"rejected:\", error)",
+        "output": "x86_64 (AMD64)\naarch64 (ARM64)\nrejected: not an ELF shared object",
+        "interpretation": "The script checks the four magic bytes, reads the endianness flag at offset 5 and unpacks the two byte e_machine field at offset 18, so value 62 reports x86_64 and 183 reports aarch64, while a shell script header is rejected outright. Recording this field in the compatibility record catches the failure contract from the chapter before dlopen: an AMD64 TMB shared object shipped to an ARM64 executor fails to load or, worse, gets rebuilt silently with a different compiler. The headers here are synthetic bytes, not a real compiled library."
+      }
     ]
   },
   {
@@ -706,6 +1690,28 @@
     "suffix": ".md",
     "concepts": ["Laplace", "block", "diagonal", "random", "effects"],
     "outcome": "Derive when integrated group likelihoods can be summed and verify the block-diagonal Hessian condition.",
+    "key_terms": [
+      [
+        "Laplace approximation",
+        "Replacing an integral over random effects with a Gaussian approximation around the inner mode, using the Hessian log determinant."
+      ],
+      [
+        "Random effect",
+        "A latent variable integrated out of the likelihood, which TMB can handle with the Laplace approximation."
+      ],
+      [
+        "Conditional block structure",
+        "The proven property that latent variables are independent by group given shared parameters, so the marginal likelihood factorizes by group."
+      ],
+      [
+        "Inner mode",
+        "The latent value that minimizes the group's joint negative log density for the current shared parameters."
+      ],
+      [
+        "Marginal likelihood",
+        "The probability of the data after integrating out latent variables, approximated here as a sum of group Laplace terms."
+      ]
+    ],
     "sources": [
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
@@ -713,6 +1719,15 @@
         "Spark 4.0.1 programming guide",
         "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "Laplace against the exact Gaussian random-intercept marginal",
+        "language": "python",
+        "code": "import numpy as np\n\ngroups = {\"g1\": np.array([1.0, 2.0, 0.5]), \"g2\": np.array([-1.0, 0.0])}\nsigma2, tau2 = 1.0, 2.0\n\n\ndef exact(y):\n    cov = sigma2 * np.eye(len(y)) + tau2 * np.ones((len(y), len(y)))\n    sign, logdet = np.linalg.slogdet(cov)\n    return 0.5 * (len(y) * np.log(2 * np.pi) + logdet + y @ np.linalg.solve(cov, y))\n\n\ndef laplace(y):\n    hessian = len(y) / sigma2 + 1 / tau2\n    u = y.sum() / sigma2 / hessian\n    joint = 0.5 * (len(y) * np.log(2 * np.pi * sigma2) + np.sum((y - u) ** 2) / sigma2)\n    joint += 0.5 * (np.log(2 * np.pi * tau2) + u * u / tau2)\n    return joint + 0.5 * np.log(hessian) - 0.5 * np.log(2 * np.pi)\n\n\nfor name, y in groups.items():\n    print(name, round(exact(y), 10), round(laplace(y), 10))\nprint(\"total\", round(sum(exact(y) for y in groups.values()), 10))",
+        "output": "g1 4.6047706741 4.6047706741\ng2 2.9425960226 2.9425960226\ntotal 7.5473666968",
+        "interpretation": "For both groups the exact Gaussian marginal negative log likelihood, built from the full covariance sigma2 I plus tau2 times a ones matrix, matches the Laplace value to ten decimal places: 4.6047706741 for g1 and 2.9425960226 for g2. Agreement is exact because the joint density is quadratic in the random intercept, so the second order expansion is the whole function. The total 7.5473666968 is the sum of independent group terms, which is what lets each group be integrated in its own task while sigma2 and tau2 stay shared and optimized globally."
+      }
     ]
   },
   {
@@ -726,6 +1741,28 @@
     "suffix": ".md",
     "concepts": ["TMB", "gradient", "driver", "optimizer", "tape"],
     "outcome": "Evaluate every partition at the same parameter vector, merge pure TMB summaries and optimize the original shared objective.",
+    "key_terms": [
+      [
+        "Parameter proposal",
+        "The single theta the driver owns at one iteration and sends to every worker for evaluation."
+      ],
+      [
+        "Complete evaluation",
+        "An objective and gradient formed only after every required partition contribution is present and validated."
+      ],
+      [
+        "R subprocess",
+        "A bounded separate R process that runs the compiled model, a different runtime contract from in-process rpy2."
+      ],
+      [
+        "rpy2",
+        "A Python bridge to an embedded R session whose data conversion is qualified separately by the rpy2-frame case."
+      ],
+      [
+        "Derivative coordinates",
+        "The parameterization, such as log sigma rather than sigma, in which workers must return gradients consistently."
+      ]
+    ],
     "sources": [
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
@@ -733,6 +1770,15 @@
         "Spark 4.0.1 programming guide",
         "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "objective and gradient checks that a final estimate would miss",
+        "language": "python",
+        "code": "partitions = [[1.0, 3.0], [8.0, 10.0, 10.0, 12.0, 9.0, 11.0]]\n\n\ndef summaries(mu, scale_bug=False):\n    total_loss = total_grad = 0.0\n    for rows in partitions:\n        factor = 1.0 / len(rows) if scale_bug else 1.0\n        total_loss += factor * sum(0.5 * (y - mu) ** 2 for y in rows)\n        total_grad += factor * sum(mu - y for y in rows)\n    return total_loss, total_grad\n\n\nfor mu in (6.0, 8.0, 10.0):\n    print(mu, summaries(mu), summaries(mu, scale_bug=True))",
+        "output": "6.0 (70.0, -16.0) (17.333333333333332, 0.0)\n8.0 (54.0, 0.0) (21.333333333333332, 4.0)\n10.0 (70.0, 16.0) (33.333333333333336, 8.0)",
+        "interpretation": "With correct summation the loss is 70, 54 and 70 at mu equal to 6, 8 and 10, and the gradient is zero at 8, the row weighted mean of all eight observations. The buggy version divides each partition by its own row count, so its gradient vanishes at 6, the average of the two partition means. Checking loss and gradient at fixed parameters exposes the bug immediately, while a test that only asks whether the optimizer converged would happily accept 6. A single global constant factor, unlike this per partition one, would keep the optimum at 8."
+      }
     ]
   },
   {
@@ -746,6 +1792,28 @@
     "suffix": ".md",
     "concepts": ["latent", "coupling", "Hessian", "log", "determinant"],
     "outcome": "Show quantitatively how an off-block latent dependence changes a Laplace approximation and forbids an independent-group decomposition.",
+    "key_terms": [
+      [
+        "Correlated latent structure",
+        "Random effects linked across groups, which prevents independent group integration."
+      ],
+      [
+        "Off-diagonal block",
+        "A Hessian or covariance entry connecting two groups; its presence breaks a product of block determinants."
+      ],
+      [
+        "Coupled determinant",
+        "The value ab - c^2 for a two-by-two Hessian, which summing separate log determinants would get wrong by omitting c."
+      ],
+      [
+        "Connected component",
+        "A part of the latent dependency graph with no links to other parts, which can be evaluated as an independent unit."
+      ],
+      [
+        "Sparse factorization",
+        "A linear-algebra method that accounts for coupling explicitly instead of pretending groups are independent."
+      ]
+    ],
     "sources": [
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
@@ -753,6 +1821,22 @@
         "Spark 4.0.1 programming guide",
         "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "the omitted curvature term as coupling grows",
+        "language": "python",
+        "code": "import numpy as np\n\nfor c in (0.0, 0.5, 1.0, 1.5, 1.9):\n    hessian = np.array([[2.0, c], [c, 2.0]])\n    coupled = np.linalg.det(hessian)\n    blocks = hessian[0, 0] * hessian[1, 1]\n    gap = 0.5 * np.log(blocks / coupled)\n    print(f\"c={c:.1f} det={coupled:.4f} blocks={blocks:.1f} half-log gap={gap:.6f}\")",
+        "output": "c=0.0 det=4.0000 blocks=4.0 half-log gap=0.000000\nc=0.5 det=3.7500 blocks=4.0 half-log gap=0.032269\nc=1.0 det=3.0000 blocks=4.0 half-log gap=0.143841\nc=1.5 det=1.7500 blocks=4.0 half-log gap=0.413339\nc=1.9 det=0.3900 blocks=4.0 half-log gap=1.163951",
+        "interpretation": "Holding the diagonal at 2, the true determinant falls from 4 to 0.39 as the coupling c grows from 0 to 1.9, while the block product stays at 4. The omitted half log term is zero only at c equal to 0, is 0.143841 at c equal to 1 as the chapter states, and reaches 1.163951 near the edge of positive definiteness. The error is not a fixed tolerance: it grows without bound as coupling strengthens, so a test suite needs at least one strongly coupled case, not just the uncoupled limit."
+      },
+      {
+        "title": "cutting a spatial chain at a partition boundary",
+        "language": "python",
+        "code": "import numpy as np\n\nedges = [(0, 1), (1, 2), (2, 3)]\npartition = {0: \"p0\", 1: \"p0\", 2: \"p1\", 3: \"p1\"}\n\n\ndef precision(keep, kappa=1.0, rho=0.9):\n    q = kappa * np.eye(4)\n    for i, j in keep:\n        q[i, i] += rho\n        q[j, j] += rho\n        q[i, j] = q[j, i] = -rho\n    return q\n\n\ncrossing = [(i, j) for i, j in edges if partition[i] != partition[j]]\nlocal = [e for e in edges if e not in crossing]\nfull, cut = precision(edges), precision(local)\nprint(\"crossing edges:\", crossing)\nprint(\"log det full:\", round(np.linalg.slogdet(full)[1], 6))\nprint(\"log det cut :\", round(np.linalg.slogdet(cut)[1], 6))\nprint(\n    \"corr(x1, x2) full:\",\n    round(\n        np.linalg.inv(full)[1, 2] / np.sqrt(np.linalg.inv(full)[1, 1] * np.linalg.inv(full)[2, 2]),\n        4,\n    ),\n)",
+        "output": "crossing edges: [(1, 2)]\nlog det full: 2.857389\nlog det cut : 2.059239\ncorr(x1, x2) full: 0.3792",
+        "interpretation": "Assigning four chain sites to two partitions puts exactly one edge, between sites 1 and 2, across the boundary. Dropping it lowers the log determinant of the precision from 2.857389 to 2.059239, a change of about 0.80 that flows straight into the Laplace marginal likelihood, and it erases a prior correlation of 0.3792 between those two latent effects. Each partition still looks like a sensible model on its own. Only the joint precision shows that the edge mattered, which is why partitioning by connected component is the safe default."
+      }
     ]
   },
   {
@@ -766,6 +1850,28 @@
     "suffix": ".md",
     "concepts": ["MLE", "posterior", "Laplace", "uncertainty"],
     "outcome": "Compare estimation targets and uncertainty for one shared model without treating optimizer output and posterior draws as equivalent.",
+    "key_terms": [
+      [
+        "Maximum likelihood estimate (MLE)",
+        "The parameter value that maximizes the probability of the observed data given the parameters."
+      ],
+      [
+        "Posterior distribution",
+        "The Bayesian target, proportional to likelihood times latent prior times parameter prior, conditioned on the data."
+      ],
+      [
+        "MAP estimate",
+        "The posterior mode in a declared parameterization, which is neither the posterior mean nor the MLE in general."
+      ],
+      [
+        "MCMC chain",
+        "A sequence of posterior draws; running independent chains in parallel differs from distributing one likelihood."
+      ],
+      [
+        "Jacobian adjustment",
+        "The correction needed when a probability density is redefined in transformed variables."
+      ]
+    ],
     "sources": [
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
       [
@@ -776,6 +1882,22 @@
         "PyTorch 2.9 distributed data parallel",
         "https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "posterior mean against the MLE as the prior widens",
+        "language": "python",
+        "code": "y = [1.0, 3.0]\nsigma2, m0 = 1.0, 0.0\nprint(\"MLE\", sum(y) / len(y))\nfor s0_sq in (0.25, 1.0, 4.0, 100.0):\n    precision = len(y) / sigma2 + 1 / s0_sq\n    mean = (sum(y) / sigma2 + m0 / s0_sq) / precision\n    print(f\"prior var {s0_sq:6.2f}: posterior mean {mean:.4f}, posterior var {1 / precision:.4f}\")",
+        "output": "MLE 2.0\nprior var   0.25: posterior mean 0.6667, posterior var 0.1667\nprior var   1.00: posterior mean 1.3333, posterior var 0.3333\nprior var   4.00: posterior mean 1.7778, posterior var 0.4444\nprior var 100.00: posterior mean 1.9900, posterior var 0.4975",
+        "interpretation": "The MLE for observations 1 and 3 stays at 2 regardless of the prior. The posterior mean moves from 0.6667 with prior variance 0.25 to 1.3333 at the chapter's prior variance of 1, then 1.7778 and 1.99 as the prior widens toward flat. Posterior variance approaches 0.5, the sampling variance of the mean. A PyMC run with prior variance 1 that reports about 1.33 is correct, not a disagreement with an optimizer that reports 2. Compare each library against the analytic value of its own target."
+      },
+      {
+        "title": "Laplace error for a Poisson random intercept",
+        "language": "python",
+        "code": "import math\n\nimport numpy as np\n\ncounts, tau2 = np.array([0, 1, 0]), 1.0\ngrid = np.linspace(-12, 12, 200_001)\nstep = grid[1] - grid[0]\n\n\ndef neg_joint(u):\n    rate = np.exp(u)\n    log_lik = np.sum(counts) * u - len(counts) * rate - sum(math.lgamma(k + 1) for k in counts)\n    return -(log_lik - 0.5 * np.log(2 * np.pi * tau2) - 0.5 * u * u / tau2)\n\n\nvalues = neg_joint(grid)\nexact = -np.log(np.sum(np.exp(-values)) * step)\nmode = grid[np.argmin(values)]\ncurvature = len(counts) * np.exp(mode) + 1 / tau2\nlaplace = neg_joint(mode) + 0.5 * np.log(curvature) - 0.5 * np.log(2 * np.pi)\nprint(f\"mode={mode:.4f} quadrature={exact:.6f} laplace={laplace:.6f} gap={laplace - exact:+.6f}\")",
+        "output": "mode=-0.6176 quadrature=2.906600 laplace=2.907164 gap=+0.000564",
+        "interpretation": "For three Poisson counts with a normal random intercept of variance 1, dense quadrature on a fine grid gives a marginal negative log likelihood of 2.906600, and the Laplace approximation at the mode u equal to -0.6176 gives 2.907164, a gap of 0.000564. The gap is small but nonzero because the log joint is not quadratic, unlike the Gaussian case where Laplace is exact. Small counts are where this error grows, so a TMB versus PyMC comparison should state which integral each tool targets before reading the difference."
+      }
     ]
   },
   {
@@ -789,6 +1911,28 @@
     "suffix": ".md",
     "concepts": ["profiling", "scheduling", "serialization", "break", "even"],
     "outcome": "Build a reproducible cost decomposition and decide when distributed likelihood evaluation is justified by measured work.",
+    "key_terms": [
+      [
+        "Wall-clock decomposition",
+        "A diagnostic split of elapsed time into preparation, scheduling, scanning, conversion, computation and reduction."
+      ],
+      [
+        "Cold and warm runs",
+        "Measurements with and without first-use costs such as compilation and caching, which must be labeled separately."
+      ],
+      [
+        "Fixed overhead",
+        "Per-evaluation costs such as scheduling and serialization that can dominate on small data."
+      ],
+      [
+        "Equal-target comparison",
+        "Benchmarking methods at the same objective, tolerance and gradient norm rather than at different stopping points."
+      ],
+      [
+        "Spill",
+        "Data written to disk when memory is insufficient, reported with peak memory alongside elapsed time."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -798,6 +1942,22 @@
         "Spark 4.0.1 SQL performance tuning",
         "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "a fixed-overhead ledger for a ten-action optimizer",
+        "language": "python",
+        "code": "serial_fit = 0.2\nfor actions, overhead, work, workers in ((10, 0.1, 0.02, 4), (10, 0.1, 2.0, 4), (3, 0.1, 2.0, 4)):\n    distributed = actions * (overhead + work / workers)\n    serial = max(serial_fit, actions * work)\n    print(f\"actions={actions} work/eval={work}s serial={serial:.2f}s spark={distributed:.2f}s\")",
+        "output": "actions=10 work/eval=0.02s serial=0.20s spark=1.05s\nactions=10 work/eval=2.0s serial=20.00s spark=6.00s\nactions=3 work/eval=2.0s serial=6.00s spark=1.80s",
+        "interpretation": "This is illustrative arithmetic, not a benchmark. With 0.02 seconds of work per evaluation, ten actions at 0.1 seconds of scheduling each cost 1.05 seconds against a 0.2 second serial fit. Raise the work to 2 seconds per evaluation and the same ledger gives 6 seconds on four workers against 20 seconds serial. The crossover depends on work per action relative to fixed overhead, so the ledger must record evaluation count and warm evaluation time before anyone claims a speedup from distribution."
+      },
+      {
+        "title": "critical path with one dominant group",
+        "language": "python",
+        "code": "import heapq\n\nsizes = [900] + [10] * 10\nfor workers in (1, 2, 10, 50):\n    loads = [0] * workers\n    for size in sorted(sizes, reverse=True):\n        heapq.heapreplace(loads, loads[0] + size)\n    print(f\"workers={workers:2d} makespan={max(loads)} speedup={sum(sizes) / max(loads):.3f}\")",
+        "output": "workers= 1 makespan=1000 speedup=1.000\nworkers= 2 makespan=900 speedup=1.111\nworkers=10 makespan=900 speedup=1.111\nworkers=50 makespan=900 speedup=1.111",
+        "interpretation": "Greedy longest group first scheduling places the 900 row group and ten groups of 10 onto workers. One worker takes 1000 units; two workers already reach the floor of 900, and fifty workers still finish at 900, a speedup of only 1.111. The indivisible group sets the critical path, exactly the ninety percent skew case in the chapter. Adding executors only adds idle slots, so the useful measurements are the group size distribution and the slowest task duration, not the executor count."
+      }
     ]
   },
   {
@@ -811,6 +1971,28 @@
     "suffix": ".md",
     "concepts": ["architecture", "validation", "scientific", "inference"],
     "outcome": "Choose and defend independent fitting, additive global MLE, DDP or a coupled-model alternative for four concrete modeling cases.",
+    "key_terms": [
+      [
+        "Design review",
+        "An explanation of the model, parameter ownership, decomposition, numerics, data delivery, runtime preparation and evidence."
+      ],
+      [
+        "Evidence level",
+        "The kind of check behind a claim, from parsed source and serial oracles to actual Spark execution and multi-host acceptance."
+      ],
+      [
+        "Serial oracle",
+        "A bounded independent computation that checks a numerical claim without Spark."
+      ],
+      [
+        "Investigation record",
+        "The retained hashes, versions, topology, IDs, errors, diagnostics, timing scope and unsupported cases for a project."
+      ],
+      [
+        "Unsupported case",
+        "A scenario explicitly recorded as not covered, so a pass is not read as broader than its evidence."
+      ]
+    ],
     "sources": [
       [
         "Spark 4.0.1 programming guide",
@@ -820,6 +2002,15 @@
         "Spark 4.0.1 SQL performance tuning",
         "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
       ]
+    ],
+    "worked_examples": [
+      {
+        "title": "deciding case A or case B from the dependence graph",
+        "language": "python",
+        "code": "def classify(edges, partition):\n    crossing = [(a, b) for a, b in edges if partition[a] != partition[b]]\n    return (\"B: keep coupling\", crossing) if crossing else (\"A: additive summaries\", crossing)\n\n\nsites = [\"s1\", \"s2\", \"s3\", \"s4\"]\nby_hash = {s: i % 2 for i, s in enumerate(sites)}\nby_component = {\"s1\": 0, \"s2\": 0, \"s3\": 1, \"s4\": 1}\nprint(classify([], by_hash))\nprint(classify([(\"s1\", \"s2\"), (\"s3\", \"s4\")], by_hash))\nprint(classify([(\"s1\", \"s2\"), (\"s3\", \"s4\")], by_component))",
+        "output": "('A: additive summaries', [])\n('B: keep coupling', [('s1', 's2'), ('s3', 's4')])\n('A: additive summaries', [])",
+        "interpretation": "The classifier labels a design case A when no dependence edge crosses a partition and case B otherwise. With no spatial edges, hash partitioning is fine. With edges between s1 and s2 and between s3 and s4, the same hash assignment splits both pairs and forces case B, while assigning by connected component restores case A with no crossing edges. The decision depends on the dependence graph and the partition key together, which is why the decision record names both rather than only the model family."
+      }
     ]
   }
 ]

@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A model contract declares the output columns and types expected by consumers. Enforcing that contract can reject an incompatible model before a replacement relation is published. It complements data tests, which inspect conditions on resulting records. Schema compatibility and data quality remain different dimensions of a reliable product.</p>
 <p>The first model declares an integer identifier and a bigint amount. Explicit SQL casts make the intended types predictable. The second case first builds a valid table, then changes amount into incompatible text. The command must fail, and the program checks that the previously valid relation remains available for this specific failure path.</p>
 <p>That observation is deliberately narrow. It does not establish that an entire multi-model build is atomic or that every failure rolls back every prior change. Another model may have materialized earlier, and data tests can fail after materialization. Publication needs its own project-level decision and recovery contract.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Model contract:</strong> A declared list of column names and data types that a model&#x27;s output must match.</li>
+<li><strong>contract.enforced:</strong> The setting that makes dbt compare the model&#x27;s columns and types with its contract before materializing and fail on a mismatch.</li>
+<li><strong>Constraint:</strong> A rule such as not_null that dbt passes to the database in the table definition; whether it is enforced depends on the platform.</li>
+<li><strong>Explicit cast:</strong> A CAST in the model SQL that produces the declared type exactly rather than relying on the type the database infers.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The model config contains contract.enforced=true and a complete column/type declaration. Column constraints such as not_null depend on database support. An explicit cast documents the intended SQL type; it should not be used to hide a value-domain error. Query actual database contents after failure to establish what state survived.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

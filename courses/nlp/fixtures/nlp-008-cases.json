@@ -4,7 +4,7 @@
     {
       "exercise": 1,
       "task": "Calculate the two class-by-feature count rows and document priors.",
-      "expected": "Counts [[0,3],[3,1]] in class order[0,1]; priors [.5,.5]."
+      "expected": "Counts [[0, 3], [3, 1]] in class order [0, 1]; priors [.5, .5]."
     },
     {
       "exercise": 2,
@@ -14,7 +14,7 @@
     {
       "exercise": 3,
       "task": "Score probe [1,0] in log space and normalize with logsumexp.",
-      "expected": "Posterior [3/13,10/13] for classes[0,1]."
+      "expected": "Posterior [3/13, 10/13] for classes [0, 1]."
     },
     {
       "exercise": 4,

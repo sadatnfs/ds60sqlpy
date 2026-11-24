@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Protect an invariant and use a predicate while waiting.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A mutex serializes access to shared state. A condition variable lets a thread wait for a state predicate while releasing the mutex. A queue invariant describes valid states such as size at most capacity. Notifications are hints to recheck state because wakes can be spurious or another thread can consume the item first.</p>
+<ul>
+<li><strong>mutex:</strong> a lock that serializes access to shared state so only one thread holds it at a time.</li>
+<li><strong>condition variable:</strong> a waiting mechanism that releases the mutex while a thread waits and reacquires it before the thread rechecks state.</li>
+<li><strong>predicate wait:</strong> the overload of <code>wait</code> that rechecks the protected condition after every wakeup.</li>
+<li><strong>spurious wakeup:</strong> a return from waiting without a matching state change, which is why the predicate is the source of truth.</li>
+<li><strong>queue invariant:</strong> a rule about valid queue states, such as size at most capacity.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>cv.wait(lock,predicate)</code> repeatedly tests the predicate under the mutex. The producer updates queue state under the same mutex before notifying. Consumers must distinguish an empty open queue from an empty closed queue so shutdown does not wait forever.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: beginner. Direct prerequisites: `apache-003`.
 
+## Key terms
+
+- **Network namespace:** An isolated set of network interfaces, routes and ports. Inside a container, localhost refers to that container's own loopback, not the host or a neighboring service.
+- **Listener:** A process bound to an address, port and protocol that accepts connections. Listeners in different namespaces can use the same port number without conflict.
+- **Compose service DNS:** The name resolution Docker Compose provides on a project network, so a client reaches a service by its service name instead of a container IP address that can change on replacement.
+- **Published port:** A host address and port mapped to a container port. It creates a separate path from the host and does not change what localhost means inside another container.
+- **Arrow Flight:** An Arrow RPC framework built on gRPC that streams record batches between a client and a server. The chapter runs a bounded Flight server and a short-lived client on a private network.
+
 ## Localhost belongs to the process's network namespace
 
 A client connects to a listener through an address, port and protocol. Before that
@@ -78,6 +86,34 @@ fail in another container's client?** The healthcheck runs in the server's own
 namespace, while the client loopback names itself. The two cases observe both
 paths on the real topology and connect the address distinction to an actual
 successful read and a bounded expected failure.
+
+## Worked examples
+
+### Keep the Flight server on an internal network
+
+```yaml
+server:
+  command: [service.py, serve, --state, /state]
+  healthcheck:
+    test: [CMD, python3, client.py, --endpoint, "grpc://127.0.0.1:8815", --health]
+networks:
+  default:
+    internal: true
+```
+
+This excerpt from the arrow-flight compose file has no ports entry, so nothing on the host can reach port 8815, and the internal network blocks outbound traffic as well. The healthcheck runs inside the server container, which is why loopback works there and nowhere else. If a review adds a published port to make debugging easier, it widens the attack surface the lesson deliberately closed; use the tools profile client instead.
+
+### Probe service DNS and loopback from the client
+
+```bash
+mkdir -p work
+cp -R courses/apache-data-platforms/projects/arrow-flight work/arrow-flight
+cd work/arrow-flight
+bash run.sh start
+bash run.sh network-check
+```
+
+Run this only in an owned workshop. The network check should report service_dns_read_passed as true, meaning the client resolved the name server and fetched the east total of 11, and client_loopback_rejected as true, meaning grpc://127.0.0.1:8815 inside the client container found no listener. Both must hold. A loopback success would mean the client and server share a network namespace, which breaks the isolation claim.
 
 ## Complete worked source
 

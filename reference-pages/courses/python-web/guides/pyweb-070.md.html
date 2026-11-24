@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>pyweb-069</code>, <code>docker-005</code>, <code>docker-004</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A Docker image contains prepared code and dependencies, while a running container has a process lifecycle and external storage holds durable data. This chapter uses the owned web lab to distinguish those layers through stop, exact resume and application-container replacement. No step rebuilds an image merely to recover a stopped service.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Image:</strong> A prepared, read-only package of code and dependencies from which containers are created.</li>
+<li><strong>Container:</strong> A running or stopped process instance created from an image, with its own lifecycle separate from the image.</li>
+<li><strong>Named volume:</strong> Docker-managed storage, here holding PostgreSQL data, that persists when application containers are replaced.</li>
+<li><strong>Resume versus replace:</strong> Resume restarts the exact existing containers; replace recreates the application containers from the saved image while keeping the database volume.</li>
+<li><strong>Migration step:</strong> Applying reviewed schema migrations as an explicit start action rather than on every resume or inside a request.</li>
+</ul>
 <h3 id="mechanism-separate-preparation-migration-and-serving">Mechanism: separate preparation, migration and serving<a class="heading-anchor" href="#mechanism-separate-preparation-migration-and-serving" aria-label="Link to this section">#</a></h3>
 <p>The workshop prepare action builds a small source/static-assets layer from an already prepared python-web image. It saves the selected project, image references and ports. The start action uses those local images, starts PostgreSQL, applies the reviewed migrations and synthetic fixture preparation, then starts the three web servers and worker.</p>
 <p>Resume starts the exact existing five containers and checks their identities. It does not pull, build, rerun migrations or change projects. Replace deliberately recreates the application and worker containers from the saved image while retaining the database service and volume. These operations serve different purposes and should not be hidden behind one ambiguous restart command.</p>
@@ -209,6 +217,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The replace action creates new app/worker containers from the saved image, then verify reads the same prior note and job records. This demonstrates that durable data belongs outside those containers. It also exercises Django&#x27;s prepared static assets and the server configuration carried by the image.</p>
 <p>The workshop does not delete the PostgreSQL volume or private settings. Using down with volume removal, switching project names or pruning state would invalidate the recovery claim. Export evidence before cleaning only explicitly owned synthetic resources, and keep learner data unless the learner deliberately requests deletion.</p>
 <p>A newer application image may require a migration or compatibility review. Replacing containers is not permission to apply an arbitrary incompatible schema change. Preserve immutable released images and qualify the new source/version through the repository&#x27;s release process.</p>
+<h3 id="worked-example-an-added-column-breaks-positional-reads-in-old-code">Worked example: an added column breaks positional reads in old code<a class="heading-anchor" href="#worked-example-an-added-column-breaks-positional-reads-in-old-code" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> sqlite3
+
+db <span class="syntax-operator">=</span> sqlite3<span class="syntax-operator">.</span>connect<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">:memory:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+db<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CREATE TABLE note (id INTEGER PRIMARY KEY, title TEXT)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+db<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">INSERT INTO note (title) VALUES (</span><span class="syntax-string">&#x27;</span><span class="syntax-string">kept</span><span class="syntax-string">&#x27;</span><span class="syntax-string">)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">old_explicit</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> db<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">SELECT id, title FROM note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fetchall<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">old_star</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    identifier<span class="syntax-punctuation">,</span> title <span class="syntax-operator">=</span> db<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">SELECT * FROM note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fetchone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> title
+
+
+db<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ALTER TABLE note ADD COLUMN owner TEXT</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+db<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">PRAGMA user_version = 2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>old_explicit<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    old_star<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>db<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">PRAGMA user_version</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fetchone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">[(1, &#x27;kept&#x27;)]
+ValueError
+2</code></pre>
+<p>During a rolling replacement the migration runs while containers with the old image are still serving. Adding a nullable column is the expand step, and it is compatible only with code that names its columns: the explicit query still returns the prior record, while the <code>SELECT *</code> unpacking fails on the third column. The schema version moved to 2 in the same database the old process reads, which is why a migration must be safe for both images at once. Dropping or renaming the old column waits for a later release, after no old container remains.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why does copying only the source folder not copy progress?</strong> Database contents and private runtime state are intentionally outside source packaging. Back up and restore those through their documented storage boundaries.</p>
 <p><strong>Why is a healthy process not enough?</strong> A health check can succeed while a principal workflow fails because of schema, authorization, assets or worker state. Actual acceptance and retained-record readback establish broader behavior.</p>

@@ -70,7 +70,7 @@ ThreadSanitizer is a separate instrumented execution path with toolchain and pla
 
 The first example stores three Sample records with IDs 1,2,3 and values10,20,30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce 60 before any timing comparison is meaningful. Equal totals are a basic correctness check;in a richer transformation,also verify that identity-to-value relationships remain intact.
 
-reserve(rows.size()) can avoid repeated growth allocations while materializing a values vector. It changes capacity,not size. push_back constructs the actual elements. Writing values[0] immediately after reserve on an empty vector would violate the element-access contract. This is a concrete link between performance-oriented allocation control and the ownership rules from cpp-007.
+reserve(rows.size()) can avoid repeated growth allocations while materializing a values vector. It changes capacity,not size. push_back constructs the actual elements. Writing `values[0]` immediately after reserve on an empty vector would violate the element-access contract. This is a concrete link between performance-oriented allocation control and the ownership rules from cpp-007.
 
 Data movement has a cost. Creating a separate values sequence may improve repeated scans but require an upfront copy and additional memory. If only one tiny scan is performed,the conversion cost can dominate. A benchmark should state whether layout conversion is included and how many queries reuse the result. Otherwise two timings can describe different amounts of work.
 
@@ -83,7 +83,7 @@ Hardware cache behavior,alignment,compiler vectorization and input size influenc
 
 The map fixture counts occurrences of2,3,2,4. The count for 2 is2,which preserves multiplicity. A set would retain only membership and answer a different question. The index construction traverses every input and updates counts. That upfront work must be included when comparing one query with a direct scan,and can be amortized only when the index is actually reused.
 
-map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference: find(9) leaves size unchanged,while counts[9] creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.
+map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference: find(9) leaves size unchanged,while `counts[9]` creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.
 
 Ordering is also part of the container contract. std::map maintains an ordering by its comparator,whereas unordered alternatives have different iteration and performance properties. Do not rely on unspecified order when emitting a deterministic report. If output order matters,choose or impose it deliberately rather than inheriting it accidentally from one implementation run.
 

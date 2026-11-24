@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-071`, `apache-069`.
 
+## Key terms
+
+- **Atlas hook:** A plugin in a supported application, such as Hive, that observes operations and publishes metadata notifications to Atlas.
+- **Notification:** A metadata change message, typically delivered through Kafka, that Atlas consumes to update its graph.
+- **REST ingestion:** Submitting entities directly to Atlas's REST API. It records explicit metadata and does not prove a hook observed a real execution.
+- **Unique attribute upsert:** Creating or updating an entity by its qualifiedName so a retried request updates the same asset instead of creating a duplicate.
+- **Provenance:** A record of who or what produced a metadata entry and how, which distinguishes hook observations from manual API submissions.
+
 ## Metadata ingestion needs a delivery and identity contract
 
 An Atlas hook observes supported application operations and publishes metadata
@@ -80,6 +88,32 @@ catalog?** No. Stable identities, compatible update semantics and reconciliation
 are still required to handle duplicates and ordering. These cases distinguish
 explicit API provenance from real hook instrumentation and show why delivery and
 asset identity must be designed together.
+
+## Worked examples
+
+### Look up an entity by its unique name
+
+```bash
+curl -s -u "$ATLAS_USER:$ATLAS_PASSWORD" \
+  "$DS60_ATLAS_ENDPOINT/api/atlas/v2/entity/uniqueAttribute/type/ds60_<owner>_dataset?attr:qualifiedName=ds60://<owner>/raw"
+```
+
+qualifiedName is the identity Atlas uses to decide whether a submission creates a new entity or updates an existing one. Submitting the same payload twice should return the same GUID both times, which makes a retried ingestion safe. If a retry creates a second entity, the qualifiedName changed between runs, often because it embedded a timestamp or a run ID instead of a stable logical name.
+
+### Compare GUIDs across a deliberate retry
+
+```python
+first = {"raw": "guid-a", "curated": "guid-b", "transform": "guid-c"}
+second = {"raw": "guid-a", "curated": "guid-b", "transform": "guid-c"}
+changed = {key for key in first if first[key] != second[key]}
+print("identity stable" if not changed else "new identities: " + ", ".join(sorted(changed)))
+```
+
+```text
+identity stable
+```
+
+The dictionaries stand in for the entity_guids field that two check receipts produce, one before and one after a repeated apply. Comparing them key by key separates an idempotent retry from a duplicate. A partially failed bulk request is the harder case: some entities may exist and others not, so read back every expected key before resubmitting rather than assuming nothing was written.
 
 ## Complete worked source
 

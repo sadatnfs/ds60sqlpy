@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Deliver a measured scientific application with a CPU baseline, adversarial tests, profiling artifacts and a reproducible benchmark.
+
 Work through *Capstone: a measured scientific or data application* with the concrete cases below. Finish with this evidence:
 CPU baseline, adversarial tests, sanitizer results where applicable, profiling artifacts, reproducible benchmark, failure behavior and a report stating when CPU is preferable. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 An independent numerical project begins with a bounded question, not a performance claim. Specify accepted input, output semantics, precision, resource budget and failure behavior. Build an independent CPU reference and adversarial fixtures before optimizing. Choose algorithms or libraries that fit the contract, then profile the complete pipeline. Retain evidence that another learner can reproduce: source, generation parameters, correctness comparisons, tool diagnostics where available and timing samples. A CPU-only project remains a valid algorithm/design portfolio piece when it clearly leaves GPU performance unmeasured.
+
+### Key terms
+
+- **Research question:** The specific, measurable question that the application and its benchmark are designed to answer.
+- **Reproducible benchmark:** A measurement that another person can rerun from recorded code, inputs, environment and procedure.
+- **Profiling artifact:** A saved profiler report or timeline that supports a stated performance claim.
+- **CPU preference boundary:** The problem size or condition below which the CPU version is the better choice.
 
 ## How to run and study this lesson
 

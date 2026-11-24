@@ -198,6 +198,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Direct prerequisites:</strong> <code>dme-021</code>, <code>dme-042</code>, <code>dme-043</code>, <code>dme-046</code>.</p>
 <p><strong>Outcome:</strong> Trace a declared circuit-breaker/retry mechanism with bounded probes.</p>
 <p>Open the worked program in the classroom code pad. This tutorial exposes complete examples and answered discussions without an exam gate. The pad has fresh temporary state; separately documented projects use their own owned lifecycle.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Timeout:</strong> The maximum time a caller waits before treating a call as failed.</li>
+<li><strong>Backoff:</strong> Spacing repeated attempts, for example with delays that grow with attempt number up to a cap and jitter that desynchronizes callers.</li>
+<li><strong>Circuit breaker:</strong> A guard that stops calls to a dependency after observed failures, then allows a controlled recovery probe, moving through closed, open and half-open states.</li>
+<li><strong>Nested retries:</strong> Retries at several independent layers, whose attempt counts multiply the calls reaching a dependency.</li>
+<li><strong>Degraded service:</strong> A reduced response, explicitly labeled as a fallback, returned while a dependency is avoided or unavailable.</li>
+</ul>
 <h3 id="recovery-behavior-can-amplify-the-original-failure">Recovery behavior can amplify the original failure<a class="heading-anchor" href="#recovery-behavior-can-amplify-the-original-failure" aria-label="Link to this section">#</a></h3>
 <p>A dependency becomes slow, callers time out, and each caller retries. Those extra attempts increase load on the struggling dependency, making it slower still. If several layers independently retry, one user action can generate many downstream calls. A recovery mechanism designed without a workload budget can turn a partial failure into a wider incident.</p>
 <p>A timeout limits how long one caller waits at a particular boundary. It does not prove that the downstream effect failed or that downstream computation stopped. A retry creates another attempt. It is appropriate only when the operation&#x27;s semantics and remaining deadline permit it. A circuit breaker temporarily avoids calls to a dependency after observed failures, then allows a controlled recovery probe. These mechanisms solve related but distinct problems.</p>
@@ -305,6 +313,34 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="worked-example-three-layers-of-three-retries">Worked example: Three layers of three retries<a class="heading-anchor" href="#worked-example-three-layers-of-three-retries" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">calls</span><span class="syntax-punctuation">(</span>layers<span class="syntax-punctuation">,</span> attempts<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> attempts<span class="syntax-operator">*</span><span class="syntax-operator">*</span>layers
+
+
+<span class="syntax-keyword">for</span> layers <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">layers</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> layers<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">attempts per layer 3 -&gt; backend calls per user request</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> calls<span class="syntax-punctuation">(</span>layers<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span>
+budget<span class="syntax-punctuation">,</span> spent<span class="syntax-punctuation">,</span> outcomes <span class="syntax-operator">=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> request <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> spent <span class="syntax-operator">&lt;</span> budget<span class="syntax-punctuation">:</span>
+        spent <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+        outcomes<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">retried</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        outcomes<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">failed fast</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">retry budget of 10 across 20 failing requests:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    outcomes<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">retried</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">retried,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    outcomes<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">failed fast</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">failed fast</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-text">layers 1 attempts per layer 3 -&gt; backend calls per user request 3
+layers 2 attempts per layer 3 -&gt; backend calls per user request 9
+layers 3 attempts per layer 3 -&gt; backend calls per user request 27
+retry budget of 10 across 20 failing requests: 10 retried, 10 failed fast</code></pre>
+<p>A single layer that tries three times sends 3 calls to the backend for one user request. When a gateway, a service and a client library each retry three times, one failure becomes 27 backend calls, just when the backend is already struggling. The budget shown here limits retries across all requests: of 20 failing requests, the first 10 are retried and the remaining 10 fail immediately. Retrying at only one layer, usually the outermost one, and sharing a retry budget keeps a partial outage from being multiplied into a full one.</p>
 <h3 id="deadlines-backoff-and-jitter">Deadlines, backoff and jitter<a class="heading-anchor" href="#deadlines-backoff-and-jitter" aria-label="Link to this section">#</a></h3>
 <p>A total deadline should include waiting, connection setup, attempts, backoff and response handling. Giving each nested layer the full original timeout can exceed the caller&#x27;s intended deadline. Propagate the remaining budget where the protocol supports it, and stop starting new attempts when there is insufficient time for a useful result. Record whether a timeout occurred before admission, during computation or while returning a response.</p>
 <p>Backoff spaces repeated attempts. Exponential backoff increases a delay with attempt number, usually with a cap. Jitter varies delays so many callers do not retry in synchronized waves. For example, a design might sample a delay from a bounded interval whose upper limit grows with the attempt number. The program does not implement sleeping because this chapter&#x27;s deterministic model focuses on attempt accounting; a real client policy must test its actual timing behavior separately.</p>

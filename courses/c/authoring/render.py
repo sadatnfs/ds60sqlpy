@@ -19,6 +19,7 @@ from scripts.format_inline_code import canonical_markdown  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import variants  # noqa: E402
 from outcomes import MINUTES, OUTCOMES  # noqa: E402
+from reasoning import LABELS, REASONING  # noqa: E402
 
 SPECS = []
 
@@ -67,7 +68,9 @@ def format_c(source):
 
 
 def snippet(source):
-    return format_c(source).strip()
+    # Outside a function body clang-format reads `a && b` as an rvalue-reference declarator
+    # and prints `a &&b`; C has no such declarator, so restore the operator spacing.
+    return re.sub(r"(?<=[\w)\]]) &&(?=[\w(!])", " && ", format_c(source).strip())
 
 
 def program(s, count=6, worked=False):
@@ -103,6 +106,16 @@ def _lower_first(text):
     return text[:1].lower() + text[1:] if text[1:2].islower() else text
 
 
+def _clause(text):
+    """The first sentence of an observation or task as a lower-case clause without its period."""
+    return _lower_first(re.split(r"\.\s+(?=[A-Z])", text.strip())[0]).rstrip(".")
+
+
+def _join(items):
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
 def _occurs(excerpt, code):
     """Whether an edited excerpt already appears verbatim, which would make it ambiguous."""
     return " ".join(excerpt.split()) in " ".join(code.split())
@@ -130,7 +143,12 @@ def practice(ident, s):
             why=c["why"],
             variant=v,
             shown=shown,
+            cond=cond,
+            obs=_clause(c["expected"]),
+            named=_case(c["title"]),
         )
+        obs, named = _clause(c["expected"]), _case(c["title"])
+        original = edited = None
         if v:
             original, edited = span(v["line"]), span(v["broken"])
         if index == 0:
@@ -143,19 +161,24 @@ def practice(ident, s):
                 )
             elif v:
                 row["task"] = (
-                    f"Copy worked example 1 into a scratch pad and change {original} to {edited}. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line."
+                    f"Copy worked example 1, {named}, into a scratch pad and change {original} to {edited}. Before running, predict which CHECK fails and which value it sees in place of the worked result ({obs}); then run it and restore the original line."
                 )
             else:
                 row["task"] = (
                     f"Close worked example 1 and rebuild it in a fresh pad, keeping the CHECK on {cond}. Then propose one defined input change that would make that CHECK fail and explain why before trying it."
                 )
             row["expected"] = (
-                f"The changed run {stop}. Restoring the original line brings back the worked observation: {_lower_first(c['expected'])}"
+                f"With {edited} the run {stop}, because {named} no longer shows that {obs}. Restoring {original} brings that observation back."
                 if v
                 else f"Your rebuild passes with the original input ({_lower_first(c['expected'])}), and your proposed change makes the CHECK on {cond} fail."
             )
             row["verify"] = (
-                f"Compare your written prediction with the failing CHECK and name the value that made {cond} false. The edit is defined behavior: it was run under AddressSanitizer and UndefinedBehaviorSanitizer without a report. After restoring the input, the program prints its success line again."
+                f"Name the value that made {cond} false, where your prediction for {named} said {obs}. "
+                + (
+                    f"Sanitizers report nothing for this {named} edit, so it is defined; restoring {original} passes again."
+                    if v
+                    else f"Keep the {named} change defined (no out-of-range or uninitialized read); undoing it passes again."
+                )
             )
         elif index == 1:
             row["title"] = c["title"] + (
@@ -163,41 +186,41 @@ def practice(ident, s):
             )
             if v and v["in_check"]:
                 row["task"] = (
-                    f"A careless edit changed the CHECK in worked example 2 so that it reads {edited}. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it."
+                    f"A careless edit changed the CHECK in worked example 2, {named}, so that it reads {edited}. Run the example with that line, explain why the edited CHECK now fails even though the program state still means {obs}, and restore it."
                 )
             elif v and _occurs(v["broken"], rows[0]["shown"] + "\n" + shown):
                 row["task"] = (
-                    f"A regression changed {original} to {edited} in worked example 2. Run worked example 2 with that change, use the failing CHECK to explain the defect and repair it without changing the CHECK."
+                    f"A regression changed {original} to {edited} in worked example 2, {named}. Run the example with that change, use the failing CHECK to explain why {obs} no longer holds and repair it without changing the CHECK."
                 )
             elif v:
                 row["task"] = (
-                    f"A regression changed one token in worked example 2, so one line now reads {edited}. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK."
+                    f"A regression changed one token in worked example 2, {named}, so one line now reads {edited}. Run the example with that line, use the failing CHECK to find why {obs} no longer holds and repair the line without changing the CHECK."
                 )
             else:
                 row["task"] = (
-                    f"Introduce one defined, deliberate defect into a copy of worked example 2 that makes the CHECK on {cond} fail, then explain how the reported line leads back to the faulty statement."
+                    f"Introduce one defined, deliberate defect into a copy of worked example 2, {named}, that makes the CHECK on {cond} fail, then explain how the reported line leads back to the statement that should make {obs}."
                 )
             row["expected"] = (
-                f"Before the repair the run {stop}; after it the line reads {original} again and {_lower_first(c['expected'])}"
+                f"Before the repair the run {stop}. Once the line reads {original} again, {named} again shows that {obs}."
                 if v
                 else f"The defective copy {stop}; the repaired copy reproduces the worked observation: {_lower_first(c['expected'])}"
             )
             row["verify"] = (
-                f"Keep the failing and the repaired runs. Explain why the edited CHECK rejects the same program state that {cond} accepts."
+                f"Keep the failing and the repaired runs of {named}. Explain why the edited CHECK rejects the same state that {cond} accepts, where {obs}."
                 if v and v["in_check"]
-                else f"Keep the failing and the repaired runs. Explain why the changed token alters the value tested by {cond} for this input."
+                else f"Keep the failing and the repaired runs of {named}. Explain why the changed token alters the value tested by {cond}, so the run can no longer show that {obs}."
             )
         elif v and not v["in_check"]:
             row["verify"] = (
-                f"Keep a CHECK equivalent to {cond}. As a control, change {original} to {edited}: the run must stop with `Check failed` at that CHECK, with no sanitizer report. Restore the line before continuing."
+                f"To confirm that {obs}, keep a CHECK equivalent to {cond} after you {_clause(c['task'])}. As a control for {named}, change {original} to {edited}: the run must stop with `Check failed` at that CHECK, with no sanitizer report. Restore the line before continuing."
             )
         elif v:
             row["verify"] = (
-                f"Keep a CHECK equivalent to {cond}. As a control, change {original} to {edited} inside it: the run must stop with `Check failed`, which shows the CHECK can fail. Restore it."
+                f"To confirm that {obs}, keep a CHECK equivalent to {cond} after you {_clause(c['task'])}. As a control for {named}, change {original} to {edited} inside it: the run must stop with `Check failed`, which shows the CHECK can fail. Restore it."
             )
         else:
             row["verify"] = (
-                f"Keep a CHECK equivalent to {cond} and confirm the success line. Then name a defined input that would make it fail, without executing any out-of-range access."
+                f"To confirm that {obs}, keep a CHECK equivalent to {cond} after you {_clause(c['task'])}, and confirm the success line. Then name a defined input that would make it fail for {named}, without executing any out-of-range access."
             )
         if index == 0 and v:
             third = f"compute the checked value with {edited} in place before running"
@@ -215,6 +238,119 @@ def practice(ident, s):
         )
         rows.append(row)
     return rows
+
+
+ARRAY = re.compile(
+    r"\b(?:unsigned\s+|const\s+)*(?:char|int|long|short|double|float|size_t|bool|u?int\d+_t|struct\s+\w+)"
+    r"\s+\**(\w+)\s*\[\s*([^\]]*?)\s*\]"
+)
+NOT_FUNCTIONS = {"if", "for", "while", "switch", "sizeof", "return", "do"}
+
+
+def _arrays(code):
+    return list(dict.fromkeys(f"`{name}[{size}]`" for name, size in ARRAY.findall(code)))
+
+
+def _helpers(helper):
+    names = re.findall(r"\b(\w+)\s*\((?:[^;{}()]|\([^()]*\))*\)\s*\{", helper)
+    return list(dict.fromkeys(f"`{n}`" for n in names if n not in NOT_FUNCTIONS))
+
+
+def _case(title):
+    return f'the "{_lower_first(title)}" case'
+
+
+def _capital(text):
+    return text[:1].upper() + text[1:]
+
+
+def lesson_prose(ident, s, rows, following):
+    """Guide paragraphs that name this lesson's own cases, checks, storage and helpers."""
+    n = [r["named"] for r in rows]
+    terms = [_lower_first(name) for name, meaning in s["terms"]]
+    helpers = _helpers(s["helper"])
+    arrays = _arrays(s["cases"][0]["code"] + "\n" + s["cases"][1]["code"])
+    extra = [h for h in s["headers"].split()]
+    where = " or ".join(helpers[:3]) if helpers else "the case code inside `main`"
+    first, second = rows[0], rows[1]
+    title = _lower_first(s["title"])
+    t0 = terms[0]
+    classroom = (
+        f"Open the unified Docker classroom, choose C and save a pad for {ident}, {title}."
+        f" The Linux worker compiles your `main.c` as C17 with warnings and pthread support, then runs {n[0]}, {n[1]} and the other {ident} cases"
+        f" under bounded time and output. You need no host compiler to study {t0}, and Windows uses WSL 2."
+    )
+    pad = (
+        f"For {n[2]} and every other {ident} case the pad takes no extra compiler flags, interactive input, archives, host files or packages."
+        f" Files the {ident} reference creates are owned temporary fixtures, not saved progress;"
+        f" multi-file builds and sanitizer runs of the {t0} code are contributor workflows."
+    )
+    reference = (
+        f"The {ident} reference has `int main(void)`"
+        + (f", {_join('`<' + h + '>`' for h in extra)}" if extra else "")
+        + (f" and {_join(helpers)} above main" if helpers else " and runs every case inside main")
+        + f". Its always-on `CHECK` evaluates once; a false CHECK on {first['cond']} in {n[0]} exits nonzero, while a pass prints nothing."
+        f" Unlike `assert`, `NDEBUG` cannot remove it, so {t0} validation never depends on optional assertions."
+        f" Solution snippets for {n[2]} and the rest belong inside main unless they declare a helper; one reference file assembles all six."
+    )
+    examples = (
+        f"Worked example 1 ({n[0]}) and worked example 2 ({n[1]}) are complete C files to copy whole into your pad."
+        f" Example 2 first repeats {n[0]}"
+        + (f" and includes {_join(helpers)}" if helpers else "")
+        + f"; the reference adds {n[2]}, {n[3]}, {n[4]} and {n[5]}."
+    )
+    prediction = (
+        f"Predict worked example 1: when you {_clause(s['cases'][0]['task'])}, the CHECK on {first['cond']} should see that {first['obs']}."
+        f" For {n[1]}, predict that {second['obs']}."
+        + (
+            f" Write down the declared size of {_join(arrays)} before indexing it."
+            if arrays
+            else f" Trace each object {n[0]} and {n[1]} read from initialization to last use."
+        )
+        + f" Separate a compiler diagnostic, a valid {t0} rejection and undefined behavior; never run an out-of-bounds access, dangling read or data race in {ident} to see what it prints."
+    )
+    pitfalls = (
+        f"Fix diagnostics in {n[0]} and {n[1]} one cause at a time, starting with the first warning for {title}; a declaration mismatch in {where} cascades."
+        f" If the CHECK on {second['cond']} in {n[1]} fails, compare the actual value with the claim that {second['obs']} and find the earliest departing transition."
+        f" A clean compile, or a run of {n[2]} that did not crash, does not rule out undefined behavior."
+        f"\n\nIn {n[3]} and {n[4]}, give every pointer and index a target, bounds, alignment, lifetime and mutability under the {_join(terms)} rules."
+        f" Check each library result before use and release each owned resource once per path."
+        f" {_capital(n[5])} transfers the mechanism; keep its distinction from {n[0]} instead of replacing a rejected input with a plausible default."
+    )
+    selfcheck = (
+        f"Close the reference and explain {t0} with a tiny trace of {n[2]}."
+        f" Rebuild {n[0]} and {n[3]} from a blank file, stating what makes each expression defined."
+        f" Change the data or ownership in {n[4]} and predict the result, then name the observation that would refute your account of {_join(terms)}."
+    )
+    if following:
+        onward = (
+            f"Move on to {following[0]}, {_lower_first(following[1])}, once you can explain {n[0]} through {n[5]} and repair Exercise 2 without an answer."
+            f" Later lessons hide {_join(terms)} behind APIs, where an unexplained pointer or unchecked size grows more dangerous."
+        )
+    else:
+        onward = (
+            f"This is the last C lesson: finish when you can explain {n[0]} through {n[5]} and repair Exercise 2 without an answer."
+            f" Carry {_join(terms)} into your own APIs, where an unexplained pointer or unchecked size grows more dangerous."
+        )
+    nextstep = f"Save your {ident} source and diagnostics with your notes. {onward}"
+    transfer = (
+        f"Add a fresh distinguishing input for {n[5]} to your own {ident} source."
+        f" Explain why every access in {where} stays within a live object and each owned resource is released."
+        f" An expected {t0} failure belongs in the test contract; undefined behavior does not."
+        f" Keep diagnostics and sanitizer evidence for {n[1]} apart from ordinary output: the fixture proves its stated {_join(terms)} assumptions, not universal safety."
+    )
+    return dict(
+        reference=reference,
+        examples=examples,
+        prediction=prediction,
+        pitfalls=pitfalls,
+        selfcheck=selfcheck,
+        nextstep=nextstep,
+        transfer=transfer,
+        terms=terms,
+        classroom=classroom,
+        pad=pad,
+    )
 
 
 def render():
@@ -245,6 +381,8 @@ def render():
             for i, c in enumerate(s["cases"][:2])
         )
         rows = practice(ident, s)
+        following = (f"c-{number + 1:03d}", SPECS[number]["title"]) if number < len(SPECS) else None
+        prose = lesson_prose(ident, s, rows, following)
         exercises = "\n\n".join(
             f"### Exercise {i}: {r['title']}\n\n{r['task']}\n\n**Expected:** {r['expected']}\n\n**Verify:** {r['verify']}\n\n**Progressive hints:** {r['hints']}"
             for i, r in enumerate(rows, 1)
@@ -261,7 +399,7 @@ def render():
 
 ## Learning objectives
 
-{outcome} Along the way, explain {", ".join(name.lower() for name, meaning in s["terms"])}. Implement the six investigations with explicit checks, identify a plausible defect and defend a fresh boundary case before execution. Completing a reference is not evidence of independent mastery.
+{outcome} Along the way, explain {_join(prose["terms"])}. Implement the six investigations, from {rows[0]["named"]} to {rows[5]["named"]}, with explicit checks, identify a plausible defect and defend a fresh boundary case before execution. Completing a reference is not evidence of independent mastery.
 
 ## Purpose and mental model
 
@@ -277,9 +415,9 @@ def render():
 
 ## How to run this lesson
 
-Open the unified Docker classroom, choose C and save your own learner pad. The prepared Linux worker stages one `main.c`, compiles it as C17 with warnings and pthread support, and executes the result under bounded time and output. No host compiler is required. Windows uses WSL 2 and the same Linux containers.
+{prose["classroom"]}
 
-The complete reference has `int main(void)` and the required standard headers. Its `CHECK` helper is always active and evaluates its condition once. A false check terminates with a nonzero result; a passing check produces no output. Unlike the standard `assert` macro, this helper is not removed by `NDEBUG`. Required operations and input validation must never depend on optional assertions. The explanatory solution snippets belong inside main unless they declare a helper; supporting declarations go above main. `CHECK(expression)` is the always-on teaching check supplied by the complete reference. The separate reference assembles all six cases into one complete file.
+{prose["reference"]}
 
 For an independently prepared Linux contributor environment, copy your own file to an ignored working directory and run:
 
@@ -288,11 +426,11 @@ cc -std=c17 -Wall -Wextra -Wpedantic -pthread main.c -lm -o lesson
 ./lesson
 ```
 
-The pad does not accept arbitrary compiler flags, interactive input, a project archive, host files or external package installation. Files created by a reference are owned temporary fixtures, not saved learner progress. Multi-file builds and sanitizers are explicitly prepared contributor workflows when discussed below.
+{prose["pad"]}
 
 {s["boundary"]}
 
-Each worked example below is a complete C file. Copy one whole block into your saved pad. Example 2 includes the first case as well as the second, so its setup is complete. Supporting helper definitions are included. The separate reference adds the other four investigations.
+{prose["examples"]}
 
 ## Worked example / walkthrough
 
@@ -300,7 +438,7 @@ Each worked example below is a complete C file. Copy one whole block into your s
 
 ## Prediction before execution
 
-Trace each object from initialization through its last valid use. Write down the size of every array, the capacity of every output buffer and the ownership of any allocated storage. Distinguish a compiler diagnostic from a valid runtime rejection and from undefined behavior. Never execute an out-of-bounds access, dangling-pointer read or data race simply to discover what value it happens to print.
+{prose["prediction"]}
 
 ## Exercises
 
@@ -308,37 +446,45 @@ Trace each object from initialization through its last valid use. Write down the
 
 ## Common pitfalls and diagnosis
 
-Begin with the first relevant compiler warning or error. A declaration mismatch can cause many later diagnostics, so fix one cause at a time. If a check fails, compare actual and expected values and identify the earliest state transition that differs from the intended invariant. A program that compiles can still contain undefined behavior. A program that ran once without crashing can still access invalid memory.
-
-For every pointer, identify its target object, bounds, alignment, lifetime and whether mutation is permitted. For every library call, inspect its return value before using output. For every owned resource, identify one release on each completed path. The worked examples and solutions explain the lesson-specific counterexamples; keep those distinctions rather than replacing a rejected input with a plausible default.
+{prose["pitfalls"]}
 
 ## Self-check and retrieval
 
-Close the reference and explain {s["terms"][0][0].lower()} using a tiny concrete trace. Reconstruct one normal case and one boundary case from a blank source file. State the assumptions that make every expression defined. Then change the data or ownership pattern and predict the result. Explain which observation would prove your interpretation wrong.
+{prose["selfcheck"]}
 
 ## Next step and sources
 
-Save the source and its actual diagnostics with your learning notes. Move onward when you can explain all six outcomes and repair a changed case without copying an answer. Larger projects reuse these contracts; an unexplained pointer or unchecked size calculation becomes more dangerous when hidden behind an API.
+{prose["nextstep"]}
 
-[Primary language, library or platform reference]({s["source"]}), reviewed 2026-10-23. Teaching explanations and synthetic fixtures are original.
+[Primary reference for {_lower_first(s["title"])}]({s["source"]}), reviewed 2026-10-23. Teaching explanations and synthetic fixtures are original.
 
 ## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning for {ident}: {s["title"]}.
 Read {paths["guide"]} and my saved attempt based on {paths["starter"]}.
-Ask me to predict {s["cases"][0]["expected"]} and justify every memory access.
+Ask me to predict what worked example 1, {rows[0]["named"]}, shows (expected: {rows[0]["obs"]}) and justify every memory access.
 Give one hint about my first incorrect assumption; request actual compiler or runtime evidence.
 Keep {paths["reference"]} and {paths["answers"]} closed until I request a reveal or comparison.
 Distinguish C17 guarantees from POSIX or compiler-specific behavior.
-Finish with a fresh case about {s["terms"][-1][0].lower()}.
+Finish with a fresh case about {prose["terms"][-1]}.
 ```
 """
-        answers = f"# {ident}: explained solutions\n\nCompare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.\n\n## Mechanism and assumptions\n\n{s['model']}\n\n{s['anatomy']}\n\n"
+        answers = f"# {ident}: explained solutions\n\nCompare after an attempt or explicit reveal. The complete executable reference, `{ident}_solution.c`, implements all six cases, from {rows[0]['named']} to {rows[5]['named']}, in one `main.c`.\n\n## Mechanism and assumptions\n\n{s['model']}\n\n{s['anatomy']}\n\n"
+        notes = REASONING.get(ident)
+        if notes and len(notes["cases"]) != len(rows):
+            raise ValueError(ident + " reasoning needs one entry per case")
         for i, r in enumerate(rows, 1):
             lead = f"The unchanged code is worked example {i}:\n\n" if i <= 2 else ""
             answers += f"## Exercise {i}: {r['title']}\n\n{r['task']}\n\n{lead}```c\n{r['shown']}\n```\n\n**Expected:** {r['expected']}\n\n{r['why']}\n\n"
-        answers += "## After comparison\n\nReturn to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.\n"
+            if notes:
+                answers += "".join(
+                    f"**{label}.** {text}\n\n"
+                    for label, text in zip(LABELS, notes["cases"][i - 1], strict=True)
+                )
+        answers += (
+            "## After comparison\n\n" + (notes["transfer"] if notes else prose["transfer"]) + "\n"
+        )
         starter = (
             "#include <stdio.h>\n\nint main(void) {\n"
             + "".join(

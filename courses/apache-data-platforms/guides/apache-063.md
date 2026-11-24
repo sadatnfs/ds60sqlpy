@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-003`, `apache-008`, `apache-039`.
 
+## Key terms
+
+- **HiveServer2:** The Hive service that accepts SQL sessions from clients such as Beeline and runs queries on an execution engine.
+- **Hive Metastore:** The service that stores metadata for databases, tables, columns, partitions and storage locations, without reading the data files themselves.
+- **Warehouse:** The filesystem or object-store location holding a table's actual data files, separate from the Metastore records that describe them.
+- **External table:** A Hive table whose data files live at a declared location that Hive does not own, so dropping the table leaves the files in place.
+- **Beeline:** The JDBC command-line client used to open a HiveServer2 session and run SQL.
+
 ## Query service, metadata service and storage have different jobs
 
 HiveServer2 accepts SQL sessions through its supported client protocol. The
@@ -85,6 +93,35 @@ schema, and a healthy Thrift socket does not prove query execution or file acces
 It supplies metadata while actual data access belongs to the query engine and
 storage path. These cases first register a bounded external contract, then inspect
 that metadata independently so a failure can be attributed to the correct layer.
+
+## Worked examples
+
+### Register an external table and one partition
+
+```sql
+CREATE DATABASE IF NOT EXISTS ds60 LOCATION 'file:///warehouse/ds60.db';
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ds60.orders (id INT, region STRING, amount INT)
+PARTITIONED BY (day STRING)
+STORED AS PARQUET
+LOCATION 'file:///warehouse/orders';
+
+ALTER TABLE ds60.orders ADD IF NOT EXISTS PARTITION (day = '2026-01-01')
+LOCATION 'file:///warehouse/orders/day=2026-01-01';
+```
+
+These statements from initialize.hql only write metadata to the PostgreSQL-backed metastore; no Parquet file is read or created. EXTERNAL means dropping the table later removes the definition but leaves the files. Partitions are not discovered automatically, so a new day directory stays invisible to queries until ALTER TABLE ADD PARTITION or MSCK REPAIR TABLE registers it.
+
+### Read metadata through Thrift without Beeline
+
+```java
+Table table = client.getTable("ds60", "orders");
+Partition partition = client.getPartition("ds60", "orders", List.of("2026-01-01"));
+System.out.println(table.getSd().getLocation());
+System.out.println(partition.getSd().getLocation());
+```
+
+This simplified fragment from MetadataProbe.java talks directly to the metastore, so it works even when HiveServer2 is down. It should print file:/warehouse/orders and file:/warehouse/orders/day=2026-01-01. The probe also asks for a table that does not exist and expects an error, which shows the metastore answers truthfully rather than with a default. Seeing the right locations here while a Beeline query fails narrows the problem to HiveServer2 or the files, not the catalog.
 
 ## Complete worked source
 

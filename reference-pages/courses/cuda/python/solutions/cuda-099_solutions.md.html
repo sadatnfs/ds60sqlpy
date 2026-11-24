@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-weighted-accumulation">Exercise 1: Compute weighted accumulation<a class="heading-anchor" href="#exercise-1-compute-weighted-accumulation" aria-label="Link to this section">#</a></h3>
 <p>Use sample-count weights.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute weighted accumulation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Weight each microbatch mean gradient by its sample count: <code>(3*2 + 1*8) / (3 + 1) = 14/4 = 3.5</code>.</p>
+<p><strong>Why it is correct here.</strong> The effective-batch gradient is the mean over all four examples. Microbatch means already divide by their own sizes, so multiplying back by the sizes recovers the sums before dividing by the total.</p>
+<p><strong>A plausible wrong approach.</strong> Averaging the two means, <code>(2 + 8)/2 = 5</code>, gives the single example in the second microbatch the same weight as the three in the first, so it counts three times as much as it should.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>weighted == 3.5</code> and <code>wrong == 5</code>. Compare with the mean gradient of one batch containing all four examples.</p>
 <h3 id="exercise-2-find-unequal-batch-normalization-error">Exercise 2: Find unequal-batch normalization error<a class="heading-anchor" href="#exercise-2-find-unequal-batch-normalization-error" aria-label="Link to this section">#</a></h3>
 <p>Do not average unequal means blindly.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>find unequal-batch normalization error</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Find the normalization error in an accumulation loop that divides each microbatch loss by the number of microbatches regardless of their sizes, which equals averaging unequal means.</p>
+<p><strong>Why it is correct here.</strong> Dividing by the microbatch count is correct only when all microbatches have the same size. A short final microbatch then gets too much weight in every epoch.</p>
+<p><strong>A plausible wrong approach.</strong> Trusting that the loop is right because it matches the full-batch gradient on evenly divisible data hides the error, which only appears for an uneven final microbatch.</p>
+<p><strong>How to verify.</strong> Test with sizes 3 and 1 and compare the accumulated gradient with 3.5. Scaling each loss by <code>size/total</code> fixes it, and the test should then pass.</p>
 <h3 id="exercise-3-place-optimizer-steps">Exercise 3: Place optimizer steps<a class="heading-anchor" href="#exercise-3-place-optimizer-steps" aria-label="Link to this section">#</a></h3>
 <p>Step once per effective batch.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>place optimizer steps</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Place <code>optimizer.step()</code> and <code>optimizer.zero_grad()</code> once per effective batch, after the last microbatch&#x27;s <code>backward()</code>, not after each microbatch.</p>
+<p><strong>Why it is correct here.</strong> Gradients accumulate in <code>.grad</code> across backward calls. Stepping after each microbatch applies several smaller updates with different parameters, which is a different algorithm from one large-batch update.</p>
+<p><strong>A plausible wrong approach.</strong> Calling <code>zero_grad()</code> inside the microbatch loop discards earlier contributions, so only the last microbatch affects the update.</p>
+<p><strong>How to verify.</strong> Count optimizer steps per epoch and confirm it equals the number of effective batches. Compare the updated weights with a single full-batch step.</p>
 <h3 id="exercise-4-explain-checkpoint-recomputation">Exercise 4: Explain checkpoint recomputation<a class="heading-anchor" href="#exercise-4-explain-checkpoint-recomputation" aria-label="Link to this section">#</a></h3>
 <p>Recompute discarded intermediates during backward.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain checkpoint recomputation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain activation checkpointing: selected layers discard their intermediate activations after the forward pass and recompute them during backward from saved inputs.</p>
+<p><strong>Why it is correct here.</strong> Memory falls because only the segment inputs stay alive, an illustrative 20 MiB saved in the lesson&#x27;s example, but each checkpointed segment runs its forward computation twice.</p>
+<p><strong>A plausible wrong approach.</strong> Checkpointing every layer when memory is not the constraint adds recomputation with no benefit.</p>
+<p><strong>How to verify.</strong> Measure peak allocated memory and step time with checkpointing on and off. Gradients must match within tolerance, since recomputation changes time but not the math.</p>
 <h3 id="exercise-5-account-for-frozen-weights">Exercise 5: Account for frozen weights<a class="heading-anchor" href="#exercise-5-account-for-frozen-weights" aria-label="Link to this section">#</a></h3>
 <p>Freezing gradients does not remove parameters.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>account for frozen weights</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Account for frozen weights: setting <code>requires_grad=False</code> removes gradient and optimizer state for those parameters, but the parameters themselves stay in memory.</p>
+<p><strong>Why it is correct here.</strong> Freezing saves gradient storage and optimizer moments, three times the parameter bytes for Adam, but the forward pass still reads every frozen weight.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming a frozen model costs nothing in memory leads to under-budgeting by the full parameter size.</p>
+<p><strong>How to verify.</strong> Compare allocated memory before and after freezing and confirm the reduction matches gradient plus optimizer bytes while parameter bytes remain.</p>
 <h3 id="exercise-6-design-equal-update-tests">Exercise 6: Design equal-update tests<a class="heading-anchor" href="#exercise-6-design-equal-update-tests" aria-label="Link to this section">#</a></h3>
 <p>Match data order loss reduction state and random behavior.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design equal-update tests</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design tests for equal updates: compare accumulated microbatch training with full-batch training using the same data order, loss reduction, initial state and disabled randomness such as dropout.</p>
+<p><strong>Why it is correct here.</strong> Accumulation is meant to reproduce the large-batch update. Holding every other factor fixed isolates the accumulation logic.</p>
+<p><strong>A plausible wrong approach.</strong> Running the comparison with dropout enabled and different seeds produces differences that hide or mimic accumulation bugs.</p>
+<p><strong>How to verify.</strong> Assert weights after one effective step agree within float tolerance, and repeat with an uneven final microbatch.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Correct weighted gradient 3.5 versus incorrect 5.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-099_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

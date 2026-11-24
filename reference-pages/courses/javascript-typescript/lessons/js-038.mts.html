@@ -202,19 +202,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// handle({ method: &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R1&#x27;, body: { a: 3, b: 3 } });`. Before</span></span>
 <span class="source-line"><span class="syntax-comment">// running it, predict which check fails and which value it now sees; then run it and restore</span></span>
 <span class="source-line"><span class="syntax-comment">// the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(decoded.body.data.total, 5)`. Restoring the original line brings back the</span></span>
-<span class="source-line"><span class="syntax-comment">// worked observation: status 200 and decoded total 5.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(decoded.body.data.total, 5)`. Restoring `const reply = handle({ method:</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R1&#x27;, body: { a: 2, b: 3 } });` brings back: status 200</span></span>
+<span class="source-line"><span class="syntax-comment">// and decoded total 5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Return a stable invalid-input envelope: debug a regression</span></span>
 <span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `const reply = handle({</span></span>
 <span class="source-line"><span class="syntax-comment">// method: &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R3&#x27;, body: { a: &#x27;2&#x27;, b: 3 } });`. Run Example B</span></span>
 <span class="source-line"><span class="syntax-comment">// with that line, use the failing check to locate the defect and repair it without changing</span></span>
 <span class="source-line"><span class="syntax-comment">// the check.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(reply.body.requestId, &#x27;R2&#x27;)`; after it the line reads `const reply =</span></span>
-<span class="source-line"><span class="syntax-comment">// handle({ method: &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R2&#x27;, body: { a: &#x27;2&#x27;, b: 3 } });` again</span></span>
-<span class="source-line"><span class="syntax-comment">// and status 400 with bad_request and matching request id.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(reply.body.requestId, &#x27;R2&#x27;)`. Restoring `const reply = handle({ method:</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;POST&#x27;, path: &#x27;/sum&#x27;, requestId: &#x27;R2&#x27;, body: { a: &#x27;2&#x27;, b: 3 } });` brings back: status 400</span></span>
+<span class="source-line"><span class="syntax-comment">// with bad_request and matching request id.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Distinguish route and method failures</span></span>
 <span class="source-line"><span class="syntax-comment">// Use an unknown path and an unsupported method.</span></span>

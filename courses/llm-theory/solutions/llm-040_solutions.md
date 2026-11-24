@@ -1,6 +1,6 @@
 # llm-040: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these a statistical evaluation and reliability argument answers after attempting *Group a second fixture* through *Combine gates with uncertainty*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Expose row-weighting dependence* points to one step. `llm-040_solution.py` holds the assertions; this page explains how they test clustered resampling. Then try *Combine gates with uncertainty* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -33,7 +33,7 @@ np.testing.assert_allclose(g2.mean(), 5 / 6, atol=1e-12, rtol=0)
 
 **Expected:** family means A 2, B -0.5, C 1; row mean 0.5; equal-family mean 5/6.
 
-**Verify:** In a fresh process, the exercise checks confirm `g2` equals `[2, -0.5, 1]`; `d2.mean() == 0.5` and `g2.mean()` matches `5 / 6` within 1e-12.
+**Verify:** For *Group a second fixture*, a fresh-process check confirms `g2` equals `[2, -0.5, 1]`; `d2.mean() == 0.5` and `g2.mean()` matches `5 / 6` within 1e-12.
 
 ## Exercise 2: Predict bootstrap support
 
@@ -50,7 +50,7 @@ assert len(np.unique(np.round(est, 12))) <= 10
 
 **Expected:** every estimate lies in [-0.5, 2]; at most 10 distinct means occur.
 
-**Verify:** In a fresh process, the exercise checks confirm `est.min() >= -0.5`; `est.max() <= 2` and `len(np.unique(np.round(est, 12))) <= 10`.
+**Verify:** For *Predict bootstrap support*, a fresh-process check confirms `est.min() >= -0.5`; `est.max() <= 2` and `len(np.unique(np.round(est, 12))) <= 10`.
 
 ## Exercise 3: Expose row-weighting dependence
 
@@ -65,7 +65,7 @@ assert repeated.mean() != diff.mean() and grouped.mean() == 0
 
 **Expected:** row mean changes; family mean remains 0.
 
-**Verify:** In a fresh process, the exercise checks confirm `repeated.mean() != diff.mean()` and `grouped.mean() == 0`.
+**Verify:** For *Expose row-weighting dependence*, a fresh-process check confirms `repeated.mean() != diff.mean()` and `grouped.mean() == 0`.
 
 ## Exercise 4: Report selective accuracy
 
@@ -80,7 +80,7 @@ assert answered / total == 0.5 and correct / answered == 1 and correct == 2
 
 **Expected:** coverage 0.5; answered accuracy 1; total correct answers 2.
 
-**Verify:** In a fresh process, the exercise checks confirm `answered / total == 0.5`, `correct / answered == 1` and `correct == 2`.
+**Verify:** For *Report selective accuracy*, a fresh-process check confirms `answered / total == 0.5`, `correct / answered == 1` and `correct == 2`.
 
 ## Exercise 5: Audit decision chronology
 
@@ -97,7 +97,7 @@ assert forbidden[1] != "validation"
 
 **Expected:** test-driven selection is invalid for a fresh final claim.
 
-**Verify:** In a fresh process, the exercise checks confirm `all((part == 'validation' for action, part in ledger if action == 'select_prompt'))` and `forbidden[1] != 'validation'`.
+**Verify:** For *Audit decision chronology*, a fresh-process check confirms `all((part == 'validation' for action, part in ledger if action == 'select_prompt'))` and `forbidden[1] != 'validation'`.
 
 ## Exercise 6: Combine gates with uncertainty
 
@@ -113,8 +113,8 @@ assert not go
 
 **Expected:** decision no-go regardless of favorable average.
 
-**Verify:** In a fresh process, the exercise checks confirm `not go`.
+**Verify:** For *Combine gates with uncertainty*, a fresh-process check confirms `not go`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Report selective accuracy* and predict the result first; keep *Audit decision chronology* failing beside the repair. Log a missing NumPy separately from a wrong clustered resampling value in `llm-040`.

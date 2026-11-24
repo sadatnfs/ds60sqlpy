@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Count admitted records in the first example.</p>
 <p>Only A is admitted.</p>
+<p><strong>Approach:</strong> Evaluate both rules for every row and admit only rows where neither flag is TRUE.</p>
+<p><strong>Why it holds here:</strong> A has a nonempty id and amount 2. The second row has an empty id, C has amount -1, and D has NA, which fails is.finite. That leaves only A, so the mask is TRUE, FALSE, FALSE, FALSE.</p>
+<p><strong>Tempting mistake:</strong> Filtering with <code>raw[raw$amount &gt;= 0, ]</code>. It keeps the empty id row, which has a valid amount, and returns an extra row of NA for D.</p>
+<p><strong>Verify:</strong> <code>identical(admitted, c(TRUE, FALSE, FALSE, FALSE))</code> returns TRUE, and <code>sum(admitted)</code> returns 1.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Make the empty-ID row also have a negative amount.</p>
 <p>The row has both missing_id and invalid_amount flags.</p>
+<p><strong>Approach:</strong> Keep each rule in its own logical column, computed independently, so a row can carry several reasons.</p>
+<p><strong>Why it holds here:</strong> With amount -3, the empty id row fails both rules. The reference input does exactly that, and its first rejected row shows TRUE under missing_id and TRUE under invalid_amount.</p>
+<p><strong>Tempting mistake:</strong> Recording a single reason from an if and else chain where the first failing rule wins. The row would list only the missing id, so after that fix the resubmitted record would be rejected again for its amount.</p>
+<p><strong>Verify:</strong> <code>result$rejected$missing_id[[1]]</code> and <code>result$rejected$invalid_amount[[1]]</code> both return TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Return admitted and quarantined tables with stable IDs.</p>
 <p>Their counts reconcile to the input count.</p>
+<p><strong>Approach:</strong> Build both tables from one mask, <code>data[keep, ]</code> and <code>data[!keep, ]</code>, and attach the flags to the rejected rows.</p>
+<p><strong>Why it holds here:</strong> One mask makes the two sets disjoint and complete: 1 admitted plus 3 rejected equals 4 input rows. The row names 2, 3 and 4 tie each rejection back to its position, which matters for the row with no id.</p>
+<p><strong>Tempting mistake:</strong> Writing the rejected condition separately, for example <code>data[data$amount &lt; 0, ]</code>. It misses D and the empty id row, so the counts no longer add up to 4.</p>
+<p><strong>Verify:</strong> <code>nrow(result$admitted) + nrow(result$rejected) == nrow(raw)</code> returns TRUE.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose replacing every invalid numeric parse with zero.</p>
 <p>Preserve a parse-failure signal and apply an explicit admission policy.</p>
+<p><strong>Approach:</strong> Keep a parse failure flag next to the parsed value and treat it as a rejection reason under an explicit policy.</p>
+<p><strong>Why it holds here:</strong> A zero would pass this lesson&#x27;s <code>amount &lt; 0</code> rule, so a value that could not be read would be admitted as a real measurement and lower every total it enters.</p>
+<p><strong>Tempting mistake:</strong> Replacing every NA from as.numeric with 0. Blank fields and malformed text both become valid looking zeros, and the original problem is no longer visible anywhere.</p>
+<p><strong>Verify:</strong> In the worked example, <code>parse_failed</code> returns TRUE only for the text 1,5, and the admitted mean returns 9.75.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Validate a zero-row table with the correct schema.</p>
 <p>An empty but correctly typed batch can be admitted under a stated empty-batch policy.</p>
+<p><strong>Approach:</strong> Run the full schema check on a zero row batch, then admit it if the empty batch policy allows empty days.</p>
+<p><strong>Why it holds here:</strong> <code>raw[integer(0), , drop = FALSE]</code> keeps id as character and amount as numeric, so the type checks pass and both tables are empty. Schema validity and row validity are separate questions.</p>
+<p><strong>Tempting mistake:</strong> Skipping validation when <code>nrow(data) == 0</code>. A broken export that yields zero rows with amount read as character would pass, and the type problem would surface on a later, nonempty day.</p>
+<p><strong>Verify:</strong> <code>nrow(empty$admitted)</code> and <code>nrow(empty$rejected)</code> both return 0.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain what local validation cannot prove.</p>
 <p>Range and schema checks do not establish representativeness, causality, freshness or measurement accuracy.</p>
+<p><strong>Approach:</strong> Report the admitted row as passing these rules, and list separately what the rules do not check.</p>
+<p><strong>Why it holds here:</strong> A with amount 2 passes both checks, but nothing here tests the currency, whether A was already loaded yesterday, how recent the batch is, or whether the stores in it represent all stores.</p>
+<p><strong>Tempting mistake:</strong> Labeling the admitted table as correct data. The rules only show that ids are present and amounts are finite and nonnegative.</p>
+<p><strong>Verify:</strong> The rejected table shows a reason for each of its three rows; no column in result shows freshness, duplication across batches or measurement accuracy.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

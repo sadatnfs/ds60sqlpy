@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Keep missingness and numerical failure distinct and report the denominator used by each aggregation policy.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-014</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (deletion and replacement change a mean) and worked case B (skipmissing does not remove NaN) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-014: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>missing:</strong> The value for an unknown data entry, which propagates through arithmetic and comparisons using three-valued logic.</li>
+<li><strong>nothing:</strong> The singleton meaning that no value exists, such as a failed search result, which does not propagate the way <code>missing</code> does.</li>
+<li><strong>NaN:</strong> A floating-point value produced by an undefined operation such as <code>0.0 / 0.0</code> that is still a number and is distinct from <code>missing</code>.</li>
+<li><strong>Union type:</strong> A type such as <code>Union{Missing, Float64}</code> that lets one container hold either alternative.</li>
+<li><strong>Coverage:</strong> The count or fraction of observations actually present, reported beside any summary that skipped missing values.</li>
+</ul>
 <h3 id="three-states-with-different-meanings">Three states with different meanings<a class="heading-anchor" href="#three-states-with-different-meanings" aria-label="Link to this section">#</a></h3>
 <p><code>missing</code> represents unknown or unavailable data. <code>nothing</code> commonly represents the absence of a returned value. NaN is a floating-point value that often indicates an undefined numerical result. These states are not interchangeable, and a function should not collapse them into zero without a declared policy.</p>
 <p>Operations involving <code>missing</code> can propagate uncertainty. The eager Boolean operators <code>&amp;</code> and <code>|</code> support three-valued behavior when one part is unknown. An <code>if</code> condition and the controlling operand of <code>&amp;&amp;</code> or <code>||</code> still require a Boolean. <code>ismissing</code> produces a definite test. <code>skipmissing</code> iterates over observed values, while <code>coalesce</code> substitutes a stated replacement for missing data.</p>

@@ -8,7 +8,7 @@ Compute group-relative advantages, expose degeneracy and weighting choices, and 
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-023`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-023` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for grpo groups, normalization and kl estimators in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about GRPO and group baseline: Shifting all rewards leaves the normalized advantages unchanged, a constant group yields zero advantages, response and token averaging give 0 and 1/3, the estimator differs from current-policy KL under the wrong sampling law, and its value 0 has derivative 0.5. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Relative rewards provide a comparison signal
 
@@ -23,6 +23,14 @@ For a nonconstant group,
 \]
 
 The centered advantages sum to zero. That does not imply that the policy gradient is zero, because each advantage multiplies a different score-function or probability-ratio derivative. The value of a centered objective at the old policy and its derivative are different objects.
+
+## Key terms
+
+- **GRPO:** Group-relative policy optimization, which normalizes rewards within a group of responses to the same prompt.
+- **Group baseline:** The group mean reward subtracted from each response's reward in place of a learned value baseline.
+- **Zero-variance group:** A group with identical rewards, assigned zero advantages by an explicit policy to avoid division by zero.
+- **Length normalization:** The averaging convention for token terms; per-response averaging weights responses equally, while pooling all tokens favors longer responses.
+- **KL estimator:** A sample average whose expectation equals KL(p, q) only when actions are drawn from p; old-policy samples need importance correction.
 
 ## Worked case A: constant groups and invariances
 

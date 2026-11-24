@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-058-kafka-ingestion-and-real-time-segments">apache-058: Kafka ingestion and real-time segments<a class="heading-anchor" href="#apache-058-kafka-ingestion-and-real-time-segments" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-057</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Real-time table:</strong> A Pinot table that ingests records from a stream such as Kafka instead of from uploaded batch segments.</li>
+<li><strong>Consuming segment:</strong> An in-progress real-time segment that a server builds from stream records and later commits as a completed segment.</li>
+<li><strong>Flush threshold:</strong> The row count or time limit at which a consuming segment is completed and committed.</li>
+<li><strong>Stream decoder:</strong> The configured component, here JSON, that turns stream messages into typed column values.</li>
+<li><strong>Ingestion lag:</strong> The gap between the latest source offset and the records already queryable in Pinot. A small query result does not show it is zero.</li>
+</ul>
 <h3 id="a-consuming-segment-connects-a-log-to-an-analytical-table">A consuming segment connects a log to an analytical table<a class="heading-anchor" href="#a-consuming-segment-connects-a-log-to-an-analytical-table" aria-label="Link to this section">#</a></h3>
 <p>Real-time Pinot ingestion reads a supported stream, decodes records and builds consuming segments. Those segments later become completed segments according to the configured flush and commit rules. Kafka partition positions, decoded rows, indexed documents and query results are related observations, but they need not advance at the same instant. A small query result does not establish that the consumer has caught up to the source.</p>
 <p>The prepared <code>realtime-table.json</code> uses the actual Kafka connector configuration keys for the pinned Pinot release. It declares a topic, broker address, low-level consumer, JSON decoder and flush thresholds. Those settings are a prepared route, not evidence that the standalone offline workshop has exercised Kafka ingestion. Connect only an explicitly owned private Kafka project with matching networking and record a separate live qualification before asserting this path passed.</p>

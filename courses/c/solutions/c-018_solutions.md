@@ -1,6 +1,6 @@
 # c-018: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-018_solution.c`, implements all six cases, from the "round-trip an owned stream" case to the "transfer binary zero bytes" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -24,13 +24,13 @@ CHECK(fread(data, 1, 3, f) == 3 && strcmp(data, "abc") == 0);
 CHECK(fclose(f) == 0);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `fwrite("abc", 1, 3, f) == 3`. Restoring the original line brings back the worked observation: three bytes return and match abc.
+**Expected:** With `CHECK(fwrite("abc", 1, 4, f) == 3);` the run stops with `Check failed` at the CHECK on `fwrite("abc", 1, 3, f) == 3`, because the "round-trip an owned stream" case no longer shows that three bytes return and match abc. Restoring `CHECK(fwrite("abc", 1, 3, f) == 3);` brings that observation back.
 
 The terminator comes from initialized output storage, not from fread. Binary reads do not automatically append a string terminator.
 
 ## Exercise 2: Observe a short read: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(fwrite("ab", 1, 3, f) == 2);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+A careless edit changed the CHECK in worked example 2, the "observe a short read" case, so that it reads `CHECK(fwrite("ab", 1, 3, f) == 2);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means two bytes return and EOF becomes set, and restore it.
 
 The unchanged code is worked example 2:
 
@@ -45,7 +45,7 @@ CHECK(n == 2 && feof(f) && !ferror(f));
 CHECK(fclose(f) == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `fwrite("ab", 1, 2, f) == 2`; after it the line reads `CHECK(fwrite("ab", 1, 2, f) == 2);` again and two bytes return and EOF becomes set.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `fwrite("ab", 1, 2, f) == 2`. Once the line reads `CHECK(fwrite("ab", 1, 2, f) == 2);` again, the "observe a short read" case again shows that two bytes return and EOF becomes set.
 
 The count is the primary evidence. EOF explains why the remaining requested bytes were unavailable.
 
@@ -122,4 +122,4 @@ Binary data is length-delimited, not terminated by zero. String functions would 
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer binary zero bytes" case to your own c-018 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected stream state failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "observe a short read" case apart from ordinary output: the fixture proves its stated stream state, short read and EOF indicator assumptions, not universal safety.

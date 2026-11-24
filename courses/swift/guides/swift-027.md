@@ -6,7 +6,7 @@ Intermediate, approximately 90 minutes. Prerequisites: `swift-026`
 
 ## Learning objectives
 
-Write behavior tests for the prepared package with XCTest and know where Swift Testing fits. The central exercise is task 3: Add a real JourneyCore test for rejected negative quantity.
+Write behavior tests for the prepared package with XCTest and know where Swift Testing fits. The central exercise is task 3: Add a real JourneyCore test that rejects a blank item title.
 
 ## Purpose and mental model
 
@@ -87,7 +87,7 @@ struct LessonMain {
 
 2. **Guided modification.** Add the minimum Int case without unsafe negation.
 
-3. **Independent construction.** Add a real JourneyCore test for rejected negative quantity.
+3. **Independent construction.** Add a real JourneyCore test that rejects a blank item title.
 
 4. **Diagnose a defect.** Diagnose a test comparing the same function call on both sides.
 
@@ -107,7 +107,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Check independently derived cases) before changing anything, and confirm its observation: Normal and boundary values satisfy the clamp contract.
 2. Compare Example B (Catch a plausible wrong boundary) with Example A and name the first line whose behavior differs. Its observation is: The zero case catches the wrong default and clamping is idempotent.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Random tests need reproducible seeds and an oracle.
+3. Before opening the explanation, check your task 3 attempt (Add a real JourneyCore test that rejects a blank item title) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

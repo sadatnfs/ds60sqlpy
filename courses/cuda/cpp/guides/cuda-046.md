@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Call cuBLAS GEMM with correct column-major shapes and leading dimensions and compare it fairly, including setup.
+
 Work through *cuBLAS and cuBLASLt without layout confusion* with the concrete cases below. Finish with this evidence:
 correct shapes/layouts and a fair comparison including setup where relevant. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 GEMM computes scaled matrix multiplication plus an existing output contribution. In conventional notation, C becomes alpha times A*B plus beta times C. Classic cuBLAS uses column-major conventions, so leading dimensions and transpose flags must be interpreted accordingly. cuBLASLt provides more explicit layout and algorithm descriptors, with workspace and compute-type choices. A handle has lifecycle and stream configuration. Check library status separately from CUDA completion. A successful call with wrong dimensions can produce plausible but incorrect data, especially when symmetric inputs conceal transposition mistakes.
+
+### Key terms
+
+- **Column-major order:** A storage order in which each column is contiguous, which cuBLAS assumes by default.
+- **Leading dimension:** The stride in elements between consecutive columns of a column-major matrix in cuBLAS.
+- **Transpose flag:** An operation argument such as `CUBLAS_OP_T` that tells cuBLAS to use a matrix transposed without copying it.
+- **cuBLAS handle:** A library context created once and reused, which owns workspace and stream settings.
+- **Alpha and beta:** Scalars in C = alpha * op(A) * op(B) + beta * C, where a nonzero beta reads the existing C.
 
 ## Mathematical contract
 

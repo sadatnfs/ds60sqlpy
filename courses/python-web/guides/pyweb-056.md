@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-055`.
 
 Django's admin is a privileged application for managing registered models. It should not be confused with a general-purpose end-user interface or assumed safe merely because it is included in the framework. This chapter checks the distinction between an ordinary user, a staff user and a superuser through actual admin requests.
 
+## Key terms
+
+- **Django admin:** A privileged built-in application for managing registered models, intended for trusted staff rather than end users.
+- **Staff status:** The `is_staff` flag that lets a user enter the admin without granting any model permission inside it.
+- **Superuser:** A user with `is_superuser` who receives every permission, so such accounts should be rare and tightly controlled.
+- **ModelAdmin:** The class that configures how one model appears and which actions are offered in the admin.
+- **force_login():** A test Client method that attaches an authenticated session for a user without checking a password.
+
 ## Mechanism: entry permission and model permission differ
 
 Staff status permits access to the admin under Django's normal policy, but it does not grant every model permission. Individual actions still depend on the user's permissions and the ModelAdmin configuration. A superuser has broad authority and should be used sparingly in real operations.
@@ -29,6 +37,39 @@ The synthetic superuser can open the user changelist, and the rendered HTML cont
 That asset observation is deliberately limited. The test has not fetched the CSS or JavaScript files from a production server. The owned workshop runs collectstatic during preparation and serves the resulting local files through the chosen static delivery boundary. Browser acceptance verifies those requests without external CDNs.
 
 A real admin must also protect secrets, uploads and custom actions. A model field appearing in an admin form may permit changes that bypass assumptions in a public API. Review administrative writes as another application entrypoint rather than assuming public-route validation covers them.
+
+## Worked example: the staff flag opens the door, permissions open rooms
+
+```python
+def admin_status(user, path):
+    if not (user["active"] and user["staff"]):
+        return 302
+    if path == "/admin/":
+        return 200
+    needed = {"auth.view_user", "auth.change_user"}
+    return 200 if user["superuser"] or needed & user["perms"] else 403
+
+
+people = {
+    "ordinary": dict(active=True, staff=False, superuser=False, perms=set()),
+    "staff": dict(active=True, staff=True, superuser=False, perms=set()),
+    "viewer": dict(active=True, staff=True, superuser=False, perms={"auth.view_user"}),
+    "superuser_not_staff": dict(active=True, staff=False, superuser=True, perms=set()),
+}
+for name, user in people.items():
+    print(name, admin_status(user, "/admin/"), admin_status(user, "/admin/auth/user/"))
+```
+
+Expected output:
+
+```text
+ordinary 302 302
+staff 200 403
+viewer 200 200
+superuser_not_staff 302 302
+```
+
+The first three rows reproduce the lesson's observed codes: an ordinary user is redirected to the login page, a staff user sees the empty index but gets 403 on the user changelist, and a staff user with `auth.view_user` can read it. The last row is the less obvious case. `AdminSite.has_permission` checks `is_active` and `is_staff` only, so a superuser account with `is_staff=False` is turned away before its unlimited permissions are consulted. Auditing who can reach the admin therefore means listing both the staff flag and the permission set for every account, not just counting superusers.
 
 ## Failure diagnosis and discussion
 

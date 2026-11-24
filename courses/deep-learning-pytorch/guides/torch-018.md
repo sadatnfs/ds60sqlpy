@@ -139,7 +139,7 @@ torch.testing.assert_close(alone[0], together[0], atol=1e-6, rtol=0)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The running mean becomes [1, 2] and the running variance 1.5 after one step, eval leaves the running mean and batch counter unchanged, the LayerNorm row matches within 1e-6 alone or beside [100, 200], and PyTorch momentum 0.1 gives 1 where Keras momentum 0.1 gives 9. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Update a running mean. Predict exercise 6, Handle a constant feature row, from its prompt alone: Apply LayerNorm to 5, 5 and inspect finiteness. Then explain why this finish condition holds: The running mean becomes [1, 2] and the running variance 1.5 after one step, eval leaves the running mean and batch counter unchanged, the LayerNorm row matches within 1e-6 alone or beside [100, 200], and PyTorch momentum 0.1 gives 1 where Keras momentum 0.1 gives 9. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -175,15 +175,15 @@ If validation changes running state, inspect train/eval at the exact call and wh
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Freeze state during evaluation) alters one assumption of Example A (Update a running mean). Hint 2: exercise 4, Inspect running variance convention, should end at running variance 1.5 for each feature. Work backward from it. Hint 3: exercise 5, Translate momentum explicitly, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Running statistic, Momentum convention, Batch coupling using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Check LayerNorm row independence, from its inputs alone. Predict whether exercise 3, Normalize a new LayerNorm row, survives one changed input. Then explain Running statistic, Momentum convention, Batch coupling in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-017` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Update a running mean) cannot be rebuilt without help, revisit `torch-017` first. Otherwise keep your exercise 2 attempt, Predict the running variance, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

@@ -43,3 +43,5 @@ The networking builder's common Markdown writer covers both new lesson bundles
 and its final depth-supplement updates to original guides. The original 42
 identities and verifier admission remain unchanged. Do not manually format a
 derived guide or change a test assertion to bypass an owner regeneration error.
+
+Solution reasoning for each exercise comes from `../reasoning.json` and is rendered by `../reasoning.py` after the `**Expected:**` line; see `../complete/README.md` for the data format and validator.

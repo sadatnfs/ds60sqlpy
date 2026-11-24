@@ -296,7 +296,7 @@ static bool try_area(int w,int h,int *out){if(out==NULL||w<=0||h<=0||w>INT_MAX/h
 add(
     "Arrays, bounds and element counts",
     """An array owns a fixed number of elements of one type. Its valid indices run from zero through length minus one. C does not attach a runtime bounds check to each subscript. In many expressions an array converts to a pointer to its first element, which loses the length information. A function receiving an array-like parameter therefore normally needs a separate element count. sizeof applied to an actual array measures the whole array, but sizeof applied to a pointer measures the pointer object. Confusing these contexts is a common source of incomplete loops and out-of-bounds access.""",
-    """int values[3] allocates three integers. A partial initializer fills remaining elements with zero. sizeof values / sizeof values[0] derives an element count only where values is still an array. A parameter written int values[] is adjusted to a pointer parameter. Pass the logical length explicitly and document whether a null pointer is permitted for length zero. Never dereference the one-past position.""",
+    """`int values[3]` allocates three integers. A partial initializer fills remaining elements with zero. `sizeof values / sizeof values[0]` derives an element count only where `values` is still an array. A parameter written `int values[]` is adjusted to a pointer parameter. Pass the logical length explicitly and document whether a null pointer is permitted for length zero. Never dereference the one-past position.""",
     [
         ("Array extent", "The number of elements in an array object."),
         (

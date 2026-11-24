@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Calculate element and byte offsets for strided views and draw an explicit ownership and lifetime diagram.
+
 Work through *Memory as addresses, ownership, shape and stride* with the concrete cases below. Finish with this evidence:
 a correct offset table and explicit ownership/lifetime diagram. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A shape says how many logical coordinates exist. A stride says how far to move in storage when a coordinate increases by one. A row-major two-dimensional float array with row stride s elements places coordinate (r,c) at element offset r*s+c, then multiplies by the element size to obtain a byte offset. Padded rows use s greater than their logical width. A view can change shape and strides while borrowing the same allocation. Copying an address does not extend the allocation's lifetime or create independent data. Device and host pointers also carry an accessibility contract beyond their printed numeric value.
+
+### Key terms
+
+- **Stride:** The number of elements to move in storage when one logical coordinate increases by one.
+- **Row-major layout:** A storage order in which elements of one row are contiguous, placing (r, c) at element offset r*s+c.
+- **View:** An object that reinterprets shape and strides over storage it borrows without owning or copying it.
+- **Aliasing:** Two names or pointers that refer to overlapping storage, so a write through one changes values seen through the other.
+- **Pitch:** The padded row length in bytes chosen for an allocation, which can exceed the logical row width.
 
 ## Mathematical contract
 

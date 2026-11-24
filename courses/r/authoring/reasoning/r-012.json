@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Calls against the reference after_fee",
+      "body": "```text\ncall                           rate used   result\nafter_fee(50)                  0.1         45\nafter_fee(50, rate = 0)        0           50\nafter_fee(50, rate = 0.2)      0.2         40\nafter_fee(numeric(0))          0.1         numeric(0)\nafter_fee(50, c(0.1, 0.2))     rejected    error: invalid fee inputs\nafter_fee(10, TRUE)            rejected    error: invalid fee inputs\nafter_fee(0, 50)               rejected    error: invalid fee inputs\n```\n\nThe first row is the only one that depends on the default. If a maintainer changed the default to 0.2, that row would print 40 and the next two rows would not move, so only a test that omits rate can notice the change. The last row is a swapped positional call: amount 0 and rate 50. The range check stops it; without that check it would quietly return 0 times -49, which is 0.\n\nPrinting the summary list shows each field on its own line:\n\n```text\n$count\n[1] 2\n\n$total\n[1] 6\n```\n\nThe count prints without a decimal because `length()` returns an integer, which matters when the reference compares with `identical()`."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Call `after_fee(50)` and let the default rate of 0.1 apply.",
+      "why": "Omitting rate uses 0.1, so the function keeps 90 percent of the amount: 50 times 0.9 is 45.",
+      "wrong": "Computing `50 * 0.1`, which is 5. That is the fee itself, not the amount after the fee, and it is off by a factor of nine.",
+      "verify": "`after_fee(50)` returns 45, matching the reference check."
+    },
+    {
+      "approach": "Pass the rate by name: `after_fee(50, rate = 0)`.",
+      "why": "The explicit value replaces the default, and 0 passes the range check because the interface allows 0 through 1. Nothing is deducted, so 50 comes back.",
+      "wrong": "Calling `after_fee(0, 50)` with the values in the wrong positions. Amount becomes 0 and rate becomes 50, which the range check rejects, so the caller gets an error rather than the unchanged amount.",
+      "verify": "`after_fee(50, rate = 0)` returns 50."
+    },
+    {
+      "approach": "Return `list(count = length(x), total = sum(x))` and let the caller read the fields.",
+      "why": "For c(2, 4) the count is 2 and the total is 6. length returns an integer, so the expected object is `list(count = 2L, total = 6)`.",
+      "wrong": "Printing with `cat()` inside the function. The caller sees text on the console, but the function returns NULL, so `result$count` is NULL and cannot be tested.",
+      "verify": "`identical(summary(c(2, 4)), list(count = 2L, total = 6))` returns TRUE."
+    },
+    {
+      "approach": "Include `length(rate) != 1L` in the validation so a vector rate stops before any arithmetic runs.",
+      "why": "With amount 50 and rate c(0.1, 0.2), arithmetic would recycle the amount and return 45 and 40, two answers to a one-policy question.",
+      "wrong": "Relying on R to warn. Lengths 1 and 2 divide evenly, so recycling produces no warning, and Example 3 shows that two amounts with two rates are silent too.",
+      "verify": "In the reference `bad` returns TRUE, which only happens when the error handler ran."
+    },
+    {
+      "approach": "Pass `numeric(0)` and let vectorized arithmetic return an empty result.",
+      "why": "`numeric(0)` is numeric, so validation passes, and multiplying it by 0.9 gives numeric(0). The summary function gives count 0 and total 0 because `sum(numeric(0))` is 0.",
+      "wrong": "Adding a check that the amount has at least one element. An empty batch is a normal input here, and rejecting it turns a quiet day into a failure.",
+      "verify": "`identical(after_fee(numeric(0)), numeric(0))` returns TRUE."
+    },
+    {
+      "approach": "Treat a new default as an interface change: find callers that omit rate and keep a test that pins `after_fee(50) == 45`.",
+      "why": "The reference shows `after_fee(50, rate = 0.2)` and `after_fee(50)` differ, 40 against 45. Every omitted-rate call would move if the default became 0.2.",
+      "wrong": "Rerunning only tests that pass rate explicitly. They never exercise the default, so all of them stay green while every default caller changes.",
+      "verify": "The reference check `after_fee(50, rate = 0.2) != after_fee(50)` returns TRUE today; with a default of 0.2 it would return FALSE and stop."
+    }
+  ]
+}

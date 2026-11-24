@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Nested data is common in event payloads, transaction items and model outputs. A list holds a variable-length sequence inside one row; a struct combines named fields into one value with a defined internal schema. These representations can preserve relationships that would be awkward to encode as unrelated flat columns. Flattening them is a deliberate change in grain, not merely a display operation.</p>
 <p>Exploding an item list turns one order record into multiple item records. Empty lists and absent lists require different interpretations: one can mean that no items were recorded, while the other can mean that the item information is unavailable. The first case makes an explicit eligible-order policy before exploding. This avoids relying on a library default to decide the analytical meaning of empty or missing collections.</p>
 <p>Native nested expressions retain the columnar model. list.eval applies an expression to elements of each list; struct.field extracts a named component. These operations make the intended shape visible to the engine. Python object loops may still be useful for unusual logic, but should not replace simple native transformations without a reason and a measured cost.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>List column:</strong> A column whose values are variable-length lists of one inner type.</li>
+<li><strong>Struct column:</strong> A column whose values are records of named fields, built with <code>pl.struct</code> and read with <code>struct.field</code>.</li>
+<li><strong>explode:</strong> An operation that turns each list element into its own row, changing the row grain and repeating the other columns.</li>
+<li><strong>Empty versus null list:</strong> An empty list is a known absence of items with <code>list.len</code> 0; a null list is unknown, and its length stays null.</li>
+<li><strong>list.eval:</strong> A method that applies an expression to each list&#x27;s elements, referred to with <code>pl.element()</code>, without exploding rows.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>list.len returns list lengths while preserving null for an absent list. Filtering positive lengths before explode makes the item-grain population explicit. pl.struct packs named columns, and struct.field selects by name rather than position. Inside list.eval, pl.element refers to one list element, not an outer DataFrame column.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

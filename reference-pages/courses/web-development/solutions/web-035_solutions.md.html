@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-035.md</code>.</p>
 <h3 id="exercise-1-explain-how-a-list-differs-from-a-keyed-record">Exercise 1: Explain how a list differs from a keyed record.<a class="heading-anchor" href="#exercise-1-explain-how-a-list-differs-from-a-keyed-record" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A list models ordered values; a record&#x27;s named keys identify fields.</p>
+<p><strong>Approach:</strong> Describe a list as positions 0, 1, 2 holding values of one kind, and a record as named keys each holding a different field.</p>
 <p><strong>Why:</strong> A list uses consecutive integer positions, while a record&#x27;s string keys name its fields.</p>
+<p><strong>Plausible wrong approach:</strong> Storing a record as <code>[&#x27;CSS&#x27;, 55]</code> fails because code must remember that position 1 means minutes, which breaks when fields are added.</p>
+<p><strong>How to verify:</strong> Accessing <code>$row[&#x27;minutes&#x27;]</code> on the keyed record prints 55 and reads clearly in the code.</p>
 <h3 id="exercise-2-add-a-second-validated-study-row">Exercise 2: Add a second validated study row.<a class="heading-anchor" href="#exercise-2-add-a-second-validated-study-row" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Every row has the declared subject and integer-minutes fields.</p>
+<p><strong>Approach:</strong> Append a second array with the same <code>subject</code> and <code>minutes</code> keys, and check that minutes is an int with <code>is_int</code>.</p>
 <p><strong>Why:</strong> Records with the same keys and types can be processed by one function without special cases.</p>
+<p><strong>Plausible wrong approach:</strong> Spelling the key as <code>minute</code> in the new row fails because later code reads <code>minutes</code> and gets a missing key warning.</p>
+<p><strong>How to verify:</strong> A loop over both rows prints each subject and minutes with no warnings. <code>array_column($rows, &#x27;minutes&#x27;)</code> returns two integers, one per row.</p>
 <h3 id="exercise-3-filter-and-summarize-study-records-without-changing-the-originals">Exercise 3: Filter and summarize study records without changing the originals.<a class="heading-anchor" href="#exercise-3-filter-and-summarize-study-records-without-changing-the-originals" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The derived list contains only qualifying rows and retains consecutive indices.</p>
+<p><strong>Approach:</strong> Use <code>array_filter</code> with a typed arrow function, wrap it in <code>array_values</code>, then sum with <code>array_sum(array_column($visible, &#x27;minutes&#x27;))</code>.</p>
 <p><strong>Why:</strong> array_filter returns a new array, and array_values renumbers it into a list.</p>
+<p><strong>Plausible wrong approach:</strong> Modifying <code>$rows</code> inside a <code>foreach</code> by reference fails because the original data changes and a later filter sees altered values.</p>
+<p><strong>How to verify:</strong> After the summary, dumping <code>$rows</code> shows the original records unchanged, and the derived list has keys 0 upward.</p>
 <h3 id="exercise-4-diagnose-json-output-changing-from-an-array-to-an-object-shape">Exercise 4: Diagnose JSON output changing from an array to an object shape.<a class="heading-anchor" href="#exercise-4-diagnose-json-output-changing-from-an-array-to-an-object-shape" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect numeric key gaps after filtering and reindex when the contract is a list.</p>
+<p><strong>Approach:</strong> Encode the filtered array, notice an object with numeric keys, and add <code>array_values</code> before encoding to restore a list.</p>
 <p><strong>Why:</strong> array_filter preserves keys, so gaps such as 0 and 2 make json_encode produce an object instead of a list.</p>
+<p><strong>Plausible wrong approach:</strong> Passing <code>JSON_FORCE_OBJECT</code> or changing the client fails because the real problem is the key gap in the PHP array.</p>
+<p><strong>How to verify:</strong> <code>json_encode</code> after reindexing prints a value that starts with <code>[</code> instead of <code>{</code>. A JavaScript client can then call <code>.map</code> on the parsed value without a TypeError.</p>
 <h3 id="exercise-5-test-an-empty-result-and-a-missing-required-field">Exercise 5: Test an empty result and a missing required field.<a class="heading-anchor" href="#exercise-5-test-an-empty-result-and-a-missing-required-field" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Empty lists are valid where declared; malformed records are rejected explicitly.</p>
+<p><strong>Approach:</strong> Run the filter with a threshold no row meets, and run validation on a row lacking <code>minutes</code>, recording both outcomes.</p>
 <p><strong>Why:</strong> An empty list is a valid result, while a malformed record must be rejected before it is used.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>$row[&#x27;minutes&#x27;] ?? 0</code> for missing fields fails because a broken record silently becomes a valid zero minute session.</p>
+<p><strong>How to verify:</strong> The empty filter encodes as [] and the malformed row raises the declared validation error.</p>
 <h3 id="exercise-6-explain-the-risk-of-a-lingering-foreach-reference">Exercise 6: Explain the risk of a lingering foreach reference.<a class="heading-anchor" href="#exercise-6-explain-the-risk-of-a-lingering-foreach-reference" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A reference variable can still alias the last element and cause later assignments to mutate it.</p>
+<p><strong>Approach:</strong> Call <code>unset($row)</code> after any <code>foreach ($rows as &amp;$row)</code> loop so the reference no longer points at the last element.</p>
 <p><strong>Why:</strong> After a by-reference loop, <code>$item</code> still points at the last element, so a later assignment overwrites it; <code>unset($item)</code> breaks the reference.</p>
+<p><strong>Plausible wrong approach:</strong> Reusing <code>$row</code> in a second plain <code>foreach</code> fails because each assignment then overwrites the last element of the array.</p>
+<p><strong>How to verify:</strong> Without <code>unset</code>, the last record ends up duplicated; with <code>unset</code>, all records keep their original values.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-035_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

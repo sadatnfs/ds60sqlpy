@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-002.md</code>.</p>
 <h3 id="exercise-1-predict-the-text-content-after-character-references-are-parsed">Exercise 1: Predict the text content after character references are parsed.<a class="heading-anchor" href="#exercise-1-predict-the-text-content-after-character-references-are-parsed" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The browser displays comparison signs and an ampersand, not the entity source.</p>
+<p><strong>Approach:</strong> Replace each reference in the example with the character it names: <code>&amp;lt;</code> becomes &lt;, <code>&amp;amp;</code> becomes &amp; and <code>&amp;gt;</code> becomes &gt;.</p>
 <p><strong>Why:</strong> Character references are decoded during parsing, so the text node holds the real &lt; and &amp; characters while the source keeps them escaped.</p>
+<p><strong>Plausible wrong approach:</strong> Predicting that the reader sees <code>&amp;lt;</code> literally fails because the parser decodes references in text before anything is painted.</p>
+<p><strong>How to verify:</strong> Run <code>document.querySelector(&#x27;p&#x27;).textContent</code> in the console and confirm it returns 2 &lt; 3 &amp; 3 &gt; 2.</p>
 <h3 id="exercise-2-add-a-language-attribute-and-explain-its-role">Exercise 2: Add a language attribute and explain its role.<a class="heading-anchor" href="#exercise-2-add-a-language-attribute-and-explain-its-role" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The root lang attribute identifies the language for pronunciation and processing.</p>
+<p><strong>Approach:</strong> Put <code>lang=&quot;en&quot;</code> on the <code>html</code> root so every descendant inherits the language unless an element overrides it.</p>
 <p><strong>Why:</strong> lang tells assistive technology which pronunciation rules to apply and lets browsers use language-specific hyphenation and quotation marks.</p>
+<p><strong>Plausible wrong approach:</strong> Putting <code>lang</code> only on one paragraph fails to describe the rest of the document, so screen readers may guess the language elsewhere.</p>
+<p><strong>How to verify:</strong> <code>document.documentElement.lang</code> returns en, and an inner element with <code>lang=&quot;fr&quot;</code> reports its own value through <code>.lang</code>.</p>
 <h3 id="exercise-3-build-a-notes-paragraph-with-nested-importance-and-literal-angle-brackets">Exercise 3: Build a notes paragraph with nested importance and literal angle brackets.<a class="heading-anchor" href="#exercise-3-build-a-notes-paragraph-with-nested-importance-and-literal-angle-brackets" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The structure remains a paragraph and the comparison is text rather than an element.</p>
+<p><strong>Approach:</strong> Write a <code>p</code> containing a <code>strong</code> around the important word, and escape every literal angle bracket in the comparison text.</p>
 <p><strong>Why:</strong> Escaping keeps the comparison as text so the parser does not open a new element, while nested inline elements add importance without breaking the paragraph.</p>
+<p><strong>Plausible wrong approach:</strong> Typing a raw <code>&lt;b</code> or <code>&lt;x&gt;</code> in the comparison fails because the parser starts a new element and the text after it vanishes from view.</p>
+<p><strong>How to verify:</strong> The Elements tree shows one <code>p</code> with one <code>strong</code> child and no unexpected element named after the comparison text.</p>
 <h3 id="exercise-4-repair-overlapping-emphasis-tags-by-drawing-their-tree">Exercise 4: Repair overlapping emphasis tags by drawing their tree.<a class="heading-anchor" href="#exercise-4-repair-overlapping-emphasis-tags-by-drawing-their-tree" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each opened element is closed before its parent closes.</p>
+<p><strong>Approach:</strong> Draw the tree from the opening tags, then close the innermost open element before closing its parent.</p>
 <p><strong>Why:</strong> Elements form a tree, so a child must close before its parent closes. Crossing tags force the parser to repair the tree, which can split or extend the emphasis unexpectedly.</p>
+<p><strong>Plausible wrong approach:</strong> Swapping the closing tags so they overlap fails because the parser&#x27;s adoption steps silently restructure the tree into something the source does not show.</p>
+<p><strong>How to verify:</strong> After repair, the Elements panel nesting matches your drawing exactly, with <code>strong</code> fully inside <code>em</code> or fully outside it.</p>
 <h3 id="exercise-5-add-two-related-notes-without-duplicating-an-id">Exercise 5: Add two related notes without duplicating an id.<a class="heading-anchor" href="#exercise-5-add-two-related-notes-without-duplicating-an-id" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Shared class names group them while each id remains unique.</p>
+<p><strong>Approach:</strong> Give both notes the same class for shared meaning and styling, and give each a different <code>id</code> only if something must target it.</p>
 <p><strong>Why:</strong> An id names one element for fragments, labels and scripts, so it must be unique; a class can mark any number of elements.</p>
+<p><strong>Plausible wrong approach:</strong> Reusing one <code>id</code> for both notes fails because <code>getElementById</code> and fragment links return only the first match, hiding the second note.</p>
+<p><strong>How to verify:</strong> <code>document.querySelectorAll(&#x27;.note&#x27;).length</code> returns 2 while each <code>id</code> you assigned appears exactly once in the tree.</p>
 <h3 id="exercise-6-explain-escaping-versus-validation-with-a-text-and-url-example">Exercise 6: Explain escaping versus validation with a text and URL example.<a class="heading-anchor" href="#exercise-6-explain-escaping-versus-validation-with-a-text-and-url-example" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Escaping preserves literal text; URL validation separately restricts allowed schemes and destinations.</p>
+<p><strong>Approach:</strong> Escape the text example so it displays literally, then separately check the URL example&#x27;s scheme against an allowlist such as https.</p>
 <p><strong>Why:</strong> Escaping changes how a value is written in one output context so it stays text; validation rejects values such as a javascript: URL that remain dangerous even when correctly escaped.</p>
+<p><strong>Plausible wrong approach:</strong> Escaping a <code>javascript:</code> URL fails as a defense because escaping only changes how characters print; the dangerous scheme is still a valid link target.</p>
+<p><strong>How to verify:</strong> The escaped text shows angle brackets as characters, and a <code>javascript:</code> URL is rejected by the scheme check rather than rendered as a link.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-002_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

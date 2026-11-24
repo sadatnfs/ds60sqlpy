@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-028`, `apache-030`, `apache-031`.
 
+## Key terms
+
+- **Metadata database:** Airflow's store for Dag Runs, task instances, scheduling state and configuration. A successful connection to it does not prove that output data still exists.
+- **Scheduler heartbeat:** The scheduler's periodically updated liveness timestamp. A stale heartbeat reveals a stopped scheduler even when the API server returns HTTP 200.
+- **Task instance state:** The recorded status of one task in one Dag Run, such as queued, running, success, failed or up_for_retry.
+- **Named volume:** The Docker volume that holds the workshop's metadata, logs, attempt markers and outputs so they survive replacing the container image or process.
+
 ## Operational state has several independent owners
 
 Airflow retains Dag Runs, task instances, scheduling state and configuration in
@@ -77,6 +84,47 @@ persistence and task diagnosis from a broad unsupported claim of production
 resilience.
 
 The [complete Airflow workshop](../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+
+## Worked examples
+
+### Read component health instead of an HTTP status
+
+```python
+import json
+import urllib.request
+
+url = "http://127.0.0.1:8080/api/v2/monitor/health"
+with urllib.request.urlopen(url, timeout=5) as response:
+    data = json.loads(response.read(16_385))
+components = ("metadatabase", "scheduler", "dag_processor", "triggerer")
+print({name: data[name]["status"] for name in components})
+```
+
+This mirrors the project health.py, which runs inside the Airflow container. A healthy deployment prints four entries, each with the status healthy. The endpoint can answer with HTTP 200 while the scheduler entry says unhealthy, because the API server is a separate process from the scheduler; a probe that stops at the status code would report a stalled platform as fine. If only dag_processor is unhealthy, new or edited DAG files will not appear even though existing runs continue.
+
+### Stop, resume and compare saved history
+
+```bash
+cd work/airflow
+bash run.sh readback
+bash run.sh stop
+bash run.sh resume
+bash run.sh health
+bash run.sh readback
+```
+
+In an owned workshop, the two readback documents should list the same outputs and saved_observations, because stop and resume keep the container and its PostgreSQL metadata volume. Readback only inspects files and metadata, so running it twice must not create new runs. If the second readback shows fewer summaries, something deleted state between the calls; check whether down or destroy was run instead of stop, and read bash run.sh logs before starting anything new.
+
+### Separate waiting work from failed work
+
+```bash
+cd work/airflow
+bash run.sh status
+bash run.sh logs
+bash run.sh health
+```
+
+Status shows whether the airflow container is running and healthy, the bounded logs show the last 100 lines, and health names which component is unhealthy. A task stuck in queued with a healthy scheduler usually points to pool or concurrency limits, while a task that never leaves scheduled with an unhealthy scheduler points to the scheduler process itself. A failed task has a log with an exception and a retry count; treat that as an application problem and fix its inputs, not the platform.
 
 ## Complete worked source
 

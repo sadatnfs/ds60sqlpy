@@ -1,6 +1,6 @@
 # llm-039: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these robustness, fairness and finite safety evidence answers after attempting *Compare uneven denominators* through *Write a finite claim*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Analyze a counterfactual pair* points to one step. `llm-039_solution.py` holds the assertions; this page explains how they test counterfactual pair. Then try *Write a finite claim* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -117,4 +117,4 @@ Next evidence: investigate the failure and evaluate additional independent famil
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Handle an untested group* and predict the result first; keep *Write a finite claim* failing beside the repair. Log a missing the Python standard library separately from a wrong counterfactual pair value in `llm-039`.

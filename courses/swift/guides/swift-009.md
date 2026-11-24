@@ -112,7 +112,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Mutate an independent array value) before changing anything, and confirm its observation: Appending to the copy leaves the original unchanged.
 2. Compare Example B (Do not confuse capacity and count) with Example A and name the first line whose behavior differs. Its observation is: Reserving twenty slots creates no logical elements.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Array value semantics do not recursively clone objects.
+3. Before opening the explanation, check your task 3 attempt (Build a filtered array without changing the source) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

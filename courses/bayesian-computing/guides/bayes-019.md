@@ -10,6 +10,13 @@ The fixture uses five Poisson counts 0,1,2,0,3 and a Gamma(2,1) prior under the 
 
 The program deliberately contains two independent copies of this posterior. One uses a declared positive rate lambda. The other uses an unconstrained z with rate \(\exp(z)\). They are computational replicas for a comparison; they are not two separate pieces of evidence to multiply onto a single rate parameter.
 
+## Key terms
+
+- **Declared constraint:** A bound such as lower=0 that Stan maps to an unconstrained scale while adding the Jacobian automatically.
+- **Manual transformation:** A parameter written on its own unconstrained scale, such as z with rate exp(z), whose density needs a user-supplied Jacobian.
+- **Log Jacobian term:** The added log absolute derivative, here z for rate exp(z), that keeps the intended measure on the rate.
+- **Gamma-Poisson oracle:** The exact Gamma(8, 6) posterior used to confirm that both parameterizations target the same distribution.
+
 ## Worked case 1: use a declared positive rate
 
 The first parameter is `real<lower=0> lambda`. Its prior and likelihood are expressed directly on the positive rate scale. Stan handles the internal constrained-to-unconstrained parameter transform. Adding another `log(lambda)` merely because the declaration is positive would generally double-count a transformation term.
@@ -43,6 +50,34 @@ The two replicas here are intentionally independent conditional targets. Their p
 **Can a compiler detect a missing Jacobian?** It can sometimes warn about suspicious transformed sampling statements, but syntactically valid target increments can still encode the wrong density. A derivation and an independent reference case remain necessary.
 
 **Why compare two parameterizations inside one tiny program?** It makes the target relationship explicit and keeps data and priors identical. The exact gamma posterior provides a stronger check than visual similarity between two short histograms. In an ordinary analysis, select a justified parameterization and retain its mathematical explanation.
+
+## Worked example: Sampling a log rate with and without the Jacobian term
+
+```python
+import numpy as np
+from scipy import stats
+
+counts = np.array([3, 5, 2, 2])  # Gamma(2, 1) prior on a Poisson rate
+u = np.linspace(-3, 3, 60001)  # u = log(rate)
+lam = np.exp(u)
+log_lik = counts.sum() * u - len(counts) * lam
+for label, jac in (("with + u", u), ("without", 0.0)):
+    lp = stats.gamma.logpdf(lam, 2, scale=1) + log_lik + jac
+    w = np.exp(lp - lp.max())
+    w /= w.sum()
+    print(f"{label:9s}: posterior mean of rate {w @ lam:.4f}")
+print(f"exact Gamma(14, 5) mean {14 / 5:.4f}; Gamma(13, 5) mean {13 / 5:.4f}")
+```
+
+Observed output:
+
+```text
+with + u : posterior mean of rate 2.8000
+without  : posterior mean of rate 2.6000
+exact Gamma(14, 5) mean 2.8000; Gamma(13, 5) mean 2.6000
+```
+
+The counts 3, 5, 2 and 2 sum to 12 over four periods. With a Gamma(2, 1) prior on the rate the exact posterior is Gamma(14, 5), mean 2.8. The grid works on \(u=\log\lambda\), as a manual Stan parameterization would. Adding the log Jacobian \(\log|d\lambda/du|=u\) reproduces 2.8000 exactly. Dropping it targets a different distribution: the gamma prior evaluated at \(e^u\) without the Jacobian corresponds on the rate scale to a density proportional to \(\lambda^{2-1}e^{-\lambda}/\lambda\), which is Gamma(1, 1), so the posterior becomes Gamma(13, 5) with mean 2.6000. The error is exactly one unit of prior shape, about 7 percent of the mean, and it would not disappear as the program ran longer. Stan's parser warns about a possible missing Jacobian only in some patterns, such as a nonlinear transform on the left of a sampling statement, so this program would run silently. When the constraint is declared as a lower bound of zero instead, Stan adds this term automatically, which is the safer default.
 
 ## Complete reproducible program
 

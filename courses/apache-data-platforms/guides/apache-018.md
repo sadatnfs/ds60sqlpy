@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-016`, `apache-005`.
 
+## Key terms
+
+- **Target partitions:** The DataFusion setting for how many execution partitions a plan uses for parallel work in one process. It is not a count of machines or proof of core usage.
+- **Execution partition:** One parallel stream of record batches inside a physical plan, distinct from file partitions, Arrow chunks and record-batch size.
+- **Memory pool:** The runtime component that tracks memory reserved by cooperating operators and refuses or triggers spilling at a configured limit.
+- **Fair spill pool:** A DataFusion memory pool that shares memory among spilling operators. It is not a hard limit on every byte the Python process allocates.
+- **Spill:** Writing intermediate operator state, such as sorted runs, to temporary disk files so an operator can finish within its memory reservation.
+
 ## Logical partitions consume physical resources
 
 DataFusion is an embedded query engine. A session can create several execution
@@ -82,6 +90,43 @@ aggregate state. More exchange partitions also add bookkeeping and merge work.
 The exact effect depends on the plan and operator implementation. These two cases
 prove correctness under declared settings while making the unmeasured performance
 and spill claims explicit.
+
+## Worked examples
+
+### Run the same aggregate at two partition counts
+
+```python
+import pyarrow as pa
+from datafusion import SessionConfig, SessionContext
+
+rows = pa.table({"group_id": [i % 10 for i in range(4000)], "value": [i % 37 for i in range(4000)]})
+query = "SELECT group_id, COUNT(*) AS n, SUM(value) AS total FROM events GROUP BY group_id ORDER BY group_id"
+results = []
+for count in [1, 4]:
+    ctx = SessionContext(SessionConfig().with_target_partitions(count))
+    ctx.register_record_batches("events", [rows.to_batches(max_chunksize=500)])
+    results.append(ctx.sql(query).to_arrow_table())
+print(results[0].equals(results[1]), results[0].num_rows)
+```
+
+The comparison should print True and 10: the answer is identical at one and four target partitions, and each group holds 400 rows. Only the work layout changes, including how many hash partitions the aggregate builds and how much memory each holds. If results differ between counts, suspect a missing ORDER BY or a non-deterministic function before blaming the engine.
+
+### Bound a sort by projecting and filtering first
+
+```sql
+SELECT
+  id,
+  value
+FROM
+  events
+WHERE
+  value < 2
+ORDER BY
+  value,
+  id
+```
+
+Projecting two columns and keeping only values 0 and 1 means the sort sees roughly 2 of every 37 rows instead of the full table, which keeps it inside the memory pool without spilling. Under a small fair spill pool, a full sort of wide rows would write to the configured spill directory. When a query is slow, check for spill files in that directory; their presence shows memory pressure, not a wrong answer.
 
 ## Complete worked source
 

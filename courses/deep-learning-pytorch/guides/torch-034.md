@@ -66,7 +66,7 @@ The perturbation rule here is f(x)=1 when \(x\ge 0\). Starting at one, the shift
 
 A different application might model these shifts as measurement noise while the latent class remains fixed. That is a different target policy and needs its own oracle. For this simple sign rule, perturbations with magnitude strictly below one cannot cross from the starting point to the negative side. That analytic statement is local to this scalar rule and declared perturbation set; it is not evidence that an arbitrary neural classifier is robust to all small changes.
 
-Severity is another independent axis. Nine minor passes and one severe failure yield a90% overall pass rate. If the predeclared release rule blocks on any severe failure, the correct decision remains no-go. Choosing a favorable aggregate after observing the severe failure changes the decision policy. Preserve case-level identity, severity and the actual failed condition so a summary cannot erase it.
+Severity is another independent axis. Nine minor passes and one severe failure yield a 90% overall pass rate. If the predeclared release rule blocks on any severe failure, the correct decision remains no-go. Choosing a favorable aggregate after observing the severe failure changes the decision policy. Preserve case-level identity, severity and the actual failed condition so a summary cannot erase it.
 
 Privacy is not established by removing names from an example or by obtaining a good accuracy score. Differential privacy describes a randomized mechanism's output behavior under a defined change to a dataset. Its guarantee depends on the neighboring-dataset unit, privacy parameters and the mechanism/accounting assumptions. Record-level adjacency and person-level adjacency are different promises when a person contributes multiple rows. Clipping, noise, sampling and repeated releases require a coherent analysis; this chapter implements none of them. [NIST SP 800-226](https://csrc.nist.gov/pubs/sp/800/226/final) discusses evaluation of such guarantees and implementation hazards.
 
@@ -125,7 +125,7 @@ assert changed.tolist() == [1, 1, 0]
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Group A has 1 error of 2 and group B 0 of 1, 8 rows contain only 3 unique IDs, the shifts give labels 1, 1, 0, the 0.9 pass rate still reports 1 severe failure, and an untested group is None rather than 0. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Count group errors. Predict exercise 6, Write a bounded card, from its prompt alone: Record 3 unique units, synthetic teaching use and untested future conditions. Then explain why this finish condition holds: Group A has 1 error of 2 and group B 0 of 1, 8 rows contain only 3 unique IDs, the shifts give labels 1, 1, 0, the 0.9 pass rate still reports 1 severe failure, and an untested group is None rather than 0. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -161,15 +161,15 @@ If a perturbation changes a prediction, first decide whether the correct label s
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Expose repeated identities) alters one assumption of Example A (Count group errors). Hint 2: exercise 4, Keep severe failures visible, should end at overall pass rate 0.9; severe failure count 1. Work backward from it. Hint 3: exercise 5, Represent an untested group, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Subgroup denominator, Robustness condition, Finite safety evidence using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Trace a controlled perturbation, from its inputs alone. Predict whether exercise 3, Trace a new perturbation, survives one changed input. Then explain Subgroup denominator, Robustness condition, Finite safety evidence in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-033` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Count group errors) cannot be rebuilt without help, revisit `torch-033` first. Otherwise keep your exercise 2 attempt, Deduplicate repeated identities, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

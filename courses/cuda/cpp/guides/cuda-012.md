@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Launch a bounded kernel, check launch and completion status separately and validate returned values on the host.
+
 Work through *The first bounded kernel and the truth about completion* with the concrete cases below. Finish with this evidence:
 host validates the returned values and reports both launch and completion status. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 The `__global__` qualifier declares a kernel callable through CUDA launch syntax. In `fill<<<blocks, threads>>>(out,n)`, the angle-bracket configuration chooses a grid of blocks and threads per block; parentheses carry ordinary function arguments. Each thread reads its own indices to choose work. A launch normally submits work asynchronously. Checking cudaGetLastError after submission detects launch problems, while a checked synchronization or dependent copy exposes execution failures. Only after the dependency is complete should the host validate returned values. Device printf is a debugging tool with ordering and buffering limitations, not a replacement for checking the output buffer.
+
+### Key terms
+
+- **Kernel:** A `__global__` function that the host launches to run across many device threads.
+- **Execution configuration:** The `<<<blocks, threads>>>` launch parameters that set the grid size and the threads per block.
+- **Asynchronous launch:** Kernel submission that returns control to the host before the device finishes the work.
+- **Completion check:** A checked synchronization, such as `cudaDeviceSynchronize`, that waits for device work and reports errors raised during execution.
 
 ## How to run and study this lesson
 

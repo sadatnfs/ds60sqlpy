@@ -36,7 +36,7 @@ assert.equal(add(2, 3), 5);
 assert.equal(add(-1, 1), 0);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(add(-1, 1), 0)`. Restoring the original line brings back the worked observation: 5 and 0.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(add(-2, 1), 0);`. Restoring `assert.equal(add(-1, 1), 0);` brings back: 5 and 0.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(add(-1, 1), 0)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -56,7 +56,7 @@ assert.equal(first(), 2);
 assert.equal(second(), 1);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(second(), 1)`; after it the line reads `assert.equal(second(), 1);` again and first 1, 2; second 1.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(second(), 2);`. Restoring `assert.equal(second(), 1);` brings back: first 1, 2; second 1.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(second(), 1)` accepts.
 

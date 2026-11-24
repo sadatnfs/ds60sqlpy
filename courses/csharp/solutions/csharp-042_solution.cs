@@ -37,6 +37,19 @@ internal static class Program {
             "useful nonsecret context retained");
     }
     {
+      // Task 2: Guided modification
+      var rights = new HashSet<string>(StringComparer.Ordinal);
+      rights.Add("report:read");
+      rights.Add("audit:read");
+      Check(rights.Contains("audit:read"), "second read allowed");
+      Check(!rights.Contains("audit:write"), "audit write still denied");
+      Check(!rights.Contains("report:write"), "no write implied");
+      bool IsRead(string right) {
+        return right.EndsWith(":read", StringComparison.Ordinal);
+      }
+      Check(rights.All(IsRead), "every grant is a read");
+    }
+    {
       // Task 3: Independent construction
       string[] allowed = { "line", "field", "reason" };
       var safe = new HashSet<string>(allowed, StringComparer.Ordinal);
@@ -48,6 +61,17 @@ internal static class Program {
       var visible = error.Where(item => safe.Contains(item.Key));
       var shown = visible.ToDictionary(item => item.Key, item => item.Value);
       Check(shown.Count == 3 && !shown.ContainsKey("token"), "allowlisted");
+    }
+    {
+      // Task 5: Boundary evidence
+      var rights = new HashSet<string>(StringComparer.Ordinal);
+      rights.Add("report:read");
+      Check(rights.Contains("report:read"), "exact action allowed");
+      Check(!rights.Contains("report:delete"), "missing permission denied");
+      Check(!rights.Contains(""), "empty action denied");
+      Check(!rights.Contains("Report:read"), "case variant denied");
+      Check(!rights.Contains("REPORT:READ"), "upper case denied");
+      Check(!rights.Contains("report:read "), "trailing space denied");
     }
     Console.WriteLine("csharp-042: passed");
     await Task.CompletedTask;

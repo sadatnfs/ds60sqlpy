@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Build the eligibility ledger from the ten raw records.</p>
 <p>There are eight observed values and two missing measurements, with four observed values per group.</p>
 <p><strong>Expected evidence:</strong> Counts 10/8/2 and group counts 4/4.</p>
+<p><strong>Approach:</strong> Keep d with all ten records, form observed from the non missing rows, and record n and missing per group in summary.</p>
+<p><strong>Why it holds here:</strong> Each group has five records and one missing value, A5 and B5, so the ledger shows 10 records, 8 observed values and 2 missing ones, four observed per group. The figure can then say exactly what it excludes.</p>
+<p><strong>Tempting mistake:</strong> Calling na.omit(d) first and summarizing what remains. The counts of 4 look complete, and nothing in the output says two measurements were absent.</p>
+<p><strong>Verify:</strong> <code>nrow(observed)</code> returns 8, <code>summary$n</code> returns 4 and 4, and <code>summary$missing</code> returns 1 and 1.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Derive means, SEs and t-interval endpoints.</p>
 <p>Means are 2.5 and 4.5; squared SEs 5/12 and 17/12; half-widths are qt(0.975,3) times SE.</p>
 <p><strong>Expected evidence:</strong> Independent numerical oracle.</p>
+<p><strong>Approach:</strong> Inside the split, compute n, sd, se and qt(0.975, n - 1) from the non missing values only, then store lower, upper and half.</p>
+<p><strong>Why it holds here:</strong> Group A&#x27;s observed values 1, 2, 3, 4 give mean 2.5 and SE squared 5/12. Group B&#x27;s 2, 3, 6, 7 give mean 4.5 and 17/12. With 3 degrees of freedom the half widths are about 2.05 and 3.79.</p>
+<p><strong>Tempting mistake:</strong> Taking n as length(values), which counts the missing entry. A would then use 5 and 4 degrees of freedom, and its half width would fall from about 2.05 to about 1.60, overstating precision from a value that was never measured.</p>
+<p><strong>Verify:</strong> <code>summary$se^2</code> returns 5/12 and 17/12, and <code>summary$half</code> returns about 2.05 and 3.79.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a static raw-point and interval display from those tables.</p>
 <p>Eight raw marks and two mean intervals correspond to distinct statistical objects.</p>
 <p><strong>Expected evidence:</strong> Correct layer counts and interval coordinates.</p>
+<p><strong>Approach:</strong> Plot observed as points, then add geom_errorbar and a cross geom_point using data = summary and inherit.aes = FALSE, with a caption naming the interval type.</p>
+<p><strong>Why it holds here:</strong> The global mapping uses value, which exists in observed but not in summary. Turning off inheritance lets the summary layers use lower, upper and mean, so the plot shows eight raw values and two intervals as different objects.</p>
+<p><strong>Tempting mistake:</strong> Omitting inherit.aes = FALSE on the summary layers. They then look for value in summary, and the build stops instead of drawing the intervals.</p>
+<p><strong>Verify:</strong> <code>nrow(layers[[1]])</code> returns 8, and <code>nrow(layers[[2]])</code> and <code>nrow(layers[[3]])</code> each return 2.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Construct an interactive figure retaining raw IDs and a separate summary trace.</p>
 <p>The raw trace has eight keyed observations; the summary trace has two means and supplied error bars.</p>
 <p><strong>Expected evidence:</strong> Trace counts 8 and 2 with retained identity.</p>
+<p><strong>Approach:</strong> Add the observed trace with customdata = ~id and a hover template, then a separate summary trace with error_y set from summary$half.</p>
+<p><strong>Why it holds here:</strong> The two traces hold different things: eight measured values with IDs A1 to A4 and B1 to B4, and two means with their interval half widths. Keeping them apart means the observation count stays at 8.</p>
+<p><strong>Tempting mistake:</strong> Appending the two means to the observed rows and drawing one trace. It then has ten points, two of them with no ID, and anyone counting markers sees ten observations.</p>
+<p><strong>Verify:</strong> <code>length(traces[[1]]$x)</code> returns 8, <code>length(traces[[2]]$x)</code> returns 2, and the sorted customdata returns the eight observed IDs.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Diagnose interpreting the mean difference as a causal effect.</p>
 <p>The difference of two is descriptive for this fixture. A causal interpretation requires additional design assumptions and evidence.</p>
 <p><strong>Expected evidence:</strong> No unsupported causal claim.</p>
+<p><strong>Approach:</strong> Describe the gap of 2 between the means as a difference in this sample, and name what would be required before calling it an effect.</p>
+<p><strong>Why it holds here:</strong> d contains only id, group and value. Nothing records how records came to be in A or B, and with intervals of about 0.45 to 4.55 and 0.71 to 8.29 the data are also compatible with a much smaller or larger gap.</p>
+<p><strong>Tempting mistake:</strong> Writing that being in group B raises the value by 2. That needs an assignment mechanism or an identification argument, and the fixture supplies neither.</p>
+<p><strong>Verify:</strong> <code>diff(summary$mean)</code> returns 2, and <code>names(d)</code> returns only id, group and value.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Produce a factual report of what execution and capture established.</p>
 <p>Report calculation and layer/trace checks, actual printed/captured figures, and any unperformed readability, hover or accessibility checks.</p>
 <p><strong>Expected evidence:</strong> A complete bounded evidence record.</p>
+<p><strong>Approach:</strong> Write the evidence record in three parts: numerical checks, layer and trace checks with the figures actually printed, and the browser checks still outstanding.</p>
+<p><strong>Why it holds here:</strong> The reference establishes 10, 8 and 2 records, the means, SEs and half widths, layer counts 8, 2 and 2, trace counts 8 and 2, and the error array. It prints the summary table and both figures, but it does not observe hover, readability or screen reader output.</p>
+<p><strong>Tempting mistake:</strong> Writing that the figure was validated because the script finished. That merges payload checks with classroom observations that nobody made.</p>
+<p><strong>Verify:</strong> The reference prints r-060 reference checks passed after the three printed objects, and the record shows the browser checks marked as not yet performed.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 7 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

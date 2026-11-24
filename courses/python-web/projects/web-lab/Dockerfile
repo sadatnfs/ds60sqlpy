@@ -5,5 +5,7 @@ COPY . /opt/web-lab/
 RUN WEB_PREPARING=1 python manage.py collectstatic --noinput --verbosity 0 \
     && python -m compileall -q .
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+# compose.yaml supplies the host UID and GID; plain docker run uses nobody.
+USER 65534:65534
 ENTRYPOINT []
 CMD ["python", "serve.py", "fastapi"]

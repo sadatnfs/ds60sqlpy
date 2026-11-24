@@ -198,21 +198,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-inspect-the-destination">1. Inspect the destination<a class="heading-anchor" href="#1-inspect-the-destination" aria-label="Link to this section">#</a></h3>
 <p>Record adapter type, database identity and schema. Names such as prod should not be assumed to point to real production or to be safe without inspection.</p>
+<p><strong>Why it holds here:</strong> Both targets use the same warehouse.duckdb file and differ only in schema, dev or prod.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming a target named prod is real production is wrong here; it is a schema in a local file.</p>
+<p><strong>How to verify:</strong> Read profiles.yml outputs and run dbt debug --target prod; expect the local path and schema prod.</p>
 <p><strong>Expected:</strong> Both are owned local fixtures.</p>
 <h3 id="2-preserve-calculation-semantics">2. Preserve calculation semantics<a class="heading-anchor" href="#2-preserve-calculation-semantics" aria-label="Link to this section">#</a></h3>
 <p>Use environment branches only where their behavior is deliberate and tested. Hidden semantic differences can invalidate promotion evidence.</p>
+<p><strong>Why it holds here:</strong> The model adds target.name only as a label. answer is 42 in both schemas.</p>
+<p><strong>Plausible wrong approach:</strong> Branching numeric logic on target.name would make dev results differ from what prod publishes.</p>
+<p><strong>How to verify:</strong> Query select answer from dev.answer and from prod.answer and expect 42 in both.</p>
 <p><strong>Expected:</strong> The result remains 42.</p>
 <h3 id="3-change-the-default">3. Change the default<a class="heading-anchor" href="#3-change-the-default" aria-label="Link to this section">#</a></h3>
 <p>A repeatable job should record the chosen target. Relying on a mutable local default weakens reproducibility.</p>
+<p><strong>Why it holds here:</strong> Changing the profile default to prod does not matter when --target dev is passed; the flag wins.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on the default means a teammate with a different profile writes somewhere else.</p>
+<p><strong>How to verify:</strong> Set target: prod in profiles.yml, run build --target dev, and confirm only dev.answer changes.</p>
 <p><strong>Expected:</strong> The explicit selection wins for the invocation.</p>
 <h3 id="4-reject-missing-configuration">4. Reject missing configuration<a class="heading-anchor" href="#4-reject-missing-configuration" aria-label="Link to this section">#</a></h3>
 <p>Preserve the failure and repair the environment declaration. Do not redirect checks to a shared database to make them run.</p>
+<p><strong>Why it holds here:</strong> example_two runs with --target missing and dbt fails before writing run_results.json.</p>
+<p><strong>Plausible wrong approach:</strong> Pointing the missing name at another shared database just to make it run hides the misconfiguration.</p>
+<p><strong>How to verify:</strong> Confirm the command fails and target/run_results.json does not exist.</p>
 <p><strong>Expected:</strong> The command fails clearly.</p>
 <h3 id="5-separate-secrets">5. Separate secrets<a class="heading-anchor" href="#5-separate-secrets" aria-label="Link to this section">#</a></h3>
 <p>Use an approved secret mechanism in a separately owned environment. Do not place real passwords or tokens into the versioned lesson project.</p>
+<p><strong>Why it holds here:</strong> Real credentials belong in an approved secret store or environment variables read through env_var, never in the committed profiles.yml.</p>
+<p><strong>Plausible wrong approach:</strong> Hardcoding a password in the lesson project leaks it to anyone who can read the repo or logs.</p>
+<p><strong>How to verify:</strong> Search the project and logs for the secret value and expect no match; profiles.yml should only reference env_var.</p>
 <p><strong>Expected:</strong> They are outside maintained public fixtures and logs.</p>
 <h3 id="6-compare-isolation-claims">6. Compare isolation claims<a class="heading-anchor" href="#6-compare-isolation-claims" aria-label="Link to this section">#</a></h3>
 <p>Evaluate actual permissions, concurrency, backups, network boundaries and recovery for a deployed environment. The local case demonstrates routing only.</p>
+<p><strong>Why it holds here:</strong> Two schemas in one DuckDB file show routing only. They share the same file, process and permissions.</p>
+<p><strong>Plausible wrong approach:</strong> Claiming dev and prod are isolated because they have different schema names ignores that a single file corruption affects both.</p>
+<p><strong>How to verify:</strong> List what a deployed setup needs: separate credentials, grants, backups and network rules, and confirm none exist here.</p>
 <p><strong>Expected:</strong> They do not provide independent failure domains or access control.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;dbt-019: complete local dbt project investigation.&quot;&quot;&quot;</span>

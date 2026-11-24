@@ -6,7 +6,7 @@ Read the [guide](../guides/spark-032.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Define watermark placement and window state
 
-Apply withWatermark(event_time,5 minutes) before grouping by a 5-minute window and team. Aggregate records and total amount, retaining the window struct in the result.
+Apply withWatermark(event_time, 5 minutes) before grouping by a 5-minute window and team. Aggregate records and total amount, retaining the window struct in the result.
 
 **Expected:** A streaming aggregate with window, team, records, total. The watermark is attached to the same event-time column used by the window.
 
@@ -59,9 +59,9 @@ The receipt establishes what the query actually reported rather than equating a 
 
 ### Exercise 3: Accept a retained out-of-order event and observe finalization
 
-Publish phase 2, run the compatible query again and read finalized sink rows as(start, team, records, total). Verify the 00:03 event contributed before the first window closed.
+Publish phase 2, run the compatible query again and read finalized sink rows as (start, team, records, total). Verify the 00:03 event contributed before the first window closed.
 
-**Expected:** The finalized sink contains only(00:00, A,3,35) at this point. The actual watermark reaches at least 00:07.
+**Expected:** The finalized sink contains only `(00:00, A, 3, 35)` at this point. The actual watermark reaches at least 00:07.
 
 ```scala
 def finalRows(spark: SparkSession, root: Path): Seq[(String, String, Long, Long)] = {
@@ -127,7 +127,7 @@ The drop counter and unchanged emitted result jointly substantiate the tested po
 
 Publish the 00:30 administrative advancer, run phase 4 and return a ledger of total source inputs, observed drops and final business-window records.
 
-**Expected:** Seven total inputs, one observed drop, five finalized business records across three tuples:(00:00, A,3,35),(00:10, A,1,30),(00:10, B,1,7). The advancer window remains pending.
+**Expected:** Seven total inputs, one observed drop, five finalized business records across three tuples: `(00:00, A, 3, 35)`, `(00:10, A, 1, 30)`, `(00:10, B, 1, 7)`. The advancer window remains pending.
 
 ```scala
 def eventLedger(
@@ -216,4 +216,6 @@ The negative cases validate actual engine eligibility rather than relying only o
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Define watermark placement and window state) is built inside the program, so opening the lesson fetches nothing; it expects: A streaming aggregate with window, team, records, total. The watermark is attached to the same event-time column used by the window. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

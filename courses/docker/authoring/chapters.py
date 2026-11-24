@@ -322,7 +322,7 @@ Order instructions by dependency: runtime base, application directory, source co
             "Compare the file's path with the context directory you passed.",
         ),
         (
-            "Explain why EXPOSE does not make localhost:8080 work.",
+            "Explain why EXPOSE does not make `localhost:8080` work.",
             "It is metadata; port publishing is a runtime configuration.",
             "The container process must listen on the correct interface and a host mapping must exist. An EXPOSE instruction alone establishes neither of those operational facts.",
             "Compare EXPOSE in the Dockerfile with ports in compose.yaml.",
@@ -571,7 +571,7 @@ Troubleshoot in layers: application listen address, process state, container por
             "Read 127.0.0.1:18080:8080 from left to right as host address, host port and container port.",
         ),
         (
-            "Predict whether localhost:18080 inside app reaches the host browser endpoint.",
+            "Predict whether `localhost:18080` inside app reaches the host browser endpoint.",
             "It refers to app container loopback and normally fails.",
             "Loopback is relative to the caller namespace. A hostname that works in the browser does not automatically name the same machine from a container.",
             "Ask whose loopback interface localhost means inside the container.",
@@ -1146,7 +1146,7 @@ A DNS resolution failure, a refused connection and a valid HTTP error are differ
         "Run after the app is healthy in the copied fixture.",
         "sh",
         "docker compose -p ds60-docker-study --profile tools run --rm client",
-        "The peer prints the app response using app:8080 without relying on host port 18080.",
+        "The peer prints the app response using `app:8080` without relying on host port 18080.",
     ),
     (
         "Contrast destination scopes",
@@ -3179,4 +3179,969 @@ MISTAKES = {
     "Namespaces, cgroups, OCI and the runtime beneath Docker": "Believing each container has its own kernel. Changing kernel or cgroup settings to match an example. Assuming every OCI runtime behaves identically.",
     "Runtime secrets, configuration files and controlled disclosure": "Passing secrets as environment variables that appear in `docker inspect`. Declaring a secret but not granting it to the service. Rotating by restarting without revoking the old credential.",
     "Scaling replicas, shared state and concurrency traps": "Scaling a service that keeps its state in local files. Relying on an in-process lock across containers. Publishing a fixed host port on a scaled service.",
+}
+
+KEY_TERMS = {
+    "Containers, images and the process model": (
+        (
+            "Process",
+            "A running program together with its memory, open files and operating-system identity.",
+        ),
+        (
+            "Image",
+            "A packaged, read-only filesystem plus startup configuration from which containers are created.",
+        ),
+        (
+            "Container",
+            "A running or stopped instance created from an image, with its own writable layer and isolation settings.",
+        ),
+        (
+            "Writable layer",
+            "The per-container record of file changes made on top of the image's read-only content.",
+        ),
+        (
+            "Shared kernel",
+            "The engine's single Linux kernel, which every container on that engine uses instead of booting a guest kernel.",
+        ),
+    ),
+    "The Linux engine, WSL 2 and your first inspection": (
+        (
+            "Docker client",
+            "The command you type, which sends API requests to an engine rather than running containers itself.",
+        ),
+        (
+            "Docker engine",
+            "The daemon that receives client requests and builds images and manages containers on its Linux host or VM.",
+        ),
+        (
+            "Docker context",
+            "A named client setting that selects which engine endpoint your commands are sent to.",
+        ),
+        (
+            "WSL 2",
+            "The Windows Subsystem for Linux version that provides the Ubuntu shell and Linux environment the course uses on Windows.",
+        ),
+        (
+            "`docker info`",
+            "A read-only command that asks the selected engine to report its version, operating system and resource settings.",
+        ),
+    ),
+    "The filesystem, writable layers and container lifetime": (
+        (
+            "Image layers",
+            "The read-only filesystem layers an image supplies, shared unchanged by every container created from it.",
+        ),
+        (
+            "Merged view",
+            "The single filesystem a container sees, combining the image layers with its own writable changes.",
+        ),
+        (
+            "Container lifetime",
+            "The span from creation to removal; a restart keeps the writable layer, while removal and recreation discard it.",
+        ),
+        (
+            "Read-only root filesystem",
+            "A runtime setting that refuses writes to packaged paths, so only explicit mounts remain writable.",
+        ),
+    ),
+    "Processes, PID 1, signals and graceful shutdown": (
+        (
+            "PID 1",
+            "The process ID of a container's initial process, which has special Linux signal and child-reaping behavior.",
+        ),
+        (
+            "Signal",
+            "A notification delivered to a process, such as SIGTERM asking it to stop or SIGKILL ending it without cleanup.",
+        ),
+        (
+            "Graceful shutdown",
+            "Refusing new work, finishing bounded in-flight work, closing resources and exiting before the grace period ends.",
+        ),
+        (
+            "Exec form",
+            "The JSON array form of `CMD` or `ENTRYPOINT`, which gives the runtime the arguments directly without starting a shell.",
+        ),
+        (
+            "Init process",
+            "A small PID 1 program that reaps adopted child processes and forwards signals to the application.",
+        ),
+    ),
+    "Dockerfile instructions and the first reproducible image": (
+        (
+            "Dockerfile",
+            "A build recipe whose instructions define a sequence of filesystem and configuration changes for an image.",
+        ),
+        ("`FROM`", "The instruction that selects the base image a build starts from."),
+        (
+            "`COPY`",
+            "The instruction that copies named files from the build context into the image.",
+        ),
+        (
+            "`CMD`",
+            "The instruction that supplies the default command a future container runs; it does not execute during the build.",
+        ),
+        (
+            "Image tag",
+            "A local, human-readable name for a built image; creating one does not push anything to a registry.",
+        ),
+    ),
+    "Build context, .dockerignore and accidental data exposure": (
+        (
+            "Build context",
+            "The set of files a builder may read during a build, usually the directory passed to the build command.",
+        ),
+        (
+            ".dockerignore",
+            "A file of patterns that removes matching paths from the build context before the builder receives it.",
+        ),
+        (
+            "Ignore pattern",
+            "One line in .dockerignore, such as a directory name or glob, that excludes matching paths.",
+        ),
+        (
+            "Layer history",
+            "The stored record of each image layer, which can keep a file even after a later instruction deletes it.",
+        ),
+        (
+            "Explicit COPY",
+            "Copying only named files instead of the whole context, so every file in the image has a known reason to be there.",
+        ),
+    ),
+    "Layers, cache invalidation and efficient rebuilds": (
+        ("Layer", "The recorded filesystem changes produced by one build step."),
+        (
+            "Build cache",
+            "Stored results of earlier build steps that the builder reuses when an instruction and its inputs are unchanged.",
+        ),
+        (
+            "Cache invalidation",
+            "The point where a changed instruction or input forces that step and every later step to run again.",
+        ),
+        (
+            "Instruction order",
+            "The sequence of Dockerfile steps, which decides how much work a single changed input invalidates.",
+        ),
+        (
+            "Dependency layer",
+            "A layer built from dependency metadata such as a lockfile, placed before frequently edited source so it stays cached.",
+        ),
+    ),
+    "Environment variables, command arguments and configuration": (
+        (
+            "Environment variable",
+            "A named string value supplied to a process, which the application must parse and validate itself.",
+        ),
+        (
+            "`ENTRYPOINT`",
+            "The Dockerfile instruction that sets the executable a container runs, with `CMD` supplying its default arguments.",
+        ),
+        (
+            "Compose interpolation",
+            "Substitution of variable references, often from a `.env` file, while Compose renders its model before containers start.",
+        ),
+        (
+            "`env_file`",
+            "A service setting that injects the variables from a named file into that service's container environment.",
+        ),
+        (
+            "Configuration validation",
+            "Parsing and bounds checking settings at startup, so a missing or malformed value fails with a clear error.",
+        ),
+    ),
+    "Ports, loopback and the first browser request": (
+        (
+            "Port publishing",
+            "Mapping a host address and port to a container port so host traffic can reach a container listener.",
+        ),
+        (
+            "Loopback address",
+            "An address such as 127.0.0.1 that points back to the same network namespace, so inside a container it means that container.",
+        ),
+        (
+            "Bind address",
+            "The address a server listens on; 0.0.0.0 accepts connections on every interface in its own namespace.",
+        ),
+        (
+            "Host port",
+            "The host side of a mapping, such as port 18080 bound to 127.0.0.1 for the fixture.",
+        ),
+        (
+            "Container port",
+            "The port the application listens on inside its container, such as 8080 for the fixture.",
+        ),
+    ),
+    "Logs, exit status and observation before repair": (
+        (
+            "Standard streams",
+            "The standard output and standard error channels a process writes to, which Docker's logging driver captures.",
+        ),
+        (
+            "Container logs",
+            "The captured stream output for one container, which has bounded retention and is not a database.",
+        ),
+        (
+            "Exit status",
+            "The small integer a process returns when it ends, where zero conventionally means success.",
+        ),
+        (
+            "Container state",
+            "The engine's record of whether a container is created, running, restarting or exited, plus its exit code.",
+        ),
+        (
+            "Events",
+            "The engine's time-ordered stream of lifecycle notices such as create, start, die and stop.",
+        ),
+    ),
+    "Compose services, projects and a complete application": (
+        (
+            "Compose service",
+            "A named definition of how to create containers that share one role, such as `app` or `client`.",
+        ),
+        (
+            "Compose project",
+            "The group of containers, networks and volumes that Compose creates and owns for one application.",
+        ),
+        (
+            "`compose.yaml`",
+            "The declarative file that describes an application's services, networks and volumes.",
+        ),
+        (
+            "Project name",
+            "The explicit identity Compose uses to label and find a project's resources, which keeps commands and cleanup scoped.",
+        ),
+        (
+            "Service name",
+            "The key under `services` that also acts as a DNS name for peers on the project's network.",
+        ),
+    ),
+    "Health checks, startup order and real readiness": (
+        (
+            "Health check",
+            "A small command the engine runs on a schedule to classify a container as starting, healthy or unhealthy.",
+        ),
+        (
+            "Readiness",
+            "The point where an application can do the work a dependent component needs, which is stronger than its process existing.",
+        ),
+        (
+            "`depends_on`",
+            "The Compose setting that orders service startup and can wait for a named condition on a dependency.",
+        ),
+        (
+            "`service_healthy`",
+            "A `depends_on` condition that waits until the dependency's health check reports healthy before starting the dependent.",
+        ),
+        (
+            "Startup order",
+            "The sequence in which Compose starts services, which helps initialization but does not guarantee later availability.",
+        ),
+    ),
+    "Named volumes, bind mounts and persistence experiments": (
+        (
+            "Named volume",
+            "Engine-managed storage, mounted into containers, that survives container removal and recreation.",
+        ),
+        (
+            "Bind mount",
+            "A mapping of an explicitly chosen host path into a container, giving its processes direct access to those host files.",
+        ),
+        (
+            "Temporary filesystem",
+            "Volatile storage, usually backed by memory, that disappears when the container stops.",
+        ),
+        (
+            "Container recreation",
+            "Removing a container and creating a new one, which discards its writable layer but keeps mounted volumes.",
+        ),
+        (
+            "`volume-nocopy`",
+            "A mount option that stops Docker from seeding an empty named volume with the image content at its mount path.",
+        ),
+    ),
+    "First capstone: build, serve, replace and explain": (
+        (
+            "Image rebuild",
+            "Running the build again from current inputs to produce a new image identity for the changed source.",
+        ),
+        (
+            "Container replacement",
+            "Removing the old container and starting a new one from the chosen image under the same project.",
+        ),
+        (
+            "Persistent data",
+            "State kept on a named volume, such as the fixture counter, that must survive container replacement.",
+        ),
+        (
+            "Image identity",
+            "The image ID or digest that shows which build a container actually runs, unlike a reusable tag.",
+        ),
+        (
+            "Health endpoint",
+            "A small HTTP path the application answers to report readiness without changing any data.",
+        ),
+    ),
+    "BuildKit, cache mounts and build secrets": (
+        (
+            "BuildKit",
+            "The modern Docker build engine that runs a build graph, reuses cached results and provides special mounts to steps.",
+        ),
+        (
+            "Cache mount",
+            "A directory mounted into one build step that keeps reusable downloads between builds without adding them to a layer.",
+        ),
+        (
+            "Secret mount",
+            "A file mounted into one build step that exposes sensitive input without copying it into an image layer.",
+        ),
+        (
+            "Build secret",
+            "Sensitive build input supplied with the `--secret` option, never through `ARG`, `ENV`, a source file or a command URL.",
+        ),
+        (
+            "Cold build",
+            "A build with no reusable cache, which shows the full cost of every step and every external download.",
+        ),
+    ),
+    "Multi-stage builds and runtime dependency boundaries": (
+        (
+            "Multi-stage build",
+            "A Dockerfile with more than one `FROM` instruction, where each stage has its own filesystem and configuration.",
+        ),
+        (
+            "Builder stage",
+            "A stage that holds the compilers, tools and tests needed to produce an artifact but not to run it.",
+        ),
+        (
+            "`COPY --from`",
+            "The instruction form that copies a chosen artifact from an earlier stage into the current one.",
+        ),
+        (
+            "Final stage",
+            "The shipped runtime image, which should contain only what the artifact needs to start and run.",
+        ),
+        (
+            "Target stage",
+            "A named stage selected with the `--target` build option, which deliberately stops the build there for debugging or testing.",
+        ),
+    ),
+    "CPU architectures, image indexes and cross-platform builds": (
+        (
+            "CPU architecture",
+            "A machine instruction family such as `amd64` or `arm64` that a binary is compiled for.",
+        ),
+        (
+            "Image index",
+            "A multi-platform list that points to platform-specific images so the engine can select a compatible one.",
+        ),
+        (
+            "Target platform",
+            "The operating system and architecture pair, such as `linux/arm64`, requested with the `--platform` option.",
+        ),
+        (
+            "Emulation",
+            "Executing foreign-architecture instructions through a translator such as QEMU, which is slower and does not prove native behavior.",
+        ),
+        (
+            "Cross-compilation",
+            "A compiler running natively while emitting binaries for a different target architecture.",
+        ),
+    ),
+    "Bridge networks, service DNS and container-to-container traffic": (
+        (
+            "Bridge network",
+            "A virtual network on one engine that connects container interfaces; Compose creates a user-defined one per project.",
+        ),
+        (
+            "Service DNS",
+            "Name resolution that maps a Compose service name such as `app` to a current container address on the network.",
+        ),
+        (
+            "Container-to-container traffic",
+            "Requests between peers on a shared network, such as client to `app:8080`, that never use the host's published port.",
+        ),
+        (
+            "Network vantage point",
+            "The namespace a request starts from, which decides what names and addresses such as localhost mean.",
+        ),
+    ),
+    "Network isolation, gateways and outbound connectivity": (
+        (
+            "Gateway",
+            "The router address that forwards a network's traffic to destinations beyond it.",
+        ),
+        (
+            "Internal network",
+            "A Docker network marked internal, which blocks external connectivity for the containers attached to it.",
+        ),
+        (
+            "Outbound connectivity",
+            "A container's ability to reach destinations outside its network, normally through routing and address translation.",
+        ),
+        (
+            "Network mode none",
+            "A setting that gives a container no ordinary external networking, suited to pure computation.",
+        ),
+        (
+            "Host networking",
+            "A mode where the container uses the host's network stack directly, removing a major layer of network isolation.",
+        ),
+    ),
+    "Users, UID ownership and writable data paths": (
+        (
+            "UID",
+            "A numeric user ID that the kernel uses for ownership and permission checks, independent of any username label.",
+        ),
+        (
+            "`USER`",
+            "The Dockerfile instruction that sets the user, by name or UID, that later steps and the container process run as.",
+        ),
+        (
+            "File ownership",
+            "The user and group IDs recorded on a file, which together with its mode decide who can read or write it.",
+        ),
+        (
+            "Writable data path",
+            "A directory such as /data that the image deliberately prepares as writable for the non-root process.",
+        ),
+        (
+            "Non-root user",
+            "A process identity other than UID 0, which reduces the ordinary privileges of the application.",
+        ),
+    ),
+    "Backups, restores and proving data recovery": (
+        ("Backup", "A retained copy of state intended for recovery."),
+        ("Restore", "Reconstructing usable state from a backup into a chosen target."),
+        (
+            "Recovery test",
+            "An independent restore followed by checks that prove a backup actually recovers the expected data.",
+        ),
+        (
+            "Volume archive",
+            "A tar file of a named volume's contents, made while the application is stopped.",
+        ),
+        (
+            "Consistency boundary",
+            "The condition, such as a stopped application, under which copied data is complete and safe to restore.",
+        ),
+    ),
+    "Resource limits, contention and honest performance experiments": (
+        (
+            "Memory limit",
+            "A cap on a container's accounted memory, beyond which its processes can be killed under memory pressure.",
+        ),
+        (
+            "CPU limit",
+            "A quota on the CPU time a container's cgroup may use per period, which throttles work but does not reserve a core.",
+        ),
+        (
+            "PID limit",
+            "A bound on how many processes a container may create, set in Compose with `pids_limit`.",
+        ),
+        (
+            "Contention",
+            "Competition among workloads for the same shared CPU, memory or I/O, which slows each of them.",
+        ),
+        (
+            "Measurement",
+            "Several recorded runs with a fixed workload, image, limits and host allocation that support an honest performance claim.",
+        ),
+    ),
+    "Read-only filesystems, capabilities and least privilege": (
+        (
+            "Linux capabilities",
+            "Named pieces of traditional root privilege that can be granted or dropped individually.",
+        ),
+        (
+            "`cap_drop`",
+            "The Compose setting that removes listed capabilities, often `ALL`, from a service's processes.",
+        ),
+        (
+            "`read_only`",
+            "The Compose setting that makes a container's root filesystem read-only, leaving only explicit mounts writable.",
+        ),
+        (
+            "`no-new-privileges`",
+            "A security option that stops a process from gaining privileges through set-user-ID programs or similar mechanisms.",
+        ),
+        (
+            "Least privilege",
+            "Granting a process only the permissions its real work needs, then testing that the application still functions.",
+        ),
+    ),
+    "Rootless engines, user namespaces and host trust": (
+        (
+            "Rootless mode",
+            "Running the engine and its containers under an ordinary user identity without a root daemon.",
+        ),
+        ("User namespace", "A kernel mapping of container user IDs to different host user IDs."),
+        (
+            "Engine socket",
+            "The daemon API endpoint through which any authorized client can create containers with powerful host access.",
+        ),
+        (
+            "Host trust",
+            "What a process may do to the host, as decided by its capabilities, ID mappings, mounts and daemon access.",
+        ),
+        (
+            "Root inside a container",
+            "UID 0 within a container, which is not automatically host root but is also not automatically harmless.",
+        ),
+    ),
+    "Image names, digests and an offline transfer": (
+        (
+            "Image reference",
+            "A name made of an optional registry, a repository, and an optional tag or digest.",
+        ),
+        ("Tag", "A mutable, human-friendly name that can be moved to different image content."),
+        (
+            "Digest",
+            "A content hash that identifies exact image bytes and cannot be moved to other content.",
+        ),
+        (
+            "`docker image save`",
+            "The command that exports local images into an archive for transfer without a registry.",
+        ),
+        (
+            "Archive checksum",
+            "A hash of the archive, compared with a value from a trustworthy channel, that detects altered transfers.",
+        ),
+    ),
+    "Compose overrides, profiles and configuration review": (
+        (
+            "Override file",
+            "A Compose file layered on a base file that changes or adds to the application model.",
+        ),
+        (
+            "Merge rules",
+            "The rules for combining Compose files, which differ for scalar values, mappings and sequences such as ports.",
+        ),
+        (
+            "Profile",
+            "A label that makes a service optional, so it starts only when that profile is enabled or the service is named.",
+        ),
+        (
+            "Effective model",
+            "The combined configuration after every file, override and interpolation has been applied.",
+        ),
+        (
+            "`docker compose config`",
+            "The command that renders and validates the effective model without starting anything.",
+        ),
+    ),
+    "Intermediate capstone: a recoverable two-tier teaching system": (
+        (
+            "Two-tier system",
+            "An application tier that owns state plus a client tier that reaches it through service DNS.",
+        ),
+        (
+            "Service DNS",
+            "Lookup of a peer by its Compose service name, so the client survives the app container's address changing.",
+        ),
+        (
+            "Resource limits",
+            "Bounds on memory, CPU and processes that keep each service's execution constrained and predictable.",
+        ),
+        (
+            "Restore target",
+            "A separate, disposable volume or project that receives a backup during a recovery test.",
+        ),
+        (
+            "Operator guide",
+            "A short document naming the project, the state volume, inspection steps and what can be removed safely.",
+        ),
+    ),
+    "Registries, tags, digests and deliberate publication": (
+        ("Registry", "A service that stores image manifests and blobs for distribution."),
+        ("Repository", "A group of related image names, with their tags, inside a registry."),
+        (
+            "Authorization",
+            "The decision about which operations an authenticated identity may perform, such as pull but not overwrite.",
+        ),
+        (
+            "Release tag",
+            "A tag used for a published release, which a reviewed process should resolve to an immutable digest.",
+        ),
+        (
+            "Publication review",
+            "A deliberate check of credentials, destination, retention and rollback before anything is pushed.",
+        ),
+    ),
+    "Software bills of materials and image provenance": (
+        ("SBOM", "A software bill of materials listing the components included in an artifact."),
+        (
+            "Provenance",
+            "A record of how an artifact was built, including its inputs and builder information.",
+        ),
+        (
+            "Attestation",
+            "A build statement, such as an SBOM or provenance record, stored with a specific image in its image index.",
+        ),
+        ("SPDX", "A standard format for exchanging SBOM data about packages, files and licenses."),
+        (
+            "Image digest",
+            "The immutable identity an SBOM or provenance record must be tied to before it supports a release decision.",
+        ),
+    ),
+    "Vulnerability findings, patching and dependency updates": (
+        (
+            "Vulnerability finding",
+            "A scanner's match between a component version and a published issue, which is evidence to investigate, not a verdict.",
+        ),
+        ("Affected version", "A component version that the published issue lists as vulnerable."),
+        (
+            "Scanner",
+            "A tool that inventories an image's components and matches them against vulnerability data under its own rules.",
+        ),
+        (
+            "Base image update",
+            "Moving the `FROM` reference to a patched base so a rebuild picks up fixed operating-system packages.",
+        ),
+        (
+            "Rebuild and retest",
+            "Producing a new image from updated inputs and running the relevant tests on that final image before replacing containers.",
+        ),
+    ),
+    "CI builds, test layers and artifact promotion": (
+        (
+            "Continuous integration",
+            "Running repeatable checks automatically whenever source changes.",
+        ),
+        (
+            "CI test stage",
+            "A pipeline step that tests the built image itself, beyond the source tests that ran earlier.",
+        ),
+        (
+            "Image promotion",
+            "Artifact promotion for containers, moving one already tested immutable image through delivery stages instead of rebuilding different bytes for each.",
+        ),
+        (
+            "Immutable digest",
+            "The content identity that links the tested image to the deployed one.",
+        ),
+        (
+            "Parallel jobs",
+            "Pipeline jobs that run at the same time and need isolated or deliberately serialized shared fixtures.",
+        ),
+    ),
+    "Debugging minimal images without changing the contract": (
+        (
+            "Minimal image",
+            "An image that omits a shell, package manager and debugging tools to reduce size and unneeded functionality.",
+        ),
+        (
+            "Debug container",
+            "A separate, short-lived tools container started deliberately to inspect a running application.",
+        ),
+        (
+            "Shared namespaces",
+            "Joining another container's process or network namespace, so a tools container sees the app's processes and network stack.",
+        ),
+        (
+            "Diagnostic vantage point",
+            "The namespace and permissions a diagnostic command runs with, which decide what it can actually observe.",
+        ),
+    ),
+    "Restart policies, failure loops and idempotent startup": (
+        (
+            "Restart policy",
+            "A rule telling the engine when to restart an exited container, such as on-failure or unless-stopped.",
+        ),
+        (
+            "Crash loop",
+            "Repeated restarts of a process that fails on every startup, consuming resources and repeating side effects.",
+        ),
+        (
+            "Idempotent startup",
+            "Initialization that can run again without creating duplicate or conflicting state.",
+        ),
+        (
+            "Backoff",
+            "A growing delay between restart attempts that limits how quickly a failing service is retried.",
+        ),
+    ),
+    "Application migrations and durable state versioning": (
+        ("Migration", "A change that moves stored data or a schema from one version to another."),
+        (
+            "Schema version",
+            "A stored marker, such as the fixture's `schema_version` field, that tells code which data format it is reading.",
+        ),
+        (
+            "Rollback",
+            "Returning to an earlier image, which does not automatically reverse a data migration.",
+        ),
+        (
+            "Durable state",
+            "Data that outlives containers and images and therefore carries its own version and recovery needs.",
+        ),
+        (
+            "Precondition",
+            "A fact about the starting schema or data that a migration verifies before changing anything.",
+        ),
+    ),
+    "Image size, startup latency and measurement": (
+        (
+            "Image size",
+            "The stored and transferred size of an image, which affects pulls but is only one part of startup cost.",
+        ),
+        (
+            "Startup latency",
+            "The time from a start request to a usable application, including pulling, unpacking, creation and initialization.",
+        ),
+        (
+            "Incremental download",
+            "The new layer data an engine must fetch, which is often smaller than the displayed total image size.",
+        ),
+        (
+            "Cold cache",
+            "A measurement condition with images or build cache missing, so transfer and initialization costs are included.",
+        ),
+        (
+            "Warm restart",
+            "A measurement condition with layers already present locally, so transfer cost is excluded and only startup work is timed.",
+        ),
+    ),
+    "Compose on one host and the limits of orchestration": (
+        (
+            "Single-host Compose",
+            "Defining and operating a related application on one selected engine, with no multi-node recovery.",
+        ),
+        (
+            "Orchestration",
+            "Coordinating desired state for workloads across many resources and failure domains.",
+        ),
+        (
+            "Scheduling",
+            "Deciding which node runs each workload based on resources, constraints and policy.",
+        ),
+        (
+            "Failure domain",
+            "A set of resources, such as one host, that can fail together and take every workload on it down.",
+        ),
+        (
+            "Desired state",
+            "The declared configuration that an orchestrator's controllers continually work to make true.",
+        ),
+    ),
+    "TLS, reverse proxies and publishing responsibly": (
+        (
+            "TLS",
+            "A protocol that authenticates the server identity and encrypts traffic in transit under a certificate trust model.",
+        ),
+        (
+            "Certificate",
+            "A signed document binding a server name to a public key, which clients verify through trusted issuers.",
+        ),
+        (
+            "Reverse proxy",
+            "A server that receives client requests and forwards them to an upstream application, often terminating TLS.",
+        ),
+        (
+            "Public exposure",
+            "Making a service reachable from the internet, which adds identity, access control, patching and abuse handling duties.",
+        ),
+        (
+            "Forwarded header",
+            "A proxy-added claim about the original client, which an application should trust only from known proxies.",
+        ),
+    ),
+    "Incident response, disk pressure and scoped cleanup": (
+        (
+            "Incident",
+            "An observed deviation from expected behavior that requires diagnosis or recovery.",
+        ),
+        (
+            "Disk pressure",
+            "A shortage of free disk space caused by images, build cache, writable layers, logs or volumes.",
+        ),
+        (
+            "`docker system df`",
+            "A read-only command that reports disk usage by images, containers, local volumes and build cache.",
+        ),
+        (
+            "Pruning",
+            "Removing resources that a tool's rules consider unused, which is not the same as unimportant.",
+        ),
+        (
+            "Scoped cleanup",
+            "Deleting only identified resources whose ownership and retention are known, then verifying recovery.",
+        ),
+    ),
+    "Namespaces, cgroups, OCI and the runtime beneath Docker": (
+        (
+            "Namespace",
+            "A kernel feature that changes which operating-system objects, such as processes or mounts, a process can see.",
+        ),
+        ("cgroup", "A kernel group of processes used for resource accounting and limits."),
+        (
+            "OCI",
+            "The Open Container Initiative, which defines image and runtime specifications for interoperability.",
+        ),
+        (
+            "OCI runtime",
+            "The low-level program that creates a container process from a bundle according to the OCI runtime specification.",
+        ),
+        (
+            "containerd",
+            "The container manager that Docker tooling can use to pull images and supervise containers through an OCI runtime.",
+        ),
+    ),
+    "Runtime secrets, configuration files and controlled disclosure": (
+        (
+            "Runtime secret",
+            "Sensitive input an application needs while it runs, with a different lifecycle from a build secret.",
+        ),
+        (
+            "Secret file",
+            "A file that Compose mounts into a selected service to deliver a declared secret's value.",
+        ),
+        (
+            "/run/secrets",
+            "The in-container directory where Compose places declared secrets as files.",
+        ),
+        (
+            "Controlled disclosure",
+            "Exposing a secret only to the processes that need it and keeping it out of logs, reports and screenshots.",
+        ),
+        (
+            "Rotation",
+            "Replacing a secret value with a new one and retiring the old value without exposing either.",
+        ),
+    ),
+    "Scaling replicas, shared state and concurrency traps": (
+        (
+            "Replica",
+            "Another instance of the same application role, which adds capacity only if routing and state design allow it.",
+        ),
+        (
+            "Shared state",
+            "Data that several replicas read or write, such as one file or session store.",
+        ),
+        (
+            "Race condition",
+            "A defect where the outcome depends on the timing of concurrent operations.",
+        ),
+        (
+            "Lost update",
+            "A race where one writer's change overwrites another's because both read the same old value.",
+        ),
+        (
+            "Load balancer",
+            "A component that distributes requests among replicas but does not synchronize their memory, sessions or files.",
+        ),
+    ),
+    "Advanced capstone: a release, recovery and teaching handoff": (
+        (
+            "Release record",
+            "A document tying an image identity to its source inputs, tested engine and platform, and observed behavior.",
+        ),
+        (
+            "Recovery rehearsal",
+            "Practicing backup and restore against a disposable target to prove the recovery procedure works.",
+        ),
+        (
+            "Handoff",
+            "Passing a system to another operator with enough evidence and instructions to run it independently.",
+        ),
+        (
+            "Acceptance evidence",
+            "Recorded observations that show the released image meets its runtime, persistence and restore requirements.",
+        ),
+        (
+            "Assumption",
+            "A belief not yet verified, which a good release explanation keeps separate from observed facts.",
+        ),
+    ),
+}
+
+# Per-lesson diagnosis advice for the Exercise 4 boundary case, keyed by lesson
+# id. Each entry names the first observation for that lesson's own failure.
+BOUNDARY = {
+    "docker-001": "Compare `docker ps` with `docker ps -a` for the same container ID before deciding anything was deleted, and read the STATUS column rather than the name.",
+    "docker-002": "Run `docker version` and read whether the Server section appears at all; a printed client version alone says nothing about the engine, the selected context or socket permission.",
+    "docker-003": "Record the container ID from `docker compose ps -q app` before and after `up`, then note which path the missing file was written to, so the evidence separates recreation from a bad write.",
+    "docker-004": "List the processes inside the container and identify which one is PID 1 before reading the running status as evidence about the server.",
+    "docker-005": "Read the build log line that names the context size and the failing `COPY` source path before moving any file or widening the context directory.",
+    "docker-006": "Use `docker history` on the image to list every layer with its size; a later `rm` step does not remove the earlier `COPY` layer from that list.",
+    "docker-007": "Compare the text of the cached `RUN` instruction with the bytes it downloads; an unchanged instruction can be served from cache even when the remote file changed.",
+    "docker-008": "Print the argument vector the program actually received, and compare the exec array with the shell form, before adding a shell wrapper to the command.",
+    "docker-009": "Check which address the server binds inside the container, `127.0.0.1` or `0.0.0.0`, before editing the published mapping or the browser URL.",
+    "docker-010": "Send one request to the application and read its status code and log line; a container STATUS of Up only reports that the main process exists.",
+    "docker-011": "List the existing projects, containers and published ports with their labels before renaming or removing anything that might belong to another copy.",
+    "docker-012": "Run the healthcheck command from inside the container and the browser request from the host, then compare the two paths hop by hop.",
+    "docker-013": "Compare the files in `/app` from the image with the files the running container shows, and read the mount table for the same path.",
+    "docker-014": "Change only the host side of one published port in a scratch copy, record the first failing request, then restore the mapping and confirm the original request succeeds again.",
+    "docker-015": "Search the build output and the final image layers for the secret value's location, not the value itself, before blaming the secret mount option.",
+    "docker-016": "Read the `--target` flag and the final stage name in the build command, then list the shipped image's files to see which stage produced it.",
+    "docker-017": "Compare the image platform with the host architecture and check the executable's format before reading any application code.",
+    "docker-018": "Record the resolved address, then test whether anything listens on that address and port inside the target container before touching DNS settings.",
+    "docker-019": "Restore the bridge network, reproduce the original refusal and read the published mapping and listen address that host mode was hiding.",
+    "docker-020": "Record the effective UID and GID in the container, the owner and mode of the mounted path on the host, and the exact operation that was denied.",
+    "docker-021": "Parse and validate the restored file with the application's own reader; a matching checksum only shows the bytes were copied faithfully.",
+    "docker-022": "Check `docker stats` CPU% against the cpus quota and the cgroup `cpu.stat` `nr_throttled` count before reading memory usage.",
+    "docker-023": "Read the application's error for the exact path it tried to write, then decide whether that cache is temporary, durable or avoidable before choosing a mount.",
+    "docker-024": "Identify which step needs engine access and move it to a host worksheet the learner runs deliberately, rather than granting the browser session a socket.",
+    "docker-025": "Run `docker image ls` for the exact repository and tag before the run; with `--pull never` an absent image is reported as an error rather than downloaded.",
+    "docker-026": "Render the merged model with `docker compose config` and read the complete `ports` list for the service before assuming an override replaced it.",
+    "docker-027": "Send the same request from the host and from a peer container, then compare the host mapping with the service name and internal port the peer used.",
+    "docker-028": "Resolve the tag to its current digest and compare it with the digest recorded beside the earlier acceptance evidence.",
+    "docker-029": "Identify who issued the provenance statement and whether a verification policy accepts that issuer before reading any of its fields as fact.",
+    "docker-030": "Resolve the tag named in the scan report to a digest, compare it with the deployed digest, and note the scanner's database date.",
+    "docker-031": "Compare the digest that passed acceptance with the digest being deployed; if they differ, the acceptance result does not yet apply.",
+    "docker-032": "Write down what the interactive change revealed, then recreate the container from the maintained image to confirm the repair is gone.",
+    "docker-033": "Count the seed records after each start and read the initializer to see whether it checks for existing state before writing.",
+    "docker-034": "Read the version marker in the stored data and compare it with the versions the rolled-back reader accepts before restarting it again.",
+    "docker-035": "Compare the file lists of the working and optimized images for certificate bundles and libraries before measuring size again.",
+    "docker-036": "Name the storage class and provisioner the translated claim depends on, and check whether a restore procedure exists for its data.",
+    "docker-037": "Read the proxy log for the upstream it contacted and request the app route directly from an owned vantage point before changing either side.",
+    "docker-038": "Read the volume's labels and creating project, and ask who owns its data, before treating unattached as unwanted.",
+    "docker-039": "Record the host's cgroup version and mount layout, then map the example's path onto it without changing kernel or boot settings.",
+    "docker-040": "Render the effective Compose model and read the service's `secrets` list before editing file permissions or adding a host mount.",
+    "docker-041": "Read which replica holds the published host port and which replicas failed to start, then decide between a routing layer and distinct ports.",
+    "docker-042": "Write down the single layer you changed, the first observation that failed, and the request that proves the repair, before running the full acceptance again.",
+}
+
+# Per-lesson retrieval prompt, keyed by lesson id, used beside worked example 2.
+RETRIEVAL = {
+    "docker-001": "From memory, give one creation event and one removal event for each of image, container and writable layer.",
+    "docker-002": "Without notes, say which command output proves the client works and which proves the engine answers.",
+    "docker-003": "Predict whether a file written to `/tmp` in the container survives `restart`, `up --force-recreate` and an image rebuild.",
+    "docker-004": "Describe what happens to the main process during `docker compose stop --timeout 10` when it ignores SIGTERM.",
+    "docker-005": "List the Dockerfile instructions of the fixture in order and say which one changes when only the source file changes.",
+    "docker-006": "Name two files from the fixture directory that should never reach the build context, and the ignore rule that excludes each.",
+    "docker-007": "Predict which build steps rerun after editing only `server.py` with the dependency file copied first.",
+    "docker-008": "Explain from memory why `restart` keeps the old environment while recreating the service applies the new value.",
+    "docker-009": "Trace a host request to `127.0.0.1:18080` and a peer request to `app:8080` without looking at the diagram.",
+    "docker-010": "Recall which exit code each program produced and which log line identified the failure.",
+    "docker-011": "Name every resource the `ds60-docker-study` project creates and which of them `down` keeps.",
+    "docker-012": "Say what `condition: service_healthy` waits for and what it cannot promise about a host browser request.",
+    "docker-013": "Predict the counter value after recreating the app with the named volume kept, and after removing that volume.",
+    "docker-014": "Recall the container IDs before and after recreation and what their difference proves about replacement.",
+    "docker-015": "Explain where the secret is visible during a `RUN --mount=type=secret` step and where it must not appear afterward.",
+    "docker-016": "List what the final stage copies from the builder and what it deliberately leaves behind.",
+    "docker-017": "Name the image index entry the engine selects on an arm64 host and the error a mismatched binary produces.",
+    "docker-018": "Recall which destination the host browser, a peer client and the app healthcheck each use, and why they differ.",
+    "docker-019": "Predict the output of the computation under `--network none` and explain why no network was needed.",
+    "docker-020": "Recall the UID and GID the fixture image runs as and which host paths it may write.",
+    "docker-021": "List the restore steps in order and name the check that proves the restored data is usable.",
+    "docker-022": "Say which column in a `docker stats` sample would rise first under CPU contention and which under a memory leak.",
+    "docker-023": "Name the positive and negative acceptance checks and what each would show if the root filesystem were writable.",
+    "docker-024": "Explain from memory why mounting `/var/run/docker.sock` grants control of the host.",
+    "docker-025": "Recall the commands that move an image offline and the flag that proves no download happened.",
+    "docker-026": "Predict the merged `ports` list when both Compose files declare a port for the same service.",
+    "docker-027": "Draw the recovery state machine and mark where a failure stops the sequence.",
+    "docker-028": "List the fields a release identity record needs and say which one never changes after publication.",
+    "docker-029": "Explain what an SBOM describes, what a provenance statement claims and which object both refer to.",
+    "docker-030": "Trace the patch steps and name the identity you would record before replacing the container.",
+    "docker-031": "Recall the receipt fields and say which one ties the test result to the exact artifact.",
+    "docker-032": "Name one observation from each vantage point, host, peer and app, without looking back.",
+    "docker-033": "Rewrite the unsafe initializer as the safe sequence from memory.",
+    "docker-034": "Recall the order of the compatible transition and the point after which rollback needs a migration back.",
+    "docker-035": "List the startup phases and say which one an image size reduction can shorten.",
+    "docker-036": "Map each Compose concept to the requirement it becomes on a cluster without looking at the table.",
+    "docker-037": "Match a certificate mismatch, a proxy 502 and an app 401 to the layer that failed.",
+    "docker-038": "Say what `docker compose down` removes and what it leaves for a separate, deliberate decision.",
+    "docker-039": "Match network namespace, mount namespace, cgroup and OCI runtime to what each isolates or controls.",
+    "docker-040": "Recall how the validator proves the secret is present without printing it.",
+    "docker-041": "Name the requirement each of routing, shared data, sessions and retries adds when replicas increase.",
+    "docker-042": "Trace one browser request through the system and one peer request, naming every port.",
 }

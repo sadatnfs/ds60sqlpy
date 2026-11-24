@@ -2310,17 +2310,17 @@
       "tried": 6
     },
     "2": {
-      "after": "+",
-      "before": "-",
-      "check": 3,
-      "end": 1,
+      "after": "",
+      "before": "byValue",
+      "check": 4,
+      "end": 7,
       "inside": false,
-      "kind": "operator",
+      "kind": "comparator",
       "outcome": "killed",
-      "sha": "c2dc18da44311a9d",
+      "sha": "5b019fbc6b1c997f",
       "start": 0,
-      "token": 74,
-      "tried": 4
+      "token": 82,
+      "tried": 1
     },
     "3": {
       "after": "<=",

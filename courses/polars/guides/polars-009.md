@@ -14,6 +14,14 @@ Order-sensitive windows need a total ordering rule. Sorting by customer and time
 
 Group centering illustrates a different kind of window. Subtracting a group mean keeps one output per row while using all measurements in that group. It is useful for descriptive analysis, but computing the mean from future or held-out rows would contaminate a deployed feature. Training-time fitting and online application therefore need an additional temporal or split boundary.
 
+## Key terms
+
+- **Window expression:** An expression with `.over(keys)` that computes within each group but returns one value per input row.
+- **Lag:** The previous row's value within an ordered group, computed with `shift(1)`; the first row of each group gets null.
+- **Cumulative sum:** A running total along the row order from `cum_sum`, restarting in each group when used with `over`.
+- **Total ordering:** A sort rule with a tie-breaker column so that every row has one position and order-sensitive results are deterministic.
+- **Leakage:** A feature that uses information unavailable at the row's decision time, such as a group mean that includes later events.
+
 ## Syntax and data contract
 
 over("customer") assigns the expression to customer groups. cum_sum and shift(1) depend on the order established before the window operation. A reduction such as mean().over("group") broadcasts a group statistic back to each group row. Give the derived column a distinct alias and verify both its values and the unchanged row count.

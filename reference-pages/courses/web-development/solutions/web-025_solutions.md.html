@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-025.md</code>.</p>
 <h3 id="exercise-1-predict-when-the-registered-callback-executes">Exercise 1: Predict when the registered callback executes.<a class="heading-anchor" href="#exercise-1-predict-when-the-registered-callback-executes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It runs on a matching event, not merely because the listener was registered.</p>
+<p><strong>Approach:</strong> Separate registration from execution: <code>addEventListener</code> stores the function now, and the browser calls it later each time a click happens.</p>
 <p><strong>Why:</strong> addEventListener stores the callback; the browser calls it later, once per matching event.</p>
+<p><strong>Plausible wrong approach:</strong> Saying the callback runs when the page loads fails because registering a listener only stores the function and runs none of its code.</p>
+<p><strong>How to verify:</strong> Put <code>console.log</code> inside the callback; the message appears only after each click, never during page load.</p>
 <h3 id="exercise-2-change-the-display-label-without-changing-numeric-state">Exercise 2: Change the display label without changing numeric state.<a class="heading-anchor" href="#exercise-2-change-the-display-label-without-changing-numeric-state" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The counter logic remains independent of presentation wording.</p>
+<p><strong>Approach:</strong> Keep <code>count</code> as the number and build the display text from it in one place, such as <code>output.textContent = &#x27;Total: &#x27; + count</code>.</p>
 <p><strong>Why:</strong> Keeping state separate from presentation lets the wording change without breaking the arithmetic.</p>
+<p><strong>Plausible wrong approach:</strong> Storing the label in the same variable as the count fails because <code>count += 1</code> then appends text instead of adding one.</p>
+<p><strong>How to verify:</strong> Rename the label to Clicks so far and click twice; the number still reads 2.</p>
 <h3 id="exercise-3-build-a-native-button-counter-with-a-reset-action-and-output">Exercise 3: Build a native-button counter with a reset action and output.<a class="heading-anchor" href="#exercise-3-build-a-native-button-counter-with-a-reset-action-and-output" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Increment and reset work by keyboard and pointer, with a visible announced result.</p>
+<p><strong>Approach:</strong> Use two native buttons with <code>type=&quot;button&quot;</code>, one <code>output</code> element, a numeric <code>count</code>, an increment listener and a reset listener.</p>
 <p><strong>Why:</strong> Native buttons are keyboard operable, and output can be announced as a status when its text changes.</p>
+<p><strong>Plausible wrong approach:</strong> Making the controls from <code>div</code> elements with click handlers fails because they are not focusable and ignore Enter and Space.</p>
+<p><strong>How to verify:</strong> Tab to Add, press Enter twice and Space once, then reset; the output shows 3 and then 0.</p>
 <h3 id="exercise-4-diagnose-a-null-selection-caused-by-a-missing-id">Exercise 4: Diagnose a null selection caused by a missing id.<a class="heading-anchor" href="#exercise-4-diagnose-a-null-selection-caused-by-a-missing-id" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect the document relationship before attaching the listener.</p>
+<p><strong>Approach:</strong> Read the selector, search the HTML for that exact <code>id</code>, and check whether the script runs before or after the element is parsed.</p>
 <p><strong>Why:</strong> querySelector returns null when no element matches, and calling a method on null throws a TypeError.</p>
+<p><strong>Plausible wrong approach:</strong> Wrapping the call in <code>try</code> and ignoring the error fails because the button then silently has no listener at all.</p>
+<p><strong>How to verify:</strong> Logging <code>document.querySelector(&#x27;#add&#x27;)</code> prints the button element instead of null after the fix.</p>
 <h3 id="exercise-5-insert-text-containing-angle-brackets-without-creating-markup">Exercise 5: Insert text containing angle brackets without creating markup.<a class="heading-anchor" href="#exercise-5-insert-text-containing-angle-brackets-without-creating-markup" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> textContent preserves the literal data and creates no extra element.</p>
+<p><strong>Approach:</strong> Assign the string <code>&#x27;&lt;new learner&gt;&#x27;</code> with <code>textContent</code> and inspect the DOM to count the element children of the label.</p>
 <p><strong>Why:</strong> textContent stores characters as text, so angle brackets never reach the HTML parser and cannot create elements.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>innerHTML</code> for the same string fails because the browser parses it as markup and may create an unknown element.</p>
+<p><strong>How to verify:</strong> The label shows the angle brackets literally, and the Elements panel shows only a text node inside it.</p>
 <h3 id="exercise-6-explain-why-reading-state-back-from-formatted-text-is-fragile">Exercise 6: Explain why reading state back from formatted text is fragile.<a class="heading-anchor" href="#exercise-6-explain-why-reading-state-back-from-formatted-text-is-fragile" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Formatting, localization and extra words can break parsing while the underlying number is unchanged.</p>
+<p><strong>Approach:</strong> Keep a numeric variable as the source of truth and treat the visible text as output only, regenerated after each change.</p>
 <p><strong>Why:</strong> Parsing formatted text couples logic to presentation, so a translation or extra word breaks the state.</p>
+<p><strong>Plausible wrong approach:</strong> Reading <code>parseInt(output.textContent)</code> fails as soon as the text becomes Total: 3 or uses a localized format such as 1.000.</p>
+<p><strong>How to verify:</strong> Change the display format to Total: 3 and confirm the next click still shows Total: 4.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-025_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

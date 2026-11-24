@@ -1740,12 +1740,12 @@
     "6": {
       "after": "1",
       "before": "0",
-      "check": 0,
+      "check": 1,
       "end": 1,
       "inside": false,
       "kind": "literal",
       "outcome": "killed",
-      "sha": "c2e1252ff3ab0e07",
+      "sha": "ed2f4490a1243c71",
       "start": 0,
       "token": 9,
       "tried": 2

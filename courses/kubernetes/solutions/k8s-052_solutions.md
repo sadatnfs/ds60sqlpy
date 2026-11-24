@@ -20,11 +20,25 @@ The API type needs an implementation. Do not fabricate a public IP or change to 
 
 **Expected:** The requested external entrypoint may remain unprovisioned.
 
+**Solution reasoning**
+
+- **Approach:** Expect the Service to be created with no external address in status.loadBalancer.
+- **Why it is correct:** Only a cloud controller or local load balancer implementation fills that status, and an unsupported cluster has none.
+- **Plausible wrong approach:** Waiting for an external IP to appear assumes infrastructure that the local cluster does not have.
+- **How to verify:** The prediction says the external entrypoint may stay unprovisioned.
+
 ## Exercise 2: Name the controller and infrastructure responsibilities.
 
 Kubernetes desired state and provider operations are linked but distinct systems with separate failures.
 
 **Expected:** Reconcile the request and provision actual routing resources.
+
+**Solution reasoning**
+
+- **Approach:** Separate the controller that watches the Service from the infrastructure it creates.
+- **Why it is correct:** The controller reconciles the desired Service into provider resources, and those resources carry the real traffic.
+- **Plausible wrong approach:** Expecting the API server itself to provision a load balancer skips the controller that does the work.
+- **How to verify:** The answer gives reconciliation to the controller and routing to the provisioned infrastructure.
 
 ## Exercise 3: Draw both node-backed and direct-Pod conceptual paths.
 
@@ -32,17 +46,38 @@ Different load balancers use different backend models. Qualification must match 
 
 **Expected:** The implementation choice is explicit rather than assumed.
 
+**Solution reasoning**
+
+- **Approach:** Draw one path through node ports and another that targets Pod IPs directly.
+- **Why it is correct:** Implementations differ: some send traffic to nodes first, while others route straight to Pod addresses.
+- **Plausible wrong approach:** Assuming the node-backed path for every provider can misplace health checks and source address behavior.
+- **How to verify:** Both paths are drawn, and the implementation choice is stated.
+
 ## Exercise 4: Diagnose assigned address with no successful requests.
 
 A status field is one checkpoint. Continue through the actual request path instead of declaring the service healthy.
 
 **Expected:** Inspect listener, health checks, backend route and app behavior.
 
+**Solution reasoning**
+
+- **Approach:** Check the listener, provider health checks, backend route and app behavior in that order.
+- **Why it is correct:** An assigned address proves only that provisioning happened, not that backends pass checks or the app answers.
+- **Plausible wrong approach:** Recreating the Service because the address exists but fails discards evidence and may change the address.
+- **How to verify:** The diagnosis covers listener, health checks, backend route and app.
+
 ## Exercise 5: Explain load-balancer health versus Pod readiness.
 
 A node health check may not prove the intended application response. Correlate the layers.
 
 **Expected:** Infrastructure health and Kubernetes endpoint eligibility can test different things.
+
+**Solution reasoning**
+
+- **Approach:** Compare what the provider health check probes with what the readiness probe checks.
+- **Why it is correct:** The load balancer may check a node port or path while Kubernetes readiness tests the container, so results can differ.
+- **Plausible wrong approach:** Assuming a healthy target means a ready Pod merges two checks run by different systems.
+- **How to verify:** The answer names both checks and says they can disagree.
 
 ## Exercise 6: Plan a local versus cloud qualification.
 
@@ -51,3 +86,10 @@ Cloud provisioning is not a free side effect of reading a tutorial. Keep ownersh
 For example, a provider quota or controller permission error can prevent address allocation while the internal app remains healthy. Conversely, an allocated address can exist with failing backend health checks. Keep controller reconciliation, provider infrastructure and application evidence in separate rows. This prevents restarting a healthy Pod to repair an unrelated provisioning failure or mistaking a released address for a valid rollback target.
 
 **Expected:** Named implementation, owned resources, cost/cleanup boundary and real request evidence.
+
+**Solution reasoning**
+
+- **Approach:** Name the implementation, list owned resources, set a cost and cleanup boundary and require a real request.
+- **Why it is correct:** Cloud load balancers cost money and outlive a lesson if not removed, while local ones may behave differently.
+- **Plausible wrong approach:** Running the cloud path without a cleanup step can leave billed resources behind.
+- **How to verify:** The plan has a named implementation, owned resources, cleanup and request evidence.

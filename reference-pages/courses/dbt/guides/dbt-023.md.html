@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Performance work begins with a correct delivered contract. A query that removes duplicates, drops ordering or changes a filter may run faster because it performs a different computation. Compare values, identities and required ordering before comparing elapsed time. SQL&#x27;s multiset behavior is particularly important because equal-looking records can represent distinct contributions.</p>
 <p>The first case builds a bounded ten-thousand-row relation, executes a grouped query repeatedly and checks its answer with independent Python arithmetic. It also retrieves an actual DuckDB plan. The measured interval covers the query connection/execution path, not the preceding dbt build. Those scopes are reported separately so the timing is not misrepresented as total pipeline cost.</p>
 <p>The counterexample applies DISTINCT and changes a total from 17 to 12. It is not a valid optimization for an additive multiset contract. Tiny timings in this classroom are demonstrations of a measurement method, not rankings of databases or capacity promises. A production study needs representative size, distribution, concurrency and failure behavior.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>EXPLAIN:</strong> A statement that shows the plan the database chose for a query without returning the query&#x27;s rows.</li>
+<li><strong>Correctness oracle:</strong> A trusted reference result that a faster query must reproduce before its timing counts.</li>
+<li><strong>Multiset:</strong> A collection compared with duplicates counted, so adding DISTINCT removes repeated rows and can change a total from 17 to 12.</li>
+<li><strong>Measurement interval:</strong> The timed region a benchmark reports, here a <code>perf_counter</code> span around only the query.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>EXPLAIN returns database planning information; inspect it alongside actual result checks. perf_counter measures a declared interval, and a small repeated sample can report a median without hiding individual variability. Do not assert exact plan text or a guaranteed speed ordering across versions and machines. Materialization, refresh and read costs belong to the complete workload decision.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

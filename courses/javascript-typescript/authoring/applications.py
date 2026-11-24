@@ -1,6 +1,6 @@
 from render import add, ex
 
-NODE = "https://nodejs.org/download/release/v24.11.0/docs/api/"
+NODE = "https://nodejs.org/download/release/v24.22.3/docs/api/"
 TS = "https://www.typescriptlang.org/docs/handbook/2/"
 
 add(

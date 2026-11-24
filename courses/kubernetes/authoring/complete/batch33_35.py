@@ -235,11 +235,11 @@ If the candidate fails, retain its observations and restore the verified path. D
         ),
         (
             "Reject the failing candidate",
-            "Evaluate reviewer, reviewer, ERROR, reviewer against the four-response gate.",
-            "Failure with one error; do not proceed to promotion.",
-            "Count all attempted requests.",
-            "A finite negative result is actionable because it violates the declared rule. Retrying until four successes appear would change the experiment and conceal the failure rate observed during the original window.",
-            "Count all four attempts against the gate threshold, including the error.",
+            "Evaluate a new candidate sample, reviewer, reviewer, reviewer, TIMEOUT, where the fourth request ran past the declared deadline, against the four-response gate.",
+            "Failure: only three valid responses arrived within the deadline; do not proceed to promotion.",
+            "A late response counts as an error, not as a pass.",
+            "A finite negative result is actionable because it violates the declared rule. Waiting past the deadline for the fourth answer, or retrying until four successes appear, would change the experiment and conceal the failure rate observed during the original window.",
+            "Count all four attempts against the gate threshold, including the timed-out one.",
         ),
         (
             "Restore and verify stable traffic",
@@ -268,6 +268,7 @@ def main():
     assert selects(selector,{'app':'hello','release':'stable'})
     assert not selects(selector,{'app':'hello','release':'candidate'})
     assert not gate(['reviewer','reviewer','ERROR','reviewer'],'reviewer')
+    assert not gate(['reviewer','reviewer','reviewer','TIMEOUT'],'reviewer')
     assert gate(['hello']*4,'hello')
     print('k8s-034 synthetic selector and release gates passed; no live traffic changed')
 

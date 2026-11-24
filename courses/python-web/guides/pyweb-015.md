@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-014`.
 
 Flask exposes convenient context-local proxies such as `request`, `g` and `current_app`. Their values belong to active contexts, not ordinary module globals. This chapter allocates a tiny request resource, closes it after success and failure, and demonstrates that an application context alone does not create a request.
 
+## Key terms
+
+- **Application context:** The Flask context that makes `current_app` and `g` available; it can be pushed without any request.
+- **Request context:** The Flask context pushed for one request, which makes `request` and `session` available to code running during that request.
+- **g object:** A namespace that belongs to the application context and commonly holds a resource for the duration of one request.
+- **Teardown hook:** A function registered with `teardown_request` that runs after each request, successful or failed, and receives any exception so it can release resources.
+- **Context-local proxy:** An object such as `request` or `current_app` that refers to the value of the currently active context instead of a fixed module global.
+
 ## Mechanism: context ownership determines lifetime
 
 The application context makes application-related state available. The request context adds information about a particular request. A normal request pushes the relevant contexts, which is why `g` is often used for resources associated with that request. More precisely, `g` belongs to the application context; manually retaining an application context can give it a different lifetime.
@@ -25,6 +33,58 @@ This pattern can avoid repeatedly opening the same resource within one request. 
 The `/fail` route raises a deliberate RuntimeError. Testing mode propagates that exception to the caller, which catches the expected error. Teardown still runs and records the second resource as closed after a failure. The program checks the complete close record rather than assuming exceptions automatically clean up every library object.
 
 A separate application context allows access to `current_app`, but accessing `request.path` raises because there is no active request context. This makes the two boundaries observable. A background worker cannot safely reach back into a completed request by using the same proxy names; pass the necessary validated data explicitly.
+
+## Worked example: the order of request hooks on success and failure
+
+```python
+from flask import Flask, g
+
+app = Flask(__name__)
+log = []
+
+
+@app.before_request
+def before():
+    g.connection = "conn"
+    log.append("before")
+
+
+@app.after_request
+def after(response):
+    log.append(f"after {response.status_code}")
+    return response
+
+
+@app.teardown_request
+def teardown(error):
+    log.append(f"teardown {type(error).__name__ if error else None}")
+
+
+@app.get("/ok")
+def ok():
+    return {"connection": g.connection}
+
+
+@app.get("/boom")
+def boom():
+    raise KeyError("missing")
+
+
+client = app.test_client()
+for path in ("/ok", "/boom"):
+    log.clear()
+    status = client.get(path).status_code
+    print(path, status, log)
+```
+
+Expected output:
+
+```text
+/ok 200 ['before', 'after 200', 'teardown None']
+/boom 500 ['before', 'after 500', 'teardown KeyError']
+```
+
+Unlike the lesson, this application leaves `TESTING` off, so the unhandled `KeyError` was converted into a 500 response instead of propagating into the test. The hooks ran in the same order both times: `before_request`, then `after_request` on the response that was actually sent, then `teardown_request`. Only teardown received the original exception, which is why the lesson closes its resource there: `after_request` sees a 500 response object but not the `KeyError`, and it is skipped entirely when an exception escapes in testing mode. With `TESTING=True` the second request would raise `KeyError` in the caller and the log would end at teardown. Each request got its own `g`, so the connection stored on the first request was not visible on the second.
 
 ## Failure diagnosis
 

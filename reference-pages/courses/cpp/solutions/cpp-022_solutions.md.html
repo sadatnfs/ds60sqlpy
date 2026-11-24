@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>Portable serialization converts a value into a documented byte or text format. A filesystem path describes a location in the current platform, not a portable file format. Endianness is byte ordering in multi-byte values. A version marker lets a reader reject incompatible representations instead of silently misinterpreting them.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
-<p>A serializer chooses a representation that survives a different compiler or machine. The text v1, 7, 125 has a version, field order and unit interpretation; a raw struct dump has unspecified padding and platform-specific layout. A decoder must validate the version, exact field count, complete integer syntax and value ranges separately. The executable reference separates a shape-only illustration from decode, which also checks both integer conversions, full consumption and nonnegative ranges. The malformed suffix case must fail the full decoder even though its field count looks correct.</p>
+<p>A serializer chooses a representation that survives a different compiler or machine. The text <code>v1,7,125</code> has a version, field order and unit interpretation; a raw struct dump has unspecified padding and platform-specific layout. A decoder must validate the version, exact field count, complete integer syntax and value ranges separately. The executable reference separates a shape-only illustration from decode, which also checks both integer conversions, full consumption and nonnegative ranges. The malformed suffix case must fail the full decoder even though its field count looks correct.</p>
 <h3 id="paths-serialized-bytes-and-versioned-records">Paths, serialized bytes and versioned records<a class="heading-anchor" href="#paths-serialized-bytes-and-versioned-records" aria-label="Link to this section">#</a></h3>
 <p>A filesystem path describes a location; a serialized record describes data. Joining records and batch.csv with filesystem::path uses platform-aware path composition. It does not open the file, create directories or validate the record bytes. A .csv suffix is a naming convention, not a parser implementation or a guarantee about quoting and delimiters.</p>
-<p>The record format in this lesson is intentionally narrow: v1, id, cents with exactly three fields, decimal integer values and nonnegative domain constraints. The version tag is part of the data contract. A decoder should reject an unsupported version rather than guessing that a future format has the same meaning. A writer and reader can round-trip a value only when they agree on those details.</p>
-<p>Shape validation checks delimiters and field count; value validation checks each field&#x27;s full conversion and range. The reference contains both an introductory shape illustration and a strict decoder. A string such as v1, 7, 125x has the right number of fields but fails full numeric consumption. A negative amount can parse as an integer while failing the domain rule. Keep those reasons distinct when debugging.</p>
+<p>The record format in this lesson is intentionally narrow: <code>v1,&lt;id&gt;,&lt;cents&gt;</code> with exactly three fields, decimal integer values and nonnegative domain constraints. The version tag is part of the data contract. A decoder should reject an unsupported version rather than guessing that a future format has the same meaning. A writer and reader can round-trip a value only when they agree on those details.</p>
+<p>Shape validation checks delimiters and field count; value validation checks each field&#x27;s full conversion and range. The reference contains both an introductory shape illustration and a strict decoder. A string such as <code>v1,7,125x</code> has the right number of fields but fails full numeric consumption. A negative amount can parse as an integer while failing the domain rule. Keep those reasons distinct when debugging.</p>
 <p>Text serialization avoids some machine-layout hazards but still needs explicit rules for encoding, line endings, whitespace and maximum size. Writing the raw bytes of a C++ struct is not a portable substitute: padding, endianness, integer width and ABI layout can differ. Even on the same machine, uninitialized padding is not a stable public format.</p>
 <p>Path safety is also separate from grammar. A correctly parsed record can be written to the wrong location if the working directory or user-controlled path is misunderstood. The examples only construct a relative path and inspect filename/parent components. Actual file creation belongs to an owned host directory with explicit failure handling. Later lessons restrict identifiers before mapping them into filenames.</p>
 <h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
@@ -214,34 +214,34 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-keyword">auto</span> p <span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>filesystem<span class="syntax-operator">:</span><span class="syntax-operator">:</span>path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">records</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">batch.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected: The path joins components using platform rules; filename is batch.csv.</p>
 <h3 id="exercise-1-specify-the-wire-format">Exercise 1: Specify the wire format<a class="heading-anchor" href="#exercise-1-specify-the-wire-format" aria-label="Link to this section">#</a></h3>
-<p>Document v1, 7, 125 field order and units.</p>
+<p>Document the field order and units of <code>v1,7,125</code>.</p>
 <p><strong>Expected:</strong> Version v1, ID 7, cents 125, three fields.</p>
-<p><strong>Reasoning:</strong> Representation should be interpretable without the original struct.</p>
+<p><strong>Reasoning:</strong> A reader on another machine only has the bytes, so the document must fix the field order (version, ID, cents) and the unit (integer cents) that <code>decode</code> relies on; without it, <code>7</code> and <code>125</code> could be swapped or read as dollars.</p>
 <p><strong>Verify:</strong> Check your document against <code>encode(7, 125) == &quot;v1,7,125&quot;</code>: the version comes first, the ID second and the cents third, and the unit is named.</p>
 <h3 id="exercise-2-check-zero-values">Exercise 2: Check zero values<a class="heading-anchor" href="#exercise-2-check-zero-values" aria-label="Link to this section">#</a></h3>
 <p>Encode ID 0 and cents 0.</p>
-<p><strong>Expected:</strong> v1, 0, 0.</p>
-<p><strong>Reasoning:</strong> Zero must survive round-trip as data.</p>
+<p><strong>Expected:</strong> <code>v1,0,0</code>.</p>
+<p><strong>Reasoning:</strong> <code>std::to_string(0)</code> yields <code>&quot;0&quot;</code>, so the record is <code>v1,0,0</code> with all three fields present. A writer that skipped zero or empty values would change the field count and the strict decoder would reject its own output.</p>
 <p><strong>Verify:</strong> Assert <code>encode(0, 0) == &quot;v1,0,0&quot;</code>; zero values must still produce all three fields.</p>
 <h3 id="exercise-3-build-a-strict-decoder">Exercise 3: Build a strict decoder<a class="heading-anchor" href="#exercise-3-build-a-strict-decoder" aria-label="Link to this section">#</a></h3>
 <p>Require v1 and exactly three comma-separated fields.</p>
-<p><strong>Expected:</strong> v2, 7, 125 and v1, 7, 125, junk rejected.</p>
-<p><strong>Reasoning:</strong> Version and full-field-count checks prevent ambiguity.</p>
+<p><strong>Expected:</strong> <code>v2,7,125</code> and <code>v1,7,125,junk</code> rejected; <code>v1,7,125</code> accepted.</p>
+<p><strong>Reasoning:</strong> <code>v2,7,125</code> has the right shape but an unknown version, so only the version gate rejects it; <code>v1,7,125,junk</code> has a known version but four fields, so only the exact field count rejects it. Each check catches a case the other misses.</p>
 <p><strong>Verify:</strong> Assert your decoder rejects <code>&quot;v2,7,125&quot;</code> and <code>&quot;v1,7,125,junk&quot;</code> but accepts <code>&quot;v1,7,125&quot;</code> as ID 7 and 125 cents.</p>
 <h3 id="exercise-4-reject-raw-layout">Exercise 4: Reject raw layout<a class="heading-anchor" href="#exercise-4-reject-raw-layout" aria-label="Link to this section">#</a></h3>
 <p>Explain why writing sizeof(record) is not a portable format.</p>
 <p><strong>Expected:</strong> Padding, type width and byte order named.</p>
-<p><strong>Reasoning:</strong> A memory representation is not a schema.</p>
+<p><strong>Reasoning:</strong> A struct&#x27;s bytes include compiler-chosen padding, platform-dependent integer widths such as <code>long</code>, and the host byte order. None of these is written down for the reader, so the same <code>sizeof(record)</code> bytes can decode to different values on another compiler or machine.</p>
 <p><strong>Verify:</strong> Check that your explanation ties each hazard to a concrete case, for example <code>sizeof(long)</code> being 4 on 64-bit Windows but 8 on 64-bit Linux.</p>
 <h3 id="exercise-5-resolve-a-path">Exercise 5: Resolve a path<a class="heading-anchor" href="#exercise-5-resolve-a-path" aria-label="Link to this section">#</a></h3>
 <p>Print current_path and records/batch.csv absolute resolution in an owned directory.</p>
 <p><strong>Expected:</strong> Both anchor and resolved file documented.</p>
-<p><strong>Reasoning:</strong> Relative locations depend on the working directory.</p>
+<p><strong>Reasoning:</strong> <code>records/batch.csv</code> is resolved against <code>std::filesystem::current_path()</code> at run time, so the same program writes to different folders when launched from different directories; printing both paths shows which anchor was used.</p>
 <p><strong>Verify:</strong> Print <code>std::filesystem::current_path()</code> and <code>std::filesystem::absolute(&quot;records/batch.csv&quot;)</code>, and confirm the second path starts with the first.</p>
 <h3 id="exercise-6-transfer-versioning">Exercise 6: Transfer versioning<a class="heading-anchor" href="#exercise-6-transfer-versioning" aria-label="Link to this section">#</a></h3>
 <p>Design v2 with a fourth status field.</p>
 <p><strong>Expected:</strong> Explicit v2 reader or rejection, never v1 silent truncation.</p>
-<p><strong>Reasoning:</strong> Schema changes need compatibility decisions.</p>
+<p><strong>Reasoning:</strong> A v1 reader that ignored extra fields would decode <code>v2,7,125,paid</code> as ID 7 and 125 cents and silently drop the status. Rejecting unknown versions, or adding an explicit v2 reader, makes the compatibility decision visible instead of losing data.</p>
 <p><strong>Verify:</strong> Feed <code>&quot;v2,7,125,paid&quot;</code> to the v1 reader and confirm it is rejected rather than decoded as ID 7 and 125 cents; only the v2 reader may accept it.</p></article>
   </main>
 </body>

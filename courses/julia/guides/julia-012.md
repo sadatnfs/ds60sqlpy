@@ -10,6 +10,14 @@ Express useful type relationships without confusing subtype relations, storage r
 
 Open `julia-012` in `/classroom` with its prepared `julia` runtime. Worked case A (preserve the element representation) and worked case B (distinguish invariance from a method family) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-012: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Parametric type:** A type with parameters, such as `Point{T}`, where each concrete instance like `Point{Float64}` is a distinct type.
+- **where clause:** Syntax such as `where {T<:Real}` that introduces a type variable and bounds the types a method accepts.
+- **Parametric invariance:** A `Vector{Float64}` is not a subtype of `Vector{Real}`, even though `Float64` is a subtype of `Real`.
+- **AbstractVector:** The supertype of vectors, ranges and views, so methods annotated with it accept more containers than `Vector` does.
+- **Type stability:** A function is type stable when its argument types determine one concrete return type, which lets the compiler specialize it.
+
 ## A type parameter records a relationship
 
 A parametric type can represent the same structure with different element types. A record containing `Vector{T}` retains a relationship between its parameter and its stored elements. A parametric method can use that relationship to construct compatible accumulators or outputs.

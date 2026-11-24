@@ -8,6 +8,12 @@
     "optional stopping",
     "decision rule"
   ],
+  "key_terms": {
+    "Familywise error rate": "The probability of at least one false rejection among all tests in a declared family.",
+    "Bonferroni allocation": "Testing each of m hypotheses at alpha/m, which controls the familywise error rate by the union bound.",
+    "Alpha spending": "Allocating the error budget across planned interim analyses in advance.",
+    "Optional stopping": "Ending data collection when results look favorable, which inflates error unless the procedure accounts for it."
+  },
   "outcome": "Prespecify a family of comparisons and monitoring times, calculate conservative error control, and separate statistical evidence from release policy.",
   "verification": "A single comparison at the threshold rejects the null under the declared non-strict rule, none of three equal findings crosses the Bonferroni threshold, an overspent monitoring plan and an unknown result are rejected, and significance alone does not mandate deployment.",
   "level": "intermediate",
@@ -20,42 +26,78 @@
       "task": "Test one valid p-value 0.05 at alpha 0.05.",
       "expected": "The declared non-strict rule rejects.",
       "hint": "State whether equality is included.",
-      "answer": "With one prespecified comparison the threshold remains 0.05; this code uses <=."
+      "answer": "With one prespecified comparison the threshold remains 0.05; this code uses <=.",
+      "reasoning": {
+        "approach": "Call `bonferroni([0.05])` at the default alpha 0.05. With one comparison the threshold is alpha / 1 = 0.05.",
+        "why": "The decision rule is `p <= alpha / len(p)`. Since 0.05 <= 0.05 is true, the comparison rejects. The family has one member, so no multiplicity adjustment changes the threshold.",
+        "pitfall": "Using a strict `<` would fail to reject at exactly 0.05. Either convention can be defended, but it must match the written protocol; switching after seeing a boundary p-value changes the rule to fit the result.",
+        "verify": "The reference asserts `bonferroni([0.05]).tolist() == [True]`. Change the input to 0.0501 and confirm it returns `[False]`."
+      }
     },
     {
       "title": "Three equal findings",
       "task": "Use p-values 0.02,0.02,0.02.",
       "expected": "None crosses equal Bonferroni thresholds.",
       "hint": "Each allocation is approximately 0.0167.",
-      "answer": "Three nominal findings are not three adjusted findings under this family definition."
+      "answer": "Three nominal findings are not three adjusted findings under this family definition.",
+      "reasoning": {
+        "approach": "Call `bonferroni([0.02, 0.02, 0.02])`. The family has three members, so each threshold is 0.05 / 3, about 0.0167.",
+        "why": "Each p-value is 0.02, which is above 0.0167, so none is rejected. Each would pass a single unadjusted 0.05 test, but the family claim (at least one true effect, with family error at most 0.05) is not supported.",
+        "pitfall": "Reporting three significant improvements because each p-value is below 0.05 ignores that three tests were run. Worked case A shows the independent three-test family error is about 0.143, nearly three times the nominal rate.",
+        "verify": "The reference asserts `bonferroni([0.02, 0.02, 0.02]).tolist() == [False] * 3`. Worked case A's `[0.01, 0.03, 0.2]` rejects only 0.01."
+      }
     },
     {
       "title": "Overspend the budget",
       "task": "Allocate 0.03 and 0.03 while total alpha is 0.05.",
       "expected": "The monitoring plan is rejected.",
       "hint": "Validate budgets before observing results.",
-      "answer": "The advertised family bound requires the total allocation to remain within its declared budget."
+      "answer": "The advertised family bound requires the total allocation to remain within its declared budget.",
+      "reasoning": {
+        "approach": "Call `spent_decisions([0.1, 0.2], [0.03, 0.03])` with alpha 0.05. The validation computes `a.sum()` and compares it with alpha plus a small tolerance.",
+        "why": "The budgets add to 0.06, which exceeds 0.05. The plan's promise is that total false rejection probability across looks stays below alpha by the union bound; a 0.06 allocation breaks that bound before any data are examined.",
+        "pitfall": "Accepting the plan and just noting it is \"slightly over\" means the reported family guarantee is false. If more budget is needed for a later look, an earlier allocation must shrink so the total stays at 0.05.",
+        "verify": "The reference rejects `([0.1], [0.06])` as an overspent single look and fails with `Invalid monitoring plan accepted` otherwise. Worked case B shows a valid split, 0.01 + 0.015 + 0.025 = 0.05."
+      }
     },
     {
       "title": "Specify dependent looks",
       "task": "Explain whether the union bound requires independent tests.",
       "expected": "It does not; individual error bounds still need to hold.",
       "hint": "Separate the bound from the illustrative independent calculation.",
-      "answer": "The formula \\(1-(1-\\alpha)^m\\) uses independence; the union-bound inequality does not."
+      "answer": "The formula \\(1-(1-\\alpha)^m\\) uses independence; the union-bound inequality does not.",
+      "reasoning": {
+        "approach": "Write the two inequalities side by side. The union bound says the probability that any of m tests falsely rejects is at most the sum of their individual error rates. The formula 1 - (1 - alpha) to the power m gives the exact family error only for independent tests.",
+        "why": "Repeated looks at an accumulating evaluation are strongly dependent, since later data include earlier data. The union bound still holds because it makes no independence assumption; it only requires each look's own error rate to be at most its budget.",
+        "pitfall": "Using 1 - (1 - 0.05 / 3) cubed to justify the plan and then noting the looks are dependent is a mismatch. The independence formula is the illustrative calculation in case A, not the guarantee the monitoring plan relies on.",
+        "verify": "No assertion covers this task. Check your explanation by naming which inequality the `spent_decisions` budget check enforces (the sum, so the union bound) and noting it would remain valid for dependent looks."
+      }
     },
     {
       "title": "Unknown result",
       "task": "Replace a p-value with NaN.",
       "expected": "The decision function rejects it.",
       "hint": "Do not silently drop the row and reduce the family.",
-      "answer": "Unknown evidence requires an explicit incomplete assessment, not a smaller multiplicity correction."
+      "answer": "Unknown evidence requires an explicit incomplete assessment, not a smaller multiplicity correction.",
+      "reasoning": {
+        "approach": "Pass `[float(\"nan\")]` with budget `[0.01]` to `spent_decisions`. The guard `np.isfinite(p).all()` fails and the function raises.",
+        "why": "A missing p-value, such as from a failed job, is not evidence for or against an effect. Excluding it while keeping its budget elsewhere, or treating it as 1, both change the family the plan was written for.",
+        "pitfall": "Dropping the NaN and recomputing Bonferroni with a smaller m makes each remaining threshold larger, which raises the chance of rejection. Missing evidence would then make the test more permissive, the opposite of what is safe.",
+        "verify": "The reference includes `([float(\"nan\")], [0.01])` in the invalid list. Record the look as incomplete and rerun it rather than editing the family."
+      }
     },
     {
       "title": "Separate value from significance",
       "task": "A precise improvement is below the minimum useful effect.",
       "expected": "The statistical result alone does not mandate deployment.",
       "hint": "Use a declared practical margin and independent safety gates.",
-      "answer": "A release decision combines expected utility, uncertainty, constraints and costs; its logic must be recorded separately from a p-value."
+      "answer": "A release decision combines expected utility, uncertainty, constraints and costs; its logic must be recorded separately from a p-value.",
+      "reasoning": {
+        "approach": "Write down the estimated improvement, its interval, and the minimum useful effect, and compare the interval with that minimum. A very precise estimate can lie entirely below it.",
+        "why": "Statistical significance says the effect is probably not zero; it does not say the effect is large enough to justify migration cost, risk or latency. A release decision needs the size of the effect and the costs, not only the p-value.",
+        "pitfall": "Shipping because the result is significant is the mistake. With a large evaluation set, an improvement of 0.1 points can be highly significant and still not worth any operational change.",
+        "verify": "No assertion covers this task. Verify by recording the decision rule explicitly, for example \"ship if the lower interval bound exceeds 0.02 and no constraint fails,\" and checking the estimate against it separately from the p-value."
+      }
     }
   ],
   "sources": [

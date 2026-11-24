@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-client-and-backend-ports">Exercise 1: Predict client and backend ports.<a class="heading-anchor" href="#exercise-1-predict-client-and-backend-ports" aria-label="Link to this section">#</a></h3>
 <p>The two fields belong to different sides of the mapping. The app listener must match the resolved target.</p>
 <p><strong>Expected:</strong> Client 80 and backend 8080.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read port 80 from the Service and targetPort 8080 as the backend listener.</li>
+<li><strong>Why it is correct:</strong> Clients connect to the Service port, and kube-proxy forwards to the Pod&#x27;s targetPort, so the two values belong to different sides.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting the client to dial 8080 on the ClusterIP uses the backend port on the frontend side.</li>
+<li><strong>How to verify:</strong> The answer gives client 80 and backend 8080.</li>
+</ul>
 <h3 id="exercise-2-change-only-the-service-selector-in-a-synthetic-record">Exercise 2: Change only the Service selector in a synthetic record.<a class="heading-anchor" href="#exercise-2-change-only-the-service-selector-in-a-synthetic-record" aria-label="Link to this section">#</a></h3>
 <p>The Service object can remain valid. Controller-derived endpoint evidence reveals the mismatch.</p>
 <p><strong>Expected:</strong> The matching endpoint set becomes empty.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Change only the selector to a label no Pod carries and read the EndpointSlices.</li>
+<li><strong>Why it is correct:</strong> The EndpointSlice controller lists only Pods matching the selector, so the set becomes empty while the Service stays valid.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting the API server to reject the Service would miss that selectors are not checked against existing Pods.</li>
+<li><strong>How to verify:</strong> The endpoint set is empty, and the Service object still exists.</li>
+</ul>
 <h3 id="exercise-3-trace-a-fresh-tcp-request-through-the-service">Exercise 3: Trace a fresh TCP request through the Service.<a class="heading-anchor" href="#exercise-3-trace-a-fresh-tcp-request-through-the-service" aria-label="Link to this section">#</a></h3>
 <p>A connection-level path is more precise than saying the Service sends traffic to a Deployment.</p>
 <p><strong>Expected:</strong> Caller, virtual destination, chosen endpoint and listener are named.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name the caller, the ClusterIP destination, the endpoint kube-proxy selected and the Pod listener.</li>
+<li><strong>Why it is correct:</strong> kube-proxy picks one ready endpoint per new connection and rewrites the destination to that Pod and port.</li>
+<li><strong>Plausible wrong approach:</strong> Saying the Service sends traffic to the Deployment skips the per-connection endpoint choice.</li>
+<li><strong>How to verify:</strong> All four elements of the connection path are named.</li>
+</ul>
 <h3 id="exercise-4-diagnose-a-clusterip-with-no-ready-endpoints">Exercise 4: Diagnose a ClusterIP with no ready endpoints.<a class="heading-anchor" href="#exercise-4-diagnose-a-clusterip-with-no-ready-endpoints" aria-label="Link to this section">#</a></h3>
 <p>Allocation and backend eligibility are separate. A public load balancer would not fix an empty backend set.</p>
 <p><strong>Expected:</strong> Inspect selector matches and readiness before external routing.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check the selector against Pod labels, then check readiness of the matched Pods.</li>
+<li><strong>Why it is correct:</strong> A ClusterIP with no ready endpoints has nowhere to send connections, whichever external path reaches it.</li>
+<li><strong>Plausible wrong approach:</strong> Adding a LoadBalancer Service gives another entry point to the same empty backend set.</li>
+<li><strong>How to verify:</strong> The diagnosis starts at selector matches and readiness.</li>
+</ul>
 <h3 id="exercise-5-explain-why-http-path-routing-is-not-provided-by-this-service">Exercise 5: Explain why HTTP path routing is not provided by this Service.<a class="heading-anchor" href="#exercise-5-explain-why-http-path-routing-is-not-provided-by-this-service" aria-label="Link to this section">#</a></h3>
 <p>An HTTP-aware proxy needs a separate configuration and implementation. Keep transport and application routing distinct.</p>
 <p><strong>Expected:</strong> Layer 4 connection selection does not interpret URL paths.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Explain that a Service forwards by IP and port and never reads the HTTP request.</li>
+<li><strong>Why it is correct:</strong> Layer 4 selection happens at connection setup, before any URL path is sent, so path rules need an HTTP-aware proxy.</li>
+<li><strong>Plausible wrong approach:</strong> Adding paths to the Service spec has nowhere to go, because the Service API has no field for them.</li>
+<li><strong>How to verify:</strong> The answer points to an Ingress or Gateway style proxy for path routing.</li>
+</ul>
 <h3 id="exercise-6-design-a-stable-endpoint-for-replacing-pods">Exercise 6: Design a stable endpoint for replacing Pods.<a class="heading-anchor" href="#exercise-6-design-a-stable-endpoint-for-replacing-pods" aria-label="Link to this section">#</a></h3>
 <p>Verify replacement with UIDs when needed. Stable access does not mean the same Pod handled every request.</p>
-<p><strong>Expected:</strong> Clients use Service discovery while backend identities can change.</p></article>
+<p><strong>Expected:</strong> Clients use Service discovery while backend identities can change.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Have clients use the Service name, and record backend UIDs when replacement evidence is needed.</li>
+<li><strong>Why it is correct:</strong> The Service name and ClusterIP stay fixed while Pods behind them are replaced.</li>
+<li><strong>Plausible wrong approach:</strong> Treating stable access as proof one Pod handled every request ignores that backends can change.</li>
+<li><strong>How to verify:</strong> Clients use Service discovery, and backend UIDs are recorded separately.</li>
+</ul></article>
   </main>
 </body>
 </html>

@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Inspect syntax without evaluating untrusted text, implement a hygienic single-evaluation macro and call a precisely typed Linux C function.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-031</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (inspect and expand a bounded expression) and worked case B (count bytes through the actual C library) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-031: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Expr:</strong> The data structure for parsed Julia code, with a head symbol and a list of arguments, produced by quoting or <code>Meta.parse</code>.</li>
+<li><strong>Macro hygiene:</strong> Macro expansion renames the macro&#x27;s local variables, and <code>esc</code> marks code that must resolve in the caller&#x27;s scope.</li>
+<li><strong>Single evaluation:</strong> A macro binds each argument expression to a local once before reuse, so side effects are not repeated.</li>
+<li><strong>ccall:</strong> The built-in call into a compiled C function, whose declared argument and return types must match the C ABI signature.</li>
+<li><strong>Cstring:</strong> A <code>ccall</code> argument type that passes a zero-terminated pointer to a string&#x27;s UTF-8 bytes, so C <code>strlen</code> counts bytes.</li>
+</ul>
 <h3 id="code-can-be-represented-as-data">Code can be represented as data<a class="heading-anchor" href="#code-can-be-represented-as-data" aria-label="Link to this section">#</a></h3>
 <p>Julia represents many syntax forms as expressions. Quoting <code>:(1 + 2)</code> constructs a representation instead of immediately adding. <code>Meta.parse</code> converts a source string into syntax, but parsing alone does not validate its safety or intended meaning. Evaluating arbitrary parsed input can execute arbitrary program behavior. Configuration and learner records should remain data with a defined schema.</p>
 <p>Macros transform syntax before the resulting code executes. Ordinary functions receive evaluated argument values. Prefer a function when values are sufficient; macros add complexity around name resolution, evaluation count and source locations. A macro is useful when it must introduce control structure or inspect the caller&#x27;s expression.</p>

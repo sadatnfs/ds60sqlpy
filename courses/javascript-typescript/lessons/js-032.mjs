@@ -4,17 +4,17 @@
 // 'cd']), upper, sink);` to `await pipeline(Readable.from(['ab!', 'cd']), upper, sink);`.
 // Before running it, predict which check fails and which value it now sees; then run it and
 // restore the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.equal(output.join(''), 'ABCD')`. Restoring the original line brings back the
-// worked observation: ABCD after successful pipeline completion.
+// Expected: The changed run fails with an `AssertionError` at `assert.equal(output.join(''),
+// 'ABCD')`. Restoring `await pipeline(Readable.from(['ab', 'cd']), upper, sink);` brings
+// back: ABCD after successful pipeline completion.
 
 // Exercise 2: Observe false write and drain without guessing timing: debug a regression
 // A regression changed one token in Example B, so one line now reads `highWaterMark: 3,`.
 // Run Example B with that line, use the failing check to locate the defect and repair it
 // without changing the check.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.equal(sink.write(Buffer.from('ab')), false)`; after it the line reads
-// `highWaterMark: 2,` again and write returns false; drain follows release; stream finishes.
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.equal(sink.write(Buffer.from('ab')), false)`. Restoring `highWaterMark: 2,` brings
+// back: write returns false; drain follows release; stream finishes.
 
 // Exercise 3: Propagate a producer failure and destroy the sink
 // Use an async source that yields once then throws.

@@ -49,61 +49,61 @@ int main() {
 
 ### Exercise 1: Compile a fixed source
 
-**Inputs/evidence:** For cpp-002 Exercise 1, main.cpp with iostream include and int main.
+**Inputs/evidence:** Main.cpp with iostream include and int main.
 
-**Expected result/shape:** For cpp-002 Exercise 1, compilation and linking succeed; no syntax/link diagnostic.
+**Expected result/shape:** Compilation and linking succeed; no syntax/link diagnostic.
 
-**Verify:** For cpp-002 Exercise 1, record the actual compiler and status, not a copied transcript.
+**Verify:** Record the actual compiler and status, not a copied transcript.
 
 The target must list main.cpp. A successful process requires an executable from the current source, so preserve the build command and result separately from output.
 
 ### Exercise 2: Verify exact output
 
-**Inputs/evidence:** For cpp-002 Exercise 2, unmodified hello program.
+**Inputs/evidence:** Unmodified hello program.
 
-**Expected result/shape:** For cpp-002 Exercise 2, stdout hello, learner\n; empty stderr; exit 0.
+**Expected result/shape:** Stdout hello, learner\n; empty stderr; exit 0.
 
-**Verify:** For cpp-002 Exercise 2, compare bytes/line ending and status independently.
+**Verify:** Compare bytes/line ending and status independently.
 
 A screenshot containing hello is weaker than an exact line check. The explicit newline terminates the greeting, and an empty diagnostic stream avoids hiding an unrelated error.
 
 ### Exercise 3: Rebuild after a literal edit
 
-**Inputs/evidence:** For cpp-002 Exercise 3, same source except greeting literal.
+**Inputs/evidence:** Same source except greeting literal.
 
-**Expected result/shape:** For cpp-002 Exercise 3, stdout hello, reviewer\n after the new build.
+**Expected result/shape:** Stdout hello, reviewer\n after the new build.
 
-**Verify:** For cpp-002 Exercise 3, compare source edit, rebuild receipt and new output; do not run a stale executable.
+**Verify:** Compare source edit, rebuild receipt and new output; do not run a stale executable.
 
 Only the intended literal changes. If output remains old, first verify the target and build directory rather than editing several unrelated source lines.
 
 ### Exercise 4: Diagnose a missing semicolon
 
-**Inputs/evidence:** For cpp-002 Exercise 4, a deliberately invalid source copy.
+**Inputs/evidence:** A deliberately invalid source copy.
 
-**Expected result/shape:** For cpp-002 Exercise 4, nonzero compile result with a useful source location; no new successful run.
+**Expected result/shape:** Nonzero compile result with a useful source location; no new successful run.
 
-**Verify:** For cpp-002 Exercise 4, retain the compiler category, repair the semicolon and confirm a fresh build.
+**Verify:** Retain the compiler category, repair the semicolon and confirm a fresh build.
 
 The compiler may point at the following token because that is where the grammar becomes impossible. Read nearby source rather than matching a vendor-specific full message.
 
 ### Exercise 5: Inspect an intentional nonzero exit
 
-**Inputs/evidence:** For cpp-002 Exercise 5, stderr fixture rejected; return 2.
+**Inputs/evidence:** Stderr fixture rejected; return 2.
 
-**Expected result/shape:** For cpp-002 Exercise 5, nonzero runtime result 2 and the diagnostic; this is expected failure evidence.
+**Expected result/shape:** Nonzero runtime result 2 and the diagnostic; this is expected failure evidence.
 
-**Verify:** For cpp-002 Exercise 5, distinguish the successful build from failed execution.
+**Verify:** Distinguish the successful build from failed execution.
 
 The compiler accepts valid code that deliberately returns 2. That demonstrates why build success and program success must remain separate phases.
 
 ### Exercise 6: Verify the named CMake target
 
-**Inputs/evidence:** For cpp-002 Exercise 6, main.cpp and the supplied CMakeLists.txt.
+**Inputs/evidence:** Main.cpp and the supplied CMakeLists.txt.
 
-**Expected result/shape:** For cpp-002 Exercise 6, configure/build succeed and CTest executes one test named greeting.
+**Expected result/shape:** Configure/build succeed and CTest executes one test named greeting.
 
-**Verify:** For cpp-002 Exercise 6, retain all three phase results; if CMake/Ninja is absent label this check unavailable.
+**Verify:** Retain all three phase results; if CMake/Ninja is absent label this check unavailable.
 
 The fixed compiler worker can establish language execution but cannot claim it invoked CMake. The CMake target requires C++20 and registers a separate output-checking CTest test.
 

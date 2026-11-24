@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-036-transactions-and-isolation">apache-036: Transactions and isolation<a class="heading-anchor" href="#apache-036-transactions-and-isolation" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-034</code>, <code>apache-035</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Transactional producer:</strong> A producer with a transactional identifier that initializes, begins, sends, then commits or aborts, so records across partitions become visible together or not at all.</li>
+<li><strong>read_committed:</strong> A consumer isolation level that returns only records from committed transactions and skips aborted transactional data.</li>
+<li><strong>read_uncommitted:</strong> The isolation level under which a consumer also observes records from aborted transactions.</li>
+<li><strong>Control record:</strong> A marker the broker writes into a partition to record that a transaction committed or aborted.</li>
+<li><strong>Producer fencing:</strong> Rejecting an older producer instance that shares a transactional identifier with a newer one, so a stale instance cannot complete a transaction.</li>
+</ul>
 <h3 id="a-transaction-groups-specific-kafka-operations">A transaction groups specific Kafka operations<a class="heading-anchor" href="#a-transaction-groups-specific-kafka-operations" aria-label="Link to this section">#</a></h3>
 <p>Kafka transactions let a producer write records across partitions and make their committed visibility depend on one transaction outcome. A transactional producer initializes its identity, begins a transaction, sends records, then commits or aborts. Consumers choose an isolation level. A read_committed consumer excludes aborted transactional data; a read_uncommitted consumer can observe records from aborted transactions.</p>
 <p>This guarantee has a defined scope. It does not automatically include a write to an unrelated SQL database, an HTTP side effect, a file in a separate store or a human&#x27;s interpretation of a duplicate business operation. A consume-transform-produce workflow can include consumer offsets in the Kafka transaction when implemented with the appropriate APIs, but that is different from simply calling commitSync on a separate consumer.</p>

@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "track_id": "jax",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "jax-001",
+      "title": "A linear predictor and its mean squared error in JAX",
+      "anchor": "reference",
+      "source_path": "courses/jax/solutions/jax-001_solution.py",
+      "source_sha256": "e197330c7d0b227ff3c025f4581a80591a9bcf389c6c5fd5a6c176d086aee279",
+      "expected_output": ["jax-001: 8 asserted cases passed"],
+      "steps": [
+        {
+          "lines": [5, 15],
+          "excerpt": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\n\n# Choose precision before creating arrays; the usual JAX default is 32 bit.\njax.config.update(\"jax_enable_x64\", True)\n\n\ndef close(actual, expected, *, atol=1e-10, rtol=1e-10):\n    np.testing.assert_allclose(np.asarray(actual), expected, atol=atol, rtol=rtol)",
+          "title": "Imports, precision and a comparison helper",
+          "explanation": "jax.numpy mirrors the NumPy API but runs through JAX so functions can be differentiated and compiled. jax_enable_x64 switches JAX to 64 bit floats; it must be set before any array is created because JAX defaults to 32 bit. close wraps NumPy's assert_allclose so every check compares against an expected value within a tiny tolerance.",
+          "observe": "np.asarray converts a JAX array to NumPy before comparing."
+        },
+        {
+          "lines": [18, 25],
+          "excerpt": "def predict(weight, inputs):\n    return weight * inputs\n\n\ndef mse(weight, inputs, targets):\n    if inputs.ndim != 1 or inputs.shape != targets.shape or inputs.size == 0:\n        raise ValueError(\"one nonempty target per input\")\n    return jnp.mean((predict(weight, inputs) - targets) ** 2)",
+          "title": "Predict and measure error",
+          "explanation": "predict multiplies every input by a single weight. mse first checks that inputs are a nonempty 1D array with exactly one target per input, then averages the squared differences between predictions and targets.",
+          "observe": "A shape mismatch raises ValueError before any arithmetic runs."
+        },
+        {
+          "lines": [28, 35],
+          "excerpt": "x = jnp.array([1.0, 2.0, 3.0])\ny = 2 * x\n\n\ndef main():\n    # Case 1: A hand-calculated loss\n    close(predict(0.0, x), [0.0, 0.0, 0.0])\n    close(mse(0.0, x, y), 56 / 3)",
+          "title": "Case 1: a loss you can check by hand",
+          "explanation": "The targets are y = 2x, so the true weight is 2. With weight 0 every prediction is 0, and the squared errors are 4, 16 and 36. Their mean is 56 divided by 3.",
+          "observe": "Hand calculations make the first check easy to trust."
+        },
+        {
+          "lines": [37, 43],
+          "excerpt": "    # Case 2: A plausible shape mistake\n    try:\n        mse(0.0, x, y[:, None])\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"shape mismatch accepted\")",
+          "title": "Case 2: a plausible shape mistake",
+          "explanation": "y[:, None] turns targets into a 3 by 1 column. Subtracting a column from a row would broadcast to 3 by 3 and give a wrong number without any error, so mse refuses the mismatched shape.",
+          "observe": "try, except, else turns a missing error into a test failure."
+        },
+        {
+          "lines": [45, 53],
+          "excerpt": "    # Case 3: Trace another predictor\n    close(predict(1.0, x), [1.0, 2.0, 3.0])\n    close(mse(1.0, x, y), 14 / 3)\n\n    # Case 4: Construct an exact fit\n    close(mse(2.0, x, y), 0.0)\n\n    # Case 5: Change the target\n    close(mse(2.0, x, jnp.array([2.0, 4.0, 7.0])), 1 / 3)",
+          "title": "Cases 3 to 5: other weights and targets",
+          "explanation": "Weight 1 halves the error at each point, giving 14 over 3. Weight 2 fits exactly, so the loss is 0. Changing one target to 7 leaves one error of 1, so the mean is one third.",
+          "observe": "The loss responds exactly as the arithmetic predicts."
+        },
+        {
+          "lines": [55, 65],
+          "excerpt": "    # Case 6: Reject missing observations\n    try:\n        mse(0.0, jnp.array([]), jnp.array([]))\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"empty loss accepted\")\n\n    # Case 7: Separate sum from mean\n    close(jnp.sum((0.0 * x - y) ** 2), 56.0)\n    close(3 * mse(0.0, x, y), 56.0)",
+          "title": "Cases 6 and 7: empty data and sum versus mean",
+          "explanation": "An empty input has no mean, so mse raises. The summed squared error is 56, which equals 3 times the mean, a reminder to always say which reduction a reported loss uses.",
+          "observe": "Sum and mean differ by the number of examples."
+        },
+        {
+          "lines": [67, 74],
+          "excerpt": "    # Case 8: Transfer to new inputs\n    close(predict(2.0, jnp.array([4.0, 5.0])), [8.0, 10.0])\n\n    print(\"jax-001: 8 asserted cases passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Case 8: predict on new inputs, then print",
+          "explanation": "Once the weight is 2, predictions for 4 and 5 are 8 and 10. main prints its marker only after every assertion has passed.",
+          "observe": "The output is jax-001: 8 asserted cases passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "jax-008",
+      "title": "Forward and reverse mode derivatives with jvp and vjp",
+      "anchor": "reference",
+      "source_path": "courses/jax/solutions/jax-008_solution.py",
+      "source_sha256": "3bd2e2778561d04e84366fb58c263bda5e72fc9eeb0bc679aadc23365502a038",
+      "expected_output": ["jax-008: 8 asserted cases passed"],
+      "steps": [
+        {
+          "lines": [5, 16],
+          "excerpt": "import math\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\n\n# Choose precision before creating arrays; the usual JAX default is 32 bit.\njax.config.update(\"jax_enable_x64\", True)\n\n\ndef close(actual, expected, *, atol=1e-10, rtol=1e-10):\n    np.testing.assert_allclose(np.asarray(actual), expected, atol=atol, rtol=rtol)",
+          "title": "Imports, precision and a comparison helper",
+          "explanation": "jax.numpy mirrors the NumPy API but runs through JAX so functions can be differentiated and compiled. jax_enable_x64 switches JAX to 64 bit floats; it must be set before any array is created because JAX defaults to 32 bit. close wraps NumPy's assert_allclose so every check compares against an expected value within a tiny tolerance.",
+          "observe": "All later checks rely on close."
+        },
+        {
+          "lines": [19, 25],
+          "excerpt": "def function(value):\n    a, b = value\n    return jnp.stack((a * a, a * b, jnp.sin(b)))\n\n\npoint = jnp.array([2.0, 0.0])\njacobian = jnp.array([[4.0, 0.0], [0.0, 2.0], [0.0, 1.0]])",
+          "title": "A function with two inputs and three outputs",
+          "explanation": "function maps (a, b) to a squared, a times b and sin of b. jnp.stack gathers the three outputs into one array. jacobian is the hand computed table of partial derivatives at the point (2, 0): one row per output, one column per input.",
+          "observe": "The Jacobian is a 3 by 2 matrix."
+        },
+        {
+          "lines": [28, 32],
+          "excerpt": "def main():\n    # Case 1: Push one input direction\n    value, tangent = jax.jvp(function, (point,), (jnp.array([3.0, 4.0]),))\n    close(value, [4.0, 0.0, 0.0])\n    close(tangent, [12.0, 8.0, 4.0])",
+          "title": "Case 1: forward mode pushes a direction",
+          "explanation": "jax.jvp evaluates the function and also the Jacobian times an input direction, without building the whole matrix. Pushing the direction (3, 4) through gives (12, 8, 4).",
+          "observe": "jvp returns the value and the tangent together."
+        },
+        {
+          "lines": [34, 37],
+          "excerpt": "    # Case 2: Pull back an output weighting\n    value, pullback = jax.vjp(function, point)\n    (input_cotangent,) = pullback(jnp.array([1.0, 2.0, 3.0]))\n    close(input_cotangent, [4.0, 7.0])",
+          "title": "Case 2: reverse mode pulls back a weighting",
+          "explanation": "jax.vjp returns the value and a pullback function. Calling pullback with a weight per output returns the transposed Jacobian times those weights. This is the operation behind backpropagation, efficient when there are many inputs and few outputs.",
+          "observe": "The result is (4, 7)."
+        },
+        {
+          "lines": [39, 51],
+          "excerpt": "    # Case 3: Probe the first input coordinate\n    close(jax.jvp(function, (point,), (jnp.array([1.0, 0.0]),))[1], [4.0, 0.0, 0.0])\n\n    # Case 4: Probe the second output coordinate\n    _, back = jax.vjp(function, point)\n    close(back(jnp.array([0.0, 1.0, 0.0]))[0], [0.0, 2.0])\n\n    # Case 5: Check duality\n    v, u = jnp.array([3.0, 4.0]), jnp.array([1.0, 2.0, 3.0])\n    jv = jax.jvp(function, (point,), (v,))[1]\n    _, back = jax.vjp(function, point)\n    close(jnp.vdot(u, jv), 40.0)\n    close(jnp.vdot(v, back(u)[0]), 40.0)",
+          "title": "Cases 3 to 5: probe columns, rows and duality",
+          "explanation": "A unit input direction reads one column of the Jacobian, and a unit output weighting reads one row. Case 5 checks that u dot (J v) equals v dot (J transpose u); both are 40, which confirms the two modes agree.",
+          "observe": "Duality is a good sanity check for any derivative code."
+        },
+        {
+          "lines": [53, 56],
+          "excerpt": "    # Case 6: Check a directional finite difference\n    direction, h = jnp.array([3.0, 4.0]), 1e-5\n    finite = (function(point + h * direction) - function(point - h * direction)) / (2 * h)\n    close(finite, jacobian @ direction, atol=1e-8, rtol=0.0)",
+          "title": "Case 6: compare with finite differences",
+          "explanation": "A central finite difference estimates the derivative by evaluating the function slightly ahead and behind along a direction. It should match the Jacobian times the direction, within a looser tolerance because finite differences are approximate.",
+          "observe": "Tolerance 1e-8 allows for truncation error."
+        },
+        {
+          "lines": [58, 71],
+          "excerpt": "    # Case 7: Change the point\n    close(\n        jax.jacfwd(function)(jnp.array([1.0, 1.0])), [[2.0, 0.0], [1.0, 1.0], [0.0, math.cos(1.0)]]\n    )\n\n    # Case 8: Recover a scalar gradient\n    weights = jnp.array([1.0, 2.0, 3.0])\n    close(jax.grad(lambda z: jnp.vdot(weights, function(z)))(point), [4.0, 7.0])\n\n    print(\"jax-008: 8 asserted cases passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Cases 7 and 8: full Jacobian and a scalar gradient",
+          "explanation": "jax.jacfwd builds the full Jacobian at a new point, including cos(1) for the sine output. Wrapping the outputs in a weighted sum gives a scalar, and jax.grad of that scalar equals the vjp result from case 2. main prints the marker.",
+          "observe": "The output is jax-008: 8 asserted cases passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "jax-019",
+      "title": "Solving linear systems and differentiating through the solve",
+      "anchor": "reference",
+      "source_path": "courses/jax/solutions/jax-019_solution.py",
+      "source_sha256": "6b6257983709af55593597cc2c9991ffc8946fe8fa5d76bc58c7cc971414ba7c",
+      "expected_output": ["jax-019: 8 asserted cases passed"],
+      "steps": [
+        {
+          "lines": [5, 19],
+          "excerpt": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\n\n# Choose precision before creating arrays; the usual JAX default is 32 bit.\njax.config.update(\"jax_enable_x64\", True)\n\n\ndef close(actual, expected, *, atol=1e-10, rtol=1e-10):\n    np.testing.assert_allclose(np.asarray(actual), expected, atol=atol, rtol=rtol)\n\n\nmatrix = jnp.array([[3.0, 1.0], [1.0, 2.0]])\nright = jnp.array([9.0, 8.0])",
+          "title": "Setup, a small system and its right hand side",
+          "explanation": "jax.numpy mirrors the NumPy API but runs through JAX so functions can be differentiated and compiled. jax_enable_x64 switches JAX to 64 bit floats; it must be set before any array is created because JAX defaults to 32 bit. close wraps NumPy's assert_allclose so every check compares against an expected value within a tiny tolerance. matrix and right define the system A x = b.",
+          "observe": "The matrix is symmetric and well conditioned."
+        },
+        {
+          "lines": [22, 30],
+          "excerpt": "def admitted_matrix(value):\n    condition = np.linalg.cond(np.asarray(value))\n    if not np.isfinite(condition) or condition > 1e10:\n        raise ValueError(\"matrix outside the declared conditioning policy\")\n\n\ndef parameter_solution(theta):\n    a = jnp.diag(jnp.array([2.0 + theta, 3.0]))\n    return jnp.linalg.solve(a, jnp.array([2.0, 6.0]))",
+          "title": "Admission policy and a parameterized solve",
+          "explanation": "admitted_matrix computes the condition number, which measures how much small input errors can be amplified. Matrices that are singular or worse than 1e10 are rejected. parameter_solution solves a diagonal system whose first entry depends on theta, so derivatives with respect to theta can be checked.",
+          "observe": "At theta 0 the solution is (1, 2)."
+        },
+        {
+          "lines": [33, 38],
+          "excerpt": "def main():\n    # Case 1: Check a solve by its equation\n    admitted_matrix(matrix)\n    solution = jnp.linalg.solve(matrix, right)\n    close(solution, [2.0, 3.0])\n    close(matrix @ solution - right, [0.0, 0.0])",
+          "title": "Case 1: check a solve by its equation",
+          "explanation": "jnp.linalg.solve finds x without forming an inverse, which is faster and more accurate. The residual A x minus b should be zero, which is a stronger check than comparing x alone.",
+          "observe": "The solution is (2, 3) and the residual is (0, 0)."
+        },
+        {
+          "lines": [40, 49],
+          "excerpt": "    # Case 2: Differentiate a controlled matrix change\n    close(parameter_solution(0.0), [1.0, 2.0])\n    close(jax.grad(lambda theta: parameter_solution(theta).sum())(0.0), -0.5)\n\n    # Case 3: Change the right-hand side\n    close(jnp.linalg.solve(matrix, jnp.array([4.0, 3.0])), [1.0, 1.0])\n\n    # Case 4: Differentiate with respect to b\n    gradient = jax.grad(lambda b: jnp.linalg.solve(matrix, b).sum())(right)\n    close(gradient, [0.2, 0.4])",
+          "title": "Cases 2 to 4: differentiate through solve",
+          "explanation": "jax.grad works through jnp.linalg.solve. Increasing theta increases the first diagonal entry, so the first component 2 over (2 + theta) shrinks with slope -0.5. Differentiating the sum of the solution with respect to b gives the solution of A transpose g = 1.",
+          "observe": "Case 4 confirms A transpose times the gradient is (1, 1)."
+        },
+        {
+          "lines": [52, 63],
+          "excerpt": "    # Case 5: Reject a singular fixture\n    try:\n        admitted_matrix(jnp.array([[1.0, 2.0], [2.0, 4.0]]))\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"singular matrix admitted\")\n\n    # Case 6: Check the sensitivity numerically\n    h = 1e-5\n    finite = (parameter_solution(h).sum() - parameter_solution(-h).sum()) / (2 * h)\n    close(finite, -0.5, atol=1e-8, rtol=0.0)",
+          "title": "Cases 5 and 6: reject a singular matrix and confirm numerically",
+          "explanation": "The second row of [[1, 2], [2, 4]] is twice the first, so it has no unique solution and the policy rejects it. A central finite difference confirms the derivative -0.5 from case 2.",
+          "observe": "The singular fixture raises ValueError."
+        },
+        {
+          "lines": [65, 69],
+          "excerpt": "    # Case 7: Interpret ridge regularization\n    x = jnp.array([[1.0], [2.0], [3.0]])\n    y = 2 * x[:, 0]\n    ridge = jnp.linalg.solve(x.T @ x + 14 * jnp.eye(1), x.T @ y)\n    close(ridge, [1.0])",
+          "title": "Case 7: ridge regularization",
+          "explanation": "Ridge regression solves (X transpose X + lambda I) w = X transpose y. Here X transpose X is 14 and X transpose y is 28, so adding lambda 14 shrinks the fitted weight from 2 to 1.",
+          "observe": "Regularization pulls the weight toward zero."
+        },
+        {
+          "lines": [71, 81],
+          "excerpt": "    # Case 8: Compile a valid solve\n    compiled = jax.jit(jnp.linalg.solve)\n    solution = compiled(matrix, right)\n    close(solution, [2.0, 3.0])\n    close(matrix @ solution, right)\n\n    print(\"jax-019: 8 asserted cases passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Case 8: compile the solve",
+          "explanation": "jax.jit compiles jnp.linalg.solve with XLA. The compiled function returns the same answer, which is checked both directly and through the residual. main prints the marker.",
+          "observe": "The output is jax-019: 8 asserted cases passed."
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-005`, `web-002`.
 
 A string can be valid application data while containing characters meaningful to HTML. Templates must preserve the intended distinction between text and markup. This chapter uses real Jinja rendering through Flask and then examines a separate URL-selection boundary.
 
+## Key terms
+
+- **Jinja template:** A text file with placeholders and control statements that Flask renders into HTML by inserting values from the view.
+- **Autoescaping:** A template setting that converts characters such as `<`, `>` and `&` in inserted values into HTML entities so the browser displays them as text.
+- **Markup:** A string type that tells Jinja a value is trusted HTML and must not be escaped; only author-owned constants should receive it.
+- **Output context:** The place a value is inserted, such as HTML text, an attribute, JavaScript, CSS or a URL, each with its own interpretation and escaping rules.
+- **Destination allowlist:** A fixed mapping from accepted names to known local paths, used instead of treating a client-supplied string as a ready-to-use URL.
+
 ## Mechanism: escaping depends on the output context
 
 The template places a title inside an HTML heading. Jinja's HTML autoescaping converts characters such as `<` and `>` into their text representations so the browser does not interpret them as element syntax. The example also includes one author-owned constant marked as trusted `Markup` to show the explicit boundary between text and intended markup.
@@ -27,6 +35,30 @@ A useful habit is to trace the origin of each template value. A literal in trust
 The link endpoint supports the names `home` and `help`. A request for `help` produces the known local path `/help`. A request containing a JavaScript-style destination is not an allowlisted name and returns 400. There is no attempt to make that arbitrary URL safe by escaping it into an attribute.
 
 This small mapping is appropriate when the product offers a finite set of navigation choices. Applications that truly accept arbitrary URLs need a more complete scheme, host and normalization policy. Keeping the product's actual requirements narrow can make the implementation easier to review.
+
+## Worked example: where autoescaping applies and where it does not
+
+```python
+from flask import Flask, render_template_string
+
+app = Flask(__name__)
+title = '"><img src=x onerror=alert(1)>'
+
+with app.app_context():
+    print(render_template_string("<h1>{{ t }}</h1>", t=title))
+    print(render_template_string("<h1>{{ t|safe }}</h1>", t=title))
+    print(render_template_string('<a title="{{ t }}">x</a>', t=title))
+```
+
+Expected output:
+
+```text
+<h1>&#34;&gt;&lt;img src=x onerror=alert(1)&gt;</h1>
+<h1>"><img src=x onerror=alert(1)></h1>
+<a title="&#34;&gt;&lt;img src=x onerror=alert(1)&gt;">x</a>
+```
+
+Jinja escaped the hostile title in the element body and inside a quoted attribute, turning `"`, `<` and `>` into entities so the browser would display the text instead of building an `img` element. The middle line shows the cost of `|safe`: the filter marks the value as trusted markup, so the injected tag is emitted verbatim and would run its `onerror` handler. That is why the lesson only wraps a fixed, author-owned literal in `Markup`. Escaping still does not make a URL safe: a value such as `javascript:alert(1)` contains no characters to escape, so placing it in `href` would remain dangerous, which is the reason the lesson maps destination names to an allowlist of paths.
 
 ## Failure diagnosis
 

@@ -62,7 +62,7 @@ def run_parquet(spark, input_path, checkpoint, output):
     OWNED_QUERIES.append(query)
     try:
         if not query.awaitTermination(45):
-            raise TimeoutError("Finite query exceeded45-second deadline")
+            raise TimeoutError("Finite query exceeded 45-second deadline")
         if query.exception() is not None:
             raise RuntimeError(str(query.exception()))
         progress = query.recentProgress
@@ -130,7 +130,7 @@ def measured(spark, source, partitions, root):
     import time
 
     if type(partitions) is not int or not 1 <= partitions <= 8:
-        raise ValueError("Partition budget1..8")
+        raise ValueError("Partition budget 1..8")
     group = f"budget-{partitions}-{uuid.uuid4().hex}"
     previous = spark.conf.get("spark.sql.shuffle.partitions")
     spark.conf.set("spark.sql.shuffle.partitions", str(partitions))
@@ -235,7 +235,7 @@ def main():
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
         if spark.version != "4.0.1":
-            raise ValueError("Prepared Spark4.0.1 required")
+            raise ValueError("Prepared Spark 4.0.1 required")
         spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
         owned_root = Path(tempfile.mkdtemp(prefix="spark-039-", dir=Path.cwd()))
         source = spark.range(0, 20000, 1, 4).withColumn(

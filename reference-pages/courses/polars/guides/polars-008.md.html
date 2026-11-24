@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A wide table stores repeated measurements in separate columns, while a long table stores the measurement label as a value in a column. Neither representation is inherently more correct. The useful question is which grain makes the intended operation explicit. A before/after comparison can be wide for a paired difference and long for grouped summaries or visual encodings.</p>
 <p>Reshaping needs an identity contract. In the worked example, the pair (id, period) identifies one measurement in the long table. A pivot can reconstruct the original wide table only when that cell identity is unique, or when an explicit aggregation defines how duplicates should combine. Asking a pivot to choose an arbitrary record hides an unresolved data-model question.</p>
 <p>Round-trip tests are useful but bounded. Reconstructing the original fixture proves preservation for those columns and values under the selected schema. It does not establish that every real-world duplicate represents an additive measurement, or that missing periods should be filled with zero. Preserve identifiers and distinguish an absent measurement from a measured zero.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>unpivot:</strong> The wide-to-long reshape that keeps <code>index</code> identity columns and turns the <code>on</code> columns into variable and value pairs.</li>
+<li><strong>pivot:</strong> The long-to-wide reshape that spreads <code>values</code> into one column per <code>on</code> value for each <code>index</code> key.</li>
+<li><strong>Compound key:</strong> Several columns, such as id and period, that together identify one cell.</li>
+<li><strong>Cell uniqueness:</strong> The requirement that each index and column pair has one value; otherwise an explicit aggregation must define how duplicates combine.</li>
+<li><strong>Round trip:</strong> Reshaping long to wide and back, then checking that the original rows are recovered.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>unpivot names index columns that remain identifiers, the columns converted into long values, and the variable/value output names. pivot names the column whose values become output column names, the row identifier and the measurement column. Use select to restore a deliberate column order and sort to restore a deliberate row order before comparing tables.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

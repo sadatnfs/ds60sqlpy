@@ -39,6 +39,17 @@ internal static class Program {
       Check(rejected, "domain rejects empty identity");
     }
     {
+      // Task 2: Guided modification
+      var utc = TimeSpan.Zero;
+      var instant = new DateTimeOffset(2025, 6, 15, 9, 30, 0, utc);
+      var service = new StampService(new FixedClock(instant));
+      string stamp = service.Stamp("order-7");
+      string expected = "2025-06-15T09:30:00.0000000+00:00:order-7";
+      Check(stamp == expected, "predicted stamp");
+      var epoch = new StampService(new FixedClock(DateTimeOffset.UnixEpoch));
+      Check(epoch.Stamp("order-7") != stamp, "only the clock changed");
+    }
+    {
       // Task 3: Independent construction
       (int Total, int Rejected) Aggregate(IEnumerable<int> quantities) {
         int total = 0;
@@ -54,6 +65,30 @@ internal static class Program {
       }
       var result = Aggregate(new[] { 2, -1, 3 });
       Check(result.Total == 5 && result.Rejected == 1, "core aggregation");
+    }
+    {
+      // Task 5: Boundary evidence
+      var utc = TimeSpan.Zero;
+      var edge = new DateTimeOffset(2024, 12, 31, 23, 59, 59, utc);
+      var service = new StampService(new FixedClock(edge));
+      string yearEnd = "2024-12-31T23:59:59.0000000+00:00:a";
+      Check(service.Stamp("a") == yearEnd, "year end");
+      var next = new StampService(new FixedClock(edge.AddSeconds(1)));
+      string newYear = "2025-01-01T00:00:00.0000000+00:00:a";
+      Check(next.Stamp("a") == newYear, "next second is next year");
+      var plusTwo = edge.ToOffset(TimeSpan.FromHours(2));
+      var local = new StampService(new FixedClock(plusTwo));
+      string shifted = "2025-01-01T01:59:59.0000000+02:00:a";
+      Check(local.Stamp("a") == shifted, "same instant, next date");
+      bool Rejects(string id) {
+        try {
+          service.Stamp(id);
+          return false;
+        } catch (ArgumentException) {
+          return true;
+        }
+      }
+      Check(Rejects("") && Rejects("   "), "blank identity rejected");
     }
     Console.WriteLine("csharp-040: passed");
     await Task.CompletedTask;

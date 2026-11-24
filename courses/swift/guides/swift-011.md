@@ -122,7 +122,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Return two related counts) before changing anything, and confirm its observation: Named tuple fields expose the accounting relationship.
 2. Compare Example B (Model distinct outcomes) with Example A and name the first line whose behavior differs. Its observation is: Each outcome exposes only its own meaningful payload.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An enum raw value and an associated value solve different problems.
+3. Before opening the explanation, check your task 3 attempt (Model loading, ready and failed states with an enum) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

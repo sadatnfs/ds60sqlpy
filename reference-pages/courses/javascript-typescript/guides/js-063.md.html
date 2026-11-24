@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A choropleth colors geographic regions according to a value. The map’s geometry and the statistical table usually come from different sources, so they must be joined by a stable identifier. A display name is often a weak key because spelling, language and boundary definitions can change.</p>
 <p>Raw counts often track population or exposure rather than the phenomenon of interest. A rate divides an event count by a relevant denominator, such as eligible people or observation time. The denominator must match the numerator’s geography, period and population. A beautiful map cannot repair a mismatched denominator.</p>
 <p>Missing data needs its own visual state. A region with no measurement is not equivalent to a measured zero. Keep an explicit missing color or pattern, a legend and a table. Be cautious about ecological inference: a region-level association does not necessarily describe individuals within that region.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Choropleth:</strong> A map that fills each region with a color representing a value for that region.</li>
+<li><strong>Rate:</strong> An event count divided by a matching denominator, such as eligible people, for the same geography, period and population.</li>
+<li><strong>Geographic join:</strong> Matching map features to statistical rows through a stable region ID and reporting unmatched features and rows.</li>
+<li><strong>Missing data:</strong> A region without a measurement, drawn with its own color or pattern and legend entry so it is not confused with a measured zero.</li>
+<li><strong>Ecological inference:</strong> Drawing conclusions about individuals from associations measured only at the region level, which aggregated data cannot support.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Create a Map from stable region ID to validated data, then look up each feature’s ID. Validate duplicate statistical IDs and report unmatched features and rows. Compute rates only for positive valid denominators. Choose a sequential scale for nonnegative ordered rates and explain its domain.</p>
 <p>The reference uses synthetic planar regions with <code>geoIdentity</code>, so the lesson isolates join and rate logic without introducing a global projection. It includes one missing region deliberately. This is a map-like teaching fixture, not a real-world geographic claim.</p>

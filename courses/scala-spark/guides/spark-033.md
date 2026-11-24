@@ -8,7 +8,7 @@ Advanced; approximately 105 minutes. Direct prerequisites: `spark-032`. The prep
 
 ## How to run this lesson
 
-Open `spark-033` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-033` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-033.scala) and [PySpark learner](../lessons/spark-033.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-033_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-033_solution.scala) and [PySpark reference](../solutions/spark-033_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -55,9 +55,7 @@ All source files are atomically published under fresh owned scratch, each phase 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import org.apache.spark.sql.streaming.{StreamingQueryProgress, Trigger}
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
@@ -84,20 +82,7 @@ val batches = Seq(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -183,7 +168,7 @@ Filter accepted identities, drop the reason field, attach a five-minute watermar
 
 Run both first-phase branches with AvailableNow: deduplicated records to accepted-output and missing-ID records to quarantine-output. Use distinct checkpoints and bounded await/stop scopes.
 
-**Expected result/shape:** Accepted(e1, delivery 1,10), (e2, delivery 2,10); quarantine(delivery 3, NULL, missing_event_id). The raw source has 3 rows; prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.
+**Expected result/shape:** `Accepted(e1, delivery 1, 10)`, `(e2, delivery 2, 10)`; quarantine (delivery 3, NULL, missing_event_id). The raw source has 3 rows; prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.
 
 **Verify:** Assert both exact output populations, branch metrics 2/1 and an independent raw batch-source count 3.
 
@@ -193,7 +178,7 @@ Run both first-phase branches with AvailableNow: deduplicated records to accepte
 
 Publish the second file after the first phase terminates and run both compatible branches again. Compare the accepted business identities and their total.
 
-**Expected result/shape:** Accepted(e1, delivery 1,10), (e2, delivery 2,10), (e3, delivery 5,10); delivery 4 replay contributes no additional row. Business total 30.
+**Expected result/shape:** `Accepted(e1, delivery 1, 10)`, `(e2, delivery 2, 10)`, `(e3, delivery 5, 10)`; delivery 4 replay contributes no additional row. Business total 30.
 
 **Verify:** Assert all retained event/delivery pairs, sum 30, raw source total 5 and prepared branch metrics 2 accepted-eligible inputs versus 0 quarantined inputs for this phase.
 
@@ -213,7 +198,7 @@ Publish the 00:20 advancer and run both branches. Sum actual numRowsRemoved stat
 
 Read the six source deliveries once as a bounded batch and compare them with both sinks. Return source deliveries, known-ID deliveries, quarantine rows, accepted rows including advancer, and business total.
 
-**Expected result/shape:** Ledger(6,5,1,4,30). One known-ID delivery is suppressed as an in-horizon replay; three distinct equal-valued business events remain.
+**Expected result/shape:** `Ledger(6, 5, 1, 4, 30)`. One known-ID delivery is suppressed as an in-horizon replay; three distinct equal-valued business events remain.
 
 **Verify:** Assert the complete ledger and six unique delivery IDs; confirm no active queries remain before cleanup.
 
@@ -225,7 +210,7 @@ Do not deduplicate by amount when identity is the contract. Do not merge all NUL
 
 ## Self-check
 
-Explain the contract of `classify` / `classify` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `classify` / `classify` without reading its solution. Then, from memory, state what Exercise 6 (Reconcile deliveries, quarantine, replay suppression and business totals) must produce: `Ledger(6, 5, 1, 4, 30)`. One known-ID delivery is suppressed as an in-horizon replay; three distinct equal-valued business events remain. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

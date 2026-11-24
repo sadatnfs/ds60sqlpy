@@ -23,6 +23,13 @@ Suppose a query filters, invokes a Python UDF, then aggregates. The UDF may crea
 Use the release's supported-operator list and `spark.rapids.sql.explain=NOT_ON_GPU` diagnostics as aids, not universal truths detached from versions. The published table may be generated against a particular Spark release; inspect the matching plugin and distribution notes. An explicit CPU/GPU parity test over adversarial tiny fixtures is the final semantic guard before measuring a larger workload.
 
 
+### Key terms
+
+- **CPU fallback:** Running an unsupported part of a query on the CPU inside a working GPU plugin environment.
+- **Unsupported expression:** An expression or dtype the plugin release cannot execute on the GPU under the current configuration.
+- **Explain diagnostics:** Plugin output that reports which operators will not run on the GPU and why.
+- **CPU-only baseline:** An ordinary Spark run with the GPU plugin disabled or absent, used as the semantic reference.
+
 ## Worked examples
 
 ### Worked example 1
@@ -55,27 +62,39 @@ Treat printed timing values as synthetic whenever the program says model, fixtur
 
 ### Exercise 1: Classify fallback versus unavailable device
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **classify fallback versus unavailable device** in the examples above.
+**Trap to avoid:** Calling a GPU-less run a fallback suggests the plugin was active and made per-operator choices, when actually it never started.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Find an unsupported expression
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **find an unsupported expression** in the examples above.
+**Trap to avoid:** Assuming support from the operator name alone misses expression-level and type-level restrictions, which are the usual cause of fallback.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Count boundary costs
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **count boundary costs** in the examples above.
+**Trap to avoid:** Assuming only the UDF runs slower and the rest stays fast ignores that the transitions stall the GPU sections on both sides.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Rewrite an opaque function declaratively
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **rewrite an opaque function declaratively** in the examples above.
+**Trap to avoid:** Rewriting with a built-in that differs on edge cases, such as whitespace or null handling, changes results while appearing equivalent.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Preserve edge semantics
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **preserve edge semantics** in the examples above.
+**Trap to avoid:** Testing only typical values passes implementations that disagree exactly where production data is unusual.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design a mixed-plan report
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design a mixed-plan report** in the examples above.
+**Trap to avoid:** Reporting only the percentage of GPU operators hides which fallback is expensive. One fallback on a small lookup table may be harmless, while one on the widest projection can dominate the job.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

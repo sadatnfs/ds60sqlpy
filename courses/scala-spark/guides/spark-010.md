@@ -75,7 +75,7 @@ Each call constructs a fresh iterator over unchanged source values. Repetition p
 
 For inputs between-1000000 and 1000000, retain even values and double them in order. Preserve input and duplicates. Reject values outside the bound so Int multiplication is safe.
 
-**Expected result/shape:** Seq(1,2,3,4) becomes Seq(4,8); Seq(0,2,2) becomes Seq(0,4,4); empty remains empty.
+**Expected result/shape:** `Seq(1, 2, 3, 4)` becomes `Seq(4, 8)`; `Seq(0, 2, 2)` becomes `Seq(0, 4, 4)`; empty remains empty.
 
 **Verify:** Assert the exact results, input preservation and the out-of-domain rejection.
 
@@ -85,7 +85,7 @@ For inputs between-1000000 and 1000000, retain even values and double them in or
 
 Return a lazy even-filter/double-map iterator with local trace messages filter: value and map: value. Validate the same numeric domain before construction. The trace should remain empty until consumption.
 
-**Expected result/shape:** Taking one output from 1,2,3,4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4.
+**Expected result/shape:** Taking one output from `1, 2, 3, 4` yields 4 with trace `filter:1, filter:2, map:2`. Consuming the rest yields 8 and appends `filter:3, filter:4, map:4`.
 
 **Verify:** Assert the empty initial trace, both exact output pieces and all six messages in order.
 
@@ -95,7 +95,7 @@ Return a lazy even-filter/double-map iterator with local trace messages filter: 
 
 Consume a supplied iterator into a Vector twice and return both results. Do not cache or recreate the iterator inside this function. Explain why this intentionally returns an empty second traversal.
 
-**Expected result/shape:** A fresh iterator over 1,2,3 yields (Vector(1,2,3), Vector.empty). An already empty iterator yields two empty Vectors.
+**Expected result/shape:** A fresh iterator over 1,2,3 yields (`Vector(1, 2, 3)`, Vector.empty). An already empty iterator yields two empty Vectors.
 
 **Verify:** Assert both tuple components and the already-exhausted case.
 
@@ -105,7 +105,7 @@ Consume a supplied iterator into a Vector twice and return both results. Do not 
 
 Return a factory creating a fresh bounded even-filter/double-map iterator on each call. Validate source values once and preserve them. Do not return the same iterator object repeatedly.
 
-**Expected result/shape:** Two factory calls both yield Vector(4,8) for 1,2,3,4, even after the first is exhausted.
+**Expected result/shape:** Two factory calls both yield `Vector(4, 8)` for 1,2,3,4, even after the first is exhausted.
 
 **Verify:** Consume two independently obtained iterators and assert both exact results; verify the immutable source remains unchanged.
 
@@ -115,7 +115,7 @@ Return a factory creating a fresh bounded even-filter/double-map iterator on eac
 
 For bounded nonnegative event amounts and nonblank IDs, compute naive delivered cents over attempts and logical once-per-ID cents when attempts>0. Reject conflicting amounts for one ID and negative attempt counts. This is a pure ledger calculation, not a real sink.
 
-**Expected result/shape:** Records (a,100), (b,50), (a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0); same ID with 100 and 101 is rejected.
+**Expected result/shape:** Records `(a, 100)`, `(b, 50)`, `(a, 100)` with two attempts give naive 500, logical 150. Zero attempts gives `(0, 0)`; same ID with 100 and 101 is rejected.
 
 **Verify:** Assert both totals, the zero-attempt identity and a conflicting-payload failure.
 

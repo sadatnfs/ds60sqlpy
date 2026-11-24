@@ -298,7 +298,7 @@ catch (error: unknown) { assert.equal(message(error), 'unclassified failure'); }
         ex(
             "Preserve every batch outcome",
             "Summarize one fulfilled value and one rejected task.",
-            "value:2 and error:offline.",
+            "`value:2` and `error:offline`.",
             r"""const outcomes = await Promise.allSettled([Promise.resolve(2), Promise.reject(new Error('offline'))]);
 const summaries = outcomes.map(outcome => {
   if (outcome.status === 'fulfilled') return `value:${outcome.value}`;
@@ -347,7 +347,7 @@ add(
 
 Adjacency-list BFS performs O(V+E) work under ordinary Map lookup assumptions and stores O(V) extra state. An array plus a cursor avoids repeated shift operations that move remaining elements. Several shortest paths may exist; neighbor order defines this implementation's deterministic tie policy. Weighted edges need another algorithm, such as Dijkstra for nonnegative weights. BFS does not minimize arbitrary travel cost merely because its path has few edges.
 
-Dynamic programming reuses overlapping subproblem results. For minimum coin count, best[a] is the smallest number of allowed coins summing to amount a. best[0]=0. Each other state minimizes best[a-coin]+1 over usable denominations. Infinity represents an unreachable amount. The recurrence assumes unbounded reuse of positive integer coins. For coins 1,3,4 and target 6, greedy selection gives 4+1+1, while the recurrence discovers 3+3. The table has O(amount) memory and O(amount times number-of-coins) work, so numeric magnitude is part of its cost.""",
+Dynamic programming reuses overlapping subproblem results. For minimum coin count, `best[a]` is the smallest number of allowed coins summing to amount a, and `best[0] = 0`. Each other state minimizes `best[a - coin] + 1` over usable denominations. Infinity represents an unreachable amount. The recurrence assumes unbounded reuse of positive integer coins. For coins 1, 3 and 4 and target 6, greedy selection gives 4+1+1, while the recurrence discovers 3+3. The table has O(amount) memory and O(amount times number-of-coins) work, so numeric magnitude is part of its cost.""",
     """ReadonlyMap<string, readonly string[]> states that search consumes the graph without modifying it. Runtime checks require every referenced neighbor to exist. A null parent marks the source; an absent Map entry means undiscovered. Reconstruction follows parent links until null. The DP table is filled in increasing amount order so every dependency is already available. Positive integer denominations and a target cap preserve this dependency order and bound resource use.""",
     [
         (

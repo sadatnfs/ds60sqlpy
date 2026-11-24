@@ -10,6 +10,14 @@ Fit a small regression procedure with stable linear algebra and select regulariz
 
 Open `julia-021` in `/classroom` with its prepared `julia` runtime. Worked case A (recover a known line) and worked case B (select on development data) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-021: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Design matrix:** The matrix whose rows are observations and whose columns are an intercept and the predictors of a linear model.
+- **Ridge penalty:** A squared slope penalty scaled by lambda that shrinks coefficients while leaving the intercept unpenalized.
+- **Augmented least squares:** Solving ridge by stacking penalty rows under the design matrix and using QR instead of inverting normal equations.
+- **Development selection:** Choosing lambda using only the development split, so the final split stays untouched until the choice is frozen.
+- **Leakage:** Information from evaluation rows entering fitting or selection, which makes the reported score optimistic.
+
 ## The fitted object includes a procedure
 
 A regression example needs an observation unit, input schema, training rule and evaluation target. Correct matrix arithmetic cannot determine whether the rows are representative or the features were available at prediction time. The small fixture here makes the fitting and selection boundaries explicit before those scientific questions are generalized.

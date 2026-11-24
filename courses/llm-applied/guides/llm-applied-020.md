@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-019`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-019` (Preference optimization, DPO and the RLHF distinction). They introduce the notation this lesson needs for bi-encoder and contrastive objective.
 
 ## Learning objectives
 
@@ -78,23 +78,25 @@ Treat negative selection as part of the supervised task. A visually similar pass
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-020/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `llm-torch-cpu` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-020.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-020.py` in the declared `llm-torch-cpu` profile. *Construct paired retrieval features*, *Train the query projection* and *Evaluate a perturbed held-out query* need only PyTorch and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-020/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Train the query projection* and *Evaluate a perturbed held-out query* reuse the helper and fixture introduced in *Construct paired retrieval features*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Score shape `(2, 2)`; one positive per query. Example B should give: Loss decreases; each query ranks its paired document first. Example C should give: document 0 remains higher on this declared local perturbation. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
-Compute query_embeddings=query_features@W andscore_matrix=query_embeddings@document_features.T. Cross entropy uses the diagonal document index as the positive label. Clear gradients and updateW under a fixed budget. For the reranker, score each pair with a linear weight and optimize softplus(-(positive_score-negative_score)). Inspect parameter changes, training loss and ranking separately. Freeze document features in this fixture so only the query projection is trained.
+Compute query_embeddings=query_features@W and `score_matrix`=query_embeddings@document_features.T. Cross entropy uses the diagonal document index as the positive label. Clear gradients and update W under a fixed budget. For the reranker, score each pair with a linear weight and optimize softplus(-(positive_score-negative_score)). Inspect parameter changes, training loss and ranking separately. Freeze document features in this fixture so only the query projection is trained.
 
 ## Derive the first query-projection and reranker updates
 
-Queries and documents are both the 2-by-2 identity matrix, while W begins at zero. The score matrix \(QWD^{\mathsf T}\) is therefore W itself. Each row has uniform class probabilities[0.5, 0.5], and the labels are[0, 1]. Mean cross entropy across two rows gives gradient[[-0.25, 0.25], [0.25, -0.25]]. SGD at 0.5 produces W=[[0.125, -0.125], [-0.125, 0.125]] after one update.
+Queries and documents are both the 2-by-2 identity matrix, while W begins at zero. The score matrix \(QWD^{\mathsf T}\) is therefore W itself. Each row has uniform class probabilities `[0.5, 0.5]`, and the labels are `[0, 1]`. Mean cross entropy across two rows gives gradient `[[-0.25, 0.25], [0.25, -0.25]]`. SGD at 0.5 produces W=[[0.125, -0.125], [-0.125, 0.125]] after one update.
 
-The positive-minus-negative score margin is 0.25 in both training rows. Symmetry preserves the form[[a, -a], [-a, a]] during this particular optimization, with positive a after the first step. For a new query[x, y], the two scores are[a(x-y), -a(x-y)], so the decision boundary is \(x=y\). The held-out[0.9, 0.1] lies well on the document 0 side; after the first step its scores are[0.1, -0.1]. That is a local feature-space check, not a test of understanding a new sentence.
+The positive-minus-negative score margin is 0.25 in both training rows. Symmetry preserves the form[[a, -a], [-a, a]] during this particular optimization, with positive a after the first step. For a new query `[x, y]`, the two scores are[a(x-y), -a(x-y)], so the decision boundary is \(x=y\). The held-out `[0.9, 0.1]` lies well on the document 0 side; after the first step its scores are `[0.1, -0.1]`. That is a local feature-space check, not a test of understanding a new sentence.
 
 The cross-entropy derivative can be written \(\frac{Q^{\mathsf T}(P-Y)D}{B}\) for this fixed-feature linear projection, where P contains row probabilities, Y the one-hot targets and B the number of query rows. Its shape matches W. In a real trainable encoder, gradients would flow through encoder and embedding parameters for fixed tokenized inputs; ordinary discrete token IDs and the tokenizer are not differentiable parts of that graph. Here document features remain fixed and only four projection entries are updated.
 
-The reranker has weight w=[w = 0, w1], positive feature[1, 0] and negative[0, 1]. Its score margin is w0-w1 and its loss is softplus(-(w0-w1)). At zero, the gradient is[-0.5, 0.5]. A0.2 SGD step produces[0.1, -0.1], giving margin 0.2 and a smaller loss. This independent calculation shows what the pairwise objective favors without assuming the training loop's result.
+The reranker has weight w=[w = 0, w1], positive feature `[1, 0]` and negative `[0, 1]`. Its score margin is w0-w1 and its loss is softplus(-(w0-w1)). At zero, the gradient is `[-0.5, 0.5]`. A0.2 SGD step produces `[0.1, -0.1]`, giving margin 0.2 and a smaller loss. This independent calculation shows what the pairwise objective favors without assuming the training loop's result.
 
 A pairwise loss for one query should compare candidates under that same query's intended relevance. Mixing a positive from one question with a negative from an unrelated question can teach a shortcut unless the dataset design explicitly calls for it. In-batch negatives also assume that another row's positive is not a valid answer for the current query. Multiple correct passages or duplicated source families can violate that assumption.
 
@@ -130,7 +132,7 @@ scores = (queries @ projection) @ documents.T
 assert tuple(scores.shape) == (2, 2) and labels.tolist() == [0, 1]
 ```
 
-**Expected:** score shape(2, 2); one positive per query.
+**Expected:** score shape `(2, 2)`; one positive per query.
 
 ### Example B: Train the query projection
 
@@ -167,23 +169,26 @@ assert held_scores.argmax(1).item() == 0
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: score shape(2, 2); one positive per query. actual gradient updates True; pretrained_semantic_encoder False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Train the query projection*, predict its result from the prompt alone: Run 30SGD at 0.5 updates on cross entropy against diagonal positives. Write the guess beside the stated outcome (loss decreases; each query ranks its paired document first). Then predict how the decisive case, *Bound the model claim*, should end: Record that fixed vectors were used and natural-language encoder quality was not measured. For fine-tuning embeddings and a small reranker, the finish condition is: Score shape `(2, 2)`; one positive per query. Actual gradient updates True; pretrained_semantic_encoder False.
 
 ## Exercises
 
 1. **Construct paired retrieval features.** Use queries and documents equal to the 2-by-2 identity matrix, with positive labels 0, 1.
-   **Expected:** score shape(2, 2); one positive per query.
-   **Verify:** Save the assertion results for exercise 1, including score shape(2, 2); one positive per query.
+   **Expected:** score shape `(2, 2)`; one positive per query.
+   **Verify:** Save the assertion results for exercise 1, including score shape `(2, 2)`; one positive per query.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Train the query projection.** Run 30SGD at 0.5 updates on cross entropy against diagonal positives.
    **Expected:** loss decreases; each query ranks its paired document first.
    **Verify:** Save the assertion results for exercise 2, including loss decreases; each query ranks its paired document first.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-3. **Evaluate a perturbed held-out query.** Use held-out feature[.9, .1] and compare its two document scores.
+3. **Evaluate a perturbed held-out query.** Use held-out feature `[.9, .1]` and compare its two document scores.
    **Expected:** document 0 remains higher on this declared local perturbation.
    **Verify:** Save the assertion results for exercise 3, including document 0 remains higher on this declared local perturbation.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-4. **Train a pairwise reranker.** Use positive feature[1, 0], negative[0, 1] and a zero linear weight; run 20SGD at 0.2 updates.
+4. **Train a pairwise reranker.** Use positive feature `[1, 0]`, negative `[0, 1]` and a zero linear weight; run 20SGD at 0.2 updates.
    **Expected:** positive score exceeds negative and pairwise loss decreases.
    **Verify:** Save the assertion results for exercise 4, including positive score exceeds negative and pairwise loss decreases.
 
@@ -203,19 +208,21 @@ If training improves but retrieval quality falls, inspect false negatives, famil
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate bi-encoder and contrastive objective for the fixture in *Construct paired retrieval features*. Hint 2: change one literal in *Train the query projection* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Train a pairwise reranker*, with its stated result (positive score exceeds negative and pairwise loss decreases). If *Bound the model claim* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Bi-encoder, Contrastive objective, False negative using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain bi-encoder, contrastive objective and false negative using *Construct paired retrieval features*. Recompute its result (score shape `(2, 2)`; one positive per query) from the inputs. Change one input in *Evaluate a perturbed held-out query* and predict whether the stated result (document 0 remains higher on this declared local perturbation) still holds. Say which part of fine-tuning embeddings and a small reranker the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-019` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Construct paired retrieval features* cannot be reconstructed without the solution, revisit `llm-applied-019` (Preference optimization, DPO and the RLHF distinction). Otherwise keep the six observations from fine-tuning embeddings and a small reranker and continue to `llm-applied-021` (Optional pretrained-model adaptation with pinned offline artifacts).
 
 ## Sources and verification status
 
-API and mechanism reference: [Sentence-BERT](https://arxiv.org/abs/1908.10084), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for bi-encoder: [Sentence-BERT](https://arxiv.org/abs/1908.10084), reviewed 2026-10-22. The fixtures for *Construct paired retrieval features*, *Train the query projection* and *Evaluate a perturbed held-out query* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

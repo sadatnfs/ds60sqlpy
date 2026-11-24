@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-the-first-invalidated-step-after-editing-server-py">Exercise 1: Predict the first invalidated step after editing server.py.<a class="heading-anchor" href="#exercise-1-predict-the-first-invalidated-step-after-editing-server-py" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The COPY using that file and dependent later steps.</p>
 <p><strong>Why:</strong> The builder tracks relevant inputs. Earlier independent operations can remain reusable while operations based on changed filesystem state require new results.</p>
+<p><strong>Approach:</strong> Walk the fixture Dockerfile top to bottom and find the first instruction whose input includes server.py: COPY server.py /app/server.py.</p>
+<p><strong>Why this is correct:</strong> FROM and WORKDIR keep their cache keys, so they reuse. COPY&#x27;s checksum changes, and every later step, including RUN mkdir and the metadata steps, rebuilds after it.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting only the COPY step to rebuild fails, because the builder reuses a later step only when its parent layer is unchanged.</p>
+<p><strong>How to verify:</strong> Edit a comment in server.py, rebuild with --progress=plain, and confirm the log shows CACHED up to WORKDIR and executed steps from COPY onward.</p>
 <h3 id="exercise-2-record-evidence-of-a-real-cache-hit">Exercise 2: Record evidence of a real cache hit.<a class="heading-anchor" href="#exercise-2-record-evidence-of-a-real-cache-hit" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A specific step labeled cached in plain build logs.</p>
 <p><strong>Why:</strong> Elapsed time alone is ambiguous because network and CPU vary. A named cached step ties the observation to the builder decision being studied.</p>
+<p><strong>Approach:</strong> Capture the plain progress output of the second identical build and look for the CACHED marker beside specific step numbers.</p>
+<p><strong>Why this is correct:</strong> A CACHED label is the builder&#x27;s own record that it reused a layer, which ties the evidence to the decision rather than to timing noise.</p>
+<p><strong>A plausible wrong approach:</strong> Using a shorter wall-clock time as proof fails, because a warm disk or a quiet network can make an uncached build faster too.</p>
+<p><strong>How to verify:</strong> Save both logs and point to the step lines for COPY and RUN mkdir labeled CACHED in the second log.</p>
 <h3 id="exercise-3-reorder-dependency-metadata-and-app-source-conceptually">Exercise 3: Reorder dependency metadata and app source conceptually.<a class="heading-anchor" href="#exercise-3-reorder-dependency-metadata-and-app-source-conceptually" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Stable dependency inputs precede rapidly changing source.</p>
 <p><strong>Why:</strong> This allows source edits to reuse dependencies when lockfiles remain unchanged. It does not justify ignoring a lockfile change or copying too little to perform a correct build.</p>
+<p><strong>Approach:</strong> Place a COPY of dependency metadata such as requirements.txt and its RUN install before the COPY of application source.</p>
+<p><strong>Why this is correct:</strong> Editing source then leaves the metadata checksum unchanged, so the expensive install layer is reused and only the source copy reruns.</p>
+<p><strong>A plausible wrong approach:</strong> Copying source before installing dependencies reruns the install on every code edit, and copying too few files can make the install fail.</p>
+<p><strong>How to verify:</strong> Edit only application source and rebuild; the install step should show CACHED while the source COPY runs. Then edit the lockfile and see the install run again.</p>
 <h3 id="exercise-4-diagnose-a-cached-step-that-downloads-a-mutable-dependency">Exercise 4: Diagnose a cached step that downloads a mutable dependency.<a class="heading-anchor" href="#exercise-4-diagnose-a-cached-step-that-downloads-a-mutable-dependency" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A cache hit can preserve old bytes even with unchanged command text.</p>
 <p><strong>Why:</strong> The command can have external inputs absent from the visible file hash. Pinning and deliberate update procedures provide a stronger reproducibility story than relying on caching behavior.</p>
+<p><strong>Approach:</strong> Note that a RUN that fetches a file by URL has a cache key built from the command text, not from the bytes at that URL.</p>
+<p><strong>Why this is correct:</strong> If the server publishes a new file under the same URL, the builder still reuses the old layer, so two machines can hold different contents.</p>
+<p><strong>A plausible wrong approach:</strong> Running --no-cache on every build to stay fresh discards all reuse and still does not pin anything, so builds stay unrepeatable.</p>
+<p><strong>How to verify:</strong> Pin the download by version and checksum and verify it in the RUN; changing either value changes the command text and forces a rebuild.</p>
 <h3 id="exercise-5-explain-no-cache-versus-pulling-a-base">Exercise 5: Explain no-cache versus pulling a base.<a class="heading-anchor" href="#exercise-5-explain-no-cache-versus-pulling-a-base" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Reexecuting build steps and refreshing a base are separate choices.</p>
 <p><strong>Why:</strong> One option changes cache reuse; another changes the image resolved by the base reference. Conflating them makes debugging rebuilds needlessly expensive and hard to interpret.</p>
+<p><strong>Approach:</strong> Name the two controls: --no-cache ignores existing build cache, and --pull asks the builder to resolve and fetch the FROM image again.</p>
+<p><strong>Why this is correct:</strong> The fixture builds FROM a <code>python:3.12-slim</code> tag; --no-cache can rerun every step on the same local base, while --pull may get a newer image.</p>
+<p><strong>A plausible wrong approach:</strong> Using --no-cache to pick up a base security fix fails if the local base is stale, because no new base is fetched.</p>
+<p><strong>How to verify:</strong> Compare the base image ID before and after each option with docker image inspect; only a pull can change it, while --no-cache changes step execution.</p>
 <h3 id="exercise-6-design-a-build-performance-experiment">Exercise 6: Design a build-performance experiment.<a class="heading-anchor" href="#exercise-6-design-a-build-performance-experiment" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Same engine and context, one controlled edit, named cache observations.</p>
 <p><strong>Why:</strong> Record build identity and changed inputs so timing is interpretable. Optimize the expensive invalidated step after confirming it is actually the bottleneck.</p>
+<p><strong>Approach:</strong> Fix the engine, context and base, make one controlled edit, and record the step log and timing for a cold build and a warm rebuild.</p>
+<p><strong>Why this is correct:</strong> Holding everything else constant makes the CACHED and executed steps attributable to the single edit, so the slow step is identified by evidence.</p>
+<p><strong>A plausible wrong approach:</strong> Changing the base tag, Dockerfile order and source at once leaves no way to tell which change caused the speedup or slowdown.</p>
+<p><strong>How to verify:</strong> Present a table of step number, cached or executed, and duration for each run, and name the slowest executed step as the optimization target.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

@@ -38,7 +38,7 @@ object Main {
     val rows = reviewed.limit(101).count()
     require(
       rows <= 100L && reviewed.agg(countDistinct("key")).first().getLong(0) == rows,
-      "Approved keys must be known,unique and bounded"
+      "Approved keys must be known, unique and bounded"
     )
     reviewed
   }

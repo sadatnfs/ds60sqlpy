@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-059-indexes-and-query-plans">apache-059: Indexes and query plans<a class="heading-anchor" href="#apache-059-indexes-and-query-plans" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-058</code>, <code>apache-057</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Forward index:</strong> The per-column structure that retrieves a document&#x27;s value, the baseline for every column.</li>
+<li><strong>Dictionary encoding:</strong> Mapping each distinct column value to a compact integer identifier that other index structures can reference.</li>
+<li><strong>Inverted index:</strong> A structure mapping each value to the documents containing it, which speeds equality filters on moderately selective columns.</li>
+<li><strong>Range index:</strong> A structure that speeds interval predicates such as amount between two values.</li>
+<li><strong>Sorted column:</strong> A column by which a segment&#x27;s rows are physically ordered, so a filter on it can locate a contiguous document range.</li>
+</ul>
 <h3 id="indexes-exchange-preparation-and-storage-for-query-work">Indexes exchange preparation and storage for query work<a class="heading-anchor" href="#indexes-exchange-preparation-and-storage-for-query-work" aria-label="Link to this section">#</a></h3>
 <p>A Pinot segment can contain several indexes serving different access patterns. A dictionary maps values to compact identifiers; an inverted index maps a value to matching document positions; a range index helps suitable interval predicates; a sorted layout can exploit ordering. A forward index supports value retrieval. These structures overlap in purpose, but one index name is not a universal substitute for every other structure.</p>
 <p>Index selection should start with query shapes and data distribution. Equality on a moderately selective region can benefit from an inverted index, while a range over an amount column needs a different comparison. An index that matches almost every row may save little scanning and still consume memory, storage and ingestion work. Tiny fixtures demonstrate API and result semantics without providing reliable performance rankings.</p>
@@ -231,6 +239,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Retain schema, table config, segment metadata, source distribution, query, explain output and measured resource work. Existing segments may need a supported reload or rebuild before a changed index configuration takes effect. Editing the controller JSON alone is therefore weaker evidence than inspecting actual segments after the intended operation.</p>
 <p><strong>Interview discussion: why might an added inverted index fail to improve latency?</strong> It may be unselective, absent from old segments, unused by the selected plan or irrelevant to the bottleneck. The two cases first preserve result equality and then inspect physical work, making performance a measured claim instead of a property inferred from configuration syntax.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="index-declarations-in-the-table-config">Index declarations in the table config<a class="heading-anchor" href="#index-declarations-in-the-table-config" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">&quot;tableIndexConfig&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-tag">&quot;invertedIndexColumns&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;region&quot;</span><span class="syntax-punctuation">],</span>
+    <span class="syntax-tag">&quot;rangeIndexColumns&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;amount&quot;</span><span class="syntax-punctuation">]</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>From table.json, the inverted index maps each region value to the matching document IDs, and the range index supports comparisons on amount. Both are built when the segment is created, so adding one to an existing table needs a segment reload before it takes effect. A config that lists an index is a request, not proof; confirm it in the segment metadata from the controller before claiming that a query used it.</p>
+<h4 id="an-equality-and-range-filter-together">An equality and range filter together<a class="heading-anchor" href="#an-equality-and-range-filter-together" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  id
+<span class="syntax-keyword">FROM</span>
+  ds60_orders
+<span class="syntax-keyword">WHERE</span>
+  region <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;east&#x27;</span>
+  <span class="syntax-keyword">AND</span> amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span></code></pre>
+<p>The expected result is the single ID 3, because ID 1 is in east but has amount 4. Run EXPLAIN PLAN FOR on the same statement to see which filter operators Pinot chose; an inverted index filter on region and a range filter on amount should appear instead of a full scan. With three rows, timing differences are noise, so compare plans and docs-scanned counts on two separately named tables before arguing about speed.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="pinot-apache-059-command-notebook">Pinot apache-059 command notebook<a class="heading-anchor" href="#pinot-apache-059-command-notebook" aria-label="Link to this section">#</a></h2>

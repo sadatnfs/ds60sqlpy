@@ -243,23 +243,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict customer counts for Paper and Home separately.</p>
 <p>Paper has 3 customers and Home has 2; their sum 5 exceeds the whole-model distinct count 3.</p>
+<p><strong>Why it fits this model:</strong> DISTINCTCOUNT(Sales[CustomerKey]) is evaluated in each category. Paper reaches Ada, Bo and Cy (3); Home reaches Bo and Cy (2). Bo and Cy bought in both.</p>
+<p><strong>Tempting mistake:</strong> Adding the category counts gives 5 customers, but the whole model has only three customers with sales. Overlapping populations are not additive.</p>
+<p><strong>How to confirm:</strong> <code>SUMMARIZECOLUMNS ( ROLLUPADDISSUBTOTAL ( Product[Category], &quot;IsTotal&quot; ), &quot;Customers&quot;, DISTINCTCOUNT ( Sales[CustomerKey] ) )</code> shows 3, 2 and a total of 3.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Restrict Paper to 2025 and predict order count.</p>
 <p>Orders 201, 202 and 204 remain: three orders.</p>
+<p><strong>Why it fits this model:</strong> Removing 2024 drops order 101, which held two Paper lines (S1 and S2). Paper keeps S4, S5 and S7 in orders 201, 202 and 204, for 3 orders and 67 USD.</p>
+<p><strong>Tempting mistake:</strong> Subtracting the two removed lines from Paper&#x27;s four orders gives 2. That treats lines as orders, though both removed lines came from one order.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( [OrderCount], Product[Category] = &quot;Paper&quot;, &#x27;Date&#x27;[Year] = 2025 )</code> returns 3, and NetRevenue under the same filters returns 67.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write two separate measures for catalog customers and customers with sales.</p>
 <p>COUNTROWS(Customer) counts catalog members; DISTINCTCOUNT(Sales[CustomerKey]) counts purchasing identities in eligible facts.</p>
+<p><strong>Why it fits this model:</strong> COUNTROWS(Customer) counts catalog members (4, including Di), while DISTINCTCOUNT(Sales[CustomerKey]) counts buyers in eligible facts (3). Under West these are 1 and BLANK.</p>
+<p><strong>Tempting mistake:</strong> Using COUNTROWS(Customer) as &quot;customers who bought Paper&quot; returns 4, because the single-direction relationship does not filter Customer from Product through Sales.</p>
+<p><strong>How to confirm:</strong> Under Paper expect a catalog count of 4 and a buyer count of 3; under West expect 1 and BLANK.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a grand total built by adding per-category distinct customers.</p>
 <p>The same customer can be counted repeatedly. Reevaluate the distinct-count measure in total context.</p>
+<p><strong>Why it fits this model:</strong> Each product has two buyers: Notebook (Ada, Bo), Pen (Ada, Cy) and Mug (Bo, Cy). The total row must reevaluate DISTINCTCOUNT over all eight lines, which gives 3.</p>
+<p><strong>Tempting mistake:</strong> <code>SUMX ( VALUES ( Product[Product] ), [Customers] )</code> adds 2 + 2 + 2 and reports 6 customers, double counting every buyer.</p>
+<p><strong>How to confirm:</strong> The per-product rows show 2, 2 and 2 while the total row shows 3, the same as the whole-model case.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain how blank keys change DISTINCTCOUNT.</p>
 <p>A blank can count as one distinct value. Decide whether it is an unknown bucket or excluded quality failure.</p>
+<p><strong>Why it fits this model:</strong> DISTINCTCOUNT treats BLANK as one more distinct value. If one sales line lacked a CustomerKey, the count would rise from 3 to 4 without any new person.</p>
+<p><strong>Tempting mistake:</strong> Reporting 4 as customers counts an unknown bucket as a buyer; quietly dropping the line instead hides a data-quality failure.</p>
+<p><strong>How to confirm:</strong> With such a row, DISTINCTCOUNT returns 4, DISTINCTCOUNTNOBLANK returns 3 and COUNTBLANK(Sales[CustomerKey]) returns 1, so all three can be reported.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the reasoning to daily active users.</p>
 <p>The sum of daily distinct users measures user-days, not monthly unique users; both can be useful if named correctly.</p>
+<p><strong>Why it fits this model:</strong> In 2025 each sales date has one buyer: Ada on January 2, Cy on January 3, Bo on January 5, Bo on February 2 and Cy on February 3. Their sum, 5, is a count of customer-days.</p>
+<p><strong>Tempting mistake:</strong> Calling that 5 the unique 2025 customers overstates the population, because only Ada, Bo and Cy bought that year; Bo and Cy are counted twice.</p>
+<p><strong>How to confirm:</strong> Under 2025, <code>SUMX ( VALUES ( &#x27;Date&#x27;[Date] ), DISTINCTCOUNT ( Sales[CustomerKey] ) )</code> returns 5 and DISTINCTCOUNT alone returns 3.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

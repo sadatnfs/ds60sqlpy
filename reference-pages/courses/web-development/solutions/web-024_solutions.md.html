@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-024.md</code>.</p>
 <h3 id="exercise-1-write-three-learner-tasks-before-drawing-the-interface">Exercise 1: Write three learner tasks before drawing the interface.<a class="heading-anchor" href="#exercise-1-write-three-learner-tasks-before-drawing-the-interface" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Find a topic, assess its prerequisites and choose a clear next action.</p>
+<p><strong>Approach:</strong> Write each task as a learner goal with a verb and an object, such as find a topic, check its prerequisites and choose a next step.</p>
 <p><strong>Why:</strong> Starting from tasks keeps the interface focused on finding a topic, checking prerequisites and taking the next step.</p>
+<p><strong>Plausible wrong approach:</strong> Starting with a color palette or a hero image fails because the layout then serves decoration, and no criterion tells you when the page is done.</p>
+<p><strong>How to verify:</strong> Each card in the finished page answers one written task, and you can point to the element that does it.</p>
 <h3 id="exercise-2-define-a-small-token-set-for-the-page">Exercise 2: Define a small token set for the page.<a class="heading-anchor" href="#exercise-2-define-a-small-token-set-for-the-page" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Spacing, text and surface choices are consistent and named by role.</p>
+<p><strong>Approach:</strong> Define tokens such as <code>--space</code>, <code>--text</code> and <code>--surface</code> in <code>:root</code>, named for the role they play, and use them in every card rule.</p>
 <p><strong>Why:</strong> A small role-based token set keeps the page consistent and makes later palette changes safe.</p>
+<p><strong>Plausible wrong approach:</strong> Naming tokens after hues such as <code>--blue</code> fails because a later palette change leaves names that no longer describe the value.</p>
+<p><strong>How to verify:</strong> Changing <code>--space</code> once updates every card gap and padding, and the tokens appear in the Computed panel.</p>
 <h3 id="exercise-3-build-a-complete-offline-portal-with-three-paths-and-local-destinations">Exercise 3: Build a complete offline portal with three paths and local destinations.<a class="heading-anchor" href="#exercise-3-build-a-complete-offline-portal-with-three-paths-and-local-destinations" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> All cards, navigation and headings are meaningful, keyboard reachable and responsive.</p>
+<p><strong>Approach:</strong> Build one <code>main</code>, a navigation list, three <code>article</code> cards with headings, prerequisites and specific links, and the auto-fit grid from worked example 2.</p>
 <p><strong>Why:</strong> A meaningful structure keeps the portal usable without styles, and the CSS then adapts it to different widths.</p>
+<p><strong>Plausible wrong approach:</strong> Adding a progress bar that claims saved progress fails because static HTML has no storage, so the number is invented.</p>
+<p><strong>How to verify:</strong> Every link reaches a matching local <code>id</code>, Tab visits each card link in reading order, and the grid stacks at narrow width.</p>
 <h3 id="exercise-4-audit-one-deliberately-vague-link-and-one-broken-fragment">Exercise 4: Audit one deliberately vague link and one broken fragment.<a class="heading-anchor" href="#exercise-4-audit-one-deliberately-vague-link-and-one-broken-fragment" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Replace the vague label and repair the target relationship.</p>
+<p><strong>Approach:</strong> List all link names out of context, then click each fragment link and confirm the target <code>id</code> exists exactly once.</p>
 <p><strong>Why:</strong> Link text must describe its destination, and every fragment must match an existing id.</p>
+<p><strong>Plausible wrong approach:</strong> Fixing the vague label with <code>title</code> text fails because many readers never see tooltips and the accessible name may stay Read more.</p>
+<p><strong>How to verify:</strong> The links list shows distinct names, and every fragment scrolls to its matching heading.</p>
 <h3 id="exercise-5-review-narrow-width-zoom-keyboard-and-print-behavior">Exercise 5: Review narrow width, zoom, keyboard and print behavior.<a class="heading-anchor" href="#exercise-5-review-narrow-width-zoom-keyboard-and-print-behavior" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Retain observations for each surface instead of claiming a universal pass from one screenshot.</p>
+<p><strong>Approach:</strong> Record separate notes for narrow width, 200 percent zoom, keyboard only and print preview, each with what you saw and the browser used.</p>
 <p><strong>Why:</strong> Narrow width, zoom, keyboard and print each exercise different behavior, so each needs its own evidence.</p>
+<p><strong>Plausible wrong approach:</strong> Writing a single pass line for the whole portal fails because a later reader cannot tell which surface was actually checked.</p>
+<p><strong>How to verify:</strong> Your notes contain four dated entries, each naming the condition, the observation and any remaining problem.</p>
 <h3 id="exercise-6-explain-the-portal-s-remaining-backend-requirements">Exercise 6: Explain the portal&#x27;s remaining backend requirements.<a class="heading-anchor" href="#exercise-6-explain-the-portal-s-remaining-backend-requirements" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Persistent identity, saved progress and authorization need a server and storage contract beyond this static page.</p>
+<p><strong>Approach:</strong> Separate what the static page does from features that need storage, identity or permissions, and name the server piece each one requires.</p>
 <p><strong>Why:</strong> Saved progress, identity and permissions require a server and storage; a static page can only describe them.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>localStorage</code> and calling it saved progress fails because it is tied to one browser and gives no account or authorization.</p>
+<p><strong>How to verify:</strong> Your explanation names at least sign-in, a progress table and an authorization check, none implemented in the static page.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-024_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

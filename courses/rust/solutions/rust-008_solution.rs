@@ -24,6 +24,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let louder = shout(original);
         assert_eq!(louder, "ready!");
     }
+
+    {
+        // Task 5: Boundary evidence
+        let count = 5_i32;
+        let copied = count;
+        assert_eq!(count + copied, 10);
+        let name = String::from("pear");
+        let address = name.as_ptr();
+        let moved = name;
+        assert_eq!(moved.as_ptr(), address);
+        let cloned = moved.clone();
+        assert_ne!(cloned.as_ptr(), address);
+        assert_eq!(moved, cloned);
+    }
     println!("rust-008: passed");
     Ok(())
 }

@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use <code>.data(records, d =&gt; d.id)</code> to match by identity. Save a node reference for entity A, reorder the records and redraw, then compare with <code>===</code>. This checks actual DOM reuse, not just a similar-looking chart.</p>
 <p>Sort a copied array when you want display order without mutating a source collection owned elsewhere. Keep the key based on identity rather than the value being sorted. A value can change while the entity remains the same.</p>
 <h3 id="exercise-1-predict-which-node-should-survive-reordering">Exercise 1: Predict which node should survive reordering.<a class="heading-anchor" href="#exercise-1-predict-which-node-should-survive-reordering" aria-label="Link to this section">#</a></h3>
-<p>Keys express entity identity. Reordering changes placement, not which object the node represents.</p>
+<p>Keys express entity identity. Reordering changes placement, not which object the node represents. The key function (d) =&gt; d.id ties the node to A, so after the second draw svg.select(&#x27;[data-id=&quot;A&quot;]&#x27;).node() is the same object captured as before. Without a key, the first node would be rebound to B because it is first in the new array. Compare the two references with ===.</p>
 <p><strong>Expected:</strong> The node for A remains the same object.</p>
 <h3 id="exercise-2-update-a-value-while-retaining-its-id">Exercise 2: Update A value while retaining its ID.<a class="heading-anchor" href="#exercise-2-update-a-value-while-retaining-its-id" aria-label="Link to this section">#</a></h3>
-<p>An entity can change attributes without being replaced. This distinction supports coherent transitions and focus behavior.</p>
+<p>An entity can change attributes without being replaced. This distinction supports coherent transitions and focus behavior. A moves from v 3 to v 6, so its radius goes from 24 to 48 because r is d.v * 8. Removing and re-adding the node would also give 48, but the identity check would fail. The reference checks both before === the current A node and r === 48.</p>
 <p><strong>Expected:</strong> The existing A node receives new geometry.</p>
 <h3 id="exercise-3-implement-a-keyed-redraw-with-two-records">Exercise 3: Implement a keyed redraw with two records.<a class="heading-anchor" href="#exercise-3-implement-a-keyed-redraw-with-two-records" aria-label="Link to this section">#</a></h3>
-<p>Test object equality as well as visible geometry. A fresh identical-looking node would not prove the reuse contract.</p>
+<p>Test object equality as well as visible geometry. A fresh identical-looking node would not prove the reuse contract. Draw [A 3, B 5], capture both nodes, then draw [B 4, A 6]. Verify that each captured node still has its own data-id and that their cx values swapped: A moves from 150 to 400 and B from 400 to 150.</p>
 <p><strong>Expected:</strong> Node identity and current data values both match expectations.</p>
 <h3 id="exercise-4-diagnose-using-a-sorted-index-as-the-key">Exercise 4: Diagnose using a sorted index as the key.<a class="heading-anchor" href="#exercise-4-diagnose-using-a-sorted-index-as-the-key" aria-label="Link to this section">#</a></h3>
-<p>The bug may be invisible until stateful interactions or animation are added. Choose an ID independent of ordering.</p>
+<p>The bug may be invisible until stateful interactions or animation are added. Choose an ID independent of ordering. A key of (d, i) =&gt; i behaves like no key: after reordering, the node at index 0 now represents B. With only fill and radius the picture looks right, but a focus ring or tooltip attached to A would jump to B. Check the data-id on the captured node after reordering.</p>
 <p><strong>Expected:</strong> Position changes can associate a node with a different entity.</p>
 <h3 id="exercise-5-reject-duplicate-ids-before-rendering">Exercise 5: Reject duplicate IDs before rendering.<a class="heading-anchor" href="#exercise-5-reject-duplicate-ids-before-rendering" aria-label="Link to this section">#</a></h3>
-<p>Validation belongs near the data boundary. If duplicates are legitimate, define an aggregation or a composite identity deliberately.</p>
+<p>Validation belongs near the data boundary. If duplicates are legitimate, define an aggregation or a composite identity deliberately. The reference compares new Set(ids).size with rows.length, so two A rows throw before the join. Letting D3 bind them would keep one A node and send the other to enter, with no error. The rejected flag confirms the throw.</p>
 <p><strong>Expected:</strong> A clear error precedes ambiguous joins.</p>
 <h3 id="exercise-6-transfer-identity-reasoning-to-a-live-leaderboard">Exercise 6: Transfer identity reasoning to a live leaderboard.<a class="heading-anchor" href="#exercise-6-transfer-identity-reasoning-to-a-live-leaderboard" aria-label="Link to this section">#</a></h3>
-<p>The chart should show movement of known participants rather than replacement of anonymous ranked positions.</p>
+<p>The chart should show movement of known participants rather than replacement of anonymous ranked positions. Key on participant ID, not rank, so a score change moves the same node; check one participant&#x27;s node is reused after two rank swaps.</p>
 <p><strong>Expected:</strong> Scores change and ranks reorder while participant IDs remain stable.</p></article>
   </main>
 </body>

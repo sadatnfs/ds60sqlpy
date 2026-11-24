@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the ordinary unfiltered total in case A.</p>
 <p>It is 187.</p>
+<p><strong>Why it fits this model:</strong> Case A has no role, so the North filter is the only restriction. Without it, every sales line is visible.</p>
+<p><strong>Tempting mistake:</strong> Assuming that because users normally see North, North is the unfiltered total. A report filter is a default view, not a limit.</p>
+<p><strong>How to confirm:</strong> EVALUATE ROW(&quot;Total&quot;, [NetRevenue]) with no filters returns 187, and REMOVEFILTERS(Customer) under North also returns 187.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the declared role to SouthViewer.</p>
 <p>Expected revenue is 80, including after an ordinary Customer-filter removal.</p>
+<p><strong>Why it fits this model:</strong> SouthViewer allows only Bo (customer 20), whose lines are S3 (40), S6 (20) and S7 (20). RLS filters the rows before any measure runs.</p>
+<p><strong>Tempting mistake:</strong> Expecting REMOVEFILTERS(Customer) to return 187 as in case A. It removes filter context, not the role.</p>
+<p><strong>How to confirm:</strong> Under an enforced SouthViewer role, VisibleRevenue and AfterRemovingCustomerFilters both return 80.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a real RLS acceptance record template.</p>
 <p>Record test identity/workspace role, model/role version, relationships, submitted query, expected allowed rows and actual observed result, including denial cases.</p>
+<p><strong>Why it fits this model:</strong> An acceptance record proves who ran what, under which role, and that disallowed rows stayed hidden.</p>
+<p><strong>Tempting mistake:</strong> Recording only &quot;North shows 107&quot;. That does not show whether a South user is blocked from Ada&#x27;s 51 and Cy&#x27;s 56.</p>
+<p><strong>How to confirm:</strong> Each row lists identity, role, model version, query, expected rows and observed value, including denial cases: North 107, South 80, together 187.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose testing only as the workspace administrator.</p>
 <p>Use the documented applicable role and identity; an unrestricted result cannot certify Viewer RLS behavior.</p>
+<p><strong>Why it fits this model:</strong> Workspace Admin, Member and Contributor roles are not restricted by RLS the way a Viewer is, so they see every row.</p>
+<p><strong>Tempting mistake:</strong> Signing off NorthViewer after an administrator saw 187 or applied a filter that returned 107. Neither result came from the role.</p>
+<p><strong>How to confirm:</strong> Test with a Viewer identity assigned to NorthViewer and expect 107, including after REMOVEFILTERS(Customer).</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why hidden report pages or disabled buttons are insufficient.</p>
 <p>A real security boundary must constrain allowed data through the supported engine/service controls, not just the visible navigation.</p>
+<p><strong>Why it fits this model:</strong> Hiding a South page only changes navigation. The model still answers any query the user&#x27;s permissions allow.</p>
+<p><strong>Tempting mistake:</strong> Considering South hidden because the page is gone, while the user can build a new query and read Bo&#x27;s 80.</p>
+<p><strong>How to confirm:</strong> As the restricted user, run a query with REMOVEFILTERS(Customer); an enforced role returns 107, an unenforced one returns 187.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the distinction to a SQL dashboard WHERE clause.</p>
 <p>A removable predicate does not protect data from another authorized query path; test actual role/permission boundaries separately.</p>
+<p><strong>Why it fits this model:</strong> A SQL dashboard&#x27;s WHERE region = &#x27;North&#x27; plays the same role as case A&#x27;s ordinary filter: any other query can omit it.</p>
+<p><strong>Tempting mistake:</strong> Writing the predicate into every dashboard query and treating that as access control.</p>
+<p><strong>How to confirm:</strong> Connect as the restricted database login and run SELECT SUM(net) with no WHERE clause; enforced row security returns 107 instead of 187.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

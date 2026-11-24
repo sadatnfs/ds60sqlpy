@@ -8,7 +8,7 @@ Analyze a crossed prompt/model/seed experiment and distinguish decoding variabil
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-012`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-012` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for prompt, model and seed effects in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about crossed design and interaction: The per-prompt differences are -0.1 and +0.3, the additive reconstruction recovers every cell, equal selection budgets give development scores of 0.9, the seed variance is 0.01, and a malformed axis is rejected. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## A score belongs to a complete system specification
 
@@ -23,6 +23,13 @@ For a descriptive two-factor decomposition of cell means, write
 \]
 
 where model and prompt effects are centered and interaction terms are the remaining differences. This is an algebraic decomposition of the observed table. Statistical inference would also need a sampling model, task-level replication and an appropriate dependence structure. Three seeds do not automatically provide three independent samples of the task population.
+
+## Key terms
+
+- **Crossed design:** Evaluating every model with every prompt on a common set of tasks and generation seeds.
+- **Interaction effect:** The part of a cell mean not explained by model and prompt main effects, here up to 0.1 in size.
+- **Generation seed:** The random seed for sampling outputs; repeated seeds are not independent samples of the task population.
+- **System specification:** The full configuration, including prompt, decoding settings, seed, corpus and parser, that a score belongs to.
 
 ## Worked case A: a prompt interaction reverses a comparison
 

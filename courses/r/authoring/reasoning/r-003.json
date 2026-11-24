@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Trace the recycled fee pattern",
+      "body": "Example 2 adds a length-two fee vector to four amounts. R repeats the shorter vector until it covers every position, which this trace makes visible.\n\n```text\nposition  amount  fees after recycling  sum\n1         10      1                     11\n2         20      2                     22\n3         30      1                     31\n4         40      2                     42\n```\n\nNothing in the output marks rows three and four as reused fees, and no warning appears because four is a multiple of two. With three amounts and two fees, R still returns 11, 22 and 31 but adds a warning that the longer object length is not a multiple of the shorter one. That warning is a side effect of the lengths, not a check of your intent, which is why the guard `length(fee) == 1L || length(fee) == length(amount)` belongs in the script."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Multiply the vector by the scalar and compare with the expected vector using `identical()`. The reference asserts `c(2, 4, 6) * 3` equals `c(6, 12, 18)`.",
+      "why": "A length-one multiplier is an intended broadcast: every element is multiplied by the same 3, so recycling is the contract rather than an accident.",
+      "wrong": "Predicting a single number such as 36 by imagining that the vector is summed first. Arithmetic operators work element by element and return a vector of the same length as the longer operand.",
+      "verify": "`print(c(2, 4, 6) * 3)` shows `[1]  6 12 18`, three values, and `length()` of the result is 3."
+    },
+    {
+      "approach": "Assert equal lengths, then add. The reference sets `fees <- c(1, 2, 3)`, checks `length(amount) == length(fees)` and expects 11, 22 and 33.",
+      "why": "With one fee per amount, each position pairs a record with its own fee, so 10 + 1, 20 + 2 and 30 + 3 are the intended row sums.",
+      "wrong": "Leaving the starter's two fees in place. `c(10, 20, 30) + c(1, 2)` returns 11, 22, 31 with a warning, and the third record is charged the first record's fee.",
+      "verify": "`stopifnot(identical(amount + fees, c(11, 22, 33)))` passes, and no warning is printed during the run."
+    },
+    {
+      "approach": "Write a small predicate that accepts a fee of length one or a fee whose length equals the amounts. The reference's `valid()` helper returns that logical.",
+      "why": "The two allowed shapes are exactly the two intended contracts in this lesson: a flat fee for everyone or one fee per record. Every other length is rejected before arithmetic runs.",
+      "wrong": "Accepting any length that divides evenly, using a remainder test such as `length(amount) %% length(fee) == 0`. That passes two fees for four records, the silent pattern from Example 2.",
+      "verify": "The reference checks `valid(amount, 2)` and `valid(amount, fees)` are TRUE and `valid(amount, c(1, 2))` is FALSE for three amounts."
+    },
+    {
+      "approach": "Compare the lengths and ask whether a two-element pattern has any meaning for the four records. Divisibility only explains why R stayed quiet.",
+      "why": "Example 2 returns 11, 22, 31 and 42 with no warning, yet nothing says records three and four should reuse the first two fees.",
+      "wrong": "Concluding that the result is valid because no warning appeared. The lack of a warning is a property of the lengths four and two, not evidence that the fee schedule repeats.",
+      "verify": "Apply the per-row rule: `length(amount) == length(fees)` is FALSE for these inputs, which is the check Example 2 asserts with `stopifnot(!valid_per_row)`."
+    },
+    {
+      "approach": "Evaluate `numeric(0) + 2` and inspect its length and type rather than its printed form.",
+      "why": "Recycling to the longer length does not apply when one operand is empty: the result has length zero, so there is nothing to add the fee to and nothing is invented.",
+      "wrong": "Expecting the scalar 2, or an NA, as if an empty vector were a zero or a missing amount. Code that then takes `result[[1]]` fails with a subscript out of bounds error.",
+      "verify": "The reference asserts `length(numeric(0) + 2) == 0L`; `print()` shows `numeric(0)` and `typeof()` is still \"double\"."
+    },
+    {
+      "approach": "Keep the identifier and the measurement in separate vectors, or later in a data frame with explicit column types, instead of one atomic vector.",
+      "why": "`c(\"A\", 2)` forces a common type and turns 2 into the text \"2\", so the measurement can no longer be added or compared numerically. The reference asserts `is.character(c(\"A\", 2))` to show the coercion.",
+      "wrong": "Calling `as.numeric()` on the combined vector to rescue the number. That produces NA for \"A\" with a coercion warning, so one value is lost to fix the other.",
+      "verify": "`is.double(c(1, 2))` returns TRUE for the separate measurement vector, and `c(\"A\", 2)[2] + 1` fails with a non-numeric argument error."
+    }
+  ]
+}

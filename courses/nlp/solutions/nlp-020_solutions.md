@@ -6,31 +6,31 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 Coverage identifies any non-abstaining source, while conflict requires at least one zero and one one. The third row is the only conflict. Reporting .25 or one-third without naming the denominator would make two correct calculations look inconsistent.
 
-**Expected:** Coverage.75,overall conflict.25 and conflict among covered1/3.
+**Expected:** Coverage .75, overall conflict .25 and conflict among covered 1/3.
 
 ## Exercise 2: Implement tie-aware voting
 
-Abstentions contribute no class evidence. A tie and no coverage share the output sentinel but should retain different diagnostic flags. A production consumer must not coerce -1 into class zero or a negative array index.
+Abstentions contribute no class evidence. A tie and no coverage share the output sentinel but should retain different diagnostic flags. A production consumer must not coerce -1 into class zero or a negative array index. Breaking ties toward class 0 would silently turn genuine disagreement into a negative label. Assert the output [1, 0, -1, -1] and inspect the separate tie and no-coverage flags.
 
-**Expected:** Outputs[1,0,-1,-1].
+**Expected:** Outputs [1, 0, -1, -1].
 
 ## Exercise 3: Inspect source correlation
 
-The numerical change shows how repetition of one cue can dominate a naive vote. It does not establish that collapsing is always the best statistical model. A learned label model needs assumptions and validation for source dependence and accuracy.
+The numerical change shows how repetition of one cue can dominate a naive vote. It does not establish that collapsing is always the best statistical model. A learned label model needs assumptions and validation for source dependence and accuracy. Treating three copies of one keyword rule as three votes outweighs an independent source. Collapse the duplicates and check that the row moves from majority 1 to abstain.
 
-**Expected:** Majority1 becomes abstain, with a written explanation of duplicated evidence.
+**Expected:** Majority 1 becomes abstain, with a written explanation of duplicated evidence.
 
 ## Exercise 4: Rank uncertainty
 
-Entropy measures uncertainty under the current predicted distribution. It does not directly measure expected labeling value or detect every confidently wrong outlier. The selection rule is a heuristic whose behavior should be inspected by class and domain.
+Entropy measures uncertainty under the current predicted distribution. It does not directly measure expected labeling value or detect every confidently wrong outlier. The selection rule is a heuristic whose behavior should be inspected by class and domain. Sorting by maximum probability descending would surface the most confident items, the opposite of the intent. Confirm p = 0.5 ranks first.
 
-**Expected:** Top two uncertainty indices[0,1]; \(p=0.5\) has maximum entropy.
+**Expected:** Top two uncertainty indices [0, 1]; \(p=0.5\) has maximum entropy.
 
 ## Exercise 5: Enforce diversity and budget
 
-The second-most-uncertain item is skipped because its family is already present. Index three is more uncertain than index two, so it fills the second slot. The explicit budget and stable ordering make the policy reproducible, but not universally optimal.
+The second-most-uncertain item is skipped because its family is already present. Index three is more uncertain than index two, so it fills the second slot. The explicit budget and stable ordering make the policy reproducible, but not universally optimal. Taking the top two by entropy alone selects two items from one family. Verify the selection is [0, 3] and that a zero budget returns [].
 
-**Expected:** Selected indices[0,3]; budget0 returns an empty batch.
+**Expected:** Selected indices [0, 3]; budget 0 returns an empty batch.
 
 ## Exercise 6: Protect independent evaluation
 

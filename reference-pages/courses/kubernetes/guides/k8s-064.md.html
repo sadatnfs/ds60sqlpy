@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Troubleshooting is a sequence of discriminating observations. Start with the caller, intended name, protocol, port and expected application result. Then identify the first layer where actual behavior differs from the model. Changing several layers at once can make the symptom disappear without explaining the cause.</p>
 <p>A useful request ladder separates name resolution, route reachability, transport connection, TLS identity, proxy routing and application semantics. Kubernetes adds controller and endpoint state that helps explain those steps. A successful test at one layer should not be promoted into a claim about every later layer.</p>
 <p>Controlled comparisons are powerful. If direct Pod traffic succeeds but Service traffic fails, focus on selector/endpoints/data-plane differences. If an internal Service request succeeds but external traffic fails, inspect the external listener and routing path. Each comparison requires the same intended application and an owned permitted probe.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Request ladder:</strong> An ordered set of checks for name resolution, route reachability, transport connection, TLS identity, proxy routing and application semantics.</li>
+<li><strong>Controlled comparison:</strong> Changing one variable between two otherwise identical requests, so a difference in outcome points to that variable.</li>
+<li><strong>First failing layer:</strong> The first rung of the request ladder where actual behavior differs from the model, which is where diagnosis should focus.</li>
+<li><strong>Layer-scoped evidence:</strong> A successful test proves only its own layer, so it cannot be promoted into a claim about every later layer.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Use a hypothesis table with expected observation if true, expected observation if false and the smallest safe check. Preserve the failure before repair. Avoid broad all-namespace commands and packet captures when an exact field or short request answers the question.</p>
 <p>A timeout is ambiguous: it can involve dropped packets, no route, DNS delay, a stalled TLS handshake or an application that never responds. A refused connection, TLS error and HTTP status narrow the phase differently. Read the actual diagnostic rather than translating every failure into service down.</p>

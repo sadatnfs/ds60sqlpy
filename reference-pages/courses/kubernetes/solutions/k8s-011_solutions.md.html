@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-identify-finite-work-controls">Exercise 1: Identify finite-work controls<a class="heading-anchor" href="#exercise-1-identify-finite-work-controls" aria-label="Link to this section">#</a></h3>
 <p>A single completion is the desired successful work count, parallelism bounds concurrent Pods, and backoff controls retries after failures. The active deadline bounds duration independently of the outer app operation deadline.</p>
 <p><strong>Expected:</strong> Starter: 1, 1, Never, 1 and 30 seconds. Edited source: 1, 1, Never, 0 and 20 seconds.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read completions and parallelism from spec, restartPolicy from the Pod template, then backoffLimit and activeDeadlineSeconds, and edit the last two.</li>
+<li><strong>Why it is correct:</strong> The starter needs one success, runs one Pod at a time, never restarts in place, allows one retry and stops at 30 seconds; the edit sets backoffLimit 0 and 20 seconds.</li>
+<li><strong>Plausible wrong approach:</strong> Setting restartPolicy to OnFailure to remove retries moves restarts into the Pod rather than removing them.</li>
+<li><strong>How to verify:</strong> Quoted values read 1, 1, Never, 0 and 20 seconds from your edited YAML.</li>
+</ul>
 <h3 id="exercise-2-verify-exact-task-output">Exercise 2: Verify exact task output<a class="heading-anchor" href="#exercise-2-verify-exact-task-output" aria-label="Link to this section">#</a></h3>
 <p>The fixed task is deterministic and has no external side effects. Its receipt connects controller state to the actual task container and a small independent ledger. It does not certify arbitrary learner code or every written exercise.</p>
 <p><strong>Expected:</strong> Owned Complete Job, controlled successful task Pod, exit 0 and exact accepted 3, rejected 2 and total 35 output.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run the success outcome and compare the output ledger against the expected values field by field.</li>
+<li><strong>Why it is correct:</strong> The fixed task is deterministic, so a correct run prints accepted 3, rejected 2 and total 35 and exits 0.</li>
+<li><strong>Plausible wrong approach:</strong> Trusting the Complete condition without reading the ledger could accept a task that exited 0 with wrong totals.</li>
+<li><strong>How to verify:</strong> Ledger fields match exactly and the task Pod&#x27;s controller ownerReference is this Run&#x27;s Job UID.</li>
+</ul>
 <h3 id="exercise-3-observe-intentional-failure">Exercise 3: Observe intentional failure<a class="heading-anchor" href="#exercise-3-observe-intentional-failure" aria-label="Link to this section">#</a></h3>
 <p>The source remains syntactically valid and the workload can start, but the task intentionally reports failure. This distinguishes runtime task failure from manifest rejection or image absence.</p>
 <p><strong>Expected:</strong> Job reaches Failed; operation reports failure and cleans its owned UID.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Change only the outcome value to failure and Run it.</li>
+<li><strong>Why it is correct:</strong> The manifest is still valid and the container starts, so the Job controller records a nonzero exit and marks the Job Failed when backoff is exhausted.</li>
+<li><strong>Plausible wrong approach:</strong> Treating Failed as a manifest problem sends you to the YAML, yet the API accepted it and the container ran.</li>
+<li><strong>How to verify:</strong> The Job condition is Failed, the container exit code is nonzero and cleanup names the same Job UID.</li>
+</ul>
 <h3 id="exercise-4-explain-retry-semantics">Exercise 4: Explain retry semantics<a class="heading-anchor" href="#exercise-4-explain-retry-semantics" aria-label="Link to this section">#</a></h3>
 <p>The Job controller can create another Pod even when the kubelet will not restart a failed container in the same Pod. Production side effects must tolerate duplicate attempts rather than assuming the controller provides exactly-once execution.</p>
 <p><strong>Expected:</strong> At most the declared retry budget is requested; Never does not forbid a replacement Pod attempt.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Count new Pods per backoffLimit value, keeping restartPolicy Never in mind.</li>
+<li><strong>Why it is correct:</strong> With Never, each failed attempt is a separate Pod, so backoffLimit 0 allows one Pod and backoffLimit 1 allows up to two.</li>
+<li><strong>Plausible wrong approach:</strong> Reading Never as no retries at all confuses kubelet restarts within a Pod with Job controller retries across Pods.</li>
+<li><strong>How to verify:</strong> Expect at most one task Pod at backoffLimit 0 and at most two at backoffLimit 1, with restartCount staying 0 in each.</li>
+</ul>
 <h3 id="exercise-5-review-the-suspended-cronjob">Exercise 5: Review the suspended CronJob<a class="heading-anchor" href="#exercise-5-review-the-suspended-cronjob" aria-label="Link to this section">#</a></h3>
 <p>Suspension affects future scheduling. It does not erase an already running Job or prove that the schedule previously fired. A live recurring lab needs a separate host capability and multiple observed timestamps/results.</p>
 <p><strong>Expected:</strong> A five-minute UTC schedule is configured but suspended; existing active Jobs require separate handling.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read schedule, timeZone, suspend, concurrencyPolicy and startingDeadlineSeconds from the fixture and state each effect.</li>
+<li><strong>Why it is correct:</strong> The five-minute schedule in UTC is defined, but suspend true stops new Jobs from being created, and existing Jobs keep running.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming suspend deletes active Jobs or proves past runs would mistake a future scheduling switch for cleanup or history.</li>
+<li><strong>How to verify:</strong> Each field is named with its effect and the conclusion says no new Job starts while suspended.</li>
+</ul>
 <h3 id="exercise-6-design-an-idempotent-handoff">Exercise 6: Design an idempotent handoff<a class="heading-anchor" href="#exercise-6-design-an-idempotent-handoff" aria-label="Link to this section">#</a></h3>
 <p>Use an application-level identity and an atomic or otherwise justified publication protocol. A final successful Job count cannot establish that an external sink received exactly one effect. The teaching task avoids that external boundary and labels the limitation.</p>
 <p><strong>Expected:</strong> A stable logical-work key, commit boundary, replay policy and acceptance ledger are named.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Give each logical unit of work a stable key and publish its effect through a check that rejects a key already committed.</li>
+<li><strong>Why it is correct:</strong> The Job controller may start a second Pod after an attempt that already wrote its effect, so the sink must dedupe on the key.</li>
+<li><strong>Plausible wrong approach:</strong> Relying on backoffLimit 0 to prevent duplicates fails because a node loss or deadline can still yield a second Pod.</li>
+<li><strong>How to verify:</strong> Simulate a crash after the write and before the acknowledgment; the retry finds the key and publishes nothing new.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A failed task exit, a deadline exceeded condition and a missing image are different failures. The fixed failure mode demonstrates application failure with bounded cleanup. A timeout of the outer operation is another boundary, with a separate cleanup reserve.</p>
 <p>Do not hide failed attempts by reading only the most recent success counter, or claim that printing the expected text proves task correctness. The fixed reference uses independent expected counts and ties logs to a verified owned successful Pod. Written reasoning about recurrence and idempotency remains outside automatic grading.</p></article>

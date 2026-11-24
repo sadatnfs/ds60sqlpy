@@ -6,7 +6,7 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 The class-zero documents contain three thanks events and no urgent events. Class one contains three urgent and one thanks. Each class contains two documents, so the prior is balanced despite unequal total token counts. Keeping those units separate is essential to the model.
 
-**Expected:** Counts [[0,3],[3,1]] in class order[0,1]; priors [.5,.5].
+**Expected:** Counts [[0, 3], [3, 1]] in class order [0, 1]; priors [.5, .5].
 
 ## Exercise 2: Apply Laplace smoothing
 
@@ -18,7 +18,7 @@ Smoothing assigns a nonzero urgent probability to class zero despite no observed
 
 The two unnormalized weights are 0.1 and one-third. Their sum is \(\frac{13}{30}\), giving the stated fractions. Logsumexp computes the same normalization without underflow. Matching one argmax alone would miss a wrong probability scale, so compare the full vector.
 
-**Expected:** Posterior \([\frac{3}{13},\frac{10}{13}]\) for classes[0,1].
+**Expected:** Posterior \([\frac{3}{13},\frac{10}{13}]\) for classes [0, 1].
 
 ## Exercise 4: Verify library parity
 
@@ -42,7 +42,7 @@ The missing not coordinate makes the messages identical to the model. Conditiona
 
 Multinomial Naive Bayes is a compact probabilistic baseline for nonnegative text counts. It models the class prior and the distribution of token events within each class, then combines those pieces with Bayes' rule. Its conditional-independence assumption is strong, but the resulting classifier can be useful even when the language is not actually generated independently word by word.
 
-The feature order is [urgent,thanks]. Four documents have count rows [2,1],[1,0],[0,2],[0,1] and labels [1,1,0,0]. We derive the fitted probabilities by hand and compare them with a real scikit-learn MultinomialNB. This establishes implementation parity on a known fixture, not a claim of calibrated confidence or deployment accuracy.
+The feature order is [urgent, thanks]. Four documents have count rows [2, 1], [1, 0], [0, 2], [0, 1] and labels [1, 1, 0, 0]. We derive the fitted probabilities by hand and compare them with a real scikit-learn MultinomialNB. This establishes implementation parity on a known fixture, not a claim of calibrated confidence or deployment accuracy.
 
 Separate the prior probability of a class from the likelihood of tokens under that class. A word can favor an urgent class while a strong nonurgent prior still makes the posterior nonurgent. Class imbalance and the target population therefore matter to the decision, not just the presence of a distinctive keyword.
 

@@ -243,23 +243,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Reconcile the two role-specific cost rows.</p>
 <p>25 + 19 = 44, matching the unrestricted constant-product-cost calculation.</p>
+<p><strong>Why it fits this model:</strong> NorthViewer allows Ada and Cy and SouthViewer allows Bo. Di (West) has no sales, so the two roles cover every sales line once.</p>
+<p><strong>Tempting mistake:</strong> Adding role rows as a reconciliation where principals can map to overlapping regions; overlap would count lines twice.</p>
+<p><strong>How to confirm:</strong> Cost 25 + 19 = 44 and revenue 107 + 80 = 187, matching the unrestricted results.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add an unmatched principal to the acceptance matrix.</p>
 <p>Expected Customer and Sales populations are empty under that policy; record the corresponding BLANK measures and real role-test requirement.</p>
+<p><strong>Why it fits this model:</strong> The declared policy denies unmapped principals, so every measure sees empty Customer and Sales tables.</p>
+<p><strong>Tempting mistake:</strong> Expecting zeros, or the unrestricted 187, for an unmapped principal.</p>
+<p><strong>How to confirm:</strong> The expected row is Revenue, LineCost, GroupedCost and AfterCustomerFilterRemoval all BLANK, with a note that a real role test is still required.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Produce an offline change-review packet for the grouped-cost rewrite.</p>
 <p>Include the exact formulas, constant-rate assumption, missing-key/rate policy, North/South and ordinary-filter cases, hashes, rollback plan and explicit unperformed external checks.</p>
+<p><strong>Why it fits this model:</strong> The packet ties formula, assumptions and expected results together so another reviewer can check each claim.</p>
+<p><strong>Tempting mistake:</strong> A packet with only the new formula and the word &quot;faster&quot;, which does not show what must stay equal.</p>
+<p><strong>How to confirm:</strong> Include unrestricted 44 and 44, North 25 and 25, South 19 and 19, unmapped BLANK, the one-cost-per-product assumption, and the checks not yet run.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose approving a release because the exported DAX matches the reference text.</p>
 <p>It proves only source identity. Actual model loading, role enforcement, refresh and performance need their own observed evidence.</p>
+<p><strong>Why it fits this model:</strong> Matching text proves the source is the one reviewed. It says nothing about how an engine loads or secures it.</p>
+<p><strong>Tempting mistake:</strong> Approving the release because the exported DAX is byte-identical to the reference.</p>
+<p><strong>How to confirm:</strong> In the target service, run the role rows: NorthViewer revenue 107, line and grouped cost 25 each, 107 after customer filter removal; SouthViewer revenue 80, costs 19 each, 80 after removal.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain the acceptance impact of changing a relationship to bidirectional.</p>
 <p>Revisit the full context/role matrix and ambiguity analysis; do not assume a previously correct formula retains identical behavior.</p>
+<p><strong>Why it fits this model:</strong> Customer to GroupMembership is single-direction, so an Audience filter does not reach Sales today. Making it bidirectional lets it.</p>
+<p><strong>Tempting mistake:</strong> Assuming the measures still return what they did. Under NorthViewer, a visual by Audience currently repeats 107 for each audience; after the change Newsletter (Ada, Bo) shows 51 and Prospects (Bo, Cy) shows 56.</p>
+<p><strong>How to confirm:</strong> Rerun the full matrix after the change, including role rows and audience breakdowns (unrestricted Newsletter 131 and Prospects 136).</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Describe a bounded next extension to this model.</p>
 <p>For example, add return-event dates with an explicit role, fixture, reconciliation and expected matrix before attempting external model execution. Avoid importing an unrelated platform merely to increase scope.</p>
+<p><strong>Why it fits this model:</strong> One new requirement with its own evidence is a bounded extension. Return-event dates fill the gap from the commercial capstone.</p>
+<p><strong>Tempting mistake:</strong> Adding a live platform deployment as the next step, which increases scope without answering a new business question.</p>
+<p><strong>How to confirm:</strong> Add ReturnDate to R1 and R2 with a stated date role, then check that refunds still total 13 and adjusted revenue 174 across refund months.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

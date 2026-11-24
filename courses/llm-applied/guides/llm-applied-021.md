@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-020`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-020` (Fine-tuning embeddings and a small reranker). They introduce the notation this lesson needs for pinned revision and offline asset manifest.
 
 ## Learning objectives
 
@@ -74,7 +74,7 @@ Keep the default chapter as a written review. The separate pretrained fixture ha
 
 **Pinned revision:** An immutable model-repository commit identifying exact source artifacts.
 
-**Offline asset manifest:** Local filenames,hashes,license note and revision used by a run.
+**Offline asset manifest:** Local filenames, hashes, license note and revision used by a run.
 
 **Chat-template alignment:** Agreement between rendered prompt prefix and full conversation tokens.
 
@@ -82,9 +82,9 @@ Keep the default chapter as a written review. The separate pretrained fixture ha
 
 ## How to run this lesson
 
-Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.
+Use the reading worksheet `courses/llm-applied/lessons/llm-applied-021.md`. *Inspect the pinned artifact contract*, *Separate acquisition from execution* and *Verify chat-template boundaries* are text cases; no execution or model download is required.
 
-Read the three worked cases in order and write the assumptions, intermediate reasoning and conclusion for each one. These are text cases, not programs to execute. Compare your written interpretation with the stated expected observations, then answer the six exercises in your saved worksheet. A correct argument must state its evidence boundary; source presence does not establish a model run. The optional pretrained recipe is a separate, deliberately prepared execution path with its own artifacts and receipts. Reading this chapter does not run or qualify that recipe.
+Read *Inspect the pinned artifact contract*, *Separate acquisition from execution* and *Verify chat-template boundaries* in order, writing the assumptions and conclusion for each. Compare them with the stated observations, beginning with Exact 40-character revision and Apache-2.0 card note are present. Then answer the six cases, ending with *Distinguish an unexecuted learner scenario*. These are text cases, not programs to execute. The optional pretrained recipe is a separate, deliberately prepared execution path; reading this chapter does not run or qualify it.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -161,21 +161,24 @@ assert len(full_ids) > len(prompt_ids)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: exact 40-character revision and Apache-2.0 card note are present. this hypothetical learner run remains unverified; no generated success receipt. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Separate acquisition from execution*, predict its result from the prompt alone: Trace the optional workflow from dependency preparation to snapshot acquisition to offline training. Write the guess beside the stated outcome (training requires existing local assets and never falls back to a remote model ID). Then predict how the decisive case, *Distinguish an unexecuted learner scenario*, should end: For a hypothetical new learner who has only reviewed scripts, write the status without overwriting the separately qualified maintainer recipe. For optional pretrained-model adaptation with pinned offline artifacts, the finish condition is: Exact 40-character revision and Apache-2.0 card note are present. Pretrained execution unverified; no generated success receipt.
 
 ## Exercises
 
 1. **Inspect the pinned artifact contract.** Read the supplied model manifest and identify model ID, revision and license note before any download.
    **Expected:** exact 40-character revision and Apache-2.0 card note are present.
    **Verify:** Save the reasoning table for exercise 1, including exact 40-character revision and Apache-2.0 card note are present.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Separate acquisition from execution.** Trace the optional workflow from dependency preparation to snapshot acquisition to offline training.
    **Expected:** training requires existing local assets and never falls back to a remote model ID.
    **Verify:** Save the reasoning table for exercise 2, including training requires existing local assets and never falls back to a remote model ID.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Verify chat-template boundaries.** For each local prompt/completion record, compare full conversation token IDs with the prompt rendered usingadd_generation_prompt=True.
    **Expected:** prompt IDs are an exact prefix; at least one completion token remains.
    **Verify:** Save the reasoning table for exercise 3, including prompt IDs are an exact prefix; at least one completion token remains.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Inspect trainer labels before training.** Read one collated batch and compare labels with the prompt/completion boundary.
    **Expected:** prompt labels-100; active completion labels match their input token IDs.
@@ -197,19 +200,21 @@ If the generated answer is wrong despite supplied evidence, score that failure e
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate pinned revision and offline asset manifest for the fixture in *Inspect the pinned artifact contract*. Hint 2: change one literal in *Separate acquisition from execution* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Inspect trainer labels before training*, with its stated result (prompt labels-100; active completion labels match their input token IDs). If *Distinguish an unexecuted learner scenario* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Pinned revision, Offline asset manifest, Chat-template alignment using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain pinned revision, offline asset manifest and chat-template alignment using *Inspect the pinned artifact contract*. Recompute its result (exact 40-character revision and Apache-2.0 card note are present) from the inputs. Change one input in *Verify chat-template boundaries* and predict whether the stated result (prompt IDs are an exact prefix; at least one completion token remains) still holds. Say which part of optional pretrained-model adaptation with pinned offline artifacts the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-020` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Inspect the pinned artifact contract* cannot be reconstructed without the solution, revisit `llm-applied-020` (Fine-tuning embeddings and a small reranker). Otherwise keep the six observations from optional pretrained-model adaptation with pinned offline artifacts and continue to `llm-applied-022` (Structured tools for extraction, aggregation and data-science work).
 
 ## Sources and verification status
 
-API and mechanism reference: [TRL SFTTrainer 0.24.0](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for pinned revision: [TRL SFTTrainer 0.24.0](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer), reviewed 2026-10-22. The fixtures for *Inspect the pinned artifact contract*, *Separate acquisition from execution* and *Verify chat-template boundaries* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 ## Complete optional scripts and setup
 

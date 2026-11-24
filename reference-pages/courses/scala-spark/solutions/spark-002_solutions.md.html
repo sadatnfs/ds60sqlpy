@@ -221,35 +221,36 @@ println<span class="syntax-punctuation">(</span>label<span class="syntax-punctua
 <p><strong>Expected:</strong> short; only one branch supplies the assigned String.</p>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-the-basket">Exercise 1: Compute the basket<a class="heading-anchor" href="#exercise-1-compute-the-basket" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 1, 125L, 200L, 75L.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 1, total is 400L.</p>
-<p><strong>Verify:</strong> For spark-002 Exercise 1, assert total==400L and print the named value.</p>
+<p><strong>Inputs/evidence:</strong> 125L, 200L, 75L.</p>
+<p><strong>Expected result/shape:</strong> Total is 400L.</p>
+<p><strong>Verify:</strong> Assert total==400L and print the named value.</p>
 <p>Addition preserves all three prices. A literal String &quot;400&quot; can look correct when printed but is not the required Long result.</p>
 <h4 id="exercise-2-preserve-the-type-boundary">Exercise 2: Preserve the type boundary<a class="heading-anchor" href="#exercise-2-preserve-the-type-boundary" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 2, 2147483647L+1L and an intentionally reviewed Int-only variant.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 2, Long result 2147483648L; reject relying on the overflowing Int value as money.</p>
-<p><strong>Verify:</strong> For spark-002 Exercise 2, run the Long assertion; explain why the narrower arithmetic is a different contract.</p>
+<p><strong>Inputs/evidence:</strong> 2147483647L+1L and an intentionally reviewed Int-only variant.</p>
+<p><strong>Expected result/shape:</strong> Long result 2147483648L; reject relying on the overflowing Int value as money.</p>
+<p><strong>Verify:</strong> Run the Long assertion; explain why the narrower arithmetic is a different contract.</p>
 <p>The expected number exceeds the positive Int range. This small example shows type choice before data grows, without requiring an overflow as a valid answer.</p>
 <h4 id="exercise-3-calculate-remaining-budget">Exercise 3: Calculate remaining budget<a class="heading-anchor" href="#exercise-3-calculate-remaining-budget" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 3, budget 450L, total 400L.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 3, remaining 50L.</p>
-<p><strong>Verify:</strong> For spark-002 Exercise 3, assert the difference, not merely the total.</p>
-<p>A separate immutable budget keeps the meaning of each input visible. Subtract total from budget; reversing operands yields-50 and a different statement.</p>
+<p><strong>Inputs/evidence:</strong> Budget 450L, total 400L.</p>
+<p><strong>Expected result/shape:</strong> Remaining 50L.</p>
+<p><strong>Verify:</strong> Assert the difference, not merely the total.</p>
+<p>A separate immutable budget keeps the meaning of each input visible. Subtract total from budget; reversing operands yields -50 and a different statement.</p>
 <h4 id="exercise-4-return-a-branch-value">Exercise 4: Return a branch value<a class="heading-anchor" href="#exercise-4-return-a-branch-value" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 4, remaining 50L, threshold 0L.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 4, String message is within budget.</p>
-<p><strong>Verify:</strong> For spark-002 Exercise 4, assert the exact String and its nonnegative condition.</p>
+<p><strong>Inputs/evidence:</strong> Remaining 50L, threshold 0L.</p>
+<p><strong>Expected result/shape:</strong> String message is within budget.</p>
+<p><strong>Verify:</strong> Assert the exact String and its nonnegative condition.</p>
 <p>Both branches must return meaningful labels. Writing println inside each branch would make the assigned result Unit rather than the intended String.</p>
 <h4 id="exercise-5-diagnose-reassignment">Exercise 5: Diagnose reassignment<a class="heading-anchor" href="#exercise-5-diagnose-reassignment" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 5, one immutable binding and a proposed reassignment.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with 350L.</p>
-<p><strong>Verify:</strong> For spark-002 Exercise 5, retain the compiler error category and show the new-name repair; do not include broken code in the final reference.</p>
+<p><strong>Inputs/evidence:</strong> One immutable binding and a proposed reassignment.</p>
+<p><strong>Expected result/shape:</strong> Compile-time rejection; repaired code uses a new name revisedBudget with 350L.</p>
+<p><strong>Verify:</strong> Retain the compiler error category and show the new-name repair; do not include broken code in the final reference.</p>
 <p>Reassignment violates val. The lesson asks for a new scenario, so name that scenario rather than replacing the original input or switching to var without a reason.</p>
 <h4 id="exercise-6-transfer-the-budget">Exercise 6: Transfer the budget<a class="heading-anchor" href="#exercise-6-transfer-the-budget" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 6, same 400L basket, new 350L budget.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 6, remaining-50L and over budget label.</p>
-<p><strong>Verify:</strong> For spark-002 Exercise 6, assert both changed outputs while the original total stays 400L.</p>
+<p><strong>Inputs/evidence:</strong> Same 400L basket, new 350L budget.</p>
+<p><strong>Expected result/shape:</strong> Remaining -50L and over budget label.</p>
+<p><strong>Verify:</strong> Assert both changed outputs while the original total stays 400L.</p>
 <p>Only the budget changes. A result that also changes spending has mixed the two scenarios; preserve the original bindings to expose that error.</p>
+<p>Notice that the same <code>if</code> expression from Exercise 4 now produces the other label without any edit to its code. The label depends only on the sign of the remaining value, so a negative Long selects the over budget branch. If your message still reads within budget, check whether the comparison uses the new remaining value or a stale binding from the first scenario.</p>
 <h3 id="retrieval-review">Retrieval review<a class="heading-anchor" href="#retrieval-review" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>
 <p>A complete review accounts for every named expected value and one deliberately incorrect alternative. A process exit by itself does not grade reasoning.</p></article>

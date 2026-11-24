@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-056.md</code>.</p>
 <h3 id="exercise-1-draw-the-trust-boundary-around-actor-identity-and-form-values">Exercise 1: Draw the trust boundary around actor identity and form values.<a class="heading-anchor" href="#exercise-1-draw-the-trust-boundary-around-actor-identity-and-form-values" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The adapter verifies identity; the application validates proposed domain values.</p>
+<p><strong>Approach:</strong> Mark actor id as trusted because the adapter verified it, and mark every form value as untrusted data that the core must validate.</p>
 <p><strong>Why:</strong> Identity comes from the adapter after verification, while form values are untrusted proposals that the application validates.</p>
+<p><strong>Plausible wrong approach:</strong> Placing actor id inside the form input array fails because the core can no longer tell a verified value from a submitted one.</p>
+<p><strong>How to verify:</strong> The <code>createPlan</code> signature takes actor id and input as separate parameters with different names.</p>
 <h3 id="exercise-2-write-the-acceptance-matrix-before-implementing-the-service">Exercise 2: Write the acceptance matrix before implementing the service.<a class="heading-anchor" href="#exercise-2-write-the-acceptance-matrix-before-implementing-the-service" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Normal, invalid and cross-owner cases have explicit observations.</p>
+<p><strong>Approach:</strong> Write rows for valid, invalid and cross owner cases, each with the input, the expected result and the expected row count.</p>
 <p><strong>Why:</strong> An acceptance matrix written first prevents the tests from simply copying what the implementation does.</p>
+<p><strong>Plausible wrong approach:</strong> Writing the matrix after the code passes fails because it then records what the code does instead of what it should do.</p>
+<p><strong>How to verify:</strong> Each matrix row has an observable outcome, and the invalid row expects zero new rows.</p>
 <h3 id="exercise-3-build-a-tested-planner-core-with-validation-and-prepared-storage">Exercise 3: Build a tested planner core with validation and prepared storage.<a class="heading-anchor" href="#exercise-3-build-a-tested-planner-core-with-validation-and-prepared-storage" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Accepted plans persist in the disposable database and rejected inputs create no rows.</p>
+<p><strong>Approach:</strong> Validate into a complete value, insert with a prepared statement, and run the matrix against a fresh memory database.</p>
 <p><strong>Why:</strong> Validating before mutation means a rejected request leaves no partial rows.</p>
+<p><strong>Plausible wrong approach:</strong> Sharing one database across all test cases fails because rows from earlier cases change counts in later ones.</p>
+<p><strong>How to verify:</strong> Every matrix row passes, and the invalid case leaves <code>SELECT COUNT(*) FROM plans</code> unchanged.</p>
 <h3 id="exercise-4-diagnose-a-service-that-writes-before-validating-all-fields">Exercise 4: Diagnose a service that writes before validating all fields.<a class="heading-anchor" href="#exercise-4-diagnose-a-service-that-writes-before-validating-all-fields" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Move complete validation before mutation or ensure a correctly owned transaction aborts the entire unit.</p>
+<p><strong>Approach:</strong> Move all validation ahead of the first write, or wrap the writes in a transaction that rolls back on any failure.</p>
 <p><strong>Why:</strong> A write before validation completes can leave partial state unless one transaction rolls it back.</p>
+<p><strong>Plausible wrong approach:</strong> Deleting the partial row in a catch block fails because a crash between insert and delete leaves the orphan anyway.</p>
+<p><strong>How to verify:</strong> Minutes of 500 now raise the rejection and the plans table has the same row count as before.</p>
 <h3 id="exercise-5-test-cross-owner-retrieval-and-an-invalid-duration">Exercise 5: Test cross-owner retrieval and an invalid duration.<a class="heading-anchor" href="#exercise-5-test-cross-owner-retrieval-and-an-invalid-duration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> No other actor&#x27;s row is exposed and the invalid request changes no stored state.</p>
+<p><strong>Approach:</strong> Store a plan for actor 1, request it as actor 2, then submit minutes of -1 and count rows before and after.</p>
 <p><strong>Why:</strong> Owner scoping hides other actors&#x27; rows, and an invalid request must leave the row count unchanged.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only that actor 2&#x27;s request did not throw fails because it might have returned actor 1&#x27;s plan.</p>
+<p><strong>How to verify:</strong> Actor 2 receives null, and the count is the same before and after the invalid request. Actor 1 still receives the plan, confirming the scope blocks only the other actor.</p>
 <h3 id="exercise-6-explain-the-remaining-work-before-this-core-becomes-a-deployed-application">Exercise 6: Explain the remaining work before this core becomes a deployed application.<a class="heading-anchor" href="#exercise-6-explain-the-remaining-work-before-this-core-becomes-a-deployed-application" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Real HTTP, session, CSRF, persistence, concurrency, accessibility and operational acceptance remain separate integration tasks.</p>
+<p><strong>Approach:</strong> List each production concern the core leaves out, and name the integration test or review that would cover it.</p>
 <p><strong>Why:</strong> Real HTTP handling, sessions, CSRF, durable storage, concurrency, accessibility and operations each need their own acceptance tests.</p>
+<p><strong>Plausible wrong approach:</strong> Calling the core deployable because the matrix passes fails because no HTTP request, session or real database was involved.</p>
+<p><strong>How to verify:</strong> Your list covers HTTP, sessions, CSRF, persistence, concurrency and accessibility, each with a planned check.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-056_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

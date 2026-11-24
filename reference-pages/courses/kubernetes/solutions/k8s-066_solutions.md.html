@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-the-entire-request-path-with-address-and-port-roles">Exercise 1: Predict the entire request path with address and port roles.<a class="heading-anchor" href="#exercise-1-predict-the-entire-request-path-with-address-and-port-roles" aria-label="Link to this section">#</a></h3>
 <p>A complete path distinguishes node, Pod, Service and public entrypoint addresses. Do not collapse them into one generic IP.</p>
 <p><strong>Expected:</strong> Every hop names its caller, destination and responsible component.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name the caller, destination address and port and responsible component at every hop.</li>
+<li><strong>Why it is correct:</strong> Each hop can rewrite addresses or ports, so naming them shows where a mismatch would occur.</li>
+<li><strong>Plausible wrong approach:</strong> Describing the path as client to app hides the Service, proxy and Pod hops.</li>
+<li><strong>How to verify:</strong> Every hop has caller, destination and component.</li>
+</ul>
 <h3 id="exercise-2-classify-available-and-unavailable-lab-capabilities">Exercise 2: Classify available and unavailable lab capabilities.<a class="heading-anchor" href="#exercise-2-classify-available-and-unavailable-lab-capabilities" aria-label="Link to this section">#</a></h3>
 <p>An honest capability inventory prevents fake runtime claims and accidental installation or cloud provisioning.</p>
 <p><strong>Expected:</strong> Controllers, policy enforcement, dual-stack and external routing are explicit.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Mark which controllers, policy enforcement, dual-stack support and external routing the lab really has.</li>
+<li><strong>Why it is correct:</strong> Lessons can only verify capabilities that are present, so missing ones must be labeled.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming a LoadBalancer or policy enforcer exists leads to claims nothing tested.</li>
+<li><strong>How to verify:</strong> Each capability is marked available or unavailable.</li>
+</ul>
 <h3 id="exercise-3-produce-a-complete-architecture-and-acceptance-packet">Exercise 3: Produce a complete architecture and acceptance packet.<a class="heading-anchor" href="#exercise-3-produce-a-complete-architecture-and-acceptance-packet" aria-label="Link to this section">#</a></h3>
 <p>The packet should be usable by another learner with the documented prepared environment, without ambient credentials or hidden state.</p>
 <p><strong>Expected:</strong> Diagram, manifests, ownership ledger, checks and limitations align.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Assemble the diagram, manifests, ownership ledger, checks and limitations so they agree.</li>
+<li><strong>Why it is correct:</strong> Each part must describe the same resources and ports, or the packet contradicts itself.</li>
+<li><strong>Plausible wrong approach:</strong> Updating manifests without the diagram leaves reviewers checking a different system.</li>
+<li><strong>How to verify:</strong> The parts are consistent with each other.</li>
+</ul>
 <h3 id="exercise-4-diagnose-and-repair-the-single-target-port-fault">Exercise 4: Diagnose and repair the single target-port fault.<a class="heading-anchor" href="#exercise-4-diagnose-and-repair-the-single-target-port-fault" aria-label="Link to this section">#</a></h3>
 <p>Preserve the failure and keep other fields unchanged. This establishes causality more clearly than recreating every resource.</p>
 <p><strong>Expected:</strong> The first incorrect mapping is found and a fresh request verifies repair.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Walk the path until the Service targetPort no longer matches the container listener, then fix that field.</li>
+<li><strong>Why it is correct:</strong> The first incorrect mapping is the fault, and a fresh request after the fix proves repair.</li>
+<li><strong>Plausible wrong approach:</strong> Changing the container port and the Service together can hide which side was wrong.</li>
+<li><strong>How to verify:</strong> The fix touches one field, and a new request succeeds.</li>
+</ul>
 <h3 id="exercise-5-verify-isolation-with-both-positive-and-negative-flows">Exercise 5: Verify isolation with both positive and negative flows.<a class="heading-anchor" href="#exercise-5-verify-isolation-with-both-positive-and-negative-flows" aria-label="Link to this section">#</a></h3>
 <p>A policy object existing or one successful request cannot establish isolation. Keep the implementation and caller identities in the record.</p>
 <p><strong>Expected:</strong> Allowed traffic succeeds and the denied owned case fails under an enforcing CNI.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run one flow the policy allows and one owned flow it denies, under a named enforcing CNI.</li>
+<li><strong>Why it is correct:</strong> Only the denied result shows enforcement, since allowed traffic also passes without any policy.</li>
+<li><strong>Plausible wrong approach:</strong> Testing only the allowed flow proves nothing on a CNI that ignores policies.</li>
+<li><strong>How to verify:</strong> The allowed flow succeeds and the denied flow fails.</li>
+</ul>
 <h3 id="exercise-6-teach-the-system-and-defend-its-evidence-limits">Exercise 6: Teach the system and defend its evidence limits.<a class="heading-anchor" href="#exercise-6-teach-the-system-and-defend-its-evidence-limits" aria-label="Link to this section">#</a></h3>
 <p>Independent understanding includes recognizing what remains unqualified. A good operator can stop at a missing capability without inventing success or widening authority.</p>
-<p><strong>Expected:</strong> Explain mechanisms, current results, untested platforms and scoped cleanup.</p></article>
+<p><strong>Expected:</strong> Explain mechanisms, current results, untested platforms and scoped cleanup.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Explain mechanisms, present current results, list untested platforms and describe scoped cleanup.</li>
+<li><strong>Why it is correct:</strong> Clear limits let readers know which claims are proven here and which still need testing.</li>
+<li><strong>Plausible wrong approach:</strong> Presenting local lab results as valid for every cloud platform overclaims.</li>
+<li><strong>How to verify:</strong> The explanation covers mechanisms, results, untested platforms and cleanup.</li>
+</ul></article>
   </main>
 </body>
 </html>

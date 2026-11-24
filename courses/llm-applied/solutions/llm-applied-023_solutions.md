@@ -1,6 +1,6 @@
 # llm-applied-023: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for domain assistant boundaries: freshness, injection, budgets and traces only after attempting *Check evidence freshness* through *Make stale evidence produce abstention*. A discrepancy in *Reject stale and future evidence* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-023_solution.py` runs the assertions; this page explains why they test freshness policy and injected clock.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Use timezone-aware UTC datetimes and reject naive timestamps. Compareage=now-pub
 
 ## Trace temporal admission, work consumption and diagnosis
 
-The freshness helper computes age=now-published and accepts0<=age<=maximum_age. Both boundaries are inclusive. At a two-day limit, a source exactly two days old is admitted; a source two days plus one microsecond old is not. A future publication has negative age and fails rather than remaining perpetually fresh. These comparisons implement a chosen policy, not a test that the document is factually correct.
+The freshness helper computes age=now-published and accepts 0<=age<=maximum_age. Both boundaries are inclusive. At a two-day limit, a source exactly two days old is admitted; a source two days plus one microsecond old is not. A future publication has negative age and fails rather than remaining perpetually fresh. These comparisons implement a chosen policy, not a test that the document is factually correct.
 
 The supplied fixtures use timezone-aware UTC datetimes. Rejection of naive timestamps prevents one obvious ambiguity, but a complete real-time interface also needs normalization and a policy for source clocks. Civil-time transitions and ambiguous local timestamps deserve separate tests if non-UTC input is supported. An aware timestamp alone should not be described as a complete clock-quality guarantee.
 
@@ -34,7 +34,7 @@ The counter measures admitted attempts when consume is called before an operatio
 
 The trace helper retains request_id, corpus_version, policy, result and excludes fields named secret or source_text. That is a useful key-level allowlist, but it does not inspect the contents of the allowed values. If a raw private question is placed inside request_id, the allowlist will retain it. A production trace schema therefore needs typed identifiers, value-length limits, permitted categories and an access/retention policy, not merely approved field names.
 
-Authorization and freshness are independent gates. The final example combines an authorized source with stale=False admission, resulting in unknown. An error response should explain the failure category without revealing restricted source identities or copying content into logs. The exact user-visible reason may need to distinguish absence, staleness and forbidden access internally while preserving the outward disclosure policy.
+Authorization and freshness are independent gates. The final example combines an authorized source with fresh=False, resulting in unknown. An error response should explain the failure category without revealing restricted source identities or copying content into logs. The exact user-visible reason may need to distinguish absence, staleness and forbidden access internally while preserving the outward disclosure policy.
 
 ### Interview reasoning with explanatory answers
 
@@ -77,7 +77,7 @@ assert not fresh(now + timedelta(hours=1), now, timedelta(days=2))
 
 ## Exercise 3: Enforce a three-call budget
 
-The question is: Consume exactly3 operations, then attempt a fourth.
+The question is: Consume exactly 3 operations, then attempt a fourth.
 
 The failing request does not perform work first and report the overrun afterward. Real execution also needs bounded duration and cancellation, which this counter does not implement.
 
@@ -94,9 +94,9 @@ else:
 assert budget.used == 3
 ```
 
-**Expected:** used3; fourth raisesRuntimeError before increment.
+**Expected:** used 3; fourth raises `RuntimeError` before increment.
 
-**Verify:** Compare the computed values or written argument with used3; fourth raisesRuntimeError before increment.
+**Verify:** Compare the computed values or written argument with used 3; fourth raises `RuntimeError` before increment.
 
 ## Exercise 4: Reject naive timestamp assumptions
 
@@ -146,7 +146,7 @@ assert (
 
 ## Exercise 6: Make stale evidence produce abstention
 
-The question is: Combine authorizedTrue withfreshFalse and require both before answering.
+The question is: Combine authorized True with fresh=False and require both before answering.
 
 Authorization and freshness are independent gates. A permitted but stale source should not be treated as current merely because it is accessible.
 
@@ -165,4 +165,4 @@ assert result["reason"] == "stale evidence"
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Enforce a three-call budget* and predict how the result changes before checking it; the unchanged inputs give: used 3; fourth raises `RuntimeError` before increment. Keep the original *Make stale evidence produce abstention* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

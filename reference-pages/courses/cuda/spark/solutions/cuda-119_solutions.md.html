@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-resource-share-slots">Exercise 1: Compute resource-share slots<a class="heading-anchor" href="#exercise-1-compute-resource-share-slots" aria-label="Link to this section">#</a></h3>
 <p>One divided by 0.25 gives four accounting slots.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute resource-share slots</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute resource-share slots: an executor with one GPU and tasks requesting <code>spark.task.resource.gpu.amount = 0.25</code> admits <code>1/0.25 = 4</code> tasks by GPU accounting.</p>
+<p><strong>Why it is correct here.</strong> Spark&#x27;s resource scheduler treats the GPU as a divisible amount for admission. Four tasks of one quarter each exhaust the executor&#x27;s one unit.</p>
+<p><strong>A plausible wrong approach.</strong> Reading 0.25 as a quarter of the device&#x27;s memory reserved for each task treats an admission count as a hardware partition, which Spark does not create.</p>
+<p><strong>How to verify.</strong> The reference uses <code>Fraction</code> to compute <code>slots == 4</code> exactly. Check the executor&#x27;s task count in the Spark UI while a stage runs.</p>
 <h3 id="exercise-2-compare-cpu-and-gpu-limits">Exercise 2: Compare CPU and GPU limits<a class="heading-anchor" href="#exercise-2-compare-cpu-and-gpu-limits" aria-label="Link to this section">#</a></h3>
 <p>The effective bound includes all constraints.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare CPU and GPU limits</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Combine CPU and GPU limits: the effective number of concurrent tasks is the minimum of GPU shares, executor cores divided by cores per task, and the plugin&#x27;s concurrent GPU task limit; with a plugin limit of 2 the active bound is <code>min(4, 2) = 2</code>.</p>
+<p><strong>Why it is correct here.</strong> Each control gates a different resource. Spark may run four tasks, but the plugin lets only two use the GPU at once, so the others wait inside the plugin.</p>
+<p><strong>A plausible wrong approach.</strong> Tuning only the GPU amount and expecting four concurrent GPU tasks ignores the plugin limit, and the extra tasks hold CPU slots while waiting.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>active == 2</code>. Record each setting and compare with observed concurrent GPU tasks in plugin metrics.</p>
 <h3 id="exercise-3-explain-vram-nonpartitioning">Exercise 3: Explain VRAM nonpartitioning<a class="heading-anchor" href="#exercise-3-explain-vram-nonpartitioning" aria-label="Link to this section">#</a></h3>
 <p>Scheduling fractions do not reserve fixed memory slices.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain VRAM nonpartitioning</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain that fractional GPU amounts do not partition VRAM: four tasks sharing one GPU allocate from the same device memory pool as their work demands.</p>
+<p><strong>Why it is correct here.</strong> Scheduling shares limit how many tasks start, but each task&#x27;s memory use depends on its batch and operators. One large task can use most of the memory.</p>
+<p><strong>A plausible wrong approach.</strong> Planning each task to have a quarter of device memory leads to out-of-memory errors when tasks use more than that share.</p>
+<p><strong>How to verify.</strong> Monitor device memory during a stage with several tasks and observe that usage varies by task rather than splitting evenly.</p>
 <h3 id="exercise-4-verify-device-addresses">Exercise 4: Verify device addresses<a class="heading-anchor" href="#exercise-4-verify-device-addresses" aria-label="Link to this section">#</a></h3>
 <p>Inspect explicit discovery and assignment.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>verify device addresses</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Verify device addresses: check that each executor discovers its GPUs through the configured discovery script and that task resource info lists the assigned address.</p>
+<p><strong>Why it is correct here.</strong> Explicit discovery prevents two executors on a host from both using GPU 0 while another GPU sits idle.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming the default device assignment is correct on multi-GPU hosts risks oversubscribing one device.</p>
+<p><strong>How to verify.</strong> Log <code>TaskContext.get().resources()[&#x27;gpu&#x27;].addresses</code> in a small job and confirm addresses are distinct across executors on the same host.</p>
 <h3 id="exercise-5-design-a-concurrency-experiment">Exercise 5: Design a concurrency experiment<a class="heading-anchor" href="#exercise-5-design-a-concurrency-experiment" aria-label="Link to this section">#</a></h3>
 <p>Hold query partitions and data fixed.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a concurrency experiment</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a concurrency experiment that varies only the task concurrency setting while holding the query, partition count and data fixed.</p>
+<p><strong>Why it is correct here.</strong> Partition count and data size both affect stage time, so they must stay constant for differences to be attributed to concurrency.</p>
+<p><strong>A plausible wrong approach.</strong> Changing concurrency and partition count together makes it impossible to tell which caused the change.</p>
+<p><strong>How to verify.</strong> Record settings and stage metrics for each run, and confirm the outputs match across runs.</p>
 <h3 id="exercise-6-describe-oversubscription-failure">Exercise 6: Describe oversubscription failure<a class="heading-anchor" href="#exercise-6-describe-oversubscription-failure" aria-label="Link to this section">#</a></h3>
 <p>Too many live tasks can spill or fail without any syntax error.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>describe oversubscription failure</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Describe oversubscription failure: too many live tasks on one GPU can exhaust device memory, causing spills or task failures without any syntax or configuration error.</p>
+<p><strong>Why it is correct here.</strong> Memory demand appears only at runtime, so a configuration that looks valid can fail on larger data.</p>
+<p><strong>A plausible wrong approach.</strong> Concluding from a successful small test that a concurrency setting is safe misses failures that appear with real data volumes.</p>
+<p><strong>How to verify.</strong> Increase concurrency on a representative dataset and watch spill metrics and task failures to find the safe bound.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Four scheduling shares with a two-task plugin admission bound.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-119_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

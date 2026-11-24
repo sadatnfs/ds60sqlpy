@@ -8,7 +8,7 @@ Advanced; approximately 105 minutes. Direct prerequisites: `spark-037`. The prep
 
 ## How to run this lesson
 
-Open `spark-038` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-038` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-038.scala) and [PySpark learner](../lessons/spark-038.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-038_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-038_solution.scala) and [PySpark reference](../solutions/spark-038_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -34,7 +34,7 @@ The [Scala learner](../lessons/spark-038.scala) and [PySpark learner](../lessons
 
 A slow-job report is not a diagnosis. It may refer to source starvation, one expensive partition, state growth, storage delay, driver work or an application correctness failure. Observability is useful when each measurement is connected to a specific question and a bounded next check. This lesson combines actual local streaming progress with three clearly labeled synthetic incident records.
 
-The actual query reads three occurrences:1:100,1:100,2:200. Native streaming deduplication retains two keys. The program waits for finite completion, records input/state/sink metrics and reads the committed two-row product. It then adds 3:300, restarts the same checkpoint and observes state growth from two to three entries. That growth has a known explanation:new keys are retained with no eviction policy in this tiny fixture.
+The actual query reads three occurrences: `1:100`, `1:100`, `2:200`. Native streaming deduplication retains two keys. The program waits for finite completion, records input/state/sink metrics and reads the committed two-row product. It then adds 3:300, restarts the same checkpoint and observes state growth from two to three entries. That growth has a known explanation: new keys are retained with no eviction policy in this tiny fixture.
 
 ## Read progress without inventing unavailable values
 
@@ -42,11 +42,11 @@ numInputRows describes admitted input work for the reported trigger. State opera
 
 State memory is not driver RSS, executor heap size, total container memory or a cloud charge. It is one implementation-specific operator observation. Compare it with state rows, keys, watermark progress and the actual configured retention policy before deciding that growth is abnormal. An increasing state-row count can be expected when new keys arrive and no eviction exists; deleting checkpoints is not an acceptable response to an unexplained graph.
 
-A separate empty AvailableNow run admits no source rows and terminates. That is a valid finite no-work result. It may have no progress records or no readable Parquet product. The code does not manufacture a schema by reading an empty output path. An active long-running query with zero input is a different operational situation:inspect upstream supply, source discovery, permissions and offsets before blaming compute capacity.
+A separate empty AvailableNow run admits no source rows and terminates. That is a valid finite no-work result. It may have no progress records or no readable Parquet product. The code does not manufacture a schema by reading an empty output path. An active long-running query with zero input is a different operational situation: inspect upstream supply, source discovery, permissions and offsets before blaming compute capacity.
 
 ## Three seeded incident records
 
-The skew fixture has task runtimes [100, 100, 10000] milliseconds in one stage. The max-to-median ratio is 100, but the observation alone does not establish the cause. One partition may contain a hot key, or the task may be slowed by storage or another resource. A reversible check is to inspect key/partition work distribution and compare the heavy task's input/shuffle work. Success means a changed plan or partition policy preserves the output oracle while reducing the documented imbalance, not merely hiding the slow task from the chart.
+The skew fixture has task runtimes `[100, 100, 10000]` milliseconds in one stage. The max-to-median ratio is 100, but the observation alone does not establish the cause. One partition may contain a hot key, or the task may be slowed by storage or another resource. A reversible check is to inspect key/partition work distribution and compare the heavy task's input/shuffle work. Success means a changed plan or partition policy preserves the output oracle while reducing the documented imbalance, not merely hiding the slow task from the chart.
 
 The state fixture reports retained rows 10,100,1000 while the recorded watermark remains unchanged. This motivates checking event-time parsing, the watermark column, new-key rate and retention semantics. It is not proof of a memory leak. The success condition should name expected eviction or bounded key growth under a defined late-event policy, with exact output consequences reviewed.
 
@@ -67,9 +67,7 @@ The final packet connects actual input/state/output observations to their query 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
@@ -77,7 +75,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-038-")
 val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
@@ -91,20 +89,7 @@ publishFile(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -112,7 +97,7 @@ import json
 import uuid
 
 if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark4.0.1 required")
+    raise ValueError("Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-038-", dir=Path.cwd()))
 input_path = owned_root / "input"
@@ -229,7 +214,7 @@ Do not call zero input a compute bottleneck without checking source progress. Do
 
 ## Self-check
 
-Explain the contract of `capture` / `capture` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `capture` / `capture` without reading its solution. Then, from memory, state what Exercise 6 (Sanitize evidence with an allowlist) must produce: Exact four-field record, with fake token/password absent. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -237,9 +222,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark4.0.1 streaming monitoring](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#monitoring-streaming-queries)
+- [Spark 4.0.1 streaming monitoring](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#monitoring-streaming-queries)
 
-- [Spark4.0.1 monitoring and event logs](https://spark.apache.org/docs/4.0.1/monitoring.html)
+- [Spark 4.0.1 monitoring and event logs](https://spark.apache.org/docs/4.0.1/monitoring.html)
 
 ## Ask an AI tutor about this lesson
 

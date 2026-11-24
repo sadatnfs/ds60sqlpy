@@ -43,7 +43,7 @@ await withPackage(async (directory) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.stdout.trim(), '1')`. Restoring the original line brings back the worked observation: actual child prints 1.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.stdout.trim(), '2');`. Restoring `assert.equal(result.stdout.trim(), '1');` brings back: actual child prints 1.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(result.stdout.trim(), '1')` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -66,7 +66,7 @@ await withPackage(async (directory) => {
 });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(result.stdout.trim(), '6')`; after it the line reads `console.log(twice(3));` again and actual child prints 6.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(result.stdout.trim(), '6')`. Restoring `console.log(twice(3));` brings back: actual child prints 6.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(result.stdout.trim(), '6')` for this input.
 

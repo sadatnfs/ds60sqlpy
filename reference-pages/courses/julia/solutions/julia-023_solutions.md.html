@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-023-explained-reference">julia-023: explained reference<a class="heading-anchor" href="#julia-023-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-023_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Check the problem before the solver. <code>objective(x) = (x[1]-1)^2 + 4(x[2]+2)^2</code> is a convex quadratic with minimum 0 at <code>[1, -2]</code>. Worked example A runs BFGS with a ForwardDiff gradient, and worked example B minimizes <code>(x-3)^2</code> over the interval from 0 to 2. Convergence evidence combines the point, objective value and gradient norm.</p>
 <h3 id="1-check-the-objective-sign">1. Check the objective sign<a class="heading-anchor" href="#1-check-the-objective-sign" aria-label="Link to this section">#</a></h3>
 <p>Successful numerical progress cannot validate a mistaken objective definition.</p>
 <p><strong>Expected observation:</strong> The mathematical problem changes.</p>
+<p><strong>Why it holds here:</strong> Negating the quadratic makes it unbounded below, so a minimizer moves away from <code>[1, -2]</code> without end.</p>
+<p><strong>Plausible wrong approach:</strong> Flipping the sign to turn a maximization into minimization and forgetting to flip it back optimizes the opposite goal.</p>
+<p><strong>How to verify:</strong> Evaluate <code>-objective</code> at points farther from <code>[1, -2]</code> and confirm it keeps decreasing.</p>
 <h3 id="2-verify-the-known-optimum">2. Verify the known optimum<a class="heading-anchor" href="#2-verify-the-known-optimum" aria-label="Link to this section">#</a></h3>
 <p>The test supports this convex fixture rather than a blanket global-convergence claim.</p>
 <p><strong>Expected observation:</strong> Objective and gradient are zero.</p>
+<p><strong>Why it holds here:</strong> At <code>[1, -2]</code> both squared terms are zero, so the objective is 0 and its gradient <code>[2(x1-1), 8(x2+2)]</code> is zero.</p>
+<p><strong>Plausible wrong approach:</strong> Trusting only the solver&#x27;s returned point skips an independent check that this point is actually optimal.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>objective([1.0, -2.0]) == 0</code>, a zero gradient there, and values 1 and 4 at nearby points.</p>
 <h3 id="3-inspect-the-feasible-set">3. Inspect the feasible set<a class="heading-anchor" href="#3-inspect-the-feasible-set" aria-label="Link to this section">#</a></h3>
 <p>Constraints are part of the problem, not an optional display filter.</p>
 <p><strong>Expected observation:</strong> The best feasible point is near 2.</p>
+<p><strong>Why it holds here:</strong> <code>(x-3)^2</code> decreases on the interval from 0 to 2, so the bounded minimizer is the endpoint 2, with value 1.</p>
+<p><strong>Plausible wrong approach:</strong> Solving without bounds and then clamping 3 to 2 happens to work here but fails for objectives whose clamped point is not optimal.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>abs(point-2) &lt; 1e-5</code> and a minimum near 1; the reference checks <code>(x-0.5)^2</code> gives 0.5 inside the interval.</p>
 <h3 id="4-read-convergence-evidence">4. Read convergence evidence<a class="heading-anchor" href="#4-read-convergence-evidence" aria-label="Link to this section">#</a></h3>
 <p>Independent mathematical checks make the optimization result more interpretable.</p>
 <p><strong>Expected observation:</strong> They agree with the known quadratic solution.</p>
+<p><strong>Why it holds here:</strong> Example A checks <code>point ≈ [1, -2]</code>, <code>Optim.minimum(result) &lt; 1e-12</code>, a gradient norm below 1e-6 and <code>Optim.converged(result)</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Reading only the converged flag accepts a run that stopped by a tolerance on a wrong objective or a poor starting point.</p>
+<p><strong>How to verify:</strong> Print the point, objective and <code>norm(ForwardDiff.gradient(objective, point))</code> together.</p>
 <h3 id="5-scale-a-parameter">5. Scale a parameter<a class="heading-anchor" href="#5-scale-a-parameter" aria-label="Link to this section">#</a></h3>
 <p>Conditioning improvements should retain the original interpretation and feasible decisions.</p>
 <p><strong>Expected observation:</strong> Update penalties and constraints consistently.</p>
+<p><strong>Why it holds here:</strong> If <code>x[2]</code> is changed from meters to centimeters, the weight 4 and the offset 2 must change with it to describe the same problem.</p>
+<p><strong>Plausible wrong approach:</strong> Rescaling a parameter for faster convergence but leaving the penalty and bounds in the old units solves a different problem.</p>
+<p><strong>How to verify:</strong> Map the rescaled optimum back to original units and confirm it equals <code>[1, -2]</code>.</p>
 <h3 id="6-assess-a-fitted-model">6. Assess a fitted model<a class="heading-anchor" href="#6-assess-a-fitted-model" aria-label="Link to this section">#</a></h3>
 <p>A better fit can still reflect overfitting, leakage or a poor target.</p>
-<p><strong>Expected observation:</strong> Evaluate the frozen procedure on independent data.</p></article>
+<p><strong>Expected observation:</strong> Evaluate the frozen procedure on independent data.</p>
+<p><strong>Why it holds here:</strong> A lower training objective only shows that the optimizer fit these data better, not that predictions improve elsewhere.</p>
+<p><strong>Plausible wrong approach:</strong> Reporting the drop in training loss as evidence of model quality ignores overfitting and leakage.</p>
+<p><strong>How to verify:</strong> Freeze the fitted procedure and evaluate it on held-out data, as lesson julia-021 does with its final rows.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-023: all reference checks passed</code>:</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> objective<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test</span> ForwardDiff<span class="syntax-operator">.</span>gradient<span class="syntax-punctuation">(</span>objective<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> objective<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+    <span class="syntax-decorator">@test</span> objective<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span>
+    scalar <span class="syntax-operator">=</span> Optim<span class="syntax-operator">.</span>optimize<span class="syntax-punctuation">(</span>x <span class="syntax-operator">-&gt;</span> <span class="syntax-punctuation">(</span>x<span class="syntax-operator">-</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-operator">^</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> abs<span class="syntax-punctuation">(</span>Optim<span class="syntax-operator">.</span>minimizer<span class="syntax-punctuation">(</span>scalar<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-5</span>
+    <span class="syntax-decorator">@test</span> Optim<span class="syntax-operator">.</span>minimum<span class="syntax-punctuation">(</span>scalar<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-8</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict fixed dot matching on &quot;a.b&quot; and &quot;axb&quot;.</p>
 <p>Only a.b matches.</p>
+<p><strong>Approach:</strong> Call <code>grepl(&quot;.&quot;, x, fixed = TRUE)</code> on c(&quot;a.b&quot;, &quot;axb&quot;).</p>
+<p><strong>Why it holds here:</strong> Fixed matching looks for a literal dot. &quot;a.b&quot; contains one and &quot;axb&quot; does not, so the result is TRUE, FALSE.</p>
+<p><strong>Tempting mistake:</strong> Dropping <code>fixed = TRUE</code>. As a regex the dot matches any character, so both strings return TRUE and the check is useless. Escaping it as <code>\\.</code> also works, but fixed matching states the intent more plainly for a literal delimiter.</p>
+<p><strong>Verify:</strong> <code>identical(grepl(&quot;.&quot;, c(&quot;a.b&quot;, &quot;axb&quot;), fixed = TRUE), c(TRUE, FALSE))</code> returns TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Allow exactly five digits instead of four.</p>
 <p>Use ^[0-9]{5}$.</p>
+<p><strong>Approach:</strong> Change the repetition count to five and keep both anchors: <code>^[0-9]{5}$</code>.</p>
+<p><strong>Why it holds here:</strong> The anchors tie the pattern to the whole field, so &quot;00123&quot; has exactly five digits and passes, while &quot;123&quot; is too short.</p>
+<p><strong>Tempting mistake:</strong> Removing the anchors. <code>[0-9]{5}</code> finds five digits inside &quot;001234&quot;, so a six-digit value passes as a five-digit ID.</p>
+<p><strong>Verify:</strong> <code>grepl(&quot;^[0-9]{5}$&quot;, &quot;00123&quot;)</code> returns TRUE and on &quot;123&quot; returns FALSE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Split &quot;A|12&quot; on a literal pipe.</p>
 <p>strsplit(..., fixed=TRUE) returns the two fields.</p>
+<p><strong>Approach:</strong> Split with <code>strsplit(&quot;A|12&quot;, &quot;|&quot;, fixed = TRUE)</code> and take <code>[[1]]</code> to get a character vector.</p>
+<p><strong>Why it holds here:</strong> The pipe is meant as a literal delimiter, so fixed matching gives the two fields A and 12.</p>
+<p><strong>Tempting mistake:</strong> Splitting on the regex pipe. Example 3 shows the result is A, |, 1 and 2, four pieces with the delimiter kept as data.</p>
+<p><strong>Verify:</strong> <code>identical(fields, c(&quot;A&quot;, &quot;12&quot;))</code> returns TRUE.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose accepting &quot;ID12 bad&quot; with an unanchored digit search.</p>
 <p>Use the intended anchored field grammar.</p>
+<p><strong>Approach:</strong> Validate with the anchored grammar <code>^[0-9]+$</code> instead of searching for digits.</p>
+<p><strong>Why it holds here:</strong> &quot;ID12bad&quot; contains 12 but also letters, so it is not an all-digit field and the anchored test rejects it.</p>
+<p><strong>Tempting mistake:</strong> Testing with <code>grepl(&quot;[0-9]+&quot;, x)</code>. It returns TRUE for &quot;ID12bad&quot;, &quot;A17&quot; and &quot;17x&quot; alike, as the guide table shows.</p>
+<p><strong>Verify:</strong> <code>grepl(&quot;^[0-9]+$&quot;, &quot;ID12bad&quot;)</code> returns FALSE.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Retain an empty trailing field deliberately.</p>
 <p>Define and test an explicit parser policy rather than silently assuming every delimiter creates a retained empty component.</p>
+<p><strong>Approach:</strong> Write down the field policy, then append an empty field when a line ends with the delimiter, for example with <code>endsWith(x, &quot;|&quot;)</code>.</p>
+<p><strong>Why it holds here:</strong> Under a two-field contract &quot;A|&quot; means A plus an empty second field, but strsplit returns only &quot;A&quot;.</p>
+<p><strong>Tempting mistake:</strong> Assuming every row splits into two parts and reading <code>parts[[2]]</code>. For &quot;A|&quot; that stops with subscript out of bounds, or misaligns columns if rows of one and two pieces are bound into a table, since the shorter row is recycled or rejected depending on the binding function.</p>
+<p><strong>Verify:</strong> <code>identical(strsplit(&quot;A|&quot;, &quot;|&quot;, fixed = TRUE)[[1]], &quot;A&quot;)</code> returns TRUE, which is the behavior the policy corrects.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain a byte limit for Unicode text.</p>
 <p>State encoding and byte/character units separately and test multibyte input.</p>
+<p><strong>Approach:</strong> Measure with <code>nchar(text, type = &quot;bytes&quot;)</code> when the limit is in bytes, and say which unit applies.</p>
+<p><strong>Why it holds here:</strong> &quot;café&quot; is four characters but five UTF-8 bytes because é is stored as c3 a9.</p>
+<p><strong>Tempting mistake:</strong> Checking <code>nchar(text) &lt;= 4</code> for a four-byte column. café passes, then overflows the column or is cut in the middle of é, leaving the lone byte c3, which is not valid UTF-8 on its own.</p>
+<p><strong>Verify:</strong> <code>nchar(text, type = &quot;bytes&quot;)</code> returns 5 while <code>nchar(text)</code> returns 4.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -8,6 +8,13 @@ A logistic model represents a binary outcome through a linear predictor \(\eta_i
 
 The synthetic fixture contains eight covariate values and overlapping outcomes, so the positive and negative classes are not perfectly separated. The priors are proper normal distributions on intercept and slope. Their scales have meaning in the units of x and should be reviewed through prior prediction.
 
+## Key terms
+
+- **Linear predictor:** The log-odds eta_i = alpha + beta x_i, whose inverse logit gives the success probability.
+- **Bernoulli-logit likelihood:** A Bernoulli density written on the logit scale so the log likelihood is computed stably from eta.
+- **Complete separation:** Outcomes perfectly split by a covariate, letting the unpenalized likelihood improve as the coefficient grows without bound.
+- **Prior predictive check:** Simulating outcomes from the priors to review whether coefficient scales are plausible in the units of x.
+
 ## Worked case 1: follow likelihood, probabilities and replicas
 
 The model block contributes a Bernoulli-logit likelihood for every observed outcome. The generated quantities calculate fitted probabilities, pointwise log likelihood and replicated binary outcomes. These are different objects: a probability is a parameter-derived prediction, while a replicated outcome includes a Bernoulli draw conditional on that prediction.
@@ -37,6 +44,42 @@ The classroom's short chains demonstrate the actual compiled model. Inspect coef
 **Why use the logit density instead of a manually computed sigmoid in the likelihood?** It preserves the intended calculation at extreme linear predictors and avoids unnecessary precision loss. It does not change the statistical model or solve separation by itself.
 
 **Does a credible interval excluding zero imply a useful intervention?** It concerns a parameter conditional on the model. Practical utility, transport, intervention identification and predictive performance require additional questions and evidence. The tutorial supplies a complete computational path without collapsing those scientific distinctions.
+
+## Worked example: Separated data: likelihood climbs forever, the prior stops it
+
+```python
+import numpy as np
+from scipy import optimize
+
+x = np.array([-2.0, -1.0, 1.0, 2.0])
+y = np.array([0, 0, 1, 1])
+
+
+def loglik(b):
+    eta = b * x
+    return np.sum(y * eta - np.logaddexp(0, eta))
+
+
+for b in (1, 5, 10, 20):
+    print(f"beta {b:>2}: log likelihood {loglik(b):.6f}")
+for scale in (2.5, 10.0):
+    res = optimize.minimize_scalar(lambda b: -(loglik(b) - 0.5 * (b / scale) ** 2))
+    p = 1 / (1 + np.exp(-res.x))
+    print(f"normal(0, {scale}) prior: posterior mode {res.x:.3f}, P(y=1 | x=1) {p:.3f}")
+```
+
+Observed output:
+
+```text
+beta  1: log likelihood -0.880379
+beta  5: log likelihood -0.013521
+beta 10: log likelihood -0.000091
+beta 20: log likelihood -0.000000
+normal(0, 2.5) prior: posterior mode 1.981, P(y=1 | x=1) 0.879
+normal(0, 10.0) prior: posterior mode 3.945, P(y=1 | x=1) 0.981
+```
+
+The four observations are perfectly separated: every negative \(x\) has \(y=0\) and every positive \(x\) has \(y=1\). The log likelihood therefore keeps rising as the slope grows, from \(-0.880\) at \(\beta=1\) to \(-0.0135\) at 5, \(-0.00009\) at 10 and effectively 0 at 20. Its supremum, zero, is never reached by any finite slope, so maximum likelihood has no answer and a sampler with a flat prior would drift toward infinity. Adding a normal(0, 2.5) prior gives the log posterior a finite maximum at \(\beta=1.981\), where the extra likelihood gained by steepening no longer pays for the prior penalty. The fitted probability at \(x=1\) is then 0.879. A wider normal(0, 10) prior lets the mode move to 3.945 and the probability to 0.981. With separated data the answer depends visibly on the prior because the likelihood carries no information about the slope's upper end. Reporting that dependence, rather than one fitted number, is the honest summary. A larger sample with some overlap would make both priors agree.
 
 ## Complete reproducible program
 

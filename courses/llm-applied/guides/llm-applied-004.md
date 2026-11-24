@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-003`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-003` (Prompt and context engineering with measurable boundaries). They introduce the notation this lesson needs for corpus manifest and content hash.
 
 ## Learning objectives
 
@@ -76,9 +76,11 @@ Decide whether a question asks for the currently served rule or the rule effecti
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-004/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-004.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-004.py` in the declared `python-core` profile. *Fingerprint authored sources*, *Detect a changed definition* and *Choose an active version explicitly* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-004/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Detect a changed definition* and *Choose an active version explicitly* reuse the helper and fixture introduced in *Fingerprint authored sources*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: 6 complete records; all hashes contain 64 characters. Example B should give: Hash differs; family remains metric; version is 2. Example C should give: Active IDs metric-v2 and trial-v1. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -229,21 +231,24 @@ assert {d["id"] for d in active.values()} == {"metric-v2", "trial-v1"}
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 6 complete records; all hashes contain 64 characters. attack text remains data; restricted record remains restricted. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Detect a changed definition*, predict its result from the prompt alone: Create metric-v2 with changed text and compare content hashes to metric-v1. Write the guess beside the stated outcome (hash differs; family remains metric; version is 2). Then predict how the decisive case, *Keep instruction-like documents inert*, should end: Inspect attack-v1 and confirm its text does not alter the manifest validator or access metadata. For corpus provenance, versions and evaluation isolation, the finish condition is: 6 complete records; all hashes contain 64 characters. Attack text remains data; restricted record remains restricted.
 
 ## Exercises
 
 1. **Fingerprint authored sources.** Add source=course-authored, permission=course-fixture and SHA256 to each local document.
    **Expected:** 6 complete records; all hashes contain 64 characters.
    **Verify:** Save the assertion results for exercise 1, including 6 complete records; all hashes contain 64 characters.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Detect a changed definition.** Create metric-v2 with changed text and compare content hashes to metric-v1.
    **Expected:** hash differs; family remains metric; version is 2.
    **Verify:** Save the assertion results for exercise 2, including hash differs; family remains metric; version is 2.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Choose an active version explicitly.** Select the highest version per family from metric-v1, metric-v2 and trial-v1.
    **Expected:** active IDs metric-v2 and trial-v1.
    **Verify:** Save the assertion results for exercise 3, including active IDs metric-v2 and trial-v1.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Detect family leakage.** Place metric-v1 in training and metric-v2 in testing, then compare their families.
    **Expected:** family intersection contains metric despite different hashes.
@@ -265,19 +270,21 @@ If a corpus passes admission yet violates access rules, inspect which external p
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate corpus manifest and content hash for the fixture in *Fingerprint authored sources*. Hint 2: change one literal in *Detect a changed definition* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Detect family leakage*, with its stated result (family intersection contains metric despite different hashes). If *Keep instruction-like documents inert* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Corpus manifest, Content hash, Document family using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain corpus manifest, content hash and document family using *Fingerprint authored sources*. Recompute its result (6 complete records; all hashes contain 64 characters) from the inputs. Change one input in *Choose an active version explicitly* and predict whether the stated result (active IDs metric-v2 and trial-v1) still holds. Say which part of corpus provenance, versions and evaluation isolation the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-003` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Fingerprint authored sources* cannot be reconstructed without the solution, revisit `llm-applied-003` (Prompt and context engineering with measurable boundaries). Otherwise keep the six observations from corpus provenance, versions and evaluation isolation and continue to `llm-applied-005` (Chunking, overlap, offsets and context budgets).
 
 ## Sources and verification status
 
-API and mechanism reference: [Datasheets for Datasets](https://arxiv.org/abs/1803.09010), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for corpus manifest: [Datasheets for Datasets](https://arxiv.org/abs/1803.09010), reviewed 2026-10-22. The fixtures for *Fingerprint authored sources*, *Detect a changed definition* and *Choose an active version explicitly* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

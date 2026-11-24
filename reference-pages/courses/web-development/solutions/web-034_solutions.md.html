@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-034.md</code>.</p>
 <h3 id="exercise-1-trace-the-accumulator-after-each-iteration">Exercise 1: Trace the accumulator after each iteration.<a class="heading-anchor" href="#exercise-1-trace-the-accumulator-after-each-iteration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It progresses through 20, 50 and 65.</p>
+<p><strong>Approach:</strong> Write a row per iteration with the current value and the running total, adding each element to the previous total.</p>
 <p><strong>Why:</strong> The accumulator adds each element in turn, so it holds 20, 50 and then 65.</p>
+<p><strong>Plausible wrong approach:</strong> Writing only the final total fails because a wrong intermediate step, such as starting at 20 instead of 0, is then invisible.</p>
+<p><strong>How to verify:</strong> Echoing <code>$total</code> inside the loop prints 20, 50 and 65 on three lines.</p>
 <h3 id="exercise-2-add-a-guard-against-negative-durations">Exercise 2: Add a guard against negative durations.<a class="heading-anchor" href="#exercise-2-add-a-guard-against-negative-durations" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Invalid values fail before they enter the total.</p>
+<p><strong>Approach:</strong> Inside the loop, check <code>$minutes &lt; 0</code> before adding and throw an exception that names the offending value.</p>
 <p><strong>Why:</strong> Validating inside the loop stops one bad value from silently corrupting the total.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>continue</code> to skip negatives fails because the total then looks valid while silently hiding a data problem.</p>
+<p><strong>How to verify:</strong> An input of [20, -5] stops with the error message, and no total is printed for it. An input of [20, 30] still prints 50, so the guard rejects only invalid values.</p>
 <h3 id="exercise-3-build-a-bounded-weekly-duration-summary-with-a-route-label">Exercise 3: Build a bounded weekly-duration summary with a route label.<a class="heading-anchor" href="#exercise-3-build-a-bounded-weekly-duration-summary-with-a-route-label" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The total and label follow the declared cases and terminate predictably.</p>
+<p><strong>Approach:</strong> Sum validated durations with <code>foreach</code>, then map the level to a label with <code>match</code>, adding a default arm only if unknown levels are allowed.</p>
 <p><strong>Why:</strong> foreach always terminates over a finite array, and match maps each declared case to one label.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>while (true)</code> with a manual break fails because a missing exit condition makes the worker run until its time limit.</p>
+<p><strong>How to verify:</strong> The summary prints the expected total and label for each level, and an unknown level follows the declared rule.</p>
 <h3 id="exercise-4-diagnose-a-while-loop-whose-condition-never-changes">Exercise 4: Diagnose a while loop whose condition never changes.<a class="heading-anchor" href="#exercise-4-diagnose-a-while-loop-whose-condition-never-changes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Identify the missing progress step and replace it with a bounded iteration where possible.</p>
+<p><strong>Approach:</strong> Find the variable in the <code>while</code> condition and look for the statement that should change it on each pass.</p>
 <p><strong>Why:</strong> A loop whose condition never changes never ends; foreach or a counter with a fixed bound guarantees progress.</p>
+<p><strong>Plausible wrong approach:</strong> Adding a counter that breaks after 1000 passes fails because it hides the missing update and returns a wrong partial result.</p>
+<p><strong>How to verify:</strong> After adding the update, the loop runs exactly as many times as the input requires and then stops. Adding an echo of the loop variable shows it changing on every pass until the condition becomes false.</p>
 <h3 id="exercise-5-test-an-empty-collection">Exercise 5: Test an empty collection.<a class="heading-anchor" href="#exercise-5-test-an-empty-collection" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The total is zero without a special invalid array access.</p>
+<p><strong>Approach:</strong> Run the summary with <code>[]</code> and confirm the loop body never executes while the total stays at its starting value of 0.</p>
 <p><strong>Why:</strong> foreach over an empty array runs zero times, so the total keeps its initial value of 0.</p>
+<p><strong>Plausible wrong approach:</strong> Reading <code>$durations[0]</code> before the loop fails because an empty array has no first element and PHP emits a warning.</p>
+<p><strong>How to verify:</strong> The program prints a total of 0 for an empty list and emits no warnings.</p>
 <h3 id="exercise-6-explain-match-versus-switch-for-a-typed-mapping">Exercise 6: Explain match versus switch for a typed mapping.<a class="heading-anchor" href="#exercise-6-explain-match-versus-switch-for-a-typed-mapping" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Match returns a value and compares strictly; switch has different comparison and fall-through rules.</p>
+<p><strong>Approach:</strong> Compare the two forms on &#x27;0&#x27; and on false: <code>match</code> uses identity and returns a value, while <code>switch</code> compares loosely and can fall through.</p>
 <p><strong>Why:</strong> match compares with === and throws UnhandledMatchError for an unmatched value, while switch compares loosely and falls through without break.</p>
+<p><strong>Plausible wrong approach:</strong> Treating them as interchangeable fails because <code>switch</code> matches &#x27;0&#x27; against <code>case false</code>, while <code>match</code> does not.</p>
+<p><strong>How to verify:</strong> Running the contrast case prints switch: false branch and match: string arm. Removing the string arm makes the <code>match</code> call throw an UnhandledMatchError for &#x27;0&#x27;.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-034_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

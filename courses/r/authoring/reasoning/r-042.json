@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Compute the sample variance with the n minus 1 divisor, divide it by n for the variance of the mean, and take the square root.",
+      "why": "The deviations from 5 are -3, -1, 1 and 3, whose squares sum to 20. Dividing by 3 gives 20/3, dividing again by 4 gives 5/3, so the standard error is about 1.29.",
+      "wrong": "Dividing the squared deviations by n, which gives 5 and an SE squared of 5/4. That is the bootstrap's plug-in variance, not the sample estimate this lesson asks for.",
+      "verify": "`isTRUE(all.equal(mean_se(x)^2, 5 / 3))` returns TRUE."
+    },
+    {
+      "approach": "Shift every value by 3 and recompute both the mean and the standard error.",
+      "why": "x + 3 is 5, 7, 9 and 11. The mean moves to 8, but each deviation from the mean is still -3, -1, 1 or 3, so sd, and therefore the SE, are unchanged.",
+      "wrong": "Expecting the SE to grow because the mean grew, as if uncertainty were a fixed share of the estimate. Multiplying by 3, not adding 3, is what would triple the SE.",
+      "verify": "`mean(x + 3) == 8` returns TRUE and `isTRUE(all.equal(mean_se(x + 3), mean_se(x)))` returns TRUE."
+    },
+    {
+      "approach": "Enumerate all 4^4 = 256 ordered index tuples with expand.grid, weight each one equally, and divide the squared deviations of their means by 256.",
+      "why": "Every ordered draw is equally likely, so these 256 means are the complete bootstrap distribution. Its center is 5 and its variance is the plug-in variance 5 divided by 4 draws, which is 1.25.",
+      "wrong": "Calling `var(means)`, which divides by 255 and returns about 1.255, as if the 256 values were a sample. Listing only the 35 unordered multisets with equal weight is also wrong, because 2, 2, 2, 2 arises once while a mix of four different values arises 24 times.",
+      "verify": "`length(means)` returns 256, and `mean((means - 5)^2)` returns 1.25 within all.equal."
+    },
+    {
+      "approach": "Divide the standard deviation by the square root of n.",
+      "why": "With n = 4 the square root is 2, so the correct SE is sd/2, about 1.29, while sd/4 is about 0.65. The variance of a mean shrinks with n, so its standard deviation shrinks with the square root of n.",
+      "wrong": "Using `sd(x) / length(x)`. Here it halves the SE, and with 100 observations it would be ten times too small, giving intervals far narrower than the data support.",
+      "verify": "`isTRUE(all.equal(sd(x) / length(x), mean_se(x) / 2))` returns TRUE."
+    },
+    {
+      "approach": "Stop with a clear message when fewer than two finite values are supplied.",
+      "why": "The sample variance divides by n minus 1, which is 0 for one value, so `sd(1)` returns NA. One observation carries no information about spread.",
+      "wrong": "Returning NA or 0 so the code keeps running. An NA SE turns the interval into NA, NA without saying why, and 0 claims perfect certainty from a single reading.",
+      "verify": "`inherits(try(mean_se(1), silent = TRUE), \"try-error\")` returns TRUE."
+    },
+    {
+      "approach": "Label each interval by its procedure and target before comparing endpoints: a t interval for the mean, and percentile limits of the exact bootstrap distribution.",
+      "why": "The t interval is 5 plus or minus qt(0.975, 3) times about 1.29, roughly 0.89 to 9.11. The bootstrap limits are 3 and 7, because the 7th and 8th smallest of the 256 means are both 3. The bootstrap uses the smaller plug-in variance and no t correction for 3 degrees of freedom.",
+      "wrong": "Preferring the bootstrap interval because it is narrower, or claiming either has 95 percent coverage. With 4 values, the percentile method is known to be too narrow, and one fixture cannot check coverage.",
+      "verify": "The printed list shows `t_mean_interval` near 0.89 and 9.11 and `exact_empirical_percentile` at 3 and 7."
+    }
+  ]
+}

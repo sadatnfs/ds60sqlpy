@@ -1,6 +1,6 @@
 # swift-026: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-026_solution.swift](swift-026_solution.swift). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-026_solution.swift](swift-026_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -14,37 +14,59 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Identify the core and presentation responsibilities.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: A portable contract can be shared by an executable, tests and a later app adapter. The pure kernel is suitable for a reusable library.
+**Reference answer.** It runs as the `Task 1` block of the reference program.
+
+```swift
+func total(_ values: [Int]) -> Int { values.reduce(0, +) }
+func render(_ total: Int) -> String { "total=\(total)" }
+let sum = total([4, 6])
+precondition(sum == 10)
+precondition(render(sum) == "total=10")
+```
+
+**Observe:** The core returns the number 10, and presentation separately turns it into total=10.
+
+total is the reusable calculation with no knowledge of text, while render only formats; that split is the library-versus-executable boundary a package makes explicit.
 
 ### Task 2: Guided modification
 
 Build the complete JourneyCore package with swift build.
 
-No separate reference answer has been written for this task. Start from Example B: Moving this function into another target requires a deliberate public interface rather than copying implementation text. Presentation is independently testable.
+**Written answer.** Copy fixtures/JourneyCore into your own workspace and run swift build in the copied directory. It compiles the JourneyCore library and the journey-demo executable and ends with Build complete!; in the reference run on swift:6.3.3-noble the last steps were Linking journey-demo and Build complete! (3.01s). No dependency is fetched, because the manifest declares none.
 
 ### Task 3: Independent construction
 
 Run swift test and the journey-demo executable.
 
-No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Package** and the lesson notes.
+**Written answer.** In the copied package run swift test, then swift run journey-demo. The reference run on swift:6.3.3-noble reported Executed 4 tests, with 0 failures and printed JourneyCore: 1/2 complete; round trip passed. The tests exercise the library through @testable import, and the executable consumes only its public API.
 
 ### Task 4: Diagnose a defect
 
 Diagnose a symbol that is internal when another module needs public access.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A manifest is not executed by the classroom source pad. Do not assume adding a dependency is offline. Public API choices become compatibility obligations.
+**Written answer.** Removing public from StudyPlan.completedCount still compiles inside JourneyCore, but the JourneyDemo target then fails with 'completedCount' is inaccessible due to 'internal' protection level, as the reference build showed. Symbols default to internal, visible only within their module; anything another target must call needs public, which also makes it a compatibility promise.
 
 ### Task 5: Boundary evidence
 
 Perform a clean package build using only the lab-owned output directory.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Keep a pure core function) and Example B (Separate presentation from calculation).
+**Written answer.** Inside the copied package run swift package clean, then swift build. Clean removes build products under that package's .build directory and leaves sources alone; the rebuild recreates .build in the same place, which the reference run confirmed was the only output location. Never point cleanup at a directory you did not create.
 
 ### Task 6: Transfer and justify
 
 Add a new target only when it creates a useful dependency boundary and document that direction.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Package**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Run swift test and the journey-demo executable) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** The portable part of this lesson splits a calculation, `total`, from presentation, `render`, so each can live in a different target of a Swift package. Example A checks the pure sum on `[2, 3]` and on an empty array. Example B checks that `render(5)` produces `total=5`. The package tasks then build and test JourneyCore outside the pad.
+
+**Why it is correct.** `reduce(0, +)` starts from 0, so `[2, 3]` sums to 5 and an empty array returns 0 without special cases. `render` only formats a number it is given, so its output depends on nothing but its argument. Because neither function reads global state or files, both can move into a library target and be tested from a test target unchanged.
+
+**A plausible wrong approach.** Putting `print("total=\(values.reduce(0, +))")` in one function mixes calculation with output; a test would then need to capture standard output. Moving `total` into a library target without marking it `public` compiles in that module but fails from the executable target with an inaccessible-symbol error, which is task 4.
+
+**How to verify.** For the package tasks, run `swift build` and `swift test` in the JourneyCore directory with a lab-owned build path and record their actual output; the pad marker is not evidence that the package builds on your machine.
 
 ## Mechanism and diagnostic reasoning
 

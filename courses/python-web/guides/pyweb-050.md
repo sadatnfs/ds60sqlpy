@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-049`.
 
 An ORM can make related-object access look like ordinary attribute lookup while issuing extra SQL behind the scenes. This chapter measures the N-plus-one pattern and compares select_related with prefetch_related on the same small fixture. It checks query counts without claiming a universal latency improvement.
 
+## Key terms
+
+- **N+1 query pattern:** One query to load a list followed by one more query for each item's related object, which here gives four queries for three notes.
+- **Foreign key:** A field that stores the identifier of a related row, such as a note's author, whose object may need another query to load.
+- **select_related:** A QuerySet method that follows single-valued relationships with a SQL join and builds the related objects from the same rows.
+- **prefetch_related:** A QuerySet method that loads related objects in a separate query and joins them to the main results in Python.
+- **CaptureQueriesContext:** A Django test utility that records the SQL statements executed inside its block so query counts can be checked.
+
 ## Mechanism: choose where the relationship is resolved
 
 A Note contains a foreign key to Author. Loading notes alone gives each note an author identifier, but accessing note.author may require another query. Repeating that access across several independently loaded notes can produce one initial query plus one query per note.
@@ -29,6 +37,39 @@ The select_related version produces the same tuples with one query. The prefetch
 This ordering protects against a misleading optimization that changes which rows are returned. A faster query yielding incomplete data is not an equivalent implementation. The fixture's stable ordering also prevents nondeterministic row order from obscuring a genuine semantic comparison.
 
 For many-to-many or reverse relationships, prefetching often fits naturally, but accessing a differently filtered relation afterward can issue a fresh query and bypass the prefetched cache. Inspect the exact access expression used by the template or serializer rather than assuming a prefetch anywhere in the code solves every lookup.
+
+## Worked example: counting the queries behind a prefetch
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.executescript(
+    "CREATE TABLE author (id INTEGER PRIMARY KEY, name TEXT);"
+    "CREATE TABLE note (id INTEGER PRIMARY KEY, author_id INTEGER, title TEXT);"
+    "INSERT INTO author VALUES (1, 'Ada'), (2, 'Grace');"
+    "INSERT INTO note (author_id, title) VALUES (1, 'a'), (2, 'b'), (1, 'c');"
+)
+seen = []
+db.set_trace_callback(seen.append)
+notes = db.execute("SELECT id, author_id, title FROM note ORDER BY id").fetchall()
+ids = sorted({author_id for _, author_id, _ in notes})
+marks = ", ".join("?" * len(ids))
+names = dict(db.execute(f"SELECT id, name FROM author WHERE id IN ({marks})", ids))
+print([(title, names[author_id]) for _, author_id, title in notes])
+print(len(seen))
+print(seen[1])
+```
+
+Expected output:
+
+```text
+[('a', 'Ada'), ('b', 'Grace'), ('c', 'Ada')]
+2
+SELECT id, name FROM author WHERE id IN (1, 2)
+```
+
+This is what `prefetch_related("author")` does by hand: one query for the notes, then one `IN` query for the distinct author ids, joined in Python. The trace callback plays the role of `CaptureQueriesContext` and records exactly two statements. Add a hundred more notes and it still records two, while the naive loop in the lesson grows to one query per note plus one. `select_related` would collapse this into a single JOIN, which suits a foreign key; prefetch is the tool for reverse and many-to-many relations, where a JOIN would repeat each parent row once per child.
 
 ## Failure diagnosis and discussion
 

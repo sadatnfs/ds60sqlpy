@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Compute exact histogram counts with atomics and explain two timing regimes through contention.
+
 Work through *Histograms, atomics and contention* with the concrete cases below. Finish with this evidence:
 exact counts and a contention-based explanation of two timing regimes. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A histogram counts values into bins. Several threads can increment the same bin, so ordinary read-modify-write operations can lose updates. An atomic addition makes that individual update indivisible at its supported scope. It does not make an entire multi-step algorithm atomic or publish unrelated data automatically. A block-private histogram can reduce global contention by combining local counts before a global merge. It also costs shared memory and initialization work. Distribution matters: uniformly spread samples and one hot bin exercise very different contention patterns even with identical input size.
+
+### Key terms
+
+- **Atomic operation:** A read-modify-write update, such as `atomicAdd`, that is indivisible with respect to competing updates at its scope.
+- **Contention:** Many threads updating the same location, which serializes their atomic operations.
+- **Privatization:** Giving each block its own shared-memory histogram and merging the partial counts globally afterward.
+- **Lost update:** A wrong count that occurs when two threads read the same old value and both write back an increment.
 
 ## How to run and study this lesson
 

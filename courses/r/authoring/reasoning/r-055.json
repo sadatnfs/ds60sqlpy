@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Add coord_cartesian(ylim = c(0, 4)) to base for one plot and scale_y_continuous(limits = c(0, 4)) for the other, then build both and inspect the smoothing layer, data[[2]].",
+      "why": "A scale limit is applied before the statistic, so y = 100 becomes missing and lm fits only (1, 1), (2, 2), (3, 3), giving y = x. The coordinate zoom acts after fitting, so lm still sees all four points and fits slope 29.8 and intercept -48.",
+      "wrong": "Comparing only the two pictures and dismissing the removed rows warning as noise. The warning is the sign that an observation left the fit, not a display message.",
+      "verify": "`max(ggplot2::ggplot_build(zoom)$data[[2]]$y, na.rm = TRUE)` returns about 71.2, while the same expression for limited returns 3."
+    },
+    {
+      "approach": "Use coord_cartesian for the zoom and state in the caption that the point (4, 100) lies above the window.",
+      "why": "The four observations remain the model input. With slope 29.8 the full data line crosses the 0 to 4 band only between x of about 1.61 and 1.75, so the zoom shows a steep sliver of a fit driven by the extreme point, which is honest about the model.",
+      "wrong": "Using the ylim(0, 4) shortcut, or subsetting d to rows with y at most 4 first. Both remove y = 100 before lm runs, so the window shows a tidy y = x line that the full data never produced.",
+      "verify": "`max(ggplot2::ggplot_build(zoom)$data[[2]]$y, na.rm = TRUE) > 4` returns TRUE."
+    },
+    {
+      "approach": "Build fixed and free and read the SCALE_Y column of the panel layout table in each.",
+      "why": "Group A spans y 1 to 2 and group B spans 100 to 200. Fixed panels share one y scale running to 200, which flattens A near the floor. free_y gives each panel its own scale.",
+      "wrong": "Comparing the built layer data. The y values are 1, 2, 100 and 200 in both plots, because facet scales change the panel layout and not the data, so this check finds no difference.",
+      "verify": "`length(unique(ggplot2::ggplot_build(fixed)$layout$layout$SCALE_Y))` returns 1, and the same expression for free returns 2."
+    },
+    {
+      "approach": "Confirm every x is positive, then add scale_x_log10 to the plot of 1, 10 and 100.",
+      "why": "log10 sends 1, 10 and 100 to 0, 1 and 2, so equal ratios of 10 become equal steps while the axis still labels the original values. The positivity check matters because a zero would become minus infinity and be dropped.",
+      "wrong": "Mapping aes(log(x), y) instead. Natural log places the points at 0, 2.30 and 4.61, and the axis shows those logs rather than 1, 10 and 100, so a reader must convert every label back.",
+      "verify": "`all(positive$x > 0)` returns TRUE, and `ggplot2::ggplot_build(log_plot)$data[[1]]$x` returns 0, 1, 2."
+    },
+    {
+      "approach": "Compare the observed labels with names(palette) before plotting, and either add C to the named palette or reject the data under the contract.",
+      "why": "The palette fixes A as #0072B2 and B as #D55E00. Since C has no entry, any automatic choice for it is a decision nobody made, and A and B must keep their colours across reports.",
+      "wrong": "Dropping the manual scale so the default hue scale absorbs C. The default spaces hues by level count, so going from two levels to three recolours A and B as well, and earlier figures no longer match.",
+      "verify": "`setdiff(c(\"A\", \"C\"), names(palette))` returns \"C\"."
+    },
+    {
+      "approach": "Before comparing panels, compare the numerical ranges behind each panel's height and decide whether the reader needs shared scales.",
+      "why": "Under free_y, A's rise from 1 to 2 and B's rise from 100 to 200 fill the same panel height, so the two slopes look equal although B rises 100 times as far.",
+      "wrong": "Reading the free panels side by side as a magnitude comparison. Free scales suit shape within a panel; magnitude across panels needs fixed scales or an explicit annotation of each range.",
+      "verify": "`diff(range(f$y[f$group == \"B\"])) / diff(range(f$y[f$group == \"A\"]))` returns 100."
+    }
+  ]
+}

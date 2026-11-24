@@ -106,6 +106,28 @@ def loss(weight):
                 "https://docs.jax.dev/en/latest/_autosummary/jax.lax.stop_gradient.html",
             ),
         ),
+        key_terms=(
+            (
+                "Gradient",
+                "The vector of partial derivatives of a scalar objective, one sensitivity per parameter coordinate, evaluated at the current parameters.",
+            ),
+            (
+                "Scalar objective",
+                "A single number, such as a mean or sum of per-example losses, whose choice of reduction changes the gradient and the step.",
+            ),
+            (
+                "value_and_grad",
+                "A JAX transformation that returns both the objective and its gradient at the same pre-update parameter state.",
+            ),
+            (
+                "Central finite difference",
+                "An approximate derivative from evaluating the function slightly above and below a point, used as an independent check.",
+            ),
+            (
+                "stop_gradient",
+                "A JAX function that passes its value through unchanged in the forward computation but contributes zero derivative.",
+            ),
+        ),
     ),
     Unit(
         8,
@@ -203,6 +225,28 @@ jacobian = jnp.array([[4., 0.], [0., 2.], [0., 1.]])""",
         (
             ("JVP", "https://docs.jax.dev/en/latest/_autosummary/jax.jvp.html"),
             ("VJP", "https://docs.jax.dev/en/latest/_autosummary/jax.vjp.html"),
+        ),
+        key_terms=(
+            (
+                "Jacobian",
+                "The matrix of partial derivatives of every output with respect to every input, with one row per output and one column per input.",
+            ),
+            (
+                "Tangent",
+                "An input-shaped direction pushed forward by a JVP, which returns the output-shaped change J times v.",
+            ),
+            (
+                "Cotangent",
+                "An output-shaped weighting pulled back by a VJP, which returns the input-shaped product J-transpose times u.",
+            ),
+            (
+                "Pushforward",
+                "The JVP view of the local linear map, carrying an input direction forward to an output direction.",
+            ),
+            (
+                "Pullback",
+                "The VJP view of the local linear map, carrying an output weighting back to input coordinates, as a scalar-loss gradient does.",
+            ),
         ),
     ),
 ]
@@ -303,6 +347,24 @@ expected_hessian = jnp.array([[2., 1.], [1., 4.]])""",
             "A dense Hessian's successful construction can conceal an unnecessary memory cost. Check whether the task needs the full matrix, a diagonal approximation or products with selected vectors. Do not interpret finite-difference failure at a nonsmooth point as proof that all autodiff is broken.",
             "Connect curvature to the least-squares Hessian in the statistics book. Explain when a matrix-free product would be sufficient for an iterative method, and which additional convergence and conditioning assumptions that method would need.",
             (("Autodiff cookbook", "https://docs.jax.dev/en/latest/301/cookbook.html"),),
+            key_terms=(
+                (
+                    "Hessian",
+                    "The matrix of second derivatives of a scalar function, describing how each gradient coordinate changes with each parameter.",
+                ),
+                (
+                    "Hessian-vector product",
+                    "The Hessian applied to one vector, computed as a JVP of the gradient without materializing the dense matrix.",
+                ),
+                (
+                    "Directional curvature",
+                    "The quantity v-transpose H v, which measures how the slope changes along one direction at one point.",
+                ),
+                (
+                    "Forward-over-reverse",
+                    "Composing a forward-mode JVP around a reverse-mode gradient, one of two orderings that should agree on a smooth objective.",
+                ),
+            ),
         ),
         Unit(
             10,
@@ -399,6 +461,28 @@ compiled_repeat = jax.jit(repeat_add, static_argnames=("n",))""",
             "For repeated recompilation, inspect function identity, static values, shapes and dtypes. For a missing Python side effect, ask whether it happened only during tracing. Do not introduce mutable global state to communicate between compiled calls.",
             "Explain why a static batch size and a dynamic threshold are different decisions. Design a small family of acceptable shapes or configurations and name the evidence needed to measure compilation overhead separately from warm execution.",
             (("JIT compilation", "https://docs.jax.dev/en/latest/jit-compilation.html"),),
+            key_terms=(
+                (
+                    "Tracer",
+                    "The abstract stand-in JAX passes through a function during tracing, carrying shape and dtype but no concrete runtime value.",
+                ),
+                (
+                    "Static argument",
+                    "An argument whose concrete value is available to Python-level decisions at trace time and is part of the compiled specialization.",
+                ),
+                (
+                    "Specialization",
+                    "A compiled version of a function for one combination of shapes, dtypes and static values.",
+                ),
+                (
+                    "Compilation cache",
+                    "The store of compiled specializations that later calls reuse, so trace-time Python side effects need not run again.",
+                ),
+                (
+                    "Trace-time side effect",
+                    "A Python action such as print or list append that happens while tracing and is not a reliable per-execution update.",
+                ),
+            ),
         ),
     ]
 )
@@ -502,6 +586,28 @@ def branch(value):
             "For a carry error, compare shape, dtype and tree structure before and after one transition. For a gradient failure, identify the primitive and the differentiation mode. A branch that changes output shape needs a different representation or explicit static configuration.",
             "Write a fixed-step simulation transition and explain how a runtime stopping criterion changes its numerical and derivative contract. Connect the difference to solver tolerance and discretization error rather than treating all loops as interchangeable syntax.",
             (("Control flow", "https://docs.jax.dev/en/latest/control-flow.html"),),
+            key_terms=(
+                (
+                    "lax.cond",
+                    "A structured branch whose runtime scalar predicate chooses between branches that return the same structure, shapes and dtypes.",
+                ),
+                (
+                    "lax.scan",
+                    "A structured loop that applies one transition over a sequence and returns the final carry plus a stacked history of outputs.",
+                ),
+                (
+                    "lax.while_loop",
+                    "A loop whose runtime condition decides how many iterations run, which ordinary reverse-mode differentiation does not support.",
+                ),
+                (
+                    "Loop carry",
+                    "The state passed from one iteration to the next, which must keep the same shape, dtype and tree structure every step.",
+                ),
+                (
+                    "Dynamic shape",
+                    "An array size that depends on runtime values, which traced code cannot express and which padding plus masks can replace.",
+                ),
+            ),
         ),
         Unit(
             12,
@@ -600,6 +706,28 @@ targets = jnp.array([1., 2.])""",
             "When a vectorized result is wrong, write the unmapped function signature, every in_axes entry and the expected output axes. When a gradient comparison differs, check whether the objective couples examples or uses a different reduction before blaming vmap.",
             "Design a two-axis comparison of candidate parameter vectors and observations. Explain why vmap alone does not establish multi-device parallelism, and estimate the memory cost of retaining a gradient for every example in a larger model.",
             (("vmap", "https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html"),),
+            key_terms=(
+                (
+                    "vmap",
+                    "A JAX transformation that adds a mapped batch axis around a function written for one example, without a Python loop.",
+                ),
+                (
+                    "in_axes",
+                    "The vmap specification that says which arguments vary along which axis and which are shared across the batch.",
+                ),
+                (
+                    "Shared argument",
+                    "An unmapped input, such as one parameter vector, that every mapped example receives unchanged.",
+                ),
+                (
+                    "Per-example gradient",
+                    "One gradient per observation, obtained by vmapping the gradient of a one-example loss over the rows.",
+                ),
+                (
+                    "Separable objective",
+                    "A loss that is an equally weighted mean of independent per-example terms, so averaging per-example gradients gives its gradient.",
+                ),
+            ),
         ),
     ]
 )
@@ -712,6 +840,28 @@ active = jnp.array([True, True, True, False])""",
             "A suspiciously small loss can come from a wrong denominator, wrong class axis or masking after an invalid operation. Inspect active target identities and direct gradients. The host-side validation function is intentionally not a transformed numerical kernel.",
             "Map this objective to shifted next-token labels in llm-017 and llm-031. Explain why excluding prompt targets does not imply zero gradient through all prompt representations in a full causal model.",
             (("JAX neural-network functions", "https://docs.jax.dev/en/latest/jax.nn.html"),),
+            key_terms=(
+                (
+                    "Logits",
+                    "Unnormalized scores, one per candidate class, that are not probabilities until a softmax normalizes them.",
+                ),
+                (
+                    "Log-softmax",
+                    "The stable computation of normalized log probabilities from logits, used to score the target class.",
+                ),
+                (
+                    "Target mask",
+                    "An indicator that marks which target positions are real supervised events and which are padding or ignored storage.",
+                ),
+                (
+                    "Active denominator",
+                    "The count of masked-in targets, which must divide the masked loss sum so padding cannot change the mean or gradients.",
+                ),
+                (
+                    "Sentinel index",
+                    "A placeholder label marking an ignored target, which is replaced by a safe index before any gather.",
+                ),
+            ),
         ),
         Unit(
             14,
@@ -822,6 +972,28 @@ zero_state = (jnp.float64(0.), jnp.float64(0.), jnp.int64(0))""",
                     "https://docs.jax.dev/en/latest/the-training-cookbook.html",
                 ),
                 ("Adam paper", "https://arxiv.org/abs/1412.6980"),
+            ),
+            key_terms=(
+                (
+                    "SGD",
+                    "Stochastic gradient descent, which subtracts the learning rate times the current gradient and keeps no history.",
+                ),
+                (
+                    "Momentum",
+                    "An optimizer that keeps a velocity accumulating earlier gradients, so the next step depends on gradient history.",
+                ),
+                (
+                    "Adam",
+                    "An optimizer that keeps first and second moment averages of the gradient plus a step count and scales each update by them.",
+                ),
+                (
+                    "Optimizer state",
+                    "The values besides the parameters, such as velocity, moments and step count, that determine the next update.",
+                ),
+                (
+                    "Bias correction",
+                    "Adam's division of each moment by one minus beta to the power t, which compensates for starting the moments at zero.",
+                ),
             ),
         ),
     ]
@@ -955,6 +1127,24 @@ def train():
                 ("Pytrees and MLPs", "https://docs.jax.dev/en/latest/pytrees.html"),
                 ("Training cookbook", "https://docs.jax.dev/en/latest/the-training-cookbook.html"),
             ),
+            key_terms=(
+                (
+                    "MLP",
+                    "A multilayer perceptron that alternates affine maps with nonlinear functions, here one tanh hidden layer of four units.",
+                ),
+                (
+                    "Initialization policy",
+                    "The complete rule for creating starting parameters, including key splits, value scale and zero biases.",
+                ),
+                (
+                    "Training step",
+                    "One compiled function that computes the mean loss, differentiates it and returns updated parameters.",
+                ),
+                (
+                    "Held-out evaluation",
+                    "Measuring error on listed inputs never used for updates, which is separate evidence from a reduced training loss.",
+                ),
+            ),
         ),
         Unit(
             16,
@@ -1061,6 +1251,28 @@ key = jax.random.key(41)""",
                 (
                     "Stateful computations",
                     "https://docs.jax.dev/en/latest/stateful-computations.html",
+                ),
+            ),
+            key_terms=(
+                (
+                    "Inverted dropout",
+                    "A training transform that zeroes each activation with probability one minus q and divides survivors by the keep probability q.",
+                ),
+                (
+                    "Keep probability",
+                    "The probability q that an activation is retained, which must lie in (0, 1] so the scaling is defined.",
+                ),
+                (
+                    "Training mode",
+                    "An explicit flag that selects the stochastic dropout computation instead of the deterministic evaluation identity.",
+                ),
+                (
+                    "Evaluation mode",
+                    "The deterministic path that returns activations unchanged under the inverted dropout convention.",
+                ),
+                (
+                    "Key ownership",
+                    "The rule for which part of training state holds the next random key, so each step draws a new mask instead of reusing one.",
                 ),
             ),
         ),
@@ -1198,6 +1410,28 @@ def compare(left, right):
                 ),
                 ("Random API", "https://docs.jax.dev/en/latest/jax.random.html"),
             ),
+            key_terms=(
+                (
+                    "Checkpoint",
+                    "A saved state specified by the continuation it promises, such as identical predictions or an identical next update.",
+                ),
+                (
+                    "Optimizer history",
+                    "Accumulated values such as momentum velocity that the next update reads, so a weights-only snapshot cannot reproduce it.",
+                ),
+                (
+                    "Random state",
+                    "The typed key carried in training state, whose saved value fixes the next noise draw after reconstruction.",
+                ),
+                (
+                    "Next-step parity",
+                    "The check that a reconstructed state produces exactly the same next update as the uninterrupted run.",
+                ),
+                (
+                    "Serialization boundary",
+                    "The conversion of numerical state into a durable format such as an npz file, which must preserve values, dtypes and key data.",
+                ),
+            ),
         ),
         Unit(
             18,
@@ -1296,6 +1530,28 @@ def safe_log_extension(values):
             (
                 ("Debugging", "https://docs.jax.dev/en/latest/debugging.html"),
                 ("Errors", "https://docs.jax.dev/en/latest/errors.html"),
+            ),
+            key_terms=(
+                (
+                    "Tracer conversion error",
+                    "An error raised when traced code requests a concrete host value, such as converting a tracer to a NumPy array.",
+                ),
+                (
+                    "Dynamic output length",
+                    "A result size that depends on runtime data, such as a Boolean selection, which a fixed-shape compiled calculation cannot express.",
+                ),
+                (
+                    "jax.debug.print",
+                    "A printing function that reports runtime values inside transformed code, whereas Python print observes only tracing.",
+                ),
+                (
+                    "checkify",
+                    "A JAX transformation that turns explicit checks into an error value returned with the result and inspected at the host boundary.",
+                ),
+                (
+                    "Finite intermediates",
+                    "The requirement that every branch, including an unselected one, computes finite values so its derivative cannot introduce NaN.",
+                ),
             ),
         ),
     ]

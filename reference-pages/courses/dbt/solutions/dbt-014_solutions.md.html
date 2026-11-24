@@ -198,21 +198,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-write-a-complete-definition">1. Write a complete definition<a class="heading-anchor" href="#1-write-a-complete-definition" aria-label="Link to this section">#</a></h3>
 <p>State which records contribute, the grouping key, time boundary and unit. Keep the definition aligned with the model and tests.</p>
+<p><strong>Why it holds here:</strong> mart sums amount across all orders, so its grain is one row for the whole table. With the seed rows 5 and 7, total is 12 in the same unit as amount.</p>
+<p><strong>Plausible wrong approach:</strong> Writing total as the total amount repeats the column name without saying what is included.</p>
+<p><strong>How to verify:</strong> Write the description, then ask whether a reader could predict 12 from the two seed rows without reading the SQL.</p>
 <p><strong>Expected:</strong> A reader can interpret the quantity without guessing.</p>
 <h3 id="2-add-a-downstream-consumer">2. Add a downstream consumer<a class="heading-anchor" href="#2-add-a-downstream-consumer" aria-label="Link to this section">#</a></h3>
 <p>The exposure is a maintained declaration. Validate actual consumer behavior separately and update ownership when responsibility changes.</p>
+<p><strong>Why it holds here:</strong> An exposure declares a consumer and its dependency. dbt places it in the manifest graph so you can see who reads mart.</p>
+<p><strong>Plausible wrong approach:</strong> Treating the exposure as proof that the dashboard exists or reads mart today is wrong, since dbt never contacts it.</p>
+<p><strong>How to verify:</strong> Add a second exposure with depends_on ref(&#x27;mart&#x27;) and an owner, run docs generate, and confirm its depends_on.nodes lists model.classroom.mart.</p>
 <p><strong>Expected:</strong> The new edge appears in the manifest.</p>
 <h3 id="3-inspect-physical-type">3. Inspect physical type<a class="heading-anchor" href="#3-inspect-physical-type" aria-label="Link to this section">#</a></h3>
 <p>Generate docs against the intended materialized state and retain its invocation/source context. A stale catalog can describe an older deployment.</p>
+<p><strong>Why it holds here:</strong> catalog.json is built by querying the database, so it shows the real type that DuckDB stored, such as INTEGER for answer in example_two.</p>
+<p><strong>Plausible wrong approach:</strong> Reading a catalog generated before the latest build would report an older type for a changed column.</p>
+<p><strong>How to verify:</strong> Run build then docs generate and check catalog nodes for the column; the type should match the cast in the SQL.</p>
 <p><strong>Expected:</strong> It matches the built database representation.</p>
 <h3 id="4-find-an-undocumented-field">4. Find an undocumented field<a class="heading-anchor" href="#4-find-an-undocumented-field" aria-label="Link to this section">#</a></h3>
 <p>Add a semantic review gate appropriate to the project. Avoid automatically filling descriptions with generic repeated text.</p>
+<p><strong>Why it holds here:</strong> example_two has an empty description for answer. The gap remains visible in the manifest, which is the point of the exercise.</p>
+<p><strong>Plausible wrong approach:</strong> Filling every empty description with a placeholder sentence makes the docs look complete while saying nothing.</p>
+<p><strong>How to verify:</strong> Check that <code>nodes[&#x27;model.classroom.answer&#x27;][&#x27;description&#x27;] == &#x27;&#x27;</code> in the manifest and that its <code>columns</code> map is empty, because example_two has no schema.yml; the gap stays until someone writes a real description.</p>
 <p><strong>Expected:</strong> The documentation gap remains visible.</p>
 <h3 id="5-separate-lineage-from-execution">5. Separate lineage from execution<a class="heading-anchor" href="#5-separate-lineage-from-execution" aria-label="Link to this section">#</a></h3>
 <p>Combine lineage with actual deployment and service evidence when making operational claims. Keep those evidence sources separately identifiable.</p>
+<p><strong>Why it holds here:</strong> An exposure records a declared dependency only. It does not show that the dashboard ran, loaded, or displayed the current total.</p>
+<p><strong>Plausible wrong approach:</strong> Citing the exposure as evidence the report refreshed confuses declared lineage with observed execution.</p>
+<p><strong>How to verify:</strong> Compare the exposure with an actual dashboard refresh log; only the log shows a run.</p>
 <p><strong>Expected:</strong> It cannot prove the external dashboard ran successfully.</p>
 <h3 id="6-export-a-compact-review-record">6. Export a compact review record<a class="heading-anchor" href="#6-export-a-compact-review-record" aria-label="Link to this section">#</a></h3>
 <p>Keep a bounded summary with links or hashes identifying the underlying artifacts. The full files remain the detailed evidence in a durable project.</p>
+<p><strong>Why it holds here:</strong> A short review record picks the description, owner, exposure dependency and artifact identifiers from manifest.json and catalog.json.</p>
+<p><strong>Plausible wrong approach:</strong> Copying the full artifacts into the record makes review hard and duplicates files that change with every run.</p>
+<p><strong>How to verify:</strong> Write a small JSON record with the model description, exposure owner, dependency nodes and a hash of each artifact, then check each value against the source files.</p>
 <p><strong>Expected:</strong> The record contains meaning, ownership and dependency identifiers.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;dbt-014: actual local dbt and DuckDB reference.&quot;&quot;&quot;</span>

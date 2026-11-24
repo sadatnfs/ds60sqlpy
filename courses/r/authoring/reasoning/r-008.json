@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Trace fill order and the prediction rows",
+      "body": "The starter matrix and its byrow twin hold the same six integers in different cells.\n\n```text\ncall                                  row 1   row 2\nmatrix(1:6, nrow = 2)                 1 3 5   2 4 6\nmatrix(1:6, nrow = 2, byrow = TRUE)   1 2 3   4 5 6\n```\n\nExample 1 multiplies a 3 by 2 design by a length-two coefficient vector, which R treats as a 2 by 1 column. Each output row is one observation's sum of feature times coefficient:\n\n```text\nrow  intercept  x  2 * intercept + 3 * x\n1    1          0  2\n2    1          1  5\n3    1          2  8\n```\n\nThe inner dimensions, two columns and two coefficients, must match, and the outer ones give the 3 by 1 shape. `print(prediction)` therefore shows a single column headed `[,1]` with rows 2, 5 and 8. The design's column names do not carry over, because the result takes row names from the design and column names from beta, and neither has any."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Build the matrix with the default fill and read its first row with `m[1, ]`.",
+      "why": "R fills down columns: the first column takes 1 and 2, the second 3 and 4, the third 5 and 6. The first row is therefore 1, 3, 5.",
+      "wrong": "Reading the input order 1, 2, 3 as the first row, which assumes filling across rows. That only happens with `byrow = TRUE`.",
+      "verify": "The reference asserts `identical(m[1, ], c(1L, 3L, 5L))`, and `print(m)` shows row `[1,]` as 1 3 5."
+    },
+    {
+      "approach": "Pass `byrow = TRUE` with the same `nrow = 2`.",
+      "why": "The shape stays 2 by 3, but the six values now fill across, so the first row is 1, 2, 3 and the second 4, 5, 6.",
+      "wrong": "Transposing with `t(m)` instead. That produces a 3 by 2 matrix whose first row is 1, 2, a different shape from the one requested.",
+      "verify": "`by_row[1, ]` returns 1, 2, 3 as the reference checks, and `dim(by_row)` returns 2 and 3."
+    },
+    {
+      "approach": "Bind a column of ones to the feature values and multiply: `cbind(1, c(3, 4)) %*% c(2, 3)`.",
+      "why": "Each row computes 2 * 1 + 3 * x, so x = 3 gives 11 and x = 4 gives 14. The column of ones is what lets the intercept enter every row.",
+      "wrong": "Leaving out the ones column. `c(3, 4) %*% c(2, 3)` treats both as vectors and returns their inner product, a 1 by 1 matrix holding 18.",
+      "verify": "`as.numeric(design %*% c(2, 3))` returns 11 and 14, and `dim()` of the product shows 2 and 1."
+    },
+    {
+      "approach": "Keep `%*%` and add a shape guard, `ncol(design) == length(beta)`, before multiplying.",
+      "why": "The matrix product sums feature times coefficient within each row. The elementwise `*` in Example 3 recycles beta by row instead, so no feature receives its own coefficient.",
+      "wrong": "Patching the elementwise result with `rowSums(design * beta)`. It returns a plausible-looking 8 and 15, but those are not the predictions.",
+      "verify": "The matrix product returns 11 and 14, while `rowSums(design * beta)` returns 8 and 15 for the same inputs."
+    },
+    {
+      "approach": "Extract with `design[, 1, drop = FALSE]` and test the dimensions of the result.",
+      "why": "The intercept column is one column of two rows. Keeping it as a matrix means later matrix code still sees a 2 by 1 object.",
+      "wrong": "Writing `design[, 1]`. R simplifies to the vector 1, 1, `dim()` becomes NULL, and `nrow()` of it returns NULL.",
+      "verify": "The reference asserts `identical(dim(one), c(2L, 1L))`, so `nrow(one)` returns 2 rather than NULL."
+    },
+    {
+      "approach": "After `solve(a, b)`, substitute the solution back and measure the largest absolute residual.",
+      "why": "For `diag(c(2, 4))` and b = 6, 8, the solution is 3 and 2, and multiplying back reproduces b exactly. The check tests the returned numbers against the equation itself.",
+      "wrong": "Treating a tiny residual as proof the coefficients are trustworthy. A nearly singular matrix can return a solution with a small residual that changes wildly when b moves slightly, and the check says nothing about whether the model is right.",
+      "verify": "The residual value here is 0, below the 1e-12 threshold; `kappa(a, exact = TRUE)` returns 2, showing this system is well conditioned."
+    }
+  ]
+}

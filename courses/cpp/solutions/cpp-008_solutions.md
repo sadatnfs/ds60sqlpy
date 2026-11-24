@@ -19,7 +19,7 @@ In doubled, the const vector reference borrows the caller input for the call. `a
 
 The first complete program passes a temporary vector. That temporary remains alive through the function call, so the borrowed parameter is valid while doubled reads it. The returned vector owns different storage and survives after the temporary argument is destroyed. A function returning a reference to its local out would instead leave the caller with a reference to an object whose lifetime ended at return.
 
-The second program copies a const input and edits the copy. Constness of the source does not make the copied vector const. The two objects have separate state, so changing ys[0] does not change xs[0]. This is different from `const auto& ys=xs`, which would create another read-only alias to the same vector and prohibit the assignment through ys.
+The second program copies a const input and edits the copy. Constness of the source does not make the copied vector const. The two objects have separate state, so changing `ys[0]` does not change `xs[0]`. This is different from `const auto& ys=xs`, which would create another read-only alias to the same vector and prohibit the assignment through ys.
 
 Choose parameter passing based on the interface. Small integers are commonly copied. A read-only large vector can be borrowed by const reference. A function that needs to retain an owned copy may accept by value and move into its storage. A mutation function can take a nonconst reference, but then the caller must understand the side effect. Avoid using references simply because they look faster: lifetime and aliasing are part of the cost.
 
@@ -58,7 +58,7 @@ Draw input, copied output and borrowed parameter.
 
 ## Exercise 2: Predict mutation
 
-Change output[0] to 99 after doubled([2, 4]).
+Change `output[0]` to 99 after `doubled({2, 4})`.
 
 **Expected:** Input first value 2; output first value 99.
 
@@ -78,7 +78,7 @@ Write size_of(const vector<int>&) without mutation.
 
 ## Exercise 4: Diagnose const assignment
 
-Attempt xs[0]=9 through const vector<int>& in a scratch file.
+Attempt `xs[0] = 9` through const vector<int>& in a scratch file.
 
 **Expected:** Compilation fails; remove mutation to repair.
 

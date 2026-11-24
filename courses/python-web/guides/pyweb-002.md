@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-001`.
 
 A URL can identify a resource and carry options for viewing it. The path and query string have different roles and different parsing rules. This chapter observes a percent-encoded name, repeated query parameters and an integer path converter through a real Flask client. The goal is to recognize what the application actually receives before adding validation or database queries.
 
+## Key terms
+
+- **Path parameter:** A variable segment of a route pattern, such as `<name>`, that the router decodes and passes to the handler as an argument.
+- **Query string:** The part of a URL after `?` that carries `key=value` options; Flask exposes the parsed values through `request.args`.
+- **Percent encoding:** The URL convention that writes a byte as `%` plus two hexadecimal digits, so `%20` represents a space in `/people/Ada%20Lovelace`.
+- **Multidict:** A mapping that can keep several values under one key, so `getlist("tag")` returns every `tag` value while a single lookup returns one.
+- **Path converter:** A route rule such as `<int:item_id>` that restricts which segments match and converts the match to a Python value; a nonmatching segment produces 404 Not Found.
+
 ## Mechanism: encoding is part of transport
 
 The path `/people/Ada%20Lovelace` represents a name containing a space. Percent encoding expresses bytes that cannot appear literally in that location. The framework decodes the path into the route argument `name`. The raw query string remains available as bytes through `request.query_string`, while `request.args` provides a parsed multidict.
@@ -25,6 +33,38 @@ The name is application input, even after successful decoding. Decoding does not
 `/items/7` matches the integer converter and produces an integer value seven. `/items/seven` does not match and returns 404. The example verifies the value and its Python type in the successful case, then the routing failure in the second case.
 
 Do not infer that every integer accepted by a converter is a valid database identifier. The application still needs to decide whether zero, negative numbers, extremely large numbers or absent records make sense. The precise converter's domain is also framework-specific, so test boundaries rather than assuming it behaves like unrestricted `int(text)`.
+
+## Worked example: reading the same URL three ways
+
+```python
+from flask import Flask, request
+
+app = Flask(__name__)
+
+
+@app.get("/people/<name>")
+def person(name):
+    return {
+        "name": name,
+        "first_tag": request.args.get("tag"),
+        "all_tags": request.args.getlist("tag"),
+        "page": request.args.get("page", 1, type=int),
+    }
+
+
+with app.test_client() as client:
+    print(client.get("/people/Grace%20Hopper?tag=navy&tag=cobol&page=x").json)
+    print(client.get("/people/Grace/Hopper").status_code)
+```
+
+Expected output:
+
+```text
+{'all_tags': ['navy', 'cobol'], 'first_tag': 'navy', 'name': 'Grace Hopper', 'page': 1}
+404
+```
+
+The router decoded `%20` before the handler saw `name`, so the view received `Grace Hopper` with a real space. The query string held two `tag` values: `get` returned only `navy`, while `getlist` kept both in order, which is the difference between a single option and a repeated filter. The `page=x` value failed the `type=int` conversion, so Flask silently used the default `1`; that is convenient for optional paging but would hide a client mistake if you needed an explicit 400. The second request shows that a literal slash is a path separator: `<name>` matches one segment only, so `/people/Grace/Hopper` finds no rule and returns 404. Using `<path:name>` would accept it.
 
 ## Failure diagnosis
 

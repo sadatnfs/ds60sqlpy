@@ -1,6 +1,6 @@
 # llm-019: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these overfit one batch to diagnose the loop answers after attempting *Clone the initial state* through *Limit the conclusion*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Train the repeated batch* points to one step. `llm-019_solution.py` holds the assertions; this page explains how they test overfit diagnostic. Then try *Limit the conclusion* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -34,7 +34,7 @@ y = torch.tensor([[2, 3, 4]])
 
 **Expected:** all parameter tensors initially equal.
 
-**Verify:** In a fresh process, the exercise checks confirm `all((torch.equal(a, b) for a, b in zip(trained.parameters(), control.parameters())))`.
+**Verify:** For *Clone the initial state*, a fresh-process check confirms `all((torch.equal(a, b) for a, b in zip(trained.parameters(), control.parameters())))`.
 
 ## Exercise 2: Run a no-update control
 
@@ -56,7 +56,7 @@ assert len(set(values)) == 1 and all(
 
 **Expected:** all losses equal; weights unchanged.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(set(values)) == 1` and `all((torch.equal(v, before[k]) for k, v in control.state_dict().items()))`.
+**Verify:** For *Run a no-update control*, a fresh-process check confirms `len(set(values)) == 1` and `all((torch.equal(v, before[k]) for k, v in control.state_dict().items()))`.
 
 ## Exercise 3: Train the repeated batch
 
@@ -79,7 +79,7 @@ assert np.isfinite(curve).all() and curve[-1] < curve[0]
 
 **Expected:** final batch loss below its initial loss.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(curve).all()` and `curve[-1] < curve[0]`.
+**Verify:** For *Train the repeated batch*, a fresh-process check confirms `np.isfinite(curve).all()` and `curve[-1] < curve[0]`.
 
 ## Exercise 4: Check the class axis
 
@@ -94,7 +94,7 @@ assert tuple(z.shape) == (1, 3, 16)
 
 **Expected:** shape (1, 3, 16).
 
-**Verify:** In a fresh process, the exercise checks confirm `tuple(z.shape) == (1, 3, 16)`.
+**Verify:** For *Check the class axis*, a fresh-process check confirms `tuple(z.shape) == (1, 3, 16)`.
 
 ## Exercise 5: Verify the control stayed isolated
 
@@ -108,7 +108,7 @@ assert all(torch.equal(v, before[k]) for k, v in control.state_dict().items())
 
 **Expected:** every control tensor unchanged.
 
-**Verify:** In a fresh process, the exercise checks confirm `all((torch.equal(v, before[k]) for k, v in control.state_dict().items()))`.
+**Verify:** For *Verify the control stayed isolated*, a fresh-process check confirms `all((torch.equal(v, before[k]) for k, v in control.state_dict().items()))`.
 
 ## Exercise 6: Limit the conclusion
 
@@ -128,8 +128,8 @@ assert report["heldout_count"] == 0 and not report["generalization_established"]
 
 **Expected:** heldout_count0 and generalization_establishedFalse.
 
-**Verify:** In a fresh process, the exercise checks confirm `report['heldout_count'] == 0` and `not report['generalization_established']`.
+**Verify:** For *Limit the conclusion*, a fresh-process check confirms `report['heldout_count'] == 0` and `not report['generalization_established']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Check the class axis* and predict the result first; keep *Verify the control stayed isolated* failing beside the repair. Log a missing PyTorch separately from a wrong overfit diagnostic value in `llm-019`.

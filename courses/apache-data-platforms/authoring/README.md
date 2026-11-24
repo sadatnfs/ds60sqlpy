@@ -5,6 +5,26 @@ unit adds `units/apache-NNN.json`, `chapters/apache-NNN.md` and a complete sourc
 `programs/`. Python sources target a prepared real library. Markdown sources are
 project command notebooks and have reading runtime, with no classroom Run promise.
 
+Each unit file carries `key_terms`: 3 to 5 `[term, definition]` pairs naming the
+lesson-specific concepts its chapter uses. Terms contain no `*` or `:` and must be
+unique within the unit; each definition is one or two sentences ending with a
+period. The generator validates them and renders a `## Key terms` section of
+`- **Term:** definition.` bullets between the guide's orientation line and the
+chapter prose.
+
+A unit file may also carry `worked_examples`: at least two objects with `title`,
+`language`, `code`, `interpretation` and an optional `output`. Each example is a
+concrete artifact for the lesson's tool (a project command, CQL, HQL, SQL, a
+config excerpt, or a Java or Python fragment consistent with the pinned versions)
+followed by one interpretation paragraph, ending with a period, that explains what
+the output or behavior shows and what to check. Titles and code must be unique
+within the unit, values are trimmed non-empty strings without em or en dashes or
+triple backticks, and Python code must parse and match `ruff format`. Record an
+`output` only when it was actually produced by running the code; for services that
+the classroom does not run, describe the expected shape in the interpretation.
+The generator renders a `## Worked examples` section after the chapter prose and
+before `## Complete worked source`.
+
 Run `python courses/apache-data-platforms/authoring/build.py` to refresh this
 subject's guides and examples. `--check` verifies exact source/output parity.
 Before all 88 units are complete these commands intentionally do not create

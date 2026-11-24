@@ -153,7 +153,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Replay without duplicate effect) before changing anything, and confirm its observation: A repeated operation returns its receipt without applying again.
 2. Compare Example B (Reject conflicting identity reuse) with Example A and name the first line whose behavior differs. Its observation is: A changed payload is rejected and prior state remains intact.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An in-memory actor ledger loses its state after restart.
+3. Before opening the explanation, check your task 3 attempt (Add a read-only receipt lookup that never re-executes work) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

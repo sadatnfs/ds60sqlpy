@@ -14,6 +14,13 @@ PyTorch torch.compile has guards and graph-break behavior; TensorFlow tf.functio
 
 
 
+### Key terms
+
+- **Tracing:** Recording the operations executed on sample inputs to build a graph for compilation.
+- **Graph break:** A point where the compiler cannot capture code, so execution falls back to eager Python.
+- **Shape specialization:** Compiling for specific input shapes, so a new shape can trigger recompilation.
+- **Break-even call count:** The number of calls after which compile time is repaid by faster steady-state execution.
+
 ## Worked examples
 
 ### Worked example 1
@@ -38,6 +45,14 @@ print("CPU compilation model:", len(set(shapes)), "specializations; break-even",
 
 **Expected observation:** Two modeled specializations;500-call break-even.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `shapes` | `[(4, 8), (4, 8), (8, 8)]` |
+| `compile_ms` | `500` |
+| `saving_ms` | `1` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -56,27 +71,39 @@ Choose either lane first, then compare the other using identical mathematical in
 
 ### Exercise 1: Count specializations
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **count specializations** in the examples above.
+**Trap to avoid:** Counting one compilation per call, three here, ignores the cache and overestimates startup cost. Counting one compilation total assumes the compiler generalizes across shapes, which static specialization does not.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Calculate break-even calls
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **calculate break-even calls** in the examples above.
+**Trap to avoid:** Assuming compilation pays off immediately because each call is faster ignores the startup cost. A short-lived job of 100 calls loses 400 ms overall.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Describe a graph break
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **describe a graph break** in the examples above.
+**Trap to avoid:** Assuming a program that ran without errors under the compiler was compiled as one graph overlooks silent breaks, which are reported only when logging is enabled.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Specify an accepted shape set
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **specify an accepted shape set** in the examples above.
+**Trap to avoid:** Accepting arbitrary shapes in production lets each new batch size trigger a recompilation, causing latency spikes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare gradients
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **compare gradients** in the examples above.
+**Trap to avoid:** Checking only that forward outputs match and assuming gradients follow can miss a backward bug that shows up only as slower training.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Separate compilation and replay
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **separate compilation and replay** in the examples above.
+**Trap to avoid:** Expecting graph replay to speed up compute-bound kernels confuses launch overhead with kernel time.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

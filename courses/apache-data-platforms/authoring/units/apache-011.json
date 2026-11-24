@@ -5,6 +5,44 @@
   "minutes": 50,
   "prerequisites": ["apache-010"],
   "concepts": ["compute kernels", "chunks", "null policy"],
+  "key_terms": [
+    [
+      "Record batch",
+      "A set of equal-length Arrow columns sharing one schema, representing one batch of rows."
+    ],
+    [
+      "Chunked array",
+      "A column made of several contiguous array pieces. Chunk boundaries reflect storage or arrival history, not customer groups, file partitions or transactions."
+    ],
+    [
+      "Compute kernel",
+      "A native, typed Arrow function such as filter, greater or sum that processes whole arrays instead of looping over Python values."
+    ],
+    [
+      "Null policy",
+      "How a kernel treats missing inputs. A comparison with null yields null, and a filter must state whether a null selection drops the row or emits a null slot."
+    ],
+    [
+      "Explicit fill",
+      "Replacing nulls with a stated value, as fill_null does, before computing, so the business choice about missing data is visible in the code."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Merge chunk means from sums and counts",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.compute as pc\n\nvalues = pa.chunked_array([[4], [None, 8, 2, 6]], type=pa.int64())\nnaive = sum(pc.mean(chunk).as_py() for chunk in values.chunks) / values.num_chunks\nsums = sum(pc.sum(chunk).as_py() for chunk in values.chunks)\ncounts = sum(len(chunk) - chunk.null_count for chunk in values.chunks)\nprint(naive, sums / counts, pc.mean(values).as_py())",
+      "output": "4.666666666666666 5.0 5.0",
+      "interpretation": "Averaging the two chunk means gives about 4.67, while merging sums and counts gives 5, matching the compute kernel on the whole chunked array. The naive version weights a one-row chunk the same as a four-row chunk. Any custom code that combines partial aggregates across chunks, files or partitions has the same trap, so test it with deliberately unequal chunk sizes."
+    },
+    {
+      "title": "Keep unknown filter results visible",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.compute as pc\n\nvalues = pa.chunked_array([[4, None, 8], [2, 6]], type=pa.int64())\nmask = pc.greater(values, 5)\nprint(pc.filter(values, mask).to_pylist())\nprint(pc.filter(values, mask, null_selection_behavior=\"emit_null\").to_pylist())",
+      "output": "[8, 6]\n[None, 8, 6]",
+      "interpretation": "The default filter drops the null comparison result along with the false ones, leaving 8 and 6. With emit_null, the unknown row stays as a null so a reviewer can see that one measurement could not be classified. Use the second form when building exception reports, because silently dropping unknown rows makes a filtered count look more certain than the data allows."
+    }
+  ],
   "evidence": "Independent exact-value assertions and expected failure observations in the complete bounded program.",
   "sources": [
     ["Arrow compute functions", "https://arrow.apache.org/docs/python/compute.html"],

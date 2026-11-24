@@ -198,9 +198,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-003</code>, <code>cuda-009</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Compile one <code>main.cu</code> with a reviewed <code>nvcc</code> command and draw its source-to-executable artifact diagram.</p>
 <p>Work through <em>The <code>.cu</code> file, compiler driver and executable</em> with the concrete cases below. Finish with this evidence: preserved compiler output plus a source-to-executable diagram. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A .cu translation unit can contain ordinary host functions and CUDA device functions. nvcc coordinates separate compilation paths, invokes a supported host compiler and links the CUDA runtime. PTX is a virtual instruction representation; a cubin holds device machine code for a target architecture. An executable can package several device images in a fat binary. Loading may select a compatible image or invoke supported JIT compilation of PTX. This explains why source compilation, host linking, device loading and kernel execution can fail at different times. Header suffix .cuh is a convention, not an instruction that executes anything.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>nvcc:</strong> The CUDA compiler driver that separates host and device code, calls a host compiler and links the CUDA runtime.</li>
+<li><strong>PTX:</strong> A virtual GPU instruction set that the driver can just-in-time compile for a compatible architecture.</li>
+<li><strong>cubin:</strong> A binary that holds native device machine code for one specific GPU architecture.</li>
+<li><strong>Fat binary:</strong> An embedded bundle of several device images, such as cubins for multiple architectures plus PTX.</li>
+<li><strong>JIT compilation:</strong> Just-in-time translation of PTX into machine code when a module is loaded on a device.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-011_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-011_cpu.py</code></pre>

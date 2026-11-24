@@ -16,11 +16,25 @@ A signature check is meaningful only relative to a trust decision. The course fi
 
 **Expected:** Four distinct roles with an independently chosen trust key.
 
+**Solution reasoning**
+
+- **Approach:** Separate payload, signature, public key and expected digest, and note where the key came from.
+- **Why it is correct:** A signature only means something if the verifying key was obtained independently of the artifact.
+- **Plausible wrong approach:** Taking the public key from the same bundle as the payload lets an attacker supply both.
+- **How to verify:** Four roles are listed, and the key has an independent source.
+
 ## Exercise 2: Check content integrity
 
 The digest comparison must use an independent expected value. Computing a fresh digest and merely printing it is not an integrity check, because there is nothing trusted to compare it against.
 
 **Expected:** Different content produces a different expected comparison result.
+
+**Solution reasoning**
+
+- **Approach:** Hash the original and changed byte sequences with the declared algorithm.
+- **Why it is correct:** A cryptographic hash changes completely when any byte changes, so the two digests differ.
+- **Plausible wrong approach:** Comparing visible text could miss a whitespace or encoding change.
+- **How to verify:** The two digests differ, and only the original matches the expected one.
 
 ## Exercise 3: Verify the positive signature
 
@@ -28,11 +42,25 @@ This is the cryptographic positive control. The standard-library chapter checker
 
 **Expected:** Exit 0 plus successful verification output, with tool identity recorded.
 
+**Solution reasoning**
+
+- **Approach:** Run the qualified CLI against attestation.json with the fixed key and signature, recording tool and exit.
+- **Why it is correct:** Exit 0 with a success message means the signature matches the payload bytes under that key.
+- **Plausible wrong approach:** Treating any output text as success ignores a nonzero exit hidden behind a warning.
+- **How to verify:** Command, exit 0 and tool version are recorded.
+
 ## Exercise 4: Verify the tamper negative
 
 The negative control catches a verifier invocation that accidentally ignores the signature or checks the wrong file. Re-signing the modified file or replacing the public key would destroy the intended experiment.
 
 **Expected:** Nonzero exit and verification failure.
+
+**Solution reasoning**
+
+- **Approach:** Repeat the exact command against attestation-tampered.json.
+- **Why it is correct:** The changed payload no longer matches the signature, so verification fails with a nonzero exit.
+- **Plausible wrong approach:** Regenerating the signature for the tampered file makes it verify and erases the negative control.
+- **How to verify:** Only the payload changed, and the run exits nonzero.
 
 ## Exercise 5: Join signature subject to artifact
 
@@ -40,11 +68,25 @@ A signature authenticates a statement under its trust assumptions. Deployment au
 
 **Expected:** The signed subject digest must match the actual artifact under the correct format contract.
 
+**Solution reasoning**
+
+- **Approach:** Compare the subject digest inside the signed statement with artifactB's actual digest.
+- **Why it is correct:** The signature binds the statement, and the statement names artifactA's digest, so it says nothing about B.
+- **Plausible wrong approach:** Accepting B because the signature verifies ignores what the signed statement is about.
+- **How to verify:** The subject digest differs from artifactB's digest.
+
 ## Exercise 6: State enforcement and offline limits
 
 The report should state exactly which algorithm, key and payload were tested. It should not claim registry provenance, transparency-log validation or enforced cluster protection without the corresponding real materials and runtime receipts.
 
 **Expected:** Synthetic RSA fixture only; real image and cluster policy qualification remain separate.
+
+**Solution reasoning**
+
+- **Approach:** List what this local RSA check cannot prove: registry provenance, cluster admission and identity of a real image.
+- **Why it is correct:** The check verifies one file locally; a cluster enforces nothing unless an admission policy checks images.
+- **Plausible wrong approach:** Claiming images are now verified at deploy time assumes an admission controller that was never configured.
+- **How to verify:** The list names all three limits.
 
 ## Boundary and troubleshooting review
 

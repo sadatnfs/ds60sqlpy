@@ -38,6 +38,12 @@
       "code": "summarize_amount <- function(x) {\n  stopifnot(is.numeric(x))\n  if (length(x) == 0L) return(list(count = 0L, total = 0))\n  list(count = length(x), total = sum(x))\n}\nresult <- summarize_amount(c(2, 4))\nstopifnot(result$count == 2L, result$total == 6)\nstopifnot(summarize_amount(numeric(0))$count == 0L)\nprint(result)\n",
       "explanation": "The result is a structured object, so downstream code can use its fields without parsing console text.",
       "expected": "Count 2, total 6; empty count 0."
+    },
+    {
+      "title": "An unchecked rate recycles and coerces silently",
+      "code": "fee_unchecked <- function(amount, rate = 0.1) amount * (1 - rate)\nsilent <- fee_unchecked(c(100, 100), c(0.1, 0.2))\nstopifnot(isTRUE(all.equal(silent, c(90, 80))))\nstopifnot(fee_unchecked(10, TRUE) == 0)\nafter_fee <- function(amount, rate = 0.1) {\n  if (!is.numeric(rate) || length(rate) != 1L) stop(\"rate must be one number\", call. = FALSE)\n  amount * (1 - rate)\n}\nmsg <- tryCatch(after_fee(c(100, 100), c(0.1, 0.2)), error = conditionMessage)\nstopifnot(identical(msg, \"rate must be one number\"))\nprint(silent)\n",
+      "explanation": "Two amounts and two rates have matching lengths, so R pairs them position by position with no warning and charges each amount a different fee. A single policy has quietly become two. Passing TRUE as the rate is worse: TRUE becomes 1 in arithmetic, so the amount drops to 0. The checked version stops before computing, and because call. = FALSE the message is just the sentence, which tryCatch hands to conditionMessage. A caller now learns about the bad rate at the call, not in a later total.",
+      "expected": "[1] 90 80 from the unchecked call; the checked call returns the message instead of numbers."
     }
   ],
   "exercises": [

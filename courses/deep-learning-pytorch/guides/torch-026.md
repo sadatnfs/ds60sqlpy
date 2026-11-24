@@ -68,7 +68,7 @@ Stable object identity matters as much as a stable parameter count. Replacing a 
 
 ## Treat a custom backward as a local vector-Jacobian product
 
-For \(f(x)=x^3\), the local derivative is 3 \({x}^{2}\). backward receives the derivative from later computation, so it must return \(\mathrm{grad\_output}\times3x^2\). At \(x=2\), the derivative of 2 f(x) is \(2\cdot 12=24\). Returning only 3 \({x}^{2}\) would pass a unit-upstream test but fail this composition. For a vector of independently cubed elements, the returned gradient has the same shape and multiplies each incoming component by its own local derivative.
+For \(f(x)=x^3\), the local derivative is 3 \({x}^{2}\). backward receives the derivative from later computation, so it must return \(\mathrm{grad\_output}\times3x^2\). At \(x=2\), the derivative of `2 * f(x)` is \(2\cdot 12=24\). Returning only 3 \({x}^{2}\) would pass a unit-upstream test but fail this composition. For a vector of independently cubed elements, the returned gradient has the same shape and multiplies each incoming component by its own local derivative.
 
 save_for_backward preserves the tensor values required by the rule and lets autograd enforce relevant lifetime/version checks. Do not mutate saved input storage between forward and backward or detach a value that must support a higher-order derivative. A function with several inputs returns a corresponding derivative entry for each differentiable input, and None where that input has no requested derivative under the declared contract. [Extending PyTorch 2.9 autograd](https://docs.pytorch.org/docs/2.9/notes/extending.html).
 
@@ -151,7 +151,7 @@ torch.testing.assert_close(module(x), 1.5 * x, atol=1e-12, rtol=0)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The zero-kernel residual returns its input with one parameter and one buffer, the identity kernel with scale 0.5 returns 1.5x, a width-3 input raises ValueError, gradcheck passes for Cube, and the incoming factor 2 gives gradient 24 at x = 2. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Build an identity residual. Predict exercise 6, Inspect the incoming-gradient factor, from its prompt alone: Differentiate the sum of 2*Cube(x) at x = 2. Then explain why this finish condition holds: The zero-kernel residual returns its input with one parameter and one buffer, the identity kernel with scale 0.5 returns 1.5x, a width-3 input raises ValueError, gradcheck passes for Cube, and the incoming factor 2 gives gradient 24 at x = 2. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -187,15 +187,15 @@ If a custom backward passes only when the outer coefficient is one, multiply the
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Keep state stable across calls) alters one assumption of Example A (Build an identity residual). Hint 2: exercise 4, Reject incompatible feature width, should end at ValueError naming feature width. Work backward from it. Hint 3: exercise 5, Validate a custom cube derivative, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Custom module, Buffer, Grad check using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Check a known residual transform, from its inputs alone. Predict whether exercise 3, Differentiate Cube at a new point, survives one changed input. Then explain Custom module, Buffer, Grad check in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-025` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Build an identity residual) cannot be rebuilt without help, revisit `torch-025` first. Otherwise keep your exercise 2 attempt, Predict state for a wider module, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

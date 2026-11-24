@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-057`.
 
+## Key terms
+
+- **Real-time table:** A Pinot table that ingests records from a stream such as Kafka instead of from uploaded batch segments.
+- **Consuming segment:** An in-progress real-time segment that a server builds from stream records and later commits as a completed segment.
+- **Flush threshold:** The row count or time limit at which a consuming segment is completed and committed.
+- **Stream decoder:** The configured component, here JSON, that turns stream messages into typed column values.
+- **Ingestion lag:** The gap between the latest source offset and the records already queryable in Pinot. A small query result does not show it is zero.
+
 ## A consuming segment connects a log to an analytical table
 
 Real-time Pinot ingestion reads a supported stream, decodes records and builds

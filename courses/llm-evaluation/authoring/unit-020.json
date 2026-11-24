@@ -2,6 +2,12 @@
   "number": 20,
   "title": "Direct Preference Optimization from ratios to gradients",
   "concepts": ["DPO", "reference log probability", "Bradley-Terry", "sequence likelihood", "beta"],
+  "key_terms": {
+    "DPO": "Direct Preference Optimization, which fits a policy to preferences with loss -log sigma(beta m) using a frozen reference.",
+    "Implicit reward": "The scaled log ratio of policy to reference probability for a response, whose context constant cancels in comparisons.",
+    "Log-ratio margin": "The chosen-response log ratio minus the rejected-response log ratio, zero when policy equals reference.",
+    "Beta parameter": "The strength of the implied KL regularization, which scales the margin inside the logistic loss."
+  },
   "outcome": "Derive the DPO loss from a regularized preference model and distinguish sequence log probabilities, temperature effects and held-out evaluation.",
   "verification": "At the reference policy the loss is log 2 with derivative -1, the preferred-action probabilities for the three beta values are 0.9, 0.75 and about 0.634, and the sequence-sum and mean-token margins have opposite signs.",
   "level": "advanced",
@@ -14,42 +20,78 @@
       "task": "Set policy and reference log odds equal for any positive beta.",
       "expected": "The loss for a positive preference is log 2.",
       "hint": "Both reference-relative log ratios cancel.",
-      "answer": "The initial classifier is indifferent under the pairwise parameterization."
+      "answer": "The initial classifier is indifferent under the pairwise parameterization.",
+      "reasoning": {
+        "approach": "Call `dpo_loss(3, 3, 0.1)`. The policy and reference log-odds shifts are equal, so z = beta times (3 - 3) = 0.",
+        "why": "With z = 0 the loss is `logaddexp(0, 0)` = log 2. At initialization, when the policy equals the reference, every preference pair costs log 2 regardless of beta.",
+        "pitfall": "Expecting the initial loss to depend on beta is the mistake. Beta scales the margin, and a zero margin scaled by anything is still zero.",
+        "verify": "The reference asserts `np.isclose(dpo_loss(3, 3, 0.1), np.log(2))`, and case A asserts the same for beta 2."
+      }
     },
     {
       "title": "Differentiate the two-action loss",
       "task": "Use beta 2 and zero reference-relative log-odds shift.",
       "expected": "The derivative is -1.",
       "hint": "Differentiate softplus(-beta times the shift).",
-      "answer": "The result includes the beta scale and the logistic residual; it should agree with finite differences."
+      "answer": "The result includes the beta scale and the logistic residual; it should agree with finite differences.",
+      "reasoning": {
+        "approach": "Call `dpo_gradient(0, 0, 2)`. The formula is beta times (sigmoid(z) - win_fraction).",
+        "why": "With z = 0 the sigmoid is 0.5 and the win fraction is 1, so the derivative is 2 times (0.5 - 1) = -1. Case A confirms this at delta 0.4 against a central finite difference.",
+        "pitfall": "Dropping the beta factor gives -0.5. That is the gradient with respect to z, not delta, and it would understate the step size by a factor of beta.",
+        "verify": "Case A asserts `dpo_gradient(0, 0, 2) == -1` and `np.isclose(numeric, dpo_gradient(delta, 0, 2), atol=1e-10)`."
+      }
     },
     {
       "title": "Compare beta optima",
-      "task": "Fit a3:1 preference ratio with beta 0.5,1 and 2 under a uniform reference.",
+      "task": "Fit a 3:1 preference ratio with beta 0.5, 1 and 2 under a uniform reference.",
       "expected": "Preferred-action probabilities are 0.9,0.75 and approximately 0.634.",
       "hint": "The optimum policy-logit shift is log 3 divided by beta.",
-      "answer": "Initial gradient magnitude and final optimum displacement are different properties of the objective."
+      "answer": "Initial gradient magnitude and final optimum displacement are different properties of the objective.",
+      "reasoning": {
+        "approach": "Call `fitted_delta(3, 1, beta)` for beta 0.5, 1 and 2, then take the sigmoid of each.",
+        "why": "The optimum is delta = log(3) / beta. For beta 0.5, delta = log 9 and the sigmoid is 9 / 10 = 0.9. For beta 1, it is 0.75. For beta 2, delta = log of the square root of 3 and the probability is about 0.634. At each optimum, beta times delta equals log 3, so the gradient is zero.",
+        "pitfall": "Assuming a larger beta moves the policy further because its initial gradient is larger is the mistake. Larger beta gives larger first steps but a smaller final change from the reference.",
+        "verify": "Case B asserts probabilities `[0.9, 0.75, np.sqrt(3) / (1 + np.sqrt(3))]` and gradients below 1e-12 at each optimum."
+      }
     },
     {
       "title": "Change length normalization",
       "task": "Use the token log-ratio arrays in the reference exercise.",
       "expected": "The sequence-sum margin is negative while the mean-token margin is positive.",
       "hint": "Chosen and rejected sequences have different lengths.",
-      "answer": "Normalizing each sequence by its own length changes its relative contribution and therefore the objective."
+      "answer": "Normalizing each sequence by its own length changes its relative contribution and therefore the objective.",
+      "reasoning": {
+        "approach": "Compute per-token log-ratios: chosen is [0.3, 0.3] (two tokens) and rejected is [0.2, 0.2, 0.2, 0.2] (four tokens). Compare sums and means.",
+        "why": "The chosen sum is 0.6 and the rejected sum is 0.8, a margin of -0.2. The chosen mean is 0.3 and the rejected mean is 0.2, a margin of +0.1. The longer rejected response wins on sums because it has more tokens.",
+        "pitfall": "Assuming normalization is a minor detail is the mistake. Summing favors longer sequences, averaging removes that effect, and each defines a different objective.",
+        "verify": "The reference asserts `chosen.sum() - rejected.sum() < 0` and `chosen.mean() - rejected.mean() > 0`."
+      }
     },
     {
       "title": "Protect the reference",
       "task": "Update the reference parameters while retaining the same loss label.",
       "expected": "The objective has changed.",
       "hint": "The reference is part of the training specification.",
-      "answer": "Reference refresh can be a deliberate algorithmic choice, but it is not the same fixed-reference DPO problem."
+      "answer": "Reference refresh can be a deliberate algorithmic choice, but it is not the same fixed-reference DPO problem.",
+      "reasoning": {
+        "approach": "Keep the reference model frozen for the whole run. If it is updated, record that as a different algorithm.",
+        "why": "The DPO loss measures the policy relative to the reference. If the reference moves, the same loss value refers to a different comparison point, and the fixed-reference optimum from exercise 3 no longer applies.",
+        "pitfall": "Letting the reference share parameters with the policy, for example by not copying it, is a common bug. The loss then goes to log 2 every step and training appears stuck.",
+        "verify": "No reference assertion covers this task. Hash the reference parameters before and after training and confirm they are identical."
+      }
     },
     {
       "title": "Bound the claim",
       "task": "Observe a lower training DPO loss.",
       "expected": "Conclude improved fit to the declared preference objective only.",
       "hint": "Separate training labels from independent task outcomes.",
-      "answer": "Task utility, robustness, calibration and critical constraints still need their own held-out evaluation."
+      "answer": "Task utility, robustness, calibration and critical constraints still need their own held-out evaluation.",
+      "reasoning": {
+        "approach": "State that a lower training DPO loss shows the policy fits the training preference pairs better under the declared beta and reference.",
+        "why": "The loss rewards matching the labeled preferences. It does not measure whether answers are correct, robust to new prompts, calibrated or free of critical errors.",
+        "pitfall": "Reporting the lower loss as an improved model is the mistake. Eval-019 shows a policy can raise a proxy while lowering true utility.",
+        "verify": "Pair the training loss with held-out preference accuracy and an independent task metric, as in the decision gates of eval-016."
+      }
     }
   ],
   "sources": [

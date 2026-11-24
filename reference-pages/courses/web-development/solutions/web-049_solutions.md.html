@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-049.md</code>.</p>
 <h3 id="exercise-1-explain-why-a-hidden-form-field-alone-does-not-prevent-csrf">Exercise 1: Explain why a hidden form field alone does not prevent CSRF.<a class="heading-anchor" href="#exercise-1-explain-why-a-hidden-form-field-alone-does-not-prevent-csrf" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The server must verify an unpredictable session-bound value, not merely the presence of a field.</p>
+<p><strong>Approach:</strong> Ask what an attacker&#x27;s page can include: it can add any hidden field, so only an unpredictable value tied to the session proves intent.</p>
 <p><strong>Why:</strong> A field&#x27;s presence proves nothing; the server must compare an unpredictable value bound to the user&#x27;s session.</p>
+<p><strong>Plausible wrong approach:</strong> Checking that a field named <code>csrf</code> exists fails because a forged form can include that field with any value.</p>
+<p><strong>How to verify:</strong> A synthetic request with a made up token value is rejected by the comparison.</p>
 <h3 id="exercise-2-add-wrong-type-and-missing-token-rejection">Exercise 2: Add wrong-type and missing-token rejection.<a class="heading-anchor" href="#exercise-2-add-wrong-type-and-missing-token-rejection" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Array, null and absent values cannot reach a successful comparison.</p>
+<p><strong>Approach:</strong> Check <code>is_string($submitted) &amp;&amp; $submitted !== &#x27;&#x27;</code> before <code>hash_equals</code>, and treat anything else as a rejected request.</p>
 <p><strong>Why:</strong> Rejecting arrays, null and empty strings first prevents type errors and accidental matches.</p>
+<p><strong>Plausible wrong approach:</strong> Passing an array straight into <code>hash_equals</code> fails because the function throws a TypeError instead of returning a clean rejection.</p>
+<p><strong>How to verify:</strong> Array, null and missing tokens all return rejected without an uncaught error.</p>
 <h3 id="exercise-3-build-a-state-change-decision-that-checks-method-token-and-authorization">Exercise 3: Build a state-change decision that checks method, token and authorization.<a class="heading-anchor" href="#exercise-3-build-a-state-change-decision-that-checks-method-token-and-authorization" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Only a deliberate allowed POST with matching token can reach the mutation branch.</p>
+<p><strong>Approach:</strong> Require POST, then a matching token, then an authorization check, and reach the mutation only when all three pass in that order.</p>
 <p><strong>Why:</strong> A state change needs a deliberate POST, a valid token and authorization; any missing check opens a different attack.</p>
+<p><strong>Plausible wrong approach:</strong> Running the mutation first and rolling it back on a bad token fails because side effects such as emails may already be sent.</p>
+<p><strong>How to verify:</strong> Tracing a GET, a bad token and a missing permission shows each stopped before the mutation branch.</p>
 <h3 id="exercise-4-diagnose-a-token-placed-in-a-url">Exercise 4: Diagnose a token placed in a URL.<a class="heading-anchor" href="#exercise-4-diagnose-a-token-placed-in-a-url" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> URLs can leak through logs, history and referrers, so use the appropriate body or header channel.</p>
+<p><strong>Approach:</strong> Move the token from the query string into a hidden POST field or a request header.</p>
 <p><strong>Why:</strong> URLs appear in logs, history and Referer headers, so a token in the query string can leak.</p>
+<p><strong>Plausible wrong approach:</strong> Keeping the token in a URL and making it shorter fails because history, logs and Referer headers still record it.</p>
+<p><strong>How to verify:</strong> Your server access log for the form submission shows a path with no token in it.</p>
 <h3 id="exercise-5-test-mismatched-empty-and-matching-synthetic-tokens">Exercise 5: Test mismatched, empty and matching synthetic tokens.<a class="heading-anchor" href="#exercise-5-test-mismatched-empty-and-matching-synthetic-tokens" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Only the exact nonempty expected token passes the local comparison contract.</p>
+<p><strong>Approach:</strong> Compare a fixed synthetic token against a different string, an empty string and an identical string, recording each result.</p>
 <p><strong>Why:</strong> hash_equals compares in constant time, and only the exact nonempty expected token should pass.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only the matching case fails because a comparison that always returns true would pass it too.</p>
+<p><strong>How to verify:</strong> Only the identical string returns true, and the other two return false. A token differing only in its last character also returns false.</p>
 <h3 id="exercise-6-explain-the-relationship-between-csrf-samesite-and-xss">Exercise 6: Explain the relationship between CSRF, SameSite and XSS.<a class="heading-anchor" href="#exercise-6-explain-the-relationship-between-csrf-samesite-and-xss" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> They are distinct mechanisms; SameSite supports CSRF defenses while same-origin script injection can defeat them.</p>
+<p><strong>Approach:</strong> Describe each mechanism: tokens prove a form came from your page, SameSite limits cookie sending, and XSS runs script inside your origin.</p>
 <p><strong>Why:</strong> SameSite limits when cookies are sent cross-site and supports CSRF defense, but injected same-origin script can read tokens and send valid requests.</p>
+<p><strong>Plausible wrong approach:</strong> Saying SameSite cookies remove the need for tokens fails because some browsers and request types still send them.</p>
+<p><strong>How to verify:</strong> Your answer explains that injected script can read the token, so XSS defeats CSRF defenses.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-049_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

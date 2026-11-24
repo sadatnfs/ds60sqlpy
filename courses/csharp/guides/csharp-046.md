@@ -104,29 +104,29 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program {
-  private static void Check(bool condition, string reason) {
-    if (!condition)
-      throw new InvalidOperationException(reason);
-  }
-
-  private static async Task Main() {
+internal static class Program
+{
+    private static void Check(bool condition, string reason)
     {
-      var scale = new Scale(3);
-      Check(scale.Apply(4) == 12, "primary constructor parameter");
-      Check(nameof(List<>) == "List", "C# 14 unbound generic nameof");
-      StringBuilder? missing = null;
-      missing?.Capacity = 32;
-      Check(missing is null, "C# 14 null-conditional assignment");
-      Check("\e" == "\u001b", "C# 13 escape sequence");
+        if (!condition) throw new InvalidOperationException(reason);
     }
-    Console.WriteLine("csharp-046: passed");
-    await Task.CompletedTask;
-  }
 
-  public sealed class Scale(int factor) {
-    public int Apply(int value) => checked(value * factor);
-  }
+    private static async Task Main()
+    {
+        {
+            var scale = new Scale(3);
+            Check(scale.Apply(4) == 12, "primary constructor parameter");
+            Check(nameof(List<>) == "List", "C# 14 unbound generic nameof");
+            StringBuilder? missing = null;
+            missing?.Capacity = 32;
+            Check(missing is null, "C# 14 null-conditional assignment");
+            Check("\e" == "\u001b", "C# 13 escape sequence");
+        }
+        Console.WriteLine("csharp-046: passed");
+        await Task.CompletedTask;
+    }
+
+    public sealed class Scale(int factor) { public int Apply(int value) => checked(value * factor); }
 }
 ```
 

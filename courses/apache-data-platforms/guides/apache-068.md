@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-067`, `apache-063`.
 
+## Key terms
+
+- **schematool:** The Hive tool that initializes, upgrades and verifies the Metastore's relational schema version.
+- **Schema migration:** Upgrading the Metastore database schema for new binaries. Rolling the binaries back does not reverse the migration.
+- **Schema verification:** Checking at startup that the stored schema version matches the binaries, failing clearly instead of upgrading silently.
+- **Metadata backup:** A consistent dump of the Metastore database with its version information. It cannot restore warehouse files lost from a separate volume.
+
 ## A metadata upgrade changes durable state
 
 The Metastore's relational schema is versioned independently from a container
@@ -76,6 +83,36 @@ rolling back a Metastore upgrade?** Durable database changes can outlive the
 container and may be incompatible with the old binary. These cases require
 preflight schema verification and an independently tested owned restoration path
 before treating a migration as recoverable.
+
+## Worked examples
+
+### Verify the schema version before startup
+
+```bash
+cd work/hive
+bash run.sh verify-schema
+bash run.sh status
+```
+
+verify-schema runs schematool -dbType postgres -info in a separate admin container, which prints the Hive distribution version and the metastore schema version stored in the database. The two must agree before the metastore starts. A mismatch does not mean the data is broken; it means the binaries and the stored schema disagree, and starting anyway can let a newer metastore write rows that an older one cannot read back.
+
+### Take a consistent copy before any upgrade
+
+```bash
+pg_dump --format=custom --file=metastore-before-upgrade.dump metastore
+pg_restore --list metastore-before-upgrade.dump
+```
+
+Run against the owned PostgreSQL service, pg_dump takes a single consistent snapshot of the metastore database, and pg_restore --list confirms the archive is readable without restoring it. Test the upgrade against a restored copy in a separate database, never on the live one. If the trial fails, the original remains untouched and the failure output becomes the evidence for planning the real change.
+
+### Read why the metastore refused to start
+
+```bash
+cd work/hive
+bash run.sh logs
+```
+
+When versions disagree, the metastore log names the expected and found schema versions and stops. Setting hive.metastore.schema.verification to false would hide that message and let the service run on an incompatible schema, which is the opposite of the safe response. The right fix is either matching binaries or a tested schematool upgrade on a copy, followed by verify-schema again before startup.
 
 ## Complete worked source
 

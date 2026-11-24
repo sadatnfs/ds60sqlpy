@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "track_id": "java",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "java-001",
+      "title": "From one printed line to a compiler diagnostic, checked with assertions",
+      "anchor": "reference",
+      "source_path": "courses/java/solutions/java-001_solution.java",
+      "source_sha256": "de3ae7116c259e58386df9a2af5cfc0fc0554a39e01b0ca945d80b0d44bc626b",
+      "expected_output": ["Hello, Java"],
+      "steps": [
+        {
+          "lines": [1, 9],
+          "excerpt": "import java.util.*;\n\npublic class Main {\n\n  public static void main(String[] args) throws Exception {\n    // Exercise 1: Print a first result\n    String message = \"Hello, Java\";\n    System.out.println(message);\n    assert message.equals(\"Hello, Java\");",
+          "title": "The class, main and the first printed line",
+          "explanation": "Java code lives in classes. The worker saves this file as Main.java, so the public class must be named Main. The JVM starts the program by calling public static void main(String[] args). System.out.println writes the string and a newline to standard output. The assert statement checks a condition, but only when the JVM runs with the -ea flag; the classroom worker passes -ea, so these checks are active.",
+          "observe": "This is the only line the program prints: Hello, Java"
+        },
+        {
+          "lines": [11, 21],
+          "excerpt": "    // Exercise 2: Evaluate before printing\n    int total = 2 + 3;\n    String line = \"total=\" + total;\n    assert total == 5;\n    assert line.equals(\"total=5\");\n\n    // Exercise 3: Trace sequential state\n    int count = 1;\n    count = count + 1;\n    count = count * 3;\n    assert count == 6;",
+          "title": "Evaluate first, then build text, and follow state in order",
+          "explanation": "2 + 3 is computed as an int before anything is turned into text. Then \"total=\" + total uses string concatenation: when one side of + is a String, Java converts the other side to text. The count block runs top to bottom: count starts at 1, becomes 2, then 6. Each assignment replaces the old value.",
+          "observe": "line is total=5 and count ends at 6. Neither is printed; the assertions confirm them."
+        },
+        {
+          "lines": [23, 27],
+          "excerpt": "    // Exercise 4: Verify assertion mode\n    boolean enabled = false;\n    assert enabled = true;\n    if (!enabled) throw new IllegalStateException(\"Run with -ea\");\n    assert enabled;",
+          "title": "Proving that assertions are switched on",
+          "explanation": "assert enabled = true uses a single equals sign on purpose: it is an assignment whose value is true. If assertions are enabled, that assignment runs and enabled becomes true. If the JVM was started without -ea, the whole assert statement is skipped, enabled stays false, and the next line throws an IllegalStateException with a clear message. This guards every later assert from being silently ignored.",
+          "observe": "With -ea, enabled becomes true and the program continues."
+        },
+        {
+          "lines": [29, 37],
+          "excerpt": "    // Exercise 5: Separate runtime failure\n    boolean dividedByZero = false;\n    try {\n      int zero = 0;\n      int ignored = 10 / zero;\n    } catch (ArithmeticException expected) {\n      dividedByZero = true;\n    }\n    assert dividedByZero;",
+          "title": "A runtime failure that the program expects",
+          "explanation": "Dividing an int by zero compiles fine, because the compiler does not know the value of zero, but it fails while running with an ArithmeticException. The try block contains the risky line and the catch block handles exactly that exception type by setting a flag. This shows the difference between a compile-time error and a runtime error.",
+          "observe": "dividedByZero becomes true and the program does not crash."
+        },
+        {
+          "lines": [39, 50],
+          "excerpt": "    // Exercise 6: Observe a real compiler diagnostic\n    var compiler = javax.tools.ToolProvider.getSystemJavaCompiler();\n    assert compiler != null : \"A JDK compiler is required\";\n    var diagnostics = new javax.tools.DiagnosticCollector<javax.tools.JavaFileObject>();\n    var source = new javax.tools.SimpleJavaFileObject(\n      java.net.URI.create(\"string:///Broken.java\"),\n      javax.tools.JavaFileObject.Kind.SOURCE\n    ) {\n      public CharSequence getCharContent(boolean ignore) {\n        return \"class Broken { int f() { return 1 } }\";\n      }\n    };",
+          "title": "Preparing broken source text for the compiler API",
+          "explanation": "ToolProvider.getSystemJavaCompiler gives the program access to javac itself, which is only available in a JDK, not a plain runtime. A DiagnosticCollector will gather the compiler's messages. The anonymous SimpleJavaFileObject supplies source code from a string instead of a file; that source is missing the semicolon after return 1, so it cannot compile.",
+          "observe": "The broken class exists only as a string inside this program."
+        },
+        {
+          "lines": [51, 69],
+          "excerpt": "    try (var files = compiler.getStandardFileManager(diagnostics, null, null)) {\n      boolean compiled = compiler\n        .getTask(\n          null,\n          files,\n          diagnostics,\n          List.of(\"-proc:none\", \"--release\", \"21\"),\n          null,\n          List.of(source)\n        )\n        .call();\n      assert !compiled;\n      assert diagnostics\n        .getDiagnostics()\n        .stream()\n        .anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR);\n    }\n  }\n}",
+          "title": "Compiling it and checking for an ERROR diagnostic",
+          "explanation": "try with resources opens the compiler's file manager and closes it automatically when the block ends. getTask(...).call() runs the compilation and returns false because of the syntax error. The final assert streams over the collected diagnostics and confirms at least one has kind ERROR. Main then returns normally, so the program exits with status 0 after its single printed line.",
+          "observe": "compiled is false and an ERROR diagnostic was recorded, but nothing more is printed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "java-014",
+      "title": "Java streams: lazy pipelines, collectors, one-shot streams and safe reductions",
+      "anchor": "reference",
+      "source_path": "courses/java/solutions/java-014_solution.java",
+      "source_sha256": "bbe87edbbb33c0e783c1ca6478f4d76f4883ffc5f3025b0664952a6923d03763",
+      "expected_output": ["java-014: all six exercises passed"],
+      "steps": [
+        {
+          "lines": [1, 12],
+          "excerpt": "import java.util.*;\n\npublic class Main {\n\n  public static void main(String[] args) throws Exception {\n    // Exercise 1: Filter and sum\n    int total = List.of(1, 2, 3, 4)\n      .stream()\n      .filter(value -> value % 2 == 0)\n      .mapToInt(value -> value * value)\n      .sum();\n    assert total == 20;",
+          "title": "A stream pipeline from source to terminal",
+          "explanation": "List.of creates an immutable list, and stream() turns it into a pipeline of values. filter keeps only even numbers, mapToInt squares each one and switches to an IntStream of primitive ints, which avoids boxing every value into an Integer. sum is the terminal operation: nothing runs until a terminal operation asks for a result. assert only checks its condition when the JVM is started with -ea, which is why the course runs Java with assertions enabled.",
+          "observe": "Only 2 and 4 pass the filter, so the total is 4 + 16 = 20."
+        },
+        {
+          "lines": [14, 23],
+          "excerpt": "    // Exercise 2: Observe laziness with an explicit terminal\n    var calls = new java.util.concurrent.atomic.AtomicInteger();\n    var pipeline = List.of(1, 2, 3)\n      .stream()\n      .map(value -> {\n        calls.incrementAndGet();\n        return value * 2;\n      });\n    assert calls.get() == 0;\n    assert pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3;",
+          "title": "Intermediate operations are lazy",
+          "explanation": "An AtomicInteger is a counter object that the lambda can update, since a lambda may only use local variables that are effectively final. Building the pipeline with map does not call the lambda yet, so the counter is still 0. Calling toList, a terminal operation, finally pulls the three values through map, and the counter reaches 3. Side effects in stream lambdas are generally a bad idea; here the counter exists only to make laziness visible.",
+          "observe": "calls is 0 after building the pipeline and 3 after toList."
+        },
+        {
+          "lines": [25, 34],
+          "excerpt": "    // Exercise 3: Group with a collector\n    Map<String, Long> counts = List.of(\"red\", \"blue\", \"red\")\n      .stream()\n      .collect(\n        java.util.stream.Collectors.groupingBy(\n          value -> value,\n          java.util.stream.Collectors.counting()\n        )\n      );\n    assert counts.equals(Map.of(\"red\", 2L, \"blue\", 1L));",
+          "title": "Grouping with a collector",
+          "explanation": "collect hands every element to a Collector. Collectors.groupingBy takes a function that picks each element's key, here the colour itself, and a downstream collector that summarizes each group; counting returns a Long per group. The result is a Map from colour to count. Map.equals compares contents, not key order, and 2L is a long literal so it matches the Long values.",
+          "observe": "counts equals {red=2, blue=1}."
+        },
+        {
+          "lines": [36, 46],
+          "excerpt": "    // Exercise 4: Reject stream reuse\n    var once = List.of(1, 2).stream();\n    long counted = once.count();\n    assert counted == 2;\n    boolean reused = false;\n    try {\n      once.toList();\n    } catch (IllegalStateException expected) {\n      reused = true;\n    }\n    assert reused;",
+          "title": "A stream can be consumed only once",
+          "explanation": "once.count() is a terminal operation, so it consumes the stream. Calling toList on the same stream object afterwards throws IllegalStateException. The try and catch blocks record that the exception happened, and assert reused fails the program if it did not. To traverse data again, create a new stream from the source collection.",
+          "observe": "Reusing a consumed stream throws instead of returning an empty result."
+        },
+        {
+          "lines": [48, 58],
+          "excerpt": "    // Exercise 5: Check the reduction identity\n    int correct = List.of(1, 2, 3).stream().reduce(0, Integer::sum);\n    int wrong = List.of(1, 2, 3).stream().reduce(10, Integer::sum);\n    assert correct == 6 && wrong == 16;\n\n    // Exercise 6: Expose nonassociative subtraction\n    assert (10 - 3) - 2 == 5 && 10 - (3 - 2) == 9;\n    assert java.util.stream.IntStream.rangeClosed(1, 100).parallel().sum() == 5050;\n    System.out.println(\"java-014: all six exercises passed\");\n  }\n}",
+          "title": "Reduction identities, associativity and the result line",
+          "explanation": "reduce(identity, accumulator) starts from the identity and combines elements one at a time. For addition the identity is 0. Using 10 adds 10 to the result, and with a parallel stream it could be added once per chunk, so the answer would depend on how the work was split. Parallel reduction also needs an associative operation: subtraction is not associative, as the two groupings show. Integer addition is, so the parallel sum of 1 to 100 is always 5050. When every assertion has passed, the program prints its success line.",
+          "observe": "The program prints: java-014: all six exercises passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "java-034",
+      "title": "Application design in Java: a pure core, injected dependencies and side effects last",
+      "anchor": "reference",
+      "source_path": "courses/java/solutions/java-034_solution.java",
+      "source_sha256": "e5e5f0923d4a62bbe453688a717e08a54ac3958ec021626471c150aa31e3ca39",
+      "expected_output": ["java-034: all six exercises passed"],
+      "steps": [
+        {
+          "lines": [1, 16],
+          "excerpt": "import java.util.*;\n\npublic class Main {\n\n  interface Catalog {\n    java.util.OptionalLong unitPrice(String id) throws java.io.IOException;\n  }\n\n  record Quote(String item, int quantity, long totalCents, java.time.Instant created) {}\n\n  static long total(int quantity, long unitPrice) {\n    if (quantity <= 0 || unitPrice < 0) throw new IllegalArgumentException(\n      \"positive quantity and nonnegative price required\"\n    );\n    return Math.multiplyExact((long) quantity, unitPrice);\n  }",
+          "title": "An interface boundary, a record and a pure calculation",
+          "explanation": "Catalog is an interface for looking up a price. It returns OptionalLong, so a missing item is an explicit empty value rather than a magic number, and it may throw IOException because real catalogs live in databases or services. A record such as Quote is a compact immutable data class with constructor, accessors, equals and toString generated for you. total is pure: it depends only on its arguments, validates them, and uses Math.multiplyExact, which throws ArithmeticException on overflow instead of wrapping to a wrong number.",
+          "observe": "The calculation has no I/O, so it can be tested with plain values."
+        },
+        {
+          "lines": [18, 27],
+          "excerpt": "  record Service(\n    Catalog catalog,\n    java.util.function.Supplier<java.time.Instant> clock,\n    java.util.function.Consumer<String> audit\n  ) {\n    Service {\n      Objects.requireNonNull(catalog);\n      Objects.requireNonNull(clock);\n      Objects.requireNonNull(audit);\n    }",
+          "title": "Dependencies passed in, not created inside",
+          "explanation": "Service is a record holding its three dependencies: the catalog, a clock supplied as a Supplier of Instant, and an audit sink as a Consumer of String. Supplying the clock lets tests pin time instead of reading the system clock. The compact constructor, the block named Service without parameters, runs on construction; Objects.requireNonNull fails at once if a dependency is missing, instead of failing later with a confusing NullPointerException.",
+          "observe": "Every collaborator is visible in the constructor, so tests can substitute any of them."
+        },
+        {
+          "lines": [29, 41],
+          "excerpt": "    Quote quote(String id, int quantity) throws java.io.IOException {\n      if (id == null || id.isBlank() || quantity <= 0) throw new IllegalArgumentException(\n        \"valid item and quantity required\"\n      );\n      long price = catalog\n        .unitPrice(id)\n        .orElseThrow(() -> new NoSuchElementException(\"unknown item\"));\n      long amount = total(quantity, price);\n      Quote result = new Quote(id, quantity, amount, clock.get());\n      audit.accept(\"quoted:\" + id);\n      return result;\n    }\n  }",
+          "title": "Order of operations: validate, look up, calculate, then record",
+          "explanation": "quote checks its own inputs before touching the catalog. It then asks for the price and converts an empty OptionalLong into NoSuchElementException with orElseThrow. The total is calculated and the Quote is built with the injected clock. Only after everything has succeeded does it send an audit event. Putting the side effect last means a failure at any earlier step leaves no misleading success record.",
+          "observe": "audit.accept is the final action before returning."
+        },
+        {
+          "lines": [43, 72],
+          "excerpt": "  public static void main(String[] args) throws Exception {\n    // Exercise 1: Test the pure calculation\n    assert total(3, 125) == 375;\n    boolean invalid = false;\n    try {\n      total(0, 125);\n    } catch (IllegalArgumentException expected) {\n      invalid = true;\n    }\n    assert invalid;\n\n    // Exercise 2: Compose a deterministic service\n    List<String> audit = new ArrayList<>();\n    var instant = java.time.Instant.parse(\"2026-01-01T00:00:00Z\");\n    Catalog catalog = id ->\n      id.equals(\"item-a\") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();\n    Service service = new Service(catalog, () -> instant, audit::add);\n    Quote quote = service.quote(\"item-a\", 2);\n    assert quote.totalCents() == 250 &&\n    quote.created().equals(instant) &&\n    audit.equals(List.of(\"quoted:item-a\"));\n\n    // Exercise 3: Reject an unknown catalog item\n    boolean missing = false;\n    try {\n      service.quote(\"missing\", 2);\n    } catch (NoSuchElementException expected) {\n      missing = true;\n    }\n    assert missing && audit.size() == 1;",
+          "title": "Deterministic tests with lambdas as fakes",
+          "explanation": "Because Catalog has one abstract method, a lambda can implement it; here only item-a has a price. The clock lambda always returns a fixed Instant, and audit::add is a method reference that appends events to a list. Quoting two item-a gives 250 cents, the pinned time and exactly one audit event. Asking for a missing item throws NoSuchElementException, and the audit list still has one entry, proving the failure produced no event.",
+          "observe": "The audit list stays at one entry after the failed lookup."
+        },
+        {
+          "lines": [74, 107],
+          "excerpt": "    // Exercise 4: Propagate an infrastructure failure\n    List<String> failures = new ArrayList<>();\n    Service unavailable = new Service(\n      id -> {\n        throw new java.io.IOException(\"catalog unavailable\");\n      },\n      () -> instant,\n      failures::add\n    );\n    boolean propagated = false;\n    try {\n      unavailable.quote(\"item-a\", 1);\n    } catch (java.io.IOException expected) {\n      propagated = expected.getMessage().equals(\"catalog unavailable\");\n    }\n    assert propagated && failures.isEmpty();\n\n    // Exercise 5: Prove invalid quantity fails before a repository call\n    var calls = new java.util.concurrent.atomic.AtomicInteger();\n    Service checked = new Service(\n      id -> {\n        calls.incrementAndGet();\n        return java.util.OptionalLong.of(1);\n      },\n      () -> instant,\n      value -> {}\n    );\n    boolean rejected = false;\n    try {\n      checked.quote(\"item-a\", -1);\n    } catch (IllegalArgumentException expected) {\n      rejected = true;\n    }\n    assert rejected && calls.get() == 0;",
+          "title": "Infrastructure errors propagate; bad input never reaches the repository",
+          "explanation": "A catalog lambda that always throws IOException simulates an outage. The service does not catch it, so the caller sees the original message, and nothing is audited. In the next case a counter records every catalog call. A quantity of -1 is rejected by quote's own validation before the catalog is consulted, so the counter stays at 0. Validating early protects slow or costly dependencies from requests that can never succeed.",
+          "observe": "failures stays empty and calls stays 0."
+        },
+        {
+          "lines": [109, 125],
+          "excerpt": "    // Exercise 6: Detect arithmetic overflow without an event\n    List<String> overflowAudit = new ArrayList<>();\n    Service expensive = new Service(\n      id -> java.util.OptionalLong.of(Long.MAX_VALUE),\n      () -> instant,\n      overflowAudit::add\n    );\n    boolean overflow = false;\n    try {\n      expensive.quote(\"x\", 2);\n    } catch (ArithmeticException expected) {\n      overflow = true;\n    }\n    assert overflow && overflowAudit.isEmpty();\n    System.out.println(\"java-034: all six exercises passed\");\n  }\n}",
+          "title": "Overflow is an error, not an event, and the result line",
+          "explanation": "A catalog returning Long.MAX_VALUE as the price makes two units overflow a long. multiplyExact throws ArithmeticException inside total, before any audit event, so the overflow audit list stays empty. Without the exact method the multiplication would silently wrap to a negative total. When all six exercises have passed, main prints its success line.",
+          "observe": "The program prints: java-034: all six exercises passed"
+        }
+      ]
+    }
+  ]
+}

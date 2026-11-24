@@ -17,6 +17,16 @@ SPECS = AUTHORED["CHAPTERS"]
 CONCEPTS = AUTHORED["CONCEPTS"]
 REFERENCE_LABELS = AUTHORED["REFERENCE_LABELS"]
 MISTAKES = AUTHORED["MISTAKES"]
+KEY_TERMS = AUTHORED["KEY_TERMS"]
+BOUNDARY = AUTHORED["BOUNDARY"]
+RETRIEVAL = AUTHORED["RETRIEVAL"]
+REASONING = runpy.run_path(str(Path(__file__).with_name("reasoning.py")))["REASONING"]
+REASONING_LABELS = (
+    "Approach",
+    "Why this is correct",
+    "A plausible wrong approach",
+    "How to verify",
+)
 # Exercises led by these verbs ask for an answer rather than an artifact, so the
 # guide shows the prompt and the solutions file keeps the expected answer.
 ANSWER_VERBS = {
@@ -45,6 +55,45 @@ def series(items):
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
 
 
+def check_key_terms():
+    titles = [spec[0] for spec in SPECS]
+    if set(KEY_TERMS) != set(titles):
+        missing = sorted(set(titles) - set(KEY_TERMS))
+        extra = sorted(set(KEY_TERMS) - set(titles))
+        raise ValueError(f"KEY_TERMS mismatch: missing {missing}, extra {extra}")
+    for title in titles:
+        pairs = KEY_TERMS[title]
+        terms = [term for term, _ in pairs]
+        if not 3 <= len(pairs) <= 5 or len(set(terms)) != len(terms):
+            raise ValueError(f"{title}: key terms need 3 to 5 unique entries")
+        for term, definition in pairs:
+            if not term or len(term) > 80 or any(c in term for c in ":*\n"):
+                raise ValueError(f"{title}: unusable key term {term!r}")
+            if not definition.endswith("."):
+                raise ValueError(f"{title}: definition of {term!r} must end with a period")
+
+
+def check_reasoning():
+    titles = [spec[0] for spec in SPECS]
+    if set(REASONING) != set(titles):
+        missing = sorted(set(titles) - set(REASONING))
+        extra = sorted(set(REASONING) - set(titles))
+        raise ValueError(f"REASONING mismatch: missing {missing}, extra {extra}")
+    for spec in SPECS:
+        title, tasks = spec[0], spec[4]
+        entries = REASONING[title]
+        if len(entries) != len(tasks):
+            raise ValueError(f"{title}: reasoning needs one entry per exercise ({len(tasks)})")
+        for i, parts in enumerate(entries, 1):
+            if len(parts) != len(REASONING_LABELS):
+                raise ValueError(f"{title} exercise {i}: reasoning needs four parts")
+            for label, part in zip(REASONING_LABELS, parts, strict=True):
+                if not part.strip() or not part.endswith((".", "?")):
+                    raise ValueError(f"{title} exercise {i}: {label} must be a sentence")
+                if "\u2014" in part or "\u2013" in part:
+                    raise ValueError(f"{title} exercise {i}: {label} contains a dash")
+
+
 def write(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.suffix == ".md":
@@ -52,7 +101,17 @@ def write(path, text):
     path.write_text(text.rstrip() + "\n", encoding="utf-8", newline="\n")
 
 
+def check_lesson_prose():
+    keys = {f"docker-{n:03d}" for n in range(1, len(SPECS) + 1)}
+    for name, table in (("BOUNDARY", BOUNDARY), ("RETRIEVAL", RETRIEVAL)):
+        if set(table) != keys:
+            raise ValueError(f"{name} needs exactly one entry per lesson")
+
+
 def build():
+    check_lesson_prose()
+    check_key_terms()
+    check_reasoning()
     rows, records = [], []
     for n, spec in enumerate(SPECS, 1):
         key = f"docker-{n:03d}"
@@ -60,6 +119,9 @@ def build():
         prereq = [f"docker-{n - 1:03d}"] if n > 1 else []
         title, mental, anatomy, examples, tasks, refs = spec
         concepts = CONCEPTS[title]
+        key_terms = "\n".join(
+            f"- **{term}:** {definition}" for term, definition in KEY_TERMS[title]
+        )
         rows.append(
             dict(
                 id=key,
@@ -95,6 +157,10 @@ def build():
 
 {mental}
 
+### Key terms
+
+{key_terms}
+
 ## Anatomy and a trace you can follow
 
 {anatomy}
@@ -125,6 +191,8 @@ For Dockerfile examples, create a file named `Dockerfile` in a scratch project. 
             answer += (
                 f"\n## Exercise {i}: {prompt}\n\n**{label}:** {expected}\n\n**Why:** {reason}\n"
             )
+            for part_label, part in zip(REASONING_LABELS, REASONING[title][i - 1], strict=True):
+                answer += f"\n**{part_label}:** {part}\n"
         boundary = (
             ""
             if answer_task(tasks[3][0])
@@ -136,11 +204,11 @@ For Dockerfile examples, create a file named `Dockerfile` in a scratch project. 
 
 {MISTAKES[title]}
 
-Exercise 4 is this chapter's boundary case: {tasks[3][0]} {boundary}Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: {tasks[3][0]} {boundary}{BOUNDARY[key]} Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using {series(concepts)}. Reconstruct worked example 2 ({examples[1][0]}) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. {RETRIEVAL[key]} Then reconstruct worked example 2 ({examples[1][0]}) with one different value, predict what changes, and name which of {series(concepts)} the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

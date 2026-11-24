@@ -14,12 +14,12 @@ A Python loop inside an ordinary UDF does not become a CUDA kernel because the p
     "Grouping values [2,4,6,8] by accompanying labels A,A,B,B is the same relational objective in Scala and PySpark. Equivalent output is necessary, but GPU operator evidence still comes from the executed plan.",
     "Classify four execution layers;Explain cuDF versus plugin;Identify an opaque UDF;Write equivalent Scala and PySpark expressions;Define CPU-only progress;List real GPU evidence",
     "Separate local dataframe Spark operators UDF processes and training;The plugin integrates cuDF with Spark planning and execution;Arbitrary host code is not automatically accelerated;Use the same schema null policy and aggregation;Run semantic references and inspect teaching plans;Require compatible GPU runtime executed operator plan metrics and equal results",
-    """rows=[("A",2),("A",4),("B",6),("B",8)]
-totals={}
-for key,value in rows:
-    totals[key]=totals.get(key,0)+value
-assert totals=={"A":6,"B":14}
-print("CPU Spark semantic oracle:",sorted(totals.items()))""",
+    """rows = [("A", 2), ("A", 4), ("B", 6), ("B", 8)]
+totals = {}
+for key, value in rows:
+    totals[key] = totals.get(key, 0) + value
+assert totals == {"A": 6, "B": 14}
+print("CPU Spark semantic oracle:", sorted(totals.items()))""",
     "Grouped totals A 6 and B 14; no GPU execution claimed.",
 )
 
@@ -33,10 +33,12 @@ Record artifacts by version and checksum and keep a known CPU baseline. Do not c
     "A package can load on one Linux host but fail to initialize native libraries on another architecture. Version ledger completeness and actual smoke execution are both required.",
     "List matrix axes;Identify a Scala mismatch;Distinguish toolkit and driver;Record artifact provenance;Design a CPU rollback;Define compatibility acceptance",
     "Include Spark Scala Java plugin CUDA architecture driver GPU and OS;Match the declared binary line;The driver is a host/runtime capability;Use release version checksum and primary source;Keep ordinary Spark environment and query;Require import startup bounded query and expected result on the selected host",
-    """def compatible(spark_scala,jar_scala,host_arch,jar_arch):
-    return spark_scala==jar_scala and host_arch==jar_arch
-assert compatible("2.13","2.13","x86_64","x86_64")
-assert not compatible("2.13","2.12","x86_64","x86_64")
+    """def compatible(spark_scala, jar_scala, host_arch, jar_arch):
+    return spark_scala == jar_scala and host_arch == jar_arch
+
+
+assert compatible("2.13", "2.13", "x86_64", "x86_64")
+assert not compatible("2.13", "2.12", "x86_64", "x86_64")
 print("CPU compatibility worksheet: mismatched Scala binary line rejected")""",
     "Illustrative Scala/host-architecture predicate rejects mismatch; not a full compatibility probe.",
 )
@@ -51,11 +53,11 @@ The plugin replaces supported physical operators with GPU-capable implementation
     "A count action triggers execution; constructing a DataFrame alone is lazy. A plan printed before an action does not contain the same runtime evidence as the completed SQL execution view.",
     "Draw logical versus physical plan;Mark GPU candidate nodes;Locate transitions;Explain lazy evaluation;Compare initial and final AQE plan;Choose operator metrics",
     "Logical nodes describe intent and physical nodes choose execution;Use actual plugin names from the selected release;Each transition may copy or change representation;An action is required for work;Inspect the final executed plan;Use rows batches time spill and device observations together",
-    """plan=[("scan","CPU"),("filter","GPU"),("aggregate","GPU"),("collect","CPU")]
-transitions=sum(plan[i][1]!=plan[i-1][1] for i in range(1,len(plan)))
-assert transitions==2
-assert sum(device=="GPU" for _,device in plan)==2
-print("Synthetic plan worksheet:",transitions,"CPU/GPU transitions")""",
+    """plan = [("scan", "CPU"), ("filter", "GPU"), ("aggregate", "GPU"), ("collect", "CPU")]
+transitions = sum(plan[i][1] != plan[i - 1][1] for i in range(1, len(plan)))
+assert transitions == 2
+assert sum(device == "GPU" for _, device in plan) == 2
+print("Synthetic plan worksheet:", transitions, "CPU/GPU transitions")""",
     "Synthetic plan has two GPU nodes and two backend transitions.",
 )
 
@@ -69,7 +71,10 @@ For CPU-only study, use ordinary Spark with the GPU plugin disabled or absent. F
     "A machine with no GPU should use the CPU baseline configuration. This differs from a GPU machine where one unsupported expression falls back inside an otherwise valid plugin job.",
     "Classify fallback versus unavailable device;Find an unsupported expression;Count boundary costs;Rewrite an opaque function declaratively;Preserve edge semantics;Design a mixed-plan report",
     "Fallback is per supported execution environment;Consult operator type and expression rules;Include representation and transfer costs;Use built-in expressions only when equivalent;Test nulls overflow strings and timestamps;List each reason and observed transition",
-    """states=[{"gpu_visible":False,"plugin_enabled":False},{"gpu_visible":True,"plugin_enabled":True,"cpu_operator":True}]
+    """states = [
+    {"gpu_visible": False, "plugin_enabled": False},
+    {"gpu_visible": True, "plugin_enabled": True, "cpu_operator": True},
+]
 assert states[0]["plugin_enabled"] is False
 assert states[1]["cpu_operator"] is True
 print("CPU configuration worksheet: CPU baseline and GPU mixed plan are distinct")""",
@@ -87,11 +92,12 @@ Use explicit schemas and deterministic ordering for comparison. Floating aggrega
     "Calculate both counts;Handle all-null aggregate;Compare decimal values;Name timestamp timezone;Choose float tolerances;Design ordered result comparison",
     "Row count 3 and non-null count 2;Follow Spark SQL null-result semantics;Use exact decimal type and scale;Set and record session timezone;Tie tolerance to dtype algorithm and scale;Sort by stable keys without erasing duplicate rows",
     """from decimal import Decimal
-values=[2,None,5]
-assert len(values)==3
-assert sum(v is not None for v in values)==2
-assert sum(v for v in values if v is not None)==7
-assert Decimal("1.10")+Decimal("2.20")==Decimal("3.30")
+
+values = [2, None, 5]
+assert len(values) == 3
+assert sum(v is not None for v in values) == 2
+assert sum(v for v in values if v is not None) == 7
+assert Decimal("1.10") + Decimal("2.20") == Decimal("3.30")
 print("CPU SQL-semantics oracle: rows 3, nonnull 2, sum 7, decimal 3.30")""",
     "Rows 3, non-null 2, sum 7 and exact decimal 3.30.",
 )
@@ -106,13 +112,13 @@ Spark's row-to-columnar and columnar-to-row transitions can add work around unsu
     "A validity mask for nine rows needs at least two bytes at one bit per row. Treating null as numeric zero would erase information rather than merely change representation.",
     "Count fixed-width payload;Count validity bytes;Explain string offsets;Locate row-column transitions;Budget transfer payload;Design a conversion parity test",
     "Rows times element width;Ceiling rows divided by eight;Offsets identify boundaries in character data;Inspect the physical plan;Include values masks offsets and temporary copies;Compare schema row identity nulls and values",
-    """rows,itemsize=1000,8
-payload=rows*itemsize
-mask=(9+7)//8
-assert payload==8000 and mask==2
-strings=["a","longer",""]
-assert sum(len(s.encode("utf-8")) for s in strings)==7
-print("CPU columnar ledger:",payload,mask,7)""",
+    """rows, itemsize = 1000, 8
+payload = rows * itemsize
+mask = (9 + 7) // 8
+assert payload == 8000 and mask == 2
+strings = ["a", "longer", ""]
+assert sum(len(s.encode("utf-8")) for s in strings) == 7
+print("CPU columnar ledger:", payload, mask, 7)""",
     "Fixed payload 8000 bytes, nine-row mask 2 bytes, string characters 7 bytes.",
 )
 
@@ -127,13 +133,14 @@ Follow the selected plugin release's executor-to-GPU mapping and Spark resource 
     "Compute resource-share slots;Compare CPU and GPU limits;Explain VRAM nonpartitioning;Verify device addresses;Design a concurrency experiment;Describe oversubscription failure",
     "One divided by 0.25 gives four accounting slots;The effective bound includes all constraints;Scheduling fractions do not reserve fixed memory slices;Inspect explicit discovery and assignment;Hold query partitions and data fixed;Too many live tasks can spill or fail without any syntax error",
     """from fractions import Fraction
-gpu=Fraction(1)
-request=Fraction(1,4)
-slots=int(gpu/request)
-plugin_limit=2
-active=min(slots,plugin_limit)
-assert slots==4 and active==2
-print("CPU resource model:",slots,"scheduled shares;",active,"GPU-active bound")""",
+
+gpu = Fraction(1)
+request = Fraction(1, 4)
+slots = int(gpu / request)
+plugin_limit = 2
+active = min(slots, plugin_limit)
+assert slots == 4 and active == 2
+print("CPU resource model:", slots, "scheduled shares;", active, "GPU-active bound")""",
     "Four scheduling shares with a two-task plugin admission bound.",
 )
 
@@ -147,12 +154,12 @@ A spill moves data to a slower tier to preserve progress under pressure. It is a
     "A spill can allow completion while adding serialization and I/O cost. Comparing only kernel time misses the resulting end-to-end slowdown.",
     "Compute concurrent live memory;Lower concurrency;Separate JVM and device pools;Budget spill disk;Design safe batch changes;Interpret successful but spilling execution",
     "Add per-task live sets and shared state;Reduce simultaneous live demand;They are separate allocators and resources;Use explicit disposable paths and capacity;Bound rows and bytes before launch;Completion is valid but performance and storage behavior need reporting",
-    """per_task,shared,capacity=2,1,8
-assert 3*per_task+shared==7
-assert 4*per_task+shared==9
-safe=[tasks for tasks in range(1,5) if tasks*per_task+shared<=capacity]
-assert safe==[1,2,3]
-print("CPU memory budget:",safe,"safe task counts in the model")""",
+    """per_task, shared, capacity = 2, 1, 8
+assert 3 * per_task + shared == 7
+assert 4 * per_task + shared == 9
+safe = [tasks for tasks in range(1, 5) if tasks * per_task + shared <= capacity]
+assert safe == [1, 2, 3]
+print("CPU memory budget:", safe, "safe task counts in the model")""",
     "One through three tasks fit the simplified budget; four do not.",
 )
 
@@ -166,12 +173,12 @@ Skew concentrates rows on a few keys, creating large partitions and long tasks. 
     "If one partition holds 900 rows and nine others hold roughly 11, the maximum task dominates the barrier despite a small average partition size.",
     "Calculate duplicate join output;Add unmatched keys;Identify skew;Compare broadcast and shuffle;Design a safe rewrite;Inspect final AQE decision",
     "Multiply key multiplicities;Inner joins exclude unmatched keys while outer joins preserve defined null rows;Compare maximum and distribution not average alone;Broadcast replicates one side and shuffle redistributes both as needed;Preserve duplicates and null-key semantics;Capture executed plan after action",
-    """left=[("A",1),("A",2),("B",3)]
-right=[("A",10),("A",20),("C",30)]
-joined=[(k,a,b) for k,a in left for r,b in right if k==r]
-assert len(joined)==4
-assert {k for k,_,_ in joined}=={"A"}
-print("CPU join oracle:",joined)""",
+    """left = [("A", 1), ("A", 2), ("B", 3)]
+right = [("A", 10), ("A", 20), ("C", 30)]
+joined = [(k, a, b) for k, a in left for r, b in right if k == r]
+assert len(joined) == 4
+assert {k for k, _, _ in joined} == {"A"}
+print("CPU join oracle:", joined)""",
     "Four A matches from two-by-two duplicate keys.",
 )
 
@@ -185,14 +192,14 @@ Do not infer RDMA, peer-to-peer or GPUDirect capability from an installed librar
     "Reducing shuffle volume through an equivalent pre-aggregation may help more than changing transport. The rewrite must preserve aggregate semantics, especially for nonassociative or stateful operations.",
     "Compute transfer lower bound;Identify local versus network time;Explain pre-aggregation;List transport qualification;Separate startup settings;Design a bounded shuffle comparison",
     "Bytes divided by effective bandwidth;Measure the complete stage;Combine only when mathematical semantics allow;Verify devices topology libraries and real traffic;Some shuffle choices require fresh executors;Use identical partitioned fixtures and capture bytes spills and output",
-    """gib=1024**3
-payload=10*gib
-bandwidth=gib
-seconds=payload/bandwidth
-assert seconds==10
-kernel_saving=0.05
-assert kernel_saving/seconds<0.01
-print("CPU shuffle bound:",seconds,"seconds before additional overhead")""",
+    """gib = 1024**3
+payload = 10 * gib
+bandwidth = gib
+seconds = payload / bandwidth
+assert seconds == 10
+kernel_saving = 0.05
+assert kernel_saving / seconds < 0.01
+print("CPU shuffle bound:", seconds, "seconds before additional overhead")""",
     "Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it.",
 )
 
@@ -206,10 +213,10 @@ Separate semantic smoke fixtures from performance datasets. Tiny data is excelle
     "A warm GPU run reading cached data cannot fairly be compared with a cold CPU run downloading inputs. Label cache state or repeat under matched conditions.",
     "Calculate partition averages;Explain skew beyond averages;Capture final AQE plan;Define cache policy;Choose semantic and performance fixtures;Separate estimated and observed speedup",
     "Divide rows by partitions;Report tails and maximum sizes;Inspect after the action;Use equivalent cold or warm states;Tiny bounded correctness data and representative measured data serve different purposes;Predictions remain predictions until executed",
-    """rows=1_000_000
-assert rows//100==10000 and rows//10==100000
-runs=[{"backend":"CPU","cache":"cold"},{"backend":"GPU","cache":"warm"}]
-assert runs[0]["cache"]!=runs[1]["cache"]
+    """rows = 1_000_000
+assert rows // 100 == 10000 and rows // 10 == 100000
+runs = [{"backend": "CPU", "cache": "cold"}, {"backend": "GPU", "cache": "warm"}]
+assert runs[0]["cache"] != runs[1]["cache"]
 print("CPU benchmark worksheet: unmatched cache comparison rejected")""",
     "Partition averages 10000 and 100000; unmatched cache states rejected.",
 )
@@ -224,12 +231,16 @@ GPU-accelerated machine-learning integrations such as Spark RAPIDS ML are separa
     "Calling a GPU library from every partition does not automatically coordinate multi-GPU training. Each task needs a defined device share and bounded memory contract.",
     "Classify four APIs;Replace an equivalent simple UDF;Explain Arrow limits;Define GPU-aware UDF ownership;Distinguish SQL and ML acceleration;Design quality parity tests",
     "Name SQL UDF pandas-style and local GPU dataframe surfaces;Use a built-in expression if null/type semantics match;Interchange format is not an execution device;Record assigned device batches and cleanup;They are separate integrations;Use same split target metric and preprocessing",
-    """values=[1,None,3]
+    """values = [1, None, 3]
+
+
 def expression(x):
-    return None if x is None else x*2
-expected=[2,None,6]
-assert [expression(x) for x in values]==expected
-print("CPU expression parity oracle:",expected)""",
+    return None if x is None else x * 2
+
+
+expected = [2, None, 6]
+assert [expression(x) for x in values] == expected
+print("CPU expression parity oracle:", expected)""",
     "Null-preserving expression produces [2, None,6].",
 )
 
@@ -243,10 +254,10 @@ This is a manual external lab for a named disposable cluster and namespace. Neve
     "A driver pod running successfully while executors remain Pending proves control-plane submission only. Inspect resource requests, events and image/runtime constraints before changing code.",
     "Draw scheduler layers;Name ownership boundaries;Diagnose Pending executors;Verify device visibility;Design private networking;Write scoped cleanup",
     "Kubernetes allocates pods and Spark allocates tasks;Use exact cluster namespace labels and job identity;Read events and resource availability;Run a bounded owned executor probe;Keep internal services private;Delete only resources created for this named lab and preserve requested logs",
-    """nodes=[{"name":"cpu-node","gpu":0},{"name":"gpu-node","gpu":1}]
-eligible=[node["name"] for node in nodes if node["gpu"]>=1]
-assert eligible==["gpu-node"]
-print("CPU scheduling worksheet:",eligible)""",
+    """nodes = [{"name": "cpu-node", "gpu": 0}, {"name": "gpu-node", "gpu": 1}]
+eligible = [node["name"] for node in nodes if node["gpu"] >= 1]
+assert eligible == ["gpu-node"]
+print("CPU scheduling worksheet:", eligible)""",
     "Only the illustrative GPU node is eligible; no cluster operation occurs.",
 )
 
@@ -260,11 +271,11 @@ Recovery should preserve input snapshots, output commit semantics and event logs
     "A task writes an external message then fails before Spark commits its output. Retrying may send the message twice unless an idempotency or transactional design handles it.",
     "Classify failure layers;Correlate job identities;Budget before changing settings;Analyze retry side effects;Define process cleanup;Preserve an incident packet",
     "Use first evidence rather than guessing;Link app executor stage task and SQL IDs;Count actual live and spill categories;At-least-once execution can duplicate writes;Terminate only owned job processes;Keep sanitized config plans logs metrics and input identity",
-    """events=[("task1","write","key-7"),("task1-retry","write","key-7")]
-raw=len(events)
-idempotent=len({key for _,_,key in events})
-assert raw==2 and idempotent==1
-print("CPU retry model:",raw,"attempts;",idempotent,"logical keys")""",
+    """events = [("task1", "write", "key-7"), ("task1-retry", "write", "key-7")]
+raw = len(events)
+idempotent = len({key for _, _, key in events})
+assert raw == 2 and idempotent == 1
+print("CPU retry model:", raw, "attempts;", idempotent, "logical keys")""",
     "Two attempts can target one logical output key.",
 )
 
@@ -278,13 +289,13 @@ The GPU report includes exact compatibility matrix, initial and executed plans, 
     "Adding a duplicate A price row intentionally doubles A matches. A defensive uniqueness check should reject that input if the business contract requires one price per product.",
     "Derive expected revenue;Write Scala expressions;Write PySpark expressions;Test duplicate dimension keys;Capture executed GPU evidence;Prepare a balanced capstone report",
     "A revenue is \\((2+4)\\times10=60\\), and B revenue is \\(3\\times20=60\\);Use explicit schema join and groupBy;Match those operations and sort output;Reject or explicitly accept multiplicity;Require plans metrics and equality on actual hardware;Include CPU functionality and pending GPU limitations separately",
-    """sales=[("A",2),("A",4),("B",3)]
-prices={"A":10,"B":20}
-revenue={}
-for product,quantity in sales:
-    revenue[product]=revenue.get(product,0)+quantity*prices[product]
-assert sorted(revenue.items())==[("A",60),("B",60)]
-print("CPU ETL oracle:",sorted(revenue.items()))""",
+    """sales = [("A", 2), ("A", 4), ("B", 3)]
+prices = {"A": 10, "B": 20}
+revenue = {}
+for product, quantity in sales:
+    revenue[product] = revenue.get(product, 0) + quantity * prices[product]
+assert sorted(revenue.items()) == [("A", 60), ("B", 60)]
+print("CPU ETL oracle:", sorted(revenue.items()))""",
     "Sorted revenue [(A,60),(B,60)].",
 )
 
@@ -298,12 +309,12 @@ Compare total completion time, resource cost, operational complexity and output 
     "A GPU query saves 30 seconds of compute but adds 40 seconds of transfers and conversions. The complete application loses 10 seconds despite faster arithmetic.",
     "Compute end-to-end tradeoff;Choose a tiny-data tool;Separate setup and steady state;Include operational cost;Define a reevaluation trigger;Write an evidence-based recommendation",
     "Sum all changed costs;A local CPU tool may be sufficient;Both boundaries matter for user workflow;Count maintenance compatibility and resource ownership;Name data growth or changed workload support;Recommend the simplest qualified option and state missing evidence",
-    """saved_compute,added_transfer=30,40
-net=added_transfer-saved_compute
-assert net==10
-candidates={"local_cpu":0.1,"spark_startup_only":3.0}
-assert candidates["local_cpu"]<candidates["spark_startup_only"]
-print("CPU architecture decision: GPU candidate adds",net,"seconds")""",
+    """saved_compute, added_transfer = 30, 40
+net = added_transfer - saved_compute
+assert net == 10
+candidates = {"local_cpu": 0.1, "spark_startup_only": 3.0}
+assert candidates["local_cpu"] < candidates["spark_startup_only"]
+print("CPU architecture decision: GPU candidate adds", net, "seconds")""",
     "GPU candidate adds 10 modeled seconds end to end.",
 )
 

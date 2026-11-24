@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-007_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Assume hypothetical bandwidth of 600 GB/s, using decimal billions, and a 12-byte-per-element vector addition. The ideal useful-element throughput is 50 billion elements/s. One million elements require at least 20 microseconds at that bandwidth, excluding launch and host transfer. This is a thought experiment, not a claim about the learner&#x27;s GPU.</p>
+<p><strong>Approach:</strong> Multiply one million elements by 12 bytes, giving 12 MB, and divide by 600e9 bytes per second.</p>
+<p><strong>Why it is correct:</strong> Vector add reads two float32 values and writes one, so 12 bytes per element is the useful traffic floor.</p>
+<p><strong>A plausible wrong approach:</strong> Dividing by 600 GiB/s instead of decimal GB/s shifts the answer by about 7 percent and mixes unit systems.</p>
+<p><strong>How to verify:</strong> The reference asserts the time is within 1e-15 of 20e-6 seconds and prints ideal_memory_seconds 2e-05.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A hypothetical device has 10 TFLOP/s arithmetic capacity and 500 GB/s bandwidth. At intensity 2 FLOP/byte the roofline is 1 TFLOP/s; at intensity 40 it is capped at 10 TFLOP/s. Increasing reuse can change the limiting resource, but a kernel must still expose sufficient independent work.</p>
+<p><strong>Approach:</strong> Compute min(10 TFLOP/s, intensity times 500 GB/s) separately for intensity 2 and intensity 40.</p>
+<p><strong>Why it is correct:</strong> At 2 FLOP/byte bandwidth allows 1 TFLOP/s, below the compute ceiling; at 40 the product 20 TFLOP/s is capped at 10.</p>
+<p><strong>A plausible wrong approach:</strong> Quoting 10 TFLOP/s for both kernels ignores that the low-intensity kernel starves for bytes long before arithmetic saturates.</p>
+<p><strong>How to verify:</strong> The reference asserts limits == [1e12, 10e12]; the ridge point 10e12 / 500e9 = 20 FLOP/byte separates the regimes.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Two eight-byte reads and one eight-byte write per element gives 24,000 useful bytes. Measured transactions and cache traffic can differ.</p>
+<p><strong>Approach:</strong> Count per element two 8-byte float64 reads and one 8-byte write, then multiply 24 bytes by 1,000.</p>
+<p><strong>Why it is correct:</strong> Only bytes the algorithm must move count as useful, so 24,000 bytes is a floor on any implementation&#x27;s traffic.</p>
+<p><strong>A plausible wrong approach:</strong> Using 4-byte elements from the float32 example gives 12,000 bytes, half the real payload for float64.</p>
+<p><strong>How to verify:</strong> Recompute 3 <em> 8 </em> 1000 == 24000 and note that profiler transaction counts may exceed it.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>The units do not cancel. Divide bytes by bytes/s for memory time, or floating operations by operations/s for arithmetic time.</p>
+<p><strong>Approach:</strong> Write the units of each operand, bytes and FLOP per second, and show they do not cancel to seconds.</p>
+<p><strong>Why it is correct:</strong> Time equals a quantity divided by its rate in matching units, so bytes need bytes per second.</p>
+<p><strong>A plausible wrong approach:</strong> Converting TFLOP/s to bytes by assuming one byte per FLOP invents an intensity that the kernel does not have.</p>
+<p><strong>How to verify:</strong> Redo the example: 12e6 bytes / 600e9 bytes/s gives 2e-5 s, and the units check reads seconds.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Fixed launch and synchronization overhead dominate; the asymptotic bandwidth model omits that term.</p>
+<p><strong>Approach:</strong> Add a fixed overhead term for launch and synchronization to the bandwidth model and compare magnitudes for one element.</p>
+<p><strong>Why it is correct:</strong> Moving 12 bytes at 600 GB/s takes 20 picoseconds, far below microsecond-scale launch overhead.</p>
+<p><strong>A plausible wrong approach:</strong> Plotting the single-element kernel on a roofline predicts near-zero time and makes any measurement look like a defect.</p>
+<p><strong>How to verify:</strong> Compare 12 / 600e9 with a stated overhead assumption and confirm overhead is many orders larger.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Correctness first, then measured time, compiler resource usage and selected memory/occupancy metrics on the same workload. Reduced estimated bytes alone is insufficient.</p>
+<p><strong>Approach:</strong> Validate the tiled kernel&#x27;s output first, then compare measured time, register counts and occupancy on identical inputs.</p>
+<p><strong>Why it is correct:</strong> Fewer global reads help only if doubled registers do not reduce resident warps so much that latency stays exposed.</p>
+<p><strong>A plausible wrong approach:</strong> Accepting the tiled version because estimated bytes fell skips both correctness and the occupancy trade.</p>
+<p><strong>How to verify:</strong> Record compiler resource usage and timed samples for both variants on the same device and workload.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-007_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

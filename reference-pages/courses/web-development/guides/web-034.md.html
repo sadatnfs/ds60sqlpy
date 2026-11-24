@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Control flow determines which statements execute and how often. A branch chooses among alternatives, while a loop repeats a body for a sequence or condition. A loop needs a termination argument: a bounded collection, an advancing counter or another condition that is guaranteed to change. The classroom enforces execution limits, but a good program should still have its own understandable bound.</p>
 <p>Guard clauses reject invalid conditions before the main computation. They reduce nesting and make accepted input clearer. A match expression compares strictly and returns a value; it differs from a switch statement&#x27;s traditional loose comparison behavior and fall-through possibilities. Use the construct whose semantics fit the task rather than choosing the shortest spelling.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Branch:</strong> A path chosen by a condition in <code>if</code>, <code>elseif</code> or <code>else</code>.</li>
+<li><strong>Guard clause:</strong> An early <code>return</code> or <code>throw</code> that handles an invalid or trivial case first, so the main path stays simple.</li>
+<li><strong>Match expression:</strong> A <code>match</code> that compares with strict identity, returns a value and throws <code>UnhandledMatchError</code> when no arm matches.</li>
+<li><strong>Loop termination:</strong> The guarantee that a loop eventually stops, usually because each iteration moves toward a fixed bound.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>A foreach loop visits array values and can also expose keys. A for loop makes initialization, condition and update explicit. In a match expression, each arm maps a condition to a result, and a default arm handles other values when that is appropriate. Do not silently map invalid input to a valid default if the contract requires rejection.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -215,6 +222,23 @@ foreach ([20, 30, 15] as $minutes) { $total += $minutes; }</code></pre>
 <p>Strict matching preserves the distinction between labels.</p>
 <pre class="highlighted-code"><code class="language-php">$label = match (&#x27;beginner&#x27;) { &#x27;beginner&#x27; =&gt; &#x27;Start here&#x27;, &#x27;advanced&#x27; =&gt; &#x27;Project work&#x27;, default =&gt; &#x27;Review route&#x27; };</code></pre>
 <p><strong>Expected observation:</strong> The result is Start here.</p>
+<h3 id="contrast-case-switch-versus-match-on-a-string-zero">Contrast case: switch versus match on a string zero<a class="heading-anchor" href="#contrast-case-switch-versus-match-on-a-string-zero" aria-label="Link to this section">#</a></h3>
+<p>Both blocks receive the string &#x27;0&#x27; from a form field. Trace which branch each one selects.</p>
+<pre class="highlighted-code"><code class="language-php">$value = &#x27;0&#x27;;
+
+switch ($value) {
+  case false:
+    echo &quot;switch: false branch\n&quot;;
+    break;
+  default:
+    echo &quot;switch: default branch\n&quot;;
+}
+
+echo match ($value) {
+  false =&gt; &quot;match: false arm\n&quot;,
+  &#x27;0&#x27; =&gt; &quot;match: string arm\n&quot;,
+};</code></pre>
+<p><code>switch</code> compares with loose equality, and the string &#x27;0&#x27; loosely equals false, so it prints switch: false branch even though the value is a string. <code>match</code> uses strict identity, so the false arm does not match and the string arm does, printing match: string arm. If the string arm were removed, <code>match</code> would throw an <code>UnhandledMatchError</code> instead of quietly choosing a branch, which surfaces the unexpected value. That strictness is why worked example 2 uses <code>match</code> for a mapping where each input should land in one deliberate case. With <code>switch</code>, remember also that a missing <code>break</code> lets execution fall through into the next case.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-trace-the-accumulator-after-each-iteration">Exercise 1: Trace the accumulator after each iteration.<a class="heading-anchor" href="#exercise-1-trace-the-accumulator-after-each-iteration" aria-label="Link to this section">#</a></h4>

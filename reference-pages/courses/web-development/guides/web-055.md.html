@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>An endpoint should not assume its dataset will remain small. Bound the amount of work and the response size. Pagination returns a portion of a collection under a documented order. Offset pagination is simple but can shift as records are inserted or removed. Cursor pagination identifies a position in a stable ordering and needs a tie-breaker when the primary sort value is not unique.</p>
 <p>Caching reuses a previous result, but the cache key and invalidation policy are part of correctness. A key that omits user identity or authorization scope can expose another user&#x27;s data. A stale result may be acceptable for one display and harmful for another. Define freshness, ownership and failure behavior before using a cache to hide an expensive query.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Cursor pagination:</strong> Continuing after the last seen sort key instead of skipping rows by offset, which stays stable when rows are inserted.</li>
+<li><strong>Stable ordering:</strong> An <code>ORDER BY</code> that ends with a unique tie-breaker, such as the ID, so every row has exactly one position.</li>
+<li><strong>Cache key:</strong> The identifier of a stored result, which must include every input that changes that result.</li>
+<li><strong>Invalidation:</strong> Removing or replacing cached results when the data behind them changes.</li>
+<li><strong>Workload budget:</strong> A stated limit, such as a maximum page size or query time, that keeps one request from consuming unbounded resources.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The reference demonstrates a bounded in-memory cursor over unique increasing ids. It validates the page size, selects ids greater than the cursor and takes only the requested count. This is an algorithm model, not a database query plan or distributed cache. A production query needs a matching index and engine-specific measurement.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -224,6 +232,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The key includes the context that changes the result.</p>
 <pre class="highlighted-code"><code class="language-php">$key = &#x27;notes:user:&#x27; . $actorId . &#x27;:version:&#x27; . $version;</code></pre>
 <p><strong>Expected observation:</strong> Different actors and data versions do not accidentally share one entry.</p>
+<h3 id="contrast-case-offset-pages-while-a-record-is-deleted">Contrast case: offset pages while a record is deleted<a class="heading-anchor" href="#contrast-case-offset-pages-while-a-record-is-deleted" aria-label="Link to this section">#</a></h3>
+<p>Records have ids 1 through 5 and pages hold two items. After the first page is read, record 1 is deleted.</p>
+<pre class="highlighted-code"><code class="language-php">$ids = [1, 2, 3, 4, 5];
+$page1 = array_slice($ids, 0, 2);
+
+$ids = [2, 3, 4, 5];
+$offsetPage2 = array_slice($ids, 2, 2);
+
+$after = end($page1);
+$cursorPage2 = array_slice(
+  array_values(array_filter($ids, fn ($id) =&gt; $id &gt; $after)), 0, 2
+);</code></pre>
+<p>The first page is [1, 2]. After the deletion, offset 2 skips the first two remaining records, 2 and 3, so the offset page is [4, 5] and record 3 is never shown. The cursor version asks for ids greater than the last seen id, 2, so it returns [3, 4] and the deletion does not shift anything. An insertion at the front would cause the opposite problem for offsets: a repeated record. The cursor depends on ids being unique and ordered, which is why the reference sorts by id.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-why-pagination-needs-an-explicit-stable-order">Exercise 1: Explain why pagination needs an explicit stable order.<a class="heading-anchor" href="#exercise-1-explain-why-pagination-needs-an-explicit-stable-order" aria-label="Link to this section">#</a></h4>

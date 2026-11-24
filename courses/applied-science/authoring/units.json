@@ -9,6 +9,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["estimand", "transport", "effect modification"],
+    "key_terms": {
+      "Estimand": "The exact quantity a scientific question asks for, fixing the population, intervention contrast, outcome and summary scale before any estimator is chosen.",
+      "Estimator": "A rule that turns observed data into a numerical approximation of the estimand under stated assumptions.",
+      "Standardization": "Averaging stratum-specific effects with the stratum weights of a declared population instead of the sample's own mix.",
+      "Transport": "Carrying effects estimated in one population, such as a trial mix, to a different target population whose covariate distribution is known.",
+      "Effect modification": "Variation of the treatment effect across strata, which makes a population average depend on the stratum mix it uses."
+    },
+    "worked_examples": [
+      {
+        "title": "Two target populations, one set of stratum effects",
+        "language": "python",
+        "code": "import numpy as np\n\n# Risk under treatment and control in two age strata of a source trial.\nrisk_treated = np.array([0.30, 0.60])\nrisk_control = np.array([0.20, 0.56])\neffect = risk_treated - risk_control\n\ntargets = {\n    \"clinic (70% young)\": np.array([0.7, 0.3]),\n    \"nursing home (10% young)\": np.array([0.1, 0.9]),\n}\nfor name, share in targets.items():\n    print(f\"{name}: standardized risk difference {share @ effect:.3f}\")\n\n# Observational allocation: the old, high-risk stratum is mostly treated.\nn_treated = np.array([100, 900])\nn_control = np.array([900, 100])\ncrude = (n_treated @ risk_treated) / n_treated.sum() - (n_control @ risk_control) / n_control.sum()\nprint(\"stratum effects:\", effect.round(2))\nprint(f\"crude treated-minus-control difference: {crude:.3f}\")\n",
+        "output": "clinic (70% young): standardized risk difference 0.082\nnursing home (10% young): standardized risk difference 0.046\nstratum effects: [0.1  0.04]\ncrude treated-minus-control difference: 0.334\n",
+        "interpretation": "The same two stratum effects, 0.10 among the young and 0.04 among the old, produce different answers for different declared targets. The clinic, with 70 percent young patients, gets \\(0.7(0.10)+0.3(0.04)=0.082\\); the nursing home, with 10 percent young residents, gets \\(0.1(0.10)+0.9(0.04)=0.046\\). Neither number is wrong: each answers a question about a specific population, which is why the estimand must name its target before any averaging. The crude difference of 0.334 answers no causal question at all. It is eight times the old-stratum effect because 900 of the 1,000 treated people are old, with baseline risk 0.56, while 900 of the 1,000 controls are young, with baseline risk 0.20. Most of the gap is age, not treatment. If the allocation were reversed, with the young mostly treated, the crude contrast would compare low-risk treated people with high-risk controls and could fall below zero even though both stratum effects stay positive."
+      }
+    ],
     "outcome": "Standardize stratum effects to a declared target population and show how a crude comparison can reverse the sign of a positive effect.",
     "lab": "Transport the same stratum-specific effects from the trial mix to the target population, then compare both with the crude treated-minus-control difference.",
     "verification": "Trial ATE 1.8 and transported target ATE 1.2 come from the same stratum effects; the crude difference is -1.3, with the opposite sign.",
@@ -26,6 +42,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["positivity", "overlap", "effective sample size"],
+    "key_terms": {
+      "Positivity": "The requirement that every covariate pattern in the target support has a treatment probability strictly between zero and one.",
+      "Practical overlap": "Whether the observed sample actually contains useful treated and control comparisons, even when the theoretical probabilities are nonzero.",
+      "Inverse-probability weight": "A weight of 1/e(x) for treated units and 1/(1 - e(x)) for controls that rebuilds the target population within each arm.",
+      "Overlap weighting": "Weighting strata in proportion to p(x)e(x)(1 - e(x)), which targets the population where either treatment is plausible rather than the original population.",
+      "Effective sample size": "Kish's concentration summary (sum of weights) squared divided by the sum of squared weights; it equals n for equal weights and shrinks as weights concentrate."
+    },
+    "worked_examples": [
+      {
+        "title": "Weights that balance versus weights that change the population",
+        "language": "python",
+        "code": "import numpy as np\n\ne = np.array([0.05, 0.20, 0.50, 0.80, 0.95])  # propensity of five units\ntreated = np.array([1, 0, 1, 1, 0])\n\n\ndef ess(w):\n    return w.sum() ** 2 / (w**2).sum()\n\n\nipw = np.where(treated == 1, 1 / e, 1 / (1 - e))\noverlap = np.where(treated == 1, 1 - e, e)\nprint(\"IPW weights:    \", ipw.round(2), \" ESS\", round(ess(ipw), 2))\nprint(\"overlap weights:\", overlap.round(2), \" ESS\", round(ess(overlap), 2))\nprint(\"share of IPW weight on unit 0:\", round(ipw[0] / ipw.sum(), 3))\nprint(\"tilting function e(1-e):\", (e * (1 - e)).round(4))\n",
+        "output": "IPW weights:     [20.    1.25  2.    1.25 20.  ]  ESS 2.45\noverlap weights: [0.95 0.2  0.5  0.2  0.95]  ESS 3.67\nshare of IPW weight on unit 0: 0.449\ntilting function e(1-e): [0.0475 0.16   0.25   0.16   0.0475]\n",
+        "interpretation": "Unit 0 has propensity 0.05 and was treated, so its inverse-probability weight is \\(1/0.05=20\\), and unit 4, an untreated unit with propensity 0.95, gets \\(1/(1-0.95)=20\\) as well. Those two units carry most of the total weight of 44.5; unit 0 alone holds 0.449 of it. The effective sample size \\((\\sum w)^2/\\sum w^2 = 44.5^2/807.125 = 2.45\\) says the five observations behave like fewer than three equally weighted ones. Overlap weights replace the extreme values with 0.95 and raise the effective sample size to 3.67, but they do not estimate the same quantity. Their implied target population is tilted by \\(e(1-e)\\), which is 0.25 at the center and only 0.0475 for units 0 and 4, so the estimate describes people whose treatment was genuinely uncertain. Moving unit 0's propensity to 0.01 would raise its IPW weight to 100 and drive the effective sample size toward one, while its overlap weight would barely change."
+      }
+    ],
     "outcome": "Show that inverse-probability weights balance a finite population exactly, that overlap weighting changes the target population and that concentrated weights shrink the effective sample size.",
     "lab": "Recover the treatment effect by inverse-probability weighting in an exact population table, then compare the overlap-weighted effect with the population effect.",
     "verification": "The weighted effect is exactly 2; overlap weighting gives 2.8 against the population effect 3.4; effective sample sizes are 3 for equal weights and 2809/2503 for weights 1, 1, 1 and 50.",
@@ -43,6 +75,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["sensitivity", "negative control", "measurement error"],
+    "key_terms": {
+      "Sensitivity analysis": "A study of how much a specified, interpretable violation of an assumption would change a conclusion.",
+      "Omitted-variable contribution": "In the additive model, the bias gamma times delta p created by an unmeasured binary variable that shifts outcomes by gamma and differs in prevalence by delta p.",
+      "Tipping point": "The combination of sensitivity parameters at which the adjusted effect reaches zero or a decision reverses.",
+      "Negative-control outcome": "An outcome the treatment cannot plausibly cause but that shares confounding or measurement bias with the main outcome, so an association with it signals bias."
+    },
+    "worked_examples": [
+      {
+        "title": "E-value tipping point and a negative-control outcome",
+        "language": "python",
+        "code": "import numpy as np\n\nrr_obs = 1.8\ne_value = rr_obs + np.sqrt(rr_obs * (rr_obs - 1))\nprint(f\"E-value for RR {rr_obs}: {e_value:.3f}\")\n\n# Bias factor of a binary confounder with exposure association rr_eu and outcome rr_ud.\nfor rr_eu, rr_ud in [(1.5, 1.5), (2.0, 2.0), (3.0, 3.0)]:\n    bias = rr_eu * rr_ud / (rr_eu + rr_ud - 1)\n    print(f\"RR_EU={rr_eu}, RR_UD={rr_ud}: bias factor {bias:.3f}, adjusted RR {rr_obs / bias:.3f}\")\n\n# Negative-control outcome: exposure cannot cause it, so any association is bias.\nnc_exposed, nc_unexposed = 26 / 200, 20 / 200\nprint(f\"negative-control RR: {nc_exposed / nc_unexposed:.2f}\")\n",
+        "output": "E-value for RR 1.8: 3.000\nRR_EU=1.5, RR_UD=1.5: bias factor 1.125, adjusted RR 1.600\nRR_EU=2.0, RR_UD=2.0: bias factor 1.333, adjusted RR 1.350\nRR_EU=3.0, RR_UD=3.0: bias factor 1.800, adjusted RR 1.000\nnegative-control RR: 1.30\n",
+        "interpretation": "An observed risk ratio of 1.8 has an E-value of \\(1.8+\\sqrt{1.8\\times0.8}=3.0\\): an unmeasured confounder would need risk-ratio associations of 3 with both exposure and outcome to move the estimate to the null. The grid shows the path. Associations of 1.5 each produce a bias factor of \\(2.25/2=1.125\\) and leave an adjusted ratio of 1.6, associations of 2 each leave 1.35, and only the pair (3, 3) reaches the bias factor 1.8 that cancels the effect. The grid is silent about whether such a confounder exists. The negative-control outcome adds evidence the grid cannot: 26 events among 200 exposed people versus 20 among 200 unexposed gives a ratio of 1.30 for an outcome the exposure cannot cause. That number says roughly a 1.3-fold bias is already present, so a confounder strong enough to push 1.8 down to about 1.4 is not hypothetical. If the negative-control ratio had been 1.0, the same E-value would have been more reassuring."
+      }
+    ],
     "outcome": "Locate the tipping point at which an unmeasured confounder would explain an observed effect and use a negative control to expose bias that a sensitivity grid does not reveal.",
     "lab": "Tabulate bias-adjusted effects over confounder prevalence and strength, then compare treated and untreated means of a negative-control outcome.",
     "verification": "The observed effect 3 falls to 0 at prevalence 0.5 with strength 6 and turns negative beyond it; the negative-control difference is 1.33 despite a known zero effect; reliability 0.5 attenuates a slope of 2 to 1.",
@@ -60,6 +107,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["staggered DiD", "group-time ATT", "parallel trends"],
+    "key_terms": {
+      "Staggered adoption": "A design in which units start treatment at different times, so a unit can serve as untreated early and treated later.",
+      "Group-time ATT": "The average treatment effect on the treated for adoption cohort g at time t, contrasted against the last pretreatment period g - 1.",
+      "Eligible comparison group": "Units not yet treated by time t, so their change over the contrast window is not contaminated by their own treatment effects.",
+      "Parallel trends": "The assumption that treated and comparison groups would have changed by the same amount without treatment; a pretrend test cannot prove it.",
+      "No anticipation": "The assumption that outcomes do not respond to treatment before the adoption period."
+    },
+    "worked_examples": [
+      {
+        "title": "Event-time aggregation of clean group-time effects",
+        "language": "python",
+        "code": "import numpy as np\n\n# ATT(g, t) estimates from never-treated comparisons, keyed by cohort g and period t.\natt = {(2, 2): 1.0, (2, 3): 2.0, (2, 4): 3.0, (3, 3): 0.5, (3, 4): 1.0, (4, 4): 0.2}\nsize = {2: 40, 3: 30, 4: 30}\n\nfor e in range(3):\n    cells = [(g, t) for (g, t) in att if t - g == e]\n    w = np.array([size[g] for g, _ in cells], float)\n    vals = np.array([att[c] for c in cells])\n    print(f\"event time {e}: cohorts {[g for g, _ in cells]}, weighted ATT {w @ vals / w.sum():.3f}\")\n\nsimple = np.mean(list(att.values()))\ncohort_weighted = sum(size[g] * v for (g, _), v in att.items()) / sum(size[g] for g, _ in att)\nprint(f\"unweighted mean of cells {simple:.3f}; cohort-size weighted {cohort_weighted:.3f}\")\n",
+        "output": "event time 0: cohorts [2, 3, 4], weighted ATT 0.610\nevent time 1: cohorts [2, 3], weighted ATT 1.571\nevent time 2: cohorts [2], weighted ATT 3.000\nunweighted mean of cells 1.283; cohort-size weighted 1.386\n",
+        "interpretation": "Each group-time cell was already estimated against never-treated units, so this example only decides how to summarize them. Event time 0 collects the first treated period of all three cohorts: \\((40(1.0)+30(0.5)+30(0.2))/100=0.610\\). Event time 1 has only cohorts 2 and 3 because cohort 4 is not observed one period after adoption, giving \\((40(2.0)+30(1.0))/70=1.571\\). Event time 2 rests on cohort 2 alone, so its 3.000 is a statement about the earliest adopters, not about everyone. The rising profile 0.61, 1.57, 3.00 mixes two things: effects that grow with exposure, and a changing composition of which cohorts contribute. The two single summaries also disagree, 1.283 unweighted versus 1.386 weighted by cohort size, because the large early cohort has the largest effects and the most cells. Reporting the event-time profile with its contributing cohorts is more honest than either single number. If cohort 4 had 300 units instead of 30, the event-time 0 average would fall toward 0.2."
+      }
+    ],
     "outcome": "Estimate group-time effects under staggered adoption with uncontaminated comparison groups and show how an already-treated control erases a real effect.",
     "lab": "Recover cohort-specific dynamic effects at period 4, then repeat the contrast using the already-treated early cohort as the control.",
     "verification": "At period 4 the early cohort's effect is 6 and the late cohort's is 2, while the contrast against the already-treated cohort is 0.",
@@ -78,6 +141,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["g-formula", "dynamic regime", "mediator"],
+    "key_terms": {
+      "Treatment-confounder feedback": "A time-varying state that is affected by an earlier treatment and also influences later treatment and the outcome.",
+      "Dynamic regime": "A policy that maps the observed history at each decision time to an action instead of fixing every action in advance.",
+      "Sequential g-formula": "An identification formula that averages outcome means over the intermediate-state distribution induced by the policy's own earlier actions.",
+      "Sequential exchangeability": "The assumption that, given the observed history, each treatment decision is independent of the potential outcomes."
+    },
+    "worked_examples": [
+      {
+        "title": "Enumerating the sequential g-formula for three regimes",
+        "language": "python",
+        "code": "def p_l1(a0):  # P(L1 = 1 | A0): treatment lowers a risk marker\n    return 0.3 if a0 else 0.6\n\n\ndef mean_y(a0, l1, a1):  # outcome mean given history\n    return 10 + 2 * a0 + 3 * a1 - 4 * l1 + 2 * a1 * l1\n\n\ndef g_formula(rule0, rule1):\n    total = 0.0\n    a0 = rule0\n    for l1 in (0, 1):\n        p = p_l1(a0) if l1 else 1 - p_l1(a0)\n        total += p * mean_y(a0, l1, rule1(l1))\n    return total\n\n\nprint(\"never treat :\", round(g_formula(0, lambda l1: 0), 4))\nprint(\"always treat:\", round(g_formula(1, lambda l1: 1), 4))\nprint(\"treat at t1 only if L1 = 1, starting treated:\", round(g_formula(1, lambda l1: l1), 4))\n# Freeze L1 at its untreated distribution while setting both treatments to 1.\nfrozen = sum((p_l1(0) if l1 else 1 - p_l1(0)) * mean_y(1, l1, 1) for l1 in (0, 1))\nprint(\"always treat with L1 frozen at never-treat distribution:\", round(frozen, 4))\n",
+        "output": "never treat : 7.6\nalways treat: 14.4\ntreat at t1 only if L1 = 1, starting treated: 12.3\nalways treat with L1 frozen at never-treat distribution: 13.8\n",
+        "interpretation": "Never treating gives \\(0.4(10)+0.6(6)=7.6\\), because without treatment the risk marker \\(L_1\\) equals 1 with probability 0.6 and each marker costs 4 points. Always treating gives 14.4: treatment lowers that probability to 0.3, so \\(0.7(15)+0.3(13)=14.4\\). The total effect is therefore 6.8. The dynamic rule, which treats at time 1 only when \\(L_1=1\\), gets \\(0.7(12)+0.3(13)=12.3\\); it gives up 3 points for marker-free patients who would have benefited from the second dose. The last line freezes \\(L_1\\) at its untreated distribution while setting both treatments to 1, which yields \\(0.4(15)+0.6(13)=13.8\\). The 0.6 gap between 14.4 and 13.8 is the part of the total effect transmitted by changing the marker. A regression of \\(Y\\) on both treatments that adjusts for \\(L_1\\) would remove exactly that pathway, because it conditions on a variable that treatment itself shifts."
+      }
+    ],
     "outcome": "Evaluate static and dynamic treatment regimes with the sequential g-formula and show how freezing a mediator distribution removes part of the total effect.",
     "lab": "Enumerate never-treat, always-treat and dynamic regimes over the intermediate covariate, then hold the mediator at its untreated distribution.",
     "verification": "Never treat 2.2, the dynamic policy 4.75 and always treat 7.6 lie in that order; freezing the mediator distribution loses 0.4 of the total effect.",
@@ -95,6 +173,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["target trial", "IPW", "time zero"],
+    "key_terms": {
+      "Target trial": "A specification of the randomized trial an observational analysis emulates, aligning eligibility, treatment assignment and the start of follow-up.",
+      "Time zero": "The moment follow-up begins; it must coincide with eligibility and assignment so no group receives guaranteed survival time.",
+      "Immortal time": "Follow-up during which the outcome cannot occur for a group by construction, such as time a person must survive to be classified as treated.",
+      "Sequential inverse-probability weight": "A weight for a policy-consistent path equal to one over the product of the conditional probabilities of its observed actions."
+    },
+    "worked_examples": [
+      {
+        "title": "Exact sequential IPW equals the enumerated policy value",
+        "language": "python",
+        "code": "from itertools import product\n\np_l0 = 0.4  # P(L0 = 1)\n\n\ndef p_a0(l0):\n    return 0.7 if l0 else 0.3  # P(A0 = 1 | L0)\n\n\ndef p_l1(l0, a0):\n    return 0.2 + 0.4 * l0 - 0.1 * a0\n\n\ndef p_a1(l1):\n    return 0.6 if l1 else 0.5\n\n\ndef y(l0, a0, l1, a1):\n    return 5 + l0 + 2 * a0 + 3 * l1 - 2 * a1 + 4 * a1 * l1\n\n\npolicy = lambda l: l  # treat exactly when the current covariate is 1\ndirect, ipw = 0.0, 0.0\nfor l0, a0, l1, a1 in product((0, 1), repeat=4):\n    pl0 = p_l0 if l0 else 1 - p_l0\n    pa0 = p_a0(l0) if a0 else 1 - p_a0(l0)\n    pl1 = p_l1(l0, a0) if l1 else 1 - p_l1(l0, a0)\n    pa1 = p_a1(l1) if a1 else 1 - p_a1(l1)\n    follows = (a0 == policy(l0)) and (a1 == policy(l1))\n    ipw += pl0 * pa0 * pl1 * pa1 * follows * y(l0, a0, l1, a1) / (pa0 * pa1)\n    if follows:\n        direct += pl0 * pl1 * y(l0, a0, l1, a1)\nprint(f\"g-formula value {direct:.4f}\")\nprint(f\"IPW value       {ipw:.4f}\")\n",
+        "output": "g-formula value 7.8000\nIPW value       7.8000\n",
+        "interpretation": "The loop enumerates all sixteen histories of \\((L_0, A_0, L_1, A_1)\\), so nothing here is sampled. The direct g-formula keeps only histories the policy would produce and multiplies the covariate probabilities, never the treatment probabilities. The IPW sum multiplies the full observed-data probability of each history and then divides by \\(P(A_0)P(A_1)\\) for the actions actually taken; those treatment factors cancel exactly, which is why both lines print 7.8000. This identity is the core of sequential weighting. It requires every policy-consistent action to have positive probability: if \\(P(A_1=1\\mid L_1=1)\\) were 0, some histories would carry an infinite weight and the IPW line would fail even though the g-formula could still be written down. Time zero matters too. The weight for \\(A_1\\) uses only \\(L_1\\), information measured before the second decision; adding a variable recorded after \\(A_1\\) to that denominator would break the cancellation and the two numbers would disagree."
+      }
+    ],
     "outcome": "Align a target-trial time zero, verify a sequential inverse-probability policy value by exact summation and reject covariates that were not available at baseline.",
     "lab": "Compute the always-treat value by sequential weighting over an exact probability table, then check two records for availability after assignment.",
     "verification": "The weighted always-treat value is 7.2 over probabilities summing to 1, and one record whose availability time follows assignment is rejected as a baseline variable.",
@@ -112,6 +205,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["vintage", "availability", "overlapping horizons"],
+    "key_terms": {
+      "Vintage": "The version of a series exactly as it was available at a specific information cutoff.",
+      "Availability time": "When an analyst could first use a record, as distinct from the event time at which the measurement belongs in the world.",
+      "Revision": "A later value for the same event time that replaces the first report and must not leak into an earlier forecast origin.",
+      "Overlapping horizons": "Forecasts from different origins that share target times, which makes their errors dependent."
+    },
+    "worked_examples": [
+      {
+        "title": "As-of reconstruction from a revision log",
+        "language": "python",
+        "code": "import pandas as pd\n\nlog = pd.DataFrame(\n    {\n        \"period\": [1, 2, 2, 3, 3, 3, 4],\n        \"released\": [2, 3, 5, 4, 5, 7, 5],\n        \"value\": [100, 104, 110, 103, 108, 109, 112],\n    }\n)\n\n\ndef as_of(origin):\n    known = log[log.released <= origin]\n    return known.sort_values(\"released\").groupby(\"period\").value.last()\n\n\nfor origin in (4, 5, 7):\n    print(f\"vintage at origin {origin}:\", as_of(origin).to_dict())\n\nlatest = as_of(99)\ntruth_period_4 = 112\nnaive_from_vintage = as_of(4).iloc[-1]  # last known level at origin 4\nnaive_from_latest = latest.loc[3]  # what a revised backtest would use\nprint(\n    \"forecast for period 4 from vintage 4:\",\n    naive_from_vintage,\n    \"error\",\n    truth_period_4 - naive_from_vintage,\n)\nprint(\n    \"forecast for period 4 from latest data:\",\n    naive_from_latest,\n    \"error\",\n    truth_period_4 - naive_from_latest,\n)\n",
+        "output": "vintage at origin 4: {1: 100, 2: 104, 3: 103}\nvintage at origin 5: {1: 100, 2: 110, 3: 108, 4: 112}\nvintage at origin 7: {1: 100, 2: 110, 3: 109, 4: 112}\nforecast for period 4 from vintage 4: 103 error 9\nforecast for period 4 from latest data: 109 error 3\n",
+        "interpretation": "The log has seven rows but only four periods, because periods 2 and 3 were revised after their first release. At origin 4 the analyst knew period 2 as 104 and period 3 as 103; period 4 had not been released at all. By origin 5 both earlier periods had been revised upward, to 110 and 108, and period 4 appeared at 112. Origin 7 adds one more revision, period 3 to 109. A naive last-value forecast of period 4 made at origin 4 had only 103 available and missed by 9. A backtest that rebuilds that same forecast from the latest table uses 109 and appears to miss by only 3. The two-thirds reduction in error is pure leakage: the revised value of period 3 was not known until origin 7, three periods after the forecast was due. Any backtest that reads the final table rather than calling an as-of function inherits this optimism, and its size depends on how large and how directional the revisions are."
+      }
+    ],
     "outcome": "Reconstruct as-of vintages from revision histories, forecast only from information available at each origin and show how a revised backtest leaks later information.",
     "lab": "Forecast event four from the vintage available at cutoff four, then repeat the backtest with the later revision of event two.",
     "verification": "The vintage-aware forecast is 18, the backtest that uses the revision of 14 to 50 gives 36, and four overlapping two-step forecasts cover only three unique target events.",
@@ -133,6 +241,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["MinT", "coherence", "covariance"],
+    "key_terms": {
+      "Coherence": "The requirement that forecasts respect aggregation constraints, so every total equals the sum of its components.",
+      "Summing matrix": "The matrix S that maps bottom-level series b to every level of the hierarchy, so a coherent vector satisfies y = Sb.",
+      "MinT reconciliation": "Weighted least squares that adjusts base forecasts to a coherent set using an error covariance approximation W.",
+      "Error covariance approximation": "The positive-definite matrix W expressing relative forecast uncertainty; a small-sample estimate can be unstable or singular."
+    },
+    "worked_examples": [
+      {
+        "title": "OLS and WLS reconciliation of a two-region total",
+        "language": "python",
+        "code": "import numpy as np\n\nS = np.array([[1, 1], [1, 0], [0, 1]], float)  # rows: total, region A, region B\nbase = np.array([100.0, 70.0, 20.0])  # incoherent: 70 + 20 != 100\n\n\ndef reconcile(W):\n    Wi = np.linalg.inv(W)\n    P = np.linalg.solve(S.T @ Wi @ S, S.T @ Wi)\n    return S @ P @ base\n\n\nols = reconcile(np.eye(3))\nwls = reconcile(np.diag([1.0, 25.0, 1.0]))  # region A forecast is noisy\nprint(\"base:\", base, \" incoherence\", base[0] - base[1:].sum())\nprint(\"OLS :\", ols.round(3))\nprint(\"WLS :\", wls.round(3))\n\nlow_total = np.array([10.0, 2.0, 20.0])  # total far below children\nprint(\"OLS with small total:\", (S @ np.linalg.solve(S.T @ S, S.T @ low_total)).round(3))\n",
+        "output": "base: [100.  70.  20.]  incoherence 10.0\nOLS : [96.667 73.333 23.333]\nWLS : [99.63  79.259 20.37 ]\nOLS with small total: [14. -2. 16.]\n",
+        "interpretation": "The base forecasts are incoherent by 10 units, since the regions sum to 90 while the total says 100. Ordinary least-squares reconciliation splits that gap evenly over the three series: the total drops by \\(10/3\\) to 96.667 and each region rises by the same amount, to 73.333 and 23.333. That is reasonable only if every base forecast is equally reliable. Giving region A a variance 25 times larger makes it the cheap place to absorb error, so the weighted projection moves A by more than 9 units to 79.259 and barely touches the total (99.63) and region B (20.37). The final line shows why coherence is not plausibility. With a total of 10 and children of 2 and 20, the gap is \\(-12\\) and OLS shifts each series by 4, producing a region A forecast of \\(-2\\). The result adds up perfectly and is impossible for nonnegative demand. A nonnegativity constraint, or a better base forecast for the total, is needed."
+      }
+    ],
     "outcome": "Reconcile hierarchical forecasts with ordinary and covariance-weighted projections and show that coherent forecasts can still be physically implausible.",
     "lab": "Reconcile an incoherent total with its components by OLS and weighted projections, then inspect a coherent forecast with a negative component.",
     "verification": "OLS reconciliation turns base forecasts 12, 4 and 5 into 11 = 5 + 6; trusting the total moves it back toward 12 (about 12.0 = 5.5 + 6.5); a nonnegative refit gives bottom forecasts 0 and 2.5.",
@@ -154,6 +277,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["pinball loss", "calibration", "newsvendor"],
+    "key_terms": {
+      "Pinball loss": "An asymmetric piecewise-linear loss whose expected value is minimized by a conditional quantile instead of a mean.",
+      "Newsvendor problem": "Choosing a quantity before demand is known when shortages cost c_u per unit and excess costs c_o per unit.",
+      "Critical fractile": "The quantile level c_u/(c_u + c_o) that minimizes expected newsvendor loss for continuous demand.",
+      "Calibration": "Agreement between predicted probabilities or intervals and observed outcome frequencies, checked separately by horizon or group."
+    },
+    "worked_examples": [
+      {
+        "title": "Critical fractile, pinball loss and horizon-level coverage",
+        "language": "python",
+        "code": "import numpy as np\n\ncu, co = 4.0, 1.0  # lost margin per unit short, cost per unit left over\nfractile = cu / (cu + co)\ndemand = np.array([8, 9, 10, 10, 11, 12, 12, 13, 15, 20])\norder = np.quantile(demand, fractile, method=\"inverted_cdf\")\nprint(f\"critical fractile {fractile:.2f}, order quantity {order}\")\n\n\ndef pinball(q, y, tau):\n    return np.mean(np.maximum(tau * (y - q), (tau - 1) * (y - q)))\n\n\nfor q in (10, 13, 15):\n    print(f\"q={q}: pinball loss at tau 0.8 = {pinball(q, demand, 0.8):.3f}\")\n\nhit = {1: [1] * 19 + [0], 2: [1] * 17 + [0] * 3, 3: [1] * 12 + [0] * 8}\nfor h, v in hit.items():\n    print(f\"horizon {h}: 80% interval coverage {np.mean(v):.2f}\")\nprint(f\"pooled coverage {np.mean(sum(hit.values(), [])):.3f}\")\n",
+        "output": "critical fractile 0.80, order quantity 13\nq=10: pinball loss at tau 0.8 = 1.900\nq=13: pinball loss at tau 0.8 = 1.100\nq=15: pinball loss at tau 0.8 = 1.100\nhorizon 1: 80% interval coverage 0.95\nhorizon 2: 80% interval coverage 0.85\nhorizon 3: 80% interval coverage 0.60\npooled coverage 0.800\n",
+        "interpretation": "Losing 4 per unit short and 1 per unit left over gives the critical fractile \\(4/(4+1)=0.8\\), so the order should be the 80th percentile of demand. With ten equally likely values, the inverted empirical distribution reaches 0.8 at the eighth sorted value, 13. The pinball loss confirms it: ordering 10 costs 1.900 per period, while 13 and 15 both cost 1.100. The tie is informative. Moving from 13 to 15 adds 0.2 per unit for the eight demands at or below 13 and saves 0.8 per unit for the two demands at 15 and 20, and \\(8(0.2)=2(0.8)\\), so the loss is flat on that interval. Any order between 13 and 15 is equally good for this sample. The coverage table shows a separate failure. Pooled over horizons the 80 percent intervals cover exactly 0.800, but horizon 1 covers 0.95, horizon 2 covers 0.85 and horizon 3 covers only 0.60. A planner ordering three periods ahead would be short far more often than the pooled number promises."
+      }
+    ],
     "outcome": "Choose an order quantity from the newsvendor critical fractile under asymmetric loss and show how pooled interval coverage can hide a failing horizon.",
     "lab": "Compute the critical fractile and cost-minimizing quantity, then split interval coverage by forecast horizon.",
     "verification": "Critical fractile 0.8 selects quantity 3 with expected cost 4.67 against 5.0 for the mean policy; coverage is 1.0 at the first horizon but 0.4 at the second.",
@@ -175,6 +313,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["risk set", "left truncation", "partial likelihood"],
+    "key_terms": {
+      "Risk set": "The units that have entered observation and have not yet failed or been censored just before an event time.",
+      "Left truncation": "Delayed entry, in which a unit joins the risk set only after its entry time instead of at time zero.",
+      "Proportional hazards": "The Cox model assumption h(t | x) = h_0(t)exp(beta x), with a covariate effect constant over time.",
+      "Partial likelihood": "The product over event times of each failing unit's share of risk-set hazard, in which the baseline hazard cancels."
+    },
+    "worked_examples": [
+      {
+        "title": "Score and information of a tiny Cox partial likelihood",
+        "language": "python",
+        "code": "import numpy as np\n\nt = np.array([1.0, 2.0, 3.0, 4.0, 5.0])\nd = np.array([1, 1, 1, 0, 1])\nx = np.array([1.0, 1.0, 0.0, 1.0, 0.0])\n\n\ndef score_info(beta):\n    u, info = 0.0, 0.0\n    for i in np.flatnonzero(d):\n        risk = t >= t[i]\n        w = np.exp(beta * x[risk])\n        mean = (w @ x[risk]) / w.sum()\n        u += x[i] - mean\n        info += (w @ x[risk] ** 2) / w.sum() - mean**2\n    return u, info\n\n\nbeta = 0.0\nfor step in range(6):\n    u, info = score_info(beta)\n    print(f\"step {step}: beta {beta:.5f}, score {u:.5f}, information {info:.5f}\")\n    beta += u / info\nprint(f\"hazard ratio exp(beta) = {np.exp(beta):.4f}, SE = {1 / np.sqrt(score_info(beta)[1]):.4f}\")\n",
+        "output": "step 0: beta 0.00000, score 0.56667, information 0.71222\nstep 1: beta 0.79563, score 0.01664, information 0.64140\nstep 2: beta 0.82158, score 0.00006, information 0.63642\nstep 3: beta 0.82168, score 0.00000, information 0.63640\nstep 4: beta 0.82168, score 0.00000, information 0.63640\nstep 5: beta 0.82168, score 0.00000, information 0.63640\nhazard ratio exp(beta) = 2.2743, SE = 1.2535\n",
+        "interpretation": "At \\(\\beta=0\\) the score is 0.56667: summing observed covariates minus risk-set averages over the four events gives \\((1-3/5)+(1-2/4)+(0-1/3)+(0-0)\\), since the last event at time 5 has only itself, with \\(x=0\\), at risk. A positive score says increasing \\(\\beta\\) raises the partial likelihood. One Newton step divides the score by the information 0.71222 and jumps to 0.79563, and the second step moves only 0.026 more. By step 3 the score is zero to five decimals and \\(\\beta=0.82168\\), a hazard ratio of 2.2743. The standard error 1.2535 is \\(1/\\sqrt{0.6364}\\) and dwarfs the estimate, so a 95 percent interval for the log hazard ratio runs roughly from \\(-1.6\\) to 3.3. Four events cannot distinguish a doubling of hazard from no effect. The censored subject at time 4 still matters: it sits in the risk sets at times 1, 2 and 3 and changes their averages."
+      }
+    ],
     "outcome": "Compute Cox partial likelihoods by hand from risk sets, including delayed entry, and locate the maximizing coefficient.",
     "lab": "Evaluate the log partial likelihood at coefficient 0 with and without delayed entry, then search a grid for the maximizer.",
     "verification": "The log partial likelihood is -log(12) = -2.485 at coefficient 0 and -log(6) = -1.792 with delayed entry; the grid maximum 0.35 matches the closed form log(2)/2 = 0.347.",
@@ -195,6 +348,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["censoring", "AFT", "Weibull"],
+    "key_terms": {
+      "Right censoring": "Follow-up that ends at c before an event, contributing the survival probability S(c) = P(T > c) rather than a density.",
+      "Exposure time": "Total observed follow-up; for an exponential model the rate MLE is observed events divided by exposure.",
+      "Weibull shape": "The parameter k in cumulative hazard (t/s)^k that lets the hazard rise or fall over time.",
+      "Accelerated failure time": "A model in which a covariate multiplies the time scale, so every survival quantile shifts by the same time ratio.",
+      "Time ratio": "The factor e^(b_1) by which a binary covariate stretches every quantile of the survival distribution in an AFT model."
+    },
+    "worked_examples": [
+      {
+        "title": "Weibull fit with right-censoring and a time ratio",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import optimize\n\nt = np.array([2.0, 3.0, 5.0, 6.0, 8.0, 4.0, 7.0, 9.0, 12.0, 15.0])\nd = np.array([1, 1, 1, 0, 1, 1, 1, 0, 1, 0])\nx = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])\n\n\ndef nll(par, d=d):\n    b0, b1, log_k = par\n    k = np.exp(log_k)\n    scale = np.exp(b0 + b1 * x)\n    z = (t / scale) ** k\n    log_f = np.log(k) - np.log(scale) + (k - 1) * np.log(t / scale) - z\n    return -np.sum(d * log_f - (1 - d) * z)\n\n\nfit = optimize.minimize(nll, [1.0, 0.0, 0.0], method=\"BFGS\")\nb0, b1, log_k = fit.x\nprint(f\"converged {fit.success}, -loglik {fit.fun:.4f}\")\nprint(f\"shape k {np.exp(log_k):.3f}, time ratio exp(b1) {np.exp(b1):.3f}\")\nprint(f\"median time x=0: {np.exp(b0) * np.log(2) ** (1 / np.exp(log_k)):.3f}\")\nprint(f\"median time x=1: {np.exp(b0 + b1) * np.log(2) ** (1 / np.exp(log_k)):.3f}\")\nwrong = optimize.minimize(nll, [1.0, 0.0, 0.0], args=(np.ones(10),), method=\"BFGS\")\nprint(f\"censored times treated as events: time ratio {np.exp(wrong.x[1]):.3f}\")\n",
+        "output": "converged True, -loglik 20.4439\nshape k 2.076, time ratio exp(b1) 2.217\nmedian time x=0: 4.932\nmedian time x=1: 10.934\ncensored times treated as events: time ratio 1.921\n",
+        "interpretation": "The censored model converges with shape \\(k=2.076\\), an increasing hazard, and a time ratio of 2.217 for the \\(x=1\\) group. On the accelerated failure time scale that ratio stretches the whole survival curve: the fitted median moves from 4.932 to 10.934 and \\(10.934/4.932=2.217\\). The interpretation is a statement about time, not about hazard: members of the second group take about 2.2 times as long to reach any survival quantile. The wrong fit, which counts the three censored times as events, shrinks the time ratio to 1.921. Two of those three observations, the follow-ups ending at 9 and 15, belong to the \\(x=1\\) group, so treating them as failures pretends that group failed earlier than the data show, while only the censored time 6 shortens the \\(x=0\\) group. The censoring term \\(-(t/\\lambda)^k\\) uses only the survival probability up to the censoring time, and dropping it biases the comparison toward no difference."
+      }
+    ],
     "outcome": "Write censored and left-truncated likelihood contributions, fit a Weibull model by maximum likelihood and interpret an AFT time ratio.",
     "lab": "Compare the censored exponential rate with the naive rate, add delayed entry, then fit Weibull models without and with a binary AFT covariate.",
     "verification": "Exponential rates 0.15 (censoring-aware), 0.25 (naive) and 0.214 (delayed entry); the AFT fit returns time ratio 2, hazard ratio about 0.41 and shape about 1.29 with gradient norms below 1e-5.",
@@ -215,6 +384,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["cumulative incidence", "competing risk", "PH diagnostics"],
+    "key_terms": {
+      "Competing risk": "An event that prevents the event of interest from occurring, such as a different failure mode ending a lifetime.",
+      "Cumulative incidence": "The absolute probability of failing from a specific cause by time t, which depends on survival from all causes.",
+      "Cause-specific hazard": "The instantaneous rate of one cause among units still free of every event.",
+      "Episode splitting": "Dividing follow-up at a declared change point so a time interaction can test whether a coefficient is constant."
+    },
+    "worked_examples": [
+      {
+        "title": "Aalen-Johansen incidence versus one minus Kaplan-Meier",
+        "language": "python",
+        "code": "import numpy as np\n\nt = np.array([1, 2, 2, 3, 4, 5, 6, 7])\ncause = np.array([1, 2, 1, 2, 2, 1, 0, 2])  # 0 = censored\n\nsurv, cif = 1.0, 0.0\nkm = 1.0\nfor v in np.unique(t):\n    at_risk = np.sum(t >= v)\n    e1 = np.sum((t == v) & (cause == 1))\n    e_any = np.sum((t == v) & (cause > 0))\n    cif += surv * e1 / at_risk\n    surv *= 1 - e_any / at_risk\n    km *= 1 - e1 / at_risk  # competing events treated as censoring\n    print(f\"t={v}: at risk {at_risk}, cause-1 {e1}, any {e_any}, CIF1 {cif:.4f}, 1-KM {1 - km:.4f}\")\n",
+        "output": "t=1: at risk 8, cause-1 1, any 1, CIF1 0.1250, 1-KM 0.1250\nt=2: at risk 7, cause-1 1, any 2, CIF1 0.2500, 1-KM 0.2500\nt=3: at risk 5, cause-1 0, any 1, CIF1 0.2500, 1-KM 0.2500\nt=4: at risk 4, cause-1 0, any 1, CIF1 0.2500, 1-KM 0.2500\nt=5: at risk 3, cause-1 1, any 1, CIF1 0.3750, 1-KM 0.5000\nt=6: at risk 2, cause-1 0, any 0, CIF1 0.3750, 1-KM 0.5000\nt=7: at risk 1, cause-1 0, any 1, CIF1 0.3750, 1-KM 0.5000\n",
+        "interpretation": "Up to time 4 the two columns agree at 0.25, because both cause-1 events occur at times 1 and 2, before competing events have thinned the population enough to matter. They separate at time 5. Competing events at times 2, 3 and 4 shrink the all-cause survival from \\(7/8\\) to \\(0.875\\times5/7\\times4/5\\times3/4=0.375\\), so the cause-1 event adds \\(0.375\\times1/3=0.125\\) and the Aalen-Johansen incidence becomes 0.375. One minus Kaplan-Meier treats the cause-2 events as censoring, keeps its cause-1 survival at 0.75 through time 4, and adds \\(0.75\\times1/3=0.25\\), reaching 0.500. That 0.500 describes a hypothetical world where nobody can experience cause 2, which is not the population analyzed. With four competing events among eight people, the overstatement is a third of the true incidence. Censoring at time 6 lowers the risk set but adds no mass to either column."
+      }
+    ],
     "outcome": "Accumulate cumulative incidence under competing risks, contrast it with one minus Kaplan-Meier and test proportional hazards with an episode-split time interaction.",
     "lab": "Compute cause-specific cumulative incidence for four complete records, then fit constant and episode-split Cox models to simulated data whose effect reverses after time 1.",
     "verification": "Each cause has incidence 0.5 while one minus Kaplan-Meier gives 0.625; the constant log hazard ratio is 0.54, while the split model gives 0.86 before time 1 and a change of -1.68 (SE 0.30) after it.",
@@ -235,6 +419,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["retrieval", "cold start", "candidate recall"],
+    "key_terms": {
+      "Candidate generation": "The retrieval stage that selects a manageable set of items from a large universe before a ranker orders them.",
+      "Candidate recall": "The share of relevant items present among the first k candidates, |R intersect C_k| / |R|.",
+      "Retrieval ceiling": "The limit candidate recall places on any downstream ranker, since a missing item cannot be ranked.",
+      "Jaccard similarity": "The size of the intersection of two item sets divided by the size of their union.",
+      "Cold start": "A user or item with no history and therefore no neighborhood, requiring an explicit fallback policy."
+    },
+    "worked_examples": [
+      {
+        "title": "Co-occurrence candidates, recall ceiling and a cold item",
+        "language": "python",
+        "code": "from collections import Counter\nfrom itertools import combinations\n\nbaskets = [{\"a\", \"b\", \"c\"}, {\"a\", \"b\"}, {\"b\", \"c\", \"d\"}, {\"a\", \"c\"}, {\"c\", \"d\"}]\npairs = Counter()\nfor basket in baskets:\n    for i, j in combinations(sorted(basket), 2):\n        pairs[i, j] += 1\n        pairs[j, i] += 1\n\n\ndef candidates(item, k):\n    scored = sorted(((n, j) for (i, j), n in pairs.items() if i == item), reverse=True)\n    return [j for _, j in scored[:k]]\n\n\nheld_out = {\"a\": {\"c\", \"d\"}, \"d\": {\"b\", \"e\"}}  # next purchases after the training window\nfor item, future in held_out.items():\n    for k in (1, 2):\n        cands = candidates(item, k)\n        recall = len(future & set(cands)) / len(future)\n        print(f\"seed {item}, k={k}: candidates {cands}, recall {recall:.2f}\")\nprint(\"candidates for new item e:\", candidates(\"e\", 2))\n",
+        "output": "seed a, k=1: candidates ['c'], recall 0.50\nseed a, k=2: candidates ['c', 'b'], recall 0.50\nseed d, k=1: candidates ['c'], recall 0.00\nseed d, k=2: candidates ['c', 'b'], recall 0.50\ncandidates for new item e: []\n",
+        "interpretation": "The co-occurrence table counts how often two items share a basket. Item a appears with c twice and with b twice, and the sort breaks the tie toward c, so the single candidate for a is c. Since the held-out future for a is {c, d}, recall is 0.50 at both \\(k=1\\) and \\(k=2\\): d never appeared with a in training, so no ranking model applied after this retrieval step could ever recommend it. That 0.50 is a ceiling on any downstream recall. Seed d shows the dependence on \\(k\\): its strongest neighbor c is not in its future, so recall is 0.00 at \\(k=1\\) and rises to 0.50 when b is admitted at \\(k=2\\). Item e has no training history, and the function returns an empty list. That is a correct output, not a bug, but it means the system needs an explicit cold-start rule, such as popular items or content similarity, rather than a silent empty slate."
+      }
+    ],
     "outcome": "Generate recommendation candidates from item co-occurrence, measure the retrieval ceiling with candidate recall and define an explicit cold-start policy.",
     "lab": "Score unseen items by Jaccard similarity to the target user's history, check recall at 2, then rank items by popularity for a user without history.",
     "verification": "Items i3 and i4 score 1/3 and i5 scores 0, so recall at 2 is 1 for i4 but 0 for i5, which no reranker can recover; the cold-start policy ranks i3 first.",
@@ -253,6 +453,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["BPR", "negative sampling", "temporal leakage"],
+    "key_terms": {
+      "Pairwise logistic objective": "The BPR-style loss log(1 + exp(-d^T w)) on positive-minus-negative feature differences, plus an L2 penalty.",
+      "Preference pair": "A positive and a negative item for one context; an unobserved item is not automatically a known negative.",
+      "Negative sampling": "The rule that chooses which unobserved items become negatives, which defines what the training comparison means.",
+      "Temporal leakage": "Use of information from after the training cutoff, for example through item statistics or an index built from future interactions."
+    },
+    "worked_examples": [
+      {
+        "title": "BPR gradient check and leakage-free negatives",
+        "language": "python",
+        "code": "import numpy as np\n\nu = np.array([0.5, -0.2])\nitems = {\"p\": np.array([0.4, 0.1]), \"n\": np.array([-0.3, 0.6])}\n\n\ndef loss(u):\n    s = u @ (items[\"p\"] - items[\"n\"])\n    return np.log1p(np.exp(-s))\n\n\ns = u @ (items[\"p\"] - items[\"n\"])\nanalytic = -(1 / (1 + np.exp(s))) * (items[\"p\"] - items[\"n\"])\nh = 1e-6\nnumeric = np.array([(loss(u + h * e) - loss(u - h * e)) / (2 * h) for e in np.eye(2)])\nprint(\"score difference:\", round(float(s), 4), \" loss:\", round(float(loss(u)), 6))\nprint(\"analytic grad:\", analytic.round(6), \" numeric grad:\", numeric.round(6))\n\nevents = [(\"u1\", \"p\", 1), (\"u1\", \"q\", 3), (\"u1\", \"r\", 6)]  # (user, item, day)\ncatalog = {\"p\", \"q\", \"r\", \"s\", \"t\"}\ncutoff = 2\never = {i for _, i, _ in events}\nseen_by_cutoff = {i for _, i, day in events if day <= cutoff}\nprint(\"negatives if future is excluded:\", sorted(catalog - ever))\nprint(\"negatives using only past positives:\", sorted(catalog - seen_by_cutoff))\n",
+        "output": "score difference: 0.45  loss: 0.493249\nanalytic grad: [-0.272553  0.19468 ]  numeric grad: [-0.272553  0.19468 ]\nnegatives if future is excluded: ['s', 't']\nnegatives using only past positives: ['q', 'r', 's', 't']\n",
+        "interpretation": "The BPR loss for one triple is \\(\\log(1+e^{-s})\\) where \\(s\\) is the score of the positive item minus the negative item, here 0.45, giving 0.493249. The analytic gradient with respect to the user vector is \\(-\\sigma(-s)(v_p-v_n)\\). With \\(v_p-v_n=(0.7,-0.5)\\) and \\(\\sigma(-0.45)=0.3894\\) that is \\((-0.2726, 0.1947)\\), and the central finite difference agrees to six decimals. Agreement at this one point justifies trusting the analytic gradient in a training loop; a sign error would show up immediately as opposite signs. The sampling lines show leakage. With a training cutoff at day 2, the user has only interacted with p. Excluding every item the user ever touched removes q and r, which leaks the future: the training set now knows those items will become positives. Sampling from the catalog minus past positives keeps q and r as legitimate negatives, which is what an online system would have seen on day 2."
+      }
+    ],
     "outcome": "Train a pairwise BPR ranking objective with an independently checked gradient and keep future positives out of negative sampling.",
     "lab": "Train pairwise logistic ranking weights and compare the analytic gradient with finite differences, then sample negatives that respect attribution and reporting delays.",
     "verification": "Training lowers the pairwise loss from log 2 = 0.693 to 0.081 with all margins positive; the negative sampler returns only c at time 5 and c and d at time 9.",
@@ -271,6 +486,22 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["IPS", "doubly robust", "support"],
+    "key_terms": {
+      "Logging policy": "The mechanism that chose the logged actions, whose probabilities p(a | x) must match actual selection including overrides.",
+      "Inverse propensity scoring": "Estimating a target policy's value by averaging rewards reweighted by q(a | x)/p(a | x).",
+      "Support": "The requirement that every action the target policy uses has positive logging probability in the relevant contexts.",
+      "Doubly robust estimator": "A combination of an outcome model and importance weights that remains consistent if either component is correct.",
+      "Weight clipping": "Capping importance ratios to reduce variance at the cost of a changed expectation, that is, bias."
+    },
+    "worked_examples": [
+      {
+        "title": "IPS, clipped IPS and doubly robust on six logged rounds",
+        "language": "python",
+        "code": "import numpy as np\n\naction = np.array([0, 1, 1, 0, 1, 0])\nreward = np.array([1.0, 0.0, 1.0, 0.0, 1.0, 1.0])\np_log = np.array([0.9, 0.1, 0.1, 0.9, 0.1, 0.9])  # logging probability of the action taken\np_new = np.where(action == 1, 0.8, 0.2)  # new policy prefers action 1\nq_hat = {0: 0.6, 1: 0.5}  # reward model by action\n\nw = p_new / p_log\nips = np.mean(w * reward)\nclipped = np.mean(np.minimum(w, 3.0) * reward)\ndirect = 0.8 * q_hat[1] + 0.2 * q_hat[0]\nq_taken = np.array([q_hat[a] for a in action])\ndr = direct + np.mean(w * (reward - q_taken))\nprint(\"importance weights:\", w.round(3))\nprint(f\"IPS {ips:.4f}, clipped IPS (cap 3) {clipped:.4f}, direct {direct:.4f}, DR {dr:.4f}\")\nprint(f\"ESS of weights {w.sum() ** 2 / (w**2).sum():.3f} out of {len(w)}\")\n",
+        "output": "importance weights: [0.222 8.    8.    0.222 8.    0.222]\nIPS 2.7407, clipped IPS (cap 3) 1.0741, direct 0.5200, DR 1.1941\nESS of weights 3.167 out of 6\n",
+        "interpretation": "The new policy chooses action 1 with probability 0.8, while the logging policy chose it with probability 0.1, so each logged action-1 round gets weight 8. Three such rounds dominate: plain IPS returns 2.7407, an impossible value for rewards bounded by 1, because two of those three rounds had reward 1. Clipping weights at 3 brings the estimate to 1.0741, still above 1, and introduces bias whose size depends on the cap. The direct method uses only the reward model, \\(0.8(0.5)+0.2(0.6)=0.52\\), and is biased if that model is wrong. The doubly robust estimate 1.1941 adds the weighted residuals to 0.52. Here the residuals on action-1 rounds are \\(-0.5, +0.5, +0.5\\), each multiplied by 8, so the correction is still dominated by those three rows. The effective sample size of 3.167 out of 6 and the impossible IPS value say the same thing: the log contains too little support for action 1 to evaluate this policy reliably."
+      }
+    ],
     "outcome": "Estimate a new policy's value from logged data with inverse propensity scoring and a doubly robust correction and show how clipping trades bias for variance.",
     "lab": "Recover the new policy's value by IPS and by doubly robust estimation, then clip the importance weights.",
     "verification": "IPS and doubly robust estimates both equal 0.5 against a logging-policy average of 0.32; clipping lowers the estimate to 0.34.",
@@ -289,6 +520,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["duality", "shadow price", "KKT"],
+    "key_terms": {
+      "Shadow price": "A constraint's dual value, the local derivative of optimal objective value with respect to that constraint's bound.",
+      "Binding constraint": "A constraint that holds with equality at the optimum; changes in the active set end the range where a dual value applies.",
+      "Strong duality": "For a well-posed linear program, equality between the primal and dual optimal values.",
+      "KKT conditions": "Feasibility, dual feasibility, stationarity and complementary slackness, which together certify an optimum of a convex program."
+    },
+    "worked_examples": [
+      {
+        "title": "Re-solving across the second capacity to find its price range",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy.optimize import linprog\n\n\ndef solve(b1, b2):\n    res = linprog(c=[-3, -2], A_ub=[[1, 1], [2, 1]], b_ub=[b1, b2], method=\"highs\")\n    return -res.fun, res.x, -res.ineqlin.marginals\n\n\nfor b2 in (4, 5, 6, 8, 10, 11, 12):\n    value, x, duals = solve(5, b2)\n    print(f\"b2={b2:>2}: x={x.round(3) + 0.0}, value={value:.2f}, duals={duals.round(3)}\")\n",
+        "output": "b2= 4: x=[0. 4.], value=8.00, duals=[0. 2.]\nb2= 5: x=[0. 5.], value=10.00, duals=[0. 2.]\nb2= 6: x=[1. 4.], value=11.00, duals=[1. 1.]\nb2= 8: x=[3. 2.], value=13.00, duals=[1. 1.]\nb2=10: x=[5. 0.], value=15.00, duals=[1. 1.]\nb2=11: x=[5. 0.], value=15.00, duals=[3. 0.]\nb2=12: x=[5. 0.], value=15.00, duals=[3. 0.]\n",
+        "interpretation": "The program in this unit varies the first capacity; this table varies the second, \\(2x_1+x_2\\le b_2\\), with \\(b_1=5\\). Below 5, only the second constraint binds and the solution produces only \\(x_2\\), so each extra unit of \\(b_2\\) is worth its price of 2, as values 8 and 10 confirm. Between 5 and 10 both constraints bind, the price of \\(b_2\\) drops to 1 and the value rises from 11 at \\(b_2=6\\) to 13 at 8 and 15 at 10, one per unit. Above 10 the solution is stuck at \\((5,0)\\), the second constraint is slack and its price is 0; the first capacity now carries the whole value at price 3. At exactly \\(b_2=5\\) and \\(b_2=10\\) the problem is degenerate and the reported dual is one of two valid one-sided slopes. Pricing the second resource from the \\(b_2=8\\) solution would overstate the gain from expanding to 12 by 2 units, because the price falls to zero after 10."
+      }
+    ],
     "outcome": "Solve a small linear program, verify its dual shadow price and show that the price is valid only within its local sensitivity range.",
     "lab": "Verify the primal allocation and the shadow price of the binding resource, then apply a resource change beyond the local range.",
     "verification": "Allocation (3, 2) has value 13 and shadow price 1, matching a finite-difference derivative; raising the resource from 5 to 9 gives 16, not the 17 the local price predicts.",
@@ -313,6 +559,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["MILP", "integrality", "relaxation"],
+    "key_terms": {
+      "Mixed-integer linear program": "An optimization with a linear objective and constraints in which some variables must take integer values.",
+      "Integrality": "The restriction that a decision such as selecting a project is 0 or 1 rather than fractional.",
+      "Linear relaxation": "The problem with each binary restriction replaced by bounds from 0 to 1, whose optimum is an upper bound on the integer maximum.",
+      "Optimality gap": "The distance between the best feasible incumbent and the best bound, which limits any claim of exact optimality."
+    },
+    "worked_examples": [
+      {
+        "title": "Enumeration, relaxation bound and rounding up",
+        "language": "python",
+        "code": "from itertools import product\nimport numpy as np\nfrom scipy.optimize import linprog\n\nvalue = np.array([10, 13, 7, 8])\nweight = np.array([4, 6, 3, 5])\ncap = 10\n\nbest = max(\n    ((value @ np.array(z), z) for z in product((0, 1), repeat=4) if weight @ np.array(z) <= cap)\n)\nprint(\"exact integer optimum:\", best[0], \"choice\", best[1])\n\nlp = linprog(-value, A_ub=[weight], b_ub=[cap], bounds=[(0, 1)] * 4, method=\"highs\")\nprint(\"LP relaxation bound:\", round(-lp.fun, 4), \"x =\", lp.x.round(4))\nup = np.ceil(lp.x - 1e-9) + 0.0\nprint(\"rounded up:\", up, \"weight\", weight @ up, \"value\", value @ up)\ndown = np.floor(lp.x + 1e-9)\nprint(\"rounded down:\", down, \"weight\", weight @ down, \"value\", value @ down)\nprint(\"optimality gap of rounding down:\", best[0] - value @ down)\n",
+        "output": "exact integer optimum: 23 choice (1, 1, 0, 0)\nLP relaxation bound: 23.5 x = [1.  0.5 1.  0. ]\nrounded up: [1. 1. 1. 0.] weight 13.0 value 30.0\nrounded down: [1. 0. 1. 0.] weight 7.0 value 17.0\noptimality gap of rounding down: 6.0\n",
+        "interpretation": "Enumerating all 16 subsets finds the best feasible choice: items 1 and 2, weight 10 and value 23. The linear relaxation reaches 23.5 by taking half of item 2, and because every integer solution is also feasible for the relaxation, 23.5 is a certified upper bound. The integer optimum is within 0.5 of it, so a branch-and-bound solver holding the incumbent 23 can prove it is within 0.5, about 2.1 percent, of optimal without enumerating anything else. Rounding the relaxation is not a solution method. Rounding up yields weight 13, three units over capacity, with an attractive but meaningless value of 30. Rounding down is feasible at weight 7 but leaves value 17, six below the optimum, because it discards the high-value item 2 instead of swapping out item 3. The relaxation ranks items by value per unit weight (item 1 at 2.5, item 3 at 2.33, item 2 at 2.17), which is why it fills item 3 before item 2 even though item 2 belongs in the integer answer."
+      }
+    ],
     "outcome": "Solve a binary allocation exactly, compare it with its linear-programming relaxation bound and show that rounding the relaxation can violate a resource constraint.",
     "lab": "Solve the binary allocation and check its feasibility and integrality, then round the fractional relaxation.",
     "verification": "The integer optimum is 14 with choice (0, 1, 1), below the relaxation bound 14.8; rounding the relaxation costs 11, exceeding the budget of 9.",
@@ -337,6 +598,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["scenario", "robust optimization", "EVPI"],
+    "key_terms": {
+      "Scenario table": "A finite list of possible outcomes with probabilities; an omitted scenario is not protected by any objective.",
+      "Bayes action": "The action minimizing expected loss, the probability-weighted sum of scenario losses.",
+      "Minimax decision": "The action minimizing the worst listed scenario loss, ignoring the scenario probabilities.",
+      "EVPI": "The expected value of perfect information, the reduction in expected loss if the true scenario were known before deciding."
+    },
+    "worked_examples": [
+      {
+        "title": "Expected cost, minimax cost, minimax regret and EVPI",
+        "language": "python",
+        "code": "import numpy as np\n\nprob = np.array([0.5, 0.3, 0.2])  # low, medium, high demand\ncost = np.array(\n    [\n        [10, 30, 60],  # small capacity\n        [20, 22, 35],  # medium capacity\n        [35, 35, 36],\n    ]\n)  # large capacity\nnames = [\"small\", \"medium\", \"large\"]\n\nexpected = cost @ prob\nregret = cost - cost.min(axis=0)\nfor name, e, worst, r in zip(names, expected, cost.max(axis=1), regret.max(axis=1)):\n    print(f\"{name:>6}: expected {e:.1f}, worst case {worst}, max regret {r}\")\nwait_and_see = prob @ cost.min(axis=0)\nprint(\n    f\"best expected cost {expected.min():.1f}, wait-and-see {wait_and_see:.1f}, EVPI {expected.min() - wait_and_see:.1f}\"\n)\n",
+        "output": " small: expected 26.0, worst case 60, max regret 25\nmedium: expected 23.6, worst case 35, max regret 10\n large: expected 35.2, worst case 36, max regret 25\nbest expected cost 23.6, wait-and-see 18.6, EVPI 5.0\n",
+        "interpretation": "Medium capacity minimizes expected cost at 23.6, ahead of small at 26.0 and large at 35.2. Its worst case is 35, one unit better than large and far better than small's 60 under high demand, so the minimax criterion also picks medium here; it would favor large if the medium cost under high demand rose above 36. Regret measures each option against the best cost achievable in each scenario, 10, 22 and 35. Medium's largest regret is 10 (in the low scenario), compared with 25 for both alternatives, so all three criteria agree in this table. That agreement is a property of these numbers, not a rule. Wait-and-see cost is \\(0.5(10)+0.3(22)+0.2(35)=18.6\\), the expected cost if the decision could be made after observing demand. The gap \\(23.6-18.6=5.0\\) is the expected value of perfect information: paying more than 5 for a demand study cannot be justified, however accurate the study, while a study costing 2 might be."
+      }
+    ],
     "outcome": "Compare expected-cost and minimax decisions across demand scenarios and compute the expected value of perfect information.",
     "lab": "Choose a quantity by expected cost and by worst-case cost, then compute how much perfect scenario information would save.",
     "verification": "Expected cost selects 4 (expected cost 4.3), minimax selects 10 (worst cost 8) and the expected value of perfect information is 4.3.",
@@ -361,6 +637,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["heterogeneity", "random effects", "prediction interval"],
+    "key_terms": {
+      "Between-study heterogeneity": "Variation in true effects across studies, summarized by the variance tau^2.",
+      "Random-effects model": "A synthesis model in which each study estimates its own true effect drawn around an overall mean.",
+      "DerSimonian-Laird estimator": "The moment estimator of tau^2 from Cochran's Q, truncated at zero.",
+      "Prediction interval": "An interval for a new study's true effect that adds tau^2 to the uncertainty of the mean, so it is wider than the confidence interval."
+    },
+    "worked_examples": [
+      {
+        "title": "DerSimonian-Laird on five studies",
+        "language": "python",
+        "code": "import numpy as np\nfrom scipy import stats\n\ny = np.array([0.10, 0.30, 0.35, 0.65, 0.45])\nv = np.array([0.010, 0.020, 0.015, 0.025, 0.010])\nw = 1 / v\nfixed = w @ y / w.sum()\nQ = w @ (y - fixed) ** 2\nk = len(y)\ntau2 = max(0.0, (Q - (k - 1)) / (w.sum() - (w**2).sum() / w.sum()))\nwr = 1 / (v + tau2)\nmu = wr @ y / wr.sum()\nse = np.sqrt(1 / wr.sum())\nz = stats.norm.ppf(0.975)\nt = stats.t.ppf(0.975, k - 2)\nhalf_pi = t * np.sqrt(tau2 + se**2)\nprint(f\"fixed {fixed:.4f}, Q {Q:.3f}, I2 {max(0, (Q - (k - 1)) / Q):.3f}, tau2 {tau2:.4f}\")\nprint(f\"random-effects mean {mu:.4f}, 95% CI [{mu - z * se:.4f}, {mu + z * se:.4f}]\")\nprint(f\"95% prediction interval [{mu - half_pi:.4f}, {mu + half_pi:.4f}]\")\n",
+        "output": "fixed 0.3346, Q 10.890, I2 0.633, tau2 0.0249\nrandom-effects mean 0.3548, 95% CI [0.1793, 0.5304]\n95% prediction interval [-0.2227, 0.9323]\n",
+        "interpretation": "The inverse-variance weights pull the fixed-effect mean to 0.3346. Cochran's \\(Q=10.890\\) with \\(k-1=4\\) degrees of freedom is well above 4, so the studies disagree more than sampling error explains; \\(I^2=0.633\\) says 63 percent of the observed spread is between-study variation. The method-of-moments estimate \\(\\tau^2=0.0249\\), a between-study standard deviation of about 0.158, is added to every study's variance. That flattens the weights and shifts the mean to 0.3548, with a 95 percent confidence interval of [0.179, 0.530]. That interval describes the average effect across studies like these. A new study's true effect is far less certain: the prediction interval adds \\(\\tau^2\\) and uses a \\(t\\) quantile with \\(k-2=3\\) degrees of freedom (3.18 rather than 1.96), producing [\\(-0.223\\), 0.932]. A program team expecting a positive result in a new site should read the second interval: it includes harm. With only five studies, \\(\\tau^2\\) itself is very uncertain."
+      }
+    ],
     "outcome": "Estimate between-study heterogeneity with the DerSimonian-Laird method and distinguish a confidence interval for the mean effect from a prediction interval for a new study.",
     "lab": "Compute tau-squared and the random-effects mean, then compare confidence and prediction half-widths.",
     "verification": "tau-squared = (11.1875 - 3)/75 = 0.109 and the mean is 0.475; the prediction half-width 0.750 is about twice the confidence half-width 0.379.",
@@ -381,6 +672,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["dependent effects", "GLS", "missing studies"],
+    "key_terms": {
+      "Dependent effects": "Several estimates that share participants, controls or measurements and therefore have correlated errors.",
+      "Sampling covariance matrix": "The matrix V giving variances and covariances of the estimates; it is part of the model, not a numerical convenience.",
+      "Generalized least squares": "Pooling estimates with weights from V inverse, which accounts for correlation instead of treating rows as independent.",
+      "Missing-study scenario": "A sensitivity analysis that adds hypothetical effects to show how conclusions would change, without estimating real missing studies."
+    },
+    "worked_examples": [
+      {
+        "title": "Correlated outcomes from one study and an added null study",
+        "language": "python",
+        "code": "import numpy as np\n\n\ndef gls(y, V):\n    ones = np.ones(len(y))\n    Vi = np.linalg.inv(V)\n    var = 1 / (ones @ Vi @ ones)\n    return var * (ones @ Vi @ y), np.sqrt(var), var * (ones @ Vi)\n\n\ny = np.array([0.40, 0.44, 0.10])  # study 1 reports two outcomes; study 2 one\nse = np.array([0.10, 0.10, 0.10])\nfor rho in (0.0, 0.8):\n    V = np.diag(se**2)\n    V[0, 1] = V[1, 0] = rho * se[0] * se[1]\n    est, s, weights = gls(y, V)\n    print(f\"rho={rho}: pooled {est:.4f}, SE {s:.4f}, weights {weights.round(3)}\")\n\nV = np.diag(np.r_[se, 0.10] ** 2)\nV[0, 1] = V[1, 0] = 0.8 * 0.01\nest, s, _ = gls(np.r_[y, 0.0], V)\nprint(f\"with an unpublished null study (0.0, SE 0.10): pooled {est:.4f}, SE {s:.4f}\")\n",
+        "output": "rho=0.0: pooled 0.3133, SE 0.0577, weights [0.333 0.333 0.333]\nrho=0.8: pooled 0.2684, SE 0.0688, weights [0.263 0.263 0.474]\nwith an unpublished null study (0.0, SE 0.10): pooled 0.1821, SE 0.0567\n",
+        "interpretation": "Study 1 reports two outcomes, 0.40 and 0.44, and study 2 reports 0.10, all with standard error 0.10. Ignoring the dependence gives each row weight one third, so study 1 effectively counts twice, and the pooled value 0.3133 sits near its results. With within-study correlation 0.8, the two study-1 rows carry nearly the same information. GLS recognizes this and gives them weight 0.263 each, while study 2 rises to 0.474. The pooled estimate falls to 0.2684 and the standard error rises from 0.0577 to 0.0688, which is the honest precision of what are almost two studies, not three. The last line is a sensitivity scenario rather than an estimate: if one unpublished study with effect 0.0 and the same precision existed, the pooled value would fall to 0.1821. Stating that scenario explicitly lets a reader judge whether a single missing null study is plausible enough to change a decision that depends on the effect exceeding 0.25."
+      }
+    ],
     "outcome": "Combine dependent effect sizes through their covariance and make a missing-study scenario explicit in a synthesis sensitivity analysis.",
     "lab": "Compare the variance of the same mean under independent and correlated effects, then add two hypothetical unpublished negative studies.",
     "verification": "The mean stays 0.5 while its variance rises from 0.020 (independent) to 0.035 (dependent); the stated missing-study scenario moves the visible mean 0.5 to 0.24.",
@@ -401,6 +707,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Moran I", "spatial validation", "permutation"],
+    "key_terms": {
+      "Spatial weights": "The matrix W encoding a declared adjacency or distance relation between locations.",
+      "Moran's I": "A global summary of spatial dependence comparing centered values with their weighted neighbors.",
+      "Permutation reference set": "Rearrangements of the observed values over the same locations, used to compute a p-value under exchangeability.",
+      "Blocked spatial validation": "Holding out contiguous regions so nearby correlated observations do not appear in both training and evaluation."
+    },
+    "worked_examples": [
+      {
+        "title": "Moran's I on a 3 by 3 grid with rook neighbors",
+        "language": "python",
+        "code": "from itertools import combinations\nimport numpy as np\n\ncoords = [(r, c) for r in range(3) for c in range(3)]\nW = np.array(\n    [[1.0 if abs(a[0] - b[0]) + abs(a[1] - b[1]) == 1 else 0.0 for b in coords] for a in coords]\n)\n\n\ndef moran(v):\n    z = np.asarray(v, float) - np.mean(v)\n    return len(z) / W.sum() * (z @ W @ z) / (z @ z)\n\n\nstripe = [1, 1, 1, 0, 0, 0, 0, 0, 1]\nchecker = [1, 0, 1, 0, 1, 0, 1, 0, 1]\nprint(f\"neighbor pairs {int(W.sum() / 2)}\")\nprint(f\"left block of four I = {moran([1, 1, 0, 1, 1, 0, 0, 0, 0]):.4f}\")\nprint(f\"checkerboard I = {moran(checker):.4f}, expected under randomness {-1 / 8:.4f}\")\nref = []\nfor ones in combinations(range(9), 4):\n    v = np.zeros(9)\n    v[list(ones)] = 1\n    ref.append(moran(v))\nobs = moran([1, 1, 0, 1, 1, 0, 0, 0, 0])\nprint(f\"{len(ref)} arrangements; exact p for block = {np.mean(np.array(ref) >= obs - 1e-12):.4f}\")\n",
+        "output": "neighbor pairs 12\nleft block of four I = 0.3500\ncheckerboard I = -1.0000, expected under randomness -0.1250\n126 arrangements; exact p for block = 0.0317\n",
+        "interpretation": "On a 3 by 3 grid with rook adjacency there are 12 neighbor pairs, so \\(\\sum W=24\\). Putting four ones in the upper-left 2 by 2 block gives \\(I=0.35\\): neighbors tend to share values. The checkerboard reaches \\(I=-1\\) because every neighbor pair has opposite values, the extreme of negative autocorrelation. Neither should be compared with zero. Under random arrangement the expected value is \\(-1/(n-1)=-0.125\\), so a modest positive \\(I\\) is further from randomness than it looks. The permutation reference set enumerates all \\(\\binom{9}{4}=126\\) ways to place four ones. Exactly four arrangements, the four 2 by 2 blocks that each contain the center cell, reach 0.35, giving an exact p-value of \\(4/126=0.0317\\). That p-value is conditional on the neighbor definition: switching to queen adjacency, which adds diagonal pairs, changes both \\(W\\) and the reference distribution. The same dependence that makes \\(I\\) positive also inflates random-split validation scores, because neighboring cells in training and test share information."
+      }
+    ],
     "outcome": "Compute Moran's I for clustered and alternating maps, obtain its exact permutation p-value and compare random row splits with spatial blocks.",
     "lab": "Contrast Moran's I for clustered and alternating values on a six-node chain, enumerate all 20 arrangements, then count neighbor edges crossing train and test folds.",
     "verification": "Moran's I is 0.6 clustered and -1 alternating, the exact one-sided p-value is 2/20 = 0.10, and random folds cut 5 neighbor edges against 1 for spatial blocks.",
@@ -418,6 +739,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Horvitz-Thompson", "design effect", "survey"],
+    "key_terms": {
+      "Inclusion probability": "The design probability pi_i that population unit i enters the sample.",
+      "Horvitz-Thompson estimator": "A population total estimated by summing sampled values divided by their inclusion probabilities, unbiased under the design.",
+      "Design effect": "The variance inflation relative to independent sampling, 1 + (m - 1)rho for equal clusters of size m with correlation rho.",
+      "Primary sampling unit": "The first-stage unit, such as a cluster, that determines the effective number of independent observations."
+    },
+    "worked_examples": [
+      {
+        "title": "Every possible sample under a two-draw design",
+        "language": "python",
+        "code": "from itertools import combinations\nimport numpy as np\n\ny = np.array([2.0, 4.0, 6.0, 20.0])\nsamples = list(combinations(range(4), 2))\np_sample = np.array([0.30, 0.10, 0.10, 0.10, 0.10, 0.30])  # design over the six pairs\npi = np.array([sum(p for s, p in zip(samples, p_sample) if i in s) for i in range(4)])\nprint(\"inclusion probabilities:\", pi.round(2), \" sum\", pi.sum().round(2))\n\nht = np.array([sum(y[i] / pi[i] for i in s) for s in samples])\nfor s, p, est in zip(samples, p_sample, ht):\n    print(f\"sample {s}: probability {p:.2f}, HT total {est:7.3f}\")\nprint(f\"E[HT] = {p_sample @ ht:.3f}; true total {y.sum():.1f}\")\nprint(f\"design SD of HT = {np.sqrt(p_sample @ (ht - y.sum()) ** 2):.3f}\")\n",
+        "output": "inclusion probabilities: [0.5 0.5 0.5 0.5]  sum 2.0\nsample (0, 1): probability 0.30, HT total  12.000\nsample (0, 2): probability 0.10, HT total  16.000\nsample (0, 3): probability 0.10, HT total  44.000\nsample (1, 2): probability 0.10, HT total  20.000\nsample (1, 3): probability 0.10, HT total  48.000\nsample (2, 3): probability 0.30, HT total  52.000\nE[HT] = 32.000; true total 32.0\ndesign SD of HT = 17.889\n",
+        "interpretation": "The design selects one of six pairs, with pairs (0,1) and (2,3) three times as likely as the others. Every unit still appears in exactly half the probability mass, so all inclusion probabilities equal 0.5 and each Horvitz-Thompson total is twice the sample sum. The six possible estimates range from 12 to 52 around a true total of 32. Weighting them by the design probabilities gives exactly 32.000, which is what unbiasedness means: an average over samples the design could have drawn. It says nothing about the one sample actually drawn. The most likely samples are the two worst: (0,1) gives 12 and (2,3) gives 52, together carrying 60 percent of the probability. The design standard deviation of 17.889 reflects that. A design that paired one small and one large unit with high probability would have the same inclusion probabilities and the same unbiased expectation but a much smaller spread, because joint inclusion probabilities, not marginal ones, determine the variance."
+      }
+    ],
     "outcome": "Compute Horvitz-Thompson totals with inclusion weights, separate their expectation from one realized sample and derive a cluster design effect.",
     "lab": "Average the Horvitz-Thompson estimator over every possible sample, compare one realized sample, then derive the design effect of cluster sampling.",
     "verification": "The expected Horvitz-Thompson total 16 equals the population total while the realized sample gives 15; the Hajek mean is 4 and the cluster design effect is 2.2.",
@@ -438,6 +774,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["identification", "ridge", "high dimension"],
+    "key_terms": {
+      "Identification": "Whether the data and assumptions determine a unique value of a target quantity.",
+      "Minimum-norm interpolation": "The least-squares solution with the smallest coefficient norm, which can fit training data exactly when p > n.",
+      "Ridge regression": "Least squares with a quadratic penalty lambda times the squared coefficient norm, well-posed for every positive lambda.",
+      "Estimable combination": "A function of coefficients the data determine, such as the sum of two duplicated predictors' coefficients."
+    },
+    "worked_examples": [
+      {
+        "title": "Minimum-norm interpolation and a duplicated predictor",
+        "language": "python",
+        "code": "import numpy as np\n\nrng = np.random.default_rng(3)\nn, p = 6, 20\nbeta = np.zeros(p)\nbeta[0] = 2.0\nX = rng.normal(size=(n, p))\ny = X @ beta + rng.normal(0, 0.5, n)\nXt = rng.normal(size=(200, p))\nyt = Xt @ beta + rng.normal(0, 0.5, 200)\nb = np.linalg.pinv(X) @ y\nprint(\n    f\"train RMSE {np.sqrt(np.mean((X @ b - y) ** 2)):.2e}, test RMSE {np.sqrt(np.mean((Xt @ b - yt) ** 2)):.3f}\"\n)\nprint(\n    f\"test RMSE of the true beta {np.sqrt(np.mean((Xt @ beta - yt) ** 2)):.3f}; of zero {np.sqrt(np.mean(yt**2)):.3f}\"\n)\n\nx = rng.normal(size=30)\nD = np.column_stack([x, x])\nyd = 3 * x\nfor lam in (0.01, 1.0, 10.0):\n    coef = np.linalg.solve(D.T @ D + lam * np.eye(2), D.T @ yd)\n    print(f\"ridge lambda {lam}: coefficients {coef.round(4)}, sum {coef.sum():.4f}\")\n",
+        "output": "train RMSE 1.62e-15, test RMSE 1.763\ntest RMSE of the true beta 0.482; of zero 2.130\nridge lambda 0.01: coefficients [1.4998 1.4998], sum 2.9996\nridge lambda 1.0: coefficients [1.48 1.48], sum 2.9600\nridge lambda 10.0: coefficients [1.3216 1.3216], sum 2.6431\n",
+        "interpretation": "With six observations and twenty predictors, the minimum-norm least-squares solution fits the training data to \\(10^{-15}\\), machine precision. On 200 new points its RMSE is 1.763, worse than the true coefficients at 0.482 and barely better than predicting zero at 2.130. A perfect training fit was guaranteed by the dimensions, so it carries no information about generalization; only held-out data revealed the problem. The second part isolates identification. When two columns are identical, any coefficients \\((b_1,b_2)\\) with \\(b_1+b_2=3\\) produce the same fitted values, so the data identify only the sum. Ridge resolves the tie by splitting the sum evenly, 1.4998 each at \\(\\lambda=0.01\\). Increasing \\(\\lambda\\) shrinks the sum itself, to 2.96 at 1 and 2.643 at 10. Reporting 1.48, half of the \\(\\lambda=1\\) sum, as the effect of the first predictor would be a statement about the penalty, not the data. The same split appears whenever predictors are nearly collinear."
+      }
+    ],
     "outcome": "Show that interpolating a design with more predictors than observations does not establish generalization and that duplicated predictors identify only their sum.",
     "lab": "Fit a minimum-norm interpolating model and a ridge model to 20 observations of 40 predictors, compare errors, then duplicate a predictor.",
     "verification": "The interpolating fit has training error 0 while ridge has test error 1.88 against the true signal; the duplicated design has rank 1, so coefficients (1, 2) and (2, 1) give identical fits.",
@@ -455,6 +806,21 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["decision dossier", "rollback", "uncertainty"],
+    "key_terms": {
+      "Decision dossier": "A record linking the question, observation unit, information cutoff, assumptions, uncertainty and decision rule to an action.",
+      "Lower score": "The illustrative conservative value tau_j - 1.96 SE_j used to rank regions.",
+      "Budgeted selection": "Choosing binary actions that maximize total score subject to a resource budget, without forcing full budget use.",
+      "Rollback condition": "A prespecified evidence change that triggers reassessment and a fallback action."
+    },
+    "worked_examples": [
+      {
+        "title": "Lower-bound selection under budget and a revision trigger",
+        "language": "python",
+        "code": "from itertools import combinations\nimport numpy as np\n\nnames = [\"A\", \"B\", \"C\", \"D\"]\nest = np.array([5.0, 8.0, 3.0, 6.0])\nse = np.array([1.0, 4.0, 0.5, 2.0])\ncost = np.array([3, 4, 2, 3])\nbudget = 7\nlower = est - 1.645 * se\n\n\ndef best(score):\n    options = [\n        s for r in range(5) for s in combinations(range(4), r) if cost[list(s)].sum() <= budget\n    ]\n    return max(options, key=lambda s: score[list(s)].sum())\n\n\nprint(\"one-sided 95% lower bounds:\", \", \".join(f\"{n} {v:.3f}\" for n, v in zip(names, lower)))\nprint(\"select on point estimates:\", [names[i] for i in best(est)])\nprint(\"select on lower bounds   :\", [names[i] for i in best(lower)])\nrevised_A = 5.0 - 3.4\nprint(\n    f\"revised A estimate {revised_A:.1f}, lower bound {revised_A - 1.645:.3f}, rollback {revised_A - 1.645 < 0}\"\n)\n",
+        "output": "one-sided 95% lower bounds: A 3.355, B 1.420, C 2.178, D 2.710\nselect on point estimates: ['B', 'D']\nselect on lower bounds   : ['A', 'D']\nrevised A estimate 1.6, lower bound -0.045, rollback True\n",
+        "interpretation": "Ranking by point estimate selects B and D, total estimated benefit 14 within the budget of 7. But B's standard error of 4 gives a one-sided 95 percent lower bound of only 1.42. Ranking by lower bound selects A and D, at cost 6, with combined lower bound 6.065 compared with 4.13 for B and D. The lower-bound rule gives up 3 units of expected benefit in exchange for a portfolio whose benefit is far more certain. Which rule is right is a decision about risk tolerance that the dossier should declare before seeing results. The last line exercises the rollback condition. If A's estimate is revised to 1.6 with the same standard error, its lower bound becomes \\(1.6-1.645=-0.045\\), below zero, and the predeclared trigger fires. Because the trigger was written down beforehand, rolling back A is an execution of policy rather than a fresh judgment that could be argued away. A threshold chosen after seeing 1.6 would carry no such credibility."
+      }
+    ],
     "outcome": "Assemble a decision dossier that estimates effects with uncertainty, selects actions on lower bounds under a budget and triggers a declared rollback when evidence is revised.",
     "lab": "Estimate regional effects and standard errors, select regions whose lower bounds justify their cost, then revise the evidence and apply the rollback rule.",
     "verification": "Effects 3, 1 and -1 with standard errors sqrt(1/3), sqrt(4/3) and sqrt(1/12); only north is selected, and after the revision no region qualifies, which triggers the declared rollback.",

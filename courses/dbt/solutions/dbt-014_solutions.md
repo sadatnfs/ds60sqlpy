@@ -9,11 +9,23 @@ The executable reference contains the two complete worked cases with assertions.
 
 State which records contribute, the grouping key, time boundary and unit. Keep the definition aligned with the model and tests.
 
+**Why it holds here:** mart sums amount across all orders, so its grain is one row for the whole table. With the seed rows 5 and 7, total is 12 in the same unit as amount.
+
+**Plausible wrong approach:** Writing total as the total amount repeats the column name without saying what is included.
+
+**How to verify:** Write the description, then ask whether a reader could predict 12 from the two seed rows without reading the SQL.
+
 **Expected:** A reader can interpret the quantity without guessing.
 
 ## 2. Add a downstream consumer
 
 The exposure is a maintained declaration. Validate actual consumer behavior separately and update ownership when responsibility changes.
+
+**Why it holds here:** An exposure declares a consumer and its dependency. dbt places it in the manifest graph so you can see who reads mart.
+
+**Plausible wrong approach:** Treating the exposure as proof that the dashboard exists or reads mart today is wrong, since dbt never contacts it.
+
+**How to verify:** Add a second exposure with depends_on ref('mart') and an owner, run docs generate, and confirm its depends_on.nodes lists model.classroom.mart.
 
 **Expected:** The new edge appears in the manifest.
 
@@ -21,11 +33,23 @@ The exposure is a maintained declaration. Validate actual consumer behavior sepa
 
 Generate docs against the intended materialized state and retain its invocation/source context. A stale catalog can describe an older deployment.
 
+**Why it holds here:** catalog.json is built by querying the database, so it shows the real type that DuckDB stored, such as INTEGER for answer in example_two.
+
+**Plausible wrong approach:** Reading a catalog generated before the latest build would report an older type for a changed column.
+
+**How to verify:** Run build then docs generate and check catalog nodes for the column; the type should match the cast in the SQL.
+
 **Expected:** It matches the built database representation.
 
 ## 4. Find an undocumented field
 
 Add a semantic review gate appropriate to the project. Avoid automatically filling descriptions with generic repeated text.
+
+**Why it holds here:** example_two has an empty description for answer. The gap remains visible in the manifest, which is the point of the exercise.
+
+**Plausible wrong approach:** Filling every empty description with a placeholder sentence makes the docs look complete while saying nothing.
+
+**How to verify:** Check that `nodes['model.classroom.answer']['description'] == ''` in the manifest and that its `columns` map is empty, because example_two has no schema.yml; the gap stays until someone writes a real description.
 
 **Expected:** The documentation gap remains visible.
 
@@ -33,11 +57,23 @@ Add a semantic review gate appropriate to the project. Avoid automatically filli
 
 Combine lineage with actual deployment and service evidence when making operational claims. Keep those evidence sources separately identifiable.
 
+**Why it holds here:** An exposure records a declared dependency only. It does not show that the dashboard ran, loaded, or displayed the current total.
+
+**Plausible wrong approach:** Citing the exposure as evidence the report refreshed confuses declared lineage with observed execution.
+
+**How to verify:** Compare the exposure with an actual dashboard refresh log; only the log shows a run.
+
 **Expected:** It cannot prove the external dashboard ran successfully.
 
 ## 6. Export a compact review record
 
 Keep a bounded summary with links or hashes identifying the underlying artifacts. The full files remain the detailed evidence in a durable project.
+
+**Why it holds here:** A short review record picks the description, owner, exposure dependency and artifact identifiers from manifest.json and catalog.json.
+
+**Plausible wrong approach:** Copying the full artifacts into the record makes review hard and duplicates files that change with every run.
+
+**How to verify:** Write a small JSON record with the model description, exposure owner, dependency nodes and a hash of each artifact, then check each value against the source files.
 
 **Expected:** The record contains meaning, ownership and dependency identifiers.
 

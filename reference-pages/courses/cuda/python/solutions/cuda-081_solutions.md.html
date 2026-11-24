@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-distinguish-copy-and-alias">Exercise 1: Distinguish copy and alias<a class="heading-anchor" href="#exercise-1-distinguish-copy-and-alias" aria-label="Link to this section">#</a></h3>
 <p>An alias shares storage.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>distinguish copy and alias</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Contrast <code>alias = owner</code> with <code>copied = list(owner)</code>. After <code>alias[0] = 9</code>, <code>owner</code> is <code>[9, 2, 3]</code> while <code>copied</code> stays <code>[1, 2, 3]</code>.</p>
+<p><strong>Why it is correct here.</strong> Assignment binds a second name to the same list object, so a mutation through either name is visible through both. <code>list(owner)</code> allocates new storage with the same values.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming any transfer between libraries copies data leads to surprises when a zero-copy exchange like DLPack shares storage and a later in-place edit changes both arrays.</p>
+<p><strong>How to verify.</strong> Run the reference: both assertions pass. For device arrays, compare data pointers; equal pointers mean an alias.</p>
 <h3 id="exercise-2-trace-owner-lifetime">Exercise 2: Trace owner lifetime<a class="heading-anchor" href="#exercise-2-trace-owner-lifetime" aria-label="Link to this section">#</a></h3>
 <p>Keep the producer owner alive under the API contract.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>trace owner lifetime</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Trace lifetime: when a consumer receives a view of a producer&#x27;s buffer, the producer object must stay alive, or ownership must transfer under the exchange protocol&#x27;s rules, until the consumer is finished.</p>
+<p><strong>Why it is correct here.</strong> If the producer&#x27;s last reference disappears, its memory pool may reuse the bytes while the consumer still reads them. The consumer&#x27;s view does not keep memory alive unless the protocol says so.</p>
+<p><strong>A plausible wrong approach.</strong> Deleting the original tensor right after the exchange to save memory assumes the consumer holds a copy.</p>
+<p><strong>How to verify.</strong> Keep a reference to the producer until the consumer&#x27;s work completes. A test can delete the producer, allocate new data and check whether the consumer view changed.</p>
 <h3 id="exercise-3-describe-metadata-requirements">Exercise 3: Describe metadata requirements<a class="heading-anchor" href="#exercise-3-describe-metadata-requirements" aria-label="Link to this section">#</a></h3>
 <p>Include dtype shape strides device and offset.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>describe metadata requirements</strong> is qualified there.</p>
+<p><strong>Approach.</strong> List the metadata a consumer needs to read a shared buffer: data pointer, byte offset, dtype, shape, strides and device identity.</p>
+<p><strong>Why it is correct here.</strong> The bytes have no meaning without metadata. The same 24 bytes can be three float64 values or six float32 values, and strides decide whether a 2 by 3 view is row-major or transposed.</p>
+<p><strong>A plausible wrong approach.</strong> Passing only the pointer and the shape forces the consumer to guess dtype and layout.</p>
+<p><strong>How to verify.</strong> Exchange a transposed 2 by 3 array and check the consumer&#x27;s strides and values match the producer&#x27;s.</p>
 <h3 id="exercise-4-explain-missing-autograd-edges">Exercise 4: Explain missing autograd edges<a class="heading-anchor" href="#exercise-4-explain-missing-autograd-edges" aria-label="Link to this section">#</a></h3>
 <p>Storage protocols do not universally preserve graph semantics.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain missing autograd edges</strong> is qualified there.</p>
+<p><strong>Approach.</strong> State that sharing storage with another library through a protocol such as DLPack does not carry the originating autograd graph, so gradients do not flow back through the exchange.</p>
+<p><strong>Why it is correct here.</strong> Storage protocols describe memory, not the operation history PyTorch records. The consumer sees plain data, and operations it performs are invisible to the producer&#x27;s autograd.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming a forward result that matches means gradients are also correct conflates two different checks.</p>
+<p><strong>How to verify.</strong> Run a forward comparison and a separate gradient check. A missing gradient shows up as <code>None</code> or zeros where nonzero values were expected.</p>
 <h3 id="exercise-5-name-stream-readiness-evidence">Exercise 5: Name stream readiness evidence<a class="heading-anchor" href="#exercise-5-name-stream-readiness-evidence" aria-label="Link to this section">#</a></h3>
 <p>Record the producer event or negotiated stream.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>name stream readiness evidence</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Name the evidence that a shared buffer is ready: the producer&#x27;s recorded CUDA event, or a stream negotiated in the exchange, for example the <code>stream</code> argument of <code>__dlpack__</code>.</p>
+<p><strong>Why it is correct here.</strong> Producer writes may still be queued when the exchange happens. The consumer must order its reads after the producer&#x27;s work, which requires an event or a stream agreement.</p>
+<p><strong>A plausible wrong approach.</strong> Relying on the host call having returned treats Python completion as device completion.</p>
+<p><strong>How to verify.</strong> Record which event or stream was used. A test with a slow producer kernel should still show correct values in the consumer.</p>
 <h3 id="exercise-6-design-mutation-tests">Exercise 6: Design mutation tests<a class="heading-anchor" href="#exercise-6-design-mutation-tests" aria-label="Link to this section">#</a></h3>
 <p>Change one view and inspect the other without unsafe concurrent writes.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design mutation tests</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design mutation tests: change one element through the consumer view, synchronize, then read the producer to see whether the change is visible, avoiding concurrent writes from both sides.</p>
+<p><strong>Why it is correct here.</strong> Visibility after a sequential mutation determines whether the exchange produced an alias or a copy. Sequencing avoids a data race that would make the result undefined.</p>
+<p><strong>A plausible wrong approach.</strong> Writing from both libraries at once to see what happens produces a race whose outcome proves nothing.</p>
+<p><strong>How to verify.</strong> Record whether the mutation was visible and compare with the documented behavior of the exchange.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Alias changes to 9 while copied value remains 1.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-081_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

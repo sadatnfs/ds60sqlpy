@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>An expression produces a value. Arithmetic operators combine numbers, concatenation joins strings, and logical operators combine conditions. Parentheses make intended grouping clear when an expression mixes operations. Do not assume that familiar-looking operators have the same precedence in every language or version. A readable intermediate variable is often safer than a dense one-line formula.</p>
 <p>Many decimal fractions cannot be represented exactly by binary floating point. For a small money example, represent amounts as integer cents and define rounding when converting from external decimal text. This avoids accidentally treating a display string as a precise numeric representation. Integer arithmetic still has limits: values outside the supported range need a different numeric representation or library.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Expression:</strong> Code that produces a value, such as <code>$a + 2</code> or a function call.</li>
+<li><strong>Operator precedence:</strong> The rules that decide which operator binds first, such as <code>*</code> before <code>+</code>; parentheses make the intended order explicit.</li>
+<li><strong>Integer minor units:</strong> Storing money as a whole number of the smallest unit, such as cents, to avoid floating-point rounding errors.</li>
+<li><strong>Integer range:</strong> The limits of PHP&#x27;s <code>int</code> type; a result beyond <code>PHP_INT_MAX</code> becomes a float, so larger values need another representation.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Compute subtotal cents as unit cents times quantity, then add a fixed fee. Validate quantity before multiplication. Use intdiv for deliberate integer division and the remainder operator for the remaining cents. This lesson does not accept arbitrary decimal currency strings; that parser would need explicit scale, sign, range and rounding rules.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -216,6 +223,17 @@ $totalCents = $unitCents * $quantity;</code></pre>
 <p>Integer division and remainder produce two decimal digits.</p>
 <pre class="highlighted-code"><code class="language-php">$label = intdiv($totalCents, 100) . &#x27;.&#x27; . str_pad((string) ($totalCents % 100), 2, &#x27;0&#x27;, STR_PAD_LEFT);</code></pre>
 <p><strong>Expected observation:</strong> 375 cents displays as 3.75.</p>
+<h3 id="contrast-case-money-stored-as-floats">Contrast case: money stored as floats<a class="heading-anchor" href="#contrast-case-money-stored-as-floats" aria-label="Link to this section">#</a></h3>
+<p>This version represents prices in dollars as floats. Print the result two ways and compare with the integer version from worked example 1.</p>
+<pre class="highlighted-code"><code class="language-php">$total = 0.1 + 0.2;
+echo $total, &quot;\n&quot;;
+var_export($total === 0.3);
+echo &quot;\n&quot;;
+var_export($total);
+
+$cents = 10 + 20;
+var_export($cents === 30);</code></pre>
+<p>Binary floating point cannot represent 0.1 or 0.2 exactly, so their sum is slightly larger than 0.3. <code>echo</code> rounds to the configured display precision and shows 0.3, which makes the value look correct. The strict comparison with 0.3 is false, and <code>var_export</code> prints the full value 0.30000000000000004. Across many line items these tiny differences can change a rounded total or make an equality check fail. The integer version stores 10 and 20 cents, adds them to exactly 30, and the comparison is true. That is why this lesson keeps every amount in integer cents and only formats a decimal label at output time.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-125-cents-times-three-units">Exercise 1: Predict 125 cents times three units.<a class="heading-anchor" href="#exercise-1-predict-125-cents-times-three-units" aria-label="Link to this section">#</a></h4>

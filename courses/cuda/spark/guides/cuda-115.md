@@ -23,6 +23,13 @@ The plugin's explain diagnostics can report why a node is not selected for GPU e
 A useful review table has columns node, semantic role, input/output representation, supported status, fallback reason, rows/batches, elapsed time and spill. This turns a screenshot into an argument. A GPU node in a planned diagram is weaker evidence than that node in an executed query with metrics, and even the executed node must be accompanied by a correct result comparison.
 
 
+### Key terms
+
+- **Catalyst:** Spark's query optimizer, which transforms logical plans and selects physical implementations.
+- **Logical plan:** A description of what a query computes, independent of how it executes.
+- **Columnar transition:** An operator inserted to convert between row and columnar formats around GPU operators.
+- **AQE final plan:** The physical plan after Adaptive Query Execution applies runtime statistics, which can differ from the initial plan.
+
 ## Worked examples
 
 ### Worked example 1
@@ -47,33 +54,51 @@ print("Synthetic plan worksheet:", transitions, "CPU/GPU transitions")
 
 **Expected observation:** Synthetic plan has two GPU nodes and two backend transitions.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `transitions` | `2` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Draw logical versus physical plan
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **draw logical versus physical plan** in the examples above.
+**Trap to avoid:** Reading device placement from the logical plan fails, because logical nodes carry no device information and the plugin acts only on the physical plan.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Mark GPU candidate nodes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **mark GPU candidate nodes** in the examples above.
+**Trap to avoid:** Guessing GPU placement from operator type, for example assuming all aggregates run on the GPU, ignores expression-level fallback.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Locate transitions
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **locate transitions** in the examples above.
+**Trap to avoid:** Counting GPU nodes and ignoring transitions makes a plan with many short GPU sections look better than one long section.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain lazy evaluation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain lazy evaluation** in the examples above.
+**Trap to avoid:** Timing the line that defines the DataFrame and reporting it as query time measures plan construction, which is nearly instant.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare initial and final AQE plan
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **compare initial and final AQE plan** in the examples above.
+**Trap to avoid:** Citing the pre-execution plan as the executed plan can report a join strategy that never ran.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Choose operator metrics
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **choose operator metrics** in the examples above.
+**Trap to avoid:** Reporting only total job time hides which operator dominates and whether spilling occurred.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

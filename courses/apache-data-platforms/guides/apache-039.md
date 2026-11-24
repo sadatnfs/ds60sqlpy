@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-003`, `apache-013`.
 
+## Key terms
+
+- **Iceberg table:** A table defined by metadata files that record its schema, partition spec and snapshots, rather than by whichever Parquet files happen to sit in a directory.
+- **Snapshot:** A committed table state that references the data files it contains. Immutable data files are reused across snapshots, so a snapshot is not a full copy.
+- **Manifest list:** The file a snapshot points to that lists its manifests. Each manifest in turn lists data or delete files with partition values and statistics.
+- **Catalog pointer:** The catalog's record of a table's current metadata file. Moving it is the commit that makes a new snapshot current.
+- **Warehouse:** The storage location holding a table's data and metadata files, distinct from the catalog that points to the current metadata.
+
 ## A table is a committed view of files
 
 A directory of Parquet objects does not by itself say which files form a table,
@@ -80,6 +88,32 @@ Parquet describes a file. Iceberg describes a versioned table made of files,
 including commits, schema identity, partition specifications and retained history.
 These cases show the actual extra contract: one current committed view and an
 independently selectable earlier snapshot, both pointing to real local files.
+
+## Worked examples
+
+### List the files a scan will read
+
+```python
+for task in table.scan().plan_files():
+    print(task.file.file_path, task.file.record_count, task.file.file_format)
+```
+
+Run after the first append in the lesson program, this prints one line per data file: a file URI under the warehouse data directory, a record count of 3, and the format PARQUET. The planner gets this list from the manifests of the current snapshot, not by listing the directory. Sum the record counts and compare with the scan row count; a mismatch usually means delete files are being applied, which the record count of a data file alone does not show.
+
+### Reopen the catalog and read by snapshot
+
+```python
+reopened = load_catalog(
+    "lesson",
+    type="sql",
+    uri="sqlite:///" + str(root / "catalog.db"),
+    warehouse=(root / "warehouse").as_uri(),
+)
+orders = reopened.load_table("demo.orders")
+print(len(orders.snapshots()), orders.scan(snapshot_id=first).to_arrow().num_rows)
+```
+
+After two appends, a fresh catalog object should report two snapshots and three rows for the first one, proving the history lives in the SQLite catalog and the metadata files rather than in Python memory. If the reopened catalog cannot find the table, compare the uri and warehouse values with the writer; a different SQLite path creates a new empty catalog without any error.
 
 ## Complete worked source
 

@@ -201,19 +201,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">     7) &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out == 7);` to `CHECK(table_put(&amp;t, 2, 7)</span></span>
 <span class="source-line"><span class="syntax-comment">     &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out == 7);` inside its CHECK. Before running,</span></span>
 <span class="source-line"><span class="syntax-comment">     predict whether the CHECK still holds and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The changed run stops with `Check failed` at the CHECK on</span></span>
-<span class="source-line"><span class="syntax-comment">     `table_put(&amp;t, 1, 7) &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out == 7`. Restoring the</span></span>
-<span class="source-line"><span class="syntax-comment">     original line brings back the worked observation: lookup succeeds with 7.</span></span>
-<span class="source-line"><span class="syntax-comment">   */</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: With `CHECK(table_put(&amp;t, 2, 7) &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out</span></span>
+<span class="source-line"><span class="syntax-comment">     == 7);` the run stops with `Check failed` at the CHECK on `table_put(&amp;t, 1,</span></span>
+<span class="source-line"><span class="syntax-comment">     7) &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out == 7`, because the &quot;insert and</span></span>
+<span class="source-line"><span class="syntax-comment">     retrieve&quot; case no longer shows that lookup succeeds with 7. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(table_put(&amp;t, 1, 7) &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out == 7);` brings</span></span>
+<span class="source-line"><span class="syntax-comment">     that observation back. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Resolve a collision: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2 so that it reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(table_put(&amp;t, 1, 10) &amp;&amp; table_put(&amp;t, 10, 90));`. Run worked example</span></span>
-<span class="source-line"><span class="syntax-comment">     2 with that line, explain why the edited CHECK now fails for the same</span></span>
-<span class="source-line"><span class="syntax-comment">     program state, and restore it. Expected: Before the repair the run stops</span></span>
-<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `table_get(&amp;t, 9, &amp;out) &amp;&amp; out == 90`;</span></span>
-<span class="source-line"><span class="syntax-comment">     after it the line reads `CHECK(table_put(&amp;t, 1, 10) &amp;&amp; table_put(&amp;t, 9,</span></span>
-<span class="source-line"><span class="syntax-comment">     90));` again and both values remain retrievable. */</span></span>
+<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2, the &quot;resolve a</span></span>
+<span class="source-line"><span class="syntax-comment">     collision&quot; case, so that it reads `CHECK(table_put(&amp;t, 1, 10) &amp;&amp;</span></span>
+<span class="source-line"><span class="syntax-comment">     table_put(&amp;t, 10, 90));`. Run the example with that line, explain why the</span></span>
+<span class="source-line"><span class="syntax-comment">     edited CHECK now fails even though the program state still means both</span></span>
+<span class="source-line"><span class="syntax-comment">     values remain retrievable, and restore it. Expected: Before the repair the</span></span>
+<span class="source-line"><span class="syntax-comment">     run stops with `Check failed` at the CHECK on `table_get(&amp;t, 9, &amp;out) &amp;&amp;</span></span>
+<span class="source-line"><span class="syntax-comment">     out == 90`. Once the line reads `CHECK(table_put(&amp;t, 1, 10) &amp;&amp;</span></span>
+<span class="source-line"><span class="syntax-comment">     table_put(&amp;t, 9, 90));` again, the &quot;resolve a collision&quot; case again shows</span></span>
+<span class="source-line"><span class="syntax-comment">     that both values remain retrievable. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Replace an existing key</span></span>
 <span class="source-line"><span class="syntax-comment">     Write key 2 twice with different values.</span></span>

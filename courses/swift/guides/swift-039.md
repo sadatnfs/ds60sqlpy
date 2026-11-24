@@ -130,7 +130,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Apply a domain action) before changing anything, and confirm its observation: The transformed item changes completion while retaining the original value.
 2. Compare Example B (Keep identity stable during edits) with Example A and name the first line whose behavior differs. Its observation is: Completion changes do not manufacture a new identity.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A successful core test does not prove app rendering.
+3. Before opening the explanation, check your task 3 attempt (Build and test JourneyCore before opening the Apple app) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

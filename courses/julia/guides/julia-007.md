@@ -10,6 +10,14 @@ Trace array storage and indexing while choosing deliberately between copies and 
 
 Open `julia-007` in `/classroom` with its prepared `julia` runtime. Worked case A (inspect a column-major matrix) and worked case B (mutate a view and a copy) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-007: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Array shape:** The tuple of dimension lengths returned by `size`, which determines how indices map to elements.
+- **Column-major order:** Julia stores a matrix column by column, so looping over the first index in the innermost loop visits memory contiguously.
+- **View:** An array created with `view` or `@views` that refers to its parent's memory, so writing through it changes the parent.
+- **Shallow copy:** The `copy` function duplicates the outer container but shares inner mutable elements, while `deepcopy` duplicates them as well.
+- **Aliasing:** Two names or arrays that refer to overlapping storage, so a write through one is visible through the other.
+
 ## Shape and storage are separate descriptions
 
 An array has element values, an element type and an index shape. A matrix can contain six values arranged as two rows and three columns. Julia's ordinary dense arrays use column-major storage, so a linear traversal visits a column before moving to the next. A scientific formula should state its intended axes rather than relying on storage order to supply meaning.
@@ -72,6 +80,8 @@ An in-place transformation can be correct only under assumptions about which inp
 ## Diagnose shape mistakes
 
 Print small shapes and selected elements before running a large numerical routine. A transposed matrix may have the same element count while representing a different computation. A vector and a one-column matrix also have different shapes. Later broadcasting and linear-algebra units use these distinctions explicitly.
+
+When an index error appears, print `size(A)`, `axes(A)` and the index that failed. Compare the failing index with each axis range in turn. Most mistakes turn out to be a swapped row and column, a zero-based offset copied from another language, or a vector used where a one-column matrix was expected.
 
 Keep array bounds checks while learning and testing a contract. Removing them can turn a clear indexing exception into incorrect or unsafe behavior. If performance later motivates a lower-level implementation, establish its indexing invariants independently first.
 

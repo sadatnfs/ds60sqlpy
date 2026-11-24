@@ -41,6 +41,15 @@ internal static class Program {
       Check(rejected, "same key cannot change payload");
     }
     {
+      // Task 2: Guided modification
+      var ledger = new Ledger();
+      ledger.Apply("op-1", 3);
+      ledger.Apply("op-2", 3);
+      int third = ledger.Apply("op-3", 5);
+      Check(third == 11 && ledger.Total == 11, "predicted total 11");
+      Check(ledger.Apply("op-3", 5) == 11 && ledger.Total == 11, "op-3 replay");
+    }
+    {
       // Task 3: Independent construction
       var receipts = new Dictionary<string, int>(StringComparer.Ordinal);
       int executions = 0;
@@ -56,6 +65,21 @@ internal static class Program {
       int retry = Execute("op-1", 3);
       Check(first == 30 && retry == 30, "same receipt");
       Check(executions == 1, "command ran once");
+    }
+    {
+      // Task 5: Boundary evidence
+      var ledger = new Ledger();
+      int first = ledger.Apply("op-9", 4);
+      int same = ledger.Apply("op-9", 4);
+      Check(first == 4 && same == 4 && ledger.Total == 4, "identical replays");
+      bool conflict = false;
+      try {
+        ledger.Apply("op-9", 5);
+      } catch (InvalidOperationException) {
+        conflict = true;
+      }
+      Check(conflict && ledger.Total == 4, "conflict rejected, no effect");
+      Check(ledger.Apply("op-9", 4) == 4, "original receipt still valid");
     }
     Console.WriteLine("csharp-047: passed");
     await Task.CompletedTask;

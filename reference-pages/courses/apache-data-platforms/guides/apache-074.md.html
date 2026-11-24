@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-074-graph-indexes-and-recovery">apache-074: Graph, indexes and recovery<a class="heading-anchor" href="#apache-074-graph-indexes-and-recovery" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-073</code>, <code>apache-069</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Graph backend:</strong> The store, JanusGraph in Atlas, that persists entities and relationships, commonly on HBase. Its durability decides what survives a restart.</li>
+<li><strong>Search index:</strong> The index backend, such as Solr, that serves Atlas discovery queries. It can lag or be unavailable while graph reads succeed.</li>
+<li><strong>Restart retention:</strong> Entities and lineage that remain readable by GUID after Atlas and its backing services restart, which holds only if the graph storage itself survived.</li>
+<li><strong>Backup consistency:</strong> Whether graph and index backups capture the same point in time, so a restore does not leave search out of step with stored entities.</li>
+<li><strong>Failure domain:</strong> The set of components that fail together. Containers on one Docker engine share one host, so restarting them cannot prove disaster recovery.</li>
+</ul>
 <h3 id="graph-persistence-and-search-availability-are-different-states">Graph persistence and search availability are different states<a class="heading-anchor" href="#graph-persistence-and-search-availability-are-different-states" aria-label="Link to this section">#</a></h3>
 <p>Atlas stores metadata relationships in a graph backend and uses indexes to support discovery. A direct entity lookup can succeed while a search query is stale or unavailable. Likewise, a responsive search service does not prove that all graph mutations were durably recorded. Recovery needs a coordinated plan for the actual selected backend and index implementation.</p>
 <p>The pinned 2.5.0 source provides graph/index configuration choices with specific component versions. The prepared native-server runbook requires recording those choices, their durable directories and backup procedures. A general Atlas label is not enough to reconstruct a deployment. Default local server execution remains omitted rather than claiming unsupported JVM or backend combinations ran here.</p>
@@ -211,6 +219,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Record backend versions, durable storage locations, backup cut, source revision, entity GUIDs, edge set and search timing. State whether the failure caused lost metadata, temporary unavailability or stale discovery. Those outcomes imply different recovery actions and should not be collapsed into a generic restart success flag.</p>
 <p><strong>Interview discussion: why can an Atlas entity exist but be absent from search?</strong> Direct graph/entity access and indexed discovery can have different readiness or consistency states. The first case requires durable identity/lineage survival, while the second tests search separately and keeps index maintenance distinct from graph restoration.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="record-identities-restart-then-check-only">Record identities, restart, then check only<a class="heading-anchor" href="#record-identities-restart-then-check-only" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/atlas
+bash run.sh check
+bash run.sh check</code></pre>
+<p>Run check once before the server lifecycle change and once after, without apply in between. Both receipts should list identical entity_guids and both expected edges. Because check is read-only, any difference points at persistence: the graph store in HBase or Cassandra lost writes, or the server came back attached to a different backend. Running apply to fix a gap would recreate entities with new GUIDs and destroy the evidence.</p>
+<h4 id="graph-read-versus-index-search-after-recovery">Graph read versus index search after recovery<a class="heading-anchor" href="#graph-read-versus-index-search-after-recovery" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash">curl -s -u <span class="syntax-string">&quot;</span>$ATLAS_USER<span class="syntax-string">:</span>$ATLAS_PASSWORD<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  <span class="syntax-string">&quot;</span>$DS60_ATLAS_ENDPOINT<span class="syntax-string">/api/atlas/v2/entity/guid/&lt;curated-guid&gt;</span><span class="syntax-string">&quot;</span>
+curl -s -u <span class="syntax-string">&quot;</span>$ATLAS_USER<span class="syntax-string">:</span>$ATLAS_PASSWORD<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  <span class="syntax-string">&quot;</span>$DS60_ATLAS_ENDPOINT<span class="syntax-string">/api/atlas/v2/search/basic?typeName=ds60_&lt;owner&gt;_dataset</span><span class="syntax-string">&quot;</span></code></pre>
+<p>The first call reads from the graph store; the second goes through the Solr or Elasticsearch index. If the GUID read succeeds while search returns fewer entities, the data survived and the index is behind or needs a rebuild. If both fail, the graph is the problem. Keeping the two observations separate prevents a full restore when a reindex would have been enough.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="atlas-apache-074-prepared-command-notebook">Atlas apache-074 prepared command notebook<a class="heading-anchor" href="#atlas-apache-074-prepared-command-notebook" aria-label="Link to this section">#</a></h2>

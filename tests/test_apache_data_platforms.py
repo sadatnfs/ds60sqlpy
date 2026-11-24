@@ -386,6 +386,45 @@ def test_every_developed_unit_has_exact_source_and_explicit_execution_boundary()
             assert meta["runtime"] == "data-platforms-python"
 
 
+def test_key_terms_are_validated_and_rendered_before_the_chapter() -> None:
+    builder = runpy.run_path(str(BASE / "authoring/build.py"))
+    render = builder["key_terms"]
+    meta = json.loads((BASE / "authoring/units/apache-074.json").read_text())
+    guide = (BASE / "guides/apache-074.md").read_text()
+    section = render("apache-074", meta["key_terms"])
+    start = guide.index(section)
+    assert guide.index("Tutorial mode.") < start < guide.index("## Worked case")
+    term = ["Snapshot", "A committed table state."]
+    for bad, reason in [
+        ([term, ["Manifest", "Lists data files."]], "3 to 5"),
+        ([term, term, ["Catalog", "Locates tables."]], "duplicate"),
+        ([term, ["Bad: term", "Has a colon."], ["Catalog", "Locates."]], "malformed"),
+        ([term, ["Manifest", "Lists data files"], ["Catalog", "Locates."]], "sentence"),
+        ([term, ["Manifest"], ["Catalog", "Locates."]], "string pairs"),
+    ]:
+        with pytest.raises(ValueError, match=reason):
+            render("apache-074", bad)
+
+
+def test_worked_examples_are_validated_and_rendered_before_the_source() -> None:
+    builder = runpy.run_path(str(BASE / "authoring/build.py"))
+    render = builder["worked_examples"]
+    meta = json.loads((BASE / "authoring/units/apache-052.json").read_text())
+    guide = (BASE / "guides/apache-052.md").read_text()
+    start = guide.index(render("apache-052", meta["worked_examples"]))
+    assert guide.index("## Diagnosis") < start < guide.index("## Complete worked source")
+    one = {"title": "One", "language": "bash", "code": "bash run.sh check", "interpretation": "Ok."}
+    two = dict(one, title="Two", code="bash run.sh logs")
+    for bad, reason in [
+        ([one], "at least two"),
+        ([one, dict(two, title="one")], "duplicate"),
+        ([one, dict(two, interpretation="Reads logs \u2014 fast.")], "dash"),
+        ([one, dict(two, interpretation="No final period")], "interpretation"),
+    ]:
+        with pytest.raises(ValueError, match=reason):
+            render("apache-052", bad)
+
+
 @pytest.mark.parametrize("rows", [0, 4])
 def test_crosslanguage_fixture_rejects_wrong_row_count(rows: int) -> None:
     import io

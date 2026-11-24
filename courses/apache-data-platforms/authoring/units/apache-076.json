@@ -5,6 +5,28 @@
   "minutes": 75,
   "prerequisites": ["apache-075"],
   "concepts": ["control plane", "signed URL", "Parquet data plane"],
+  "key_terms": [
+    [
+      "Control plane",
+      "The sharing server's API that authorizes a recipient and returns table metadata and eligible files."
+    ],
+    [
+      "Pre-signed URL",
+      "A temporary object-store URL the server returns for one data file, letting the client read bytes directly without the bearer token."
+    ],
+    [
+      "Data plane",
+      "The path by which the client downloads Parquet bytes from object storage, separate from the control requests."
+    ],
+    [
+      "minReaderVersion",
+      "The protocol field stating the lowest reader version a response requires. The course client accepts only version 1 and refuses anything else."
+    ],
+    [
+      "Host allowlist",
+      "The explicit set of data hosts the client may fetch from, which keeps it from following arbitrary URLs or redirects."
+    ]
+  ],
   "evidence": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred.",
   "sources": [
     ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"],

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-001.md</code>.</p>
 <h3 id="exercise-1-predict-which-text-from-the-first-example-is-visible">Exercise 1: Predict which text from the first example is visible.<a class="heading-anchor" href="#exercise-1-predict-which-text-from-the-first-example-is-visible" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Only Hello, web. appears as paragraph text.</p>
+<p><strong>Approach:</strong> Read the example tag by tag and mark which characters are markup and which are character data inside the body.</p>
 <p><strong>Why:</strong> Tags are instructions to the parser, not visible text, and the title is metadata shown in the tab; only character data inside body elements is painted.</p>
+<p><strong>Plausible wrong approach:</strong> Counting the angle-bracket text as visible fails because <code>&lt;p&gt;</code> and <code>&lt;/p&gt;</code> are consumed by the parser and never painted as letters.</p>
+<p><strong>How to verify:</strong> Open the preview and select all visible text; the copied text is exactly Hello, web. with no tag names.</p>
 <h3 id="exercise-2-change-a-paragraph-without-changing-the-document-title">Exercise 2: Change a paragraph without changing the document title.<a class="heading-anchor" href="#exercise-2-change-a-paragraph-without-changing-the-document-title" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The visible body changes while the browser document title remains the same.</p>
+<p><strong>Approach:</strong> Locate the <code>title</code> element in <code>head</code> and the paragraph in <code>body</code>, then edit only the paragraph&#x27;s character data.</p>
 <p><strong>Why:</strong> The title element and the body content are independent parts of the document tree, so editing a paragraph cannot change the tab text.</p>
+<p><strong>Plausible wrong approach:</strong> Editing the <code>h1</code> and expecting the tab to follow fails because the tab label comes only from <code>title</code>, not from the first heading.</p>
+<p><strong>How to verify:</strong> After the edit, the browser tab or <code>document.title</code> in the console still shows the original title string.</p>
 <h3 id="exercise-3-build-a-complete-document-with-a-title-one-heading-and-two-paragraphs">Exercise 3: Build a complete document with a title, one heading and two paragraphs.<a class="heading-anchor" href="#exercise-3-build-a-complete-document-with-a-title-one-heading-and-two-paragraphs" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The preview contains one main heading and two paragraphs inside the body.</p>
+<p><strong>Approach:</strong> Type the skeleton first (doctype, <code>html lang</code>, <code>head</code> with <code>meta charset</code> and <code>title</code>, <code>body</code>), then add one <code>h1</code> and two <code>p</code> elements.</p>
 <p><strong>Why:</strong> A complete document gives the parser an explicit standards mode, language, encoding and title, so the browser does not have to recover from missing structure.</p>
-<h3 id="exercise-4-explain-why-php-source-pasted-into-an-html-page-does-not-execute-on-a-php-server">Exercise 4: Explain why PHP source pasted into an HTML page does not execute on a PHP server.<a class="heading-anchor" href="#exercise-4-explain-why-php-source-pasted-into-an-html-page-does-not-execute-on-a-php-server" aria-label="Link to this section">#</a></h3>
+<p><strong>Plausible wrong approach:</strong> Leaving out the doctype still renders text, but the page drops into quirks mode, so later CSS box sizing lessons behave differently.</p>
+<p><strong>How to verify:</strong> In the console, <code>document.compatMode</code> returns CSS1Compat and <code>document.querySelectorAll(&#x27;body p&#x27;).length</code> returns 2.</p>
+<h3 id="exercise-4-explain-why-php-source-pasted-into-an-html-page-does-not-execute-in-the-browser-preview">Exercise 4: Explain why PHP source pasted into an HTML page does not execute in the browser preview.<a class="heading-anchor" href="#exercise-4-explain-why-php-source-pasted-into-an-html-page-does-not-execute-in-the-browser-preview" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A browser preview parses HTML; no PHP interpreter or server request was involved.</p>
+<p><strong>Approach:</strong> Identify which program reads the file in this pad: the browser&#x27;s HTML parser, which has no PHP interpreter attached.</p>
 <p><strong>Why:</strong> PHP runs only when a PHP interpreter processes the file, normally through a server. The HTML parser treats <code>&lt;?php ... ?&gt;</code> as a bogus comment, so nothing executes and the code is not even displayed.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming the code ran silently with no output fails because the parser turns <code>&lt;?php ... ?&gt;</code> into a comment node and nothing executes.</p>
+<p><strong>How to verify:</strong> Inspect the Elements tree and find a comment node containing the PHP text, with no echoed output anywhere in the body.</p>
 <h3 id="exercise-5-remove-the-styling-and-inspect-what-remains-useful">Exercise 5: Remove the styling and inspect what remains useful.<a class="heading-anchor" href="#exercise-5-remove-the-styling-and-inspect-what-remains-useful" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Document structure and readable text remain; meaning does not depend on CSS.</p>
+<p><strong>Approach:</strong> Delete or comment out the <code>style</code> element, reload, and read the page from top to bottom as plain structure.</p>
 <p><strong>Why:</strong> HTML elements carry meaning and order independently of CSS, so headings, paragraphs and links stay understandable when presentation is removed.</p>
+<p><strong>Plausible wrong approach:</strong> Judging usefulness by how polished the page looks fails here, because the question is whether headings and paragraphs still order the content.</p>
+<p><strong>How to verify:</strong> With styles removed, the <code>h1</code> still appears first and both paragraphs follow in source order with default browser spacing.</p>
 <h3 id="exercise-6-trace-a-requested-page-from-source-to-visible-output">Exercise 6: Trace a requested page from source to visible output.<a class="heading-anchor" href="#exercise-6-trace-a-requested-page-from-source-to-visible-output" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Distinguish server response bytes, parsed document tree, applied style and painted output.</p>
+<p><strong>Approach:</strong> Write four stages in order (bytes received, tree built, styles applied, pixels painted) and attach one possible failure to each.</p>
 <p><strong>Why:</strong> Each stage can fail on its own: the server can send the wrong bytes, the parser can repair broken markup, CSS can hide content and painting can clip it, so naming the stage tells you where to look.</p>
+<p><strong>Plausible wrong approach:</strong> Collapsing everything into the page loaded hides which stage failed, so a parser repair gets blamed on CSS or the server.</p>
+<p><strong>How to verify:</strong> For each stage, name the tool that shows it: Network panel for bytes, Elements for the tree, Computed for styles and the preview for paint.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-001_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

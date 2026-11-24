@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Every rendered box has content, optional padding, a border and an outside margin. With the default content-box sizing, a declared width describes the content, so padding and borders add to the outer width. With border-box sizing, the declared width includes the content, padding and borders. Margins remain outside either calculation. This distinction explains many layouts that unexpectedly exceed a parent.</p>
 <p>Overflow occurs when content needs more room than the available box. Hiding overflow can conceal essential information; scrolling or wrapping may preserve it. Long unbroken strings and images are frequent sources of overflow. A fixed height can clip translated text, enlarged fonts or error messages, so prefer content-driven height unless the interaction truly requires a bounded region.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Content box:</strong> The innermost area of a box that holds its text or children; by default <code>width</code> sizes only this area.</li>
+<li><strong>Padding:</strong> The space between the content and the border, which shows the element&#x27;s background.</li>
+<li><strong>Margin:</strong> The transparent space outside the border that separates a box from its neighbors; adjacent vertical margins can collapse.</li>
+<li><strong>Box-sizing:</strong> The property whose <code>border-box</code> value makes <code>width</code> include padding and border, which makes sizing predictable.</li>
+<li><strong>Overflow:</strong> Content that does not fit its box, and the property that decides whether it is shown, clipped or scrollable.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>For a 200px content-box with 20px left and right padding and 2px borders, outer width is 244px. For a 200px border-box, the content width becomes 156px. Set a consistent box-sizing rule on all elements and pseudo-elements. Use max-inline-size to constrain readable width without assuming the writing direction.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -223,6 +231,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">border</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-keyword">px</span> <span class="syntax-keyword">solid</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The border box is 200px wide.</p>
+<h3 id="contrast-case-a-fixed-height-that-clips-a-validation-message">Contrast case: a fixed height that clips a validation message<a class="heading-anchor" href="#contrast-case-a-fixed-height-that-clips-a-validation-message" aria-label="Link to this section">#</a></h3>
+<p>The card below was sized for one line of text. Add the second line and compare the two overflow settings.</p>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">message</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">box-sizing</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">border-box</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">height</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">padding</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.5</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">overflow</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">hidden</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-comment">/* repair */</span>
+<span class="syntax-punctuation">.</span><span class="syntax-class">message</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">height</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">auto</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">min-block-size</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>With <code>height: 3rem</code> and <code>overflow: hidden</code>, the box keeps its 3rem border box, and after 1rem of vertical padding only 2rem remain for text, so a second line of the message is cut off with no scrollbar and no warning. The repair keeps the minimum look of the original but lets the block grow, so a longer error such as Enter a whole number from 5 to 120 stays fully visible. Increase the root font size to see the difference grow: the fixed version loses more text, while the repaired version simply gets taller.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-calculate-outer-widths-for-the-two-examples">Exercise 1: Calculate outer widths for the two examples.<a class="heading-anchor" href="#exercise-1-calculate-outer-widths-for-the-two-examples" aria-label="Link to this section">#</a></h4>

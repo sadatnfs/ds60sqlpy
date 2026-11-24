@@ -127,7 +127,7 @@ def main():
         }
         predicted_raw_join_rows = 1600 * 2 + 400
         assert predicted_raw_join_rows == 3600
-        print("Raw dimension multiplicity predicts3600 pairs for2000 accepted facts")
+        print("Raw dimension multiplicity predicts 3600 pairs for 2000 accepted facts")
         known = [i for i in range(1, 2001) if i % 10 != 0]
         amount_total = sum(i % 7 + 1 for i in known)
         weighted = sum((i % 7 + 1) * ((0 if i <= 1600 else (i - 1601) % 4 + 1) + 2) for i in known)

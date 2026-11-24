@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-012</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Django organizes an application around settings, URL configuration, views and reusable applications. This chapter reduces that structure to a complete finite example so each connection is visible. It also demonstrates a subtle boundary: declaring ALLOWED_HOSTS does not mean every arbitrary view automatically calls the host-validation API.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>URLconf:</strong> Django&#x27;s ordered list of URL patterns that resolves an incoming path to a view and its captured arguments.</li>
+<li><strong>Path converter:</strong> A typed segment such as <code>&lt;int:identifier&gt;</code> that decides whether text matches the route and converts it before calling the view.</li>
+<li><strong>reverse():</strong> A Django function that builds a URL from a route name and arguments instead of repeating the literal path.</li>
+<li><strong>ALLOWED_HOSTS:</strong> The setting listing acceptable Host header values, enforced only when code calls <code>request.get_host()</code>, which CommonMiddleware does.</li>
+<li><strong>Settings:</strong> Django&#x27;s process-level configuration of installed applications, middleware and databases, normally kept in a settings module.</li>
+</ul>
 <h3 id="mechanism-configuration-connects-components">Mechanism: configuration connects components<a class="heading-anchor" href="#mechanism-configuration-connects-components" aria-label="Link to this section">#</a></h3>
 <p>Settings define installed applications, middleware, database connections and other process-level choices. Django setup initializes its application registry. A URL configuration contains ordered patterns that resolve an incoming path into a view and captured arguments. A named route supports reverse construction of a URL without duplicating its literal path throughout the code.</p>
 <p>A view accepts a request and returns a response. The integer path converter turns matching path text into a Python integer before calling the view. It also determines which text matches the route at all. A word does not reach this view and then fail business logic; it fails URL resolution.</p>
@@ -209,6 +217,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The minimal JSON view does not read request.get_host. With no relevant middleware, an untrusted Host header can still reach that view. The program then installs CommonMiddleware and creates a fresh client so the middleware chain is rebuilt. The same untrusted host receives 400.</p>
 <p>This is not a recommendation to omit host validation. It demonstrates why a security claim should identify the actual enforcement point. ALLOWED_HOSTS configures Django&#x27;s host-validation behavior when that boundary is invoked; raw access to request metadata is not the same API.</p>
 <p>A production project must review middleware order, trusted proxy behavior and direct access to the application server. Forwarded host settings are meaningful only when the request comes through an actually trusted proxy path. A configuration value alone is not network acceptance evidence.</p>
+<h3 id="worked-example-how-converters-and-route-order-pick-a-view">Worked example: how converters and route order pick a view<a class="heading-anchor" href="#worked-example-how-converters-and-route-order-pick-a-view" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> django.conf <span class="syntax-keyword">import</span> settings
+
+settings<span class="syntax-operator">.</span>configure<span class="syntax-punctuation">(</span>ROOT_URLCONF<span class="syntax-operator">=</span>__name__<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">import</span> django
+
+django<span class="syntax-operator">.</span>setup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">from</span> django.urls <span class="syntax-keyword">import</span> Resolver404<span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">,</span> resolve<span class="syntax-punctuation">,</span> reverse
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">detail</span><span class="syntax-punctuation">(</span>request<span class="syntax-punctuation">,</span> identifier<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">by_slug</span><span class="syntax-punctuation">(</span>request<span class="syntax-punctuation">,</span> slug<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span>
+
+
+urlpatterns <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">notes/&lt;int:identifier&gt;/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> detail<span class="syntax-punctuation">,</span> name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">note-detail</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">notes/&lt;slug:slug&gt;/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> by_slug<span class="syntax-punctuation">,</span> name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">note-slug</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+
+<span class="syntax-keyword">for</span> url <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/notes/7/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">/notes/first-draft/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">/notes/7</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">/notes/-3/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        match <span class="syntax-operator">=</span> resolve<span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">)</span>
+        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">,</span> match<span class="syntax-operator">.</span>url_name<span class="syntax-punctuation">,</span> match<span class="syntax-operator">.</span>kwargs<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> Resolver404<span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>url<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">404</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>reverse<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">note-slug</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> args<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">release-notes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">/notes/7/ note-detail {&#x27;identifier&#x27;: 7}
+/notes/first-draft/ note-slug {&#x27;slug&#x27;: &#x27;first-draft&#x27;}
+/notes/7 404
+/notes/-3/ note-slug {&#x27;slug&#x27;: &#x27;-3&#x27;}
+/notes/release-notes/</code></pre>
+<p>Django tries <code>urlpatterns</code> from top to bottom and stops at the first pattern whose converters all match. The <code>int</code> converter only accepts digits, so <code>7</code> reached <code>detail</code> already converted to an integer, while <code>first-draft</code> fell through to the slug route. The last two lines are the surprises. <code>/notes/7</code> without the trailing slash matches nothing; in a running site <code>CommonMiddleware</code> with <code>APPEND_SLASH</code> would redirect it, but the resolver itself is strict. And <code>-3</code> is not a valid integer to the <code>int</code> converter, yet hyphens and digits are legal slug characters, so a request meant for a numeric note silently landed on the slug view. Ordering routes from most to least specific and choosing converters that cannot overlap prevents this. <code>reverse</code> runs the same table backwards, which is why the lesson builds links by route name instead of formatting strings.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why did a route start failing after adding a converter?</strong> The converter changes matching and argument conversion. Inspect URL resolution before debugging the view body.</p>
 <p><strong>Why does changing MIDDLEWARE after constructing a client not affect an already loaded chain?</strong> The client/server may have initialized its handler. Build a new controlled handler for a configuration comparison rather than assuming live mutation rebuilds everything.</p>

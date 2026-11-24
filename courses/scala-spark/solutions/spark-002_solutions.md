@@ -45,63 +45,65 @@ println(label)
 
 ### Exercise 1: Compute the basket
 
-**Inputs/evidence:** For spark-002 Exercise 1, 125L, 200L, 75L.
+**Inputs/evidence:** 125L, 200L, 75L.
 
-**Expected result/shape:** For spark-002 Exercise 1, total is 400L.
+**Expected result/shape:** Total is 400L.
 
-**Verify:** For spark-002 Exercise 1, assert total==400L and print the named value.
+**Verify:** Assert total==400L and print the named value.
 
 Addition preserves all three prices. A literal String "400" can look correct when printed but is not the required Long result.
 
 ### Exercise 2: Preserve the type boundary
 
-**Inputs/evidence:** For spark-002 Exercise 2, 2147483647L+1L and an intentionally reviewed Int-only variant.
+**Inputs/evidence:** 2147483647L+1L and an intentionally reviewed Int-only variant.
 
-**Expected result/shape:** For spark-002 Exercise 2, Long result 2147483648L; reject relying on the overflowing Int value as money.
+**Expected result/shape:** Long result 2147483648L; reject relying on the overflowing Int value as money.
 
-**Verify:** For spark-002 Exercise 2, run the Long assertion; explain why the narrower arithmetic is a different contract.
+**Verify:** Run the Long assertion; explain why the narrower arithmetic is a different contract.
 
 The expected number exceeds the positive Int range. This small example shows type choice before data grows, without requiring an overflow as a valid answer.
 
 ### Exercise 3: Calculate remaining budget
 
-**Inputs/evidence:** For spark-002 Exercise 3, budget 450L, total 400L.
+**Inputs/evidence:** Budget 450L, total 400L.
 
-**Expected result/shape:** For spark-002 Exercise 3, remaining 50L.
+**Expected result/shape:** Remaining 50L.
 
-**Verify:** For spark-002 Exercise 3, assert the difference, not merely the total.
+**Verify:** Assert the difference, not merely the total.
 
-A separate immutable budget keeps the meaning of each input visible. Subtract total from budget; reversing operands yields-50 and a different statement.
+A separate immutable budget keeps the meaning of each input visible. Subtract total from budget; reversing operands yields -50 and a different statement.
 
 ### Exercise 4: Return a branch value
 
-**Inputs/evidence:** For spark-002 Exercise 4, remaining 50L, threshold 0L.
+**Inputs/evidence:** Remaining 50L, threshold 0L.
 
-**Expected result/shape:** For spark-002 Exercise 4, String message is within budget.
+**Expected result/shape:** String message is within budget.
 
-**Verify:** For spark-002 Exercise 4, assert the exact String and its nonnegative condition.
+**Verify:** Assert the exact String and its nonnegative condition.
 
 Both branches must return meaningful labels. Writing println inside each branch would make the assigned result Unit rather than the intended String.
 
 ### Exercise 5: Diagnose reassignment
 
-**Inputs/evidence:** For spark-002 Exercise 5, one immutable binding and a proposed reassignment.
+**Inputs/evidence:** One immutable binding and a proposed reassignment.
 
-**Expected result/shape:** For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with 350L.
+**Expected result/shape:** Compile-time rejection; repaired code uses a new name revisedBudget with 350L.
 
-**Verify:** For spark-002 Exercise 5, retain the compiler error category and show the new-name repair; do not include broken code in the final reference.
+**Verify:** Retain the compiler error category and show the new-name repair; do not include broken code in the final reference.
 
 Reassignment violates val. The lesson asks for a new scenario, so name that scenario rather than replacing the original input or switching to var without a reason.
 
 ### Exercise 6: Transfer the budget
 
-**Inputs/evidence:** For spark-002 Exercise 6, same 400L basket, new 350L budget.
+**Inputs/evidence:** Same 400L basket, new 350L budget.
 
-**Expected result/shape:** For spark-002 Exercise 6, remaining-50L and over budget label.
+**Expected result/shape:** Remaining -50L and over budget label.
 
-**Verify:** For spark-002 Exercise 6, assert both changed outputs while the original total stays 400L.
+**Verify:** Assert both changed outputs while the original total stays 400L.
 
 Only the budget changes. A result that also changes spending has mixed the two scenarios; preserve the original bindings to expose that error.
+
+Notice that the same `if` expression from Exercise 4 now produces the other label without any edit to its code. The label depends only on the sign of the remaining value, so a negative Long selects the over budget branch. If your message still reads within budget, check whether the comparison uses the new remaining value or a stale binding from the first scenario.
 
 ## Retrieval review
 

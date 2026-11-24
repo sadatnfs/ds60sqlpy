@@ -42,11 +42,23 @@ Predict the closing balance for Notebook and Mug at February 28.
 
 It is 8 + 7 = 15, coincidentally equal to the earlier carried subset for different reasons.
 
+**Why it fits this model:** Inventory is a state. At February 28 the closing balance for Notebook and Mug is that date's snapshot: 8 + 7 = 15.
+
+**Tempting mistake:** Summing both month-end snapshots for the two products gives 10 + 5 + 8 + 7 = 30, which counts each product twice.
+
+**How to confirm:** Under 'Date'[Date] = DATE(2025, 2, 28) and ProductKey IN {1, 3}, SUM(Inventory[Units]) returns 15; case B's 15 comes from the January 31 values 10 + 5.
+
 ### Exercise 2
 
 Remove Mug's February snapshot conceptually.
 
 A shared February 28 date can omit Mug, while per-product carry-forward would use January 31's5. The policies must be named separately.
+
+**Why it fits this model:** Without Mug's February row, the two policies differ. A shared last date (February 28) has only Notebook, while per-product carry-forward takes Mug's last known 5 from January 31.
+
+**Tempting mistake:** Using LASTDATE('Date'[Date]) or the latest snapshot across all products and calling it per-product last known. Mug silently drops out.
+
+**How to confirm:** The shared-date policy gives 8; per-product carry-forward gives 8 + 5 = 13. Label which one the measure implements.
 
 ### Exercise 3
 
@@ -54,11 +66,23 @@ Write a staleness acceptance rule for carried balances.
 
 For example, retain a balance only if its age is at most a declared number of days; otherwise return BLANK and a missing/stale indicator.
 
+**Why it fits this model:** A carried balance has an age: cutoff minus the snapshot used. At the February 15 cutoff, the January 31 snapshots are 15 days old.
+
+**Tempting mistake:** Carrying the last known value with no age limit, so a snapshot that is months old still shows as current stock.
+
+**How to confirm:** With a 31-day limit, February 15 returns 15; with a 7-day limit it returns BLANK plus a stale flag for both products.
+
 ### Exercise 4
 
 Diagnose dividing 65 by six rows and calling it average inventory over two months.
 
 The result mixes product and temporal weighting. Define whether the desired average is across products, observation dates or time intervals.
+
+**Why it fits this model:** The six rows are three products at two dates. Daily totals are 35 on January 31 and 30 on February 28.
+
+**Tempting mistake:** 65 / 6, about 10.83, mixes products and dates: it is the mean per product-snapshot, not the average stock held.
+
+**How to confirm:** AVERAGEX(VALUES(Inventory[SnapshotDate]), CALCULATE(SUM(Inventory[Units]))) returns 32.5 units averaged over the two snapshot dates.
 
 ### Exercise 5
 
@@ -66,12 +90,24 @@ Explain a product with no snapshot before the cutoff.
 
 Return an explicit unavailable result; do not invent a zero or use a later snapshot that leaks future information.
 
+**Why it fits this model:** If the cutoff is January 15, 2025, no snapshot is on or before it, so LastKnown is BLANK and no rows match. Bag (ProductKey 4) has no snapshots at all.
+
+**Tempting mistake:** Returning 0 for these products, or using the February 28 snapshot, which reports stock not yet known on January 15.
+
+**How to confirm:** Case B with Cutoff set to DATE(2025, 1, 15) returns BLANK, and the report should flag the products with no available balance.
+
 ### Exercise 6
 
 Transfer semi-additivity to account balances.
 
 Sum compatible accounts at a date, but use closing/average-balance rules over time rather than summing repeated states.
 
+**Why it fits this model:** Account balances behave like inventory. If an account shows 100 on January 31 and 120 on February 28, the two-month closing balance is 120.
+
+**Tempting mistake:** Summing the two month-end balances to 220, while the 20 of net transactions across February is the flow that explains the change.
+
+**How to confirm:** The closing balance (120) equals the opening balance (100) plus February transactions (20); balances add across accounts on one date, not across dates.
+
 ## Review the boundary
 
-A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.
+Another readable expression is sound when its population, context and units match; record any assumed engine separately.

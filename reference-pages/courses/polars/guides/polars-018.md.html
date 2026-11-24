@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The final case combines several contracts rather than introducing another table method. Raw events arrive with identifiers, customer keys, textual amounts and event times. One event is repeated and another has an invalid amount. A reliable pipeline should account for both before publishing a customer-level feature table. A final total alone cannot explain which records were rejected or duplicated.</p>
 <p>The deduplication in this fixture is justified because the repeated event has identical content. Conflicting versions of one event would require a reviewed ordering or conflict policy; unique(subset=...) must not arbitrarily choose a winner in that situation. The accepted rows then produce one result per customer, with an event count beside the amount total. This makes the change from event grain to customer grain explicit.</p>
 <p>The second case writes a typed artifact and a receipt containing its hash, schema, row count and grain. A cryptographic hash establishes byte identity, not correctness or authenticity by itself. Readback checks the published content, while the earlier row accounting checks how it was derived. In a durable system, publication would also need ownership, atomicity, lineage and a retention policy.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Data contract:</strong> The declared columns, types, keys and value rules that published rows must satisfy.</li>
+<li><strong>Deduplication:</strong> Removing repeated events with <code>unique(subset=...)</code>, which is justified only when the repeats have identical content.</li>
+<li><strong>Quarantine:</strong> Holding rows that violate the contract apart with a reason instead of publishing them or silently dropping them.</li>
+<li><strong>Artifact hash:</strong> A sha256 digest of the written file&#x27;s bytes, which identifies exact bytes, not logical equality of the data.</li>
+<li><strong>Readback receipt:</strong> A JSON record of the contract and the file&#x27;s SHA-256 hash, written after the published file is read back and checked.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Parse into a new field, isolate invalid rows, apply the declared duplicate rule and only then aggregate. Use a stable sort before publishing an ordered result. write_parquet creates the typed output; hashlib.sha256 records its exact bytes; a JSON receipt makes the contract inspectable. A hash can legitimately change when a library writes an equivalent Parquet encoding, so distinguish byte identity from logical equality.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

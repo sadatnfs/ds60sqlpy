@@ -198,21 +198,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-add-a-missing-value">1. Add a missing value<a class="heading-anchor" href="#1-add-a-missing-value" aria-label="Link to this section">#</a></h3>
 <p>Use a missingness policy that the model and serving interface share. Keep the reason so coverage and model behavior can be interpreted.</p>
+<p>Add row 4 with usage None. The current check row[&quot;usage&quot;] &lt; 0 raises TypeError on None, so the fixture would crash rather than classify it; test for None first and append &quot;missing_usage&quot; as its own reason. Replacing None with 0.0 would accept the row as a light user, which is the mislabeling the check warns about. Verify that rejected now holds ids 2, 3 and 4 with three different reason lists.</p>
 <p><strong>Expected:</strong> Missing is not mislabeled as a negative value.</p>
 <h3 id="2-add-a-legitimate-category">2. Add a legitimate category<a class="heading-anchor" href="#2-add-a-legitimate-category" aria-label="Link to this section">#</a></h3>
 <p>Review encoding and model behavior before accepting the category. A vocabulary update can affect train/serve compatibility.</p>
+<p>Adding &quot;east&quot; to the set inside example_one alone is the tempting shortcut: row 3 would still fail because its value is &quot;unknown&quot;, while an east row would pass with no record that the vocabulary changed. Change expected[&quot;region&quot;] to [&quot;east&quot;, &quot;north&quot;, &quot;south&quot;], compute the new digest, and confirm it differs from the approved one, so the serving side can refuse a model built on the two-region list.</p>
 <p><strong>Expected:</strong> The change is versioned and tested.</p>
 <h3 id="3-check-a-unit-conversion">3. Check a unit conversion<a class="heading-anchor" href="#3-check-a-unit-conversion" aria-label="Link to this section">#</a></h3>
 <p>Apply the conversion explicitly and preserve its source definition. Do not relabel minutes as hours without transforming values.</p>
+<p>Example_two shows why the column set cannot catch this: set(expected) == set(changed) is True while the digests differ. For a value of 90 minutes the model should receive 1.5, not 90. Write the conversion as usage_hours = usage_minutes / 60, assert 90 becomes 1.5, and record the unit in the contract text so the hash moves with it.</p>
 <p><strong>Expected:</strong> The converted value matches the declared unit.</p>
 <h3 id="4-preserve-rejection-counts">4. Preserve rejection counts<a class="heading-anchor" href="#4-preserve-rejection-counts" aria-label="Link to this section">#</a></h3>
 <p>Choose a classification policy and record all relevant reasons where appropriate. Do not present a partial count as full data quality.</p>
+<p>Here 3 rows produce 1 accepted and 2 rejected, and the reason counts are one negative_usage and one unknown_region. Add a row with usage -2.0 and region &quot;west&quot; and the totals become 1 accepted, 3 rejected, but 4 reasons. Summing reasons to get the rejected count would report 4 and break accepted + rejected == 4. Report both tables.</p>
 <p><strong>Expected:</strong> Accepted plus rejected equals the input population.</p>
 <h3 id="5-review-a-hash-claim">5. Review a hash claim<a class="heading-anchor" href="#5-review-a-hash-claim" aria-label="Link to this section">#</a></h3>
 <p>Use review and a trusted publication mechanism for those additional claims. A changed hash should trigger analysis, not automatic approval.</p>
+<p>For this fixture the approved digest proves only that the three-key dictionary serialized with sorted keys is byte-identical to what was reviewed. It says nothing about whether &quot;nonnegative float&quot; was the right rule or whether the data obeys it; row 2 with usage -1.0 is caught by example_one, not by the hash. Treating a matching hash as a passed quality check is the error to avoid.</p>
 <p><strong>Expected:</strong> It establishes exact serialized identity.</p>
 <h3 id="6-bind-the-consumer">6. Bind the consumer<a class="heading-anchor" href="#6-bind-the-consumer" aria-label="Link to this section">#</a></h3>
 <p>Validate the feature interface before inference and fail clearly on incompatible inputs. The artifact lessons implement that boundary.</p>
+<p>Store the value returned in &quot;version&quot; next to the model file and compare it with digest(expected) at load time; a mismatch should stop serving before any row is scored. Comparing column names would pass the minutes contract from example_two, which is the case this binding exists to stop.</p>
 <p><strong>Expected:</strong> The version or digest is retained with the model.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;mle-004: local, bounded ML engineering investigation.&quot;&quot;&quot;</span>

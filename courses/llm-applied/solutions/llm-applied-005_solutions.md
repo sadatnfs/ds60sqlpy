@@ -1,6 +1,6 @@
 # llm-applied-005: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for chunking, overlap, offsets and context budgets only after attempting *Split a fixed document* through *Handle empty and short sources*. A discrepancy in *Verify citation offsets* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-005_solution.py` runs the assertions; this page explains why they test chunk and overlap.
 
 ## Mechanism review
 
@@ -18,13 +18,13 @@ The default splitter uses whitespace tokens only as a transparent fixture. Actua
 
 ## Reading the implementation
 
-re.finditer over non-whitespace spans records exact start/end offsets in the original text. A window of size tokens advances bysize-overlap. The chunk text is sliced from the first token start to the last token end, preserving internal whitespace. Each output recordsdocument_id, version, start, end, text. Validate0<=overlap<size before looping so a zero or negative step cannot hang the process.
+re.finditer over non-whitespace spans records exact start/end offsets in the original text. A window of size tokens advances by size-overlap. The chunk text is sliced from the first token start to the last token end, preserving internal whitespace. Each output records document_id, version, start, end, text. Validate 0<=overlap<size before looping so a zero or negative step cannot hang the process.
 
 ## Derive windows, duplication and citation coordinates
 
-Let a nonempty document have n whitespace-token spans, window size s and overlap o, with \(0\le o<s\). The advance is \(d=s-o\). The first chunk covers up to s spans; further chunks begin at d, 2d and so on until one reaches the end. For this helper, the number of chunks is one when \(n\le s\) and otherwise1+ceil((n-s)/d). Empty input produces zero chunks under the declared policy.
+Let a nonempty document have n whitespace-token spans, window size s and overlap o, with \(0\le o<s\). The advance is \(d=s-o\). The first chunk covers up to s spans; further chunks begin at d, 2d and so on until one reaches the end. For this helper, the number of chunks is one when \(n\le s\) and otherwise 1+ceil((n-s)/d). Empty input produces zero chunks under the declared policy.
 
-For \(n=7\), \(s=3\), \(o=1\), \(d=2\) and the chunk count is1+ceil(4/2)=3. The span-index groups are[0, 1, 2], [2, 3, 4], [4, 5, 6]. Stored token occurrences total nine while unique source positions total seven. Positions2 and 4 are repeated once. The redundancy ratio for this finite fixture is9/7, about1.286; it is not nine independent observations supporting the answer.
+For \(n=7\), \(s=3\), \(o=1\), \(d=2\) and the chunk count is 1+ceil(4/2)=3. The span-index groups are `[0, 1, 2], [2, 3, 4], [4, 5, 6]`. Stored token occurrences total nine while unique source positions total seven. Positions 2 and 4 are repeated once. The redundancy ratio for this finite fixture is 9/7, about 1.286; it is not nine independent observations supporting the answer.
 
 For a long uniform document with full windows, stored token occurrences per newly covered position approach \(\frac{s}{s-o}\). Overlap near the window size can therefore create a large storage and retrieval cost. At \(s=100\), \(o=90\), the advance is ten and the interior duplication factor approaches ten. That arithmetic does not prove an optimal overlap policy; it identifies a cost to measure beside evidence recall.
 
@@ -40,7 +40,7 @@ Overlap can improve boundary coverage without making each chunk self-sufficient.
 
 **Why not increase overlap until recall is perfect?** Duplication consumes storage and context, can return several copies of the same evidence and can displace a complementary source. Recall and useful context sufficiency are different measurements.
 
-**What should identify a chunk?** The source/version and boundaries plus the splitter representation policy. An ordinal such as chunk3 can refer to different content after an earlier section changes.
+**What should identify a chunk?** The source/version and boundaries plus the splitter representation policy. An ordinal such as chunk 3 can refer to different content after an earlier section changes.
 
 **Can a whitespace chunk count predict model-token use?** Only under an explicitly verified mapping, which this fixture does not supply. The intended tokenizer and rendered chat format must measure the actual model budget.
 
@@ -102,9 +102,9 @@ assert sum(len(c["text"].split()) for c in chunks) == 9
 assert len(text.split()) == 7
 ```
 
-**Expected:** 9 stored token occurrences versus7 source positions.
+**Expected:** 9 stored token occurrences versus 7 source positions.
 
-**Verify:** Compare the computed values or written argument with 9 stored token occurrences versus7 source positions.
+**Verify:** Compare the computed values or written argument with 9 stored token occurrences versus 7 source positions.
 
 ## Exercise 5: Reject invalid policies
 
@@ -144,4 +144,4 @@ assert len(short) == 1 and short[0]["text"] == "only two"
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Preserve unusual whitespace* and predict how the result changes before checking it; the unchanged inputs give: first chunk retains the double space; second chunk is gamma. Keep the original *Handle empty and short sources* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

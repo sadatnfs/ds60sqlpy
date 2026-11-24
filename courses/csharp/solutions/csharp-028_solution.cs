@@ -34,6 +34,18 @@ internal static class Program {
             "idempotence");
     }
     {
+      // Task 2: Guided modification
+      Check(ClampNonnegative(int.MinValue) == 0, "most negative clamps to 0");
+      Check(ClampNonnegative(int.MaxValue) == int.MaxValue, "largest kept");
+      bool overflow = false;
+      try {
+        Math.Abs(int.MinValue);
+      } catch (OverflowException) {
+        overflow = true;
+      }
+      Check(overflow, "an Abs-based clamp would fail at the extreme");
+    }
+    {
       // Task 3: Independent construction
       bool ValidQuantity(int value) => value >= 0 && value <= 1000;
       int[] inputs = { -1, 0, 1000, 1001 };
@@ -41,6 +53,17 @@ internal static class Program {
       for (int i = 0; i < inputs.Length; i++) {
         Check(ValidQuantity(inputs[i]) == expected[i], $"case {inputs[i]}");
       }
+    }
+    {
+      // Task 5: Boundary evidence
+      int[] samples = { int.MinValue, -1, 0, 1, int.MaxValue };
+      foreach (int value in samples) {
+        int once = ClampNonnegative(value);
+        Check(ClampNonnegative(once) == once, $"idempotent at {value}");
+      }
+      Check(ClampNonnegative(-1) == 0, "largest invalid input becomes 0");
+      Check(ClampNonnegative(0) == 0, "boundary itself is kept");
+      Check(ClampNonnegative(1) == 1, "smallest positive is kept");
     }
     Console.WriteLine("csharp-028: passed");
     await Task.CompletedTask;

@@ -16,6 +16,14 @@ The project is successful when a new learner can reproduce the outcome from the 
 
 This lab is not a benchmark, production service or shared hosting system. Its fixed host loopback port and synthetic counter keep the exercise inspectable. If the port or project identity conflicts with existing work, choose an unused owned identity before starting rather than stopping another application.
 
+### Key terms
+
+- **Image rebuild:** Running the build again from current inputs to produce a new image identity for the changed source.
+- **Container replacement:** Removing the old container and starting a new one from the chosen image under the same project.
+- **Persistent data:** State kept on a named volume, such as the fixture counter, that must survive container replacement.
+- **Image identity:** The image ID or digest that shows which build a container actually runs, unlike a reusable tag.
+- **Health endpoint:** A small HTTP path the application answers to report readiness without changing any data.
+
 ## Anatomy and a trace you can follow
 
 Copy `courses/docker/fixtures/compose-lab/` into a new directory below `.learning/`. Read its README in full. Validate the model, build with plain progress, start with readiness, request the message and counter, and recreate the app with its volume intact. Preserve commands and observations in the lesson worksheet.
@@ -99,11 +107,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Editing the maintained fixture instead of a learner copy. Treating a successful build as proof that the app serves the right response. Removing the volume when only the container needed replacing.
 
-Exercise 4 is this chapter's boundary case: Introduce and repair one wrong host port in a scratch model. Its expected observation is: Explain the first failing network hop and restore the original mapping. Use it to avoid treating a successful command as proof of the wrong claim. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Introduce and repair one wrong host port in a scratch model. Its expected observation is: Explain the first failing network hop and restore the original mapping. Use it to avoid treating a successful command as proof of the wrong claim. Change only the host side of one published port in a scratch copy, record the first failing request, then restore the mapping and confirm the original request succeeds again. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using image rebuild, container replacement, persistent data and evidence record. Reconstruct worked example 2 (Prove replacement and stop cleanly) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Recall the container IDs before and after recreation and what their difference proves about replacement. Then reconstruct worked example 2 (Prove replacement and stop cleanly) with one different value, predict what changes, and name which of image rebuild, container replacement, persistent data and evidence record the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

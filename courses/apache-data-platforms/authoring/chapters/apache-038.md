@@ -23,7 +23,7 @@ The workshop's broker configuration makes these choices explicit:
 `controller.quorum.voters` lists a single voter, so there is no quorum to lose a
 member from. The broker listens on port 9092 for clients and 9093 for controller
 traffic, and `advertised.listeners` is the address returned to clients in metadata.
-The workshop advertises kafka:9092 inside its owned private Compose network and
+The workshop advertises `kafka:9092` inside its owned private Compose network and
 publishes no host ports. Its saved cluster identity is separate from container
 identity and image identity. Kafka's retained metadata and log volume must agree
 with that cluster identity; the startup script refuses a mismatched existing

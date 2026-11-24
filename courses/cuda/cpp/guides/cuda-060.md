@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Verify a multi-GPU all-reduce result, record the observed topology and interpret strong or weak scaling.
+
 Work through *Multiple GPUs, topology and collective communication* with the concrete cases below. Finish with this evidence:
 correct combined result, observed topology, collective completion and strong/weak scaling interpretation where meaningful. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Multiple GPUs have distinct allocations, execution contexts and communication paths. Peer access may be available for a pair, but it must be supported and explicitly configured under the platform's rules. Topology affects whether traffic uses PCIe, NVLink or other paths. A collective such as all-reduce combines values and makes the result available to every participant. Participants must agree on communicator, datatype, count and collective order; mismatches can hang or fail. Multi-GPU within one machine does not prove multi-node operation, which adds network, process-launch and failure concerns.
+
+### Key terms
+
+- **All-reduce:** A collective that combines values from every participant and returns the same result to all of them.
+- **NCCL communicator:** An object that describes the participating GPUs and their ranks for NCCL collectives.
+- **Peer access:** The ability of one GPU to read or write another GPU's memory directly over NVLink or PCIe.
+- **Strong scaling:** Speedup for a fixed total problem size as the number of GPUs grows.
+- **Weak scaling:** Efficiency when the problem size grows in proportion to the number of GPUs.
 
 ## Mathematical contract
 
@@ -57,7 +67,6 @@ values = [1, 2, 3, 4, 5]
 partials = [sum(values[:3]), sum(values[3:])]
 all_reduce_model = [sum(partials)] * 2
 assert partials == [6, 9] and all_reduce_model == [15, 15]
-assert 1.6 / 2 == 0.8
 print({"CPU_collective_model": all_reduce_model, "multi_GPU_executed": False})
 ```
 

@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-008`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-008` (Hybrid retrieval, reciprocal-rank fusion and reranking). They introduce the notation this lesson needs for authorization filter and metadata filter.
 
 ## Learning objectives
 
@@ -78,9 +78,11 @@ Choose whether different principals may share a cache only after establishing th
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-009/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-009.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-009.py` in the declared `python-core` profile. *Filter before scoring*, *Permit an explicitly privileged scope* and *Partition answer caches* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-009/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Permit an explicitly privileged scope* and *Partition answer caches* reuse the helper and fixture introduced in *Filter before scoring*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: private-v1 absent before ranking. Example B should give: all 6 documents admitted. Example C should give: Keys differ. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -205,21 +207,24 @@ assert public_key != private_key
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: private-v1 absent before ranking. trace contains only public document IDs. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Permit an explicitly privileged scope*, predict its result from the prompt alone: Use allowed scopes public, restricted and compare the admitted set. Write the guess beside the stated outcome (all 6 documents admitted). Then predict how the decisive case, *Avoid restricted identifiers in public traces*, should end: Create a trace from admitted result IDs only and check it contains no restricted ID. For metadata filtering and access-controlled retrieval, the finish condition is: private-v1 absent before ranking. Trace contains only public document IDs.
 
 ## Exercises
 
 1. **Filter before scoring.** Give a public-only request the six-document corpus and inspect admitted IDs.
    **Expected:** private-v1 absent before ranking.
    **Verify:** Save the assertion results for exercise 1, including private-v1 absent before ranking.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Permit an explicitly privileged scope.** Use allowed scopes public, restricted and compare the admitted set.
    **Expected:** all 6 documents admitted.
    **Verify:** Save the assertion results for exercise 2, including all 6 documents admitted.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Partition answer caches.** Build cache keys for the same question under public-only and privileged scope sets.
    **Expected:** keys differ.
    **Verify:** Save the assertion results for exercise 3, including keys differ.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Invalidate on corpus change.** Change corpus-v1 tocorpus-v2 under the same access policy.
    **Expected:** cache key changes.
@@ -241,19 +246,21 @@ If a document asks for broader access, trace whether any application code derive
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate authorization filter and metadata filter for the fixture in *Filter before scoring*. Hint 2: change one literal in *Permit an explicitly privileged scope* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Invalidate on corpus change*, with its stated result (cache key changes). If *Avoid restricted identifiers in public traces* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Authorization filter, Metadata filter, Policy fingerprint using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain authorization filter, metadata filter and policy fingerprint using *Filter before scoring*. Recompute its result (private-v1 absent before ranking) from the inputs. Change one input in *Partition answer caches* and predict whether the stated result (keys differ) still holds. Say which part of metadata filtering and access-controlled retrieval the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-008` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Filter before scoring* cannot be reconstructed without the solution, revisit `llm-applied-008` (Hybrid retrieval, reciprocal-rank fusion and reranking). Otherwise keep the six observations from metadata filtering and access-controlled retrieval and continue to `llm-applied-010` (Query rewriting and bounded multi-hop retrieval).
 
 ## Sources and verification status
 
-API and mechanism reference: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for authorization filter: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixtures for *Filter before scoring*, *Permit an explicitly privileged scope* and *Partition answer caches* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

@@ -239,23 +239,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict DISTINCTCOUNT(Sales[ProductKey]) in the S4 context.</p>
 <p>It is 1, unlike COUNTROWS(Product), which is 4.</p>
+<p><strong>Why it fits this model:</strong> The filter sits on Sales[SaleID], so the fact table is reduced to the S4 line and counting keys in that filtered fact sees ProductKey 1 only. Product itself is untouched because the relationship flows from Product to Sales.</p>
+<p><strong>Tempting mistake:</strong> Reading COUNTROWS(Product) = 4 in the same context as four products involved in S4. That count measures the unfiltered dimension, not the line.</p>
+<p><strong>How to confirm:</strong> Under Sales[SaleID] = &quot;S4&quot;, ROW(&quot;FactKeys&quot;, DISTINCTCOUNT(Sales[ProductKey]), &quot;DimRows&quot;, COUNTROWS(Product)) returns 1 and 4.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Predict the all-model product count and products-with-sales count.</p>
 <p>The dimension has four products, while Sales contains three product keys.</p>
+<p><strong>Why it fits this model:</strong> The dimension lists Notebook, Pen, Mug and Bag, but Sales only carries keys 1, 2 and 3. Bag is a catalog member with no fact rows, so the two counts answer different questions.</p>
+<p><strong>Tempting mistake:</strong> Labeling DISTINCTCOUNT(Product[ProductKey]) as products sold. It returns 4 and counts Bag, which has never sold.</p>
+<p><strong>How to confirm:</strong> <code>EXCEPT ( VALUES ( Product[ProductKey] ), VALUES ( Sales[ProductKey] ) )</code> should return key 4 alone, explaining the gap between 4 and 3.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a query returning both populations with unambiguous labels.</p>
 <p>Use ROW(&quot;CatalogProducts&quot;,COUNTROWS(Product),&quot;SoldProducts&quot;,DISTINCTCOUNT(Sales[ProductKey])).</p>
+<p><strong>Why it fits this model:</strong> Each count names its population, so the result stays readable under any filter. With no filter it returns 4 and 3; under Product[Color] = &quot;Blue&quot; both become 2 (Notebook and Mug), and under SaleID S4 they read 4 and 1.</p>
+<p><strong>Tempting mistake:</strong> Giving both columns the label Products. A reader then sees 4 and 3 side by side with no way to tell catalog size from sold assortment.</p>
+<p><strong>How to confirm:</strong> Run the query three times (no filter, Blue, S4) and expect 4 and 3, 2 and 2, then 4 and 1.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a proposed bidirectional fix for every empty report cell.</p>
 <p>Review path ambiguity and intended populations first. An explicit measure can be preferable to changing every filter path.</p>
+<p><strong>Why it fits this model:</strong> Setting the Product relationship to both directions changes every measure that counts Product: under SaleID S4, COUNTROWS(Product) would fall from 4 to 1. With Customer also bidirectional, Product and Customer gain a path through Sales.</p>
+<p><strong>Tempting mistake:</strong> Flipping the relationship to Both so one empty cell fills in. The other visuals that relied on single-direction behavior then change silently.</p>
+<p><strong>How to confirm:</strong> Prefer CALCULATE ( COUNTROWS ( Product ), CROSSFILTER ( Sales[ProductKey], Product[ProductKey], BOTH ) ) inside one measure, and confirm that the plain COUNTROWS(Product) under S4 still returns 4.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why a duplicate ProductKey is not solved by sorting the dimension.</p>
 <p>Sorting changes display order, not duplicate keys. Repair the key or model the legitimate lower grain.</p>
+<p><strong>Why it fits this model:</strong> A one-to-many relationship requires each ProductKey once on the Product side. Two rows for key 1 mean Notebook&#x27;s 67 has two candidate labels, and display order cannot choose one.</p>
+<p><strong>Tempting mistake:</strong> Sorting the dimension so the preferred label appears first. Relationships and lookups do not read rows in display order, so the ambiguity remains.</p>
+<p><strong>How to confirm:</strong> COUNTROWS(Product) must equal DISTINCTCOUNT(Product[ProductKey]); on the clean fixture both are 4.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Compare an inner SQL join with this model when a sales key has no product.</p>
 <p>Regular-model blank-member behavior can retain its amount. Match missing-key policy before using the join as an oracle.</p>
+<p><strong>Why it fits this model:</strong> An inner join keeps only matched rows. In the unknown-member variant, S9 has ProductKey 999 and amount 7, and the regular relationship assigns it to the blank Product member instead of dropping it.</p>
+<p><strong>Tempting mistake:</strong> Using the inner-join total of 187 as the oracle for the model. The model reports 194, and the 7 difference is S9 under the blank member, not a DAX bug.</p>
+<p><strong>How to confirm:</strong> A SQL LEFT JOIN that labels unmatched keys Unknown returns 187 for known products plus 7 for Unknown, matching the model grand total of 194.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

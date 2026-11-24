@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-064`.
 
 Database performance and correctness interact through query plans, indexes and transaction ownership. This chapter inspects a real SQLite plan before and after adding a composite index, then creates a controlled write conflict and verifies recovery. It avoids presenting small-fixture timing as a production benchmark.
 
+## Key terms
+
+- **Composite index:** An index on several columns in a fixed order, such as owner then id, that supports filters and ordering in that sequence.
+- **EXPLAIN QUERY PLAN:** The SQLite statement that describes the strategy chosen for a query, such as a scan or a search using a named index.
+- **Keyset pagination:** Fetching the next page with a predicate such as `id > ?` and an ORDER BY instead of a growing OFFSET.
+- **Write lock:** The exclusive lock taken by `BEGIN IMMEDIATE`, which makes a competing writer fail with a database is locked error until rollback or commit.
+
 ## Mechanism: an index supports a particular access pattern
 
 The query filters by owner, advances past an identifier and orders by identifier with a small limit. A composite index on owner and id matches that access pattern. Column order matters because the index organizes keys in that sequence; an unrelated index is not automatically useful merely because it contains one requested column.
@@ -29,6 +36,34 @@ Two connections open the same temporary database. The first starts an immediate 
 This is actual SQLite locking behavior. PostgreSQL uses different concurrency machinery and error conditions, so the lesson does not label the result as PostgreSQL lock qualification. The owned service workshop tests its real database separately.
 
 A production service should define whether to wait, retry or fail when contention occurs. Retrying without a bounded budget can amplify load. Retrying a non-idempotent operation without reconciling prior effects can also change business results.
+
+## Worked example: offset pages repeat a row after an insert, keyset pages do not
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE notes (id INTEGER PRIMARY KEY, title TEXT)")
+db.executemany("INSERT INTO notes (title) VALUES (?)", [(str(i),) for i in range(1, 7)])
+page_one = [r[0] for r in db.execute("SELECT id FROM notes ORDER BY id DESC LIMIT 2")]
+db.execute("INSERT INTO notes (title) VALUES ('new')")
+by_offset = [r[0] for r in db.execute("SELECT id FROM notes ORDER BY id DESC LIMIT 2 OFFSET 2")]
+by_key = [
+    r[0]
+    for r in db.execute(
+        "SELECT id FROM notes WHERE id < ? ORDER BY id DESC LIMIT 2", (page_one[-1],)
+    )
+]
+print(page_one, by_offset, by_key)
+```
+
+Expected output:
+
+```text
+[6, 5] [5, 4] [4, 3]
+```
+
+A reader fetched the newest two notes, then a write added note 7 before the second page. Counting with `OFFSET 2` now lands one row earlier, so note 5 appears twice and a busy list can also skip rows when deletes happen. The keyset query carries the last id seen and asks for ids below it, so the page is defined by data rather than position. It also scales better: with the lesson's `notes(owner, id)` index, `WHERE owner = ? AND id > ?` seeks straight to the boundary, while a large offset still walks and discards every earlier row.
 
 ## Failure diagnosis and discussion
 

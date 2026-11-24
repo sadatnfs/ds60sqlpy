@@ -3,6 +3,28 @@
   "title": "Strings, Unicode and indexing boundaries",
   "concepts": ["UTF-8", "code unit", "code point", "grapheme", "normalization"],
   "outcome": "Process text without confusing byte positions, Unicode characters and visible grapheme clusters.",
+  "key_terms": [
+    [
+      "Code unit",
+      "One byte of a UTF-8 `String`; `ncodeunits` counts them, and string indices are positions in this byte sequence."
+    ],
+    [
+      "Code point",
+      "One Unicode scalar value, stored in a `Char`, that can occupy between one and four UTF-8 code units."
+    ],
+    [
+      "StringIndexError",
+      "The error raised when an index falls inside a multibyte character, which is why code steps with `nextind` or `eachindex`."
+    ],
+    [
+      "Grapheme",
+      "A user-perceived character, such as a letter plus a combining accent, that can span several code points."
+    ],
+    [
+      "Normalization",
+      "Rewriting text to a canonical form such as NFC with `Unicode.normalize`, so composed and decomposed spellings compare equal."
+    ]
+  ],
   "level": "beginner",
   "minutes": 90,
   "prerequisites": ["julia-001"],
@@ -11,48 +33,68 @@
     ["Unicode standard library", "https://docs.julialang.org/en/v1/stdlib/Unicode/"]
   ],
   "figure": 0,
+  "approach": "Keep three units apart: bytes indexed by `String`, characters returned by iteration, and graphemes a reader sees. Move between positions with `nextind` rather than `+ 1`, count with the function that matches the unit, normalize only by deliberate choice, and handle the empty string before asking for a first character.",
   "exercises": [
     {
       "title": "Advance safely",
       "task": "Move from the first to the second character in the UTF-8 fixture.",
       "expected": "nextind returns 3.",
       "hint": "Use a string-aware index operation.",
-      "answer": "Adding one to a valid byte index can enter a multibyte character."
+      "answer": "Adding one to a valid byte index can enter a multibyte character.",
+      "why": "In `\"éλ\"` the letter é occupies bytes 1 and 2 in UTF-8, so `nextind(\"éλ\", 1)` returns 3, where λ begins.",
+      "wrong": "Using index 2 as the second character lands inside é, and `\"éλ\"[2]` throws `StringIndexError` instead of returning λ.",
+      "verify": "The reference asserts `nextind(\"éλ\", 1) == 3`; also print `ncodeunits(\"éλ\")`, which is 4, beside `length(\"éλ\")`, which is 2."
     },
     {
       "title": "Count visible units",
       "task": "Compare characters and graphemes in the combining-accent example.",
       "expected": "Two characters form one grapheme.",
       "hint": "Use Unicode.graphemes for this representation.",
-      "answer": "A visible text unit can contain multiple code points."
+      "answer": "A visible text unit can contain multiple code points.",
+      "why": "`\"e\\u0301\"` stores e followed by a combining acute accent: two characters that render as one visible grapheme.",
+      "wrong": "Reporting `length` as the visible count says 2 for a single displayed letter, which miscounts any text with combining marks.",
+      "verify": "Compare `length(s)` with `length(collect(Unicode.graphemes(s)))` after `using Unicode`; expect 2 and 1."
     },
     {
       "title": "Normalize deliberately",
       "task": "Apply NFC to the combining-accent fixture.",
       "expected": "It matches the precomposed form.",
       "hint": "Retain the original if exact provenance matters.",
-      "answer": "Canonical equivalence is a specific Unicode relation, not arbitrary semantic equivalence."
+      "answer": "Canonical equivalence is a specific Unicode relation, not arbitrary semantic equivalence.",
+      "why": "NFC composes e plus U+0301 into the single code point U+00E9, so the normalized string equals the precomposed é.",
+      "wrong": "Comparing the raw strings with `==` reports them unequal and could lead to duplicate keys for what readers consider the same word.",
+      "verify": "Assert `Unicode.normalize(\"e\\u0301\", :NFC) == \"\\u00e9\"` and keep the original string if provenance must be exact."
     },
     {
       "title": "Handle empty text",
       "task": "Check an empty string before selecting its first character.",
       "expected": "The empty case is identified explicitly.",
       "hint": "Do not assume every string has index 1.",
-      "answer": "A parser or display routine needs a documented empty-input policy."
+      "answer": "A parser or display routine needs a documented empty-input policy.",
+      "why": "`\"\"` has no characters, so `first(\"\")` fails; testing `isempty` first lets the routine apply its stated empty policy.",
+      "wrong": "Assuming index 1 always exists produces an indexing error deep inside a parser rather than a clear message about empty input.",
+      "verify": "The reference checks `isempty(\"\")`; add a branch that returns `nothing` for empty input and test both branches."
     },
     {
       "title": "Choose offset units",
       "task": "Store offsets for a cited text passage.",
       "expected": "Name byte, character or grapheme units and the text version.",
       "hint": "The source representation determines valid boundaries.",
-      "answer": "Offsets are only reproducible against the same representation and indexing contract."
+      "answer": "Offsets are only reproducible against the same representation and indexing contract.",
+      "why": "Citation offsets depend on the unit, since the same passage starting after é sits at byte 3 but character 2.",
+      "wrong": "Storing bare integers without naming the unit lets a reader slice bytes with character counts and cut a character in half.",
+      "verify": "Record each offset with its unit and text version, then reslice with `nextind` or `thisind` and confirm the cited text reappears."
     },
     {
       "title": "Add a counterexample",
       "task": "Test an ASCII indexing algorithm with multibyte text.",
       "expected": "The invalid byte-index assumption becomes visible.",
       "hint": "Use an expected failure rather than silently deleting characters.",
-      "answer": "A representative boundary fixture checks a mechanism that ASCII alone cannot exercise."
+      "answer": "A representative boundary fixture checks a mechanism that ASCII alone cannot exercise.",
+      "why": "An algorithm that steps by `i + 1` works on `\"ASCII\"` because there `ncodeunits` equals `length`; multibyte text breaks that equality.",
+      "wrong": "Testing only with ASCII fixtures passes every case while the byte-stepping bug remains, since every character there is one byte.",
+      "verify": "Keep `ncodeunits(\"ASCII\") == length(\"ASCII\")` as the reference does, and add `@test_throws StringIndexError \"éλ\"[2]` as the counterexample."
     }
-  ]
+  ],
+  "checks_note": "These six lines separate characters from bytes. `nextind(\"éλ\", 1) == 3` holds because é occupies two code units, so the next valid index skips index 2. The ASCII comparison then shows the one case where `length` and `ncodeunits` agree. `join` and `string` build text without manual spacing, and `lowercase` normalizes a label without changing its meaning. If an edit makes `nextind` return 2, it is treating byte offsets as character positions."
 }

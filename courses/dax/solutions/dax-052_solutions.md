@@ -42,11 +42,23 @@ Predict ALL(Product) under the North/year 2025 starting context.
 
 With no initial Product restriction, the measure remains 83; unrelated Customer and Date filters remain.
 
+**Why it fits this model:** ALL(Product) removes Product filters only, and none are active. North (Ada and Cy) and 2025 still select S4, S5 and S8.
+
+**Tempting mistake:** Expecting 187 as with ALL(Sales). ALL(Sales) clears the expanded fact table, including Customer and Date, but ALL(Product) cannot reach them.
+
+**How to confirm:** Under Region North and Year 2025, CALCULATE([NetRevenue], ALL(Product)) returns 83.
+
 ### Exercise 2
 
 Change requested color from Red to Blue.
 
 Requested and existing pair counts both become two.
+
+**Why it fits this model:** Notebook is Paper and Blue, and Mug is Home and Blue, so both requested pairs exist in Product.
+
+**Tempting mistake:** Concluding from this case that a cross product of valid values always exists. Case B's Home and Red has no product.
+
+**How to confirm:** RequestedPairs 2 and ExistingPairs 2 for Blue, against 2 and 1 for Red.
 
 ### Exercise 3
 
@@ -54,11 +66,23 @@ Write a denominator-debugging ledger.
 
 Record incoming filters, regular/limited relationships, expanded-table scope, requested versus surviving combinations and the exact query's value-filter behavior.
 
+**Why it fits this model:** The ledger lists the incoming filters (North, 2025), the modifier and the tables it covers, the relationship type, the requested and existing pairs, and the value at each step.
+
+**Tempting mistake:** Writing only "used ALL" in the ledger, which does not say whether 187 or 83 is expected.
+
+**How to confirm:** For case A the ledger reads Original 83, ALL(Sales) 187 and REMOVEFILTERS(Sales[NetAmount]) 83, each with its reason.
+
 ### Exercise 4
 
 Diagnose using ALL(Sales) to remove only a product-color selection.
 
 It can remove related dimension filters that should remain. Prefer a deliberately scoped modifier when that is the intended question.
+
+**Why it fits this model:** To remove only the color filter, name that column. Under Blue, North and 2025, the lines are S4 and S8.
+
+**Tempting mistake:** Using ALL(Sales) also clears North and 2025, so the measure jumps to the whole-model 187.
+
+**How to confirm:** Blue, North and 2025 give 63. REMOVEFILTERS(Product[Color]) gives 83, while ALL(Sales) gives 187.
 
 ### Exercise 5
 
@@ -66,12 +90,24 @@ Explain why an Independent versus Coalesced value-filter setting needs explicit 
 
 Record the setting and engine/version, then test same-table filter combinations and totals; do not invent an execution result from the setting's name.
 
+**Why it fits this model:** Independent and Coalesced settings control how filters on columns of the same table combine. Formulas do not show the setting.
+
+**Tempting mistake:** Predicting a result from the setting's name, such as assuming Independent means filters never interact, without testing.
+
+**How to confirm:** Record the setting and engine version, then test case B's Paper or Home with Red selection and the totals in the target model.
+
 ### Exercise 6
 
 Transfer the domain check to size/color inventory selections.
 
 Keep requested values, existing combinations and unavailable inventory distinct, especially when calculating shares or removing only one filter.
 
+**Why it fits this model:** Size and color selections work like Category and Color here. Each label exists, but the pair may not: Home and Red has no product.
+
+**Tempting mistake:** Computing a share where the denominator counts requested pairs. For Paper or Home with Red, only Pen exists, so the share must be based on 1 pair, not 2.
+
+**How to confirm:** Count existing combinations with SUMMARIZE over the dimension before computing shares; Pen's 24 USD is the only Red revenue.
+
 ## Review the boundary
 
-A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.
+Another readable expression is sound when its population, context and units match; record any assumed engine separately.

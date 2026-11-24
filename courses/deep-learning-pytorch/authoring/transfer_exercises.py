@@ -46,7 +46,7 @@ Independent units available: 3""",
             "Use training targets 1, 3, 5 to predict a constant on holdout targets 7 and 9. Report the constant, the holdout residuals and the holdout MSE.",
             "constant 3; residuals 4 and 6; squared errors 16 and 36; MSE 26.",
             """Training mean=(1+3+5)/3=3
-Holdout residuals=7-3, 9-3 = 4, 6
+Holdout residuals (target minus prediction)=7-3, 9-3 = 4, 6
 Squared errors=16, 36
 MSE=52/2=26""",
             "The constant comes only from training targets. Using the holdout mean 8 would give MSE 1 but would make the holdout part of fitting.",
@@ -90,7 +90,7 @@ assert tuple(grid.shape)==(3,2) and grid.stride()==(2,1) and grid.dtype==torch.f
     ex(
         "Write through a column view",
         "Take column 1 of the (3, 2) tensor as a view, set its last entry to -7 and inspect the original tensor and the view's stride.",
-        "grid[2, 1] becomes -7; the column view has stride (2,).",
+        "`grid[2, 1]` becomes -7; the column view has stride (2,).",
         """column=grid[:,1]; column[2]=-7
 assert grid[2,1].item()==-7 and column.stride()==(2,)""",
         "Basic slicing returns a view, so the write lands in the shared storage. The view steps two elements per entry because it skips the other column.",
@@ -98,7 +98,7 @@ assert grid[2,1].item()==-7 and column.stride()==(2,)""",
     ex(
         "Separate contiguous from clone",
         "Call contiguous() and clone() on the already contiguous grid, then write 100 into the [0, 0] entry of the first result and -100 into the second.",
-        "contiguous() returns the same storage, so grid[0, 0] becomes 100; the clone write leaves grid unchanged.",
+        "contiguous() returns the same storage, so `grid[0, 0]` becomes 100; the clone write leaves grid unchanged.",
         """same=grid.contiguous(); owned=grid.clone()
 same[0,0]=100; owned[0,0]=-100
 assert same.data_ptr()==grid.data_ptr() and grid[0,0].item()==100 and owned[0,0].item()==-100""",

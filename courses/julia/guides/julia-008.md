@@ -10,6 +10,14 @@ Choose collection representations according to identity, ordering, mutability an
 
 Open `julia-008` in `/classroom` with its prepared `julia` runtime. Worked case A (a record with explicit fields) and worked case B (count categories and inspect membership) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-008: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Tuple:** An immutable, fixed-length ordered collection whose element types are part of its own type.
+- **NamedTuple:** An immutable tuple with named fields, such as `(id = 7, score = 0.5)`, read with field syntax like `row.score`.
+- **Dict:** A hash table that maps keys to values and whose iteration order is unspecified, so reports should sort keys explicitly.
+- **Key equality:** Dictionaries and sets match keys with `isequal` and `hash`, so `1` and `1.0` select the same entry.
+- **Set:** An unordered collection of distinct elements that uses the same equality and hashing rules as dictionary keys.
+
 ## A collection has a contract beyond its contents
 
 A tuple is an immutable ordered collection whose element types can differ. A named tuple adds field names, making a small record easier to interpret. A dictionary maps keys to values, while a set records membership. These structures answer different questions and should not be selected only because they can all hold several values.

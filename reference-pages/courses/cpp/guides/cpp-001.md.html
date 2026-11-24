@@ -222,7 +222,7 @@ compile: hello.o
 link: hello
 run stdout: hello, learner
 run exit: 0</code></pre>
-<p><strong>Expected:</strong> There are four phases and one successful process observation.</p>
+<p><strong>Expected:</strong> There are three build phases (compile, link, run) after you write the input, and one successful process observation.</p>
 <h4 id="worked-example-2-stop-at-the-first-failed-phase">Worked example 2: Stop at the first failed phase<a class="heading-anchor" href="#worked-example-2-stop-at-the-first-failed-phase" aria-label="Link to this section">#</a></h4>
 <p>A tool reporting an error did run; the program being compiled did not thereby run.</p>
 <pre class="highlighted-code"><code class="language-text">compile: error: expected semicolon
@@ -233,9 +233,9 @@ process: not run</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-name-each-artifact">Exercise 1: Name each artifact<a class="heading-anchor" href="#exercise-1-name-each-artifact" aria-label="Link to this section">#</a></h4>
 <p>Classify editable text, object file, executable and printed line.</p>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 1, hello.cpp, hello.o, hello and hello, learner.</p>
-<p><strong>Expected result/shape:</strong> For cpp-001 Exercise 1, source/object/executable/output in that order.</p>
-<p><strong>Verify:</strong> For cpp-001 Exercise 1, label all four without treating the executable as source.</p>
+<p><strong>Inputs/evidence:</strong> <code>hello.cpp</code>, <code>hello.o</code>, <code>hello</code> and the output <code>hello, learner</code>.</p>
+<p><strong>Expected result/shape:</strong> Source/object/executable/output in that order.</p>
+<p><strong>Verify:</strong> Label all four without treating the executable as source.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Start with the file a learner edits.</li>
@@ -244,9 +244,9 @@ process: not run</code></pre>
 </ol>
 <h4 id="exercise-2-read-a-relative-path">Exercise 2: Read a relative path<a class="heading-anchor" href="#exercise-2-read-a-relative-path" aria-label="Link to this section">#</a></h4>
 <p>Resolve a source path from a named working directory.</p>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 2, working directory course; relative path lessons/hello.cpp.</p>
-<p><strong>Expected result/shape:</strong> For cpp-001 Exercise 2, the intended file is course/lessons/hello.cpp.</p>
-<p><strong>Verify:</strong> For cpp-001 Exercise 2, draw the joined path and explain why changing the working directory changes a relative path.</p>
+<p><strong>Inputs/evidence:</strong> Working directory course; relative path lessons/hello.cpp.</p>
+<p><strong>Expected result/shape:</strong> The intended file is course/lessons/hello.cpp.</p>
+<p><strong>Verify:</strong> Draw the joined path and explain why changing the working directory changes a relative path.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Locate the base directory.</li>
@@ -255,9 +255,9 @@ process: not run</code></pre>
 </ol>
 <h4 id="exercise-3-classify-a-syntax-error">Exercise 3: Classify a syntax error<a class="heading-anchor" href="#exercise-3-classify-a-syntax-error" aria-label="Link to this section">#</a></h4>
 <p>Identify the first failing phase in a missing-semicolon transcript.</p>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 3, compiler rejects std::cout line; no object emitted.</p>
-<p><strong>Expected result/shape:</strong> For cpp-001 Exercise 3, compile failure; linking and learner-process execution not established.</p>
-<p><strong>Verify:</strong> For cpp-001 Exercise 3, state which artifact is absent and avoid claiming a runtime crash.</p>
+<p><strong>Inputs/evidence:</strong> Compiler rejects std::cout line; no object emitted.</p>
+<p><strong>Expected result/shape:</strong> Compile failure; linking and learner-process execution not established.</p>
+<p><strong>Verify:</strong> State which artifact is absent and avoid claiming a runtime crash.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Which tool reported the error?</li>
@@ -266,9 +266,9 @@ process: not run</code></pre>
 </ol>
 <h4 id="exercise-4-classify-a-link-error">Exercise 4: Classify a link error<a class="heading-anchor" href="#exercise-4-classify-a-link-error" aria-label="Link to this section">#</a></h4>
 <p>Explain undefined reference after compilation succeeds.</p>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 4, hello.o exists; linker says a called function has no definition.</p>
-<p><strong>Expected result/shape:</strong> For cpp-001 Exercise 4, link failure; no new executable established.</p>
-<p><strong>Verify:</strong> For cpp-001 Exercise 4, identify the missing definition or omitted object as the next check.</p>
+<p><strong>Inputs/evidence:</strong> <code>hello.o</code> exists; linker says a called function has no definition.</p>
+<p><strong>Expected result/shape:</strong> Link failure; no new executable established.</p>
+<p><strong>Verify:</strong> Identify the missing definition or omitted object as the next check.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Compilation and linking are separate.</li>
@@ -277,9 +277,9 @@ process: not run</code></pre>
 </ol>
 <h4 id="exercise-5-read-a-runtime-failure">Exercise 5: Read a runtime failure<a class="heading-anchor" href="#exercise-5-read-a-runtime-failure" aria-label="Link to this section">#</a></h4>
 <p>Compare stdout with exit status.</p>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 5, program prints started then exits 2.</p>
-<p><strong>Expected result/shape:</strong> For cpp-001 Exercise 5, the process ran and failed its declared contract despite producing text.</p>
-<p><strong>Verify:</strong> For cpp-001 Exercise 5, record both started and exit 2; do not call output alone success.</p>
+<p><strong>Inputs/evidence:</strong> Program prints started then exits 2.</p>
+<p><strong>Expected result/shape:</strong> The process ran and failed its declared contract despite producing text.</p>
+<p><strong>Verify:</strong> Record both started and exit 2; do not call output alone success.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Output can be partial.</li>
@@ -288,9 +288,9 @@ process: not run</code></pre>
 </ol>
 <h4 id="exercise-6-transfer-the-phase-trace">Exercise 6: Transfer the phase trace<a class="heading-anchor" href="#exercise-6-transfer-the-phase-trace" aria-label="Link to this section">#</a></h4>
 <p>A source edit is saved but the old executable is run. Predict the stale greeting.</p>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 6, old executable prints hello, learner; source now says hello, reviewer; no rebuild.</p>
-<p><strong>Expected result/shape:</strong> For cpp-001 Exercise 6, the old executable still prints hello, learner.</p>
-<p><strong>Verify:</strong> For cpp-001 Exercise 6, name the missing build step and keep source/build/run receipts separate.</p>
+<p><strong>Inputs/evidence:</strong> Old executable prints hello, learner; source now says hello, reviewer; no rebuild.</p>
+<p><strong>Expected result/shape:</strong> The old executable still prints hello, learner.</p>
+<p><strong>Verify:</strong> Name the missing build step and keep source/build/run receipts separate.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Which artifact did the process start from?</li>
@@ -306,6 +306,7 @@ process: not run</code></pre>
 <p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not paste a diagnostic as though it were a command. Do not infer a successful link from one existing object file, or a correct program from exit 0 alone. Avoid overwriting source when choosing an executable output path.</p>
+<p>A frequent mix-up is reading a stale executable. If the compile step fails but an older <code>hello</code> from a previous build is still on disk, running it prints the old greeting and exits 0, which looks like success for the new source. Check the timestamp of the compile output, or delete <code>hello</code> before rebuilding, so that a run transcript can only come from the build you just traced. The same reasoning explains Worked example 2: no new object file means no new evidence about the program.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-002.md.html">cpp-002</a>, which turns this phase trace into a tiny named build target.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-021`, `apache-005`, `apache-011`.
 
+## Key terms
+
+- **Stage:** A set of Ballista tasks that can run under the same dependency boundary. A downstream stage starts only after the shuffle output it reads is available.
+- **Task:** One unit of work that a scheduler assigns to an executor, usually one partition of one stage. It is neither an Arrow record batch nor necessarily a whole stage.
+- **Shuffle:** The exchange that writes or exposes intermediate partitions by grouping key so downstream tasks can read their required inputs.
+- **Partial aggregate:** A per-partition result, such as a sum by region, computed before the shuffle and combined into the final aggregate afterward.
+- **Partition skew:** An uneven key distribution that makes one task or partition much larger than the others, so it dominates the stage's completion time.
+
 ## A stage boundary changes where intermediate state lives
 
 A query such as group by region can perform partial aggregation near each input
@@ -77,6 +85,34 @@ preserving exact answers, and identify which performance conclusions still need
 real task metrics and representative scale.
 
 The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+
+## Worked examples
+
+### Capture plan text and hot-key results
+
+```bash
+cd work/ballista
+bash run.sh plans
+bash run.sh evidence
+```
+
+The plans receipt holds the EXPLAIN text for the regional aggregate and a hot_key_rows list for a 200-row source where 180 rows share the key hot. That list should show hot with n of 180 and twenty rare keys with n of 1, matching the fixture oracle. Look in the plan text for a repartition between partial and final aggregation; that boundary is where a hot key concentrates on one task.
+
+### Compute the hot-key oracle independently
+
+```python
+from collections import Counter
+
+hot = [{"id": i, "region": "hot" if i < 180 else f"rare-{i}", "amount": 1} for i in range(200)]
+counts = Counter(row["region"] for row in hot)
+print(counts.most_common(2), len(counts))
+```
+
+```text
+[('hot', 180), ('rare-180', 1)] 21
+```
+
+One region holds 180 of 200 rows and the other 20 appear once each, giving 21 groups. That distribution is what makes the final aggregate stage uneven: whichever task receives hot does most of the stage work. The engine result must equal this oracle, but equality proves only correctness; a local frequency count says nothing about task timing, which needs scheduler telemetry.
 
 ## Complete worked source
 

@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use independent x and y scales for their units. A <code>scaleSqrt</code> radius range maps nonnegative magnitude to radius. A circle at <code>(x(d.x), y(d.y))</code> encodes one record. Colors can represent categories, but labels or shapes should support readers who cannot distinguish the colors.</p>
 <p>The reference validates finite positions and the area relationship for magnitudes 1 and 4. It does not perform a statistical test. Use a tooltip or table for exact records and make missing or invalid coordinates an explicit data policy.</p>
 <h3 id="exercise-1-predict-circle-radii-for-sizes-1-and-4">Exercise 1: Predict circle radii for sizes 1 and 4.<a class="heading-anchor" href="#exercise-1-predict-circle-radii-for-sizes-1-and-4" aria-label="Link to this section">#</a></h3>
-<p>The radius ratio is two while the area ratio is four. This preserves the magnitude-to-area relation.</p>
+<p>The radius ratio is two while the area ratio is four. This preserves the magnitude-to-area relation. With scaleSqrt and a range ending at 20 for size 4, size 1 gives 20 <em> sqrt(1/4) = 10. The reference uses [0, 24], giving 12 and 24, the same 2 to 1 radius ratio and 4 to 1 area ratio. A linear radius scale would make the area ratio 16 to 1. The check (r(4) </em> r(4)) / (r(1) * r(1)) === 4 confirms the square-root mapping.</p>
 <p><strong>Expected:</strong> 10 and 20 under the stated square-root scale.</p>
 <h3 id="exercise-2-add-two-identical-coordinate-records">Exercise 2: Add two identical coordinate records.<a class="heading-anchor" href="#exercise-2-add-two-identical-coordinate-records" aria-label="Link to this section">#</a></h3>
-<p>Overlap can conceal multiplicity. Record counts remain a data check even when marks visually coincide.</p>
+<p>Overlap can conceal multiplicity. Record counts remain a data check even when marks visually coincide. Add two rows at x 2, y 4; three circles stack at one point but selectAll(&quot;circle&quot;).size() still counts every record. Judging the count by eye would undercount. Assert the size matches rows.length.</p>
 <p><strong>Expected:</strong> The record count exceeds the unique visible position count.</p>
 <h3 id="exercise-3-build-a-three-variable-scatterplot">Exercise 3: Build a three-variable scatterplot.<a class="heading-anchor" href="#exercise-3-build-a-three-variable-scatterplot" aria-label="Link to this section">#</a></h3>
-<p>A chart should let a reader distinguish spatial coordinates from the meaning of marker area.</p>
+<p>A chart should let a reader distinguish spatial coordinates from the meaning of marker area. The reference maps x and y to position with axes and size to area with scaleSqrt, plus a title on each circle giving all three values. Without a size legend, readers will read radius rather than area. Verify the tooltip text for B reads &quot;B: x 2, y 4, size 4&quot;.</p>
 <p><strong>Expected:</strong> Position and area mappings have named units and a size explanation.</p>
 <h3 id="exercise-4-diagnose-mapping-magnitude-directly-to-radius">Exercise 4: Diagnose mapping magnitude directly to radius.<a class="heading-anchor" href="#exercise-4-diagnose-mapping-magnitude-directly-to-radius" aria-label="Link to this section">#</a></h3>
-<p>If area is the intended quantity encoding, use an appropriate radius transformation and validate a known ratio.</p>
+<p>If area is the intended quantity encoding, use an appropriate radius transformation and validate a known ratio. d3.scaleLinear for radius makes size 4 cover 16 times the area of size 1. Compare r(4)^2 / r(1)^2: 4 means area encodes size, 16 means radius does.</p>
 <p><strong>Expected:</strong> Area exaggerates large values quadratically.</p>
 <h3 id="exercise-5-choose-a-justified-overplotting-strategy">Exercise 5: Choose a justified overplotting strategy.<a class="heading-anchor" href="#exercise-5-choose-a-justified-overplotting-strategy" aria-label="Link to this section">#</a></h3>
-<p>Opacity, jitter and bins solve different tasks. Do not hide the transformation from readers.</p>
+<p>Opacity, jitter and bins solve different tasks. Do not hide the transformation from readers. The reference uses fill-opacity 0.65 so overlaps darken. Jitter would move points off their true coordinates; say so in the caption if used, and keep counts in tooltips.</p>
 <p><strong>Expected:</strong> The strategy and its effect on interpretation are stated.</p>
 <h3 id="exercise-6-explain-a-correlation-without-claiming-causation">Exercise 6: Explain a correlation without claiming causation.<a class="heading-anchor" href="#exercise-6-explain-a-correlation-without-claiming-causation" aria-label="Link to this section">#</a></h3>
-<p>Selection, confounding and reverse causality can create patterns. Visualization supports inquiry, not automatic causal identification.</p>
+<p>Selection, confounding and reverse causality can create patterns. Visualization supports inquiry, not automatic causal identification. In the fixture, y rises with x for A and B but C at x 3 has y 3. Describe association only; three points cannot rule out a confounder. Adding a regression line to three points would suggest more certainty than the data holds; report the three tuples in a table instead.</p>
 <p><strong>Expected:</strong> Describe association and identify alternative explanations.</p></article>
   </main>
 </body>

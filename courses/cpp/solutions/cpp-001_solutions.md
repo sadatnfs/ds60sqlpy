@@ -28,7 +28,7 @@ run stdout: hello, learner
 run exit: 0
 ```
 
-**Expected:** There are four phases and one successful process observation.
+**Expected:** There are three build phases (compile, link, run) after you write the input, and one successful process observation.
 
 ### Worked example 2: Stop at the first failed phase
 
@@ -47,61 +47,61 @@ process: not run
 
 ### Exercise 1: Name each artifact
 
-**Inputs/evidence:** For cpp-001 Exercise 1, hello.cpp, hello.o, hello and hello, learner.
+**Inputs/evidence:** `hello.cpp`, `hello.o`, `hello` and the output `hello, learner`.
 
-**Expected result/shape:** For cpp-001 Exercise 1, source/object/executable/output in that order.
+**Expected result/shape:** Source/object/executable/output in that order.
 
-**Verify:** For cpp-001 Exercise 1, label all four without treating the executable as source.
+**Verify:** Label all four without treating the executable as source.
 
 The suffixes are conventional clues, but the build transcript establishes provenance. A printed greeting is data from a process, not the executable file itself.
 
 ### Exercise 2: Read a relative path
 
-**Inputs/evidence:** For cpp-001 Exercise 2, working directory course; relative path lessons/hello.cpp.
+**Inputs/evidence:** Working directory course; relative path lessons/hello.cpp.
 
-**Expected result/shape:** For cpp-001 Exercise 2, the intended file is course/lessons/hello.cpp.
+**Expected result/shape:** The intended file is course/lessons/hello.cpp.
 
-**Verify:** For cpp-001 Exercise 2, draw the joined path and explain why changing the working directory changes a relative path.
+**Verify:** Draw the joined path and explain why changing the working directory changes a relative path.
 
 A relative path is interpreted against a base. Quoting protects spaces but does not change which base directory a tool uses.
 
 ### Exercise 3: Classify a syntax error
 
-**Inputs/evidence:** For cpp-001 Exercise 3, compiler rejects std::cout line; no object emitted.
+**Inputs/evidence:** Compiler rejects std::cout line; no object emitted.
 
-**Expected result/shape:** For cpp-001 Exercise 3, compile failure; linking and learner-process execution not established.
+**Expected result/shape:** Compile failure; linking and learner-process execution not established.
 
-**Verify:** For cpp-001 Exercise 3, state which artifact is absent and avoid claiming a runtime crash.
+**Verify:** State which artifact is absent and avoid claiming a runtime crash.
 
 The compiler diagnoses syntax before it can produce valid object code. This is different from a process failing after a successful build.
 
 ### Exercise 4: Classify a link error
 
-**Inputs/evidence:** For cpp-001 Exercise 4, hello.o exists; linker says a called function has no definition.
+**Inputs/evidence:** `hello.o` exists; linker says a called function has no definition.
 
-**Expected result/shape:** For cpp-001 Exercise 4, link failure; no new executable established.
+**Expected result/shape:** Link failure; no new executable established.
 
-**Verify:** For cpp-001 Exercise 4, identify the missing definition or omitted object as the next check.
+**Verify:** Identify the missing definition or omitted object as the next check.
 
 A declaration tells the compiler a signature; the linker still needs a matching definition. This is not solved by ignoring the link command result.
 
 ### Exercise 5: Read a runtime failure
 
-**Inputs/evidence:** For cpp-001 Exercise 5, program prints started then exits 2.
+**Inputs/evidence:** Program prints started then exits 2.
 
-**Expected result/shape:** For cpp-001 Exercise 5, the process ran and failed its declared contract despite producing text.
+**Expected result/shape:** The process ran and failed its declared contract despite producing text.
 
-**Verify:** For cpp-001 Exercise 5, record both started and exit 2; do not call output alone success.
+**Verify:** Record both started and exit 2; do not call output alone success.
 
 Diagnostic text can precede a failure. A verifier must inspect the status as well as expected values, and a partial output stream cannot make a failing process green.
 
 ### Exercise 6: Transfer the phase trace
 
-**Inputs/evidence:** For cpp-001 Exercise 6, old executable prints hello, learner; source now says hello, reviewer; no rebuild.
+**Inputs/evidence:** Old executable prints hello, learner; source now says hello, reviewer; no rebuild.
 
-**Expected result/shape:** For cpp-001 Exercise 6, the old executable still prints hello, learner.
+**Expected result/shape:** The old executable still prints hello, learner.
 
-**Verify:** For cpp-001 Exercise 6, name the missing build step and keep source/build/run receipts separate.
+**Verify:** Name the missing build step and keep source/build/run receipts separate.
 
 Editing text does not mutate existing machine code. Rebuild and then run the resulting target before expecting the new behavior.
 

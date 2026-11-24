@@ -42,6 +42,18 @@ internal static class Program {
       Check(!Array.Exists(values, value => value == 9), "absent target");
     }
     {
+      // Task 2: Guided modification
+      int[] values = { 2, -3, 4, -1, 6 };
+      int sum = 0;
+      foreach (int value in values) {
+        if (value < 0)
+          continue;
+        sum += value;
+      }
+      Check(sum == 12, "negatives skipped");
+      Check(sum == values.Where(v => v >= 0).Sum(), "same as filtered sum");
+    }
+    {
       // Task 3: Independent construction
       bool TryFirstIndex(int[] items, int target, out int index) {
         for (int i = 0; i < items.Length; i++) {
@@ -57,6 +69,24 @@ internal static class Program {
       Check(TryFirstIndex(values, 7, out int at) && at == 1, "first match");
       Check(!TryFirstIndex(values, 9, out _), "not found");
       Check(!TryFirstIndex(Array.Empty<int>(), 1, out _), "empty input");
+    }
+    {
+      // Task 5: Boundary evidence
+      int FirstIndex(int[] items, int target) {
+        for (int i = 0; i < items.Length; i++) {
+          if (items[i] == target)
+            return i;
+        }
+        return -1;
+      }
+      int[] empty = Array.Empty<int>();
+      int[] single = { 4 };
+      int[] other = { 1, 2 };
+      int[] repeated = { 4, 9, 4 };
+      Check(FirstIndex(empty, 4) == -1, "empty input");
+      Check(FirstIndex(single, 4) == 0, "singleton match");
+      Check(FirstIndex(other, 4) == -1, "no match");
+      Check(FirstIndex(repeated, 4) == 0, "repeated match returns the first");
     }
     Console.WriteLine("csharp-006: passed");
     await Task.CompletedTask;

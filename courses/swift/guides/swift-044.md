@@ -114,7 +114,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Describe state with words) before changing anything, and confirm its observation: The label communicates completion without relying on color.
 2. Compare Example B (Keep identity separate from translation) with Example A and name the first line whose behavior differs. Its observation is: Switching language changes the title from Read to Lire while the completion saved under lesson-one still shows complete.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A label should not duplicate an entire surrounding screen.
+3. Before opening the explanation, check your task 3 attempt (Run JourneyApp using keyboard navigation and VoiceOver on macOS) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-compare-build-and-runtime-secrets">Exercise 1: Compare build and runtime secrets.<a class="heading-anchor" href="#exercise-1-compare-build-and-runtime-secrets" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Temporary build input versus application-time input.</p>
 <p><strong>Why:</strong> Their consumers and lifetimes differ. A build-only credential should not be copied into the final runtime image.</p>
+<p><strong>Approach:</strong> Separate when each secret is needed: a build secret serves one RUN step; a runtime secret like demo is read while the app runs.</p>
+<p><strong>Why this is correct:</strong> A build-only credential that ends up in the runtime image stays readable for the image&#x27;s whole life.</p>
+<p><strong>A plausible wrong approach:</strong> Using the same token for build and runtime and copying it into the image to reuse it widens exposure.</p>
+<p><strong>How to verify:</strong> The final image lacks the build credential, and the app reads demo from /run/secrets at runtime only.</p>
 <h3 id="exercise-2-predict-whether-a-local-secret-file-is-automatically-encrypted-everywhere">Exercise 2: Predict whether a local secret file is automatically encrypted everywhere.<a class="heading-anchor" href="#exercise-2-predict-whether-a-local-secret-file-is-automatically-encrypted-everywhere" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> No; host storage and platform behavior require separate protection.</p>
 <p><strong>Why:</strong> The secret abstraction controls delivery, not every storage layer. Describe the actual local Compose implementation honestly.</p>
+<p><strong>Approach:</strong> Ask where demo-secret.txt lives: in plain form on the host, protected only by host file permissions.</p>
+<p><strong>Why this is correct:</strong> Local Compose delivers the file into the container; it does not encrypt the host copy.</p>
+<p><strong>A plausible wrong approach:</strong> Treating the secrets key as encryption leaves the host file readable by other local users if its mode allows.</p>
+<p><strong>How to verify:</strong> ls -l on the host file shows its mode and owner, which set who can read it.</p>
 <h3 id="exercise-3-design-a-no-disclosure-validation-message">Exercise 3: Design a no-disclosure validation message.<a class="heading-anchor" href="#exercise-3-design-a-no-disclosure-validation-message" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Report presence or a bounded error without the sensitive value.</p>
 <p><strong>Why:</strong> Useful diagnostics need not reveal bytes. Avoid including environment dumps, full headers or file contents in error reports.</p>
+<p><strong>Approach:</strong> Read the worked example&#x27;s check: it reads the file, rejects empty content, and prints only that input is present.</p>
+<p><strong>Why this is correct:</strong> The message proves the secret is configured without writing its bytes to output or logs.</p>
+<p><strong>A plausible wrong approach:</strong> Printing the value to confirm it loaded copies it into logs that others may read.</p>
+<p><strong>How to verify:</strong> Run the check with an empty file and a filled file; the first raises and the second prints present, with no value shown.</p>
 <h3 id="exercise-4-diagnose-a-secret-declared-but-not-granted-to-a-service">Exercise 4: Diagnose a secret declared but not granted to a service.<a class="heading-anchor" href="#exercise-4-diagnose-a-secret-declared-but-not-granted-to-a-service" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The service lacks the intended mounted input.</p>
 <p><strong>Why:</strong> Check the effective model and service access list before changing file permissions or adding a broad host mount.</p>
+<p><strong>Approach:</strong> Check the service&#x27;s secrets list in docker compose config: a top-level declaration alone does not mount the file into any service.</p>
+<p><strong>Why this is correct:</strong> Without the grant there is no /run/secrets/demo in that container, so reading it fails.</p>
+<p><strong>A plausible wrong approach:</strong> Changing host file permissions or bind-mounting the folder adds exposure without granting the secret.</p>
+<p><strong>How to verify:</strong> After adding demo under the service&#x27;s secrets, the file exists in that container only.</p>
 <h3 id="exercise-5-explain-credential-rotation-beyond-restarting-a-container">Exercise 5: Explain credential rotation beyond restarting a container.<a class="heading-anchor" href="#exercise-5-explain-credential-rotation-beyond-restarting-a-container" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> New input must be applied and old authority revoked deliberately.</p>
 <p><strong>Why:</strong> The external service decides which credential remains valid. A process lifecycle event alone cannot establish that policy change.</p>
+<p><strong>Approach:</strong> Separate delivering a new value from making the old one invalid: the service that issued it must revoke it.</p>
+<p><strong>Why this is correct:</strong> Restarting the container picks up the new file but leaves the old credential usable by anyone holding it.</p>
+<p><strong>A plausible wrong approach:</strong> Calling rotation done after a restart leaves the leaked old value working.</p>
+<p><strong>How to verify:</strong> A request using the old credential is rejected by the issuing service after revocation.</p>
 <h3 id="exercise-6-write-a-secret-data-flow-review">Exercise 6: Write a secret data-flow review.<a class="heading-anchor" href="#exercise-6-write-a-secret-data-flow-review" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Source, host protection, service grant, read path, logs, rotation and deletion.</p>
 <p><strong>Why:</strong> Following the bytes through their lifetime reveals exposure paths that a single Compose setting cannot address.</p>
+<p><strong>Approach:</strong> Follow the bytes: where they are created, how the host stores them, which service gets them, how it reads them, what may log them, and how they are rotated and deleted.</p>
+<p><strong>Why this is correct:</strong> Each stage can leak in its own way, which a single compose setting does not cover.</p>
+<p><strong>A plausible wrong approach:</strong> Reviewing only the secrets block misses an error message that prints the value.</p>
+<p><strong>How to verify:</strong> Each stage in the review has a named control and the check that confirmed it.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

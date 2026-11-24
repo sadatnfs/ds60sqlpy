@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-009-explained-reference">eval-009: explained reference<a class="heading-anchor" href="#eval-009-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-009_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-009_reference.py</code> asserts each answer below, from <em>One supported claim</em> to <em>Disentangle truth and support</em>, on the authored citation precision and claim coverage fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Unknown support relation</em> tests.</p>
 <h3 id="1-one-supported-claim">1. One supported claim<a class="heading-anchor" href="#1-one-supported-claim" aria-label="Link to this section">#</a></h3>
 <p>Perfect precision does not imply that the full answer has adequate evidence coverage.</p>
+<p><strong>Approach.</strong> Use case A&#x27;s claims <code>[&quot;c1&quot;, &quot;c2&quot;, &quot;c3&quot;]</code> and keep only the first link, <code>(&quot;c1&quot;, &quot;d1&quot;)</code>, which is judged <code>True</code>. Call <code>citation_metrics</code> and read both fields.</p>
+<p><strong>Why it holds for this fixture.</strong> One link is judged and it is supported, so link precision is 1 / 1 = 1. Only claim c1 has a supported link, so claim coverage is 1 / 3. The answer makes three claims and offers evidence for one of them.</p>
+<p><strong>A tempting wrong approach.</strong> Reporting precision alone as &quot;citations are 100 percent accurate&quot; is the mistake. A system can reach perfect precision by citing only its easiest claim and leaving the rest unsupported; coverage is what exposes that.</p>
+<p><strong>How to verify.</strong> Worked case A asserts <code>citation_metrics(claims, links[:1], support) == {&quot;link_precision&quot;: 1.0, &quot;claim_coverage&quot;: 1 / 3}</code>. The full three-link version gives 2 / 3 for both.</p>
 <p><strong>Expected observation:</strong> Precision 1, coverage 1/3.</p>
 <h3 id="2-no-citations">2. No citations<a class="heading-anchor" href="#2-no-citations" aria-label="Link to this section">#</a></h3>
 <p>There are no links to judge, but no eligible claim has supported evidence.</p>
+<p><strong>Approach.</strong> Call <code>citation_metrics([&quot;c&quot;], [], {})</code>. With no links the precision denominator is zero, so the function returns <code>None</code> for precision, and coverage is 0 / 1.</p>
+<p><strong>Why it holds for this fixture.</strong> Precision asks what share of offered links are supported; with no links offered, that share is undefined. Coverage asks what share of eligible claims have support; the one claim has none, so 0 is a real, defined failure.</p>
+<p><strong>A tempting wrong approach.</strong> Setting precision to 1 because no citation was wrong rewards an answer for citing nothing. Setting it to 0 confuses &quot;no evidence offered&quot; with &quot;evidence offered and wrong,&quot; which the next check distinguishes.</p>
+<p><strong>How to verify.</strong> The reference asserts the result equals <code>{&quot;link_precision&quot;: None, &quot;claim_coverage&quot;: 0.0}</code>. Compare with one link judged <code>False</code>, which gives 0.0 for both.</p>
 <p><strong>Expected observation:</strong> Precision is missing; coverage is 0.</p>
 <h3 id="3-unknown-support-relation">3. Unknown support relation<a class="heading-anchor" href="#3-unknown-support-relation" aria-label="Link to this section">#</a></h3>
 <p>Retain missingness and acquire a label or use an explicit assessment-sampling protocol.</p>
+<p><strong>Approach.</strong> Pass a link <code>(&quot;c&quot;, &quot;d&quot;)</code> with an empty support dictionary. The function checks <code>(c, d) not in support</code> for every link and raises <code>Unjudged or duplicate link</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> No one has decided whether document d supports claim c. Including the link with any assumed value would make precision depend on a guess, and the guess would differ between assessors and between runs.</p>
+<p><strong>A tempting wrong approach.</strong> Treating unjudged links as unsupported looks conservative but is not neutral: it penalizes new citation patterns that assessors have not reached yet, which biases comparisons toward the system that produced the judged pool.</p>
+<p><strong>How to verify.</strong> The reference includes <code>([(&quot;c&quot;, &quot;d&quot;)], {})</code> in its invalid list and fails with <code>Invalid citation accepted</code> if it passes. A <code>None</code> value in the support map is also rejected by the Boolean type check.</p>
 <p><strong>Expected observation:</strong> The helper rejects it.</p>
 <h3 id="4-duplicate-a-citation">4. Duplicate a citation<a class="heading-anchor" href="#4-duplicate-a-citation" aria-label="Link to this section">#</a></h3>
 <p>Duplicated markup should not increase the apparent amount of evidence.</p>
+<p><strong>Approach.</strong> Pass <code>[(&quot;c&quot;, &quot;d&quot;), (&quot;c&quot;, &quot;d&quot;)]</code> with the pair judged <code>True</code>. The guard <code>len(set(links)) != len(links)</code> raises before any metric is computed.</p>
+<p><strong>Why it holds for this fixture.</strong> Two identical links point to the same evidence for the same claim. Counting both would raise the numerator and denominator of precision together and could make an answer look as if it had twice the evidence it does.</p>
+<p><strong>A tempting wrong approach.</strong> Deduplicating quietly inside the metric hides a formatting bug in the system that produced the answer. The bug should be fixed or measured, not absorbed.</p>
+<p><strong>How to verify.</strong> The reference includes the duplicated pair in the invalid list. After removing the duplicate, <code>citation_metrics([&quot;c&quot;], [(&quot;c&quot;, &quot;d&quot;)], {(&quot;c&quot;, &quot;d&quot;): True})</code> returns 1.0 for both fields.</p>
 <p><strong>Expected observation:</strong> The helper rejects it.</p>
 <h3 id="5-use-a-newer-document">5. Use a newer document<a class="heading-anchor" href="#5-use-a-newer-document" aria-label="Link to this section">#</a></h3>
 <p>A later correction cannot be treated as information the original system had at decision time.</p>
+<p><strong>Approach.</strong> Call <code>eligible_evidence({&quot;id&quot;: &quot;d1-v2&quot;, &quot;published&quot;: 12}, 10, {&quot;d1-v2&quot;})</code>. The function requires both an allowed ID and <code>published &lt;= cutoff</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> The answer was produced at day 10, and document version d1-v2 appeared at day 12. The original system could not have cited it, so a historical reconstruction that accepts it rewards evidence from the future, the same leakage as a delayed label in eval-002.</p>
+<p><strong>A tempting wrong approach.</strong> Grading against the latest document version because it is more accurate mixes two questions: whether the system behaved well with the evidence it had, and whether the evidence later changed.</p>
+<p><strong>How to verify.</strong> Worked case B asserts the call returns <code>False</code> at cutoff 10 and <code>True</code> at cutoff 12. An ID not in the allowed set, such as <code>&quot;restricted&quot;</code>, is ineligible at any cutoff.</p>
 <p><strong>Expected observation:</strong> That version is ineligible for the historical reconstruction.</p>
 <h3 id="6-disentangle-truth-and-support">6. Disentangle truth and support<a class="heading-anchor" href="#6-disentangle-truth-and-support" aria-label="Link to this section">#</a></h3>
 <p>Citation evaluation measures a relation to supplied evidence. It does not establish that all evidence is correct or current.</p>
+<p><strong>Approach.</strong> Write a claim that quotes a source word for word, where the source itself states a wrong value. Judge support (does the cited passage say this?) and truth (is it correct?) separately.</p>
+<p><strong>Why it holds for this fixture.</strong> Support is <code>True</code> because the claim matches the passage. Truth is <code>False</code> because the passage is wrong. Worked case B encodes exactly this pair: <code>support = True</code>, <code>truth = False</code>.</p>
+<p><strong>A tempting wrong approach.</strong> Treating supported claims as verified facts is the mistake. Citation metrics measure faithfulness to supplied evidence; they cannot detect errors in that evidence, so a corpus with stale or wrong documents yields faithful but false answers.</p>
+<p><strong>How to verify.</strong> Worked case B asserts <code>support and not truth</code>. In a report, label the support metric explicitly as a relation to the corpus snapshot and track truth through a separate assessment.</p>
 <p><strong>Expected observation:</strong> Support can be true while truth is false.</p></article>
   </main>
 </body>

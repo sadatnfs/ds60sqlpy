@@ -115,7 +115,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Round-trip in an owned directory) before changing anything, and confirm its observation: The UTF-8 bytes round-trip in a uniquely owned location.
 2. Compare Example B (Distinguish file and network locations) with Example A and name the first line whose behavior differs. Its observation is: The two URLs carry different location schemes.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Never remove an arbitrary caller-provided directory.
+3. Before opening the explanation, check your task 3 attempt (Persist a Codable value in a temporary file and validate after reading) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

@@ -11,6 +11,7 @@ def main():
     assert selects(selector, {"app": "hello", "release": "stable"})
     assert not selects(selector, {"app": "hello", "release": "candidate"})
     assert not gate(["reviewer", "reviewer", "ERROR", "reviewer"], "reviewer")
+    assert not gate(["reviewer", "reviewer", "reviewer", "TIMEOUT"], "reviewer")
     assert gate(["hello"] * 4, "hello")
     print("k8s-034 synthetic selector and release gates passed; no live traffic changed")
 

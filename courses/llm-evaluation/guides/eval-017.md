@@ -8,7 +8,7 @@ Derive a pairwise reward likelihood, test its invariances and identify what comp
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-017`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-017` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for preference data and bradley-terry reward models in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about Bradley-Terry and pairwise likelihood: Equal scores give preference probability 0.5 and loss log 2, shifting both rewards changes neither loss nor gradient, reversed counts fit probability 0.25, all-win data has no finite estimate, the loss stays finite at 2000, and a preference cycle has no scalar ordering. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Preferences define a different target from correctness
 
@@ -21,6 +21,13 @@ P(a\succ b\mid x)=\sigma(r(x,a)-r(x,b)).
 \]
 
 For a positive comparison, the negative log likelihood is \(\log(1+\exp(-(r_a-r_b)))\). A numerically stable softplus calculation is preferable to taking the logarithm of a probability that may round to zero. The code uses `logaddexp` and checks extreme score differences.
+
+## Key terms
+
+- **Bradley-Terry model:** A comparison model in which P(a preferred over b) is the logistic function of the score difference r_a - r_b.
+- **Pairwise likelihood:** The likelihood of observed preference outcomes, whose loss log(1 + exp(-(r_a - r_b))) is computed stably with logaddexp.
+- **Offset nonidentifiability:** The fact that adding a constant to all scores within a prompt leaves every preference probability unchanged.
+- **Comparison graph:** The graph of which responses were compared, whose connectivity limits which score differences are identified.
 
 ## Worked case A: reward offsets are unidentified
 

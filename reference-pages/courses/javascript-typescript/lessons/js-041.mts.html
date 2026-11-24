@@ -200,19 +200,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `{ group: &#x27;A&#x27;, value: 2 },` to `{</span></span>
 <span class="source-line"><span class="syntax-comment">// group: &#x27;A&#x27;, value: 3 },`. Before running it, predict which check fails and which value it</span></span>
 <span class="source-line"><span class="syntax-comment">// now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.deepEqual([...result.groups], [[&#x27;A&#x27;, { count: 2, sum: 5 }], [&#x27;B&#x27;, { count: 1, sum:</span></span>
-<span class="source-line"><span class="syntax-comment">// 4 }]])`. Restoring the original line brings back the worked observation: A count 2 sum 5;</span></span>
-<span class="source-line"><span class="syntax-comment">// B count 1 sum 4; zero rejected.</span></span>
+<span class="source-line"><span class="syntax-comment">// 4 }]])`. Restoring `{ group: &#x27;A&#x27;, value: 2 },` brings back: A count 2 sum 5; B count 1 sum</span></span>
+<span class="source-line"><span class="syntax-comment">// 4; zero rejected.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Quarantine syntax and domain failures with physical line numbers: debug a regression</span></span>
 <span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `&quot;value&quot;:3`. Run</span></span>
 <span class="source-line"><span class="syntax-comment">// Example B with that line, use the failing check to locate the defect and repair it without</span></span>
 <span class="source-line"><span class="syntax-comment">// changing the check.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(result.groups.get(&#x27;A&#x27;), { count: 1, sum: 2 })`; after it the line reads</span></span>
-<span class="source-line"><span class="syntax-comment">// `&quot;value&quot;:2` again and one accepted row; diagnostics at lines 2 and 3 with json/schema</span></span>
-<span class="source-line"><span class="syntax-comment">// categories.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(result.groups.get(&#x27;A&#x27;), { count: 1, sum: 2 })`. Restoring `&quot;value&quot;:2`</span></span>
+<span class="source-line"><span class="syntax-comment">// brings back: one accepted row; diagnostics at lines 2 and 3 with json/schema categories.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Preserve a multi-byte group name across single-byte chunks</span></span>
 <span class="source-line"><span class="syntax-comment">// Use an emoji group and split every UTF-8 byte.</span></span>

@@ -121,7 +121,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Reuse an ordering mechanism) before changing anything, and confirm its observation: One implementation preserves Int and String results.
 2. Compare Example B (Preserve container element type) with Example A and name the first line whose behavior differs. Its observation is: Swapping retains the same concrete element type.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Any discards useful type information.
+3. Before opening the explanation, check your task 3 attempt (Create a generic immutable triple with a rotation operation) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

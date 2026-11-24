@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: beginner. Direct prerequisites: <code>pyweb-010</code>, <code>python-10</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A repeatable web test needs a clear owner for every piece of state. A client cookie jar, an application object&#x27;s in-memory data and a persistent database have different lifetimes. This chapter uses a real application factory to show which state is shared and which is isolated.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Application factory:</strong> A function such as <code>make_app()</code> that builds and returns a new application, with its own state, every time it is called.</li>
+<li><strong>Fixture:</strong> A known starting state, such as a fresh item list, that a test creates explicitly instead of inheriting from earlier code or runs.</li>
+<li><strong>Cookie jar:</strong> The store of cookies a test client keeps and sends on its later requests; each client owns a separate jar.</li>
+<li><strong>Closure:</strong> A function that captures variables from its enclosing scope, which is how the route functions share the factory&#x27;s item list.</li>
+<li><strong>State isolation:</strong> Arranging tests so each one owns its state and cannot pass or fail because of what another test or client left behind.</li>
+</ul>
 <h3 id="mechanism-create-the-application-deliberately">Mechanism: create the application deliberately<a class="heading-anchor" href="#mechanism-create-the-application-deliberately" aria-label="Link to this section">#</a></h3>
 <p><code>make_app()</code> constructs a Flask application, a fresh item list and its route functions. The functions close over that list, so clients of the same application see the same server-side fixture. Each test client separately owns its cookies. The session&#x27;s created-count therefore belongs to the client&#x27;s signed session, while the total item count belongs to the application fixture.</p>
 <p>Factories are useful beyond tests. They let deployment code construct an application from explicit configuration and make dependencies easier to replace. They also discourage accidental reliance on a single import-time global object. A factory does not, however, make in-memory state durable or shared across multiple operating-system processes.</p>
@@ -208,6 +216,33 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-case-a-new-application-starts-with-a-fresh-fixture">Worked case: a new application starts with a fresh fixture<a class="heading-anchor" href="#worked-case-a-new-application-starts-with-a-fresh-fixture" aria-label="Link to this section">#</a></h3>
 <p>A third client belongs to a newly constructed application. Both counts start at zero. This verifies the factory&#x27;s state boundary. It would fail if the list were defined as a module global and every factory invocation reused it unintentionally.</p>
 <p>The example intentionally reports that the item list does not survive process restart. Later workshops use an explicitly persistent database and test stop/resume behavior. An in-memory dictionary should not be presented as a production storage layer merely because a client test passes.</p>
+<h3 id="worked-example-a-module-level-list-leaks-between-tests">Worked example: a module-level list leaks between tests<a class="heading-anchor" href="#worked-example-a-module-level-list-leaks-between-tests" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> flask <span class="syntax-keyword">import</span> Flask
+
+shared_items <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">make_app</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    app <span class="syntax-operator">=</span> Flask<span class="syntax-punctuation">(</span>__name__<span class="syntax-punctuation">)</span>
+
+    <span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/items</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">create</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        items<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">item</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-number">201</span>
+
+    <span class="syntax-keyword">return</span> app
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">test_create</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> make_app<span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>test_client<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/items</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>json<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">shared:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> test_create<span class="syntax-punctuation">(</span>shared_items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> test_create<span class="syntax-punctuation">(</span>shared_items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">isolated:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> test_create<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> test_create<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">shared: 1 2
+isolated: 1 1</code></pre>
+<p>Both calls to <code>test_create</code> assert the same story, that creating one item yields a count of 1, but with a module-level list the second run saw 2 because state from the first run survived. The test would pass or fail depending on order, which is the classic flaky-test symptom. Passing a fresh list into each factory call reproduces what the lesson&#x27;s <code>make_app</code> does with its local <code>items</code>: every application fixture starts empty. The lesson&#x27;s <code>session</code> counter adds a second boundary, since two clients of one application share server state but not cookies. In pytest, a fixture that calls the factory gives every test its own application; scoping that fixture to <code>module</code> would reintroduce the leak.</p>
 <h3 id="failure-diagnosis">Failure diagnosis<a class="heading-anchor" href="#failure-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Tests that pass individually but fail in a suite often share state accidentally. Inspect module globals, default mutable arguments, reused cookies, global dependency overrides and database cleanup. Tests that pass only in a particular order may be relying on another test to create data. Make each case&#x27;s setup and expected initial state explicit.</p>
 <p>Avoid fixing test contamination by blindly resetting an entire developer or learner database. Use owned temporary state, transactional test databases or clearly scoped fixtures. The classroom and its service workshops preserve learner data independently from these disposable test examples.</p>

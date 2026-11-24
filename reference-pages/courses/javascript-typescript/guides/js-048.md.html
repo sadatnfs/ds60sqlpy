@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>CSV is a text format whose cells do not automatically have the domain types your analysis needs. Parsing a file into rows and interpreting strings as numbers or dates are separate steps. Empty strings, malformed values and duplicate IDs require explicit policies before visual encoding.</p>
 <p>A missing measurement is not necessarily zero. Replacing absence with zero can distort averages, totals and visual trends. Reject invalid rows with a reason, retain a count of excluded rows, and make the policy visible to the chart reader. Trimming text and checking finite numeric values are small but important boundary operations.</p>
 <p>Aggregation changes the row grain. A transaction table has one row per event; a category summary may have one row per group. The correct denominator and missing-value policy depend on that grain. A data scientist should be able to reconstruct the aggregate from the small source rows before rendering it.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>CSV parsing:</strong> Converting comma-separated text into row objects with <code>d3.csvParse</code>; every cell arrives as a string until a row accessor converts it.</li>
+<li><strong>Row accessor:</strong> A function passed to <code>d3.csvParse</code> that returns a cleaned object for each row, or null to omit the row.</li>
+<li><strong>Missingness:</strong> The absence of a measurement, such as a blank cell, which is not the same as zero. Because <code>Number(&#x27;&#x27;)</code> is 0, the blank check must come before numeric conversion.</li>
+<li><strong>Validation:</strong> Checking each parsed row against explicit rules, such as finite numbers and trimmed categories, and counting rejected rows with a reason.</li>
+<li><strong>Rollup:</strong> The <code>d3.rollup</code> operation that groups rows by a key and reduces each group, for example with <code>d3.sum</code>, returning a Map at a coarser row grain.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>d3.csvParse</code> parses inline CSV without a network request. A row accessor can return a cleaned object or null to omit a row, but an omission should be counted and explained. <code>Number(&#x27;&#x27;)</code> is zero, which is why a blank-string check must precede numeric conversion.</p>
 <p><code>d3.rollup(rows, group =&gt; d3.sum(group, d =&gt; d.value), d =&gt; d.category)</code> returns a Map keyed by category. The grouping key should be normalized intentionally. Case-sensitive category names may be genuinely distinct or accidental inconsistencies; do not merge them without a domain decision.</p>

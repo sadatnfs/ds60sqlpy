@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-031`, `sql-foun
 
 An asynchronous database session is a unit of work, not a shared global connection that every request can mutate. This chapter creates an async SQLAlchemy engine during lifespan, borrows a session for each request and checks a uniqueness failure followed by successful recovery.
 
+## Key terms
+
+- **Async engine:** The SQLAlchemy object that manages database connectivity and pooling for asyncio code; one engine is normally shared by the application.
+- **AsyncSession:** An asyncio SQLAlchemy session that tracks one unit of work and its transaction; each request borrows its own instead of sharing one.
+- **async_sessionmaker:** A factory bound to the engine that creates a new AsyncSession for each request.
+- **aiosqlite:** An asyncio driver for SQLite that lets the fixture run real SQL offline, although its locking behavior differs from PostgreSQL.
+- **Rollback after failure:** Ending the failed transaction once the database rejects a write, which is required before the session can be used again.
+
 ## Mechanism: engine, session and transaction are different objects
 
 The engine manages database connectivity and pooling. A session tracks a unit of work and its transaction state. A transaction defines which changes commit together. Sharing an engine is normal; sharing one mutable session concurrently across requests is not a substitute for a pool.
@@ -29,6 +37,51 @@ The program submits a value that violates the unique constraint. It converts the
 The final assertion is essential. An error response alone does not establish recovery. If the session remains in a failed state or the engine was closed accidentally, subsequent operations will fail for reasons unrelated to the new input. Testing success after failure exposes that lifecycle defect.
 
 Do not catch every database exception and label it a duplicate. A network outage, malformed SQL or unexpected schema mismatch is not the same business condition. Map only understood failures to a public domain response, retain safe diagnostics internally and let unexpected defects remain visible to operators.
+
+## Worked example: what expire_on_commit costs after a commit
+
+```python
+from sqlalchemy import String, create_engine, event
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class Item(Base):
+    __tablename__ = "items"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(40), unique=True)
+
+
+engine = create_engine("sqlite://")
+Base.metadata.create_all(engine)
+statements = []
+
+
+@event.listens_for(engine, "before_cursor_execute")
+def record(conn, cursor, sql, params, context, many):
+    statements.append(sql.split()[0])
+
+
+for expire in (True, False):
+    with Session(engine, expire_on_commit=expire) as db:
+        item = Item(name=f"item-{expire}")
+        db.add(item)
+        db.commit()
+        statements.clear()
+        print(expire, item.name, statements)
+```
+
+Expected output:
+
+```text
+True item-True ['SELECT']
+False item-False []
+```
+
+This synchronous session makes a hidden query visible. With the default `expire_on_commit=True`, every attribute is marked stale at commit, so simply reading `item.name` afterwards issued a fresh `SELECT`. A synchronous session can do that quietly, but an `AsyncSession` cannot perform implicit I/O on attribute access and raises `MissingGreenlet` instead. That is why the lesson's `async_sessionmaker` passes `expire_on_commit=False`: objects returned from an async endpoint after commit must already hold their values.
 
 ## Failure diagnosis and discussion
 

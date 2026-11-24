@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>event.transform.rescaleX(baseScale)</code> creates a scale for the transformed horizontal view. Use that same scale for marks and axis ticks. The base scale remains unchanged so reset has a stable reference.</p>
 <p>Set explicit extent and scaleExtent for predictable behavior. The reference applies a known transform programmatically, checks the visible domain narrows and then resets. This establishes the transformation logic; manual interaction acceptance still includes pointer and keyboard behavior.</p>
 <h3 id="exercise-1-predict-transformed-coordinate-100">Exercise 1: Predict transformed coordinate 100.<a class="heading-anchor" href="#exercise-1-predict-transformed-coordinate-100" aria-label="Link to this section">#</a></h3>
-<p>Transform order is encoded by the D3 transform representation. Test a known value before applying it to all marks.</p>
+<p>Transform order is encoded by the D3 transform representation. Test a known value before applying it to all marks. D3 applies scale then translate: k <em> x + tx, so 2 </em> 100 - 100 = 100. Translating first would give (100 - 100) * 2 = 0. Call d3.zoomIdentity.translate(-100, 0).scale(2).applyX(100) to confirm.</p>
 <p><strong>Expected:</strong> 100 under translation-100 and scale 2.</p>
 <h3 id="exercise-2-compare-original-and-zoomed-domains">Exercise 2: Compare original and zoomed domains.<a class="heading-anchor" href="#exercise-2-compare-original-and-zoomed-domains" aria-label="Link to this section">#</a></h3>
-<p>Zoom is a view state. Mutating the base repeatedly can accumulate errors and make reset unreliable.</p>
+<p>Zoom is a view state. Mutating the base repeatedly can accumulate errors and make reset unreliable. With translate(-60, 0).scale(2), rescaleX maps the range <code>[60, 590]</code> back through the transform, giving a view domain of [0, 5] while base stays [0, 10]. Assigning base = view on each zoom would compound the change. The reference checks the view span is under 10 and base is still &quot;0,10&quot;.</p>
 <p><strong>Expected:</strong> The view domain narrows while the base domain stays unchanged.</p>
 <h3 id="exercise-3-implement-linked-mark-and-axis-zooming">Exercise 3: Implement linked mark and axis zooming.<a class="heading-anchor" href="#exercise-3-implement-linked-mark-and-axis-zooming" aria-label="Link to this section">#</a></h3>
-<p>A moving chart with a stale axis gives false numeric meaning. Treat axis updates as part of the interaction contract.</p>
+<p>A moving chart with a stale axis gives false numeric meaning. Treat axis updates as part of the interaction contract. In the zoom handler, the reference sets every circle&#x27;s cx with view and calls axisBottom(view) in the same step. Updating only the circles would leave ticks reading 0 to 10 over data that now spans 0 to 5. Read the first and last tick labels after zooming.</p>
 <p><strong>Expected:</strong> Both use the same rescaled view.</p>
 <h3 id="exercise-4-diagnose-enlarged-labels-after-scaling-the-whole-group">Exercise 4: Diagnose enlarged labels after scaling the whole group.<a class="heading-anchor" href="#exercise-4-diagnose-enlarged-labels-after-scaling-the-whole-group" aria-label="Link to this section">#</a></h3>
-<p>Decide which visual properties should stay constant. Rescale positions and redraw axes when readable text is the goal.</p>
+<p>Decide which visual properties should stay constant. Rescale positions and redraw axes when readable text is the goal. Applying event.transform as an SVG transform on a group scales circles and tick text by 2 as well. Rescale x positions and redraw the axis so 5-pixel radii stay 5.</p>
 <p><strong>Expected:</strong> Geometry and text were transformed together.</p>
 <h3 id="exercise-5-add-a-native-reset-button">Exercise 5: Add a native reset button.<a class="heading-anchor" href="#exercise-5-add-a-native-reset-button" aria-label="Link to this section">#</a></h3>
-<p>Reset should use the stable base transform, not infer an inverse from partially mutated state.</p>
+<p>Reset should use the stable base transform, not infer an inverse from partially mutated state. &quot;Reset zoom&quot; applies d3.zoomIdentity, which makes view equal to base again; the check confirms &quot;0,10&quot;. Undoing by dividing the current domain would accumulate rounding.</p>
 <p><strong>Expected:</strong> The initial domain and mark positions are restored.</p>
 <h3 id="exercise-6-review-zoom-for-a-long-time-series">Exercise 6: Review zoom for a long time series.<a class="heading-anchor" href="#exercise-6-review-zoom-for-a-long-time-series" aria-label="Link to this section">#</a></h3>
-<p>Navigation should help analysis without trapping scrolling or hiding context. Keep an overview or clear current-domain label when needed.</p>
+<p>Navigation should help analysis without trapping scrolling or hiding context. Keep an overview or clear current-domain label when needed. With scaleExtent [1, 4], the narrowest view spans 2.5 units of 10; label the current domain so readers know which part of the sine they see. Add Reset zoom near the chart and keep a small overview that shows where the zoomed window sits in the full 0 to 10 range, so wheel scrolling does not strand the reader.</p>
 <p><strong>Expected:</strong> Bounds, clipping, readable ticks and accessible alternate controls.</p></article>
   </main>
 </body>

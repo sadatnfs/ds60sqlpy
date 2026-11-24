@@ -27,7 +27,7 @@
       "exercise": 4,
       "title": "Preserve parents without inventing observed children",
       "input_contract": "Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays.",
-      "expected": "Five rows:the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL).",
+      "expected": "Five rows: the three observed children plus (20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL).",
       "verification": "Assert five rows, four distinct parents and exactly three nonnull generated positions."
     },
     {

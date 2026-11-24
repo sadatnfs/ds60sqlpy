@@ -888,7 +888,7 @@
         "Restart the owned Atlas backing services",
         "Verify entity and lineage survival and diagnose index lag"
       ],
-      "outcome": "Understand graph storage, search indexes and backup consistency"
+      "outcome": "Distinguish search index lag from missing graph data and verify Atlas entities survive a restart"
     },
     {
       "id": "apache-075",

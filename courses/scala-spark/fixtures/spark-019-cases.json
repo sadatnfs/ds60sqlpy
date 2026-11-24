@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Interpret lag without claiming strict temporal availability",
       "input_contract": "Using ascending time NULL last then event_id, return event_id, previous_id, gap_seconds. Lag the event identity and time, then subtract epoch seconds.",
-      "expected": "1(NULL, NULL),2(1,60),3(2,0),4(NULL, NULL),5(4,120),6(5,0),7(8, NULL),8(NULL, NULL).",
+      "expected": "1(NULL, NULL), 2(1, 60), 3(2, 0), 4(NULL, NULL), 5(4, 120), 6(5, 0), 7(8, NULL), 8(NULL, NULL).",
       "verification": "Assert the complete identity/gap rows and explain zero gaps and the known previous ID with unknown duration."
     }
   ],

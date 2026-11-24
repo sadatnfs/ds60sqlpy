@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Validate the finite input and output grain",
       "input_contract": "Read a static copy of the two-row schema fixture and require bigint id/cents, known nonnull values and at most 8 rows. Return its canonical ordered bag without removing duplicates.",
-      "expected": "The first bag is 1:100,2:200. A NULL identity or cents value is rejected.",
+      "expected": "The first bag is 1:100, 2:200. A NULL identity or cents value is rejected.",
       "verification": "Compare the exact two-row bag and reject an explicit null-id DataFrame."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Write a guarantee ledger from exact counts",
       "input_contract": "Return output row count, distinct business IDs and total cents, then explain why source recovery is not business-ID deduplication or a universal exactly-once guarantee.",
-      "expected": "4 occurrences,3 distinct IDs, total 800.",
+      "expected": "4 occurrences, 3 distinct IDs, total 800.",
       "verification": "Compare all three independent values and preserve the duplicate occurrence."
     }
   ],

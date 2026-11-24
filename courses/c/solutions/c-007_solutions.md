@@ -1,6 +1,6 @@
 # c-007: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-007_solution.c`, implements all six cases, from the "compare length and storage" case to the "transfer an empty string" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ char word[] = "cat" creates four characters including the terminator. strlen cou
 
 ## Exercise 1: Compare length and storage: change one input
 
-Copy worked example 1 into a scratch pad and change `char word[] = "cat";` to `char word[] = "cat!";`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "compare length and storage" case, into a scratch pad and change `char word[] = "cat";` to `char word[] = "cat!";`. Before running, predict which CHECK fails and which value it sees in place of the worked result (strlen is 3 while array size is 4); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +19,13 @@ char word[] = "cat";
 CHECK(strlen(word) == 3 && sizeof word == 4);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `strlen(word) == 3 && sizeof word == 4`. Restoring the original line brings back the worked observation: strlen is 3 while array size is 4.
+**Expected:** With `char word[] = "cat!";` the run stops with `Check failed` at the CHECK on `strlen(word) == 3 && sizeof word == 4`, because the "compare length and storage" case no longer shows that strlen is 3 while array size is 4. Restoring `char word[] = "cat";` brings that observation back.
 
 The fourth byte is the terminator. Forgetting it when allocating an output creates a one-byte overflow risk.
 
 ## Exercise 2: Modify owned text: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `word[1] = 'b';`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "modify owned text" case, so one line now reads `word[1] = 'b';`. Run the example with that line, use the failing CHECK to find why the result is bat no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -35,7 +35,7 @@ word[0] = 'b';
 CHECK(strcmp(word, "bat") == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(word, "bat") == 0`; after it the line reads `word[0] = 'b';` again and the result is bat.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(word, "bat") == 0`. Once the line reads `word[0] = 'b';` again, the "modify owned text" case again shows that the result is bat.
 
 The array is writable. Performing the same assignment through a pointer to a string literal would be undefined behavior.
 
@@ -97,4 +97,4 @@ Even an empty C string needs a terminator object. A null pointer is absence of a
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer an empty string" case to your own c-007 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected null terminator failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "modify owned text" case apart from ordinary output: the fixture proves its stated null terminator, capacity and truncation assumptions, not universal safety.

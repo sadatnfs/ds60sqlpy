@@ -14,6 +14,14 @@ The first case starts with four records and classifies their outcomes. One recor
 
 Precision is a separate contract. Binary floating-point is suitable for many scientific approximations but does not represent every decimal fraction exactly. Decimal stores scaled decimal values with an explicit precision and scale. Integer casts also have finite bounds. Narrowing 128 to signed 8-bit storage cannot preserve its value; an explicit failure or null is safer than assuming every smaller dtype is an interchangeable optimization.
 
+## Key terms
+
+- **Strict cast:** A cast that raises an error when any value cannot be converted, which is the default for `cast`.
+- **Non-strict cast:** `cast(..., strict=False)`, which turns unconvertible values into null, so the new nulls must be counted and explained.
+- **Integer bounds:** The range a fixed-width integer type can hold; 128 does not fit Int8, whose maximum is 127.
+- **Decimal:** A fixed-point type `pl.Decimal(precision, scale)` that stores exact base-ten values, so a money total such as 0.30 carries no binary rounding error.
+- **Quarantine:** Keeping rows that failed parsing in a separate frame with a reason instead of dropping them or silently nulling them.
+
 ## Syntax and data contract
 
 cast(pl.Int64, strict=False) changes the parsed column while retaining failed conversions as null. Combine is_not_null on the raw field with is_null on the parsed field to identify invalid tokens. pl.Decimal(precision=12, scale=2) declares twelve decimal digits with two fractional positions. Choose its range from the data contract, and inspect the result of any arithmetic or cast that changes precision.

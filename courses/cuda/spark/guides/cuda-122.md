@@ -14,6 +14,13 @@ Do not infer RDMA, peer-to-peer or GPUDirect capability from an installed librar
 
 
 
+### Key terms
+
+- **Shuffle:** Redistribution of records between tasks, often across executors and hosts.
+- **Serialization:** Encoding records or columnar batches into bytes for transfer or storage.
+- **Shuffle manager:** The pluggable Spark component that writes and fetches shuffle data, with its own compatibility rules.
+- **Pre-aggregation:** Partial aggregation before a shuffle that reduces the bytes moved.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,33 +48,55 @@ print("CPU shuffle bound:", seconds, "seconds before additional overhead")
 
 **Expected observation:** Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `gib` | `1073741824` |
+| `payload` | `10737418240` |
+| `bandwidth` | `1073741824` |
+| `seconds` | `10.0` |
+| `kernel_saving` | `0.05` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Compute transfer lower bound
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute transfer lower bound** in the examples above.
+**Trap to avoid:** Spending effort to halve a 100 ms kernel, saving 50 ms, addresses less than 1 percent of the 10-second floor, as the reference asserts with `kernel_saving/seconds < 0.01`.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Identify local versus network time
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **identify local versus network time** in the examples above.
+**Trap to avoid:** Profiling only the GPU kernels shows local compute and misses fetch wait time, which may dominate. A GPU profile of a shuffle-bound stage can look idle for long stretches, and that idle time is exactly the network wait.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain pre-aggregation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **explain pre-aggregation** in the examples above.
+**Trap to avoid:** Pre-aggregating a non-associative operation, such as a median computed from partial medians, produces wrong results.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: List transport qualification
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **list transport qualification** in the examples above.
+**Trap to avoid:** Enabling the transport setting and assuming it is active skips checking whether it actually carried traffic. A missing library on one host can silently route that host's traffic over the default path.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate startup settings
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **separate startup settings** in the examples above.
+**Trap to avoid:** Setting a shuffle manager in an existing session and attributing later timing changes to it measures noise. Any improvement seen there comes from caching, warm JIT code or variation between runs.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design a bounded shuffle comparison
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design a bounded shuffle comparison** in the examples above.
+**Trap to avoid:** Comparing configurations on different data sizes confounds the transport effect with payload size. Different partition counts also change the number of shuffle blocks, which affects per-block overhead independently of bandwidth.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

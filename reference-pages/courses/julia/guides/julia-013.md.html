@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use broadcasting with explicit axes and distinguish an elementwise formula from a mutation-order-dependent algorithm.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-013</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (row and column contributions) and worked case B (an in-place update and a snapshot) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-013: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Broadcasting:</strong> Applying a function elementwise across arrays and scalars, expanding singleton dimensions so compatible shapes combine.</li>
+<li><strong>Dot syntax:</strong> Writing <code>f.(x)</code> or <code>x .+ y</code> requests broadcasting, and the <code>@.</code> macro adds a dot to every call in an expression.</li>
+<li><strong>Loop fusion:</strong> Nested dotted calls in one expression combine into a single loop without allocating temporary arrays.</li>
+<li><strong>Singleton dimension:</strong> An axis of length one that broadcasting repeats to match the other operand, so a column and a row form a matrix.</li>
+<li><strong>Mutation order:</strong> When a loop writes values that later iterations read, such as a shift, the result depends on write order unless the source is snapshotted.</li>
+</ul>
 <h3 id="dots-request-elementwise-application">Dots request elementwise application<a class="heading-anchor" href="#dots-request-elementwise-application" aria-label="Link to this section">#</a></h3>
 <p>Broadcasting applies an operation across compatible collection shapes. A dot on a function call or operator requests the broadcasted form. Compatible singleton axes can be expanded without copying the corresponding logical value into a full matrix first.</p>
 <p>Shape remains meaningful. A vector can align with one matrix axis, while a reshaped row can align with another. Write the intended formula using row and column indices before relying on broadcasting to infer the desired arrangement. Equal element counts are not sufficient for compatible axes.</p>

@@ -3,6 +3,28 @@
   "title": "Inference, profiling and measured performance",
   "concepts": ["inference", "specialization", "warm measurements", "allocation", "profiling"],
   "outcome": "Explain which work a timing includes, inspect type inference and measure a small kernel without turning machine-dependent timing into a correctness assertion.",
+  "key_terms": [
+    [
+      "Type inference",
+      "The compiler's deduction of result types from argument types, which `@inferred` checks against the observed result."
+    ],
+    [
+      "Specialization",
+      "Julia compiles a separate method instance for each combination of concrete argument types it encounters."
+    ],
+    [
+      "Warm measurement",
+      "Timing a call after an initial run so that compilation time is excluded from the reported cost."
+    ],
+    [
+      "Allocation measurement",
+      "Using `@allocated` to report the bytes an expression allocates, exposing temporaries or type instability."
+    ],
+    [
+      "Function barrier",
+      "Passing a value of uncertain type into a separate function so that function is compiled for the concrete type."
+    ]
+  ],
   "level": "advanced",
   "minutes": 150,
   "prerequisites": ["julia-012", "julia-019"],
@@ -12,48 +34,67 @@
     ["InteractiveUtils", "https://docs.julialang.org/en/v1/stdlib/InteractiveUtils/"]
   ],
   "figure": 0,
+  "approach": "Keep correctness and timing in separate claims. `sum_squares` is parametric in `T<:AbstractFloat` and starts at `zero(T)`, so its return type is inferable and matches the element type. `measured` calls the kernel once to compile it, then wraps a second call in `@timed` and returns the value, seconds and bytes, and only the value is asserted.",
   "exercises": [
     {
       "title": "Trace the accumulator",
       "task": "Trace `total` after each element of `[1.0, 2.0, 3.0]`.",
       "expected": "The values are 1, 5 and 14.",
       "hint": "Square each item before adding.",
-      "answer": "The accumulator is Float64 throughout; the final value is 14."
+      "answer": "The accumulator is Float64 throughout; the final value is 14.",
+      "why": "The loop adds 1 squared to reach 1, then 4 to reach 5, then 9 to reach 14, all as `Float64` because `zero(Float64)` started the total.",
+      "wrong": "Adding the items before squaring gives 6 and then 36, which is the square of the sum rather than the sum of squares.",
+      "verify": "Print `total` inside an owned copy of the loop and compare with `sum_squares([1.0, 2.0, 3.0]) == 14`."
     },
     {
       "title": "Preserve precision",
       "task": "Run `sum_squares` on `Float32[1, 2]`.",
       "expected": "The result is `Float32(5)`.",
       "hint": "Inspect typeof as well as value.",
-      "answer": "`zero(T)` and floating multiplication preserve the specified small-case element arithmetic."
+      "answer": "`zero(T)` and floating multiplication preserve the specified small-case element arithmetic.",
+      "why": "With `T = Float32`, `zero(T)` and each product stay `Float32`, so the result is exactly `Float32(5)`.",
+      "wrong": "Initializing `total = 0.0` promotes the sum to `Float64` and makes `@inferred` report a type other than the element type.",
+      "verify": "The reference asserts `(@inferred sum_squares(Float32[1, 2])) === Float32(5)`."
     },
     {
       "title": "Change workload size",
       "task": "Measure lengths 100 and 10000 after warmup.",
       "expected": "Both return four times their length; observed time may vary.",
       "hint": "Do not assert which individual call is faster.",
-      "answer": "A larger workload changes the experiment. Multiple observations are needed to compare scaling."
+      "answer": "A larger workload changes the experiment. Multiple observations are needed to compare scaling.",
+      "why": "Every element of `fill(2.0, n)` contributes 4, so the value is 400 for length 100 and 40000 for length 10000.",
+      "wrong": "Asserting that the longer run takes about 100 times longer turns a machine-dependent observation into a test that can fail randomly.",
+      "verify": "Assert the two values, collect several `measured` observations per length and report their spread rather than one number."
     },
     {
       "title": "Diagnose invalid science",
       "task": "Pass `[NaN]` and explain why inference still succeeds.",
       "expected": "The numerical result is NaN.",
       "hint": "A known type is not a finite value.",
-      "answer": "Inference concerns types. Scientific input validation is a separate contract."
+      "answer": "Inference concerns types. Scientific input validation is a separate contract.",
+      "why": "NaN is a `Float64`, so inference finds the same concrete type and the kernel returns NaN, since NaN times NaN is NaN.",
+      "wrong": "Reading a clean `@code_warntype` report as proof that inputs are valid confuses type stability with data validation.",
+      "verify": "The reference asserts `sum_squares([NaN]) |> isnan` and `sum_squares([Inf]) == Inf`; add an explicit `isfinite` check where needed."
     },
     {
       "title": "Design a benchmark record",
       "task": "List the fields needed to reproduce a timing claim.",
       "expected": "Include input, versions, threads, cold/warm boundary and repetitions.",
       "hint": "Keep correctness results with the timings.",
-      "answer": "A benchmark record identifies environment and work; a number without these cannot support a transferable claim."
+      "answer": "A benchmark record identifies environment and work; a number without these cannot support a transferable claim.",
+      "why": "A timing is reproducible only if the record names the input size, Julia version, thread count, warm or cold state and the number of repeats.",
+      "wrong": "Publishing a single `@time` line from a laptop gives readers no way to tell whether compilation or other load was included.",
+      "verify": "Store the correctness check result beside each timing row and rerun the record on another machine to compare."
     },
     {
       "title": "Transfer to a data pipeline",
       "task": "Identify which parsing, fitting and plotting boundaries you would measure.",
       "expected": "Separate phases plus end-to-end time.",
       "hint": "Avoid double-counting nested boundaries.",
-      "answer": "Phase measurements explain bottlenecks while end-to-end time captures the actual user experience."
+      "answer": "Phase measurements explain bottlenecks while end-to-end time captures the actual user experience.",
+      "why": "Timing parsing, fitting and plotting separately locates the slow phase, while one outer timer measures what a user waits for.",
+      "wrong": "Adding the phase times to an outer timer that already contains them counts each phase twice.",
+      "verify": "Check that the phase times sum to less than or equal to the end-to-end time and explain any gap."
     }
   ]
 }

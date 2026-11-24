@@ -28,6 +28,8 @@ A short-circuit guard should state an invariant. For example, check that a colle
 
 Trace the predicate, the chosen branch and any side effects. A returned zero can be a real numeric result, whereas `nothing` can mean that no valid result was produced. Tests should distinguish those states. Comparing strings or floating values also requires the appropriate representation and tolerance policy from earlier units.
 
+A quick check is to list each input class and the branch you expect it to take: an ordinary value, zero, a negative denominator, NaN and an empty collection. Then run each one and compare. A branch that no test reaches is a decision nobody has verified.
+
 Avoid relying on an implementation accident such as one container's current ordering or one numeric type's conversion rules. Express the condition needed by the algorithm. A clear predicate makes failures easier to explain and makes later changes to data representations less likely to alter behavior silently.
 
 The programs establish Julia's Boolean and equality behavior on small authored cases. They do not choose a universal policy for missing information. A reliable data-science application records that policy and tests normal, boundary and rejected inputs explicitly.

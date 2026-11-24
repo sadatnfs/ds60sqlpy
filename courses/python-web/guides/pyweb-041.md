@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-040`.
 
 A WebSocket begins with an HTTP handshake and then carries messages over a longer-lived connection. Authentication, origin checks, message schemas, size limits and close behavior all remain application responsibilities. This chapter exercises a finite one-message exchange through the real framework WebSocket interface.
 
+## Key terms
+
+- **WebSocket handshake:** The initial HTTP exchange that the server accepts or refuses before any messages flow over the long-lived connection.
+- **Origin check:** Comparing the handshake's Origin header with an expected value, which blocks unwanted browser initiation but is not authentication.
+- **Message schema:** A strict Pydantic model applied to every received message, independently of the checks made at the handshake.
+- **Close code:** A numeric reason sent when closing a WebSocket: 1000 for normal completion, 1008 for a policy violation and 1009 for a message too big.
+
 ## Mechanism: handshake and message validation are separate
 
 The handler checks a synthetic bearer credential and an expected Origin before accepting the connection. Origin is useful against unwanted browser initiation, but a nonbrowser client can supply arbitrary headers, so it is not a replacement for authentication. Real browser WebSocket clients also have different header-setting capabilities from this test fixture.
@@ -29,6 +36,49 @@ A numeric string where the schema requires a strict integer is rejected after th
 These cases prevent two common shortcuts: validating only the initial connection and assuming every later message is safe, or accepting first and checking identity only after sending sensitive state. The correct ordering depends on the protocol, but it must be deliberate and tested.
 
 Large-message protection has multiple layers. The application bound controls the text it processes after receipt; the server's protocol configuration should also limit frames/messages and connection resources. One in-handler check should not be presented as complete network resource protection.
+
+## Worked example: a receive loop that ends on disconnect
+
+```python
+from starlette.applications import Starlette
+from starlette.routing import WebSocketRoute
+from starlette.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
+
+log = []
+
+
+async def echo(websocket):
+    await websocket.accept()
+    try:
+        while True:
+            text = await websocket.receive_text()
+            await websocket.send_text(text[::-1])
+    except WebSocketDisconnect as exc:
+        log.append(f"client left with {exc.code}")
+    finally:
+        log.append("subscriptions released")
+
+
+app = Starlette(routes=[WebSocketRoute("/echo", echo)])
+with TestClient(app) as client:
+    with client.websocket_connect("/echo") as ws:
+        for word in ("ping", "socket"):
+            ws.send_text(word)
+            print(ws.receive_text())
+        ws.close(code=1001)
+print(log)
+```
+
+Expected output:
+
+```text
+gnip
+tekcos
+['client left with 1001', 'subscriptions released']
+```
+
+The lesson's handler reads one message and closes, while most real sockets run a loop like this one until the client leaves. There is no special return value for a closed connection: `receive_text` raises `WebSocketDisconnect`, carrying the close code the client sent, here 1001 for going away. Catching that exception is the normal exit path, not an error, and the `finally` block is where per connection state such as chat room membership or a subscription to a message broker must be released. A handler that forgets this leaks one subscription for every closed browser tab, and the leak grows quietly until memory or broker limits run out.
 
 ## Failure diagnosis and discussion
 

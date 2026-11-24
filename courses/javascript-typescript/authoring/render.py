@@ -50,9 +50,36 @@ def add(
     )
 
 
+IMPORT = re.compile(r"^import\s+(type\s+)?\{([^}]*)\}\s+from\s+(['\"][^'\"]+['\"]);?$")
+
+
+def used_imports(imports, body):
+    """Drop named import specifiers that a standalone worked example never references."""
+    kept = []
+    for line in imports.splitlines():
+        match = IMPORT.match(line.strip())
+        if not match:
+            kept.append(line)
+            continue
+        names = [n.strip() for n in match.group(2).split(",") if n.strip()]
+        used = [
+            n for n in names if re.search(rf"(?<![\w$.]){re.escape(n.split()[-1])}(?![\w$])", body)
+        ]
+        if used:
+            kept.append(
+                f"import {match.group(1) or ''}{{ {', '.join(used)} }} from {match.group(3)};"
+            )
+    return "\n".join(kept)
+
+
 def program(spec, blocks, reference=True, typed=False):
     signature = ": Promise<{ checks: number; status: string }>" if typed else ""
-    result = spec["imports"] + "\n\n" + spec["helper"] + "\n\n"
+    imports = (
+        spec["imports"]
+        if reference
+        else used_imports(spec["imports"], spec["helper"] + "\n" + "\n".join(blocks))
+    )
+    result = imports + "\n\n" + spec["helper"] + "\n\n"
     result += "export async function verify()" + signature + " {\n"
     for i, block in enumerate(blocks, 1):
         label = (
@@ -130,6 +157,16 @@ def reading_practice(spec):
     return rows
 
 
+def _guard(code, condition):
+    """The whole `if (...) check` statement when a check only runs under a guard."""
+    head = " ".join(condition.split())[:40]
+    for line in code.splitlines():
+        text = line.strip()
+        if text.startswith("if (") and head in " ".join(text.split()):
+            return text.rstrip(";")
+    return None
+
+
 def practice(ident, spec, typed, language, path):
     """Six exercises: two derived from the worked examples, four authored investigations.
 
@@ -154,7 +191,11 @@ def practice(ident, spec, typed, language, path):
         row = {"title": e["title"], "task": e["prompt"], "expected": e["expected"]}
         if v:
             original, edited = span(v["line"]), span(v["broken"])
-            fail = f"fails with an `AssertionError` at the check {cond}"
+            fail = (
+                f"fails with an `AssertionError` at {edited}"
+                if v["in_check"]
+                else f"fails with an `AssertionError` at {cond}"
+            )
         if index == 0:
             row["title"] = e["title"] + (
                 ": predict an edited check" if v and v["in_check"] else ": change one input"
@@ -176,7 +217,7 @@ def practice(ident, spec, typed, language, path):
                 )
             if v:
                 row["expected"] = (
-                    f"The changed run {fail}. Restoring the original line brings back the worked observation: {expected}"
+                    f"The changed run {fail}. Restoring {original} brings back: {expected}"
                 )
                 row["verify"] = (
                     "Compare your written prediction with the reported `AssertionError`, including its actual and "
@@ -222,7 +263,7 @@ def practice(ident, spec, typed, language, path):
                     "explain how the reported actual and expected values lead back to the faulty line."
                 )
             row["expected"] = (
-                f"Before the repair the run {fail}; after it the line reads {original} again and {expected}"
+                f"Before the repair the run {fail}. Restoring {original} brings back: {expected}"
                 if v
                 else f"The defective copy fails the check {cond}; the repaired copy reproduces the worked observation: {expected}"
             )
@@ -244,8 +285,12 @@ def practice(ident, spec, typed, language, path):
                 "must fail with an `AssertionError`, which shows the check can fail. Restore it."
             )
         else:
+            guard = _guard(shown, condition) if condition else None
             row["verify"] = (
-                f"Keep a check equivalent to {cond} and confirm that the reference still passes. Then name an input "
+                f"Keep the guarded check {span(guard)} and confirm that the reference still passes. Then name an input "
+                "that satisfies the guard but makes the check fail, and explain which value changes."
+                if guard
+                else f"Keep a check equivalent to {cond} and confirm that the reference still passes. Then name an input "
                 "that would make it fail and explain which value changes."
             )
         if index == 0 and v:

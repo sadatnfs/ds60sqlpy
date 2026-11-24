@@ -8,7 +8,7 @@ Evaluate a changed finite policy from logged actions with explicit propensity/su
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-024`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-024` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for off-policy evaluation and the final alignment audit in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about importance sampling and self-normalization: With the target equal to the behavior policy all weights are 1 and the value is 0.75; the useful target is valued at 0.9; missing behavior support is rejected; a zero outcome model reduces the doubly robust estimate to importance sampling; self-normalized and ordinary estimates differ. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## A trained policy changes the observed distribution
 
@@ -26,9 +26,17 @@ With an outcome estimate \(\widehat q(x,a)\), a contextual-bandit doubly robust 
 
 This unit treats one-step contextual decisions. Long trajectories require additional treatment of sequential probabilities and dependence; multiplying many ratios can create severe variance. The name doubly robust does not remove overlap, consistency, correct target-population weighting or appropriate nuisance-fitting assumptions.
 
+## Key terms
+
+- **Importance weight:** pi(A|X)/b(A|X), the ratio of target to behavior probability for the logged action.
+- **Self-normalized estimate:** The weighted reward sum divided by the weight sum, with a different bias and variance tradeoff.
+- **Doubly robust estimate:** An outcome-model prediction plus an importance-weighted correction of its residual on the logged action.
+- **Overlap:** The requirement that the behavior policy gives positive probability to every action the target policy may take.
+- **Independent task utility:** The task outcome used for the final decision, kept distinct from the preference-training reward so a favorable training signal cannot certify itself.
+
 ## Worked case A: reconstruct a known finite value
 
-Two contexts occur equally often. Their behavior policies are[0.8,0.2] and[0.3,0.7], while the target policies are[0.5,0.5] and[0.8,0.2]. The authored reward table favors action 0 in the first context and action 1 in the second. Exact target value is 0.35. A constructed log with action counts matching the behavior proportions gives that same importance estimate.
+Two contexts occur equally often. Their behavior policies are `[0.8, 0.2]` and `[0.3, 0.7]`, while the target policies are `[0.5, 0.5]` and `[0.8, 0.2]`. The authored reward table favors action 0 in the first context and action 1 in the second. Exact target value is 0.35. A constructed log with action counts matching the behavior proportions gives that same importance estimate.
 
 ```python
 import numpy as np
@@ -221,7 +229,7 @@ Set the target policy equal to the behavior policy in case A.
 
 ### 2. Evaluate a useful target
 
-Use target rows[0.9,0.1] and[0.1,0.9] with the exact synthetic outcome table.
+Use target rows `[0.9, 0.1]` and `[0.1, 0.9]` with the exact synthetic outcome table.
 
 **Expected:** The target value is 0.9.
 

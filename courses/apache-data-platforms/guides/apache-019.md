@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-015`, `apache-011`.
 
+## Key terms
+
+- **Scalar UDF:** A user-defined function that produces one output value per input row. In DataFusion Python, it receives whole Arrow arrays and must return an Arrow array of the declared type.
+- **Volatility:** The declared stability of a function, such as immutable or volatile, which tells the optimizer whether it may constant fold or reuse the function's results.
+- **Vectorized callback:** A UDF body that applies an Arrow compute kernel to a whole array instead of running a Python loop over individual values.
+- **Null semantics:** How a function treats missing inputs, such as returning null when an argument is null, which must agree with the declared types and the query's meaning.
+
 ## A function has types, effects and an optimization boundary
 
 A user-defined function extends SQL with application-specific behavior. It must
@@ -81,6 +88,47 @@ semantics behind declared types and volatility. It cannot generally infer which
 rows the function rejects or whether a predicate can move through it. These cases
 make the extension contract visible and separate semantic correctness from an
 unmeasured performance claim.
+
+## Worked examples
+
+### Register a vectorized scalar function
+
+```python
+import pyarrow as pa
+import pyarrow.compute as pc
+from datafusion import SessionContext, udf
+
+ctx = SessionContext()
+batch = pa.table({"id": [1, 2, 3], "meters": pa.array([1, 25, None], type=pa.int64())})
+ctx.register_record_batches("distances", [batch.to_batches()])
+to_cm = udf(lambda values: pc.multiply(values, 100), [pa.int64()], pa.int64(), "immutable", "cm")
+ctx.register_udf(to_cm)
+print(
+    ctx.sql(
+        "SELECT cm(meters) AS cm, meters * 100 AS native FROM distances ORDER BY id"
+    ).to_pylist()
+)
+```
+
+Expect three rows where both columns read 100, 2500 and null. The function receives a whole Arrow array per batch, so the null stays null without any special handling. Marking it immutable lets the optimizer treat equal inputs as equal outputs; declaring a function immutable when it reads a clock or a random source would allow caching or folding that returns stale values.
+
+### Make a zero fill an explicit, named choice
+
+```python
+import pyarrow as pa
+import pyarrow.compute as pc
+
+meters = pa.array([1, 25, None], type=pa.int64())
+print(pc.multiply(meters, 100).to_pylist())
+print(pc.multiply(pc.fill_null(meters, 0), 100).to_pylist())
+```
+
+```text
+[100, 2500, None]
+[100, 2500, 0]
+```
+
+The first list keeps the missing distance unknown and the second turns it into zero centimeters, which downstream sums and averages will treat as a real measurement. The lesson registers the second behavior under the name missing_as_zero so a reader of the SQL can see the choice. Hiding a fill inside a function with a neutral name is the defect to look for in review.
 
 ## Complete worked source
 

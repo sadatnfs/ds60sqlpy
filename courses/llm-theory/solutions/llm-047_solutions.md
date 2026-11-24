@@ -1,6 +1,6 @@
 # llm-047: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these sparse experts, routing capacity and load balancing answers after attempting *Calculate a top-2 expert mixture* through *Validate routing policy and ties*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Compute a load-balancing term* points to one step. `llm-047_solution.py` holds the assertions; this page explains how they test sparse expert activation. Then try *Validate routing policy and ties* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Capacity bounds how many tokens an expert accepts in one batch. Overflow needs a
 
 ## Reading the implementation
 
-Inputs have shape(tokens, model_width), router logits(tokens, experts), and expert matrices(experts, model_width, output_width). Stable descending argsort declares a lowest-index tie policy. The selected gates are normalized before combining expert outputs. The capacity helper tracks assigned counts, accepted counts and dropped-token flags separately. A Switch-style auxiliary term uses hard assignment fractions f and mean router probabilities P, with the hard fractions held fixed for a local gradient calculation.
+Inputs have shape (tokens, model_width), router logits(tokens, experts), and expert matrices(experts, model_width, output_width). Stable descending argsort declares a lowest-index tie policy. The selected gates are normalized before combining expert outputs. The capacity helper tracks assigned counts, accepted counts and dropped-token flags separately. A Switch-style auxiliary term uses hard assignment fractions f and mean router probabilities P, with the hard fractions held fixed for a local gradient calculation.
 
 ## Exercise 1: Calculate a top-2 expert mixture
 
@@ -41,7 +41,7 @@ np.testing.assert_allclose(gates.sum(1), 1, atol=1e-12, rtol=0)
 
 **Expected:** outputs [1.25, 0], [0, 1.75], [-0.25, -0.25].
 
-**Verify:** In a fresh process, the exercise checks confirm `output` matches `[[1.25, 0], [0, 1.75], [-0.25, -0.25]]` within 1e-12 and `gates.sum(1)` matches `1` within 1e-12.
+**Verify:** For *Calculate a top-2 expert mixture*, a fresh-process check confirms `output` matches `[[1.25, 0], [0, 1.75], [-0.25, -0.25]]` within 1e-12 and `gates.sum(1)` matches `1` within 1e-12.
 
 ## Exercise 2: Enforce expert capacity with residual fallback
 
@@ -63,7 +63,7 @@ np.testing.assert_allclose(residual, [[2, 0], [0, 2], [3, 3], [2, 1]], atol=1e-1
 
 **Expected:** assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input.
 
-**Verify:** In a fresh process, the exercise checks confirm `assigned.tolist() == [3, 1]`; `accepted.tolist() == [2, 1]`; `dropped.tolist() == [False, False, False, True]` and `residual` matches `[[2, 0], [0, 2], [3, 3], [2, 1]]` within 1e-12.
+**Verify:** For *Enforce expert capacity with residual fallback*, a fresh-process check confirms `assigned.tolist() == [3, 1]`; `accepted.tolist() == [2, 1]`; `dropped.tolist() == [False, False, False, True]` and `residual` matches `[[2, 0], [0, 2], [3, 3], [2, 1]]` within 1e-12.
 
 ## Exercise 3: Compute a load-balancing term
 
@@ -84,7 +84,7 @@ np.testing.assert_allclose(
 
 **Expected:** auxiliary loss .012; balanced fixture .01.
 
-**Verify:** In a fresh process, the exercise checks confirm `loss` matches `0.012` within 1e-12 and `coefficient * 2 * np.dot([0.5, 0.5], [0.5, 0.5])` matches `0.01` within 1e-12.
+**Verify:** For *Compute a load-balancing term*, a fresh-process check confirms `loss` matches `0.012` within 1e-12 and `coefficient * 2 * np.dot([0.5, 0.5], [0.5, 0.5])` matches `0.01` within 1e-12.
 
 ## Exercise 4: Trace a local router gradient
 
@@ -104,7 +104,7 @@ np.testing.assert_allclose(numeric, -3 / 16, atol=1e-8, rtol=0)
 
 **Expected:** derivative of first output coordinate is \(\frac{-3}{16}\) within 1e-8.
 
-**Verify:** In a fresh process, the exercise checks confirm `numeric` matches `-3 / 16` within 1e-8.
+**Verify:** For *Trace a local router gradient*, a fresh-process check confirms `numeric` matches `-3 / 16` within 1e-8.
 
 ## Exercise 5: Separate total and active parameter counts
 
@@ -120,7 +120,7 @@ assert active * 2 * width * hidden == 32768
 
 **Expected:** total 131072 expert weights; 32768 selected expert weights per token.
 
-**Verify:** In a fresh process, the exercise checks confirm `expert_count * 2 * width * hidden == 131072` and `active * 2 * width * hidden == 32768`.
+**Verify:** For *Separate total and active parameter counts*, a fresh-process check confirms `expert_count * 2 * width * hidden == 131072` and `active * 2 * width * hidden == 32768`.
 
 ## Exercise 6: Validate routing policy and ties
 
@@ -145,8 +145,8 @@ for action in [
 
 **Expected:** invalid policies raise ValueError; top-2 tie indices 0, 1.
 
-**Verify:** In a fresh process, the exercise checks confirm `tied.tolist() == [[0, 1]]` and for every looped case, `action()` raises `ValueError`.
+**Verify:** For *Validate routing policy and ties*, a fresh-process check confirms `tied.tolist() == [[0, 1]]` and for every looped case, `action()` raises `ValueError`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Trace a local router gradient* and predict the result first; keep *Validate routing policy and ties* failing beside the repair. Log a missing NumPy separately from a wrong sparse expert activation value in `llm-047`.

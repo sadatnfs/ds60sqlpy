@@ -16,6 +16,13 @@ S(t_j)=S(t_j^-)\left(1-\frac{\sum_k d_{kj}}{n_j}\right).
 
 The previous survival factor includes every failure cause. A cause-specific hazard describes an instantaneous rate among units still event-free; cumulative incidence describes an absolute probability. They answer related but different questions.
 
+## Key terms
+
+- **Competing risk:** An event that prevents the event of interest from occurring, such as a different failure mode ending a lifetime.
+- **Cumulative incidence:** The absolute probability of failing from a specific cause by time t, which depends on survival from all causes.
+- **Cause-specific hazard:** The instantaneous rate of one cause among units still free of every event.
+- **Episode splitting:** Dividing follow-up at a declared change point so a time interaction can test whether a coefficient is constant.
+
 ## Worked case 1: reconcile cause probabilities
 
 Four units fail sequentially from causes 1,2,1,2, with no censoring. The program accumulates each cause's incidence while updating survival for all failures. The result is .5 for each cause and zero remaining survival. These values agree with the observed proportions because follow-up is complete, giving a simple independent oracle.
@@ -53,6 +60,40 @@ Keep the event dictionary explicit. A terminal event, temporary loss of observat
 **Why must cause incidences and survival be reviewed together?** Their relationship checks whether probabilities describe mutually exclusive outcomes coherently. An impossible sum can reveal a data, risk-set or modeling error before any scientific interpretation is attempted.
 
 **Does a significant proportional-hazards diagnostic tell us which model is correct?** It identifies evidence against a particular restriction. It does not select the replacement mechanism automatically. Use the scientific time process, observed patterns, validation and the desired prediction or effect target to choose a defensible continuation.
+
+## Worked example: Aalen-Johansen incidence versus one minus Kaplan-Meier
+
+```python
+import numpy as np
+
+t = np.array([1, 2, 2, 3, 4, 5, 6, 7])
+cause = np.array([1, 2, 1, 2, 2, 1, 0, 2])  # 0 = censored
+
+surv, cif = 1.0, 0.0
+km = 1.0
+for v in np.unique(t):
+    at_risk = np.sum(t >= v)
+    e1 = np.sum((t == v) & (cause == 1))
+    e_any = np.sum((t == v) & (cause > 0))
+    cif += surv * e1 / at_risk
+    surv *= 1 - e_any / at_risk
+    km *= 1 - e1 / at_risk  # competing events treated as censoring
+    print(f"t={v}: at risk {at_risk}, cause-1 {e1}, any {e_any}, CIF1 {cif:.4f}, 1-KM {1 - km:.4f}")
+```
+
+Observed output:
+
+```text
+t=1: at risk 8, cause-1 1, any 1, CIF1 0.1250, 1-KM 0.1250
+t=2: at risk 7, cause-1 1, any 2, CIF1 0.2500, 1-KM 0.2500
+t=3: at risk 5, cause-1 0, any 1, CIF1 0.2500, 1-KM 0.2500
+t=4: at risk 4, cause-1 0, any 1, CIF1 0.2500, 1-KM 0.2500
+t=5: at risk 3, cause-1 1, any 1, CIF1 0.3750, 1-KM 0.5000
+t=6: at risk 2, cause-1 0, any 0, CIF1 0.3750, 1-KM 0.5000
+t=7: at risk 1, cause-1 0, any 1, CIF1 0.3750, 1-KM 0.5000
+```
+
+Up to time 4 the two columns agree at 0.25, because both cause-1 events occur at times 1 and 2, before competing events have thinned the population enough to matter. They separate at time 5. Competing events at times 2, 3 and 4 shrink the all-cause survival from \(7/8\) to \(0.875\times5/7\times4/5\times3/4=0.375\), so the cause-1 event adds \(0.375\times1/3=0.125\) and the Aalen-Johansen incidence becomes 0.375. One minus Kaplan-Meier treats the cause-2 events as censoring, keeps its cause-1 survival at 0.75 through time 4, and adds \(0.75\times1/3=0.25\), reaching 0.500. That 0.500 describes a hypothetical world where nobody can experience cause 2, which is not the population analyzed. With four competing events among eight people, the overstatement is a third of the true incidence. Censoring at time 6 lowers the risk set but adds no mass to either column.
 
 ## Complete reproducible program
 

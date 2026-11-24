@@ -10,6 +10,13 @@ Represent a record as \((t,a,v)\), with event time \(t\), availability time \(a\
 
 The tiny fixture follows an exact linear series: 10,12,14,16,18. An event-two value of 14 is later revised to 50. This extreme revision makes leakage visible. It is a teaching contrast, not a realistic claim about the frequency or magnitude of revisions in an operational dataset.
 
+## Key terms
+
+- **Vintage:** The version of a series exactly as it was available at a specific information cutoff.
+- **Availability time:** When an analyst could first use a record, as distinct from the event time at which the measurement belongs in the world.
+- **Revision:** A later value for the same event time that replaces the first report and must not leak into an earlier forecast origin.
+- **Overlapping horizons:** Forecasts from different origins that share target times, which makes their errors dependent.
+
 ## Worked case 1: a vintage-aware forecast
 
 At cutoff four, the available series through event three is 10,12,14,16. Least squares fits its trend and extrapolates event four to 18. The `as_of` function filters by availability and sorts by event/availability to construct the valid snapshot. Its explicit assertions verify both the older and current values of the revised event.
@@ -39,6 +46,58 @@ Numerical accuracy is not the only operational criterion. Forecasts must arrive 
 **Should all revised data be excluded forever?** No. At a later origin, a revision that is already available can legitimately enter training. The requirement is to reproduce what was known at each origin, not to prohibit useful information.
 
 **Does the example prove that linear regression is a good forecaster?** It proves that a linear procedure recovers a deliberately linear fixture under a valid information snapshot. Its larger lesson is procedural: changing the information boundary can dominate the apparent choice of forecasting algorithm.
+
+## Worked example: As-of reconstruction from a revision log
+
+```python
+import pandas as pd
+
+log = pd.DataFrame(
+    {
+        "period": [1, 2, 2, 3, 3, 3, 4],
+        "released": [2, 3, 5, 4, 5, 7, 5],
+        "value": [100, 104, 110, 103, 108, 109, 112],
+    }
+)
+
+
+def as_of(origin):
+    known = log[log.released <= origin]
+    return known.sort_values("released").groupby("period").value.last()
+
+
+for origin in (4, 5, 7):
+    print(f"vintage at origin {origin}:", as_of(origin).to_dict())
+
+latest = as_of(99)
+truth_period_4 = 112
+naive_from_vintage = as_of(4).iloc[-1]  # last known level at origin 4
+naive_from_latest = latest.loc[3]  # what a revised backtest would use
+print(
+    "forecast for period 4 from vintage 4:",
+    naive_from_vintage,
+    "error",
+    truth_period_4 - naive_from_vintage,
+)
+print(
+    "forecast for period 4 from latest data:",
+    naive_from_latest,
+    "error",
+    truth_period_4 - naive_from_latest,
+)
+```
+
+Observed output:
+
+```text
+vintage at origin 4: {1: 100, 2: 104, 3: 103}
+vintage at origin 5: {1: 100, 2: 110, 3: 108, 4: 112}
+vintage at origin 7: {1: 100, 2: 110, 3: 109, 4: 112}
+forecast for period 4 from vintage 4: 103 error 9
+forecast for period 4 from latest data: 109 error 3
+```
+
+The log has seven rows but only four periods, because periods 2 and 3 were revised after their first release. At origin 4 the analyst knew period 2 as 104 and period 3 as 103; period 4 had not been released at all. By origin 5 both earlier periods had been revised upward, to 110 and 108, and period 4 appeared at 112. Origin 7 adds one more revision, period 3 to 109. A naive last-value forecast of period 4 made at origin 4 had only 103 available and missed by 9. A backtest that rebuilds that same forecast from the latest table uses 109 and appears to miss by only 3. The two-thirds reduction in error is pure leakage: the revised value of period 3 was not known until origin 7, three periods after the forecast was due. Any backtest that reads the final table rather than calling an as-of function inherits this optimism, and its size depends on how large and how directional the revisions are.
 
 ## Complete reproducible program
 

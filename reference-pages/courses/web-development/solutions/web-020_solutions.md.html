@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-020.md</code>.</p>
 <h3 id="exercise-1-identify-the-difference-between-a-transition-and-keyframe-animation">Exercise 1: Identify the difference between a transition and keyframe animation.<a class="heading-anchor" href="#exercise-1-identify-the-difference-between-a-transition-and-keyframe-animation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A transition follows a property change; an animation follows a named timeline.</p>
+<p><strong>Approach:</strong> Compare triggers: a transition runs only when a property value changes, while a keyframe animation runs from its own named timeline.</p>
 <p><strong>Why:</strong> A transition interpolates between two values when a property changes, while @keyframes define a timeline that runs on its own.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting a transition to loop fails because it runs once per value change and stops at the new value.</p>
+<p><strong>How to verify:</strong> A hover transition plays once per hover and then rests, while an <code>animation</code> with <code>animation-iteration-count: infinite</code> keeps running with no interaction at all.</p>
 <h3 id="exercise-2-limit-a-transition-to-one-intentional-property">Exercise 2: Limit a transition to one intentional property.<a class="heading-anchor" href="#exercise-2-limit-a-transition-to-one-intentional-property" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Unrelated style changes no longer animate automatically.</p>
+<p><strong>Approach:</strong> Replace <code>transition: all</code> with <code>transition: transform 120ms ease</code> so only the intended movement animates.</p>
 <p><strong>Why:</strong> transition: all animates every later property change, including ones you did not intend; listing one property keeps the effect deliberate.</p>
+<p><strong>Plausible wrong approach:</strong> Keeping <code>all</code> with a shorter duration fails because unrelated layout changes still animate, just more quickly.</p>
+<p><strong>How to verify:</strong> Changing the card&#x27;s padding in developer tools happens instantly while hover still animates the transform.</p>
 <h3 id="exercise-3-build-a-card-interaction-with-a-static-reduced-motion-alternative">Exercise 3: Build a card interaction with a static reduced-motion alternative.<a class="heading-anchor" href="#exercise-3-build-a-card-interaction-with-a-static-reduced-motion-alternative" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The card remains understandable and usable without movement.</p>
+<p><strong>Approach:</strong> Add the hover transform and a reduced-motion media query that removes both the transition and the transform.</p>
 <p><strong>Why:</strong> The reduced-motion query lets people who are sensitive to motion get a fully usable static interaction.</p>
+<p><strong>Plausible wrong approach:</strong> Removing only the transition fails because the card still jumps 2px on hover, which is still motion.</p>
+<p><strong>How to verify:</strong> With reduced motion emulated, hovering leaves the card in place and its border or outline still changes.</p>
 <h3 id="exercise-4-diagnose-an-animation-that-hides-information-until-it-finishes">Exercise 4: Diagnose an animation that hides information until it finishes.<a class="heading-anchor" href="#exercise-4-diagnose-an-animation-that-hides-information-until-it-finishes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Make the essential content available without waiting for motion.</p>
+<p><strong>Approach:</strong> Make the content visible in its final state by default and let motion only decorate that change.</p>
 <p><strong>Why:</strong> Information that appears only at the end of an animation delays or hides it for everyone and fails when motion is disabled.</p>
+<p><strong>Plausible wrong approach:</strong> Starting content at <code>opacity: 0</code> until an animation finishes fails because a failed or skipped animation leaves the text invisible.</p>
+<p><strong>How to verify:</strong> With animations disabled in developer tools, or with the keyframes rule deleted, all text is visible and readable as soon as the page loads.</p>
 <h3 id="exercise-5-test-with-reduced-motion-enabled-and-with-keyboard-focus">Exercise 5: Test with reduced motion enabled and with keyboard focus.<a class="heading-anchor" href="#exercise-5-test-with-reduced-motion-enabled-and-with-keyboard-focus" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Motion is reduced and the focus indicator still communicates interaction.</p>
+<p><strong>Approach:</strong> Emulate <code>prefers-reduced-motion: reduce</code>, then tab through the cards and confirm each focus outline is still visible.</p>
 <p><strong>Why:</strong> Disabling motion must not remove the focus indicator, which communicates state rather than decoration.</p>
+<p><strong>Plausible wrong approach:</strong> Disabling all hover and focus styles under reduced motion fails because users lose the focus signal along with the motion.</p>
+<p><strong>How to verify:</strong> With the preference on, no element moves and every focused card still shows its outline.</p>
 <h3 id="exercise-6-explain-why-transform-does-not-guarantee-a-fast-page">Exercise 6: Explain why transform does not guarantee a fast page.<a class="heading-anchor" href="#exercise-6-explain-why-transform-does-not-guarantee-a-fast-page" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The full rendering workload, content size and device determine performance.</p>
+<p><strong>Approach:</strong> Profile a hover on a page with many large cards and look at layout, paint and composite work in the performance panel.</p>
 <p><strong>Why:</strong> transform avoids layout but still costs painting and compositing, so total workload and device speed decide performance.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming transform is free fails because large layers, many elements and slow devices still cost memory and frame time.</p>
+<p><strong>How to verify:</strong> The performance trace shows frame timings for the hover on each version, and you compare those recorded numbers instead of assuming which one is faster.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-020_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

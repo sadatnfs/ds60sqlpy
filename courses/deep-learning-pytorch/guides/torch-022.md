@@ -158,7 +158,7 @@ for cut in range(1, 4):
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Uniform causal outputs are [2, 0], [1, 1] and [\(\frac{8}{3}\), \(\frac{8}{3}\)], changing the third value to [100, 200] alters only the last row to [34, \(\frac{202}{3}\)], all prefixes match within 1e-12, and an all-masked row raises ValueError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Compute uniform causal mixtures. Predict exercise 6, Keep inference dropout disabled, from its prompt alone: Repeat functional attention with `dropout_p=0` and compare exact outputs. Then explain why this finish condition holds: Uniform causal outputs are [2, 0], [1, 1] and [\(\frac{8}{3}\), \(\frac{8}{3}\)], changing the third value to [100, 200] alters only the last row to [34, \(\frac{202}{3}\)], all prefixes match within 1e-12, and an all-masked row raises ValueError. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -194,15 +194,15 @@ If padded query outputs affect the objective, inspect the loss participation mas
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Perturb only the future) alters one assumption of Example A (Compute uniform causal mixtures). Hint 2: exercise 4, Reject an all-masked row, should end at ValueError before the attention call. Work backward from it. Hint 3: exercise 5, Translate mask polarity explicitly, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain SDPA, Mask polarity, Prefix invariance using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Recompute nonuniform prefixes, from its inputs alone. Predict whether exercise 3, Compute one nonuniform weight, survives one changed input. Then explain SDPA, Mask polarity, Prefix invariance in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-021` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Compute uniform causal mixtures) cannot be rebuilt without help, revisit `torch-021` first. Otherwise keep your exercise 2 attempt, Predict a bidirectional change, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

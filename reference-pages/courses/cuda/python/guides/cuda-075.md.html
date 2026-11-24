@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>An image has coordinates, channel conventions and storage layout. Map thread x to columns and thread y to rows only after defining that contract. A row-major scalar image uses offset <code>row * width + column</code>. A rectangular block launch requires independent checks for row and column, because the input dimensions may have different tails. Multiplying both dimensions by the same bound accidentally accepts invalid coordinates.</p>
 <p>Stencil operations read neighbors, so boundary policy is part of correctness: zero padding, clamp, reflect and valid-only output produce different results. Read from an immutable input and write to a separate output unless a proven algorithm allows in-place updates. A CPU loop is useful because its coordinate meanings are visible. Do not infer coalescing or performance from that loop&#x27;s execution time.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Flat pixel offset:</strong> The position <code>row * width + col</code> of a pixel in a row-major image buffer.</li>
+<li><strong>Zero padding:</strong> A boundary rule that treats out-of-range neighbors as zero.</li>
+<li><strong>Clamp to edge:</strong> A boundary rule that replaces an out-of-range coordinate with the nearest valid one.</li>
+<li><strong>In-place contamination:</strong> Corruption that occurs when a stencil writes results into the same buffer that neighboring threads are still reading.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>For a 2 by 3 image, row 1 column 2 maps to flat offset 5. Swapping row and column changes the address and can escape the allocation.</p>
@@ -216,20 +223,40 @@ clamped <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> <span class="syntax-number">1</span> <span class="syntax-operator">*</span> <span class="syntax-number">3</span> <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU image reference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> clamped<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Clamped horizontal average [4, 6, 8].</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>values</code></td>
+<td><code>[3, 6, 9]</code></td>
+</tr>
+<tr>
+<td><code>clamped</code></td>
+<td><code>[4.0, 6.0, 8.0]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-a-rectangular-tile">Exercise 1: Trace a rectangular tile<a class="heading-anchor" href="#exercise-1-trace-a-rectangular-tile" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>trace a rectangular tile</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing pairs directly from a single flattened thread number tempts the reader to assign <code>x</code> to rows, because rows are listed first in mathematics. The tile then covers three rows and two columns, a transposed shape.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-calculate-flat-offsets">Exercise 2: Calculate flat offsets<a class="heading-anchor" href="#exercise-2-calculate-flat-offsets" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>calculate flat offsets</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using <code>column * width + row</code> swaps the roles. For row 1 column 2 it gives <code>2*3 + 1 = 7</code>, which lies past the six-element allocation, so a kernel would read or write out of bounds.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-change-clamp-to-zero-padding">Exercise 3: Change clamp to zero padding<a class="heading-anchor" href="#exercise-3-change-clamp-to-zero-padding" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>change clamp to zero padding</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calling both versions a three-point average and comparing only the interior value 6 hides the change. Tests that skip the edges will pass for either padding and miss a semantic regression.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-find-in-place-stencil-contamination">Exercise 4: Find in-place stencil contamination<a class="heading-anchor" href="#exercise-4-find-in-place-stencil-contamination" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>find in-place stencil contamination</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming each thread writes only its own element and therefore cannot interfere ignores that neighbors read that element. Ownership of writes is not the same as ownership of reads.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-test-width-one">Exercise 5: Test width one<a class="heading-anchor" href="#exercise-5-test-width-one" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>test width one</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming width is always at least 3 and reading <code>values[i-1]</code> and <code>values[i+1]</code> directly fails: <code>values[-1]</code> silently returns the last element in Python, and <code>values[1]</code> raises IndexError. A device version reads out of bounds.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-row-and-column-tail-guards">Exercise 6: Explain row and column tail guards<a class="heading-anchor" href="#exercise-6-explain-row-and-column-tail-guards" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>explain row and column tail guards</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Guarding only the flat offset with <code>offset &lt; height*width</code> lets a thread with column 3 and row 0 in a width-3 image pass, because its offset 3 is valid. It then writes into row 1, column 0, corrupting another pixel.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

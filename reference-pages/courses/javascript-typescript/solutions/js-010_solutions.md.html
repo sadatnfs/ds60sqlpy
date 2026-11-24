@@ -218,7 +218,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> The changed run fails with an <code>AssertionError</code> at the check <code>assert.equal(module.count, 1)</code>. Restoring the original line brings back the worked observation: count changes from 0 to 1 through the imported namespace.</p>
+<p><strong>Expected:</strong> The changed run fails with an <code>AssertionError</code> at <code>assert.equal(module.count, 1)</code>. Restoring <code>1;</code> brings back: count changes from 0 to 1 through the imported namespace.</p>
 <p><strong>Verify:</strong> Compare your written prediction with the reported <code>AssertionError</code>, including its actual and expected values, and name the value that made <code>assert.equal(module.count, 1)</code> fail. After restoring the line, the program prints its <code>{&quot;checks&quot;:1,&quot;status&quot;:&quot;passed&quot;}</code> receipt again.</p>
 <h3 id="exercise-2-resolve-a-relative-dependency-debug-a-regression">Exercise 2: Resolve a relative dependency: debug a regression<a class="heading-anchor" href="#exercise-2-resolve-a-relative-dependency-debug-a-regression" aria-label="Link to this section">#</a></h3>
 <p>Task: A regression changed one token in Example B, so one line now reads <code>3</code>. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.</p>
@@ -234,7 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>answer<span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the run fails with an <code>AssertionError</code> at the check <code>assert.equal(module.answer, 8)</code>; after it the line reads <code>2</code> again and answer equals 8.</p>
+<p><strong>Expected:</strong> Before the repair the run fails with an <code>AssertionError</code> at <code>assert.equal(module.answer, 8)</code>. Restoring <code>2</code> brings back: answer equals 8.</p>
 <p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>assert.equal(module.answer, 8)</code> for this input.</p>
 <h3 id="exercise-3-prove-cached-module-identity">Exercise 3: Prove cached module identity<a class="heading-anchor" href="#exercise-3-prove-cached-module-identity" aria-label="Link to this section">#</a></h3>
 <p>Task: Import one URL twice and compare the namespace and exported object.</p>

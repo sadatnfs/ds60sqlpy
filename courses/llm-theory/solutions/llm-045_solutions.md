@@ -1,6 +1,6 @@
 # llm-045: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these pre/post normalization, RMSNorm and gated feed-forward networks answers after attempting *Compare RMSNorm and LayerNorm* through *Test invariance and zero-vector boundaries*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Calculate a SwiGLU gate derivative* points to one step. `llm-045_solution.py` holds the assertions; this page explains how they test pre-norm. Then try *Test invariance and zero-vector boundaries* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -43,7 +43,7 @@ np.testing.assert_allclose(
 
 **Expected:** RMSNorm mean nonzero; LayerNorm mean approximately 0.
 
-**Verify:** In a fresh process, the exercise checks confirm `abs(rms.mean().item()) > 0.5`; `centered.mean().item()` matches `0` within 1e-12 and `rms.detach().numpy()` matches `np.array([3.0, 4.0]) / np.sqrt(12.5 + 1e-08)` within 1e-12.
+**Verify:** For *Compare RMSNorm and LayerNorm*, a fresh-process check confirms `abs(rms.mean().item()) > 0.5`; `centered.mean().item()` matches `0` within 1e-12 and `rms.detach().numpy()` matches `np.array([3.0, 4.0]) / np.sqrt(12.5 + 1e-08)` within 1e-12.
 
 ## Exercise 2: Trace pre/post residual Jacobians
 
@@ -66,7 +66,7 @@ torch.testing.assert_close(
 
 **Expected:** pre-norm Jacobian is identity; post-norm Jacobian annihilates a constant feature shift.
 
-**Verify:** In a fresh process, the exercise checks confirm `pre` matches `torch.eye(3, dtype=torch.float64)` within 1e-12 and `post @ torch.ones(3, dtype=torch.float64)` matches `torch.zeros(3, dtype=torch.float64)` within 1e-10.
+**Verify:** For *Trace pre/post residual Jacobians*, a fresh-process check confirms `pre` matches `torch.eye(3, dtype=torch.float64)` within 1e-12 and `post @ torch.ones(3, dtype=torch.float64)` matches `torch.zeros(3, dtype=torch.float64)` within 1e-10.
 
 ## Exercise 3: Calculate a SwiGLU gate derivative
 
@@ -84,7 +84,7 @@ assert output.item() == 0 and gate.grad.item() == 1 and up.grad.item() == 0
 
 **Expected:** output 0; gradient with respect to g is 1; with respect to u is 0.
 
-**Verify:** In a fresh process, the exercise checks confirm `output.item() == 0`, `gate.grad.item() == 1` and `up.grad.item() == 0`.
+**Verify:** For *Calculate a SwiGLU gate derivative*, a fresh-process check confirms `output.item() == 0`, `gate.grad.item() == 1` and `up.grad.item() == 0`.
 
 ## Exercise 4: Check the RMSNorm Jacobian formula
 
@@ -103,7 +103,7 @@ torch.testing.assert_close(automatic, analytic, atol=1e-10, rtol=0)
 
 **Expected:** matrices agree within 1e-10.
 
-**Verify:** In a fresh process, the exercise checks confirm `automatic` matches `analytic` within 1e-10.
+**Verify:** For *Check the RMSNorm Jacobian formula*, a fresh-process check confirms `automatic` matches `analytic` within 1e-10.
 
 ## Exercise 5: Match feed-forward parameter budgets
 
@@ -124,9 +124,9 @@ result = (F.silu(inputs @ wg) * (inputs @ wu)) @ wd
 assert tuple(result.shape) == (2, 4) and torch.isfinite(result).all()
 ```
 
-**Expected:** both 48 weight entries; output shape(2, 4).
+**Expected:** both 48 weight entries; output shape (2, 4).
 
-**Verify:** In a fresh process, the exercise checks confirm `2 * d * plain_hidden == 3 * d * gated_hidden == 48`; `tuple(result.shape) == (2, 4)` and `torch.isfinite(result).all()`.
+**Verify:** For *Match feed-forward parameter budgets*, a fresh-process check confirms `2 * d * plain_hidden == 3 * d * gated_hidden == 48`; `tuple(result.shape) == (2, 4)` and `torch.isfinite(result).all()`.
 
 ## Exercise 6: Test invariance and zero-vector boundaries
 
@@ -143,8 +143,8 @@ assert torch.isfinite(rms_norm(torch.zeros(3, dtype=torch.float64))).all()
 
 **Expected:** LayerNorm shift invariant; RMSNorm changes; both zero cases finite.
 
-**Verify:** In a fresh process, the exercise checks confirm `layer_norm(base + 5)` matches `layer_norm(base)` within 1e-12; `not torch.allclose(rms_norm(base + 5), rms_norm(base))` and `torch.isfinite(rms_norm(torch.zeros(3, dtype=torch.float64))).all()`.
+**Verify:** For *Test invariance and zero-vector boundaries*, a fresh-process check confirms `layer_norm(base + 5)` matches `layer_norm(base)` within 1e-12; `not torch.allclose(rms_norm(base + 5), rms_norm(base))` and `torch.isfinite(rms_norm(torch.zeros(3, dtype=torch.float64))).all()`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Check the RMSNorm Jacobian formula* and predict the result first; keep *Match feed-forward parameter budgets* failing beside the repair. Log a missing PyTorch separately from a wrong pre-norm value in `llm-045`.

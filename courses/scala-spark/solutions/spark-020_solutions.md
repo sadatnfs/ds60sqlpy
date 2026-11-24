@@ -125,7 +125,7 @@ The operator promises order inside a partition and the test checks exactly that 
 
 Order key descending then event identity id ascending and return the first 5 rows. Repeat after several input layouts.
 
-**Expected:** IDs [3, 7, 11, 15, 19], allkey 3 and values [30, 70, 110, 150, 190]. The final sixthkey 3 row is outside the limit.
+**Expected:** IDs `[3, 7, 11, 15, 19]`, all with key 3, and values `[30, 70, 110, 150, 190]`. The sixth key 3 row is outside the limit.
 
 ```scala
 def preview(frame: DataFrame): Seq[(Long, Long, Long)] = {
@@ -156,4 +156,6 @@ The complete ordering converts a relation into a specified display sequence befo
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Establish logical content independently of layout) is built inside the program, so opening the lesson fetches nothing; it expects: IDs 0..23 appear once, `key = id % 4`, `value = 10 * id`. Metrics are `24, 24, 276, 2760`. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

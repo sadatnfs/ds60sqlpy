@@ -14,7 +14,7 @@ Algorithms connect a problem contract to a sequence of operations and invariants
 
 ## Reading the reference
 
-A lower-bound search returns the first index whose value is at least the target, or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming table dp[amount] stores the minimum coin count for that exact amount, with dp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
+A lower-bound search returns the first index whose value is at least the target, or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming table `dp[amount]` stores the minimum coin count for that exact amount, with `dp[0] = 0` and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
 
 ## Exercise 1: Find the first duplicate boundary: change one input
 

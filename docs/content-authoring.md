@@ -323,6 +323,24 @@ plain text, static HTML and the unified classroom.
 - Give every guide a `## Key terms` section with at least three
   lesson-specific `- **Term:** definition` bullets drawn from the lesson's
   plan concepts.
+- Give every guide at least two worked examples. A worked example is a fenced
+  block the learner can run or inspect (code, a query, a command, a manifest),
+  shown on concrete inputs and followed by prose that interprets it: what the
+  output shows, why, and what would change if one input changed. An expected
+  output block may follow, but at least one fence must be the artifact itself.
+  Guides need at least 1,050 words of teaching (`thin-guide`); add a contrast
+  example, an output walkthrough or a trace on a small input, not padding.
+- Write each practice solution so the reasoning outweighs the code. For every
+  task, state the approach, why it is correct for this lesson's data, one
+  plausible wrong approach and exactly why it fails here, and how to verify
+  the result (the command, check or expected value). The shortest Markdown
+  solution needs at least 700 words (`thin-solution`).
+- Keep new prose specific to its lesson. The coverage matrix records
+  `templated_words`: words in paragraphs of 20 or more words whose sampled
+  8-word phrases mostly also appear in three or more lessons. Its corpus total
+  is pinned in `tests/test_coverage_matrix.py` and may only fall, so a helper
+  paragraph pasted across lessons, or a fixed sentence frame filled with a
+  lesson name, fails CI. The `--track` helper prints the track total.
 - Count real learner actions, questions, predictions, diagnoses, and
   explanations. Repeated sub-bullets, headings, hints, and answer steps do not
   become separate exercises merely to satisfy the count.

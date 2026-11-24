@@ -97,7 +97,7 @@ The baseline uses no holdout target to fit its constant. A baseline fitted to th
 
 ```text
 Training mean=(2+4+6)/3=4
-Holdout residuals=4,6,8,10
+Holdout residuals (target minus prediction)=8-4, 10-4, 12-4, 14-4 = 4, 6, 8, 10
 Squared errors=16,36,64,100
 MSE=216/4=54
 ```
@@ -119,7 +119,7 @@ Training execution evidence: absent unless an actual optimizer run is recorded
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The card records 3 training and 4 holdout rows, a baseline mean of 4 with holdout MSE 54, the hand rule labeled as an analytic oracle rather than a trained model, and the reused holdout reclassified as validation. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Define a prediction unit. Predict exercise 6, Bound the conclusion, from its prompt alone: Write a report for a successful tiny CPU reference that avoids a production-quality claim. Then explain why this finish condition holds: The card records 3 training and 4 holdout rows, a baseline mean of 4 with holdout MSE 54, the hand rule labeled as an analytic oracle rather than a trained model, and the reused holdout reclassified as validation. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -155,15 +155,15 @@ If the constant baseline differs from four, inspect which target population was 
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Calculate a mean baseline) alters one assumption of Example A (Define a prediction unit). Hint 2: exercise 4, Audit selection leakage, should end at holdout was used for selection; new untouched assessment needed. Work backward from it. Hint 3: exercise 5, Align a framework comparison, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Prediction unit, Training, Holdout using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Separate an exact relation from learned evidence, from its inputs alone. Predict whether exercise 3, Classify evidence for a generated fixture, survives one changed input. Then explain Prediction unit, Training, Holdout in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite  if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Define a prediction unit) cannot be rebuilt without help, revisit  first. Otherwise keep your exercise 2 attempt, Recompute a training-only baseline, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

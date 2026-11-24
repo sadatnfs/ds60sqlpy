@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-008`, `apache-063`.
 
+## Key terms
+
+- **Entity type:** An Atlas type definition that declares the attributes and relationships its instances can carry, often inheriting from DataSet or Process.
+- **Entity:** One instance of an entity type representing an asset or process, stored with a server-assigned GUID.
+- **GUID:** The globally unique identifier Atlas assigns to a stored entity instance.
+- **qualifiedName:** The unique attribute a producer sets so that retries can locate the same logical asset without knowing its GUID.
+- **Relationship type:** A typed definition of how two entity types connect, such as a process to its input and output datasets.
+
 ## A metadata type is different from an asset instance
 
 Atlas provides a type system for describing metadata. An entity type defines

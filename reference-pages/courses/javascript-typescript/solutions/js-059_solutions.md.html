@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Construct the hierarchy from an object whose children field contains nested objects. Apply <code>d3.tree().size([height,width])</code> to compute coordinates. For a left-to-right tree, use the layout y coordinate as horizontal position and x as vertical position.</p>
 <p><code>root.links()</code> returns source-target pairs; <code>d3.linkHorizontal</code> converts each pair into a path. Check node and edge counts: a connected tree with n nodes has n-1 parent edges. This is a structural invariant, not a visual preference.</p>
 <h3 id="exercise-1-predict-node-and-edge-counts">Exercise 1: Predict node and edge counts.<a class="heading-anchor" href="#exercise-1-predict-node-and-edge-counts" aria-label="Link to this section">#</a></h3>
-<p>Each non-root node has one parent edge. This invariant catches missing or duplicated structural relationships.</p>
+<p>Each non-root node has one parent edge. This invariant catches missing or duplicated structural relationships. In a tree every node except the root has exactly one parent, so links = nodes - 1. The reference hierarchy has six nodes (Learning, Languages, Systems, JavaScript, Python, Docker) and five links, and checks both numbers. Counting the children arrays alone would miss the root and give five nodes.</p>
 <p><strong>Expected:</strong> Three nodes and two links in the small example.</p>
 <h3 id="exercise-2-add-a-grandchild-under-a">Exercise 2: Add a grandchild under A.<a class="heading-anchor" href="#exercise-2-add-a-grandchild-under-a" aria-label="Link to this section">#</a></h3>
-<p>The new relationship changes topology. Its position should follow the layout rather than a manually chosen unrelated coordinate.</p>
+<p>The new relationship changes topology. Its position should follow the layout rather than a manually chosen unrelated coordinate. Adding a child under Docker makes it depth 3 in the reference tree and raises the counts to 7 and 6. Hard-coding the new node&#x27;s position would break the next time siblings change; let d3.tree recompute and confirm all coordinates stay finite.</p>
 <p><strong>Expected:</strong> Depth 2 appears and counts become 4 nodes, 3 links.</p>
 <h3 id="exercise-3-render-a-labeled-left-to-right-tree">Exercise 3: Render a labeled left-to-right tree.<a class="heading-anchor" href="#exercise-3-render-a-labeled-left-to-right-tree" aria-label="Link to this section">#</a></h3>
-<p>Use the same layout coordinates for both marks and links. Swapping x and y inconsistently produces misleading connections.</p>
+<p>Use the same layout coordinates for both marks and links. Swapping x and y inconsistently produces misleading connections. <code>d3.tree().size([260, 420])</code> puts breadth in x and depth in y, so a left-to-right tree draws nodes at translate(d.y, d.x) and links with linkHorizontal using x = d.y and y = d.x. Swapping only one of the two would draw links that miss their circles. Inspect a link path&#x27;s end point against its target node transform.</p>
 <p><strong>Expected:</strong> Links connect the matching source and target nodes.</p>
 <h3 id="exercise-4-diagnose-using-a-tree-for-a-cyclic-relationship-graph">Exercise 4: Diagnose using a tree for a cyclic relationship graph.<a class="heading-anchor" href="#exercise-4-diagnose-using-a-tree-for-a-cyclic-relationship-graph" aria-label="Link to this section">#</a></h3>
-<p>A general network needs a different representation or an explicitly chosen spanning tree whose omissions are disclosed.</p>
+<p>A general network needs a different representation or an explicitly chosen spanning tree whose omissions are disclosed. d3.hierarchy expects nested children with no cycles; an edge list with A to B to A cannot be nested at all. Use a force network, or pick a spanning tree and state which edges were dropped.</p>
 <p><strong>Expected:</strong> The data model does not satisfy tree assumptions.</p>
 <h3 id="exercise-5-handle-long-labels-in-a-narrow-view">Exercise 5: Handle long labels in a narrow view.<a class="heading-anchor" href="#exercise-5-handle-long-labels-in-a-narrow-view" aria-label="Link to this section">#</a></h3>
-<p>Truncation needs a discoverable full value. Geometric fit alone does not establish usable reading.</p>
+<p>Truncation needs a discoverable full value. Geometric fit alone does not establish usable reading. Labels such as &quot;JavaScript&quot; sit 10 pixels from leaf circles; in a narrow view, truncate with an ellipsis and keep the full name in a title or side list. Check the longest label at the narrowest width you support.</p>
 <p><strong>Expected:</strong> Labels remain readable or an alternate list exposes full names.</p>
 <h3 id="exercise-6-design-a-collapsible-taxonomy-state-model">Exercise 6: Design a collapsible taxonomy state model.<a class="heading-anchor" href="#exercise-6-design-a-collapsible-taxonomy-state-model" aria-label="Link to this section">#</a></h3>
-<p>Do not encode collapse only by deleting data permanently. Keep the source hierarchy and view state distinct.</p>
+<p>Do not encode collapse only by deleting data permanently. Keep the source hierarchy and view state distinct. Store collapsed ids in a Set and rebuild the view from the unchanged source; deleting children would lose them for re-expansion.</p>
 <p><strong>Expected:</strong> Stable node IDs and explicit collapsed sets preserve identity.</p></article>
   </main>
 </body>

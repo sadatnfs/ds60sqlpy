@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-028</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Dependencies let a FastAPI route request a resource or decision without manually constructing it in every handler. This chapter follows acquisition, use and cleanup through successful and failing requests. It also demonstrates a test override and the importance of removing that override afterward.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Dependency:</strong> A callable that FastAPI resolves for a request and injects into the route, after first resolving that callable&#x27;s own dependencies.</li>
+<li><strong>Depends:</strong> The FastAPI marker, usually written inside <code>Annotated</code>, declaring that a parameter&#x27;s value comes from a dependency callable.</li>
+<li><strong>Yield dependency:</strong> A generator dependency in which code before <code>yield</code> acquires a resource and code after it performs cleanup, even when the route raises.</li>
+<li><strong>Dependency override:</strong> An entry in <code>app.dependency_overrides</code> that replaces one dependency for a test; it must be removed afterward so later tests use the real dependency.</li>
+<li><strong>Request scope:</strong> The lifetime of one request, appropriate for a database session, in contrast to the application lifespan suited to a shared client pool.</li>
+</ul>
 <h3 id="mechanism-the-dependency-graph-owns-lifetimes">Mechanism: the dependency graph owns lifetimes<a class="heading-anchor" href="#mechanism-the-dependency-graph-owns-lifetimes" aria-label="Link to this section">#</a></h3>
 <p>A dependency is a callable whose inputs can themselves be dependencies. FastAPI resolves that graph for a request. A generator dependency with <code>yield</code> separates acquisition before the yield from cleanup after it. This is suitable for a request-scoped connection or unit of work whose lifetime must end even when the route raises an exception.</p>
 <p>The yielded object is not automatically global application state. A reusable HTTP client pool can belong to application lifespan, while a database session belongs to one request. Confusing those lifetimes can leak transactions across users or repeatedly recreate an expensive pool. The dependency graph should express the intended ownership rather than merely reduce typing.</p>
@@ -209,6 +217,51 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A failing request still enters the cleanup portion of the generator. The program checks that event explicitly. It also installs a controlled override, verifies the changed result and removes the override before the final failure observation.</p>
 <p>An exception does not automatically decide whether a transaction should commit. A dependency may manage rollback on failure, but the application must define that policy. Catching an exception inside a handler and returning an error response can look like normal completion to surrounding cleanup code. Transaction ownership must therefore be designed alongside exception handling.</p>
 <p>Overrides are especially useful for clocks, outbound clients and authenticated identity in focused tests. They are less useful when they replace the exact behavior the test claims to validate. An authentication test that overrides the authentication dependency proves route behavior under an assumed identity, not password or token verification.</p>
+<h3 id="worked-example-how-a-yield-dependency-sees-a-handler-failure">Worked example: how a yield dependency sees a handler failure<a class="heading-anchor" href="#worked-example-how-a-yield-dependency-sees-a-handler-failure" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> contextlib <span class="syntax-keyword">import</span> contextmanager
+
+events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-decorator">@contextmanager</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">repository</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">open</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">yield</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">except</span> LookupError<span class="syntax-punctuation">:</span>
+        events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rollback</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">raise</span>
+    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
+        events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">close</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-decorator">@contextmanager</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">fake_repository</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">yield</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">42</span><span class="syntax-punctuation">}</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">handle</span><span class="syntax-punctuation">(</span>endpoint<span class="syntax-punctuation">,</span> provider<span class="syntax-operator">=</span>repository<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">with</span> provider<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> repo<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">return</span> <span class="syntax-number">200</span><span class="syntax-punctuation">,</span> endpoint<span class="syntax-punctuation">(</span>repo<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> LookupError<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-number">404</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">read</span><span class="syntax-punctuation">(</span>repo<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> repo<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">missing</span><span class="syntax-punctuation">(</span>repo<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> LookupError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">no such row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>handle<span class="syntax-punctuation">(</span>read<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> handle<span class="syntax-punctuation">(</span>missing<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> handle<span class="syntax-punctuation">(</span>read<span class="syntax-punctuation">,</span> fake_repository<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">(200, 7) (404, None) (200, 42)
+[&#x27;open&#x27;, &#x27;close&#x27;, &#x27;open&#x27;, &#x27;rollback&#x27;, &#x27;close&#x27;]</code></pre>
+<p>This is a plain Python model of what FastAPI does with a <code>yield</code> dependency: run the code before <code>yield</code>, hand the value to the endpoint, then resume the generator when the request ends. When the endpoint raises, the exception is thrown back in at the <code>yield</code>, so the dependency can roll back before <code>finally</code> closes the resource. The third call swaps in a fake provider, the job <code>app.dependency_overrides</code> does in the lesson, and the event list proves the real repository never opened. Notice that <code>rollback</code> appears once: a successful read reached <code>close</code> without passing through the <code>except</code> branch.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why can a test pass alone but fail in the suite?</strong> Shared application objects, leaked overrides and unclosed resources are common causes. Check setup and teardown symmetry before adding sleeps or changing expected values.</p>
 <p><strong>Should every dependency be asynchronous?</strong> No. Choose based on actual operations and framework execution rules. Declaring an async function around a blocking call does not make that call nonblocking and can stall unrelated requests.</p>

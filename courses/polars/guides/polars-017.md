@@ -14,6 +14,14 @@ The first case collects the query on every repetition and checks its answer. It 
 
 Performance comparisons must preserve the output contract. An unordered result can be compared as a set or multiset when order is irrelevant; an ordered consumer needs the sorting cost included. The second case distinguishes bag equality from sequence equality. This prevents a supposed optimization from silently removing an ordering requirement.
 
+## Key terms
+
+- **Measurement interval:** The timed region, here `perf_counter` readings around only the `collect` call, that a reported duration covers.
+- **Cache regime:** Whether a timing ran warm, with data and code already cached, or cold; timings from different regimes are not comparable.
+- **Median:** The middle of repeated timings, which resists occasional slow outliers better than the mean.
+- **Bag versus sequence equality:** Bag equality compares rows as a multiset, ignoring order; sequence equality also requires the same order.
+- **estimated_size:** A DataFrame method that estimates the frame's buffer size in bytes, not the process peak or every temporary allocation.
+
 ## Syntax and data contract
 
 perf_counter measures elapsed time around the actual collect call. Record the engine and the number of repetitions. estimated_size describes the frame's buffer estimate, not the whole process peak or every temporary allocation. Sort only when that is part of the intended comparison, and account for its cost explicitly.

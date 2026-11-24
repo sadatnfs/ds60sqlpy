@@ -18,7 +18,7 @@ SVG is a document tree of vector shapes. A rectangle has x and y coordinates, wi
 The first chart maps three synthetic counts to horizontal bar lengths. A zero-length bar corresponds to zero, making length comparisons interpretable. Labels provide category identity and exact values. The chart is intentionally small enough that you can calculate every coordinate by hand.""",
     """`d3.select(host)` wraps one existing DOM element in a selection. `.append('svg')` creates an SVG child and returns a selection containing it. `.attr(name, value)` changes an attribute; a callback receives the bound datum and index. A chain is a sequence of operations, not special chart syntax.
 
-This lesson first uses a simple multiplier rather than a scale to expose the arithmetic. With width equal to count times 20, counts 2, 5 and 8 produce widths 40, 100 and 160. Later lessons replace the literal multiplier with a scale whose domain and range are explicit. Keep text separate from rectangle geometry.""",
+This lesson first uses a simple multiplier rather than a scale to expose the arithmetic. With width equal to count times 20, counts 2, 5 and 8 produce widths of 40 units, 100 units and 160 units. Later lessons replace the literal multiplier with a scale whose domain and range are explicit. Keep text separate from rectangle geometry.""",
     (
         "Map a count to length",
         "A literal computation exposes the first encoding.",
@@ -57,7 +57,7 @@ check(secondTop > firstTop, "A larger y value should be drawn lower");""",
     [
         (
             "Predict the three bar widths.",
-            "40, 100 and 160 units.",
+            "widths of 40 units, 100 units and 160 units.",
             "The same linear multiplier maps all counts. A consistent baseline makes the length ratio represent the count ratio.",
         ),
         (
@@ -1204,7 +1204,7 @@ svg
         (
             "Predict the stack endpoints.",
             "First segment0..2, second2..5.",
-            "Endpoints are cumulative positions. The second segment height represents3, not5.",
+            "Endpoints are cumulative positions. The second segment height represents 3, not 5.",
         ),
         (
             "Normalize two proportional rows.",
@@ -2285,7 +2285,7 @@ svg
   .attr("x", origin[0] + 10)
   .attr("y", origin[1] - 10)
   .text("longitude 0, latitude 0");""",
-        "A Mercator graticule with a red point at longitude 0, latitude 0, drawn at (320, 180) as configured by center and translate.",
+        "A Mercator graticule with a red point at longitude 0, latitude 0, drawn at `(320, 180)` as configured by center and translate.",
     ),
     [
         (
@@ -3007,3 +3007,481 @@ LESSONS = [
     )
     for title, concepts, mental, anatomy, examples, tasks, reference, refs in LESSONS
 ]
+
+
+# Lesson-specific vocabulary rendered as each guide's Key terms list.
+KEY_TERMS = {
+    "js-043": [
+        (
+            "SVG",
+            "Scalable Vector Graphics, a document tree of vector shapes such as `rect` and `text` whose geometry is set through attributes. In its usual coordinate system x grows to the right and y grows downward.",
+        ),
+        (
+            "viewBox",
+            "The SVG attribute that declares the internal coordinate system as min-x, min-y, width and height. CSS scales that system to the display area, and a shape outside it stays in the DOM but is not visible.",
+        ),
+        (
+            "Selection",
+            "A D3 wrapper around existing DOM elements, created with `d3.select`, whose methods such as `.append` and `.attr` act on the wrapped elements and return a selection for chaining.",
+        ),
+        (
+            "Visual encoding",
+            "A mapping from a data property, such as a count, to a perceptual property, such as bar length, position or color.",
+        ),
+    ],
+    "js-044": [
+        (
+            "Data join",
+            "The operation `selection.data(values)` that pairs an array of records with selected nodes so each node can be created, updated or removed to match the data.",
+        ),
+        (
+            "Enter",
+            "The part of a join holding records that have no matching node yet; `join` creates one new element for each of them.",
+        ),
+        (
+            "Update",
+            "The part of a join holding existing nodes that matched a record; they keep their element and receive the new bound datum.",
+        ),
+        (
+            "Exit",
+            "The part of a join holding existing nodes with no matching record; the default `join` removes them so stale marks do not accumulate.",
+        ),
+        (
+            "Bound datum",
+            "The record attached to a node by a join, passed as `d` to attribute callbacks along with the group index `i`.",
+        ),
+    ],
+    "js-045": [
+        (
+            "Key function",
+            "The second argument to `selection.data`, such as `d => d.id`, that computes a string for each record and node so the join matches by identity instead of array index.",
+        ),
+        (
+            "Object identity",
+            "Whether two references point to the same object, checked with `===`. A keyed join keeps the same DOM node for the same entity across redraws.",
+        ),
+        (
+            "Index matching",
+            "The default join behavior without a key: the first record pairs with the first node, so sorting or filtering changes which entity a node represents.",
+        ),
+        (
+            "Reconciliation",
+            "Updating an existing DOM tree to match new data by reusing, adding and removing nodes rather than rebuilding every mark.",
+        ),
+        (
+            "Duplicate key",
+            "Two records that produce the same key, which breaks the one-entity-one-node contract and should be rejected or aggregated before drawing.",
+        ),
+    ],
+    "js-046": [
+        ("Domain", "The input extent of a scale in data units, such as `[0, 10]` counts."),
+        (
+            "Range",
+            "The output extent of a scale in visual units, such as `[40, 600]` SVG coordinates. A vertical range is often written `[bottom, top]` because SVG y grows downward.",
+        ),
+        (
+            "Linear scale",
+            "A callable `d3.scaleLinear` mapping in which equal input differences produce equal output differences. Its `.invert` method maps a coordinate back to a data value.",
+        ),
+        (
+            "Band scale",
+            "A `d3.scaleBand` mapping from discrete categories to evenly spaced bands whose `bandwidth()` gives bar thickness. A category outside its domain returns undefined.",
+        ),
+        (
+            "Zero baseline",
+            "Starting a bar chart's quantitative domain at zero so each bar's length stays proportional to its value.",
+        ),
+    ],
+    "js-047": [
+        (
+            "Axis generator",
+            "A function such as `d3.axisBottom(x)` that, when called on an SVG group, draws the domain line, ticks and labels for a scale.",
+        ),
+        (
+            "Tick",
+            "A selected reference value on an axis, drawn as a short line with a label. A requested tick count is only a hint, while `tickValues` fixes the ticks exactly.",
+        ),
+        (
+            "Format specifier",
+            "A `d3.format` pattern such as `.0%` that turns numbers into display text without changing the scale. The percent type multiplies by 100, so it expects fractions such as 0.25.",
+        ),
+        (
+            "Units",
+            "The measurement meaning of a value, such as dollars, counts or percent of a stated denominator, named in the axis title so readers can interpret the ticks.",
+        ),
+    ],
+    "js-048": [
+        (
+            "CSV parsing",
+            "Converting comma-separated text into row objects with `d3.csvParse`; every cell arrives as a string until a row accessor converts it.",
+        ),
+        (
+            "Row accessor",
+            "A function passed to `d3.csvParse` that returns a cleaned object for each row, or null to omit the row.",
+        ),
+        (
+            "Missingness",
+            "The absence of a measurement, such as a blank cell, which is not the same as zero. Because `Number('')` is 0, the blank check must come before numeric conversion.",
+        ),
+        (
+            "Validation",
+            "Checking each parsed row against explicit rules, such as finite numbers and trimmed categories, and counting rejected rows with a reason.",
+        ),
+        (
+            "Rollup",
+            "The `d3.rollup` operation that groups rows by a key and reduces each group, for example with `d3.sum`, returning a Map at a coarser row grain.",
+        ),
+    ],
+    "js-049": [
+        (
+            "UTC",
+            "Coordinated Universal Time. Using UTC parsing, scales and formatting together keeps a date from shifting a day when the viewer is in another time zone.",
+        ),
+        (
+            "Time scale",
+            "A `d3.scaleUtc` mapping from Date instants to positions whose ticks fall on calendar boundaries.",
+        ),
+        (
+            "Line generator",
+            "A `d3.line` function that turns an ordered array of records into SVG path data through x and y accessors. It connects points in the order supplied, so records must be sorted by time first.",
+        ),
+        (
+            "Defined predicate",
+            "The `.defined` accessor of a line generator; records for which it returns false break the path into separate segments.",
+        ),
+        (
+            "Missing interval",
+            "A stretch of time with no valid observation, shown as a visible gap rather than a line that implies continuous measurement.",
+        ),
+    ],
+    "js-050": [
+        (
+            "Scatterplot",
+            "A chart that places each record as a point at two quantitative positions to show the joint distribution of two variables.",
+        ),
+        (
+            "Area encoding",
+            "Representing a third quantity by circle area. A `d3.scaleSqrt` radius keeps area proportional to the value, since doubling a radius quadruples the area.",
+        ),
+        (
+            "Overplotting",
+            "Points overlapping so that density and repeated values are hidden. Opacity, smaller marks, jitter or aggregation can reveal them, each changing what a reader can infer.",
+        ),
+        (
+            "Jitter",
+            "Small, bounded, disclosed offsets added to point positions to separate identical coordinates; jittered points are no longer exact measurements.",
+        ),
+        (
+            "Correlation",
+            "The degree to which two variables move together. A visible association in a scatterplot does not by itself establish causation.",
+        ),
+    ],
+    "js-051": [
+        (
+            "Histogram",
+            "A chart of counts or densities for quantitative observations grouped into adjacent numeric intervals.",
+        ),
+        (
+            "Bin",
+            "One interval with lower edge `x0` and upper edge `x1`. `d3.bin` returns each bin as an array of its observations, so the count is the array length.",
+        ),
+        (
+            "Threshold",
+            "A boundary value between bins. A value equal to a threshold belongs to the bin that starts there, and only the last bin includes its upper edge.",
+        ),
+        (
+            "Density",
+            "Count divided by sample size and bin width, so bar area represents the share of observations; it is needed when bin widths differ.",
+        ),
+    ],
+    "js-052": [
+        (
+            "Quantile",
+            "The value below which a given fraction of sorted observations falls. `d3.quantileSorted` assumes its input is already sorted in ascending order.",
+        ),
+        (
+            "Median",
+            "The 0.5 quantile, the middle value of the sorted data; for `[1, 2, 3, 4, 5]` it is 3.",
+        ),
+        (
+            "Box plot",
+            "A summary that draws the first and third quartiles as a box, the median as a line and whiskers by a stated rule. It omits most features of the raw observations.",
+        ),
+        (
+            "Sampling uncertainty",
+            "Uncertainty about a parameter estimate that comes from observing only a sample. An interval from a stated procedure describes it, which differs from the spread of individual observations.",
+        ),
+    ],
+    "js-053": [
+        (
+            "Stack layout",
+            "The `d3.stack().keys(...)` layout that returns, for each series and row, a `[lower, upper]` pair of cumulative endpoints. A segment's height is the distance between the two endpoints.",
+        ),
+        (
+            "Grouped bars",
+            "Subgroup bars placed side by side within each group so every bar shares a common baseline for precise comparison.",
+        ),
+        (
+            "Normalization",
+            "Rescaling each row so its components sum to one, as `d3.stackOffsetExpand` does. It shows shares but hides differences in totals.",
+        ),
+        (
+            "Denominator",
+            "The total that a share is computed against. A zero total makes a composition undefined and requires an explicit policy.",
+        ),
+    ],
+    "js-054": [
+        (
+            "Chart component",
+            "A function that renders into a caller-owned container from explicit arguments such as data and size, and can be called again to update the same marks.",
+        ),
+        (
+            "Render contract",
+            "The documented expectations of a component: accepted data shape, dimensions, identity key, empty state and cleanup.",
+        ),
+        (
+            "Responsive viewBox",
+            "An SVG viewBox that lets one logical coordinate system scale to the container width, so layout math stays in fixed units while the display size changes.",
+        ),
+        (
+            "Empty state",
+            "What a component shows when it receives no records, such as a readable message instead of blank space or stale marks.",
+        ),
+        (
+            "ResizeObserver",
+            "A browser API that reports element size changes through a callback. A component that creates one must disconnect it when the component is removed.",
+        ),
+    ],
+    "js-055": [
+        (
+            "Transition",
+            "A D3 object created with `selection.transition()` that moves attributes from their current values to targets over a duration instead of setting them immediately.",
+        ),
+        (
+            "Interpolation",
+            "Computing intermediate values between a start state and an end state, while easing controls the pace along the timeline.",
+        ),
+        (
+            "Interruption",
+            "Cancelling an active transition, either with `.interrupt(name)` or by starting a newer transition with the same name on the element. The interrupted transition's `.end()` promise rejects.",
+        ),
+        (
+            "Reduced motion",
+            "The user preference reported by `matchMedia('(prefers-reduced-motion: reduce)')`, which should lead to an immediate or static update rather than animation.",
+        ),
+    ],
+    "js-056": [
+        (
+            "Event handler",
+            "A listener registered with `selection.on(type, listener)`. D3 calls it with the DOM event and the datum bound to the node.",
+        ),
+        (
+            "Pointer coordinates",
+            "The `[x, y]` pair returned by `d3.pointer(event, node)`, measured in the given node's coordinate system so SVG scaling is accounted for, unlike page coordinates.",
+        ),
+        (
+            "Tooltip",
+            "A small supplemental label shown near a mark on hover or focus. Essential values must also be available without it.",
+        ),
+        (
+            "Keyboard focus",
+            "The element that currently receives key presses. Native buttons are focusable and activate with Enter or Space without extra code.",
+        ),
+        (
+            "Text insertion",
+            "Setting content with `.text()` or `textContent`, so markup characters in a data label appear literally instead of being parsed as HTML.",
+        ),
+    ],
+    "js-057": [
+        (
+            "Brush",
+            "A `d3.brushX` interaction that lets a user drag out a horizontal interval. Its event selection is a pair of pixel coordinates, or null when cleared.",
+        ),
+        (
+            "Selection range",
+            "The brushed pixel interval converted to data values with `x.invert`, together with a stated policy for whether boundary values count as selected.",
+        ),
+        (
+            "Linked view",
+            "A second chart or list that reacts to the same selection, such as a record list that updates when the brush moves.",
+        ),
+        (
+            "Shared state",
+            "One object holding the current selection that every view reads, so coordinated views cannot contradict each other.",
+        ),
+        (
+            "Brush move",
+            "Setting a brush extent from code with `brush.move`, which drives presets and resets through the same path as a drag.",
+        ),
+    ],
+    "js-058": [
+        (
+            "Zoom transform",
+            "The object from a `d3.zoom` event holding a scale factor `k` and translation `x` and `y` between the base view and the current viewport.",
+        ),
+        (
+            "rescaleX",
+            "The method `transform.rescaleX(baseScale)`, which returns a copy of the base scale whose domain matches the visible region while the base scale stays unchanged.",
+        ),
+        (
+            "Viewport",
+            "The visible part of the data space inside the plot area, usually bounded with a clip path so panned marks do not cover the axes.",
+        ),
+        (
+            "Scale extent",
+            "The `zoom.scaleExtent([min, max])` limit on how far a user can zoom out or in.",
+        ),
+        (
+            "Reset",
+            "Returning the zoom to `d3.zoomIdentity` so the view matches the original base scale again.",
+        ),
+    ],
+    "js-059": [
+        (
+            "Hierarchy",
+            "Data with parent-child relationships and no cycles. `d3.hierarchy` wraps nested objects as nodes with `parent`, `children`, `depth` and the original `data`.",
+        ),
+        (
+            "Parent",
+            "The single node directly above a node in a hierarchy. Every node except the root has exactly one parent.",
+        ),
+        (
+            "Tree layout",
+            "The `d3.tree().size(...)` layout that assigns x and y coordinates from topology alone. For a left-to-right tree, the layout y becomes the horizontal position.",
+        ),
+        (
+            "Link",
+            "A source-target pair from `root.links()`, one per parent-child edge, so a connected tree with n nodes has n - 1 links.",
+        ),
+    ],
+    "js-060": [
+        (
+            "Treemap",
+            "A layout that divides a rectangle into nested tiles whose areas are proportional to nonnegative values in a hierarchy.",
+        ),
+        (
+            "Hierarchical sum",
+            "The `node.sum(accessor)` operation that sets each node's value to its own accessor result plus the values of all its descendants. Supplying values only at leaves avoids double counting.",
+        ),
+        (
+            "Tile bounds",
+            "The `x0`, `y0`, `x1` and `y1` fields a treemap layout adds to each node, so width is `x1 - x0` and height is `y1 - y0`.",
+        ),
+        (
+            "Padding",
+            "Space reserved between tiles by the layout. It improves readability but means pixel areas no longer match value ratios exactly.",
+        ),
+    ],
+    "js-061": [
+        (
+            "Graph",
+            "A set of nodes connected by edges that, unlike a tree, can contain cycles and several routes between the same nodes.",
+        ),
+        (
+            "Force simulation",
+            "A `d3.forceSimulation` that iteratively updates node positions and velocities under simulated forces such as link attraction and charge repulsion.",
+        ),
+        (
+            "Input mutation",
+            "The simulation writes `x`, `y`, `vx` and `vy` into node objects and replaces link endpoint IDs with node references, so records owned elsewhere must be copied first.",
+        ),
+        (
+            "Layout convergence",
+            "The simulation cooling toward a stable arrangement. Stopping its timer and calling a fixed number of ticks with a seeded random source makes the layout repeatable.",
+        ),
+    ],
+    "js-062": [
+        (
+            "GeoJSON",
+            "A JSON format for geographic features. A FeatureCollection holds Feature objects, each with a geometry and a properties object.",
+        ),
+        (
+            "Longitude",
+            "The angle east or west of the prime meridian in degrees. GeoJSON lists it first in each position, so swapping it with latitude yields plausible but wrong locations.",
+        ),
+        (
+            "Projection",
+            "A function such as `d3.geoMercator()` that maps `[longitude, latitude]` on the globe to flat `[x, y]` coordinates. Every projection distorts area, shape, distance or direction in some way.",
+        ),
+        (
+            "geoPath",
+            "The generator returned by `d3.geoPath(projection)` that converts GeoJSON geometry into SVG path data.",
+        ),
+    ],
+    "js-063": [
+        (
+            "Choropleth",
+            "A map that fills each region with a color representing a value for that region.",
+        ),
+        (
+            "Rate",
+            "An event count divided by a matching denominator, such as eligible people, for the same geography, period and population.",
+        ),
+        (
+            "Geographic join",
+            "Matching map features to statistical rows through a stable region ID and reporting unmatched features and rows.",
+        ),
+        (
+            "Missing data",
+            "A region without a measurement, drawn with its own color or pattern and legend entry so it is not confused with a measured zero.",
+        ),
+        (
+            "Ecological inference",
+            "Drawing conclusions about individuals from associations measured only at the region level, which aggregated data cannot support.",
+        ),
+    ],
+    "js-064": [
+        (
+            "Canvas",
+            "An HTML element that draws into a single pixel bitmap through a 2D context. Its marks are not DOM nodes, so the author must supply semantics and hit testing.",
+        ),
+        (
+            "Device pixel ratio",
+            "The value of `window.devicePixelRatio`, the number of physical pixels per CSS pixel. Scaling the backing bitmap by it keeps Canvas drawing sharp on dense screens.",
+        ),
+        (
+            "Hit testing",
+            "Finding which mark lies under a pointer position, computed in the same coordinate space used to draw the marks.",
+        ),
+        (
+            "Quadtree",
+            "A `d3.quadtree` spatial index that recursively divides two-dimensional space so `find(x, y)` locates the nearest point without scanning every point.",
+        ),
+    ],
+    "js-065": [
+        (
+            "Dashboard state",
+            "One explicit object holding filters, selected IDs and display options from which every view is derived.",
+        ),
+        (
+            "Derived data",
+            "Records computed from the unchanged source rows and the current state by a pure function, then passed to rendering.",
+        ),
+        (
+            "Cross-filter",
+            "A selection in one view that filters the records shown in the other views.",
+        ),
+        (
+            "Single source of truth",
+            "The rule that each piece of state is stored in one place that every view reads, instead of each chart keeping its own copy.",
+        ),
+    ],
+    "js-066": [
+        (
+            "Acceptance check",
+            "An explicit test the finished dashboard must pass, such as a filtered total, a mark count, a keyboard route or the completion marker.",
+        ),
+        (
+            "Accessibility review",
+            "Manual checking of keyboard operation, focus, narrow screens, reduced motion and assistive technology output, which automated DOM checks support but do not replace.",
+        ),
+        (
+            "Data provenance",
+            "The documented origin, row grain, units and transformations behind each visible claim in the dashboard.",
+        ),
+        (
+            "Visual regression",
+            "An unintended change in the rendered appearance, such as clipped or illegible labels, found by reviewing the output rather than by data assertions.",
+        ),
+    ],
+}

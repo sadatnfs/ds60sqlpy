@@ -16,36 +16,36 @@ An attribute callback `(d, i) => ...` receives the record as d and its current g
 
 ## Exercise 1: Predict the node count after two draws.
 
-The exit selection is removed by the standard join. Repeated rendering should reflect current input cardinality.
+The exit selection is removed by the standard join. Repeated rendering should reflect current input cardinality. draw([20, 30, 40]) creates three circles; draw([25, 35]) updates the first two and the exit removes the third. A version that appends inside draw would end with five. The reference checks size() === 2 and radii "25,35".
 
 **Expected:** Two circles after changing three records to two.
 
 ## Exercise 2: Change the second input to an empty array.
 
-An empty dataset is a valid state. Exit handling should remove old marks rather than showing stale data.
+An empty dataset is a valid state. Exit handling should remove old marks rather than showing stale data. With draw([]) the join has no enter or update and every circle leaves through exit, so size() is 0. Guarding with if (values.length === 0) return would leave the old two circles on screen as if nothing changed. Assert zero circles after the call.
 
 **Expected:** No managed circles remain.
 
 ## Exercise 3: Write a render function using a data join.
 
-Separate creation policy from attributes so the function can update existing nodes instead of appending duplicates.
+Separate creation policy from attributes so the function can update existing nodes instead of appending duplicates. Put validation first, then selectAll("circle").data(values).join("circle") and set cx, cy and r on the merged selection. Setting attributes only on the enter branch would leave updated nodes with stale radii. Call draw twice with different arrays and compare radii each time.
 
 **Expected:** Repeated calls produce exactly one mark per current record.
 
 ## Exercise 4: Diagnose a chart that doubles its nodes on every click.
 
-Check the selector and join boundary first. Styling cannot correct an ever-growing stale DOM.
+Check the selector and join boundary first. Styling cannot correct an ever-growing stale DOM. If the selector is selectAll("g") while the code appends circles, the join never sees the existing circles and creates new ones every click. Log svg.selectAll("circle").size() after each click: a count that grows by the data length points to this mismatch.
 
 **Expected:** It uses unconditional append or selects the wrong managed nodes.
 
 ## Exercise 5: Add an explicit invalid-value rejection.
 
-Geometry has a domain contract. Silent invalid attributes make a bad input look like a missing data point.
+Geometry has a domain contract. Silent invalid attributes make a bad input look like a missing data point. The reference checks Number.isFinite(v) && v >= 0 before touching the DOM, so draw([-1]) throws and the previous circles stay. Letting the browser receive r = -1 leaves an invisible circle that looks like missing data. The try/catch in the reference sets refused to true.
 
 **Expected:** A negative radius input is refused before drawing.
 
 ## Exercise 6: Apply the same pattern to an HTML list.
 
-The mechanism is about data-to-node relationships, not SVG alone. Preserve text safety when labels are external.
+The mechanism is about data-to-node relationships, not SVG alone. Preserve text safety when labels are external. Replace "circle" with "li" inside a ul and set .text(d => d). Using .html() with an external label would let markup in the label run as HTML; count li nodes after two updates to confirm reconciliation.
 
 **Expected:** Current records reconcile to current list items.

@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Python host code can select a device, allocate memory, prepare compiled code and submit a kernel. These are resource-management operations, distinct from device arithmetic. Low-level CUDA bindings expose handles, status values and byte counts that higher-level arrays normally hide. A kernel launch also needs argument layout, grid/block geometry and a stream, all matched to the compiled function signature.</p>
 <p>Keep beginners on a small reviewed host wrapper before exposing every binding. The wrapper validates input, owns resources and checks both submission errors and later completion errors. CUDA Python components are independently versioned; use release-matched examples rather than copying a moving development API. For this chapter the CPU contract lab checks argument and lifetime reasoning; a prepared external CUDA Python driver lab requires its own version ledger.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Low-level binding:</strong> A thin Python interface that exposes driver or runtime API calls nearly one to one.</li>
+<li><strong>Handle:</strong> An opaque value identifying a context, module, stream or allocation that must be created and destroyed explicitly.</li>
+<li><strong>Status code:</strong> The result value every low-level call returns, which must be checked because errors do not raise exceptions automatically.</li>
+<li><strong>Application binary interface (ABI):</strong> The binary contract, including symbol names, calling conventions and data layouts, that compiled components must agree on.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A kernel expecting float32 input plus a 32-bit length cannot safely receive a float64 allocation plus a pointer where an integer belongs. Values need ABI-correct representation.</p>
@@ -223,17 +230,23 @@ validate_contract<span class="syntax-punctuation">(</span><span class="syntax-nu
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-specify-the-kernel-signature">Exercise 1: Specify the kernel signature<a class="heading-anchor" href="#exercise-1-specify-the-kernel-signature" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>specify the kernel signature</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Passing a plain Python <code>int</code> for <code>n</code> and letting the wrapper guess the width may package it as 64 bits. On some interfaces that shifts the following arguments or truncates the value.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-count-allocation-bytes">Exercise 2: Count allocation bytes<a class="heading-anchor" href="#exercise-2-count-allocation-bytes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>count allocation bytes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Sizing a buffer by element count alone, as if every element were one byte, under-allocates by the itemsize factor and lets the kernel write past the end.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-classify-compile-versus-launch-errors">Exercise 3: Classify compile versus launch errors<a class="heading-anchor" href="#exercise-3-classify-compile-versus-launch-errors" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>classify compile versus launch errors</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting compile success as working code treats the first stage as the whole contract. A module built for one architecture may still fail to load on another.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-cleanup-order">Exercise 4: Design cleanup order<a class="heading-anchor" href="#exercise-4-design-cleanup-order" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>design cleanup order</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Releasing resources in reverse creation order without waiting looks tidy, but order of creation says nothing about device completion.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-abi-mismatch">Exercise 5: Explain ABI mismatch<a class="heading-anchor" href="#exercise-5-explain-abi-mismatch" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>explain ABI mismatch</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Expecting a type error from the device is the mistake: device code has no runtime type information about its arguments.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-release-pinned-evidence">Exercise 6: Define release-pinned evidence<a class="heading-anchor" href="#exercise-6-define-release-pinned-evidence" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>define release-pinned evidence</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Recording only the Python package version omits the toolkit, driver and architecture, which are the usual causes of cross-machine failures.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

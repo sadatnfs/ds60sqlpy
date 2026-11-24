@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-052`, `apache-051`.
 
+## Key terms
+
+- **Replication factor:** The number of replicas that store each partition under a keyspace's placement strategy.
+- **Consistency level:** The number of replica responses a read or write requires before the coordinator reports success, such as ONE or QUORUM.
+- **QUORUM:** A consistency level that requires a majority of replicas, floor(N / 2) + 1 for replication factor N. With RF 1 it is a single replica.
+- **Replica overlap:** The condition R + W > N, under which read and write replica sets must intersect. It does not by itself make concurrent updates linearizable.
+- **Coordinator:** The node that receives a client request, forwards it to the relevant replicas and applies the requested consistency level.
+
 ## A consistency level counts replicas in a topology
 
 Replication factor states how many replicas store a partition under the configured

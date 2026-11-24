@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-025`.
 
 The preceding chapters examined individual mechanisms. This walkthrough combines several in one complete Flask fixture: a login flow, CSRF validation, parameterized SQLite storage and server-assigned ownership. The program uses a temporary database and real client requests, then inspects the final stored rows.
 
+## Key terms
+
+- **Session reset at login:** Clearing existing session data before recording the authenticated user, which also invalidates the earlier CSRF token so the client must fetch a fresh one.
+- **Parameterized query:** SQL in which values such as owner and title are passed separately as `?` parameters, so the database treats them as data and never as SQL syntax.
+- **Server-assigned ownership:** Setting a record's owner from the authenticated session instead of from any field the client supplies.
+- **Connection context manager:** Using `with sqlite3.connect(path) as db` so a successful block commits and an exception rolls back; the context does not close the connection itself.
+
 ## Mechanism: compose boundaries without weakening them
 
 The application owns its database path and test-only signing key. A CSRF endpoint supplies the framework token. Login verifies a hashed password, clears prior session state and records the authenticated user. The client obtains a fresh token after login because clearing the session changes the token's associated context.
@@ -29,6 +36,50 @@ A POST without the CSRF header receives 400 and does not create a note. Another 
 These checks complement each other. CSRF refusal controls the protected request flow. Schema validation limits writable fields. Authentication provides identity. Server-side ownership assignment scopes stored data. None should be treated as an automatic replacement for the others.
 
 A larger application must also check ownership on individual read/update/delete routes, coordinate concurrent transactions and handle account lifecycle. The prior ownership chapter and the later shared engineering chapters extend those contracts.
+
+## Worked example: why login starts by clearing the session
+
+```python
+from flask import Flask, session
+
+app = Flask(__name__)
+app.config.update(TESTING=True, SECRET_KEY="test-only-integrated-fixture")
+
+
+@app.post("/login/bob")
+def bob_logs_in():
+    session.update(user="bob", role="admin")
+    return {}
+
+
+@app.post("/login/alice/<mode>")
+def alice_logs_in(mode):
+    if mode == "clear":
+        session.clear()
+    session["user"] = "alice"
+    return {}
+
+
+@app.get("/whoami")
+def whoami():
+    return dict(session)
+
+
+for mode in ("keep", "clear"):
+    with app.test_client() as shared_browser:
+        shared_browser.post("/login/bob")
+        shared_browser.post(f"/login/alice/{mode}")
+        print(mode, shared_browser.get("/whoami").json)
+```
+
+Expected output:
+
+```text
+keep {'role': 'admin', 'user': 'alice'}
+clear {'user': 'alice'}
+```
+
+Picture one browser on a shared desk. Bob signs in as an administrator and walks away without logging out, then Alice signs in. When the login route only overwrites `user`, every other key from Bob's session rides along, and Alice silently inherits `role: admin`. The integrated program's `login` view calls `session.clear()` before writing `user` for exactly this reason: authentication is a boundary, and nothing written before it should be trusted after it. The same habit protects any flag you later add to the session, such as a cart, a pending redirect or a cached permission.
 
 ## Failure diagnosis
 

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Document an accepted error policy and measure numerical differences under reviewed compiler options such as fast math.
+
 Work through *Floating point under optimization* with the concrete cases below. Finish with this evidence:
 a documented policy for accepted error and rejected non-finite output, plus measured differences under reviewed compiler configurations. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A mathematically equivalent expression can have different floating-point behavior. Fused multiply-add rounds a product-plus-sum once instead of rounding the product and then the addition. Fast-math modes can change precision and special-value behavior, so they require an explicit error budget. Variance computed as mean of squares minus square of mean subtracts nearby large values and can lose a small real variance. A centered or carefully merged online algorithm reduces that risk. Conditioning describes sensitivity of the problem itself; algorithmic stability describes how well the chosen computation handles it. Neither is fixed merely by changing processors.
+
+### Key terms
+
+- **Fused multiply-add (FMA):** An operation that computes a*b+c with a single rounding instead of two.
+- **Fast math:** Compiler options such as `--use_fast_math` that trade precision and special-value handling for speed.
+- **Welford's algorithm:** An online method for mean and variance that avoids subtracting large, nearly equal sums.
+- **Error budget:** The documented maximum deviation from a reference that a result may show and still be accepted.
 
 ## Mathematical contract
 

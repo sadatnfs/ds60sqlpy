@@ -1,12 +1,12 @@
 # llm-applied-015: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for full supervised fine-tuning of a tiny causal decoder only after attempting *Build an explicit SFT batch* through *Write an honest adaptation receipt*. A discrepancy in *Measure the initial state* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-015_solution.py` runs the assertions; this page explains why they test full sft and answer-only objective.
 
 ## Mechanism review
 
 Full supervised fine-tuning updates all trainable model parameters on governed target examples. The operation can change representations, attention and output behavior together, which offers flexibility but also risks overfitting and forgetting. A working training loop is not evidence that a subject assistant has learned current facts or become reliable. The task data, mask, objective, optimizer and evaluation split define what the update actually means.
 
-This chapter performs real CPU gradient updates on the course's small causal decoder. It has a literal vocabulary of 16 token IDs, width32, two attention heads and one block. The tokens stand for authored prompt and answer symbols, not natural-language competence. Two training sequences teach a simple answer pattern; a separately identified held-out prompt tests a small transfer case. We update every parameter for exactly20 steps and report training and held-out loss separately. No pretrained weights, external corpus or hosted model is used. The point is to make the mechanics, evidence and limitations of full SFT visible before using a larger stack.
+This chapter performs real CPU gradient updates on the course's small causal decoder. It has a literal vocabulary of 16 token IDs, width 32, two attention heads and one block. The tokens stand for authored prompt and answer symbols, not natural-language competence. Two training sequences teach a simple answer pattern; a separately identified held-out prompt tests a small transfer case. We update every parameter for exactly 20 steps and report training and held-out loss separately. No pretrained weights, external corpus or hosted model is used. The point is to make the mechanics, evidence and limitations of full SFT visible before using a larger stack.
 
 **Full SFT:** Updating all trainable model parameters on supervised examples.
 
@@ -18,34 +18,34 @@ This chapter performs real CPU gradient updates on the course's small causal dec
 
 ## Reading the implementation
 
-Construct shifted inputs and answer-only labels, using-100 for the prompt-prediction position. Set a local seed before model creation. Adam receives all model parameters. Each step clears gradients, calculates logits, flattens the batch/time axes for cross entropy, backpropagates and applies one update. A detached clone records initial state. Evaluation usesmodel.eval andtorch.no_grad, then calculates the same active-target objective on held-out IDs.
+Construct shifted inputs and answer-only labels, using-100 for the prompt-prediction position. Set a local seed before model creation. Adam receives all model parameters. Each step clears gradients, calculates logits, flattens the batch/time axes for cross entropy, backpropagates and applies one update. A detached clone records initial state. Evaluation uses model.eval and torch.no_grad, then calculates the same active-target objective on held-out IDs.
 
 ## Trace the full-SFT state and objective
 
-The model uses vocabulary16, width32, two attention heads and context capacity32. For a training batch with \(B=2\), \(T=3\), token and position embeddings combine into[2, 3, 32]. The QKV projection produces[2, 3, 96], then each component becomes[2, 2, 3, 16] after splitting into two heads. Attention scores have shape[2, 2, 3, 3], with a causal allowed-position relation. The output logits return to[2, 3, 16].
+The model uses vocabulary 16, width 32, two attention heads and context capacity 32. For a training batch with \(B=2\), \(T=3\), token and position embeddings combine into `[2, 3, 32]`. The QKV projection produces `[2, 3, 96]`, then each component becomes `[2, 2, 3, 16]` after splitting into two heads. Attention scores have shape `[2, 2, 3, 3]`, with a causal allowed-position relation. The output logits return to `[2, 3, 16]`.
 
 The trainable parameter ledger is explicit:
 
 | Component | Entries |
 | --- | --- |
-| Token embedding16×32 | 512 |
-| Position embedding32×32 | 1024 |
+| Token embedding 16×32 | 512 |
+| Position embedding 32×32 | 1024 |
 | Two LayerNorm scales and biases | 128 |
-| Bias-free QKV32×96 | 3072 |
-| Bias-free attention projection32×32 | 1024 |
-| Feed-forward32→64→32 including biases | 4192 |
-| Bias-free vocabulary projection32×16 | 512 |
+| Bias-free QKV 32×96 | 3072 |
+| Bias-free attention projection 32×32 | 1024 |
+| Feed-forward 32→64→32 including biases | 4192 |
+| Bias-free vocabulary projection 32×16 | 512 |
 | Total | 10464 |
 
 No weights are tied in this decoder. Parameter count does not equal total training memory: gradients, Adam moment state, activations and temporary attention tensors contribute separately. The CPU example does not measure GPU peak allocation or optimizer sharding.
 
-The two sequences yield four active targets:5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability1/16 and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is(1/16-1)/4=-15/64, and every other class gradient is1/64. The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
+The two sequences yield four active targets: 5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability 1/16 and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is (1/16-1)/4=-15/64, and every other class gradient is 1/64. The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
 
-Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a20-entry curve records states before updates1 through20: its final element describes the model after19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.
+Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a 20-entry curve records states before updates 1 through 20: its final element describes the model after 19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.
 
 The objective is teacher-forced next-token cross entropy. It conditions each position on the supplied prefix, including previous true answer tokens. Autoregressive generation instead conditions later positions on its own earlier outputs. A lower teacher-forced loss does not guarantee exact generated answers or correct stopping behavior. The lesson deliberately evaluates token loss and parameter changes; it does not silently substitute them for a generation-quality test.
 
-The held-out sequence[7, 2, 5, 3] changes the first prompt token while preserving the second prompt token 2 and the answer[5, 3]. A model could succeed by learning a shortcut from token 2 to5 and then to3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.
+The held-out sequence `[7, 2, 5, 3]` changes the first prompt token while preserving the second prompt token 2 and the answer `[5, 3]`. A model could succeed by learning a shortcut from token 2 to 5 and then to 3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.
 
 The decoder returns a detached key/value cache, but this training objective discards it and uses full uncached sequences. Reusing that detached cache across training segments would change the gradient boundary. Treat it as an inference facility unless a separate truncated-training objective is explicitly designed and tested.
 
@@ -59,7 +59,7 @@ The decoder returns a detached key/value cache, but this training objective disc
 
 ## Exercise 1: Build an explicit SFT batch
 
-The question is: Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.
+The question is: Use sequences `[1, 2, 5, 3]` and `[1, 4, 6, 3]`, masking the first shifted target.
 
 The first answer token is still supervised. The mask excludes predicting the prompt continuation, not the role of the prompt as conditioning context.
 
@@ -77,9 +77,9 @@ assert (
 )
 ```
 
-**Expected:** inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.
+**Expected:** inputs shape `(2, 3)`; labels `[[-100, 5, 3], [-100, 6, 3]]`; 4 active targets.
 
-**Verify:** Compare the computed values or written argument with inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.
+**Verify:** Compare the computed values or written argument with inputs shape `(2, 3)`; labels `[[-100, 5, 3], [-100, 6, 3]]`; 4 active targets.
 
 ## Exercise 2: Measure the initial state
 
@@ -102,13 +102,13 @@ assert (
 )
 ```
 
-**Expected:** both losses finite; all model parameters trainable; count below50000.
+**Expected:** both losses finite; all model parameters trainable; count below 50000.
 
-**Verify:** Compare the computed values or written argument with both losses finite; all model parameters trainable; count below50000.
+**Verify:** Compare the computed values or written argument with both losses finite; all model parameters trainable; count below 50000.
 
 ## Exercise 3: Perform actual full fine-tuning
 
-The question is: Run20 Adam updates atlearningrate.01, clearing gradients each time.
+The question is: Run 20 Adam updates at learning rate 0.01, clearing gradients each time.
 
 Checking an embedding parameter demonstrates that the update reaches more than the final output layer. A loss curve alone could be misleading if it came from a different object or cached tensor.
 
@@ -151,7 +151,7 @@ assert (
 
 ## Exercise 5: Evaluate the frozen held-out prompt
 
-The question is: After the declared20 updates, evaluate the held-out sequence without another optimizer step.
+The question is: After the declared 20 updates, evaluate the held-out sequence without another optimizer step.
 
 A held-out score may improve or worsen. The lesson reports the observation rather than requiring a favorable result that could encourage test-driven tuning.
 
@@ -201,4 +201,4 @@ with torch.no_grad():
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Perform actual full fine-tuning* and predict how the result changes before checking it; the unchanged inputs give: 20 finite losses; training loss decreases; an embedding parameter changes. Keep the original *Write an honest adaptation receipt* failure beside the repaired result; a missing PyTorch and NumPy runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

@@ -422,7 +422,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Predict Promise and microtask ordering and combine Promises with all, allSettled and race correctly.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Resolve the second deferred Promise first, then the first.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;result remains first,second.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;result remains `[&#x27;first&#x27;, &#x27;second&#x27;]`.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;js-013&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -442,7 +442,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Cancel async work cooperatively with AbortSignal and release timers and listeners exactly once, including with using.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run the custom operation without aborting, then abort its signal after completion.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;value 7; started,completed,cleaned exactly once.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;value 7; trace `started`, `completed`, `cleaned`, with cleanup exactly once.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;js-014&quot;</span><span class="syntax-punctuation">,</span></span>

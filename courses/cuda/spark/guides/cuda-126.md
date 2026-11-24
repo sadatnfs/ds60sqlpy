@@ -14,6 +14,13 @@ Recovery should preserve input snapshots, output commit semantics and event logs
 
 
 
+### Key terms
+
+- **First relevant error:** The earliest error tied to the failure, which later generic retries can hide.
+- **Task retry:** Spark rerunning a failed task, which is safe only when the task's output commit is idempotent.
+- **Event log:** Spark's recorded history of jobs, stages, tasks and SQL executions used for later diagnosis.
+- **Incident packet:** A bounded bundle of logs, plans, configuration and identities that documents one failure.
+
 ## Worked examples
 
 ### Worked example 1
@@ -38,33 +45,52 @@ print("CPU retry model:", raw, "attempts;", idempotent, "logical keys")
 
 **Expected observation:** Two attempts can target one logical output key.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `raw` | `2` |
+| `idempotent` | `1` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Classify failure layers
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **classify failure layers** in the examples above.
+**Trap to avoid:** Increasing JVM heap after a device OOM changes an unrelated limit and leaves the GPU live set unchanged.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Correlate job identities
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **correlate job identities** in the examples above.
+**Trap to avoid:** Matching logs by timestamp alone can mix events from concurrent tasks. Clock differences between hosts make timestamp matching even less reliable across executors.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Budget before changing settings
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **budget before changing settings** in the examples above.
+**Trap to avoid:** Trying random settings until the job passes may hide the cause and fail again on larger data. Several simultaneous changes also make it impossible to say which one fixed the failure.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Analyze retry side effects
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **analyze retry side effects** in the examples above.
+**Trap to avoid:** Sending messages directly from tasks without idempotency produces duplicates after a retry. Speculative execution can run two attempts at once, duplicating writes even without any failure.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Define process cleanup
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **define process cleanup** in the examples above.
+**Trap to avoid:** Killing all Java or Python processes on a node stops unrelated work. It can also kill the node's own agents, which are often Java or Python processes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Preserve an incident packet
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **preserve an incident packet** in the examples above.
+**Trap to avoid:** Keeping raw configuration with credentials risks leaking secrets. Dropping configuration entirely, on the other hand, removes the settings needed to reproduce the failure.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

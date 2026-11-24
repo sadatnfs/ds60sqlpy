@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Call an axis generator on a group: <code>g.call(d3.axisBottom(x))</code>. Translate that group to the bottom coordinate, leaving the scale range in the chart’s coordinate system. Recalling the generator on the same group updates its ticks.</p>
 <p>Use a visible axis title and a chart description. Avoid assuming that a bare dollar sign, abbreviation or color legend communicates enough context. Units and denominator matter, especially for rates and normalized comparisons.</p>
 <h3 id="exercise-1-predict-percent-formatting-for-0-4">Exercise 1: Predict percent formatting for 0.4.<a class="heading-anchor" href="#exercise-1-predict-percent-formatting-for-0-4" aria-label="Link to this section">#</a></h3>
-<p>The format treats the input as a fraction. It scales displayed text without changing the data domain.</p>
+<p>The format treats the input as a fraction. It scales displayed text without changing the data domain. d3.format(&quot;.0%&quot;) multiplies by 100 and appends the sign, so 0.4 prints 40%. Writing a custom formatter as value + &quot;%&quot; would print 0.4%. The reference shows the same behavior on its axis: tick 0.25 reads 25%.</p>
 <p><strong>Expected:</strong> 40%.</p>
 <h3 id="exercise-2-change-explicit-tick-values-to-four-named-values">Exercise 2: Change explicit tick values to four named values.<a class="heading-anchor" href="#exercise-2-change-explicit-tick-values-to-four-named-values" aria-label="Link to this section">#</a></h3>
-<p>Tick selection is a presentation decision. Keep the scale shared so a separate formatting change does not shift data positions.</p>
+<p>Tick selection is a presentation decision. Keep the scale shared so a separate formatting change does not shift data positions. Replace [0, 0.25, 0.5, 0.75, 1] with four values, say [0, 0.2, 0.6, 1], and keep the same x. The circle at x(0.25) stays at 200 pixels because the scale did not change. Building a second scale just for the axis would let ticks and marks drift apart; check the new tick count is 4 and the circle&#x27;s cx is unchanged.</p>
 <p><strong>Expected:</strong> The axis labels match that list and remain aligned with the marks.</p>
 <h3 id="exercise-3-build-a-labeled-quantitative-axis">Exercise 3: Build a labeled quantitative axis.<a class="heading-anchor" href="#exercise-3-build-a-labeled-quantitative-axis" aria-label="Link to this section">#</a></h3>
-<p>A reader should understand what a coordinate means without opening the source code.</p>
+<p>A reader should understand what a coordinate means without opening the source code. The reference puts the axis at translate(0,280) and a centered caption &quot;Conversion rate (fraction of eligible visits)&quot; at y 330. An axis with percent ticks but no caption still leaves the reader guessing the denominator. Verify the five tick labels join to &quot;0%,25%,50%,75%,100%&quot; and the caption text exists.</p>
 <p><strong>Expected:</strong> Visible quantity, units and correctly formatted tick values.</p>
 <h3 id="exercise-4-diagnose-2500-for-a-value-intended-as-25">Exercise 4: Diagnose 2500% for a value intended as 25%.<a class="heading-anchor" href="#exercise-4-diagnose-2500-for-a-value-intended-as-25" aria-label="Link to this section">#</a></h3>
-<p>Repair the representation contract at the data boundary or choose a formatter matching stored units. Do not merely remove the percent sign.</p>
+<p>Repair the representation contract at the data boundary or choose a formatter matching stored units. Do not merely remove the percent sign. If the data stores 25 for twenty-five percent, &quot;.0%&quot; prints 2500%. Deleting the percent sign leaves 2500, which is still wrong. Either divide by 100 when loading, or use a plain number format with a &quot;%&quot; unit in the caption, then confirm 25 renders as 25%.</p>
 <p><strong>Expected:</strong> The stored percentage was treated as a fraction.</p>
 <h3 id="exercise-5-compare-fixed-precision-and-meaningful-precision">Exercise 5: Compare fixed precision and meaningful precision.<a class="heading-anchor" href="#exercise-5-compare-fixed-precision-and-meaningful-precision" aria-label="Link to this section">#</a></h3>
-<p>More decimals are not more accuracy. Choose enough precision to avoid hiding meaningful differences without implying unsupported measurement certainty.</p>
+<p>More decimals are not more accuracy. Choose enough precision to avoid hiding meaningful differences without implying unsupported measurement certainty. For example, &quot;.2%&quot; would show 25.00%, implying hundredths of a percent that a handful of visits cannot support, while &quot;.0%&quot; could merge 24.6% and 25.4%. Choose digits from the sample size and check that two values you need to distinguish print differently.</p>
 <p><strong>Expected:</strong> Displayed digits reflect measurement and comparison needs.</p>
 <h3 id="exercise-6-design-axes-for-counts-and-rates-side-by-side">Exercise 6: Design axes for counts and rates side by side.<a class="heading-anchor" href="#exercise-6-design-axes-for-counts-and-rates-side-by-side" aria-label="Link to this section">#</a></h3>
-<p>A count and a rate answer different questions. Shared colors do not make their numeric scales interchangeable.</p>
+<p>A count and a rate answer different questions. Shared colors do not make their numeric scales interchangeable. Give each panel its own scale and caption, for example &quot;visits (count)&quot; and &quot;conversion rate (fraction)&quot;. Sharing one y scale would squash the rates near zero.</p>
 <p><strong>Expected:</strong> Separate unit labels and denominators make the comparison explicit.</p></article>
   </main>
 </body>

@@ -66,7 +66,7 @@ A tensor's value, storage aliases, graph role and stored gradient are related bu
 | no_grad | Suppresses recording for ordinary operations in its scope | Evaluation behavior of Dropout or BatchNorm |
 | eval | Selects evaluation behavior of affected modules | Disabled autograd or cleared gradients |
 
-For tensors requiring gradients, a leaf is not the result of a tracked differentiable operation. An intermediate such as 2 w has an operation history even when assigned to a named variable. Tensors not requiring gradients are treated as leaves by convention. A conversion or copy operation can therefore change the graph role of a tracked tensor; inspect the actual metadata instead of assuming every user-named tensor is a leaf. [PyTorch 2.9 is_leaf](https://docs.pytorch.org/docs/2.9/generated/torch.Tensor.is_leaf.html).
+For tensors requiring gradients, a leaf is not the result of a tracked differentiable operation. An intermediate such as `2 * w` has an operation history even when assigned to a named variable. Tensors not requiring gradients are treated as leaves by convention. A conversion or copy operation can therefore change the graph role of a tracked tensor; inspect the actual metadata instead of assuming every user-named tensor is a leaf. [PyTorch 2.9 is_leaf](https://docs.pytorch.org/docs/2.9/generated/torch.Tensor.is_leaf.html).
 
 The first fixture has \(w=0\) and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate's gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.
 
@@ -74,7 +74,7 @@ Now reset `w.grad` to None and compute (w-2)². The new contribution is -4. Buil
 
 None and numeric zero have different meanings. None may indicate that no gradient has been stored, that a reset occurred, that the tensor was unused, or that an intermediate was not retained. A numeric zero can be the correct derivative of a connected path. Optimizers can also treat them differently: parameters with None gradients are commonly skipped, whereas zero gradients may still interact with momentum or weight decay. This distinction is documented for zero_grad rather than being merely a display detail. [PyTorch 2.9 zero_grad](https://docs.pytorch.org/docs/2.9/generated/torch.optim.Optimizer.zero_grad.html).
 
-The detach example changes shared storage. After detached=source.detach(), writing detached[0]=9 changes source[0] as well. The earlier source.detach().clone() snapshot remains one because it owns a copy. The snapshot is suitable for comparing later mutation, but detaching a value that the objective actually needs can break learning. Ownership and differentiation must both match the intended interface.
+The detach example changes shared storage. After detached=source.detach(), writing `detached[0] = 9` changes `source[0]` as well. The earlier source.detach().clone() snapshot remains one because it owns a copy. The snapshot is suitable for comparing later mutation, but detaching a value that the objective actually needs can break learning. Ownership and differentiation must both match the intended interface.
 
 Finally, model.eval() does not stop derivatives through a Linear layer. It changes a module's training flag and the behavior of layers that consult it. no_grad affects ordinary operation recording while leaving the original tensor's `requires_grad` flag unchanged; factory operations with an explicit `requires_grad` argument are a documented exception to treating the scope as a blanket flag rewrite. Keep mode, recording and gradient-buffer decisions separate in the surrounding training or inference function.
 
@@ -129,7 +129,7 @@ assert w.grad.item() == -4
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The leaf gradient becomes -4 then -8 without clearing and returns to -4 after reset, the detached view shares storage while a detached clone does not, no_grad output has `requires_grad` False, and eval output still requires grad. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Inspect leaf and nonleaf state. Predict exercise 6, Show eval is separate, from its prompt alone: Put a Linear module in eval mode, run a differentiable input, and inspect output tracking. Then explain why this finish condition holds: The leaf gradient becomes -4 then -8 without clearing and returns to -4 after reset, the detached view shares storage while a detached clone does not, no_grad output has `requires_grad` False, and eval output still requires grad. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -165,15 +165,15 @@ If a saved observation changes later, look for shared storage through detach or 
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Observe accumulation across fresh graphs) alters one assumption of Example A (Inspect leaf and nonleaf state). Hint 2: exercise 4, Separate detach from ownership, should end at shared original changes; owned clone stays unchanged. Work backward from it. Hint 3: exercise 5, Use no_grad for an observation, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Leaf tensor, Detach, Gradient accumulation using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Clear before an independent step, from its inputs alone. Predict whether exercise 3, Clear with zero_ and with None, survives one changed input. Then explain Leaf tensor, Detach, Gradient accumulation in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-006` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Inspect leaf and nonleaf state) cannot be rebuilt without help, revisit `torch-006` first. Otherwise keep your exercise 2 attempt, Accumulate three backward calls, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

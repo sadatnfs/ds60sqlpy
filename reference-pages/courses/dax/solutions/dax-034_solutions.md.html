@@ -237,23 +237,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the two-day window ending February 3.</p>
 <p>Revenue is 56 and both dates have sales, so both daily-average definitions give 28.</p>
+<p><strong>Why it fits this model:</strong> DATESINPERIOD with -2 days ending February 3 gives February 2 and 3. Both have sales, S7 20 and S8 36, so both averages are 56 / 2 = 28.</p>
+<p><strong>Tempting mistake:</strong> Concluding from this window that the two averages are equivalent. They agree only because every date in it had sales; case B&#x27;s three days split them into 28 and about 18.67.</p>
+<p><strong>How to confirm:</strong> Days 2, Revenue 56, and both averages 28.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Move the three-day anchor to January 4, 2025.</p>
 <p>Revenue is 47; the calendar-day average is 47/3, while the sale-day average is 47/2.</p>
+<p><strong>Why it fits this model:</strong> Ending at January 4 gives January 2 to 4: S4 27 on the 2nd and S5 20 on the 3rd, none on the 4th. The calendar average is 47 / 3, about 15.67, and the sale-day average 47 / 2 = 23.5.</p>
+<p><strong>Tempting mistake:</strong> Anchoring with a month filter makes MAX(&#x27;Date&#x27;[Date]) return January 31, so the window becomes January 29 to 31 and the revenue BLANK.</p>
+<p><strong>How to confirm:</strong> Under &#x27;Date&#x27;[Date] = DATE(2025, 1, 4), expect Days 3, Revenue 47 and averages of about 15.67 and 23.5.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a complete rolling-window contract.</p>
 <p>For this case: OrderDate, three calendar days ending February 3 inclusive, complete available data, USD per calendar day.</p>
+<p><strong>Why it fits this model:</strong> The contract names the role, the length, the inclusive end, coverage and units. With OrderDate, February 1 to 3 holds 56 USD over 3 days, about 18.67 per calendar day.</p>
+<p><strong>Tempting mistake:</strong> Leaving the role unstated invites a ShipDate version: S6 ships February 1 and S7 February 3, so it gives 40 USD and about 13.33 per day.</p>
+<p><strong>How to confirm:</strong> The order-role window returns 3 days, 56 and about 18.67, matching case A.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose averaging only returned visual rows when zero-sale dates were suppressed.</p>
 <p>Use an explicit calendar set rather than assuming visible event dates represent every eligible day.</p>
+<p><strong>Why it fits this model:</strong> The calendar set includes February 1, which is observed with no sales. AVERAGEX over the window with COALESCE keeps that day as 0.</p>
+<p><strong>Tempting mistake:</strong> Averaging the visible rows of a visual that hides empty dates uses only February 2 and 3 and reports 28 per day instead of about 18.67.</p>
+<p><strong>How to confirm:</strong> Over the window, AVERAGEX of COALESCE([NetRevenue], 0) returns about 18.67, while the visible-row average is 28.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why a window ending after February 28 needs another check.</p>
 <p>Later blanks can be unavailable outcomes; do not coalesce them to observed zero without a coverage policy.</p>
+<p><strong>Why it fits this model:</strong> Observation ends on 2025-02-28. A window ending March 2 holds one observed zero day (February 28) and two unobserved days.</p>
+<p><strong>Tempting mistake:</strong> Coalescing every blank to 0 reports 0 / 3 = 0 per day, as if March 1 and 2 were observed with no sales.</p>
+<p><strong>How to confirm:</strong> Flag March days as unavailable. The window should show one observed day with 0 USD and two unknown days, not a complete average.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the denominator to an availability percentage.</p>
 <p>A missing telemetry interval may be unknown rather than available or unavailable; define its treatment before aggregating.</p>
+<p><strong>Why it fits this model:</strong> Availability needs three states: up, down and unknown. Of 24 hourly intervals with 20 up, 2 down and 2 missing, the known-only rate is 20 / 22, about 90.9 percent.</p>
+<p><strong>Tempting mistake:</strong> Treating the 2 missing intervals as down gives 20 / 24, about 83.3 percent; treating them as up gives 22 / 24, about 91.7 percent. Either way the unknown is hidden.</p>
+<p><strong>How to confirm:</strong> Report 20 / 22 with &quot;2 of 24 intervals unknown&quot; beside it, just as the window above separates observed zero days from blanks.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

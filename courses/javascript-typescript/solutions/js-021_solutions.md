@@ -44,7 +44,7 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(wider.count, 2)`. Restoring the original line brings back the worked observation: label A; original count remains 2.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(wider.count, 2)`. Restoring `const wider = { id: 'A', count: 2 };` brings back: label A; original count remains 2.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(wider.count, 2)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -68,7 +68,7 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(view.count, 4)`; after it the line reads `mutable.count = 4;` again and readonly view observes count changing from 1 to 4.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(view.count, 4)`. Restoring `mutable.count = 4;` brings back: readonly view observes count changing from 1 to 4.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(view.count, 4)` for this input.
 

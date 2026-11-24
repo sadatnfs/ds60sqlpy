@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-separate-name-uid-and-version">Exercise 1: Separate name, UID and version<a class="heading-anchor" href="#exercise-1-separate-name-uid-and-version" aria-label="Link to this section">#</a></h3>
 <p>The distinctions prevent accidental updates after replacement and incorrect arithmetic on server tokens. A human-friendly name is useful navigation, but it is not enough for a destructive or ownership-sensitive operation.</p>
 <p><strong>Expected:</strong> Name addresses an object; UID its lifetime; resourceVersion is an opaque API token.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> State what happens to hello-config, u1 and rv-A when the object is deleted and recreated.</li>
+<li><strong>Why it is correct:</strong> The name is reused, a new UID is assigned and resourceVersion is an opaque token that changes on every write.</li>
+<li><strong>Plausible wrong approach:</strong> Comparing resourceVersion values as numbers to decide which is newer relies on a format the API does not promise.</li>
+<li><strong>How to verify:</strong> Name stays, UID changes and resourceVersion changes.</li>
+</ul>
 <h3 id="exercise-2-predict-the-conflict">Exercise 2: Predict the conflict<a class="heading-anchor" href="#exercise-2-predict-the-conflict" aria-label="Link to this section">#</a></h3>
 <p>Optimistic concurrency detects that the read premise became stale. The rejection protects the newer state, but the client still has to handle it explicitly rather than treating conflict as an unexplained generic failure.</p>
 <p><strong>Expected:</strong> 409-style conflict with current data unchanged.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Send an update carrying rv-A against stored rv-B and read the object afterward.</li>
+<li><strong>Why it is correct:</strong> An update with a stale resourceVersion fails with 409 Conflict and does not modify the stored object.</li>
+<li><strong>Plausible wrong approach:</strong> Retrying the same request blindly repeats the conflict because rv-A is still stale.</li>
+<li><strong>How to verify:</strong> The stored object still shows rv-B and its original data.</li>
+</ul>
 <h3 id="exercise-3-recompute-after-reread">Exercise 3: Recompute after reread<a class="heading-anchor" href="#exercise-3-recompute-after-reread" aria-label="Link to this section">#</a></h3>
 <p>A correct retry is a fresh decision based on current state. The desired change may no longer be necessary or appropriate. Bounded retries and cancellation make contention visible instead of hiding an endless loop.</p>
 <p><strong>Expected:</strong> A new conditional request uses current state and a bounded retry count.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Reread at rv-B, reapply only the message edit and send it with a retry limit.</li>
+<li><strong>Why it is correct:</strong> The new request carries the current version and the fields another writer changed, so the update does not undo their work.</li>
+<li><strong>Plausible wrong approach:</strong> Removing resourceVersion to force the write overwrites whatever changed since rv-A.</li>
+<li><strong>How to verify:</strong> The request carries rv-B, preserves unrelated fields and has a retry cap.</li>
+</ul>
 <h3 id="exercise-4-stop-on-replacement-identity">Exercise 4: Stop on replacement identity<a class="heading-anchor" href="#exercise-4-stop-on-replacement-identity" aria-label="Link to this section">#</a></h3>
 <p>The new object may belong to another actor or a later operation. Updating it solely because the name matches violates the original operation scope, even if its content looks familiar.</p>
 <p><strong>Expected:</strong> Refuse the mutation across object replacement.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare the reread UID u2 with the recorded u1 before writing.</li>
+<li><strong>Why it is correct:</strong> A different UID means the object was replaced, so the lease&#x27;s expectations no longer apply.</li>
+<li><strong>Plausible wrong approach:</strong> Writing because the name still matches would modify an object the lease never covered.</li>
+<li><strong>How to verify:</strong> UIDs differ, and the mutation is refused.</li>
+</ul>
 <h3 id="exercise-5-recover-from-watch-expiration">Exercise 5: Recover from watch expiration<a class="heading-anchor" href="#exercise-5-recover-from-watch-expiration" aria-label="Link to this section">#</a></h3>
 <p>The server no longer promises the requested historical stream. Rebuilding from current state is compatible with level-driven reconciliation and avoids fabricating a sequence that may never have happened.</p>
 <p><strong>Expected:</strong> Current u2 snapshot retained; watcher restarts from the new list token.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> After 410 Gone, replace the cache with the fresh list and resume watching from its resourceVersion.</li>
+<li><strong>Why it is correct:</strong> An expired resourceVersion cannot be resumed, so a new list is the only consistent starting point.</li>
+<li><strong>Plausible wrong approach:</strong> Restarting the watch from the old version returns 410 again and never recovers.</li>
+<li><strong>How to verify:</strong> The cache holds the u2 snapshot, and the watch starts from the list token.</li>
+</ul>
 <h3 id="exercise-6-handle-bookmarks-and-duplicates">Exercise 6: Handle bookmarks and duplicates<a class="heading-anchor" href="#exercise-6-handle-bookmarks-and-duplicates" aria-label="Link to this section">#</a></h3>
 <p>The observer should separate stream progress from application objects and make side effects idempotent. A watch reconnect is expected operational behavior, not evidence that each event must trigger another create or external call.</p>
 <p><strong>Expected:</strong> Bookmark advances progress; duplicate state does not repeat external effects.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Treat the bookmark as progress only and dedupe the repeated MODIFIED event by resourceVersion.</li>
+<li><strong>Why it is correct:</strong> A bookmark carries a version with no object change, and a duplicate event describes state already handled.</li>
+<li><strong>Plausible wrong approach:</strong> Calling the external service for each MODIFIED event repeats side effects on redelivery.</li>
+<li><strong>How to verify:</strong> The bookmark updates progress, and the duplicate causes no second effect.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A conditional replace, a patch with appropriate preconditions and server-side apply have different merge/ownership semantics. This lesson models compare-and-swap on a tiny object; it does not teach that every PATCH automatically prevents lost updates. Specify the actual API operation and precondition when reviewing a live client.</p>
 <p>A supplied 409 or 410 trace is a deterministic teaching fixture. A live receipt must include the exact owned identity, request outcome and bounded recovery observation without exposing credentials. Do not enable broad watch or write permissions merely to make a reading exercise runnable in the normal module pad.</p></article>

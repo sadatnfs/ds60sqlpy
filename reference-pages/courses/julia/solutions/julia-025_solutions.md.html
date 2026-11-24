@@ -195,24 +195,54 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-025-explained-reference">julia-025: explained reference<a class="heading-anchor" href="#julia-025-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-025_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Keep correctness and timing in separate claims. <code>sum_squares</code> is parametric in <code>T&lt;:AbstractFloat</code> and starts at <code>zero(T)</code>, so its return type is inferable and matches the element type. <code>measured</code> calls the kernel once to compile it, then wraps a second call in <code>@timed</code> and returns the value, seconds and bytes, and only the value is asserted.</p>
 <h3 id="1-trace-the-accumulator">1. Trace the accumulator<a class="heading-anchor" href="#1-trace-the-accumulator" aria-label="Link to this section">#</a></h3>
 <p>The accumulator is Float64 throughout; the final value is 14.</p>
 <p><strong>Expected observation:</strong> The values are 1, 5 and 14.</p>
+<p><strong>Why it holds here:</strong> The loop adds 1 squared to reach 1, then 4 to reach 5, then 9 to reach 14, all as <code>Float64</code> because <code>zero(Float64)</code> started the total.</p>
+<p><strong>Plausible wrong approach:</strong> Adding the items before squaring gives 6 and then 36, which is the square of the sum rather than the sum of squares.</p>
+<p><strong>How to verify:</strong> Print <code>total</code> inside an owned copy of the loop and compare with <code>sum_squares([1.0, 2.0, 3.0]) == 14</code>.</p>
 <h3 id="2-preserve-precision">2. Preserve precision<a class="heading-anchor" href="#2-preserve-precision" aria-label="Link to this section">#</a></h3>
 <p><code>zero(T)</code> and floating multiplication preserve the specified small-case element arithmetic.</p>
 <p><strong>Expected observation:</strong> The result is <code>Float32(5)</code>.</p>
+<p><strong>Why it holds here:</strong> With <code>T = Float32</code>, <code>zero(T)</code> and each product stay <code>Float32</code>, so the result is exactly <code>Float32(5)</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Initializing <code>total = 0.0</code> promotes the sum to <code>Float64</code> and makes <code>@inferred</code> report a type other than the element type.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>(@inferred sum_squares(Float32[1, 2])) === Float32(5)</code>.</p>
 <h3 id="3-change-workload-size">3. Change workload size<a class="heading-anchor" href="#3-change-workload-size" aria-label="Link to this section">#</a></h3>
 <p>A larger workload changes the experiment. Multiple observations are needed to compare scaling.</p>
 <p><strong>Expected observation:</strong> Both return four times their length; observed time may vary.</p>
+<p><strong>Why it holds here:</strong> Every element of <code>fill(2.0, n)</code> contributes 4, so the value is 400 for length 100 and 40000 for length 10000.</p>
+<p><strong>Plausible wrong approach:</strong> Asserting that the longer run takes about 100 times longer turns a machine-dependent observation into a test that can fail randomly.</p>
+<p><strong>How to verify:</strong> Assert the two values, collect several <code>measured</code> observations per length and report their spread rather than one number.</p>
 <h3 id="4-diagnose-invalid-science">4. Diagnose invalid science<a class="heading-anchor" href="#4-diagnose-invalid-science" aria-label="Link to this section">#</a></h3>
 <p>Inference concerns types. Scientific input validation is a separate contract.</p>
 <p><strong>Expected observation:</strong> The numerical result is NaN.</p>
+<p><strong>Why it holds here:</strong> NaN is a <code>Float64</code>, so inference finds the same concrete type and the kernel returns NaN, since NaN times NaN is NaN.</p>
+<p><strong>Plausible wrong approach:</strong> Reading a clean <code>@code_warntype</code> report as proof that inputs are valid confuses type stability with data validation.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>sum_squares([NaN]) |&gt; isnan</code> and <code>sum_squares([Inf]) == Inf</code>; add an explicit <code>isfinite</code> check where needed.</p>
 <h3 id="5-design-a-benchmark-record">5. Design a benchmark record<a class="heading-anchor" href="#5-design-a-benchmark-record" aria-label="Link to this section">#</a></h3>
 <p>A benchmark record identifies environment and work; a number without these cannot support a transferable claim.</p>
 <p><strong>Expected observation:</strong> Include input, versions, threads, cold/warm boundary and repetitions.</p>
+<p><strong>Why it holds here:</strong> A timing is reproducible only if the record names the input size, Julia version, thread count, warm or cold state and the number of repeats.</p>
+<p><strong>Plausible wrong approach:</strong> Publishing a single <code>@time</code> line from a laptop gives readers no way to tell whether compilation or other load was included.</p>
+<p><strong>How to verify:</strong> Store the correctness check result beside each timing row and rerun the record on another machine to compare.</p>
 <h3 id="6-transfer-to-a-data-pipeline">6. Transfer to a data pipeline<a class="heading-anchor" href="#6-transfer-to-a-data-pipeline" aria-label="Link to this section">#</a></h3>
 <p>Phase measurements explain bottlenecks while end-to-end time captures the actual user experience.</p>
-<p><strong>Expected observation:</strong> Separate phases plus end-to-end time.</p></article>
+<p><strong>Expected observation:</strong> Separate phases plus end-to-end time.</p>
+<p><strong>Why it holds here:</strong> Timing parsing, fitting and plotting separately locates the slow phase, while one outer timer measures what a user waits for.</p>
+<p><strong>Plausible wrong approach:</strong> Adding the phase times to an outer timer that already contains them counts each phase twice.</p>
+<p><strong>How to verify:</strong> Check that the phase times sum to less than or equal to the end-to-end time and explain any gap.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-025: all reference checks passed</code>:</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-punctuation">(</span><span class="syntax-decorator">@inferred</span> sum_squares<span class="syntax-punctuation">(</span><span class="syntax-keyword">Float32</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">===</span> <span class="syntax-keyword">Float32</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> sum_squares<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">25</span>
+    <span class="syntax-decorator">@test</span> sum_squares<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">NaN</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">|&gt;</span> isnan
+    <span class="syntax-decorator">@test</span> sum_squares<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Inf</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">Inf</span>
+    <span class="syntax-decorator">@test</span> measured<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>value <span class="syntax-operator">==</span> <span class="syntax-number">4</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">MethodError</span> sum_squares<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

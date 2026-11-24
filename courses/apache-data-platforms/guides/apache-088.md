@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-081`, `apache-082`, `apache-083`, `apache-084`, `apache-085`, `apache-086`, `apache-087`.
 
+## Key terms
+
+- **Evidence dossier:** The reviewable record of what was built, the bounded input, the expected result and which stages were only parsed, compiled or configured.
+- **Acceptance criterion:** A stated, source-bound result that a capstone run must reproduce exactly before it counts as passing.
+- **Qualified workshop:** A course workshop whose actual components have run and been recorded in its qualification ledger, unlike one that is only prepared.
+- **Owned lifecycle:** Starting, retaining and destroying only the capstone's own labeled resources, with destruction requiring explicit confirmation.
+
 ## A capstone is a reviewable evidence dossier
 
 An auditable data-platform capstone selects a coherent path and demonstrates its
@@ -77,6 +84,37 @@ contract, actual source/runtime identity, independent semantic and failure oracl
 retained-state readback and a reproducible owned lifecycle. These cases deliver
 one concrete path and then independently challenge its recovery claims, producing
 evidence another engineer can assess without trusting the author's summary alone.
+
+## Worked examples
+
+### Hash the sources a dossier depends on
+
+```bash
+cd work/integration
+shasum -a 256 batch_snapshot.py run.sh
+```
+
+Each line pairs a SHA-256 digest with a file name. The receipt from batch_snapshot.py already embeds its own source hash; comparing that value with this command shows the reviewed code is the code that ran. A reviewer who gets a different digest should treat every result in the dossier as unverified until the mismatch is explained.
+
+### Check that the dossier states its boundaries
+
+```python
+receipt = {
+    "passed": True,
+    "fresh_catalog_readback": True,
+    "wrong_catalog_rejected": True,
+    "direct_spark_or_iceberg_datafusion_connector_qualified": False,
+}
+required = ["passed", "fresh_catalog_readback", "wrong_catalog_rejected"]
+missing = [key for key in required if receipt.get(key) is not True]
+print("missing:", missing, "declared unsupported:", [k for k, v in receipt.items() if v is False])
+```
+
+```text
+missing: [] declared unsupported: ['direct_spark_or_iceberg_datafusion_connector_qualified']
+```
+
+The fields come from the integration receipt. A good dossier states both what passed and what was not qualified; here the Spark connector route is declared false rather than omitted. A reviewer can then see at once that the capstone proves the Iceberg, Arrow and DataFusion path and makes no claim about Spark.
 
 ## Complete worked source
 

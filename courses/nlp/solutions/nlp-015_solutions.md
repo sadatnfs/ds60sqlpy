@@ -18,7 +18,7 @@ Removing padding only after attention is too late if valid queries already atten
 
 This performs actual parameter updates and verifies the objective numerically. The constructed features make the problem easy, so the result is explicitly a training receipt. It does not replace a held-out natural-language evaluation or demonstrate that the fixed encoder parameters were learned.
 
-**Expected:** Loss decreases from log2 to below.1 and training predictions [0,1,0,1].
+**Expected:** Loss decreases from log 2 to below .1 and training predictions [0, 1, 0, 1].
 
 ## Exercise 4: Mask subword supervision
 

@@ -5,6 +5,40 @@
   "minutes": 60,
   "prerequisites": ["apache-004"],
   "concepts": ["hash partitioning", "skew", "mergeable state"],
+  "key_terms": [
+    [
+      "Hash partitioning",
+      "Assigning a record to bucket h(k) mod P from a hash of its key k and a partition count P. The same key keeps its bucket only while the hash function, key encoding and partition count stay unchanged."
+    ],
+    [
+      "Partition skew",
+      "An uneven distribution in which one hot key or bucket receives far more records than the others, so the worker that owns it becomes the bottleneck."
+    ],
+    [
+      "Mergeable state",
+      "Partial results, such as per-partition sums and counts, that can be combined in any order into the same final answer without recovering the source order."
+    ],
+    [
+      "Shuffle",
+      "Redistributing records across workers so that all records with the same grouping key meet. Its cost includes serialization, network transfer, buffering, file writes and scheduling barriers."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Bucket keys with a stable hash",
+      "language": "python",
+      "code": "import hashlib\nfrom collections import Counter\n\n\ndef bucket(key: str, partitions: int = 4) -> int:\n    digest = hashlib.sha256(key.encode()).digest()\n    return int.from_bytes(digest[:8], \"big\") % partitions\n\n\ncounts = Counter(bucket(f\"customer-{n}\") for n in range(200))\nprint(sorted(counts.items()))\nprint(bucket(\"customer-7\") == bucket(\"customer-7\"))",
+      "output": "[(0, 50), (1, 46), (2, 40), (3, 64)]\nTrue",
+      "interpretation": "The four bucket counts fall between 40 and 64 around an ideal of 50, which is ordinary variation for a good hash over only 200 distinct keys. The repeated call returns True on every run and every machine because SHA256 does not depend on a per-process seed, unlike the built-in Python hash for strings. Spread across distinct keys says nothing about load when one key dominates, which the next example shows."
+    },
+    {
+      "title": "Measure skew from one hot key",
+      "language": "python",
+      "code": "import hashlib\nfrom collections import Counter\n\n\ndef bucket(key: str, partitions: int = 4) -> int:\n    digest = hashlib.sha256(key.encode()).digest()\n    return int.from_bytes(digest[:8], \"big\") % partitions\n\n\nevents = [\"hot\"] * 180 + [f\"k{n}\" for n in range(20)]\nplain = Counter(bucket(key) for key in events)\nsalted = Counter(bucket(f\"{key}#{i % 4}\") for i, key in enumerate(events))\nprint(max(plain.values()), max(salted.values()))",
+      "output": "187 95",
+      "interpretation": "Without salting, one bucket holds at least the 180 hot events, so one worker does most of the job while three idle. Salting spreads the hot key across sub-keys and the largest bucket shrinks sharply. The cost is a second step: per-salt partial results must be merged, and averages can be merged only from sums and counts, never from per-salt averages."
+    }
+  ],
   "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
   "sources": [
     ["DataFusion partitions", "https://datafusion.apache.org/python/user-guide/basics.html"],

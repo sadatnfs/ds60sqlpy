@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "track_id": "llm-theory",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "llm-004",
+      "title": "A bigram language model with add one smoothing",
+      "anchor": "reference",
+      "source_path": "courses/llm-theory/solutions/llm-004_solution.py",
+      "source_sha256": "573fbce7f4aa6544c0382dbdbd5b9867aa379793edf0c98b9a3a85d7fa1304ca",
+      "expected_output": ["{'transitions': 3, 'validation_nll':"],
+      "steps": [
+        {
+          "lines": [8, 13],
+          "excerpt": "def fit_bigram(sequences, vocabulary):\n    vocabulary = tuple(vocabulary)\n    if not vocabulary or len(set(vocabulary)) != len(vocabulary):\n        raise ValueError(\"unique nonempty vocabulary required\")\n    indices = {token: index for index, token in enumerate(vocabulary)}\n    counts = np.zeros((len(vocabulary), len(vocabulary)), dtype=np.int64)",
+          "title": "Set up a count table",
+          "explanation": "fit_bigram turns the vocabulary into a tuple and rejects an empty or duplicated vocabulary. indices maps each token to a row and column number. counts is a square integer table where row i, column j will count how often token j follows token i.",
+          "observe": "The table starts at all zeros, one row and one column per token."
+        },
+        {
+          "lines": [14, 20],
+          "excerpt": "    for sequence in sequences:\n        sequence = list(sequence)\n        if any(token not in indices for token in sequence):\n            raise ValueError(\"unknown training token\")\n        for left, right in zip(sequence, sequence[1:], strict=False):\n            counts[indices[left], indices[right]] += 1\n    return counts",
+          "title": "Count pairs inside each document",
+          "explanation": "zip(sequence, sequence[1:]) pairs each token with the next one. Because this runs per document, the last token of one document is never paired with the first of the next. Unknown tokens are rejected so the table cannot silently grow.",
+          "observe": "Two documents A B A and A A produce three transitions in total."
+        },
+        {
+          "lines": [23, 32],
+          "excerpt": "def next_probabilities(counts, context, vocabulary):\n    vocabulary = tuple(vocabulary)\n    counts = np.asarray(counts)\n    if not vocabulary or counts.shape != (len(vocabulary), len(vocabulary)):\n        raise ValueError(\"vocabulary/count shape mismatch\")\n    if (counts < 0).any():\n        raise ValueError(\"nonnegative counts required\")\n    row = counts[vocabulary.index(context)] if context in vocabulary else np.zeros(len(vocabulary))\n    mass = np.asarray(row, dtype=np.float64) + 1\n    return mass / mass.sum()",
+          "title": "Turn a row of counts into probabilities",
+          "explanation": "next_probabilities checks the table shape and that counts are not negative. It picks the row for the context token, or a row of zeros for a context it has never seen. Adding 1 to every count is add one smoothing, which gives unseen next tokens a small nonzero probability. Dividing by the sum makes the row sum to 1.",
+          "observe": "An unknown context gives a uniform distribution."
+        },
+        {
+          "lines": [35, 48],
+          "excerpt": "def verify():\n    vocabulary = (\"A\", \"B\", \"C\")\n    # Exercise 1: within-document counts\n    counts = fit_bigram([[\"A\", \"B\", \"A\"], [\"A\", \"A\"]], vocabulary)\n    np.testing.assert_array_equal(counts, [[1, 1, 0], [1, 0, 0], [0, 0, 0]])\n    # Exercise 2: explicit pseudo-count denominators\n    for context, expected in (\n        (\"A\", [2 / 5, 2 / 5, 1 / 5]),\n        (\"B\", [0.5, 0.25, 0.25]),\n        (\"C\", [1 / 3] * 3),\n    ):\n        np.testing.assert_allclose(\n            next_probabilities(counts, context, vocabulary), expected, rtol=0, atol=1e-12\n        )",
+          "title": "Exercises 1 and 2: counts and denominators",
+          "explanation": "The exact count table is asserted. Then each context's probabilities are compared with hand computed fractions. For A the counts are 1, 1, 0, so smoothed mass is 2, 2, 1 over 5. assert_allclose with a tiny absolute tolerance allows for floating point rounding.",
+          "observe": "Context C has no counts, so all three probabilities are one third."
+        },
+        {
+          "lines": [49, 64],
+          "excerpt": "    # Exercise 3: no cross-document pair\n    assert fit_bigram([[\"A\"], [\"B\"]], vocabulary).sum() == 0\n    assert fit_bigram([[\"A\", \"B\"]], vocabulary).sum() == 1\n    # Exercise 4: an unseen context does not add vocabulary\n    original = counts.copy()\n    np.testing.assert_allclose(\n        next_probabilities(counts, \"Z\", vocabulary), [1 / 3] * 3, rtol=0, atol=1e-12\n    )\n    # Exercise 5: invalid vocabulary or training token\n    for documents, vocab in (([], []), ([], [\"A\", \"A\"]), ([[\"Z\"]], vocabulary)):\n        try:\n            fit_bigram(documents, vocab)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"invalid training fixture accepted\")",
+          "title": "Exercises 3 to 5: boundaries and bad inputs",
+          "explanation": "Single token documents add no pairs. An unseen context does not add a vocabulary entry. Empty vocabularies, duplicate vocabularies and unknown training tokens all raise ValueError.",
+          "observe": "The loop uses try, except, else so a missing error becomes a test failure."
+        },
+        {
+          "lines": [65, 73],
+          "excerpt": "    # Exercise 6: held-out scoring is read-only\n    score = -math.log(next_probabilities(counts, \"C\", vocabulary)[0])\n    assert math.isclose(score, math.log(3), rel_tol=0, abs_tol=1e-12)\n    np.testing.assert_array_equal(counts, original)\n    return {\"transitions\": int(counts.sum()), \"validation_nll\": score}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercise 6: score held out data without changing the model",
+          "explanation": "The negative log probability of A after C is log 3, because the probability is one third. Comparing counts with the earlier copy proves scoring did not modify the model. The function returns the number of transitions and this score.",
+          "observe": "The printed dictionary starts with 'transitions': 3, followed by a validation negative log likelihood close to log 3."
+        }
+      ]
+    },
+    {
+      "lesson_id": "llm-021",
+      "title": "Fingerprints and family level splits for training data",
+      "anchor": "reference",
+      "source_path": "courses/llm-theory/solutions/llm-021_solution.py",
+      "source_sha256": "1ba174c6577cbc6d108a3eb2f9dbad96365196e1dfa7b2376b3c905fdd9dbd43",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [6, 14],
+          "excerpt": "def verify():\n    # Worked example A: Fingerprint exact text\n    import hashlib, json\n\n    hash_text = lambda t: hashlib.sha256(t.encode(\"utf-8\")).hexdigest()\n    a = hash_text(\"red square\")\n    copy = hash_text(\"red square\")\n    para = hash_text(\"square colored red\")\n    assert a == copy and a != para",
+          "title": "Worked example A: exact text fingerprints",
+          "explanation": "hash_text encodes text as UTF 8 bytes and hashes it with SHA 256. Identical text gives an identical hash, but a paraphrase with the same meaning gives a different one. Exact hashing finds copies, not reworded duplicates.",
+          "observe": "a equals copy and differs from para."
+        },
+        {
+          "lines": [16, 20],
+          "excerpt": "    # Worked example B: Assign whole families\n    family = {\"a\": \"F\", \"a2\": \"F\", \"b\": \"G\", \"c\": \"H\"}\n    policy = {\"F\": \"train\", \"G\": \"validation\", \"H\": \"test\"}\n    manifest = {doc: policy[group] for doc, group in family.items()}\n    assert manifest == {\"a\": \"train\", \"a2\": \"train\", \"b\": \"validation\", \"c\": \"test\"}",
+          "title": "Worked example B: assign whole families",
+          "explanation": "family maps each document to a family, such as an original and its near copy. policy assigns each family to one split. The dictionary comprehension builds a manifest where each document inherits its family's split, so related documents never straddle train and test.",
+          "observe": "a and a2 both land in train."
+        },
+        {
+          "lines": [22, 28],
+          "excerpt": "    # Exercise 3: Audit all partition pairs\n    sets = {part: {family[d] for d, p in manifest.items() if p == part} for part in policy.values()}\n    assert (\n        not sets[\"train\"] & sets[\"validation\"]\n        and not sets[\"train\"] & sets[\"test\"]\n        and not sets[\"validation\"] & sets[\"test\"]\n    )",
+          "title": "Exercise 3: audit every pair of partitions",
+          "explanation": "For each split, a set comprehension collects the families that appear in it. The & operator intersects sets; an empty intersection means no shared families. All three pairs are checked.",
+          "observe": "Every intersection is empty."
+        },
+        {
+          "lines": [30, 35],
+          "excerpt": "    # Exercise 4: Inject a known leak\n    bad = dict(manifest)\n    bad[\"a2\"] = \"validation\"\n    train = {family[d] for d, p in bad.items() if p == \"train\"}\n    valid = {family[d] for d, p in bad.items() if p == \"validation\"}\n    assert train & valid == {\"F\"}",
+          "title": "Exercise 4: inject a known leak",
+          "explanation": "Copying the manifest and moving a2 to validation creates a deliberate leak. The audit should then find family F in both train and validation, which proves the audit can detect a real problem.",
+          "observe": "The intersection is exactly {'F'}."
+        },
+        {
+          "lines": [37, 45],
+          "excerpt": "    # Exercise 5: Preserve the manifest identity\n    payload = lambda: json.dumps(manifest, sort_keys=True, separators=(\",\", \":\")).encode()\n    before = hashlib.sha256(payload()).hexdigest()\n    summary = {\"test_documents\": sum(p == \"test\" for p in manifest.values())}\n    assert summary[\"test_documents\"] == 1 and hashlib.sha256(payload()).hexdigest() == before\n\n    # Exercise 6: Distinguish normalization policy\n    assert hash_text(\"red square\") != hash_text(\"red square \")\n    assert hash_text(\"red square\".strip()) == hash_text(\"red square \".strip())",
+          "title": "Exercises 5 and 6: stable identities and normalization",
+          "explanation": "json.dumps with sort_keys and compact separators gives the same bytes for the same content, so its hash identifies the manifest. Computing a summary must not change that hash. Exercise 6 shows that a trailing space changes the hash unless a normalization policy such as strip is applied first.",
+          "observe": "Normalization is a policy choice, made explicit in code."
+        },
+        {
+          "lines": [47, 52],
+          "excerpt": "    # Exercise 1: Assign a second family policy\n    family2 = {\"p\": \"J\", \"p2\": \"J\", \"p3\": \"J\", \"q\": \"K\", \"r\": \"L\"}\n    policy2 = {\"J\": \"test\", \"K\": \"train\", \"L\": \"validation\"}\n    manifest2 = {doc: policy2[group] for doc, group in family2.items()}\n    assert sorted(d for d, s in manifest2.items() if s == \"test\") == [\"p\", \"p2\", \"p3\"]\n    assert list(manifest2.values()).count(\"train\") == 1 and manifest2[\"r\"] == \"validation\"",
+          "title": "Exercise 1: a second family policy",
+          "explanation": "Three documents in family J all go to test together. Counting values confirms one train document and one validation document.",
+          "observe": "Test holds p, p2 and p3."
+        },
+        {
+          "lines": [54, 65],
+          "excerpt": "    # Exercise 2: Predict the effect of key order\n    forward = json.dumps({\"a\": \"train\", \"b\": \"test\"})\n    backward = json.dumps({\"b\": \"test\", \"a\": \"train\"})\n    assert hash_text(forward) != hash_text(backward)\n    assert hash_text(json.dumps({\"a\": \"train\", \"b\": \"test\"}, sort_keys=True)) == hash_text(\n        json.dumps({\"b\": \"test\", \"a\": \"train\"}, sort_keys=True)\n    )\n    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercise 2: key order changes the serialized text",
+          "explanation": "Two dictionaries with the same items in a different order serialize to different JSON text and therefore different hashes. sort_keys=True removes that difference. The function returns the summary and the script prints it.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    },
+    {
+      "lesson_id": "llm-033",
+      "title": "The preference loss behind direct preference optimization",
+      "anchor": "reference",
+      "source_path": "courses/llm-theory/solutions/llm-033_solution.py",
+      "source_sha256": "e5c9feb44075a0bc8933e18d331825e835342466879cc19531998793c0503f9d",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [6, 11],
+          "excerpt": "def verify():\n    # Worked example A: Evaluate equal margins\n    margin = 0.1 * ((-2 - (-3)) - (-4 - (-5)))\n    loss = np.logaddexp(0, -margin)\n    assert margin == 0\n    np.testing.assert_allclose(loss, np.log(2), atol=1e-12, rtol=0)",
+          "title": "Worked example A: equal margins give log 2",
+          "explanation": "The margin compares how much the trained model raised the chosen response over a reference model with how much it raised the rejected one, scaled by beta. Here both improve by 1, so the margin is 0. The loss is log(1 + exp(-margin)), which np.logaddexp(0, -margin) computes stably. At margin 0 that is log 2.",
+          "observe": "A loss of log 2 means the model shows no preference yet."
+        },
+        {
+          "lines": [13, 21],
+          "excerpt": "    # Worked example B: Favor the chosen response\n    margin = 0.5 * (2 - 0)\n    loss = np.logaddexp(0, -margin)\n    np.testing.assert_allclose(loss, np.log1p(np.exp(-1)), atol=1e-12, rtol=0)\n\n    # Exercise 3: Reverse the labels\n    reversed_margin = -margin\n    reversed_loss = np.logaddexp(0, -reversed_margin)\n    assert reversed_margin == -1 and reversed_loss > loss",
+          "title": "Worked example B and Exercise 3: direction matters",
+          "explanation": "A positive margin of 1 lowers the loss to log1p(exp(-1)). Swapping chosen and rejected flips the sign of the margin and raises the loss, which is how the objective pushes the model toward the preferred answer.",
+          "observe": "reversed_loss is larger than loss."
+        },
+        {
+          "lines": [23, 26],
+          "excerpt": "    # Exercise 4: Check numeric stability\n    values = np.logaddexp(0, -np.array([1000.0, -1000.0]))\n    assert np.isfinite(values).all()\n    np.testing.assert_allclose(values, [0, 1000], atol=1e-12, rtol=0)",
+          "title": "Exercise 4: stable for extreme margins",
+          "explanation": "Computing exp(1000) directly would overflow. logaddexp avoids that, giving about 0 for a huge positive margin and about 1000 for a huge negative one.",
+          "observe": "Both values are finite."
+        },
+        {
+          "lines": [28, 40],
+          "excerpt": "    # Exercise 5: Track pair identity\n    scores = {\"r1\": -2.0, \"r2\": -4.0}\n    pair = {\"chosen\": \"r1\", \"rejected\": \"r2\"}\n    flipped = {\"chosen\": pair[\"rejected\"], \"rejected\": pair[\"chosen\"]}\n    assert flipped[\"chosen\"] == \"r2\" and scores[\"r1\"] == -2\n\n    # Exercise 6: Limit the claim\n    report = {\n        \"preference_agreement\": True,\n        \"factuality_verified\": False,\n        \"online_rl_executed\": False,\n    }\n    assert not report[\"factuality_verified\"] and not report[\"online_rl_executed\"]",
+          "title": "Exercises 5 and 6: track identities and limit claims",
+          "explanation": "Flipping a pair swaps which response id is chosen without altering any scores. The report records that agreeing with preferences does not verify factuality and that no online reinforcement learning ran here.",
+          "observe": "The claims stay as narrow as the evidence."
+        },
+        {
+          "lines": [42, 47],
+          "excerpt": "    # Exercise 1: Compute a margin from log probabilities\n    margin2 = 0.25 * ((-1 - (-4)) - (-2 - (-3)))\n    loss2 = np.logaddexp(0, -margin2)\n    assert margin2 == 0.5\n    np.testing.assert_allclose(loss2, np.log1p(np.exp(-0.5)), atol=1e-12, rtol=0)\n    assert loss2 < np.log(2)",
+          "title": "Exercise 1: margin from log probabilities",
+          "explanation": "The chosen response rises by 3 against the reference and the rejected one by 1, so the difference is 2. With beta 0.25 the margin is 0.5 and the loss falls below log 2.",
+          "observe": "margin2 equals 0.5 exactly."
+        },
+        {
+          "lines": [49, 59],
+          "excerpt": "    # Exercise 2: Predict the effect of beta\n    margin3 = 1.0 * ((-1 - (-4)) - (-2 - (-3)))\n    loss3 = np.logaddexp(0, -margin3)\n    assert margin3 == 2\n    np.testing.assert_allclose(loss3, np.log1p(np.exp(-2)), atol=1e-12, rtol=0)\n    assert loss3 < loss2\n    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercise 2: a larger beta sharpens the loss",
+          "explanation": "With beta 1.0 the same log probabilities give a margin of 2 and a smaller loss. Beta controls how strongly the loss reacts to differences from the reference. The script prints the summary once every check passes.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    }
+  ]
+}

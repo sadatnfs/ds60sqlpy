@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A PHP string is a sequence of bytes. UTF-8 is an encoding that represents characters using one or more bytes, so strlen counts bytes rather than user-perceived characters. A visible character can also consist of multiple code points, such as a letter with a combining mark. Code-point count and grapheme count are therefore different concepts. Choose the measure that matches the product requirement.</p>
 <p>This worker does not assume every optional internationalization extension. The examples use valid UTF-8 and demonstrate byte-level behavior plus a Unicode-aware regular expression. Production text normalization, locale-aware sorting and grapheme handling need deliberate library and extension choices. Do not truncate arbitrary UTF-8 bytes and then assume the result remains valid text.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>UTF-8:</strong> An encoding that stores each Unicode code point in one to four bytes, with ASCII characters taking one byte.</li>
+<li><strong>Byte length:</strong> The count <code>strlen()</code> returns, which is the number of bytes, not the number of visible characters, for non-ASCII text.</li>
+<li><strong>Code point:</strong> One Unicode value, counted by <code>mb_strlen()</code> when the encoding is UTF-8.</li>
+<li><strong>Grapheme:</strong> What a reader perceives as one character, which can combine several code points, such as a letter with an accent mark.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use explicit UTF-8 when escaping HTML output. JSON requires valid Unicode data and can fail on invalid UTF-8. A Unicode regular expression with the u modifier interprets the pattern as UTF-8, but it is not a universal grapheme library. The mbstring functions count and cut by code point instead of byte: <code>mb_strlen(&#x27;café&#x27;)</code> is 4 while <code>strlen(&#x27;café&#x27;)</code> is 5, and <code>mb_strcut</code> truncates to a byte budget without splitting a character. PHP 8.4 adds <code>mb_trim</code>, <code>mb_ltrim</code> and <code>mb_rtrim</code> for Unicode whitespace. A code point is still not always one visible character, because an accent can be a separate combining code point. Keep validation, normalization and output encoding separate because they solve different problems.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -215,6 +222,15 @@ echo strlen($text);</code></pre>
 <p>The encoder validates its input representation.</p>
 <pre class="highlighted-code"><code class="language-php">$json = json_encode([&#x27;label&#x27; =&gt; &#x27;café&#x27;], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);</code></pre>
 <p><strong>Expected observation:</strong> The result is valid JSON that preserves the readable Unicode label.</p>
+<h3 id="contrast-case-byte-slicing-a-multibyte-label">Contrast case: byte slicing a multibyte label<a class="heading-anchor" href="#contrast-case-byte-slicing-a-multibyte-label" aria-label="Link to this section">#</a></h3>
+<p>Both lines try to keep the first four characters of a short label, then encode it as JSON.</p>
+<pre class="highlighted-code"><code class="language-php">$label = &#x27;café&#x27;;
+$bytes = substr($label, 0, 4);
+$chars = mb_substr($label, 0, 4, &#x27;UTF-8&#x27;);
+
+echo json_encode([&#x27;label&#x27; =&gt; $chars], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE), &quot;\n&quot;;
+echo json_encode([&#x27;label&#x27; =&gt; $bytes], JSON_THROW_ON_ERROR), &quot;\n&quot;;</code></pre>
+<p>In UTF-8 &#x27;café&#x27; is five bytes because é uses two. <code>substr</code> counts bytes, so <code>$bytes</code> keeps c, a, f and only the first byte of é, which is not valid UTF-8. <code>mb_substr</code> counts code points and keeps the full word. The first <code>json_encode</code> prints the label normally. The second throws a <code>JsonException</code> for malformed UTF-8 because JSON requires valid Unicode. Without the throw flag, it would return false instead, which is easy to miss.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-the-utf-8-byte-length-of">Exercise 1: Predict the UTF-8 byte length of é.<a class="heading-anchor" href="#exercise-1-predict-the-utf-8-byte-length-of" aria-label="Link to this section">#</a></h4>

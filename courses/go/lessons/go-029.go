@@ -19,7 +19,7 @@ func main() {
 	// Expected: The snapshot retains its original first element.
 
 	// Exercise 6: Transfer local construction: Build a result string inside a worker and send the completed value.
-	// Expected: The reader receives ready:3.
+	// Expected: The reader receives `ready:3`.
 
 	fmt.Println("Implement the six investigations in your saved pad.")
 }

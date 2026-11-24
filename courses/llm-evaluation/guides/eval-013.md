@@ -8,7 +8,7 @@ Evaluate a complete model/prompt selection procedure without using final outcome
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-013`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-013` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for selection procedures and protected holdouts in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about selection bias and nested evaluation: The mean maximum of two noisy candidates is 0.05, changing only final outcomes leaves the selected IDs unchanged, ties choose the first candidate, and the optimistic same-table procedure scores 0.85 but no longer counts as a protected assessment. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Selection is part of the system
 
@@ -17,6 +17,13 @@ A candidate can include a model, prompt, retrieval depth, judge, parser and abst
 Suppose several candidates have the same underlying quality but their development estimates contain zero-mean noise. Selecting the maximum does not preserve zero-mean noise in the selected score. For observed estimates \(\widehat{q}_j=q+\varepsilon_j\), the reported development maximum is \(q+\max_j\varepsilon_j\). Even when each \(\varepsilon_j\) has mean zero, its maximum usually has positive expectation. More search opportunities can therefore improve the reported development score without improving true quality.
 
 The issue is not that tuning is forbidden. Tuning is a useful part of development. The requirement is to distinguish the data that select the system from the data that assess the selected procedure, and to include the relevant search budget when comparing two approaches.
+
+## Key terms
+
+- **Selection bias:** Optimism created when the best of several noisy development scores is reported as if it were unbiased.
+- **Winner optimism:** The positive expected maximum of zero-mean noise, which grows with the number of candidates searched.
+- **Nested evaluation:** Repeating the whole selection procedure inside each outer fold so the assessment data never inform the choice.
+- **Holdout reuse:** Consulting a protected holdout repeatedly or fitting transforms on it, which leaks information into selection.
 
 ## Worked case A: exact selection optimism
 

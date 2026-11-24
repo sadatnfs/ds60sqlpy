@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Distinguish a valid zero from a rejected count.</p>
 <p>Both cannot be represented by the same unexplained numeric zero.</p>
+<p><strong>Approach:</strong> Run both inputs through <code>safe()</code> and read <code>ok</code> before looking at <code>value</code>.</p>
+<p><strong>Why it holds here:</strong> &quot;0&quot; gives ok TRUE with value 0, while &quot;bad&quot; gives ok FALSE with value NULL, so the status field carries the difference the numbers cannot.</p>
+<p><strong>Tempting mistake:</strong> A fallback that returns 0 on any error. &quot;0&quot; and &quot;bad&quot; both become 0, and the rejected row is counted as a real zero, as the broad wrapper in Example 3 shows.</p>
+<p><strong>Verify:</strong> <code>safe(&quot;0&quot;)$ok</code> returns TRUE while <code>safe(&quot;bad&quot;)$ok</code> returns FALSE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add a valid digit-only input &quot;0&quot;.</p>
 <p>The result is successful with value 0.</p>
+<p><strong>Approach:</strong> Pass &quot;0&quot; through the pattern <code>^[0-9]+$</code> and convert it with <code>as.integer()</code>.</p>
+<p><strong>Why it holds here:</strong> The pattern requires one or more digits and nothing else, and &quot;0&quot; is a single digit, so it is accepted and converts to 0L.</p>
+<p><strong>Tempting mistake:</strong> Tightening the pattern to <code>^[1-9][0-9]*$</code> to forbid leading zeros. That also rejects &quot;0&quot; itself, which this domain allows.</p>
+<p><strong>Verify:</strong> <code>safe(&quot;0&quot;)$value</code> returns 0L, which the reference compares with <code>== 0L</code>.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Return structured status, value and diagnostic fields.</p>
 <p>Callers can aggregate rejection rates without parsing arbitrary console output.</p>
+<p><strong>Approach:</strong> Return <code>list(ok, value, message)</code> from both the success and the error branch.</p>
+<p><strong>Why it holds here:</strong> Success fills value and leaves message NULL; failure does the reverse. Matching names let one expression collect status for all three starter inputs.</p>
+<p><strong>Tempting mistake:</strong> Returning the bare integer on success and the message string on failure. Combining results for &quot;12&quot;, &quot;0&quot; and &quot;bad&quot; with <code>c()</code> turns every value into text.</p>
+<p><strong>Verify:</strong> <code>vapply(lapply(inputs, safe), function(r) r$ok, logical(1))</code> returns TRUE, TRUE, FALSE.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose tryCatch(..., error=function(e)0) around a whole pipeline.</p>
 <p>Catch only expected failures at a narrow boundary and retain diagnostics.</p>
+<p><strong>Approach:</strong> Wrap only the parse call, handle the specific message it is documented to raise, and re-raise anything else.</p>
+<p><strong>Why it holds here:</strong> Bad input is an expected outcome here, but a missing function or package is a defect. Example 3 shows that a broad handler cannot tell them apart.</p>
+<p><strong>Tempting mistake:</strong> Placing <code>tryCatch(..., error = function(e) 0)</code> around the whole pipeline. A typo, a missing dependency and the word &quot;bad&quot; all return 0 without a trace.</p>
+<p><strong>Verify:</strong> In Example 3 <code>narrow(&quot;bad&quot;)</code> returns NA, and the typo result shows a message containing parse_cuont.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Restore a changed option after an error.</p>
 <p>on.exit restores the original option when the function exits.</p>
+<p><strong>Approach:</strong> Save the previous options and register <code>on.exit(options(previous), add = TRUE)</code> immediately, before the code that can fail.</p>
+<p><strong>Why it holds here:</strong> <code>options(digits = 3)</code> returns the old setting, and on.exit runs even when <code>stop(&quot;intentional&quot;)</code> ends the function.</p>
+<p><strong>Tempting mistake:</strong> Restoring with <code>options(previous)</code> as the last line of the function. The error exits first, the line never runs, and the session keeps printing three significant digits.</p>
+<p><strong>Verify:</strong> After the caught error, <code>getOption(&quot;digits&quot;)</code> returns the same value as <code>old</code>.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain when suppressing a warning is justified.</p>
 <p>Handle or record a specifically understood warning; do not silence all new warnings by default.</p>
+<p><strong>Approach:</strong> Suppress or muffle only a warning whose cause is known and whose information is kept elsewhere.</p>
+<p><strong>Why it holds here:</strong> The reference silences the integer-range coercion warning because the resulting NA is immediately turned into its own error, so nothing is lost. Example 2 records its warning before muffling it.</p>
+<p><strong>Tempting mistake:</strong> Wrapping the whole batch in <code>suppressWarnings()</code>. A new warning from a later parser change disappears with no record.</p>
+<p><strong>Verify:</strong> In Example 2 <code>warnings_seen</code> returns the one recorded notice and <code>value</code> is 4.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 3 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -123,7 +123,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Retain a produced type) before changing anything, and confirm its observation: The generic consumer knows the produced value is an Int.
 2. Compare Example B (Hide representation with an opaque result) with Example A and name the first line whose behavior differs. Its observation is: The caller uses sequence behavior without naming the concrete array type.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Some does not mean any arbitrary type at each return.
+3. Before opening the explanation, check your task 3 attempt (Write a generic transformation preserving the producer item type) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

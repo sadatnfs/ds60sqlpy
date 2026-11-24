@@ -10,6 +10,13 @@ Use a prepared optimization library while checking the objective, feasible set a
 
 Open `julia-023` in `/classroom` with its prepared `julia` runtime. Worked case A (minimize a convex quadratic) and worked case B (a feasible boundary changes the answer) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-023: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **BFGS:** A quasi-Newton method that builds an approximate inverse Hessian from successive gradients to choose search directions.
+- **Gradient callback:** A function supplied to the optimizer that returns the objective's gradient and should be checked against an independent derivative.
+- **Bounded optimization:** Searching only within stated limits, such as the interval 0 through 2, where the answer may lie on a boundary.
+- **Convergence flag:** The `Optim.converged` result reports that a stopping criterion was met, not that the global minimum was proven.
+
 ## Specify the optimization problem first
 
 An optimizer searches for a point that improves a stated objective under a stated feasible set. The algorithm name does not determine whether the objective represents the scientific question. A mistaken sign, reduction or parameterization can be optimized successfully while solving the wrong problem.

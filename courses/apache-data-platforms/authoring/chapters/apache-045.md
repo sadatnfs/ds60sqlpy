@@ -56,6 +56,15 @@ sum oracle. The result has two final groups even though the stream case can expo
 three incremental updates. This difference illustrates result semantics rather
 than a disagreement about the source amounts.
 
+The SQL mode registers the fixture as a filesystem table and asks the grouped
+question in batch mode:
+
+<!-- include: projects/flink/src/WorkshopJobs.java from="TableEnvironment table = TableEnvironment.create" until="var lines = new ArrayList" java -->
+
+The `CREATE TEMPORARY TABLE` statement names the same columns as the Java source,
+and `GROUP BY region` returns one final row per region instead of a stream of
+updates. The job then rejects any result other than `east,11` and `west,9`.
+
 A Table API or SQL planner can choose physical operators that differ from the
 handwritten Java graph. The user still needs compatible connectors, formats,
 source visibility and sink commit behavior. A supported SQL keyword does not

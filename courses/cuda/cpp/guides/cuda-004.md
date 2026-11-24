@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Design a decomposition that covers every element exactly once and states each synchronization requirement.
+
 Work through *Parallel decomposition before launch syntax* with the concrete cases below. Finish with this evidence:
 a decomposition that covers every element once and states synchronization requirements. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Decomposition assigns parts of a problem to workers while preserving its mathematical meaning. A map transforms each input independently. A reduction combines many values into one. A scan produces every prefix, so its outputs encode more information than a reduction. Gather reads from chosen locations; scatter writes to chosen locations and needs a conflict policy when destinations overlap. Work counts all operations, while dependency depth counts the longest chain that cannot be parallelized. A useful decomposition names each output owner, describes required inputs and states when producers must finish before consumers read.
+
+### Key terms
+
+- **Map:** A pattern in which each output is computed independently from its own input element.
+- **Reduction:** A pattern that combines many values into one result with an associative operation such as addition or maximum.
+- **Scan:** A pattern that produces every prefix combination of its input, so output i depends on all earlier inputs.
+- **Dependency depth:** The length of the longest chain of operations that must run in sequence, which bounds parallel speedup.
+- **Scatter:** A pattern that writes to computed destinations and needs a conflict policy when destinations overlap.
 
 ## Mathematical contract
 

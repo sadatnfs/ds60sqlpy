@@ -16,7 +16,7 @@ This unit treats one-step contextual decisions. Long trajectories require additi
 
 ## Worked case A: reconstruct a known finite value
 
-Two contexts occur equally often. Their behavior policies are[0.8,0.2] and[0.3,0.7], while the target policies are[0.5,0.5] and[0.8,0.2]. The authored reward table favors action 0 in the first context and action 1 in the second. Exact target value is 0.35. A constructed log with action counts matching the behavior proportions gives that same importance estimate.
+Two contexts occur equally often. Their behavior policies are `[0.8, 0.2]` and `[0.3, 0.7]`, while the target policies are `[0.5, 0.5]` and `[0.8, 0.2]`. The authored reward table favors action 0 in the first context and action 1 in the second. Exact target value is 0.35. A constructed log with action counts matching the behavior proportions gives that same importance estimate.
 
 {{WORKED_A}}
 

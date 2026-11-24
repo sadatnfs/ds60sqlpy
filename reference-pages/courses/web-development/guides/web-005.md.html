@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Lists express relationships that paragraphs do not. An ordered list describes a sequence where position matters. An unordered list groups peers without requiring order. A description list pairs terms with explanations. These structures help reading tools announce item counts and relationships. A row of hyphens in plain text may look like a list but does not expose that structure.</p>
 <p>A quotation identifies borrowed language and should have a source when appropriate. Code identifies literal program text, while pre preserves whitespace. The combination pre and code is useful for multiline snippets. Long lines still need an overflow policy. Never use a quotation element simply to indent text or a list merely to create a visual column.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Ordered list:</strong> An <code>ol</code> list whose items have a meaningful sequence, such as steps, and are numbered by the browser.</li>
+<li><strong>Unordered list:</strong> A <code>ul</code> list whose items form a set in which changing the order does not change the meaning.</li>
+<li><strong>Description list:</strong> A <code>dl</code> list that pairs terms in <code>dt</code> elements with their descriptions in <code>dd</code> elements.</li>
+<li><strong>Quotation:</strong> Words from another source, marked with <code>blockquote</code> for a block or <code>q</code> for a short inline phrase.</li>
+<li><strong>Code element:</strong> The <code>code</code> element marks a fragment of computer code, and a surrounding <code>pre</code> keeps its spaces and line breaks.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>A list contains li elements; nested lists belong inside the parent li they elaborate. A description list contains dt terms and dd explanations. A short inline token uses code without pre. Literal less-than signs in displayed code must be escaped because the containing HTML still has to parse correctly.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -218,6 +226,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Escaping prevents the example from becoming live markup.</p>
 <pre class="highlighted-code"><code class="language-html"><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">pre</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">code</span><span class="syntax-punctuation">&gt;</span>&amp;lt;p&amp;gt;Hello&amp;lt;/p&amp;gt;<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">code</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">pre</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected observation:</strong> The displayed code contains literal paragraph tags.</p>
+<h3 id="contrast-case-a-nested-list-placed-beside-its-parent-item">Contrast case: a nested list placed beside its parent item<a class="heading-anchor" href="#contrast-case-a-nested-list-placed-beside-its-parent-item" aria-label="Link to this section">#</a></h3>
+<p>Both versions indent the same way in the editor, but only one produces the structure the indentation suggests.</p>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!-- broken --&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">ul</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span>Tools<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">ul</span>
+    <span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span>Editor<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">ul</span>
+  <span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">ul</span><span class="syntax-punctuation">&gt;</span>
+
+<span class="syntax-comment">&lt;!-- repaired --&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">ul</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">li</span>
+    <span class="syntax-punctuation">&gt;</span>Tools
+    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">ul</span>
+      <span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span>Editor<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">ul</span>
+    <span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">li</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">ul</span><span class="syntax-punctuation">&gt;</span></code></pre>
+<p>In the broken version, the inner <code>ul</code> is a direct child of the outer <code>ul</code>, which only permits <code>li</code> children. Browsers still draw it indented, so the defect hides on screen, but the outer list now has one item plus a stray list, and assistive technology reports one item instead of an item with a sublist. In the repaired version Editor belongs to Tools. The check is <code>document.querySelector(&#x27;ul &gt; ul&#x27;)</code>, which returns an element for the broken markup and null for the repair.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-choose-a-list-type-for-steps-and-an-unordered-tool-collection">Exercise 1: Choose a list type for steps and an unordered tool collection.<a class="heading-anchor" href="#exercise-1-choose-a-list-type-for-steps-and-an-unordered-tool-collection" aria-label="Link to this section">#</a></h4>

@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict these two counts in the clean retail model.</p>
 <p>Both counts are four; that clean fixture alone cannot reveal the function difference.</p>
+<p><strong>Why it fits this model:</strong> In the clean retail model every Sales ProductKey (1, 2 or 3) matches a stored Product row, so the engine adds no blank member. VALUES and DISTINCT both return the four stored keys.</p>
+<p><strong>Tempting mistake:</strong> Using the clean fixture as the only test and concluding that VALUES and DISTINCT are interchangeable. The unknown-member model, with S9 on key 999, returns 5 and 4.</p>
+<p><strong>How to confirm:</strong> Run case A on both models: retail gives 4 and 4, unknown-member gives 5 and 4.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add a second unmatched source key with another fact.</p>
 <p>VALUES still adds one blank member, while the unknown revenue grows by the new amount. A separate key-quality query must count the distinct unmatched codes.</p>
+<p><strong>Why it fits this model:</strong> Every unmatched code joins the same blank member. A hypothetical S10 on key 998 with Net 5 leaves VALUES at 5, raises UnknownRevenue from 7 to 12 and AllRevenue to 199.</p>
+<p><strong>Tempting mistake:</strong> Expecting COUNTROWS(VALUES(Product[ProductKey])) to reach 6, one per bad code, mistakes the semantic bucket for a list of codes, so a key-quality count built that way stays at one.</p>
+<p><strong>How to confirm:</strong> <code>COUNTROWS ( EXCEPT ( DISTINCT ( Sales[ProductKey] ), DISTINCT ( Product[ProductKey] ) ) )</code> returns 2 for {998, 999}, while VALUES still counts 5.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write the reconciliation equation for product reporting.</p>
 <p>Known revenue 187 + unknown revenue 7 = all revenue 194.</p>
+<p><strong>Why it fits this model:</strong> Known revenue is everything mapped to a stored key: Notebook 67 + Pen 24 + Mug 96 = 187. Adding the blank bucket&#x27;s 7 gives AllRevenue 194.</p>
+<p><strong>Tempting mistake:</strong> A product visual that hides the blank row lists rows that sum to 187 under a grand total of 194, and a reader who adds the rows reports a 7 USD gap as a calculation bug.</p>
+<p><strong>How to confirm:</strong> Case B returns UnknownRevenue 7 and AllRevenue 194, and <code>CALCULATE ( [NetRevenue], NOT ISBLANK ( Product[ProductKey] ) )</code> returns 187.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose labeling VALUES(ProductKey) count as the number of sellable SKUs.</p>
 <p>The count five includes the unknown bucket. Stored sellable-product policy needs its own catalog definition.</p>
+<p><strong>Why it fits this model:</strong> The sellable catalog is the stored Product table, four rows, or the three that sold if the policy requires sales. The fifth VALUES member exists only because S9&#x27;s key 999 has no match.</p>
+<p><strong>Tempting mistake:</strong> Publishing 5 as the SKU count adds a product nobody can buy, and the count shifts as soon as the bad key is repaired, although no catalog change occurred.</p>
+<p><strong>How to confirm:</strong> Under the unknown-member model, COUNTROWS(Product) is 4, DISTINCT is 4 and VALUES is 5; only the first two belong in a catalog measure.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why Bag is not the unknown member.</p>
 <p>Key 4 is valid and unsold; the synthetic blank member represents facts lacking a valid product mapping.</p>
+<p><strong>Why it fits this model:</strong> Bag (key 4) is a real Product row with no Sales lines, so its revenue is BLANK. The blank member holds S9&#x27;s 7 USD, which has no valid product.</p>
+<p><strong>Tempting mistake:</strong> Treating Bag as the unknown bucket because both look empty in a report confuses no facts with no dimension row, and sends the data-quality fix to the wrong table.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( [NetRevenue], Product[ProductKey] = 4 )</code> is BLANK, and <code>CALCULATE ( [NetRevenue], ISBLANK ( Product[ProductKey] ) )</code> is 7.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer this reconciliation to late-arriving dimensions.</p>
 <p>Retain and report the unmatched population, then verify how reconciliation changes after the correct dimension member arrives.</p>
+<p><strong>Why it fits this model:</strong> A late product row is the same pattern over time. Until key 999 arrives, S9&#x27;s 7 sits in the blank bucket; afterward it moves to the new product, and the total stays 194.</p>
+<p><strong>Tempting mistake:</strong> Filtering out unmatched facts until the dimension catches up reports 187 today and 194 later, so the same period&#x27;s total changes for no business reason.</p>
+<p><strong>How to confirm:</strong> Before the fix: unknown 7, total 194. After a Product row for 999 is loaded: unknown BLANK, product 999 at 7, total still 194.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

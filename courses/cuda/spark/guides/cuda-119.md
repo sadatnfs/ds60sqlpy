@@ -23,6 +23,13 @@ A fractional GPU request does not partition device memory into equal private sli
 Before a real run, verify resource discovery and assigned device addresses inside the exact executor environment. The plugin's supported executor-to-GPU mapping is release-specific and currently documented separately from general Spark scheduling. Copying a generic Spark GPU configuration without checking plugin requirements can produce a valid-looking but unsupported setup. Keep all resource choices in the compatibility and experiment ledger.
 
 
+### Key terms
+
+- **Executor:** A Spark JVM process that runs tasks and owns resources such as CPU cores and a GPU.
+- **Task slot:** A unit of executor CPU capacity that allows one task to run.
+- **Fractional GPU resource amount:** A per-task GPU request that sets a scheduling share but does not partition device memory.
+- **GPU admission concurrency:** The plugin limit on how many tasks may actively use an executor's GPU at once.
+
 ## Worked examples
 
 ### Worked example 1
@@ -51,33 +58,55 @@ print("CPU resource model:", slots, "scheduled shares;", active, "GPU-active bou
 
 **Expected observation:** Four scheduling shares with a two-task plugin admission bound.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `gpu` | `Fraction(1, 1)` |
+| `request` | `Fraction(1, 4)` |
+| `slots` | `4` |
+| `plugin_limit` | `2` |
+| `active` | `2` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Compute resource-share slots
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute resource-share slots** in the examples above.
+**Trap to avoid:** Reading 0.25 as a quarter of the device's memory reserved for each task treats an admission count as a hardware partition, which Spark does not create.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Compare CPU and GPU limits
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **compare CPU and GPU limits** in the examples above.
+**Trap to avoid:** Tuning only the GPU amount and expecting four concurrent GPU tasks ignores the plugin limit, and the extra tasks hold CPU slots while waiting.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain VRAM nonpartitioning
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **explain VRAM nonpartitioning** in the examples above.
+**Trap to avoid:** Planning each task to have a quarter of device memory leads to out-of-memory errors when tasks use more than that share.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Verify device addresses
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **verify device addresses** in the examples above.
+**Trap to avoid:** Assuming the default device assignment is correct on multi-GPU hosts risks oversubscribing one device.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a concurrency experiment
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design a concurrency experiment** in the examples above.
+**Trap to avoid:** Changing concurrency and partition count together makes it impossible to tell which caused the change.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Describe oversubscription failure
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **describe oversubscription failure** in the examples above.
+**Trap to avoid:** Concluding from a successful small test that a concurrency setting is safe misses failures that appear with real data volumes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

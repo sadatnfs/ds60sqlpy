@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-066-hive-sql-and-execution-plans">apache-066: Hive SQL and execution plans<a class="heading-anchor" href="#apache-066-hive-sql-and-execution-plans" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-065</code>, <code>apache-063</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>EXPLAIN:</strong> A Hive statement that shows the planned stages, scans, filters, joins and aggregations for a query without running it.</li>
+<li><strong>Table statistics:</strong> Row counts, sizes and column distributions stored for planning. Stale or missing statistics can produce a correct but inefficient plan.</li>
+<li><strong>Map join:</strong> A join in which the small table is loaded into memory on each task so the large table needs no shuffle.</li>
+<li><strong>Join cardinality:</strong> How many rows a join produces. Duplicate keys can multiply rows without any error, so it must be checked independently.</li>
+<li><strong>Execution engine:</strong> The runtime, such as Tez or a local path, that Hive uses to carry out a plan. Having Tez installed does not prove a query used it.</li>
+</ul>
 <h3 id="a-sql-plan-describes-work-not-just-a-desired-answer">A SQL plan describes work, not just a desired answer<a class="heading-anchor" href="#a-sql-plan-describes-work-not-just-a-desired-answer" aria-label="Link to this section">#</a></h3>
 <p>Hive SQL expresses a relational result. The selected execution engine, optimizer, statistics and storage readers determine how that result is produced. EXPLAIN exposes a planned structure that can include scans, filters, aggregations, exchanges and joins. A plan is valuable evidence, but actual runtime counters are needed to establish which work occurred and where time was spent.</p>
 <p>The prepared local workshop deliberately uses a bounded execution path and a three-row Parquet fixture. It is not a YARN cluster, a distributed Tez benchmark or a demonstration of production resource management. The full official image contains compatible Hadoop/Tez components, but their presence does not establish that a specific query selected or exercised a distributed execution route.</p>

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Configure a CUTLASS or CuTe kernel with correct layouts and benchmark it against a library baseline.
+
 Work through *CUTLASS, CuTe and tile abstractions* with the concrete cases below. Finish with this evidence:
 correct layouts, supported feature declaration and benchmark against an appropriate library baseline. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 CUTLASS supplies composable matrix-operation building blocks, while CuTe provides abstractions for shapes, strides and layout composition used in tiled algorithms. An operation atom describes a small supported operation; larger tiles organize repeated work and data movement. Epilogues transform accumulated results, often adding scale, bias or activation. Templates encode choices at compile time, but they do not absolve the programmer from understanding coordinates, alignment, resource costs and architecture support. Pin dependencies and begin with a prepared supported example. A novel tile DSL is an elective comparison, not a universal prerequisite for basic CUDA.
+
+### Key terms
+
+- **CUTLASS:** An NVIDIA C++ template library for building high-performance matrix multiply and related kernels.
+- **CuTe layout:** A pair of shape and stride that maps logical coordinates to memory offsets in CUTLASS 3.
+- **Epilogue:** The final stage of a GEMM kernel that applies scaling, bias or activation before storing results.
+- **MMA atom:** The smallest matrix-multiply-accumulate instruction shape that CuTe composes into larger tiles.
 
 ## How to run and study this lesson
 

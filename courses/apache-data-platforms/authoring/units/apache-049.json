@@ -5,6 +5,42 @@
   "minutes": 75,
   "prerequisites": ["apache-048", "apache-005"],
   "concepts": ["backpressure", "busy/idle metrics", "capacity", "state-compatible rescale"],
+  "key_terms": [
+    [
+      "Backpressure",
+      "The condition in which a slow downstream operator fills network buffers so upstream tasks must slow down."
+    ],
+    [
+      "Busy time",
+      "The fraction of time a task spends processing records, as opposed to idle time waiting for input or backpressured time waiting for output space."
+    ],
+    [
+      "Throughput",
+      "The rate of records processed per unit of time, which differs from the latency of an individual record."
+    ],
+    [
+      "Parallelism",
+      "The number of parallel subtasks for an operator or job. Changing it redistributes keyed state and does not guarantee linear scaling."
+    ],
+    [
+      "Rescaling",
+      "Restarting a job with different parallelism from compatible state, which requires stable operator identities and compatible serializers."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "The pressure topology with chaining disabled",
+      "language": "java",
+      "code": "result = environment\n  .fromSource(\n    new NumberSequenceSource(0, 499),\n    WatermarkStrategy.noWatermarks(),\n    \"pressure-numbers\"\n  )\n  .uid(\"pressure-source\")\n  .map(new Payload())\n  .name(\"pressure-payload-producer\")\n  .uid(\"pressure-payload\")\n  .disableChaining()\n  .map(new SlowConsumer())\n  .name(\"bounded-slow-consumer\")\n  .uid(\"pressure-consumer\")\n  .disableChaining();",
+      "interpretation": "This fragment from WorkshopJobs.java keeps the producer and the slow consumer as separate tasks. Chaining would fuse them into one thread, and a fused chain cannot report that one side is waiting on buffers from the other, so the backpressure metric would stay at zero even though the job is slow. The finite sequence of 500 numbers also gives a fixed oracle: whatever the pressure reading, the finished output must contain exactly those values."
+    },
+    {
+      "title": "Require a measured metric, not a configured delay",
+      "language": "bash",
+      "code": "cd work/flink\nbash run.sh backpressure\nbash run.sh readback",
+      "interpretation": "The backpressure route polls the REST job details and keeps the accumulated-backpressured-time value reported for the pressure-payload-producer vertex. The route fails when no positive value appears, because a sleep inside SlowConsumer is only a cause, while the metric is the observation. In the readback, look for the metric rows together with the output population; a large backpressured time with a complete output means the job was slowed but correct, and a missing row means the window ended before Flink sampled the task."
+    }
+  ],
   "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
   "sources": [
     [

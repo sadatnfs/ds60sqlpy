@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Establish a finite restart baseline",
       "input_contract": "Run the restart scenario with two supplied records and retain progress plus exact sink values.",
-      "expected": "2 input rows and bag 1:100,2:200.",
+      "expected": "2 input rows and bag 1:100, 2:200.",
       "verification": "Assert the literal bag, input count 2 and inactive query."
     },
     {

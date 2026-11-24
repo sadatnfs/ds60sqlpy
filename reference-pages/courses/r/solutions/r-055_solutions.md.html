@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Build the coordinate-zoom and scale-limited fitted-line comparison.</p>
 <p>The coordinate zoom retains all four observations in the fit, while the scale limit removes the extreme y value before fitting.</p>
 <p><strong>Expected evidence:</strong> Different fitted numerical layers.</p>
+<p><strong>Approach:</strong> Add coord_cartesian(ylim = c(0, 4)) to base for one plot and scale_y_continuous(limits = c(0, 4)) for the other, then build both and inspect the smoothing layer, data[[2]].</p>
+<p><strong>Why it holds here:</strong> A scale limit is applied before the statistic, so y = 100 becomes missing and lm fits only (1, 1), (2, 2), (3, 3), giving y = x. The coordinate zoom acts after fitting, so lm still sees all four points and fits slope 29.8 and intercept -48.</p>
+<p><strong>Tempting mistake:</strong> Comparing only the two pictures and dismissing the removed rows warning as noise. The warning is the sign that an observation left the fit, not a display message.</p>
+<p><strong>Verify:</strong> <code>max(ggplot2::ggplot_build(zoom)$data[[2]]$y, na.rm = TRUE)</code> returns about 71.2, while the same expression for limited returns 3.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Choose a zoom that preserves the model-fitting data.</p>
 <p>Use coord_cartesian and retain the full-data fit; document any points outside the displayed window.</p>
 <p><strong>Expected evidence:</strong> Model inputs preserved.</p>
+<p><strong>Approach:</strong> Use coord_cartesian for the zoom and state in the caption that the point (4, 100) lies above the window.</p>
+<p><strong>Why it holds here:</strong> The four observations remain the model input. With slope 29.8 the full data line crosses the 0 to 4 band only between x of about 1.61 and 1.75, so the zoom shows a steep sliver of a fit driven by the extreme point, which is honest about the model.</p>
+<p><strong>Tempting mistake:</strong> Using the ylim(0, 4) shortcut, or subsetting d to rows with y at most 4 first. Both remove y = 100 before lm runs, so the window shows a tidy y = x line that the full data never produced.</p>
+<p><strong>Verify:</strong> <code>max(ggplot2::ggplot_build(zoom)$data[[2]]$y, na.rm = TRUE) &gt; 4</code> returns TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Compare fixed and free-y facet scale assignments.</p>
 <p>Fixed panels share one y-scale assignment; free_y gives one per panel in this fixture.</p>
 <p><strong>Expected evidence:</strong> One versus two scale assignments.</p>
+<p><strong>Approach:</strong> Build fixed and free and read the SCALE_Y column of the panel layout table in each.</p>
+<p><strong>Why it holds here:</strong> Group A spans y 1 to 2 and group B spans 100 to 200. Fixed panels share one y scale running to 200, which flattens A near the floor. free_y gives each panel its own scale.</p>
+<p><strong>Tempting mistake:</strong> Comparing the built layer data. The y values are 1, 2, 100 and 200 in both plots, because facet scales change the panel layout and not the data, so this check finds no difference.</p>
+<p><strong>Verify:</strong> <code>length(unique(ggplot2::ggplot_build(fixed)$layout$layout$SCALE_Y))</code> returns 1, and the same expression for free returns 2.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Transform positive values 1,10,100 with a log10 x scale.</p>
 <p>The built x coordinates are 0,1,2, representing equal ratios as equal spacing.</p>
 <p><strong>Expected evidence:</strong> Expected transformed positions.</p>
+<p><strong>Approach:</strong> Confirm every x is positive, then add scale_x_log10 to the plot of 1, 10 and 100.</p>
+<p><strong>Why it holds here:</strong> log10 sends 1, 10 and 100 to 0, 1 and 2, so equal ratios of 10 become equal steps while the axis still labels the original values. The positivity check matters because a zero would become minus infinity and be dropped.</p>
+<p><strong>Tempting mistake:</strong> Mapping aes(log(x), y) instead. Natural log places the points at 0, 2.30 and 4.61, and the axis shows those logs rather than 1, 10 and 100, so a reader must convert every label back.</p>
+<p><strong>Verify:</strong> <code>all(positive$x &gt; 0)</code> returns TRUE, and <code>ggplot2::ggplot_build(log_plot)$data[[1]]$x</code> returns 0, 1, 2.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a new category missing from a named palette contract.</p>
 <p>Admit the category with an explicit mapping or reject it under the application contract; do not silently change existing identities.</p>
 <p><strong>Expected evidence:</strong> Unmapped category detected.</p>
+<p><strong>Approach:</strong> Compare the observed labels with names(palette) before plotting, and either add C to the named palette or reject the data under the contract.</p>
+<p><strong>Why it holds here:</strong> The palette fixes A as #0072B2 and B as #D55E00. Since C has no entry, any automatic choice for it is a decision nobody made, and A and B must keep their colours across reports.</p>
+<p><strong>Tempting mistake:</strong> Dropping the manual scale so the default hue scale absorbs C. The default spaces hues by level count, so going from two levels to three recolours A and B as well, and earlier figures no longer match.</p>
+<p><strong>Verify:</strong> <code>setdiff(c(&quot;A&quot;, &quot;C&quot;), names(palette))</code> returns &quot;C&quot;.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain when free scales can mislead a magnitude comparison.</p>
 <p>Free scales can make a small and a large range occupy similar panel heights; shared scales or explicit annotation are needed for direct magnitude comparison.</p>
 <p><strong>Expected evidence:</strong> Comparison limit stated.</p>
+<p><strong>Approach:</strong> Before comparing panels, compare the numerical ranges behind each panel&#x27;s height and decide whether the reader needs shared scales.</p>
+<p><strong>Why it holds here:</strong> Under free_y, A&#x27;s rise from 1 to 2 and B&#x27;s rise from 100 to 200 fill the same panel height, so the two slopes look equal although B rises 100 times as far.</p>
+<p><strong>Tempting mistake:</strong> Reading the free panels side by side as a magnitude comparison. Free scales suit shape within a panel; magnitude across panels needs fixed scales or an explicit annotation of each range.</p>
+<p><strong>Verify:</strong> <code>diff(range(f$y[f$group == &quot;B&quot;])) / diff(range(f$y[f$group == &quot;A&quot;]))</code> returns 100.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 7 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -127,7 +127,7 @@ assert len(history) == 3 and np.isfinite(history).all() and len(set(history)) ==
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Six IDs give three batches, five give sizes 2, 2, 1, the cleared run produces three distinct finite weights, omitting zero_grad changes the endpoint, and batch means 2 and 8 over 2 and 1 records combine to 4, not 5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Count batches and updates. Predict exercise 6, Aggregate unequal batch means, from its prompt alone: Combine mean loss 2 over 2 examples and mean loss 8 over 1 example. Then explain why this finish condition holds: Six IDs give three batches, five give sizes 2, 2, 1, the cleared run produces three distinct finite weights, omitting zero_grad changes the endpoint, and batch means 2 and 8 over 2 and 1 records combine to 4, not 5. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -163,15 +163,15 @@ If batch-size changes appear to improve a model, compare examples seen, update c
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Retain a short tail) alters one assumption of Example A (Count batches and updates). Hint 2: exercise 4, Expose accidental accumulation, should end at different endpoint. Work backward from it. Hint 3: exercise 5, Shuffle paired records together, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Epoch, Batch, Gradient reset using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Run three independent updates, from its inputs alone. Predict whether exercise 3, Trace two single-record updates, survives one changed input. Then explain Epoch, Batch, Gradient reset in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-008` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Count batches and updates) cannot be rebuilt without help, revisit `torch-008` first. Otherwise keep your exercise 2 attempt, Count updates with a dropped tail, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

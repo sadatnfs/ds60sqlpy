@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-027`.
 
 A partial update must distinguish a missing field from a field explicitly set to null. Treating both as Python `None` can silently erase data or prevent users from clearing an optional value. This chapter uses Pydantic's field-set tracking and a strict request model to make those semantics visible.
 
+## Key terms
+
+- **BaseModel:** The Pydantic base class whose subclasses declare typed fields and validate incoming data into model instances.
+- **PATCH:** An HTTP method for a partial update that should change only the fields the request actually supplies.
+- **Fields set:** Pydantic's record of which fields the caller supplied, kept separately from values that came from defaults.
+- **exclude_unset:** A `model_dump` option that omits fields the caller did not supply, so an empty PATCH produces an empty update mapping.
+- **Explicit null:** A field sent with the value `null`, which is a deliberate instruction to clear an optional value rather than an omission.
+
 ## Mechanism: values and presence are separate information
 
 A model instance contains validated values, but it also records which fields the caller supplied. `model_dump(exclude_unset=True)` preserves that distinction when producing an update mapping. A default value can exist on the model without being an instruction to overwrite the stored value.
@@ -29,6 +37,47 @@ The second case supplies null for the optional display name and confirms that th
 That final state assertion is important. A status code can be correct while an earlier mutation has already occurred. The intended ordering is parse, validate, authorize, compute the permitted change, then commit. If application code mutates a shared object before validating the whole request, error handling cannot reliably undo the side effect.
 
 Presence semantics also affect generated clients. A client that always serializes every optional property as null may issue clearing commands when its caller intended omission. Contract tests should include actual serialized requests from important clients, especially when different languages represent missing values differently.
+
+## Worked example: applying three PATCH bodies to one record
+
+```python
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+
+class Patch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    display_name: str | None = None
+    age: Annotated[int, Field(strict=True, ge=0)] | None = None
+
+
+record = {"display_name": "Ada", "age": 37}
+bodies = ({"age": 38}, {"display_name": None}, {"age": True}, {"age": 39, "role": "admin"})
+for body in bodies:
+    try:
+        patch = Patch.model_validate(body)
+    except ValidationError as error:
+        print("rejected", [e["type"] for e in error.errors()])
+        continue
+    naive = {**record, **patch.model_dump()}
+    record.update(patch.model_dump(exclude_unset=True))
+    print("naive", naive)
+    print("kept ", record)
+```
+
+Expected output:
+
+```text
+naive {'display_name': None, 'age': 38}
+kept  {'display_name': 'Ada', 'age': 38}
+naive {'display_name': None, 'age': None}
+kept  {'display_name': None, 'age': 38}
+rejected ['int_type']
+rejected ['extra_forbidden']
+```
+
+The `naive` lines show what happens when a handler merges the full dump: a body that only mentioned `age` wiped `display_name`, and a body that only cleared the name also erased the age. Dumping with `exclude_unset=True` keeps exactly the fields the client sent, including an explicit `null`, so the `kept` record changes one field per request. Strict mode refuses `True` for `age` even though Python treats booleans as integers, and `extra="forbid"` stops a client from smuggling a `role` field into the update.
 
 ## Failure diagnosis and discussion
 

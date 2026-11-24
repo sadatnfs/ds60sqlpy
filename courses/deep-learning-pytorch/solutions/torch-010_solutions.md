@@ -1,6 +1,6 @@
 # torch-010: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting Datasets, held-out families and leakage controls yourself. They reuse the guide's literal inputs, starting from Example A, Inspect a literal Dataset, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Map-style Dataset, Subset, Split unit. After a pass, choose a new input for exercise 6, Apply the frozen transform, without looking.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Subclass Dataset and implement __len__ and__getitem__. A Subset stores a sequenc
 
 ## Trace selection, fitted state and delegated access
 
-The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 from A and B; assessment selects 4, 5, 6, 7 from C and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, account C, value 20. A local batch position zero is not a replacement for the source identity.
+The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 from A and B; assessment selects 4, 5, 6, 7 from C and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus `assessment[0]` returns original identity 4, account C, value 20. A local batch position zero is not a replacement for the source identity.
 
 | Population | Original identities | Values | Mean |
 | --- | --- | --- | --- |
@@ -149,4 +149,4 @@ torch.testing.assert_close(
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Perturb only assessment values, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose row-level leakage, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

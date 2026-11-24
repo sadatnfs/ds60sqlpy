@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-throughput">Exercise 1: Compute throughput<a class="heading-anchor" href="#exercise-1-compute-throughput" aria-label="Link to this section">#</a></h3>
 <p>Batch divided by completed seconds.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute throughput</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute throughput as items divided by completed seconds: 32 items in 0.008 s gives <code>32 / 0.008 = 4000</code> items per second.</p>
+<p><strong>Why it is correct here.</strong> Throughput measures how much work finishes per unit of time over a completed batch. The reference asserts <code>throughput == 4000</code>, using the time at which the whole batch is done.</p>
+<p><strong>A plausible wrong approach.</strong> Dividing by the time until the batch was enqueued rather than completed inflates throughput, because GPU work is asynchronous and the enqueue returns almost immediately.</p>
+<p><strong>How to verify.</strong> Synchronize before stopping the timer, and confirm the measured items per second times the batch time equals the batch size.</p>
 <h3 id="exercise-2-separate-per-item-cost-and-request-latency">Exercise 2: Separate per-item cost and request latency<a class="heading-anchor" href="#exercise-2-separate-per-item-cost-and-request-latency" aria-label="Link to this section">#</a></h3>
 <p>Amortized cost is not latency.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate per-item cost and request latency</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate amortized cost from latency: <code>0.008 / 32 = 0.00025</code> s is the cost per item averaged over the batch, but each request in the batch waits the whole 8 ms, plus any time spent queuing for the batch to fill.</p>
+<p><strong>Why it is correct here.</strong> A request&#x27;s latency runs from its arrival to its response. Batching shares the 8 ms of execution among 32 items, yet none of them finishes before the batch completes.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting 0.25 ms as request latency promises response times that no request experiences, and service level objectives built on it will fail.</p>
+<p><strong>How to verify.</strong> Record arrival and completion times per request in a serving test. The minimum latency should be at least the 8 ms batch time.</p>
 <h3 id="exercise-3-set-both-pytorch-inference-controls">Exercise 3: Set both PyTorch inference controls<a class="heading-anchor" href="#exercise-3-set-both-pytorch-inference-controls" aria-label="Link to this section">#</a></h3>
 <p>Use eval plus inference_mode when appropriate.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>set both PyTorch inference controls</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Call <code>model.eval()</code> to switch dropout and batch normalization to inference behavior, and wrap inference in <code>torch.inference_mode()</code> to disable gradient tracking.</p>
+<p><strong>Why it is correct here.</strong> <code>eval()</code> changes module behavior, while <code>inference_mode</code> controls autograd. They are independent switches, so both are needed for correct and efficient inference.</p>
+<p><strong>A plausible wrong approach.</strong> Using only <code>torch.no_grad()</code> keeps dropout active, so predictions vary between calls, and batch normalization keeps updating running statistics.</p>
+<p><strong>How to verify.</strong> Run the same input twice with dropout in the model: outputs must be identical after <code>eval()</code> and may differ without it.</p>
 <h3 id="exercise-4-specify-tensorflow-training-behavior">Exercise 4: Specify TensorFlow training behavior<a class="heading-anchor" href="#exercise-4-specify-tensorflow-training-behavior" aria-label="Link to this section">#</a></h3>
 <p>Pass training=False for relevant calls.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>specify TensorFlow training behavior</strong> is qualified there.</p>
+<p><strong>Approach.</strong> In TensorFlow pass <code>training=False</code> when calling the Keras model for inference, which controls dropout and batch normalization behavior.</p>
+<p><strong>Why it is correct here.</strong> Keras layers read the <code>training</code> argument to choose behavior. Calling <code>model(x)</code> directly in custom code may default to a mode that does not match evaluation.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming <code>model.predict</code> and <code>model(x)</code> behave the same in every custom layer is risky when a layer reads <code>training</code> differently.</p>
+<p><strong>How to verify.</strong> Compare outputs of <code>model(x, training=False)</code> across repeated calls; they must be identical when dropout is present.</p>
 <h3 id="exercise-5-measure-cold-start">Exercise 5: Measure cold start<a class="heading-anchor" href="#exercise-5-measure-cold-start" aria-label="Link to this section">#</a></h3>
 <p>Include load and first execution separately.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>measure cold start</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Measure cold start as separate phases: process start and model load, first execution including any compilation or algorithm search, then steady-state execution.</p>
+<p><strong>Why it is correct here.</strong> First requests after deployment pay one-time costs. Separating phases shows whether a slow first response comes from loading weights or from first-call compilation.</p>
+<p><strong>A plausible wrong approach.</strong> Averaging cold start into steady-state latency hides a multi-second first response. Autoscaling services start new replicas often, so cold start can affect many users.</p>
+<p><strong>How to verify.</strong> Record a timestamp after each phase in a fresh process and report each phase separately.</p>
 <h3 id="exercise-6-test-an-exported-signature-boundary">Exercise 6: Test an exported signature boundary<a class="heading-anchor" href="#exercise-6-test-an-exported-signature-boundary" aria-label="Link to this section">#</a></h3>
 <p>Reject unsupported shape or dtype explicitly.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>test an exported signature boundary</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Test the exported signature: send an input with an unsupported shape or dtype, such as float64 when the signature declares float32, and confirm a clear rejection.</p>
+<p><strong>Why it is correct here.</strong> The exported model has a fixed contract. Explicit rejection is better than silent casting, which can change numerical behavior.</p>
+<p><strong>A plausible wrong approach.</strong> Letting the runtime cast silently makes accepted inputs ambiguous. A float64 request cast to float32 loses precision without anyone noticing.</p>
+<p><strong>How to verify.</strong> Write tests for one valid and two invalid inputs and assert the error messages name the expected signature.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>4000 items/s with 8 ms batch latency, not 0.25 ms request latency.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-095_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

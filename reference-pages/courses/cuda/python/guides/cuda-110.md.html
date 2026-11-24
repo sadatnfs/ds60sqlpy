@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A native extension package combines Python compatibility, framework ABI, host compiler, CUDA toolkit, architecture targets and system libraries. A wheel filename alone does not promise every GPU can execute its embedded code. Native device binaries target architectures; intermediate representations can provide a JIT path only within supported compatibility rules. Record what was built and what was actually executed.</p>
 <p>Use a fixed project with reviewed build dependencies and reproducible metadata. Test import, operator registration, forward/backward behavior and unsupported-input failure in each declared environment. Keep build-time downloads explicit and separate from classroom reading. The browser&#x27;s single-file pad does not become a general package manager. Publishing packages or using external registries is a separately authorized workflow.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Framework ABI:</strong> The binary interface of a framework build that a native extension must match.</li>
+<li><strong>Wheel:</strong> A built Python package whose tags describe Python and platform compatibility but not every GPU it can run on.</li>
+<li><strong>Native cubin:</strong> Compiled device code for a specific GPU architecture that runs without just-in-time compilation.</li>
+<li><strong>PTX:</strong> An intermediate representation that the driver can JIT-compile for newer architectures within compatibility rules.</li>
+<li><strong>Build ledger:</strong> A record of compiler, toolkit, framework, architecture targets and what was actually executed.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A package can import because its host shared library loads, then fail when the first kernel lacks compatible device code. Import is only the first qualification step.</p>
@@ -222,17 +230,23 @@ manifest <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-list-compatibility-axes">Exercise 1: List compatibility axes<a class="heading-anchor" href="#exercise-1-list-compatibility-axes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>list compatibility axes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Recording only the Python version suggests one wheel works everywhere that Python runs, while a framework ABI change alone can break the import.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-separate-import-and-execution">Exercise 2: Separate import and execution<a class="heading-anchor" href="#exercise-2-separate-import-and-execution" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>separate import and execution</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating a successful import as proof of portability passes packages that cannot run any kernel on the target GPU.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-explain-native-code-versus-intermediate-code">Exercise 3: Explain native code versus intermediate code<a class="heading-anchor" href="#exercise-3-explain-native-code-versus-intermediate-code" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>explain native code versus intermediate code</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Shipping native code only for the build machine&#x27;s GPU makes the package fail on any older or newer architecture.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-a-build-ledger">Exercise 4: Design a build ledger<a class="heading-anchor" href="#exercise-4-design-a-build-ledger" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>design a build ledger</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Building from a developer machine without recording flags yields an artifact nobody can reproduce or audit.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-test-unsupported-dtype">Exercise 5: Test unsupported dtype<a class="heading-anchor" href="#exercise-5-test-unsupported-dtype" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>test unsupported dtype</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Silently casting to float32 hides precision loss and gives callers a different result from what they requested.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-a-package-release-gate">Exercise 6: Define a package release gate<a class="heading-anchor" href="#exercise-6-define-a-package-release-gate" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>define a package release gate</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Testing one environment and declaring the whole matrix supported presents untested claims as verified.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

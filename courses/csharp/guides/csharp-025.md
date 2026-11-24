@@ -40,7 +40,7 @@ Read the operations in dependency order. Record which values exist before each l
 
 ### Example A: Round-trip an owned text file
 
-The random name prevents collisions while the observable content remains deterministic.
+The random name prevents collisions while the observable content remains deterministic. `new UTF8Encoding(false)` writes UTF-8 without a byte order mark: `é` takes two bytes, so `café` is five bytes. `Encoding.UTF8` would prepend the three-byte BOM EF BB BF and make the file eight bytes long.
 
 ```csharp
 using System;
@@ -70,11 +70,12 @@ internal static class Program {
       string root = Path.Combine(Path.GetTempPath(),
                                  "lesson-" + Guid.NewGuid().ToString("N"));
       Directory.CreateDirectory(root);
+      var utf8 = new UTF8Encoding(false);
       try {
         string path = Path.Combine(root, "note.txt");
-        File.WriteAllText(path, "café", Encoding.UTF8);
-        Check(File.ReadAllText(path, Encoding.UTF8) == "café",
-              "UTF-8 round trip");
+        File.WriteAllText(path, "café", utf8);
+        Check(File.ReadAllBytes(path).Length == 5, "five UTF-8 bytes, no BOM");
+        Check(File.ReadAllText(path, utf8) == "café", "UTF-8 round trip");
       } finally {
         Directory.Delete(root, true);
       }
@@ -86,7 +87,7 @@ internal static class Program {
 }
 ```
 
-**Observe:** The Unicode text round-trips and the owned directory is removed.
+**Observe:** The file holds exactly five bytes, the Unicode text round-trips and the owned directory is removed.
 
 ### Example B: Separate logical and filesystem names
 
@@ -155,7 +156,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Reproduce Example A (Round-trip an owned text file) before changing anything, and confirm its observation: The Unicode text round-trips and the owned directory is removed.
+1. Reproduce Example A (Round-trip an owned text file) before changing anything, and confirm its observation: The file holds exactly five bytes, the Unicode text round-trips and the owned directory is removed.
 2. Compare Example B (Separate logical and filesystem names) with Example A and name the first line whose behavior differs. Its observation is: A simple leaf name and a nested path are recognized as different shapes.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Path normalization alone does not solve symlink attacks or concurrent replacement.
 

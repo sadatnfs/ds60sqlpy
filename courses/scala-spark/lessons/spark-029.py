@@ -92,7 +92,7 @@ def main():
         source = spark.range(0, 30, 1, 2).withColumn("value", F.col("id") * 2)
         ids = range(30)
         assert sum(i * 2 for i in ids) == 870
-        print("Declared30-row product total=870")
+        print("Declared 30-row product total=870")
         a = receipt_text("run-a", "0" * 64)
         b = receipt_text("run-b", "0" * 64)
         assert json.loads(a)["data_path"] == "runs/run-a/data" and a != b

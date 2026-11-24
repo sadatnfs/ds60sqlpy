@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Ingress describes HTTP and HTTPS routing intent to Services. It requires an Ingress controller that interprets the resource and implements a proxy path. Creating an Ingress object without a controller does not create a web server or make a hostname reachable.</p>
 <p>A host rule matches the HTTP host name, while a path rule matches the URL path according to its pathType. Exact, Prefix and implementation-specific rules are not interchangeable. Prefix matching is based on path elements, not an arbitrary raw string startsWith rule. Rewriting paths is controller-specific behavior rather than a universal core Ingress feature.</p>
 <p>The controller itself needs an exposure path, such as a load balancer or a deliberately mapped local port. DNS must point the chosen hostname at that entrypoint. An HTTP route can be configured correctly while public DNS or TLS is still wrong. Diagnose the request as a chain.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Ingress controller:</strong> The proxy implementation that watches Ingress objects and actually routes traffic. Without one, Ingress rules do nothing.</li>
+<li><strong>Host rule:</strong> An Ingress rule that matches requests by HTTP host name.</li>
+<li><strong>pathType:</strong> The Ingress field that selects path matching: Exact for one path, or Prefix for matching path elements.</li>
+<li><strong>ingressClassName:</strong> The Ingress field naming which controller should handle the Ingress.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Use networking.k8s.io/v1 and specify ingressClassName when the prepared environment requires it. Each backend references a Service and a port in the API, not a Pod directly. That reference does not require every controller to send packets through the Service ClusterIP. A controller can derive eligible Pod endpoints and proxy to them directly, or use the ClusterIP according to its implementation and configuration. Traefik’s documented nativeLB option is one concrete example of these alternatives. The fixture uses a reserved example hostname and is manual-only.</p>
 <p>Ingress remains a supported API, while Gateway API offers a more expressive role-oriented model. Neither choice installs its own controller. A learner should understand both the API contract and the selected implementation before relying on annotations.</p>

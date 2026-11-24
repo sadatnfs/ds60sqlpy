@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-046`, `apache-006`.
 
+## Key terms
+
+- **Keyed state:** Managed Flink state scoped to one key of a keyed stream and one operator, so the total for east is independent of the total for west.
+- **ValueState:** A keyed state primitive that holds a single value per key, checkpointed and restored by Flink.
+- **TimerService:** The process function service for registering and deleting event-time or processing-time timers for the current key.
+- **Event-time timer:** A timer that fires when the watermark passes its timestamp, not when wall-clock time passes. Sleeping in the client does not fire it.
+- **Operator identity:** The stable identifier, descriptor name and serializer that tie managed state to an operator across restores.
+
 ## Keyed state belongs to a key and an operator
 
 A keyed operator partitions records by a declared key and exposes state scoped to

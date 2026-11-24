@@ -104,7 +104,7 @@ def main():
             "SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe"
         ).first()
         assert tuple(comparison) == (None, True)
-        print("Ordinary equality is unknown;explicit NULL-safe equality is true")
+        print("Ordinary equality is unknown; explicit NULL-safe equality is true")
         print("spark-016: worked examples passed; six task implementations remain")
     finally:
         spark.stop()

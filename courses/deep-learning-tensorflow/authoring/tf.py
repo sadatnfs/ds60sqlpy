@@ -18,7 +18,11 @@ add(
             "Partition IDs 1..6 into batches of size two; retain each batch and count one update per batch.",
             "batches [[1, 2], [3, 4], [5, 6]] and 3 updates.",
             """ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,6,2)]
-assert batches==[[1,2],[3,4],[5,6]]""",
+updates=0
+for _batch in batches:
+    updates+=1
+assert batches==[[1,2],[3,4],[5,6]] and updates==3
+assert sum(batches,[])==ids""",
             "The counter measures updates, not observations. Concatenating the three batches recovers the six original identities exactly once. This check detects both an omitted final slice and a loop that increments once per record.",
         ),
         ex(
@@ -28,7 +32,7 @@ assert batches==[[1,2],[3,4],[5,6]]""",
             """ids=list(range(1,6)); batches=[ids[i:i+2] for i in range(0,5,2)]
 assert list(map(len,batches))==[2,2,1]
 assert sum((b for b in batches if len(b)==2),[])==[1,2,3,4]""",
-            "An epoch with drop_remainder may not expose every record. Naming that choice avoids quietly changing the training population. The tail has one example and its mean gradient must divide by one.",
+            "An epoch with drop_remainder may not expose every record. Naming that choice avoids quietly changing the training population. The tail has one example, so a mean loss over that batch divides by one example, not by the nominal batch size of two.",
         ),
         ex(
             "Trace weight state",
@@ -349,7 +353,7 @@ assert np.count_nonzero((p>=.8)!=labels)==1""",
 add(
     "tf-014",
     """Multiclass and multilabel prediction answer different questions. In a multiclass task exactly one class is chosen, so a softmax distributes one unit of probability across mutually exclusive outcomes. In a multilabel task several labels may hold at once, so each label gets its own binary decision. A tensor with three outputs does not by itself tell you which task is intended. The target contract determines the activation, loss and denominator. Integer sparse targets name one class index; a vector such as [1, 0, 1] names two independently present labels. Converting one task into the other changes the meaning of the data.""",
-    """Sparse categorical cross entropy takes class indices with shape(batch,), alongside logits shaped(batch, classes). Sigmoid cross entropy instead takes a binary matrix matching logits. Softmax reduces across the class axis. Explicitly check which axes a loss function reduces before comparing mean losses, particularly when multilabel losses are averaged across both labels and examples.""",
+    """Sparse categorical cross entropy takes class indices with shape (batch,), alongside logits shaped (batch, classes). Sigmoid cross entropy instead takes a binary matrix matching logits. Softmax reduces across the class axis. Explicitly check which axes a loss function reduces before comparing mean losses, particularly when multilabel losses are averaged across both labels and examples.""",
     [
         ("Multiclass", "One outcome among mutually exclusive categories."),
         ("Multilabel", "Independent binary outcomes that may coexist."),
@@ -614,7 +618,7 @@ import tf018
 add(
     "tf-019",
     """Convolutional layers reuse a small kernel at many positions. Each output sees a local patch, so the kernel has fewer parameters than an unconstrained map from every input pixel to every output pixel. TensorFlow applies cross-correlation: it slides the kernel without rotating it. A mathematical convolution would reverse spatial axes. Channels and batches add axes but do not change the basic local dot product. VALID padding includes only patches entirely inside the image; SAME padding inserts boundary values under a defined convention. The output shape depends on input size, kernel size, stride and padding, not on the apparent visual size of a plotted image.""",
-    """tf.nn.conv2d expects image shape(batch, height, width, channels) and filter shape(height, width, input_channels, output_channels). A 3x3 single-channel image and 2x2 kernel with stride 1 and VALID padding produce shape (1, 2, 2, 1). The first result is 1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.""",
+    """tf.nn.conv2d expects image shape (batch, height, width, channels) and filter shape (height, width, input_channels, output_channels). A 3x3 single-channel image and 2x2 kernel with stride 1 and VALID padding produce shape (1, 2, 2, 1). The first result is 1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.""",
     [
         ("Kernel", "Shared weights applied to each local patch."),
         ("Stride", "Distance between adjacent kernel positions."),
@@ -631,12 +635,15 @@ np.testing.assert_array_equal(out.numpy().reshape(2,2),np.full((2,2),-4))""",
             "Every patch has a bottom-right value four greater than its top-left value. The equal outputs are an arithmetic property of this ramp image, not a generic property of convolution.",
         ),
         ex(
-            "Rotate the kernel",
-            "Reverse both spatial axes and repeat the calculation.",
-            "all outputs+4.",
-            """rot=tf.reverse(kernel,axis=[0,1]); changed=tf.nn.conv2d(image,rot,strides=1,padding='VALID')
-np.testing.assert_array_equal(changed.numpy().reshape(2,2),np.full((2,2),4))""",
-            "Kernel orientation distinguishes cross-correlation from mathematical convolution. A symmetric kernel would hide this difference, which is why the asymmetric diagonal kernel is useful.",
+            "Rotate the kernel on a steeper image",
+            "Use a new image with rows 0, 1, 2 / 10, 11, 12 / 20, 21, 22. Apply the original kernel, then reverse both spatial axes of the kernel and apply it again.",
+            "original kernel gives all outputs -11; the rotated kernel gives all outputs +11.",
+            """steep=tf.reshape(tf.constant([0.,1.,2.,10.,11.,12.,20.,21.,22.]),(1,3,3,1))
+rot=tf.reverse(kernel,axis=[0,1])
+np.testing.assert_array_equal(tf.nn.conv2d(steep,kernel,strides=1,padding='VALID').numpy().reshape(2,2),np.full((2,2),-11))
+changed=tf.nn.conv2d(steep,rot,strides=1,padding='VALID')
+np.testing.assert_array_equal(changed.numpy().reshape(2,2),np.full((2,2),11))""",
+            "On this image each bottom-right value is 11 greater than its top-left value, so the original kernel reports -11. Reversing the kernel swaps which corner gets the positive weight and flips the sign. Kernel orientation distinguishes cross-correlation from mathematical convolution; a symmetric kernel would hide this difference, which is why the asymmetric diagonal kernel is useful.",
         ),
         ex(
             "Count output positions",
@@ -687,7 +694,7 @@ add(
     [
         ex(
             "Compare two reductions",
-            "Pool patch [[1, 3], [2, 4]] with a2x2 window.",
+            "Pool patch [[1, 3], [2, 4]] with a 2x2 window.",
             "max 4; average 2.5.",
             """x=tf.constant([[[[1.],[3.]],[[2.],[4.]]]])
 assert float(tf.nn.max_pool2d(x,2,2,'VALID')[0,0,0,0])==4
@@ -1074,7 +1081,7 @@ assert duplicate and positive_id==negative_id""",
         ),
         ex(
             "Observe temperature",
-            "Compare softmax[1, 0] at temperatures 1 and 0.5.",
+            "Compare `softmax([1, 0])` at temperatures 1 and 0.5.",
             "positive probability increases at 0.5; ranking stays 0 first.",
             """p1=tf.nn.softmax([1.,0.]).numpy(); p2=tf.nn.softmax(np.array([1.,0.],dtype='float32')/.5).numpy()
 assert p2[0]>p1[0] and int(p1.argmax())==int(p2.argmax())==0""",
@@ -1342,7 +1349,7 @@ np.testing.assert_allclose(loss.numpy(),[np.logaddexp(0,-1)],atol=1e-6,rtol=0)""
         ),
         ex(
             "Check shift invariance",
-            "Compare softmax[1000,999] with softmax[0, -1].",
+            "Compare `softmax([1000, 999])` with `softmax([0, -1])`.",
             "probabilities agree within 1e-6.",
             """np.testing.assert_allclose(tf.nn.softmax(z).numpy(),tf.nn.softmax([0.,-1.]).numpy(),atol=1e-6,rtol=0)""",
             "A common score shift cancels from the normalized distribution. This metamorphic property can catch an implementation that normalizes the wrong axis or clips scores inconsistently.",

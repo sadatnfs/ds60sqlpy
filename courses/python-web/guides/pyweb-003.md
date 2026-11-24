@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-002`.
 
 HTTP methods communicate the intended semantics of an operation. GET retrieves a representation, PUT replaces a target representation, and DELETE removes a target resource under its documented contract. This chapter compares repeated PUT and DELETE requests and separates idempotence from identical response bytes.
 
+## Key terms
+
+- **Safe method:** A method such as GET whose intended semantics are read-only from the client's perspective, even if the server records logs or metrics.
+- **Idempotent method:** A method whose intended effect after several identical requests equals the effect of one request, as with PUT replacement and DELETE removal.
+- **PUT:** A method that stores the complete representation in the request body at the target URL; this example returns 201 when it creates and 200 when it replaces.
+- **DELETE:** A method that removes the target resource; here the first request returns 204 and a repeat returns 404 while the final state stays absent.
+- **204 No Content:** A success status meaning the server fulfilled the request and intentionally sends no response body.
+
 ## Mechanism: method semantics describe effects
 
 A safe method is intended to be read-only from the client's perspective. Servers may still record access logs or metrics. An idempotent method has the same intended effect after multiple identical requests as after one. Safety and idempotence are related but different properties: deletion changes state, yet repeated deletion can leave the same final absence.
@@ -27,6 +35,45 @@ The in-memory dictionary makes the example easy to inspect. It is a temporary fi
 The first DELETE removes item one and returns 204 with an empty body. The second DELETE returns 404 because the item is already absent. After either sequence, the resource is absent. The program checks both the state and the empty 204 body.
 
 Some APIs choose to return 204 for an already absent target as well. That can be a valid documented contract. The important point is that a retry does not create a new destructive side effect or operate on an unrelated resource. Authorization must be checked for each request regardless of whether the method is idempotent.
+
+## Worked example: PUT is idempotent but POST is not
+
+```python
+from flask import Flask, request
+
+app = Flask(__name__)
+records = {}
+
+
+@app.put("/items/<int:item_id>")
+def replace(item_id):
+    created = item_id not in records
+    records[item_id] = request.get_json()
+    return records[item_id], 201 if created else 200
+
+
+@app.post("/items")
+def append():
+    item_id = max(records, default=0) + 1
+    records[item_id] = request.get_json()
+    return {"id": item_id}, 201
+
+
+with app.test_client() as client:
+    print([client.put("/items/5", json={"title": "A"}).status_code for _ in range(3)])
+    print([client.post("/items", json={"title": "B"}).json["id"] for _ in range(3)])
+    print(sorted(records))
+```
+
+Expected output:
+
+```text
+[201, 200, 200]
+[6, 7, 8]
+[5, 6, 7, 8]
+```
+
+Sending the same PUT three times left exactly one record at key 5: the first call created it (201) and the repeats replaced it with an identical value (200). The statuses differ, yet the server state after one call equals the state after three, which is what idempotence means. The POST loop is the contrast: each identical body allocated a fresh identifier, so three retries produced records 6, 7 and 8. A client that retries a timed-out POST can therefore duplicate data, while retrying this PUT is safe. If the PUT handler appended to a list instead of assigning `records[item_id]`, it would stop being idempotent even though the method name stayed PUT.
 
 ## Failure diagnosis
 

@@ -10,13 +10,13 @@ The split prevents direct family identity from crossing the boundary in this fix
 
 ## Exercise 2: Implement exact identifier extraction
 
-A regex that captures the first three digits of TKT-3019 would silently create the wrong identity. Counting matches also prevents an arbitrary first-ID choice in a message containing two tickets. The parser proves format consistency only, not external ticket existence.
+A regex that captures the first three digits of TKT-3019 would silently create the wrong identity. Counting matches also prevents an arbitrary first-ID choice in a message containing two tickets. The parser proves format consistency only, not external ticket existence. Taking only the first match in a message with two tickets would pick one arbitrarily. Run the three malformed inputs and confirm each raises ValueError.
 
 **Expected:** Canonical TKT-301; three malformed/ambiguous cases raise ValueError.
 
 ## Exercise 3: Fit the real classifier and expose OOV
 
-The fitted classifier performs genuine local learning, but an empty feature row contains no lexical evidence. Detecting that condition prevents a prior-based output from masquerading as an informed domain judgment. Preserve this boundary when changing the representation.
+The fitted classifier performs genuine local learning, but an empty feature row contains no lexical evidence. Detecting that condition prevents a prior-based output from masquerading as an informed domain judgment. Preserve this boundary when changing the representation. Letting the classifier return its prior class for the all-OOV message would look like a judgment. Check that the empty feature row maps to unsupported-vocabulary.
 
 **Expected:** Expected labels for represented probes; unsupported-vocabulary for the all-OOV message.
 
@@ -28,7 +28,7 @@ The deterministic filters enforce a separate evidence eligibility contract. The 
 
 ## Exercise 5: Exercise failure paths
 
-Independent perturbations localize the boundary being tested. A category prediction does not override access, and source expiry does not become a classification error. The failure ledger makes the appropriate repair or escalation concrete.
+Independent perturbations localize the boundary being tested. A category prediction does not override access, and source expiry does not become a classification error. The failure ledger makes the appropriate repair or escalation concrete. Change one input at a time, role, time or ticket text, and verify which boundary reports the failure.
 
 **Expected:** Insufficient-evidence for role/time changes; explicit parser failures; no unauthorized or stale quote.
 
@@ -36,7 +36,7 @@ Independent perturbations localize the boundary being tested. A category predict
 
 The handoff should include exact fixtures, code/configuration, observed outputs and unsupported cases. It creates a stable interface for later neural retrieval or generation. Any extension must preserve authorization, freshness and provenance while demonstrating task utility on new independent families.
 
-**Expected:** A reviewer can reproduce parsing,prediction,source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus.
+**Expected:** A reviewer can reproduce parsing, prediction, source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus.
 
 ## Transfer and limits
 

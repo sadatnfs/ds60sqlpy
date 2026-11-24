@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>SVG keeps a DOM node for each mark, making styling and interaction convenient. Canvas draws pixels into one bitmap, which can reduce DOM overhead for many simple marks. Canvas does not automatically provide a separate accessible or interactive element for each point. The author must supply semantics and hit testing.</p>
 <p>A Canvas has a backing resolution and a CSS display size. Device pixel ratio can make a one-to-one backing bitmap look blurry on high-density screens. Scale the backing dimensions and drawing context deliberately while keeping analytical coordinates in the documented logical space.</p>
 <p>Performance depends on data size, transformations, layout, rendering and interactions. Switching to Canvas does not fix an expensive quadratic data algorithm. Measure the slow stage, avoid repeated allocations where appropriate and preserve an accessible data summary or table.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Canvas:</strong> An HTML element that draws into a single pixel bitmap through a 2D context. Its marks are not DOM nodes, so the author must supply semantics and hit testing.</li>
+<li><strong>Device pixel ratio:</strong> The value of <code>window.devicePixelRatio</code>, the number of physical pixels per CSS pixel. Scaling the backing bitmap by it keeps Canvas drawing sharp on dense screens.</li>
+<li><strong>Hit testing:</strong> Finding which mark lies under a pointer position, computed in the same coordinate space used to draw the marks.</li>
+<li><strong>Quadtree:</strong> A <code>d3.quadtree</code> spatial index that recursively divides two-dimensional space so <code>find(x, y)</code> locates the nearest point without scanning every point.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Set canvas.width and height for the backing bitmap, set CSS width and height for display, then transform the context by the device pixel ratio. Draw circles with beginPath, arc and fill. A quadtree can search nearby points efficiently, but its coordinates must match the pointer coordinate space.</p>
 <p>The reference draws a bounded grid of 100 points and performs a known nearest-point lookup. It does not benchmark a million records or claim universal Canvas superiority. The SVG is hidden for this lesson because the output is the Canvas plus a textual summary.</p>

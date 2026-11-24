@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-011.md) and attempt one language first. The [Sc
 
 Implement aboveTen/above_ten returning a Spark Column for amount_cents>10. Do not collect values or return a Python/Scala scalar Boolean.
 
-**Expected:** Passing the predicate to raw.filter retains IDs 2 and 4. In Python, bool(predicate) raises ValueError rather than choosing one row's truth value.
+**Expected:** Passing the predicate to `raw.filter` retains IDs 2 and 4. In Python, bool(predicate) raises ValueError rather than choosing one row's truth value.
 
 ```scala
 def aboveTen(): Column = {
@@ -65,7 +65,7 @@ def missing_ids(frame):
 
 SQL NULL expresses unknown row data and is tested with an engine missingness operator. Equality to a null literal generally produces unknown rather than true, and a driver identity test does not inspect rows at all. The zero counterexample confirms that the implementation preserves a valid observed amount instead of collapsing it with absence.
 
-**Verification evidence:** Assert[3] and separately assert that the zero-amount filter returns [1].
+**Verification evidence:** Assert `[3]` and separately assert that the zero-amount filter returns [1].
 
 ### Exercise 4: Combine conditions with engine operators
 
@@ -104,7 +104,7 @@ The condition remains one composite engine expression rather than several driver
 
 Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without filling NULL or dropping identity. Keep a Long-compatible integer result.
 
-**Expected:** Ordered rows are (1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown.
+**Expected:** Ordered rows are `(1, 1)`, `(2, 21)`, `(3, NULL)`, `(4, 21)`. The two 21 values remain separate events and unknown remains unknown.
 
 ```scala
 def projected(frame: DataFrame): DataFrame = {
@@ -154,4 +154,6 @@ The temporary view provides a name for the same local DataFrame plan inside this
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Construct a predicate without collapsing it to a driver Boolean) is built inside the program, so opening the lesson fetches nothing; it expects: Passing the predicate to `raw.filter` retains IDs 2 and 4. In Python, `bool(predicate)` raises `ValueError` rather than choosing one row's truth value. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

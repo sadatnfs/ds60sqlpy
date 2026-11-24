@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A host timer around an asynchronous launch may measure enqueue latency rather than completed arithmetic. GPU events delimit work in a stream; host end-to-end timing must wait for all work needed by the output. These boundaries answer different questions. Warmup can include context creation, library initialization, compilation and allocator population, so report cold-start cost separately from repeated steady-state samples.</p>
 <p>Use a distribution rather than one flattering minimum. Median summarizes the middle observation, while a tail statistic describes slow requests. Record sample count, workload size, dtype, transfer policy, synchronization and competing load. A speedup should compare equal outputs and equally complete work. This chapter&#x27;s CPU trace arithmetic is deliberately a model: it cannot establish a GPU speedup.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Enqueue latency:</strong> The host time needed to submit work to the device queue, which can be much shorter than the time the work takes to execute.</li>
+<li><strong>GPU event:</strong> A marker recorded in a stream whose timestamps measure elapsed device time between two points.</li>
+<li><strong>Warmup:</strong> Initial runs that absorb one-time costs such as context creation, JIT compilation and allocator growth before timing starts.</li>
+<li><strong>Median timing:</strong> The middle value of repeated measurements, which resists outliers better than a single run or the mean.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A launch returns at 2 microseconds but the output finishes at 102 microseconds. A host timer stopped at return undercounts the operation by a factor of 51.</p>
@@ -215,6 +222,24 @@ submit_us<span class="syntax-punctuation">,</span> finish_us <span class="syntax
 <span class="syntax-keyword">assert</span> finish_us <span class="syntax-operator">/</span> submit_us <span class="syntax-operator">==</span> <span class="syntax-number">51</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU trace analysis: median</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> statistics<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ms; tail</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>samples<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Median 11 ms and maximum 100 ms, from synthetic trace data.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>samples</code></td>
+<td><code>[10, 11, 10, 12, 100]</code></td>
+</tr>
+<tr>
+<td><code>submit_us</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>finish_us</code></td>
+<td><code>102</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
 <p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
@@ -243,17 +268,23 @@ cp<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-identify-the-timing-boundary">Exercise 1: Identify the timing boundary<a class="heading-anchor" href="#exercise-1-identify-the-timing-boundary" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>identify the timing boundary</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Stopping the timer at the return reports 2 microseconds and undercounts by the factor of 51 the reference computes.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-compute-the-median">Exercise 2: Compute the median<a class="heading-anchor" href="#exercise-2-compute-the-median" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>compute the median</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the mean, 28.6 ms, mixes the tail into the center and overstates the typical case by a factor of about 2.6.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-add-transfer-cost">Exercise 3: Add transfer cost<a class="heading-anchor" href="#exercise-3-add-transfer-cost" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>add transfer cost</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting only the kernel interval as latency makes a GPU path look faster than a CPU path that includes its own I/O.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-separate-first-call-compile-time">Exercise 4: Separate first-call compile time<a class="heading-anchor" href="#exercise-4-separate-first-call-compile-time" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>separate first-call compile time</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Discarding the first call without reporting it hides a cost a real user pays at process start.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-equal-work-comparison">Exercise 5: Design equal-work comparison<a class="heading-anchor" href="#exercise-5-design-equal-work-comparison" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design equal-work comparison</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing a float32 GPU run with a float64 CPU run reports a speedup that is partly a precision change.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-why-cpu-trace-is-not-a-benchmark">Exercise 6: Explain why CPU trace is not a benchmark<a class="heading-anchor" href="#exercise-6-explain-why-cpu-trace-is-not-a-benchmark" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>explain why CPU trace is not a benchmark</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Copying the 11 ms median into a report as GPU latency misrepresents a CPU script&#x27;s constant as a hardware result.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

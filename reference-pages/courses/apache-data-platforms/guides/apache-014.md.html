@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-014-language-boundaries-and-flight">apache-014: Language boundaries and Flight<a class="heading-anchor" href="#apache-014-language-boundaries-and-flight" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-012</code>, <code>apache-004</code>, <code>rust-042</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>C Data Interface:</strong> Arrow&#x27;s in-process ABI for passing arrays between languages through C structures. A release callback tells the producer when the consumer no longer needs the buffers.</li>
+<li><strong>IPC interoperability:</strong> Exchanging Arrow data as IPC bytes between independent implementations, here Python Arrow 23 and Rust Arrow 60, which must agree on the schema and data.</li>
+<li><strong>Arrow Flight:</strong> An RPC framework over gRPC that streams Arrow record batches between a client and a server, with descriptors naming datasets and tickets authorizing one retrieval.</li>
+<li><strong>Flight ticket:</strong> An opaque token returned by get_flight_info that the client presents to do_get to stream the data. The workshop server rejects every ticket it did not issue.</li>
+</ul>
 <h3 id="interchange-is-a-contract-between-independently-owned-processes">Interchange is a contract between independently owned processes<a class="heading-anchor" href="#interchange-is-a-contract-between-independently-owned-processes" aria-label="Link to this section">#</a></h3>
 <p>Arrow describes typed columnar memory and related interchange protocols. It is not itself a database, transaction manager or durable catalog. The C Data Interface exposes arrays across an in-process language boundary with explicit ownership and release callbacks. Arrow IPC serializes batches for a file or stream. Flight transfers Arrow data through RPC. They solve related problems at different boundaries and should not all be described as the same zero-copy mechanism.</p>
 <p>A reference-counted buffer can be shared inside one process without copying its values, but crossing a process or network boundary can require serialization, framing, transport buffers and allocations. A compatible representation can reduce conversion cost without eliminating every copy. Claims about copy counts require measurements at the specific boundary, not just the presence of an Arrow type.</p>

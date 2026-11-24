@@ -99,7 +99,7 @@ go func() { ch <- fmt.Sprintf("ready:%d", 3) }()
 check(<-ch == "ready:3", "result")
 ```
 
-**Expected:** The reader receives ready:3.
+**Expected:** The reader receives `ready:3`.
 
 Keeping construction state local simplifies the argument compared with exposing several partially updated shared fields.
 

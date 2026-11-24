@@ -16,6 +16,14 @@ Loopback refers to the local network namespace. `127.0.0.1` inside a container p
 
 The wildcard address `0.0.0.0` is a listening choice, not a browser destination. Binding a published port to host loopback reduces accidental exposure to other machines. The real boundary also depends on the engine, host firewall and platform networking, so do not describe a port mapping as an authentication system.
 
+### Key terms
+
+- **Port publishing:** Mapping a host address and port to a container port so host traffic can reach a container listener.
+- **Loopback address:** An address such as 127.0.0.1 that points back to the same network namespace, so inside a container it means that container.
+- **Bind address:** The address a server listens on; 0.0.0.0 accepts connections on every interface in its own namespace.
+- **Host port:** The host side of a mapping, such as port 18080 bound to 127.0.0.1 for the fixture.
+- **Container port:** The port the application listens on inside its container, such as 8080 for the fixture.
+
 ## Anatomy and a trace you can follow
 
 Read `127.0.0.1:18080:8080` as host address, host port and container port. A browser on the host requests `http://127.0.0.1:18080/`. A peer container on the same Compose network requests `http://app:8080/` using service discovery. They reach the same application through different paths.
@@ -64,7 +72,7 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 **Hint:** Read 127.0.0.1:18080:8080 from left to right as host address, host port and container port.
 
-### Exercise 2: Predict whether localhost:18080 inside app reaches the host browser endpoint.
+### Exercise 2: Predict whether `localhost:18080` inside app reaches the host browser endpoint.
 
 **Hint:** Ask whose loopback interface localhost means inside the container.
 
@@ -88,11 +96,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Binding the server to 127.0.0.1 inside the container, so the published port cannot reach it. Publishing on all host interfaces when loopback is enough. Using `localhost` in one container to reach another.
 
-Exercise 4 is this chapter's boundary case: Diagnose a server bound to container 127.0.0.1 only. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a server bound to container 127.0.0.1 only. Check which address the server binds inside the container, `127.0.0.1` or `0.0.0.0`, before editing the published mapping or the browser URL. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using port publishing, loopback address, bind address, host port and container port. Reconstruct worked example 2 (Compare two destinations) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Trace a host request to `127.0.0.1:18080` and a peer request to `app:8080` without looking at the diagram. Then reconstruct worked example 2 (Compare two destinations) with one different value, predict what changes, and name which of port publishing, loopback address, bind address, host port and container port the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

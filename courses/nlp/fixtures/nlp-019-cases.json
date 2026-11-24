@@ -14,22 +14,22 @@
     {
       "exercise": 3,
       "task": "Calculate the hundred-item prevalence counterexample.",
-      "expected": "Raw agreement.98 but kappa slightly below zero."
+      "expected": "Raw agreement .98 but kappa slightly below zero."
     },
     {
       "exercise": 4,
       "task": "Compute proportions and entropy for the three three-rater rows.",
-      "expected": "Soft labels[2/3,1,0]; positive entropy only for the disputed row."
+      "expected": "Soft labels [2/3, 1, 0]; positive entropy only for the disputed row."
     },
     {
       "exercise": 5,
       "task": "Create a final-label record without changing the independent ratings.",
-      "expected": "Original(1,1,0),final label1,rationale and item identity retained."
+      "expected": "Original (1, 1, 0), final label 1, rationale and item identity retained."
     },
     {
       "exercise": 6,
       "task": "Evaluate two identical all-positive arrays and design a follow-up annotation sample.",
-      "expected": "Raw agreement1,kappa undefined/None; follow-up includes rare and ambiguous categories."
+      "expected": "Raw agreement 1, kappa undefined/None; follow-up includes rare and ambiguous categories."
     }
   ]
 }

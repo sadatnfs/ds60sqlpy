@@ -28,6 +28,8 @@ An in-place transformation can be correct only under assumptions about which inp
 
 Print small shapes and selected elements before running a large numerical routine. A transposed matrix may have the same element count while representing a different computation. A vector and a one-column matrix also have different shapes. Later broadcasting and linear-algebra units use these distinctions explicitly.
 
+When an index error appears, print `size(A)`, `axes(A)` and the index that failed. Compare the failing index with each axis range in turn. Most mistakes turn out to be a swapped row and column, a zero-based offset copied from another language, or a vector used where a one-column matrix was expected.
+
 Keep array bounds checks while learning and testing a contract. Removing them can turn a clear indexing exception into incorrect or unsafe behavior. If performance later motivates a lower-level implementation, establish its indexing invariants independently first.
 
 The examples verify concrete storage-sharing and shape properties. They do not claim that views are always faster than copies. Access patterns, specialization and repeated reuse can affect performance, so compare semantically equivalent implementations under a measured workload.

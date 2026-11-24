@@ -3,6 +3,28 @@
   "title": "Parametric types and generic numerical code",
   "concepts": ["parametric type", "where", "invariance", "AbstractVector", "type stability"],
   "outcome": "Express useful type relationships without confusing subtype relations, storage representation or a method signature.",
+  "key_terms": [
+    [
+      "Parametric type",
+      "A type with parameters, such as `Point{T}`, where each concrete instance like `Point{Float64}` is a distinct type."
+    ],
+    [
+      "where clause",
+      "Syntax such as `where {T<:Real}` that introduces a type variable and bounds the types a method accepts."
+    ],
+    [
+      "Parametric invariance",
+      "A `Vector{Float64}` is not a subtype of `Vector{Real}`, even though `Float64` is a subtype of `Real`."
+    ],
+    [
+      "AbstractVector",
+      "The supertype of vectors, ranges and views, so methods annotated with it accept more containers than `Vector` does."
+    ],
+    [
+      "Type stability",
+      "A function is type stable when its argument types determine one concrete return type, which lets the compiler specialize it."
+    ]
+  ],
   "level": "intermediate",
   "minutes": 150,
   "prerequisites": ["julia-011"],
@@ -11,48 +33,68 @@
     ["Julia parametric methods", "https://docs.julialang.org/en/v1/manual/methods/"]
   ],
   "figure": 0,
+  "approach": "`typed_total` is parametric in `T<:Real` and starts from `zero(T)`, so integers, rationals, `Float32` and `BigInt` keep their own representation. Parametric containers are invariant, so `Vector{Float64}` is not a `Vector{Real}`; the signature `AbstractVector{<:Real}` expresses the intended family instead.",
   "exercises": [
     {
       "title": "Preserve a rational",
       "task": "Sum 1//3 and 2//3.",
       "expected": "The result is exactly 1//1.",
       "hint": "Use a compatible zero and arithmetic.",
-      "answer": "A hardcoded floating accumulator would change the representation contract."
+      "answer": "A hardcoded floating accumulator would change the representation contract.",
+      "why": "With `T = Rational{Int}`, the accumulator starts at `0//1` and adds 1//3 and 2//3 exactly to get `1//1`.",
+      "wrong": "Initializing `total = 0.0` converts the sum to `Float64`, so the result is approximately 1.0 and no longer rational.",
+      "verify": "Example A asserts `typed_total([1//3, 2//3]) == 1//1`; also check `typeof` of the result is `Rational{Int}`."
     },
     {
       "title": "Handle an empty concrete vector",
       "task": "Sum `Int[]`.",
       "expected": "The explicit additive identity is 0.",
       "hint": "The element type supplies `zero(T)`.",
-      "answer": "This empty-input policy is valid for this additive operation, not every statistic."
+      "answer": "This empty-input policy is valid for this additive operation, not every statistic.",
+      "why": "`Int[]` still has element type `Int`, so `zero(Int)` is returned without the loop running, giving 0.",
+      "wrong": "Using `values[1]` as the initial total fails on an empty vector, and applying the same identity idea to a mean would be wrong.",
+      "verify": "Example A asserts `typed_total(Int[]) == 0`."
     },
     {
       "title": "Inspect invariance",
       "task": "Test whether Vector{Float64} is a subtype of Vector{Real}.",
       "expected": "It is not.",
       "hint": "Compare exact container parameters with a family constraint.",
-      "answer": "The two vector types have different representation and mutation contracts."
+      "answer": "The two vector types have different representation and mutation contracts.",
+      "why": "Invariance means `Vector{Float64} <: Vector{Real}` is false, since a `Vector{Real}` could store any real and a `Float64` vector cannot.",
+      "wrong": "Assuming covariance, as with Python type hints for read-only sequences, predicts true and leads to signatures that reject float vectors.",
+      "verify": "Example B asserts `!(Vector{Float64} <: Vector{Real})` and `Vector{Float64} <: AbstractVector{<:Real}`."
     },
     {
       "title": "Accept a useful family",
       "task": "Use AbstractVector{<:Real} in a method signature.",
       "expected": "Concrete real vectors can be accepted.",
       "hint": "Express the intended family without forcing a conversion.",
-      "answer": "A suitable signature can preserve generic behavior and avoid unnecessary restrictions."
+      "answer": "A suitable signature can preserve generic behavior and avoid unnecessary restrictions.",
+      "why": "`accepts_reals(values::AbstractVector{<:Real})` accepts `[1//2]` because `Rational{Int}` is a subtype of `Real`, returning its length 1.",
+      "wrong": "Annotating the parameter as `Vector{Real}` rejects nearly all concrete vectors, forcing callers to convert data first.",
+      "verify": "The reference asserts `accepts_reals([1//2]) == 1`."
     },
     {
       "title": "Reject unrelated elements",
       "task": "Pass a vector of strings to the real-vector method.",
       "expected": "A MethodError occurs.",
       "hint": "The domain constraint is meaningful here.",
-      "answer": "Broadening a signature requires defining the corresponding arithmetic or behavior."
+      "answer": "Broadening a signature requires defining the corresponding arithmetic or behavior.",
+      "why": "`String` is not a subtype of `Real`, so no method matches a string vector and Julia raises `MethodError`.",
+      "wrong": "Widening the signature to `AbstractVector` makes the call succeed until `+` or `zero` fails deeper inside.",
+      "verify": "The reference asserts `@test_throws MethodError accepts_reals([\"text\"])`."
     },
     {
       "title": "Connect to differentiation",
       "task": "Explain why an output buffer should not always be Float64.",
       "expected": "It may discard or reject another numeric representation.",
       "hint": "Type relationships can carry derivative information.",
-      "answer": "Generic arithmetic is needed for methods such as forward-mode differentiation, subject to their own supported-operation contract."
+      "answer": "Generic arithmetic is needed for methods such as forward-mode differentiation, subject to their own supported-operation contract.",
+      "why": "Forward-mode automatic differentiation passes dual numbers through the same arithmetic, and a `zeros(Float64, n)` buffer cannot hold them.",
+      "wrong": "Hardcoding `Float64` output storage either throws on dual inputs or strips their derivative part, making the gradient wrong or absent.",
+      "verify": "Show `typed_total(Float32[1, 2]) isa Float32` and `typed_total(BigInt[1, 2]) == 3` from the reference as evidence that generic code preserves type."
     }
-  ]
+  ],
+  "checks_note": "`typed_total(Float32[1, 2]) isa Float32` shows that starting from `zero(eltype(values))` keeps the element type, and the `BigInt` case shows the same code serving arbitrary precision. `accepts_reals` takes a rational and rejects text by dispatch, because `String` is not a `Real`. The two concreteness lines separate an abstract container type, `AbstractVector{Float64}`, which suits signatures, from `Vector{Float64}`, which suits stored fields. Together these lines cover the three questions the lesson asks of every signature: what result type comes back, which argument types are accepted, and which are refused before any work starts. A version that started the total at the integer literal 0 would return `Float64` for `Float32` input after promotion, or keep `Int` where a `BigInt` sum was needed."
 }

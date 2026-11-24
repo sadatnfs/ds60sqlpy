@@ -1,6 +1,6 @@
 # llm-012: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these greedy decoding, temperature and sampling answers after attempting *Predict a hotter distribution* through *Reject invalid draws*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Use fixed draws* points to one step. `llm-012_solution.py` holds the assertions; this page explains how they test greedy decoding. Then try *Reject invalid draws* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -32,7 +32,7 @@ assert hot[2] < base[2] and hot[3] > base[3]
 
 **Expected:** greedy token 2; at temperature 2 its probability falls, token 3 gains mass and the argmax stays 2.
 
-**Verify:** In a fresh process, the exercise checks confirm `int(np.argmax(scores2)) == 2`, `base.argmax() == hot.argmax() == 2`, `hot[2] < base[2]` and `hot[3] > base[3]`.
+**Verify:** For *Predict a hotter distribution*, a fresh-process check confirms `int(np.argmax(scores2)) == 2`, `base.argmax() == hot.argmax() == 2`, `hot[2] < base[2]` and `hot[3] > base[3]`.
 
 ## Exercise 2: Compute an exact two-token probability
 
@@ -49,7 +49,7 @@ np.testing.assert_allclose(sharp[0], 1 / (1 + np.exp(-2)), atol=1e-12, rtol=0)
 
 **Expected:** token 0 probability \(1/(1+e^{-1})\approx 0.731\) at temperature 1 and \(1/(1+e^{-2})\approx 0.881\) at temperature 0.5.
 
-**Verify:** In a fresh process, the exercise checks confirm `pair[0]` matches `1 / (1 + np.exp(-1))` within 1e-12 and `sharp[0]` matches `1 / (1 + np.exp(-2))` within 1e-12.
+**Verify:** For *Compute an exact two-token probability*, a fresh-process check confirms `pair[0]` matches `1 / (1 + np.exp(-1))` within 1e-12 and `sharp[0]` matches `1 / (1 + np.exp(-2))` within 1e-12.
 
 ## Exercise 3: Use fixed draws
 
@@ -65,7 +65,7 @@ assert [int(np.searchsorted(cumulative, d, side="right")) for d in [0.1, 0.6, 0.
 
 **Expected:** tokens 0, 1, 2.
 
-**Verify:** In a fresh process, the exercise checks confirm `[int(np.searchsorted(cumulative, d, side='right')) for d in [0.1, 0.6, 0.9]] == [0, 1, 2]`.
+**Verify:** For *Use fixed draws*, a fresh-process check confirms `[int(np.searchsorted(cumulative, d, side='right')) for d in [0.1, 0.6, 0.9]] == [0, 1, 2]`.
 
 ## Exercise 4: Retain two candidates
 
@@ -83,7 +83,7 @@ np.testing.assert_allclose(filtered.sum(), 1, atol=1e-12, rtol=0)
 
 **Expected:** token 2 probability 0; first two sum 1.
 
-**Verify:** In a fresh process, the exercise checks confirm `filtered[2] == 0` and `filtered.sum()` matches `1` within 1e-12.
+**Verify:** For *Retain two candidates*, a fresh-process check confirms `filtered[2] == 0` and `filtered.sum()` matches `1` within 1e-12.
 
 ## Exercise 5: Declare ties
 
@@ -97,7 +97,7 @@ assert int(np.argmax([1, 1, 0])) == 0
 
 **Expected:** token 0 under the stated rule.
 
-**Verify:** In a fresh process, the exercise checks confirm `int(np.argmax([1, 1, 0])) == 0`.
+**Verify:** For *Declare ties*, a fresh-process check confirms `int(np.argmax([1, 1, 0])) == 0`.
 
 ## Exercise 6: Reject invalid draws
 
@@ -124,8 +124,8 @@ for bad in [1, -0.1]:
 
 **Expected:** 0 and 0.999 accepted; 1 and -0.1 rejected.
 
-**Verify:** In a fresh process, the exercise checks confirm `validate_draw(0) == 0`; `validate_draw(0.999) == 0.999` and for every `bad` in `[1, -0.1]`, `validate_draw(bad)` raises `ValueError`.
+**Verify:** For *Reject invalid draws*, a fresh-process check confirms `validate_draw(0) == 0`; `validate_draw(0.999) == 0.999` and for every `bad` in `[1, -0.1]`, `validate_draw(bad)` raises `ValueError`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Retain two candidates* and predict the result first; keep *Reject invalid draws* failing beside the repair. Log a missing NumPy separately from a wrong greedy decoding value in `llm-012`.

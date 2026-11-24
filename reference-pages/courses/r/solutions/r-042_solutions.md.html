@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Derive the sample mean and estimated SE for c(2,4,6,8).</p>
 <p>The mean is 5; sample variance 20/3; estimated SE is sqrt(5/3).</p>
 <p><strong>Expected evidence:</strong> Mean 5, SE squared 5/3.</p>
+<p><strong>Approach:</strong> Compute the sample variance with the n minus 1 divisor, divide it by n for the variance of the mean, and take the square root.</p>
+<p><strong>Why it holds here:</strong> The deviations from 5 are -3, -1, 1 and 3, whose squares sum to 20. Dividing by 3 gives 20/3, dividing again by 4 gives 5/3, so the standard error is about 1.29.</p>
+<p><strong>Tempting mistake:</strong> Dividing the squared deviations by n, which gives 5 and an SE squared of 5/4. That is the bootstrap&#x27;s plug-in variance, not the sample estimate this lesson asks for.</p>
+<p><strong>Verify:</strong> <code>isTRUE(all.equal(mean_se(x)^2, 5 / 3))</code> returns TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add three to every observation and compare the estimate and SE.</p>
 <p>The mean becomes 8 while the standard error is unchanged.</p>
 <p><strong>Expected evidence:</strong> Mean 8; same SE.</p>
+<p><strong>Approach:</strong> Shift every value by 3 and recompute both the mean and the standard error.</p>
+<p><strong>Why it holds here:</strong> x + 3 is 5, 7, 9 and 11. The mean moves to 8, but each deviation from the mean is still -3, -1, 1 or 3, so sd, and therefore the SE, are unchanged.</p>
+<p><strong>Tempting mistake:</strong> Expecting the SE to grow because the mean grew, as if uncertainty were a fixed share of the estimate. Multiplying by 3, not adding 3, is what would triple the SE.</p>
+<p><strong>Verify:</strong> <code>mean(x + 3) == 8</code> returns TRUE and <code>isTRUE(all.equal(mean_se(x + 3), mean_se(x)))</code> returns TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Enumerate all four-draw bootstrap samples and verify their conditional variance.</p>
 <p>The empirical variance is 5 and four independent draws produce mean variance 5/4.</p>
 <p><strong>Expected evidence:</strong> 256 means; conditional variance 1.25.</p>
+<p><strong>Approach:</strong> Enumerate all 4^4 = 256 ordered index tuples with expand.grid, weight each one equally, and divide the squared deviations of their means by 256.</p>
+<p><strong>Why it holds here:</strong> Every ordered draw is equally likely, so these 256 means are the complete bootstrap distribution. Its center is 5 and its variance is the plug-in variance 5 divided by 4 draws, which is 1.25.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>var(means)</code>, which divides by 255 and returns about 1.255, as if the 256 values were a sample. Listing only the 35 unordered multisets with equal weight is also wrong, because 2, 2, 2, 2 arises once while a mix of four different values arises 24 times.</p>
+<p><strong>Verify:</strong> <code>length(means)</code> returns 256, and <code>mean((means - 5)^2)</code> returns 1.25 within all.equal.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose dividing the observation standard deviation by n instead of sqrt(n).</p>
 <p>The wrong formula shrinks uncertainty too quickly. For n4 it is half the correct SE.</p>
 <p><strong>Expected evidence:</strong> Wrong SE equals correct SE/2.</p>
+<p><strong>Approach:</strong> Divide the standard deviation by the square root of n.</p>
+<p><strong>Why it holds here:</strong> With n = 4 the square root is 2, so the correct SE is sd/2, about 1.29, while sd/4 is about 0.65. The variance of a mean shrinks with n, so its standard deviation shrinks with the square root of n.</p>
+<p><strong>Tempting mistake:</strong> Using <code>sd(x) / length(x)</code>. Here it halves the SE, and with 100 observations it would be ten times too small, giving intervals far narrower than the data support.</p>
+<p><strong>Verify:</strong> <code>isTRUE(all.equal(sd(x) / length(x), mean_se(x) / 2))</code> returns TRUE.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>State a policy for estimating this SE from zero or one observation.</p>
 <p>Reject the request explicitly instead of presenting NA as a successful uncertainty estimate.</p>
 <p><strong>Expected evidence:</strong> A defined error for count below 2.</p>
+<p><strong>Approach:</strong> Stop with a clear message when fewer than two finite values are supplied.</p>
+<p><strong>Why it holds here:</strong> The sample variance divides by n minus 1, which is 0 for one value, so <code>sd(1)</code> returns NA. One observation carries no information about spread.</p>
+<p><strong>Tempting mistake:</strong> Returning NA or 0 so the code keeps running. An NA SE turns the interval into NA, NA without saying why, and 0 claims perfect certainty from a single reading.</p>
+<p><strong>Verify:</strong> <code>inherits(try(mean_se(1), silent = TRUE), &quot;try-error&quot;)</code> returns TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Compare a Student t mean interval with a percentile interval from the exact bootstrap distribution.</p>
 <p>Both describe uncertainty of a mean under different procedures; their agreement or disagreement on this fixture does not establish population coverage or a future-observation prediction interval.</p>
 <p><strong>Expected evidence:</strong> Correctly labeled intervals with declared quantile convention.</p>
+<p><strong>Approach:</strong> Label each interval by its procedure and target before comparing endpoints: a t interval for the mean, and percentile limits of the exact bootstrap distribution.</p>
+<p><strong>Why it holds here:</strong> The t interval is 5 plus or minus qt(0.975, 3) times about 1.29, roughly 0.89 to 9.11. The bootstrap limits are 3 and 7, because the 7th and 8th smallest of the 256 means are both 3. The bootstrap uses the smaller plug-in variance and no t correction for 3 degrees of freedom.</p>
+<p><strong>Tempting mistake:</strong> Preferring the bootstrap interval because it is narrower, or claiming either has 95 percent coverage. With 4 values, the percentile method is known to be too narrow, and one fixture cannot check coverage.</p>
+<p><strong>Verify:</strong> The printed list shows <code>t_mean_interval</code> near 0.89 and 9.11 and <code>exact_empirical_percentile</code> at 3 and 7.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 7 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

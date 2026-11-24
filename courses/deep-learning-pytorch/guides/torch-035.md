@@ -143,7 +143,7 @@ assert (
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The paired differences are -1, 0, -1 with mean \(\frac{-2}{3}\) favoring model A, all 1000 bootstrap means lie in [-1, 0], reseeding with 7 replays the same indices, and a missing ID is rejected before comparison. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Align predictions by ID. Predict exercise 6, Preserve a final-test boundary, from its prompt alone: Record configuration choice on validation and assessment on test; flag a test-driven new choice. Then explain why this finish condition holds: The paired differences are -1, 0, -1 with mean \(\frac{-2}{3}\) favoring model A, all 1000 bootstrap means lie in [-1, 0], reseeding with 7 replays the same indices, and a missing ID is rejected before comparison. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -179,15 +179,15 @@ If an unpaired method gives different uncertainty, inspect the covariance and re
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Interpret the average contrast) alters one assumption of Example A (Align predictions by ID). Hint 2: exercise 4, Replay the local random stream, should end at exact match. Work backward from it. Hint 3: exercise 5, Reject missing assessment identities, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Paired difference, Resampling unit, Selection bias using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Resample pairs reproducibly, from its inputs alone. Predict whether exercise 3, Bound the new bootstrap means, survives one changed input. Then explain Paired difference, Resampling unit, Selection bias in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-034` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Align predictions by ID) cannot be rebuilt without help, revisit `torch-034` first. Otherwise keep your exercise 2 attempt, Interpret the new mean contrast, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

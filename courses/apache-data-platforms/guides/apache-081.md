@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-020`, `apache-044`.
 
+## Key terms
+
+- **Batch lakehouse:** A path combining Parquet files, an Iceberg table commit and a query engine to publish a reproducible batch result.
+- **Snapshot identifier:** The Iceberg snapshot ID that fixes exactly which data files a batch result read.
+- **Source identity:** The recorded fixture, schema, catalog and table identities that bind a result to its exact inputs.
+- **Arrow bridge:** Materializing a selected snapshot as an Arrow table for DataFusion. It does not prove that a direct Spark or Iceberg connector ran.
+- **Identity dossier:** The receipt pairing source, snapshot, reader versions and exact result so another contributor can reproduce and check the batch.
+
 ## A reproducible batch product names its inputs and commit
 
 A batch lakehouse path can combine Arrow interchange, an Iceberg table and a
@@ -75,6 +83,39 @@ A defined input/schema/catalog/snapshot contract, compatible reader versions and
 independent result identity. The two cases bind one committed batch and then
 show exactly which refresh changes the answer, while keeping the prepared
 Spark connector claim separate.
+
+## Worked examples
+
+### Run the batch into a new output directory
+
+```bash
+cd work/integration
+bash run.sh batch batch-1
+cat .workshop/batch-1/receipt.json
+```
+
+run.sh refuses an output name that already exists, so each run leaves a separate receipt. The receipt lists two snapshot IDs, the original totals east 11 and west 9, and current totals east 11 and west 11 after the correction row. A second run must use batch-2; reusing a name would overwrite evidence that a reviewer may still need.
+
+### A content digest for the declared input
+
+```python
+import hashlib
+import json
+
+rows = [
+    {"id": 1, "region": "east", "amount": 4},
+    {"id": 2, "region": "west", "amount": 9},
+    {"id": 3, "region": "east", "amount": 7},
+]
+encoded = json.dumps(rows, sort_keys=True, separators=(",", ":")).encode()
+print(hashlib.sha256(encoded).hexdigest()[:16])
+```
+
+```text
+fe0fffef33dcfb0d
+```
+
+This mirrors logical_digest in batch_snapshot.py. Sorting keys and fixing separators makes the digest depend on values, not on formatting, so two runs over the same logical input agree even if the file layout differs. If a later batch reports a different source digest while claiming the same input, someone changed the data and the comparison between runs is invalid.
 
 ## Complete worked source
 

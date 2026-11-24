@@ -38,6 +38,12 @@
       "code": "instant <- as.POSIXct(\"2025-01-15 12:00:00\", format = \"%Y-%m-%d %H:%M:%S\", tz = \"UTC\")\nlater <- instant + 90 * 60\nstopifnot(as.numeric(difftime(later, instant, units = \"mins\")) == 90)\nstopifnot(format(instant, \"%H:%M\", tz = \"UTC\") == \"12:00\")\nstopifnot(format(instant, \"%H:%M\", tz = \"America/New_York\") == \"07:00\")\nprint(c(utc = format(instant, tz = \"UTC\"), new_york = format(instant, tz = \"America/New_York\")))\n",
       "explanation": "Changing the display zone does not change the underlying instant. The elapsed interval is calculated between instants, not by subtracting printed clock strings.",
       "expected": "12:00 UTC and 07:00 NewYork; elapsed 90 minutes."
+    },
+    {
+      "title": "A clock day that lasts eleven hours",
+      "code": "zone <- \"America/New_York\"\nmidnight <- as.POSIXct(\"2025-03-09 00:00\", format = \"%Y-%m-%d %H:%M\", tz = zone)\nnoon <- as.POSIXct(\"2025-03-09 12:00\", format = \"%Y-%m-%d %H:%M\", tz = zone)\nelapsed <- as.numeric(difftime(noon, midnight, units = \"hours\"))\nstopifnot(elapsed == 11)\nstopifnot(format(midnight, \"%Z\") == \"EST\", format(noon, \"%Z\") == \"EDT\")\nstopifnot(format(noon, \"%H:%M\", tz = \"UTC\") == \"16:00\")\nprint(c(elapsed_hours = elapsed))\n",
+      "explanation": "The two clock labels are twelve hours apart, yet only eleven hours passed, because on that Sunday New York clocks jumped from 02:00 straight to 03:00. Both labels exist, so both parse, and R stores each one as an instant: midnight EST is 05:00 UTC and noon EDT is 16:00 UTC. difftime subtracts those stored instants and reports 11. Subtracting the hour fields of the printed strings would report 12, so a shift length or a billing total computed that way overcounts by one hour for every record that spans the change. The %Z checks make the offset switch visible.",
+      "expected": "elapsed_hours 11, with the zone label changing from EST to EDT."
     }
   ],
   "exercises": [

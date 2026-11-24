@@ -70,11 +70,11 @@ The first argument list supplies the starting accumulator; the second supplies t
 
 ### Exercise 1: Retain observed zero and repeated values
 
-Implement a nonnegative filter for Seq(100L, -5L, 0L, 100L, 25L). Preserve input order and duplicate values. An empty input should remain empty.
+Implement a nonnegative filter for `Seq(100L, -5L, 0L, 100L, 25L)`. Preserve input order and duplicate values. An empty input should remain empty.
 
-**Expected result/shape:** The result is Seq(100L, 0L, 100L, 25L), with four occurrences. Both 100-cent entries and the zero remain.
+**Expected result/shape:** The result is `Seq(100L, 0L, 100L, 25L)`, with four occurrences. Both 100-cent entries and the zero remain.
 
-**Verify:** Assert the exact sequence and confirm the original five-element sequence is unchanged; also assert accepted(Seq.empty) is empty.
+**Verify:** Assert the exact sequence and confirm the original five-element sequence is unchanged; also assert accepted (Seq.empty) is empty.
 
 **Progressive hint:** Compare the policy nonnegative with strictly positive before choosing the comparison operator.
 
@@ -92,7 +92,7 @@ Split every input amount into accepted nonnegative and rejected negative sequenc
 
 For nonnegative Long amounts, return integer-cent five-percent fees rounded down. Reject a negative amount with IllegalArgumentException. Avoid multiplying by five before division, which could overflow on a very large Long.
 
-**Expected result/shape:** Seq(100L, 0L, 100L, 25L) maps to Seq(5L, 0L, 5L, 1L). Long.MaxValue maps safely to Long.MaxValue/20L.
+**Expected result/shape:** `Seq(100L, 0L, 100L, 25L)` maps to `Seq(5L, 0L, 5L, 1L)`. Long.MaxValue maps safely to Long.MaxValue/20L.
 
 **Verify:** Assert the exact four fees, the maximum-Long case and rejection of Seq(-1L).
 
@@ -100,19 +100,19 @@ For nonnegative Long amounts, return integer-cent five-percent fees rounded down
 
 ### Exercise 4: Fold count and total together
 
-Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns (0L, 0L); an overflowing total raises ArithmeticException.
+Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns `(0L, 0L)`; an overflowing total raises ArithmeticException.
 
-**Expected result/shape:** The accepted fixture returns (4L, 225L), while Seq(Long.MaxValue,1L) is rejected by checked addition.
+**Expected result/shape:** The accepted fixture returns `(4L, 225L)`, while `Seq(Long.MaxValue, 1L)` is rejected by checked addition.
 
 **Verify:** Assert the two-component result, the empty identity and the overflow exception independently.
 
-**Progressive hint:** A fold accumulator can be a tuple matched as(count, total) in each update.
+**Progressive hint:** A fold accumulator can be a tuple matched as (count, total) in each update.
 
 ### Exercise 5: Represent multiplicity in a Map
 
 Return a map from amount to occurrence count without discarding repeated values. Compare maps by keys and counts rather than assuming iteration order. Empty input returns an empty map.
 
-**Expected result/shape:** The accepted fixture yields Map(100L->2L, 0L->1L, 25L->1L); the sum of counts is four.
+**Expected result/shape:** The accepted fixture yields `Map(100L->2L, 0L->1L, 25L->1L)`; the sum of counts is four.
 
 **Verify:** Assert exact map equality and reconcile all map counts to the accepted sequence size.
 
@@ -120,9 +120,9 @@ Return a map from amount to occurrence count without discarding repeated values.
 
 ### Exercise 6: Transfer the bag contract to grouped reporting
 
-Given group/amount pairs, reject blank group labels, retain nonnegative amount occurrences and return per-group(count, total) using checked summary. Groups with only rejected amounts are absent from the accepted report and remain explainable through the rejection policy.
+Given group/amount pairs, reject blank group labels, retain nonnegative amount occurrences and return per-group (count, total) using checked summary. Groups with only rejected amounts are absent from the accepted report and remain explainable through the rejection policy.
 
-**Expected result/shape:** A100, A100, B0, B25, C-5 yields A:(2,200), B:(2,25). Report counts sum to four and totals to 225; a blank label is rejected even on a negative row.
+**Expected result/shape:** A100, A100, B0, B25, C-5 yields `A:(2, 200)`, `B:(2, 25)`. Report counts sum to four and totals to 225; a blank label is rejected even on a negative row.
 
 **Verify:** Assert the complete map, both global reconciliations and the blank-label failure before filtering can hide it.
 

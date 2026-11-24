@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A stylesheet is easier to change when responsibilities are visible. Base rules describe document defaults, component rules describe reusable structures, and narrowly named utilities make deliberate local adjustments. These categories are a design choice, not a browser feature by themselves. Cascade layers let authors establish an explicit ordering among groups of declarations without continually increasing selector specificity.</p>
 <p>For normal author declarations, later layers take priority over earlier layers, and unlayered normal declarations have priority over layered normal declarations. Important declarations reverse layer priority, which is one reason indiscriminate important usage makes reasoning harder. A good architecture keeps selectors understandable and limits the area a change can affect.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Cascade layer:</strong> A named <code>@layer</code> group of rules; for normal declarations, a later layer wins over an earlier one regardless of specificity.</li>
+<li><strong>Unlayered declaration:</strong> A normal declaration outside every layer, which takes priority over all layered normal declarations.</li>
+<li><strong>Utility:</strong> A narrowly named single-purpose class for a deliberate local adjustment, usually placed in the last layer.</li>
+<li><strong>Native CSS nesting:</strong> Writing a rule inside its parent rule, where <code>&amp;</code> stands for the parent selector, such as <code>&amp;:hover</code>.</li>
+<li><strong>Where pseudo-class:</strong> The <code>:where()</code> wrapper, which gives its selector zero specificity so later rules can override it easily.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Declare the layer order once with <code>@layer base, components, utilities</code>. Put actual rules inside those layers. Native CSS nesting keeps a component&#x27;s states next to its base rule: inside <code>.note { ... }</code>, the nested <code>&amp;:hover { ... }</code> means <code>.note:hover</code>. Wrapping a selector in <code>:where()</code> sets its specificity to zero, so <code>:where(.note) a</code> is easy for a later component or utility rule to override. Keep component names tied to a useful responsibility such as lesson-card, not a visual accident such as left-blue-box. Test a component in more than one surrounding context to expose accidental ancestor dependencies.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -231,6 +239,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The utility overrides earlier normal layered color declarations.</p>
+<h3 id="contrast-case-an-unlayered-selector-beating-a-layered-component">Contrast case: an unlayered selector beating a layered component<a class="heading-anchor" href="#contrast-case-an-unlayered-selector-beating-a-layered-component" aria-label="Link to this section">#</a></h3>
+<p>Someone adds a quick fix outside every layer. Predict the color of <code>.note</code> paragraphs before inspecting.</p>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">base</span><span class="syntax-operator">,</span> <span class="syntax-tag">components</span><span class="syntax-operator">,</span> <span class="syntax-tag">utilities</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">components</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#0753a4</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-comment">/* quick fix, added outside any layer */</span>
+<span class="syntax-tag">p</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#172033</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>For normal declarations, unlayered author styles rank above every named layer, and layer order is compared before specificity. The class selector <code>.note</code> is more specific than the type selector <code>p</code>, but that comparison never happens: the unlayered <code>p</code> rule wins, so note paragraphs turn #172033. Moving the quick fix into <code>@layer base</code> restores the intended outcome, because base is declared first and components now outranks it. The Styles panel lists the losing <code>.note</code> declaration as struck through, which is the evidence to look for.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-the-layer-winner-for-normal-declarations">Exercise 1: Predict the layer winner for normal declarations.<a class="heading-anchor" href="#exercise-1-predict-the-layer-winner-for-normal-declarations" aria-label="Link to this section">#</a></h4>

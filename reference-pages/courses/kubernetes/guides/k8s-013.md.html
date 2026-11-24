@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A rollout changes a Deployment&#x27;s Pod template and reconciles toward a new ReplicaSet revision. The Deployment object can retain its UID while old and new Pods coexist. A readiness failure in the candidate revision may leave old Ready backends serving traffic, so a successful request alone does not prove that the new version completed.</p>
 <p>The stateful rollout is a host-lab contract. The browser creates and cleans a fresh workload each Run; it does not patch an existing Deployment across Runs. The provided JSON illustrates a synthetic configuration revision using the already approved fixture image and a changed message marker. It is not evidence of an image upgrade. A two-image release experiment additionally requires two separately preloaded, qualified image identities from the host receipt.</p>
 <p>Treat the desired manifest as the durable release intent. A rollback should restore a reviewed desired state and then verify generation, updated/ready counts and application identity. Merely seeing some ready traffic can conceal that the cluster is still serving the prior revision.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Rollout:</strong> The controlled replacement of Pods from an old template revision with Pods from a new one.</li>
+<li><strong>Revision:</strong> A numbered version of a Deployment&#x27;s Pod template, carried by the ReplicaSet that runs it.</li>
+<li><strong>metadata.generation:</strong> A counter the API server increments when an object&#x27;s desired spec changes. Comparing it with status.observedGeneration shows whether the controller has processed the change.</li>
+<li><strong>Rollback:</strong> Returning a Deployment to an earlier Pod template, which itself proceeds as a new rollout.</li>
+<li><strong>Mixed rollout:</strong> A period when Pods from old and new revisions are ready at the same time, so clients can reach either version.</li>
+</ul>
 <h3 id="follow-generations-and-replicasets">Follow generations and ReplicaSets<a class="heading-anchor" href="#follow-generations-and-replicasets" aria-label="Link to this section">#</a></h3>
 <p>metadata.generation changes when the relevant desired spec changes. status.observedGeneration reports what the controller has processed. The Deployment revision annotation and ReplicaSet ownership track rollout history, but a revision number is not an image digest or application version by itself.</p>
 <p>During a rolling update, the old ReplicaSet can retain ready Pods while the new template creates Pods that are not ready. updatedReplicas may describe the candidate count even when readyReplicas still includes old replicas. Compare actual Pod template/image/configuration identity and controller ownership to interpret the aggregate counts.</p>

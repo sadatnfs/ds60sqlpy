@@ -16,11 +16,25 @@ The distinctions prevent accidental updates after replacement and incorrect arit
 
 **Expected:** Name addresses an object; UID its lifetime; resourceVersion is an opaque API token.
 
+**Solution reasoning**
+
+- **Approach:** State what happens to hello-config, u1 and rv-A when the object is deleted and recreated.
+- **Why it is correct:** The name is reused, a new UID is assigned and resourceVersion is an opaque token that changes on every write.
+- **Plausible wrong approach:** Comparing resourceVersion values as numbers to decide which is newer relies on a format the API does not promise.
+- **How to verify:** Name stays, UID changes and resourceVersion changes.
+
 ## Exercise 2: Predict the conflict
 
 Optimistic concurrency detects that the read premise became stale. The rejection protects the newer state, but the client still has to handle it explicitly rather than treating conflict as an unexplained generic failure.
 
 **Expected:** 409-style conflict with current data unchanged.
+
+**Solution reasoning**
+
+- **Approach:** Send an update carrying rv-A against stored rv-B and read the object afterward.
+- **Why it is correct:** An update with a stale resourceVersion fails with 409 Conflict and does not modify the stored object.
+- **Plausible wrong approach:** Retrying the same request blindly repeats the conflict because rv-A is still stale.
+- **How to verify:** The stored object still shows rv-B and its original data.
 
 ## Exercise 3: Recompute after reread
 
@@ -28,11 +42,25 @@ A correct retry is a fresh decision based on current state. The desired change m
 
 **Expected:** A new conditional request uses current state and a bounded retry count.
 
+**Solution reasoning**
+
+- **Approach:** Reread at rv-B, reapply only the message edit and send it with a retry limit.
+- **Why it is correct:** The new request carries the current version and the fields another writer changed, so the update does not undo their work.
+- **Plausible wrong approach:** Removing resourceVersion to force the write overwrites whatever changed since rv-A.
+- **How to verify:** The request carries rv-B, preserves unrelated fields and has a retry cap.
+
 ## Exercise 4: Stop on replacement identity
 
 The new object may belong to another actor or a later operation. Updating it solely because the name matches violates the original operation scope, even if its content looks familiar.
 
 **Expected:** Refuse the mutation across object replacement.
+
+**Solution reasoning**
+
+- **Approach:** Compare the reread UID u2 with the recorded u1 before writing.
+- **Why it is correct:** A different UID means the object was replaced, so the lease's expectations no longer apply.
+- **Plausible wrong approach:** Writing because the name still matches would modify an object the lease never covered.
+- **How to verify:** UIDs differ, and the mutation is refused.
 
 ## Exercise 5: Recover from watch expiration
 
@@ -40,11 +68,25 @@ The server no longer promises the requested historical stream. Rebuilding from c
 
 **Expected:** Current u2 snapshot retained; watcher restarts from the new list token.
 
+**Solution reasoning**
+
+- **Approach:** After 410 Gone, replace the cache with the fresh list and resume watching from its resourceVersion.
+- **Why it is correct:** An expired resourceVersion cannot be resumed, so a new list is the only consistent starting point.
+- **Plausible wrong approach:** Restarting the watch from the old version returns 410 again and never recovers.
+- **How to verify:** The cache holds the u2 snapshot, and the watch starts from the list token.
+
 ## Exercise 6: Handle bookmarks and duplicates
 
 The observer should separate stream progress from application objects and make side effects idempotent. A watch reconnect is expected operational behavior, not evidence that each event must trigger another create or external call.
 
 **Expected:** Bookmark advances progress; duplicate state does not repeat external effects.
+
+**Solution reasoning**
+
+- **Approach:** Treat the bookmark as progress only and dedupe the repeated MODIFIED event by resourceVersion.
+- **Why it is correct:** A bookmark carries a version with no object change, and a duplicate event describes state already handled.
+- **Plausible wrong approach:** Calling the external service for each MODIFIED event repeats side effects on redelivery.
+- **How to verify:** The bookmark updates progress, and the duplicate causes no second effect.
 
 ## Boundary and troubleshooting review
 

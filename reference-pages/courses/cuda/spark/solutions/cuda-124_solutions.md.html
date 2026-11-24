@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-classify-four-apis">Exercise 1: Classify four APIs<a class="heading-anchor" href="#exercise-1-classify-four-apis" aria-label="Link to this section">#</a></h3>
 <p>Name SQL UDF pandas-style and local GPU dataframe surfaces.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>classify four APIs</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Classify four API surfaces: built-in SQL and DataFrame expressions, row-at-a-time Python UDFs, pandas-style vectorized UDFs that receive Arrow batches, and a local GPU dataframe library such as cuDF called inside a task.</p>
+<p><strong>Why it is correct here.</strong> Each surface hands data to a different executor. Built-in expressions stay in the planner&#x27;s view, while the other three move data into Python processes where Catalyst and the plugin cannot follow.</p>
+<p><strong>A plausible wrong approach.</strong> Treating a pandas UDF as equivalent to a built-in because it is vectorized ignores the process boundary and serialization that still surround it.</p>
+<p><strong>How to verify.</strong> For one example transformation, write it on all four surfaces and inspect the executed plan for Python evaluation nodes in the last three.</p>
 <h3 id="exercise-2-replace-an-equivalent-simple-udf">Exercise 2: Replace an equivalent simple UDF<a class="heading-anchor" href="#exercise-2-replace-an-equivalent-simple-udf" aria-label="Link to this section">#</a></h3>
 <p>Use a built-in expression if null/type semantics match.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>replace an equivalent simple UDF</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Replace a simple UDF that returns <code>x*2</code> with the built-in expression <code>col(&#x27;x&#x27;) * 2</code>, after confirming the null and type semantics match: null input gives null output in both.</p>
+<p><strong>Why it is correct here.</strong> The built-in expression is visible to the optimizer and can run on the GPU through the plugin, removing the transitions to and from a Python worker.</p>
+<p><strong>A plausible wrong approach.</strong> Replacing a UDF that maps null to 0 with the built-in, which keeps null, changes results while appearing to be the same arithmetic.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>[2, None, 6]</code> from <code>[1, None, 3]</code>. Run the built-in on the same values and compare, including the null position and the result type.</p>
 <h3 id="exercise-3-explain-arrow-limits">Exercise 3: Explain Arrow limits<a class="heading-anchor" href="#exercise-3-explain-arrow-limits" aria-label="Link to this section">#</a></h3>
 <p>Interchange format is not an execution device.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain Arrow limits</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain Arrow limits: Arrow is an in-memory columnar interchange format that lets Spark pass batches to Python efficiently, but it is not an execution device.</p>
+<p><strong>Why it is correct here.</strong> Arrow reduces serialization cost at the boundary. The UDF body still runs wherever its own code runs, usually on the CPU.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming that enabling Arrow moves UDF work to the GPU confuses data format with execution location.</p>
+<p><strong>How to verify.</strong> Compare UDF time with Arrow enabled and disabled on CPU, and check the plan for the same Python evaluation node in both.</p>
 <h3 id="exercise-4-define-gpu-aware-udf-ownership">Exercise 4: Define GPU-aware UDF ownership<a class="heading-anchor" href="#exercise-4-define-gpu-aware-udf-ownership" aria-label="Link to this section">#</a></h3>
 <p>Record assigned device batches and cleanup.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define GPU-aware UDF ownership</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define GPU-aware UDF ownership: each task records which device address it was assigned, bounds the batch it moves to that device, and frees device memory before returning.</p>
+<p><strong>Why it is correct here.</strong> Several Python workers can share one GPU. Without explicit ownership they all default to device 0 and their memory adds up without any coordination.</p>
+<p><strong>A plausible wrong approach.</strong> Calling a GPU library from every partition with no device assignment risks oversubscription and out-of-memory errors that appear only at higher concurrency.</p>
+<p><strong>How to verify.</strong> Log the assigned address and the peak device memory per task, and confirm memory returns to its baseline after each task finishes.</p>
 <h3 id="exercise-5-distinguish-sql-and-ml-acceleration">Exercise 5: Distinguish SQL and ML acceleration<a class="heading-anchor" href="#exercise-5-distinguish-sql-and-ml-acceleration" aria-label="Link to this section">#</a></h3>
 <p>They are separate integrations.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>distinguish SQL and ML acceleration</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Distinguish SQL acceleration, which replaces Spark operators through the plugin, from ML acceleration, which uses separate GPU training libraries with their own integration.</p>
+<p><strong>Why it is correct here.</strong> The two have different configuration, support lists and evidence. A GPU-accelerated ETL plan says nothing about whether the training step used the GPU.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the whole pipeline as accelerated because the SQL plan shows GPU operators omits the training step.</p>
+<p><strong>How to verify.</strong> Collect evidence separately: the executed plan for SQL and the training library&#x27;s device logs or metrics for ML.</p>
 <h3 id="exercise-6-design-quality-parity-tests">Exercise 6: Design quality parity tests<a class="heading-anchor" href="#exercise-6-design-quality-parity-tests" aria-label="Link to this section">#</a></h3>
 <p>Use same split target metric and preprocessing.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design quality parity tests</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design quality parity tests for GPU and CPU model training: same train and test split, same target, same metric and same preprocessing, comparing the metric within a stated tolerance.</p>
+<p><strong>Why it is correct here.</strong> Training algorithms on different backends can differ in floating-point order and defaults, so model quality, not identical weights, is the right comparison.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing a GPU model trained on a different split with a CPU model attributes data differences to the backend.</p>
+<p><strong>How to verify.</strong> Fix the split by a seeded key, record preprocessing steps, and report both metrics with the tolerance used.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Null-preserving expression produces [2, None,6].</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-124_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

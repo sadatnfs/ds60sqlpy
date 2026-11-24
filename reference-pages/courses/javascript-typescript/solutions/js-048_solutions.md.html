@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>d3.csvParse</code> parses inline CSV without a network request. A row accessor can return a cleaned object or null to omit a row, but an omission should be counted and explained. <code>Number(&#x27;&#x27;)</code> is zero, which is why a blank-string check must precede numeric conversion.</p>
 <p><code>d3.rollup(rows, group =&gt; d3.sum(group, d =&gt; d.value), d =&gt; d.category)</code> returns a Map keyed by category. The grouping key should be normalized intentionally. Case-sensitive category names may be genuinely distinct or accidental inconsistencies; do not merge them without a domain decision.</p>
 <h3 id="exercise-1-predict-blank-string-numeric-conversion">Exercise 1: Predict blank-string numeric conversion.<a class="heading-anchor" href="#exercise-1-predict-blank-string-numeric-conversion" aria-label="Link to this section">#</a></h3>
-<p>Blind conversion silently changes missingness into a measured zero. Keep those states distinct.</p>
+<p>Blind conversion silently changes missingness into a measured zero. Keep those states distinct. Number(&quot;&quot;) returns 0, so the B row with a blank value would become a measured zero. The reference trims the text and rejects it when text === &quot;&quot; before trusting Number. Test both Number(&quot;&quot;) and Number(&quot;oops&quot;), which is NaN.</p>
 <p><strong>Expected:</strong> Number of an empty string is 0, so prevalidation is required.</p>
 <h3 id="exercise-2-count-rejected-rows-with-reasons">Exercise 2: Count rejected rows with reasons.<a class="heading-anchor" href="#exercise-2-count-rejected-rows-with-reasons" aria-label="Link to this section">#</a></h3>
-<p>A chart should not silently shrink its sample. A small rejection ledger makes the cleaning policy reviewable.</p>
+<p>A chart should not silently shrink its sample. A small rejection ledger makes the cleaning policy reviewable. In the fixture the blank B row (index 3) and the C row with &quot;oops&quot; (index 4) are rejected, so rejected has length 2 and rows has 3. Dropping invalid rows with a plain filter would give the same totals but no record of why the sample shrank. Check rows.length + rejected.length equals the five parsed rows.</p>
 <p><strong>Expected:</strong> Every omitted row is accounted for as blank or malformed.</p>
 <h3 id="exercise-3-parse-and-aggregate-the-inline-fixture">Exercise 3: Parse and aggregate the inline fixture.<a class="heading-anchor" href="#exercise-3-parse-and-aggregate-the-inline-fixture" aria-label="Link to this section">#</a></h3>
-<p>Check the row-level interpretation before grouping. Aggregation can conceal a wrong conversion if only the final shape is inspected.</p>
+<p>Check the row-level interpretation before grouping. Aggregation can conceal a wrong conversion if only the final shape is inspected. d3.rollup sums A as 2 + 3 = 5 and B as 4. If the blank had been converted to 0, B would still total 4, which is why the row-level rejection count, not the total, reveals the cleaning rule. The reference checks <code>totals[0].value === 5</code> and <code>totals[1].value === 4</code>.</p>
 <p><strong>Expected:</strong> A totals to 5 and B totals to 4 from valid rows.</p>
 <h3 id="exercise-4-diagnose-treating-a-blank-value-as-zero">Exercise 4: Diagnose treating a blank value as zero.<a class="heading-anchor" href="#exercise-4-diagnose-treating-a-blank-value-as-zero" aria-label="Link to this section">#</a></h3>
-<p>Repair the cleaning rule and compare the resulting counts or means. Merely hiding the zero mark does not fix the data.</p>
+<p>Repair the cleaning rule and compare the resulting counts or means. Merely hiding the zero mark does not fix the data. With blank-as-zero, B&#x27;s mean would fall from 4 to 2 even though its sum stays 4. Compare means before and after the fix to see the invented measurement.</p>
 <p><strong>Expected:</strong> The chart includes an invented measurement.</p>
 <h3 id="exercise-5-handle-a-category-with-only-missing-rows">Exercise 5: Handle a category with only missing rows.<a class="heading-anchor" href="#exercise-5-handle-a-category-with-only-missing-rows" aria-label="Link to this section">#</a></h3>
-<p>Whether to retain an empty category depends on the analytical universe. Make that decision explicit.</p>
+<p>Whether to retain an empty category depends on the analytical universe. Make that decision explicit. C has only the invalid &quot;oops&quot; row, so totals contains A and B but no C. A chart that adds C with value 0 would claim a measured zero. Decide whether C belongs in the universe and, if it does, label it &quot;no valid values&quot;.</p>
 <p><strong>Expected:</strong> Its absence or missing state is documented rather than called zero.</p>
 <h3 id="exercise-6-transfer-the-pipeline-to-a-rate-metric">Exercise 6: Transfer the pipeline to a rate metric.<a class="heading-anchor" href="#exercise-6-transfer-the-pipeline-to-a-rate-metric" aria-label="Link to this section">#</a></h3>
-<p>Averaging percentages can differ from a ratio of sums. Choose the aggregation that matches the question.</p>
+<p>Averaging percentages can differ from a ratio of sums. Choose the aggregation that matches the question. For rates, sum numerators and denominators per group before dividing; averaging per-row percentages weights a 1-visit row like a 100-visit row.</p>
 <p><strong>Expected:</strong> Validate numerator and denominator at a defined grain before division.</p></article>
   </main>
 </body>

@@ -1,6 +1,6 @@
 # llm-022: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these reproducibility, evaluation mode and restart answers after attempting *Create Adam history* through *Verify evaluation and cleanup*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Calculate the uninterrupted next step* points to one step. `llm-022_solution.py` holds the assertions; this page explains how they test evaluation mode. Then try *Verify evaluation and cleanup* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -34,7 +34,7 @@ assert w.item() > 0 and opt.state[w]["step"].item() == 2
 
 **Expected:** positive weight and optimizer step 2.
 
-**Verify:** In a fresh process, the exercise checks confirm `w.item() > 0` and `opt.state[w]['step'].item() == 2`.
+**Verify:** For *Create Adam history*, a fresh-process check confirms `w.item() > 0` and `opt.state[w]['step'].item() == 2`.
 
 ## Exercise 2: Save a trusted local checkpoint
 
@@ -52,7 +52,7 @@ saved = w.item()
 
 **Expected:** checkpoint file exists.
 
-**Verify:** In a fresh process, the exercise checks confirm `path.is_file()`.
+**Verify:** For *Save a trusted local checkpoint*, a fresh-process check confirms `path.is_file()`.
 
 ## Exercise 3: Calculate the uninterrupted next step
 
@@ -70,7 +70,7 @@ assert opt.state[w]["step"].item() == 3 and expected != saved
 
 **Expected:** step 3 and changed weight.
 
-**Verify:** In a fresh process, the exercise checks confirm `opt.state[w]['step'].item() == 3` and `expected != saved`.
+**Verify:** For *Calculate the uninterrupted next step*, a fresh-process check confirms `opt.state[w]['step'].item() == 3` and `expected != saved`.
 
 ## Exercise 4: Restore in a new interpreter
 
@@ -103,7 +103,7 @@ np.testing.assert_allclose(restored["weight"], expected, atol=1e-6, rtol=0)
 
 **Expected:** child weight agrees within 1e-6.
 
-**Verify:** In a fresh process, the exercise checks confirm `not (result.returncode)` and `restored['weight']` matches `expected` within 1e-6.
+**Verify:** For *Restore in a new interpreter*, a fresh-process check confirms `not (result.returncode)` and `restored['weight']` matches `expected` within 1e-6.
 
 ## Exercise 5: Expose weights-only continuation
 
@@ -121,7 +121,7 @@ assert abs(fresh_w.item() - expected) > 1e-6
 
 **Expected:** weight differs from full-state continuation.
 
-**Verify:** In a fresh process, the exercise checks confirm `abs(fresh_w.item() - expected) > 1e-06`.
+**Verify:** For *Expose weights-only continuation*, a fresh-process check confirms `abs(fresh_w.item() - expected) > 1e-06`.
 
 ## Exercise 6: Verify evaluation and cleanup
 
@@ -140,8 +140,8 @@ assert not path.exists()
 
 **Expected:** dropout returns ones; temporary path absent.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.equal(drop(ones), ones)` and `not path.exists()`.
+**Verify:** For *Verify evaluation and cleanup*, a fresh-process check confirms `torch.equal(drop(ones), ones)` and `not path.exists()`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Restore in a new interpreter* and predict the result first; keep *Expose weights-only continuation* failing beside the repair. Log a missing PyTorch separately from a wrong evaluation mode value in `llm-022`.

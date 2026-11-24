@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Trace producer and consumer threads through each block barrier and verify correct tail behavior.
+
 Work through *Shared memory and block synchronization* with the concrete cases below. Finish with this evidence:
 correct boundary behavior and a synchronization explanation naming producer and consumer threads. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Shared memory lets threads in one block communicate through a common scratch array. Communication requires ordering: a consumer must not read a location until its producer has written it. `__syncthreads()` is a block barrier with memory-ordering effects for participating threads. Put bounds predicates around loads and stores while keeping the required barrier participation uniform. Invalid tail lanes can load a neutral value and still reach the barrier. A barrier does not coordinate ordinary independent blocks, and a memory fence does not force other threads to arrive at the same program point.
+
+### Key terms
+
+- **Block barrier:** A `__syncthreads()` call that every thread in the block must reach before any continues, which also orders shared-memory accesses.
+- **Producer and consumer:** A thread that writes a shared value and a thread that later reads it, which need an ordering between them.
+- **Neutral value:** An identity element, such as zero for addition, that invalid tail lanes load so they can still reach the barrier.
+- **Divergent barrier:** A barrier reached by only some threads of a block, which is undefined behavior and can hang the kernel.
 
 ## How to run and study this lesson
 

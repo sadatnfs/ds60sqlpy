@@ -14,6 +14,13 @@ Choose a small release-pinned library family instead of installing every package
 
 
 
+### Key terms
+
+- **Stable sort:** A sort that keeps equal keys in their original relative order.
+- **Comparator:** The rule that orders two keys and must define a consistent ordering.
+- **Reusable plan:** A library object, such as an FFT plan, prepared for one shape and dtype and reused only within that contract.
+- **Temporary storage:** Workspace memory a library algorithm requests, whose ownership and stream association affect correctness.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,33 +46,54 @@ print("CPU library contracts:", ordered, "matrix output", (a[0], b[1]))
 
 **Expected observation:** Stable duplicate order and matrix output shape (2,4).
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `records` | `[(2, 'A'), (1, 'B'), (2, 'C')]` |
+| `ordered` | `[(1, 'B'), (2, 'A'), (2, 'C')]` |
+| `a` | `(2, 3)` |
+| `b` | `(3, 4)` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Trace stable sorting
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **trace stable sorting** in the examples above.
+**Trap to avoid:** Assuming every GPU sort is stable lets downstream code rely on an order an unstable sort may legally change, which then varies between runs or releases.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Specify duplicate semantics
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **specify duplicate semantics** in the examples above.
+**Trap to avoid:** Leaving the rule unstated passes tests on small inputs where an unstable algorithm happens to preserve order, then fails on larger inputs that use a different internal path.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Calculate output shape
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **calculate output shape** in the examples above.
+**Trap to avoid:** Taking the output as 3 by 3 or 2 by 3 confuses contracted and kept dimensions, and allocating the wrong output buffer causes a library error or an out-of-bounds write.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Account for temporary storage
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **account for temporary storage** in the examples above.
+**Trap to avoid:** Budgeting only inputs and outputs leads to out-of-memory errors that appear only on large arrays.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate plan creation
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **separate plan creation** in the examples above.
+**Trap to avoid:** Reusing a plan prepared for a different shape or dtype gives wrong results or errors, so caching must be keyed by both.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Choose a release-specific contract
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **choose a release-specific contract** in the examples above.
+**Trap to avoid:** Relying on the latest online docs while running an older release can promise features or guarantees the installed version does not have.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

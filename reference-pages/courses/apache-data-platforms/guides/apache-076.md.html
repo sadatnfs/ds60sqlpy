@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-076-metadata-file-urls-and-read-paths">apache-076: Metadata, file URLs and read paths<a class="heading-anchor" href="#apache-076-metadata-file-urls-and-read-paths" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-075</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Control plane:</strong> The sharing server&#x27;s API that authorizes a recipient and returns table metadata and eligible files.</li>
+<li><strong>Pre-signed URL:</strong> A temporary object-store URL the server returns for one data file, letting the client read bytes directly without the bearer token.</li>
+<li><strong>Data plane:</strong> The path by which the client downloads Parquet bytes from object storage, separate from the control requests.</li>
+<li><strong>minReaderVersion:</strong> The protocol field stating the lowest reader version a response requires. The course client accepts only version 1 and refuses anything else.</li>
+<li><strong>Host allowlist:</strong> The explicit set of data hosts the client may fetch from, which keeps it from following arbitrary URLs or redirects.</li>
+</ul>
 <h3 id="control-responses-and-data-bytes-travel-different-paths">Control responses and data bytes travel different paths<a class="heading-anchor" href="#control-responses-and-data-bytes-travel-different-paths" aria-label="Link to this section">#</a></h3>
 <p>A sharing client first asks the service for table metadata and eligible files. The service can return signed URLs granting temporary reads of those data files. The client then retrieves bytes from storage and decodes them with a compatible reader. A successful metadata response does not prove that the recipient can reach the object store or interpret every advertised feature.</p>
 <p>This split is useful for distributing large data without routing all bytes through the sharing control service. It also introduces separate failure and security boundaries. Service credentials, URL authorization, network egress, file availability and file-format compatibility must each be considered. A control endpoint returning 200 is therefore weaker evidence than a completed row-level read.</p>

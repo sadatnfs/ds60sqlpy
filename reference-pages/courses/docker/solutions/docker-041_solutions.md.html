@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-the-lost-update-result">Exercise 1: Predict the lost-update result.<a class="heading-anchor" href="#exercise-1-predict-the-lost-update-result" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The final value can be 8 after two attempted increments.</p>
 <p><strong>Why:</strong> Both writers used the same old value. Atomic file visibility prevents partial bytes but not stale computations.</p>
+<p><strong>Approach:</strong> Step through the worked example: both writers read 7 before either writes, and both compute 8.</p>
+<p><strong>Why this is correct:</strong> Each write is atomic, so the file always holds a whole value, but both writes say 8, leaving one increment lost.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting 9 because each write is atomic confuses complete writes with ordered read-modify-write.</p>
+<p><strong>How to verify:</strong> Run two concurrent increments against two replicas sharing study-data; the final count can fall short of the starts.</p>
 <h3 id="exercise-2-identify-the-scope-of-the-fixture-lock">Exercise 2: Identify the scope of the fixture lock.<a class="heading-anchor" href="#exercise-2-identify-the-scope-of-the-fixture-lock" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Threads in one process, not multiple containers.</p>
 <p><strong>Why:</strong> A lock object in memory is not shared across isolated processes. State the assumption instead of extending it by analogy.</p>
+<p><strong>Approach:</strong> Ask where the lock lives: in server.py&#x27;s memory, shared only by that process&#x27;s threads.</p>
+<p><strong>Why this is correct:</strong> A second container has its own copy of the lock, so the two never wait on each other.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming the in-process lock protects shared study-data across replicas extends it beyond its scope.</p>
+<p><strong>How to verify:</strong> The design note states the single-process assumption, and the concurrent test shows lost updates once it is broken.</p>
 <h3 id="exercise-3-design-a-replica-readiness-checklist">Exercise 3: Design a replica-readiness checklist.<a class="heading-anchor" href="#exercise-3-design-a-replica-readiness-checklist" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Routing, state concurrency, sessions, resource budget and recovery.</p>
 <p><strong>Why:</strong> Each requirement can fail independently. A successful second process start does not prove the application is safely scalable.</p>
+<p><strong>Approach:</strong> Check routing, shared-state writes, sessions, resource budget and recovery one at a time for a second replica.</p>
+<p><strong>Why this is correct:</strong> Any of these can fail alone; the fixture&#x27;s counter fails the shared-state item.</p>
+<p><strong>A plausible wrong approach:</strong> Starting a second replica and seeing it healthy as proof of scalability ignores the counter&#x27;s concurrency gap.</p>
+<p><strong>How to verify:</strong> Each item has a check; the counter item fails under the concurrent increment test until redesigned.</p>
 <h3 id="exercise-4-diagnose-a-fixed-host-port-collision">Exercise 4: Diagnose a fixed host-port collision.<a class="heading-anchor" href="#exercise-4-diagnose-a-fixed-host-port-collision" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Several replicas cannot all bind the same host socket independently.</p>
 <p><strong>Why:</strong> Introduce an intended routing layer or distinct ports for a controlled experiment. Do not disable isolation merely to make startup succeed.</p>
+<p><strong>Approach:</strong> Read the ports line: 127.0.0.1:18080 can be bound by only one container at a time.</p>
+<p><strong>Why this is correct:</strong> A second replica tries the same host socket and fails to start.</p>
+<p><strong>A plausible wrong approach:</strong> Switching to network_mode host to avoid the collision removes isolation and still allows only one listener.</p>
+<p><strong>How to verify:</strong> Add a proxy in front, or give each replica its own port for a test; each then starts.</p>
 <h3 id="exercise-5-explain-why-load-balancing-does-not-fix-lost-updates">Exercise 5: Explain why load balancing does not fix lost updates.<a class="heading-anchor" href="#exercise-5-explain-why-load-balancing-does-not-fix-lost-updates" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Traffic distribution does not serialize shared-state transactions.</p>
 <p><strong>Why:</strong> The data store or application protocol must provide the necessary concurrency guarantees regardless of which replica receives the request.</p>
+<p><strong>Approach:</strong> Separate who receives a request from how shared data is updated.</p>
+<p><strong>Why this is correct:</strong> A balancer spreads requests, but each replica still does its own read-modify-write on the same file.</p>
+<p><strong>A plausible wrong approach:</strong> Adding a balancer to fix wrong counts keeps the same race in every replica.</p>
+<p><strong>How to verify:</strong> Run the concurrent test behind the balancer; counts still fall short.</p>
 <h3 id="exercise-6-propose-a-correct-scaled-counter-architecture">Exercise 6: Propose a correct scaled counter architecture.<a class="heading-anchor" href="#exercise-6-propose-a-correct-scaled-counter-architecture" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A transaction-capable shared store or explicit single-writer ownership.</p>
 <p><strong>Why:</strong> Defend the consistency and failure semantics. Test concurrent increments and unknown outcomes rather than presenting replica count as correctness evidence.</p>
+<p><strong>Approach:</strong> Choose a store with atomic increments or transactions, or route every write to one owning instance.</p>
+<p><strong>Why this is correct:</strong> Either makes increments ordered, which replicas alone cannot provide.</p>
+<p><strong>A plausible wrong approach:</strong> Raising the replica count to show scalability adds more writers to the race.</p>
+<p><strong>How to verify:</strong> Concurrent increments match the request count, and a timed-out request is checked rather than retried blindly.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-028_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A producer writes payload 42, then releases a ready flag. A consumer acquires that publication before reading the payload. The happens-before chain connects payload write to payload read. This is a conceptual protocol; an actual CUDA implementation must use supported atomic types, scope and participating execution conditions.</p>
+<p><strong>Approach:</strong> Order four events: write payload 42, release the ready flag, acquire the flag in the consumer, then read the payload.</p>
+<p><strong>Why it is correct:</strong> A release store orders earlier writes before the flag, and an acquire load that sees it orders later reads after it.</p>
+<p><strong>A plausible wrong approach:</strong> Using a plain volatile flag with no release or acquire semantics lets the consumer see ready before 42 is visible.</p>
+<p><strong>How to verify:</strong> The reference asserts the four positions are strictly increasing and prints GPU_memory_model_test False, so a device litmus test is still needed.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>Two workers atomically increment a count, giving count two, while writing separate payloads without publication ordering. The count&#x27;s arithmetic can be correct even though the payload protocol is incomplete. &#x27;Atomic&#x27; describes the increment, not every access in the surrounding program.</p>
+<p><strong>Approach:</strong> Separate the atomic counter from the payload protocol and add release and acquire to the publication.</p>
+<p><strong>Why it is correct:</strong> atomicAdd gives a correct count of two, but says nothing about when each worker&#x27;s payload becomes visible.</p>
+<p><strong>A plausible wrong approach:</strong> Reasoning that the atomic increment also publishes the payload confuses arithmetic atomicity with ordering.</p>
+<p><strong>How to verify:</strong> Check that a consumer reading the count before the payloads would be guarded by an acquire on a published flag.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Payload write, release publication, matching acquire observation and payload read, with the required ordering relationship between them.</p>
+<p><strong>Approach:</strong> List payload write, release publication, matching acquire and payload read.</p>
+<p><strong>Why it is correct:</strong> Removing any link breaks the chain that makes the write visible before the read.</p>
+<p><strong>A plausible wrong approach:</strong> Listing only write and read assumes program order on one thread carries to another.</p>
+<p><strong>How to verify:</strong> Trace the chain on a diagram and mark which thread executes each event.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Ordering does not schedule or release resources for another block. Progress and memory visibility are separate obligations.</p>
+<p><strong>Approach:</strong> Separate progress from visibility: the producer must be scheduled to write at all.</p>
+<p><strong>Why it is correct:</strong> A fence orders memory operations of the calling thread and cannot start another block.</p>
+<p><strong>A plausible wrong approach:</strong> Adding more fences in the waiting consumer still never schedules a non-resident producer.</p>
+<p><strong>How to verify:</strong> Replace the wait with a kernel boundary and confirm the consumer sees 42.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>When the observer is in another block or on the host/device boundary. Use a primitive with scope matching actual observers and supported memory.</p>
+<p><strong>Approach:</strong> Match fence or atomic scope to the farthest observer: block, device or system.</p>
+<p><strong>Why it is correct:</strong> A block-scope operation only promises ordering to threads in the same block.</p>
+<p><strong>A plausible wrong approach:</strong> Using block scope for a host observer leaves the host free to see a stale payload.</p>
+<p><strong>How to verify:</strong> List each observer and confirm the chosen scope covers it.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Publish data and ownership only after writing completes; consumers acknowledge completion before producers reuse the slot. Account for wraparound and capacity.</p>
+<p><strong>Approach:</strong> Write a slot, release its full state, let the consumer acquire, read, and release it empty.</p>
+<p><strong>Why it is correct:</strong> Both directions need publication, and the producer must not reuse a slot until it sees empty.</p>
+<p><strong>A plausible wrong approach:</strong> Indexing slots with head mod capacity but not tracking fullness overwrites unread data on wraparound.</p>
+<p><strong>How to verify:</strong> Test a capacity-2 ring with three items and confirm the third waits for the first.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-028_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

@@ -16,6 +16,14 @@ A CPU quota limits how much CPU time a cgroup can consume over a period. A memor
 
 Performance experiments need controlled inputs and measurements. A single fast run can benefit from caches, idle neighbors or a different architecture. Record the workload, image, limits, host allocation and several runs. Avoid deliberately exhausting the host as a lesson demonstration.
 
+### Key terms
+
+- **Memory limit:** A cap on a container's accounted memory, beyond which its processes can be killed under memory pressure.
+- **CPU limit:** A quota on the CPU time a container's cgroup may use per period, which throttles work but does not reserve a core.
+- **PID limit:** A bound on how many processes a container may create, set in Compose with `pids_limit`.
+- **Contention:** Competition among workloads for the same shared CPU, memory or I/O, which slows each of them.
+- **Measurement:** Several recorded runs with a fixed workload, image, limits and host allocation that support an honest performance claim.
+
 ## Anatomy and a trace you can follow
 
 The fixture uses modest `mem_limit`, `cpus` and `pids_limit` settings. These are runtime constraints on the teaching process, not proof of a production capacity plan. `docker stats --no-stream` gives a point-in-time view. Observe trends with bounded sampling if you need a rate, and distinguish cumulative values from instantaneous ones.
@@ -90,11 +98,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Reading `cpus: 0.5` as half of a dedicated core. Raising container limits when the engine VM itself is short of memory. Drawing a conclusion from one `docker stats` sample.
 
-Exercise 4 is this chapter's boundary case: Diagnose slowness without assuming memory failure. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose slowness without assuming memory failure. Check `docker stats` CPU% against the cpus quota and the cgroup `cpu.stat` `nr_throttled` count before reading memory usage. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using memory limit, CPU limit, PID limit, contention and measurement. Reconstruct worked example 2 (Read a bounded resource sample) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Say which column in a `docker stats` sample would rise first under CPU contention and which under a memory leak. Then reconstruct worked example 2 (Read a bounded resource sample) with one different value, predict what changes, and name which of memory limit, CPU limit, PID limit, contention and measurement the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

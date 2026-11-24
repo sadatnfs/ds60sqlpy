@@ -1,6 +1,6 @@
 """Stage six: explicit calendar sets, period completeness and date roles."""
 
-from .common import lesson
+from .common import explain, lesson
 from .common import result as r
 from .common import task as t
 
@@ -901,3 +901,507 @@ LESSONS = [
         ],
     ),
 ]
+
+
+REASONING = {
+    31: [
+        (
+            (
+                "The Date table holds one row per calendar day from 2024-01-01 to 2025-12-31, and "
+                "2024 is a leap year, so February 2024 has 29 rows whether or not anything sold."
+            ),
+            (
+                "Counting sale dates instead: DISTINCTCOUNT(Sales[OrderDate]) under February 2024 "
+                "is BLANK, because the first sales are in January of each year."
+            ),
+            "Under Year 2024 and MonthNumber 2, COUNTROWS('Date') returns 29.",
+        ),
+        (
+            (
+                "The filter names one full date, 2025-01-02, so the calendar contributes one row "
+                "and the order relationship brings in S4 alone, 27 USD."
+            ),
+            (
+                "Filtering DayOfMonth = 2 and MonthNumber = 1 without the year also selects "
+                "2024-01-02, which adds S1 and S2 and gives 3 rows and 51."
+            ),
+            "CalendarDates 1, SalesRows 1 and Revenue 27.",
+        ),
+        (
+            (
+                "Each check has a number here: 731 rows for 731 distinct dates, no blanks, MAX "
+                "minus MIN plus 1 equal to the row count, and 31 rows in January 2025 against 3 "
+                "sale dates."
+            ),
+            (
+                "Building the calendar from DISTINCT(Sales[OrderDate]) leaves 7 dates. January "
+                "2025 would then have 3 days, and every per-day or window measure would skip the "
+                "gaps."
+            ),
+            (
+                "`INT ( MAX ( 'Date'[Date] ) - MIN ( 'Date'[Date] ) ) + 1` equals "
+                "COUNTROWS('Date') and DISTINCTCOUNT('Date'[Date]), all 731."
+            ),
+        ),
+        (
+            (
+                "The calendar runs to 2025-12-31 so that future dates exist, but the data is "
+                "declared observed only through 2025-02-28 and the last order date is 2025-02-03."
+            ),
+            (
+                "Using MAX('Date'[Date]) as the latest data date returns December 31, 2025, so a "
+                "freshness label would claim ten months of coverage that do not exist."
+            ),
+            (
+                "Unfiltered, MAX('Date'[Date]) is 2025-12-31 and MAX(Sales[OrderDate]) is "
+                "2025-02-03; neither replaces the declared watermark, 2025-02-28."
+            ),
+        ),
+        (
+            (
+                "Observed days without sales are true zeros. Days after the watermark are unknown. "
+                "January and February 2025 are 59 observed days with 123 USD, about 2.08 per day."
+            ),
+            (
+                "Coalescing every future day to 0 adds March as 31 days of zero demand and drops "
+                "the baseline to 123 / 90, about 1.37, as if sales had collapsed."
+            ),
+            (
+                "The observed-window average is about 2.08, and any day after 2025-02-28 should "
+                "return BLANK rather than 0."
+            ),
+        ),
+        (
+            (
+                "A working-day denominator needs its own rule. January 2025 has 23 weekdays, and "
+                "S6 was ordered on Sunday, January 5, so the policy must also say where weekend "
+                "sales belong."
+            ),
+            (
+                "Dropping dates without transactions leaves three sale dates and reports 67 / 3, "
+                "about 22.33 per working day, which counts a Sunday as a working day too."
+            ),
+            (
+                "With a weekday flag such as WEEKDAY('Date'[Date], 2) <= 5, January 2025 has 23 "
+                "working days and 47 USD sold on them (S4 and S5)."
+            ),
+        ),
+    ],
+    32: [
+        (
+            (
+                "DATESYTD returns January 1 through the latest date in context. On 2025-01-02 that "
+                "is two dates, and only S4 sold, so YTD is 27."
+            ),
+            (
+                "Accumulating from the first calendar date, 2024-01-01, counts all of 2024 as well "
+                "and returns 64 + 27 = 91, a running total, not year to date."
+            ),
+            "Under 'Date'[Date] = DATE(2025, 1, 2), CurrentDay and YTD both return 27.",
+        ),
+        (
+            (
+                "Moving the anchor back one day drops S8's 36, ordered February 3, so YTD becomes "
+                "123 - 36 = 87, and CurrentDay becomes S7's 20."
+            ),
+            (
+                "Anchoring by month (Year 2025, MonthNumber 2) lets DATESYTD run to February 28 "
+                "and return 123 for any February day, which hides the change."
+            ),
+            "Under DATE(2025, 2, 2), expect CurrentDay 20 and YTD 87.",
+        ),
+        (
+            (
+                "The ledger names the calendar, role, date span and lines: Gregorian year, "
+                "OrderDate, 2025-01-01 through 2025-02-03, S4 27, S5 20, S6 20, S7 20 and S8 36, "
+                "which add to 123."
+            ),
+            (
+                "Building the ledger from ShipDate drops S8, shipped February 4, and adds to 87, "
+                "which no longer matches the measure it is supposed to audit."
+            ),
+            "The listed amounts add to case B's YTD of 123.",
+        ),
+        (
+            (
+                "YTD sums observed sales over its date set. February 3 is day 34 of 2025, and "
+                "actual sales over those 34 days are 123."
+            ),
+            (
+                "Multiplying CurrentDay 36 by 34 elapsed days gives 1224, about ten times the real "
+                "value, because it treats one day's sales as a daily rate."
+            ),
+            "36 x 34 = 1224 against the observed 123; the two answer different questions.",
+        ),
+        (
+            (
+                "After 2025-02-28 nothing is observed. At an anchor of March 15, 2025 DATESYTD "
+                "still returns 123, the same as at February 28, because March days have no data."
+            ),
+            (
+                "Labeling 123 as YTD through March 15 implies a March with zero sales, when March "
+                "was never observed."
+            ),
+            (
+                "YTD at 2025-03-15 equals YTD at 2025-02-28 (123). The label should say data "
+                "through February 28, 2025."
+            ),
+        ),
+        (
+            (
+                "Shipped YTD keeps the same January 1 to February 3 interval but activates the "
+                "ShipDate relationship. That keeps S4, S5, S6 and S7 and drops S8, shipped "
+                "February 4: 87."
+            ),
+            (
+                "Leaving the order relationship active returns 123, which counts S8 as shipped one "
+                "day early."
+            ),
+            (
+                "`CALCULATE ( [NetRevenue], DATESYTD ( 'Date'[Date] ), USERELATIONSHIP ( "
+                "Sales[ShipDate], 'Date'[Date] ) )` returns 87 at February 3 and 123 at February "
+                "4."
+            ),
+        ),
+    ],
+    33: [
+        (
+            (
+                "The current window January 1 to 5, 2025 holds S4, S5 and S6, all of January "
+                "2025's sales, so current revenue is 67. The shifted window January 1 to 5, 2024 "
+                "holds S1 to S3, 64."
+            ),
+            (
+                "Assuming the as-of window must stay below the full month and expecting growth to "
+                "stay negative. These five days already contain every January sale in the fixture."
+            ),
+            "Through January 5: Current 67, Prior 64 and Growth 0.046875, the same as case A.",
+        ),
+        (
+            (
+                "A hypothetical 10 USD sale on January 20, 2024 falls inside case A's full prior "
+                "January but outside case B's January 1 to 3 window."
+            ),
+            (
+                "Changing both comparisons, or dividing case B's 47 by the new full-month 74, "
+                "mixes a three-day window with a full month."
+            ),
+            ("Case A becomes 67 against 74, about -0.095; case B stays 47 against 64, -0.265625."),
+        ),
+        (
+            (
+                'The title should give both windows and the role: "Order revenue, January 1 to 3, '
+                '2025 vs the same dates in 2024 (47 vs 64), data through 2025-02-28".'
+            ),
+            (
+                'A title such as "January growth -26.6%" invites comparison with full January, '
+                "which grew 4.7 percent."
+            ),
+            (
+                "The dates in the title match the DATESBETWEEN arguments, and the values read 47 "
+                "and 64."
+            ),
+        ),
+        (
+            (
+                "Here the window decides the sign: January 1 to 3 gives -0.2656 and full January "
+                "+0.0469. A policy fixed before looking, such as complete months only, selects "
+                "case A."
+            ),
+            (
+                "Picking whichever window gives a positive number reports 4.7 percent growth "
+                "because it looks good, then quietly switches windows next month when the sign "
+                "changes."
+            ),
+            (
+                "Write the policy first, then confirm that it yields case A's 67 against 64 "
+                "whatever the result."
+            ),
+        ),
+        (
+            (
+                "February 2024 has no sales, so the prior period for February 2025 is BLANK, and "
+                "DIVIDE returns BLANK growth instead of an error."
+            ),
+            (
+                "Coalescing the prior to 0 and displaying growth as 0 percent, or as infinite, "
+                "suggests flat or unlimited growth where no prior revenue existed."
+            ),
+            (
+                "Under Year 2025 and MonthNumber 2, Current is 56, Prior BLANK and Growth BLANK. "
+                "Report the absolute change, 56, under an explicit new-period label."
+            ),
+        ),
+        (
+            (
+                "Compare at equal follow-up. Each customer's first month gives Ada 24 (January "
+                "2024), Bo 40 (January 2024) and Cy 20 (January 2025)."
+            ),
+            (
+                "Comparing lifetime totals, Ada 51 and Bo 80 against Cy 56, sets about 14 months "
+                "of follow-up against 2 months for Cy, all within data through 2025-02-28."
+            ),
+            (
+                "Revenue in the month of each first order should give 24, 40 and 20; any total "
+                "over unequal follow-up must say so in its label."
+            ),
+        ),
+    ],
+    34: [
+        (
+            (
+                "DATESINPERIOD with -2 days ending February 3 gives February 2 and 3. Both have "
+                "sales, S7 20 and S8 36, so both averages are 56 / 2 = 28."
+            ),
+            (
+                "Concluding from this window that the two averages are equivalent. They agree only "
+                "because every date in it had sales; case B's three days split them into 28 and "
+                "about 18.67."
+            ),
+            "Days 2, Revenue 56, and both averages 28.",
+        ),
+        (
+            (
+                "Ending at January 4 gives January 2 to 4: S4 27 on the 2nd and S5 20 on the 3rd, "
+                "none on the 4th. The calendar average is 47 / 3, about 15.67, and the sale-day "
+                "average 47 / 2 = 23.5."
+            ),
+            (
+                "Anchoring with a month filter makes MAX('Date'[Date]) return January 31, so the "
+                "window becomes January 29 to 31 and the revenue BLANK."
+            ),
+            (
+                "Under 'Date'[Date] = DATE(2025, 1, 4), expect Days 3, Revenue 47 and averages of "
+                "about 15.67 and 23.5."
+            ),
+        ),
+        (
+            (
+                "The contract names the role, the length, the inclusive end, coverage and units. "
+                "With OrderDate, February 1 to 3 holds 56 USD over 3 days, about 18.67 per "
+                "calendar day."
+            ),
+            (
+                "Leaving the role unstated invites a ShipDate version: S6 ships February 1 and S7 "
+                "February 3, so it gives 40 USD and about 13.33 per day."
+            ),
+            "The order-role window returns 3 days, 56 and about 18.67, matching case A.",
+        ),
+        (
+            (
+                "The calendar set includes February 1, which is observed with no sales. AVERAGEX "
+                "over the window with COALESCE keeps that day as 0."
+            ),
+            (
+                "Averaging the visible rows of a visual that hides empty dates uses only February "
+                "2 and 3 and reports 28 per day instead of about 18.67."
+            ),
+            (
+                "Over the window, AVERAGEX of COALESCE([NetRevenue], 0) returns about 18.67, while "
+                "the visible-row average is 28."
+            ),
+        ),
+        (
+            (
+                "Observation ends on 2025-02-28. A window ending March 2 holds one observed zero "
+                "day (February 28) and two unobserved days."
+            ),
+            (
+                "Coalescing every blank to 0 reports 0 / 3 = 0 per day, as if March 1 and 2 were "
+                "observed with no sales."
+            ),
+            (
+                "Flag March days as unavailable. The window should show one observed day with 0 "
+                "USD and two unknown days, not a complete average."
+            ),
+        ),
+        (
+            (
+                "Availability needs three states: up, down and unknown. Of 24 hourly intervals "
+                "with 20 up, 2 down and 2 missing, the known-only rate is 20 / 22, about 90.9 "
+                "percent."
+            ),
+            (
+                "Treating the 2 missing intervals as down gives 20 / 24, about 83.3 percent; "
+                "treating them as up gives 22 / 24, about 91.7 percent. Either way the unknown is "
+                "hidden."
+            ),
+            (
+                'Report 20 / 22 with "2 of 24 intervals unknown" beside it, just as the window '
+                "above separates observed zero days from blanks."
+            ),
+        ),
+    ],
+    35: [
+        (
+            (
+                "FiscalYear is Year plus 1 from July onward. January 3, 2025 is in the July 2024 "
+                "to June 2025 year, labeled by its ending year, 2025."
+            ),
+            (
+                "Reading the label from Year coincides in January but fails from July: July 1, "
+                "2024 has Year 2024 and FiscalYear 2025."
+            ),
+            (
+                "SELECTCOLUMNS for 2025-01-03 returns FiscalYear 2025; case A shows 2024-07-01 as "
+                "2025."
+            ),
+        ),
+        (
+            (
+                "A starting-year label renames the same date set. July 2024 to June 2025 becomes "
+                "FY 2024, and fiscal-to-date revenue through February 28, 2025 is still 123."
+            ),
+            (
+                "Changing the label but keeping the filter 'Date'[FiscalYear] = 2025 now selects "
+                "July 2025 onward, past the watermark, and returns BLANK."
+            ),
+            (
+                "Under the new labels, FiscalYear = 2024 and dates <= 2025-02-28 return 123, the "
+                "same population as case B."
+            ),
+        ),
+        (
+            (
+                "The caption must say three things: which fiscal year, its end month, and the "
+                "as-of date. 123 covers July 1, 2024 to February 28, 2025, and its sales are S4 to "
+                "S8."
+            ),
+            (
+                'A caption of only "FY 2025 revenue: 123" reads as the full year to June 2025, '
+                "of which four months are still unobserved."
+            ),
+            "The caption matches case B's filters, and S4 to S8 add to 123.",
+        ),
+        (
+            (
+                "A comparable prior uses the same span. The Date table starts on January 1, 2024, "
+                "so FY 2024 has only its last six months here, and its 64 USD all comes from "
+                "January 2024."
+            ),
+            (
+                "Calling 123 against 64 growth of about 92 percent compares 8 months of a year "
+                "with an incomplete 6. A single March 2024 sale would push the full-year figure "
+                "above the as-of value."
+            ),
+            (
+                "FY 2024 through 2024-02-29 returns 64, and the caption should note that the "
+                "calendar starts on January 1, 2024."
+            ),
+        ),
+        (
+            (
+                "A 4-4-5 calendar groups whole weeks: 28, 28 and 35 days per quarter. RetailYear "
+                "here is only a month shift that starts on February 1."
+            ),
+            (
+                "Treating RetailYear as week-based works for February 2025, which has exactly 28 "
+                "days, but March has 31 days where a 4-4-5 period has 28."
+            ),
+            (
+                "A 4-4-5 quarter has 91 days, while February to April 2025 has 89; the calendar "
+                "needs week-level metadata, not a label."
+            ),
+        ),
+        (
+            (
+                "Keep both dates. S6 was ordered on January 5 and shipped on February 1, so the "
+                "January close differs by role: 67 by order date, 47 by ship date."
+            ),
+            (
+                "Overwriting transaction dates with the accounting period loses the trace, and "
+                "nobody can then explain the 20 USD gap between the two January figures."
+            ),
+            (
+                "January order revenue 67 equals January ship revenue 47 plus S6's 20, which ships "
+                "in February."
+            ),
+        ),
+    ],
+    36: [
+        (
+            (
+                "RetailYear is Year plus 1 from February, so January 31, 2025 belongs to "
+                "RetailYear 2025 and February 1, 2025 starts RetailYear 2026."
+            ),
+            (
+                "Assuming RetailYear equals the calendar year works on January 31 but gives 2025 "
+                "for February 1, a year off for eleven months of each retail year."
+            ),
+            "SELECTCOLUMNS returns RetailYear 2025 for 2025-01-31 and 2026 for 2025-02-01.",
+        ),
+        (
+            (
+                "With Gregorian tags the calendar's year begins January 1, so the YTD set at "
+                "February 3 is January 1 to February 3, 2025, and the total is 123."
+            ),
+            (
+                "Keeping the name RetailCalendar after the tags change leads readers to expect the "
+                "February-start 56, when the result is now the Gregorian 123."
+            ),
+            "After the change, the calendar version returns the same 123 as case A.",
+        ),
+        (
+            (
+                "The checklist confirms the tags (Day to Date, Year to RetailYear, Month to "
+                "YearMonth), then tests the boundary: RetailYTD at January 31, 2025 covers "
+                "February 1, 2024 to January 31, 2025, which is 67 (S4, S5, S6). February 2 "
+                "restarts at 20 and February 3 reaches 56."
+            ),
+            (
+                "Checking only one mid-year anchor will not catch a year that starts a day early "
+                "or late; a wrong boundary would show up at January 31 or February 1."
+            ),
+            (
+                "At January 31, 2025 expect 67; at February 1, BLANK; at February 2, 20; at "
+                "February 3, 56."
+            ),
+        ),
+        (
+            (
+                "RetailCalendar is a calendar object defined in model metadata. In a model with "
+                "only the Date table, the query refers to something that does not exist."
+            ),
+            (
+                "Adding a table named RetailCalendar with a RetailYear column, and expecting "
+                "TOTALYTD to read it as a calendar, still lacks the configured tags."
+            ),
+            (
+                "Without the metadata the query fails to resolve; with the specified calendar it "
+                "returns 56 at February 3."
+            ),
+        ),
+        (
+            (
+                "A calendar feature can accept sparse dates, but coverage is a separate fact. Here "
+                "coverage is declared through 2025-02-28, and February 1, 2025 is an observed day "
+                "with no sales."
+            ),
+            (
+                "Building a calendar from the 7 order dates and concluding that coverage is "
+                "complete because the feature accepts it. Observed zero days and unobserved days "
+                "look the same in that list."
+            ),
+            (
+                "Compare the 59 calendar days of January and February 2025 with the declared "
+                "coverage, separately from the 5 order dates in that period."
+            ),
+        ),
+        (
+            (
+                "A week-based year has 364 days, with a 53rd week at intervals. Its periods follow "
+                "a 4-4-5 pattern, and its start falls on a fixed weekday, not on February 1."
+            ),
+            (
+                "Reusing the February-start RetailYear as a week calendar assumes every year "
+                "starts on the same date and ignores the extra week."
+            ),
+            (
+                "Check that each defined year has 364 or 371 days, that each quarter has 28, 28 "
+                "and 35 days, and that the YTD set for a known anchor matches a hand-built list."
+            ),
+        ),
+    ],
+}
+
+explain(LESSONS, REASONING)

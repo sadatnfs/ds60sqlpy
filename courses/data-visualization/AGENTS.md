@@ -10,6 +10,9 @@ The durable numerical sources live in authoring/python_cases.py and
 authoring/browser_cases.js. Directly authored guides and explanatory solutions
 must explain vocabulary, mechanisms, two contrasting worked cases, six concrete
 practice tasks with hints, expected evidence, diagnosis and next steps.
+Per-lesson solution reasoning (approach, why it is correct, a plausible wrong
+approach, how to verify) lives in authoring/reasoning.json and is validated by
+authoring/build.py.
 The statistics book remains a separate tutorial with all answers visible.
 
 Every chart needs a descriptive caption, units, noncolor distinctions and an

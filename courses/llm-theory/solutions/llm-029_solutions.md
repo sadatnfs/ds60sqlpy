@@ -1,6 +1,6 @@
 # llm-029: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these scaling laws and the limits of a toy experiment answers after attempting *Read a longer training run* through *Write a bounded conclusion*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Calculate a local ratio* points to one step. `llm-029_solution.py` holds the assertions; this page explains how they test scaling relationship. Then try *Write a bounded conclusion* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -117,4 +117,4 @@ No frontier-performance prediction is supported.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Reject an unsupported forecast* and predict the result first; keep *Design a discriminating next run* failing beside the repair. Log a missing the Python standard library separately from a wrong scaling relationship value in `llm-029`.

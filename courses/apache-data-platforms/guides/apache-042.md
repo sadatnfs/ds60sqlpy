@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-040`, `apache-006`.
 
+## Key terms
+
+- **Optimistic concurrency:** A commit strategy in which writers prepare updates without locks and the catalog accepts a commit only if the table state they observed is still current.
+- **Commit requirement:** A condition sent with an Iceberg commit, such as the expected current snapshot or schema identity, that the catalog checks before swapping metadata.
+- **Compare-and-swap:** An atomic update that replaces the current value only if it still equals an expected old value, the model behind a catalog's metadata pointer swap.
+- **Commit conflict:** A rejected commit because another writer changed the table first. The client must reload and decide whether its operation is still valid.
+- **Ambiguous commit:** A commit whose response was lost, so the client must check whether it succeeded before repeating a business append.
+
 ## A catalog commit must detect competing table state
 
 Two writers can load the same table metadata and prepare different updates.
@@ -79,6 +87,50 @@ tradeoff is explicit conflict handling and sometimes wasted preparation work.
 These cases show both the rejected stale update and a reloaded, revalidated
 success without inventing a global lock or claiming every operation is automatically
 safe to replay.
+
+## Worked examples
+
+### Reject a commit based on stale metadata
+
+```python
+from pyiceberg.exceptions import CommitFailedException
+from pyiceberg.types import LongType
+
+stale = catalog.load_table("demo.orders")
+with table.update_schema() as update:
+    update.add_column("note", LongType())
+try:
+    with stale.update_schema() as update:
+        update.add_column("stale_field", LongType())
+except CommitFailedException as error:
+    print("rejected:", type(error).__name__)
+```
+
+The second writer loaded the table before the note column existed, so its commit asserts a schema that is no longer current, and the SQL catalog refuses the pointer swap. The output names CommitFailedException. Silent success here would mean the catalog accepted a last-writer-wins update and lost note. The same check protects concurrent appends from replacing each other's snapshots.
+
+### Reload, revalidate and retry the intended change
+
+```python
+current = catalog.load_table("demo.orders")
+names = current.schema().column_names
+if "stale_field" not in names:
+    with current.update_schema() as update:
+        update.add_column("stale_field", LongType())
+print(catalog.load_table("demo.orders").schema().column_names)
+```
+
+The retry starts from freshly loaded metadata and checks whether its change is still needed before committing, so the final column list contains id, region, amount, note and stale_field. Blindly retrying the old update object would fail again, and retrying a data append without revalidation can double write rows. Decide per operation whether a conflict should retry, merge or stop for a human.
+
+### Inspect the metadata pointer after each commit
+
+```python
+print(catalog.load_table("demo.orders").metadata_location)
+with current.update_schema() as update:
+    update.add_column("reviewed", LongType())
+print(catalog.load_table("demo.orders").metadata_location)
+```
+
+Each line prints a different metadata JSON path under the table metadata directory, with an incremented version prefix. The SQL catalog row stores only this pointer, so a commit is a compare-and-swap on that row. When diagnosing a conflict, compare the location a writer loaded with the current one; if they differ, the writer was stale.
 
 ## Complete worked source
 

@@ -76,7 +76,12 @@ The image reuses local `ds60sqlpy-worker-llm-torch-cpu:1.4.3`, then installs the
 complete `requirements.arm64.lock` or `requirements.amd64.lock` with required
 hashes and binary wheels. Torch 2.9.1 is CPU-only. Transformers 4.57.1,
 TRL 0.24.0 and PEFT 0.17.1 are explicit version choices. No CUDA dependency tree is
-installed by this recipe. `pip check` must pass during the build. The recipe
+installed by this recipe. `pip check` must pass during the build. The classroom
+base carries no pip, so the build uses Python's bundled pip for this one install
+and removes it afterwards. The recipe runs as the unprivileged `nobody` account
+(UID 65534); its `/models` mount point is owned by that account, so a new or
+empty learning volume becomes writable on first use. A volume written by an
+older root-run recipe stays root-owned; create a fresh volume for this image. The recipe
 intentionally pins the Transformers 4.57 line; an upgrade to 5.x must rerun the
 chat-template prefix and label-mask checks before any training result is reused.
 

@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-052-writes-sstables-and-reads">apache-052: Writes, SSTables and reads<a class="heading-anchor" href="#apache-052-writes-sstables-and-reads" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-051</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Commitlog:</strong> An append-only log on each node that records a write before it is applied in memory, so it can be replayed after a restart.</li>
+<li><strong>Memtable:</strong> The mutable in-memory structure that holds recent writes for a table until it is flushed to disk.</li>
+<li><strong>SSTable:</strong> An immutable sorted string table file written when a memtable flushes. Reads may merge several SSTables and the memtable.</li>
+<li><strong>Write timestamp:</strong> The timestamp attached to each written cell. When versions of the same cell conflict, the one with the highest timestamp wins.</li>
+<li><strong>Bloom filter:</strong> A per-SSTable probabilistic structure that can prove a partition key is absent but can return false positives, so a possible match still needs a read.</li>
+</ul>
 <h3 id="follow-the-write-path-and-the-read-path-separately">Follow the write path and the read path separately<a class="heading-anchor" href="#follow-the-write-path-and-the-read-path-separately" aria-label="Link to this section">#</a></h3>
 <p>Cassandra&#x27;s storage engine combines a commitlog, mutable memory structures and immutable sorted storage files called SSTables. A write can be recorded in the commitlog and applied to a memtable before later flush produces SSTables. Compaction merges selected immutable files and resolves versions according to the storage engine&#x27;s rules. It is a storage maintenance process, not a business transaction or a promise that every old byte disappears immediately.</p>
 <p>Reads can combine information from memtables and several SSTables. Bloom filters, partition indexes, caches and clustering bounds reduce unnecessary work, but none replaces a correct data model. A Bloom filter can rule out a file that does not contain a key with a controlled false-positive possibility; a possible match still needs verification. Do not describe it as an exact list of present rows.</p>
@@ -210,6 +218,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Record write timestamps, supplied consistency, partition identity, read bounds and the node&#x27;s commitlog/flush/compaction observations. Distinguish stale data from a wrong partition key or timezone. Avoid broad cache or file deletion as a first response to a surprising value; it can erase the evidence needed to explain it.</p>
 <p><strong>Interview discussion: why can an older-arriving update remain invisible?</strong> Its write timestamp can lose to a later version already stored for the same cell. That is different from a network failure or a missing partition. The two cases connect actual timestamp resolution and bounded clustering access to the LSM storage mechanisms, while keeping physical-file and failure-durability claims separate from the observed logical results.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="competing-writes-with-explicit-timestamps">Competing writes with explicit timestamps<a class="heading-anchor" href="#competing-writes-with-explicit-timestamps" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> ds60_orders<span class="syntax-punctuation">.</span>clocked <span class="syntax-punctuation">(</span><span class="syntax-keyword">key</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;demo&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;initial&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">USING</span> <span class="syntax-keyword">TIMESTAMP</span> <span class="syntax-number">1700000000000000</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">UPDATE</span> ds60_orders<span class="syntax-punctuation">.</span>clocked <span class="syntax-keyword">USING</span> <span class="syntax-keyword">TIMESTAMP</span> <span class="syntax-number">1700000000000010</span>
+<span class="syntax-keyword">SET</span> value <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;newest&#x27;</span>
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">key</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;demo&#x27;</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">UPDATE</span> ds60_orders<span class="syntax-punctuation">.</span>clocked <span class="syntax-keyword">USING</span> <span class="syntax-keyword">TIMESTAMP</span> <span class="syntax-number">1700000000000005</span>
+<span class="syntax-keyword">SET</span> value <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;stale&#x27;</span>
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">key</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;demo&#x27;</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">SELECT</span> value
+<span class="syntax-keyword">FROM</span> ds60_orders<span class="syntax-punctuation">.</span>clocked
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">key</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;demo&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+<p>The final SELECT returns newest even though stale was written last, because Cassandra resolves each cell by its write timestamp in microseconds and not by arrival order. This is why client clock skew matters: a writer whose clock runs ahead can silently win against later, correct updates. The client in the project raises an AssertionError if this rule ever changes, which makes the check repeatable after restarts.</p>
+<h4 id="a-clustering-range-inside-one-partition">A clustering range inside one partition<a class="heading-anchor" href="#a-clustering-range-inside-one-partition" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  amount
+<span class="syntax-keyword">FROM</span>
+  ds60_orders<span class="syntax-punctuation">.</span>by_customer
+<span class="syntax-keyword">WHERE</span>
+  customer_id <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;c1&#x27;</span>
+  <span class="syntax-keyword">AND</span> day_bucket <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span>
+  <span class="syntax-keyword">AND</span> ordered_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2026-01-01 00:00:02&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+<p>The illustrative customer and day values follow the shape of the by_customer table, whose partition key is customer_id plus day_bucket and whose rows are ordered by ordered_at descending. The partition key routes the read to one replica set, and the clustering range then reads a contiguous slice inside that partition. Remove the partition key and Cassandra refuses the query unless ALLOW FILTERING is added, which turns a targeted read into a scan; that refusal is a design signal, not an error to suppress.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="storage-and-timestamp-observations">Storage and timestamp observations<a class="heading-anchor" href="#storage-and-timestamp-observations" aria-label="Link to this section">#</a></h2>

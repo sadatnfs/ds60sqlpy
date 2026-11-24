@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a warp shuffle reduction that is correct for every tail size and state its participation invariant.
+
 Work through *Race reasoning, masks and warp cooperation* with the concrete cases below. Finish with this evidence:
 correct results across all tail sizes and a written participation invariant. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Warp collectives require agreement about participating lanes. A mask names lanes expected to take part in a synchronized intrinsic, and source lanes used by a shuffle must actually participate. Independent thread scheduling means a convenient source ordering is not a general synchronization guarantee. Partial warps and divergent predicates need explicit reasoning. One safe educational reduction pattern has all lanes in a full warp participate, assigns zero to invalid data lanes, and then uses a full mask. A genuinely partial group needs a suitable mask and algorithm, not the same mask pasted everywhere.
+
+### Key terms
+
+- **Lane:** A thread's position, from 0 to 31, within its warp.
+- **Participation mask:** A 32-bit value naming the lanes that must take part in a synchronized warp intrinsic.
+- **Warp shuffle:** An intrinsic such as `__shfl_down_sync` that reads a register value from another lane of the same warp.
+- **Independent thread scheduling:** The execution model, from Volta onward, in which lanes of a warp can progress separately, so implicit warp synchrony is not guaranteed.
 
 ## How to run and study this lesson
 

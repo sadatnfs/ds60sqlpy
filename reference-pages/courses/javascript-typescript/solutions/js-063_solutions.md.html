@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Create a Map from stable region ID to validated data, then look up each feature’s ID. Validate duplicate statistical IDs and report unmatched features and rows. Compute rates only for positive valid denominators. Choose a sequential scale for nonnegative ordered rates and explain its domain.</p>
 <p>The reference uses synthetic planar regions with <code>geoIdentity</code>, so the lesson isolates join and rate logic without introducing a global projection. It includes one missing region deliberately. This is a map-like teaching fixture, not a real-world geographic claim.</p>
 <h3 id="exercise-1-predict-rates-for-10-100-and-20-100">Exercise 1: Predict rates for 10/100 and 20/100.<a class="heading-anchor" href="#exercise-1-predict-rates-for-10-100-and-20-100" aria-label="Link to this section">#</a></h3>
-<p>A rate is a derived quantity. Preserve numerator and denominator so the calculation can be audited.</p>
+<p>A rate is a derived quantity. Preserve numerator and denominator so the calculation can be audited. byId maps each row to events / total, so A is 10 / 100 = 0.1 and B is 20 / 100 = 0.2, labeled 10% and 20% with format &quot;.0%&quot;. Storing only the rate would lose the fact that both share a denominator of 100. The reference checks byId.get(&quot;A&quot;) === 0.1 and byId.get(&quot;B&quot;) === 0.2.</p>
 <p><strong>Expected:</strong> 0.1 and 0.2 with an explicit common denominator meaning.</p>
 <h3 id="exercise-2-add-a-region-with-no-statistical-row">Exercise 2: Add a region with no statistical row.<a class="heading-anchor" href="#exercise-2-add-a-region-with-no-statistical-row" aria-label="Link to this section">#</a></h3>
-<p>Do not default a failed join to zero. Missingness is an observation about data availability.</p>
+<p>Do not default a failed join to zero. Missingness is an observation about data availability. Region C has a polygon but no row, so byId.has(&quot;C&quot;) is false, the fill is gray #d1d5db and the label reads &quot;C: missing&quot;. Writing byId.get(d.id) || 0 would color C as a 0% rate on the blue scale. The reference checks byId has no C.</p>
 <p><strong>Expected:</strong> It receives the documented missing-data appearance.</p>
 <h3 id="exercise-3-build-a-stable-id-choropleth-join">Exercise 3: Build a stable-ID choropleth join.<a class="heading-anchor" href="#exercise-3-build-a-stable-id-choropleth-join" aria-label="Link to this section">#</a></h3>
-<p>A join audit prevents silent region loss and name-based mismatches. Keep unmatched statistical rows visible too.</p>
+<p>A join audit prevents silent region loss and name-based mismatches. Keep unmatched statistical rows visible too. The reference keys features by id, checks row ids are unique, and builds a Map from id to rate. Joining on display names would break as soon as one source writes &quot;Region A&quot;. List unmatched features and unmatched rows separately to audit the join.</p>
 <p><strong>Expected:</strong> Every feature is matched or explicitly listed as missing.</p>
 <h3 id="exercise-4-diagnose-a-map-of-raw-events-interpreted-as-risk">Exercise 4: Diagnose a map of raw events interpreted as risk.<a class="heading-anchor" href="#exercise-4-diagnose-a-map-of-raw-events-interpreted-as-risk" aria-label="Link to this section">#</a></h3>
-<p>Choose a denominator appropriate to the question and verify its geographic and temporal alignment.</p>
+<p>Choose a denominator appropriate to the question and verify its geographic and temporal alignment. B has twice A&#x27;s events but both have 100 people; with totals of 100 and 1000, B&#x27;s rate would be lower than A&#x27;s. Map events / total, not events.</p>
 <p><strong>Expected:</strong> Population or exposure may explain the count pattern.</p>
 <h3 id="exercise-5-handle-a-zero-denominator">Exercise 5: Handle a zero denominator.<a class="heading-anchor" href="#exercise-5-handle-a-zero-denominator" aria-label="Link to this section">#</a></h3>
-<p>An invalid denominator cannot support a meaningful color. The chart should expose the limitation.</p>
+<p>An invalid denominator cannot support a meaningful color. The chart should expose the limitation. A total of 0 makes events / total Infinity or NaN, which the color scale cannot place. Treat that region like C and label it undefined.</p>
 <p><strong>Expected:</strong> Reject or mark the rate undefined rather than divide to infinity.</p>
 <h3 id="exercise-6-explain-ecological-inference-limits">Exercise 6: Explain ecological inference limits.<a class="heading-anchor" href="#exercise-6-explain-ecological-inference-limits" aria-label="Link to this section">#</a></h3>
-<p>Aggregation can create or reverse relationships. State the unit of analysis and avoid unsupported individual conclusions.</p>
+<p>Aggregation can create or reverse relationships. State the unit of analysis and avoid unsupported individual conclusions. A 20% regional rate does not say any individual in B has a 20% chance; the unit is the region. Note that the reference has only three synthetic regions, too few for any conclusion about association across areas.</p>
 <p><strong>Expected:</strong> Regional summaries do not automatically describe individuals.</p></article>
   </main>
 </body>

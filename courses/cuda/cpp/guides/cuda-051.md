@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a numerically stable row softmax and verify finite outputs and row sums against the CPU reference.
+
 Work through *Softmax and reductions for model workloads* with the concrete cases below. Finish with this evidence:
 finite outputs, row sums within justified tolerance and comparison with the CPU reference. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Softmax converts a row of logits into nonnegative weights that sum to one. Exponentiating large logits directly can overflow even when the final probabilities are ordinary finite values. Subtracting the row maximum preserves the exact mathematical ratios while keeping the largest exponential at one. A kernel needs a maximum reduction, exponentials, a sum reduction and division, with correct row boundaries and accumulation precision. Define behavior for masks and exceptional inputs separately; an all-masked row cannot be treated as an ordinary finite row without a policy. Test short, ragged and extreme-valued rows.
+
+### Key terms
+
+- **Logit:** An unnormalized score that softmax converts into a probability.
+- **Max subtraction:** Subtracting the row maximum before exponentiation so no exponent overflows, without changing the softmax result.
+- **Row reduction:** A maximum or sum computed across one row, which threads of a block or warp must combine.
+- **Overflow:** A value that exceeds the largest representable floating-point number and becomes infinity.
 
 ## Mathematical contract
 

@@ -391,7 +391,7 @@ VERIFY = {
         21,
         2,
     ): "Assert the token-set Jaccard of ready and not ready is 0.75, then record that the two status claims contradict.",
-    (21, 3): "Assert train [a1, a2, b1], test [c1] and excluded [b2] for cutoff 2.",
+    (21, 3): "Assert train `[a1, a2, b1]`, test `[c1]` and excluded `[b2]` for cutoff 2.",
     (
         21,
         4,

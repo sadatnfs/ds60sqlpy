@@ -1,6 +1,6 @@
 # c-008: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-008_solution.c`, implements all six cases, from the "change a caller-owned value" case to the "transfer a swap contract" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ A pointer identifies an object or function, or holds a null value. Dereferencing
 
 ## Exercise 1: Change a caller-owned value: change one input
 
-Copy worked example 1 into a scratch pad and change `int n = 4;` to `int n = 5;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "change a caller-owned value" case, into a scratch pad and change `int n = 4;` to `int n = 5;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the caller value becomes 5); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +20,21 @@ increment(&n);
 CHECK(n == 5);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `n == 5`. Restoring the original line brings back the worked observation: the caller value becomes 5.
+**Expected:** With `int n = 5;` the run stops with `Check failed` at the CHECK on `n == 5`, because the "change a caller-owned value" case no longer shows that the caller value becomes 5. Restoring `int n = 4;` brings that observation back.
 
 The helper receives a pointer copy, but that copy still designates the original integer.
 
+**Approach.** Trace the edited input: `n` starts at 5, `increment(&n)` adds 1 through the pointer, so `n` becomes 6 and the CHECK on 5 fails.
+
+**Why it holds here.** The helper receives a copy of the address, and that copy designates the caller's `n`, so `*p += 1` changes the caller's object.
+
+**A plausible wrong approach.** Predicting that the CHECK still passes because C passes arguments by value, so `n` would stay 5. The value that is copied is the pointer, not the integer it points to.
+
+**Verify.** Print `n` after the call and see 6; restore 4 and see 5.
+
 ## Exercise 2: Read a target copy: debug a regression
 
-A regression changed `int n = 3;` to `int n = 4;` in worked example 2. Run worked example 2 with that change, use the failing CHECK to explain the defect and repair it without changing the CHECK.
+A regression changed `int n = 3;` to `int n = 4;` in worked example 2, the "read a target copy" case. Run the example with that change, use the failing CHECK to explain why the copied value stays 3 and the target becomes 9 no longer holds and repair it without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -38,9 +46,17 @@ int copy = *p;
 CHECK(copy == 3 && n == 9);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `copy == 3 && n == 9`; after it the line reads `int n = 3;` again and the copied value stays 3 and the target becomes 9.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `copy == 3 && n == 9`. Once the line reads `int n = 3;` again, the "read a target copy" case again shows that the copied value stays 3 and the target becomes 9.
 
 Dereferencing to obtain an int copies that scalar value. Retaining the pointer would retain access to future target changes.
+
+**Approach.** Trace the regressed line: `copy` is initialized from `*p` while `n` is 4, so `copy` is 4; then `*p = 9` changes only `n`.
+
+**Why it holds here.** `copy` is a separate `int` holding the value read at that moment. The CHECK needs `copy == 3`, which fails because the starting value is wrong, not because the later write reached `copy`.
+
+**A plausible wrong approach.** Suspecting that `*p = 9` also changed `copy` and rewriting the write. `copy` holds no pointer to `n`, so no later store through `p` can change it; the defect is the initializer 4.
+
+**Verify.** Print `copy` and `n` and see `4 9` with the regression and `3 9` after restoring `int n = 3;`.
 
 ## Exercise 3: Reject an absent target
 
@@ -54,6 +70,14 @@ CHECK(!set_if_present(NULL, 8));
 
 Null is a valid absence representation under this helper contract. Other invalid pointers cannot be repaired by this check.
 
+**Approach.** Call `set_if_present(NULL, 8)` and expect false, because the helper tests for null before it writes.
+
+**Why it holds here.** `p == NULL` is true, so the function returns false and the store `*p = value` is never reached.
+
+**A plausible wrong approach.** Writing the helper as `*p = value; return p != NULL;`, testing after the store. Storing through a null pointer is undefined behavior, typically a crash, so the order of the test matters; describe it instead of running it.
+
+**Verify.** Build with `-fsanitize=address,undefined` and run: the CHECK passes with no report.
+
 ## Exercise 4: Update a present target
 
 Pass an integer address to the same helper.
@@ -66,6 +90,14 @@ CHECK(set_if_present(&n, 8) && n == 8);
 **Expected:** The helper returns true and stores 8.
 
 The caller owns the object and keeps it alive throughout the call.
+
+**Approach.** Call `set_if_present(&n, 8)` first and read `n` only after it returns, which is the order `&&` guarantees.
+
+**Why it holds here.** `&&` evaluates its left operand completely, including the store, before the right operand, so `n == 8` sees the new value.
+
+**A plausible wrong approach.** Writing the CHECK as `n == 8 && set_if_present(&n, 8)`. `n` is still 1 when the left operand is evaluated, so `&&` short-circuits, the helper never runs and the CHECK fails with `n` still 1.
+
+**Verify.** Evaluate the reordered expression into a `bool`, print it and `n`, and see `0 1`.
 
 ## Exercise 5: Distinguish pointer and target change
 
@@ -82,6 +114,14 @@ CHECK(a == 2 && b == 7 && *p == 7);
 
 Pointer assignment changes which object is designated. It is not a write to either prior or new target.
 
+**Approach.** Reassign `p` from `&a` to `&b` and check that both integers keep their values while `*p` now reads 7.
+
+**Why it holds here.** Assigning to `p` changes which object it designates. Nothing is stored into `a` or `b`, so they remain 2 and 7.
+
+**A plausible wrong approach.** Writing `*p = b;` instead of `p = &b;`. That stores 7 into `a` through the old pointer, so `a == 2` fails even though `*p` is 7.
+
+**Verify.** Print `a`, `b` and `*p` and see `2 7 7`; the `*p = b` version prints `7 7 7`.
+
 ## Exercise 6: Transfer a swap contract
 
 Swap two caller-owned integers through pointers.
@@ -96,6 +136,14 @@ CHECK(a == 7 && b == 2);
 
 A temporary preserves the first value before overwriting it. The API requires two valid writable int objects.
 
+**Approach.** Save `*a` in a temporary, copy `*b` into `*a`, then store the saved value into `*b`.
+
+**Why it holds here.** The temporary keeps the original 2 after `*a` is overwritten with 7, so `*b` receives 2 and the CHECK on `7 2` holds. Calling `swap_ints(&a, &a)` also leaves `a` unchanged.
+
+**A plausible wrong approach.** Swapping without a temporary, `*a = *b; *b = *a;`. The first store destroys 2, so both integers end as 7 and `b == 2` fails.
+
+**Verify.** Print `a` and `b` and see `7 2`; the version without the temporary prints `7 7`.
+
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Write `bool min_max(const int *values, size_t count, int *lo, int *hi)` that rejects null pointers and a count of 0, leaves both outputs unchanged on rejection, and starts both running values at `values[0]`. Check that `{4, -2, 9}` gives -2 and 9, a single element `{5}` gives 5 for both, count 0 is rejected and a null `hi` is rejected. Explain which result a version that starts the running minimum at 0 gets wrong for `{4, 9}`.

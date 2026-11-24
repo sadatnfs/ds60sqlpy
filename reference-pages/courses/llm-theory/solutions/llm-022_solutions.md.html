@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="llm-022-explanatory-solutions">llm-022: explanatory solutions<a class="heading-anchor" href="#llm-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Read these reproducibility, evaluation mode and restart answers after attempting <em>Create Adam history</em> through <em>Verify evaluation and cleanup</em>, or after asking for a reveal. They reuse the guide&#x27;s literals, so a mismatch in <em>Calculate the uninterrupted next step</em> points to one step. <code>llm-022_solution.py</code> holds the assertions; this page explains how they test evaluation mode. Then try <em>Verify evaluation and cleanup</em> on a fresh input you chose before looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Reproducibility has several layers: a saved seed, deterministic evaluation behavior, stable data identity and sufficient training state for restart. model.eval disables dropout and changes other mode-dependent layers, but it does not disable gradient tracking; no_grad is a separate context. Adam continuation requires model parameters and optimizer state, including moments and update counters. A new-process next-step comparison is stronger than reloading weights into an object that still holds the original optimizer. This tiny scalar fixture tests restart mechanics, while the decoder prefix check tests evaluation behavior. Cross-platform bitwise identity is not promised.</p>
 <p><strong>Evaluation mode:</strong> Module behavior chosen by eval, separate from gradient recording.</p>
@@ -213,7 +213,7 @@ opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.<
     opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">and</span> opt<span class="syntax-operator">.</span>state<span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">step</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span></code></pre>
 <p><strong>Expected:</strong> positive weight and optimizer step 2.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>w.item() &gt; 0</code> and <code>opt.state[w][&#x27;step&#x27;].item() == 2</code>.</p>
+<p><strong>Verify:</strong> For <em>Create Adam history</em>, a fresh-process check confirms <code>w.item() &gt; 0</code> and <code>opt.state[w][&#x27;step&#x27;].item() == 2</code>.</p>
 <h3 id="exercise-2-save-a-trusted-local-checkpoint">Exercise 2: Save a trusted local checkpoint<a class="heading-anchor" href="#exercise-2-save-a-trusted-local-checkpoint" aria-label="Link to this section">#</a></h3>
 <p>The question is: Write the scalar weight and optimizer state into an owned temporary file.</p>
 <p>The file is created by this lesson and loaded only for this local test. Loading arbitrary untrusted serialized objects is outside the fixture.</p>
@@ -223,7 +223,7 @@ torch<span class="syntax-operator">.</span>save<span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> path<span class="syntax-operator">.</span>is_file<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 saved <span class="syntax-operator">=</span> w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> checkpoint file exists.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>path.is_file()</code>.</p>
+<p><strong>Verify:</strong> For <em>Save a trusted local checkpoint</em>, a fresh-process check confirms <code>path.is_file()</code>.</p>
 <h3 id="exercise-3-calculate-the-uninterrupted-next-step">Exercise 3: Calculate the uninterrupted next step<a class="heading-anchor" href="#exercise-3-calculate-the-uninterrupted-next-step" aria-label="Link to this section">#</a></h3>
 <p>The question is: Take one more update and save the expected weight.</p>
 <p>The control uses the same objective and optimizer settings. A different batch or learning-rate schedule would make the comparison uninterpretable.</p>
@@ -233,7 +233,7 @@ opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(<
 expected <span class="syntax-operator">=</span> w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> opt<span class="syntax-operator">.</span>state<span class="syntax-punctuation">[</span>w<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">step</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> expected <span class="syntax-operator">!=</span> saved</code></pre>
 <p><strong>Expected:</strong> step 3 and changed weight.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>opt.state[w][&#x27;step&#x27;].item() == 3</code> and <code>expected != saved</code>.</p>
+<p><strong>Verify:</strong> For <em>Calculate the uninterrupted next step</em>, a fresh-process check confirms <code>opt.state[w][&#x27;step&#x27;].item() == 3</code> and <code>expected != saved</code>.</p>
 <h3 id="exercise-4-restore-in-a-new-interpreter">Exercise 4: Restore in a new interpreter<a class="heading-anchor" href="#exercise-4-restore-in-a-new-interpreter" aria-label="Link to this section">#</a></h3>
 <p>The question is: Load the trusted checkpoint into fresh weight and Adam objects, then take one step.</p>
 <p>The child has no live parent optimizer. Agreement therefore depends on reconstructing saved state, rather than on an accidental in-memory reference.</p>
@@ -258,7 +258,7 @@ result <span class="syntax-operator">=</span> subprocess<span class="syntax-oper
 restored <span class="syntax-operator">=</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>result<span class="syntax-operator">.</span>stdout<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>splitlines<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>restored<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">weight</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> child weight agrees within 1e-6.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>not (result.returncode)</code> and <code>restored[&#x27;weight&#x27;]</code> matches <code>expected</code> within 1e-6.</p>
+<p><strong>Verify:</strong> For <em>Restore in a new interpreter</em>, a fresh-process check confirms <code>not (result.returncode)</code> and <code>restored[&#x27;weight&#x27;]</code> matches <code>expected</code> within 1e-6.</p>
 <h3 id="exercise-5-expose-weights-only-continuation">Exercise 5: Expose weights-only continuation<a class="heading-anchor" href="#exercise-5-expose-weights-only-continuation" aria-label="Link to this section">#</a></h3>
 <p>The question is: Initialize a fresh optimizer at the saved weight and compare its next update.</p>
 <p>The weight alone gives the same immediate scalar prediction but a different future training trajectory. Prediction parity and restart parity are distinct tests.</p>
@@ -268,7 +268,7 @@ fresh_opt <span class="syntax-operator">=</span> torch<span class="syntax-operat
 fresh_opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>fresh_w<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> expected<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1e-6</span></code></pre>
 <p><strong>Expected:</strong> weight differs from full-state continuation.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>abs(fresh_w.item() - expected) &gt; 1e-06</code>.</p>
+<p><strong>Verify:</strong> For <em>Expose weights-only continuation</em>, a fresh-process check confirms <code>abs(fresh_w.item() - expected) &gt; 1e-06</code>.</p>
 <h3 id="exercise-6-verify-evaluation-and-cleanup">Exercise 6: Verify evaluation and cleanup<a class="heading-anchor" href="#exercise-6-verify-evaluation-and-cleanup" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use Dropout(0.5) in eval mode on ones and remove only the owned temporary checkpoint.</p>
 <p>Evaluation mode disables this stochastic layer. Cleanup is confined to the temporary fixture and never deletes learner checkpoints or progress.</p>
@@ -279,9 +279,9 @@ ones <span class="syntax-operator">=</span> torch<span class="syntax-operator">.
 temporary<span class="syntax-operator">.</span>cleanup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> path<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> dropout returns ones; temporary path absent.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>torch.equal(drop(ones), ones)</code> and <code>not path.exists()</code>.</p>
+<p><strong>Verify:</strong> For <em>Verify evaluation and cleanup</em>, a fresh-process check confirms <code>torch.equal(drop(ones), ones)</code> and <code>not path.exists()</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one input to <em>Restore in a new interpreter</em> and predict the result first; keep <em>Expose weights-only continuation</em> failing beside the repair. Log a missing PyTorch separately from a wrong evaluation mode value in <code>llm-022</code>.</p></article>
   </main>
 </body>
 </html>

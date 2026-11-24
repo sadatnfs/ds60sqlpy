@@ -16,6 +16,14 @@ Local Compose file-based secrets are not a universal encrypted secret vault. The
 
 This lesson uses only an invented value. Never copy a real credential into the repository, a screenshot or a public report. The course fixture needs no password, so the optional example belongs in a separate scratch project and demonstrates a file-reading contract rather than adding a secret requirement to the app.
 
+### Key terms
+
+- **Runtime secret:** Sensitive input an application needs while it runs, with a different lifecycle from a build secret.
+- **Secret file:** A file that Compose mounts into a selected service to deliver a declared secret's value.
+- **/run/secrets:** The in-container directory where Compose places declared secrets as files.
+- **Controlled disclosure:** Exposing a secret only to the processes that need it and keeping it out of logs, reports and screenshots.
+- **Rotation:** Replacing a secret value with a new one and retiring the old value without exposing either.
+
 ## Anatomy and a trace you can follow
 
 A top-level `secrets` entry declares a source, and a service grants itself access by name. Inside the service the file commonly appears under `/run/secrets/NAME`. The app must explicitly read that file or support a documented file-based configuration option.
@@ -98,11 +106,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Passing secrets as environment variables that appear in `docker inspect`. Declaring a secret but not granting it to the service. Rotating by restarting without revoking the old credential.
 
-Exercise 4 is this chapter's boundary case: Diagnose a secret declared but not granted to a service. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a secret declared but not granted to a service. Render the effective Compose model and read the service's `secrets` list before editing file permissions or adding a host mount. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using runtime secret, secret file, /run/secrets and controlled disclosure. Reconstruct worked example 2 (Validate presence without disclosure) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Recall how the validator proves the secret is present without printing it. Then reconstruct worked example 2 (Validate presence without disclosure) with one different value, predict what changes, and name which of runtime secret, secret file, /run/secrets and controlled disclosure the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

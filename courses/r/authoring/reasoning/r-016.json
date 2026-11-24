@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Validating ID candidates step by step",
+      "body": "```text\nraw          after trimws   grepl(\"[0-9]+\")   grepl(\"^[0-9]{4}$\")\n\" 0017 \"     \"0017\"         TRUE              TRUE\n\"A17\"        \"A17\"          TRUE              FALSE\n\"17x\"        \"17x\"          TRUE              FALSE\n\"ID12bad\"    \"ID12bad\"      TRUE              FALSE\n```\n\nThe unanchored search says yes to every row, because each one contains some digits. The anchored pattern requires exactly four digits from the first character to the last, so only the trimmed 0017 passes. Keeping the result as text matters: `as.numeric(\"0017\")` is 17, and the two leading zeros that make it a four-digit ID are gone.\n\nThe byte count for the accented word is visible in its raw bytes:\n\n```text\nexpression                       result\nnchar(text)                      4\nnchar(text, type = \"bytes\")      5\ncharToRaw(text)                  63 61 66 c3 a9\n```\n\nThe letters c, a and f take one byte each, and é takes the two bytes c3 and a9 in UTF-8, which is why a byte limit and a character limit disagree for this word."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Call `grepl(\".\", x, fixed = TRUE)` on c(\"a.b\", \"axb\").",
+      "why": "Fixed matching looks for a literal dot. \"a.b\" contains one and \"axb\" does not, so the result is TRUE, FALSE.",
+      "wrong": "Dropping `fixed = TRUE`. As a regex the dot matches any character, so both strings return TRUE and the check is useless. Escaping it as `\\\\.` also works, but fixed matching states the intent more plainly for a literal delimiter.",
+      "verify": "`identical(grepl(\".\", c(\"a.b\", \"axb\"), fixed = TRUE), c(TRUE, FALSE))` returns TRUE."
+    },
+    {
+      "approach": "Change the repetition count to five and keep both anchors: `^[0-9]{5}$`.",
+      "why": "The anchors tie the pattern to the whole field, so \"00123\" has exactly five digits and passes, while \"123\" is too short.",
+      "wrong": "Removing the anchors. `[0-9]{5}` finds five digits inside \"001234\", so a six-digit value passes as a five-digit ID.",
+      "verify": "`grepl(\"^[0-9]{5}$\", \"00123\")` returns TRUE and on \"123\" returns FALSE."
+    },
+    {
+      "approach": "Split with `strsplit(\"A|12\", \"|\", fixed = TRUE)` and take `[[1]]` to get a character vector.",
+      "why": "The pipe is meant as a literal delimiter, so fixed matching gives the two fields A and 12.",
+      "wrong": "Splitting on the regex pipe. Example 3 shows the result is A, |, 1 and 2, four pieces with the delimiter kept as data.",
+      "verify": "`identical(fields, c(\"A\", \"12\"))` returns TRUE."
+    },
+    {
+      "approach": "Validate with the anchored grammar `^[0-9]+$` instead of searching for digits.",
+      "why": "\"ID12bad\" contains 12 but also letters, so it is not an all-digit field and the anchored test rejects it.",
+      "wrong": "Testing with `grepl(\"[0-9]+\", x)`. It returns TRUE for \"ID12bad\", \"A17\" and \"17x\" alike, as the guide table shows.",
+      "verify": "`grepl(\"^[0-9]+$\", \"ID12bad\")` returns FALSE."
+    },
+    {
+      "approach": "Write down the field policy, then append an empty field when a line ends with the delimiter, for example with `endsWith(x, \"|\")`.",
+      "why": "Under a two-field contract \"A|\" means A plus an empty second field, but strsplit returns only \"A\".",
+      "wrong": "Assuming every row splits into two parts and reading `parts[[2]]`. For \"A|\" that stops with subscript out of bounds, or misaligns columns if rows of one and two pieces are bound into a table, since the shorter row is recycled or rejected depending on the binding function.",
+      "verify": "`identical(strsplit(\"A|\", \"|\", fixed = TRUE)[[1]], \"A\")` returns TRUE, which is the behavior the policy corrects."
+    },
+    {
+      "approach": "Measure with `nchar(text, type = \"bytes\")` when the limit is in bytes, and say which unit applies.",
+      "why": "\"café\" is four characters but five UTF-8 bytes because é is stored as c3 a9.",
+      "wrong": "Checking `nchar(text) <= 4` for a four-byte column. café passes, then overflows the column or is cut in the middle of é, leaving the lone byte c3, which is not valid UTF-8 on its own.",
+      "verify": "`nchar(text, type = \"bytes\")` returns 5 while `nchar(text)` returns 4."
+    }
+  ]
+}

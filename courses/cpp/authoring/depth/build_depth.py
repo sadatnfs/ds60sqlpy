@@ -157,4 +157,5 @@ for n in DETAILS:
     else:
         text = re.sub(r"(?<=## Primary references\n\n)[^\n]*", lambda _: reference, text, count=1)
     path.write_text(text)
+runpy.run_path(str(HERE / "key_terms.py"), run_name="__main__")
 runpy.run_path(str(HERE / "normalize_prose.py"), run_name="__main__")

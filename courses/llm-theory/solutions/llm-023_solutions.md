@@ -1,6 +1,6 @@
 # llm-023: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these top-p, termination and decoding failure cases answers after attempting *Retain the crossing token* through *Separate greedy mode*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Reproduce local sampling* points to one step. `llm-023_solution.py` holds the assertions; this page explains how they test nucleus. Then try *Separate greedy mode* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -33,7 +33,7 @@ np.testing.assert_allclose(sorted_p[keep].sum().item(), 0.8, atol=1e-6, rtol=0)
 
 **Expected:** retained IDs 0, 1 with original mass 0.8.
 
-**Verify:** In a fresh process, the exercise checks confirm `order[keep].tolist() == [0, 1]` and `sorted_p[keep].sum().item()` matches `0.8` within 1e-6.
+**Verify:** For *Retain the crossing token*, a fresh-process check confirms `order[keep].tolist() == [0, 1]` and `sorted_p[keep].sum().item()` matches `0.8` within 1e-6.
 
 ## Exercise 2: Renormalize retained mass
 
@@ -49,7 +49,7 @@ np.testing.assert_allclose(normalized.numpy(), [0.625, 0.375], atol=1e-6, rtol=0
 
 **Expected:** probabilities 0.625, 0.375.
 
-**Verify:** In a fresh process, the exercise checks confirm `normalized.numpy()` matches `[0.625, 0.375]` within 1e-6.
+**Verify:** For *Renormalize retained mass*, a fresh-process check confirms `normalized.numpy()` matches `[0.625, 0.375]` within 1e-6.
 
 ## Exercise 3: Reproduce local sampling
 
@@ -67,7 +67,7 @@ assert torch.equal(a, b) and set(a.tolist()) <= {0, 1}
 
 **Expected:** draw sequences match and contain only 0, 1.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.equal(a, b)` and `set(a.tolist()) <= {0, 1}`.
+**Verify:** For *Reproduce local sampling*, a fresh-process check confirms `torch.equal(a, b)` and `set(a.tolist()) <= {0, 1}`.
 
 ## Exercise 4: Stop on EOS
 
@@ -86,7 +86,7 @@ assert generated == [2, 3, 9]
 
 **Expected:** generated 2, 3, 9; 4 is never consumed.
 
-**Verify:** In a fresh process, the exercise checks confirm `generated == [2, 3, 9]`.
+**Verify:** For *Stop on EOS*, a fresh-process check confirms `generated == [2, 3, 9]`.
 
 ## Exercise 5: Enforce a cap without EOS
 
@@ -105,7 +105,7 @@ assert generated == [2, 2, 2]
 
 **Expected:** exactly 3 generated tokens.
 
-**Verify:** In a fresh process, the exercise checks confirm `generated == [2, 2, 2]`.
+**Verify:** For *Enforce a cap without EOS*, a fresh-process check confirms `generated == [2, 2, 2]`.
 
 ## Exercise 6: Separate greedy mode
 
@@ -122,8 +122,8 @@ assert choice == 0 and torch.isfinite(logits).all()
 
 **Expected:** token 0 and finite untouched logits.
 
-**Verify:** In a fresh process, the exercise checks confirm `choice == 0` and `torch.isfinite(logits).all()`.
+**Verify:** For *Separate greedy mode*, a fresh-process check confirms `choice == 0` and `torch.isfinite(logits).all()`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Stop on EOS* and predict the result first; keep *Enforce a cap without EOS* failing beside the repair. Log a missing PyTorch separately from a wrong nucleus value in `llm-023`.

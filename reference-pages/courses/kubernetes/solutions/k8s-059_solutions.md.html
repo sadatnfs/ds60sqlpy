@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-the-effect-of-an-empty-egress-list">Exercise 1: Predict the effect of an empty egress list.<a class="heading-anchor" href="#exercise-1-predict-the-effect-of-an-empty-egress-list" aria-label="Link to this section">#</a></h3>
 <p>Isolation and additive policy semantics still apply. Review every policy selecting the same Pod.</p>
 <p><strong>Expected:</strong> It contributes no allowed outgoing flows for selected Pods.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Note that policyTypes includes Egress and the egress list is empty for the selected Pods.</li>
+<li><strong>Why it is correct:</strong> Once a policy selects Pods for egress, only listed rules allow outgoing traffic, and an empty list allows none.</li>
+<li><strong>Plausible wrong approach:</strong> Reading an empty list as no restriction gets the meaning backward.</li>
+<li><strong>How to verify:</strong> The prediction says it contributes no allowed outgoing flows.</li>
+</ul>
 <h3 id="exercise-2-include-dns-in-a-dependency-map">Exercise 2: Include DNS in a dependency map.<a class="heading-anchor" href="#exercise-2-include-dns-in-a-dependency-map" aria-label="Link to this section">#</a></h3>
 <p>A hostname-based app dependency starts with a DNS leg. Ignoring it produces confusing broad failures.</p>
 <p><strong>Expected:</strong> Resolver destination and UDP/TCP requirements are explicit.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Add the cluster DNS Pods or Service and port 53 over UDP and TCP to the dependency map.</li>
+<li><strong>Why it is correct:</strong> Name lookups happen before any request, so blocking DNS breaks every named call.</li>
+<li><strong>Plausible wrong approach:</strong> Allowing only UDP 53 can break large responses that fall back to TCP.</li>
+<li><strong>How to verify:</strong> The map names the resolver destination with both UDP and TCP.</li>
+</ul>
 <h3 id="exercise-3-design-a-minimal-egress-matrix">Exercise 3: Design a minimal egress matrix.<a class="heading-anchor" href="#exercise-3-design-a-minimal-egress-matrix" aria-label="Link to this section">#</a></h3>
 <p>Use the actual prepared topology. A generic allow-all DNS rule may target the wrong namespace or resolver deployment.</p>
 <p><strong>Expected:</strong> Only named required internal or external flows are permitted.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Permit only the internal and external flows the workload needs, each with destination and port.</li>
+<li><strong>Why it is correct:</strong> A minimal list limits what a compromised Pod can reach while keeping required calls working.</li>
+<li><strong>Plausible wrong approach:</strong> Allowing all egress to simplify testing removes the control the policy was meant to add.</li>
+<li><strong>How to verify:</strong> Every allowed flow in the matrix is named and required.</li>
+</ul>
 <h3 id="exercise-4-diagnose-named-request-failure-with-direct-ip-success">Exercise 4: Diagnose named-request failure with direct-IP success.<a class="heading-anchor" href="#exercise-4-diagnose-named-request-failure-with-direct-ip-success" aria-label="Link to this section">#</a></h3>
 <p>This contrast is stronger evidence than changing application credentials or opening every port.</p>
 <p><strong>Expected:</strong> Inspect DNS egress and resolver behavior first.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check DNS egress rules and the Pod&#x27;s resolver before checking the destination.</li>
+<li><strong>Why it is correct:</strong> If the IP works, the path to the service is open, which points to blocked or failed name resolution.</li>
+<li><strong>Plausible wrong approach:</strong> Opening egress to the destination again fixes nothing when the lookup fails.</li>
+<li><strong>How to verify:</strong> The first checks are DNS egress and resolver behavior.</li>
+</ul>
 <h3 id="exercise-5-explain-why-an-ip-block-is-not-a-hostname-policy">Exercise 5: Explain why an IP block is not a hostname policy.<a class="heading-anchor" href="#exercise-5-explain-why-an-ip-block-is-not-a-hostname-policy" aria-label="Link to this section">#</a></h3>
 <p>Domain-level control needs a named supported extension or proxy design. Do not imply it exists in the standard API.</p>
 <p><strong>Expected:</strong> It matches addresses, which may not be stable or exclusive to one service.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Explain that ipBlock matches addresses, not names.</li>
+<li><strong>Why it is correct:</strong> A hostname can resolve to changing or shared addresses, so a CIDR may miss new ones or include other services.</li>
+<li><strong>Plausible wrong approach:</strong> Using a CIDR from one lookup as a permanent hostname allow can break later or overreach.</li>
+<li><strong>How to verify:</strong> The answer says addresses may not be stable or exclusive.</li>
+</ul>
 <h3 id="exercise-6-plan-an-egress-qualification-after-nat">Exercise 6: Plan an egress qualification after NAT.<a class="heading-anchor" href="#exercise-6-plan-an-egress-qualification-after-nat" aria-label="Link to this section">#</a></h3>
 <p>Policy evaluation details can differ. Test the actual path before relying on a conceptual address match.</p>
-<p><strong>Expected:</strong> Record implementation, observed addresses and both allowed/denied cases.</p></article>
+<p><strong>Expected:</strong> Record implementation, observed addresses and both allowed/denied cases.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record the CNI, the source address observed at the destination and one allowed and one denied case.</li>
+<li><strong>Why it is correct:</strong> NAT can change the source the external side sees, so observed addresses explain matching results.</li>
+<li><strong>Plausible wrong approach:</strong> Testing only an allowed destination cannot show the policy denies anything.</li>
+<li><strong>How to verify:</strong> The record has implementation, observed addresses and both outcomes.</li>
+</ul></article>
   </main>
 </body>
 </html>

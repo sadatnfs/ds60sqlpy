@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-013`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-013` (Paired reliability studies and family-aware uncertainty). They introduce the notation this lesson needs for sft record and answer target mask.
 
 ## Learning objectives
 
@@ -42,7 +42,7 @@ Formatting is part of that sequence. Role markers, separators and end-of-turn to
 
 Let record i have m_i active answer tokens and mean token loss l_i. A global token mean is the sum of \(m_{i}\cdot l_{i}\) divided by the sum of m_i. An equally weighted mean of record losses is the sum of l_i divided by the number of records. These objectives differ when answer lengths differ.
 
-For an illustrative pair, one answer has ten active tokens with mean loss 0.2 and another has 100 active tokens with mean loss 1.0. The token-weighted mean is(10*0.2+100*1.0)/110=102/110, about 0.9273. The equally weighted record mean is(0.2+1.0)/2=0.6. The first gives the longer answer more influence. Neither is automatically correct for every assistant task; the intended population and behavior should determine the weighting.
+For an illustrative pair, one answer has ten active tokens with mean loss 0.2 and another has 100 active tokens with mean loss 1.0. The token-weighted mean is (10*0.2+100*1.0)/110=102/110, about 0.9273. The equally weighted record mean is (0.2+1.0)/2=0.6. The first gives the longer answer more influence. Neither is automatically correct for every assistant task; the intended population and behavior should determine the weighting.
 
 Batching and gradient accumulation must preserve that choice. Averaging microbatch means equally can change a token-weighted objective when active-token counts differ. Report those counts so the effective denominator is visible. A record with no active target cannot contribute a defined mean supervised loss, while a truncated record with some active targets may still have lost a necessary ending or qualification.
 
@@ -78,19 +78,21 @@ Choose whether the objective weights tokens, examples or source families. Longer
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-014/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-014.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-014.py` in the declared `python-core` profile. *Align an answer-only record*, *Preserve prompt context without prompt loss* and *Reject an empty answer* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-014/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Preserve prompt context without prompt loss* and *Reject an empty answer* reuse the helper and fixture introduced in *Align an answer-only record*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: inputs `[1, 2, 5, 6]`; labels `[-100, 5, 6, 3]`; 3 active targets. Example B should give: Prompt inputs change; answer labels remain 5, 6, 3. Example C should give: ValueError for no answer targets. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
-Concatenate prompt IDs and answer IDs, then create inputs=sequence[:-1] and targets=sequence[1:]. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with-100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.
+Concatenate prompt IDs and answer IDs, then create `inputs=sequence[:-1]` and `targets=sequence[1:]`. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with -100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.
 
 ## Enumerate the target positions before training
 
 Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when \(i+1\ge P\), or equivalently \(i\ge P-1\). The first answer token is therefore supervised from the final prompt position, not from the first answer input position.
 
-For prompt[1, 2] and answer[5, 6, 3], the complete sequence is[1, 2, 5, 6, 3]:
+For prompt `[1, 2]` and answer `[5, 6, 3]`, the complete sequence is `[1, 2, 5, 6, 3]`:
 
 | Input index | Input token | Next-token target | Participates in answer loss |
 | --- | --- | --- | --- |
@@ -99,11 +101,11 @@ For prompt[1, 2] and answer[5, 6, 3], the complete sequence is[1, 2, 5, 6, 3]:
 | 2 | 5 | 6 | Yes |
 | 3 | 6 | 3 | Yes, final answer token |
 
-Inputs are[1, 2, 5, 6] and labels[-100, 5, 6, 3], with three active targets. The mean cross-entropy denominator is three for this record. Dividing the summed active loss by four would dilute the objective with the excluded prompt event. The sentinel-100 is a loss API convention, not a token the model should generate or embed.
+Inputs are `[1, 2, 5, 6]` and labels `[-100, 5, 6, 3]`, with three active targets. The mean cross-entropy denominator is three for this record. Dividing the summed active loss by four would dilute the objective with the excluded prompt event. The sentinel-100 is a loss API convention, not a token the model should generate or embed.
 
 Masking a prompt target removes that position's direct loss term. It does not remove the prompt from the forward computation. Later answer positions can attend to prompt representations, so the answer loss can backpropagate through prompt embeddings and attention paths. Confusing those two boundaries can lead to detaching useful context or incorrectly claiming prompt tokens receive no training signal.
 
-Truncation must be inspected after alignment. A maximum concatenated length of two retains[1, 2] and no answer target, so the helper rejects it. A limit of four retains[1, 2, 5, 6], giving labels[-100, 5, 6]. That passes the helper's at-least-one-answer-target rule but loses the final token 3. If 3 is an end marker, the truncated example no longer teaches the complete stopping behavior. Acceptance of some supervised content is weaker than preservation of the full answer.
+Truncation must be inspected after alignment. A maximum concatenated length of two retains `[1, 2]` and no answer target, so the helper rejects it. A limit of four retains `[1, 2, 5, 6]`, giving labels `[-100, 5, 6]`. That passes the helper's at-least-one-answer-target rule but loses the final token 3. If 3 is an end marker, the truncated example no longer teaches the complete stopping behavior. Acceptance of some supervised content is weaker than preservation of the full answer.
 
 The helper treats max_length as a sequence-length bound for this literal-token fixture. The actual model context, chat-template overhead, role tokens and generation markers must be counted under the intended tokenizer. A character boundary in raw text is not necessarily a token boundary. TRL's versioned SFT documentation distinguishes training formats and loss-mask behavior; the optional pretrained recipe checks the concrete template used there. [TRL 0.24.0 SFTTrainer](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer).
 
@@ -144,7 +146,7 @@ inputs, labels = prepare([1, 2], [5, 6, 3], 10)
 assert inputs == [1, 2, 5, 6] and labels == [-100, 5, 6, 3] and sum(x != -100 for x in labels) == 3
 ```
 
-**Expected:** inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.
+**Expected:** inputs `[1, 2, 5, 6]`; labels `[-100, 5, 6, 3]`; 3 active targets.
 
 ### Example B: Preserve prompt context without prompt loss
 
@@ -174,27 +176,30 @@ else:
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets. record excluded despite valid token arrays. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Preserve prompt context without prompt loss*, predict its result from the prompt alone: Change prompt IDs to `[8, 9]` while retaining the answer; inspect labels. Write the guess beside the stated outcome (prompt inputs change; answer labels remain 5, 6, 3). Then predict how the decisive case, *Reject unsupported targets before training*, should end: Mark a target answer as unsupported by its cited source and apply an admission gate. For supervised fine-tuning data and answer-target masks, the finish condition is: inputs `[1, 2, 5, 6]`; labels `[-100, 5, 6, 3]`; 3 active targets. Record excluded despite valid token arrays.
 
 ## Exercises
 
-1. **Align an answer-only record.** Use prompt IDs[1, 2] and answer IDs[5, 6, 3].
-   **Expected:** inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.
-   **Verify:** Save the assertion results for exercise 1, including inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.
+1. **Align an answer-only record.** Use prompt IDs `[1, 2]` and answer IDs `[5, 6, 3]`.
+   **Expected:** inputs `[1, 2, 5, 6]`; labels `[-100, 5, 6, 3]`; 3 active targets.
+   **Verify:** Save the assertion results for exercise 1, including inputs `[1, 2, 5, 6]`; labels `[-100, 5, 6, 3]`; 3 active targets.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-2. **Preserve prompt context without prompt loss.** Change prompt IDs to[8, 9] while retaining the answer; inspect labels.
+2. **Preserve prompt context without prompt loss.** Change prompt IDs to `[8, 9]` while retaining the answer; inspect labels.
    **Expected:** prompt inputs change; answer labels remain 5, 6, 3.
    **Verify:** Save the assertion results for exercise 2, including prompt inputs change; answer labels remain 5, 6, 3.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-3. **Reject an empty answer.** Prepare a record with prompt[1, 2] and no answer tokens.
+3. **Reject an empty answer.** Prepare a record with prompt `[1, 2]` and no answer tokens.
    **Expected:** ValueError for no answer targets.
    **Verify:** Save the assertion results for exercise 3, including ValueError for no answer targets.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Detect destructive truncation.** Use a context limit 2 for a prompt of length 2 and answer length 3.
    **Expected:** ValueError because truncation removes every answer target.
    **Verify:** Save the assertion results for exercise 4, including ValueError because truncation removes every answer target.
 
-5. **Keep family splits disjoint.** Assign two formatting variants tofamilyF and test that they cannot cross train/test.
+5. **Keep family splits disjoint.** Assign two formatting variants to family F and test that they cannot cross train/test.
    **Expected:** family intersectionF is a leak.
    **Verify:** Save the assertion results for exercise 5, including family intersectionF is a leak.
 
@@ -210,19 +215,21 @@ If prompt embeddings receive gradients, check whether they influence supervised 
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate sft record and answer target mask for the fixture in *Align an answer-only record*. Hint 2: change one literal in *Preserve prompt context without prompt loss* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Detect destructive truncation*, with its stated result (ValueError because truncation removes every answer target). If *Reject unsupported targets before training* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain SFT record, Answer target mask, Chat template using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain sft record, answer target mask and chat template using *Align an answer-only record*. Recompute its result (inputs `[1, 2, 5, 6]`; labels `[-100, 5, 6, 3]`; 3 active targets) from the inputs. Change one input in *Reject an empty answer* and predict whether the stated result (ValueError for no answer targets) still holds. Say which part of supervised fine-tuning data and answer-target masks the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-013` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Align an answer-only record* cannot be reconstructed without the solution, revisit `llm-applied-013` (Paired reliability studies and family-aware uncertainty). Otherwise keep the six observations from supervised fine-tuning data and answer-target masks and continue to `llm-applied-015` (Full supervised fine-tuning of a tiny causal decoder).
 
 ## Sources and verification status
 
-API and mechanism reference: [TRL SFTTrainer 0.24.0](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for sft record: [TRL SFTTrainer 0.24.0](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer), reviewed 2026-10-22. The fixtures for *Align an answer-only record*, *Preserve prompt context without prompt loss* and *Reject an empty answer* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

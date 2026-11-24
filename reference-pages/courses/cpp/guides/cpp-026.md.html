@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Form a hypothesis from a stack, breakpoint or profile before editing code.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A debugger pauses a process so its call stack and local values can be inspected. A profile measures where work was spent. A hypothesis predicts an observation that can be checked. Debugging starts with the smallest reproducible discrepancy, while performance measurement needs a correctness check and a fixed workload.</p>
+<ul>
+<li><strong>debugger:</strong> a tool that pauses a process so its call stack and local values can be inspected.</li>
+<li><strong>breakpoint:</strong> a chosen location where the debugger stops execution.</li>
+<li><strong>call stack:</strong> the chain of active function calls that shows which caller reached the current point.</li>
+<li><strong>hypothesis:</strong> a prediction about the cause of a mismatch that a specific observation can confirm or reject.</li>
+<li><strong>profile:</strong> a measurement of where execution time or work was spent.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Build with -g for source-level symbols. A breakpoint stops at a selected line; stepping enters or advances statements. Timing tiny expressions is dominated by overhead, so use a bounded repeated workload and report units plus compiler/build mode rather than a universal speed claim.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

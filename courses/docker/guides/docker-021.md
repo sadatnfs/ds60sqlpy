@@ -16,6 +16,14 @@ A filesystem copy of a live database may be inconsistent even when every file is
 
 Back up only the disposable study volume in this chapter. The main classroom’s learner progress is separate. Never use global volume pruning as part of a backup exercise, and never overwrite the only good copy while testing a restore.
 
+### Key terms
+
+- **Backup:** A retained copy of state intended for recovery.
+- **Restore:** Reconstructing usable state from a backup into a chosen target.
+- **Recovery test:** An independent restore followed by checks that prove a backup actually recovers the expected data.
+- **Volume archive:** A tar file of a named volume's contents, made while the application is stopped.
+- **Consistency boundary:** The condition, such as a stopped application, under which copied data is complete and safe to restore.
+
 ## Anatomy and a trace you can follow
 
 The fixture README includes an export using the app image’s Python standard library and a separate restore-target volume. Stop the app first, export a small JSON record to the learner copy, inspect its schema, then test restoration into a new owned volume. Record checksums and expected values without treating a checksum as proof of application semantics.
@@ -88,11 +96,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Copying a live database directory instead of making a consistent export. Restoring over the only good copy. Calling a backup successful without a restore test.
 
-Exercise 4 is this chapter's boundary case: Diagnose a valid checksum with invalid application data. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a valid checksum with invalid application data. Parse and validate the restored file with the application's own reader; a matching checksum only shows the bytes were copied faithfully. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using backup, restore, recovery test and volume archive. Reconstruct worked example 2 (Plan an independent restore) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. List the restore steps in order and name the check that proves the restored data is usable. Then reconstruct worked example 2 (Plan an independent restore) with one different value, predict what changes, and name which of backup, restore, recovery test and volume archive the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

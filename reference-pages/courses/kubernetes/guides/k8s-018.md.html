@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A ServiceAccount is a Kubernetes workload identity, not a human login name and not a secret value. A RoleBinding grants that identity a defined set of API actions in a scope. A token authenticates the identity; it does not by itself define what the identity is authorized to do.</p>
 <p>The course worker uses a short-lived scoped credential held outside learner storage. Workload Pods have automatic service-account token mounting disabled because the synthetic application does not need Kubernetes API access. The worker&#x27;s own permission to create a fixed workload is separate from any permission granted to the workload process.</p>
 <p>This reading/host-observation lesson inspects a real Role and RoleBinding example and a positive/negative authorization matrix. The normal learner identity cannot create arbitrary RBAC objects, read Secrets or widen its own privileges. The manifest example illustrates the relationship; it is not a command to install a new grant through the browser.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>ServiceAccount:</strong> A namespaced identity for processes in Pods. RBAC bindings grant it permissions just as they do for users.</li>
+<li><strong>RoleBinding:</strong> An object that grants a Role&#x27;s rules to subjects, such as a ServiceAccount, within one namespace.</li>
+<li><strong>TokenRequest:</strong> The API that issues a bounded ServiceAccount token for a specified audience and expiration.</li>
+<li><strong>Authorization:</strong> The API server&#x27;s decision whether an authenticated identity may perform a verb on a resource. An authenticated request can still be forbidden.</li>
+<li><strong>automountServiceAccountToken:</strong> A field that controls whether a ServiceAccount token is mounted into a Pod. Setting it to false removes an API credential the application does not need.</li>
+</ul>
 <h3 id="read-subject-role-and-binding-scope">Read subject, role and binding scope<a class="heading-anchor" href="#read-subject-role-and-binding-scope" aria-label="Link to this section">#</a></h3>
 <p>The Role permits get/list on Pods. The RoleBinding references that Role and names a ServiceAccount subject. The binding&#x27;s namespace determines where the Role grant applies; the subject namespace identifies where that ServiceAccount identity exists. Those two namespaces need not be the same in a general design, and confusing them can grant the wrong identity access.</p>
 <p>The literal lesson-auth subject namespace in the synthetic example is an explanatory fixture, not the current private worker namespace. A live host preparation must substitute and verify its own exact identity receipt. The learner does not choose a different namespace to escape a refusal.</p>

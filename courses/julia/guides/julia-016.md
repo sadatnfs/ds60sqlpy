@@ -10,6 +10,14 @@ Validate relational assumptions in DataFrames joins and reconcile totals before 
 
 Open `julia-016` in `/classroom` with its prepared `julia` runtime. Worked case A (expose and repair fanout) and worked case B (missing-key policy) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-016: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Join grain:** The unit that one row represents on each side of a join, which must be known before the joined result can be interpreted.
+- **Key uniqueness:** The requirement that a key appears once on a side expected to hold one row per entity, enforced with the join `validate` option.
+- **Fanout:** Row multiplication that occurs when one key matches several rows on the other side, inflating any total computed after the join.
+- **Missing key:** A join key equal to `missing`, which DataFrames rejects by default unless `matchmissing` states how to treat it.
+- **Pre-join aggregation:** Collapsing a many-row table to one row per key before joining, so the result keeps the intended grain.
+
 ## A join changes the row relationship
 
 A join combines rows according to keys. Its result depends on key multiplicities, not merely on which key values are present. If one left row matches two right rows, that left row appears twice in an ordinary matching result. Summing a left-side measurement after the join can therefore inflate its total.

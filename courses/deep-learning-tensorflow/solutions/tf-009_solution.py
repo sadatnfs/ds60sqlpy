@@ -8,7 +8,11 @@ def verify():
     # Exercise 1: Count updates
     ids = list(range(1, 7))
     batches = [ids[i : i + 2] for i in range(0, 6, 2)]
-    assert batches == [[1, 2], [3, 4], [5, 6]]
+    updates = 0
+    for _batch in batches:
+        updates += 1
+    assert batches == [[1, 2], [3, 4], [5, 6]] and updates == 3
+    assert sum(batches, []) == ids
 
     # Exercise 2: Retain a remainder
     ids = list(range(1, 6))

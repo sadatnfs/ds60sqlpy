@@ -14,6 +14,13 @@ PyTorch distinguishes allocated and reserved memory and can retain autograd grap
 
 
 
+### Key terms
+
+- **Memory ledger:** An accounting of parameters, gradients, optimizer state, activations and allocator reserve that predicts peak device memory.
+- **Optimizer state:** Extra per-parameter tensors such as Adam's first and second moments, often twice the size of the parameters.
+- **Activation memory:** Intermediate outputs saved during the forward pass for use in backward, growing with batch size and depth.
+- **Retained graph:** An autograd graph kept alive by a stored loss or output tensor, which holds its activations in memory.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,6 +46,14 @@ print("CPU memory ledger:", state_bytes, activations)
 
 **Expected observation:** State 16000 bytes and activation 4096 bytes for the example.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `params` | `1000` |
+| `state_bytes` | `16000` |
+| `activations` | `4096` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -63,27 +78,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: Build a parameter ledger
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **build a parameter ledger** in the examples above.
+**Trap to avoid:** Counting parameters only, 4000 bytes, underestimates training memory by four times for this optimizer.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Add activation bytes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **add activation bytes** in the examples above.
+**Trap to avoid:** Ignoring activations because they are temporary misses that they live from forward until backward, which is when memory peaks.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate reserve and live usage
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **separate reserve and live usage** in the examples above.
+**Trap to avoid:** Reading the reserved number in a monitoring tool and concluding tensors are leaking confuses cache with live usage. Tools such as `nvidia-smi` report the reserved total, so they show this inflated number.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Diagnose a retained graph
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **diagnose a retained graph** in the examples above.
+**Trap to avoid:** Blaming a fixed-size growth per step on fragmentation or the allocator leads to tuning allocator settings that do not fix the reference leak.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain memory growth
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **explain memory growth** in the examples above.
+**Trap to avoid:** Turning growth on to fix an out-of-memory error treats a policy as a capacity increase.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design a safe batch-size experiment
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design a safe batch-size experiment** in the examples above.
+**Trap to avoid:** Doubling until the program crashes uses an out-of-memory error as the measurement and can disrupt other users.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

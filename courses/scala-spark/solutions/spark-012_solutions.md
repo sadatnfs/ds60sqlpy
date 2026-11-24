@@ -6,7 +6,7 @@ Read the [guide](../guides/spark-012.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Inspect the complete schema contract
 
-Return ordered field triples(name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.
+Return ordered field triples (name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.
 
 **Expected:** The triples are (event_id, bigint, false), (team, string, true), (amount_cents, bigint, true).
 
@@ -104,9 +104,9 @@ The observation filter answers which amounts are known, not which are positive. 
 
 ### Exercise 5: Canonicalize content across physical repartitioning
 
-Return ordered triples(event_id, optional team, optional amount) for this bounded fixture. Compare raw, repartition(1) and repartition(3) against the same literal content, not raw collect order.
+Return ordered triples (event_id, optional team, optional amount) for this bounded fixture. Compare raw, repartition(1) and repartition(3) against the same literal content, not raw collect order.
 
-**Expected:** Every version yields (1, A,0),(2, B, NULL),(3, A,25),(4, B,40). Physical placement does not change identity, NULL state or value.
+**Expected:** Every version yields `(1, A, 0)`, `(2, B, NULL)`, `(3, A, 25)`, `(4, B, 40)`. Physical placement does not change identity, NULL state or value.
 
 ```scala
 def canonical(frame: DataFrame): Seq[(Long, Option[String], Option[Long])] = {
@@ -136,7 +136,7 @@ Repartitioning changes physical organization and can change arrival order, so ra
 
 Return master, timezone, shuffle-partition, ANSI, AQE, UI, driver-binding and Spark-version settings from the active session. Compare them with this prepared profile and rely on finally for owned stop. Do not substitute a hardcoded target string for version readback.
 
-**Expected:** Master local[2], UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.
+**Expected:** Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.
 
 ```scala
 def settings(spark: SparkSession): Map[String, String] = {
@@ -176,4 +176,6 @@ Actual readback can detect an unexpected reused or differently configured sessio
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Inspect the complete schema contract) is built inside the program, so opening the lesson fetches nothing; it expects: The triples are `(event_id, bigint, false)`, `(team, string, true)`, `(amount_cents, bigint, true)`. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

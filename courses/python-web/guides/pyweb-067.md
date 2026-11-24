@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-066`.
 
 Useful observability connects requests to outcomes without recording secrets or creating unbounded metric dimensions. This chapter instruments a real FastAPI request path with an OpenTelemetry in-memory exporter, Prometheus counters and a controlled logger. It checks both useful evidence and the absence of sensitive values.
 
+## Key terms
+
+- **Span:** One timed operation in a trace, with attributes such as `http.route` and the response status code.
+- **Metric label:** A dimension on a metric such as a Prometheus counter; every distinct label combination creates a separate time series.
+- **Cardinality:** The number of distinct label values; using the route pattern instead of the literal path keeps it bounded.
+- **Route pattern:** The template a request matched, such as `/notes/{identifier}`, with one fixed fallback label for unmatched requests.
+- **Sensitive-data exclusion:** Keeping values such as the Authorization header and query string out of logs, metrics and span attributes.
+
 ## Mechanism: each observation surface has a purpose
 
 A trace span describes one operation and its attributes. A metric aggregates repeated observations under a bounded label set. A log records a discrete diagnostic event. Copying the entire request into all three creates cost and privacy problems without necessarily improving diagnosis.
@@ -29,6 +37,36 @@ A second request receives 404 and produces another span/metric observation under
 Negative assertions are important here. A successful request count does not prove that instrumentation avoided a private header. Conversely, a redaction function can remove one field while another code path still records the same value. Inspect the actual emitted surfaces that the application owns.
 
 Metrics should not use user IDs, request IDs, email addresses or arbitrary error strings as labels. Those values can create high cardinality and expose sensitive information. A request correlation ID belongs in an appropriately controlled trace/log context when needed, not in an unbounded counter label.
+
+## Worked example: labeling by raw path leaks secrets and multiplies series
+
+```python
+import re
+from collections import Counter
+from urllib.parse import urlsplit
+
+requests = ["/notes/7?token=synthetic-secret", "/notes/8", "/notes/9?token=other", "/missing"]
+note_route = re.compile(r"^/notes/[0-9]+$")
+
+
+def route_of(target):
+    return "/notes/{identifier}" if note_route.match(urlsplit(target).path) else "unmatched"
+
+
+raw = Counter(requests)
+by_route = Counter(route_of(target) for target in requests)
+print(len(raw), any("token" in label for label in raw))
+print(dict(by_route))
+```
+
+Expected output:
+
+```text
+4 True
+{'/notes/{identifier}': 3, 'unmatched': 1}
+```
+
+Using the request target as a metric label creates one time series per distinct URL, and the query string carries the token straight into the metrics store. Labeling by route template collapses the three note requests into one series and files the 404 under `unmatched`, exactly the values the lesson's middleware reads from `request.scope["route"].path`. Every new identifier would otherwise grow the Prometheus registry without bound. The same rule keeps the log line and the `http.route` span attribute free of `/notes/7` and the token.
 
 ## Failure diagnosis and discussion
 

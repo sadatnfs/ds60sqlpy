@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-030_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A hypothetical bad predicate i&lt;=n fails at lengths 1,33 and 1,001. Reduce it to length one, where index one is already invalid. This gives a tiny regression fixture and a direct explanation. A giant dataset is unnecessary to show the underlying off-by-one error.</p>
+<p><strong>Approach:</strong> Shrink the failing inputs to length one, where i &lt;= n reaches index 1.</p>
+<p><strong>Why it is correct:</strong> A length-one array has only index 0, so the bad predicate already fails.</p>
+<p><strong>A plausible wrong approach:</strong> Debugging the 1,001-element case first buries one bad index in a large trace.</p>
+<p><strong>How to verify:</strong> The reference asserts invalid_indices(1) == [1] and invalid_indices(33) == [33].</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A recorded timeout contains &#x27;kernel submitted; completion not observed&#x27;. It does not contain a correct numerical result. Classify it as incomplete execution and inspect boundedness/dependencies. Do not add an arbitrary sleep and call the change a synchronization fix.</p>
+<p><strong>Approach:</strong> Classify the record as incomplete execution and inspect loop bounds and waits.</p>
+<p><strong>Why it is correct:</strong> Submitted without observed completion means no result exists to validate.</p>
+<p><strong>A plausible wrong approach:</strong> Adding a sleep before reading output may hide the hang without fixing the dependency.</p>
+<p><strong>How to verify:</strong> The reference receipt marks completed and validated False; keep that classification.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Learner source, exact input/shape, compile and runtime diagnostics, operation phase, environment identity and whether output validation completed.</p>
+<p><strong>Approach:</strong> Save source, exact input and shape, compile and runtime diagnostics, phase, environment and validation status.</p>
+<p><strong>Why it is correct:</strong> These fields let someone reproduce the failure after the worker is replaced.</p>
+<p><strong>A plausible wrong approach:</strong> Restarting first and collecting later loses the diagnostics tied to the failure.</p>
+<p><strong>How to verify:</strong> Restore the saved fields on a fresh worker and confirm the same failure appears.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>It destroys learner state without identifying the defect and does not repair the kernel&#x27;s ordering or bounds.</p>
+<p><strong>Approach:</strong> Leave learner volumes alone and investigate the kernel failure directly.</p>
+<p><strong>Why it is correct:</strong> Deleting state removes evidence and work without touching the defect.</p>
+<p><strong>A plausible wrong approach:</strong> Wiping everything and seeing a clean start mistakes a reset for a repair.</p>
+<p><strong>How to verify:</strong> Rerun the minimal failing case after any change and confirm it passes.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Restore one removed dimension or input condition at a time and document the threshold. Do not claim a fix from an unrelated passing case.</p>
+<p><strong>Approach:</strong> Restore one removed dimension or condition at a time until the failure returns.</p>
+<p><strong>Why it is correct:</strong> This finds the threshold where the bug appears.</p>
+<p><strong>A plausible wrong approach:</strong> Declaring a fix because a smaller unrelated case passes ignores the original trigger.</p>
+<p><strong>How to verify:</strong> Record the threshold and add that exact case as a test.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Keep at least one exact failing tail shape, a nearby divisible control and an empty/singleton boundary, checking full outputs.</p>
+<p><strong>Approach:</strong> Keep an exact failing tail shape, a nearby divisible control and empty and singleton inputs.</p>
+<p><strong>Why it is correct:</strong> The control separates tail logic from general logic, and boundaries catch the edges.</p>
+<p><strong>A plausible wrong approach:</strong> Testing only the divisible size passes while the tail bug remains.</p>
+<p><strong>How to verify:</strong> Confirm the test fails on the old code and passes on the fix.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-030_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

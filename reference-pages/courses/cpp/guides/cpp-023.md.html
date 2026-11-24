@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Separate source compatibility from binary compatibility.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>An API is the source-level interface callers use. An ABI is the compiled calling, layout and symbol convention needed to link binaries. C++ standard library objects are risky across independently compiled boundaries. A narrow C interface uses agreed primitive representations, explicit ownership and status codes to reduce coupling. This example uses platform int; a cross-platform serialized format needs its own fixed-width encoding contract.</p>
+<ul>
+<li><strong>API:</strong> the source-level interface that callers compile against.</li>
+<li><strong>ABI:</strong> the compiled calling, layout and symbol conventions that separately built binaries need to work together.</li>
+<li><strong><code>extern &quot;C&quot;</code>:</strong> a linkage specification that gives a function C language linkage; it does not make C++ types or exceptions safe for C callers.</li>
+<li><strong>status code:</strong> an integer result that reports success or a named failure separately from the output value.</li>
+<li><strong>output pointer:</strong> a parameter through which the function writes its result, here only on success.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>extern &quot;C&quot;</code> requests C language linkage for symbols; it does not make arbitrary C++ types portable or safe. Keep exceptions inside the boundary. Rebuilding all dependents can resolve an API-compatible but ABI-incompatible change; a version string alone cannot prove compatibility.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

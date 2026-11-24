@@ -5,6 +5,7 @@ import argparse
 import sys
 
 from depth_reviews_foundations_expert import REVIEWS, enrich_guide, polish_document_prose
+import specialize
 
 
 def main() -> None:
@@ -42,6 +43,7 @@ def main() -> None:
             explanation.write_text(
                 canonical(polish_document_prose(text), explanation), encoding="utf-8"
             )
+        specialize.run(identity, base)
 
 
 if __name__ == "__main__":

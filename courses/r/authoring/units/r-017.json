@@ -38,6 +38,12 @@
       "code": "group <- factor(c(\"A\", \"B\", \"A\"), levels = c(\"A\", \"B\", \"C\"))\nsubset <- group[group == \"A\"]\nstopifnot(identical(levels(subset), c(\"A\", \"B\", \"C\")))\nstopifnot(identical(levels(droplevels(subset)), \"A\"))\nprint(table(subset))\n",
       "explanation": "Subsetting retains the declared levels. Zero counts for B and C can be useful evidence rather than categories that should automatically disappear.",
       "expected": "A2, B0, C0."
+    },
+    {
+      "title": "Unknown labels become NA without a warning",
+      "code": "allowed <- c(\"A\", \"B\", \"C\")\nraw <- c(\"A\", \"b\", \"C\", \"D\")\ngroup <- factor(raw, levels = allowed)\nstopifnot(sum(is.na(group)) == 2L)\nunknown <- raw[!is.na(raw) & is.na(group)]\nstopifnot(identical(unknown, c(\"b\", \"D\")))\nstopifnot(sum(table(group)) == 2L)\nprint(table(group, useNA = \"ifany\"))\n",
+      "explanation": "factor() maps each raw label to a declared level, and a label with no match becomes NA. The lowercase b and the undeclared D both fail, and R raises no warning for either. A plain table drops NA, so it reports only two rows out of four and the loss is invisible. Comparing raw labels that were present with factor values that are missing lists exactly the two problems, b and D, which tells the reviewer whether to fix case or extend the level set. useNA = \"ifany\" puts the missing count back into the table.",
+      "expected": "Counts A 1, B 0, C 1 and <NA> 2."
     }
   ],
   "exercises": [

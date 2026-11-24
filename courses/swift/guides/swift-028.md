@@ -118,7 +118,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Await an asynchronous result) before changing anything, and confirm its observation: The awaited result is 8.
 2. Compare Example B (Propagate async failure) with Example A and name the first line whose behavior differs. Its observation is: The async boundary preserves both the valid result and the domain error.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Async does not promise a background thread.
+3. Before opening the explanation, check your task 3 attempt (Write an async adapter that returns a validated domain value) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

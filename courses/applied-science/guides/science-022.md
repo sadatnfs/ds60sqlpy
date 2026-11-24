@@ -16,6 +16,13 @@ Let \(\pi_i\) be the probability that population unit \(i\) is included, and let
 
 The expectation is over the sampling design, with population values held fixed. It is a different argument from treatment propensity weighting or model-based regression. Accurate first-order inclusion probabilities are enough for the unbiasedness statement, while variance estimation generally requires more information about the joint design.
 
+## Key terms
+
+- **Inclusion probability:** The design probability pi_i that population unit i enters the sample.
+- **Horvitz-Thompson estimator:** A population total estimated by summing sampled values divided by their inclusion probabilities, unbiased under the design.
+- **Design effect:** The variance inflation relative to independent sampling, 1 + (m - 1)rho for equal clusters of size m with correlation rho.
+- **Primary sampling unit:** The first-stage unit, such as a cluster, that determines the effective number of independent observations.
+
 ## Worked case 1: distinguish expectation from one realized sample
 
 The population values are 1,2,5,8, with unequal inclusion probabilities .2,.4,.5,.8. The code computes the design expectation of the weighted total and recovers 16 exactly. It then evaluates one particular realized sample containing the second and fourth units. That sample's weighted total is 15, illustrating that unbiasedness does not require every sample to equal the population value.
@@ -49,6 +56,41 @@ Model-based and design-based analyses can both be useful. State which source of 
 **Does a large weighted population count mean we observed that many independent people?** No. Weights represent units in the target under a design or adjustment. Precision still depends on the actual sample, dependence and estimator.
 
 **Should all weights be normalized to mean one?** Some point estimates are invariant to a common rescaling, while totals and some variance procedures are not. Follow the estimator's definition and retain the original weight meaning and population totals.
+
+## Worked example: Every possible sample under a two-draw design
+
+```python
+from itertools import combinations
+import numpy as np
+
+y = np.array([2.0, 4.0, 6.0, 20.0])
+samples = list(combinations(range(4), 2))
+p_sample = np.array([0.30, 0.10, 0.10, 0.10, 0.10, 0.30])  # design over the six pairs
+pi = np.array([sum(p for s, p in zip(samples, p_sample) if i in s) for i in range(4)])
+print("inclusion probabilities:", pi.round(2), " sum", pi.sum().round(2))
+
+ht = np.array([sum(y[i] / pi[i] for i in s) for s in samples])
+for s, p, est in zip(samples, p_sample, ht):
+    print(f"sample {s}: probability {p:.2f}, HT total {est:7.3f}")
+print(f"E[HT] = {p_sample @ ht:.3f}; true total {y.sum():.1f}")
+print(f"design SD of HT = {np.sqrt(p_sample @ (ht - y.sum()) ** 2):.3f}")
+```
+
+Observed output:
+
+```text
+inclusion probabilities: [0.5 0.5 0.5 0.5]  sum 2.0
+sample (0, 1): probability 0.30, HT total  12.000
+sample (0, 2): probability 0.10, HT total  16.000
+sample (0, 3): probability 0.10, HT total  44.000
+sample (1, 2): probability 0.10, HT total  20.000
+sample (1, 3): probability 0.10, HT total  48.000
+sample (2, 3): probability 0.30, HT total  52.000
+E[HT] = 32.000; true total 32.0
+design SD of HT = 17.889
+```
+
+The design selects one of six pairs, with pairs (0,1) and (2,3) three times as likely as the others. Every unit still appears in exactly half the probability mass, so all inclusion probabilities equal 0.5 and each Horvitz-Thompson total is twice the sample sum. The six possible estimates range from 12 to 52 around a true total of 32. Weighting them by the design probabilities gives exactly 32.000, which is what unbiasedness means: an average over samples the design could have drawn. It says nothing about the one sample actually drawn. The most likely samples are the two worst: (0,1) gives 12 and (2,3) gives 52, together carrying 60 percent of the probability. The design standard deviation of 17.889 reflects that. A design that paired one small and one large unit with high probability would have the same inclusion probabilities and the same unbiased expectation but a much smaller spread, because joint inclusion probabilities, not marginal ones, determine the variance.
 
 ## Complete reproducible program
 

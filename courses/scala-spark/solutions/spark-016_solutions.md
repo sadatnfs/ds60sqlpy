@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-016.md) and attempt one language first. The [Sc
 
 Return key, fact_rows, dimension_rows, predicted_inner for the union of key buckets. Merge NULL diagnostic buckets explicitly, but predict zero ordinary-equality pairs for NULL. Order keys with NULL last.
 
-**Expected:** A:(2,3,6), B:(1,1,1), C:(1,0,0), D:(1,0,0), E:(0,1,0), NULL:(1,1,0). Predicted inner rows sum to 7.
+**Expected:** `A:(2, 3, 6)`, `B:(1, 1, 1)`, `C:(1, 0, 0)`, `D:(1, 0, 0)`, `E:(0, 1, 0)`, `NULL:(1, 1, 0)`. Predicted inner rows sum to 7.
 
 ```scala
 def multiplicity(facts: DataFrame, dimension: DataFrame): DataFrame = {
@@ -132,7 +132,7 @@ A semi join asks whether a match exists and therefore does not need to emit ever
 
 Return fact_id, dimension_row from an inner join using NULL-safe key equality. Compare with ordinary equality and explain why the extra pair is a policy change.
 
-**Expected:** The ordinary seven pairs plus(5,105) produce eight pairs. No C or D match is invented.
+**Expected:** The ordinary seven pairs plus `(5, 105)` produce eight pairs. No C or D match is invented.
 
 ```scala
 def nullSafeJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
@@ -188,4 +188,6 @@ COUNT DISTINCT ignores NULL and collapses duplicates, so equality with total row
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Build a multiplicity ledger before joining facts) is built inside the program, so opening the lesson fetches nothing; it expects: `A:(2, 3, 6)`, `B:(1, 1, 1)`, `C:(1, 0, 0)`, `D:(1, 0, 0)`, `E:(0, 1, 0)`, `NULL:(1, 1, 0)`. Predicted inner rows sum to 7. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

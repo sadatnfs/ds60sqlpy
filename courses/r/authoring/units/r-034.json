@@ -38,6 +38,12 @@
       "code": "long <- data.frame(id = c(\"A\", \"A\", \"B\"), visit = c(1, 2, 1), value = c(10, 12, 20))\nwide <- reshape(long, idvar = \"id\", timevar = \"visit\", direction = \"wide\")\nstopifnot(is.na(wide$value.2[wide$id == \"B\"]))\npresent <- transform(long, present = TRUE)\nstopifnot(nrow(present) == 3L)\nprint(wide)\n",
       "explanation": "The missing B visit 2 cell means no supplied record here. Keeping the original long rows or a separate presence table preserves that distinction.",
       "expected": "B visit 2 isNA."
+    },
+    {
+      "title": "A duplicate cell key loses a reading",
+      "code": "long <- data.frame(id = c(\"A\", \"A\", \"A\", \"B\"), visit = c(1, 1, 2, 1), value = c(10, 11, 12, 20))\nwide <- suppressWarnings(reshape(long, idvar = \"id\", timevar = \"visit\", direction = \"wide\"))\nstopifnot(wide$value.1[wide$id == \"A\"] == 10, !(11 %in% unlist(wide[-1])))\nkey <- paste(long$id, long$visit)\nstopifnot(anyDuplicated(key) == 2L)\nfixed <- aggregate(value ~ id + visit, data = long, FUN = mean)\nstopifnot(!anyDuplicated(fixed[c(\"id\", \"visit\")]))\nstopifnot(fixed$value[fixed$id == \"A\" & fixed$visit == 1] == 10.5)\nprint(fixed)\n",
+      "explanation": "A has two readings at visit 1, 10 and 11. A wide cell holds one value, so reshape keeps the first matching row and drops the second, with only a warning, which suppressWarnings hides here to show how easily it is missed. The value 11 then appears nowhere in the wide table. Checking the key first finds the problem: the second element of the pasted key repeats the first. The fix shown averages the pair to 10.5, but only because the rule is stated; rejecting the batch or keeping the later reading are equally valid choices if documented. After aggregation the key is unique and reshaping loses nothing.",
+      "expected": "Three rows: A at visit 1 with 10.5, B at visit 1 with 20, A at visit 2 with 12; the unguarded reshape kept 10 and lost 11."
     }
   ],
   "exercises": [

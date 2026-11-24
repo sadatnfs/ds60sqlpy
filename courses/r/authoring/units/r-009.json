@@ -38,6 +38,12 @@
       "code": "record <- list(id = \"A\", note = \"draft\")\nrecord[\"note\"] <- list(NULL)\nstopifnot(\"note\" %in% names(record), is.null(record[[\"note\"]]))\nrecord$note <- NULL\nstopifnot(!(\"note\" %in% names(record)))\nprint(names(record))\n",
       "explanation": "Single-bracket replacement retains the field with a NULL value; dollar replacement by NULL deletes the field.",
       "expected": "Only id remains after deletion."
+    },
+    {
+      "title": "Flattening a record turns numbers into text",
+      "code": "record <- list(id = \"A\", values = c(2, 4))\nflat <- unlist(record)\nprint(flat)\nstopifnot(is.character(flat), length(flat) == 3L)\nstopifnot(is.na(suppressWarnings(mean(flat[2:3]))))\nstopifnot(mean(record[[\"values\"]]) == 3)\n",
+      "explanation": "unlist must return one atomic vector, and the text id forces character, so 2 and 4 become the strings \"2\" and \"4\". The two fields also become three elements with generated, numbered names, so the record boundary is gone. Taking the mean of those strings returns NA with a warning, which the example suppresses to keep the check quiet. Extracting the field with [[ keeps it numeric, and its mean is 3, which is the summary the record was built to support.",
+      "expected": "flat prints three quoted strings, \"A\", \"2\" and \"4\"; the extracted mean is 3."
     }
   ],
   "exercises": [

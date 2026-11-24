@@ -14,6 +14,13 @@ An optional TensorRT or another prepared runtime has its own operator, platform 
 
 
 
+### Key terms
+
+- **Model export:** Translating a model into an interchange or runtime representation, which is weaker evidence than successful execution.
+- **Engine build:** Selecting supported kernels for target shapes, precision and hardware to produce an executable inference engine.
+- **Shape envelope:** The range of input shapes an engine was built and tested to accept.
+- **Calibration data:** Representative inputs, kept separate from evaluation data, used to choose quantization ranges.
+
 ## Worked examples
 
 ### Worked example 1
@@ -47,27 +54,39 @@ Treat printed timing values as synthetic whenever the program says model, fixtur
 
 ### Exercise 1: Define the shape envelope
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **define the shape envelope** in the examples above.
+**Trap to avoid:** Leaving the envelope implicit means unsupported shapes reach the engine and fail with internal errors or are padded and truncated without notice.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Reject an invalid request
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **reject an invalid request** in the examples above.
+**Trap to avoid:** Splitting batch 9 into 8 and 1 automatically may be reasonable, but only as a documented path. Doing it implicitly changes latency and behavior without a contract.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate export build and execution
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **separate export build and execution** in the examples above.
+**Trap to avoid:** Reporting the deployment as working because the export succeeded skips build and execution, where unsupported operators and precision problems usually appear.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Choose calibration data
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **choose calibration data** in the examples above.
+**Trap to avoid:** Calibrating on a handful of constant inputs gives ranges that clip real activations, which lowers accuracy. Values outside the calibrated range saturate at the limit, so large activations lose their differences entirely.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Record engine compatibility
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **record engine compatibility** in the examples above.
+**Trap to avoid:** Copying an engine file to a different GPU model or runtime release can fail to load or behave differently. Rebuilding per target from the same exported graph is the safer pattern.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Compare task quality
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **compare task quality** in the examples above.
+**Trap to avoid:** Comparing only a few output tensors for closeness can miss a quality drop concentrated in some classes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

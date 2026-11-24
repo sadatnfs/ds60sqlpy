@@ -5,6 +5,39 @@
   "minutes": 60,
   "prerequisites": ["apache-015", "apache-011"],
   "concepts": ["typed scalar UDF", "volatility", "vectorization", "null semantics"],
+  "key_terms": [
+    [
+      "Scalar UDF",
+      "A user-defined function that produces one output value per input row. In DataFusion Python, it receives whole Arrow arrays and must return an Arrow array of the declared type."
+    ],
+    [
+      "Volatility",
+      "The declared stability of a function, such as immutable or volatile, which tells the optimizer whether it may constant fold or reuse the function's results."
+    ],
+    [
+      "Vectorized callback",
+      "A UDF body that applies an Arrow compute kernel to a whole array instead of running a Python loop over individual values."
+    ],
+    [
+      "Null semantics",
+      "How a function treats missing inputs, such as returning null when an argument is null, which must agree with the declared types and the query's meaning."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Register a vectorized scalar function",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.compute as pc\nfrom datafusion import SessionContext, udf\n\nctx = SessionContext()\nbatch = pa.table({\"id\": [1, 2, 3], \"meters\": pa.array([1, 25, None], type=pa.int64())})\nctx.register_record_batches(\"distances\", [batch.to_batches()])\nto_cm = udf(lambda values: pc.multiply(values, 100), [pa.int64()], pa.int64(), \"immutable\", \"cm\")\nctx.register_udf(to_cm)\nprint(\n    ctx.sql(\n        \"SELECT cm(meters) AS cm, meters * 100 AS native FROM distances ORDER BY id\"\n    ).to_pylist()\n)",
+      "interpretation": "Expect three rows where both columns read 100, 2500 and null. The function receives a whole Arrow array per batch, so the null stays null without any special handling. Marking it immutable lets the optimizer treat equal inputs as equal outputs; declaring a function immutable when it reads a clock or a random source would allow caching or folding that returns stale values."
+    },
+    {
+      "title": "Make a zero fill an explicit, named choice",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.compute as pc\n\nmeters = pa.array([1, 25, None], type=pa.int64())\nprint(pc.multiply(meters, 100).to_pylist())\nprint(pc.multiply(pc.fill_null(meters, 0), 100).to_pylist())",
+      "output": "[100, 2500, None]\n[100, 2500, 0]",
+      "interpretation": "The first list keeps the missing distance unknown and the second turns it into zero centimeters, which downstream sums and averages will treat as a real measurement. The lesson registers the second behavior under the name missing_as_zero so a reader of the SQL can see the choice. Hiding a fill inside a function with a neutral name is the defect to look for in review."
+    }
+  ],
   "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
   "sources": [
     [

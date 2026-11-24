@@ -198,21 +198,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-change-the-failure-condition">1. Change the failure condition<a class="heading-anchor" href="#1-change-the-failure-condition" aria-label="Link to this section">#</a></h3>
 <p>Define the condition and verify a designed negative fixture. Do not treat every possible warning as equivalent to an accepted result.</p>
+<p><strong>Why it holds here:</strong> In this lesson ready is materialized from events before tests run. An accepted_range test with min_value 0 on value makes a negative row a meaningful failure that blocks publication.</p>
+<p><strong>Plausible wrong approach:</strong> Treating any warning as a block mixes noise with real failures and trains people to ignore the gate.</p>
+<p><strong>How to verify:</strong> Seed a row with value -3, run build, and confirm the range test fails and published.json is not written.</p>
 <p><strong>Expected:</strong> The candidate can be blocked by a meaningful semantic failure.</p>
 <h3 id="2-inspect-candidate-state">2. Inspect candidate state<a class="heading-anchor" href="#2-inspect-candidate-state" aria-label="Link to this section">#</a></h3>
 <p>Use this observation to design consumer isolation. Hiding an error message does not remove invalid data from a relation.</p>
+<p><strong>Why it holds here:</strong> After the duplicate-id build fails, the ready table still holds 2 rows. The reference asserts this count in both cases.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming a failed build removes the table hides that its bad rows are still readable.</p>
+<p><strong>How to verify:</strong> Query select count(*) from ready after the failure and expect 2.</p>
 <p><strong>Expected:</strong> Its materialized rows are still observable.</p>
 <h3 id="3-retain-an-accepted-version">3. Retain an accepted version<a class="heading-anchor" href="#3-retain-an-accepted-version" aria-label="Link to this section">#</a></h3>
 <p>A consumer should follow a declared accepted version or pointer, not whichever file was most recently written.</p>
+<p><strong>Why it holds here:</strong> Consumers should read a named accepted version, not the newest file. The failed candidate must not replace the prior accepted output.</p>
+<p><strong>Plausible wrong approach:</strong> Overwriting published.json before tests finish would replace good data with a candidate that later fails.</p>
+<p><strong>How to verify:</strong> Publish the good case, then run the bad case and confirm the earlier published.json is still present and unchanged.</p>
 <p><strong>Expected:</strong> The accepted version remains identifiable.</p>
 <h3 id="4-handle-an-uncertain-write">4. Handle an uncertain write<a class="heading-anchor" href="#4-handle-an-uncertain-write" aria-label="Link to this section">#</a></h3>
 <p>Read the intended publication identifier or hash and determine whether it exists. Blind retries can duplicate side effects in less idempotent systems.</p>
+<p><strong>Why it holds here:</strong> A timeout after writing leaves it unknown whether the file exists. Checking its identifier or hash resolves this before retrying.</p>
+<p><strong>Plausible wrong approach:</strong> Retrying blindly can publish twice in a system where writes are not idempotent.</p>
+<p><strong>How to verify:</strong> Compute the expected hash, check the destination for that hash, and retry only if it is missing.</p>
 <p><strong>Expected:</strong> The response reconciles identity before retrying.</p>
 <h3 id="5-record-the-evidence">5. Record the evidence<a class="heading-anchor" href="#5-record-the-evidence" aria-label="Link to this section">#</a></h3>
 <p>Retain input and model versions, schema/grain, executed test outcomes and output identity. Keep provenance and semantic quality as distinct claims.</p>
+<p><strong>Why it holds here:</strong> A receipt beside the data records input version, model version, test outcomes and output hash.</p>
+<p><strong>Plausible wrong approach:</strong> Recording only a timestamp says nothing about which data or checks were accepted.</p>
+<p><strong>How to verify:</strong> Write the receipt, then confirm each field matches run_results.json and the published file&#x27;s hash.</p>
 <p><strong>Expected:</strong> It identifies source, checks and data identity.</p>
 <h3 id="6-test-a-stale-artifact">6. Test a stale artifact<a class="heading-anchor" href="#6-test-a-stale-artifact" aria-label="Link to this section">#</a></h3>
 <p>Use invocation and source/data identities. A successful result from a different run cannot justify publication of changed data.</p>
+<p><strong>Why it holds here:</strong> A stale run_results.json describes an earlier invocation. Reusing it after changing the source would accept data that was never tested.</p>
+<p><strong>Plausible wrong approach:</strong> Checking only that statuses say pass, without matching the invocation id, lets old evidence approve new data.</p>
+<p><strong>How to verify:</strong> Change the seed, keep the old run_results, and confirm a gate that compares invocation ids rejects publication.</p>
 <p><strong>Expected:</strong> A reviewed gate rejects the mismatched evidence.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;dbt-015: actual local dbt and DuckDB reference.&quot;&quot;&quot;</span>

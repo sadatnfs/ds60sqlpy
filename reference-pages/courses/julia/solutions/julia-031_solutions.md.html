@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-031-explained-reference">julia-031: explained reference<a class="heading-anchor" href="#julia-031-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-031_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Parse text into <code>Expr</code> objects only to inspect them, never to run untrusted input. <code>@positive</code> stores the escaped caller expression once in a <code>local</code> variable, checks it is a positive real and returns it. <code>c_bytes</code> rejects embedded zero bytes, then calls C <code>strlen</code> through <code>ccall</code> with an exact <code>Csize_t</code> return and <code>Cstring</code> argument.</p>
 <h3 id="1-inspect-syntax">1. Inspect syntax<a class="heading-anchor" href="#1-inspect-syntax" aria-label="Link to this section">#</a></h3>
 <p>The representation describes a call; this inspection does not evaluate arbitrary input.</p>
 <p><strong>Expected observation:</strong> The head is <code>:call</code> and the function symbol is <code>:+</code>.</p>
+<p><strong>Why it holds here:</strong> <code>Meta.parse(&quot;1 + 2&quot;)</code> produces an <code>Expr</code> with head <code>:call</code> whose first argument is the function symbol <code>:+</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Calling <code>eval</code> on the parsed expression to look at it runs the code, which is unsafe for text from outside.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>syntax.head == :call</code> and <code>syntax.args[1] == :+</code>; the reference checks <code>Meta.parse(&quot;x * 2&quot;).head == :call</code>.</p>
 <h3 id="2-detect-duplicate-evaluation">2. Detect duplicate evaluation<a class="heading-anchor" href="#2-detect-duplicate-evaluation" aria-label="Link to this section">#</a></h3>
 <p>The test protects against duplicated side effects in generated syntax.</p>
 <p><strong>Expected observation:</strong> The counter would be 2.</p>
+<p><strong>Why it holds here:</strong> The macro inserts the caller expression once, so the block that increments <code>counter[]</code> runs once and the counter ends at 1.</p>
+<p><strong>Plausible wrong approach:</strong> Writing the check as <code>$(esc(expression)) &gt; 0 || ...; $(esc(expression))</code> evaluates the argument twice and leaves the counter at 2.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>counter[] == 1</code> after <code>@positive</code> returns 3.</p>
 <h3 id="3-check-name-ownership">3. Check name ownership<a class="heading-anchor" href="#3-check-name-ownership" aria-label="Link to this section">#</a></h3>
 <p>Generated temporary names must not capture unrelated caller bindings.</p>
 <p><strong>Expected observation:</strong> The macro-local binding is hygienic.</p>
+<p><strong>Why it holds here:</strong> The macro&#x27;s <code>local result</code> is renamed by hygiene, so the caller&#x27;s own <code>result = 99</code> is not overwritten.</p>
+<p><strong>Plausible wrong approach:</strong> Escaping the whole quoted block would make the macro&#x27;s temporary name capture the caller&#x27;s <code>result</code>.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>result == 99</code> after the macro call.</p>
 <h3 id="4-trace-utf-8-bytes">4. Trace UTF 8 bytes<a class="heading-anchor" href="#4-trace-utf-8-bytes" aria-label="Link to this section">#</a></h3>
 <p>Unicode text has multiple valid units; choose the unit required by the interface.</p>
 <p><strong>Expected observation:</strong> The byte count is 2 and character count is 1.</p>
+<p><strong>Why it holds here:</strong> The letter é is stored as two UTF-8 bytes, so C <code>strlen</code> returns 2 while Julia&#x27;s <code>length</code> counts 1 character.</p>
+<p><strong>Plausible wrong approach:</strong> Passing <code>length(s)</code> to a C function that expects a byte count truncates multibyte strings.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>c_bytes(&quot;é&quot;) == 2</code> and <code>length(&quot;é&quot;) == 1</code>; the reference checks <code>c_bytes(&quot;λ&quot;) == ncodeunits(&quot;λ&quot;)</code>.</p>
 <h3 id="5-reject-embedded-zeros">5. Reject embedded zeros<a class="heading-anchor" href="#5-reject-embedded-zeros" aria-label="Link to this section">#</a></h3>
 <p>Explicit validation prevents a truncated prefix from being mistaken for the full length.</p>
 <p><strong>Expected observation:</strong> C strlen would stop at the first zero.</p>
+<p><strong>Why it holds here:</strong> C <code>strlen</code> stops at the first zero byte, so for <code>&quot;a\0b&quot;</code> it would report 1 instead of the full Julia length.</p>
+<p><strong>Plausible wrong approach:</strong> Skipping the check returns a short but plausible number, which looks like a valid length.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>@test_throws ArgumentError c_bytes(&quot;a\0b&quot;)</code>.</p>
 <h3 id="6-review-a-native-api">6. Review a native API<a class="heading-anchor" href="#6-review-a-native-api" aria-label="Link to this section">#</a></h3>
 <p>A successful synchronous call does not establish a safe retained-pointer integration.</p>
-<p><strong>Expected observation:</strong> ABI, lifetime, ownership, thread safety and release rules.</p></article>
+<p><strong>Expected observation:</strong> ABI, lifetime, ownership, thread safety and release rules.</p>
+<p><strong>Why it holds here:</strong> A native function that keeps a pointer after returning needs the Julia string to stay alive and unmoved for as long as C uses it.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming that a successful immediate call proves safety ignores that garbage collection may free the string later.</p>
+<p><strong>How to verify:</strong> Read the library&#x27;s ownership and threading documentation and add a test that holds a reference with <code>GC.@preserve</code> for the native lifetime.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-031: all reference checks passed</code>:</p>
+<p>The macro passes 0.5 through unchanged and rejects 0 and NaN, because NaN is a real but not greater than zero. The string checks use ASCII <code>&quot;abc&quot;</code>, where bytes equal characters, and λ, where <code>strlen</code> must agree with <code>ncodeunits</code>. <code>Meta.parse(&quot;x * 2&quot;)</code> is another call expression, inspected but not evaluated.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-punctuation">(</span><span class="syntax-decorator">@positive</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.5</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> <span class="syntax-punctuation">(</span><span class="syntax-decorator">@positive</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> <span class="syntax-punctuation">(</span><span class="syntax-decorator">@positive</span> <span class="syntax-builtin">NaN</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> c_bytes<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">abc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> c_bytes<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">λ</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> ncodeunits<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">λ</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> Meta<span class="syntax-operator">.</span>parse<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">x * 2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>head <span class="syntax-operator">==</span> <span class="syntax-string">:call</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

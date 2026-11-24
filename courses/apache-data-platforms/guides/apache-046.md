@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-045`, `apache-007`.
 
+## Key terms
+
+- **Event time:** The timestamp a record carries from its source contract, as opposed to processing time, the worker's clock.
+- **Watermark:** A declaration that event time has progressed past a position. It is an estimate, not proof that no older record will arrive.
+- **Bounded out-of-orderness:** A watermark strategy that sets the watermark to the maximum observed timestamp minus a fixed delay, trading latency for completeness.
+- **Tumbling window:** A fixed-size, non-overlapping event-time window, such as the half-open intervals [0, 2000) and [2000, 4000) in milliseconds.
+- **Late side output:** A separate output stream that receives records arriving after their window's watermark has passed, instead of silently dropping them.
+
 ## Event time is carried by the data
 
 Processing time is the worker's clock. Event time is the timestamp assigned to an

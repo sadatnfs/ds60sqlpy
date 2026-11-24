@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-053`.
 
 Django permissions and groups help express capabilities, while object visibility still needs a concrete data-access rule. This chapter grants one user a model-level permission through a group, compares another user without that permission and independently scopes a private note to its owner.
 
+## Key terms
+
+- **Model permission:** A capability such as `auth.change_user` that Django's default backend grants for a whole model, not for one object.
+- **Group:** A named collection of permissions; a user who belongs to the group receives those permissions.
+- **has_perm():** The user method that asks the configured authentication backends whether the user holds a permission.
+- **Object-level permission:** Authorization for one specific object, which the default backend does not implement and returns False for.
+- **Query scoping:** Restricting lookups with an owner predicate so a user's request cannot reach another user's private objects.
+
 ## Mechanism: model permission and object permission differ
 
 Django creates standard model permissions through its content-types and authentication applications. A group can hold permissions, and users can belong to groups. Calling has_perm checks the configured authentication backend's policy for the requested permission.
@@ -29,6 +37,40 @@ Two clients are logged in through force_login so this case focuses on authorizat
 The program also demonstrates that the default backend does not suddenly authorize a specific object merely because Alice has a related model permission. Object-level semantics require their own policy. The explicit predicate provides the fixture's visibility rule.
 
 In a real database-backed route, include the owner or tenant condition in the lookup itself where practical. That reduces accidental exposure through intermediate data and ensures that list, detail, update and delete paths use the same scope. Background jobs and administrative tools need an equivalent rule when acting on behalf of a user.
+
+## Worked example: a group permission that both users hold
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE note (id INTEGER PRIMARY KEY, owner TEXT, title TEXT)")
+db.executemany("INSERT INTO note VALUES (?, ?, ?)", [(1, "alice", "Private"), (2, "bob", "Draft")])
+editors = {"alice", "bob"}
+
+
+def edit(user, note_id):
+    if user not in editors:
+        return 403
+    row = db.execute(
+        "SELECT title FROM note WHERE id = ? AND owner = ?", (note_id, user)
+    ).fetchone()
+    return 404 if row is None else row[0]
+
+
+for user in ("alice", "bob", "carol"):
+    print(user, user in editors, edit(user, 1))
+```
+
+Expected output:
+
+```text
+alice True Private
+bob True 404
+carol False 403
+```
+
+Membership in the Editors group answers a model level question: may this user change notes at all? Alice and Bob both say yes, which is what `has_perm("auth.change_user")` reports in the lesson. Only the `owner = ?` clause separates them, so Bob's request for note 1 finds no row and becomes a 404. The default `ModelBackend` returns False for every `has_perm(perm, obj)` call, so it cannot do this filtering for you; the program asserts that with `alice.has_perm("auth.change_user", bob)`. Carol shows the other gate: without the group, she is refused before any database lookup.
 
 ## Failure diagnosis and discussion
 

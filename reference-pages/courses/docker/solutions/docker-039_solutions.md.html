@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-namespace-and-cgroup">Exercise 1: Distinguish namespace and cgroup.<a class="heading-anchor" href="#exercise-1-distinguish-namespace-and-cgroup" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Object visibility versus grouping and resource controls.</p>
 <p><strong>Why:</strong> Both influence container behavior but solve different problems. A memory limit does not define which network interfaces a process can see.</p>
+<p><strong>Approach:</strong> Map each setting to its mechanism: --network none and the PID view come from namespaces; mem_limit and cpus come from cgroups.</p>
+<p><strong>Why this is correct:</strong> Namespaces decide what a process can see; cgroups count and limit what it uses.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting mem_limit 128m to hide host network interfaces mixes a resource control with a visibility control.</p>
+<p><strong>How to verify:</strong> The worked example&#x27;s output shows a PID and a cgroup path; changing the network flag alters interfaces but not the cgroup.</p>
 <h3 id="exercise-2-predict-whether-the-container-has-its-own-kernel">Exercise 2: Predict whether the container has its own kernel.<a class="heading-anchor" href="#exercise-2-predict-whether-the-container-has-its-own-kernel" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Ordinary Linux containers share the engine environment kernel.</p>
 <p><strong>Why:</strong> On a desktop host that kernel may live in a Linux VM. The container boundary still does not create another guest kernel for each app.</p>
+<p><strong>Approach:</strong> Run uname -r inside the container and on the engine host or VM and compare.</p>
+<p><strong>Why this is correct:</strong> Both report the same kernel because containers share it; on a desktop that kernel belongs to the engine&#x27;s Linux VM.</p>
+<p><strong>A plausible wrong approach:</strong> Believing the fixture has its own kernel leads to wrong guesses about isolation and patching.</p>
+<p><strong>How to verify:</strong> The kernel versions match between container and engine environment.</p>
 <h3 id="exercise-3-draw-the-client-to-process-runtime-chain">Exercise 3: Draw the client-to-process runtime chain.<a class="heading-anchor" href="#exercise-3-draw-the-client-to-process-runtime-chain" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Client, engine, runtime setup, mounts and application process.</p>
 <p><strong>Why:</strong> The chain helps place errors such as daemon connection failure, image unpacking failure and application exceptions at different layers.</p>
+<p><strong>Approach:</strong> Draw client, engine API, image unpack and mounts, the OCI runtime, and finally python server.py.</p>
+<p><strong>Why this is correct:</strong> Each error belongs to one stage: cannot connect is the client to engine, unpack errors are the image, and tracebacks are the app.</p>
+<p><strong>A plausible wrong approach:</strong> Reading every failure as an application bug sends a daemon connection error to code review.</p>
+<p><strong>How to verify:</strong> Classify three sample errors to their stage, and the matching log source confirms each.</p>
 <h3 id="exercise-4-diagnose-a-missing-cgroup-path-from-an-example">Exercise 4: Diagnose a missing cgroup path from an example.<a class="heading-anchor" href="#exercise-4-diagnose-a-missing-cgroup-path-from-an-example" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect host and cgroup-version differences without changing kernel settings.</p>
 <p><strong>Why:</strong> Implementation details vary. Preserve the conceptual mechanism and record the observed platform instead of forcing one machine layout.</p>
+<p><strong>Approach:</strong> Check which cgroup version the host uses and how the engine lays it out before matching a path from an example.</p>
+<p><strong>Why this is correct:</strong> Paths differ between cgroup v1 and v2 and between engines; the mechanism is the same.</p>
+<p><strong>A plausible wrong approach:</strong> Changing kernel boot settings to match the example&#x27;s layout alters the host for a cosmetic difference.</p>
+<p><strong>How to verify:</strong> Record the observed path and cgroup version; the limit still appears in the container&#x27;s cgroup files.</p>
 <h3 id="exercise-5-explain-oci-interoperability-limits">Exercise 5: Explain OCI interoperability limits.<a class="heading-anchor" href="#exercise-5-explain-oci-interoperability-limits" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A shared specification does not guarantee every platform or feature is identical.</p>
 <p><strong>Why:</strong> Image architecture, runtime capabilities and host configuration still matter. Test the actual supported engine path.</p>
+<p><strong>Approach:</strong> Separate what OCI standardizes, image and runtime formats, from what it leaves to each platform: architectures, features and host setup.</p>
+<p><strong>Why this is correct:</strong> An OCI image for linux/amd64 still needs a compatible host, and a runtime may not support every option.</p>
+<p><strong>A plausible wrong approach:</strong> Promising the fixture runs anywhere OCI is supported skips architecture and feature checks.</p>
+<p><strong>How to verify:</strong> Run acceptance on each claimed engine and platform and record the results.</p>
 <h3 id="exercise-6-describe-the-shared-kernel-security-implication">Exercise 6: Describe the shared-kernel security implication.<a class="heading-anchor" href="#exercise-6-describe-the-shared-kernel-security-implication" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Least privilege and patching remain necessary parts of the trust model.</p>
 <p><strong>Why:</strong> Isolation reduces visibility and authority but depends on kernel enforcement. Do not describe a container as a universal hostile-code sandbox.</p>
+<p><strong>Approach:</strong> Note that every container&#x27;s syscalls reach the same kernel, so a kernel bug can cross the boundary.</p>
+<p><strong>Why this is correct:</strong> That is why the fixture also drops capabilities, runs as 10001 and needs a patched kernel.</p>
+<p><strong>A plausible wrong approach:</strong> Running untrusted code because it is in a container treats namespaces as a full sandbox.</p>
+<p><strong>How to verify:</strong> The trust note lists the fixture&#x27;s least-privilege settings and kernel patching as required parts.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

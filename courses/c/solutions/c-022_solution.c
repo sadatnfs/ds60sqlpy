@@ -88,6 +88,7 @@ int main(void) {
     size_t length = 0;
     stack[length++] = 2;
     stack[length++] = 5;
+    CHECK(length > 0);
     int out = stack[--length];
     CHECK(out == 5 && length == 1);
   }

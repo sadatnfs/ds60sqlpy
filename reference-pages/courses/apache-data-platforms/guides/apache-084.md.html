@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-084-catalog-and-governance-integration">apache-084: Catalog and governance integration<a class="heading-anchor" href="#apache-084-catalog-and-governance-integration" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-068</code>, <code>apache-074</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Qualified identity:</strong> A name that includes environment, catalog, namespace, table and, where needed, snapshot, so lineage cannot connect the wrong asset.</li>
+<li><strong>Catalog entry:</strong> A Hive Metastore or Iceberg catalog record that lets readers locate and interpret a table. It is not a governance policy.</li>
+<li><strong>Recorded governance:</strong> Atlas entities, classifications and lineage that describe assets. They are not table commits and do not enforce access.</li>
+<li><strong>Manual registration:</strong> Submitting catalog assets to Atlas through its API, which must state its source and scope rather than claim instrumented lineage.</li>
+</ul>
 <h3 id="catalog-metadata-and-governance-metadata-describe-different-contracts">Catalog metadata and governance metadata describe different contracts<a class="heading-anchor" href="#catalog-metadata-and-governance-metadata-describe-different-contracts" aria-label="Link to this section">#</a></h3>
 <p>Hive Metastore or an Iceberg catalog helps a reader locate and interpret tables and their committed state. Atlas records searchable asset, classification and lineage metadata. An integration can connect them through explicit identities, but neither service automatically supplies every responsibility of the other. A catalog entry is not a complete governance policy, and an Atlas entity is not a table commit.</p>
 <p>A shared identity scheme should include environment, catalog, namespace, table and where appropriate version or snapshot. Similar display names are insufficient. Two orders tables in different catalogs can have different owners, schemas and retention rules. Qualified metadata identity prevents a lineage edge from accidentally connecting the wrong asset.</p>
@@ -210,6 +217,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Trace catalog identity, table state, Atlas qualified name/GUID, process provenance, classification origin and actual engine policy. Keep metadata freshness separate from data freshness and enforcement. A stale search index and an outdated consumer snapshot can look similar to a user while requiring different repairs.</p>
 <p><strong>Interview discussion: what is the minimum evidence for a governed table integration?</strong> Correct cross-system identity and provenance plus actual protected operations at the stated enforcement boundary. These cases connect observed catalog state to recorded lineage and then test governance effects separately instead of treating a metadata label as a universal control.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="pin-the-table-snapshot-in-the-lineage-record">Pin the table snapshot in the lineage record<a class="heading-anchor" href="#pin-the-table-snapshot-in-the-lineage-record" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">&quot;typeName&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ds60_&lt;owner&gt;_dataset&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;attributes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-tag">&quot;qualifiedName&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ds60://&lt;owner&gt;/curated&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;curated&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-tag">&quot;description&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;demo.orders snapshot &lt;snapshot-id&gt;&quot;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>Iceberg already records which snapshot is current, and Atlas records who produced what. Writing the snapshot ID into the Atlas description, or into a custom attribute, lets a reviewer connect a lineage edge to the exact table state that existed. Without it, lineage says the process wrote curated but not which version, and a later overwrite makes the record ambiguous.</p>
+<h4 id="read-the-snapshot-from-the-table-catalog">Read the snapshot from the table catalog<a class="heading-anchor" href="#read-the-snapshot-from-the-table-catalog" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python">table <span class="syntax-operator">=</span> catalog<span class="syntax-operator">.</span>load_table<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">demo.orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+snapshot <span class="syntax-operator">=</span> table<span class="syntax-operator">.</span>current_snapshot<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>snapshot<span class="syntax-operator">.</span>snapshot_id<span class="syntax-punctuation">,</span> snapshot<span class="syntax-operator">.</span>summary<span class="syntax-operator">.</span>operation<span class="syntax-punctuation">)</span></code></pre>
+<p>This PyIceberg fragment reads the current snapshot ID and its operation, such as append, from the same catalog that batch_snapshot.py uses. Compare it with the ID stored in Atlas: a mismatch means the table moved after lineage was registered. Catalog metadata says what the table is; governance metadata says what someone decided about it, and both need to name the same state.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="integration-apache-084-complete-worked-notebook">Integration apache-084 complete worked notebook<a class="heading-anchor" href="#integration-apache-084-complete-worked-notebook" aria-label="Link to this section">#</a></h2>

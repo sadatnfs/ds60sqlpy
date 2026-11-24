@@ -14,6 +14,13 @@ Use a small bounded search over one variable at a time. Retain a failed hypothes
 
 
 
+### Key terms
+
+- **Held-out split:** Data excluded from training and tuning and used only to estimate generalization.
+- **Validation metric:** A quality measure computed on held-out data to compare runs or select checkpoints.
+- **Software and hardware ledger:** A record of source revision, versions, device, seeds and split that lets another person reproduce the report.
+- **Restart comparison:** Checking that a run resumed from a checkpoint matches an uninterrupted run under the same recipe.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,6 +46,14 @@ print(report)
 
 **Expected observation:** Three examples, MSE 2/3, GPU verification explicitly false.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `predictions` | `[1, 2, 3]` |
+| `targets` | `[1, 3, 2]` |
+| `mse` | `0.6666666666666666` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -57,27 +72,39 @@ Choose either lane first, then compare the other using identical mathematical in
 
 ### Exercise 1: Compute the validation metric
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute the validation metric** in the examples above.
+**Trap to avoid:** Reporting the training loss in place of the validation metric mixes data used for fitting with data held out for evaluation.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Write the sample ledger
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **write the sample ledger** in the examples above.
+**Trap to avoid:** Accepting a candidate that is twice as fast but evaluates only half the held-out examples compares different metrics.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Define a memory budget
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **define a memory budget** in the examples above.
+**Trap to avoid:** Giving a single total from a monitoring tool mixes reserved and live memory. It also hides which component to shrink when the budget is exceeded, such as switching optimizers or lowering the batch.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Design a restart comparison
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **design a restart comparison** in the examples above.
+**Trap to avoid:** Testing only that the checkpoint loads without errors says nothing about continuation. A checkpoint missing momentum or sampler position loads cleanly and still diverges on the next step.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose one optimization
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **choose one optimization** in the examples above.
+**Trap to avoid:** Applying a popular optimization without measuring may target a stage that is not the bottleneck. Mixed precision, for example, does little when the GPU sits idle waiting for host input.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: State pending hardware evidence
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **state pending hardware evidence** in the examples above.
+**Trap to avoid:** Leaving out the verification field lets readers assume the GPU path was tested. A later reader cannot then distinguish a validated deployment from a desk check.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

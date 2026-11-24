@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-013`.
 
 A blueprint groups related Flask routes and handlers so an application can compose them deliberately. It does not create a completely separate server. This chapter registers an API blueprint and compares an error raised inside a matched blueprint route with a request that matches no route at all.
 
+## Key terms
+
+- **Blueprint:** A named group of Flask routes and handlers that an application registers, optionally under a URL prefix such as `/api`.
+- **Qualified endpoint:** A blueprint route's endpoint name, such as `api.item`, which identifies the route for URL building and differs from its path.
+- **abort:** A Flask function that ends handling by raising an HTTP exception for a given status code, such as 404.
+- **Blueprint error handler:** A handler registered on a blueprint that formats errors raised while one of that blueprint's routes is handling a request.
+- **Application error handler:** A handler registered on the application itself, needed for errors such as an unmatched URL that occur before any blueprint owns the request.
+
 ## Mechanism: registration determines names and boundaries
 
 The blueprint has the name `api` and URL prefix `/api`. Its item function becomes the endpoint `api.item`, while its path is `/api/items/<int:key>`. Endpoint names support URL construction; path prefixes organize request targets. They are connected but not interchangeable identifiers.
@@ -25,6 +33,45 @@ Both routing and business lookup matter here. The second request found a handler
 `/api/no-route` does not match the blueprint's item route. Its 404 is handled by the application's global handler. The URL happens to begin with `/api`, but that textual prefix alone does not establish which blueprint should handle an unmatched route.
 
 The program checks that both failures have status 404 while their handler labels differ. This exposes a common misconception: defining one blueprint 404 handler is not sufficient to guarantee that every URL under a prefix receives the same custom body. Plan your application-level fallback as well.
+
+## Worked example: one blueprint registered under two prefixes
+
+```python
+from flask import Blueprint, Flask, url_for
+
+api = Blueprint("api", __name__)
+
+
+@api.get("/items/<int:key>")
+def item(key):
+    return {"id": key}
+
+
+@api.app_errorhandler(405)
+def wrong_method(error):
+    return {"error": "method not allowed"}, 405
+
+
+app = Flask(__name__)
+app.register_blueprint(api, url_prefix="/v1")
+app.register_blueprint(api, url_prefix="/v2", name="api_v2")
+
+with app.test_request_context():
+    print(url_for("api.item", key=3), url_for("api_v2.item", key=3))
+print(sorted(r.endpoint for r in app.url_map.iter_rules() if r.endpoint != "static"))
+with app.test_client() as client:
+    print(client.get("/v2/items/3").json, client.delete("/v1/items/3").json)
+```
+
+Expected output:
+
+```text
+/v1/items/3 /v2/items/3
+['api.item', 'api_v2.item']
+{'id': 3} {'error': 'method not allowed'}
+```
+
+A blueprint is a recorded set of routes and handlers, not an application, so registering it twice created two real URL rules. The second registration needed a distinct `name`, otherwise Flask refuses the duplicate, and that name became the endpoint prefix: `api_v2.item` builds `/v2/items/3`. The 405 handler was attached with `app_errorhandler`, which installs it on the whole application, unlike the lesson's `api.errorhandler(404)` that only applies to errors raised inside the blueprint's own views. That difference matters because a 405 or an unmatched URL is decided by the router before any blueprint view runs; a blueprint-local 405 handler would never fire. Printing `app.url_map` is the quickest way to confirm what a registration actually produced.
 
 ## Failure diagnosis
 

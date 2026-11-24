@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Construct `Series(values = c(3, 7), unit = \"ms\")` and call `series_total(x)`. The generic dispatches on x and finds the method registered with `S7::method(series_total, Series)`.",
+      "why": "The values are finite and the unit is one nonempty string, so the validator returns NULL and construction succeeds. The method sums 3 and 7 and names the result with the unit, giving c(ms = 10).",
+      "wrong": "Computing `sum(x@values)` outside the generic. The number is right, but the unit name is lost, so a later comparison with a named total fails and the reader no longer knows the scale.",
+      "verify": "`identical(series_total(x), c(ms = 10))` returns TRUE."
+    },
+    {
+      "approach": "Call `join_series(x, Series(values = 5, unit = \"ms\"))`. The generic dispatches on both arguments and the list(Series, Series) method checks units before building a new Series.",
+      "why": "Both units are ms, so the values are concatenated in argument order as 3, 7 and 5, and the total is 15. x itself still holds 3 and 7, because the method returns a new object.",
+      "wrong": "Passing a bare 5 as the second argument. No method is registered for a Series paired with a plain number, so S7 stops instead of guessing that 5 is in milliseconds.",
+      "verify": "`y@values` returns 3, 7, 5, and `series_total(y)` returns c(ms = 15)."
+    },
+    {
+      "approach": "Create the generic with `S7::new_generic(\"series_count\", \"x\")` and register `S7::method(series_count, Series) <- function(x) length(x@values)`.",
+      "why": "The generic dispatches on x alone. S7 validates whenever a Series is constructed or a property is set, so the method can trust its input, and length returns the integer 3L for the joined series.",
+      "wrong": "Returning `as.numeric(length(x@values))`. It prints 3, but the value is double, so `identical(series_count(y), 3L)` is FALSE and the stated integer contract is broken.",
+      "verify": "`identical(series_count(y), 3L)` returns TRUE, and `series_count(empty)` returns 0L."
+    },
+    {
+      "approach": "End the S7 validator with `if (length(problems)) problems else NULL`, returning NULL when the object is valid and a character vector of problems otherwise.",
+      "why": "S7 reads NULL as valid and any character result as a list of problems. The S4 validity function in r-022 returns TRUE on success, and the two conventions look alike but are not interchangeable.",
+      "wrong": "Copying the S4 ending `else TRUE`. S7 stops with a message saying the validator must return NULL or a character, not <logical>, so construction fails for perfectly valid inputs such as 3 and 7 in ms.",
+      "verify": "`Series(values = c(3, 7), unit = \"ms\")` returns a Series without error when the validator ends with `else NULL`."
+    },
+    {
+      "approach": "Run `x@unit <- character(0)` inside a handler expecting \"nonempty string\", then read `x@unit` again.",
+      "why": "S7 runs the validator whenever a property is replaced. character(0) has the right class, but the validator rejects it, and because the assignment fails, x keeps its previous unit.",
+      "wrong": "Assuming S7 behaves like the S4 class in r-022, where `@<-` skips validity. Skipping this test would leave the most important difference between the two systems unchecked.",
+      "verify": "The handler returns a message containing \"unit must be one nonempty string\", and `x@unit` still returns \"ms\"."
+    },
+    {
+      "approach": "Work with a Series through its S7 constructor, properties and generics, and write an explicit adapter when S4 code needs the same data.",
+      "why": "`@` is shared syntax, but S7 resolves it through its own property system. S4 methods such as combine_measure from r-022 are registered for FormalMeasure, so they have no method for a Series.",
+      "wrong": "Passing a Series to combine_measure because both objects answer `@values`. Dispatch fails, and if it did not, the S4 validity rules would never have been checked for this object.",
+      "verify": "`S7::S7_inherits(x, Series)` returns TRUE, and `class(x)` shows \"Series\" and \"S7_object\", not FormalMeasure."
+    }
+  ]
+}

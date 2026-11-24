@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "track_id": "c",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "c-004",
+      "title": "Loops, early exits and switch cases, one checked block at a time",
+      "anchor": "reference",
+      "source_path": "courses/c/solutions/c-004_solution.c",
+      "source_sha256": "cff74327012ab1d7986dbb128f83465ee74ebbd35a0d2710337e13636ecf922d",
+      "expected_output": ["All lesson checks passed."],
+      "steps": [
+        {
+          "lines": [10, 16],
+          "excerpt": "static void lesson_check(bool condition, const char *file, int line) {\n  if (!condition) {\n    fprintf(stderr, \"Check failed at %s:%d\\n\", file, line);\n    abort();\n  }\n}\n#define CHECK(condition) lesson_check((condition), __FILE__, __LINE__)",
+          "title": "An always-on CHECK helper",
+          "explanation": "lesson_check receives a condition plus the file name and line number where it was called. If the condition is false it writes a message to stderr and calls abort, which ends the program at once with a failure status. The CHECK macro fills in __FILE__ and __LINE__ for you, so a failing check reports exactly where it lives. Unlike assert, this helper does not vanish when NDEBUG is defined, so the checks always run.",
+          "observe": "Nothing is printed while every condition holds. A false condition would print a 'Check failed at' line and stop before the success message."
+        },
+        {
+          "lines": [19, 27],
+          "excerpt": "  /* Trace a prefix sum */\n  {\n    int values[] = {2, 4, 6};\n    int sum = 0;\n    for (size_t i = 0; i < 3; i++) {\n      sum += values[i];\n    }\n    CHECK(sum == 12);\n  }",
+          "title": "A prefix sum with a counted for loop",
+          "explanation": "The loop variable i starts at 0 and the loop body runs while i < 3, so i takes the values 0, 1 and 2, which are exactly the valid indexes of a three element array. Each pass adds one element to sum. The running sum goes 2, then 6, then 12. Using size_t for an index is the C convention because it is the unsigned type meant for sizes and counts.",
+          "observe": "After the loop, sum holds 12. Writing i <= 3 instead would read one element past the end of the array, which is undefined behavior."
+        },
+        {
+          "lines": [29, 38],
+          "excerpt": "  /* Handle zero iterations */\n  {\n    int values[1] = {9};\n    size_t length = 0;\n    int sum = 0;\n    for (size_t i = 0; i < length; i++) {\n      sum += values[i];\n    }\n    CHECK(sum == 0);\n  }",
+          "title": "A loop that runs zero times",
+          "explanation": "Here length is 0, so the condition i < length is false before the first pass and the body never runs. That is not an error: a for loop tests its condition before every pass, including the first one. Starting sum at 0 means an empty input produces the correct total without any special case.",
+          "observe": "values[0] is never read, and sum stays 0."
+        },
+        {
+          "lines": [40, 51],
+          "excerpt": "  /* Find the first match */\n  {\n    int values[] = {3, 8, 8};\n    size_t found = 3;\n    for (size_t i = 0; i < 3; i++) {\n      if (values[i] == 8) {\n        found = i;\n        break;\n      }\n    }\n    CHECK(found == 1);\n  }",
+          "title": "Stop at the first match with break",
+          "explanation": "found starts at 3, one past the last valid index, as a sentinel meaning 'not found yet'. When values[i] equals 8 the code records i and break leaves the loop immediately, so the second 8 at index 2 is never considered. Without break the loop would keep going and found would end up as the last match instead of the first.",
+          "observe": "found is 1, the index of the first 8."
+        },
+        {
+          "lines": [53, 75],
+          "excerpt": "  /* Include an exact threshold */\n  {\n    int score = 60;\n    bool passed = score >= 60;\n    CHECK(passed);\n  }\n\n  /* Terminate a switch case */\n  {\n    int code = 2, result = 0;\n    switch (code) {\n    case 1:\n      result = 10;\n      break;\n    case 2:\n      result = 20;\n      break;\n    default:\n      result = -1;\n      break;\n    }\n    CHECK(result == 20);\n  }",
+          "title": "Inclusive thresholds and switch cases that end with break",
+          "explanation": "score >= 60 is true when score is exactly 60, so the boundary value passes; using > would wrongly fail it. In the switch, control jumps to the case label that matches code, here case 2. Each case ends with break; if one were missing, execution would fall through into the next case and overwrite result. The default case covers every other value.",
+          "observe": "passed is true and result is 20, not -1, because case 2 stops at its own break."
+        },
+        {
+          "lines": [77, 89],
+          "excerpt": "  /* Transfer reverse traversal safely */\n  {\n    int values[] = {1, 2, 3};\n    int out = 0;\n    for (size_t remaining = 3; remaining > 0; remaining--) {\n      size_t i = remaining - 1;\n      out = out * 10 + values[i];\n    }\n    CHECK(out == 321);\n  }\n  puts(\"All lesson checks passed.\");\n  return 0;\n}",
+          "title": "Count down safely with an unsigned index",
+          "explanation": "Counting down with an unsigned type is tricky because i >= 0 is always true for size_t: decrementing past 0 wraps around to a huge value. The fix is to count remaining from 3 down while it is greater than 0 and compute i = remaining - 1 inside the body. Each pass shifts out left by one decimal digit and appends the next value, building 3, then 32, then 321. Once every check has held, puts prints the single success line.",
+          "observe": "out is 321, and the program prints: All lesson checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "c-016",
+      "title": "A growable int vector built on realloc",
+      "anchor": "reference",
+      "source_path": "courses/c/solutions/c-016_solution.c",
+      "source_sha256": "ceab917843d442329f9339632e6e454c31c5bb188103a643c02fd590dba6663f",
+      "expected_output": ["All lesson checks passed."],
+      "steps": [
+        {
+          "lines": [18, 21],
+          "excerpt": "struct Vector {\n  int *data;\n  size_t len, cap;\n};",
+          "title": "The vector's three fields",
+          "explanation": "A dynamic vector is just a pointer to heap memory plus two counts. len is how many elements are in use and cap is how many fit in the current allocation. The rule the rest of the file maintains is len <= cap, and data points to at least cap ints (or is NULL when cap is 0).",
+          "observe": "A vector written as {0} starts with data NULL, len 0 and cap 0, which is a valid empty vector."
+        },
+        {
+          "lines": [22, 33],
+          "excerpt": "static bool vector_reserve(struct Vector *v, size_t cap) {\n  if (cap <= v->cap)\n    return true;\n  if (cap > SIZE_MAX / sizeof *v->data)\n    return false;\n  int *next = realloc(v->data, cap * sizeof *v->data);\n  if (next == NULL)\n    return false;\n  v->data = next;\n  v->cap = cap;\n  return true;\n}",
+          "title": "Reserve capacity without breaking the vector on failure",
+          "explanation": "vector_reserve returns early if there is already room. Before multiplying, it checks cap > SIZE_MAX / sizeof *v->data, because cap * sizeof(int) could overflow and ask for far too little memory. realloc's result goes into a separate pointer, next. If realloc fails it returns NULL but leaves the old block alive, so assigning straight to v->data would leak it and lose the elements. Only after success are data and cap updated.",
+          "observe": "On any failure the function returns false and the vector is exactly as it was before the call."
+        },
+        {
+          "lines": [34, 42],
+          "excerpt": "static bool vector_push(struct Vector *v, int value) {\n  if (v->len == v->cap) {\n    size_t next = v->cap ? v->cap * 2 : 4;\n    if (next < v->cap || !vector_reserve(v, next))\n      return false;\n  }\n  v->data[v->len++] = value;\n  return true;\n}",
+          "title": "Push grows by doubling",
+          "explanation": "When the vector is full, push picks a new capacity: 4 for an empty vector, otherwise double the old one. Doubling keeps the average cost of a push constant, because copies get rarer as the vector grows. The next < v->cap test catches the doubling itself wrapping around. Then v->data[v->len++] = value stores the element at index len and increments len afterward.",
+          "observe": "Pushing 20 values grows the capacity 4, 8, 16, 32, so only four allocations happen."
+        },
+        {
+          "lines": [43, 54],
+          "excerpt": "static bool vector_pop(struct Vector *v, int *out) {\n  if (v->len == 0 || out == NULL)\n    return false;\n  *out = v->data[--v->len];\n  return true;\n}\nstatic void vector_destroy(struct Vector *v) {\n  free(v->data);\n  v->data = NULL;\n  v->len = 0;\n  v->cap = 0;\n}",
+          "title": "Pop and destroy",
+          "explanation": "pop refuses an empty vector or a NULL output pointer and returns false without touching *out. Otherwise --v->len decrements len first and then reads that index, which is the last element. destroy frees the block and resets every field, so the struct is back to the valid empty state and a second destroy would be harmless because free(NULL) does nothing.",
+          "observe": "After destroy, data is NULL, so no stale pointer to freed memory is left behind."
+        },
+        {
+          "lines": [56, 81],
+          "excerpt": "int main(void) {\n  /* Push into an empty vector */\n  {\n    struct Vector v = {0};\n    CHECK(vector_push(&v, 3) && vector_push(&v, 5));\n    CHECK(v.len == 2 && v.data[0] == 3 && v.data[1] == 5);\n    vector_destroy(&v);\n  }\n\n  /* Reserve without adding elements */\n  {\n    struct Vector v = {0};\n    CHECK(vector_reserve(&v, 8));\n    CHECK(v.cap >= 8 && v.len == 0);\n    vector_destroy(&v);\n  }\n\n  /* Grow while preserving contents */\n  {\n    struct Vector v = {0};\n    for (int i = 0; i < 20; i++)\n      CHECK(vector_push(&v, i));\n    for (size_t i = 0; i < v.len; i++)\n      CHECK(v.data[i] == (int)i);\n    vector_destroy(&v);\n  }",
+          "title": "Checks for push, reserve and growth",
+          "explanation": "Each block creates its own vector, uses it and destroys it, so the cases cannot affect one another. The growth block pushes 0 through 19 and then reads every element back, proving that realloc copied the old contents into each larger block. The reserve block shows that capacity can grow while len stays 0.",
+          "observe": "Every element still equals its index after four reallocations."
+        },
+        {
+          "lines": [83, 110],
+          "excerpt": "  /* Pop from a nonempty vector */\n  {\n    struct Vector v = {0};\n    int out = 0;\n    CHECK(vector_push(&v, 7));\n    CHECK(vector_pop(&v, &out) && out == 7 && v.len == 0);\n    vector_destroy(&v);\n  }\n\n  /* Reject an empty pop */\n  {\n    struct Vector v = {0};\n    int out = 9;\n    CHECK(!vector_pop(&v, &out) && out == 9);\n    vector_destroy(&v);\n  }\n\n  /* Transfer reserve failure atomicity */\n  {\n    struct Vector v = {0};\n    CHECK(vector_push(&v, 4));\n    CHECK(!vector_reserve(&v, SIZE_MAX));\n    CHECK(v.len == 1 && v.data[0] == 4);\n    vector_destroy(&v);\n  }\n  puts(\"All lesson checks passed.\");\n  return 0;\n}",
+          "title": "Pop, an empty pop, and an impossible reserve",
+          "explanation": "In the empty pop case, out starts as 9 and checks it is still 9, proving that a rejected operation does not write. The last block asks for SIZE_MAX elements; the overflow guard rejects it before realloc is even called, and the checks confirm the existing element 4 survived. When all checks pass, puts prints the success line.",
+          "observe": "The program prints: All lesson checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "c-031",
+      "title": "Rejecting integer and size overflow before it happens",
+      "anchor": "reference",
+      "source_path": "courses/c/solutions/c-031_solution.c",
+      "source_sha256": "bdb602766702dad58b85636d35d8413cd07644e132e989658572fd11827052fd",
+      "expected_output": ["All lesson checks passed."],
+      "steps": [
+        {
+          "lines": [18, 23],
+          "excerpt": "static bool add_checked(int a, int b, int *out) {\n  if (out == NULL || (b > 0 && a > INT_MAX - b) || (b < 0 && a < INT_MIN - b))\n    return false;\n  *out = a + b;\n  return true;\n}",
+          "title": "Checked signed addition",
+          "explanation": "Signed overflow in C is undefined behavior, so you cannot compute a + b and then look at the result. Instead the test happens on values that cannot overflow: if b is positive, a + b overflows exactly when a > INT_MAX - b; if b is negative, it underflows exactly when a < INT_MIN - b. Both subtractions are safe because of the sign of b. Only when the sum is known to fit does the function write *out.",
+          "observe": "The function returns false and leaves *out alone for any pair whose true sum does not fit in an int."
+        },
+        {
+          "lines": [24, 29],
+          "excerpt": "static bool size_product(size_t a, size_t b, size_t *out) {\n  if (out == NULL || (b != 0 && a > SIZE_MAX / b))\n    return false;\n  *out = a * b;\n  return true;\n}",
+          "title": "Checked size multiplication",
+          "explanation": "size_t is unsigned, so a * b wraps silently instead of being undefined, but a wrapped allocation size is a classic security bug: you allocate a tiny buffer and then write far past it. Dividing SIZE_MAX by b gives the largest a that still fits. The b != 0 guard avoids dividing by zero, and a zero product is always safe.",
+          "observe": "Use this guard before every count times element size calculation that feeds malloc or realloc."
+        },
+        {
+          "lines": [31, 48],
+          "excerpt": "int main(void) {\n  /* Add ordinary values */\n  {\n    int out = 0;\n    CHECK(add_checked(7, 5, &out) && out == 12);\n  }\n\n  /* Reject positive overflow */\n  {\n    int out = 9;\n    CHECK(!add_checked(INT_MAX, 1, &out) && out == 9);\n  }\n\n  /* Reject negative overflow */\n  {\n    int out = 9;\n    CHECK(!add_checked(INT_MIN, -1, &out) && out == 9);\n  }",
+          "title": "Ordinary sums and both overflow directions",
+          "explanation": "7 + 5 fits, so out becomes 12. INT_MAX + 1 and INT_MIN + (-1) are each one step past the limit. In both rejection cases out starts as 9 and the check confirms it is still 9, which proves the function did not write a partial or wrapped result.",
+          "observe": "Rejected calls return false and out keeps its previous value."
+        },
+        {
+          "lines": [50, 70],
+          "excerpt": "  /* Accept exact boundaries */\n  {\n    int out = 0;\n    CHECK(add_checked(INT_MAX, 0, &out) && out == INT_MAX);\n    CHECK(add_checked(INT_MIN, 0, &out) && out == INT_MIN);\n  }\n\n  /* Reject a size product */\n  {\n    size_t out = 7;\n    CHECK(!size_product(SIZE_MAX, 2, &out) && out == 7);\n  }\n\n  /* Transfer the zero product */\n  {\n    size_t out = 7;\n    CHECK(size_product(SIZE_MAX, 0, &out) && out == 0);\n  }\n  puts(\"All lesson checks passed.\");\n  return 0;\n}",
+          "title": "Exact boundaries and the zero product",
+          "explanation": "Adding 0 to INT_MAX or INT_MIN lands exactly on the limit, which is allowed, so a guard that used >= instead of > would be wrong. SIZE_MAX * 2 is rejected, but SIZE_MAX * 0 is accepted and gives 0, which shows why the b != 0 test sits in front of the division. After all checks pass the program prints its single line.",
+          "observe": "The program prints: All lesson checks passed."
+        }
+      ]
+    }
+  ]
+}

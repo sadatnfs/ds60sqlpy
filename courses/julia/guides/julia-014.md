@@ -10,6 +10,14 @@ Keep missingness and numerical failure distinct and report the denominator used 
 
 Open `julia-014` in `/classroom` with its prepared `julia` runtime. Worked case A (deletion and replacement change a mean) and worked case B (skipmissing does not remove NaN) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-014: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **missing:** The value for an unknown data entry, which propagates through arithmetic and comparisons using three-valued logic.
+- **nothing:** The singleton meaning that no value exists, such as a failed search result, which does not propagate the way `missing` does.
+- **NaN:** A floating-point value produced by an undefined operation such as `0.0 / 0.0` that is still a number and is distinct from `missing`.
+- **Union type:** A type such as `Union{Missing, Float64}` that lets one container hold either alternative.
+- **Coverage:** The count or fraction of observations actually present, reported beside any summary that skipped missing values.
+
 ## Three states with different meanings
 
 `missing` represents unknown or unavailable data. `nothing` commonly represents the absence of a returned value. NaN is a floating-point value that often indicates an undefined numerical result. These states are not interchangeable, and a function should not collapse them into zero without a declared policy.

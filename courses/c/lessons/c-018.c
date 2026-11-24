@@ -5,18 +5,21 @@ int main(void) {
      Copy worked example 1 into a scratch pad and change `CHECK(fwrite("abc", 1,
      3, f) == 3);` to `CHECK(fwrite("abc", 1, 4, f) == 3);` inside its CHECK.
      Before running, predict whether the CHECK still holds and explain why; then
-     restore it. Expected: The changed run stops with `Check failed` at the
-     CHECK on `fwrite("abc", 1, 3, f) == 3`. Restoring the original line brings
-     back the worked observation: three bytes return and match abc. */
+     restore it. Expected: With `CHECK(fwrite("abc", 1, 4, f) == 3);` the run
+     stops with `Check failed` at the CHECK on `fwrite("abc", 1, 3, f) == 3`,
+     because the "round-trip an owned stream" case no longer shows that three
+     bytes return and match abc. Restoring `CHECK(fwrite("abc", 1, 3, f) == 3);`
+     brings that observation back. */
 
   /* Exercise 2: Observe a short read: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2 so that it reads
-     `CHECK(fwrite("ab", 1, 3, f) == 2);`. Run worked example 2 with that line,
-     explain why the edited CHECK now fails for the same program state, and
+     A careless edit changed the CHECK in worked example 2, the "observe a short
+     read" case, so that it reads `CHECK(fwrite("ab", 1, 3, f) == 2);`. Run the
+     example with that line, explain why the edited CHECK now fails even though
+     the program state still means two bytes return and EOF becomes set, and
      restore it. Expected: Before the repair the run stops with `Check failed`
-     at the CHECK on `fwrite("ab", 1, 2, f) == 2`; after it the line reads
-     `CHECK(fwrite("ab", 1, 2, f) == 2);` again and two bytes return and EOF
-     becomes set. */
+     at the CHECK on `fwrite("ab", 1, 2, f) == 2`. Once the line reads
+     `CHECK(fwrite("ab", 1, 2, f) == 2);` again, the "observe a short read" case
+     again shows that two bytes return and EOF becomes set. */
 
   /* Exercise 3: Avoid prechecking EOF
      Inspect an empty stream before and after a read.

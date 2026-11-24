@@ -62,7 +62,7 @@ Prediction unit: one identified row""",
             "Use training targets 2, 4, 6 to predict the constant training mean on holdout 8, 10, 12, 14.",
             "mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.",
             """Training mean=(2+4+6)/3=4
-Holdout residuals=4,6,8,10
+Holdout residuals (target minus prediction)=8-4, 10-4, 12-4, 14-4 = 4, 6, 8, 10
 Squared errors=16,36,64,100
 MSE=216/4=54""",
             "The baseline uses no holdout target to fit its constant. A baseline fitted to the holdout mean would contaminate the comparison.",
@@ -901,7 +901,7 @@ assert id(stable.weight)==identity and len(list(stable.parameters()))==1""",
 )
 lesson(
     12,
-    "An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target 2 a-b+c, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed 100-step budget without using the holdout to choose settings.\n\nThe capstone must report what it actually establishes. A small synthetic holdout can show that the implementation uses features in the intended way, but it cannot establish robustness or population accuracy. Keep the scalar arithmetic pilot from lesson 008 as an independent mechanism check alongside the larger experiment. Hashing split IDs records identity; it does not prove the split design was appropriate.",
+    "An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target `2a - b + c`, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed 100-step budget without using the holdout to choose settings.\n\nThe capstone must report what it actually establishes. A small synthetic holdout can show that the implementation uses features in the intended way, but it cannot establish robustness or population accuracy. Keep the scalar arithmetic pilot from lesson 008 as an independent mechanism check alongside the larger experiment. Hashing split IDs records identity; it does not prove the split design was appropriate.",
     "Create X shaped (6, 3), targets shaped (6, 1), and nn.Linear(3, 1, bias=False) with zero weights. Select rows by frozen index lists. Use MSELoss and SGD 0.1, zeroing gradients every step. Evaluate after the fixed budget under no_grad. Record train and holdout losses with their counts, plus model state and split identities. Do not overwrite the original split after seeing errors.",
     [
         ("Experiment manifest", "The identities and settings needed to reconstruct a run."),
@@ -911,7 +911,7 @@ lesson(
     [
         ex(
             "Create the three-feature fixture",
-            "Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.",
+            "Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target `2a - b + c`.",
             "targets 0, 2, -1, 1, 2, 4.",
             """x=torch.tensor([[0.,0.,0.],[1.,0.,0.],[0.,1.,0.],[0.,0.,1.],[1.,1.,1.],[2.,1.,1.]],dtype=torch.float64)
 y=x@torch.tensor([[2.],[-1.],[1.]],dtype=torch.float64); train=[0,1,2,3]; test=[4,5]
@@ -1447,8 +1447,8 @@ torch.testing.assert_close(constant,torch.zeros((1,2)),atol=1e-6,rtol=0)""",
 )
 lesson(
     19,
-    "Convolution applies a shared local kernel across spatial positions. PyTorch Conv2d expects NCHW layout: batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.\n\nThe operation is cross-correlation: the kernel slides without spatial rotation. VALID-style padding 0 includes only fully contained patches. Stride controls the gap between patch starts. The 3 x3ramp image and asymmetric 2 x2kernel produce an exact output of -4 at all four positions, making orientation and layout mistakes visible before introducing learned filters.",
-    "Build image with shape (1, 1, 3, 3) and kernel (1, 1, 2, 2), then use F.conv 2 d with stride 1, padding 0. nn.Conv2d registers weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.",
+    "Convolution applies a shared local kernel across spatial positions. PyTorch Conv2d expects NCHW layout: batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.\n\nThe operation is cross-correlation: the kernel slides without spatial rotation. VALID-style padding 0 includes only fully contained patches. Stride controls the gap between patch starts. The 3x3 ramp image and asymmetric 2x2 kernel produce an exact output of -4 at all four positions, making orientation and layout mistakes visible before introducing learned filters.",
+    "Build image with shape (1, 1, 3, 3) and kernel (1, 1, 2, 2), then use `F.conv2d` with stride 1, padding 0. nn.Conv2d registers weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.",
     [
         ("NCHW", "Batch, channel, height, width axis order for PyTorch images."),
         ("Shared kernel", "One weight pattern reused at many spatial locations."),
@@ -1505,7 +1505,7 @@ assert sum(p.numel() for p in layer.parameters())==8""",
             "Increasing image height creates more applications of the same kernel, not a separate weight set for each position.",
         ),
     ],
-    "TensorFlow's common C on v2D layout is NHWC with kernels HWIO; PyTorch uses NCHW and OIHW. Translate images with axis permutation and kernels with the corresponding permutation. Both use cross-correlation semantics despite the convolution name.",
+    "TensorFlow's common `Conv2D` layout is NHWC with kernels HWIO; PyTorch uses NCHW and OIHW. Translate images with axis permutation and kernels with the corresponding permutation. Both use cross-correlation semantics despite the convolution name.",
     [
         (
             "Why is reshape insufficient for layout conversion?",

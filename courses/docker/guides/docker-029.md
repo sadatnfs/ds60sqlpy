@@ -16,6 +16,14 @@ These records become useful when tied to an immutable artifact identity and a ve
 
 The teaching image has a deliberately small application surface but still inherits a base operating system and Python runtime. Supply-chain review includes those dependencies. Copying only one server file does not mean the final image contains only one software component.
 
+### Key terms
+
+- **SBOM:** A software bill of materials listing the components included in an artifact.
+- **Provenance:** A record of how an artifact was built, including its inputs and builder information.
+- **Attestation:** A build statement, such as an SBOM or provenance record, stored with a specific image in its image index.
+- **SPDX:** A standard format for exchanging SBOM data about packages, files and licenses.
+- **Image digest:** The immutable identity an SBOM or provenance record must be tied to before it supports a release decision.
+
 ## Anatomy and a trace you can follow
 
 BuildKit creates attestations at build time and attaches them to the image index as in-toto JSON. Minimal provenance (`mode=min`) is added by default; `--sbom=true` adds an SPDX SBOM produced by a scanner plugin, and `--provenance=mode=max` records a detailed build statement. Attestations need a builder that can store an image index: the default docker driver requires the containerd image store, a docker-container builder works with either store, and `--push` keeps them in the registry. The `local` and `tar` exporters write them as JSON files, such as `sbom.spdx.json`, in the root of the export. For a pushed image, `docker buildx imagetools inspect IMAGE --format "{{ json .SBOM.SPDX }}"` prints the SBOM without pulling the image.
@@ -91,11 +99,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Generating an SBOM for a tag instead of the exact digest you ship. Trusting provenance JSON without verifying its issuer. Expecting attestations to survive a `--load` into the classic image store.
 
-Exercise 4 is this chapter's boundary case: Diagnose an unsigned provenance statement from an unknown source. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an unsigned provenance statement from an unknown source. Identify who issued the provenance statement and whether a verification policy accepts that issuer before reading any of its fields as fact. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using SBOM, provenance, attestation, SPDX and image digest. Reconstruct worked example 2 (Separate evidence objects) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Explain what an SBOM describes, what a provenance statement claims and which object both refer to. Then reconstruct worked example 2 (Separate evidence objects) with one different value, predict what changes, and name which of SBOM, provenance, attestation, SPDX and image digest the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

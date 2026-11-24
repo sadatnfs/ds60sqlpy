@@ -48,6 +48,21 @@ def task(question, hint, answer):
     return {"question": question, "hint": hint, "answer": answer}
 
 
+def explain(lessons, reasoning):
+    """Attach each exercise's solution reasoning from a part's REASONING table.
+
+    Every entry is (why, wrong, check): why the answer fits this lesson's model and
+    context, one tempting mistake and why it fails here, and how to confirm it.
+    """
+
+    for spec in lessons:
+        entries = reasoning[spec["number"]]
+        assert len(entries) == len(spec["practice"]), spec["id"]
+        for item, (why, wrong, check) in zip(spec["practice"], entries, strict=True):
+            item.update(why=why, wrong=wrong, check=check)
+    return lessons
+
+
 def lesson(
     number,
     title,

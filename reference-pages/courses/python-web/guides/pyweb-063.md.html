@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>pyweb-009</code>, <code>pyweb-012</code>, <code>python-lang-04</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A request may depend on several concurrent operations, but those operations need one accountable lifetime. Structured concurrency keeps child tasks inside a parent scope that waits for their completion or cancellation. This chapter uses TaskGroup and an explicit deadline to verify cleanup when one dependency fails.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Structured concurrency:</strong> Keeping child tasks inside a parent scope that does not exit until every child has finished or been cancelled.</li>
+<li><strong>TaskGroup:</strong> The asyncio context manager that owns the tasks created in it and cancels the remaining ones when one task fails.</li>
+<li><strong>ExceptionGroup:</strong> An exception that carries several task failures together and is handled selectively with <code>except*</code>.</li>
+<li><strong>asyncio.timeout:</strong> A context manager that cancels the work inside it when a deadline passes and raises TimeoutError at the context boundary.</li>
+<li><strong>Deadline budget:</strong> The total time allowed for a request, which must cover queueing, dependency calls, retries, cleanup and the response.</li>
+</ul>
 <h3 id="mechanism-task-ownership-forms-a-tree">Mechanism: task ownership forms a tree<a class="heading-anchor" href="#mechanism-task-ownership-forms-a-tree" aria-label="Link to this section">#</a></h3>
 <p>An asyncio TaskGroup owns the tasks created inside its context. If one task fails, the group cancels remaining tasks and waits for them before leaving the context. Related exceptions are represented through an exception group, which the caller can handle with except*. This makes unfinished child work visible at the parent boundary.</p>
 <p>A timeout bounds the duration of a waiting operation by cancelling the current task within a controlled context. The timeout exception is observed outside that context after cancellation handling has run. A finally block remains the appropriate place to release a resource owned by the cancelled operation.</p>
@@ -209,6 +217,52 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A separate operation waits on an event that will not be released. An asyncio timeout expires, the operation&#x27;s finally block records cleanup and the caller handles TimeoutError. The assertion concerns cleanup and failure classification, not a precise millisecond benchmark.</p>
 <p>Cancellation does not undo a committed external effect. A database write or remote payment may have completed before the caller&#x27;s timeout. The next chapter introduces stable operation identities and transactional outboxes to reconcile that uncertainty.</p>
 <p>Work that must survive request cancellation should move into an explicitly durable job system. Detaching a task with create_task and dropping its reference does not provide durable ownership. It merely makes the lifetime harder to observe and can lose work when the process stops.</p>
+<h3 id="worked-example-gather-leaves-a-sibling-running-taskgroup-cancels-it">Worked example: gather leaves a sibling running, TaskGroup cancels it<a class="heading-anchor" href="#worked-example-gather-leaves-a-sibling-running-taskgroup-cancels-it" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> asyncio
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">slow</span><span class="syntax-punctuation">(</span>log<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">)</span>
+        log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">slow finished</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> asyncio<span class="syntax-operator">.</span>CancelledError<span class="syntax-punctuation">:</span>
+        log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">slow cancelled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">raise</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">fail</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">dependency failed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">with_gather</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    log <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>gather<span class="syntax-punctuation">(</span>slow<span class="syntax-punctuation">(</span>log<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> fail<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span>
+        log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">caller saw error</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> log
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">with_group</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    log <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">async</span> <span class="syntax-keyword">with</span> asyncio<span class="syntax-operator">.</span>TaskGroup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> group<span class="syntax-punctuation">:</span>
+            group<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>slow<span class="syntax-punctuation">(</span>log<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+            group<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>fail<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span><span class="syntax-operator">*</span> ValueError<span class="syntax-punctuation">:</span>
+        log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">caller saw error</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> log
+
+
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>with_gather<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>with_group<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">[&#x27;caller saw error&#x27;, &#x27;slow finished&#x27;]
+[&#x27;slow cancelled&#x27;, &#x27;caller saw error&#x27;]</code></pre>
+<p>With <code>asyncio.gather</code>, the first exception propagates to the caller at once, but the slow sibling keeps running in the background and finishes after the request has already failed. In a web handler that means work, connections and possibly writes outliving the response that reported an error. The <code>TaskGroup</code> version cancels the sibling, waits for its <code>finally</code> or <code>except</code> cleanup, and only then raises the <code>ExceptionGroup</code> that <code>except*</code> unpacks. That ordering is what the lesson asserts with its <code>cleaned</code> event: the caller sees the failure only after every child has stopped.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why await a cancelled task?</strong> Cancellation is a request delivered cooperatively. Awaiting lets the caller observe termination and gives cleanup a defined completion boundary.</p>
 <p><strong>Why can timeout handling still take time?</strong> The cancelled operation may need to finish cleanup. A timeout is not an instantaneous kill of every external activity, especially threads or processes launched by the coroutine.</p>

@@ -5,6 +5,28 @@
   "minutes": 75,
   "prerequisites": ["apache-008", "apache-039", "apache-073"],
   "concepts": ["Delta Sharing", "Delta Lake/Linux Foundation", "recipient", "discovery"],
+  "key_terms": [
+    [
+      "Delta Sharing",
+      "An open protocol from the Delta Lake project under the Linux Foundation, not the Apache Software Foundation, through which a recipient discovers and reads shared tables."
+    ],
+    [
+      "Share",
+      "The top-level object a provider grants to a recipient, containing schemas that contain shared tables."
+    ],
+    [
+      "Recipient",
+      "The party granted access to shares, identified by the credentials in its profile file."
+    ],
+    [
+      "Profile file",
+      "A JSON file holding the sharing server endpoint, a bearer token and the profile format version."
+    ],
+    [
+      "Reference server",
+      "The Scala and JVM server implementation intended for development and interoperability testing, not a production deployment."
+    ]
+  ],
   "evidence": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred.",
   "sources": [
     ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"],

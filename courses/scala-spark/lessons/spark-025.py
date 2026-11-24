@@ -83,7 +83,7 @@ def main():
         many_path = str(owned_root / "many")
         assert isinstance(source.schema["id"].dataType, LongType) and source.count() == 2000
         assert source.agg(F.sum("amount")).first()[0] == 13993000
-        print("Explicit-schema source:2000 rows,total13993000")
+        print("Explicit-schema source: 2000 rows, total 13993000")
         ids = [i for i in range(1990, 2000) if i % 2 == 0]
         assert ids == [1990, 1992, 1994, 1996, 1998]
         print("Independent filtered identity oracle=", ids)

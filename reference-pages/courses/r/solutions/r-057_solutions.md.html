@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Construct one marker trace from the three observed pairs.</p>
 <p>The trace contains the three source coordinates without an implied connecting trajectory.</p>
 <p><strong>Expected evidence:</strong> Three markers with exact values.</p>
+<p><strong>Approach:</strong> Call plot_ly on d with x = ~x, y = ~observed, type = &quot;scatter&quot; and mode = &quot;markers&quot;, and name the trace Observed.</p>
+<p><strong>Why it holds here:</strong> The three pairs (1, 2), (2, 4) and (3, 3) are separate measurements. Markers show each one without suggesting that the response moved smoothly from one input to the next.</p>
+<p><strong>Tempting mistake:</strong> Drawing the observations with add_lines. The segment from 4 down to 3 then reads as a measured decline between inputs 2 and 3, which no observation supports.</p>
+<p><strong>Verify:</strong> <code>as.numeric(built$x$data[[1]]$y)</code> returns 2, 4, 3, and <code>built$x$data[[1]]$mode</code> returns &quot;markers&quot;.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add and name the rule y=2x as a line trace.</p>
 <p>The second trace has values 2,4,6 and a distinct explanatory name.</p>
 <p><strong>Expected evidence:</strong> Two identifiable traces.</p>
+<p><strong>Approach:</strong> Add the rule with add_lines(p, y = ~rule, name = &quot;Rule: 2x&quot;), which reuses x from the plot_ly call.</p>
+<p><strong>Why it holds here:</strong> The rule column holds 2, 4 and 6, so the line agrees with the observations at inputs 1 and 2 and sits 3 above the observed value at input 3. A separate named trace keeps that modeled comparison distinct from the data.</p>
+<p><strong>Tempting mistake:</strong> Adding the rule as a second unnamed marker trace. It shares the marker style, and the legend falls back to a generic trace label, so a reader cannot tell which points were measured.</p>
+<p><strong>Verify:</strong> <code>length(built$x$data)</code> returns 2, and <code>as.numeric(built$x$data[[2]]$y)</code> returns 2, 4, 6.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Set axis titles through layout.</p>
 <p>The layout identifies the x and y quantities while trace coordinates remain unchanged.</p>
 <p><strong>Expected evidence:</strong> Correct labels and unchanged data.</p>
+<p><strong>Approach:</strong> Pass xaxis = list(title = &quot;Input&quot;) and yaxis = list(title = &quot;Response&quot;) to layout.</p>
+<p><strong>Why it holds here:</strong> Without them plotly titles the axes from the formulas, so the y axis would read observed even though it also carries the rule. layout changes the labels without touching any trace values.</p>
+<p><strong>Tempting mistake:</strong> Renaming the data columns to carry display text, such as a column called Response value. Every formula and check then has to quote that name, and the label is still tied to one trace rather than the axis.</p>
+<p><strong>Verify:</strong> <code>as.numeric(built$x$data[[1]]$y)</code> still returns 2, 4, 3 after layout, and the rendered figure shows Input and Response as axis titles.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose an unsorted line trace.</p>
 <p>A line follows supplied order; sort or group under a declared trajectory contract before connecting observations.</p>
 <p><strong>Expected evidence:</strong> Ordering repair identified.</p>
+<p><strong>Approach:</strong> Reorder whole rows with <code>unsorted[order(unsorted$x), ]</code> before using a trace that connects points in row order, such as mode = &quot;lines&quot; or add_paths.</p>
+<p><strong>Why it holds here:</strong> The rows arrive as x = 3, 1, 2 with y = 6, 2, 4, so a row order path runs from (3, 6) back to (1, 2) and then to (2, 4). add_lines sorts by x for you, but the other connectors do not, so the order should be declared rather than assumed.</p>
+<p><strong>Tempting mistake:</strong> Sorting only the x column with sort(unsorted$x). The pairs become (1, 6), (2, 2) and (3, 4), so the line connects values that were never observed together.</p>
+<p><strong>Verify:</strong> <code>ordered$x</code> returns 1, 2, 3 and <code>ordered$y</code> returns 2, 4, 6.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Build a bar figure from the supplied count table and inspect its values.</p>
 <p>Trace coordinates preserve category names and 2,1,3 heights.</p>
 <p><strong>Expected evidence:</strong> Exact bar data.</p>
+<p><strong>Approach:</strong> Map category to x and count to y on the counts table with type = &quot;bar&quot;, and keep zero on the y axis with <code>rangemode = &quot;tozero&quot;</code>.</p>
+<p><strong>Why it holds here:</strong> counts already holds one row per category with heights 2, 1 and 3. A bar trace draws those values as given, and the character categories keep the order A, B, C in which they appear.</p>
+<p><strong>Tempting mistake:</strong> Using type = &quot;histogram&quot; with x = ~category. The histogram counts rows, and each category occurs once in counts, so every bar has height 1.</p>
+<p><strong>Verify:</strong> <code>as.character(b$x)</code> returns &quot;A&quot;, &quot;B&quot;, &quot;C&quot;, and <code>as.numeric(b$y)</code> returns 2, 1, 3.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain what explicit printing and figure-specification checks establish.</p>
 <p>Printing requests capture; data checks validate the specification. Actual browser rendering and interactions need separate observation.</p>
 <p><strong>Expected evidence:</strong> Evidence boundaries retained.</p>
+<p><strong>Approach:</strong> Record what each check covers: plotly_build confirms the trace values, print(p) and print(bar) request the two figures for capture, and the browser view confirms what students see.</p>
+<p><strong>Why it holds here:</strong> The built specification proves two traces with 2, 4, 3 and 2, 4, 6 and a bar trace with 2, 1, 3. It cannot show whether plotly.js loads on the classroom page, or whether hover, zoom and the legend respond.</p>
+<p><strong>Tempting mistake:</strong> Treating the closing cat line as proof that the interactive page works. The script reaches that line even when the widget later fails to load its JavaScript in the browser.</p>
+<p><strong>Verify:</strong> The reference prints r-057 reference checks passed, and a separate browser session shows both figures with working hover text.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -210,6 +210,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Input gradients are elementwise because each input influences one output. Scale and bias gradients reduce over all outputs because those parameters are shared. Forgetting those reductions is a common error that can remain hidden when testing only one element. Broadcasting adds another version of the same issue: a broadcast dimension&#x27;s gradient must be reduced back to the original parameter shape.</p>
 <p>A central finite difference computes <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo>+</mo><mi>ϵ</mi><mo stretchy="false">)</mo><mo>−</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mi>ϵ</mi><mo stretchy="false">)</mo><mo stretchy="false">]</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>2</mn><mi>ϵ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">[f(x+\epsilon)-f(x-\epsilon)]/(2\epsilon)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϵ</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϵ</span><span class="mclose">)]</span><span class="mord">/</span><span class="mopen">(</span><span class="mord">2</span><span class="mord mathnormal">ϵ</span><span class="mclose">)</span></span></span></span>. Too large an epsilon introduces truncation error; too small can lose the difference to rounding. Use small double-precision inputs away from nondifferentiable boundaries and vary epsilon if a discrepancy is ambiguous. At the ReLU kink, test the documented chosen derivative rather than insisting a symmetric finite difference define it.</p>
 <p>Backward also has memory and stream contracts. Saved forward intermediates must remain valid until consumed. Recomputing a mask can save storage only when it reproduces the same forward branch under the supported precision policy. Test non-unit upstream gradients, because differentiating a sum supplies all ones and may hide missing multiplication by the incoming gradient. State whether second derivatives are supported and test them separately; first-order correctness does not imply higher-order graph support.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Vector-Jacobian product:</strong> The quantity backward computes: the upstream gradient multiplied by the operator&#x27;s Jacobian.</li>
+<li><strong>Subgradient:</strong> A valid slope choice at a kink such as ReLU at zero, where the ordinary derivative is undefined.</li>
+<li><strong>Finite difference:</strong> A numerical derivative estimate from evaluating a function at nearby points, used to check analytic gradients.</li>
+<li><strong>Gradient check (gradcheck):</strong> A PyTorch utility that compares analytic and finite-difference gradients, usually in double precision.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>At x=2 with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>2</mn><mo separator="true">,</mo><mi>b</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a=2,b=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>, y=5 and derivative <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>y</mi><mi mathvariant="normal">/</mi><mi>d</mi><mi>x</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">dy/dx=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mord">/</span><span class="mord mathnormal">d</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>. A central finite difference around 2 agrees within numerical tolerance.</p>
@@ -230,6 +237,36 @@ bias_grad <span class="syntax-operator">=</span> <span class="syntax-builtin">su
 <span class="syntax-keyword">assert</span> bias_grad <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU gradient oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> numeric<span class="syntax-punctuation">,</span> bias_grad<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Finite-difference derivative approximately 2 and bias VJP 3.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>x</code></td>
+<td><code>2.0</code></td>
+</tr>
+<tr>
+<td><code>eps</code></td>
+<td><code>1e-05</code></td>
+</tr>
+<tr>
+<td><code>numeric</code></td>
+<td><code>2.0000000000131024</code></td>
+</tr>
+<tr>
+<td><code>upstream</code></td>
+<td><code>[1, 3]</code></td>
+</tr>
+<tr>
+<td><code>mask</code></td>
+<td><code>[0, 1]</code></td>
+</tr>
+<tr>
+<td><code>bias_grad</code></td>
+<td><code>3</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -242,17 +279,23 @@ bias_grad <span class="syntax-operator">=</span> <span class="syntax-builtin">su
 <p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-derive-the-input-vjp">Exercise 1: Derive the input VJP<a class="heading-anchor" href="#exercise-1-derive-the-input-vjp" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>derive the input VJP</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using the output <code>y</code> instead of a mask, <code>upstream * a * y</code>, scales gradients by activation values and is wrong for every positive input not equal to 1.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-derive-bias-gradient">Exercise 2: Derive bias gradient<a class="heading-anchor" href="#exercise-2-derive-bias-gradient" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>derive bias gradient</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Returning the upstream sum without masking gives 4, including a contribution from a position where the ReLU blocked gradient.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-run-finite-differences-away-from-a-kink">Exercise 3: Run finite differences away from a kink<a class="heading-anchor" href="#exercise-3-run-finite-differences-away-from-a-kink" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>run finite differences away from a kink</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Running the check in float32 with a tiny epsilon loses precision to cancellation and fails even when the analytic gradient is right.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-a-failed-kink-gradcheck">Exercise 4: Explain a failed kink gradcheck<a class="heading-anchor" href="#exercise-4-explain-a-failed-kink-gradcheck" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>explain a failed kink gradcheck</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Changing the backward to return 1 at the kink so the check passes chooses a convention for the test&#x27;s sake.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-specify-higher-order-support">Exercise 5: Specify higher-order support<a class="heading-anchor" href="#exercise-5-specify-higher-order-support" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>specify higher-order support</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming double backward works because first-order gradcheck passed leads to silent zero second derivatives.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-compare-each-framework-reference">Exercise 6: Compare each framework reference<a class="heading-anchor" href="#exercise-6-compare-each-framework-reference" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>compare each framework reference</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing PyTorch&#x27;s custom op with TensorFlow&#x27;s custom op only checks they agree with each other.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

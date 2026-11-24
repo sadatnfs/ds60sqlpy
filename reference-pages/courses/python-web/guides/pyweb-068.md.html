@@ -197,6 +197,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>pyweb-067</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A streaming generator can be correct while a client, server or proxy buffers its output. This chapter moves from in-process clients to the owned Docker web lab and uses an explicit ordering condition to test actual SSE delivery. It also compares the lifetime of a connection with the lifetime of a durable job.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Buffering:</strong> Holding streamed output in a client, server or proxy before forwarding it, which can delay events even when the generator is correct.</li>
+<li><strong>Delivery-order test:</strong> Waiting for an actual queued or running event before releasing the held job, which proves bytes arrived before completion.</li>
+<li><strong>Connection lifetime:</strong> The span of one HTTP stream; closing it does not cancel or take ownership of the durable job it reports on.</li>
+<li><strong>Job-scoped cursor:</strong> A resume position that refers to persistent event rows of the selected job, so reconnecting cannot read another job&#x27;s events.</li>
+</ul>
 <h3 id="mechanism-transport-and-work-have-different-owners">Mechanism: transport and work have different owners<a class="heading-anchor" href="#mechanism-transport-and-work-have-different-owners" aria-label="Link to this section">#</a></h3>
 <p>The FastAPI service accepts a bounded calculation into PostgreSQL. A separate worker changes the job&#x27;s state and commits event rows. The HTTP connection reads those events and formats SSE frames. Disconnecting that reader does not remove the database job or transfer ownership of the calculation back to the browser.</p>
 <p>The test creates a held job that cannot finish until a separate release request arrives. It opens the SSE stream and waits for an actual queued or running event over the socket. Only after that event is received does the test send release. This proves a meaningful delivery order without relying on a fragile claim such as every chunk arrives within a particular number of milliseconds.</p>
@@ -209,6 +216,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>After the first event, the test closes the SSE connection, releases the job and reconnects with Last-Event-ID. Returned events must have later identities. The final event reports the expected sum 10, and the database-backed job endpoint confirms the completed result.</p>
 <p>A cursor that does not belong to the job is refused. This prevents a client from silently applying a global counter from another stream and missing its own history. A production service also needs an explicit policy for expired history, snapshots and client deduplication.</p>
 <p>The browser offers separate Disconnect and Reconnect controls. Disconnect closes only the reader. It does not cancel the durable job. A product that supports job cancellation would need its own authenticated command and worker-state transition, not an assumption that closing a tab reverses work.</p>
+<h3 id="worked-example-a-bounded-queue-makes-a-fast-producer-wait">Worked example: a bounded queue makes a fast producer wait<a class="heading-anchor" href="#worked-example-a-bounded-queue-makes-a-fast-producer-wait" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> asyncio
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    queue <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>Queue<span class="syntax-punctuation">(</span>maxsize<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    deepest <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+
+    <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">producer</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">nonlocal</span> deepest
+        <span class="syntax-keyword">for</span> chunk <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">await</span> queue<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">)</span>
+            deepest <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>deepest<span class="syntax-punctuation">,</span> queue<span class="syntax-operator">.</span>qsize<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">await</span> queue<span class="syntax-operator">.</span>put<span class="syntax-punctuation">(</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span>
+
+    <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">consumer</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        received <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+        <span class="syntax-keyword">while</span> <span class="syntax-punctuation">(</span>chunk <span class="syntax-operator">:=</span> <span class="syntax-keyword">await</span> queue<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+            received<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">)</span>
+            <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> received
+
+    _<span class="syntax-punctuation">,</span> received <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>gather<span class="syntax-punctuation">(</span>producer<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> consumer<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> received<span class="syntax-punctuation">,</span> deepest
+
+
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">([0, 1, 2, 3, 4, 5], 2)</code></pre>
+<p>The producer could generate all six chunks instantly, but <code>put</code> suspends whenever two items are waiting, so memory held between the stages never exceeds two chunks while the slow consumer catches up. That suspension is backpressure: the slowest party sets the pace. An unbounded queue would accept everything and grow with every slow client. In a streaming endpoint the consumer is the network socket, and awaiting the send or drain step plays the role of the full queue. When the client disconnects, that await is where cancellation arrives.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why can TestClient content checks pass while live streaming fails?</strong> They can validate the final concatenated bytes without observing incremental network delivery. The held-job protocol tests ordering at the socket boundary.</p>
 <p><strong>What is backpressure?</strong> A slow consumer limits how quickly data can be transmitted or buffered. A complete design bounds buffers and production rate rather than accumulating unbounded events in application memory.</p>

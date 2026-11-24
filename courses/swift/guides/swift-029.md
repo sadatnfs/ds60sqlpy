@@ -115,7 +115,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Collect results without assuming order) before changing anything, and confirm its observation: Sorted results are deterministic despite unspecified completion order.
 2. Compare Example B (Handle an empty group) with Example A and name the first line whose behavior differs. Its observation is: No admitted children produces the identity result zero.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Group completion order is unspecified.
+3. Before opening the explanation, check your task 3 attempt (Implement bounded admission for a small list with at most two outstanding children) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-048-checkpoints-and-end-to-end-guarantees">apache-048: Checkpoints and end-to-end guarantees<a class="heading-anchor" href="#apache-048-checkpoints-and-end-to-end-guarantees" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-047</code>, <code>apache-036</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Checkpoint:</strong> A consistent snapshot of operator state and source positions that Flink can restore after a failure.</li>
+<li><strong>Checkpoint barrier:</strong> A marker injected into the streams that separates records before and after a checkpoint, defining a consistent cut through the graph.</li>
+<li><strong>Barrier alignment:</strong> Buffering input from channels whose barrier already arrived until barriers reach every input, which can add latency under backpressure.</li>
+<li><strong>Replayable source:</strong> A source that can restore its read position from a checkpoint so records after that point are read again.</li>
+<li><strong>Transactional sink:</strong> A sink that commits output only when a checkpoint completes, which is needed for end-to-end exactly-once results.</li>
+</ul>
 <h3 id="a-checkpoint-is-a-consistent-recovery-boundary">A checkpoint is a consistent recovery boundary<a class="heading-anchor" href="#a-checkpoint-is-a-consistent-recovery-boundary" aria-label="Link to this section">#</a></h3>
 <p>Flink checkpoints coordinated operator and source state so a job can recover from a consistent point. A source must be able to restore its position, managed state must use compatible serializers and the sink must participate in the intended commit protocol. A completed checkpoint is therefore more than a copy of one Java object&#x27;s fields, but it is not a transaction over every external action a function might perform.</p>
 <p>Checkpoint barriers identify a consistent cut through the graph. Alignment and unifying the relevant input positions can affect latency, buffering and backpressure. Unaligned checkpoint modes trade different state and operational costs; enabling a setting does not by itself prove a recovery guarantee. Begin with the actual selected mode and inspect completed checkpoint metadata and retained files.</p>

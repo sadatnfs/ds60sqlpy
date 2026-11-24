@@ -197,21 +197,25 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Find an interior boundary: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `int values[] = {2, 4,</span></span>
-<span class="source-line"><span class="syntax-comment">     6, 8};` to `int values[] = {2, 5, 6, 8};`. Before running, predict which</span></span>
-<span class="source-line"><span class="syntax-comment">     CHECK fails and which value it now sees; then run it and restore the</span></span>
-<span class="source-line"><span class="syntax-comment">     original line. Expected: The changed run stops with `Check failed` at the</span></span>
-<span class="source-line"><span class="syntax-comment">     CHECK on `lower_bound(values, 4, 5) == 2`. Restoring the original line</span></span>
-<span class="source-line"><span class="syntax-comment">     brings back the worked observation: the lower-bound index is 2. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;find an interior boundary&quot; case, into a scratch</span></span>
+<span class="source-line"><span class="syntax-comment">     pad and change `int values[] = {2, 4, 6, 8};` to `int values[] = {2, 5, 6,</span></span>
+<span class="source-line"><span class="syntax-comment">     8};`. Before running, predict which CHECK fails and which value it sees in</span></span>
+<span class="source-line"><span class="syntax-comment">     place of the worked result (the lower-bound index is 2); then run it and</span></span>
+<span class="source-line"><span class="syntax-comment">     restore the original line. Expected: With `int values[] = {2, 5, 6, 8};`</span></span>
+<span class="source-line"><span class="syntax-comment">     the run stops with `Check failed` at the CHECK on `lower_bound(values, 4,</span></span>
+<span class="source-line"><span class="syntax-comment">     5) == 2`, because the &quot;find an interior boundary&quot; case no longer shows that</span></span>
+<span class="source-line"><span class="syntax-comment">     the lower-bound index is 2. Restoring `int values[] = {2, 4, 6, 8};` brings</span></span>
+<span class="source-line"><span class="syntax-comment">     that observation back. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Find the first duplicate: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2 so that it reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(lower_bound(values, 4, 4) == 1);`. Run worked example 2 with that</span></span>
-<span class="source-line"><span class="syntax-comment">     line, explain why the edited CHECK now fails for the same program state,</span></span>
-<span class="source-line"><span class="syntax-comment">     and restore it. Expected: Before the repair the run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `lower_bound(values, 4, 3) == 1`; after it the line</span></span>
-<span class="source-line"><span class="syntax-comment">     reads `CHECK(lower_bound(values, 4, 3) == 1);` again and the index is the</span></span>
-<span class="source-line"><span class="syntax-comment">     first 3 at position 1. */</span></span>
+<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2, the &quot;find the first</span></span>
+<span class="source-line"><span class="syntax-comment">     duplicate&quot; case, so that it reads `CHECK(lower_bound(values, 4, 4) == 1);`.</span></span>
+<span class="source-line"><span class="syntax-comment">     Run the example with that line, explain why the edited CHECK now fails even</span></span>
+<span class="source-line"><span class="syntax-comment">     though the program state still means the index is the first 3 at position</span></span>
+<span class="source-line"><span class="syntax-comment">     1, and restore it. Expected: Before the repair the run stops with `Check</span></span>
+<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `lower_bound(values, 4, 3) == 1`. Once the line</span></span>
+<span class="source-line"><span class="syntax-comment">     reads `CHECK(lower_bound(values, 4, 3) == 1);` again, the &quot;find the first</span></span>
+<span class="source-line"><span class="syntax-comment">     duplicate&quot; case again shows that the index is the first 3 at position 1. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Handle no larger value</span></span>
 <span class="source-line"><span class="syntax-comment">     Search 2, 4, 6 for target 9.</span></span>

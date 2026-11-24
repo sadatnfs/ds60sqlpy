@@ -38,6 +38,12 @@
       "code": "data <- data.frame(label = c(\"Alpha\", \"Beta\", \"Beta\"), amount = c(10, 20, 40))\ngroups <- split(data$amount, data$label)\ncount <- vapply(groups, length, integer(1))\ntotal <- vapply(groups, sum, numeric(1))\nreport <- data.frame(label = as.character(names(groups)), count = unname(count), total = unname(total), mean = unname(total / count))\nstopifnot(sum(report$count) == nrow(data), sum(report$total) == sum(data$amount))\nstopifnot(isTRUE(all.equal(sum(report$total) / sum(report$count), 70 / 3)))\nprint(report)\n",
       "explanation": "Alpha has one admitted record and Beta has two. The final observation mean uses all three rather than equal weighting of the two group means.",
       "expected": "Alpha count 1, total 10, mean 10; Beta count 2, total 60, mean 30."
+    },
+    {
+      "title": "A duplicated dimension key breaks both joins differently",
+      "code": "admitted <- data.frame(id = c(\"R1\", \"R2\", \"R4\"), segment = c(\"A\", \"B\", \"B\"), amount = c(10, 20, 40))\ndimension <- data.frame(segment = c(\"A\", \"B\", \"B\"), label = c(\"Alpha\", \"Beta\", \"Beta new\"))\njoined <- merge(admitted, dimension, by = \"segment\")\nstopifnot(nrow(joined) == 5L, sum(joined$amount) == 130)\nindex <- match(admitted$segment, dimension$segment)\nstopifnot(identical(index, c(1L, 2L, 2L)), sum(admitted$amount) == 70)\nstopifnot(anyDuplicated(dimension$segment) == 3L)\nprint(joined)\n",
+      "explanation": "The dimension table lists segment B twice. merge pairs each of the two B records with both B rows, so three records become five and the total rises from 70 to 130 with no warning. match fails in a quieter way: it returns the first B row for both records, so the counts stay right but the label Beta is chosen only by row order, and the second label is never seen. Neither function stops. The check `anyDuplicated(dimension$segment)` returns 3, the position of the first repeat, so testing it before any join rejects the dimension and names the offending row.",
+      "expected": "Five rows: one for segment A and four for B, with each B record repeated once per label; the amount column adds to 130 instead of 70."
     }
   ],
   "exercises": [

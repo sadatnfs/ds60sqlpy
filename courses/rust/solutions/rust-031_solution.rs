@@ -26,6 +26,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     {
+        // Task 2: Guided modification
+        let list = Node::More(
+            1,
+            Box::new(Node::More(2, Box::new(Node::More(3, Box::new(Node::End))))),
+        );
+        assert_eq!(list.total(), 6);
+        let extended = Node::More(10, Box::new(list));
+        assert_eq!(extended.total(), 16);
+    }
+
+    {
         // Task 3: Independent construction
         use std::cell::RefCell;
         use std::rc::{Rc, Weak};
@@ -50,6 +61,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(Rc::strong_count(&parent), 1);
         drop(parent);
         assert!(child.parent.borrow().upgrade().is_none());
+    }
+
+    {
+        // Task 5: Boundary evidence
+        assert_eq!(Node::End.total(), 0);
+        let single = Node::More(-4, Box::new(Node::End));
+        assert_eq!(single.total(), -4);
+        let weak = {
+            let owner = std::rc::Rc::new(5);
+            std::rc::Rc::downgrade(&owner)
+        };
+        assert!(weak.upgrade().is_none());
+        assert_eq!(weak.strong_count(), 0);
+        let never: std::rc::Weak<i32> = std::rc::Weak::new();
+        assert!(never.upgrade().is_none());
     }
     println!("rust-031: passed");
     Ok(())

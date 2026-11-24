@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-041_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Stream A allocates X, writes X and records ready. Stream B waits, reads X and records done. Before A frees X, A waits for done. This closes both the producer-to-consumer edge and the consumer-to-reuse edge. The first event alone is insufficient for lifetime safety.</p>
+<p><strong>Approach:</strong> Order allocate, write, ready, wait in B, read, done, wait in A, then free X.</p>
+<p><strong>Why it is correct:</strong> Ready guards the read and done guards the free, closing both edges.</p>
+<p><strong>A plausible wrong approach:</strong> Using only the ready event lets A free X while B may still be reading.</p>
+<p><strong>How to verify:</strong> The reference asserts read_B comes before free_A in the event list.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A pool reserves 64 MiB and the application currently uses 16 MiB. After freeing that allocation back to the pool, live usage may be zero while reservation remains 64 MiB. Calling this a leak without examining ownership and retention policy confuses two different measurements.</p>
+<p><strong>Approach:</strong> Report live and reserved bytes separately and check pool retention policy.</p>
+<p><strong>Why it is correct:</strong> After the free, live is 0 MiB while the pool keeps 64 MiB reserved for reuse.</p>
+<p><strong>A plausible wrong approach:</strong> Calling the reserved 64 MiB a leak ignores that the pool intentionally holds it.</p>
+<p><strong>How to verify:</strong> The reference prints reserved_MiB 64 and live_MiB 0; trim the pool and confirm release.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Ready orders production before consumption; done orders final consumption before free or reuse.</p>
+<p><strong>Approach:</strong> Name ready for production before consumption and done for consumption before free.</p>
+<p><strong>Why it is correct:</strong> Each event covers one hazard: reading too early or freeing too early.</p>
+<p><strong>A plausible wrong approach:</strong> Treating one event as covering both directions leaves the reuse hazard open.</p>
+<p><strong>How to verify:</strong> Draw both arrows and check each crosses streams in the right direction.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Enqueueing does not imply completion. Establish the final-consumer dependency before the allocation becomes reusable.</p>
+<p><strong>Approach:</strong> Wait for the consuming stream&#x27;s done event before freeing.</p>
+<p><strong>Why it is correct:</strong> Enqueued work may not have run yet when the host frees.</p>
+<p><strong>A plausible wrong approach:</strong> Synchronizing the freeing stream alone does not wait for the other stream.</p>
+<p><strong>How to verify:</strong> Run a sanitizer and a delayed consumer to expose any early free.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Existing valid owners and original diagnostics; do not pretend a null allocation has valid output or destroy unrelated state.</p>
+<p><strong>Approach:</strong> Report the failure and keep existing valid buffers and diagnostics intact.</p>
+<p><strong>Why it is correct:</strong> Other owners still rely on their allocations.</p>
+<p><strong>A plausible wrong approach:</strong> Continuing with a null pointer as if allocation succeeded produces invalid output.</p>
+<p><strong>How to verify:</strong> Force an allocation failure in a test and check prior results survive.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Compare a bounded reuse pool with repeated allocation, record live versus reserved bytes and retain identical correctness and completion contracts.</p>
+<p><strong>Approach:</strong> Compare a bounded reuse pool with fresh allocation per iteration.</p>
+<p><strong>Why it is correct:</strong> Reuse avoids repeated allocation cost while the bound caps memory.</p>
+<p><strong>A plausible wrong approach:</strong> An unbounded pool can grow until other work cannot allocate.</p>
+<p><strong>How to verify:</strong> Record live and reserved bytes and timings for both, with identical outputs.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-041_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

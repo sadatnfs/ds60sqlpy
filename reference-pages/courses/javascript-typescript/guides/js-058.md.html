@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Zoom changes the mapping between data space and the visible viewport. A transform typically contains a scale factor and translation. Panning changes which portion of the data is visible; it does not change the underlying observations. Keep the original scale and data separate from the transformed view.</p>
 <p>Simply scaling an SVG group can also enlarge text and marker sizes, which may or may not be intended. Rescaling an axis from the zoom transform can preserve readable labels while changing the displayed data domain. Clipping keeps marks within the intended plot region.</p>
 <p>A usable zoom interface needs bounds and a reset. Pointer gestures can conflict with page scrolling, so test the actual browser behavior. Keyboard controls or preset views provide an alternative to wheel and drag gestures. Never use zoom to conceal a misleading initial domain.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Zoom transform:</strong> The object from a <code>d3.zoom</code> event holding a scale factor <code>k</code> and translation <code>x</code> and <code>y</code> between the base view and the current viewport.</li>
+<li><strong>rescaleX:</strong> The method <code>transform.rescaleX(baseScale)</code>, which returns a copy of the base scale whose domain matches the visible region while the base scale stays unchanged.</li>
+<li><strong>Viewport:</strong> The visible part of the data space inside the plot area, usually bounded with a clip path so panned marks do not cover the axes.</li>
+<li><strong>Scale extent:</strong> The <code>zoom.scaleExtent([min, max])</code> limit on how far a user can zoom out or in.</li>
+<li><strong>Reset:</strong> Returning the zoom to <code>d3.zoomIdentity</code> so the view matches the original base scale again.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>event.transform.rescaleX(baseScale)</code> creates a scale for the transformed horizontal view. Use that same scale for marks and axis ticks. The base scale remains unchanged so reset has a stable reference.</p>
 <p>Set explicit extent and scaleExtent for predictable behavior. The reference applies a known transform programmatically, checks the visible domain narrows and then resets. This establishes the transformation logic; manual interaction acceptance still includes pointer and keyboard behavior.</p>

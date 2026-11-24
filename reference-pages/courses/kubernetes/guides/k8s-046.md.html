@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The Container Network Interface, or CNI, is a plugin interface used in container networking. In Kubernetes, the chosen network implementation prepares Pod interfaces and connectivity according to cluster configuration. CNI is an interface and ecosystem, not one universal packet-forwarding algorithm.</p>
 <p>Cross-node Pod traffic can use routed networks, encapsulation overlays or other implementation-specific mechanisms. An overlay wraps an inner packet in an outer packet so the underlying network can transport it between nodes. Encapsulation consumes header space, affecting the maximum transmission unit, or MTU, available to the inner traffic.</p>
 <p>A small request may succeed while a large payload fails when MTU discovery, fragmentation or policy is misconfigured. This is different from a Service selector problem. Diagnose with bounded traffic and actual implementation evidence rather than changing cluster networking from a generic tutorial.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Container Network Interface:</strong> The plugin specification the container runtime calls to attach a Pod&#x27;s network namespace to the network and assign its address.</li>
+<li><strong>Overlay network:</strong> A virtual network that carries Pod traffic between nodes inside outer packets addressed from node to node.</li>
+<li><strong>Encapsulation:</strong> Wrapping a Pod packet inside an outer packet with node addresses, which adds header bytes to every packet.</li>
+<li><strong>Maximum transmission unit:</strong> The largest packet a link carries without fragmentation. Encapsulation reduces the space left for the inner packet.</li>
+<li><strong>Path MTU discovery:</strong> How a sender learns the smallest MTU on a path. If its error messages are blocked, large packets fail while small ones still work.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Separate the Pod-facing interface, node routing or overlay endpoint, underlay network and destination Pod interface. The control plane may show Ready Pods while the cross-node data path is broken. CNI setup failures can also prevent Pod sandbox creation before the app starts.</p>
 <p>The synthetic topology uses two nodes and two Pod subnets to make the hop sequence visible. It does not claim that every CNI assigns per-node CIDRs in the same way. Optional live observations require the exact prepared CNI and permissions; the course does not install or replace network plugins.</p>

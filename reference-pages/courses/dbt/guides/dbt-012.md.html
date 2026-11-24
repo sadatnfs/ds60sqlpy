@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A model version identifies a particular contract. Consumers can reference an explicit version or follow the declared latest version. Those choices have different change behavior. An explicit version supports a controlled migration; following latest can be appropriate only when the consumer accepts the change policy.</p>
 <p>The first case gives two versions the same column name and numeric type but different values. A stable consumer requests version 1 and receives 100, while an unversioned consumer follows version 2 and receives 80. This is intentionally a semantic change, not a parser or dtype error. A type-compatible change can still alter a model feature, dashboard metric or business decision.</p>
 <p>The second case makes the meaning explicit: gross 100 minus returns 20 yields net 80. The dependency graph records where the calculation came from, but it does not decide whether a consumer intended gross or net. Versioning, descriptions, comparison evidence and a migration plan work together.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Model version:</strong> One numbered implementation of a model declared under <code>versions</code>, with <code>defined_in</code> naming its SQL file and its own relation.</li>
+<li><strong>latest_version:</strong> The version an unpinned <code>ref</code> resolves to, which need not be the highest version number declared.</li>
+<li><strong>Versioned ref:</strong> A reference such as <code>ref(&#x27;customer_value&#x27;, version=1)</code> that pins a consumer to one model version.</li>
+<li><strong>Semantic change:</strong> A change in meaning that keeps the column name and type, such as an amount switching from gross 100 to net 80.</li>
+<li><strong>Migration:</strong> The planned move of each consumer from an old version to a new one before the old version is removed.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The model metadata declares latest_version and its versions, with defined_in pointing to the implementation files. ref(&#x27;customer_value&#x27;, version=1) selects an explicit contract. A plain ref follows the declared latest version. Inspect both the resolved database result and manifest dependency information.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

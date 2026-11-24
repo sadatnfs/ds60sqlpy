@@ -1,6 +1,6 @@
 # c-035: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-035_solution.c`, implements all six cases, from the "install and restore a handler" case to the "transfer a bounded shutdown model" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -20,13 +20,13 @@ CHECK(previous != SIG_ERR);
 CHECK(signal(SIGINT, previous) != SIG_ERR);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Restoring the original line brings back the worked observation: both operations succeed.
+**Expected:** With `CHECK(signal(SIGINT, previous) == SIG_ERR);` the run stops with `Check failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`, because the "install and restore a handler" case no longer shows that both operations succeed. Restoring `CHECK(signal(SIGINT, previous) != SIG_ERR);` brings that observation back.
 
 The fixture restores process state instead of leaving a changed signal policy for unrelated later work.
 
 ## Exercise 2: Record a raised notification: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+A careless edit changed the CHECK in worked example 2, the "record a raised notification" case, so that it reads `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means the signal flag becomes one, and restore it.
 
 The unchanged code is worked example 2:
 
@@ -39,7 +39,7 @@ CHECK(signal_seen == 1);
 CHECK(signal(SIGINT, previous) != SIG_ERR);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`; after it the line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again and the signal flag becomes one.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Once the line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, the "record a raised notification" case again shows that the signal flag becomes one.
 
 The handler only assigns a flag. The ordinary flow performs assertions and restoration after the handler returns.
 
@@ -123,4 +123,4 @@ A stop request does not mean in-flight operations completed. Drain or cancel the
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a bounded shutdown model" case to your own c-035 source. Explain why every access in `lesson_handler` or `stop_requested` stays within a live object and each owned resource is released. An expected signal handler failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "record a raised notification" case apart from ordinary output: the fixture proves its stated signal handler, async-signal safety and sig_atomic_t assumptions, not universal safety.

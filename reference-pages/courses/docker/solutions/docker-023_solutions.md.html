@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-map-each-hardening-setting-to-its-mechanism">Exercise 1: Map each hardening setting to its mechanism.<a class="heading-anchor" href="#exercise-1-map-each-hardening-setting-to-its-mechanism" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Mount writes, capabilities, privilege gain and temporary storage.</p>
 <p><strong>Why:</strong> The settings are complementary rather than synonyms. A clear mapping helps diagnose which boundary rejected an unintended operation.</p>
+<p><strong>Approach:</strong> Match each line to its target: read_only to the root mount, cap_drop to kernel capabilities, no-new-privileges to setuid gains and tmpfs to /tmp scratch space.</p>
+<p><strong>Why this is correct:</strong> Each one blocks a different kind of operation, so knowing the mapping tells you which rule refused a given call.</p>
+<p><strong>A plausible wrong approach:</strong> Treating all four as general hardening and removing them together to fix one error hides which boundary was involved.</p>
+<p><strong>How to verify:</strong> Trigger one forbidden action at a time, such as writing /app or changing a file owner, and note which setting the error points to.</p>
 <h3 id="exercise-2-predict-whether-read-only-root-prevents-volume-writes">Exercise 2: Predict whether read-only root prevents volume writes.<a class="heading-anchor" href="#exercise-2-predict-whether-read-only-root-prevents-volume-writes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A separately writable data mount can still allow them.</p>
 <p><strong>Why:</strong> Permissions are applied to the mounted path involved. The design deliberately separates immutable code from intended mutable state.</p>
+<p><strong>Approach:</strong> Look at the mount table: the root is read-only, while study-data is a separate named volume mounted read-write at /data.</p>
+<p><strong>Why this is correct:</strong> read_only applies to the container&#x27;s root filesystem; a volume brings its own mount options, so writes to /data still work.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting read_only: true to protect the counter from changes assumes it covers every mount.</p>
+<p><strong>How to verify:</strong> POST /increment succeeds and changes counter.json, while a write to /app as the same process fails.</p>
 <h3 id="exercise-3-write-a-least-privilege-acceptance-pair">Exercise 3: Write a least-privilege acceptance pair.<a class="heading-anchor" href="#exercise-3-write-a-least-privilege-acceptance-pair" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> One required action succeeds and one forbidden action fails.</p>
 <p><strong>Why:</strong> Checking only failure could describe a broken application. Checking only success could miss unnecessary access.</p>
+<p><strong>Approach:</strong> Pair a required action, GET /healthz returning ready with the counter persisting, with a forbidden one, writing /app/unexpected.txt.</p>
+<p><strong>Why this is correct:</strong> The pair rules out two different errors: a broken app that refuses everything and an open app that allows everything.</p>
+<p><strong>A plausible wrong approach:</strong> Testing only that /app is not writable passes for a container that cannot serve any request.</p>
+<p><strong>How to verify:</strong> Run both checks against the hardened compose file; the first succeeds and the second reports a read-only error.</p>
 <h3 id="exercise-4-diagnose-an-app-that-needs-an-undocumented-cache-directory">Exercise 4: Diagnose an app that needs an undocumented cache directory.<a class="heading-anchor" href="#exercise-4-diagnose-an-app-that-needs-an-undocumented-cache-directory" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Identify the path and provide a bounded intended mount if justified.</p>
 <p><strong>Why:</strong> Do not make the whole root filesystem writable. Determine whether the cache is temporary, durable or avoidable, then choose the smallest correct storage channel.</p>
+<p><strong>Approach:</strong> Find the exact path from the error, then ask whether the cache must survive restarts, can live in memory, or can be disabled.</p>
+<p><strong>Why this is correct:</strong> A temporary cache fits a small tmpfs like /tmp; a durable one needs a named volume; neither needs the root to become writable.</p>
+<p><strong>A plausible wrong approach:</strong> Setting read_only: false makes the error disappear and also removes protection for /app and every other path.</p>
+<p><strong>How to verify:</strong> After adding only the chosen mount, the app starts, and a write to /app still fails.</p>
 <h3 id="exercise-5-explain-why-privileged-mode-is-inappropriate-here">Exercise 5: Explain why privileged mode is inappropriate here.<a class="heading-anchor" href="#exercise-5-explain-why-privileged-mode-is-inappropriate-here" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It grants broad access unrelated to the HTTP fixture.</p>
 <p><strong>Why:</strong> A privileged container changes the trust boundary substantially. The lesson’s app has no legitimate requirement for device or host-administration capabilities.</p>
+<p><strong>Approach:</strong> List what privileged: true grants, including all capabilities, host devices and relaxed confinement, and compare it with what server.py does.</p>
+<p><strong>Why this is correct:</strong> The server only listens on 8080 and writes /data, so none of those grants serve the fixture.</p>
+<p><strong>A plausible wrong approach:</strong> Using privileged mode to get past a permission error trades a narrow fix for broad host access.</p>
+<p><strong>How to verify:</strong> The fixture passes its acceptance pair with cap_drop ALL, which shows no capability is needed.</p>
 <h3 id="exercise-6-review-a-hardening-change-without-overstating-security">Exercise 6: Review a hardening change without overstating security.<a class="heading-anchor" href="#exercise-6-review-a-hardening-change-without-overstating-security" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> State controls tested and the trusted-local-code boundary.</p>
 <p><strong>Why:</strong> No finite checklist proves a universal sandbox. Report what the actual configuration restricts and which threats remain outside its supported use.</p>
+<p><strong>Approach:</strong> Describe the configuration as tested: the four settings above, checks that passed, and the assumption that the code is trusted and local.</p>
+<p><strong>Why this is correct:</strong> The settings reduce what the process can do; they do not make the container a sandbox for hostile code.</p>
+<p><strong>A plausible wrong approach:</strong> Calling the result fully secure invites running untrusted images under a configuration never tested for that.</p>
+<p><strong>How to verify:</strong> The review lists each control with its passing check and names the threats left out of scope.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

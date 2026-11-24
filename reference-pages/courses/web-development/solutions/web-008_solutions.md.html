@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-008.md</code>.</p>
 <h3 id="exercise-1-predict-the-different-roles-of-id-and-name">Exercise 1: Predict the different roles of id and name.<a class="heading-anchor" href="#exercise-1-predict-the-different-roles-of-id-and-name" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Id supports document relationships; name identifies the submitted field.</p>
+<p><strong>Approach:</strong> Separate the two jobs: <code>id</code> links a label and other in-page references, while <code>name</code> becomes the key in submitted data.</p>
 <p><strong>Why:</strong> id connects document relationships such as label for, while name is the key used for the value in the submitted form data.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming the <code>id</code> doubles as the submitted key fails because a control with only an <code>id</code> is left out of <code>FormData</code>.</p>
+<p><strong>How to verify:</strong> Logging <code>[...new FormData(form)]</code> shows the <code>name</code> values as keys and never the <code>id</code> values.</p>
 <h3 id="exercise-2-add-a-textarea-with-a-persistent-label">Exercise 2: Add a textarea with a persistent label.<a class="heading-anchor" href="#exercise-2-add-a-textarea-with-a-persistent-label" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The label remains available while the user types.</p>
+<p><strong>Approach:</strong> Add a <code>label for=&quot;notes&quot;</code> and a <code>textarea id=&quot;notes&quot; name=&quot;notes&quot;</code>, keeping the label visible above the field.</p>
 <p><strong>Why:</strong> Placeholder text disappears while typing and often has low contrast; a label stays visible and is announced as the field&#x27;s name.</p>
+<p><strong>Plausible wrong approach:</strong> Using only <code>placeholder</code> as the label fails because the hint disappears as soon as the user starts typing.</p>
+<p><strong>How to verify:</strong> Clicking the label text focuses the textarea, and the label is still visible after you type a sentence.</p>
 <h3 id="exercise-3-build-a-study-preferences-form-with-three-native-control-types">Exercise 3: Build a study-preferences form with three native control types.<a class="heading-anchor" href="#exercise-3-build-a-study-preferences-form-with-three-native-control-types" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Every control has a useful label, stable name and suitable type.</p>
+<p><strong>Approach:</strong> Choose three native types such as <code>text</code>, <code>select</code> and <code>checkbox</code>, and give each one a label, an <code>id</code> and a stable <code>name</code>.</p>
 <p><strong>Why:</strong> Native controls provide keyboard support, accessible roles and correct submitted values without extra scripting.</p>
+<p><strong>Plausible wrong approach:</strong> Building a custom dropdown from <code>div</code> elements fails because it loses native keyboard handling and form participation.</p>
+<p><strong>How to verify:</strong> <code>FormData</code> lists every named control, and each control&#x27;s accessible name in the accessibility panel matches its label.</p>
 <h3 id="exercise-4-diagnose-a-field-missing-from-submitted-values">Exercise 4: Diagnose a field missing from submitted values.<a class="heading-anchor" href="#exercise-4-diagnose-a-field-missing-from-submitted-values" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Check name, disabled state and the control&#x27;s successful-value rules.</p>
+<p><strong>Approach:</strong> Check the missing field in order: does it have a <code>name</code>, is it <code>disabled</code>, and for checkboxes, is it actually checked?</p>
 <p><strong>Why:</strong> Only successful controls are submitted: a control without a name, a disabled control or an unchecked checkbox contributes nothing.</p>
+<p><strong>Plausible wrong approach:</strong> Blaming the server first fails because the browser never put the field into the request in this case.</p>
+<p><strong>How to verify:</strong> After adding <code>name</code> or removing <code>disabled</code>, the field appears in the <code>FormData</code> console listing.</p>
 <h3 id="exercise-5-navigate-the-form-using-only-tab-and-space">Exercise 5: Navigate the form using only Tab and Space.<a class="heading-anchor" href="#exercise-5-navigate-the-form-using-only-tab-and-space" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each enabled control is reachable and can be operated without a pointer.</p>
+<p><strong>Approach:</strong> Start before the first field and press Tab through each control, using Space for checkboxes and arrow keys inside <code>select</code>.</p>
 <p><strong>Why:</strong> Native controls are focusable and operable by keyboard by default, while custom widgets often lose this unless they are built carefully.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>tabindex=&quot;5&quot;</code> style positive values to force an order fails because it overrides document order and confuses every later control.</p>
+<p><strong>How to verify:</strong> Focus moves in source order to every enabled control, and each one can be changed without a mouse.</p>
 <h3 id="exercise-6-explain-why-form-appearance-cannot-establish-server-validation">Exercise 6: Explain why form appearance cannot establish server validation.<a class="heading-anchor" href="#exercise-6-explain-why-form-appearance-cannot-establish-server-validation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Client controls guide entry; a server must independently validate incoming data.</p>
+<p><strong>Approach:</strong> Contrast what the browser controls with what an attacker controls: any request can be crafted without your HTML form.</p>
 <p><strong>Why:</strong> Anything the browser enforces can be changed or skipped by the client, so the server must validate every field itself.</p>
+<p><strong>Plausible wrong approach:</strong> Treating <code>maxlength</code> or a <code>select</code> list as a server guarantee fails because a crafted request can send any value or length.</p>
+<p><strong>How to verify:</strong> Editing a field&#x27;s <code>maxlength</code> in the Elements panel lets you enter a longer value, showing the client rule is changeable.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-008_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

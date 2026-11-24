@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-the-validation-metric">Exercise 1: Compute the validation metric<a class="heading-anchor" href="#exercise-1-compute-the-validation-metric" aria-label="Link to this section">#</a></h3>
 <p>Mean squared errors 0,1,1 give 2/3.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute the validation metric</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute the validation MSE for predictions <code>[1, 2, 3]</code> against targets <code>[1, 3, 2]</code>: squared errors <code>0, 1, 1</code> sum to 2, divided by 3 gives <code>2/3</code>.</p>
+<p><strong>Why it is correct here.</strong> MSE averages squared errors over all validation examples. The reference computes this and asserts it is within <code>1e-12</code> of <code>2/3</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the training loss in place of the validation metric mixes data used for fitting with data held out for evaluation.</p>
+<p><strong>How to verify.</strong> Run the reference and confirm the printed report lists <code>examples</code> 3 and <code>mse</code> about 0.6667.</p>
 <h3 id="exercise-2-write-the-sample-ledger">Exercise 2: Write the sample ledger<a class="heading-anchor" href="#exercise-2-write-the-sample-ledger" aria-label="Link to this section">#</a></h3>
 <p>Track train validation and consumed counts.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>write the sample ledger</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write a sample ledger with counts for training, validation and consumed examples, such as 3 validation examples evaluated and the number of training samples seen at checkpoint time.</p>
+<p><strong>Why it is correct here.</strong> Metrics depend on their denominators. A ledger makes it visible when an optimization changes how many examples were evaluated.</p>
+<p><strong>A plausible wrong approach.</strong> Accepting a candidate that is twice as fast but evaluates only half the held-out examples compares different metrics.</p>
+<p><strong>How to verify.</strong> Assert the validation count in each report equals the full held-out set size before comparing metrics.</p>
 <h3 id="exercise-3-define-a-memory-budget">Exercise 3: Define a memory budget<a class="heading-anchor" href="#exercise-3-define-a-memory-budget" aria-label="Link to this section">#</a></h3>
 <p>Include weights state activations and reserve separately.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define a memory budget</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define a memory budget with separate lines for weights, optimizer state, activations and allocator reserve, each in bytes for the chosen dtype and batch size.</p>
+<p><strong>Why it is correct here.</strong> Separate lines show which component grows when batch size or optimizer changes, and the reserve line acknowledges caching allocator behavior.</p>
+<p><strong>A plausible wrong approach.</strong> Giving a single total from a monitoring tool mixes reserved and live memory. It also hides which component to shrink when the budget is exceeded, such as switching optimizers or lowering the batch.</p>
+<p><strong>How to verify.</strong> Compare the budget with measured allocated memory at peak for one batch size. A gap larger than the reserve line means a component is missing from the ledger, often a framework workspace.</p>
 <h3 id="exercise-4-design-a-restart-comparison">Exercise 4: Design a restart comparison<a class="heading-anchor" href="#exercise-4-design-a-restart-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare uninterrupted and resumed steps.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a restart comparison</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a restart comparison: run N steps uninterrupted, then run the same N steps with a save and resume midway, and compare final weights and losses.</p>
+<p><strong>Why it is correct here.</strong> Equal results show the checkpoint captures all state affecting training. Any divergence points to missing fields.</p>
+<p><strong>A plausible wrong approach.</strong> Testing only that the checkpoint loads without errors says nothing about continuation. A checkpoint missing momentum or sampler position loads cleanly and still diverges on the next step.</p>
+<p><strong>How to verify.</strong> Assert losses match step for step within tolerance and that weights agree at the end. Record the step at which any divergence first appears, since that step identifies the missing state.</p>
 <h3 id="exercise-5-choose-one-optimization">Exercise 5: Choose one optimization<a class="heading-anchor" href="#exercise-5-choose-one-optimization" aria-label="Link to this section">#</a></h3>
 <p>Tie it to a measured bottleneck.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose one optimization</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Choose one optimization tied to a measured bottleneck, such as removing a per-step host synchronization seen in a trace, and leave other settings fixed.</p>
+<p><strong>Why it is correct here.</strong> Linking the change to evidence makes the outcome interpretable: the bottleneck should shrink and outputs stay equal.</p>
+<p><strong>A plausible wrong approach.</strong> Applying a popular optimization without measuring may target a stage that is not the bottleneck. Mixed precision, for example, does little when the GPU sits idle waiting for host input.</p>
+<p><strong>How to verify.</strong> Compare traces before and after and confirm the metric and sample counts are unchanged. If the MSE or validation count changes, the optimization altered the computation and cannot be reported as a pure speedup.</p>
 <h3 id="exercise-6-state-pending-hardware-evidence">Exercise 6: State pending hardware evidence<a class="heading-anchor" href="#exercise-6-state-pending-hardware-evidence" aria-label="Link to this section">#</a></h3>
 <p>Mark CPU and GPU results independently.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>state pending hardware evidence</strong> is qualified there.</p>
+<p><strong>Approach.</strong> State hardware evidence separately: the report sets <code>backend</code> to <code>CPU reference</code> and <code>gpu_verified</code> to <code>False</code>, and lists the GPU checks still pending.</p>
+<p><strong>Why it is correct here.</strong> A trustworthy report never implies that a CPU run validated GPU behavior. Explicit fields prevent a reader from assuming coverage.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving out the verification field lets readers assume the GPU path was tested. A later reader cannot then distinguish a validated deployment from a desk check.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>not report[&quot;gpu_verified&quot;]</code>. Only a real device run with recorded environment may set it to true.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Three examples, MSE 2/3, GPU verification explicitly false.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-096_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

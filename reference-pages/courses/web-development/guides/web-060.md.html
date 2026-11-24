@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>The final project joins HTML structure, CSS presentation, browser interaction, PHP application logic and relational storage around one useful learner journey. Start with a small task: create and review a study plan, receive actionable validation feedback and return later without losing the plan. Expand only after the core behavior is explainable and tested. A framework may help organize a larger application, but it does not remove these contracts.</p>
 <p>Use a threat model that names assets, actors, trust boundaries and likely failures. For this learning project, synthetic notes are the data asset; anonymous session ownership is an explicit limitation; request fields are untrusted; output, SQL and filesystem access are separate interpretation boundaries. If adding real accounts, the identity and recovery design must be upgraded deliberately rather than quietly inheriting the anonymous demo&#x27;s assumptions.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Threat model:</strong> A structured list of assets, attackers, entry points and mitigations for a system.</li>
+<li><strong>Trust boundary:</strong> A point where data moves between parts with different trust, such as browser to server, where it must be validated.</li>
+<li><strong>Interpretation boundary:</strong> A point where data enters another interpreter, such as HTML output, SQL or the filesystem, each needing its own encoding or binding.</li>
+<li><strong>Operational evidence:</strong> Logs, test results and restore records showing that the system works and can be recovered.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Create an acceptance matrix with normal, invalid, cross-session, restart and accessibility cases. Keep unit checks for pure functions, integration checks for HTTP and storage, and actual browser observations for focus and layout. Connect to the JavaScript and D3 path when adding data visualization, to SQL when expanding relational modeling, and to Docker and Kubernetes when studying delivery. Each extension needs evidence for its new boundary.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -217,6 +224,22 @@ New browser session -&gt; original plan is not listed</code></pre>
 <pre class="highlighted-code"><code class="language-text">Verified: local request validation, prepared storage, CSRF rejection, keyboard form
 Not yet qualified: production TLS, account recovery, multiple replicas, public abuse resistance</code></pre>
 <p><strong>Expected observation:</strong> The report supports a concrete next step without claiming universal correctness.</p>
+<h3 id="contrast-case-a-readiness-note-with-no-evidence">Contrast case: a readiness note with no evidence<a class="heading-anchor" href="#contrast-case-a-readiness-note-with-no-evidence" aria-label="Link to this section">#</a></h3>
+<p>Two capstone reviews describe the same project. Only one tells the reader what was observed and what was not.</p>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">review_a</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">status</span><span class="syntax-punctuation">:</span> done
+  <span class="syntax-tag">summary</span><span class="syntax-punctuation">:</span> Everything works and is secure.
+
+<span class="syntax-tag">review_b</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">verified</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-punctuation">-</span> invalid minutes return a field error and insert no row
+    <span class="syntax-punctuation">-</span> wrong CSRF token returns a rejection, list unchanged
+    <span class="syntax-punctuation">-</span> reload after stop and start still shows the saved plan
+  <span class="syntax-tag">not_yet_qualified</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-punctuation">-</span> production TLS
+    <span class="syntax-punctuation">-</span> account recovery
+    <span class="syntax-punctuation">-</span> multiple replicas</code></pre>
+<p>Review A makes two broad claims and gives the reader no way to check either. Works on which inputs, and secure against what? Review B names each observation in a form someone else can repeat, and it lists what was not tested so a reader does not assume it. Review B is also more useful for planning, because the not yet qualified list becomes the next set of tasks. Shorter is not the problem with review A; unsupported is.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-define-one-small-learner-journey-and-its-finish-condition">Exercise 1: Define one small learner journey and its finish condition.<a class="heading-anchor" href="#exercise-1-define-one-small-learner-journey-and-its-finish-condition" aria-label="Link to this section">#</a></h4>

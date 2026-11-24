@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-027`, `apache-029`.
 
+## Key terms
+
+- **Asset:** An Airflow object that names a logical data product by URI. Its update event is orchestration metadata, not a copy of the data.
+- **Asset event:** A record that a producer task updated an asset, which can trigger a consumer DAG scheduled on that asset.
+- **Dynamic task mapping:** Creating task instances at runtime from a collection, unlike a Python loop that runs when the DAG file is parsed.
+- **Pool:** A named limit on how many task instances can run at once. The workshop uses a one-slot pool to make its concurrency policy explicit.
+- **Source-version readback:** A consumer reading the actual retained files and recording their source identities, rather than trusting the asset event alone.
+
 ## A data signal does not transport the dataset
 
 An Airflow asset identifies a logical data product through an explicit URI.

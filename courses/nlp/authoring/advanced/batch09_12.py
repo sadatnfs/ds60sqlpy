@@ -90,7 +90,7 @@ Inspect false positives, false negatives, unknown-token rates and performance by
     [
         (
             "Compute a score by hand",
-            """For feature order [urgent,thanks], counts [2,1], weights [2,-1] and bias -0.5, z=2*2+1*(-1)-0.5=2.5. The sigmoid is approximately 0.92414. Increasing thanks by one lowers the logit to 1.5; it does not subtract exactly one from the probability because the sigmoid is nonlinear.
+            """For feature order [urgent, thanks], counts [2, 1], weights [2, -1] and bias -0.5, z=2*2+1*(-1)-0.5=2.5. The sigmoid is approximately 0.92414. Increasing thanks by one lowers the logit to 1.5; it does not subtract exactly one from the probability because the sigmoid is nonlinear.
 
 ```python
 import numpy as np
@@ -106,7 +106,7 @@ Expected: 2.5 and approximately 0.92414. The vector order is part of the contrac
         ),
         (
             "Compare decisions and probability loss",
-            """Probabilities [0.2,0.4,0.8] yield [false,false,true] at threshold 0.5 and [false,true,true] at 0.3. No retraining is needed to change the action threshold. For labels [1,0,1,0], probabilities [0.9,0.9,0.1,0.1] have Brier score 0.41; the less extreme [0.6,0.6,0.4,0.4] score 0.26. The second array is better on these four labels, but this does not establish population calibration.
+            """Probabilities [0.2, 0.4, 0.8] yield [false, false, true] at threshold 0.5 and [false, true, true] at 0.3. No retraining is needed to change the action threshold. For labels [1, 0, 1, 0], probabilities [0.9, 0.9, 0.1, 0.1] have Brier score 0.41; the less extreme [0.6, 0.6, 0.4, 0.4] score 0.26. The second array is better on these four labels, but this does not establish population calibration.
 
 ```python
 p = np.array([0.9, 0.9, 0.1, 0.1])
@@ -145,8 +145,8 @@ Expected: 0.41. Retain labels and probabilities together so the denominator and 
         ),
         (
             "Separate a threshold",
-            "Apply thresholds 0.5 and 0.3 to [0.2,0.4,0.8] with >= semantics.",
-            "Actions [false,false,true] and [false,true,true].",
+            "Apply thresholds 0.5 and 0.3 to [0.2, 0.4, 0.8] with >= semantics.",
+            "Actions [false, false, true] and [false, true, true].",
             "Changing a threshold changes decisions, not the stored probabilities.",
             "Only the middle probability lies between the thresholds. The comparison must state whether equality triggers the positive action. In deployment the threshold should follow costs, capacity and calibration evidence, not be selected retrospectively on the final test labels.",
         ),
@@ -438,7 +438,7 @@ The executable system is an explicitly limited dictionary matcher plus a strict 
     [
         (
             "Define a span and preserve its document",
-            """A span is a half-open interval [start,end) in a stated representation. Python string indices count Unicode code points, not UTF-8 bytes or grapheme clusters. The interval should slice the unchanged source text to the reported surface string. If normalization changes length, old offsets cannot be applied to the new string without an alignment map. Preserve the original document ID and version alongside offsets.
+            """A span is a half-open interval [start, end) in a stated representation. Python string indices count Unicode code points, not UTF-8 bytes or grapheme clusters. The interval should slice the unchanged source text to the reported surface string. If normalization changes length, old offsets cannot be applied to the new string without an alignment map. Preserve the original document ID and version alongside offsets.
 
 A record such as (d1,ORG,11,20) means a typed mention in document d1, not an organization identity independent of the document. Entity-level comparison therefore includes document ID, type, start and end. Removing document identity before comparing sets can merge unrelated mentions from different sources. A duplicate predicted record should not create an extra true positive; the reference uses set-based exact mention comparison and documents that convention.
 
@@ -644,7 +644,7 @@ Rank-two compression makes the first two fixture rows collinear, losing their sm
     [
         (
             "Count contexts with boundaries",
-            """cat pet cat within one document produces [[0,2],[2,0]] for vocabulary [cat,pet]. The same words in separate one-token documents produce an all-zero matrix. The difference comes from the defined event space, not normalization. Trace each target position and its allowed neighboring positions before implementing the loops.""",
+            """cat pet cat within one document produces [[0, 2], [2, 0]] for vocabulary [cat, pet]. The same words in separate one-token documents produce an all-zero matrix. The difference comes from the defined event space, not normalization. Trace each target position and its allowed neighboring positions before implementing the loops.""",
         ),
         (
             "Calculate one PPMI cell",

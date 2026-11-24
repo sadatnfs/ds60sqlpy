@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Produce a reproducible benchmark report with retained raw data, an error budget and a limited recommendation.
+
 Work through *Optimization review and a defensible benchmark* with the concrete cases below. Finish with this evidence:
 reproducible report, retained raw data, error budget and a recommendation with its limits. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A defensible benchmark holds the problem contract fixed while changing one implementation decision. Record dtype, layout, supported shapes, numerical tolerance, data residency and required output. Compare against a competent baseline, not a deliberately poor CPU loop. Retain cold and warm measurements separately, avoid reporting only the fastest observation, and disclose device sharing, clocks and thermal conditions when relevant. A performance regression can coexist with improved kernel time if another phase grows. Report uncertainty and supported scope; no universal speed threshold is valid across every GPU and workload.
+
+### Key terms
+
+- **Competent baseline:** A reasonable optimized comparison implementation instead of a deliberately weak one.
+- **Problem contract:** The fixed definition of inputs, outputs, accuracy and timing scope that every compared version must satisfy.
+- **Raw samples:** The individual timing measurements kept alongside any summary statistic.
+- **Thermal throttling:** A clock reduction caused by heat or power limits that changes performance during a run.
 
 ## Mathematical contract
 

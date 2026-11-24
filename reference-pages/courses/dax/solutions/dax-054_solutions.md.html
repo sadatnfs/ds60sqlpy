@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the parity result for Paper.</p>
 <p>Both expressions give 19 under the stated constant-rate assumptions.</p>
+<p><strong>Why it fits this model:</strong> With one cost per product, multiplying each product&#x27;s quantity by its cost equals the line sum. Paper&#x27;s products are Notebook (7 x 2 = 14) and Pen (5 x 1 = 5).</p>
+<p><strong>Tempting mistake:</strong> Multiplying Paper&#x27;s total quantity, 12, by MAX(UnitCost) over Paper, 2, gives 24. The grouping has to be by product.</p>
+<p><strong>How to confirm:</strong> Under Category = &quot;Paper&quot;, LineCost and GroupedCost both return 19.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Introduce a transaction-specific historical cost.</p>
 <p>The rewrite is no longer justified; preserve the effective-rate grain or use a trusted stored line cost.</p>
+<p><strong>Why it fits this model:</strong> If Notebook&#x27;s 2024 line S1 had cost 1.5 instead of 2, the line form gives 3 + 6 + 4 = 13 for Notebook, while grouping by product applies one rate to all 7 units.</p>
+<p><strong>Tempting mistake:</strong> Keeping the grouped rewrite. MAX picks 2 and returns 14, so it overstates cost by 1.</p>
+<p><strong>How to confirm:</strong> Line cost 13 versus grouped 14 for Notebook; group by the key that defines the rate, or store the line cost.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a release decision for this proposed rewrite.</p>
 <p>Accept it only as a semantics candidate under documented assumptions, retain the context test grid, and require real comparable performance evidence before claiming improvement.</p>
+<p><strong>Why it fits this model:</strong> The rewrite matches here only because each product has one cost. Case A gives 44 and 44, and case B gives 20 and 20.</p>
+<p><strong>Tempting mistake:</strong> Releasing it as faster without timings, or as correct without the context grid from cases A and B.</p>
+<p><strong>How to confirm:</strong> Accept it as correct under the one-cost-per-product rule, keep both cases as regressions, and require a real benchmark before claiming speed.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose replacing a product&#x27;s unique cost with MAX across conflicting rate rows.</p>
 <p>MAX chooses a value rather than repairing ambiguous rate data. Validate rate keys and effective dates first.</p>
+<p><strong>Why it fits this model:</strong> Two cost rows for one product break the one-cost rule. MAX hides that by choosing one value.</p>
+<p><strong>Tempting mistake:</strong> If Notebook had rows at 2 and 3, MAX returns 3 and cost becomes 21, with no warning that the input was ambiguous.</p>
+<p><strong>How to confirm:</strong> Check that each ProductKey has one cost; COUNTROWS of cost rows per ProductKey should be 1 before either formula runs.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain a product with no matching dimension cost.</p>
 <p>Expose a missing-cost quality failure and block or label incomplete profit; do not claim the surviving sum is complete.</p>
+<p><strong>Why it fits this model:</strong> In the unknown-member model, S9 has ProductKey 999 and Net 7, with no matching Product row, so RELATED(Product[UnitCost]) is BLANK.</p>
+<p><strong>Tempting mistake:</strong> Reporting cost 44 against revenue 194. S9&#x27;s cost is missing, not zero, so profit is overstated.</p>
+<p><strong>How to confirm:</strong> Count sales lines whose cost is BLANK (1 here), and label profit incomplete until it is fixed.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the capstone to currency conversion.</p>
 <p>Group only by keys that preserve the full rate domain, then compare row-level and grouped results across temporal and missing-rate boundaries.</p>
+<p><strong>Why it fits this model:</strong> Rates depend on date and currency. Grouping by (SaleDate, Currency) matches the row-level sum: 100 x 1 + 100 x 1.1 + 50 x 1.2 = 270.</p>
+<p><strong>Tempting mistake:</strong> Grouping by currency only and taking MAX of EUR rates converts 150 EUR at 1.2 for 180 USD instead of 170.</p>
+<p><strong>How to confirm:</strong> Row-level and (SaleDate, Currency)-grouped conversions both return 270; the currency-only grouping does not.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

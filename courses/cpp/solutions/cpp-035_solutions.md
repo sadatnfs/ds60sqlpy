@@ -8,7 +8,7 @@ Algorithmic complexity describes how work grows as input grows. A representation
 
 ## Detailed reasoning
 
-Index building has an upfront cost that can be repaid across repeated queries. A map count preserves both occurrences of key 2; a set would answer a different question. The seemingly read-like counts[9] inserts a missing key with zero, whereas find does not change the map. That behavioral difference can contaminate an experiment and the data contract. Report index construction separately from lookup work and keep the queried answers identical.
+Index building has an upfront cost that can be repaid across repeated queries. A map count preserves both occurrences of key 2; a set would answer a different question. The seemingly read-like `counts[9]` inserts a missing key with zero, whereas find does not change the map. That behavioral difference can contaminate an experiment and the data contract. Report index construction separately from lookup work and keep the queried answers identical.
 
 <!-- depth:start -->
 ## Algorithmic work and index side effects
@@ -17,7 +17,7 @@ Complexity describes how work grows with input size under a stated model. A line
 
 The map fixture counts occurrences of 2, 3, 2, 4. The count for 2 is 2, which preserves multiplicity. A set would retain only membership and answer a different question. The index construction traverses every input and updates counts. That upfront work must be included when comparing one query with a direct scan, and can be amortized only when the index is actually reused.
 
-map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference: find(9) leaves size unchanged, while counts[9] creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.
+map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference: find(9) leaves size unchanged, while `counts[9]` creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.
 
 Ordering is also part of the container contract. std::map maintains an ordering by its comparator, whereas unordered alternatives have different iteration and performance properties. Do not rely on unspecified order when emitting a deterministic report. If output order matters, choose or impose it deliberately rather than inheriting it accidentally from one implementation run.
 
@@ -77,7 +77,7 @@ Compare 100 full scans with one index build plus 100 lookups.
 
 ## Exercise 4: Repair mutating lookup
 
-Use counts[9] to inspect absence, then repair with find.
+Use `counts[9]` to inspect absence, then repair with find.
 
 **Expected:** operator[] inserts zero; find leaves key count unchanged.
 

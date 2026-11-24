@@ -198,18 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `const original = [1, 2, 3, 4];` to</span></span>
 <span class="source-line"><span class="syntax-comment">// `const original = [2, 2, 3, 4];`. Before running it, predict which check fails and which</span></span>
 <span class="source-line"><span class="syntax-comment">// value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(original, [1, 2, 3, 4])`. Restoring the original line brings back the</span></span>
-<span class="source-line"><span class="syntax-comment">// worked observation: 6, 8; original array unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(original,</span></span>
+<span class="source-line"><span class="syntax-comment">// [1, 2, 3, 4])`. Restoring `const original = [1, 2, 3, 4];` brings back: 6, 8; original</span></span>
+<span class="source-line"><span class="syntax-comment">// array unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Supply a reduction identity: diagnose an edited check</span></span>
 <span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `assert.equal([1, 2,</span></span>
 <span class="source-line"><span class="syntax-comment">// 3].reduce((sum, value) =&gt; sum - value, 0), 6);`. Run Example B with that line, explain why</span></span>
 <span class="source-line"><span class="syntax-comment">// the edited check now fails for the same program state, and restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal([1, 2, 3].reduce((sum, value) =&gt; sum + value, 0), 6)`; after it the line</span></span>
-<span class="source-line"><span class="syntax-comment">// reads `assert.equal([1, 2, 3].reduce((sum, value) =&gt; sum + value, 0), 6);` again and 0 and</span></span>
-<span class="source-line"><span class="syntax-comment">// 6.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at `assert.equal([1, 2,</span></span>
+<span class="source-line"><span class="syntax-comment">// 3].reduce((sum, value) =&gt; sum - value, 0), 6);`. Restoring `assert.equal([1, 2,</span></span>
+<span class="source-line"><span class="syntax-comment">// 3].reduce((sum, value) =&gt; sum + value, 0), 6);` brings back: 0 and 6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Expose default sort coercion</span></span>
 <span class="source-line"><span class="syntax-comment">// Sort 10, 2, 1 with default and numeric comparators.</span></span>

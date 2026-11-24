@@ -15,6 +15,14 @@ p(y_i\mid\theta)=w\,\mathcal N(y_i\mid\mu_1,\sigma^2)
 
 The program uses `log_mix` to compute the corresponding log density stably. Averaging component log densities would be a different calculation because the logarithm of a sum is not the sum of logarithms.
 
+## Key terms
+
+- **Finite mixture:** A model in which each observation comes from one of several component distributions with mixing weights.
+- **Marginalization:** Summing over the unobserved component label so the target density stays continuous and differentiable.
+- **log_mix:** The Stan function that computes the log of a weighted sum of component densities stably from log terms.
+- **Responsibility:** The posterior probability that an observation belongs to a component, given one parameter draw.
+- **Label switching:** The symmetry that lets component labels permute across draws unless an ordering or anchored prior sets a convention.
+
 ## Worked case 1: fit a marginalized two-component model
 
 The tiny data contain one group of values near minus two and another near two. The model orders its two means and uses explicitly stated prior anchors near those two locations. The shared positive scale keeps the example compact. The weight receives a Beta(2,2) prior.
@@ -51,6 +59,43 @@ The short classroom chains are especially limited for multimodal problems. Inspe
 **Why not sample one integer membership per observation directly?** Stan's standard HMC target is continuous. Marginalization integrates those discrete possibilities into a differentiable likelihood when the structure permits it.
 
 **Does a responsibility of .99 establish a real category?** It is a probability conditional on the mixture model and, before averaging, on one parameter draw. Its scientific meaning depends on whether the components represent defensible mechanisms. A high conditional number cannot establish that interpretation on its own.
+
+## Worked example: log_mix stability and label-swap invariance
+
+```python
+import numpy as np
+from scipy.special import logsumexp
+from scipy import stats
+
+np.set_printoptions(suppress=True)
+
+
+def log_mix(w, mu1, mu2, y):
+    return logsumexp(
+        [np.log(w) + stats.norm.logpdf(y, mu1, 1), np.log1p(-w) + stats.norm.logpdf(y, mu2, 1)],
+        axis=0,
+    )
+
+
+y = np.array([-1.0, 0.2, 3.9, 60.0])
+with np.errstate(divide="ignore"):
+    naive = np.log(0.3 * stats.norm.pdf(y, 0, 1) + 0.7 * stats.norm.pdf(y, 4, 1))
+print("naive log density:", naive.round(3))
+print("log_mix          :", log_mix(0.3, 0.0, 4.0, y).round(3))
+a = log_mix(0.3, 0.0, 4.0, y[:3]).sum()
+b = log_mix(0.7, 4.0, 0.0, y[:3]).sum()
+print(f"total log likelihood {a:.4f}; with labels swapped {b:.4f}")
+```
+
+Observed output:
+
+```text
+naive log density: [-2.623 -2.141 -1.28    -inf]
+log_mix          : [   -2.623    -2.141    -1.28  -1569.276]
+total log likelihood -6.0445; with labels swapped -6.0445
+```
+
+For ordinary observations the two lines agree: \(-2.623\), \(-2.141\) and \(-1.280\). At 60 the direct formula exponentiates densities near \(e^{-1568}\), both components underflow to zero, and the log of their sum is \(-\infty\). One such point would make the whole log likelihood \(-\infty\) and stop a sampler. log_mix computes the same quantity as a log-sum-exp of the weighted component log densities and returns the finite value \(-1569.276\), which correctly says that the point is almost impossible under this mixture without saying it is impossible. The last line shows the label problem. Swapping the component means and replacing the weight 0.3 by 0.7 gives an identical log likelihood, \(-6.0445\), so the posterior has two mirror-image modes. If half the chains land in each mode, pooled draws would give means near 2 for both components. Declaring the means as an ordered vector in Stan removes one mirror image without changing any fitted density.
 
 ## Complete reproducible program
 

@@ -101,7 +101,7 @@ object Main {
           )
           .first()
         assert(row.getBoolean(0) && !row.getBoolean(1) && !row.getBoolean(2))
-        println("Missing,empty and literal null text are distinct")
+        println("Missing, empty and literal null text are distinct")
       }
       println("spark-026: worked examples passed; six task implementations remain")
     } finally {

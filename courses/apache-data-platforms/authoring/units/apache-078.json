@@ -5,6 +5,38 @@
   "minutes": 75,
   "prerequisites": ["apache-077", "apache-075"],
   "concepts": ["credential boundary", "rotation", "revocation"],
+  "key_terms": [
+    [
+      "Bearer token",
+      "A credential in the profile file that grants access to anyone who holds it, so it must never appear in notebooks, receipts or screenshots."
+    ],
+    [
+      "Credential rotation",
+      "Issuing a new token to a recipient and retiring the old one, with any overlap period stated explicitly."
+    ],
+    [
+      "Revocation",
+      "Withdrawing a recipient's access to new control requests. It does not recall already issued URLs or data already downloaded."
+    ],
+    [
+      "Credential boundary",
+      "The scope a credential covers, separating control requests, issued file URLs, cached metadata and downloaded copies."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Shape of a recipient profile",
+      "language": "json",
+      "code": "{\n  \"shareCredentialsVersion\": 1,\n  \"endpoint\": \"https://sharing.example.com/delta-sharing\",\n  \"bearerToken\": \"<fixture-only-token>\",\n  \"expirationTime\": \"2026-01-02T00:00:00Z\"\n}",
+      "interpretation": "Anyone holding this file can read every table in the shares it grants, so treat it like a password: store it untracked, give it a short expiration and never paste it into tickets. The client rejects profiles with an unexpected credentials version, an empty token or extra structure, and it never echoes the token in errors. The endpoint and expiry shown are illustrative."
+    },
+    {
+      "title": "What rotation does and does not revoke",
+      "language": "bash",
+      "code": "curl -s -o /dev/null -w \"%{http_code}\\n\" \\\n  -H \"Authorization: Bearer $OLD_RECIPIENT_TOKEN\" \\\n  \"$SHARING_ENDPOINT/shares?maxResults=1\"",
+      "interpretation": "After rotating the fixture credential, this call with the old token should return 401 or 403, which shows that new control requests are blocked. It does not invalidate presigned file URLs already handed out; those stay valid until preSignedUrlTimeoutSeconds expires, which is 60 in the example config. Files already downloaded cannot be recalled at all, so revocation is a forward-looking control, and short URL lifetimes are what limit the exposure window."
+    }
+  ],
   "evidence": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred.",
   "sources": [
     ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"],

@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-053_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A toy decimal format retaining three significant digits represents 1.001 as 1.00. Summing 1,000 such rounded inputs gives 1,000 rather than 1,001. This is a CPU quantization analogy, not an emulation of FP16 or a measured tensor-core error. Accumulating in a wider type cannot restore information already lost in the inputs.</p>
+<p><strong>Approach:</strong> Round 1.001 to three significant digits, then sum 1,000 rounded copies and compare with the exact sum.</p>
+<p><strong>Why it is correct:</strong> Rounding gives 1.00, so the sum is 1,000 against an exact 1,001.</p>
+<p><strong>A plausible wrong approach:</strong> Presenting this decimal toy as the measured error of FP16 tensor cores overstates what it shows.</p>
+<p><strong>How to verify:</strong> The reference asserts the difference is 1 within 1e-9 and prints tensor_core_emulation False.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A matrix product can use low-precision operands with wider accumulation. Compare this with low-precision accumulation separately because the two introduce different errors. Include well-scaled and badly scaled matrices, and record actual compute mode plus a supported profiling or library-path observation when available.</p>
+<p><strong>Approach:</strong> Test low-precision inputs with wide accumulation separately from low-precision accumulation.</p>
+<p><strong>Why it is correct:</strong> Input rounding and accumulation rounding produce different error growth.</p>
+<p><strong>A plausible wrong approach:</strong> Reporting one combined error figure hides which choice causes it.</p>
+<p><strong>How to verify:</strong> Compare both modes on well-scaled and badly scaled matrices against a wide reference.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Device capability, toolkit/library, operand/output/accumulator types, shape/layout/alignment, chosen compute mode, error and observed execution path.</p>
+<p><strong>Approach:</strong> Record device capability, library versions, types, shape, layout, alignment, compute mode, error and execution path.</p>
+<p><strong>Why it is correct:</strong> Tensor core use depends on all of these.</p>
+<p><strong>A plausible wrong approach:</strong> Recording only the speedup makes the result unreproducible.</p>
+<p><strong>How to verify:</strong> Rerun from the record on the same device and confirm the result.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>No. Successful arithmetic and actual instruction/path selection are separate evidence.</p>
+<p><strong>Approach:</strong> Look for profiler evidence of the instruction path rather than the result alone.</p>
+<p><strong>Why it is correct:</strong> Correct float16 results can come from non-tensor-core paths.</p>
+<p><strong>A plausible wrong approach:</strong> Inferring tensor core use from a successful call confuses outcome with mechanism.</p>
+<p><strong>How to verify:</strong> Check the kernel names or instruction counters in a profiler run.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Exponent range can overflow or underflow even when ordinary small values pass; precision and range are different limitations.</p>
+<p><strong>Approach:</strong> Include very large and very small values in tests.</p>
+<p><strong>Why it is correct:</strong> float16 overflows above about 65,504 and loses small values to underflow.</p>
+<p><strong>A plausible wrong approach:</strong> Testing only values near one passes while real data overflows.</p>
+<p><strong>How to verify:</strong> Feed 70,000 and 1e-8 and check for infinity or zero.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Compare operator error and the model-level metric, including gradients/training stability where applicable, instead of assuming lower precision is harmless.</p>
+<p><strong>Approach:</strong> Compare both operator error and model-level metrics such as accuracy or loss.</p>
+<p><strong>Why it is correct:</strong> Small per-operator errors can grow through training.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming lower precision is harmless because one layer looks fine skips the model check.</p>
+<p><strong>How to verify:</strong> Train or evaluate with both precisions and compare the metric.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-053_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

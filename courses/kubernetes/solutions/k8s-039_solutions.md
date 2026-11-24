@@ -16,11 +16,25 @@ The host operator has powers the learner deliberately lacks. Distinguishing thos
 
 **Expected:** Actors and assets are explicit rather than a blanket secure claim.
 
+**Solution reasoning**
+
+- **Approach:** Name learner, host operator and unrelated tenant, their capabilities and each asset's owner.
+- **Why it is correct:** Threats come from what each actor can do, so explicit capabilities show which paths need controls.
+- **Plausible wrong approach:** Writing that the cluster is secure names no actor and gives nothing to test.
+- **How to verify:** Each actor lists capabilities, and each asset has an owner.
+
 ## Exercise 2: Classify six adversarial fields
 
 The rejected shapes are concrete and reviewable. A successful local negative test shows the broker source boundary, while independent API and runtime controls require their own evidence and should not be inferred automatically.
 
 **Expected:** Every field has a named closed-schema or ownership rule.
+
+**Solution reasoning**
+
+- **Approach:** Map each of the six fields to the closed schema or ownership rule that rejects it.
+- **Why it is correct:** The parser accepts only known fields and owned values, so each adversarial field fails a specific rule.
+- **Plausible wrong approach:** Relying on Pod Security alone misses the foreign namespace and foreign ServiceAccount, which it does not check.
+- **How to verify:** Every field cites one rejecting rule.
 
 ## Exercise 3: Review credential exposure
 
@@ -28,11 +42,25 @@ The effective boundary includes the process environment and mounts, not just the
 
 **Expected:** No alternate path around the bounded operation API.
 
+**Solution reasoning**
+
+- **Approach:** Check learner-visible files for tokens, container engine sockets and kubeconfig paths.
+- **Why it is correct:** Any of these would let a learner call the API or the engine directly and bypass the bounded operation API.
+- **Plausible wrong approach:** Hiding the kubeconfig with file permissions while leaving its path in an artifact still points to it.
+- **How to verify:** No credential, socket or kubeconfig path appears.
+
 ## Exercise 4: Separate resource and network controls
 
 CPU limits constrain execution consumption, quotas constrain admitted object/resource totals, deadlines bound operations, and network policy governs supported traffic paths. Their effectiveness and failure modes must be tested separately.
 
 **Expected:** Each constrains a different resource or traffic dimension.
+
+**Solution reasoning**
+
+- **Approach:** Name the dimension each control limits.
+- **Why it is correct:** CPU limits cap compute per container, quota caps object counts and requests per namespace, deadlines cap time and NetworkPolicy caps traffic.
+- **Plausible wrong approach:** Expecting quota to stop network scanning gives it a traffic role it does not have.
+- **How to verify:** Four controls map to compute, object count, time and traffic.
 
 ## Exercise 5: Inspect cleanup identity defenses
 
@@ -40,11 +68,25 @@ Cleanup is itself a security-sensitive action. Ownership labels, nonce and UID p
 
 **Expected:** Foreign object preserved and cleanup reports the mismatch.
 
+**Solution reasoning**
+
+- **Approach:** Compare the found object's UID and nonce with the receipt before deleting.
+- **Why it is correct:** A same-name object with a different UID was created by someone else, so deleting it would harm another tenant.
+- **Plausible wrong approach:** Deleting by name because it matches the expected name removes the foreign object.
+- **How to verify:** The foreign object is kept, and cleanup reports the mismatch.
+
 ## Exercise 6: State residual assumptions
 
 The conclusion should tell an instructor what was actually established and what would need a different design. It preserves useful assurance while avoiding an unsupported promise about hostile tenants or kernel vulnerabilities.
 
 **Expected:** No arbitrary-code or VM-equivalent isolation claim; host trust and qualified controls are named.
+
+**Solution reasoning**
+
+- **Approach:** Write the isolation statement with trusted host assumptions, qualified controls and untested threats.
+- **Why it is correct:** Containers share a kernel, so namespace controls do not equal virtual machine separation.
+- **Plausible wrong approach:** Claiming tenants are fully isolated implies protection from kernel exploits nobody tested.
+- **How to verify:** Untested threats are listed, and no VM-equivalent claim is made.
 
 ## Boundary and troubleshooting review
 

@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Reconciling the duplicate key join",
+      "body": "For the second worked example, a short ledger compares the facts before and after the merge:\n\n```text\ncheck                       before   after   status\nfact rows                   2        3       changed\nsum(amount)                 30       40      changed\ndimension keys duplicated   A twice          cause\nfacts with no match         0        0       ok\n```\n\nA many to one lookup should leave the first two lines unchanged; it only adds a category column. Here the row count rises by one and the total by 10. That difference equals product A's amount, which points straight at the cause: A appears twice in the dimension, as X and Y, so its fact row was copied once for each match.\n\nReading the ledger before touching the aggregate matters. Dividing the total, or calling `unique()` on the joined rows, does not repair it, because the two A rows differ in category and are not duplicates of each other. The repair belongs on the dimension side: decide which category A has, or reject the dimension until its key is unique, then rerun the join and confirm both lines match again."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Look up each fact key's position with `match(facts$product, dimension$product)` and index the categories with it.",
+      "why": "B is at position 2 and A at position 1, so the index is 2, 1, 2 and the categories are Home, Paper, Home in fact order. The amounts are untouched, so the total stays 60.",
+      "wrong": "Using merge and then copying its category column back onto facts by position. merge sorts by product, giving Paper, Home, Home, which puts the wrong category on the first two facts.",
+      "verify": "`identical(result$category, c(\"Home\", \"Paper\", \"Home\"))` returns TRUE, and `sum(result$amount)` returns 60."
+    },
+    {
+      "approach": "Stop when any index is NA, or keep the row under a declared policy, such as an explicit unknown category, and count it.",
+      "why": "C has no entry in the dimension, so match returns NA for it. lookup's `stopifnot(!anyNA(index))` rejects the batch, so the record cannot vanish or quietly lose its category.",
+      "wrong": "Indexing `dimension$category[index]` without the check. The C row gets category NA, so a later summary by category files its amount under NA, and an inner merge would drop it.",
+      "verify": "The tryCatch around the C lookup returns TRUE, showing the unmatched key raised an error."
+    },
+    {
+      "approach": "Before matching, require the dimension key to have no NA and no duplicates; after matching, require every fact to have a match.",
+      "why": "match never adds rows, but with two A entries it silently takes the first one. Adding `dimension[1, ]` again creates that conflict, and the uniqueness check rejects it instead of letting row order decide.",
+      "wrong": "Trusting match because it cannot multiply facts. If the two A rows carried different categories, the answer would change whenever the dimension was re-sorted, and nothing would report it.",
+      "verify": "The tryCatch around the duplicated dimension returns TRUE, and `anyDuplicated(dimension$product)` returns 0 for the clean table."
+    },
+    {
+      "approach": "Check the dimension's key for duplicates and count matches per key before changing any aggregate.",
+      "why": "In the second example A appears twice, so merge produces two rows for the single A fact and the total rises from 30 to 40. The extra 10 is exactly A's amount, which identifies the key.",
+      "wrong": "Calling `unique()` on the joined rows. The two A rows have different categories, X and Y, so neither is removed and the inflated total remains.",
+      "verify": "`anyDuplicated(bad_dimension$product)` returns 2, and `nrow(joined)` returns 3 against 2 facts."
+    },
+    {
+      "approach": "Run the same lookup on `facts[integer(0), , drop = FALSE]` and return a zero row table with product, amount and category.",
+      "why": "match on a zero length key returns `integer(0)`, which has no NA, and assigning a zero length category column keeps the schema. No amounts are created, so the total is 0.",
+      "wrong": "Returning the empty input unchanged or `data.frame()`. The category column is missing, so binding this batch to a nonempty one fails because the names differ.",
+      "verify": "`nrow(empty)` returns 0, and `names(empty)` returns \"product\" \"amount\" \"category\"."
+    },
+    {
+      "approach": "Write the same contract for the other engine: a unique dimension key, a left join, a count of unmatched facts, and row and amount totals compared before and after.",
+      "why": "Cardinality does not depend on the engine. A duplicated key multiplies fact rows in SQL and Spark just as merge did in R, and an unmatched key is dropped by an inner join in all three.",
+      "wrong": "Relying on a plain JOIN, which is an inner join in SQL. It drops C exactly as merge did, and the total check is the only signal.",
+      "verify": "A query that groups the dimension by product with `HAVING COUNT(*) > 1` returns zero rows, and the joined amount total returns 60."
+    }
+  ]
+}

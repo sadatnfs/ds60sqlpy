@@ -29,7 +29,7 @@ OUTCOMES = {
     22: "Define custom error types that keep their causes reachable through source.",
     23: "Organize code into modules with a small, stable public surface.",
     24: "Write table-driven tests whose counterexamples reject plausible wrong implementations.",
-    25: "Write and read files as bytes or UTF-8 and remove owned temporary files on every path.",
+    25: "Write and read files as bytes or UTF-8, remove owned temporary files on the normal path and use a guard type to cover early returns.",
     26: "Choose BTreeMap, HashMap and sets for deterministic output and predictable cost.",
     27: "Run work on scoped threads that borrow local data and join results back to the parent.",
     28: "Share state across threads with Arc and Mutex while protecting compound invariants.",

@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-008.md) and attempt the [learner source](../les
 
 Return whether two Long sequences contain the same values with the same occurrence counts, ignoring order. Do not convert to Set. Empty sequences are equal.
 
-**Expected:** (1,1,2) equals(2,1,1) as a bag but differs from(1,2). Equal count and sum alone are insufficient for(1,3) versus(2,2).
+**Expected:** `(1, 1, 2)` equals `(2, 1, 1)` as a bag but differs from `(1, 2)`. Equal count and sum alone are insufficient for `(1, 3)` versus `(2, 2)`.
 
 ```scala
 def bagEqual(left: Seq[Long], right: Seq[Long]): Boolean = {
@@ -18,7 +18,7 @@ def bagEqual(left: Seq[Long], right: Seq[Long]): Boolean = {
 }
 ```
 
-groupMapReduce groups by the value, contributes one count per occurrence and adds counts for equal values. Comparing the maps ignores presentation order while preserving multiplicity. The(1,3) versus(2,2) counterexample has equal length and sum but a different bag, showing why aggregate reconciliation alone cannot prove row-level equality.
+groupMapReduce groups by the value, contributes one count per occurrence and adds counts for equal values. Comparing the maps ignores presentation order while preserving multiplicity. The `(1, 3)` versus `(2, 2)` counterexample has equal length and sum but a different bag, showing why aggregate reconciliation alone cannot prove row-level equality.
 
 ```scala
 assert(bagEqual(Seq(1L, 1L, 2L), Seq(2L, 1L, 1L)))
@@ -31,7 +31,7 @@ assert(bagEqual(Seq.empty, Seq.empty))
 
 Sum Long values with checked addition and an explicit empty identity. Report overflow through ArithmeticException instead of allowing wraparound. Negative values are permitted for this arithmetic contract.
 
-**Expected:** (100,-25,0,100) sums to 175; empty sums to 0; Long.MaxValue plus 1 and Long.MinValue minus 1 both fail.
+**Expected:** `(100, -25, 0, 100)` sums to 175; empty sums to 0; Long.MaxValue plus 1 and Long.MinValue minus 1 both fail.
 
 ```scala
 def exactSum(values: Seq[Long]): Long = {
@@ -51,7 +51,7 @@ expectArithmetic(exactSum(Seq(Long.MinValue, -1L)))
 
 Return the mathematical value of an Int plus one as a Long. Convert before adding and support the full Int range.
 
-**Expected:** Int.MaxValue becomes 2147483648 L, Int.MinValue becomes-2147483647L, and 0 becomes 1 L.
+**Expected:** Int.MaxValue becomes 2147483648L, Int.MinValue becomes -2147483647L, and 0 becomes 1L.
 
 ```scala
 def promotedIncrement(value: Int): Long = {
@@ -70,7 +70,7 @@ assert(promotedIncrement(Int.MinValue) == -2147483647L && promotedIncrement(0) =
 
 Compare finite Double values using absolute plus reference-relative tolerance. Require finite nonnegative tolerances with IllegalArgumentException on invalid policy. Return false for nonfinite actual or expected values.
 
-**Expected:** 1e8+1 versus 1 e8 passes with atol 0, rtol 1 e-7;1e-9 versus 0 passes with atol 1 e-8; NaN never passes; negative tolerance is rejected.
+**Expected:** `1e8+1` versus `1e8` passes with `atol=0, rtol=1e-7`; `1e-9` versus `0` passes with `atol=1e-8`; NaN never passes; negative tolerance is rejected.
 
 ```scala
 def closeEnough(actual: Double, expected: Double, atol: Double, rtol: Double): Boolean = {
@@ -106,7 +106,7 @@ expectIllegalArgument(closeEnough(1.0, 1.0, -1.0, 0.0))
 
 Validate a nonnegative/negative partition by checking the full combined bag and each branch predicate. Do not accept equal counts or sums as sufficient evidence.
 
-**Expected:** Input(1,-1,0,1) with accepted(1,0,1), rejected(-1) passes. Dropping a duplicate, replacing(1,3) with (2,2), or placing zero in rejected fails.
+**Expected:** Input `(1, -1, 0, 1)` with accepted `(1, 0, 1)`, rejected (-1) passes. Dropping a duplicate, replacing `(1, 3)` with `(2, 2)`, or placing zero in rejected fails.
 
 ```scala
 def validPartition(input: Seq[Long], accepted: Seq[Long], rejected: Seq[Long]): Boolean = {
@@ -125,7 +125,7 @@ assert(!validPartition(Seq(0L), Seq.empty, Seq(0L)))
 
 ### Exercise 6: Show that an oracle rejects real misconceptions
 
-Test a supplied nonnegative-filter candidate against four independent literal fixtures: empty,(0),(-1,0,2),(2,2,-1). Return false if it throws or violates a sequence result. Demonstrate rejection of zero-dropping and deduplicating candidates.
+Test a supplied nonnegative-filter candidate against four independent literal fixtures: empty, (0), `(-1, 0, 2)`, `(2, 2, -1)`. Return false if it throws or violates a sequence result. Demonstrate rejection of zero-dropping and deduplicating candidates.
 
 **Expected:** The >=0 filter passes. The >0 filter and a nonnegative-then-distinct implementation fail. A candidate throwing an exception also fails.
 

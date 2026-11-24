@@ -5,6 +5,44 @@
   "minutes": 50,
   "prerequisites": ["apache-012"],
   "concepts": ["Parquet", "partition pruning", "residual filter"],
+  "key_terms": [
+    [
+      "Dataset fragment",
+      "One file or file piece of a multi-file Parquet dataset that the scanner can read or skip."
+    ],
+    [
+      "Hive-style partitioning",
+      "A directory layout such as region=east that supplies a column value through the path instead of storing it in every row. It is a convention, not evidence of a Hive Metastore registration."
+    ],
+    [
+      "Partition pruning",
+      "Skipping whole fragments whose partition values or statistics prove they cannot satisfy the filter."
+    ],
+    [
+      "Row-group statistics",
+      "Per-column minimum, maximum and null counts stored in Parquet metadata that let a scanner skip row groups without decoding them."
+    ],
+    [
+      "Residual filter",
+      "The part of a predicate that metadata cannot decide, which must still be evaluated against the rows that are read."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Count fragments pruned by a partition filter",
+      "language": "python",
+      "code": "import tempfile\n\nimport pyarrow as pa\nimport pyarrow.dataset as ds\n\ntable = pa.table({\"id\": [1, 2, 3, 4], \"region\": [\"east\", \"west\", \"east\", \"west\"]})\npart = ds.partitioning(pa.schema([(\"region\", pa.string())]), flavor=\"hive\")\nwith tempfile.TemporaryDirectory() as root:\n    ds.write_dataset(table, root, format=\"parquet\", partitioning=part)\n    data = ds.dataset(root, format=\"parquet\", partitioning=part)\n    east = ds.field(\"region\") == \"east\"\n    print(len(list(data.get_fragments())), len(list(data.get_fragments(filter=east))))",
+      "output": "2 1",
+      "interpretation": "Two fragments exist and only one survives the east filter, so the west directory is never opened. That pruning comes from the directory names alone, before any file footer is read. If the filtered count equals the total, check that the partitioning object passed at read time matches the one used to write; a dataset opened without it sees region only as a path, not as a column."
+    },
+    {
+      "title": "Separate fragment pruning from row filtering",
+      "language": "python",
+      "code": "import tempfile\n\nimport pyarrow as pa\nimport pyarrow.dataset as ds\n\ntable = pa.table({\"region\": [\"east\", \"east\", \"west\"], \"amount\": [4, 17, 30]})\npart = ds.partitioning(pa.schema([(\"region\", pa.string())]), flavor=\"hive\")\nwith tempfile.TemporaryDirectory() as root:\n    ds.write_dataset(table, root, format=\"parquet\", partitioning=part)\n    data = ds.dataset(root, format=\"parquet\", partitioning=part)\n    rule = (ds.field(\"region\") == \"east\") & (ds.field(\"amount\") > 10)\n    print(len(list(data.get_fragments(filter=rule))), data.to_table(filter=rule).num_rows)",
+      "output": "1 1",
+      "interpretation": "One fragment is kept but only one of its two rows passes, because the amount condition cannot be decided from the directory name. The scanner still has to read the east file and evaluate the predicate row by row. When a query is slower than expected, compare fragments kept with rows returned; many kept fragments and few returned rows suggest the layout does not match the common filter."
+    }
+  ],
   "evidence": "Independent exact-value assertions and expected failure observations in the complete bounded program.",
   "sources": [
     ["Arrow dataset guide", "https://arrow.apache.org/docs/python/dataset.html"],

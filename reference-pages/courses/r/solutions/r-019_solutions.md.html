@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Explain why row.names=FALSE matters in a CSV export.</p>
 <p>It prevents an unintended extra column.</p>
+<p><strong>Approach:</strong> Write the starter frame with <code>row.names = FALSE</code>, read it back and compare the column names with the original.</p>
+<p><strong>Why it holds here:</strong> The frame&#x27;s row names are the defaults 1 and 2, which carry no business meaning. With row.names = FALSE the file holds only id and amount, so the restored names match exactly.</p>
+<p><strong>Tempting mistake:</strong> Accepting the default export. The file gains an unnamed first column, read.csv names it X, and the restored frame has three columns, so positional code reads the row index as the ID.</p>
+<p><strong>Verify:</strong> <code>names(restored)</code> returns &quot;id&quot;, &quot;amount&quot; after the FALSE export, while the default export shows &quot;X&quot;, &quot;id&quot;, &quot;amount&quot;.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Preserve an ID with leading zeros.</p>
 <p>The restored ID stays&quot;001&quot; rather than numeric 1.</p>
+<p><strong>Approach:</strong> Declare the ID column as character on read with <code>colClasses = c(&quot;character&quot;, &quot;numeric&quot;)</code>.</p>
+<p><strong>Why it holds here:</strong> &quot;001&quot; and &quot;002&quot; are identifiers, not quantities, so their characters must survive unchanged. Declaring the class means read.csv never guesses, and the leading zeros stay in place for joins and display.</p>
+<p><strong>Tempting mistake:</strong> Reading with defaults and repairing afterward with <code>sprintf(&quot;%03d&quot;, id)</code>. That assumes every ID is exactly three digits wide, which nothing in the contract promises, and it cannot restore an ID such as &quot;0001&quot;.</p>
+<p><strong>Verify:</strong> <code>restored$id</code> returns &quot;001&quot; and &quot;002&quot;, and <code>identical(restored, original)</code> returns TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Round-trip one trusted R object with attributes.</p>
 <p>saveRDS/readRDS preserve the intended local R structure.</p>
+<p><strong>Approach:</strong> Save the object with <code>saveRDS(x, path)</code>, read it with <code>readRDS(path)</code> and compare with <code>identical()</code>, using RDS only for trusted files produced by R.</p>
+<p><strong>Why it holds here:</strong> The reference object is a numeric vector with names A and B, and Example 2 uses a factor with an unused level C. RDS serializes the complete object, so names, class and levels all come back.</p>
+<p><strong>Tempting mistake:</strong> Writing the factor to CSV. Only the labels A and B are written, read.csv returns plain character, and both the factor class and level C are lost without any message.</p>
+<p><strong>Verify:</strong> <code>identical(readRDS(path), x)</code> returns TRUE, and for the factor <code>levels(readRDS(path))</code> shows &quot;A&quot;, &quot;B&quot;, &quot;C&quot;.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose default type inference as a schema guarantee.</p>
 <p>Specify and validate required column types and missing markers.</p>
+<p><strong>Approach:</strong> State the required classes and missing markers in the read call, then validate the restored names, classes and NA counts before using the data.</p>
+<p><strong>Why it holds here:</strong> From these two rows read.csv would infer integer for both columns, because the amount 2 has no decimal point. The original amount is double, so identical() fails even though the printed values look the same.</p>
+<p><strong>Tempting mistake:</strong> Treating the inferred types as the schema. A later file with 2.5 turns amount into double, and one with n/a turns it into character, so each new file can silently change the program&#x27;s behavior.</p>
+<p><strong>Verify:</strong> <code>class(read.csv(path, na.strings = &quot;&quot;)$amount)</code> returns &quot;integer&quot;, while the typed read returns &quot;numeric&quot;.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>State the JSON shape of a one-element measurement vector.</p>
 <p>Choose array versus scalar explicitly and test that representation.</p>
+<p><strong>Approach:</strong> Decide that values is always an array, wrap it in <code>I()</code> before <code>toJSON(..., auto_unbox = TRUE)</code>, and read it back with <code>simplifyVector = FALSE</code>.</p>
+<p><strong>Why it holds here:</strong> The reference record has a single measurement, 2. I() protects it from unboxing, so the text is an array with one element, the same shape as a record with two measurements, and the restored value is a list.</p>
+<p><strong>Tempting mistake:</strong> Relying on auto_unbox alone. The single value is written as the scalar 2, and a consumer expecting an array fails only on records that happen to have one measurement.</p>
+<p><strong>Verify:</strong> <code>as.character(encoded)</code> returns {&quot;values&quot;:[2]}, and <code>is.list(restored$values)</code> returns TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain whether a temporary output survives a later classroom run.</p>
 <p>Do not rely on arbitrary temporary files; retain source and supported captured artifacts through the documented UI.</p>
+<p><strong>Approach:</strong> Treat every <code>tempfile()</code> path as owned by the current session, remove it with <code>unlink()</code> when finished, and keep anything worth saving as source code or as an artifact captured through the documented classroom interface.</p>
+<p><strong>Why it holds here:</strong> tempfile() returns a path inside tempdir(), a directory created for this R session and removed when the session ends. A later classroom run starts a new session with a different directory, and the saved classroom state does not include the run filesystem.</p>
+<p><strong>Tempting mistake:</strong> Copying a path printed by an earlier run into a later script. That file is gone, so the read fails, or it finds an unrelated file if paths happen to be reused.</p>
+<p><strong>Verify:</strong> <code>file.exists(path)</code> returns FALSE after <code>unlink(path)</code>, and <code>tempdir()</code> shows a different directory in a new session.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 3 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

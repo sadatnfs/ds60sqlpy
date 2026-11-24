@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A ClusterIP Service gives clients a stable virtual endpoint for a changing set of backends. The selector usually identifies Pods by labels. The Service port is what clients address; targetPort identifies the backend listener, either numerically or through a named container port. A Service does not select an image name or Deployment name directly.</p>
 <p>Layer 4 routing concerns transport connections such as TCP. It does not normally choose a backend by HTTP path or rewrite an application URL. HTTP-aware routing belongs to a proxy or controller with that capability. A long-lived TCP connection can continue using one backend even if individual requests are numerous.</p>
 <p>A Service can exist with no eligible endpoints. Its ClusterIP allocation is not a health certificate. Read the selector, matching Pod labels, readiness and EndpointSlices, then issue a fresh request from the intended caller. Each observation narrows a different possible failure.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Service selector:</strong> The label query that decides which Pods a Service sends traffic to.</li>
+<li><strong>Service port:</strong> The port that clients connect to on the Service address.</li>
+<li><strong>targetPort:</strong> The Pod port that receives forwarded Service traffic. It can be a named port, so backends may use different numbers.</li>
+<li><strong>Layer 4 routing:</strong> Forwarding by IP address and TCP or UDP port only, without reading HTTP content.</li>
+<li><strong>Long-lived connection:</strong> A connection that stays open across many requests. Service balancing happens when it opens, so a new Pod may receive little traffic.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>The fixture uses Service port 80 and named targetPort http, resolving to containerPort 8080 on the selected Pod. Named ports help avoid duplicating a number but still need a matching declaration and real listener. Protocol defaults and transport type should be explicit when teaching non-TCP workloads.</p>
 <p>A selectorless Service can be paired with manually managed EndpointSlices, but it has a different ownership model and extra restrictions. This introductory fixture uses selectors so the controller maintains endpoints. Do not manually edit controller-owned slices to hide a wrong selector.</p>

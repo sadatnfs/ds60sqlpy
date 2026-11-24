@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Separate valid input from a failed parse without guessing from a numeric result.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A string owns characters; string_view temporarily observes them. <code>from_chars</code> parses without locale-dependent whitespace skipping. Its error code reports invalid input or overflow, while its returned pointer identifies the first unconsumed character. Trustworthy input needs both successful conversion and full consumption.</p>
+<ul>
+<li><strong><code>std::string</code>:</strong> an owning container of characters.</li>
+<li><strong><code>std::string_view</code>:</strong> a non-owning view that observes characters owned by another object.</li>
+<li><strong><code>from_chars</code>:</strong> a locale-independent conversion that returns an error code and a pointer to the first unconsumed character.</li>
+<li><strong>full consumption:</strong> the requirement that conversion stops at the end of the field, so input such as 12x is rejected.</li>
+<li><strong><code>std::optional&lt;int&gt;</code>:</strong> a result that holds either a parsed number or absence, so a present zero stays distinct from a failure.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>std::from_chars(begin,end,value)</code> uses a half-open character range. Check <code>ec == std::errc{}</code> and <code>ptr == end</code>. A prefix such as 12x can convert 12 while still violating the whole-field contract.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

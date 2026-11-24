@@ -14,6 +14,14 @@ For a symmetric proposal, the Metropolis acceptance probability is
 
 The program targets a standard normal distribution and proposes a normal perturbation around the current state. It compares log probabilities, avoiding direct ratios of tiny densities. Proposal terms cancel because the proposal is symmetric; that cancellation would not apply automatically to a different proposal mechanism.
 
+## Key terms
+
+- **Markov chain Monte Carlo:** A procedure that generates dependent states whose stationary distribution is the target under appropriate conditions.
+- **Metropolis acceptance probability:** min(1, pi(x')/pi(x)) for a symmetric proposal, computed with log densities.
+- **Autocorrelation:** Correlation between chain states at different lags, which reduces the information in each draw.
+- **Effective sample size:** The number of independent draws carrying the same Monte Carlo precision as the correlated chain.
+- **R-hat:** A convergence diagnostic comparing between-chain and within-chain variation; passing it is necessary, not sufficient.
+
 ## Worked case 1: inspect a functioning but correlated chain
 
 A proposal scale of one produces a sequence whose retained mean and variance are compatible with the known standard-normal target in this fixed numerical demonstration. The code discards an initial segment, reports acceptance and calculates lag-one correlation. The target's exact moments provide an external check on this specific example.
@@ -45,6 +53,41 @@ Separate a coding error from a computational limitation. A wrong log density can
 **Does the functioning example prove that 3,000 iterations are sufficient in general?** No. The target is a one-dimensional normal and the program has a known oracle. A hierarchy or mixture can be much harder, even with fewer observations.
 
 **Why keep a deliberately stuck implementation?** It is a controlled counterexample to a common diagnostic mistake. It demonstrates that the properties we wish to infer about computation must be checked through several independent observations, not inferred from a reassuring acceptance percentage.
+
+## Worked example: Effective sample size of an AR(1) chain against theory
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(1)
+n, rho = 20000, 0.9
+x = np.empty(n)
+x[0] = rng.normal()
+for t in range(1, n):
+    x[t] = rho * x[t - 1] + np.sqrt(1 - rho**2) * rng.normal()
+
+z = x - x.mean()
+acf = np.correlate(z, z, mode="full")[n - 1 :] / (z @ z)
+tau = 1.0
+for lag in range(1, n - 1, 2):  # Geyer: stop when a pair sum turns negative
+    pair = acf[lag] + acf[lag + 1]
+    if pair < 0:
+        break
+    tau += 2 * pair
+print(f"lag-1 autocorrelation {acf[1]:.3f}")
+print(f"estimated ESS {n / tau:.0f}; theory n(1 - rho)/(1 + rho) = {n * (1 - rho) / (1 + rho):.0f}")
+print(f"MCSE of the mean {x.std() / np.sqrt(n / tau):.4f} versus naive {x.std() / np.sqrt(n):.4f}")
+```
+
+Observed output:
+
+```text
+lag-1 autocorrelation 0.896
+estimated ESS 1032; theory n(1 - rho)/(1 + rho) = 1053
+MCSE of the mean 0.0304 versus naive 0.0069
+```
+
+The chain has 20,000 draws, but with lag-1 autocorrelation 0.896 consecutive draws largely repeat each other. Summing autocorrelation pairs until they turn negative, Geyer's rule, gives an integrated autocorrelation time near 19.4 and an effective sample size of 1,032. Theory for an AR(1) with \(\rho=0.9\) gives \(20000(0.1/1.9)=1053\), so the estimator is within about 2 percent here. The practical consequence is in the last line: the Monte Carlo standard error of the mean is 0.0304, about 4.4 times the naive 0.0069 that treats every draw as independent. Reporting the naive value would claim three decimals of accuracy that the chain does not have. The ratio \(\sqrt{20000/1032}\approx4.4\) is the price of correlation. Raising \(\rho\) to 0.99 would cut the theoretical ESS to about 100, so thinning or running longer chains does not change the arithmetic; only better mixing, through a better proposal or reparameterization, does.
 
 ## Complete reproducible program
 

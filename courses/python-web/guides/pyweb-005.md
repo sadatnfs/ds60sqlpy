@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-004`, `python-12`.
 
 Parsing JSON produces Python values, but it does not establish that those values describe a valid order. A schema states required fields, supported types, bounds and the treatment of unknown fields. The example uses a real Pydantic model within a Flask endpoint so the validation mechanism is visible independently of any framework's automatic integration.
 
+## Key terms
+
+- **Input schema:** A declared contract for incoming data listing required fields, allowed types, bounds and the treatment of unknown fields, here the Pydantic `Order` model.
+- **Type coercion:** Automatically converting a value of one type into another, such as the string `"3"` into the integer 3, which strict validation refuses.
+- **Strict mode:** The Pydantic setting `strict=True`, which rejects inputs that would need coercion, so neither a string nor the boolean `True` becomes an integer quantity.
+- **Extra-field rejection:** The `extra="forbid"` policy that reports any field outside the model, such as `approved`, instead of silently ignoring or assigning it.
+- **422 Unprocessable Content:** The status for a request whose body parsed correctly but whose content fails validation; this endpoint lists the failing field paths and error types.
+
 ## Mechanism: make coercion and extra fields deliberate
 
 The `Order` model requires a nonempty bounded item name and an integer quantity from one through ten. `ConfigDict(strict=True, extra="forbid")` rejects coercions and fields outside that model. The handler calls `model_validate`, catches `ValidationError`, and returns a bounded error representation containing field paths and error types.
@@ -25,6 +33,38 @@ Validation gives subsequent code useful assumptions: the quantity is an integer 
 The program sends quantity `"2"`, quantity `True`, and an otherwise valid order with an extra `approved` field. All return 422. It specifically checks the extra-field error type, which makes the refusal observable rather than merely relying on a generic failure status.
 
 A public error document should reveal enough for a client to repair its request without exposing sensitive internal details. The example selects error locations and types instead of serializing every exception object. Custom validation context can contain values or objects unsuitable for a public response; copying an entire internal exception is not a stable API design.
+
+## Worked example: strict and lax validation of the same payload
+
+```python
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+
+class LaxOrder(BaseModel):
+    item: str
+    quantity: int = Field(ge=1, le=10)
+
+
+class StrictOrder(LaxOrder):
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+
+payload = {"item": "book", "quantity": "3", "note": "gift"}
+print(LaxOrder.model_validate(payload).model_dump())
+try:
+    StrictOrder.model_validate(payload)
+except ValidationError as error:
+    print([(e["loc"], e["type"]) for e in error.errors()])
+```
+
+Expected output:
+
+```text
+{'item': 'book', 'quantity': 3}
+[(('quantity',), 'int_type'), (('note',), 'extra_forbidden')]
+```
+
+The lax model accepted the string `"3"` by coercing it to the integer 3 and silently dropped the unknown `note` field, so the client never learns that its gift note was ignored. The strict model, configured like the lesson's `Order`, reported two separate problems with machine-readable locations: `quantity` had the wrong JSON type and `note` was not part of the contract. Those `loc` and `type` values are exactly what the lesson's 422 response copies into its `errors` list. If the payload sent `"quantity": 30` as a real integer, the strict model would instead report `less_than_equal` because the type passed but the `le=10` bound failed.
 
 ## Failure diagnosis
 

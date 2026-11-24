@@ -310,7 +310,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Verify:</strong> Keep a check equivalent to <code>snapshot[0] == 1</code>. As a control, change <code>original := []int{1, 2}</code> to <code>original := []int{2, 2}</code>: the run must panic with <code>independent data</code>. Restore the line before continuing.</p>
 <h4 id="exercise-6-transfer-local-construction">Exercise 6: Transfer local construction<a class="heading-anchor" href="#exercise-6-transfer-local-construction" aria-label="Link to this section">#</a></h4>
 <p>Build a result string inside a worker and send the completed value.</p>
-<p><strong>Expected:</strong> The reader receives ready:3.</p>
+<p><strong>Expected:</strong> The reader receives <code>ready:3</code>.</p>
 <p><strong>Verify:</strong> Keep a check equivalent to <code>&lt;-ch == &quot;ready:3&quot;</code>. As a control, change <code>go func() { ch &lt;- fmt.Sprintf(&quot;ready:%d&quot;, 3) }()</code> to <code>go func() { ch &lt;- fmt.Sprintf(&quot;ready:%d&quot;, 4) }()</code>: the run must panic with <code>result</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
@@ -349,7 +349,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ol>
 <h4 id="hint-for-investigation-6-transfer-local-construction">Hint for investigation 6: Transfer local construction<a class="heading-anchor" href="#hint-for-investigation-6-transfer-local-construction" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: The reader receives ready:3.</li>
+<li>Restate the expected observation: The reader receives <code>ready:3</code>.</li>
 <li>The check <code>&lt;-ch == &quot;ready:3&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
 <li>Predict the effect of changing <code>go func() { ch &lt;- fmt.Sprintf(&quot;ready:%d&quot;, 3) }()</code> to <code>go func() { ch &lt;- fmt.Sprintf(&quot;ready:%d&quot;, 4) }()</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>

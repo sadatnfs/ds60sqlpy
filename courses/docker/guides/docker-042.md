@@ -16,6 +16,14 @@ An expert explanation separates facts from assumptions. It names the tested engi
 
 No capstone can certify expertise by itself. Use it to identify gaps: if you cannot explain a mount, signal, cache, network hop or recovery boundary, return to the relevant chapter. Repetition with a changed input is more valuable than copying a completed recipe.
 
+### Key terms
+
+- **Release record:** A document tying an image identity to its source inputs, tested engine and platform, and observed behavior.
+- **Recovery rehearsal:** Practicing backup and restore against a disposable target to prove the recovery procedure works.
+- **Handoff:** Passing a system to another operator with enough evidence and instructions to run it independently.
+- **Acceptance evidence:** Recorded observations that show the released image meets its runtime, persistence and restore requirements.
+- **Assumption:** A belief not yet verified, which a good release explanation keeps separate from observed facts.
+
 ## Anatomy and a trace you can follow
 
 Create a fresh learner copy, keep public synthetic configuration, build visibly, qualify host and peer requests, test one controlled failure, recreate the app, export and independently restore data, and stop owned resources. Preserve an optional image archive for offline transfer without pushing it anywhere.
@@ -100,11 +108,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Running the final project before writing predictions. Rebuilding when only configuration changed, or only recreating when the image changed. Presenting the handoff without its limits.
 
-Exercise 4 is this chapter's boundary case: Diagnose a deliberate single-layer failure. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a deliberate single-layer failure. Write down the single layer you changed, the first observation that failed, and the request that proves the repair, before running the full acceptance again. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using release record, recovery rehearsal, handoff and acceptance evidence. Reconstruct worked example 2 (Explain one complete request) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Trace one browser request through the system and one peer request, naming every port. Then reconstruct worked example 2 (Explain one complete request) with one different value, predict what changes, and name which of release record, recovery rehearsal, handoff and acceptance evidence the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

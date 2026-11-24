@@ -23,6 +23,14 @@ check(err == nil && len(v) == 3 && v[0] == 9 && v[1] == 1 && v[2] == 4, "order")
 
 Indices restore presentation order. Channel arrival order is not the input-order contract.
 
+**Approach.** Follow each task's `Index` through the pool: whichever worker squares the edited first value 4 returns `squareTask{0, 16}`, and the collector writes it to `out[0]`.
+
+**Why it holds here.** Results are placed by index, not by arrival, so the output is `[16 1 4]` on every run. Only `v[0] == 9` fails, and the check panics with `order`.
+
+**A plausible wrong approach.** Collecting with `out = append(out, result.Value)` in arrival order. With two workers the order of sends on `results` depends on scheduling, so the output is sometimes `[1 9 4]` and the original check fails on some runs only.
+
+**Verify.** Print `v` and see `[16 1 4]` before the panic. Print `v` in the restored program across repeated runs, including under `go run -race`, and it is always `[9 1 4]`.
+
 ## 2. Handle empty input: diagnose an edited check
 
 A careless edit changed the check in worked example 2 so that it reads `check(err != nil && len(v) == 0, "empty")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
@@ -38,6 +46,14 @@ check(err == nil && len(v) == 0, "empty")
 
 Every channel reaches its owned closure point even when no jobs exist.
 
+**Approach.** Trace the empty call: the feeder ranges over no items and closes `jobs`, both workers' loops end, `wg.Wait` returns and the closer goroutine closes `results`, so the collector returns `make([]int, 0)` with nil.
+
+**Why it holds here.** The function produced an empty slice and no error, so the edited `err != nil` is false and the check panics with `empty`, even though every goroutine finished.
+
+**A plausible wrong approach.** Having each worker call `close(results)` when its range loop ends. With two workers and no jobs, both exit at once and the second close panics with `close of closed channel`. One goroutine, after `wg.Wait`, must own that close.
+
+**Verify.** Print `len(v), err` and see `0 <nil>`. The restored check passes and the program exits instead of hanging, which shows every channel reached its close.
+
 ## 3. Reject absent capacity
 
 Request zero workers.
@@ -50,6 +66,14 @@ check(err != nil, "zero workers")
 **Expected:** The call returns an error immediately.
 
 Validation before goroutine creation prevents a deadlock instead of attempting to recover from it.
+
+**Approach.** Validate `workers` before creating any channel or goroutine and return `workers must be 1 through 8` for 0.
+
+**Why it holds here.** The guard runs first, so the call returns nil and the error without starting the pool, and `err != nil` holds.
+
+**A plausible wrong approach.** Removing the guard and trusting the pool. With zero workers `wg.Wait` returns at once, `results` closes and the call returns `[0]` with a nil error, while the feeder goroutine stays blocked forever on `jobs <-`. The check panics with `zero workers` and the leak goes unnoticed.
+
+**Verify.** Print `err` for 0 and for 9 workers and see `workers must be 1 through 8` both times; 1 and 8 workers return nil.
 
 ## 4. Compare serial semantics
 
@@ -65,6 +89,14 @@ check(e1 == nil && e2 == nil && slices.Equal(a, b), "same semantics")
 
 Scheduling changes while the calculation contract stays fixed. Timing claims require separate measurements.
 
+**Approach.** Run the same input with one worker and with three, then compare the slices element by element with `slices.Equal`.
+
+**Why it holds here.** Indexes fix each result's position, so both calls return `[1 4 9]` no matter how the workers interleave, and `slices.Equal` reports true.
+
+**A plausible wrong approach.** Comparing with `a == b`. Go slices are not comparable, so the program does not compile: `invalid operation: a == b (slice can only be compared to nil)`.
+
+**Verify.** Print `a, b` and see `[1 4 9] [1 4 9]`. Measure timing separately with a benchmark rather than inferring it from this check.
+
 ## 5. Retain duplicate tasks
 
 Process 2, 2 and 2.
@@ -77,6 +109,14 @@ check(err == nil && len(v) == 3 && v[2] == 4, "duplicates")
 **Expected:** All three results are retained.
 
 Positional task identity avoids accidentally deduplicating legitimate repeated work.
+
+**Approach.** Treat each position as its own task: indexes 0, 1 and 2 each carry the value 2 and each write 4 into their own slot.
+
+**Why it holds here.** Equal values do not merge because identity is the index, so the output has three entries and `v[2]` is 4.
+
+**A plausible wrong approach.** Collecting into `map[int]int` keyed by input value to "remove redundant work". All three tasks share the key 2, the map has one entry, the returned slice has length 1 and the check panics with `duplicates`.
+
+**Verify.** Print `v` and see `[4 4 4]`.
 
 ## 6. Transfer idle-worker cleanup
 
@@ -91,6 +131,14 @@ check(err == nil && len(v) == 1 && v[0] == 25, "idle workers")
 
 Idle workers stop when input closes. Excess capacity still has an operational cost even when termination is correct.
 
+**Approach.** Start four workers for one item: one worker receives the task, the feeder closes `jobs`, and all four range loops end.
+
+**Why it holds here.** After `close(jobs)` every idle worker's `range jobs` stops, so `wg.Wait` returns, `results` closes and the collector returns `[25]`.
+
+**A plausible wrong approach.** Forgetting `close(jobs)` in the feeder. The idle workers block on `range jobs` forever, `wg.Wait` never returns, `results` is never closed and the runtime reports `fatal error: all goroutines are asleep - deadlock!`.
+
+**Verify.** Print `v` and see `[25]`; the program exits normally, which shows no goroutine is left blocking the collector.
+
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Adapt the pool to compute `len(word)` for `[]string{"go", "", "worker"}` with two workers, keeping an index on every task. Check the result is 2, 0, 6 in input order, that 9 workers are rejected before any goroutine starts and that empty input returns an empty slice. Explain what a per-worker close of `results` or a missing close of `jobs` would do.

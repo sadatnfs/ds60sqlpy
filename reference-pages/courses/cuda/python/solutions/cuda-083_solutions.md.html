@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-specify-the-kernel-signature">Exercise 1: Specify the kernel signature<a class="heading-anchor" href="#exercise-1-specify-the-kernel-signature" aria-label="Link to this section">#</a></h3>
 <p>Name pointer element types and scalar widths.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>specify the kernel signature</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write the kernel signature in full: <code>x</code> is a pointer to <code>float32</code>, <code>y</code> is a pointer to <code>float32</code>, and <code>n</code> is a 32-bit signed integer, then make the Python launcher pass exactly those types, for example <code>numpy.int32(n)</code>.</p>
+<p><strong>Why it is correct here.</strong> Arguments cross the boundary as raw bytes laid out by the C ABI. The kernel reads 4 bytes for <code>n</code> and 8 bytes for each pointer, so the launcher must supply values of exactly those widths in that order.</p>
+<p><strong>A plausible wrong approach.</strong> Passing a plain Python <code>int</code> for <code>n</code> and letting the wrapper guess the width may package it as 64 bits. On some interfaces that shifts the following arguments or truncates the value.</p>
+<p><strong>How to verify.</strong> Compare the launcher&#x27;s argument tuple against the declared signature, type by type. A small launch with <code>n = 5</code> must produce five correct outputs.</p>
 <h3 id="exercise-2-count-allocation-bytes">Exercise 2: Count allocation bytes<a class="heading-anchor" href="#exercise-2-count-allocation-bytes" aria-label="Link to this section">#</a></h3>
 <p>Elements times itemsize.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count allocation bytes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute allocation bytes as elements times itemsize: five <code>float32</code> values need <code>5*4 = 20</code> bytes, while five <code>float64</code> values need 40.</p>
+<p><strong>Why it is correct here.</strong> The <code>validate_contract</code> helper in the reference rejects an allocation smaller than <code>count*itemsize</code>. The call with itemsize 8 and 20 bytes fails because 40 bytes are needed.</p>
+<p><strong>A plausible wrong approach.</strong> Sizing a buffer by element count alone, as if every element were one byte, under-allocates by the itemsize factor and lets the kernel write past the end.</p>
+<p><strong>How to verify.</strong> Run the reference: <code>validate_contract(5, 4, 20)</code> passes and <code>validate_contract(5, 8, 20)</code> raises. Add a negative count case and confirm it raises too.</p>
 <h3 id="exercise-3-classify-compile-versus-launch-errors">Exercise 3: Classify compile versus launch errors<a class="heading-anchor" href="#exercise-3-classify-compile-versus-launch-errors" aria-label="Link to this section">#</a></h3>
 <p>Compile checks source while launch tests executable compatibility.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>classify compile versus launch errors</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Classify errors by stage: a syntax error or unknown identifier fails at compilation, while a missing device, an unsupported architecture or an invalid launch configuration fails at load or launch time.</p>
+<p><strong>Why it is correct here.</strong> Compilation translates source for a target architecture and can succeed on a machine without that GPU. Launch requires a compatible device, driver and module, which are only checked when the kernel runs.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting compile success as working code treats the first stage as the whole contract. A module built for one architecture may still fail to load on another.</p>
+<p><strong>How to verify.</strong> Record three separate fields: compiled, launched and output matched. Without a device, only the first can be filled in.</p>
 <h3 id="exercise-4-design-cleanup-order">Exercise 4: Design cleanup order<a class="heading-anchor" href="#exercise-4-design-cleanup-order" aria-label="Link to this section">#</a></h3>
 <p>Wait for users then release resources.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design cleanup order</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Order cleanup so that every kernel and copy using a buffer has completed, for example by synchronizing the stream, before the buffer, the stream and the module are released.</p>
+<p><strong>Why it is correct here.</strong> Freeing memory while queued work still reads it lets the allocator hand those bytes to new work. Destroying a stream or unloading a module with pending work is also undefined.</p>
+<p><strong>A plausible wrong approach.</strong> Releasing resources in reverse creation order without waiting looks tidy, but order of creation says nothing about device completion.</p>
+<p><strong>How to verify.</strong> In a test, enqueue a long kernel, synchronize, then free, and check the output is intact. Code review should find a wait before each release.</p>
 <h3 id="exercise-5-explain-abi-mismatch">Exercise 5: Explain ABI mismatch<a class="heading-anchor" href="#exercise-5-explain-abi-mismatch" aria-label="Link to this section">#</a></h3>
 <p>Wrong byte interpretation can corrupt arguments.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain ABI mismatch</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain ABI mismatch with the example from the lesson: a kernel expecting <code>float32*</code> and a 32-bit length receives a <code>float64</code> buffer and a pointer where the integer belongs.</p>
+<p><strong>Why it is correct here.</strong> The kernel reinterprets each 8-byte double as two 4-byte floats, producing garbage values, and reads part of a pointer as the length, which can be enormous.</p>
+<p><strong>A plausible wrong approach.</strong> Expecting a type error from the device is the mistake: device code has no runtime type information about its arguments.</p>
+<p><strong>How to verify.</strong> Validate dtype and argument types in Python before launch. A test passing a <code>float64</code> array must raise in the launcher, not produce numbers.</p>
 <h3 id="exercise-6-define-release-pinned-evidence">Exercise 6: Define release-pinned evidence<a class="heading-anchor" href="#exercise-6-define-release-pinned-evidence" aria-label="Link to this section">#</a></h3>
 <p>Record component versions target architecture and exact source.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define release-pinned evidence</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define release evidence as the exact kernel source or its hash, the compiler and runtime versions, the target architecture flags, the driver version, and the GPU used for the run.</p>
+<p><strong>Why it is correct here.</strong> A kernel&#x27;s behavior depends on how it was compiled and where it ran. Pinning those components lets someone reproduce or invalidate the result later.</p>
+<p><strong>A plausible wrong approach.</strong> Recording only the Python package version omits the toolkit, driver and architecture, which are the usual causes of cross-machine failures.</p>
+<p><strong>How to verify.</strong> Another engineer should rebuild from the recorded source and versions and get the same compiled-module hash.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Insufficient storage for five float64 values is rejected.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-083_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

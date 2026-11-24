@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: beginner. Direct prerequisites: `apache-004`.
 
+## Key terms
+
+- **Hash partitioning:** Assigning a record to bucket h(k) mod P from a hash of its key k and a partition count P. The same key keeps its bucket only while the hash function, key encoding and partition count stay unchanged.
+- **Partition skew:** An uneven distribution in which one hot key or bucket receives far more records than the others, so the worker that owns it becomes the bottleneck.
+- **Mergeable state:** Partial results, such as per-partition sums and counts, that can be combined in any order into the same final answer without recovering the source order.
+- **Shuffle:** Redistributing records across workers so that all records with the same grouping key meet. Its cost includes serialization, network transfer, buffering, file writes and scheduling barriers.
+
 ## Partitioning is a placement rule
 
 A partition assigns each record to one subset of a dataset. The assignment might
@@ -81,6 +88,56 @@ dominate elapsed time. This program isolates the hot-key explanation, proves exa
 sum conservation, and reports partition sizes. A real performance diagnosis must
 then inspect the engine's actual task metrics rather than infer its bottleneck
 from this placement model alone.
+
+## Worked examples
+
+### Bucket keys with a stable hash
+
+```python
+import hashlib
+from collections import Counter
+
+
+def bucket(key: str, partitions: int = 4) -> int:
+    digest = hashlib.sha256(key.encode()).digest()
+    return int.from_bytes(digest[:8], "big") % partitions
+
+
+counts = Counter(bucket(f"customer-{n}") for n in range(200))
+print(sorted(counts.items()))
+print(bucket("customer-7") == bucket("customer-7"))
+```
+
+```text
+[(0, 50), (1, 46), (2, 40), (3, 64)]
+True
+```
+
+The four bucket counts fall between 40 and 64 around an ideal of 50, which is ordinary variation for a good hash over only 200 distinct keys. The repeated call returns True on every run and every machine because SHA256 does not depend on a per-process seed, unlike the built-in Python hash for strings. Spread across distinct keys says nothing about load when one key dominates, which the next example shows.
+
+### Measure skew from one hot key
+
+```python
+import hashlib
+from collections import Counter
+
+
+def bucket(key: str, partitions: int = 4) -> int:
+    digest = hashlib.sha256(key.encode()).digest()
+    return int.from_bytes(digest[:8], "big") % partitions
+
+
+events = ["hot"] * 180 + [f"k{n}" for n in range(20)]
+plain = Counter(bucket(key) for key in events)
+salted = Counter(bucket(f"{key}#{i % 4}") for i, key in enumerate(events))
+print(max(plain.values()), max(salted.values()))
+```
+
+```text
+187 95
+```
+
+Without salting, one bucket holds at least the 180 hot events, so one worker does most of the job while three idle. Salting spreads the hot key across sub-keys and the largest bucket shrinks sharply. The cost is a second step: per-salt partial results must be merged, and averages can be merged only from sums and counts, never from per-salt averages.
 
 ## Complete worked source
 

@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Adaptive Query Execution can coalesce partitions, change join strategy and respond to skew using runtime information. A GPU comparison must record the final executed plan, not only the initial configuration. Partition count changes task granularity, scheduler overhead, memory per task and available concurrency. There is no universal best count for every dataset and device.</p>
 <p>Separate semantic smoke fixtures from performance datasets. Tiny data is excellent for correctness but often dominated by startup. Use the same input snapshots, query, output materialization, cache state and warmup policy for CPU and GPU comparisons. Report cold and warm runs, sample distributions and resource cost. Qualification estimates help select workloads; they are not measured speedups on the learner&#x27;s hardware.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Partition coalescing:</strong> AQE merging small shuffle partitions after measuring their actual sizes.</li>
+<li><strong>Skew join handling:</strong> AQE splitting oversized partitions so one key does not dominate a join stage.</li>
+<li><strong>Partition count:</strong> The number of partitions, which sets task granularity, scheduler overhead and memory per task.</li>
+<li><strong>Startup-dominated run:</strong> A run on tiny data whose time is mostly fixed setup, which is unsuitable for performance claims.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>One million rows split into 100 equal partitions averages 10000 rows each. Reducing to 10 partitions raises the average to 100000 and may increase per-task memory.</p>
@@ -213,20 +220,36 @@ runs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</
 <span class="syntax-keyword">assert</span> runs<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">cache</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> runs<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">cache</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU benchmark worksheet: unmatched cache comparison rejected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Partition averages 10000 and 100000; unmatched cache states rejected.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>rows</code></td>
+<td><code>1000000</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-calculate-partition-averages">Exercise 1: Calculate partition averages<a class="heading-anchor" href="#exercise-1-calculate-partition-averages" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>calculate partition averages</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reducing partitions to cut scheduling overhead without checking per-task memory can turn a working job into a spilling one.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-explain-skew-beyond-averages">Exercise 2: Explain skew beyond averages<a class="heading-anchor" href="#exercise-2-explain-skew-beyond-averages" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>explain skew beyond averages</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting only the average leaves skew invisible. Adding partitions does not fix skew either, because a hot key still lands in one partition however many there are.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-capture-final-aqe-plan">Exercise 3: Capture final AQE plan<a class="heading-anchor" href="#exercise-3-capture-final-aqe-plan" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>capture final AQE plan</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting partition counts from the pre-execution plan can describe a configuration AQE changed. Coalescing may reduce 200 shuffle partitions to a handful, which changes per-task memory considerably.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-define-cache-policy">Exercise 4: Define cache policy<a class="heading-anchor" href="#exercise-4-define-cache-policy" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>define cache policy</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing those runs reports a speedup partly caused by the cache, as the reference rejects for unmatched cache states.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-choose-semantic-and-performance-fixtures">Exercise 5: Choose semantic and performance fixtures<a class="heading-anchor" href="#exercise-5-choose-semantic-and-performance-fixtures" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>choose semantic and performance fixtures</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting performance from the tiny correctness fixture gives timings that say nothing about production scale. At a few rows, Spark job scheduling dominates and both backends look the same, or the GPU looks slower.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-separate-estimated-and-observed-speedup">Exercise 6: Separate estimated and observed speedup<a class="heading-anchor" href="#exercise-6-separate-estimated-and-observed-speedup" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>separate estimated and observed speedup</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing an estimated 3 times speedup into a report as achieved presents unverified data as fact. Readers then plan hardware purchases or migrations around a number nobody measured.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

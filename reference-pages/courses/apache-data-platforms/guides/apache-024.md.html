@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-024-clients-and-supported-language-apis">apache-024: Clients and supported language APIs<a class="heading-anchor" href="#apache-024-clients-and-supported-language-apis" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-021</code>, <code>apache-019</code>, <code>rust-001</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Language binding:</strong> A package that exposes an engine&#x27;s native implementation to another language. Ballista&#x27;s Python package wraps supported behavior and does not make arbitrary Python callbacks serializable.</li>
+<li><strong>Native Rust API:</strong> The Ballista and DataFusion crates whose types and execution contracts the Python binding wraps. A Rust client needs its own prepared Cargo project and dependency lock.</li>
+<li><strong>Version compatibility:</strong> The requirement that client, scheduler and executors agree on release and dependency versions, here Ballista 54.1.0 with DataFusion 54 from one image.</li>
+<li><strong>Lazy action:</strong> A DataFrame or SQL call that only builds a plan until an action such as collect submits it to the scheduler for execution.</li>
+</ul>
 <h3 id="a-language-binding-is-not-a-universal-compatibility-promise">A language binding is not a universal compatibility promise<a class="heading-anchor" href="#a-language-binding-is-not-a-universal-compatibility-promise" aria-label="Link to this section">#</a></h3>
 <p>Ballista&#x27;s native implementation and Rust API use DataFusion types and execution contracts. Its Python package wraps supported behavior and routes selected actions to a scheduler. A Java or Scala program does not gain the complete Spark API by connecting to a Ballista endpoint. Language, SQL dialect, wire protocol and release compatibility are separate questions that must be answered for the chosen path.</p>
 <p>The prepared workshop uses the released 54.1.0 Python binding and its declared DataFusion 54 dependency. Its service classes are native Rust implementations exposed through Python, not Python simulations. The same image supplies scheduler, executors and client, reducing one source of version mismatch. This does not make arbitrary Python objects or callbacks serializable across the execution boundary.</p>

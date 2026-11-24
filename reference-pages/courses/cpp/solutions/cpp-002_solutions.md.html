@@ -225,34 +225,34 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> stderr fixture rejected plus newline; exit 2, intentionally.</p>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compile-a-fixed-source">Exercise 1: Compile a fixed source<a class="heading-anchor" href="#exercise-1-compile-a-fixed-source" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 1, main.cpp with iostream include and int main.</p>
-<p><strong>Expected result/shape:</strong> For cpp-002 Exercise 1, compilation and linking succeed; no syntax/link diagnostic.</p>
-<p><strong>Verify:</strong> For cpp-002 Exercise 1, record the actual compiler and status, not a copied transcript.</p>
+<p><strong>Inputs/evidence:</strong> Main.cpp with iostream include and int main.</p>
+<p><strong>Expected result/shape:</strong> Compilation and linking succeed; no syntax/link diagnostic.</p>
+<p><strong>Verify:</strong> Record the actual compiler and status, not a copied transcript.</p>
 <p>The target must list main.cpp. A successful process requires an executable from the current source, so preserve the build command and result separately from output.</p>
 <h4 id="exercise-2-verify-exact-output">Exercise 2: Verify exact output<a class="heading-anchor" href="#exercise-2-verify-exact-output" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 2, unmodified hello program.</p>
-<p><strong>Expected result/shape:</strong> For cpp-002 Exercise 2, stdout hello, learner\n; empty stderr; exit 0.</p>
-<p><strong>Verify:</strong> For cpp-002 Exercise 2, compare bytes/line ending and status independently.</p>
+<p><strong>Inputs/evidence:</strong> Unmodified hello program.</p>
+<p><strong>Expected result/shape:</strong> Stdout hello, learner\n; empty stderr; exit 0.</p>
+<p><strong>Verify:</strong> Compare bytes/line ending and status independently.</p>
 <p>A screenshot containing hello is weaker than an exact line check. The explicit newline terminates the greeting, and an empty diagnostic stream avoids hiding an unrelated error.</p>
 <h4 id="exercise-3-rebuild-after-a-literal-edit">Exercise 3: Rebuild after a literal edit<a class="heading-anchor" href="#exercise-3-rebuild-after-a-literal-edit" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 3, same source except greeting literal.</p>
-<p><strong>Expected result/shape:</strong> For cpp-002 Exercise 3, stdout hello, reviewer\n after the new build.</p>
-<p><strong>Verify:</strong> For cpp-002 Exercise 3, compare source edit, rebuild receipt and new output; do not run a stale executable.</p>
+<p><strong>Inputs/evidence:</strong> Same source except greeting literal.</p>
+<p><strong>Expected result/shape:</strong> Stdout hello, reviewer\n after the new build.</p>
+<p><strong>Verify:</strong> Compare source edit, rebuild receipt and new output; do not run a stale executable.</p>
 <p>Only the intended literal changes. If output remains old, first verify the target and build directory rather than editing several unrelated source lines.</p>
 <h4 id="exercise-4-diagnose-a-missing-semicolon">Exercise 4: Diagnose a missing semicolon<a class="heading-anchor" href="#exercise-4-diagnose-a-missing-semicolon" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 4, a deliberately invalid source copy.</p>
-<p><strong>Expected result/shape:</strong> For cpp-002 Exercise 4, nonzero compile result with a useful source location; no new successful run.</p>
-<p><strong>Verify:</strong> For cpp-002 Exercise 4, retain the compiler category, repair the semicolon and confirm a fresh build.</p>
+<p><strong>Inputs/evidence:</strong> A deliberately invalid source copy.</p>
+<p><strong>Expected result/shape:</strong> Nonzero compile result with a useful source location; no new successful run.</p>
+<p><strong>Verify:</strong> Retain the compiler category, repair the semicolon and confirm a fresh build.</p>
 <p>The compiler may point at the following token because that is where the grammar becomes impossible. Read nearby source rather than matching a vendor-specific full message.</p>
 <h4 id="exercise-5-inspect-an-intentional-nonzero-exit">Exercise 5: Inspect an intentional nonzero exit<a class="heading-anchor" href="#exercise-5-inspect-an-intentional-nonzero-exit" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 5, stderr fixture rejected; return 2.</p>
-<p><strong>Expected result/shape:</strong> For cpp-002 Exercise 5, nonzero runtime result 2 and the diagnostic; this is expected failure evidence.</p>
-<p><strong>Verify:</strong> For cpp-002 Exercise 5, distinguish the successful build from failed execution.</p>
+<p><strong>Inputs/evidence:</strong> Stderr fixture rejected; return 2.</p>
+<p><strong>Expected result/shape:</strong> Nonzero runtime result 2 and the diagnostic; this is expected failure evidence.</p>
+<p><strong>Verify:</strong> Distinguish the successful build from failed execution.</p>
 <p>The compiler accepts valid code that deliberately returns 2. That demonstrates why build success and program success must remain separate phases.</p>
 <h4 id="exercise-6-verify-the-named-cmake-target">Exercise 6: Verify the named CMake target<a class="heading-anchor" href="#exercise-6-verify-the-named-cmake-target" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 6, main.cpp and the supplied CMakeLists.txt.</p>
-<p><strong>Expected result/shape:</strong> For cpp-002 Exercise 6, configure/build succeed and CTest executes one test named greeting.</p>
-<p><strong>Verify:</strong> For cpp-002 Exercise 6, retain all three phase results; if CMake/Ninja is absent label this check unavailable.</p>
+<p><strong>Inputs/evidence:</strong> Main.cpp and the supplied CMakeLists.txt.</p>
+<p><strong>Expected result/shape:</strong> Configure/build succeed and CTest executes one test named greeting.</p>
+<p><strong>Verify:</strong> Retain all three phase results; if CMake/Ninja is absent label this check unavailable.</p>
 <p>The fixed compiler worker can establish language execution but cannot claim it invoked CMake. The CMake target requires C++20 and registers a separate output-checking CTest test.</p>
 <h3 id="retrieval-review">Retrieval review<a class="heading-anchor" href="#retrieval-review" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>

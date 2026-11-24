@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-009-explained-reference">julia-009: explained reference<a class="heading-anchor" href="#julia-009-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-009_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>finite_mean</code> enforces its contract in order: reject an empty vector with <code>ArgumentError</code>, reject any nonfinite value with <code>DomainError</code>, then return <code>mean</code>. <code>outcome</code> converts only those two promised failures into a <code>:rejected</code> named tuple and rethrows anything else, so a programming defect still stops the run.</p>
 <h3 id="1-keep-valid-zero">1. Keep valid zero<a class="heading-anchor" href="#1-keep-valid-zero" aria-label="Link to this section">#</a></h3>
 <p>The input satisfies the contract and its arithmetic mean happens to be zero.</p>
 <p><strong>Expected observation:</strong> The result is the valid number 0.</p>
+<p><strong>Why it holds here:</strong> <code>[-1, 1]</code> is nonempty and finite, so both guards pass and <code>mean</code> returns 0.0, a legitimate result rather than a rejection signal.</p>
+<p><strong>Plausible wrong approach:</strong> Using zero as a sentinel for invalid input would make this valid mean indistinguishable from a rejected batch in any downstream table.</p>
+<p><strong>How to verify:</strong> Worked example A asserts <code>finite_mean([-1, 1]) == 0</code>; pass the same vector through <code>outcome</code> and expect status <code>:ok</code>.</p>
 <h3 id="2-reject-empty-input">2. Reject empty input<a class="heading-anchor" href="#2-reject-empty-input" aria-label="Link to this section">#</a></h3>
 <p>A fabricated zero would hide the absence of evidence.</p>
 <p><strong>Expected observation:</strong> ArgumentError identifies the missing observation requirement.</p>
+<p><strong>Why it holds here:</strong> <code>isempty(values)</code> is checked first, so <code>Float64[]</code> raises <code>ArgumentError</code> before <code>mean</code> could divide by a count of zero.</p>
+<p><strong>Plausible wrong approach:</strong> Returning 0.0 for empty input invents an observation, and averaging that into a report weights a group that has no data.</p>
+<p><strong>How to verify:</strong> Assert <code>@test_throws ArgumentError finite_mean(Float64[])</code>, then check that <code>outcome(Float64[]).reason</code> mentions observation.</p>
 <h3 id="3-reject-nonfinite-values">3. Reject nonfinite values<a class="heading-anchor" href="#3-reject-nonfinite-values" aria-label="Link to this section">#</a></h3>
 <p>Nonfinite values need a declared policy rather than silent propagation into a report.</p>
 <p><strong>Expected observation:</strong> DomainError is raised.</p>
+<p><strong>Why it holds here:</strong> <code>all(isfinite, values)</code> fails for NaN or Inf, so the function throws <code>DomainError</code> and names the offending vector.</p>
+<p><strong>Plausible wrong approach:</strong> Letting NaN flow into <code>mean</code> yields NaN, which then compares false with everything and quietly drops out of later filters.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>@test_throws DomainError finite_mean([NaN])</code> and <code>outcome([Inf]).status == :rejected</code>.</p>
 <h3 id="4-preserve-an-unexpected-error">4. Preserve an unexpected error<a class="heading-anchor" href="#4-preserve-an-unexpected-error" aria-label="Link to this section">#</a></h3>
 <p>A broad catch can hide a programming defect behind a normal-looking outcome.</p>
 <p><strong>Expected observation:</strong> The unexpected method error is rethrown.</p>
+<p><strong>Why it holds here:</strong> A vector of strings passes the empty check, then <code>isfinite</code> has no string method, so <code>MethodError</code> escapes and <code>outcome</code> rethrows it.</p>
+<p><strong>Plausible wrong approach:</strong> A bare <code>catch</code> returning <code>:rejected</code> for every error would label a type mistake in the caller as bad data and hide the bug.</p>
+<p><strong>How to verify:</strong> The reference checks <code>@test_throws MethodError finite_mean([&quot;not numeric&quot;])</code>; example B also shows <code>outcome(nothing)</code> rethrowing.</p>
 <h3 id="5-test-independently">5. Test independently<a class="heading-anchor" href="#5-test-independently" aria-label="Link to this section">#</a></h3>
 <p>Different reasoning paths reduce the chance that code and test share one unnoticed error.</p>
 <p><strong>Expected observation:</strong> The assertion has an independent basis.</p>
+<p><strong>Why it holds here:</strong> A hand calculation such as (1 + 2 + 3) / 3 = 2 and a limiting case like a single value <code>[7]</code> come from reasoning separate from the code.</p>
+<p><strong>Plausible wrong approach:</strong> Writing the expected value as <code>sum(v) / length(v)</code> copies the implementation, so the test passes even if both share a mistake.</p>
+<p><strong>How to verify:</strong> Keep <code>finite_mean([7]) == 7</code> from the reference and add one hand-derived mean with its arithmetic written in a comment.</p>
 <h3 id="6-report-rejected-rows">6. Report rejected rows<a class="heading-anchor" href="#6-report-rejected-rows" aria-label="Link to this section">#</a></h3>
 <p>Selection through validation can change the target population and should remain visible.</p>
-<p><strong>Expected observation:</strong> Retain counts and reasons for rejected rows.</p></article>
+<p><strong>Expected observation:</strong> Retain counts and reasons for rejected rows.</p>
+<p><strong>Why it holds here:</strong> Mapping <code>outcome</code> over rows yields <code>:ok</code> and <code>:rejected</code> tuples, so valid values and rejection reasons can be counted separately.</p>
+<p><strong>Plausible wrong approach:</strong> Averaging only the successful values and printing that mean alone hides how many rows were excluded and why.</p>
+<p><strong>How to verify:</strong> Report the counts of <code>:ok</code> and <code>:rejected</code> beside the mean and confirm they add up to the number of input rows.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-009: all reference checks passed</code>:</p>
+<p>The checks follow the two error styles in the lesson. <code>finite_mean</code> returns 7 for <code>[7]</code> and throws <code>DomainError</code> for NaN, while <code>outcome</code> packages the same decision as a status, so <code>[Inf]</code> yields <code>:rejected</code> without an exception. A string input fails with <code>MethodError</code> before any arithmetic, showing that dispatch rejects it first. The last line accepts <code>0.1 + 0.2</code> rounding because it only asks for a finite result.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> finite_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">DomainError</span> finite_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">NaN</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> outcome<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>value <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test</span> outcome<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Inf</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>status <span class="syntax-operator">==</span> <span class="syntax-string">:rejected</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">MethodError</span> finite_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">not numeric</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> isfinite<span class="syntax-punctuation">(</span>finite_mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

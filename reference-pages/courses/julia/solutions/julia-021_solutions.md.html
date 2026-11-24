@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-021-explained-reference">julia-021: explained reference<a class="heading-anchor" href="#julia-021-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-021_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>fit_ridge</code> checks aligned finite inputs and a nonnegative penalty, refuses an unidentified unpenalized design, then solves an augmented least-squares system with one extra row <code>[0, sqrt(penalty)]</code> that shrinks only the slope. Penalties are chosen by development error on x = 4 and 5, and the final rows x = 6 and 7 are used once afterward.</p>
 <h3 id="1-recover-the-known-model">1. Recover the known model<a class="heading-anchor" href="#1-recover-the-known-model" aria-label="Link to this section">#</a></h3>
 <p>A correct numerical recovery validates this fixture, not a population inference.</p>
 <p><strong>Expected observation:</strong> The coefficients are approximately <code>[1, 2]</code>.</p>
+<p><strong>Why it holds here:</strong> Targets <code>1 .+ 2x</code> lie exactly on a line, so with zero penalty the least-squares solution is <code>[1, 2]</code> and the training error is essentially zero.</p>
+<p><strong>Plausible wrong approach:</strong> Comparing the fit to coefficients produced by the same function cannot catch an error in the augmented system.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>coefficients ≈ [1, 2]</code> and <code>predict(coefficients, [4, 5]) ≈ [9, 11]</code>.</p>
 <h3 id="2-trace-penalty-selection">2. Trace penalty selection<a class="heading-anchor" href="#2-trace-penalty-selection" aria-label="Link to this section">#</a></h3>
 <p>The final outcomes remain assessment inputs rather than selection inputs.</p>
 <p><strong>Expected observation:</strong> The selected penalty is 2.</p>
+<p><strong>Why it holds here:</strong> Among penalties 0, 1, 2 and 4, the development error is smallest for 2, so <code>argmin</code> selects index 3 and penalty 2.</p>
+<p><strong>Plausible wrong approach:</strong> Choosing the penalty with the lowest training error always picks 0, because the penalty only adds bias on the training rows.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>penalties[selected] == 2</code> and <code>development_errors[selected] ≈ 1/98</code>.</p>
 <h3 id="3-inspect-the-selected-fit">3. Inspect the selected fit<a class="heading-anchor" href="#3-inspect-the-selected-fit" aria-label="Link to this section">#</a></h3>
 <p>An independent derivation checks the implementation and penalty convention.</p>
 <p><strong>Expected observation:</strong> They are 12/7 and 13/7.</p>
+<p><strong>Why it holds here:</strong> Penalty 2 gives intercept 12/7 and slope 13/7, which predict 64/7 at x = 4 and 11 at x = 5, so the errors are 1/7 and 0 and the MSE is 1/98.</p>
+<p><strong>Plausible wrong approach:</strong> Penalizing the intercept as well changes both coefficients and no longer matches the augmented row <code>[0, sqrt(penalty)]</code>.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>fits[selected] ≈ [12/7, 13/7]</code>; recompute the two predictions by hand.</p>
 <h3 id="4-keep-the-final-set-separate">4. Keep the final set separate<a class="heading-anchor" href="#4-keep-the-final-set-separate" aria-label="Link to this section">#</a></h3>
 <p>If final labels change the selection, the procedure is leaking assessment information.</p>
 <p><strong>Expected observation:</strong> The chosen penalty must remain unchanged.</p>
+<p><strong>Why it holds here:</strong> The selection uses only <code>development_errors</code>, so changing the final labels 13 and 15 cannot change <code>selected</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Picking the penalty after looking at final error turns the final set into a second development set and biases the reported 5/98.</p>
+<p><strong>How to verify:</strong> Edit the final labels in an owned copy and confirm <code>penalties[selected]</code> is still 2.</p>
 <h3 id="5-reject-nonidentification">5. Reject nonidentification<a class="heading-anchor" href="#5-reject-nonidentification" aria-label="Link to this section">#</a></h3>
 <p>A numerical solution selection rule should not be mistaken for scientific identification.</p>
 <p><strong>Expected observation:</strong> The teaching helper raises an explicit error.</p>
+<p><strong>Why it holds here:</strong> <code>x = [1, 1]</code> makes the design columns proportional, so with penalty 0 <code>rank(design) &lt; 2</code> and the helper throws <code>ArgumentError</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Letting <code>\</code> return some least-squares answer and reporting its slope pretends a slope can be estimated from one x value.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>@test_throws ArgumentError fit_ridge([1, 1], [2, 3], 0)</code>.</p>
 <h3 id="6-report-scope">6. Report scope<a class="heading-anchor" href="#6-report-scope" aria-label="Link to this section">#</a></h3>
 <p>Real deployment evidence needs representative independent data, uncertainty and diagnostics.</p>
-<p><strong>Expected observation:</strong> Report the observed error without a broad accuracy guarantee.</p></article>
+<p><strong>Expected observation:</strong> Report the observed error without a broad accuracy guarantee.</p>
+<p><strong>Why it holds here:</strong> The final error 5/98 comes from two hand-built rows, so it describes this fixture and nothing about other data.</p>
+<p><strong>Plausible wrong approach:</strong> Quoting 5/98 as expected accuracy on new data treats an arithmetic exercise as a validation study.</p>
+<p><strong>How to verify:</strong> Report the final error with its row count and a statement that the rows are synthetic.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-021: all reference checks passed</code>:</p>
+<p>Four <code>ArgumentError</code> cases cover a constant x column with no penalty, mismatched lengths, a negative penalty and a nonfinite input, so <code>fit_ridge</code> rejects each before solving. <code>predict([1, 2], [0, 1]) == [1, 3]</code> uses literal coefficients, and <code>mse([1, 2], [1, 4]) == 2</code> averages squared errors of 0 and 4.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> fit_ridge<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> fit_ridge<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> fit_ridge<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> fit_ridge<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Inf</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> predict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> mse<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

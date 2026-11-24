@@ -205,6 +205,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A declarative built-in expression gives Catalyst visibility into algebra and types. Prefer it when it expresses the same contract. When a genuinely custom GPU operation is needed, define per-worker initialization, bounded batch sizes, device assignment, input/output schema, null policy and cleanup. Do not let every partition choose device zero independently on a multi-executor host.</p>
 <p>Machine-learning training is another boundary. A SQL acceleration plugin does not automatically coordinate gradient collectives across Spark tasks. Separate GPU-aware ML integrations can provide reviewed estimator behavior, but they need their own supported algorithms, versions and quality comparisons. The curriculum therefore links the Spark specialization to the PyTorch/TensorFlow distribution chapters without treating one scheduler as a drop-in replacement for the other.</p>
 <p>For the included null-preserving doubling example, the built-in expression and reference function agree on integers and missing values. The next meaningful test adds type boundaries and verifies the output schema. Only after that should a real Spark plan be inspected for supported acceleration. This sequence makes correctness visible before any GPU configuration is introduced.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Python UDF:</strong> A row-at-a-time Python function called from Spark, which the GPU plugin does not translate.</li>
+<li><strong>Pandas UDF:</strong> A vectorized Python function that receives Arrow-backed batches as pandas objects.</li>
+<li><strong>Pandas API on Spark:</strong> A pandas-like interface that compiles to Spark plans rather than running pandas code directly.</li>
+<li><strong>GPU-aware UDF:</strong> A UDF that explicitly manages GPU packages, device assignment, batch size and transfers under a reviewed contract.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A built-in multiplication expression is visible in the relational plan. A Python UDF returning x*2 may hide the same algebra behind a process boundary and block equivalent optimization.</p>
@@ -223,20 +230,40 @@ expected <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>expression<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> values<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> expected
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU expression parity oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Null-preserving expression produces [2, None,6].</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>values</code></td>
+<td><code>[1, None, 3]</code></td>
+</tr>
+<tr>
+<td><code>expected</code></td>
+<td><code>[2, None, 6]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-classify-four-apis">Exercise 1: Classify four APIs<a class="heading-anchor" href="#exercise-1-classify-four-apis" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>classify four APIs</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating a pandas UDF as equivalent to a built-in because it is vectorized ignores the process boundary and serialization that still surround it.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-replace-an-equivalent-simple-udf">Exercise 2: Replace an equivalent simple UDF<a class="heading-anchor" href="#exercise-2-replace-an-equivalent-simple-udf" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>replace an equivalent simple UDF</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Replacing a UDF that maps null to 0 with the built-in, which keeps null, changes results while appearing to be the same arithmetic.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-explain-arrow-limits">Exercise 3: Explain Arrow limits<a class="heading-anchor" href="#exercise-3-explain-arrow-limits" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>explain Arrow limits</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming that enabling Arrow moves UDF work to the GPU confuses data format with execution location.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-define-gpu-aware-udf-ownership">Exercise 4: Define GPU-aware UDF ownership<a class="heading-anchor" href="#exercise-4-define-gpu-aware-udf-ownership" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>define GPU-aware UDF ownership</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calling a GPU library from every partition with no device assignment risks oversubscription and out-of-memory errors that appear only at higher concurrency.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-distinguish-sql-and-ml-acceleration">Exercise 5: Distinguish SQL and ML acceleration<a class="heading-anchor" href="#exercise-5-distinguish-sql-and-ml-acceleration" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>distinguish SQL and ML acceleration</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the whole pipeline as accelerated because the SQL plan shows GPU operators omits the training step.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-quality-parity-tests">Exercise 6: Design quality parity tests<a class="heading-anchor" href="#exercise-6-design-quality-parity-tests" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design quality parity tests</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing a GPU model trained on a different split with a CPU model attributes data differences to the backend.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; approximately 120 minutes. Direct prerequisites: <code>spark-013</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-014</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
+<p>Open <code>spark-014</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-014.scala.html">Scala learner</a> and <a href="../lessons/spark-014.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-014_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-014_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-014_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -228,7 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The reference does not write a durable table or claim a transactional publication mechanism. It delivers a validated local report and its evidence. Later lessons add owned file output, restart and commit boundaries. This separation prevents a successful aggregate from being overclaimed as a production-ready pipeline or an exactly-once system.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
 <p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
-<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-class">Row</span>
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
 
@@ -256,20 +256,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">12L</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;A&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;paid&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">val</span> raw <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>createDataFrame<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>parallelize<span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> schema<span class="syntax-punctuation">)</span></code></pre>
-<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
-<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>
-    StructType<span class="syntax-punctuation">,</span>
-    StructField<span class="syntax-punctuation">,</span>
-    LongType<span class="syntax-punctuation">,</span>
-    IntegerType<span class="syntax-punctuation">,</span>
-    StringType<span class="syntax-punctuation">,</span>
-    DoubleType<span class="syntax-punctuation">,</span>
-    BooleanType<span class="syntax-punctuation">,</span>
-    ArrayType<span class="syntax-punctuation">,</span>
-    MapType<span class="syntax-punctuation">,</span>
-    TimestampType<span class="syntax-punctuation">,</span>
-    DecimalType<span class="syntax-punctuation">,</span>
-<span class="syntax-punctuation">)</span>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> LongType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> StructType
 
 schema <span class="syntax-operator">=</span> StructType<span class="syntax-punctuation">(</span>
     <span class="syntax-punctuation">[</span>
@@ -344,7 +332,7 @@ zero <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</
 <h4 id="exercise-1-classify-defects-without-dropping-source-occurrences">Exercise 1: Classify defects without dropping source occurrences<a class="heading-anchor" href="#exercise-1-classify-defects-without-dropping-source-occurrences" aria-label="Link to this section">#</a></h4>
 <p>Add a nullable rejection_reason Column using the declared precedence: missing_id, invalid_id, unknown_status, negative_amount. Keep every source field and row. Unknown amounts are allowed; unknown statuses are not.</p>
 <p><strong>Expected result/shape:</strong> Source row 11 has unknown_status, row 12 has missing_id, and the other 10 reasons are NULL. All 12 source_row identities remain.</p>
-<p><strong>Verify:</strong> Assert the exact two(source_row, reason) pairs and the unchanged source count 12.</p>
+<p><strong>Verify:</strong> Assert the exact two (source_row, reason) pairs and the unchanged source count 12.</p>
 <p><strong>Progressive hint:</strong> Build a when/otherwise chain and include an explicit isNull status branch because NULL isin results are unknown.</p>
 <h4 id="exercise-2-create-the-accepted-event-relation">Exercise 2: Create the accepted event relation<a class="heading-anchor" href="#exercise-2-create-the-accepted-event-relation" aria-label="Link to this section">#</a></h4>
 <p>Return source_row, event_id, team, amount_cents, status only for rows with no rejection reason. Preserve the valid void event and all accepted zero/NULL amounts.</p>
@@ -353,17 +341,17 @@ zero <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</
 <p><strong>Progressive hint:</strong> Use the validation result first; paid filtering belongs to a later business stage.</p>
 <h4 id="exercise-3-retain-a-complete-quarantine-row">Exercise 3: Retain a complete quarantine row<a class="heading-anchor" href="#exercise-3-retain-a-complete-quarantine-row" aria-label="Link to this section">#</a></h4>
 <p>Return source_row, event_id, team, amount_cents, status, rejection_reason for rejected records, ordered by source_row when inspected. Keep the original values, including the missing event ID.</p>
-<p><strong>Expected result/shape:</strong> Rows are (11, 11, A, 10, mystery, unknown_status) and (12, NULL, A, 5, paid, missing_id). Accepted and quarantined counts sum to 12.</p>
+<p><strong>Expected result/shape:</strong> Rows are (11, 11, A, 10, mystery, unknown_status) and <code>(12, NULL, A, 5, paid, missing_id)</code>. Accepted and quarantined counts sum to 12.</p>
 <p><strong>Verify:</strong> Compare every quarantined field with literal expected rows and check count conservation independently.</p>
 <p><strong>Progressive hint:</strong> Filter the same classification in the complementary direction and preserve source_row as its occurrence identity.</p>
 <h4 id="exercise-4-publish-a-null-aware-paid-summary">Exercise 4: Publish a NULL-aware paid summary<a class="heading-anchor" href="#exercise-4-publish-a-null-aware-paid-summary" aria-label="Link to this section">#</a></h4>
 <p>From accepted records, filter paid and group by team into team, rows, valued, total_cents. Count every event, only nonnull amounts, and the exact Long sum. Preserve a NULL team group and a NULL-only amount group.</p>
-<p><strong>Expected result/shape:</strong> Groups are A:(3,2,200), B:(2,2,25), C:(1,0, NULL), D:(1,1,200), E:(1,1,0), NULL:(1,1,50). Paid metrics are 9 rows,7 valued,475 cents.</p>
+<p><strong>Expected result/shape:</strong> Groups are <code>A:(3, 2, 200)</code>, <code>B:(2, 2, 25)</code>, <code>C:(1, 0, NULL)</code>, <code>D:(1, 1, 200)</code>, <code>E:(1, 1, 0)</code>, <code>NULL:(1, 1, 50)</code>. Paid metrics are 9 rows, 7 valued, 475 cents.</p>
 <p><strong>Verify:</strong> Assert the full typed canonical group list and the global paid metrics against independent literals.</p>
 <p><strong>Progressive hint:</strong> COUNT(*) and COUNT(amount_cents) have different denominators; SUM over all NULL amounts remains NULL.</p>
 <h4 id="exercise-5-expose-projection-plus-distinct-loss">Exercise 5: Expose projection-plus-distinct loss<a class="heading-anchor" href="#exercise-5-expose-projection-plus-distinct-loss" aria-label="Link to this section">#</a></h4>
 <p>Return a paid row-level projection retaining event_id, team, amount_cents. Compare it with the deliberately wrong team/amount distinct projection and explain the lost 100-cent event.</p>
-<p><strong>Expected result/shape:</strong> The correct projection has metrics(9,7,475); the wrong projection has(8,6,375). IDs 1 and 6 must both remain despite equal team/amount values.</p>
+<p><strong>Expected result/shape:</strong> The correct projection has metrics <code>(9, 7, 475)</code>; the wrong projection has <code>(8, 6, 375)</code>. IDs 1 and 6 must both remain despite equal team/amount values.</p>
 <p><strong>Verify:</strong> Assert both metric tuples and verify that correct event IDs include 1 and 6 separately.</p>
 <p><strong>Progressive hint:</strong> Identity must survive before any deduplication policy can be evaluated.</p>
 <h4 id="exercise-6-gate-the-sql-report-on-identity-and-conservation">Exercise 6: Gate the SQL report on identity and conservation<a class="heading-anchor" href="#exercise-6-gate-the-sql-report-on-identity-and-conservation" aria-label="Link to this section">#</a></h4>
@@ -374,7 +362,7 @@ zero <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If raw count becomes 11, check whether COUNT(event_id) was confused with COUNT(*). If accepted count becomes 9, look for paid filtering before validity accounting. If C and E both show zero totals, inspect premature NULL filling. If revenue drops by 100 after distinct, restore event identity. If a missing-ID row cannot be traced, use source occurrence identity in quarantine. If a duplicate event is silently chosen, define a correction/version policy or reject it; do not use partition arrival order as truth.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>classified</code> / <code>classified</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>classified</code> / <code>classified</code> without reading its solution. Then, from memory, state what Exercise 6 (Gate the SQL report on identity and conservation) must produce: The base 12-row batch passes and matches all six golden groups. Appending <code>source_row</code> 13 with a second <code>event_id</code> 1 rejects publication instead of choosing a winner. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>

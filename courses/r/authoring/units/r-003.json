@@ -38,6 +38,12 @@
       "code": "amount <- c(10, 20, 30, 40)\nfees <- c(1, 2)\nrecycled <- amount + fees\nstopifnot(identical(recycled, c(11, 22, 31, 42)))\nvalid_per_row <- length(amount) == length(fees)\nstopifnot(!valid_per_row)\nprint(recycled)\n",
       "explanation": "No warning is needed because four is a multiple of two. The separate per-row length rule still rejects the input.",
       "expected": "11, 22, 31, 42; per-row lengths are invalid."
+    },
+    {
+      "title": "Arithmetic pairs positions, not names",
+      "code": "amount <- c(a = 10, b = 20, c = 30)\nfee <- c(c = 3, b = 2, a = 1)\nby_position <- amount + fee\nby_name <- amount + fee[names(amount)]\nprint(by_position)\nprint(by_name)\nstopifnot(identical(unname(by_position), c(13, 22, 31)))\nstopifnot(identical(unname(by_name), c(11, 22, 33)))\n",
+      "explanation": "Both vectors carry names, but + ignores them and adds first to first, so record a receives the fee labeled c. The result even keeps the names of amount, which makes the wrong 13 look trustworthy. Reordering fee with fee[names(amount)] lines the labels up before the arithmetic, giving 11, 22 and 33. If fee lacked one of the names, that reorder would produce an NA for it, which is a visible signal rather than a silent mismatch.",
+      "expected": "by_position shows a 13, b 22, c 31; by_name shows a 11, b 22, c 33."
     }
   ],
   "exercises": [

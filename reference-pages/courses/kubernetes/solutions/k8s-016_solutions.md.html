@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-draw-container-order">Exercise 1: Draw container order<a class="heading-anchor" href="#exercise-1-draw-container-order" aria-label="Link to this section">#</a></h3>
 <p>The init container supplies the file dependency. If it never completes successfully, the application cannot demonstrate the read path. The ordering is a Kubernetes lifecycle contract, not a sleep inserted into application code.</p>
 <p><strong>Expected:</strong> prepare completes before read starts.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the Pod spec&#x27;s initContainers list, then containers, and mark prepare as a gate in front of read.</li>
+<li><strong>Why it is correct:</strong> The kubelet runs init containers to completion one at a time and starts application containers only after every init container exits 0.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting prepare and read to start together, like two entries in containers, predicts that read may find no file yet.</li>
+<li><strong>How to verify:</strong> initContainerStatuses shows prepare terminated with exit 0 before read appears running in containerStatuses.</li>
+</ul>
 <h3 id="exercise-2-trace-the-shared-volume">Exercise 2: Trace the shared volume<a class="heading-anchor" href="#exercise-2-trace-the-shared-volume" aria-label="Link to this section">#</a></h3>
 <p>The mount links the containers to one Pod-owned volume. Read-only root filesystems do not prohibit a separately admitted writable volume. The scope is still synthetic and bounded, with no host personal path.</p>
 <p><strong>Expected:</strong> Both containers access the same /work emptyDir within one Pod.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Follow the name work from spec.volumes to the volumeMounts of both prepare and read.</li>
+<li><strong>Why it is correct:</strong> An emptyDir is created once per Pod, so every mount that references the same volume name sees the same directory at /work.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming each container gets its own copy because its filesystem is separate would predict read finds nothing the init container wrote.</li>
+<li><strong>How to verify:</strong> One emptyDir named work exists, and both mounts reference that name with mountPath /work.</li>
+</ul>
 <h3 id="exercise-3-observe-one-application-restart">Exercise 3: Observe one application restart<a class="heading-anchor" href="#exercise-3-observe-one-application-restart" aria-label="Link to this section">#</a></h3>
 <p>The first application exit 2 triggers OnFailure restart. Its marker and flag remain in the Pod volume, so the next attempt can distinguish itself. Actual timing and status must be observed rather than copied from this trace.</p>
 <p><strong>Expected:</strong> Same Pod UID/marker across the failed first and successful next application attempt.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run the teacher fixture once and compare Pod UID, marker and restartCount across both application attempts.</li>
+<li><strong>Why it is correct:</strong> A container restart happens inside the same Pod, so the emptyDir and the marker written by prepare survive while restartCount increments.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting prepare to rerun and write a new marker treats a container restart as a Pod restart.</li>
+<li><strong>How to verify:</strong> Pod UID and marker match across attempts, and only restartCount changed.</li>
+</ul>
 <h3 id="exercise-4-compare-a-new-pod">Exercise 4: Compare a new Pod<a class="heading-anchor" href="#exercise-4-compare-a-new-pod" aria-label="Link to this section">#</a></h3>
 <p>The init step writes the new UID, which differentiates recreated bytes from persistent storage. This avoids falsely claiming that a constant marker survived when it was merely generated again.</p>
 <p><strong>Expected:</strong> New Pod UID, new marker and fresh attempt sequence.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Delete only the recorded owned Pod through the host capability and read the replacement.</li>
+<li><strong>Why it is correct:</strong> A new Pod gets a new UID and a new emptyDir, so prepare runs again and writes a fresh marker.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting the old marker to persist assumes emptyDir lives outside the Pod, which it does not.</li>
+<li><strong>How to verify:</strong> UID and marker both differ, and the old marker is nowhere in the new record.</li>
+</ul>
 <h3 id="exercise-5-diagnose-an-init-failure">Exercise 5: Diagnose an init failure<a class="heading-anchor" href="#exercise-5-diagnose-an-init-failure" aria-label="Link to this section">#</a></h3>
 <p>The first failed stage is initialization. Correct the declared shared path or intended nonroot access in the owned fixture, then verify the init exit and application output. Broad privilege changes are not a justified diagnosis.</p>
 <p><strong>Expected:</strong> Application absence is explained by init failure; the smallest mount/permission repair is identified.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Start with prepare&#x27;s state and reason, then name the single mount or permission fix.</li>
+<li><strong>Why it is correct:</strong> If an init container fails, the kubelet never starts the application container, so read&#x27;s absence follows from prepare.</li>
+<li><strong>Plausible wrong approach:</strong> Debugging the read container as a second fault chases a container that never started and has no logs.</li>
+<li><strong>How to verify:</strong> The init state shows the failure reason, and the proposed repair touches one mount or permission.</li>
+</ul>
 <h3 id="exercise-6-state-the-storage-limit">Exercise 6: State the storage limit<a class="heading-anchor" href="#exercise-6-state-the-storage-limit" aria-label="Link to this section">#</a></h3>
 <p>A successful container restart proves only continuity within that Pod lifetime. A backup must survive the relevant failure independently and be restored/verified. The example intentionally stops short of that claim.</p>
 <p><strong>Expected:</strong> emptyDir lifetime is tied to the Pod; durability and independent recovery require later storage/backup contracts.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name Pod deletion as the end of the marker and point to a PersistentVolumeClaim and a separate backup as the later contracts.</li>
+<li><strong>Why it is correct:</strong> emptyDir is removed when the Pod leaves its node, so nothing written there survives replacement, and no copy exists elsewhere.</li>
+<li><strong>Plausible wrong approach:</strong> Calling the shared file persistent because it survived a container restart confuses container lifetime with Pod lifetime.</li>
+<li><strong>How to verify:</strong> The answer names Pod deletion and a later storage or backup mechanism that would survive it.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>If the init container fails, the application may never start; inspect initContainerStatuses rather than expecting application logs. If the marker cannot be written, inspect the volume mount and nonroot permissions before relaxing the security context globally. A missing file in the application can indicate a different mount name or path.</p>
 <p>The offline script checks a lifetime model only. A live claim needs the actual UID and restart/log evidence. Neither a persisted marker in emptyDir nor a successful Pod restart is a backup or proof of PVC behavior.</p></article>

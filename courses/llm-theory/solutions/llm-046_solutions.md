@@ -1,6 +1,6 @@
 # llm-046: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these MHA, MQA, GQA and blockwise exact attention answers after attempting *Count cache and projection dimensions* through *Reject invalid grouping and empty support*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Trace online softmax at extreme scores* points to one step. `llm-046_solution.py` holds the assertions; this page explains how they test MHA. Then try *Reject invalid grouping and empty support* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ The reference here implements grouped head selection and blockwise stable attent
 
 ## Reading the implementation
 
-For the single-batch reference, Q has shape(Hq, T, d), K shape(Hkv, T, d), and V shape(Hkv, T, dv), with Hq divisible by Hkv. Query head h uses key/value head h//(Hq/Hkv). The dense helper normalizes allowed keys per query. The online helper processes legal key blocks, skips blocks with no allowed keys, and rescales old accumulated state whenever a larger score appears. It rejects an entirely masked row rather than returning an invented distribution.
+For the single-batch reference, Q has shape (Hq, T, d), K shape (Hkv, T, d), and V shape (Hkv, T, dv), with Hq divisible by Hkv. Query head h uses key/value head h//(Hq/Hkv). The dense helper normalizes allowed keys per query. The online helper processes legal key blocks, skips blocks with no allowed keys, and rescales old accumulated state whenever a larger score appears. It rejects an entirely masked row rather than returning an invented distribution.
 
 The online implementation checks its weighted-value numerator and denominator after every block, then checks the divided output. It raises ValueError when these intermediates exceed finite floating-point range, even if another evaluation order could produce a representable final average. Finite inputs and scores alone do not guarantee a finite unnormalized numerator.
 
@@ -47,9 +47,9 @@ parameters = [
 assert cache_bytes == [320, 160, 80] and parameters == [256, 192, 160]
 ```
 
-**Expected:** raw KV bytes 320, 160, 80; projection weights 256, 192, 160 for model width 8 without biases.
+**Expected:** raw KV bytes \(320, 160, 80\); projection weights \(256, 192, 160\) for model width 8 without biases.
 
-**Verify:** In a fresh process, the exercise checks confirm `cache_bytes == [320, 160, 80]` and `parameters == [256, 192, 160]`.
+**Verify:** For *Count cache and projection dimensions*, a fresh-process check confirms `cache_bytes == [320, 160, 80]` and `parameters == [256, 192, 160]`.
 
 ## Exercise 2: Verify grouped heads against an equivalent repeated-head oracle
 
@@ -71,13 +71,13 @@ assert grouped.shape == (4, 3, 2)
 np.testing.assert_allclose(grouped, oracle, atol=1e-12, rtol=0)
 ```
 
-**Expected:** outputs agree within 1e-12; shape(4, 3, 2).
+**Expected:** outputs agree within 1e-12; shape (4, 3, 2).
 
-**Verify:** In a fresh process, the exercise checks confirm `grouped.shape == (4, 3, 2)` and `grouped` matches `oracle` within 1e-12.
+**Verify:** For *Verify grouped heads against an equivalent repeated-head oracle*, a fresh-process check confirms `grouped.shape == (4, 3, 2)` and `grouped` matches `oracle` within 1e-12.
 
 ## Exercise 3: Trace online softmax at extreme scores
 
-The question is: Combine scores 1000, 999, 998 and values 1, 3, 5 in blocks of 2.
+The question is: Combine scores \(1000, 999, 998\) and values 1, 3, 5 in blocks of 2.
 
 When the running maximum changes, the old numerator and denominator must both be rescaled. Updating only one produces a plausible but incorrect weighted average.
 
@@ -93,7 +93,7 @@ assert peak == 2 and np.isfinite(online).all()
 
 **Expected:** finite output equals a maximum-shifted dense calculation.
 
-**Verify:** In a fresh process, the exercise checks confirm `online` matches `expected` within 1e-12, `peak == 2` and `np.isfinite(online).all()`.
+**Verify:** For *Trace online softmax at extreme scores*, a fresh-process check confirms `online` matches `expected` within 1e-12, `peak == 2` and `np.isfinite(online).all()`.
 
 ## Exercise 4: Compare several block sizes under causal masking
 
@@ -115,7 +115,7 @@ for block in [1, 2, 3, 5]:
 
 **Expected:** all outputs agree within 1e-12; largest temporary score block does not exceed the chosen size.
 
-**Verify:** In a fresh process, the exercise checks confirm for every `block` in `[1, 2, 3, 5]`, `output` matches `expected` within 1e-12 and for every `block` in `[1, 2, 3, 5]`, `peak <= block`.
+**Verify:** For *Compare several block sizes under causal masking*, a fresh-process check confirms for every `block` in `[1, 2, 3, 5]`, `output` matches `expected` within 1e-12 and for every `block` in `[1, 2, 3, 5]`, `peak <= block`.
 
 ## Exercise 5: Preserve a causal prefix under future changes
 
@@ -132,7 +132,7 @@ np.testing.assert_allclose(altered[:3], expected[:3], atol=1e-12, rtol=0)
 
 **Expected:** first three rows unchanged.
 
-**Verify:** In a fresh process, the exercise checks confirm `altered[:3]` matches `expected[:3]` within 1e-12.
+**Verify:** For *Preserve a causal prefix under future changes*, a fresh-process check confirms `altered[:3]` matches `expected[:3]` within 1e-12.
 
 ## Exercise 6: Reject invalid grouping and empty support
 
@@ -159,8 +159,8 @@ else:
 
 **Expected:** both raise ValueError; no output NaNs are accepted.
 
-**Verify:** In a fresh process, the exercise checks confirm `gqa(np.zeros((4, 2, 2)), np.zeros((3, 2, 2)), np.zeros((3, 2, 2)))` raises `ValueError` and `online_attention(queries, keys, values, bad, 2)` raises `ValueError`.
+**Verify:** For *Reject invalid grouping and empty support*, a fresh-process check confirms `gqa(np.zeros((4, 2, 2)), np.zeros((3, 2, 2)), np.zeros((3, 2, 2)))` raises `ValueError` and `online_attention(queries, keys, values, bad, 2)` raises `ValueError`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Compare several block sizes under causal masking* and predict the result first; keep *Reject invalid grouping and empty support* failing beside the repair. Log a missing NumPy separately from a wrong MHA value in `llm-046`.

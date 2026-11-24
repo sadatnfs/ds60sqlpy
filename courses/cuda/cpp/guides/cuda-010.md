@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a move-only buffer owner that never double releases and never leaks a partially initialized allocation.
+
 Work through *Resource ownership and failure-safe cleanup* with the concrete cases below. Finish with this evidence:
 no double release, no leaked first allocation, and clear owner/borrower relationships. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 RAII connects resource lifetime to an owning C++ object's lifetime. Its constructor establishes an invariant, and its destructor releases the resource. Copying a unique owner is usually forbidden; moving transfers ownership and leaves the source empty. This is important for CUDA allocations, streams and events because a copied raw handle does not represent an independent resource. A destructor should not throw during stack unwinding. Error reporting for explicit completion and release should happen in a deliberate path, while final cleanup remains a last safeguard. Asynchronous use adds a further obligation: do not destroy the owner while a queued operation still borrows the resource.
+
+### Key terms
+
+- **Move-only type:** A class whose copy operations are deleted, so ownership can be transferred but never duplicated.
+- **Destructor:** A member function that runs when an object's lifetime ends and releases the resource the object owns.
+- **Borrower:** Code that uses a resource through a pointer or reference without owning it or controlling its release.
+- **Stack unwinding:** The destruction of local objects in reverse order while an exception propagates out of a scope.
 
 ## How to run and study this lesson
 

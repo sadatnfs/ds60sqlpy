@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A Secret is a Kubernetes object for data that requires restricted handling. Its data field uses base64 encoding, which is a reversible representation rather than encryption. Access control, encryption-at-rest configuration, transport security and application handling are separate controls. Verify those actual controls instead of inferring confidentiality from the object kind.</p>
 <p>This lesson uses only the public markers DUMMY_LESSON_ONLY and DUMMY_LESSON_ROTATED. The current browser worker has no Secret permission and does not accept Secret manifests or Secret references. Live mount behavior is available only through a teacher-provided synthetic fixture in a separate scoped host capability. No real credential is needed or should be collected.</p>
 <p>Configuration lifetime still matters. A Secret-derived environment value is captured when a process starts. A projected Secret file can refresh asynchronously, but application reload behavior determines when the process uses new bytes. Encoding does not change those lifecycle semantics.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Secret:</strong> An API object for sensitive values such as passwords or keys. Anyone allowed to read it through the API sees the value, so access must be narrow.</li>
+<li><strong>base64 encoding:</strong> The reversible text encoding used for Secret data. It is not encryption and gives no confidentiality.</li>
+<li><strong>Encryption at rest:</strong> Encrypting stored API data in the control plane&#x27;s storage. It protects against reading that storage directly, not against an authorized API read.</li>
+<li><strong>Projected Secret file:</strong> A Secret key mounted as a file in a container. The kubelet can refresh the file later, while an environment variable keeps its starting value.</li>
+<li><strong>Application reload:</strong> The application&#x27;s step of rereading a rotated credential. Without it, the process keeps using the old value until it restarts.</li>
+</ul>
 <h3 id="decode-an-explicitly-synthetic-value">Decode an explicitly synthetic value<a class="heading-anchor" href="#decode-an-explicitly-synthetic-value" aria-label="Link to this section">#</a></h3>
 <p>The example Opaque Secret has one key, lesson-message. Decoding its data recovers the exact dummy string. That exercise demonstrates encoding only. It does not show that a real Secret is safe to print, export or place in a Git repository.</p>
 <p>General Kubernetes also supports stringData as a convenience input, with different server-side handling. Regardless of representation, the value needs an access and retention policy. The course deliberately keeps the normal worker unable to read Secrets, so an authorization denial is the expected boundary.</p>

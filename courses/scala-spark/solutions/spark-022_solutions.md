@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-022.md) and attempt one language first. The [Sc
 
 Compute input row count, distinct key count and total id sum. Confirm the key formula supports exactly 20 occurrences per key.
 
-**Expected:** Metrics(20000,1000,199990000); keys 0..999 each occur 20 times by construction.
+**Expected:** `Metrics(20000, 1000, 199990000)`; keys 0..999 each occur 20 times by construction.
 
 ```scala
 def sourceMetrics(source: DataFrame): (Long, Long, Long) = {
@@ -30,11 +30,11 @@ These checks establish the exact population before changing execution settings. 
 
 Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group.
 
-**Expected:** Sorted output [(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.
+**Expected:** Sorted output [`(0, 20)`, ...,`(999, 20)`], with total counts 20000 and an Exchange in the executed plan.
 
 ```scala
 def buildGrouped(source: DataFrame, partitions: Int): DataFrame = {
-  require(partitions >= 1 && partitions <= 16, "Partition budget is1..16")
+  require(partitions >= 1 && partitions <= 16, "Partition budget is 1..16")
   source.sparkSession.conf.set("spark.sql.shuffle.partitions", partitions.toString)
   source.groupBy("key").agg(count(lit(1)).as("n"))
 }
@@ -43,7 +43,7 @@ def buildGrouped(source: DataFrame, partitions: Int): DataFrame = {
 ```python
 def build_grouped(source, partitions):
     if isinstance(partitions, bool) or not isinstance(partitions, int) or not 1 <= partitions <= 16:
-        raise ValueError("Partition budget is1..16")
+        raise ValueError("Partition budget is 1..16")
     source.sparkSession.conf.set("spark.sql.shuffle.partitions", str(partitions))
     return source.groupBy("key").agg(F.count(F.lit(1)).alias("n"))
 ```
@@ -181,8 +181,10 @@ def work_model(reducers):
 
 The arithmetic explains why local aggregation and reduce partition count can matter while keeping estimates distinct from observed metrics. Hash distribution can be uneven and task overhead can offset smaller per-task state. The reference intentionally makes no faster/slower assertion. A useful tuning conclusion would require representative data, controlled repeats and measured task/spill distributions beyond this lesson.
 
-**Verification evidence:** Assert the two model tuples and print Spark 4.0.1, AQE false, local[2] with the distinct p2/p5 observations.
+**Verification evidence:** Assert the two model tuples and print Spark 4.0.1, AQE false, `local[2]` with the distinct p2/p5 observations.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Establish the high-cardinality fixture oracle) is built inside the program, so opening the lesson fetches nothing; it expects: `Metrics(20000, 1000, 199990000)`; keys 0..999 each occur 20 times by construction. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

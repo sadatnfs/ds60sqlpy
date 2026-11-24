@@ -195,24 +195,57 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-013-explained-reference">julia-013: explained reference<a class="heading-anchor" href="#julia-013-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-013_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Write the indexed formula first, then make array axes express it. Broadcasting extends singleton axes and fails when lengths disagree. The worked example adds per-row offsets <code>[10, 20]</code> and a one-row array of per-column offsets. For in-place loops, ask whether a read sees earlier writes, since that decides recurrence or snapshot behavior.</p>
 <h3 id="1-choose-the-axis">1. Choose the axis<a class="heading-anchor" href="#1-choose-the-axis" aria-label="Link to this section">#</a></h3>
 <p>The explicit singleton axis documents the intended broadcast alignment.</p>
 <p><strong>Expected observation:</strong> Reshape the offsets into a one-row array.</p>
+<p><strong>Why it holds here:</strong> <code>reshape([100, 200, 300], 1, 3)</code> has size <code>(1, 3)</code>, so it lines up with the three columns of <code>[1 3 5; 2 4 6]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Adding the plain vector <code>[100, 200, 300]</code> tries to match it with the two rows and raises <code>DimensionMismatch</code>.</p>
+<p><strong>How to verify:</strong> Example A asserts the result <code>[111 213 315; 122 224 326]</code>; the reference checks <code>size(reshape([1, 2, 3], 1, 3)) == (1, 3)</code>.</p>
 <h3 id="2-reject-incompatible-axes">2. Reject incompatible axes<a class="heading-anchor" href="#2-reject-incompatible-axes" aria-label="Link to this section">#</a></h3>
 <p>Shape validation prevents a silent interpretation of an unintended operation.</p>
 <p><strong>Expected observation:</strong> A DimensionMismatch occurs.</p>
+<p><strong>Why it holds here:</strong> A length 4 vector aligns with the first axis of length 2, which is neither equal nor 1, so broadcasting throws.</p>
+<p><strong>Plausible wrong approach:</strong> Arguing that 4 elements fit somewhere in a 6-element matrix treats total size as the rule rather than per-axis compatibility.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>@test_throws DimensionMismatch matrix .+ [1, 2, 3, 4]</code>.</p>
 <h3 id="3-update-in-place">3. Update in place<a class="heading-anchor" href="#3-update-in-place" aria-label="Link to this section">#</a></h3>
 <p>This dependence pattern makes the specific self-update straightforward to reason about.</p>
 <p><strong>Expected observation:</strong> The destination values change to the expected affine result.</p>
+<p><strong>Why it holds here:</strong> <code>values .= 2 .* values .+ 1</code> fuses into one loop where each output reads only its own old element, so <code>[1, 2, 3]</code> becomes <code>[3, 5, 7]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>values = 2 .* values .+ 1</code> allocates a new array and rebinds the name, so other references to the original see no change.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>values == [3, 5, 7]</code>; the reference checks a similar dotted assignment giving <code>[0.5, 1.0]</code>.</p>
 <h3 id="4-trace-a-manual-recurrence">4. Trace a manual recurrence<a class="heading-anchor" href="#4-trace-a-manual-recurrence" aria-label="Link to this section">#</a></h3>
 <p>The loop implements a recurrence, not a simultaneous snapshot assignment.</p>
 <p><strong>Expected observation:</strong> The example becomes <code>[1, 1, 1, 1]</code>.</p>
+<p><strong>Why it holds here:</strong> In the loop <code>sequential[i] = sequential[i-1]</code>, position 2 receives 1, and position 3 then reads that new 1, so all four entries become 1.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting a shift to <code>[1, 1, 2, 3]</code> assumes each read sees the original values, which only holds with separate source storage.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>sequential == [1, 1, 1, 1]</code>.</p>
 <h3 id="5-preserve-a-snapshot">5. Preserve a snapshot<a class="heading-anchor" href="#5-preserve-a-snapshot" aria-label="Link to this section">#</a></h3>
 <p>The copy changes the read/write dependency and therefore the algorithm.</p>
 <p><strong>Expected observation:</strong> The example becomes <code>[1, 1, 2, 3]</code>.</p>
+<p><strong>Why it holds here:</strong> Reading from <code>source = copy(snapshot)</code> keeps the old values available, so the shift gives <code>[1, 1, 2, 3]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Taking a <code>view</code> of the array instead of a copy shares storage and reproduces the recurrence result.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>snapshot == [1, 1, 2, 3]</code>.</p>
 <h3 id="6-choose-a-destination-type">6. Choose a destination type<a class="heading-anchor" href="#6-choose-a-destination-type" aria-label="Link to this section">#</a></h3>
 <p>Allocate a representation that can express the intended result.</p>
-<p><strong>Expected observation:</strong> The incompatible conversion is rejected.</p></article>
+<p><strong>Expected observation:</strong> The incompatible conversion is rejected.</p>
+<p><strong>Why it holds here:</strong> <code>Int[0] .= [0.5]</code> must convert 0.5 into the existing <code>Int</code> element, which is inexact, so <code>InexactError</code> is raised.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting the destination to widen to <code>Float64</code> misunderstands in-place assignment, which never changes the element type of an existing array.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>@test_throws InexactError Int[0] .= [0.5]</code>; allocate <code>zeros(1)</code> when fractional results are expected.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-013: all reference checks passed</code>:</p>
+<p>Broadcasting rules appear one at a time: <code>sin.</code> applies elementwise, a scalar expands across <code>[1, 2]</code>, and <code>.*</code> multiplies matching positions rather than performing a matrix product. <code>reshape</code> turns three values into a one by three row without copying them. The <code>destination .=</code> line writes into existing storage, and the final <code>InexactError</code> shows that an in-place write into <code>Int</code> storage cannot hold 0.5.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> sin<span class="syntax-operator">.</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">pi</span><span class="syntax-operator">/</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">≈</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">.+</span> <span class="syntax-number">3</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> size<span class="syntax-punctuation">(</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">.*</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span>
+    destination <span class="syntax-operator">=</span> zeros<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    destination <span class="syntax-operator">.=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">./</span> <span class="syntax-number">2</span>
+    <span class="syntax-decorator">@test</span> destination <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">InexactError</span> <span class="syntax-keyword">Int</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">.=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

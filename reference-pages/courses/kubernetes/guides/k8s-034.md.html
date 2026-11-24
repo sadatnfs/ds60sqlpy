@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A rollout creates or replaces workload replicas; a traffic change determines which ready backends receive requests. Those operations are related but different. A Deployment can finish creating a candidate while the Service still selects only the stable release. Conversely, broadening a selector can send requests to a candidate before the team has collected the intended application evidence.</p>
 <p>The host fixture has hello-stable and hello-candidate Deployments with distinct release labels. Both use the same preloaded 0.2 image, but /message returns hello or reviewer through a fixed environment value. This is a configuration-release rehearsal. It does not demonstrate a binary image upgrade, and /version remains the legacy fixture version string for both. A real two-image rehearsal requires separately qualified, preloaded image identities.</p>
 <p>A release gate states what must be true before changing traffic and what triggers rollback. For this small fixture, require the expected candidate marker, zero unexpected payloads and zero errors in a declared finite request sample. That sample is evidence about the observed requests, not a proof of all future behavior or an exact traffic-share guarantee.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Canary release:</strong> Sending a small, measured share of traffic to a new version before shifting the rest.</li>
+<li><strong>Weighted routing:</strong> Splitting traffic between versions by explicit weights, which requires a separately qualified traffic implementation rather than replica counts.</li>
+<li><strong>Release label:</strong> A Pod label, such as release=stable, that lets a Service selector choose one version.</li>
+<li><strong>Release gate:</strong> A stated condition, measured from application evidence, that must hold before changing traffic.</li>
+<li><strong>Selector change:</strong> Editing a Service selector to point at a different set of Pods, which switches traffic quickly and must be reversible.</li>
+</ul>
 <h3 id="compare-rolling-and-two-version-selection">Compare rolling and two-version selection<a class="heading-anchor" href="#compare-rolling-and-two-version-selection" aria-label="Link to this section">#</a></h3>
 <p>A rolling Deployment update gradually changes replicas under one controller. Old and new Pods may coexist while readiness controls endpoint eligibility. The update strategy bounds replacement behavior, but it does not by itself evaluate whether the new application gives correct answers.</p>
 <p>The two-Deployment fixture makes traffic selection explicit. Service hello starts with selector app=hello, release=stable. The candidate has matching app but a different release label, so it is excluded. Changing the release selector to candidate is a coarse cutover; a reviewed host operation must preserve Service identity and handle concurrent edits rather than replacing an unrelated object.</p>
@@ -259,10 +267,10 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Verify:</strong> Check that the gate has numeric thresholds and can fail while every replica is Ready.</p>
 <p><strong>Progressive hints:</strong> Use application observations, not only Kubernetes counts.</p>
 <h4 id="exercise-4-reject-the-failing-candidate">Exercise 4: Reject the failing candidate<a class="heading-anchor" href="#exercise-4-reject-the-failing-candidate" aria-label="Link to this section">#</a></h4>
-<p>Evaluate reviewer, reviewer, ERROR, reviewer against the four-response gate.</p>
-<p><strong>Expected result/shape:</strong> Failure with one error; do not proceed to promotion.</p>
-<p><strong>Verify:</strong> Count all four attempts against the gate threshold, including the error.</p>
-<p><strong>Progressive hints:</strong> Count all attempted requests.</p>
+<p>Evaluate a new candidate sample, reviewer, reviewer, reviewer, TIMEOUT, where the fourth request ran past the declared deadline, against the four-response gate.</p>
+<p><strong>Expected result/shape:</strong> Failure: only three valid responses arrived within the deadline; do not proceed to promotion.</p>
+<p><strong>Verify:</strong> Count all four attempts against the gate threshold, including the timed-out one.</p>
+<p><strong>Progressive hints:</strong> A late response counts as an error, not as a pass.</p>
 <h4 id="exercise-5-restore-and-verify-stable-traffic">Exercise 5: Restore and verify stable traffic<a class="heading-anchor" href="#exercise-5-restore-and-verify-stable-traffic" aria-label="Link to this section">#</a></h4>
 <p>Use the conditional host selector repair, then sample the ordinary Service.</p>
 <p><strong>Expected result/shape:</strong> Correct Service identity and four observed hello responses.</p>

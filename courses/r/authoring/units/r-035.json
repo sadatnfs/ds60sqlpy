@@ -38,6 +38,12 @@
       "code": "validate_columns <- function(data) {\n  required <- c(\"id\", \"amount\")\n  if (!all(required %in% names(data))) stop(\"missing required columns\", call. = FALSE)\n  if (!is.character(data$id) || !is.numeric(data$amount)) stop(\"invalid column types\", call. = FALSE)\n  TRUE\n}\nstopifnot(validate_columns(data.frame(id = \"A\", amount = 2)))\nbad <- tryCatch(\n  {\n    validate_columns(data.frame(id = \"A\", value = 2)); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(bad)\nprint(bad)\n",
       "explanation": "The validator does not silently rename an unexpected field or guess that value must mean amount. Structural drift gets an explicit failure.",
       "expected": "The malformed batch is rejected."
+    },
+    {
+      "title": "A parse failure is not a measured zero",
+      "code": "text <- c(\"12.5\", \"\", \"1,5\", \"7\")\nparsed <- suppressWarnings(as.numeric(text))\nzeroed <- ifelse(is.na(parsed), 0, parsed)\nstopifnot(mean(zeroed) == 4.875)\nblank <- trimws(text) == \"\"\nparse_failed <- is.na(parsed) & !blank\nstopifnot(identical(blank, c(FALSE, TRUE, FALSE, FALSE)))\nstopifnot(identical(parse_failed, c(FALSE, FALSE, TRUE, FALSE)))\nadmitted <- !blank & !parse_failed\nstopifnot(sum(admitted) == 2L, mean(parsed[admitted]) == 9.75)\nprint(data.frame(text, parsed, blank, parse_failed))\n",
+      "explanation": "as.numeric turns both the empty string and the decimal comma value 1,5 into NA, so after parsing the two problems look identical. Filling every NA with 0 then averages 12.5, 0, 0 and 7 to 4.875, and both zeros would pass a rule that rejects negative amounts. Comparing the parsed result with the original text separates the cases: a blank field is missing, while a nonblank field that failed to parse is a format error the source must fix. Each gets its own flag, and the admitted mean, 9.75, uses only the two values that were actually read.",
+      "expected": "Four rows; blank is TRUE only for the empty string, parse_failed only for 1,5, and the admitted mean is 9.75 rather than the zero filled 4.875."
     }
   ],
   "exercises": [

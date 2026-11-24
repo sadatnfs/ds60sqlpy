@@ -1,0 +1,1314 @@
+{
+  "k8s-004": [
+    {
+      "term": "RBAC",
+      "definition": "Role-based access control. A Role lists allowed verbs, API groups and resources inside a namespace, and a RoleBinding grants that Role to a subject."
+    },
+    {
+      "term": "Namespace",
+      "definition": "A scope that partitions most API object names and namespaced permissions within one cluster, so the same name can exist separately in two namespaces."
+    },
+    {
+      "term": "Caller identity",
+      "definition": "The authenticated user or ServiceAccount that sends a request. Authorization is decided for that identity, not for whoever typed the command."
+    },
+    {
+      "term": "Owned lease",
+      "definition": "The course's private reservation of one disposable cluster and namespace, which defines the only target a lab command may change."
+    },
+    {
+      "term": "Kubeconfig context",
+      "definition": "A named kubeconfig entry that combines a cluster, a user and a default namespace. Selecting it explicitly keeps a command from reaching whatever target was last active."
+    }
+  ],
+  "k8s-005": [
+    {
+      "term": "Pod",
+      "definition": "The smallest Kubernetes scheduling and lifecycle unit, holding one or more containers that share a network identity and can share volumes."
+    },
+    {
+      "term": "imagePullPolicy",
+      "definition": "The container field that tells the kubelet when to pull an image. With Never, the kubelet uses only a locally present image and reports an error instead of fetching one."
+    },
+    {
+      "term": "Pod phase",
+      "definition": "A broad lifecycle summary such as Pending, Running or Succeeded. Running does not mean every container is ready to serve."
+    },
+    {
+      "term": "Container state",
+      "definition": "The per-container status of Waiting, Running or Terminated, with a reason such as ErrImageNeverPull or an exit code."
+    },
+    {
+      "term": "Container log",
+      "definition": "The output captured from one container process. A container that never started has no application log to read."
+    }
+  ],
+  "k8s-006": [
+    {
+      "term": "Deployment",
+      "definition": "A workload controller that manages ReplicaSets to keep a declared number of identical Pods running and to roll out template changes."
+    },
+    {
+      "term": "ReplicaSet",
+      "definition": "The controller object that keeps a stable count of Pods matching its selector. A Deployment creates a new ReplicaSet for each Pod template revision."
+    },
+    {
+      "term": "Desired state",
+      "definition": "The specification stored in the API, such as replicas and the Pod template, that controllers work to make true."
+    },
+    {
+      "term": "Reconciliation",
+      "definition": "The repeated controller process of comparing desired state with observed state and acting to close the difference."
+    },
+    {
+      "term": "Owner reference",
+      "definition": "A metadata link from a dependent object, such as a Pod, to the controller object that created and manages it."
+    }
+  ],
+  "k8s-007": [
+    {
+      "term": "Label",
+      "definition": "A key and value pair in object metadata, such as app=hello, used to group and select objects."
+    },
+    {
+      "term": "Label selector",
+      "definition": "A query over labels that a Service or controller uses to choose its member Pods. A selector that matches nothing leaves a Service without endpoints."
+    },
+    {
+      "term": "Service",
+      "definition": "A stable name and virtual address that routes traffic to the ready Pods its selector matches."
+    },
+    {
+      "term": "ClusterIP",
+      "definition": "The default Service type, which gives the Service a virtual IP address reachable from inside the cluster."
+    },
+    {
+      "term": "targetPort",
+      "definition": "The Service field naming the container port, by number or name, that receives traffic sent to the Service port."
+    }
+  ],
+  "k8s-009": [
+    {
+      "term": "ConfigMap",
+      "definition": "An API object that stores non-secret configuration as key and value data for Pods to consume."
+    },
+    {
+      "term": "Environment variable reference",
+      "definition": "A container env entry that reads one ConfigMap key. Its value is resolved when the container starts and does not change inside a running process."
+    },
+    {
+      "term": "ConfigMap volume",
+      "definition": "A volume that projects ConfigMap keys as files. The kubelet refreshes mounted files after an unspecified delay, and subPath mounts behave differently."
+    },
+    {
+      "term": "Configuration reload",
+      "definition": "The application's own step of rereading changed configuration. Without it, a new value needs a new container process to take effect."
+    }
+  ],
+  "k8s-010": [
+    {
+      "term": "Resource request",
+      "definition": "The CPU and memory amount the scheduler reserves for a container when choosing a node."
+    },
+    {
+      "term": "Resource limit",
+      "definition": "The maximum CPU or memory a container may use. Exceeding a memory limit can end the container with OOMKilled, while CPU above the limit is throttled."
+    },
+    {
+      "term": "ResourceQuota",
+      "definition": "A namespace object that caps total requests, limits or object counts, so admission rejects a create that would exceed it."
+    },
+    {
+      "term": "Millicore",
+      "definition": "One thousandth of a CPU, written with the m suffix, so 100m means 0.1 CPU."
+    },
+    {
+      "term": "Pending Pod",
+      "definition": "A Pod accepted by the API but not yet running, often because no node has enough unreserved resources for its requests."
+    }
+  ],
+  "k8s-011": [
+    {
+      "term": "Job",
+      "definition": "A workload controller that runs Pods until a specified number of them complete successfully."
+    },
+    {
+      "term": "CronJob",
+      "definition": "A controller that creates Jobs on a cron schedule. Its suspend field pauses future runs without deleting existing Jobs."
+    },
+    {
+      "term": "backoffLimit",
+      "definition": "The Job field that sets how many Pod failures are retried before the Job is marked failed."
+    },
+    {
+      "term": "activeDeadlineSeconds",
+      "definition": "The Job field that bounds total run time. When the deadline passes, the Job stops its Pods and records a failure."
+    },
+    {
+      "term": "Exit code",
+      "definition": "The integer a container process returns when it ends. In this lesson 0 means success and 2 is the allowed failure outcome."
+    }
+  ],
+  "k8s-012": [
+    {
+      "term": "Observation",
+      "definition": "A recorded field value, event or bounded log line from a named owned object. It is evidence, unlike a guess about cause."
+    },
+    {
+      "term": "Hypothesis",
+      "definition": "A candidate explanation for a symptom that a specific observation could support or rule out."
+    },
+    {
+      "term": "Condition",
+      "definition": "A typed status entry such as Ready or Available, with a status, reason and message that report one aspect of an object."
+    },
+    {
+      "term": "Event",
+      "definition": "A short-lived API record of something a component did or saw, such as a scheduling decision or a failed image pull."
+    },
+    {
+      "term": "Incident timeline",
+      "definition": "An ordered record from source submission through API acceptance, scheduling, container start, readiness and client behavior that shows where a failure began."
+    }
+  ],
+  "k8s-013": [
+    {
+      "term": "Rollout",
+      "definition": "The controlled replacement of Pods from an old template revision with Pods from a new one."
+    },
+    {
+      "term": "Revision",
+      "definition": "A numbered version of a Deployment's Pod template, carried by the ReplicaSet that runs it."
+    },
+    {
+      "term": "metadata.generation",
+      "definition": "A counter the API server increments when an object's desired spec changes. Comparing it with status.observedGeneration shows whether the controller has processed the change."
+    },
+    {
+      "term": "Rollback",
+      "definition": "Returning a Deployment to an earlier Pod template, which itself proceeds as a new rollout."
+    },
+    {
+      "term": "Mixed rollout",
+      "definition": "A period when Pods from old and new revisions are ready at the same time, so clients can reach either version."
+    }
+  ],
+  "k8s-014": [
+    {
+      "term": "Stateless service",
+      "definition": "A service whose replicas keep no data that must survive a Pod replacement, so any ready replica can answer any request."
+    },
+    {
+      "term": "Bounded client Job",
+      "definition": "A Job that sends a fixed number of requests to the Service with timeouts and exits with a result, giving an application-level check."
+    },
+    {
+      "term": "False success",
+      "definition": "A result that looks healthy, such as Running Pods and an existing Service, while the application path fails."
+    },
+    {
+      "term": "Ready endpoint set",
+      "definition": "The ready Pod addresses a Service currently routes to. An empty set means the Service exists but no backend receives traffic."
+    },
+    {
+      "term": "UID-scoped cleanup",
+      "definition": "Deleting only the objects whose API-assigned UIDs were recorded at creation, so cleanup cannot remove an object the lesson does not own."
+    }
+  ],
+  "k8s-015": [
+    {
+      "term": "Startup probe",
+      "definition": "A check that holds off liveness and readiness probes until a slow-starting application first succeeds."
+    },
+    {
+      "term": "Readiness probe",
+      "definition": "A check that decides whether a container should receive Service traffic. Failing it removes the Pod from ready endpoints without restarting it."
+    },
+    {
+      "term": "Liveness probe",
+      "definition": "A check whose repeated failure makes the kubelet restart the container. A probe that is too strict causes needless restarts."
+    },
+    {
+      "term": "failureThreshold",
+      "definition": "The number of consecutive probe failures required before the kubelet acts on that probe."
+    },
+    {
+      "term": "Restart count",
+      "definition": "The per-container counter that rises each time the kubelet restarts that container inside the same Pod."
+    }
+  ],
+  "k8s-016": [
+    {
+      "term": "Init container",
+      "definition": "A container that runs to completion before the application containers start. Each init container must succeed before the next one begins."
+    },
+    {
+      "term": "emptyDir",
+      "definition": "A volume created empty for a Pod and shared by its containers. It survives container restarts and is removed with the Pod."
+    },
+    {
+      "term": "Container restart",
+      "definition": "The kubelet starting a new process for a container in the same Pod, which keeps the Pod UID and its emptyDir data."
+    },
+    {
+      "term": "Pod replacement",
+      "definition": "A controller creating a new Pod with a new UID, which starts with a fresh emptyDir."
+    },
+    {
+      "term": "Lifetime marker",
+      "definition": "A file holding the Pod UID that shows whether data survived a container restart or belongs to a replaced Pod."
+    }
+  ],
+  "k8s-017": [
+    {
+      "term": "Security context",
+      "definition": "Pod and container settings that request the process user, privilege escalation, capabilities and filesystem restrictions."
+    },
+    {
+      "term": "Pod Security admission",
+      "definition": "A built-in admission check that enforces the Privileged, Baseline or Restricted Pod Security Standard chosen for a namespace."
+    },
+    {
+      "term": "runAsNonRoot",
+      "definition": "A securityContext field that makes the kubelet refuse to start a container whose process would run as user 0."
+    },
+    {
+      "term": "allowPrivilegeEscalation",
+      "definition": "A securityContext field that, when false, stops a process from gaining more privileges than its parent, for example through setuid."
+    },
+    {
+      "term": "Dropped capabilities",
+      "definition": "Linux capabilities removed from a container process, each taking away one specific privileged kernel operation."
+    }
+  ],
+  "k8s-018": [
+    {
+      "term": "ServiceAccount",
+      "definition": "A namespaced identity for processes in Pods. RBAC bindings grant it permissions just as they do for users."
+    },
+    {
+      "term": "RoleBinding",
+      "definition": "An object that grants a Role's rules to subjects, such as a ServiceAccount, within one namespace."
+    },
+    {
+      "term": "TokenRequest",
+      "definition": "The API that issues a bounded ServiceAccount token for a specified audience and expiration."
+    },
+    {
+      "term": "Authorization",
+      "definition": "The API server's decision whether an authenticated identity may perform a verb on a resource. An authenticated request can still be forbidden."
+    },
+    {
+      "term": "automountServiceAccountToken",
+      "definition": "A field that controls whether a ServiceAccount token is mounted into a Pod. Setting it to false removes an API credential the application does not need."
+    }
+  ],
+  "k8s-019": [
+    {
+      "term": "Secret",
+      "definition": "An API object for sensitive values such as passwords or keys. Anyone allowed to read it through the API sees the value, so access must be narrow."
+    },
+    {
+      "term": "base64 encoding",
+      "definition": "The reversible text encoding used for Secret data. It is not encryption and gives no confidentiality."
+    },
+    {
+      "term": "Encryption at rest",
+      "definition": "Encrypting stored API data in the control plane's storage. It protects against reading that storage directly, not against an authorized API read."
+    },
+    {
+      "term": "Projected Secret file",
+      "definition": "A Secret key mounted as a file in a container. The kubelet can refresh the file later, while an environment variable keeps its starting value."
+    },
+    {
+      "term": "Application reload",
+      "definition": "The application's step of rereading a rotated credential. Without it, the process keeps using the old value until it restarts."
+    }
+  ],
+  "k8s-020": [
+    {
+      "term": "Name resolution",
+      "definition": "Translating a Service name into an address through cluster DNS. An NXDOMAIN answer fails before any connection is attempted."
+    },
+    {
+      "term": "DNS search configuration",
+      "definition": "The Pod's resolver settings that expand a short name such as hello within the Pod's own namespace, so the same short name elsewhere can mean a different object."
+    },
+    {
+      "term": "Service port mapping",
+      "definition": "The link from the Service port that clients call to the targetPort on the container. A wrong mapping resolves but reaches no listener."
+    },
+    {
+      "term": "HTTP status code",
+      "definition": "The server's numeric answer to a request. A 404 proves that some HTTP server answered, so name resolution and the connection already worked."
+    },
+    {
+      "term": "Layered diagnosis",
+      "definition": "Testing name resolution, connection, routing and HTTP response in order, so each result narrows where the request failed."
+    }
+  ],
+  "k8s-021": [
+    {
+      "term": "NetworkPolicy",
+      "definition": "A namespaced object that allows selected traffic to and from Pods. It has an effect only when the network plugin enforces it."
+    },
+    {
+      "term": "CNI plugin",
+      "definition": "The network implementation that wires Pod networking. Whether it enforces NetworkPolicy decides whether a policy object changes any traffic."
+    },
+    {
+      "term": "Default-deny ingress",
+      "definition": "A policy that selects every Pod in a namespace with no ingress rules, so only traffic allowed by another policy can reach them."
+    },
+    {
+      "term": "Additive policy",
+      "definition": "NetworkPolicies combine as a union of allows. No policy can subtract traffic that another policy allows."
+    },
+    {
+      "term": "podSelector",
+      "definition": "The policy field choosing which Pods a policy applies to or which peer Pods a rule allows. An empty podSelector selects every Pod in the namespace."
+    }
+  ],
+  "k8s-022": [
+    {
+      "term": "PersistentVolumeClaim",
+      "definition": "A namespaced request for storage of a given size and access mode, which a Pod mounts by claim name."
+    },
+    {
+      "term": "PersistentVolume",
+      "definition": "A cluster-scoped storage resource that a claim binds to, either created in advance or provisioned dynamically."
+    },
+    {
+      "term": "StorageClass",
+      "definition": "An object naming a provisioner and its parameters, used to create PersistentVolumes dynamically for claims that request it."
+    },
+    {
+      "term": "StatefulSet",
+      "definition": "A workload controller that gives each replica a stable name and its own claim from a volume claim template."
+    },
+    {
+      "term": "Reclaim policy",
+      "definition": "The PersistentVolume setting, Delete or Retain, that decides what happens to the underlying storage after its claim is deleted."
+    }
+  ],
+  "k8s-023": [
+    {
+      "term": "Ingress",
+      "definition": "An API object with host and path rules that an Ingress controller uses to route external HTTP traffic to Services."
+    },
+    {
+      "term": "Gateway API",
+      "definition": "A family of role-oriented routing APIs, including GatewayClass, Gateway and HTTPRoute, that expresses more than Ingress can."
+    },
+    {
+      "term": "Gateway",
+      "definition": "An object that requests listeners, such as a port and protocol, from the implementation named by its GatewayClass."
+    },
+    {
+      "term": "HTTPRoute",
+      "definition": "A Gateway API object that attaches to a Gateway and matches HTTP requests by host, path or header to backend Services."
+    },
+    {
+      "term": "TLS verification",
+      "definition": "Checking the presented certificate against a trusted CA and the requested hostname. A TCP connection or HTTP response alone does not establish the TLS contract."
+    }
+  ],
+  "k8s-024": [
+    {
+      "term": "Kustomize",
+      "definition": "A template-free tool built into kubectl that composes a base of manifests with patches."
+    },
+    {
+      "term": "Overlay",
+      "definition": "A Kustomize directory that reuses a base and applies environment-specific patches, such as a different replica count."
+    },
+    {
+      "term": "Server-side apply",
+      "definition": "An apply mode in which the API server merges the submitted fields and records which manager owns each one."
+    },
+    {
+      "term": "Field manager",
+      "definition": "The name recorded for the client that set a field under server-side apply."
+    },
+    {
+      "term": "Apply conflict",
+      "definition": "An error raised when a manager tries to change a field owned by another manager. It is resolved by deciding which manager should own the field."
+    }
+  ],
+  "k8s-025": [
+    {
+      "term": "Helm chart",
+      "definition": "A package of templates, default values and metadata that Helm renders into Kubernetes manifests."
+    },
+    {
+      "term": "Values schema",
+      "definition": "The values.schema.json file in a chart that constrains the accepted input shape before templates render."
+    },
+    {
+      "term": "Template rendering",
+      "definition": "Combining chart templates with values to produce manifests. Reviewing the rendered output shows exactly what would be applied."
+    },
+    {
+      "term": "Helm hook",
+      "definition": "A chart resource annotated to run at a release lifecycle point, such as before install or after upgrade."
+    },
+    {
+      "term": "Release",
+      "definition": "One installed instance of a chart in a namespace, with its own release metadata and revision history."
+    }
+  ],
+  "k8s-026": [
+    {
+      "term": "DaemonSet",
+      "definition": "A workload controller that runs one copy of a Pod on each eligible node, such as a log or network agent."
+    },
+    {
+      "term": "nodeSelector",
+      "definition": "A Pod field listing node labels that a node must carry for the Pod to be scheduled there."
+    },
+    {
+      "term": "Node affinity",
+      "definition": "Scheduling rules that require or prefer nodes by label expressions, more expressive than nodeSelector."
+    },
+    {
+      "term": "Taint",
+      "definition": "A node property that repels Pods that do not tolerate it, for example to reserve a node for special workloads."
+    },
+    {
+      "term": "Toleration",
+      "definition": "A Pod field that allows, but does not require, scheduling onto a node with a matching taint."
+    }
+  ],
+  "k8s-027": [
+    {
+      "term": "Service-level indicator",
+      "definition": "A measured ratio of user-relevant behavior, such as successful eligible requests divided by all eligible requests."
+    },
+    {
+      "term": "Service-level objective",
+      "definition": "A target for a service-level indicator over a defined window, such as 99 percent success over one hour."
+    },
+    {
+      "term": "Metric",
+      "definition": "A numeric measurement collected over time, such as a request counter or a latency histogram."
+    },
+    {
+      "term": "Nearest-rank quantile",
+      "definition": "A quantile found by sorting the values and choosing the one-based position ceil(qn). The convention must be stated with the result."
+    },
+    {
+      "term": "Eligible request",
+      "definition": "A request that the indicator's definition counts, so including or excluding a class of requests changes the result."
+    }
+  ],
+  "k8s-028": [
+    {
+      "term": "Persistent marker",
+      "definition": "The lesson's file-based synthetic datastore on a claim, used to prove that data survives a rollout or recovery."
+    },
+    {
+      "term": "Acceptance packet",
+      "definition": "The capstone's collection of independent observations, including a failed-change recovery, that together show the system meets its requirements."
+    },
+    {
+      "term": "Failed-change rehearsal",
+      "definition": "Deliberately shipping one bounded bad change, such as a wrong readiness path, and recovering from it under observation."
+    },
+    {
+      "term": "Reinitialization",
+      "definition": "Rewriting data from scratch after a failure. It hides data loss, so it cannot count as recovery."
+    },
+    {
+      "term": "Volume claim template",
+      "definition": "A StatefulSet field that creates one PersistentVolumeClaim per replica, which is kept when the Pod is replaced."
+    }
+  ],
+  "k8s-029": [
+    {
+      "term": "CustomResourceDefinition",
+      "definition": "A cluster-scoped registration that adds a new resource type to the API, with its group, names, versions and schema."
+    },
+    {
+      "term": "Custom resource",
+      "definition": "One instance of a type defined by a CustomResourceDefinition, stored and served by the API server like built-in objects."
+    },
+    {
+      "term": "Structural schema",
+      "definition": "An openAPIV3Schema that declares a type for every field, which the API server uses to validate and prune custom resources."
+    },
+    {
+      "term": "Resource scope",
+      "definition": "Whether a resource type is Namespaced or Cluster, which decides where its instances live."
+    },
+    {
+      "term": "Unknown-field pruning",
+      "definition": "The API server dropping fields that the structural schema does not declare, unless the schema says to preserve them."
+    }
+  ],
+  "k8s-030": [
+    {
+      "term": "Operator",
+      "definition": "A controller with application knowledge that manages that application through custom resources."
+    },
+    {
+      "term": "Reconcile loop",
+      "definition": "The controller cycle that reads current state, compares it with the custom resource's desired state and takes the next corrective action."
+    },
+    {
+      "term": "Idempotence",
+      "definition": "The property that repeating an operation does not accumulate unwanted effects, such as setting replicas to 2 instead of incrementing them."
+    },
+    {
+      "term": "Finalizer",
+      "definition": "A deletion handshake. A controller removes only its own finalizer after its cleanup is complete, and the object is deleted when none remain."
+    },
+    {
+      "term": "Status condition",
+      "definition": "A typed status entry, read together with observedGeneration, that reports what the controller has achieved for the current spec."
+    }
+  ],
+  "k8s-031": [
+    {
+      "term": "Admission control",
+      "definition": "API server checks that run after authentication and authorization and can reject a request before it is persisted."
+    },
+    {
+      "term": "ValidatingAdmissionPolicy",
+      "definition": "A built-in policy object that evaluates CEL expressions against a request to allow or deny it, without a webhook."
+    },
+    {
+      "term": "Policy binding",
+      "definition": "The separate object that connects a policy to the resources it governs, for example through a namespaceSelector, and sets the action such as Deny."
+    },
+    {
+      "term": "CEL",
+      "definition": "Common Expression Language, a constrained, side-effect-free expression language used to write admission rules."
+    },
+    {
+      "term": "Controlled denial",
+      "definition": "A deliberately noncompliant request sent to prove that the policy rejects it for the stated reason."
+    }
+  ],
+  "k8s-032": [
+    {
+      "term": "PodDisruptionBudget",
+      "definition": "An object that limits how many selected Pods may be voluntarily disrupted at once, through minAvailable or maxUnavailable."
+    },
+    {
+      "term": "Voluntary disruption",
+      "definition": "A deliberate Pod removal, such as a node drain, that respects PodDisruptionBudgets, unlike a node failure."
+    },
+    {
+      "term": "Eviction API",
+      "definition": "The API path that removes a Pod only if its PodDisruptionBudget allows it and refuses otherwise."
+    },
+    {
+      "term": "Node drain",
+      "definition": "Cordoning a node and evicting its Pods through the Eviction API before maintenance."
+    },
+    {
+      "term": "disruptionsAllowed",
+      "definition": "The PodDisruptionBudget status field that reports how many more voluntary disruptions are allowed right now."
+    }
+  ],
+  "k8s-033": [
+    {
+      "term": "HorizontalPodAutoscaler",
+      "definition": "A controller that changes a workload's desired replica count from observed metrics and a declared target."
+    },
+    {
+      "term": "CPU utilization",
+      "definition": "Observed CPU use as a percentage of the Pods' CPU requests, which the autoscaler compares with its target."
+    },
+    {
+      "term": "Desired replica count",
+      "definition": "The replica number the autoscaler computes from current replicas scaled by the ratio of observed metric to target, before bounds and stabilization apply."
+    },
+    {
+      "term": "Stabilization window",
+      "definition": "A period over which the autoscaler considers past recommendations, which prevents rapid scale-down flapping."
+    },
+    {
+      "term": "Metrics API path",
+      "definition": "The aggregated API from which the autoscaler reads resource metrics. When it is unavailable, the autoscaler cannot compute a recommendation."
+    }
+  ],
+  "k8s-034": [
+    {
+      "term": "Canary release",
+      "definition": "Sending a small, measured share of traffic to a new version before shifting the rest."
+    },
+    {
+      "term": "Weighted routing",
+      "definition": "Splitting traffic between versions by explicit weights, which requires a separately qualified traffic implementation rather than replica counts."
+    },
+    {
+      "term": "Release label",
+      "definition": "A Pod label, such as release=stable, that lets a Service selector choose one version."
+    },
+    {
+      "term": "Release gate",
+      "definition": "A stated condition, measured from application evidence, that must hold before changing traffic."
+    },
+    {
+      "term": "Selector change",
+      "definition": "Editing a Service selector to point at a different set of Pods, which switches traffic quickly and must be reversible."
+    }
+  ],
+  "k8s-035": [
+    {
+      "term": "resourceVersion",
+      "definition": "An opaque string identifying the stored version of an object, used for concurrency checks and for resuming watches."
+    },
+    {
+      "term": "Optimistic concurrency",
+      "definition": "Updating with the resourceVersion you read, so the server rejects the write if someone changed the object since."
+    },
+    {
+      "term": "409 Conflict",
+      "definition": "The HTTP status returned when an update carries a stale resourceVersion. The client should reread and reapply its intent."
+    },
+    {
+      "term": "Watch",
+      "definition": "A long-lived API request that streams changes after a given resourceVersion."
+    },
+    {
+      "term": "Relist",
+      "definition": "Fetching a fresh full list after a watch reports 410 Gone, because the requested resourceVersion is too old."
+    }
+  ],
+  "k8s-036": [
+    {
+      "term": "etcd",
+      "definition": "The key and value store that holds Kubernetes API state for the control plane."
+    },
+    {
+      "term": "etcd snapshot",
+      "definition": "A point-in-time copy of stored API state. It can restore object specifications but not the bytes inside application volumes."
+    },
+    {
+      "term": "Application data backup",
+      "definition": "A separate copy of the data an application stores, such as volume contents, taken with its own consistency method."
+    },
+    {
+      "term": "Restore boundary",
+      "definition": "The stated limit of what a backup can recover and to which point in time."
+    },
+    {
+      "term": "Isolated restore target",
+      "definition": "A separate environment where a restore is tested without touching the live system."
+    }
+  ],
+  "k8s-037": [
+    {
+      "term": "Version skew policy",
+      "definition": "The supported version differences between control plane components, kubelets and kubectl, which constrain upgrade order."
+    },
+    {
+      "term": "API deprecation",
+      "definition": "The announced removal of an API version, so manifests must move to its replacement before an upgrade removes it."
+    },
+    {
+      "term": "Replacement-cluster rehearsal",
+      "definition": "Testing an upgrade by building a new cluster at the target version and moving workloads there, instead of changing the live one."
+    },
+    {
+      "term": "Compatibility matrix",
+      "definition": "A table of components and versions known to work together, checked before choosing an upgrade path."
+    },
+    {
+      "term": "Reversible routing",
+      "definition": "Shifting traffic to the new cluster in a way that can be switched back if checks fail."
+    }
+  ],
+  "k8s-038": [
+    {
+      "term": "Digest",
+      "definition": "A content hash such as sha256 that identifies one exact image, unlike a tag, which can move."
+    },
+    {
+      "term": "Signature",
+      "definition": "A claim about specific bytes that can be verified under a public key. It does not by itself say why that key should be trusted."
+    },
+    {
+      "term": "Attestation",
+      "definition": "A signed statement about an artifact, such as how it was built or what a scan found."
+    },
+    {
+      "term": "Provenance",
+      "definition": "A record of where and how an artifact was built, including its source and build steps."
+    },
+    {
+      "term": "Trusted public key",
+      "definition": "A key the verifier has independently decided is authorized to speak for the publisher. A valid signature under any other key proves nothing."
+    }
+  ],
+  "k8s-039": [
+    {
+      "term": "Multitenancy",
+      "definition": "Sharing one cluster among several teams or customers with boundaries between them."
+    },
+    {
+      "term": "Threat model",
+      "definition": "A written analysis of assets, attackers and paths that decides which isolation controls are needed."
+    },
+    {
+      "term": "Isolation boundary",
+      "definition": "A control that separates tenants, such as RBAC, network policy, quotas or separate clusters. A namespace alone does not isolate arbitrary code."
+    },
+    {
+      "term": "Defense in depth",
+      "definition": "Layering several independent controls so that one failure does not expose a tenant."
+    },
+    {
+      "term": "Negative test",
+      "definition": "A check that a forbidden action fails, such as a cross-tenant request being denied, which shows that a boundary works."
+    }
+  ],
+  "k8s-040": [
+    {
+      "term": "Fault injection",
+      "definition": "Introducing one known, bounded fault, such as a changed Service selector, to practice detection and repair."
+    },
+    {
+      "term": "Baseline",
+      "definition": "The recorded healthy state before a change, used to tell whether a later observation is abnormal."
+    },
+    {
+      "term": "Leading hypothesis",
+      "definition": "The candidate explanation that current evidence best supports, tested next with an observation that distinguishes it from the alternatives."
+    },
+    {
+      "term": "Zero endpoint count",
+      "definition": "A Service whose selected endpoint count falls to zero while Pods stay Ready, which points at the selector rather than the application."
+    },
+    {
+      "term": "Post-repair verification",
+      "definition": "An application-level check after a fix that shows the service works again, not just that a status turned green."
+    }
+  ],
+  "k8s-041": [
+    {
+      "term": "Recovery Time Objective",
+      "definition": "The acceptable duration for restoring the defined service after a failure, abbreviated RTO."
+    },
+    {
+      "term": "Recovery Point Objective",
+      "definition": "The acceptable data-loss window, compared between the last durable data point before failure and the restored one, abbreviated RPO."
+    },
+    {
+      "term": "Recovery measurement",
+      "definition": "An observed recovery duration or data loss, compared with the objective it is meant to meet."
+    },
+    {
+      "term": "Runbook",
+      "definition": "A reviewed, step-by-step recovery procedure with one consistent definition of when recovery starts and finishes."
+    },
+    {
+      "term": "Drill milestone",
+      "definition": "An intermediate timestamp, such as a Ready Pod, that marks progress but is not the finish until the service and data are verified."
+    }
+  ],
+  "k8s-042": [
+    {
+      "term": "Platform release",
+      "definition": "Shipping a versioned platform change, such as a custom resource and its controller, with evidence that each layer works."
+    },
+    {
+      "term": "Release packet",
+      "definition": "The plan prepared before execution, with desired manifests, rendered artifact hashes, image identity, capability receipts and ownership."
+    },
+    {
+      "term": "Capability receipt",
+      "definition": "A record proving that a host capability, such as a qualified controller, exists before a live gate depends on it."
+    },
+    {
+      "term": "Owned child resource",
+      "definition": "An object that a controller creates with an owner reference to its parent custom resource."
+    },
+    {
+      "term": "Incident review",
+      "definition": "A blameless written analysis of a bounded incident that covers its timeline, cause, repair and follow-up."
+    }
+  ],
+  "k8s-043": [
+    {
+      "term": "Pod IP",
+      "definition": "The address assigned to one Pod's network namespace. It is shared by the Pod's containers and changes when the Pod is replaced."
+    },
+    {
+      "term": "Node IP",
+      "definition": "The address of a node's own network interface, distinct from the Pod addresses hosted on that node."
+    },
+    {
+      "term": "ClusterIP",
+      "definition": "A Service's virtual destination address. It is implemented by forwarding rules that pick an eligible backend, not by one interface."
+    },
+    {
+      "term": "Network namespace",
+      "definition": "A Linux kernel view of interfaces, addresses and routes. Each Pod has one, so a test result depends on which namespace the caller used."
+    },
+    {
+      "term": "Documentation address range",
+      "definition": "Address blocks such as 192.0.2.0/24 reserved for examples, so a sample address is never a real target."
+    }
+  ],
+  "k8s-044": [
+    {
+      "term": "CIDR notation",
+      "definition": "Writing an address block as a prefix and length, such as 10.0.0.0/16, where the length counts the fixed leading bits."
+    },
+    {
+      "term": "Subnet",
+      "definition": "A contiguous address block within a larger range, such as the Pod range assigned to one node."
+    },
+    {
+      "term": "Most specific route",
+      "definition": "When several routes match a destination, the one with the most specific matching prefix is chosen."
+    },
+    {
+      "term": "Address overlap",
+      "definition": "Two ranges that share addresses, which makes it ambiguous where a packet should go."
+    },
+    {
+      "term": "Service CIDR",
+      "definition": "The address range from which ClusterIPs are allocated, which must not overlap Pod or node ranges."
+    }
+  ],
+  "k8s-045": [
+    {
+      "term": "Shared network namespace",
+      "definition": "All containers in a Pod share one network namespace, so they share an IP address and one port space."
+    },
+    {
+      "term": "Loopback address",
+      "definition": "127.0.0.1 or ::1, which reaches only processes in the same network namespace, such as another container in the same Pod."
+    },
+    {
+      "term": "Sidecar container",
+      "definition": "A helper container, such as a proxy, that runs in the same Pod as the application and shares its network namespace."
+    },
+    {
+      "term": "Port conflict",
+      "definition": "Two containers in one Pod trying to bind the same address and port, so the second bind fails."
+    },
+    {
+      "term": "Non-loopback listener",
+      "definition": "A process listening on an address other than loopback, often 0.0.0.0 for IPv4, so traffic from outside the Pod can reach it."
+    }
+  ],
+  "k8s-046": [
+    {
+      "term": "Container Network Interface",
+      "definition": "The plugin specification the container runtime calls to attach a Pod's network namespace to the network and assign its address."
+    },
+    {
+      "term": "Overlay network",
+      "definition": "A virtual network that carries Pod traffic between nodes inside outer packets addressed from node to node."
+    },
+    {
+      "term": "Encapsulation",
+      "definition": "Wrapping a Pod packet inside an outer packet with node addresses, which adds header bytes to every packet."
+    },
+    {
+      "term": "Maximum transmission unit",
+      "definition": "The largest packet a link carries without fragmentation. Encapsulation reduces the space left for the inner packet."
+    },
+    {
+      "term": "Path MTU discovery",
+      "definition": "How a sender learns the smallest MTU on a path. If its error messages are blocked, large packets fail while small ones still work."
+    }
+  ],
+  "k8s-047": [
+    {
+      "term": "Service selector",
+      "definition": "The label query that decides which Pods a Service sends traffic to."
+    },
+    {
+      "term": "Service port",
+      "definition": "The port that clients connect to on the Service address."
+    },
+    {
+      "term": "targetPort",
+      "definition": "The Pod port that receives forwarded Service traffic. It can be a named port, so backends may use different numbers."
+    },
+    {
+      "term": "Layer 4 routing",
+      "definition": "Forwarding by IP address and TCP or UDP port only, without reading HTTP content."
+    },
+    {
+      "term": "Long-lived connection",
+      "definition": "A connection that stays open across many requests. Service balancing happens when it opens, so a new Pod may receive little traffic."
+    }
+  ],
+  "k8s-048": [
+    {
+      "term": "Fully qualified domain name",
+      "definition": "A complete name such as api.study.svc.cluster.local that includes the namespace and cluster domain, so no search expansion is needed."
+    },
+    {
+      "term": "Search domain",
+      "definition": "A suffix from the Pod's resolver settings that is appended to a short name, such as the Pod's own namespace domain."
+    },
+    {
+      "term": "Cluster domain",
+      "definition": "The configurable DNS suffix for the cluster, typically cluster.local, under which Service names are published."
+    },
+    {
+      "term": "DNS cache",
+      "definition": "Stored answers kept until their TTL expires, so a client can keep using an old address after a record changes."
+    },
+    {
+      "term": "Headless Service",
+      "definition": "A Service with clusterIP None whose DNS name returns the individual Pod addresses instead of one virtual IP."
+    }
+  ],
+  "k8s-049": [
+    {
+      "term": "EndpointSlice",
+      "definition": "An API object listing a subset of a Service's backend addresses, ports and conditions, which forwarding components read."
+    },
+    {
+      "term": "Endpoint ready condition",
+      "definition": "Marks an endpoint that should receive new traffic, normally matching the Pod's readiness."
+    },
+    {
+      "term": "Endpoint serving condition",
+      "definition": "Reports whether a backend is still able to serve, even while terminating, so an implementation can fall back to it."
+    },
+    {
+      "term": "Endpoint terminating condition",
+      "definition": "Marks an endpoint whose Pod is shutting down."
+    },
+    {
+      "term": "Endpoint targetRef",
+      "definition": "A reference from an endpoint to the Pod that backs it, used to trace an address to an object."
+    }
+  ],
+  "k8s-050": [
+    {
+      "term": "kube-proxy",
+      "definition": "The node component that programs Service forwarding rules from Services and EndpointSlices."
+    },
+    {
+      "term": "iptables mode",
+      "definition": "A kube-proxy mode that writes Service forwarding rules as Linux iptables chains."
+    },
+    {
+      "term": "nftables mode",
+      "definition": "A kube-proxy mode that programs Service forwarding rules through the Linux nftables framework."
+    },
+    {
+      "term": "eBPF data plane",
+      "definition": "A forwarding implementation, often part of the network plugin, that handles Services with kernel eBPF programs instead of kube-proxy rules."
+    },
+    {
+      "term": "DNAT",
+      "definition": "Destination network address translation, which rewrites a packet's destination from the Service address to a chosen backend."
+    }
+  ],
+  "k8s-051": [
+    {
+      "term": "NodePort Service",
+      "definition": "A Service type that opens the same port on every node and forwards it to the Service's backends."
+    },
+    {
+      "term": "NodePort range",
+      "definition": "The range from which node ports are allocated, 30000 through 32767 by default."
+    },
+    {
+      "term": "Node address",
+      "definition": "The node IP a client must reach to use a NodePort, which may be private and unreachable from outside."
+    },
+    {
+      "term": "External reachability",
+      "definition": "Whether a client outside the cluster can actually route to a node address and port through every firewall on the path."
+    }
+  ],
+  "k8s-052": [
+    {
+      "term": "LoadBalancer Service",
+      "definition": "A Service type that asks a cloud integration for an external load balancer in front of the Service."
+    },
+    {
+      "term": "Cloud controller",
+      "definition": "The component that talks to the provider to create load balancers and writes their address to status.loadBalancer."
+    },
+    {
+      "term": "Load balancer health check",
+      "definition": "The provider's probe of nodes or backends that decides where external traffic is sent."
+    },
+    {
+      "term": "Pending external address",
+      "definition": "A LoadBalancer Service with no address in status.loadBalancer yet, often because no controller can provision one."
+    }
+  ],
+  "k8s-053": [
+    {
+      "term": "Ingress controller",
+      "definition": "The proxy implementation that watches Ingress objects and actually routes traffic. Without one, Ingress rules do nothing."
+    },
+    {
+      "term": "Host rule",
+      "definition": "An Ingress rule that matches requests by HTTP host name."
+    },
+    {
+      "term": "pathType",
+      "definition": "The Ingress field that selects path matching: Exact for one path, or Prefix for matching path elements."
+    },
+    {
+      "term": "ingressClassName",
+      "definition": "The Ingress field naming which controller should handle the Ingress."
+    }
+  ],
+  "k8s-054": [
+    {
+      "term": "GatewayClass",
+      "definition": "A cluster-scoped object naming the controller that implements Gateways of that class."
+    },
+    {
+      "term": "Listener",
+      "definition": "A Gateway entry for one port, protocol and optional host name that routes can attach to."
+    },
+    {
+      "term": "ReferenceGrant",
+      "definition": "An object in a target namespace that allows routes in another namespace to reference its Services or Secrets."
+    },
+    {
+      "term": "Route status conditions",
+      "definition": "Per-parent status such as Accepted and ResolvedRefs that reports whether a route attached and whether its backends were found."
+    }
+  ],
+  "k8s-055": [
+    {
+      "term": "Server certificate",
+      "definition": "The certificate a server presents to prove its name, which the client checks against its trusted roots and the requested host."
+    },
+    {
+      "term": "Certificate chain",
+      "definition": "The server certificate plus intermediate certificates that link it to a root the client trusts."
+    },
+    {
+      "term": "SNI",
+      "definition": "Server Name Indication, the TLS field that carries the requested host name so a proxy can choose the right certificate."
+    },
+    {
+      "term": "Upstream hop",
+      "definition": "The connection from a proxy to its backend, which needs its own TLS and trust settings separate from the client hop."
+    }
+  ],
+  "k8s-056": [
+    {
+      "term": "SNAT",
+      "definition": "Source network address translation, which changes a packet's apparent sender, so a backend may see a node address instead of the client."
+    },
+    {
+      "term": "Connection tracking",
+      "definition": "Kernel state that remembers each translated flow, so replies are translated back correctly."
+    },
+    {
+      "term": "externalTrafficPolicy Local",
+      "definition": "A Service setting that sends external traffic only to backends on the receiving node, which can preserve the client source address because no second node hop applies SNAT."
+    },
+    {
+      "term": "Forwarding header",
+      "definition": "An HTTP header that a proxy adds to carry the original client address. It is trustworthy only when a trusted proxy sets it."
+    }
+  ],
+  "k8s-057": [
+    {
+      "term": "Headless Service DNS",
+      "definition": "DNS records for a headless Service that return Pod addresses and, with a StatefulSet, per-Pod names."
+    },
+    {
+      "term": "Stable network identity",
+      "definition": "A StatefulSet Pod's name and DNS record, which persist when the Pod is replaced even though its IP may change."
+    },
+    {
+      "term": "Governing Service",
+      "definition": "The headless Service named in a StatefulSet's serviceName field, which publishes its per-Pod DNS records."
+    },
+    {
+      "term": "publishNotReadyAddresses",
+      "definition": "A Service field that publishes DNS records for Pods before they are ready, for peers that must find each other during startup."
+    }
+  ],
+  "k8s-058": [
+    {
+      "term": "namespaceSelector",
+      "definition": "A NetworkPolicy peer field that selects source or destination namespaces by their labels."
+    },
+    {
+      "term": "Peer composition",
+      "definition": "How selectors combine: a namespaceSelector and podSelector in the same peer must both match, while separate peers mean either may match."
+    },
+    {
+      "term": "Policy isolation",
+      "definition": "A Pod becomes isolated in a direction once any policy selects it for that direction, after which only allowed traffic passes."
+    },
+    {
+      "term": "Additive allow rules",
+      "definition": "Policies that select the same Pod combine their allows, so one policy cannot deny what another permits."
+    }
+  ],
+  "k8s-059": [
+    {
+      "term": "Egress policy",
+      "definition": "A NetworkPolicy rule set that limits outbound connections from the selected Pods."
+    },
+    {
+      "term": "DNS dependency",
+      "definition": "Pods still need to reach cluster DNS over UDP and TCP, so a strict egress policy must allow it explicitly."
+    },
+    {
+      "term": "ipBlock",
+      "definition": "A NetworkPolicy peer that allows an address range in CIDR form, typically for destinations outside the cluster."
+    },
+    {
+      "term": "Hostname allowlist",
+      "definition": "Permitting egress by DNS name. The standard NetworkPolicy API cannot express it, although some implementations add it."
+    }
+  ],
+  "k8s-060": [
+    {
+      "term": "Dual stack",
+      "definition": "Running IPv4 and IPv6 together, so Pods and Services can have an address in each family."
+    },
+    {
+      "term": "ipFamilyPolicy",
+      "definition": "The Service field choosing SingleStack, PreferDualStack or RequireDualStack."
+    },
+    {
+      "term": "ipFamilies order",
+      "definition": "The Service field listing address families. Its first entry is the primary family."
+    },
+    {
+      "term": "AAAA record",
+      "definition": "A DNS record that maps a name to an IPv6 address, as an A record does for IPv4."
+    },
+    {
+      "term": "Bracketed IPv6 literal",
+      "definition": "An IPv6 address written in square brackets, such as `[2001:db8::10]:8080`, so its colons are not read as a port separator."
+    }
+  ],
+  "k8s-061": [
+    {
+      "term": "Topology label",
+      "definition": "A well-known node label, such as topology.kubernetes.io/zone, that names the failure domain a node belongs to."
+    },
+    {
+      "term": "trafficDistribution",
+      "definition": "A Service field that expresses a routing preference such as PreferSameZone or PreferSameNode. PreferClose is a deprecated alias."
+    },
+    {
+      "term": "Locality-aware routing",
+      "definition": "Preferring backends near the client to reduce latency and cross-zone cost, with fallback when no nearby backend is ready."
+    },
+    {
+      "term": "Failure domain",
+      "definition": "A set of infrastructure, such as a zone, that can fail together, so replicas should be spread across several."
+    }
+  ],
+  "k8s-062": [
+    {
+      "term": "Restart storm",
+      "definition": "Many restarts at once, often from a too strict probe or a shared dependency failure, which adds load and slows recovery."
+    },
+    {
+      "term": "Graceful termination",
+      "definition": "A shutdown in which a Pod stops receiving new traffic, finishes in-flight work and exits before it is forcibly killed."
+    },
+    {
+      "term": "Connection draining",
+      "definition": "Letting existing connections finish while no new ones arrive, so in-flight requests are not cut off."
+    },
+    {
+      "term": "Termination grace period",
+      "definition": "The time between the termination signal and forced termination. Shutdown work must fit inside it."
+    }
+  ],
+  "k8s-063": [
+    {
+      "term": "Log",
+      "definition": "A timestamped record of one discrete event from a process."
+    },
+    {
+      "term": "Trace",
+      "definition": "The record of one request as it crosses services, made of linked spans."
+    },
+    {
+      "term": "Span",
+      "definition": "One timed operation within a trace, with a link to its parent and descriptive attributes."
+    },
+    {
+      "term": "Trace ID",
+      "definition": "The identifier shared by every span of one request, which lets logs and spans be joined."
+    },
+    {
+      "term": "High-cardinality label",
+      "definition": "A metric label with many distinct values, such as a request ID, that multiplies time series and cost."
+    }
+  ],
+  "k8s-064": [
+    {
+      "term": "Request ladder",
+      "definition": "An ordered set of checks for name resolution, route reachability, transport connection, TLS identity, proxy routing and application semantics."
+    },
+    {
+      "term": "Controlled comparison",
+      "definition": "Changing one variable between two otherwise identical requests, so a difference in outcome points to that variable."
+    },
+    {
+      "term": "First failing layer",
+      "definition": "The first rung of the request ladder where actual behavior differs from the model, which is where diagnosis should focus."
+    },
+    {
+      "term": "Layer-scoped evidence",
+      "definition": "A successful test proves only its own layer, so it cannot be promoted into a claim about every later layer."
+    }
+  ],
+  "k8s-065": [
+    {
+      "term": "Service mesh",
+      "definition": "An infrastructure layer, often sidecar proxies, that adds traffic management, identity or observability around service communication."
+    },
+    {
+      "term": "Mutual TLS",
+      "definition": "TLS in which both ends present certificates and authenticate each other under an identity system."
+    },
+    {
+      "term": "Workload identity",
+      "definition": "A cryptographic identity for a workload that policies can authorize, separate from its changing IP address."
+    },
+    {
+      "term": "Multi-cluster",
+      "definition": "Running services across several clusters, which adds discovery, routing, identity and failure-domain boundaries such as different trust roots."
+    },
+    {
+      "term": "Retry amplification",
+      "definition": "Retries at several layers multiplying load during a failure, which can turn a partial outage into a full one."
+    }
+  ],
+  "k8s-066": [
+    {
+      "term": "Design packet",
+      "definition": "The capstone's written design, with a diagram, manifests, ownership ledger, checks and limitations that align."
+    },
+    {
+      "term": "Resource ledger",
+      "definition": "A reviewed list of every object to create, its owner and how it is cleaned up."
+    },
+    {
+      "term": "Acceptance matrix",
+      "definition": "A table of checks across source validation, admission, controller conditions, endpoints, requests, policy flows, rollout and cleanup."
+    },
+    {
+      "term": "Controlled fault",
+      "definition": "Exactly one field changed in a copied source, used to show that the checks detect it and that recovery works."
+    },
+    {
+      "term": "Cleanup ownership",
+      "definition": "Deleting only the resources recorded as owned by the exercise, so shared objects survive."
+    }
+  ]
+}

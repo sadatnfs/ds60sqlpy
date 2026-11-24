@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-033`, `apache-006`.
 
+## Key terms
+
+- **Deletion retention:** The policy that removes old log segments once they exceed a configured age or size.
+- **Log compaction:** Background cleaning that retains at least the latest value for each key. It is asynchronous, so a reader can still see several versions of one key.
+- **Tombstone:** A record with a key and a null value that marks the key as deleted under compaction. An empty string is not a tombstone.
+- **Schema registry:** A separate service that stores payload schemas and checks compatibility. Kafka itself transports bytes and does not enforce payload types.
+- **Reader contract:** The validation a consuming application applies to payloads. The workshop uses a small local validator, not a registry or broker enforcement.
+
 ## Retention policies decide which history remains available
 
 Deletion retention removes old log segments according to configured size or time

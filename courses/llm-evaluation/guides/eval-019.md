@@ -8,7 +8,7 @@ Derive an exact finite-policy optimum and show why improving a proxy reward can 
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-019`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-019` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for kl-regularized policies and reward exploitation in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about KL regularization and reference policy: Adding a reward constant or rescaling reward together with beta leaves the optimal policy unchanged, the gradient sums to approximately 0, large rewards still normalize to finite probabilities, missing support is rejected, and proxy reward rises while independent utility falls. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## A policy is a conditional distribution over actions
 
@@ -29,6 +29,13 @@ p_i^*=\frac{q_i\exp(r_i/\beta)}{\sum_j q_j\exp(r_j/\beta)}.
 \]
 
 The implementation subtracts the maximum log weight before exponentiation. This leaves the normalized probabilities unchanged while avoiding overflow. The reference remains fixed during this calculation; it is different from the old rollout policy used later for PPO ratios.
+
+## Key terms
+
+- **KL regularization:** A penalty beta times KL(p, q) that keeps a policy close to a fixed reference distribution q.
+- **Exponential tilt:** The optimum p_i proportional to q_i exp(r_i/beta) of the KL-regularized objective.
+- **Support condition:** The requirement that the policy put no probability where the reference has zero, or the KL becomes infinite.
+- **Reward hacking:** Policy behavior that exploits flaws in a learned reward instead of improving the intended outcome.
 
 ## Worked case A: inspect the exact optimum
 
@@ -246,7 +253,7 @@ Optimize the authored proxy from case B.
 
 ## Interactive figure variant
 
-Select **Interactive Plotly** in the lesson variant control. Its complete program uses the same authored inputs to draw the corresponding risk, calibration or policy curve. The captured figure retains a description and exact data table, and its JSON can be downloaded. Hovering a point does not create new statistical evidence. The default numerical reference remains separately saved.
+The KL regularization and reference policy curve for kl-regularized policies and reward exploitation is drawn from the same authored inputs when you pick **Interactive Plotly** in the variant control. Hover values add nothing beyond the *Add a reward constant* numbers; the saved figure keeps a description, its exact data table and downloadable JSON, beside the separately saved numerical reference.
 
 ## Ask an AI tutor about this lesson
 

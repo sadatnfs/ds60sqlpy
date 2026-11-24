@@ -10,6 +10,13 @@ This capstone uses three synthetic regions and a small two-arm dataset in each. 
 
 For region \(j\), the illustrative lower score is \(b_j=\widehat\tau_j-1.96\widehat{\operatorname{SE}}_j\). Binary actions maximize the sum of selected scores subject to a resource budget. This is a deliberately stated utility score. A sum of marginal lower bounds is not automatically a simultaneous 95% lower confidence bound, and four observations per arm do not justify a strong normal-approximation coverage claim.
 
+## Key terms
+
+- **Decision dossier:** A record linking the question, observation unit, information cutoff, assumptions, uncertainty and decision rule to an action.
+- **Lower score:** The illustrative conservative value tau_j - 1.96 SE_j used to rank regions.
+- **Budgeted selection:** Choosing binary actions that maximize total score subject to a resource budget, without forcing full budget use.
+- **Rollback condition:** A prespecified evidence change that triggers reassessment and a fallback action.
+
 ## Worked case 1: estimate, check and decide
 
 The code first verifies the expected treatment differences and independently derived standard errors. The three activity costs are three, two and one, with total budget four. Under the stated conservative score, only the first region has a positive contribution. The optimizer selects north and leaves the unused resource unspent.
@@ -39,6 +46,47 @@ The optimizer treats its scores as given inputs. If those scores are noisy or se
 **What would an interview-quality explanation emphasize?** Start with the target and data contract, explain how the estimate and uncertainty were obtained, derive how they enter the action rule, identify a failure mode, and state what evidence would change the recommendation. Listing model names is not a substitute for that chain of reasoning.
 
 **What makes this capstone complete?** Every input, calculation, assertion and decision is visible and reproducible within the declared synthetic problem. It also names the assumptions and external evidence that the example cannot supply. Completion of the program is evidence about this bounded computation, not a certificate of scientific validity in a new domain.
+
+## Worked example: Lower-bound selection under budget and a revision trigger
+
+```python
+from itertools import combinations
+import numpy as np
+
+names = ["A", "B", "C", "D"]
+est = np.array([5.0, 8.0, 3.0, 6.0])
+se = np.array([1.0, 4.0, 0.5, 2.0])
+cost = np.array([3, 4, 2, 3])
+budget = 7
+lower = est - 1.645 * se
+
+
+def best(score):
+    options = [
+        s for r in range(5) for s in combinations(range(4), r) if cost[list(s)].sum() <= budget
+    ]
+    return max(options, key=lambda s: score[list(s)].sum())
+
+
+print("one-sided 95% lower bounds:", ", ".join(f"{n} {v:.3f}" for n, v in zip(names, lower)))
+print("select on point estimates:", [names[i] for i in best(est)])
+print("select on lower bounds   :", [names[i] for i in best(lower)])
+revised_A = 5.0 - 3.4
+print(
+    f"revised A estimate {revised_A:.1f}, lower bound {revised_A - 1.645:.3f}, rollback {revised_A - 1.645 < 0}"
+)
+```
+
+Observed output:
+
+```text
+one-sided 95% lower bounds: A 3.355, B 1.420, C 2.178, D 2.710
+select on point estimates: ['B', 'D']
+select on lower bounds   : ['A', 'D']
+revised A estimate 1.6, lower bound -0.045, rollback True
+```
+
+Ranking by point estimate selects B and D, total estimated benefit 14 within the budget of 7. But B's standard error of 4 gives a one-sided 95 percent lower bound of only 1.42. Ranking by lower bound selects A and D, at cost 6, with combined lower bound 6.065 compared with 4.13 for B and D. The lower-bound rule gives up 3 units of expected benefit in exchange for a portfolio whose benefit is far more certain. Which rule is right is a decision about risk tolerance that the dossier should declare before seeing results. The last line exercises the rollback condition. If A's estimate is revised to 1.6 with the same standard error, its lower bound becomes \(1.6-1.645=-0.045\), below zero, and the predeclared trigger fires. Because the trigger was written down beforehand, rolling back A is an execution of policy rather than a fresh judgment that could be argued away. A threshold chosen after seeing 1.6 would carry no such credibility.
 
 ## Complete reproducible program
 

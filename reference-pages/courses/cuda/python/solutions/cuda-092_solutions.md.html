@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-timeline-wall-time">Exercise 1: Compute timeline wall time<a class="heading-anchor" href="#exercise-1-compute-timeline-wall-time" aria-label="Link to this section">#</a></h3>
 <p>Use latest completion minus first start.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute timeline wall time</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute wall time as latest completion minus earliest start: preparation runs 0 to 6 ms and GPU work 2 to 10 ms, so the step takes <code>10 - 0 = 10</code> ms.</p>
+<p><strong>Why it is correct here.</strong> The intervals overlap from 2 to 6 ms, so their durations cannot be added. Wall time is what the step costs end to end.</p>
+<p><strong>A plausible wrong approach.</strong> Summing durations, <code>6 + 8 = 14</code> ms, double counts the 4 ms overlap and overstates the step.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>summed == 14</code> and <code>wall == 10</code>. Read both numbers off the trace to confirm.</p>
 <h3 id="exercise-2-identify-an-overlap">Exercise 2: Identify an overlap<a class="heading-anchor" href="#exercise-2-identify-an-overlap" aria-label="Link to this section">#</a></h3>
 <p>Intervals sharing time overlap.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>identify an overlap</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Find the overlap of the two intervals: <code>max(0, 2) = 2</code> to <code>min(6, 10) = 6</code>, so 4 ms of overlap.</p>
+<p><strong>Why it is correct here.</strong> Two intervals overlap when each starts before the other ends. Here CPU preparation for the next step runs while the GPU executes.</p>
+<p><strong>A plausible wrong approach.</strong> Treating events on different rows of the trace as sequential hides the concurrency that is already happening. The step then looks like it needs a faster GPU when the existing overlap is already working.</p>
+<p><strong>How to verify.</strong> Check <code>wall == summed - overlap</code>, which gives <code>14 - 4 = 10</code>, consistent with the reference.</p>
 <h3 id="exercise-3-find-a-forced-synchronization">Exercise 3: Find a forced synchronization<a class="heading-anchor" href="#exercise-3-find-a-forced-synchronization" aria-label="Link to this section">#</a></h3>
 <p>Materializing a device scalar can wait.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>find a forced synchronization</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Look for host reads of device scalars between kernels, such as <code>loss.item()</code> or <code>print(tensor)</code> each step, which appear in the trace as gaps followed by device-to-host copies.</p>
+<p><strong>Why it is correct here.</strong> Materializing a device value on the host requires the GPU to finish queued work first, which forces the host to wait and stops it from enqueueing further work.</p>
+<p><strong>A plausible wrong approach.</strong> Blaming the gaps on slow kernels leads to optimizing compute while the host dependency stays. Faster kernels only make the GPU wait longer for the next enqueue.</p>
+<p><strong>How to verify.</strong> Remove the per-step read in a test and confirm the gaps disappear. Then log aggregated values every N steps. The logged numbers must match the per-step values averaged over the same window.</p>
 <h3 id="exercise-4-name-profiler-overhead">Exercise 4: Name profiler overhead<a class="heading-anchor" href="#exercise-4-name-profiler-overhead" aria-label="Link to this section">#</a></h3>
 <p>Detailed tracing changes work and memory.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>name profiler overhead</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Name the profiler&#x27;s overhead: detailed tracing with stacks, memory recording and shape capture adds host work and memory, which changes timing.</p>
+<p><strong>Why it is correct here.</strong> A profiler observes by instrumenting. The trace shows relative structure well, but absolute numbers include instrumentation cost.</p>
+<p><strong>A plausible wrong approach.</strong> Quoting step times from a detailed profiler run as production numbers overstates the step time.</p>
+<p><strong>How to verify.</strong> Compare step times with profiling on and off. The difference estimates overhead. Also compare peak memory, since recording shapes and stacks keeps extra host and device allocations alive.</p>
 <h3 id="exercise-5-propose-one-targeted-change">Exercise 5: Propose one targeted change<a class="heading-anchor" href="#exercise-5-propose-one-targeted-change" aria-label="Link to this section">#</a></h3>
 <p>Change only the suspected bottleneck.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>propose one targeted change</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Propose one targeted change, such as replacing per-step <code>loss.item()</code> with an aggregated log every 100 steps, and leave everything else fixed.</p>
+<p><strong>Why it is correct here.</strong> Changing one thing lets the trace before and after show its effect clearly. If the step time does not change, the hypothesis about the bottleneck was wrong, which is also useful evidence.</p>
+<p><strong>A plausible wrong approach.</strong> Applying several optimizations at once makes it impossible to tell which helped or which hurt. One change might help while another reintroduces a synchronization.</p>
+<p><strong>How to verify.</strong> Take a new trace and confirm the forced synchronizations are gone while losses remain the same.</p>
 <h3 id="exercise-6-verify-outside-profiling">Exercise 6: Verify outside profiling<a class="heading-anchor" href="#exercise-6-verify-outside-profiling" aria-label="Link to this section">#</a></h3>
 <p>Rerun synchronized uninstrumented samples with equal outputs.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>verify outside profiling</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Verify the improvement outside the profiler: run synchronized, uninstrumented timings over many steps for both versions and confirm the outputs are equal.</p>
+<p><strong>Why it is correct here.</strong> Profiler numbers include overhead, so the final claim must come from clean measurements. Equal outputs confirm the change did not alter what the step computes.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the speedup measured under the profiler assumes overhead is equal in both versions. Removing host reads also removes instrumented events, so overhead itself changes.</p>
+<p><strong>How to verify.</strong> Report the median step time over a fixed number of steps after warm-up for both versions, with equal loss values.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Summed event durations 14 ms, complete interval 10 ms.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-092_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

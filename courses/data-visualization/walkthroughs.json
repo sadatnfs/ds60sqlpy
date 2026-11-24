@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "track_id": "data-visualization",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "viz-001",
+      "title": "A sorted bar chart whose labels are proven to match their values",
+      "anchor": "reference",
+      "source_path": "courses/data-visualization/references/viz-001.py",
+      "source_sha256": "786a9e25caa56a4591983fe2d583df2d87a3e635d8175e6dc7730fcc6fdf62b7",
+      "expected_output": [
+        "Three measured completion times",
+        "u2 | Beta | 5.0",
+        "viz-001 Plotly complete"
+      ],
+      "steps": [
+        {
+          "lines": [1, 5],
+          "excerpt": "\"\"\"viz-001: complete offline Plotly reference.\"\"\"\n\nimport textwrap\n\nimport plotly.graph_objects as go",
+          "title": "Docstring and imports",
+          "explanation": "textwrap breaks a long title into short lines so it fits above a narrow chart. plotly.graph_objects, imported as go, is Plotly's object API: you build a Figure out of trace objects such as go.Bar and then adjust its layout.",
+          "observe": "No data is loaded from files or the network. Everything the chart needs is written in the program."
+        },
+        {
+          "lines": [8, 29],
+          "excerpt": "def describe(fig, title, description, columns, rows):\n    fig.update_layout(\n        title={\n            \"text\": \"<br>\".join(textwrap.wrap(title, width=28)),\n            \"font\": {\"size\": 16},\n            \"x\": 0,\n            \"xanchor\": \"left\",\n            \"automargin\": True,\n        },\n        template=\"plotly_white\",\n        height=440,\n        margin={\"l\": 65, \"r\": 25, \"t\": 90, \"b\": 65},\n        meta={\"description\": description, \"table\": {\"columns\": columns, \"rows\": rows}},\n    )\n    assert len(columns) <= 12 and len(rows) <= 100\n    print(title)\n    print(description)\n    print(\" | \".join(columns))\n    for row in rows:\n        print(\" | \".join(str(value) for value in row))\n    assert len(fig.to_json().encode()) <= 200 * 1024\n    return fig",
+          "title": "A helper that makes every figure self describing",
+          "explanation": "describe is a shared helper. It sets the title, a clean white template and margins, and stores a plain language description plus a small data table in layout.meta. That metadata is what lets the classroom show readable values next to the chart, so a reader who cannot see colors or hover still gets the numbers. It then prints the title, the description and each table row separated by vertical bars, and checks that the serialized figure stays under 200 KiB.",
+          "observe": "The printed table rows are the same rows stored in meta, so the text output and the accessible table cannot drift apart."
+        },
+        {
+          "lines": [32, 34],
+          "excerpt": "def case_01():\n    records = [(\"u1\", \"Alpha\", 2.0), (\"u2\", \"Beta\", 5.0), (\"u3\", \"Gamma\", 3.0)]\n    ordered = sorted(records, key=lambda row: row[2], reverse=True)",
+          "title": "Records, then a deliberate sort",
+          "explanation": "Each record is a tuple of user id, team and hours. sorted with key=lambda row: row[2] orders by the third field, and reverse=True puts the largest first. Sorting bars by value makes ranking easy to read; alphabetical order would hide it.",
+          "observe": "ordered now starts with Beta at 5.0 hours, then Gamma at 3.0, then Alpha at 2.0."
+        },
+        {
+          "lines": [35, 47],
+          "excerpt": "    fig = go.Figure(\n        go.Bar(\n            x=[row[1] for row in ordered],\n            y=[row[2] for row in ordered],\n            customdata=[[row[0]] for row in ordered],\n            text=[row[2] for row in ordered],\n            textposition=\"outside\",\n            marker_color=\"#176b87\",\n            hovertemplate=\"%{x}: %{y:.1f} hours (record %{customdata[0]})<extra></extra>\",\n        )\n    )\n    fig.update_xaxes(title=\"Team\")\n    fig.update_yaxes(title=\"Elapsed hours\", rangemode=\"tozero\")",
+          "title": "Build the bar trace and label the axes",
+          "explanation": "Each list comprehension pulls one field from the sorted records, so x, y, customdata and text stay in the same order. customdata carries the record id into the hover template, and text with textposition=\"outside\" prints the value above each bar. rangemode=\"tozero\" starts the y axis at zero, which keeps bar lengths honest.",
+          "observe": "Watch the axis titles: Team and Elapsed hours. A chart without units is incomplete in this course."
+        },
+        {
+          "lines": [48, 54],
+          "excerpt": "    assert sum(row[2] for row in ordered) == 10 and ordered[0][0] == \"u2\"\n    # A label/value shuffle would still draw bars but fail this identity check.\n    assert dict(zip(fig.data[0].x, fig.data[0].y, strict=True)) == {\n        \"Beta\": 5,\n        \"Gamma\": 3,\n        \"Alpha\": 2,\n    }",
+          "title": "Prove the drawn bars still match their labels",
+          "explanation": "The first assert checks the total and that the tallest record is u2. The second zips the figure's own x and y back into a dictionary. If a bug shuffled labels and values, Plotly would still draw bars, but this comparison would fail.",
+          "observe": "The check reads values back out of fig.data, not from the original list, so it tests what will actually be drawn."
+        },
+        {
+          "lines": [55, 64],
+          "excerpt": "    return describe(\n        fig,\n        \"Three measured completion times\",\n        (\n            \"Beta takes five hours, Gamma three and Alpha two. These are three\"\n            \" records, not uncertainty estimates.\"\n        ),\n        [\"record\", \"team\", \"hours\"],\n        [list(row) for row in ordered],\n    )",
+          "title": "Describe the chart in words and as a table",
+          "explanation": "case_01 returns whatever describe returns. The description states what the bars mean and also what they do not mean: three single records, not uncertainty estimates. The rows passed in are the sorted records converted to lists.",
+          "observe": "The printed table has the header record | team | hours and then u2 | Beta | 5.0 as its first row."
+        },
+        {
+          "lines": [67, 74],
+          "excerpt": "def main():\n    figure = case_01()\n    figure.show(config={\"responsive\": True, \"displaylogo\": False})\n    print(\"viz-001 Plotly complete\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Show the figure and confirm completion",
+          "explanation": "main builds the figure, calls show with a config that keeps the chart responsive and hides the Plotly logo, and prints a final marker line. The marker only prints if every assert above passed.",
+          "observe": "The last line is viz-001 Plotly complete."
+        }
+      ]
+    },
+    {
+      "lesson_id": "viz-004",
+      "title": "A dropdown that filters what you see without changing the data",
+      "anchor": "reference",
+      "source_path": "courses/data-visualization/references/viz-004.py",
+      "source_sha256": "8fbf614e4c40b390c2ced375e0587bcf8fcef0f4c6e100a6599757ae65c21987",
+      "expected_output": [
+        "Inspect groups without changing the underlying dataset",
+        "u7 | B | 7 | 15",
+        "viz-004 Plotly complete"
+      ],
+      "steps": [
+        {
+          "lines": [8, 29],
+          "excerpt": "def describe(fig, title, description, columns, rows):\n    fig.update_layout(\n        title={\n            \"text\": \"<br>\".join(textwrap.wrap(title, width=28)),\n            \"font\": {\"size\": 16},\n            \"x\": 0,\n            \"xanchor\": \"left\",\n            \"automargin\": True,\n        },\n        template=\"plotly_white\",\n        height=440,\n        margin={\"l\": 65, \"r\": 25, \"t\": 90, \"b\": 65},\n        meta={\"description\": description, \"table\": {\"columns\": columns, \"rows\": rows}},\n    )\n    assert len(columns) <= 12 and len(rows) <= 100\n    print(title)\n    print(description)\n    print(\" | \".join(columns))\n    for row in rows:\n        print(\" | \".join(str(value) for value in row))\n    assert len(fig.to_json().encode()) <= 200 * 1024\n    return fig",
+          "title": "The shared describe helper",
+          "explanation": "describe is a shared helper. It sets the title, a clean white template and margins, and stores a plain language description plus a small data table in layout.meta. That metadata is what lets the classroom show readable values next to the chart, so a reader who cannot see colors or hover still gets the numbers. It then prints the title, the description and each table row separated by vertical bars, and checks that the serialized figure stays under 200 KiB.",
+          "observe": "The same helper appears in every reference of this track, so learn it once and reuse that knowledge."
+        },
+        {
+          "lines": [32, 33],
+          "excerpt": "def case_04():\n    records = [[f\"u{i}\", \"A\" if i < 4 else \"B\", i, 2 * i + (i % 3)] for i in range(8)]",
+          "title": "Generate eight records with a formula",
+          "explanation": "The list comprehension makes users u0 to u7. Users below 4 go in group A and the rest in group B. The outcome is 2 * i + (i % 3), a fixed rule, so every run produces the same table and no random seed is needed.",
+          "observe": "records holds eight lists of user, group, baseline and outcome. For example u7 is in group B with baseline 7 and outcome 15."
+        },
+        {
+          "lines": [34, 50],
+          "excerpt": "    fig = go.Figure()\n    for group, symbol in [(\"A\", \"circle\"), (\"B\", \"square\")]:\n        subset = [row for row in records if row[1] == group]\n        fig.add_trace(\n            go.Scatter(\n                x=[row[2] for row in subset],\n                y=[row[3] for row in subset],\n                customdata=[[row[0], row[1]] for row in subset],\n                mode=\"markers\",\n                marker={\"size\": 12, \"symbol\": symbol},\n                name=group,\n                hovertemplate=(\n                    \"%{customdata[0]} (%{customdata[1]}): baseline %{x}, outcome \"\n                    \"%{y}<extra></extra>\"\n                ),\n            )\n        )",
+          "title": "One scatter trace per group",
+          "explanation": "fig starts empty. The loop filters the records for each group and adds a scatter trace with its own marker symbol, circle for A and square for B. Using shapes, not only color, keeps the groups distinguishable for color blind readers and in grayscale prints. The hover template shows the user id and group from customdata.",
+          "observe": "After the loop the figure has exactly two traces, A first and B second. The order matters for the dropdown below."
+        },
+        {
+          "lines": [51, 63],
+          "excerpt": "    fig.update_layout(\n        updatemenus=[\n            {\n                \"type\": \"dropdown\",\n                \"buttons\": [\n                    {\"label\": \"All\", \"method\": \"update\", \"args\": [{\"visible\": [True, True]}]},\n                    {\"label\": \"A\", \"method\": \"update\", \"args\": [{\"visible\": [True, False]}]},\n                    {\"label\": \"B\", \"method\": \"update\", \"args\": [{\"visible\": [False, True]}]},\n                ],\n            }\n        ],\n        uirevision=\"viz-004-fixture-v1\",\n    )",
+          "title": "A dropdown that toggles visibility",
+          "explanation": "updatemenus adds a dropdown with three buttons. Each button calls Plotly's update method with a visible list that has one entry per trace, in trace order. uirevision keeps zoom and other view state stable when the figure is updated.",
+          "observe": "Choosing A hides trace B, but the eight records still exist in the figure. Filtering changes the view, not the dataset."
+        },
+        {
+          "lines": [64, 67],
+          "excerpt": "    fig.update_xaxes(title=\"Pretreatment activity\")\n    fig.update_yaxes(title=\"Observed outcome\")\n    assert sum(len(trace.x) for trace in fig.data) == 8\n    assert [row[0] for row in records if row[1] == \"B\"] == [\"u4\", \"u5\", \"u6\", \"u7\"]",
+          "title": "Axis titles and two structural checks",
+          "explanation": "The first assert counts points across both traces and expects all eight. The second checks that group B holds exactly u4 to u7. Together they catch a filter bug that drops or duplicates records before any chart is drawn.",
+          "observe": "Both checks run on the built figure and records, before anything is printed."
+        },
+        {
+          "lines": [68, 78],
+          "excerpt": "    return describe(\n        fig,\n        \"Inspect groups without changing the underlying dataset\",\n        (\n            \"The dropdown changes visible traces. The table always contains \"\n            \"all eight source records; filtering is exploratory and does not \"\n            \"redefine the population.\"\n        ),\n        [\"user\", \"group\", \"baseline\", \"outcome\"],\n        records,\n    )",
+          "title": "Description and the full table",
+          "explanation": "describe receives all eight records as the table, not the filtered subset. The description says so explicitly: the dropdown is exploration and does not redefine the population.",
+          "observe": "The printed table ends with the row u7 | B | 7 | 15."
+        },
+        {
+          "lines": [81, 88],
+          "excerpt": "def main():\n    figure = case_04()\n    figure.show(config={\"responsive\": True, \"displaylogo\": False})\n    print(\"viz-004 Plotly complete\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Show and finish",
+          "explanation": "main builds the figure, shows it and prints a completion marker. Because the marker is the last statement, seeing it means every assert passed.",
+          "observe": "The final output line is viz-004 Plotly complete."
+        }
+      ]
+    },
+    {
+      "lesson_id": "viz-008",
+      "title": "An accessible status chart that survives a JSON round trip",
+      "anchor": "reference",
+      "source_path": "courses/data-visualization/references/viz-008.py",
+      "source_sha256": "5782ce25877a01e05c9b058970eb16d4a7c80bb8e2bebd4894ddada5b20e2efd",
+      "expected_output": [
+        "Twelve jobs at a declared observation cutoff",
+        "pending | 3",
+        "viz-008 Plotly complete"
+      ],
+      "steps": [
+        {
+          "lines": [1, 7],
+          "excerpt": "\"\"\"viz-008: complete offline Plotly reference.\"\"\"\n\nimport hashlib\nimport json\nimport textwrap\n\nimport plotly.graph_objects as go",
+          "title": "Imports for hashing and serialization",
+          "explanation": "hashlib computes a SHA-256 fingerprint and json parses the figure's JSON text. This reference treats the figure specification itself as an artifact that can be saved, restored and identified.",
+          "observe": "Two new imports compared with earlier lessons: hashlib and json."
+        },
+        {
+          "lines": [10, 31],
+          "excerpt": "def describe(fig, title, description, columns, rows):\n    fig.update_layout(\n        title={\n            \"text\": \"<br>\".join(textwrap.wrap(title, width=28)),\n            \"font\": {\"size\": 16},\n            \"x\": 0,\n            \"xanchor\": \"left\",\n            \"automargin\": True,\n        },\n        template=\"plotly_white\",\n        height=440,\n        margin={\"l\": 65, \"r\": 25, \"t\": 90, \"b\": 65},\n        meta={\"description\": description, \"table\": {\"columns\": columns, \"rows\": rows}},\n    )\n    assert len(columns) <= 12 and len(rows) <= 100\n    print(title)\n    print(description)\n    print(\" | \".join(columns))\n    for row in rows:\n        print(\" | \".join(str(value) for value in row))\n    assert len(fig.to_json().encode()) <= 200 * 1024\n    return fig",
+          "title": "The shared describe helper",
+          "explanation": "describe is a shared helper. It sets the title, a clean white template and margins, and stores a plain language description plus a small data table in layout.meta. That metadata is what lets the classroom show readable values next to the chart, so a reader who cannot see colors or hover still gets the numbers. It then prints the title, the description and each table row separated by vertical bars, and checks that the serialized figure stays under 200 KiB.",
+          "observe": "The helper is identical to earlier lessons; only the line numbers moved because of the extra imports."
+        },
+        {
+          "lines": [34, 47],
+          "excerpt": "def case_08():\n    counts = {\"completed\": 8, \"pending\": 3, \"failed\": 1}\n    fig = go.Figure(\n        go.Bar(\n            x=list(counts),\n            y=list(counts.values()),\n            text=list(counts.values()),\n            textposition=\"outside\",\n            marker_color=[\"#176b87\", \"#a66000\", \"#a61c3c\"],\n            marker_pattern_shape=[\"\", \"/\", \"x\"],\n        )\n    )\n    fig.update_xaxes(title=\"Recorded status\")\n    fig.update_yaxes(title=\"Jobs\", rangemode=\"tozero\")",
+          "title": "Status counts drawn with color and pattern",
+          "explanation": "counts is a dictionary, and Python keeps insertion order, so the bars appear as completed, pending, failed. Each bar gets both a distinct color and a distinct pattern shape: none, slashes and crosses. Printing the value as text above each bar gives a third, non visual cue.",
+          "observe": "There are three bars with heights 8, 3 and 1."
+        },
+        {
+          "lines": [48, 58],
+          "excerpt": "    fig = describe(\n        fig,\n        \"Twelve jobs at a declared observation cutoff\",\n        (\n            \"Eight completed, three pending and one failed. Pending is not \"\n            \"failure. Labels, bar patterns and the table preserve meaning \"\n            \"without relying only on color.\"\n        ),\n        [\"status\", \"count\"],\n        [[key, value] for key, value in counts.items()],\n    )",
+          "title": "Caption that separates pending from failed",
+          "explanation": "The description states the counts in words and makes a scientific point: pending jobs have not failed, they simply had not finished at the observation cutoff. The table rows are built from the same dictionary as the bars.",
+          "observe": "The printed table includes the row pending | 3."
+        },
+        {
+          "lines": [59, 62],
+          "excerpt": "    spec = fig.to_json()\n    restored = go.Figure(json.loads(spec))\n    assert list(restored.data[0].y) == [8, 3, 1] and sum(restored.data[0].y) == 12\n    assert restored.layout.meta[\"table\"][\"rows\"] == fig.layout.meta[\"table\"][\"rows\"]",
+          "title": "Serialize, restore and compare",
+          "explanation": "fig.to_json() turns the whole figure into a JSON string. go.Figure(json.loads(spec)) rebuilds a figure from that text. The asserts check that the restored bar heights and the stored table are unchanged, so the saved specification is faithful.",
+          "observe": "restored is a brand new Figure object built only from text, yet its data matches the original."
+        },
+        {
+          "lines": [63, 69],
+          "excerpt": "    print(\n        \"Figure specification bytes:\",\n        len(spec.encode()),\n        \"SHA256:\",\n        hashlib.sha256(spec.encode()).hexdigest(),\n    )\n    return fig",
+          "title": "Fingerprint the specification",
+          "explanation": "The program prints the byte length of the JSON and its SHA-256 hash. A hash identifies exact bytes, which is useful for detecting change. The exact numbers depend on the installed Plotly version, so treat them as an identity check for one environment, not a value to memorize.",
+          "observe": "A line starting with Figure specification bytes: appears. Its numbers can differ between Plotly versions."
+        },
+        {
+          "lines": [72, 79],
+          "excerpt": "def main():\n    figure = case_08()\n    figure.show(config={\"responsive\": True, \"displaylogo\": False})\n    print(\"viz-008 Plotly complete\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Show and finish",
+          "explanation": "As in every reference of this track, main shows the figure and prints a completion marker only after all checks pass.",
+          "observe": "The final output line is viz-008 Plotly complete."
+        }
+      ]
+    }
+  ]
+}

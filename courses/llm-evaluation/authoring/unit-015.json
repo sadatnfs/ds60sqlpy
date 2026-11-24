@@ -8,6 +8,13 @@
     "randomization unit",
     "guardrails"
   ],
+  "key_terms": {
+    "Label delay": "The lag between an event and the arrival of its label, which can make early observed accuracy look favorable.",
+    "Mature cohort": "A group of requests compared after a common follow-up window so delayed labels have arrived.",
+    "Distribution shift": "A change in the input or label distribution, which is distinct from a change in conditional task quality.",
+    "Jensen-Shannon divergence": "A symmetric, bounded divergence between two distributions used as a drift diagnostic.",
+    "Randomization unit": "The entity assigned to treatment in an online experiment, such as a user rather than a request."
+  },
   "outcome": "Monitor mature cohorts and service behavior without confusing delayed outcomes or changing traffic with model improvement.",
   "verification": "Immature labels give accuracy 1 at coverage 0.5 while the mature cohort gives accuracy 0.5 at coverage 1; identical distributions have JS divergence 0 and disjoint support log 2; an alert triggers a composition and coverage check before any degradation claim.",
   "level": "advanced",
@@ -20,42 +27,78 @@
       "task": "Evaluate the two requests at day 2.",
       "expected": "Accuracy 1 with label coverage 0.5.",
       "hint": "Use the same eligible cohort in both denominators.",
-      "answer": "The missing failure label has not become a success. The report must expose incomplete outcome ascertainment."
+      "answer": "The missing failure label has not become a success. The report must expose incomplete outcome ascertainment.",
+      "reasoning": {
+        "approach": "Call `observed_cohort(rows, 2)` on case A's two requests. Both events are at day 1, so both are eligible, but only the first label arrives by day 2.",
+        "why": "The labeled row is correct, so accuracy is 1 / 1 = 1. Label coverage is 1 / 2 = 0.5. The second request's label is not yet known; it has not become a success.",
+        "pitfall": "Reporting accuracy 1 at day 2 without coverage is the mistake. Delayed labels are often failures (complaints take time to arrive), so early accuracy can be systematically optimistic.",
+        "verify": "Case A asserts `early[\"accuracy\"] == 1` and `early[\"label_coverage\"] == 0.5`. The exercise checks also confirm coverage 0 when the only label arrives at day 10 and the cutoff is 5."
+      }
     },
     {
       "title": "Wait for the cohort",
       "task": "Evaluate the same requests at day 10.",
       "expected": "Accuracy 0.5 and label coverage 1.",
       "hint": "No model change is required for the apparent decline.",
-      "answer": "The difference is explained by label arrival, so an unqualified early-versus-late accuracy comparison is misleading."
+      "answer": "The difference is explained by label arrival, so an unqualified early-versus-late accuracy comparison is misleading.",
+      "reasoning": {
+        "approach": "Call `observed_cohort(rows, 10)` on the same two requests. Both labels have arrived by day 10.",
+        "why": "The second label is a failure, so accuracy becomes (1 + 0) / 2 = 0.5 with coverage 1. Nothing about the model changed between day 2 and day 10; only the set of known labels did.",
+        "pitfall": "Comparing the day 2 accuracy of one release with the day 10 accuracy of another and concluding the newer one is better is the mistake. Both releases must be compared on cohorts of the same maturity.",
+        "verify": "Case A asserts `mature[\"accuracy\"] == 0.5` and `mature[\"label_coverage\"] == 1`."
+      }
     },
     {
       "title": "Identical distributions",
       "task": "Compare a histogram to itself.",
       "expected": "JS divergence 0.",
       "hint": "Every log ratio is 1 before taking the logarithm.",
-      "answer": "This is an exact diagnostic invariant, not proof that model quality is unchanged."
+      "answer": "This is an exact diagnostic invariant, not proof that model quality is unchanged.",
+      "reasoning": {
+        "approach": "Call `js_divergence([0.3, 0.7], [0.3, 0.7])`. The mixture m equals both inputs.",
+        "why": "Each log ratio is log(x / m) = log 1 = 0, so both terms are 0 and the divergence is exactly 0. This is a property of the formula, useful as a code check.",
+        "pitfall": "Concluding from a zero drift score that model quality is unchanged is the mistake. The histogram covers inputs only; quality can change because of a model update, a label change or a feature not in the histogram.",
+        "verify": "The reference asserts `js_divergence([0.3, 0.7], [0.3, 0.7]) == 0` and that swapping the arguments of the 0.2/0.8 pair gives the same value, since JS divergence is symmetric."
+      }
     },
     {
       "title": "Disjoint support",
-      "task": "Compare[1,0] with[0,1] using natural logarithms.",
+      "task": "Compare `[1, 0]` with `[0, 1]` using natural logarithms.",
       "expected": "JS divergence is log 2.",
       "hint": "Both are compared to their midpoint.",
-      "answer": "The finite maximum is a useful boundary test and differs from an unbounded one-direction KL divergence."
+      "answer": "The finite maximum is a useful boundary test and differs from an unbounded one-direction KL divergence.",
+      "reasoning": {
+        "approach": "Call `js_divergence([1, 0], [0, 1])`. The mixture is m = [0.5, 0.5].",
+        "why": "For p, only the first entry is positive, contributing 1 times log(1 / 0.5) = log 2. The same holds for q on the second entry. The average of the two terms is log 2, about 0.693 in natural logarithms, the maximum possible value.",
+        "pitfall": "Using one-direction KL divergence on disjoint supports gives an infinite value, because some q entry is zero where p is positive. JS stays finite because both directions compare against the mixture, which is positive wherever either input is.",
+        "verify": "Case B asserts `np.isclose(js_divergence([1, 0], [0, 1]), np.log(2))` and that the 0.8/0.2 pair lies strictly between 0 and log 2."
+      }
     },
     {
       "title": "Choose assignment units",
       "task": "Requests from one user share conversational history.",
       "expected": "Consider user-level assignment and cluster-aware analysis.",
       "hint": "Interference can occur across request rows.",
-      "answer": "The experimental unit should reflect how exposure and outcomes can influence one another; many rows do not create independent users."
+      "answer": "The experimental unit should reflect how exposure and outcomes can influence one another; many rows do not create independent users.",
+      "reasoning": {
+        "approach": "Identify the unit through which requests influence one another. Requests from the same user share conversation history, so a user-level assignment keeps all of that user's requests under one system.",
+        "why": "If requests were randomized individually, a user could see system A in one turn and B in the next, and B's answer would depend on A's earlier output. Outcomes would then mix both systems and the comparison would be biased.",
+        "pitfall": "Randomizing by request because it gives more units, then computing a standard error over requests, is the mistake. The effective sample is the number of users, so uncertainty must be computed with clustering by user, as in eval-006.",
+        "verify": "No reference assertion covers this task. Check that every user ID appears under exactly one arm and that the analysis resamples users, not requests."
+      }
     },
     {
       "title": "Investigate an alert",
       "task": "A drift score rises while mature-cohort quality is stable.",
       "expected": "Investigate composition and coverage before concluding model degradation.",
       "hint": "A diagnostic is not a causal attribution.",
-      "answer": "A changed input mix may be benign or may reveal unsupported future risk; retain outcome and operational evidence alongside drift."
+      "answer": "A changed input mix may be benign or may reveal unsupported future risk; retain outcome and operational evidence alongside drift.",
+      "reasoning": {
+        "approach": "Before concluding degradation, break the drift down: which input categories changed share, whether label coverage changed, and whether mature-cohort quality is stable within each category.",
+        "why": "A rising JS score with stable mature quality often means the input mix shifted toward categories the model already handles well. It can also mean new categories arrived whose labels have not matured yet, which `observed_cohort` would show as low coverage.",
+        "pitfall": "Rolling back the model because the drift score crossed a threshold is the mistake. Drift is a property of inputs, not of model quality, and a rollback would not change the input mix.",
+        "verify": "No reference assertion covers this task. Report the drift value, per-category shares, mature-cohort accuracy and label coverage together for the same window."
+      }
     }
   ],
   "sources": [

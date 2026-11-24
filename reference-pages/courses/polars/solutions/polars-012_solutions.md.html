@@ -198,12 +198,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-inspect-a-null-bitmap-conceptually">1. Inspect a null bitmap conceptually<a class="heading-anchor" href="#1-inspect-a-null-bitmap-conceptually" aria-label="Link to this section">#</a></h3>
 <p>Columnar validity allows an absent value to be represented independently of valid zero. This distinction must survive interoperability boundaries.</p>
+<p><strong>Why it holds here:</strong> In Arrow each column has a values buffer plus a separate validity bitmap. In the reference frame the value column holds 2.0, null and 4.0, and Arrow reports null_count 1 for it.</p>
+<p><strong>Plausible wrong approach:</strong> Encoding the missing value as 0.0 or NaN in the values buffer makes it a number, so a mean would include it and null_count would read 0.</p>
+<p><strong>How to verify:</strong> Convert with frame.to_arrow() and check arrow.column(&#x27;value&#x27;).null_count == 1, then compare with a frame where the value is 0.0 and null_count is 0.</p>
 <p><strong>Expected:</strong> The answer identifies validity metadata.</p>
 <h3 id="2-avoid-a-zero-copy-claim">2. Avoid a zero-copy claim<a class="heading-anchor" href="#2-avoid-a-zero-copy-claim" aria-label="Link to this section">#</a></h3>
 <p>Inspect buffers or profile allocations for a specific conversion before making a performance claim. to_pylist explicitly constructs Python objects.</p>
+<p><strong>Why it holds here:</strong> to_arrow followed by from_arrow returning an equal frame proves the values, nulls and dtypes survived for these three rows, which is a logical claim.</p>
+<p><strong>Plausible wrong approach:</strong> Concluding that the conversion copied no memory from a passing equality test is unsupported, and to_pylist definitely creates new Python objects.</p>
+<p><strong>How to verify:</strong> Keep the claim to restored.equals(frame) being True; if memory matters, measure allocations or inspect buffer addresses for that specific path.</p>
 <p><strong>Expected:</strong> It proves logical equality on the fixture.</p>
 <h3 id="3-add-a-valid-category">3. Add a valid category<a class="heading-anchor" href="#3-add-a-valid-category" aria-label="Link to this section">#</a></h3>
 <p>Update the declared Enum and tests together. Downstream consumers need the same versioned vocabulary.</p>
+<p><strong>Why it holds here:</strong> Extending pl.Enum to [&#x27;new&#x27;, &#x27;paid&#x27;, &#x27;shipped&#x27;, &#x27;returned&#x27;] makes returned a valid label, so casting it succeeds and it sorts after shipped.</p>
+<p><strong>Plausible wrong approach:</strong> Changing only the data while keeping the three label Enum makes the cast raise, and editing only the code without a version note leaves consumers on the old list.</p>
+<p><strong>How to verify:</strong> Cast pl.Series([&#x27;returned&#x27;]) to the new Enum and check it succeeds, then confirm casting with the old three label Enum still raises.</p>
 <p><strong>Expected:</strong> The cast accepts the new label under the revised contract.</p>
 <h3 id="4-reject-an-unknown-category">4. Reject an unknown category<a class="heading-anchor" href="#4-reject-an-unknown-category" aria-label="Link to this section">#</a></h3>
 <p>Use a separate quarantine reason or deliberately evolve the vocabulary. Silently mapping it to shipped would create a false business state.</p>
@@ -217,12 +226,21 @@ status <span class="syntax-operator">=</span> pl<span class="syntax-operator">.<
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     rejected <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span>
 <span class="syntax-keyword">assert</span> rejected</code></pre>
+<p><strong>Why it holds here:</strong> cancelled is not among new, paid and shipped, so a strict cast to the Enum raises InvalidOperationError rather than inventing a code.</p>
+<p><strong>Plausible wrong approach:</strong> Replacing unknown labels with shipped before casting makes the cast pass and reports cancelled orders as shipped.</p>
+<p><strong>How to verify:</strong> Run the answer code and assert rejected is True; the same pattern rejects unknown in example_two.</p>
 <p><strong>Expected:</strong> Strict conversion rejects it.</p>
 <h3 id="5-compare-sort-policies">5. Compare sort policies<a class="heading-anchor" href="#5-compare-sort-policies" aria-label="Link to this section">#</a></h3>
 <p>The correct order depends on the question. Keep ordered state semantics explicit instead of relying on hidden physical category codes.</p>
+<p><strong>Why it holds here:</strong> For new, paid and shipped the Enum order and alphabetical order coincide, so the fixture cannot reveal a difference. Adding returned after shipped can: business order puts it last, alphabetical puts it before shipped.</p>
+<p><strong>Plausible wrong approach:</strong> Concluding from the three label fixture that the two sorts are interchangeable generalizes from a case where they happen to agree.</p>
+<p><strong>How to verify:</strong> Sort a frame with all four labels once as the Enum and once cast to String, and compare: the Enum gives new, paid, shipped, returned while text gives new, paid, returned, shipped.</p>
 <p><strong>Expected:</strong> Their orders can differ.</p>
 <h3 id="6-design-an-interchange-contract">6. Design an interchange contract<a class="heading-anchor" href="#6-design-an-interchange-contract" aria-label="Link to this section">#</a></h3>
 <p>Arrow carries structural types; your contract carries what identifiers and values mean. Add compatibility checks at the consumer boundary.</p>
+<p><strong>Why it holds here:</strong> An Arrow schema says value is a nullable float and status is a dictionary type, but not that value is in dollars, that rows are one per order, or that null means not yet measured.</p>
+<p><strong>Plausible wrong approach:</strong> Sending only the Arrow table and assuming its schema documents the data leaves the receiver to guess grain, units and the meaning of nulls.</p>
+<p><strong>How to verify:</strong> List grain, units, null policy, allowed categories and schema version in the contract, and have the consumer test the version and a key uniqueness check on arrival.</p>
 <p><strong>Expected:</strong> It includes grain, units, null policy and schema version.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;polars-012: complete bounded Polars investigation.&quot;&quot;&quot;</span>

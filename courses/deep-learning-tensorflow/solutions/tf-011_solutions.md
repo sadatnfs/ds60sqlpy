@@ -1,6 +1,6 @@
 # tf-011: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for Keras models and explicit training contracts after your own attempt at Example A, Construct a scalar model, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Dense, Compile, Training call. After matching exercise 6, Compare the scalar oracle, invent a new input without looking here.
 
 ## Mechanism review
 
@@ -134,4 +134,4 @@ np.testing.assert_allclose(-0.1 * grad, 28 / 15, atol=1e-6, rtol=0)
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one fixture value in exercise 4, Evaluation leaves weights alone, and predict the new result before running it. Keep the failing version of exercise 5, Show the extra intercept, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

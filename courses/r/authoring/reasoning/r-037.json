@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "How large the simulation error is here",
+      "body": "The first worked example prints three numbers. Two can be worked out before running it:\n\n```text\nquantity    value           source\nexact       0.3125          5 of 16 sequences\nmcse        about 0.0033    sqrt(0.3125 * 0.6875 / 20000)\ntolerance   0.02            about 6 times the mcse\nestimate    near 0.3125     depends on the draws after set.seed(41)\n```\n\nBecause the tolerance is about six standard errors, the check `abs(estimate - exact) < 0.02` would pass for almost any seed, not only 41. That is the right design for a test: it confirms the simulation targets the right quantity without depending on lucky draws. A tolerance of 0.001, about a third of a standard error, would fail for most seeds, and a seed that happened to pass would hide that fragility.\n\nThe mcse formula uses the estimate itself. If an event is rare and no draw produces it, the estimate is 0 and the formula reports an error of 0, which says nothing about how rare the event really is. Record `RNGkind()` with the seed, since the same seed under a different generator gives different draws."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Count the sequences with exactly three heads and with four heads, then divide by all sequences.",
+      "why": "Three heads can occur in choose(4, 3) = 4 orders and four heads in 1, so 5 of 2^4 = 16 equally likely sequences qualify, which is 0.3125 for a fair coin.",
+      "wrong": "Using `pbinom(3, 4, 0.5, lower.tail = FALSE)` or `heads > 3`. Both describe more than three heads and give 1/16, which leaves out the four sequences with exactly three.",
+      "verify": "`sum(choose(4, 3:4)) / 2^4` returns 0.3125, and the worked example's table shows 4 and 1 sequences for three and four heads."
+    },
+    {
+      "approach": "Compute the standard error at 100 and at 400 repetitions with p = 0.3 and compare the two.",
+      "why": "The error is the square root of p(1 - p)/B. Multiplying B by 4 divides the quantity under the root by 4, so the error halves, from about 0.0458 to about 0.0229.",
+      "wrong": "Expecting the error to fall to a quarter. That is what happens to the variance; the standard error only halves, so cutting it to a quarter takes 16 times the repetitions.",
+      "verify": "`isTRUE(all.equal(large, small / 2))` returns TRUE, and the printed values show about 0.0458 and 0.0229."
+    },
+    {
+      "approach": "Keep the event indicator `heads >= 3` as its own step and report the seed, B, estimate and mcse together.",
+      "why": "With seed 41 and 20000 draws the mcse is about 0.0033, so the estimate is a value near 0.3125 with a stated precision, and anyone can rerun it and get the same number.",
+      "wrong": "Reporting the estimate alone, for example 0.31. A reader cannot tell whether that came from 100 draws, with an error near 0.046, or from 20000.",
+      "verify": "Running `set.seed(41)` and the same rbinom call twice returns identical estimates, and the printed vector shows estimate, exact and mcse."
+    },
+    {
+      "approach": "Fix the seed before looking at any results, and judge the model with a tolerance wider than the simulation noise.",
+      "why": "Seeds only change which draws are made. Across seeds the estimate varies by about 0.0033, so trying 20 seeds and keeping the one closest to a hoped for value can shift the answer by roughly two standard errors.",
+      "wrong": "Running several seeds and reporting the one that gives the preferred estimate. The reported precision then overstates what the simulation supports.",
+      "verify": "Running seeds 1 to 20 shows estimates spread over a few thousandths around 0.3125, and the declared seed's result falls inside that range."
+    },
+    {
+      "approach": "Treat p = 0 and p = 1 as degenerate models whose draws do not vary, and say that the zero error is a property of the model.",
+      "why": "With p = 0 every draw is 0 heads and with p = 1 every draw is 4, so p(1 - p) = 0 and the mcse is 0 exactly.",
+      "wrong": "Reporting a real probability as known exactly because the simulation shows no variation. If p were 0.001 and only 100 draws were made, most runs would also show zero events and a zero error.",
+      "verify": "`all(rbinom(10, 4, 0) == 0)` and `all(rbinom(10, 4, 1) == 4)` both return TRUE."
+    },
+    {
+      "approach": "Separate the simulation error, which more draws reduce, from model error, which comes from the fair, independent flips assumption.",
+      "why": "If the real coin lands heads 55 percent of the time, three or more heads has probability about 0.391, not 0.3125. That gap of about 0.078 is more than 20 times the mcse.",
+      "wrong": "Running 2 million draws and reporting 0.3125 as settled. The simulation error shrinks to about 0.0003, while the error from assuming a fair coin stays the same.",
+      "verify": "`sum(dbinom(3:4, 4, 0.55))` returns about 0.391, while the fair coin model returns 0.3125."
+    }
+  ]
+}

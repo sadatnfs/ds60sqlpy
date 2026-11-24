@@ -37,7 +37,12 @@ lower-level browser graphics; these Plotly lessons do not replace it.
 
 Guides are directly authored. `authoring/python_cases.py`,
 `authoring/browser_cases.js` and the task/solution metadata in `authoring/units.json`
-are durable sources. Run `authoring/build.py` after editing them, then
+are durable sources. `authoring/reasoning.json` holds each lesson's four-part
+solution reasoning under the keys `approach`, `correct`, `wrong` and `verify`;
+`build.py` requires an entry for every lesson, exactly those keys, at least 20
+words per field and no em or en dashes, and renders them as the
+`## Solution reasoning` section. Keep its numbers tied to what the cases compute.
+Run `authoring/build.py` after editing them, then
 format and validate generated references. `fixtures/plotly-inventory.json`
 identifies all eight paired cases for numerical and real-browser qualification.
 Source parsing, figure creation, browser interaction, offline delivery and

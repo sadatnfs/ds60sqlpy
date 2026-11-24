@@ -1,6 +1,6 @@
 # llm-018: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these a bounded training loop with visible state answers after attempting *Prepare a tiny training batch* through *Report budget honestly*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Perform twelve bounded updates* points to one step. `llm-018_solution.py` holds the assertions; this page explains how they test training step. Then try *Report budget honestly* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -33,7 +33,7 @@ assert tuple(inputs.shape) == (2, 3) and targets.numel() == 6
 
 **Expected:** inputs shape (2, 3); 6 active targets.
 
-**Verify:** In a fresh process, the exercise checks confirm `tuple(inputs.shape) == (2, 3)` and `targets.numel() == 6`.
+**Verify:** For *Prepare a tiny training batch*, a fresh-process check confirms `tuple(inputs.shape) == (2, 3)` and `targets.numel() == 6`.
 
 ## Exercise 2: Measure the initial objective
 
@@ -49,7 +49,7 @@ assert np.isfinite(initial) and initial > 0
 
 **Expected:** finite positive loss.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(initial)` and `initial > 0`.
+**Verify:** For *Measure the initial objective*, a fresh-process check confirms `np.isfinite(initial)` and `initial > 0`.
 
 ## Exercise 3: Perform twelve bounded updates
 
@@ -78,7 +78,7 @@ assert len(losses) == 12 and np.isfinite(losses + norms).all() and max(norms) > 
 
 **Expected:** 12 finite losses and norms; at least one positive norm.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(losses) == 12`, `np.isfinite(losses + norms).all()` and `max(norms) > 0`.
+**Verify:** For *Perform twelve bounded updates*, a fresh-process check confirms `len(losses) == 12`, `np.isfinite(losses + norms).all()` and `max(norms) > 0`.
 
 ## Exercise 4: Verify actual parameter change
 
@@ -92,7 +92,7 @@ assert not torch.equal(before, model.output.weight.detach())
 
 **Expected:** weights differ.
 
-**Verify:** In a fresh process, the exercise checks confirm `not torch.equal(before, model.output.weight.detach())`.
+**Verify:** For *Verify actual parameter change*, a fresh-process check confirms `not torch.equal(before, model.output.weight.detach())`.
 
 ## Exercise 5: Clear accumulated gradients
 
@@ -107,7 +107,7 @@ assert all(p.grad is None for p in model.parameters())
 
 **Expected:** all gradients None.
 
-**Verify:** In a fresh process, the exercise checks confirm `all((p.grad is None for p in model.parameters()))`.
+**Verify:** For *Clear accumulated gradients*, a fresh-process check confirms `all((p.grad is None for p in model.parameters()))`.
 
 ## Exercise 6: Report budget honestly
 
@@ -128,8 +128,8 @@ assert report["steps"] <= report["maximum_steps"] and report["convergence_establ
 
 **Expected:** stopped_at12; no convergence claim.
 
-**Verify:** In a fresh process, the exercise checks confirm `report['steps'] <= report['maximum_steps']` and `report['convergence_established'] is False`.
+**Verify:** For *Report budget honestly*, a fresh-process check confirms `report['steps'] <= report['maximum_steps']` and `report['convergence_established'] is False`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Verify actual parameter change* and predict the result first; keep *Clear accumulated gradients* failing beside the repair. Log a missing PyTorch separately from a wrong training step value in `llm-018`.

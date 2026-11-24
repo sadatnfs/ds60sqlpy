@@ -1,6 +1,6 @@
 # llm-026: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these what a representation probe establishes answers after attempting *Construct transparent representations* through *Bound the interpretation*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Add shuffled-label control* points to one step. `llm-026_solution.py` holds the assertions; this page explains how they test probe. Then try *Bound the interpretation* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -31,7 +31,7 @@ assert torch.equal(prediction, labels)
 
 **Expected:** first-coordinate sign predicts all four labels.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.equal(prediction, labels)`.
+**Verify:** For *Construct transparent representations*, a fresh-process check confirms `torch.equal(prediction, labels)`.
 
 ## Exercise 2: Use a held-out fixture
 
@@ -48,7 +48,7 @@ assert torch.equal(got, truth)
 
 **Expected:** two correct held-out predictions.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.equal(got, truth)`.
+**Verify:** For *Use a held-out fixture*, a fresh-process check confirms `torch.equal(got, truth)`.
 
 ## Exercise 3: Add shuffled-label control
 
@@ -63,7 +63,7 @@ assert int((prediction == shuffled).sum()) == 2
 
 **Expected:** 2 of 4 correct.
 
-**Verify:** In a fresh process, the exercise checks confirm `int((prediction == shuffled).sum()) == 2`.
+**Verify:** For *Add shuffled-label control*, a fresh-process check confirms `int((prediction == shuffled).sum()) == 2`.
 
 ## Exercise 4: Protect frozen state
 
@@ -82,7 +82,7 @@ assert weight.grad is not None and features.grad is None and torch.equal(feature
 
 **Expected:** probe gradient exists; features have no gradient.
 
-**Verify:** In a fresh process, the exercise checks confirm `weight.grad is not None`; `features.grad is None` and `torch.equal(features, before)`.
+**Verify:** For *Protect frozen state*, a fresh-process check confirms `weight.grad is not None`; `features.grad is None` and `torch.equal(features, before)`.
 
 ## Exercise 5: Expose family leakage
 
@@ -97,7 +97,7 @@ assert {families[0]} & {families[1]} == {"A"}
 
 **Expected:** family A crosses partitions.
 
-**Verify:** In a fresh process, the exercise checks confirm `{families[0]} & {families[1]} == {'A'}`.
+**Verify:** For *Expose family leakage*, a fresh-process check confirms `{families[0]} & {families[1]} == {'A'}`.
 
 ## Exercise 6: Bound the interpretation
 
@@ -117,8 +117,8 @@ assert report["decodable"] and not report["causal_use_established"]
 
 **Expected:** report distinguishes decodability from causal use.
 
-**Verify:** In a fresh process, the exercise checks confirm `report['decodable']` and `not report['causal_use_established']`.
+**Verify:** For *Bound the interpretation*, a fresh-process check confirms `report['decodable']` and `not report['causal_use_established']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Protect frozen state* and predict the result first; keep *Expose family leakage* failing beside the repair. Log a missing PyTorch separately from a wrong probe value in `llm-026`.

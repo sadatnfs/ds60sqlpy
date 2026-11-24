@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-012-explained-reference">eval-012: explained reference<a class="heading-anchor" href="#eval-012-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-012_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-012_reference.py</code> asserts each answer below, from <em>Inspect each prompt</em> to <em>Validate axes</em>, on the authored crossed design and interaction fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Change the prompt target</em> tests.</p>
 <h3 id="1-inspect-each-prompt">1. Inspect each prompt<a class="heading-anchor" href="#1-inspect-each-prompt" aria-label="Link to this section">#</a></h3>
 <p>An overall favorable result does not imply improvement under every configuration.</p>
+<p><strong>Approach.</strong> Compute the cell means with <code>decomposition(fixture())</code>, then subtract the baseline row from the candidate row: <code>cells[1] - cells[0]</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> The cells are <code>[[0.9, 0.6], [0.8, 0.9]]</code> with models as rows and prompts as columns. Candidate minus baseline is 0.8 - 0.9 = -0.1 under prompt 1 and 0.9 - 0.6 = +0.3 under prompt 2. The average is +0.1.</p>
+<p><strong>A tempting wrong approach.</strong> Reporting +0.1 as &quot;the candidate is better&quot; is the mistake when the deployment uses prompt 1. The candidate is worse there, and the average hides that because prompt 2 contributes a large gain.</p>
+<p><strong>How to verify.</strong> Worked case A asserts <code>np.testing.assert_allclose(cells[1] - cells[0], [-0.1, 0.3])</code>, and the exercise checks assert the mean difference is 0.1.</p>
 <p><strong>Expected observation:</strong> The differences are -0.1 and +0.3.</p>
 <h3 id="2-check-reconstruction">2. Check reconstruction<a class="heading-anchor" href="#2-check-reconstruction" aria-label="Link to this section">#</a></h3>
 <p>This algebraic identity is a useful implementation check, independent of any inferential assumptions.</p>
+<p><strong>Approach.</strong> Add <code>grand + model[:, None] + prompt[None, :] + interaction</code> and compare with <code>cells</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> The grand mean is 0.8. Model effects are -0.05 and +0.05; prompt effects are +0.05 and -0.05. The interaction is <code>[[0.1, -0.1], [-0.1, 0.1]]</code>. For the baseline under prompt 1: 0.8 - 0.05 + 0.05 + 0.1 = 0.9, which is the observed cell.</p>
+<p><strong>A tempting wrong approach.</strong> Computing interaction with a sign error, for example adding the main effects instead of subtracting, will still produce numbers that look plausible. The reconstruction check is the fastest way to catch it.</p>
+<p><strong>How to verify.</strong> Worked case A uses <code>np.testing.assert_allclose(cells, grand + model[:, None] + prompt[None, :] + interaction)</code>. The exercise checks also confirm each effect vector and each interaction row and column sum to zero.</p>
 <p><strong>Expected observation:</strong> Every observed cell is recovered within floating tolerance.</p>
 <h3 id="3-change-the-prompt-target">3. Change the prompt target<a class="heading-anchor" href="#3-change-the-prompt-target" aria-label="Link to this section">#</a></h3>
 <p>A fixed-prompt deployment needs evidence for that prompt, not an attractive average over unused alternatives.</p>
+<p><strong>Approach.</strong> Use weights 1 and 0 over the two prompts and compute the weighted candidate minus baseline difference.</p>
+<p><strong>Why it holds for this fixture.</strong> With all weight on prompt 1 the difference is simply that column&#x27;s value, -0.1. The equal-weight +0.1 described a deployment that uses both prompts equally, which this one does not.</p>
+<p><strong>A tempting wrong approach.</strong> Using the average over prompts because it is the main effect is the mistake. Main effects average over prompts that will not be used, so they do not describe a fixed-prompt deployment when the interaction is nonzero.</p>
+<p><strong>How to verify.</strong> Compute <code>(cells[1] - cells[0]) @ [1, 0]</code> and confirm -0.1. Repeat with <code>[0, 1]</code> for +0.3.</p>
 <p><strong>Expected observation:</strong> The candidate difference becomes-0.1.</p>
 <h3 id="4-equalize-selection-budgets">4. Equalize selection budgets<a class="heading-anchor" href="#4-equalize-selection-budgets" aria-label="Link to this section">#</a></h3>
 <p>A comparison of selection procedures differs from a comparison of one selected system with an untuned mean; final assessment must still be independent.</p>
+<p><strong>Approach.</strong> Give each model the same selection procedure: choose the best prompt per model on development data with <code>cells.max(axis=1)</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> Both models reach 0.9 on development: the baseline with prompt 1 and the candidate with prompt 2. Under equal selection budgets the development difference is 0.</p>
+<p><strong>A tempting wrong approach.</strong> Case B shows the unequal version: tuning the candidate (0.9) and comparing with the baseline&#x27;s untuned mean (0.75) gives 0.15. That difference measures extra tuning effort, not a better model.</p>
+<p><strong>How to verify.</strong> Worked case B asserts <code>fair_development</code> equals <code>[0.9, 0.9]</code> and the mixed-budget difference equals 0.15. Final claims still need an independent test set because both maxima are selected values.</p>
 <p><strong>Expected observation:</strong> Both selected development scores are 0.9.</p>
 <h3 id="5-count-seed-replication">5. Count seed replication<a class="heading-anchor" href="#5-count-seed-replication" aria-label="Link to this section">#</a></h3>
 <p>This describes the three constructed seed scores. It does not quantify variation across an unseen population of task families.</p>
+<p><strong>Approach.</strong> Take the three baseline seeds under prompt 1, <code>fixture()[0, 0]</code> = <code>[0.8, 0.9, 1.0]</code>, and compute the sample variance with <code>ddof=1</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> The mean is 0.9 and the squared deviations are 0.01, 0 and 0.01, which sum to 0.02. Dividing by n - 1 = 2 gives 0.01. That is the spread across three seeds in one constructed cell.</p>
+<p><strong>A tempting wrong approach.</strong> Using 0.01 as the uncertainty of the model comparison is the mistake. Seed variation is one source; variation across task families is usually larger and needs its own replication, as in eval-006.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.isclose(fixture()[0, 0].var(ddof=1), 0.01)</code>. With <code>ddof=0</code> the result would be 0.02 / 3, about 0.0067.</p>
 <p><strong>Expected observation:</strong> The sample variance is 0.01.</p>
 <h3 id="6-validate-axes">6. Validate axes<a class="heading-anchor" href="#6-validate-axes" aria-label="Link to this section">#</a></h3>
 <p>Silently averaging an unidentified axis can mix model, prompt and replication factors and invalidate the comparison.</p>
+<p><strong>Approach.</strong> Call <code>decomposition([[1, 2]])</code>. The array has two dimensions, and the guard <code>values.ndim != 3</code> raises.</p>
+<p><strong>Why it holds for this fixture.</strong> The helper needs model, prompt and seed axes in that order. A two-dimensional input could mean model by prompt with one seed, or model by seed with one prompt, and averaging axis 2 would be impossible or meaningless.</p>
+<p><strong>A tempting wrong approach.</strong> Reshaping automatically, such as adding a trailing axis, would accept the input but would require guessing what each axis means. A wrong guess silently swaps prompt and seed variation.</p>
+<p><strong>How to verify.</strong> The reference wraps <code>decomposition([[1, 2]])</code> in <code>try</code> and fails with <code>Missing tensor axis accepted</code> if no error is raised. Pass <code>[[[1, 2]]]</code> explicitly when you mean one model, one prompt and two seeds.</p>
 <p><strong>Expected observation:</strong> The tensor contract rejects it.</p></article>
   </main>
 </body>

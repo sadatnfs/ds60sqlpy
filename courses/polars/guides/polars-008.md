@@ -14,6 +14,14 @@ Reshaping needs an identity contract. In the worked example, the pair (id, perio
 
 Round-trip tests are useful but bounded. Reconstructing the original fixture proves preservation for those columns and values under the selected schema. It does not establish that every real-world duplicate represents an additive measurement, or that missing periods should be filled with zero. Preserve identifiers and distinguish an absent measurement from a measured zero.
 
+## Key terms
+
+- **unpivot:** The wide-to-long reshape that keeps `index` identity columns and turns the `on` columns into variable and value pairs.
+- **pivot:** The long-to-wide reshape that spreads `values` into one column per `on` value for each `index` key.
+- **Compound key:** Several columns, such as id and period, that together identify one cell.
+- **Cell uniqueness:** The requirement that each index and column pair has one value; otherwise an explicit aggregation must define how duplicates combine.
+- **Round trip:** Reshaping long to wide and back, then checking that the original rows are recovered.
+
 ## Syntax and data contract
 
 unpivot names index columns that remain identifiers, the columns converted into long values, and the variable/value output names. pivot names the column whose values become output column names, the row identifier and the measurement column. Use select to restore a deliberate column order and sort to restore a deliberate row order before comparing tables.

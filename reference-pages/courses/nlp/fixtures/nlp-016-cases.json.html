@@ -199,27 +199,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement target shifting for [repair] and empty raw output.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;[BOS,repair] versus[repair,EOS]; empty becomes[BOS] versus[EOS].&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;[BOS, repair] versus [repair, EOS]; empty becomes [BOS] versus [EOS].&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compute the one-query, two-source weighted output.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Weights sum to one; output[10p,20(1-p)] with p=sigmoid(1/sqrt2).&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Weights sum to one; output [10p, 20(1-p)] with p=sigmoid(1/sqrt2).&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Mark the second source invalid and repeat the calculation.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Output exactly[10,0]; an all-invalid source raises.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Output exactly [10, 0]; an all-invalid source raises.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run width-one and width-two bounded search on the authored table.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Greedy tea,EOS probability.3; beam coffee,EOS probability.4.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Greedy tea, EOS probability .3; beam coffee, EOS probability .4.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Select a sentence for service and test an unsupported refund query.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Return index0 and the unchanged unavailable sentence; refund returns None.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Return index 0 and the unchanged unavailable sentence; refund returns None.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span></span>

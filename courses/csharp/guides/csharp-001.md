@@ -44,20 +44,7 @@ The length check establishes a specific claim before printing. Spaces and punctu
 
 ```csharp
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Globalization;
-using System.Collections.Concurrent;
-using System.Threading.Channels;
-using System.Net;
-using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Buffers;
 
 internal static class Program {
   private static void Check(bool condition, string reason) {
@@ -85,20 +72,7 @@ The second condition rejects a plausible wrong operator. This is stronger eviden
 
 ```csharp
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Globalization;
-using System.Collections.Concurrent;
-using System.Threading.Channels;
-using System.Net;
-using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Buffers;
 
 internal static class Program {
   private static void Check(bool condition, string reason) {

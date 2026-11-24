@@ -12,12 +12,12 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Exercise 2: Write through a column view
 # Take column 1 of the (3, 2) tensor as a view, set its last entry to -7 and inspect the
 # original tensor and the view's stride.
-# Expected: grid[2, 1] becomes -7; the column view has stride (2,).
+# Expected: `grid[2, 1]` becomes -7; the column view has stride (2,).
 
 # Exercise 3: Separate contiguous from clone
 # Call contiguous() and clone() on the already contiguous grid, then write 100 into the
 # [0, 0] entry of the first result and -100 into the second.
-# Expected: contiguous() returns the same storage, so grid[0, 0] becomes 100; the clone write leaves grid unchanged.
+# Expected: contiguous() returns the same storage, so `grid[0, 0]` becomes 100; the clone write leaves grid unchanged.
 
 # Exercise 4: Trace a transposed layout
 # Transpose x and inspect shape, strides and contiguity.

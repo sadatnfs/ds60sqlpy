@@ -10,6 +10,26 @@ fixture; some fixtures contain the deliberate defect that an exercise asks the
 learner to diagnose, such as a fragment link without a matching id. The optional HTTP fixture is
 maintained directly under `../fixtures/php-http-lab/`.
 
+Each chapter's `key_terms` field holds 3 to 5 `[term, definition]` pairs for
+concepts the lesson really uses. The build rejects missing, repeated or
+malformed pairs and renders them as the guide's **Key terms** list inside the
+vocabulary section. A term cannot contain `:` or `*`, and each definition is a
+complete sentence.
+
+Each chapter's `reasoning` field holds exactly six objects, one per exercise,
+with `approach`, `pitfall` and `verify` strings. Together with the exercise's
+existing explanation they render the solution's four-part reasoning: approach,
+why it is correct, a plausible wrong approach and why it fails, and how to
+verify. A pitfall needs at least 10 words and a verify step at least 8. Each
+chapter's `contrast` field holds one lesson-specific case (`heading`, `setup`,
+`lang`, `code`, `reading`) rendered as a **Contrast case** section before the
+exercises: a flawed or alternative snippet and an explanation of the behavior
+its code determines. Every string is single-line, trimmed and free of em and
+en dashes, prose ends with a period or question mark, a heading cannot
+contain `:` or `*`, and `lang` is one of html, css, js, php, text, http, sh,
+sql or yaml. Write each entry for its own lesson rather than reusing a
+sentence frame across chapters.
+
 From the repository root:
 
 ```sh

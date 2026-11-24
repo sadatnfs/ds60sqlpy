@@ -6,18 +6,18 @@ export {};
 // count: false };` to `const flags: Flags<Row> = { id: false, count: false };`. Before
 // running it, predict which check fails and which value it now sees; then run it and restore
 // the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.deepEqual(flags, { id: true, count: false })`. Restoring the original line brings
-// back the worked observation: id true and count false; a missing flag is a compile error.
+// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(flags, { id:
+// true, count: false })`. Restoring `const flags: Flags<Row> = { id: true, count: false };`
+// brings back: id true and count false; a missing flag is a compile error.
 
 // Exercise 2: Prove Omit does not remove runtime secrets: debug a regression
 // A regression changed one token in Example B, so one line now reads `const full:
 // RecordWithSecret = { id: 'A!', secret: 'fixture-only' };`. Run Example B with that line,
 // use the failing check to locate the defect and repair it without changing the check.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')`; after it the line reads `const
-// full: RecordWithSecret = { id: 'A', secret: 'fixture-only' };` again and typed view still
-// has secret at runtime; explicit projection does not.
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')`. Restoring `const full:
+// RecordWithSecret = { id: 'A', secret: 'fixture-only' };` brings back: typed view still has
+// secret at runtime; explicit projection does not.
 
 // Exercise 3: Compare distributed and whole-union array types
 // Define both conditional utilities and demonstrate their different assignment behavior.

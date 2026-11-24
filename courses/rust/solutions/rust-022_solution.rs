@@ -38,6 +38,42 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     {
+        // Task 2: Guided modification
+        #[derive(Debug)]
+        enum QuantityError {
+            Input(InputError),
+            TooLarge { max: i32 },
+        }
+        impl From<InputError> for QuantityError {
+            fn from(error: InputError) -> Self {
+                Self::Input(error)
+            }
+        }
+        fn bounded(text: &str, max: i32) -> Result<i32, QuantityError> {
+            let value = validated(text)?;
+            if value > max {
+                return Err(QuantityError::TooLarge { max });
+            }
+            Ok(value)
+        }
+        assert_eq!(bounded("40", 50).unwrap(), 40);
+        assert!(matches!(
+            bounded("51", 50),
+            Err(QuantityError::TooLarge { max: 50 })
+        ));
+        let negative = bounded("-1", 50);
+        assert!(matches!(
+            negative,
+            Err(QuantityError::Input(InputError::Negative))
+        ));
+        let malformed = bounded("x", 50);
+        assert!(matches!(
+            malformed,
+            Err(QuantityError::Input(InputError::Malformed))
+        ));
+    }
+
+    {
         // Task 3: Independent construction
         #[derive(Debug)]
         enum ImportError {
@@ -67,6 +103,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let cause = std::io::Error::other("disk full");
         let storage = ImportError::Storage(cause);
         assert_eq!(storage.source().unwrap().to_string(), "disk full");
+    }
+
+    {
+        // Task 5: Boundary evidence
+        assert_eq!(validated("0").unwrap(), 0);
+        assert!(matches!(validated("abc"), Err(InputError::Malformed)));
+        assert!(matches!(validated(""), Err(InputError::Malformed)));
+        assert!(matches!(
+            validated("2147483648"),
+            Err(InputError::Malformed)
+        ));
+        assert!(matches!(
+            validated("-2147483648"),
+            Err(InputError::Negative)
+        ));
+        assert!(matches!(
+            validated("-2147483649"),
+            Err(InputError::Malformed)
+        ));
     }
     println!("rust-022: passed");
     Ok(())

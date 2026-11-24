@@ -16,6 +16,14 @@ The YAML model is declarative input, but running Compose is still an operation a
 
 A service name is also a useful DNS name on its Compose network. The default network enables peers to find each other without fixed IPs. Named volumes remain separate storage resources. An application can therefore be recreated while preserving its data, provided the same intended volume remains mounted.
 
+### Key terms
+
+- **Compose service:** A named definition of how to create containers that share one role, such as `app` or `client`.
+- **Compose project:** The group of containers, networks and volumes that Compose creates and owns for one application.
+- **`compose.yaml`:** The declarative file that describes an application's services, networks and volumes.
+- **Project name:** The explicit identity Compose uses to label and find a project's resources, which keeps commands and cleanup scoped.
+- **Service name:** The key under `services` that also acts as a DNS name for peers on the project's network.
+
 ## Anatomy and a trace you can follow
 
 Use `docker compose -p ds60-docker-study ...` from the copied fixture directory. The explicit `-p` sets the project name consistently for build, up, logs and down. The fixture has `app` and an optional tools-profile `client`; the client uses the same local image but runs a short request command instead of the server.
@@ -90,11 +98,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Running Compose from another directory or without `-p`, so resources land in a different project. Adding `-v` to `docker compose down` as routine cleanup. Starting two copies that share a host port.
 
-Exercise 4 is this chapter's boundary case: Diagnose an unexpected resource collision. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an unexpected resource collision. List the existing projects, containers and published ports with their labels before renaming or removing anything that might belong to another copy. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using Compose service, Compose project, compose.yaml and project name. Reconstruct worked example 2 (Start and inspect the project) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Name every resource the `ds60-docker-study` project creates and which of them `down` keeps. Then reconstruct worked example 2 (Start and inspect the project) with one different value, predict what changes, and name which of Compose service, Compose project, compose.yaml and project name the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

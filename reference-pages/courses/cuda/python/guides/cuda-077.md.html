@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Parallel reduction changes the grouping of additions. Real-number addition is associative; finite-precision addition generally is not. A tree reduction can produce a different result from a left-to-right loop even when both are valid implementations. Test tolerances using scale and conditioning rather than requiring arbitrary bitwise identity. Distinguish a tolerable rounding difference from a missing tail element.</p>
 <p>Reduction also changes the parallel ownership pattern. Threads first accumulate local partials, then combine within a block, then combine block results in a later stage. A single global atomic accumulator is simpler but can contend and has nondeterministic addition order. Use a higher-accuracy CPU sum where appropriate, test cancellation-heavy inputs, and document dtype and accumulation precision.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Non-associative addition:</strong> Floating-point addition whose result depends on grouping because each step rounds.</li>
+<li><strong>Tree reduction:</strong> A pairwise combining order that halves the active values each step and rounds differently from a sequential sum.</li>
+<li><strong>Absolute and relative tolerance:</strong> Bounds that accept a result when its error is small in absolute terms or relative to the magnitude of the expected value.</li>
+<li><strong>Deterministic algorithm setting:</strong> A framework option that selects reproducible kernels, often at a performance cost.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>For [1e16,1,-1e16], a naive left sum loses the one on common binary 64 arithmetic, while math.fsum preserves it. The input is intentionally cancellation-sensitive.</p>
@@ -217,6 +224,20 @@ items <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <span class="syntax-keyword">assert</span> items <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">15</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU reduction reference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> math<span class="syntax-operator">.</span>fsum<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Accurate cancellation sum 1 and tail-preserving sum 15.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>values</code></td>
+<td><code>[1e+16, 1.0, -1e+16]</code></td>
+</tr>
+<tr>
+<td><code>items</code></td>
+<td><code>[15]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
 <p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
@@ -238,17 +259,23 @@ cp<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</spa
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA library reduction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">; order-sensitive cases need a documented tolerance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-a-tree-by-hand">Exercise 1: Compute a tree by hand<a class="heading-anchor" href="#exercise-1-compute-a-tree-by-hand" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute a tree by hand</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Pairing only <code>range(0, len(items) - 1, 2)</code> drops the odd element at each odd level. For this input the result becomes 10 and the error looks small enough to mistake for rounding.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-test-the-odd-tail">Exercise 2: Test the odd tail<a class="heading-anchor" href="#exercise-2-test-the-odd-tail" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>test the odd tail</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using a tolerance like <code>abs(result - 15) &lt; 10</code> would accept 10. Picking tolerances that wide hides structural bugs inside numerical noise.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-construct-cancellation">Exercise 3: Construct cancellation<a class="heading-anchor" href="#exercise-3-construct-cancellation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>construct cancellation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using <code>[1.0, 2.0, 3.0]</code> as the cancellation test shows nothing, since every order gives 6 exactly. A test needs magnitudes far enough apart to exceed the mantissa.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-choose-absolute-and-relative-tolerance">Exercise 4: Choose absolute and relative tolerance<a class="heading-anchor" href="#exercise-4-choose-absolute-and-relative-tolerance" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>choose absolute and relative tolerance</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using relative tolerance alone with an expected value of 0 requires exact equality. Any reordering then fails, even though both answers are within normal rounding of the large terms.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-compare-atomics-with-staged-reduction">Exercise 5: Compare atomics with staged reduction<a class="heading-anchor" href="#exercise-5-compare-atomics-with-staged-reduction" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>compare atomics with staged reduction</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Claiming the atomic version is deterministic because each update is indivisible confuses atomicity with order. Each addition is safe, but the sequence of additions still varies.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-deterministic-settings-limits">Exercise 6: Explain deterministic settings limits<a class="heading-anchor" href="#exercise-6-explain-deterministic-settings-limits" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>explain deterministic settings limits</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating a deterministic flag as a promise of identical results across machines leads to bit-exact comparisons between environments that fail for legitimate reasons.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

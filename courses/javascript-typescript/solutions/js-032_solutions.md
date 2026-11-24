@@ -50,7 +50,7 @@ assert.equal(output.join(''), 'ABCD');
 assert.equal(sink.writableFinished, true);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(output.join(''), 'ABCD')`. Restoring the original line brings back the worked observation: ABCD after successful pipeline completion.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(output.join(''), 'ABCD')`. Restoring `await pipeline(Readable.from(['ab', 'cd']), upper, sink);` brings back: ABCD after successful pipeline completion.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(output.join(''), 'ABCD')` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -79,7 +79,7 @@ sink.end();
 await finished(sink);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(sink.write(Buffer.from('ab')), false)`; after it the line reads `highWaterMark: 2,` again and write returns false; drain follows release; stream finishes.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(sink.write(Buffer.from('ab')), false)`. Restoring `highWaterMark: 2,` brings back: write returns false; drain follows release; stream finishes.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(sink.write(Buffer.from('ab')), false)` for this input.
 

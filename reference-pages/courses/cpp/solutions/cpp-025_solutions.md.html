@@ -222,7 +222,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Reasoning:</strong> A half-open index interval ends before size.</p>
 <p><strong>Verify:</strong> Check your explanation against <code>xs.size() == 2</code>: the last valid index is <code>size() - 1</code>, and <code>checked_at({2, 4}, 1) == 4</code> in Worked example 1 is the boundary that works.</p>
 <h3 id="exercise-2-use-checked-access">Exercise 2: Use checked access<a class="heading-anchor" href="#exercise-2-use-checked-access" aria-label="Link to this section">#</a></h3>
-<p>Compare at(2) with the contract of operator[2].</p>
+<p>Compare at(2) with the contract of <code>operator[](2)</code>.</p>
 <p><strong>Expected:</strong> at throws; unchecked invalid access is undefined behavior.</p>
 <p><strong>Reasoning:</strong> A deterministic exception is not a sanitizer report.</p>
 <p><strong>Verify:</strong> Confirm Worked example 2 catches <code>std::out_of_range</code> from <code>at(2)</code>, and do not run <code>xs[2]</code>; your answer must call it undefined behavior rather than predict its output.</p>

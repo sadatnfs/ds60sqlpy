@@ -16,36 +16,36 @@ A null value must be rejected explicitly because `Number(null)` becomes zero. So
 
 ## Exercise 1: Predict date order after sorting.
 
-The line generator uses array order. Sorting is an explicit preprocessing step rather than a hidden property of time scales.
+The line generator uses array order. Sorting is an explicit preprocessing step rather than a hidden property of time scales. The fixture lists January 3 first; `sort((a, b) => a.date - b.date)` subtracts Date objects as milliseconds and puts January 1 first. Sorting the ISO strings would also work here, but sorting a formatted label such as "Jan 10" before "Jan 9" would not. The reference checks that `rows[0]` is 2024-01-01.
 
 **Expected:** Chronological order by numeric instant.
 
 ## Exercise 2: Insert a missing observation.
 
-A missing value is not a measured zero. Preserve enough records to represent the missing interval.
+A missing value is not a measured zero. Preserve enough records to represent the missing interval. January 3 has value null, and line.defined excludes it, so the path has two segments: January 1 to 2 and January 4 to 5. Removing the null row entirely would instead draw a straight line from January 2 to 4, hiding the missing day. Count "M" commands in the path string.
 
 **Expected:** The path has a visible gap under the stated policy.
 
 ## Exercise 3: Build a UTC line chart with a gap.
 
-Use matching time parsing, scale and formatting conventions. Check the data ordering independently of the rendered path.
+Use matching time parsing, scale and formatting conventions. Check the data ordering independently of the rendered path. Use scaleUtc with UTC dates and utcFormat("%b %d") for ticks. Mixing local parsing with UTC formatting can shift labels by a day in some time zones. Verify both that rows are sorted and that the path contains two M commands.
 
 **Expected:** Time-ordered points and separate defined segments.
 
 ## Exercise 4: Diagnose a line that doubles back in time.
 
-Inspect numeric timestamps before changing interpolation. A curve style cannot repair incorrect temporal ordering.
+Inspect numeric timestamps before changing interpolation. A curve style cannot repair incorrect temporal ordering. A line that runs right then jumps left means the array order is not time order. Changing curve to curveMonotoneX would not help. Print rows.map(d => +d.date) and confirm it increases.
 
 **Expected:** Input order is unsorted or dates were parsed incorrectly.
 
 ## Exercise 5: Handle an empty or all-missing series.
 
-Extent on no valid data does not define a meaningful chart scale. Make the empty state part of the component contract.
+Extent on no valid data does not define a meaningful chart scale. Make the empty state part of the component contract. With all values null, d3.extent over valid values returns [undefined, undefined] and the y domain becomes NaN. Check for zero defined points first and render a "no data" message instead of an axis.
 
 **Expected:** Show an explicit no-data message rather than invalid domains.
 
 ## Exercise 6: Explain interpolation limits for irregular observations.
 
-Label gaps and sampling intervals. A smooth curve can suggest precision or continuity the data does not support.
+Label gaps and sampling intervals. A smooth curve can suggest precision or continuity the data does not support. Here observations are daily, so a straight segment between January 4 and 5 says nothing about hours in between; label the sampling interval. If a gap is real, keep it visible as the break line.defined already draws.
 
 **Expected:** Connecting samples is a visual assumption, not evidence between measurements.

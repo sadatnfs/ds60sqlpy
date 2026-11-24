@@ -197,19 +197,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Change a caller-owned value: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `int n = 4;` to `int n</span></span>
-<span class="source-line"><span class="syntax-comment">     = 5;`. Before running, predict which CHECK fails and which value it now</span></span>
-<span class="source-line"><span class="syntax-comment">     sees; then run it and restore the original line. Expected: The changed run</span></span>
-<span class="source-line"><span class="syntax-comment">     stops with `Check failed` at the CHECK on `n == 5`. Restoring the original</span></span>
-<span class="source-line"><span class="syntax-comment">     line brings back the worked observation: the caller value becomes 5. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;change a caller-owned value&quot; case, into a</span></span>
+<span class="source-line"><span class="syntax-comment">     scratch pad and change `int n = 4;` to `int n = 5;`. Before running,</span></span>
+<span class="source-line"><span class="syntax-comment">     predict which CHECK fails and which value it sees in place of the worked</span></span>
+<span class="source-line"><span class="syntax-comment">     result (the caller value becomes 5); then run it and restore the original</span></span>
+<span class="source-line"><span class="syntax-comment">     line. Expected: With `int n = 5;` the run stops with `Check failed` at the</span></span>
+<span class="source-line"><span class="syntax-comment">     CHECK on `n == 5`, because the &quot;change a caller-owned value&quot; case no longer</span></span>
+<span class="source-line"><span class="syntax-comment">     shows that the caller value becomes 5. Restoring `int n = 4;` brings that</span></span>
+<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Read a target copy: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed `int n = 3;` to `int n = 4;` in worked example 2. Run</span></span>
-<span class="source-line"><span class="syntax-comment">     worked example 2 with that change, use the failing CHECK to explain the</span></span>
-<span class="source-line"><span class="syntax-comment">     defect and repair it without changing the CHECK. Expected: Before the</span></span>
-<span class="source-line"><span class="syntax-comment">     repair the run stops with `Check failed` at the CHECK on `copy == 3 &amp;&amp; n ==</span></span>
-<span class="source-line"><span class="syntax-comment">     9`; after it the line reads `int n = 3;` again and the copied value stays 3</span></span>
-<span class="source-line"><span class="syntax-comment">     and the target becomes 9. */</span></span>
+<span class="source-line"><span class="syntax-comment">     A regression changed `int n = 3;` to `int n = 4;` in worked example 2, the</span></span>
+<span class="source-line"><span class="syntax-comment">     &quot;read a target copy&quot; case. Run the example with that change, use the</span></span>
+<span class="source-line"><span class="syntax-comment">     failing CHECK to explain why the copied value stays 3 and the target</span></span>
+<span class="source-line"><span class="syntax-comment">     becomes 9 no longer holds and repair it without changing the CHECK.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
+<span class="source-line"><span class="syntax-comment">     on `copy == 3 &amp;&amp; n == 9`. Once the line reads `int n = 3;` again, the &quot;read</span></span>
+<span class="source-line"><span class="syntax-comment">     a target copy&quot; case again shows that the copied value stays 3 and the</span></span>
+<span class="source-line"><span class="syntax-comment">     target becomes 9. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Reject an absent target</span></span>
 <span class="source-line"><span class="syntax-comment">     Pass NULL to an optional update helper.</span></span>

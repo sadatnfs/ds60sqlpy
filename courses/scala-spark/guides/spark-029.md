@@ -8,7 +8,7 @@ Advanced; approximately 120 minutes. Direct prerequisites: `spark-028`. The prep
 
 ## How to run this lesson
 
-Open `spark-029` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-029` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-029.scala) and [PySpark learner](../lessons/spark-029.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-029_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-029_solution.scala) and [PySpark reference](../solutions/spark-029_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -57,9 +57,7 @@ This design is more precise than treating overwrite as atomic publication or tre
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -73,20 +71,7 @@ val source = spark.range(0L, 30L, 1L, 2).withColumn("value", col("id") * 2L)
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -108,13 +93,13 @@ source = spark.range(0, 30, 1, 2).withColumn("value", F.col("id") * 2)
 ```scala
 val ids = 0L until 30L
 assert(ids.map(_ * 2L).sum == 870L)
-println("Declared30-row product total=870")
+println("Declared 30-row product total=870")
 ```
 
 ```python
 ids = range(30)
 assert sum(i * 2 for i in ids) == 870
-print("Declared30-row product total=870")
+print("Declared 30-row product total=870")
 ```
 
 The arithmetic oracle describes the product before any writer runs. A successful write command or content hash is insufficient if the rows violate this expected identity and value contract.
@@ -205,7 +190,7 @@ Do not call append an idempotent retry or assume overwrite is atomic publication
 
 ## Self-check
 
-Explain the contract of `productDigest` / `product_digest` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `productDigest` / `product_digest` without reading its solution. Then, from memory, state what Exercise 6 (Replay the same input without appending another product) must produce: Manifest bytes and data-file count are unchanged by valid `run-a` replay; published count remains 30. Invalid input fails before changing current.json. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

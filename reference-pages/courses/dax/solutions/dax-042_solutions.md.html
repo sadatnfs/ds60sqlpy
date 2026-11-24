@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the converted amount for F 3 alone.</p>
 <p>50 times 1.2 gives 60 USD.</p>
+<p><strong>Why it fits this model:</strong> F3 is 50 EUR on 2025-02-03, and the rate key (2025-02-03, EUR) gives 1.2 USD per EUR. 50 x 1.2 = 60.</p>
+<p><strong>Tempting mistake:</strong> Using the latest January rate, 1.1, because the rate is looked up by currency only. That gives 55.</p>
+<p><strong>How to confirm:</strong> Filtering ForeignSales[ForeignID] = &quot;F3&quot; in case A&#x27;s measure returns 60.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the FebruaryEUR rate to 1.0.</p>
 <p>Correct EUR conversion becomes 110 + 50 = 160 USD. A MAX-rate shortcut would use 1.1 and still be wrong.</p>
+<p><strong>Why it fits this model:</strong> Converting each row at its own date&#x27;s rate gives F2 at 100 x 1.1 = 110 and F3 at 50 x 1.0 = 50, so EUR converts to 160.</p>
+<p><strong>Tempting mistake:</strong> The MAX-rate shortcut now takes 1.1 for all 150 EUR, giving 165, which is wrong because it ignores dates.</p>
+<p><strong>How to confirm:</strong> After the change, CorrectUSD reads 160 and NaiveLatestRateUSD reads 165; overall ConvertedUSD becomes 100 + 160 = 260.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a rate-coverage quality rule.</p>
 <p>Reject or flag missing and duplicate date/currency matches before conversion; publish no apparently complete total while transactions are unconverted.</p>
+<p><strong>Why it fits this model:</strong> Every ForeignSales row needs exactly one rate for its (SaleDate, Currency). Here all three rows match one rate each.</p>
+<p><strong>Tempting mistake:</strong> Checking only that the rate table has no blanks. A transaction on a date with no rate is a missing join, not a blank rate value.</p>
+<p><strong>How to confirm:</strong> COUNTROWS(FILTER(ForeignSales, ISBLANK(LOOKUPVALUE(ExchangeRate[USDPerUnit], ...)))) returns 0, and the rate table&#x27;s (RateDate, Currency) key stays unique.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose substituting zero when a rate is missing.</p>
 <p>It understates the total and hides missing data. Keep an unavailable result and an explicit count of affected transactions.</p>
+<p><strong>Why it fits this model:</strong> A missing rate means the USD value is unknown. If the 2025-02-03 EUR rate were absent, F3&#x27;s 50 EUR would have no conversion.</p>
+<p><strong>Tempting mistake:</strong> Coalescing the missing rate to 0 makes F3 contribute nothing, so the total drops to 210 without warning.</p>
+<p><strong>How to confirm:</strong> Return BLANK for the total, or show 210 with &quot;1 transaction unconverted&quot; beside it, instead of a 210 that looks complete.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain whether dividing by the rate would be correct.</p>
 <p>For EUR to USD multiply by USD/EUR; dividing implements a different direction. Reciprocal conventions must be labeled.</p>
+<p><strong>Why it fits this model:</strong> USDPerUnit is USD per one unit of local currency, so EUR times USD/EUR gives USD.</p>
+<p><strong>Tempting mistake:</strong> Dividing instead gives 100 / 1.1 + 50 / 1.2, about 132.58 USD for the EUR rows, which treats the rate as EUR per USD.</p>
+<p><strong>How to confirm:</strong> Unit check: EUR x (USD / EUR) = USD. Converted EUR should be 170, above 150 local, while each rate is above 1.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the grain rule to tax rates or indexed prices.</p>
 <p>Match the complete rate key and effective interval before aggregation, and test missing or overlapping validity periods.</p>
+<p><strong>Why it fits this model:</strong> Tax rates and price indexes also have full keys: jurisdiction, product class and effective date range, like (RateDate, Currency) here.</p>
+<p><strong>Tempting mistake:</strong> Joining by jurisdiction only and taking the latest rate repeats the MAX-rate mistake.</p>
+<p><strong>How to confirm:</strong> For each transaction, count the matching rates: zero means missing and two means overlapping validity, and both should fail before aggregation.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

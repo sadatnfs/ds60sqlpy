@@ -14,6 +14,13 @@ For a partial tile, valid lanes load input while invalid lanes write the operati
 
 
 
+### Key terms
+
+- **Shared memory:** Fast on-chip memory visible to all threads of one block and lasting only for that block's lifetime.
+- **Block barrier:** A collective such as `cuda.syncthreads()` that every thread in the block must reach before any thread proceeds.
+- **Identity element:** A value that leaves a reduction unchanged, such as zero for addition, used to fill inactive slots.
+- **Early return before a barrier:** A thread leaving the kernel before a barrier, which leaves the collective incomplete and produces undefined behavior.
+
 ## Worked examples
 
 ### Worked example 1
@@ -40,33 +47,54 @@ print("CPU cooperative model:", shared, sum(shared))
 
 **Expected observation:** All four modeled lanes participate; padded sum is 12.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `tile` | `[2, 4, 6]` |
+| `width` | `4` |
+| `shared` | `[2, 4, 6, 0]` |
+| `participants` | `[0, 1, 2, 3]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Choose a sum identity
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **choose a sum identity** in the examples above.
+**Trap to avoid:** Padding with the value of the last valid element, 6, changes the sum to 18. Such a pad looks harmless because it is in the data range, which is why it passes casual inspection.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Choose a minimum identity
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **choose a minimum identity** in the examples above.
+**Trap to avoid:** Padding with 0 is the common mistake carried over from sums. For data `[2, 4, 6]` it reports a minimum of 0, a value not in the input.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Trace barrier participants
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **trace barrier participants** in the examples above.
+**Trap to avoid:** Listing only lanes 0 to 2 because they hold data treats the barrier as a data operation. On hardware, a barrier not reached by all threads is undefined behavior and can hang or corrupt shared memory.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Repair early return
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **repair early return** in the examples above.
+**Trap to avoid:** Moving the early return below the first barrier but above the second still leaves later barriers missing a participant. Every barrier after the return is affected, not only the first.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate block and grid scope
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **separate block and grid scope** in the examples above.
+**Trap to avoid:** Reading another block's partial from shared memory assumes a grid-wide shared space. The read returns the current block's own data, so the total silently counts one block several times.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design a nonmultiple test
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design a nonmultiple test** in the examples above.
+**Trap to avoid:** Testing only with `n = 4` or `n = 8` makes every block full. Bugs in padding or early returns never execute, so the test passes against broken code.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

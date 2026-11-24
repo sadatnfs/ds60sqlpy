@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Trace the two retained rows in the first example.</p>
 <p>L1 has 8 and L3 has 9; L2 has an unknown amount.</p>
+<p><strong>Approach:</strong> Compute net for every row before filtering: L3 is 2 times 5 minus 1, L1 is 1 times 8 minus 0, and L2 has an unknown quantity.</p>
+<p><strong>Why it holds here:</strong> That gives 9, 8 and NA. The mask <code>!is.na(net) &amp; net &gt;= 8</code> is TRUE, TRUE, FALSE, and sorting the two survivors by id puts L1 with 8 ahead of L3 with 9.</p>
+<p><strong>Tempting mistake:</strong> Filtering with <code>lines[lines$net &gt;= 8, ]</code>. The NA in the index produces an extra row filled with NA, so the result has three rows and one of them describes no real line.</p>
+<p><strong>Verify:</strong> <code>a$data$id</code> returns &quot;L1&quot; &quot;L3&quot;, and <code>a$data$net</code> returns 8 and 9.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Raise the threshold from eight to nine.</p>
 <p>L3 remains with net 9.</p>
+<p><strong>Approach:</strong> Call <code>transform_lines(lines, 9)</code> and keep the comparison as <code>&gt;=</code>.</p>
+<p><strong>Why it holds here:</strong> With threshold 9, L3&#x27;s net of 9 meets the boundary and L1&#x27;s net of 8 falls below it. L2 is still unknown, so the mask excludes it for the same reason as before, and one row remains.</p>
+<p><strong>Tempting mistake:</strong> Switching to <code>&gt;</code> when changing the threshold. Then <code>9 &gt; 9</code> is FALSE, L3 is dropped too, and the result is empty, which changes the policy at the boundary instead of just the number.</p>
+<p><strong>Verify:</strong> <code>b$data$id</code> returns &quot;L3&quot;, and <code>b$data$net</code> returns 9.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Return an exclusion count alongside the selected table.</p>
 <p>Report input 3, retained 2, excluded 1 under the original policy.</p>
+<p><strong>Approach:</strong> Return the selected table together with <code>nrow(lines)</code>, <code>sum(keep)</code> and <code>sum(!keep)</code> from the same mask.</p>
+<p><strong>Why it holds here:</strong> keep contains no NA because of the <code>!is.na(net)</code> term, so both sums are exact counts: 2 retained, 1 excluded, 3 input. Using one mask for the table and the counts keeps them consistent.</p>
+<p><strong>Tempting mistake:</strong> Counting exclusions as <code>sum(lines$net &lt; threshold, na.rm = TRUE)</code>. That returns 0, because L2&#x27;s NA is dropped from the count, so the unknown amount disappears from the report.</p>
+<p><strong>Verify:</strong> <code>a$retained + a$excluded == a$input</code> returns TRUE, with values 2, 1 and 3.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose sorting only prices before multiplication.</p>
 <p>Permute complete rows or join by a validated key.</p>
+<p><strong>Approach:</strong> Reorder complete rows with <code>lines[order(lines$id), ]</code>, or bring prices in through a join on a validated id, never by sorting one column.</p>
+<p><strong>Why it holds here:</strong> Sorting the prices 5, 8 and 4 into 4, 5 and 8 would give L3 a net of 2 times 4 minus 1, which is 7, and L1 a net of 5. Neither reaches 8, so the result would be empty instead of L1 and L3.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>sort(lines$price)</code> before multiplying. Each column keeps its length and type, so the bug produces no error, only wrong records.</p>
+<p><strong>Verify:</strong> <code>transform_lines(lines[c(2, 3, 1), ])$data</code> returns the same ids and nets as the original call, showing that input order does not matter.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Handle an input with no qualifying rows.</p>
 <p>Return a zero-row id/net data frame with declared types.</p>
+<p><strong>Approach:</strong> Let the same column selection run on an all FALSE mask, so the result is a zero row data frame with columns id and net.</p>
+<p><strong>Why it holds here:</strong> With threshold 100 no net qualifies. <code>lines[keep, c(&quot;id&quot;, &quot;net&quot;), drop = FALSE]</code> still returns both columns with their types, and ordering zero rows leaves them unchanged.</p>
+<p><strong>Tempting mistake:</strong> Returning NULL or <code>data.frame()</code> when nothing qualifies. Code that later reads <code>result$net</code> gets NULL, and binding this result to another batch fails or loses the columns.</p>
+<p><strong>Verify:</strong> <code>nrow(empty)</code> returns 0, and <code>names(empty)</code> returns &quot;id&quot; &quot;net&quot;.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the pipeline to a lagged feature.</p>
 <p>Sort by entity, time and a deterministic tie-breaker before computing lags.</p>
+<p><strong>Approach:</strong> Sort by entity, then by time, then by a deterministic tie breaker such as id, and compute each lag within its entity.</p>
+<p><strong>Why it holds here:</strong> Here ordering is part of the calculation. A lag pairs each row with the one before it, so the result depends on the row order, unlike the sum and the filter above.</p>
+<p><strong>Tempting mistake:</strong> Sorting by time only, or computing lags in arrival order. Rows from two entities interleave, so an entity&#x27;s first row receives the previous entity&#x27;s last value.</p>
+<p><strong>Verify:</strong> Shuffling the input rows and recomputing shows identical lag columns once both runs are sorted by entity, time and tie breaker.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

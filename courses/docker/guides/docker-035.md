@@ -16,6 +16,14 @@ Layer sharing changes the amount of new data an engine needs. The displayed tota
 
 Optimization should preserve correctness and maintainability. Removing a certificate bundle to save space may break HTTPS. Moving dependency installation to startup makes the image look smaller while making every run slower and less reproducible. Measure the user-visible path you actually want to improve.
 
+### Key terms
+
+- **Image size:** The stored and transferred size of an image, which affects pulls but is only one part of startup cost.
+- **Startup latency:** The time from a start request to a usable application, including pulling, unpacking, creation and initialization.
+- **Incremental download:** The new layer data an engine must fetch, which is often smaller than the displayed total image size.
+- **Cold cache:** A measurement condition with images or build cache missing, so transfer and initialization costs are included.
+- **Warm restart:** A measurement condition with layers already present locally, so transfer cost is excluded and only startup work is timed.
+
 ## Anatomy and a trace you can follow
 
 Compare cold and warm conditions explicitly. A cold engine or missing-image test includes transfer cost; a warm local restart does not. The course’s local workflow shows build logs so learners can see which layers are reused. Keep at least several observations and record input identity before drawing conclusions.
@@ -89,11 +97,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Installing packages when the container starts. Removing CA certificates or other runtime assets to save space. Pruning the whole engine before a benchmark.
 
-Exercise 4 is this chapter's boundary case: Diagnose a size optimization that breaks HTTPS. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a size optimization that breaks HTTPS. Compare the file lists of the working and optimized images for certificate bundles and libraries before measuring size again. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using image size, startup latency, layer reuse and measurement method. Reconstruct worked example 2 (Separate startup phases) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. List the startup phases and say which one an image size reduction can shorten. Then reconstruct worked example 2 (Separate startup phases) with one different value, predict what changes, and name which of image size, startup latency, layer reuse and measurement method the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

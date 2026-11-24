@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-separate-vulnerability-presence-and-exploitability">Exercise 1: Separate vulnerability presence and exploitability.<a class="heading-anchor" href="#exercise-1-separate-vulnerability-presence-and-exploitability" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A matched affected component versus a demonstrated reachable exploit condition.</p>
 <p><strong>Why:</strong> Both matter, but neither should be fabricated. A finding needs triage even when immediate exploitability is uncertain.</p>
+<p><strong>Approach:</strong> Read the synthetic finding: example-library 1.0 is installed and 1.1 is fixed, which shows a version match, not an attack path.</p>
+<p><strong>Why this is correct:</strong> Exploitability depends on whether the app reaches the flawed code under real inputs, which the record does not show.</p>
+<p><strong>A plausible wrong approach:</strong> Ignoring the finding until someone shows an exploit leaves a known affected version waiting for triage.</p>
+<p><strong>How to verify:</strong> The triage note states whether the component is used by server.py, and the status stays requires review until decided.</p>
 <h3 id="exercise-2-predict-why-an-interactive-patch-disappears">Exercise 2: Predict why an interactive patch disappears.<a class="heading-anchor" href="#exercise-2-predict-why-an-interactive-patch-disappears" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Container recreation returns to the packaged image inputs.</p>
 <p><strong>Why:</strong> The writable layer is not the source of truth for a reproducible release. Capture the change in the build recipe and rebuild.</p>
+<p><strong>Approach:</strong> Trace what recreation starts from: the image built from the Dockerfile, not the old container&#x27;s writable layer.</p>
+<p><strong>Why this is correct:</strong> A package installed with docker exec lives in that layer and disappears when Compose recreates the container.</p>
+<p><strong>A plausible wrong approach:</strong> Patching the running container and closing the finding leaves the next deployment unpatched.</p>
+<p><strong>How to verify:</strong> Recreate the container and check the package version; it is back to the old one until the Dockerfile changes.</p>
 <h3 id="exercise-3-design-a-minimal-base-image-update">Exercise 3: Design a minimal base-image update.<a class="heading-anchor" href="#exercise-3-design-a-minimal-base-image-update" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Change the resolved base deliberately and rerun relevant acceptance.</p>
 <p><strong>Why:</strong> Keep other changes small so failures can be attributed. Record both old and new identities for rollback and comparison.</p>
+<p><strong>Approach:</strong> Change only the resolved base, such as a new digest for <code>python:3.12-slim</code> passed through DS60_PYTHON_IMAGE, and rerun acceptance.</p>
+<p><strong>Why this is correct:</strong> With one change, a new failure points to the base and not to unrelated edits.</p>
+<p><strong>A plausible wrong approach:</strong> Bumping the base, server.py and the compose file together makes a regression hard to trace.</p>
+<p><strong>How to verify:</strong> The record lists old and new base digests, and acceptance passes on the new image.</p>
 <h3 id="exercise-4-diagnose-a-scan-report-attached-only-to-a-mutable-tag">Exercise 4: Diagnose a scan report attached only to a mutable tag.<a class="heading-anchor" href="#exercise-4-diagnose-a-scan-report-attached-only-to-a-mutable-tag" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Resolve the exact scanned artifact before using the result.</p>
 <p><strong>Why:</strong> The current tag may refer to different bytes. Evidence must be tied to immutable identity and the scanner’s knowledge date.</p>
+<p><strong>Approach:</strong> Find which digest the scanner examined, and compare it with what the tag resolves to now.</p>
+<p><strong>Why this is correct:</strong> A mutable tag may have moved since the scan, so the findings may describe other content.</p>
+<p><strong>A plausible wrong approach:</strong> Using the tag&#x27;s scan to close or open findings on today&#x27;s image applies results to bytes the scanner never read.</p>
+<p><strong>How to verify:</strong> The scan record names a digest and database date; rescan the current digest if they differ.</p>
 <h3 id="exercise-5-explain-why-zero-findings-is-not-a-universal-security-proof">Exercise 5: Explain why zero findings is not a universal security proof.<a class="heading-anchor" href="#exercise-5-explain-why-zero-findings-is-not-a-universal-security-proof" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Scanners have scope and knowledge limitations.</p>
 <p><strong>Why:</strong> Application flaws, configuration issues and unknown vulnerabilities may be outside the scanner’s matching rules. State the actual tool result and limits.</p>
+<p><strong>Approach:</strong> List what the scanner checks: known identifiers matched to recognized package versions, as of its database date.</p>
+<p><strong>Why this is correct:</strong> Flaws in server.py, weak compose settings and unpublished vulnerabilities fall outside those rules.</p>
+<p><strong>A plausible wrong approach:</strong> Reporting zero findings as the image is secure claims coverage the tool does not provide.</p>
+<p><strong>How to verify:</strong> The report names the tool, its database date and the scope, and lists configuration review as a separate check.</p>
 <h3 id="exercise-6-write-a-patch-decision-record">Exercise 6: Write a patch decision record.<a class="heading-anchor" href="#exercise-6-write-a-patch-decision-record" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Finding, affected artifact, chosen action, tests and residual risk.</p>
 <p><strong>Why:</strong> The record should make the operational decision reviewable. It should not replace evidence with an unqualified claim that everything is now safe.</p>
+<p><strong>Approach:</strong> Record the finding, the affected digest, the action chosen, the tests rerun and any risk remaining.</p>
+<p><strong>Why this is correct:</strong> A reviewer can follow the decision and see that the new image passed the same acceptance.</p>
+<p><strong>A plausible wrong approach:</strong> Writing just patched, all safe hides which image changed and what was left unresolved.</p>
+<p><strong>How to verify:</strong> Each field links to the scan output, the rebuild and a test receipt for the new digest.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

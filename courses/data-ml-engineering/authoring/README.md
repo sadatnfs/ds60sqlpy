@@ -16,12 +16,43 @@ these fields:
   "runtime_profile": "python-core",
   "language": "python",
   "concepts": ["row grain", "contract"],
+  "key_terms": [
+    { "term": "Record grain", "definition": "What exactly one record represents." },
+    {
+      "term": "Contract",
+      "definition": "The conditions under which a transformation is meaningful."
+    },
+    { "term": "Publication decision", "definition": "The choice to release or withhold a number." }
+  ],
+  "worked_examples": [],
   "outcome": "State a testable contract for a small data product.",
   "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-001.md",
   "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-001.py",
   "related_paths": [{ "label": "Polars workshop", "path": "courses/polars/README.md" }]
 }
 ```
+
+key_terms holds three to five `{term, definition}` objects for vocabulary the
+chapter really uses. A term is unique within its chapter and has no colon or
+asterisk; a definition is one or two sentences ending with a period. The
+publisher renders them as a `## Key terms` list immediately before the first H2
+of the chapter, so do not author that heading in Markdown. The chapter therefore
+needs an H2 before its worked-program marker.
+
+worked_examples holds `{title, language, code, output, interpretation}`
+objects, all strings. language is python, sql, sh, yaml, json or text; code is
+non-empty and ends with a newline; output is empty or the stdout actually
+observed when the code ran, ending with a newline; neither contains a code fence.
+Python code must parse. The interpretation is at least 40 words and reads the
+specific values or behavior shown. Titles are unique within a chapter, code and
+interpretations are unique across the book, and no field uses em or en dashes.
+Each chapter needs at least two fenced artifacts counting the complete program,
+fences authored in its Markdown and its worked examples, so a chapter without
+an authored fence needs one worked example. The publisher renders each as
+`## Worked example: <title>` with a code fence, an optional text output fence
+and the interpretation, right after the section holding the worked-program
+marker. Do not author outputs you did not observe; when a library is not
+installed, use a labeled stdlib or numpy model of the mechanism instead.
 
 Markdown contains the full chapter H1, exactly two headings beginning
 `## Worked case 1:` and `## Worked case 2:`, original theory, application and

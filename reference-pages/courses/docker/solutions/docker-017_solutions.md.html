@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-whether-linux-implies-amd64">Exercise 1: Predict whether Linux implies amd64.<a class="heading-anchor" href="#exercise-1-predict-whether-linux-implies-amd64" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> No; operating system and architecture are separate axes.</p>
 <p><strong>Why:</strong> Linux supports multiple instruction families. A release statement should name both dimensions rather than collapsing them into a single platform label.</p>
+<p><strong>Approach:</strong> Read a platform string as two parts: linux/amd64 and linux/arm64 share an OS but differ in instruction set.</p>
+<p><strong>Why this is correct:</strong> Worked example 1 builds the same Dockerfile for linux/arm64, and inspection reports Os linux and Architecture arm64 on any host.</p>
+<p><strong>A plausible wrong approach:</strong> Writing runs on Linux in a release note leaves arm64 users to discover that only amd64 was built.</p>
+<p><strong>How to verify:</strong> The image inspect template in worked example 1 prints both fields; a release note should name both.</p>
 <h3 id="exercise-2-classify-cross-compilation-and-emulation">Exercise 2: Classify cross-compilation and emulation.<a class="heading-anchor" href="#exercise-2-classify-cross-compilation-and-emulation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Producing target code versus executing foreign code.</p>
 <p><strong>Why:</strong> A cross-compiler can be native while its output is foreign. Emulation may permit execution but changes performance and cannot establish all native behavior.</p>
+<p><strong>Approach:</strong> Classify by what runs where: a cross-compiler is a native program that outputs target code, and emulation such as QEMU runs target code on another CPU.</p>
+<p><strong>Why this is correct:</strong> Cross-compiling never executes the output, while emulation does, but slowly and with emulator quirks.</p>
+<p><strong>A plausible wrong approach:</strong> Calling an emulated run on amd64 native arm64 qualification ignores timing and behavior differences.</p>
+<p><strong>How to verify:</strong> Label each matrix cell with built, emulated or native, and keep native arm64 performance claims for an arm64 host.</p>
 <h3 id="exercise-3-design-a-two-platform-evidence-matrix">Exercise 3: Design a two-platform evidence matrix.<a class="heading-anchor" href="#exercise-3-design-a-two-platform-evidence-matrix" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Separate build and execution columns for amd64 and arm64.</p>
 <p><strong>Why:</strong> Do not fill an execution cell from an index manifest alone. The matrix should make untested combinations visible.</p>
+<p><strong>Approach:</strong> Make a table with rows for linux/amd64 and linux/arm64 and columns for built, executed and acceptance passed.</p>
+<p><strong>Why this is correct:</strong> The index in worked example 2 lists one image per platform, so each row needs its own build and run evidence.</p>
+<p><strong>A plausible wrong approach:</strong> Marking arm64 as executed because the index contains an arm64 entry confuses publishing with running.</p>
+<p><strong>How to verify:</strong> Each filled cell names the host and the command used; any cell without evidence stays blank and labeled unqualified.</p>
 <h3 id="exercise-4-diagnose-exec-format-error">Exercise 4: Diagnose exec format error.<a class="heading-anchor" href="#exercise-4-diagnose-exec-format-error" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect architecture and executable format before app logic.</p>
 <p><strong>Why:</strong> A program can fail before its entry point because the kernel cannot load its format. Changing business logic or increasing memory will not fix that boundary.</p>
+<p><strong>Approach:</strong> Check the architecture first with docker image inspect and compare it to the host&#x27;s uname -m before reading application code.</p>
+<p><strong>Why this is correct:</strong> exec format error comes from the kernel refusing a binary built for another architecture, before the program&#x27;s first line.</p>
+<p><strong>A plausible wrong approach:</strong> Raising mem_limit or editing server.py has no effect, because the process never started.</p>
+<p><strong>How to verify:</strong> Rebuild for the host&#x27;s platform or enable emulation; the same command then reaches the application.</p>
 <h3 id="exercise-5-explain-why-multi-platform-output-is-not-always-one-load-result">Exercise 5: Explain why multi-platform output is not always one --load result.<a class="heading-anchor" href="#exercise-5-explain-why-multi-platform-output-is-not-always-one-load-result" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Exporter and image-store capabilities constrain output.</p>
 <p><strong>Why:</strong> Understand the selected build driver and local store rather than assuming every multi-platform result can be loaded identically on every engine.</p>
+<p><strong>Approach:</strong> Look at the build driver and image store: --load imports one image into the local store, and older stores may not hold a multi-platform index.</p>
+<p><strong>Why this is correct:</strong> A multi-platform result is an index pointing to several images, which needs an exporter and store that can represent it.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting --platform linux/amd64,linux/arm64 --load to work on every engine fails on stores that keep only one platform per tag.</p>
+<p><strong>How to verify:</strong> docker buildx ls shows the driver; push to a registry or use a store that supports indexes, then inspect the index entries.</p>
 <h3 id="exercise-6-write-an-honest-portability-claim">Exercise 6: Write an honest portability claim.<a class="heading-anchor" href="#exercise-6-write-an-honest-portability-claim" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Name the tested platform and label other platforms unqualified.</p>
 <p><strong>Why:</strong> Source portability is valuable but weaker than observed execution. Architecture-specific dependencies and runtime behavior need their own evidence.</p>
+<p><strong>Approach:</strong> State the tested platform, the host used, and the acceptance result, then list other platforms as built but unqualified.</p>
+<p><strong>Why this is correct:</strong> The fixture uses only the standard library, so it likely ports, but native dependencies elsewhere can break per architecture.</p>
+<p><strong>A plausible wrong approach:</strong> Writing works everywhere from one amd64 run makes a claim nobody has observed.</p>
+<p><strong>How to verify:</strong> Each platform named as supported has a matching row of execution evidence.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

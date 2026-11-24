@@ -210,6 +210,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The residual is prediction minus target. The chain rule multiplies its factor of two by the derivative of the prediction, which is the input. At the supplied initial weight, residuals are -2 and -4. Multiplying by inputs gives -2 and -8; doubling and averaging gives -10. SGD subtracts learning rate times gradient, so subtracting a negative gradient increases the weight. This sign check is a useful debugging habit.</p>
 <p>In PyTorch, <code>requires_grad=True</code> requests gradient tracking on the parameter. <code>loss.backward()</code> accumulates into its <code>.grad</code>, so an ordinary repeated training loop must zero old gradients at the chosen update boundary. The optimizer owns references to the trainable parameter objects; replacing a parameter object carelessly can leave the optimizer updating the old one. Inspect both parameter identity and device when debugging.</p>
 <p>In TensorFlow, <code>GradientTape</code> records operations involving watched trainable variables in its scope. <code>tape.gradient(loss, w)</code> returns the derivative, which is then paired with the variable for <code>apply_gradients</code>. A missing derivative is different from a zero derivative. Check that the intended variable was watched and that the forward computation stayed connected to it. Both frameworks need parameters, inputs and relevant optimizer state on compatible devices; neither makes a cross-device mismatch mathematically meaningful.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Device placement:</strong> Assigning tensors and model parameters to a device; all operands of one operation must be on the same device.</li>
+<li><strong>Loss gradient:</strong> The derivative of the loss with respect to each parameter, computed by backpropagation.</li>
+<li><strong>Optimizer step:</strong> The update that changes parameters using their gradients and any optimizer state.</li>
+<li><strong>Device scope:</strong> A TensorFlow context such as <code>tf.device</code> that controls where new operations are placed.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>With x=[1,2], target=[2,4], <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>, mean loss is 10 and derivative is-10. SGD with learning rate 0.1 updates w to 1.</p>
@@ -225,6 +232,32 @@ w <span class="syntax-operator">-</span><span class="syntax-operator">=</span> <
 <span class="syntax-keyword">assert</span> loss <span class="syntax-operator">==</span> <span class="syntax-number">10</span> <span class="syntax-operator">and</span> grad <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">10</span> <span class="syntax-operator">and</span> w <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU training oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> loss<span class="syntax-punctuation">,</span> grad<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Loss 10, gradient-10, new weight 1.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>x</code></td>
+<td><code>[1.0, 2.0]</code></td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td><code>[2.0, 4.0]</code></td>
+</tr>
+<tr>
+<td><code>w</code></td>
+<td><code>1.0</code></td>
+</tr>
+<tr>
+<td><code>loss</code></td>
+<td><code>10.0</code></td>
+</tr>
+<tr>
+<td><code>grad</code></td>
+<td><code>-10.0</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -237,17 +270,23 @@ w <span class="syntax-operator">-</span><span class="syntax-operator">=</span> <
 <p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-derive-the-scalar-gradient">Exercise 1: Derive the scalar gradient<a class="heading-anchor" href="#exercise-1-derive-the-scalar-gradient" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>derive the scalar gradient</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Dropping the factor 2 from the derivative, a common slip when writing it by hand, gives -5 and a half-size update. Autograd would then disagree with the hand derivation.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-calculate-the-update">Exercise 2: Calculate the update<a class="heading-anchor" href="#exercise-2-calculate-the-update" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>calculate the update</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Adding the gradient instead of subtracting it gives <code>w = -1</code>, which raises the loss to <code>((-1-2)**2 + (-2-4)**2)/2 = 22.5</code>. The sign error is easy to miss when only the update size is checked.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-compare-sum-and-mean">Exercise 3: Compare sum and mean<a class="heading-anchor" href="#exercise-3-compare-sum-and-mean" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>compare sum and mean</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing a sum-loss run with a mean-loss run and attributing the speed or convergence difference to the GPU confounds hardware with loss normalization.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-inspect-every-tensor-device">Exercise 4: Inspect every tensor device<a class="heading-anchor" href="#exercise-4-inspect-every-tensor-device" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>inspect every tensor device</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Checking only the model parameters misses inputs and targets, and moving the model after creating the optimizer can leave the optimizer holding stale references in some setups.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-write-equal-pytorch-and-tensorflow-contracts">Exercise 5: Write equal PyTorch and TensorFlow contracts<a class="heading-anchor" href="#exercise-5-write-equal-pytorch-and-tensorflow-contracts" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>write equal PyTorch and TensorFlow contracts</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Letting each framework use its default initializer or loss reduction makes the numbers differ for reasons unrelated to correctness.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-distinguish-correctness-and-performance">Exercise 6: Distinguish correctness and performance<a class="heading-anchor" href="#exercise-6-distinguish-correctness-and-performance" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>distinguish correctness and performance</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting a speedup from a run that silently used a sum loss, or ran partly on the CPU, compares different computations.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

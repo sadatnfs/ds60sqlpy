@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Compare index forms on one vector",
+      "body": "Each row below applies a different index to `x <- c(A = 10, B = 20, C = 30)`. The results come from the same three values, so differences in the output come only from the index.\n\n```text\nindex                  values    names\nx[c(3, 1, 1)]          30 10 10  C A A\nx[-2]                  10 30     A C\nx[c(\"A\", \"C\")]         10 30     A C\nx[c(TRUE, NA, FALSE)]  10 NA     A <NA>\nx[integer(0)]          none      none\nx[4]                   NA        <NA>\n```\n\nRows two and three agree here, but they ask different questions: the negative index drops a position, while the names request labels in the order given, so `x[c(\"C\", \"A\")]` would reverse them. The last row is the reason to validate positions and names before using them. Asking for a fourth element of a three-element vector does not stop the script; it returns NA with a missing name, which can flow into later arithmetic unnoticed."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Read the index vector from left to right; each entry names one position to copy into the result.",
+      "why": "In c(4, 8), position 2 holds 8 and position 1 holds 4. The index asks for 2, 2, 1, so the output is 8, 8, 4, and its length equals the index length of three.",
+      "wrong": "Expecting a set-like answer such as 8, 4 with the repeat removed, or a sorted 4, 8. Indexing never deduplicates or reorders on its own.",
+      "verify": "The reference asserts `identical(c(4, 8)[c(2, 2, 1)], c(8, 8, 4))`, and `length()` of the result returns 3."
+    },
+    {
+      "approach": "Use a negative position: `c(2, 4, 6)[-2]` excludes the second entry and keeps the rest in order.",
+      "why": "Position 2 holds 4, so the remaining values are 2 and 6. Exclusion by position does not depend on what the values are.",
+      "wrong": "Filtering by value with `x[x != 4]` happens to work here but would drop every 4 if the value repeated. Writing `x[-4]`, confusing the value with a position, is worse: an out-of-range negative index is ignored, so all three values come back with no error.",
+      "verify": "`print(c(2, 4, 6)[-2])` shows `[1] 2 6`, a result of length 2."
+    },
+    {
+      "approach": "Validate first, then assign: check `!anyDuplicated(names(x))` and `key %in% names(x)`, and only then run `x[key] <- 9`.",
+      "why": "The names A and B are unique and B is present, so exactly one entry is replaced and the vector keeps its length of two.",
+      "wrong": "Skipping the checks. A typo such as \"b\" appends a third element, as Example 3 shows. With duplicated names, `x[\"B\"] <- 9` would change only the first match and leave the second B untouched.",
+      "verify": "The reference asserts `identical(unname(x), c(1, 9))`; `length(x)` returns 2 after the update."
+    },
+    {
+      "approach": "Pick one indexing policy. To keep the first and third entries use `c(1, 3)`; to drop the second use `-2`.",
+      "why": "Positive positions retain and negative positions exclude, so `c(1, -2)` asks two incompatible questions at once. R stops with the message that only 0's may be mixed with negative subscripts.",
+      "wrong": "Assuming R will keep position 1 and drop position 2, or wrapping the call in `try()` and carrying on with whatever came back. The mixed index never produces a value.",
+      "verify": "The reference's tryCatch returns TRUE for the mixed index, and both `c(2, 4, 6)[c(1, 3)]` and `c(2, 4, 6)[-2]` return 2 and 6."
+    },
+    {
+      "approach": "Index the vector with `integer(0)` and inspect the length and printed form of the result.",
+      "why": "No positions are requested, so nothing is copied. The result keeps the type and, for the named x in the reference, the names attribute, but has no elements.",
+      "wrong": "Expecting NA or the full vector. Contrast `x[NA]`: a logical NA is recycled across every position, so it returns NA for each element instead of nothing.",
+      "verify": "The reference checks `length(x[integer(0)]) == 0L`, and `print()` shows `named numeric(0)`."
+    },
+    {
+      "approach": "Before any keyed lookup or update, test names for duplicates and for missing requested keys.",
+      "why": "R accepts `c(A = 1, A = 2)`, and `[\"A\"]` returns only the first match, 1. A lookup by name therefore silently ignores the second record, which a real key column would never allow.",
+      "wrong": "Treating names like a primary key in a table. Nothing enforces uniqueness, and a missing name returns NA rather than an error.",
+      "verify": "`anyDuplicated(c(\"A\", \"A\"))` returns 2, the position of the first repeat, so the reference check `> 0L` is TRUE."
+    }
+  ]
+}

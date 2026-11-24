@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict TRUE &amp; NA and FALSE &amp; NA.</p>
 <p>The first is NA; the second is FALSE.</p>
+<p><strong>Approach:</strong> For each expression, ask whether the known operand already decides a conjunction, then evaluate both in one vector.</p>
+<p><strong>Why it holds here:</strong> A FALSE side makes any and FALSE whatever the unknown turns out to be, so FALSE &amp; NA is FALSE. A TRUE side leaves the answer depending on the unknown, so TRUE &amp; NA stays NA, which the reference asserts with is.na().</p>
+<p><strong>Tempting mistake:</strong> Treating NA as if it were FALSE predicts FALSE for both. The opposite shortcut, assuming any NA poisons the result, predicts NA for both. Each gets one of the two cases wrong.</p>
+<p><strong>Verify:</strong> <code>print(c(TRUE &amp; NA, FALSE &amp; NA))</code> shows <code>[1]    NA FALSE</code>.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the threshold from ten to fifteen.</p>
 <p>Only the amount twenty remains.</p>
+<p><strong>Approach:</strong> Keep the missingness guard and change only the threshold: <code>x[!is.na(x) &amp; x &gt;= 15]</code>.</p>
+<p><strong>Why it holds here:</strong> Among 5, 12, NA and 20, only 20 reaches fifteen. The guard drops the unknown third amount under the same policy as before, so the threshold edit cannot quietly change how missing values are handled.</p>
+<p><strong>Tempting mistake:</strong> Dropping the guard and writing <code>x[x &gt;= 15]</code>. The NA comparison selects an NA element, so the result is NA and 20, a length-two vector with a phantom amount in it.</p>
+<p><strong>Verify:</strong> The reference asserts <code>identical(x[!is.na(x) &amp; x &gt;= 15], 20)</code>, so the result has length 1 and value 20.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a mask for known amounts from ten through twenty inclusive.</p>
 <p>Use !is.na(x) &amp; x &gt;= 10 &amp; x &lt;= 20.</p>
+<p><strong>Approach:</strong> Combine three conditions with vectorized &amp;: known, at least ten, and at most twenty.</p>
+<p><strong>Why it holds here:</strong> The upper bound is inclusive, so 20 stays in, and 5 falls below the lower bound. The selection is 12 and 20, matching the starter data exactly.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>x &lt; 20</code> drops the boundary amount and leaves only 12. Using <code>&amp;&amp;</code> instead of <code>&amp;</code> is also wrong here: it expects single values, and current R stops with an error about a length greater than one rather than building a mask.</p>
+<p><strong>Verify:</strong> <code>x[mask]</code> returns 12 and 20, and <code>sum(mask)</code> counts 2 TRUE entries.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose x == NA.</p>
 <p>Use is.na(x) to test missingness.</p>
+<p><strong>Approach:</strong> Replace the equality test with <code>is.na(x)</code>, which answers the question asked of every element.</p>
+<p><strong>Why it holds here:</strong> <code>x == NA</code> compares each amount with an unknown, so even the known values 5, 12 and 20 give NA. The result carries no information about which position is missing.</p>
+<p><strong>Tempting mistake:</strong> Using <code>which(x == NA)</code> to locate missing values. <code>which()</code> skips NA entries, so it returns <code>integer(0)</code> and claims there is nothing missing while the third amount is NA.</p>
+<p><strong>Verify:</strong> <code>is.na(x)</code> prints FALSE FALSE TRUE FALSE, the value the reference checks, while <code>sum(x == NA)</code> returns NA.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Guard an empty vector before extracting its first element.</p>
 <p>length(x) &gt; 0 &amp;&amp; x[[1]] &gt; 0 safely returns FALSE for an empty vector.</p>
+<p><strong>Approach:</strong> Put the length test first and join it with <code>&amp;&amp;</code>, so the extraction only runs when an element exists.</p>
+<p><strong>Why it holds here:</strong> <code>&amp;&amp;</code> evaluates left to right and stops at the first FALSE. For <code>numeric(0)</code> the length test is FALSE, so <code>empty[[1]]</code> is never evaluated and the whole expression is FALSE.</p>
+<p><strong>Tempting mistake:</strong> Using single <code>&amp;</code> evaluates both sides, and <code>empty[[1]]</code> fails with a subscript out of bounds error. Writing <code>empty[1] &gt; 0</code> avoids the error but returns <code>logical(0)</code>, which breaks any <code>if</code> that uses it.</p>
+<p><strong>Verify:</strong> The guarded expression returns FALSE with no error, which is exactly what the reference wraps in <code>stopifnot(!(...))</code>.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Separate an all-known claim from all(..., na.rm=TRUE).</p>
 <p>Report missingness and state that the reduced claim concerns observed predicates only.</p>
+<p><strong>Approach:</strong> Report two things: whether the claim holds for observed predicates, and how many predicates were unknown.</p>
+<p><strong>Why it holds here:</strong> <code>all(c(TRUE, NA))</code> is NA because the unknown entry could be FALSE. With <code>na.rm = TRUE</code> the answer becomes TRUE, but only about the known entries. On the starter amounts, <code>all(amount &gt;= 5)</code> is NA for the same reason.</p>
+<p><strong>Tempting mistake:</strong> Quoting the <code>na.rm = TRUE</code> result as &quot;every amount is at least 5&quot;. The third amount was never measured, so that sentence claims more than the data shows.</p>
+<p><strong>Verify:</strong> The reference checks <code>is.na(all(c(TRUE, NA)))</code> and <code>isTRUE(all(c(TRUE, NA), na.rm = TRUE))</code>; <code>sum(is.na(amount))</code> reports the 1 unknown to cite alongside.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

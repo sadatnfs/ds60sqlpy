@@ -4,21 +4,21 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 ## Exercise 1: Define normalized identity
 
-The hash confirms equality of the normalized representation, not semantic equivalence in every task. Preserving raw text lets a reviewer inspect information intentionally discarded by the policy.
+The hash confirms equality of the normalized representation, not semantic equivalence in every task. Preserving raw text lets a reviewer inspect information intentionally discarded by the policy. Hashing raw text instead would make the two records look unrelated. Assert hash equality for the normalized pair and that the original strings are untouched.
 
 **Expected:** Equal normalized hashes while original strings remain unchanged.
 
 ## Exercise 2: Expose a near-duplicate trap
 
-Three shared tokens and four union tokens produce .75. The missing negation changes meaning far more than its one-token contribution suggests. A near-duplicate detector should not automatically merge these records as equivalent evidence.
+Three shared tokens and four union tokens produce .75. The missing negation changes meaning far more than its one-token contribution suggests. A near-duplicate detector should not automatically merge these records as equivalent evidence. Merging at Jaccard .75 would treat a record and its negation as one; inspect which token is missing before merging.
 
-**Expected:** Similarity.75 despite a contradictory status claim.
+**Expected:** Similarity .75 despite a contradictory status claim.
 
 ## Exercise 3: Build the combined split
 
-The split enforces two claims at once. Retaining the exclusion list explains why a future record is absent. A different known-family forecasting target could legitimately include b2, but that would be a separately labeled evaluation.
+The split enforces two claims at once. Retaining the exclusion list explains why a future record is absent. A different known-family forecasting target could legitimately include b2, but that would be a separately labeled evaluation. A random row split could put b2 in test next to b1 in train. Check the three lists exactly, including excluded b2.
 
-**Expected:** Train[a1,a2,b1],test[c1],excluded[b2].
+**Expected:** Train `[a1, a2, b1]`, test `[c1]`, excluded `[b2]`.
 
 ## Exercise 4: Assert pipeline boundaries
 
@@ -28,15 +28,15 @@ The evidence boundary includes every learned preprocessing stage. Source metadat
 
 ## Exercise 5: Compute paired family differences
 
-Different row counts make the flattened result emphasize positive families. Neither average is intrinsically wrong, but each answers a different question. The comparison should retain paired case identities and state its weighting.
+Different row counts make the flattened result emphasize positive families. Neither average is intrinsically wrong, but each answers a different question. The comparison should retain paired case identities and state its weighting. Flattening rows gives .2, which overweights the positive families. Recompute both \(\frac{2}{15}\) and .2 from the per-family deltas.
 
-**Expected:** Equal-family2/15 versus row-weighted.2.
+**Expected:** Equal-family \(\frac{2}{15}\) versus row-weighted .2.
 
 ## Exercise 6: Bootstrap and qualify uncertainty
 
 The resampling unit preserves the dependence represented by family grouping. Reproducibility is checked through the seed, while statistical credibility still depends on enough representative independent families. A toy interval is a mechanism demonstration, not a release guarantee. The future-new-family fixture also excludes b2 explicitly because its family appeared before the cutoff. Report that exclusion alongside the one remaining test family. A reviewer should see that stricter leakage control reduced the available evidence, rather than interpreting a clean split as proof that the dataset is now large enough. Collecting more independent future families is a different remedy from generating more paraphrases of c1.
 
-**Expected:** Identical quantiles under the same seed; support within[-.1,.3]; no strong population claim from three families.
+**Expected:** Identical quantiles under the same seed; support within [-.1, .3]; no strong population claim from three families.
 
 ## Transfer and limits
 

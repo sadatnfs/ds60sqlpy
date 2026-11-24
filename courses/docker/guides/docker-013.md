@@ -16,6 +16,14 @@ The fixture stores its counter in a named volume mounted at `/data`. Its applica
 
 Mounting a directory over an image path hides the image content at that location while the mount is present. A bind mount hides the packaged directory without copying its files into the host directory. Docker-managed volumes have an important initialization exception: when an empty volume is mounted over existing image content, Docker copies that content into it by default unless volume-nocopy is selected. A nonempty mounted volume hides the packaged content. Distinguish those cases before diagnosing missing or unexpectedly seeded files.
 
+### Key terms
+
+- **Named volume:** Engine-managed storage, mounted into containers, that survives container removal and recreation.
+- **Bind mount:** A mapping of an explicitly chosen host path into a container, giving its processes direct access to those host files.
+- **Temporary filesystem:** Volatile storage, usually backed by memory, that disappears when the container stops.
+- **Container recreation:** Removing a container and creating a new one, which discards its writable layer but keeps mounted volumes.
+- **`volume-nocopy`:** A mount option that stops Docker from seeding an empty named volume with the image content at its mount path.
+
 ## Anatomy and a trace you can follow
 
 A Compose service can mount `study-data:/data`, with `study-data` declared in the top-level `volumes` section. Compose assigns a project-scoped volume name unless configured otherwise. The fixture’s app treats an absent counter.json as an initial count of zero and updates that file through an atomic replace under a process-local lock. It does not create an exclusive marker file. The separate restore command uses exclusive file creation to refuse overwriting an existing restore target.
@@ -91,11 +99,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Mounting a host directory over `/app` and hiding the packaged code. Changing the project name and then looking for data in the new, empty volume. Deleting volumes as part of routine cleanup.
 
-Exercise 4 is this chapter's boundary case: Diagnose missing code after mounting over /app. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose missing code after mounting over /app. Compare the files in `/app` from the image with the files the running container shows, and read the mount table for the same path. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using named volume, bind mount, persistence and container recreation. Reconstruct worked example 2 (Recreate the app while retaining its volume) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Predict the counter value after recreating the app with the named volume kept, and after removing that volume. Then reconstruct worked example 2 (Recreate the app while retaining its volume) with one different value, predict what changes, and name which of named volume, bind mount, persistence and container recreation the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

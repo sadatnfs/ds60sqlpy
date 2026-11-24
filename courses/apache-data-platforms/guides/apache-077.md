@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-076`, `apache-075`.
 
+## Key terms
+
+- **Table version:** A specific committed state of a shared Delta table. Requesting it pins the result so later commits do not change the answer.
+- **Predicate hint:** A filter the client sends so the server may skip files. The server can ignore it, so the client must still apply the full filter.
+- **History sharing:** A provider option that makes earlier table versions readable, still subject to the table's retention rules.
+- **Result identity:** The recorded table, version, schema and row values that let a later read be compared with the original one.
+
 ## Reproducibility requires selecting a table state
 
 A mutable table name identifies a logical object whose current contents can
@@ -76,6 +83,30 @@ Keep retries bound to the intended table state when reproducibility matters.
 It is part of query optimization unless the actual protocol/deployment explicitly
 provides a tested policy guarantee. These cases separate fixed-state reproducibility
 from file pruning and final row correctness.
+
+## Worked examples
+
+### Query the table at a pinned version
+
+```bash
+curl -s -H "Authorization: Bearer $RECIPIENT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"version": 0, "predicateHints": []}' \
+  "$SHARING_ENDPOINT/shares/ds60_fixture/schemas/tutorial/tables/orders/query"
+```
+
+The response is newline-delimited JSON: a protocol line, a metaData line and one file line per data file, each with a short-lived presigned URL. The delta-table-version response header must equal 0, or the reader cannot claim it saw the pinned state. Two reads at version 0 return the same files; a read without a version follows the latest commit and can change between calls, which is why reproducible reports always pin.
+
+### Predicate hints do not filter rows
+
+```json
+{
+  "version": 0,
+  "predicateHints": ["region = 'east'"]
+}
+```
+
+A server may use hints to skip files whose statistics cannot match, but it is allowed to ignore them, and the reference configuration sets evaluatePredicateHints to false. The client must therefore apply the filter itself after reading. If a recipient relied on hints to hide west rows, it would receive them anyway, so hints are an optimization and never an access boundary.
 
 ## Complete worked source
 

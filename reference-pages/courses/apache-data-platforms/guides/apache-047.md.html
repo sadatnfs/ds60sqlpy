@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-047-keyed-state-and-timers">apache-047: Keyed state and timers<a class="heading-anchor" href="#apache-047-keyed-state-and-timers" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-046</code>, <code>apache-006</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Keyed state:</strong> Managed Flink state scoped to one key of a keyed stream and one operator, so the total for east is independent of the total for west.</li>
+<li><strong>ValueState:</strong> A keyed state primitive that holds a single value per key, checkpointed and restored by Flink.</li>
+<li><strong>TimerService:</strong> The process function service for registering and deleting event-time or processing-time timers for the current key.</li>
+<li><strong>Event-time timer:</strong> A timer that fires when the watermark passes its timestamp, not when wall-clock time passes. Sleeping in the client does not fire it.</li>
+<li><strong>Operator identity:</strong> The stable identifier, descriptor name and serializer that tie managed state to an operator across restores.</li>
+</ul>
 <h3 id="keyed-state-belongs-to-a-key-and-an-operator">Keyed state belongs to a key and an operator<a class="heading-anchor" href="#keyed-state-belongs-to-a-key-and-an-operator" aria-label="Link to this section">#</a></h3>
 <p>A keyed operator partitions records by a declared key and exposes state scoped to that key. A ValueState holding a running total for east is independent from the value for west. The state also belongs to a particular operator identity, descriptor name and serializer. A Java field containing a mutable map does not automatically become managed Flink state or participate correctly in checkpoints and rescaling.</p>
 <p>Event-time timers are scheduled against watermark progress. Processing-time timers use the worker&#x27;s clock. A timer can fire when its relevant clock passes its deadline; merely sleeping in the client does not advance an event-time timer. Define whether an inactivity rule means no recently observed event time or no wall-clock activity, because those are different operational policies.</p>

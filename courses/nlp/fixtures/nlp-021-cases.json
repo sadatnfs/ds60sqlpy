@@ -9,12 +9,12 @@
     {
       "exercise": 2,
       "task": "Compute token-set Jaccard for ready versus not ready.",
-      "expected": "Similarity.75 despite a contradictory status claim."
+      "expected": "Similarity .75 despite a contradictory status claim."
     },
     {
       "exercise": 3,
-      "task": "Apply cutoff2 and exclude future families already seen in training.",
-      "expected": "Train[a1,a2,b1],test[c1],excluded[b2]."
+      "task": "Apply cutoff 2 and exclude future families already seen in training.",
+      "expected": "Train `[a1, a2, b1]`, test `[c1]`, excluded `[b2]`."
     },
     {
       "exercise": 4,
@@ -24,12 +24,12 @@
     {
       "exercise": 5,
       "task": "Average the supplied differences by family and compare with flattened rows.",
-      "expected": "Equal-family2/15 versus row-weighted.2."
+      "expected": "Equal-family 2/15 versus row-weighted .2."
     },
     {
       "exercise": 6,
       "task": "Run the seeded family bootstrap twice and explain the small-family limit.",
-      "expected": "Identical quantiles under the same seed; support within[-.1,.3]; no strong population claim from three families."
+      "expected": "Identical quantiles under the same seed; support within [-.1, .3]; no strong population claim from three families."
     }
   ]
 }

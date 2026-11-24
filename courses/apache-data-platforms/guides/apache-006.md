@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: beginner. Direct prerequisites: `apache-005`.
 
+## Key terms
+
+- **Idempotence:** The property that applying an operation again has the same effect as applying it once, written f(f(s, x), x) = f(s, x). Setting a value is naturally idempotent; incrementing a balance is not.
+- **Stable operation identifier:** An identifier for the business operation rather than the network attempt, which lets a receiver recognize a retry of an action it has already applied.
+- **Atomic receipt:** A record of an operation identifier written in the same database transaction as the operation's effect, so either both persist or neither does.
+- **Retry boundary:** The scope that a retry repeats, such as a network attempt, a transaction or a business action. It determines whether repeating can duplicate a side effect.
+- **Conflicting replay:** A request that reuses an already recorded identifier with a different payload. It must be rejected rather than accepted as a harmless retry.
+
 ## A retry repeats an attempt, not necessarily a business action
 
 A caller can time out after a server has accepted a request. Retrying is then
@@ -82,6 +90,62 @@ retry boundary. It does not automatically deduplicate a new business request or
 atomically commit an unrelated payment database. This local example demonstrates
 one explicit transaction boundary and rejects conflicting identity reuse, which
 are prerequisites for a credible end-to-end argument.
+
+## Worked examples
+
+### Apply a receipt and balance in one transaction
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE receipts (id TEXT PRIMARY KEY, amount INTEGER)")
+db.execute("CREATE TABLE balance (total INTEGER)")
+db.execute("INSERT INTO balance VALUES (0)")
+
+
+def apply(receipt_id: str, amount: int) -> None:
+    with db:
+        db.execute("INSERT OR IGNORE INTO receipts VALUES (?, ?)", (receipt_id, amount))
+        if db.execute("SELECT changes()").fetchone()[0]:
+            db.execute("UPDATE balance SET total = total + ?", (amount,))
+
+
+apply("r-1", 7)
+apply("r-1", 7)
+print(db.execute("SELECT total FROM balance").fetchone()[0])
+```
+
+```text
+7
+```
+
+The balance is 7 after two deliveries of the same receipt because the second insert changes no rows and the update is skipped inside the same transaction. A design that updates the balance first and records the receipt later can crash between the two statements and double count on retry. The lesson program goes further and compares a payload digest, so a reused identifier with a different amount is rejected rather than ignored.
+
+### Roll back a conflicting retry
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE receipts (id TEXT PRIMARY KEY, amount INTEGER)")
+db.execute("INSERT INTO receipts VALUES ('r-1', 7)")
+db.commit()
+try:
+    with db:
+        db.execute("INSERT INTO receipts VALUES ('r-2', 3)")
+        db.execute("INSERT INTO receipts VALUES ('r-1', 99)")
+except sqlite3.IntegrityError as error:
+    print("rolled back:", error)
+print(db.execute("SELECT id, amount FROM receipts ORDER BY id").fetchall())
+```
+
+```text
+rolled back: UNIQUE constraint failed: receipts.id
+[('r-1', 7)]
+```
+
+The conflicting insert fails on the primary key, and the context manager rolls back the whole transaction, so r-2 disappears along with the failed r-1 write. Only the original receipt remains. Partial application is the failure mode to watch for in consumers that commit per statement: they would keep r-2 and report an error, leaving the ledger in a state no single request produced.
 
 ## Complete worked source
 

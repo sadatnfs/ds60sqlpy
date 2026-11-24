@@ -47,7 +47,7 @@ await withDirectory(async (directory) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal((await handle.readFile()).length, 7)`. Restoring the original line brings back the worked observation: text round-trips; 7 UTF-8 bytes versus 5 code units; the handle reports fd -1 after its block.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal((await handle.readFile()).length, 7)`. Restoring `const text = 'A😀B\n';` brings back: text round-trips; 7 UTF-8 bytes versus 5 code units; the handle reports fd -1 after its block.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal((await handle.readFile()).length, 7)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -67,7 +67,7 @@ await withDirectory(async (directory) => {
 });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(await readLines(path), ['A😀B', 'second'])`; after it the line reads `await writeFile(path, 'A😀B\r\nsecond\n', 'utf8');` again and lines are A😀B and second, without a corrupt replacement character.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(await readLines(path), ['A😀B', 'second'])`. Restoring `await writeFile(path, 'A😀B\r\nsecond\n', 'utf8');` brings back: lines are A😀B and second, without a corrupt replacement character.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(await readLines(path), ['A😀B', 'second'])` for this input.
 

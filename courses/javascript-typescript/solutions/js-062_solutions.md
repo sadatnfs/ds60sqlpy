@@ -16,36 +16,36 @@ Check that all projected coordinates are finite and within the intended view. A 
 
 ## Exercise 1: Identify longitude and latitude positions.
 
-GeoJSON order is part of the data contract. A swapped pair can still fall within numeric bounds and silently map the wrong place.
+GeoJSON order is part of the data contract. A swapped pair can still fall within numeric bounds and silently map the wrong place. GeoJSON stores [longitude, latitude]. West is [-20, 10]: 20 degrees west and 10 north. Reading it as [lat, lon] would place it 20 degrees south of the equator, still a valid point.
 
 **Expected:** The first coordinate is longitude and the second latitude.
 
 ## Exercise 2: Change a longitude while holding latitude fixed.
 
-Use a known anchor to reason about direction before interpreting an unfamiliar region.
+Use a known anchor to reason about direction before interpreting an unfamiliar region. With geoMercator scale 400 centered at [0, 0] and translated to `[320, 190]`, longitude 20 projects to about 320 + 400 * 20 * pi / 180, roughly 459.6 pixels, and longitude -20 to about 180.4. Changing East to 30 moves it right by about 70 pixels while its y is unchanged. Print projection([30, 10]).
 
 **Expected:** The projected horizontal location changes under this projection.
 
 ## Exercise 3: Render the synthetic point collection.
 
-Keep feature identity and geometry separate from visual styling. No external fetch is required.
+Keep feature identity and geometry separate from visual styling. No external fetch is required. The reference joins three features to path elements with pointRadius 8 and places each name 12 pixels right of projection(coordinates). Labeling by array index instead of properties.name would break if features were reordered. The checks confirm the [0, 0] anchor lands at `(320, 190)` and that there are three paths.
 
 **Expected:** One finite path per feature with descriptive labels.
 
 ## Exercise 4: Diagnose a misplaced but numerically valid point.
 
-Visual plausibility is not enough. Use known landmarks or synthetic anchors to localize the mismatch.
+Visual plausibility is not enough. Use known landmarks or synthetic anchors to localize the mismatch. A point that lands in the ocean but within bounds often has swapped coordinates or a non-WGS84 source. Project a known landmark and compare.
 
 **Expected:** Check coordinate order, units, projection and source reference system.
 
 ## Exercise 5: Explain projection distortion.
 
-Choose the property relevant to the task and state the tradeoff. A familiar projection is not automatically appropriate for area comparison.
+Choose the property relevant to the task and state the tradeoff. A familiar projection is not automatically appropriate for area comparison. Mercator keeps angles but inflates areas toward the poles; use an equal-area projection such as geoEqualEarth for area comparisons. Mercator at latitude 60 doubles linear scale relative to the equator, so areas there appear about four times larger.
 
 **Expected:** A flat map cannot preserve every geographic property simultaneously.
 
 ## Exercise 6: Plan a real boundary-data integration.
 
-The map must be reproducible and legally distributable. Offline packaging needs deliberate acquisition and attribution, not a hidden runtime download.
+The map must be reproducible and legally distributable. Offline packaging needs deliberate acquisition and attribution, not a hidden runtime download. Record the boundary file's license, date and id field, bundle it with the lesson rather than fetching at runtime, and test that every feature id matches the data.
 
 **Expected:** Source/license, date, stable IDs, topology and projection checks.

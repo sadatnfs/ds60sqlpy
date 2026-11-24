@@ -5,19 +5,23 @@ int main(void) {
      Copy worked example 1 into a scratch pad and change `CHECK(signal(SIGINT,
      previous) != SIG_ERR);` to `CHECK(signal(SIGINT, previous) == SIG_ERR);`
      inside its CHECK. Before running, predict whether the CHECK still holds and
-     explain why; then restore it. Expected: The changed run stops with `Check
-     failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Restoring
-     the original line brings back the worked observation: both operations
-     succeed. */
+     explain why; then restore it. Expected: With `CHECK(signal(SIGINT,
+     previous) == SIG_ERR);` the run stops with `Check failed` at the CHECK on
+     `signal(SIGINT, previous) != SIG_ERR`, because the "install and restore a
+     handler" case no longer shows that both operations succeed. Restoring
+     `CHECK(signal(SIGINT, previous) != SIG_ERR);` brings that observation back.
+   */
 
   /* Exercise 2: Record a raised notification: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2 so that it reads
-     `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Run worked example 2 with
-     that line, explain why the edited CHECK now fails for the same program
-     state, and restore it. Expected: Before the repair the run stops with
-     `Check failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`; after
-     it the line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again and
-     the signal flag becomes one. */
+     A careless edit changed the CHECK in worked example 2, the "record a raised
+     notification" case, so that it reads `CHECK(signal(SIGINT, previous) ==
+     SIG_ERR);`. Run the example with that line, explain why the edited CHECK
+     now fails even though the program state still means the signal flag becomes
+     one, and restore it. Expected: Before the repair the run stops with `Check
+     failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Once the
+     line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, the "record
+     a raised notification" case again shows that the signal flag becomes one.
+   */
 
   /* Exercise 3: Keep work outside the handler
      Raise SIGINT with the lesson handler installed and let a normal-flow

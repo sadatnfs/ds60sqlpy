@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: beginner. Direct prerequisites: `apache-008`.
 
+## Key terms
+
+- **Buffer:** A contiguous memory region holding one part of an Arrow array, such as its fixed-width values or its validity bits.
+- **Validity bitmap:** A buffer with one bit per slot in which a set bit marks a present value, so nulls need no sentinel. Its logical size is n divided by 8, rounded up, bytes for n slots.
+- **Array offset:** The starting slot of an array within its buffers. With offset o and value width w, logical element i starts at byte (o + i) times w.
+- **Zero-copy slice:** A new array view that reuses its parent's buffers with a different offset and length instead of copying values.
+
 ## The mechanism
 
 An Arrow array is a typed view over buffers. That sentence is more precise than
@@ -83,6 +90,45 @@ conversion and Python materialization can still allocate or copy. The evidence
 in this chapter proves sharing for one slice and correct null handling, not an
 end-to-end performance claim. Next, nested arrays extend the same idea with child
 arrays and offsets whose meaning must also survive a language boundary.
+
+## Worked examples
+
+### Read the validity bitmap behind a null
+
+```python
+import pyarrow as pa
+import pyarrow.compute as pc
+
+values = pa.array([10, None, 30, 40], type=pa.int64())
+validity = values.buffers()[0].to_pybytes()[0]
+print([(validity >> i) & 1 for i in range(4)])
+print(pc.mean(values).as_py(), pc.mean(pc.fill_null(values, 0)).as_py())
+```
+
+```text
+[1, 0, 1, 1]
+26.666666666666668 20.0
+```
+
+Bit 1 is zero, so the second slot is missing even though the payload buffer still holds some integer there. The observed mean divides 80 by three known values, while the zero-filled mean divides by four and reports 20. Neither is wrong in general; the question is whether a missing reading means no measurement or a real zero, and that decision belongs in the contract rather than in a default fill.
+
+### Confirm a slice shares memory with its parent
+
+```python
+import pyarrow as pa
+
+values = pa.array([10, None, 30, 40], type=pa.int64())
+sliced = values.slice(1, 2)
+print(sliced.offset, len(sliced), sliced.to_pylist())
+print(sliced.buffers()[1].address == values.buffers()[1].address)
+```
+
+```text
+1 2 [None, 30]
+True
+```
+
+The slice reports offset 1 and length 2 and points at the same payload address as the parent, so slicing copied nothing. That is efficient, but it also means a tiny slice can keep a large parent buffer alive in memory. When memory use stays high after filtering a big batch down to a few rows, check for retained slices and copy them with take or concat if the parent should be released.
 
 ## Complete worked source
 

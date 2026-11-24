@@ -9,11 +9,23 @@ The executable reference contains the two complete worked cases with assertions.
 
 Use ownership to route review and incidents. A declared owner does not prove someone has acknowledged or fulfilled the responsibility.
 
+**Why it holds here:** Groups commerce and analysis each declare an owner, and each model names its group in config.
+
+**Plausible wrong approach:** Taking the owner field as proof that someone is on call ignores that it is only a declaration.
+
+**How to verify:** Read the manifest's groups section and the model's group config and expect Classroom team for commerce.
+
 **Expected:** Responsibility is explicitly declared.
 
 ## 2. Change access deliberately
 
 Review schema, semantics, support and migration obligations before broadening access. Public within dbt is not synonymous with public on the internet.
+
+**Why it holds here:** internal is private to commerce, so the cross-group consumer fails. Making internal public allows the reference.
+
+**Plausible wrong approach:** Making a model public without reviewing its schema and support exposes an unstable interface to other teams.
+
+**How to verify:** Change internal's access to public, run build for the cross-group case, and expect consumer to return 42.
 
 **Expected:** The reference policy changes explicitly.
 
@@ -21,11 +33,23 @@ Review schema, semantics, support and migration obligations before broadening ac
 
 Use actual grants and identity controls in a deployed environment. Do not advertise model access metadata as row/column authorization.
 
+**Why it holds here:** Model access only governs ref() in dbt. DuckDB still lets anyone with the file query internal directly.
+
+**Plausible wrong approach:** Advertising private access as a security control misleads users into thinking the data is protected.
+
+**How to verify:** Run select value from internal in DuckDB directly and expect 41.
+
 **Expected:** It remains readable here.
 
 ## 4. Define a sensitive field boundary
 
 Use an appropriate governed model, grants or service boundary and test it with the intended identity. This lesson does not configure external permissions.
+
+**Why it holds here:** A restricted column needs database grants, masking, or a separate service, tested with the intended user.
+
+**Plausible wrong approach:** Marking the model private in dbt does not hide the column from database queries.
+
+**How to verify:** Describe the grant or masking rule and how you would test it with a restricted identity.
 
 **Expected:** The answer includes a real authorization mechanism.
 
@@ -33,11 +57,23 @@ Use an appropriate governed model, grants or service boundary and test it with t
 
 Publish a documented stable model, validate consumers and retire internal references under a clear policy. Avoid silently changing their meaning.
 
+**Why it holds here:** Consumers move from internal to a documented public model, validated before internal references are removed.
+
+**Plausible wrong approach:** Changing internal's meaning in place breaks readers without warning.
+
+**How to verify:** Create the public model, run consumers against it, and confirm their outputs match before retiring the old reference.
+
 **Expected:** The plan identifies versions and acceptance checks.
 
 ## 6. Audit the claim
 
 Record accepted/rejected dependencies and observed direct SQL access. Name the external controls that require their own configuration and tests.
+
+**Why it holds here:** These two cases show that dbt accepts a same-group reference and rejects a cross-group reference to a private model.
+
+**Plausible wrong approach:** Claiming the cases prove data is protected overstates them, since direct SQL still works.
+
+**How to verify:** Write the claim and check it against the build results: example_one passes, example_two fails, and direct SQL reads internal.
 
 **Expected:** They establish local dbt reference-policy behavior.
 

@@ -8,7 +8,7 @@ Turn an intended capability into auditable labels, distinguish disagreement from
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-003`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-003` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for annotation rubrics and construct validity in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about rubric and construct validity: A response with one applicable dimension scores 1.0, a critical failure blocks admission, malformed labels and mixed rubric versions are rejected, both disagreeing labels stay in the ledger, and the proxy counterexample formats correctly while failing evidence support. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Operationalize the claim
 
@@ -19,6 +19,13 @@ Begin with the use case and the decisions that labels will support. Specify an e
 **Construct validity** asks whether the operational measure represents the intended concept. Reliable annotators can agree perfectly on a poor proxy. For example, a rule that awards a point whenever an answer contains a citation marker is reproducible but does not measure whether the cited passage supports the claim. Conversely, a nuanced factuality rubric may be meaningful yet initially yield poor agreement because its instructions are incomplete.
 
 Use anchored categories with examples and counterexamples. A numerical-answer rubric can distinguish a wrong value, a correct value with an unstated unit, and a fully correct value/unit/denominator. Ordinal levels carry an ordering, but equal distances between adjacent levels are not automatic. A score of two is not necessarily twice the quality of one. Keep labels and aggregation policy separately versioned.
+
+## Key terms
+
+- **Rubric:** A versioned rule that connects an intended capability to observable criteria with anchored categories and examples.
+- **Construct validity:** Whether an operational measure represents the intended concept, which reliable agreement alone does not show.
+- **Critical condition:** A requirement, such as respecting access control, that blocks release regardless of other weighted scores.
+- **Inapplicable criterion:** A rubric dimension that does not apply to a response and must be excluded from, not failed in, the denominator.
 
 ## Worked case A: critical conditions remain separate
 

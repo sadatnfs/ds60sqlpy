@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-033`, `apache-006`.
 
+## Key terms
+
+- **acks=all:** A producer setting under which the partition leader acknowledges a write after the in-sync replica requirement is met. On a one-broker topic it adds no redundancy.
+- **In-sync replicas:** The replicas currently caught up with the partition leader. min.insync.replicas sets how many must acknowledge an acks=all write.
+- **Idempotent producer:** A producer that uses a producer identifier and sequence numbers so brokers can suppress duplicates from its own supported retries. It does not deduplicate separate send calls.
+- **Ambiguous outcome:** A send whose acknowledgement was lost, leaving the producer unable to know whether the record was appended.
+- **Delivery timeout:** The bounded time a producer allows for a send, including retries, before reporting failure.
+
 ## An acknowledgement has a defined durability scope
 
 A producer can wait for different acknowledgement conditions. With acks=all,
@@ -100,6 +108,32 @@ charged twice?** No. It covers a defined producer retry mechanism, while chargin
 is a business effect with its own identity and transaction boundary. The two cases
 show one actual acknowledged commit and two intentionally distinct send calls,
 with no invented network-failure qualification or cross-system exactly-once claim.
+
+## Worked examples
+
+### Configure an idempotent transactional producer
+
+```java
+var properties = new Properties();
+properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP);
+properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
+properties.put(ProducerConfig.ACKS_CONFIG, "all");
+properties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "ds60-workshop-transaction-writer");
+properties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, "3000");
+properties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, "15000");
+```
+
+These lines come from the streaming project TransactionProbe.java. Idempotence lets the broker drop a resend of the same producer sequence number, and acks set to all makes the acknowledgement wait for the in-sync replicas, which is one replica in this single-broker workshop. The delivery timeout bounds how long a send can retry before its future fails. None of these settings recognizes two separate send calls with the same business key as duplicates.
+
+### Read committed and uncommitted views of the topic
+
+```bash
+cd work/streaming
+bash run.sh start
+bash run.sh check-transactions
+```
+
+In an owned workshop, the check prints a JSON line with committed_records 3, uncommitted_records 4 and aborted_hidden true. The read_committed consumer sees order-1 plus two identical same-business-id records, while read_uncommitted also sees the aborted order-2 value. The two identical records are correct Kafka behavior: they came from two awaited send calls, so deduplicating them is the consumer's business rule, not a broker guarantee.
 
 ## Complete worked source
 

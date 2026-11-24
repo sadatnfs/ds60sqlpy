@@ -255,23 +255,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the summary if Revenue uses COALESCE([NetRevenue],0).</p>
 <p>Key 4 appears with zero, creating four result rows.</p>
+<p><strong>Why it fits this model:</strong> SUMMARIZECOLUMNS drops a group only when every expression is blank. COALESCE makes Bag&#x27;s value 0, a nonblank result, so key 4 returns with 0 and the table has four rows.</p>
+<p><strong>Tempting mistake:</strong> Treating COALESCE as a display tweak hides that it changes row presence. An AVERAGEX over the new rows drops from 187 / 3, about 62.33, to 187 / 4 = 46.75.</p>
+<p><strong>How to confirm:</strong> The summary returns keys 1 to 4 with revenues 67, 24, 96 and 0.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Project only product names from the first result.</p>
 <p>The row count remains four if the input table is unchanged; naming only a column does not imply DISTINCT.</p>
+<p><strong>Why it fits this model:</strong> SELECTCOLUMNS projects every input row and never groups. With the four-row first result, projecting product names gives Notebook, Pen, Mug and Bag.</p>
+<p><strong>Tempting mistake:</strong> Assuming a projection deduplicates is the trap. Projecting Category instead returns Paper, Paper, Home and Travel, four rows, not three.</p>
+<p><strong>How to confirm:</strong> COUNTROWS of the projection is 4, and DISTINCT over the Category projection is 3.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write an intermediate-table ledger for a revenue-threshold calculation.</p>
 <p>Record keys 1..4, revenues 67/24/96/BLANK, then the qualifying key set for the threshold before applying it as a filter.</p>
+<p><strong>Why it fits this model:</strong> Record each stage. Candidates are keys 1 to 4; extended revenues are 67, 24, 96 and BLANK; a rule of revenue above 50 keeps keys 1 and 3; applying them as a filter gives 163.</p>
+<p><strong>Tempting mistake:</strong> Testing the threshold on Sales lines with <code>FILTER ( Sales, Sales[NetAmount] &gt; 50 )</code> keeps nothing, since the largest line is S3 at 40, so the result is BLANK instead of 163.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( [NetRevenue], FILTER ( VALUES ( Product[ProductKey] ), [NetRevenue] &gt; 50 ) )</code> returns 163.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose treating a virtual RevenueForKey column as a persisted model attribute.</p>
 <p>It does not become a reusable Product column outside the table expression; define an appropriate model object or reconstruct it.</p>
+<p><strong>Why it fits this model:</strong> RevenueForKey is a column of the ADDCOLUMNS result and exists only inside that query. The outer SELECTCOLUMNS can read it because it is iterating that table.</p>
+<p><strong>Tempting mistake:</strong> Writing a later measure that refers to Product[RevenueForKey] fails, because the Product table has no such column, and copying the virtual name into a visual does nothing.</p>
+<p><strong>How to confirm:</strong> Case A returns 67, 24, 96 and BLANK. For reuse, define a model measure such as [NetRevenue] and evaluate it per product.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why adding a constant 1 to a summary can change row presence.</p>
 <p>The all-blank suppression condition no longer holds for that group.</p>
+<p><strong>Why it fits this model:</strong> A constant column is never blank. Adding &quot;One&quot;, 1 to the SUMMARIZECOLUMNS call means Bag&#x27;s group has one nonblank expression, so its row returns with Revenue BLANK.</p>
+<p><strong>Tempting mistake:</strong> Adding a helper constant for convenience and expecting three rows. The table now lists Bag, and any COUNTROWS of the result reads 4.</p>
+<p><strong>How to confirm:</strong> <code>SUMMARIZECOLUMNS ( Product[ProductKey], &quot;Revenue&quot;, [NetRevenue], &quot;One&quot;, 1 )</code> returns four rows, one of them key 4 with a BLANK revenue.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the distinction to a customer coverage report.</p>
 <p>Start from the intended customer population and preserve absent outcomes explicitly rather than allowing a nonempty rule to redefine the denominator.</p>
+<p><strong>Why it fits this model:</strong> Coverage needs every eligible customer as the denominator. Starting from all four customers, three have sales (Ada 51, Bo 80, Cy 56), so coverage is 3 / 4 = 0.75.</p>
+<p><strong>Tempting mistake:</strong> Counting the rows of <code>SUMMARIZECOLUMNS ( Customer[Customer], &quot;Revenue&quot;, [NetRevenue] )</code> drops Di and reports 3 / 3 = 1.0, full coverage that does not exist.</p>
+<p><strong>How to confirm:</strong> ADDCOLUMNS over VALUES(Customer[Customer]) returns four rows with Di BLANK, and the coverage measure returns 0.75.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Create node and link copies, configure <code>forceLink(...).id(d=&gt;d.id)</code>, charge and centering forces, and call <code>.stop()</code> before manual ticks. Each tick updates the layout. A finite position check verifies basic numerical health but does not prove the chosen force parameters produce a useful explanation.</p>
 <p>Render links from their resolved source and target nodes and render labeled circles for nodes. A larger graph needs aggregation, filtering, interaction and performance planning. Do not call a dense hairball an informative visualization merely because every edge is drawn.</p>
 <h3 id="exercise-1-distinguish-graph-relationships-from-layout-distance">Exercise 1: Distinguish graph relationships from layout distance.<a class="heading-anchor" href="#exercise-1-distinguish-graph-relationships-from-layout-distance" aria-label="Link to this section">#</a></h3>
-<p>A short geometric distance can be an artifact of parameters rather than a measured similarity.</p>
+<p>A short geometric distance can be an artifact of parameters rather than a measured similarity. Links A-B, B-C and C-A are the data; forceLink distance 140 and charge -150 decide how far apart circles end up. Two nodes drawn close together have not been measured as similar. Change distance to 80 and the triangle shrinks while the three links stay the same.</p>
 <p><strong>Expected:</strong> Edges are data; force positions are a chosen visual arrangement.</p>
 <h3 id="exercise-2-copy-node-and-link-objects-before-simulation">Exercise 2: Copy node and link objects before simulation.<a class="heading-anchor" href="#exercise-2-copy-node-and-link-objects-before-simulation" aria-label="Link to this section">#</a></h3>
-<p>This protects shared application state. Shallow copies are sufficient only when the mutable fields are at the copied level.</p>
+<p>This protects shared application state. Shallow copies are sufficient only when the mutable fields are at the copied level. forceSimulation writes x, y, vx and vy onto node objects. The reference maps sourceNodes to shallow copies, so the check that no source node has &quot;x&quot; passes. Passing sourceNodes directly would leave layout state in the original data.</p>
 <p><strong>Expected:</strong> Original inputs remain free of layout mutation.</p>
 <h3 id="exercise-3-build-a-bounded-three-node-network">Exercise 3: Build a bounded three-node network.<a class="heading-anchor" href="#exercise-3-build-a-bounded-three-node-network" aria-label="Link to this section">#</a></h3>
-<p>Validate topology before layout. An unknown endpoint should fail clearly rather than create an unexplained missing edge.</p>
+<p>Validate topology before layout. An unknown endpoint should fail clearly rather than create an unexplained missing edge. The reference stops the simulation, seeds randomSource with d3.randomLcg(0.5) and runs tick(100) synchronously, then draws three lines and three circles. Because of the seed, reruns produce the same positions. The checks confirm finite positions and that every link source and target became an object.</p>
 <p><strong>Expected:</strong> All positions are finite and every link resolves to known IDs.</p>
 <h3 id="exercise-4-diagnose-a-reference-that-never-stops-animating">Exercise 4: Diagnose a reference that never stops animating.<a class="heading-anchor" href="#exercise-4-diagnose-a-reference-that-never-stops-animating" aria-label="Link to this section">#</a></h3>
-<p>Stop or dispose of owned work. A completed lesson receipt should not leave unnecessary background computation.</p>
+<p>Stop or dispose of owned work. A completed lesson receipt should not leave unnecessary background computation. Without .stop(), the simulation keeps a timer running after the lesson finishes. The reference stops it and ticks a fixed 100 steps; check no further tick events fire. In an interactive version, call simulation.stop() when the component is removed.</p>
 <p><strong>Expected:</strong> The simulation timer lacks a lifecycle boundary.</p>
 <h3 id="exercise-5-test-duplicate-or-unknown-node-ids">Exercise 5: Test duplicate or unknown node IDs.<a class="heading-anchor" href="#exercise-5-test-duplicate-or-unknown-node-ids" aria-label="Link to this section">#</a></h3>
-<p>Identity validation prevents ambiguous link resolution. A visually plausible graph can still represent the wrong entities.</p>
+<p>Identity validation prevents ambiguous link resolution. A visually plausible graph can still represent the wrong entities. A link to &quot;D&quot; makes forceLink throw &quot;node not found: D&quot;. Validate ids against a Set and reject duplicates before building the simulation.</p>
 <p><strong>Expected:</strong> The input is rejected before misleading layout.</p>
 <h3 id="exercise-6-choose-a-strategy-for-a-dense-network">Exercise 6: Choose a strategy for a dense network.<a class="heading-anchor" href="#exercise-6-choose-a-strategy-for-a-dense-network" aria-label="Link to this section">#</a></h3>
-<p>Drawing every possible edge can obscure structure. Explain the retained relationships and any information omitted.</p>
+<p>Drawing every possible edge can obscure structure. Explain the retained relationships and any information omitted. For hundreds of edges, keep only links above a weight threshold and say how many were dropped. Aggregating nodes by community, then drawing one edge per community pair, is another option. Either way the three-node reference shows the checks to keep: finite positions, resolved links and untouched source data.</p>
 <p><strong>Expected:</strong> Filter or aggregate according to an analytical question.</p></article>
   </main>
 </body>

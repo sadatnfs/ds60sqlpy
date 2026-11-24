@@ -203,21 +203,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict c(2,4,6) * 3.</p>
 <p>The values are 6,12,18.</p>
+<p><strong>Approach:</strong> Multiply the vector by the scalar and compare with the expected vector using <code>identical()</code>. The reference asserts <code>c(2, 4, 6) * 3</code> equals <code>c(6, 12, 18)</code>.</p>
+<p><strong>Why it holds here:</strong> A length-one multiplier is an intended broadcast: every element is multiplied by the same 3, so recycling is the contract rather than an accident.</p>
+<p><strong>Tempting mistake:</strong> Predicting a single number such as 36 by imagining that the vector is summed first. Arithmetic operators work element by element and return a vector of the same length as the longer operand.</p>
+<p><strong>Verify:</strong> <code>print(c(2, 4, 6) * 3)</code> shows <code>[1]  6 12 18</code>, three values, and <code>length()</code> of the result is 3.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Use fees c(1,2,3) for three amounts.</p>
 <p>Adding to 10,20,30 gives 11,22,33.</p>
+<p><strong>Approach:</strong> Assert equal lengths, then add. The reference sets <code>fees &lt;- c(1, 2, 3)</code>, checks <code>length(amount) == length(fees)</code> and expects 11, 22 and 33.</p>
+<p><strong>Why it holds here:</strong> With one fee per amount, each position pairs a record with its own fee, so 10 + 1, 20 + 2 and 30 + 3 are the intended row sums.</p>
+<p><strong>Tempting mistake:</strong> Leaving the starter&#x27;s two fees in place. <code>c(10, 20, 30) + c(1, 2)</code> returns 11, 22, 31 with a warning, and the third record is charged the first record&#x27;s fee.</p>
+<p><strong>Verify:</strong> <code>stopifnot(identical(amount + fees, c(11, 22, 33)))</code> passes, and no warning is printed during the run.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a guard allowing one fee or one fee per amount.</p>
 <p>length(fee) must be one or length(amount).</p>
+<p><strong>Approach:</strong> Write a small predicate that accepts a fee of length one or a fee whose length equals the amounts. The reference&#x27;s <code>valid()</code> helper returns that logical.</p>
+<p><strong>Why it holds here:</strong> The two allowed shapes are exactly the two intended contracts in this lesson: a flat fee for everyone or one fee per record. Every other length is rejected before arithmetic runs.</p>
+<p><strong>Tempting mistake:</strong> Accepting any length that divides evenly, using a remainder test such as <code>length(amount) %% length(fee) == 0</code>. That passes two fees for four records, the silent pattern from Example 2.</p>
+<p><strong>Verify:</strong> The reference checks <code>valid(amount, 2)</code> and <code>valid(amount, fees)</code> are TRUE and <code>valid(amount, c(1, 2))</code> is FALSE for three amounts.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose two fees applied to four unrelated records.</p>
 <p>Silent recycling can assign the wrong per-record fee.</p>
+<p><strong>Approach:</strong> Compare the lengths and ask whether a two-element pattern has any meaning for the four records. Divisibility only explains why R stayed quiet.</p>
+<p><strong>Why it holds here:</strong> Example 2 returns 11, 22, 31 and 42 with no warning, yet nothing says records three and four should reuse the first two fees.</p>
+<p><strong>Tempting mistake:</strong> Concluding that the result is valid because no warning appeared. The lack of a warning is a property of the lengths four and two, not evidence that the fee schedule repeats.</p>
+<p><strong>Verify:</strong> Apply the per-row rule: <code>length(amount) == length(fees)</code> is FALSE for these inputs, which is the check Example 2 asserts with <code>stopifnot(!valid_per_row)</code>.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Inspect numeric(0) + 2.</p>
 <p>It remains a numeric vector of length zero.</p>
+<p><strong>Approach:</strong> Evaluate <code>numeric(0) + 2</code> and inspect its length and type rather than its printed form.</p>
+<p><strong>Why it holds here:</strong> Recycling to the longer length does not apply when one operand is empty: the result has length zero, so there is nothing to add the fee to and nothing is invented.</p>
+<p><strong>Tempting mistake:</strong> Expecting the scalar 2, or an NA, as if an empty vector were a zero or a missing amount. Code that then takes <code>result[[1]]</code> fails with a subscript out of bounds error.</p>
+<p><strong>Verify:</strong> The reference asserts <code>length(numeric(0) + 2) == 0L</code>; <code>print()</code> shows <code>numeric(0)</code> and <code>typeof()</code> is still &quot;double&quot;.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Keep an ID and a numeric measurement without coercing the measurement.</p>
 <p>Use separate vectors or a list/data frame with explicit column types.</p>
+<p><strong>Approach:</strong> Keep the identifier and the measurement in separate vectors, or later in a data frame with explicit column types, instead of one atomic vector.</p>
+<p><strong>Why it holds here:</strong> <code>c(&quot;A&quot;, 2)</code> forces a common type and turns 2 into the text &quot;2&quot;, so the measurement can no longer be added or compared numerically. The reference asserts <code>is.character(c(&quot;A&quot;, 2))</code> to show the coercion.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>as.numeric()</code> on the combined vector to rescue the number. That produces NA for &quot;A&quot; with a coercion warning, so one value is lost to fix the other.</p>
+<p><strong>Verify:</strong> <code>is.double(c(1, 2))</code> returns TRUE for the separate measurement vector, and <code>c(&quot;A&quot;, 2)[2] + 1</code> fails with a non-numeric argument error.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

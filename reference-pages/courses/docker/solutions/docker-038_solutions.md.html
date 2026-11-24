@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-classify-disk-usage-by-resource-type">Exercise 1: Classify disk usage by resource type.<a class="heading-anchor" href="#exercise-1-classify-disk-usage-by-resource-type" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Images, cache, writable layers, logs and volumes.</p>
 <p><strong>Why:</strong> Each category has a different owner and retention policy. A single aggregate number does not identify safe deletions.</p>
+<p><strong>Approach:</strong> Run docker system df and split the total into images, build cache, container writable layers and volumes, then check log sizes.</p>
+<p><strong>Why this is correct:</strong> Each type has its own owner and retention rule, so the safe removals differ per type.</p>
+<p><strong>A plausible wrong approach:</strong> Deleting whatever is largest based on the total risks removing a volume that holds data.</p>
+<p><strong>How to verify:</strong> The breakdown names a category and owner for each large item before any removal is chosen.</p>
 <h3 id="exercise-2-predict-the-effect-of-ordinary-compose-down">Exercise 2: Predict the effect of ordinary Compose down.<a class="heading-anchor" href="#exercise-2-predict-the-effect-of-ordinary-compose-down" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It preserves named volumes unless explicit volume deletion is requested.</p>
 <p><strong>Why:</strong> The stop path should not erase learner state. Verify the exact command and project identity before execution.</p>
+<p><strong>Approach:</strong> Read down without -v: it stops and removes the project&#x27;s containers and network but leaves named volumes.</p>
+<p><strong>Why this is correct:</strong> study-data survives, so a later up sees the same counter.</p>
+<p><strong>A plausible wrong approach:</strong> Adding -v by habit when stopping deletes the learner&#x27;s counter with the containers.</p>
+<p><strong>How to verify:</strong> After down and up, GET /counter returns the earlier value, and docker volume ls still lists the volume.</p>
 <h3 id="exercise-3-design-an-incident-evidence-packet">Exercise 3: Design an incident evidence packet.<a class="heading-anchor" href="#exercise-3-design-an-incident-evidence-packet" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Failure symptom, time, resource inventory and bounded relevant logs.</p>
 <p><strong>Why:</strong> Preserve the original condition before changing the engine. This makes the repair explainable and helps distinguish recovery from coincidental disappearance.</p>
+<p><strong>Approach:</strong> Before changing anything, capture the symptom, the time, the df output, the project&#x27;s ps -a output and a bounded slice of logs.</p>
+<p><strong>Why this is correct:</strong> This preserves the state that explains the failure, so a later fix can be tied to its cause.</p>
+<p><strong>A plausible wrong approach:</strong> Pruning first and checking afterward makes the disk pressure vanish along with its explanation.</p>
+<p><strong>How to verify:</strong> The packet has each item with a timestamp, and the repair note refers to it.</p>
 <h3 id="exercise-4-diagnose-a-detached-volume-labeled-unused">Exercise 4: Diagnose a detached volume labeled unused.<a class="heading-anchor" href="#exercise-4-diagnose-a-detached-volume-labeled-unused" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Determine its owner and retained data purpose before deletion.</p>
 <p><strong>Why:</strong> A volume can be temporarily unattached between container runs. Tool reachability is not the same as user intent to discard data.</p>
+<p><strong>Approach:</strong> Read the volume&#x27;s labels and name to find its project, then ask whether its data is still wanted.</p>
+<p><strong>Why this is correct:</strong> A volume with no container attached may be between runs, as study-data is after down.</p>
+<p><strong>A plausible wrong approach:</strong> Deleting every dangling volume because the tool says unused can remove the only copy of learner data.</p>
+<p><strong>How to verify:</strong> The project label points to an owner, who confirms keep or delete before removal.</p>
 <h3 id="exercise-5-explain-why-broad-engine-pruning-is-out-of-scope">Exercise 5: Explain why broad engine pruning is out of scope.<a class="heading-anchor" href="#exercise-5-explain-why-broad-engine-pruning-is-out-of-scope" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It can affect unrelated workloads and recoverable state.</p>
 <p><strong>Why:</strong> The study project owns only its own resources. Cleanup authorization should remain as narrow as the task that created them.</p>
+<p><strong>Approach:</strong> Compare the scope of the study task, one project&#x27;s resources, with what system prune touches, everything on the engine.</p>
+<p><strong>Why this is correct:</strong> Pruning can remove other projects&#x27; images, caches and volumes that this task never created.</p>
+<p><strong>A plausible wrong approach:</strong> Running a broad prune because the study app is done reaches beyond what the task may remove.</p>
+<p><strong>How to verify:</strong> Cleanup commands filter by the project label, and the engine&#x27;s other resources remain afterward.</p>
 <h3 id="exercise-6-write-a-scoped-recovery-and-cleanup-plan">Exercise 6: Write a scoped recovery and cleanup plan.<a class="heading-anchor" href="#exercise-6-write-a-scoped-recovery-and-cleanup-plan" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Explicit targets, retained data, repair check and final ownership readback.</p>
 <p><strong>Why:</strong> A good plan makes every destructive action reviewable and verifies the intended outcome without claiming unrelated resources were safe to remove.</p>
+<p><strong>Approach:</strong> List each target by name, what data stays, the check that shows recovery, and a final listing of the project&#x27;s resources.</p>
+<p><strong>Why this is correct:</strong> Naming each destructive step lets someone review it, and the final listing shows exactly what remains.</p>
+<p><strong>A plausible wrong approach:</strong> A plan that says clean up Docker gives no target to review and no way to confirm the result.</p>
+<p><strong>How to verify:</strong> After the plan runs, the project-filtered listing matches the plan&#x27;s expected remaining resources.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

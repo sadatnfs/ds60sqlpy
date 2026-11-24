@@ -8,7 +8,7 @@ Advanced; approximately 135 minutes. Direct prerequisites: `spark-035`. The prep
 
 ## How to run this lesson
 
-Open `spark-036` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-036` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-036.scala) and [PySpark learner](../lessons/spark-036.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-036_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-036_solution.scala) and [PySpark reference](../solutions/spark-036_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -44,7 +44,7 @@ For a new key, the sink writes a uniquely named staged file in the same owned di
 
 JSON stores a number without preserving the original JVM integer-node width. The Scala reader therefore validates an integral batch_id and compares its Long value, while comparing identity, digest and payload exactly and rejecting unexpected fields. Comparing Jackson tree objects directly can falsely reject batch 7 after a round trip because an in-memory LongNode can decode as an IntNode. Normalizing that representation does not permit different batch content or a nonintegral ID.
 
-The filesystem assumptions are explicit:one writer, prepared local storage and same-directory atomic rename. The program does not fsync a durable transaction log or coordinate distributed writers. A rename that is atomic for local visibility is not automatically an object-store transaction or a power-loss guarantee. A production database sink would need its own transaction and uniqueness constraints, with data and deduplication record committed together.
+The filesystem assumptions are explicit: one writer, prepared local storage and same-directory atomic rename. The program does not fsync a durable transaction log or coordinate distributed writers. A rename that is atomic for local visibility is not automatically an object-store transaction or a power-loss guarantee. A production database sink would need its own transaction and uniqueness constraints, with data and deduplication record committed together.
 
 ## Inject failure at a precise point
 
@@ -65,9 +65,7 @@ Every path is inside a fresh current-job scratch root. The reference waits with 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
@@ -75,7 +73,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-036-")
 val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
@@ -90,20 +88,7 @@ val staticFrame = spark.read.schema(eventSchema).json(input.toString)
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -111,7 +96,7 @@ import json
 import uuid
 
 if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark4.0.1 required")
+    raise ValueError("Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-036-", dir=Path.cwd()))
 input_path = owned_root / "input"
@@ -237,7 +222,7 @@ Do not use runId as the replay key. Do not suppress a repeated batch ID without 
 
 ## Self-check
 
-Explain the contract of `encodeBatch` / `encode_batch` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `encodeBatch` / `encode_batch` without reading its solution. Then, from memory, state what Exercise 6 (Reject identity collisions and admit the next batch) must produce: The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1, 2, 3 and total 600 across two batch files. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -245,7 +230,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark4.0.1 foreachBatch semantics](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#using-foreach-and-foreachbatch)
+- [Spark 4.0.1 foreachBatch semantics](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#using-foreach-and-foreachbatch)
 
 - [Java 17 atomic file move](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...))
 

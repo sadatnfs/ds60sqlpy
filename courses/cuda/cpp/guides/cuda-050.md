@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement reproducible parallel Monte Carlo sampling with independent streams and report uncertainty intervals.
+
 Work through *Randomness and parallel Monte Carlo* with the concrete cases below. Finish with this evidence:
 reproducible setup metadata, uncertainty intervals and correct stream partitioning. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Parallel random-number generation needs a reproducible mapping from logical samples to independent streams or subsequences. Giving every thread identical initial state can repeat the same draws and destroy effective sample size. A seed identifies an experiment, but the generator, stream partition and sample-count mapping are also part of it. Monte Carlo error is sampling uncertainty, distinct from floating-point error or a bug. Increasing independent sample count usually reduces standard error at a square-root rate. RNG initialization can be expensive, so report setup separately from sustained generation when evaluating performance.
+
+### Key terms
+
+- **Subsequence:** A cuRAND offset that gives each thread a non-overlapping portion of one generator sequence.
+- **Monte Carlo estimate:** An average over random samples whose standard error typically shrinks in proportion to one over the square root of the sample count.
+- **Standard error:** The estimated standard deviation of a sample mean, used to build an uncertainty interval.
+- **Counter-based generator:** A generator such as Philox that computes any random value directly from a key and a counter.
 
 ## Mathematical contract
 

@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-014</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Flask exposes convenient context-local proxies such as <code>request</code>, <code>g</code> and <code>current_app</code>. Their values belong to active contexts, not ordinary module globals. This chapter allocates a tiny request resource, closes it after success and failure, and demonstrates that an application context alone does not create a request.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Application context:</strong> The Flask context that makes <code>current_app</code> and <code>g</code> available; it can be pushed without any request.</li>
+<li><strong>Request context:</strong> The Flask context pushed for one request, which makes <code>request</code> and <code>session</code> available to code running during that request.</li>
+<li><strong>g object:</strong> A namespace that belongs to the application context and commonly holds a resource for the duration of one request.</li>
+<li><strong>Teardown hook:</strong> A function registered with <code>teardown_request</code> that runs after each request, successful or failed, and receives any exception so it can release resources.</li>
+<li><strong>Context-local proxy:</strong> An object such as <code>request</code> or <code>current_app</code> that refers to the value of the currently active context instead of a fixed module global.</li>
+</ul>
 <h3 id="mechanism-context-ownership-determines-lifetime">Mechanism: context ownership determines lifetime<a class="heading-anchor" href="#mechanism-context-ownership-determines-lifetime" aria-label="Link to this section">#</a></h3>
 <p>The application context makes application-related state available. The request context adds information about a particular request. A normal request pushes the relevant contexts, which is why <code>g</code> is often used for resources associated with that request. More precisely, <code>g</code> belongs to the application context; manually retaining an application context can give it a different lifetime.</p>
 <p>The before-request hook creates a resource with an ID. The teardown hook removes it using <code>g.pop</code> and records whether an exception occurred. Popping makes the cleanup idempotent for this fixture: repeated cleanup cannot close the same stored resource twice. Real resources such as database sessions need similarly clear ownership and appropriate close/rollback behavior.</p>
@@ -207,6 +215,49 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-case-failure-and-a-missing-request-context">Worked case: failure and a missing request context<a class="heading-anchor" href="#worked-case-failure-and-a-missing-request-context" aria-label="Link to this section">#</a></h3>
 <p>The <code>/fail</code> route raises a deliberate RuntimeError. Testing mode propagates that exception to the caller, which catches the expected error. Teardown still runs and records the second resource as closed after a failure. The program checks the complete close record rather than assuming exceptions automatically clean up every library object.</p>
 <p>A separate application context allows access to <code>current_app</code>, but accessing <code>request.path</code> raises because there is no active request context. This makes the two boundaries observable. A background worker cannot safely reach back into a completed request by using the same proxy names; pass the necessary validated data explicitly.</p>
+<h3 id="worked-example-the-order-of-request-hooks-on-success-and-failure">Worked example: the order of request hooks on success and failure<a class="heading-anchor" href="#worked-example-the-order-of-request-hooks-on-success-and-failure" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> flask <span class="syntax-keyword">import</span> Flask<span class="syntax-punctuation">,</span> g
+
+app <span class="syntax-operator">=</span> Flask<span class="syntax-punctuation">(</span>__name__<span class="syntax-punctuation">)</span>
+log <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>before_request
+<span class="syntax-keyword">def</span> <span class="syntax-function">before</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    g<span class="syntax-operator">.</span>connection <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">conn</span><span class="syntax-string">&quot;</span>
+    log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">before</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>after_request
+<span class="syntax-keyword">def</span> <span class="syntax-function">after</span><span class="syntax-punctuation">(</span>response<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">after </span><span class="syntax-string">{</span>response<span class="syntax-operator">.</span>status_code<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> response
+
+
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>teardown_request
+<span class="syntax-keyword">def</span> <span class="syntax-function">teardown</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">teardown </span><span class="syntax-string">{</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__ <span class="syntax-keyword">if</span> error <span class="syntax-keyword">else</span> <span class="syntax-keyword">None</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/ok</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">connection</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> g<span class="syntax-operator">.</span>connection<span class="syntax-punctuation">}</span>
+
+
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/boom</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">boom</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> KeyError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+client <span class="syntax-operator">=</span> app<span class="syntax-operator">.</span>test_client<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/ok</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">/boom</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    log<span class="syntax-operator">.</span>clear<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    status <span class="syntax-operator">=</span> client<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>status_code
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> log<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">/ok 200 [&#x27;before&#x27;, &#x27;after 200&#x27;, &#x27;teardown None&#x27;]
+/boom 500 [&#x27;before&#x27;, &#x27;after 500&#x27;, &#x27;teardown KeyError&#x27;]</code></pre>
+<p>Unlike the lesson, this application leaves <code>TESTING</code> off, so the unhandled <code>KeyError</code> was converted into a 500 response instead of propagating into the test. The hooks ran in the same order both times: <code>before_request</code>, then <code>after_request</code> on the response that was actually sent, then <code>teardown_request</code>. Only teardown received the original exception, which is why the lesson closes its resource there: <code>after_request</code> sees a 500 response object but not the <code>KeyError</code>, and it is skipped entirely when an exception escapes in testing mode. With <code>TESTING=True</code> the second request would raise <code>KeyError</code> in the caller and the log would end at teardown. Each request got its own <code>g</code>, so the connection stored on the first request was not visible on the second.</p>
 <h3 id="failure-diagnosis">Failure diagnosis<a class="heading-anchor" href="#failure-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>“Working outside of application context” or “request context” usually signals a lifecycle mismatch. Adding an arbitrary global context around all code may hide the error while extending resource lifetimes incorrectly. Identify which operation actually needs the context and who should own it.</p>
 <p>If cleanup runs twice in a test, inspect context preservation and teardown registration before removing cleanup altogether. If cleanup itself raises, it may obscure the original error. Keep cleanup small, deliberate and safe for partially initialized resources.</p>

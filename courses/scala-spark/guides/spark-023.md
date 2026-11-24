@@ -8,7 +8,7 @@ Intermediate; approximately 105 minutes. Direct prerequisites: `spark-022`. The 
 
 ## How to run this lesson
 
-Open `spark-023` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-023` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-023.scala) and [PySpark learner](../lessons/spark-023.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-023_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-023_solution.scala) and [PySpark reference](../solutions/spark-023_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -44,7 +44,7 @@ Not every join type supports every physical strategy. A full outer equijoin with
 
 The full-outer fixture happens to produce the same rows as the inner join because all 20 dimension keys are represented among the facts and every fact key exists in the dimension. This is a controlled property of the data, not a general equivalence of join types. Add a right-only dimension key or an unmatched fact and the result relationship changes. The explanation preserves that limitation so the strategy example does not teach an incorrect relational rewrite.
 
-The final bounded-broadcast gate requires a batch relation, at most 100 rows, a nonnull unique key and an estimated size within 1 MiB before attaching the hint. Row validation uses a limit-plus-one count to reject an oversized candidate, then validates identities on the bounded population. The estimate remains only one signal. A production gate would also consider actual encoded sizes, peak build memory, concurrent queries and worker memory budgets. A successful 20-row broadcast on local[2] does not certify those production conditions.
+The final bounded-broadcast gate requires a batch relation, at most 100 rows, a nonnull unique key and an estimated size within 1 MiB before attaching the hint. Row validation uses a limit-plus-one count to reject an oversized candidate, then validates identities on the bounded population. The estimate remains only one signal. A production gate would also consider actual encoded sizes, peak build memory, concurrent queries and worker memory budgets. A successful 20-row broadcast on `local[2]` does not certify those production conditions.
 
 The lesson deliberately omits elapsed-time superiority claims. Tiny data, compilation and scheduler startup can dominate. Physical strategy evidence explains what was selected; duplicate-sensitive output comparison explains whether the choice preserved semantics. These are useful results even when neither establishes a meaningful speedup.
 
@@ -53,9 +53,7 @@ The lesson deliberately omits elapsed-time superiority claims. Tiny data, compil
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 
 val facts = spark
   .range(0L, 20000L, 1L, 4)
@@ -69,20 +67,7 @@ spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 
 facts = (
     spark.range(0, 20000, 1, 4)
@@ -104,13 +89,13 @@ spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
 ```scala
 assert(facts.count() == 20000L && dimension.count() == 20L)
 assert(dimension.select("key").distinct().count() == 20L)
-println("Known finite build side:20 unique keys")
+println("Known finite build side: 20 unique keys")
 ```
 
 ```python
 assert facts.count() == 20000 and dimension.count() == 20
 assert dimension.select("key").distinct().count() == 20
-print("Known finite build side:20 unique keys")
+print("Known finite build side: 20 unique keys")
 ```
 
 The small build relation is a measured fixture property. A unique dimension key prevents fanout, but it does not itself choose a join strategy. A production dimension needs a fresh bound and identity check rather than inheriting this fixture assurance.
@@ -147,7 +132,7 @@ Return the optimized-plan size estimate for dimension as a nonnegative integer, 
 
 Build an ordinary inner equality join on key, projecting fact_id, key, amount, factor. Execute logical metrics and record the physical plan chosen with the declared threshold.
 
-**Expected result/shape:** Metrics(20000,20000,79997,839916). The observed plan identifies a join strategy and is printed with current threshold.
+**Expected result/shape:** `Metrics(20000, 20000, 79997, 839916)`. The observed plan identifies a join strategy and is printed with current threshold.
 
 **Verify:** Assert all metrics and a join operator marker. Report the observed automatic strategy without treating a default as a universal guarantee.
 
@@ -177,7 +162,7 @@ Apply broadcast to the dimension for an inner equality join while automatic thre
 
 Request a broadcast dimension in a full outer equality join and inspect the chosen plan. Explain why this fixture still has the same output rows as the inner join.
 
-**Expected result/shape:** No BroadcastHashJoin for this unsupported full-outer hash strategy. Metrics remain(20000,20000,79997,839916) because both key domains are fully covered.
+**Expected result/shape:** No BroadcastHashJoin for this unsupported full-outer hash strategy. Metrics remain `(20000, 20000, 79997, 839916)` because both key domains are fully covered.
 
 **Verify:** Assert the observed absence of BroadcastHashJoin and exact output metrics; report a hint warning if emitted rather than hiding it.
 
@@ -185,7 +170,7 @@ Request a broadcast dimension in a full outer equality join and inspect the chos
 
 ### Exercise 6: Gate a broadcast candidate on explicit bounded evidence
 
-Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside(0,1 MiB]. Return the bounded dimension with a broadcast hint only after those checks.
+Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside (0, 1 MiB]. Return the bounded dimension with a broadcast hint only after those checks.
 
 **Expected result/shape:** The 20-row dimension passes; the same dimension with a duplicate key and a 101-row candidate fail. No unbounded input is collected or materialized by the gate.
 
@@ -199,7 +184,7 @@ Do not broadcast a relation just because it is named dimension. Do not treat a h
 
 ## Self-check
 
-Explain the contract of `estimatedBytes` / `estimated_bytes` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `estimatedBytes` / `estimated_bytes` without reading its solution. Then, from memory, state what Exercise 6 (Gate a broadcast candidate on explicit bounded evidence) must produce: The 20-row dimension passes; the same dimension with a duplicate key and a 101-row candidate fail. No unbounded input is collected or materialized by the gate. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

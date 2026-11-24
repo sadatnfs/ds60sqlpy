@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>PHP is a programming language whose interpreter executes source instructions. In the classroom, a Linux CLI worker runs one file and captures its output. On a web server, a PHP runtime can instead receive request context and produce an HTTP response. These environments share language syntax but expose different inputs and lifecycle behavior. Printing a string that looks like HTML does not turn a CLI process into a web server.</p>
 <p>PHP source begins with an opening tag, and statements commonly end with semicolons. Variables begin with a dollar sign. A comment explains source without executing it. Echo writes output; it does not return a value from a function or save data to a database. We start with literal strings and a tiny computed value so each step is visible.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>PHP interpreter:</strong> The program that reads a PHP script, compiles it to internal instructions and runs them.</li>
+<li><strong>CLI:</strong> The command-line interface, which runs a PHP script as a process and writes its output to standard output rather than an HTTP response.</li>
+<li><strong>Statement:</strong> One instruction ended by a semicolon, such as an assignment or an <code>echo</code>.</li>
+<li><strong>Server response:</strong> The status, headers and body a web server returns when PHP runs for an HTTP request instead of from the command line.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use a pure PHP file beginning with <code>&lt;?php</code>, followed by <code>declare(strict_types=1);</code> before other statements. Strict typing affects certain scalar type coercions at function call boundaries; it does not turn PHP into a statically typed language. Omit the closing tag in a pure PHP file to avoid accidental trailing output. Syntax errors occur before the intended program can run, while runtime errors occur during execution.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -213,9 +220,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected observation:</strong> One greeting line appears in the CLI output.</p>
 <h4 id="worked-example-2-a-named-value">Worked example 2: A named value<a class="heading-anchor" href="#worked-example-2-a-named-value" aria-label="Link to this section">#</a></h4>
 <p>A variable makes the data&#x27;s role explicit.</p>
-<pre class="highlighted-code"><code class="language-php">$minutes = 30;
-echo &quot;Planned minutes: &quot; . $minutes . &quot;\n&quot;;</code></pre>
+<pre class="highlighted-code"><code class="language-php"><span class="syntax-comment">&lt;?php</span>
+$minutes <span class="syntax-operator">=</span> <span class="syntax-number">30</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Planned minutes: </span><span class="syntax-string">&quot;</span> <span class="syntax-operator">.</span> $minutes <span class="syntax-operator">.</span> <span class="syntax-string">&quot;</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected observation:</strong> The dot operator concatenates the label and value.</p>
+<h3 id="contrast-case-a-closing-tag-followed-by-blank-lines">Contrast case: a closing tag followed by blank lines<a class="heading-anchor" href="#contrast-case-a-closing-tag-followed-by-blank-lines" aria-label="Link to this section">#</a></h3>
+<p>This file ends with a closing tag, then two empty lines that are easy to miss in an editor.</p>
+<pre class="highlighted-code"><code class="language-php"><span class="syntax-comment">&lt;?php</span>
+<span class="syntax-keyword">declare</span><span class="syntax-punctuation">(</span>strict_types<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">);</span>
+
+<span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, classroom.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-comment">?&gt;</span>
+
+
+</code></pre>
+<p>PHP swallows a single newline directly after <code>?&gt;</code>, but every character after that is template text, so this CLI run prints the greeting followed by extra blank lines. In a web response the same stray output is sent before any later <code>header()</code> call, which then fails because headers are already sent. Deleting the closing tag removes the risk, because a pure PHP file then has no template area at the end. The fixed file prints exactly one greeting line in the CLI worker.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-which-characters-in-the-greeting-source-appear-in-output">Exercise 1: Predict which characters in the greeting source appear in output.<a class="heading-anchor" href="#exercise-1-predict-which-characters-in-the-greeting-source-appear-in-output" aria-label="Link to this section">#</a></h4>

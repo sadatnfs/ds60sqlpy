@@ -198,21 +198,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-validate-before-switching">1. Validate before switching<a class="heading-anchor" href="#1-validate-before-switching" aria-label="Link to this section">#</a></h3>
 <p>The service project also validates feature order, finite coefficients and positive scales. Broader model acceptance still needs its evaluation and operational evidence.</p>
+<p>activate() computes sha256 of the written candidate and compares it with expected_hash before writing current.pending. In example_one the hash &quot;0&quot; * 64 cannot match {&quot;weight&quot;: 99.0}, so ValueError fires and current.json stays byte-identical to the v1 pointer. Writing the pointer first and validating afterwards would expose consumers to v2 during the gap.</p>
 <p><strong>Expected:</strong> They include artifact identity and compatible structure.</p>
 <h3 id="2-retain-failed-evidence">2. Retain failed evidence<a class="heading-anchor" href="#2-retain-failed-evidence" aria-label="Link to this section">#</a></h3>
 <p>Do not overwrite the previous accepted version or erase the failure merely to simplify directory contents. Apply an explicit retention policy later.</p>
+<p>Note that the fixture leaves v2.json on disk after the hash mismatch, because the candidate is written before it is checked. That file is the evidence: record its hash and the ValueError message beside it so a reviewer can see why it was rejected.</p>
 <p><strong>Expected:</strong> The failure remains explainable.</p>
 <h3 id="3-reconcile-an-unknown-response">3. Reconcile an unknown response<a class="heading-anchor" href="#3-reconcile-an-unknown-response" aria-label="Link to this section">#</a></h3>
 <p>Use the intended version/hash to reconcile actual state. Blindly repeating activation can create misleading audit history in a larger system.</p>
+<p>Read current.json and compare its version and sha256 with the intended values. If they already match, the activation completed and the client&#x27;s timeout lost only the response. Repeating activate() would rewrite the same pointer and add a second audit entry for one change.</p>
 <p><strong>Expected:</strong> The next action reads the pointer before retrying.</p>
 <h3 id="4-check-bundle-compatibility">4. Check bundle compatibility<a class="heading-anchor" href="#4-check-bundle-compatibility" aria-label="Link to this section">#</a></h3>
 <p>Restore a compatible model and feature transformation bundle. A file-level rollback can be technically successful while predictions are semantically wrong.</p>
+<p>In this fixture the model is a single weight, so the pointer is the whole story. A real bundle also fixes feature order and scaling; restoring v1 coefficients beside a v2 scaler would load cleanly and produce wrong scores.</p>
 <p><strong>Expected:</strong> The feature/preprocessing contract must also match.</p>
 <h3 id="5-separate-local-and-distributed-claims">5. Separate local and distributed claims<a class="heading-anchor" href="#5-separate-local-and-distributed-claims" aria-label="Link to this section">#</a></h3>
 <p>Use suitable synchronization, persistence and recovery mechanisms for the deployed environment, and test partial failures explicitly.</p>
+<p>temporary.replace() maps to os.replace, which is atomic for readers on one local filesystem. It does not fsync the directory, so a power loss could still lose the new pointer, and it coordinates nothing between replicas reading different disks.</p>
 <p><strong>Expected:</strong> It does not prove multi-replica consensus or power-loss durability.</p>
 <h3 id="6-exercise-the-real-project">6. Exercise the real project<a class="heading-anchor" href="#6-exercise-the-real-project" aria-label="Link to this section">#</a></h3>
 <p>Retain its ownership marker and state. The checker verifies real HTTP, model integrity and replacement without retraining, while leaving external production claims out of scope.</p>
+<p>Example_two runs v1, v2, v1 and confirms current.json says v1 with no current.pending left. For the real project, check that HTTP responses report the version and that the v1 hash after rollback equals the original v1 hash.</p>
 <p><strong>Expected:</strong> Actual HTTP predictions identify the selected version and restore exactly.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;mle-016: local, bounded ML engineering investigation.&quot;&quot;&quot;</span>

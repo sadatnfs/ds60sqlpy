@@ -205,21 +205,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-the-and-selector-result-for-a-wrong-namespace">Exercise 1: Predict the AND selector result for a wrong namespace.<a class="heading-anchor" href="#exercise-1-predict-the-and-selector-result-for-a-wrong-namespace" aria-label="Link to this section">#</a></h3>
 <p>Both predicates in one peer must hold. This is a precise Boolean boundary, not a formatting detail.</p>
 <p><strong>Expected:</strong> It does not match even if the Pod role is tester.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Evaluate the namespaceSelector and podSelector in one peer entry as both required.</li>
+<li><strong>Why it is correct:</strong> Two selectors in the same from item are combined with AND, so a Pod in the wrong namespace fails even with role tester.</li>
+<li><strong>Plausible wrong approach:</strong> Reading them as OR would admit any tester Pod from any namespace.</li>
+<li><strong>How to verify:</strong> The prediction says the caller does not match.</li>
+</ul>
 <h3 id="exercise-2-compare-separate-peers-with-a-combined-peer">Exercise 2: Compare separate peers with a combined peer.<a class="heading-anchor" href="#exercise-2-compare-separate-peers-with-a-combined-peer" aria-label="Link to this section">#</a></h3>
 <p>Review the indentation and list structure carefully. YAML shape changes the access relationship.</p>
 <p><strong>Expected:</strong> Separate entries create alternatives; combined selectors narrow one peer.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare two list items in from with one item holding both selectors.</li>
+<li><strong>Why it is correct:</strong> Separate items are alternatives combined with OR, while one item with both selectors narrows to callers matching both.</li>
+<li><strong>Plausible wrong approach:</strong> A single dash in the YAML decides the meaning, so misplacing it silently widens or narrows access.</li>
+<li><strong>How to verify:</strong> The answer says separate entries create alternatives and combined selectors narrow one peer.</li>
+</ul>
 <h3 id="exercise-3-build-an-allowed-denied-flow-matrix">Exercise 3: Build an allowed/denied flow matrix.<a class="heading-anchor" href="#exercise-3-build-an-allowed-denied-flow-matrix" aria-label="Link to this section">#</a></h3>
 <p>A matrix exposes gaps before live testing. Include at least one near-miss case for each selector.</p>
 <p><strong>Expected:</strong> Caller namespace, Pod labels, target port and expected result are explicit.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write rows of caller namespace, Pod labels, target port and expected allow or deny result.</li>
+<li><strong>Why it is correct:</strong> Policy decisions depend on all three inputs, so a matrix shows every case the rules must handle.</li>
+<li><strong>Plausible wrong approach:</strong> Listing only allowed callers leaves the denied cases untested.</li>
+<li><strong>How to verify:</strong> Each row names namespace, labels, port and result.</li>
+</ul>
 <h3 id="exercise-4-diagnose-a-policy-object-with-unrestricted-actual-traffic">Exercise 4: Diagnose a policy object with unrestricted actual traffic.<a class="heading-anchor" href="#exercise-4-diagnose-a-policy-object-with-unrestricted-actual-traffic" aria-label="Link to this section">#</a></h3>
 <p>API acceptance is weaker than isolation evidence. Inspect the complete applicable policy set and the CNI capability.</p>
 <p><strong>Expected:</strong> The implementation may not enforce policy or another allow rule may apply.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check whether the CNI enforces NetworkPolicy, then look for another policy allowing the flow.</li>
+<li><strong>Why it is correct:</strong> The API accepts policy objects even when nothing enforces them, and allow rules from several policies add together.</li>
+<li><strong>Plausible wrong approach:</strong> Editing the policy repeatedly when no enforcer exists will never change traffic.</li>
+<li><strong>How to verify:</strong> The diagnosis names the enforcing implementation and other allow rules.</li>
+</ul>
 <h3 id="exercise-5-explain-additive-allow-semantics">Exercise 5: Explain additive allow semantics.<a class="heading-anchor" href="#exercise-5-explain-additive-allow-semantics" aria-label="Link to this section">#</a></h3>
 <p>Do not assume a default-deny policy overrides a separate broad allow. Evaluate the combined result.</p>
 <p><strong>Expected:</strong> Multiple policies can broaden the union of permitted flows.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Explain that a Pod&#x27;s allowed traffic is the union of all policies selecting it.</li>
+<li><strong>Why it is correct:</strong> Policies only add allows, and none can deny what another one permits.</li>
+<li><strong>Plausible wrong approach:</strong> Adding a narrower policy to restrict a broad one has no effect.</li>
+<li><strong>How to verify:</strong> The answer says multiple policies can broaden the permitted set.</li>
+</ul>
 <h3 id="exercise-6-design-real-isolation-acceptance">Exercise 6: Design real isolation acceptance.<a class="heading-anchor" href="#exercise-6-design-real-isolation-acceptance" aria-label="Link to this section">#</a></h3>
 <p>The denied case is essential. A successful allowed request alone cannot prove that isolation exists.</p>
-<p><strong>Expected:</strong> One allowed and one denied owned flow under a named enforcing CNI.</p></article>
+<p><strong>Expected:</strong> One allowed and one denied owned flow under a named enforcing CNI.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run one owned flow that should pass and one that should fail, naming the enforcing CNI.</li>
+<li><strong>Why it is correct:</strong> An allowed flow alone cannot show isolation, because everything passes without enforcement.</li>
+<li><strong>Plausible wrong approach:</strong> Testing only the allowed flow passes on a cluster with no enforcement at all.</li>
+<li><strong>How to verify:</strong> Both outcomes are observed under a named CNI.</li>
+</ul></article>
   </main>
 </body>
 </html>

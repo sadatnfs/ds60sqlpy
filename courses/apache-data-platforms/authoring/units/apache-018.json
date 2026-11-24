@@ -5,6 +5,42 @@
   "minutes": 60,
   "prerequisites": ["apache-016", "apache-005"],
   "concepts": ["execution partitions", "memory pools", "spill evidence"],
+  "key_terms": [
+    [
+      "Target partitions",
+      "The DataFusion setting for how many execution partitions a plan uses for parallel work in one process. It is not a count of machines or proof of core usage."
+    ],
+    [
+      "Execution partition",
+      "One parallel stream of record batches inside a physical plan, distinct from file partitions, Arrow chunks and record-batch size."
+    ],
+    [
+      "Memory pool",
+      "The runtime component that tracks memory reserved by cooperating operators and refuses or triggers spilling at a configured limit."
+    ],
+    [
+      "Fair spill pool",
+      "A DataFusion memory pool that shares memory among spilling operators. It is not a hard limit on every byte the Python process allocates."
+    ],
+    [
+      "Spill",
+      "Writing intermediate operator state, such as sorted runs, to temporary disk files so an operator can finish within its memory reservation."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Run the same aggregate at two partition counts",
+      "language": "python",
+      "code": "import pyarrow as pa\nfrom datafusion import SessionConfig, SessionContext\n\nrows = pa.table({\"group_id\": [i % 10 for i in range(4000)], \"value\": [i % 37 for i in range(4000)]})\nquery = \"SELECT group_id, COUNT(*) AS n, SUM(value) AS total FROM events GROUP BY group_id ORDER BY group_id\"\nresults = []\nfor count in [1, 4]:\n    ctx = SessionContext(SessionConfig().with_target_partitions(count))\n    ctx.register_record_batches(\"events\", [rows.to_batches(max_chunksize=500)])\n    results.append(ctx.sql(query).to_arrow_table())\nprint(results[0].equals(results[1]), results[0].num_rows)",
+      "interpretation": "The comparison should print True and 10: the answer is identical at one and four target partitions, and each group holds 400 rows. Only the work layout changes, including how many hash partitions the aggregate builds and how much memory each holds. If results differ between counts, suspect a missing ORDER BY or a non-deterministic function before blaming the engine."
+    },
+    {
+      "title": "Bound a sort by projecting and filtering first",
+      "language": "sql",
+      "code": "SELECT\n  id,\n  value\nFROM\n  events\nWHERE\n  value < 2\nORDER BY\n  value,\n  id",
+      "interpretation": "Projecting two columns and keeping only values 0 and 1 means the sort sees roughly 2 of every 37 rows instead of the full table, which keeps it inside the memory pool without spilling. Under a small fair spill pool, a full sort of wide rows would write to the configured spill directory. When a query is slow, check for spill files in that directory; their presence shows memory pressure, not a wrong answer."
+    }
+  ],
   "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",
   "sources": [
     [

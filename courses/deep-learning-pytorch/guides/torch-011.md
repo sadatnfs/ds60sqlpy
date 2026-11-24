@@ -136,7 +136,7 @@ assert model.offset.item() == 0
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The module exposes one parameter and one buffer in state_dict, one SGD step moves the weight to \(\frac{28}{15}\) while the buffer stays 0, both tensors convert to float32, and the stale optimizer still references the old Parameter. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Inspect module state. Predict exercise 6, Keep parameter count stable across calls, from its prompt alone: Call a fresh module on batches of length 1 and 4 and compare parameter identities. Then explain why this finish condition holds: The module exposes one parameter and one buffer in state_dict, one SGD step moves the weight to \(\frac{28}{15}\) while the buffer stays 0, both tensors convert to float32, and the stale optimizer still references the old Parameter. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -172,15 +172,15 @@ If parameter count changes after a forward call, look for construction inside fo
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Check a forward call) alters one assumption of Example A (Inspect module state). Hint 2: exercise 4, Move dtype through registered state, should end at both float32. Work backward from it. Hint 3: exercise 5, Expose stale optimizer membership, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain Module, Buffer, Optimizer membership using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Run one explicit loop step, from its inputs alone. Predict whether exercise 3, Count state in a ModuleList, survives one changed input. Then explain Module, Buffer, Optimizer membership in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-010` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Inspect module state) cannot be rebuilt without help, revisit `torch-010` first. Otherwise keep your exercise 2 attempt, Predict one step with the offset present, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

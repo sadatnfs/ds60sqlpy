@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-011`.
 
+## Key terms
+
+- **Arrow IPC:** Arrow's interprocess communication format, which serializes a schema and record batches so another process can reconstruct the same logical arrays. It is not a shared-memory transport or an authentication protocol.
+- **IPC stream format:** The sequential IPC form in which a reader receives the schema and then each record batch in order, suited to consumers that process and release one bounded batch at a time.
+- **IPC file format:** The IPC form with a footer indexing batch locations, so a reader can fetch one batch without replaying the batches before it.
+- **Stream schema:** The schema declared at the start of an IPC stream, which every later batch must match in names and types. Changing a column's type requires normalization or a new stream.
+
 ## The mechanism
 
 In-memory representation and interchange are related but different tasks. A
@@ -84,6 +91,49 @@ ordered batch consumption fits the producer/consumer boundary and random batch
 lookup is unnecessary. Select file IPC when the consumer needs file-level batch
 indexing. In either case, verify schema, completeness and ownership. The format
 alone does not provide transactions, authorization, retry semantics or a catalog.
+
+## Worked examples
+
+### Preserve schema metadata through an IPC stream
+
+```python
+import pyarrow as pa
+import pyarrow.ipc as ipc
+
+schema = pa.schema([("id", pa.int64())], metadata={b"currency": b"fixture-USD"})
+sink = pa.BufferOutputStream()
+with ipc.new_stream(sink, schema) as writer:
+    writer.write_batch(pa.record_batch([[1, 2]], schema=schema))
+reader = ipc.open_stream(sink.getvalue())
+print(reader.schema.metadata)
+```
+
+```text
+{b'currency': b'fixture-USD'}
+```
+
+The currency key survives the stream because schema metadata travels in the stream header. A reader that compares schemas without check_metadata would accept a batch labeled with a different currency, so contracts that depend on metadata must compare it explicitly. Note the bytes keys: code that looks up a str key will miss the entry and may wrongly conclude it was dropped.
+
+### Fetch one batch from an IPC file footer
+
+```python
+import pyarrow as pa
+import pyarrow.ipc as ipc
+
+schema = pa.schema([("id", pa.int64())])
+sink = pa.BufferOutputStream()
+with ipc.new_file(sink, schema) as writer:
+    writer.write_batch(pa.record_batch([[1, 2]], schema=schema))
+    writer.write_batch(pa.record_batch([[3]], schema=schema))
+reader = ipc.open_file(sink.getvalue())
+print(reader.num_record_batches, reader.get_batch(1).to_pylist())
+```
+
+```text
+2 [{'id': 3}]
+```
+
+The file format records batch locations in a footer, so the reader knows there are two batches and jumps straight to the second. A stream reader has no footer and must read from the beginning. Choose the file format for data at rest that needs random access, and the stream format for pipes and sockets where the total length is not known when writing starts.
 
 ## Complete worked source
 

@@ -14,13 +14,43 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 State the assumptions making the bounded arithmetic property valid.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The range avoids overflow, making the mathematical property appropriate to this representation. All one hundred bounded pairs were checked and satisfy the addition relation.
+**Written answer.** The property `a + b == b + a` holds for mathematical integers, and Example A only checks it under assumptions that keep `i32` addition equal to that. Both values lie in 0 to 9, so every sum is at most 18 and cannot overflow `i32`. The loops enumerate all 100 pairs, so the test is exhaustive for that domain, and equality on `i32` is exact.
+
+**Why it is correct.** Outside its stated domain the property no longer describes this code: near `i32::MAX`, `a + b` panics in debug builds, so the law depends on the range limit.
+
+**Plausible wrong approach.** Concluding that addition is commutative for every `i32` from this test generalizes past the domain it enumerated.
+
+**How to verify.** Change the ranges to include `i32::MAX` and run in a debug build: the first overflowing pair panics with attempt to add with overflow.
 
 ### Task 2: Guided modification
 
 Add a small exhaustive test for checked quantity addition.
 
-No separate reference answer has been written for this task. Start from Example B: Order alone would not reject a broken implementation that drops duplicates. Sorting establishes order without losing the repeated three.
+**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut checked = 0;
+    for a in 0_u8..=u8::MAX {
+        for b in 0_u8..=u8::MAX {
+            let wide = u16::from(a) + u16::from(b);
+            let expected = u8::try_from(wide).ok();
+            assert_eq!(a.checked_add(b), expected);
+            checked += 1;
+        }
+    }
+    assert_eq!(checked, 65_536);
+    Ok(())
+}
+```
+
+**Observe:** All 65,536 pairs of u8 quantities agree with a wider oracle: checked_add returns the sum when it fits and None when it does not.
+
+The `u8` domain is small enough to enumerate completely, and the oracle adds in `u16`, which cannot overflow for two `u8` values, then checks whether the result fits back into `u8`. The oracle never calls `checked_add`, so the test does not reuse the implementation it judges.
+
+**Plausible wrong approach.** Testing only small values such as 1 + 2 never reaches the overflow boundary, so an implementation that wraps would pass.
+
+**How to verify.** Run the block. Replace `a.checked_add(b)` with `Some(a.wrapping_add(b))` and the assertion fails at 1 + 255.
 
 ### Task 3: Independent construction
 
@@ -50,13 +80,46 @@ Enumerating every mask of a small size checks the property exhaustively, includi
 
 Diagnose a sortedness test that never checks retained values.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A property can be too weak to distinguish incorrect implementations. Integer overflow can invalidate a mathematical law's assumed domain. Compiler message wording may change even when the underlying rule remains correct.
+**Written answer.** The defect is a sort test that only asserts `output.windows(2).all(|pair| pair[0] <= pair[1])`. An implementation that returns an empty vector, a vector of one repeated value, or the input with a duplicate removed passes it, because all of those are sorted. Add the multiplicity check from Example B, or compare the result with a trusted oracle such as a clone sorted by `sort_unstable`.
+
+**Why it is correct.** Sorting has two obligations: the output is ordered, and it is a permutation of the input. A property that checks only the first is too weak to reject an implementation that loses data.
+
+**Plausible wrong approach.** Adding `output.len() == input.len()` alone still accepts `[1, 1, 1, 1]` for the input `[3, 1, 3, 2]`.
+
+**How to verify.** Feed the order-only test a fake sort that returns `Vec::new()`: it passes. Run Example B's multiplicity loop on the same output and it fails.
 
 ### Task 5: Boundary evidence
 
 Preserve empty, duplicate and all-null regression fixtures.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Check a bounded algebraic property) and Example B (Check order and multiplicity separately).
+**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use arrow::array::{Array, Int32Array};
+    fn report(values: &Int32Array) -> (usize, usize, i64) {
+        let total = values.iter().flatten().map(i64::from).sum();
+        (values.len(), values.null_count(), total)
+    }
+    let fixtures = [
+        ("empty", Int32Array::from(Vec::<i32>::new()), (0, 0, 0)),
+        ("duplicate", Int32Array::from(vec![4, 4, 1]), (3, 0, 9)),
+        ("all null", Int32Array::from(vec![None, None]), (2, 2, 0)),
+    ];
+    for (name, values, expected) in &fixtures {
+        assert_eq!(report(values), *expected, "fixture {name}");
+    }
+    Ok(())
+}
+```
+
+**Observe:** The empty, duplicate and all-null fixtures each produce their recorded report, and a failure would name the fixture.
+
+Each fixture is stored with its name and expected result, so it keeps guarding against the defect it represents: duplicates must both count, and an all-null column must report two rows and two nulls rather than looking like the empty input.
+
+**Plausible wrong approach.** Deleting a fixture after its bug is fixed lets the same defect return unnoticed.
+
+**How to verify.** Run the block. Change `report` to deduplicate values before summing and the duplicate fixture fails with its name in the message.
 
 ### Task 6: Transfer and justify
 

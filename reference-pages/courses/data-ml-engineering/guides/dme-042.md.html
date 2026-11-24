@@ -198,6 +198,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Direct prerequisites:</strong> <code>dme-021</code>, <code>dme-041</code>.</p>
 <p><strong>Outcome:</strong> Exercise a bounded real ASGI contract and resource cleanup.</p>
 <p>Open the worked program in the classroom code pad. This tutorial exposes complete examples and answered discussions without an exam gate. The pad has fresh temporary state; separately documented projects use their own owned lifecycle.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Coroutine:</strong> An async function&#x27;s execution, which can pause at await points while other work runs.</li>
+<li><strong>Bounded admission:</strong> Limiting concurrent work to a fixed number of slots, here two, and rejecting extra requests with HTTP 429 instead of queueing without bound.</li>
+<li><strong>Cancellation:</strong> A caller disconnecting or a task being stopped mid-request, after which cleanup must still release what the request held.</li>
+<li><strong>Cleanup in finally:</strong> Releasing resources in a finally block so they are freed on success, failure or cancellation.</li>
+</ul>
 <h3 id="a-request-has-a-lifecycle">A request has a lifecycle<a class="heading-anchor" href="#a-request-has-a-lifecycle" aria-label="Link to this section">#</a></h3>
 <p>An online service must control what happens before, during and after computation. A request may wait for admission, acquire a resource, perform work, create an effect and send a response. The caller can disconnect or cancel at any point. If these phases are treated as one indivisible action, the system can leak capacity, duplicate effects or report misleading success and failure states.</p>
 <p>Concurrency means multiple operations are in progress at once. In an asynchronous Python application, coroutines cooperate by suspending at <code>await</code> points. That is different from running CPU-heavy work on multiple cores. A blocking numerical function inside an async handler can still occupy the event loop unless the design moves it to an appropriate execution boundary. Threads, processes and accelerators introduce their own cancellation and resource constraints.</p>
@@ -360,6 +367,44 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="worked-example-cancelling-a-request-mid-write-leaves-an-uncertain-effect">Worked example: Cancelling a request mid-write leaves an uncertain effect<a class="heading-anchor" href="#worked-example-cancelling-a-request-mid-write-leaves-an-uncertain-effect" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> asyncio
+
+ledger <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">handler</span><span class="syntax-punctuation">(</span>request_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    ledger<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>request_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">started</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.05</span><span class="syntax-punctuation">)</span>
+        ledger<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>request_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">committed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> asyncio<span class="syntax-operator">.</span>CancelledError<span class="syntax-punctuation">:</span>
+        ledger<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>request_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cancelled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">raise</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    task <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>handler<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">req-1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span>
+    task<span class="syntax-operator">.</span>cancel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">await</span> task
+    <span class="syntax-keyword">except</span> asyncio<span class="syntax-operator">.</span>CancelledError<span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">client saw: cancelled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    shielded <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>handler<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">req-2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>wait_for<span class="syntax-punctuation">(</span>asyncio<span class="syntax-operator">.</span>shield<span class="syntax-punctuation">(</span>shielded<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> timeout<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> TimeoutError<span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">client saw: timeout</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">await</span> shielded
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ledger:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> ledger<span class="syntax-punctuation">)</span>
+
+
+asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-text">client saw: cancelled
+client saw: timeout
+ledger: [(&#x27;req-1&#x27;, &#x27;started&#x27;), (&#x27;req-1&#x27;, &#x27;cancelled&#x27;), (&#x27;req-2&#x27;, &#x27;started&#x27;), (&#x27;req-2&#x27;, &#x27;committed&#x27;)]</code></pre>
+<p>Request req-1 was cancelled after 10 ms, so its ledger shows started then cancelled and no commit. That case is clean only because the commit had not happened yet; the client cannot tell this from a cancel that arrives just after a commit. Request req-2 uses asyncio.shield, so the client&#x27;s 10 ms timeout ends its wait but the handler keeps running and commits. The client saw a timeout, yet the effect happened. The only way to tell these cases apart is to read the ledger by request ID, which is why the chapter reconciles uncertain outcomes by reading back instead of retrying blindly.</p>
 <h3 id="cancellation-is-a-signal-with-boundaries">Cancellation is a signal with boundaries<a class="heading-anchor" href="#cancellation-is-a-signal-with-boundaries" aria-label="Link to this section">#</a></h3>
 <p>Cancelling an asyncio task requests cancellation at a suspension point. It does not reverse a database commit, unsend an email or necessarily stop a running thread, subprocess or GPU kernel. A timeout observed by one layer may leave work continuing in another. The system needs a clear policy for work that remains in flight and for the effects it may produce.</p>
 <p>For pure inference, cancellation may allow the service to discard an eventual result while releasing request bookkeeping, even if computation cannot be interrupted immediately. For a state-changing operation, the caller needs a stable identity and a way to query or reconcile the outcome. Returning a generic “failed” message when the effect actually committed can encourage an unsafe retry. Preserve the difference between computation failed, response not observed and accepted effect recorded.</p>

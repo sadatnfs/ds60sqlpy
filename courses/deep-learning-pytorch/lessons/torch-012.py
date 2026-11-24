@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Create the three-feature fixture
-# Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.
+# Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target `2a - b + c`.
 # Expected: targets 0, 2, -1, 1, 2, 4.
 
 # Exercise 2: Measure the training-mean baseline

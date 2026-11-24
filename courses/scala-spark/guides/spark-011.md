@@ -8,7 +8,7 @@ Beginner; approximately 75 minutes. Direct prerequisites: `spark-001`, `python-1
 
 ## How to run this lesson
 
-Open `spark-011` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-011` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-011.scala) and [PySpark learner](../lessons/spark-011.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-011_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-011_solution.scala) and [PySpark reference](../solutions/spark-011_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -49,7 +49,7 @@ This bridge assumes the existing Python testing lesson and does not require comp
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{Column, Row}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -61,20 +61,8 @@ val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StructField, StructType
 
 schema = StructType(
     [
@@ -170,7 +158,7 @@ Return ordered IDs whose amount_cents is SQL NULL. Do not compare the Column to 
 
 **Expected result/shape:** Only ID 3 is returned. The observed-zero ID 1 is absent from the missingness result.
 
-**Verify:** Assert[3] and separately assert that the zero-amount filter returns [1].
+**Verify:** Assert `[3]` and separately assert that the zero-amount filter returns [1].
 
 **Progressive hint:** Use the Column isNull operation, not a language-level object identity test.
 
@@ -188,7 +176,7 @@ Return ordered IDs with a known amount at least 10 and event_id less than 4. Com
 
 Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without filling NULL or dropping identity. Keep a Long-compatible integer result.
 
-**Expected result/shape:** Ordered rows are (1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown.
+**Expected result/shape:** Ordered rows are `(1, 1)`, `(2, 21)`, `(3, NULL)`, `(4, 21)`. The two 21 values remain separate events and unknown remains unknown.
 
 **Verify:** Compare every ordered row with literal expected values, including the NULL position.
 
@@ -210,7 +198,7 @@ If Python reports that a Column cannot be converted to bool, inspect and/or/not 
 
 ## Self-check
 
-Explain the contract of `aboveTen` / `above_ten` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `aboveTen` / `above_ten` without reading its solution. Then, from memory, state what Exercise 6 (Compare SQL and Columns with an independent expectation) must produce: Both paths return `[2, 4]`. The temporary view exists only in this owned session and no external database connection is opened. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

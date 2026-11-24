@@ -5,6 +5,39 @@
   "minutes": 100,
   "prerequisites": ["apache-080", "apache-081", "apache-084"],
   "concepts": ["versioned data product", "consumer contract", "revocation scope"],
+  "key_terms": [
+    [
+      "Data product",
+      "A shared dataset with a defined meaning, schema, identity, freshness, retention and access contract."
+    ],
+    [
+      "Consumer contract",
+      "The provider's promises about schema, versions and compatibility that a recipient can rely on."
+    ],
+    [
+      "Consumer receipt",
+      "The recipient's record of table identity, version, schema, row identity and releases, with no bearer tokens or signed URLs."
+    ],
+    [
+      "Revocation scope",
+      "The set of capabilities that revoking a recipient actually removes, as opposed to data or URLs it already holds."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "The consumer contract for version 0",
+      "language": "json",
+      "code": "{\n  \"share\": \"ds60_fixture\",\n  \"schema\": \"tutorial\",\n  \"table\": \"orders\",\n  \"version\": 0\n}",
+      "interpretation": "This fixture-contract.json is what a consumer can rely on: a named table at a fixed version with columns id, region and amount. The client checks the exact rows against an oracle after reading. Publishing a new version is a separate, announced change; consumers that pinned 0 keep their results until they choose to move."
+    },
+    {
+      "title": "Bound the data a recipient will download",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.parquet as pq\n\nsink = pa.BufferOutputStream()\npq.write_table(pa.table({\"id\": [1, 2, 3], \"region\": [\"east\", \"west\", \"east\"]}), sink)\nmetadata = pq.ParquetFile(pa.BufferReader(sink.getvalue())).metadata\nprint(metadata.num_rows, metadata.num_columns, metadata.num_row_groups)",
+      "output": "3 2 1",
+      "interpretation": "The Delta Sharing client reads each file footer and rejects files with too many rows, columns, row groups or metadata bytes before it materializes anything. Here the footer reports three rows, two columns and one row group. Checking footers first protects the recipient from a provider that publishes a much larger file than the contract promised."
+    }
+  ],
   "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",
   "sources": [
     ["Iceberg reliability and table state", "https://iceberg.apache.org/docs/latest/reliability/"],

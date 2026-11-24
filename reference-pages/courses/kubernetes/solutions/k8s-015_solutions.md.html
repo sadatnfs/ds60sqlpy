@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-name-each-question">Exercise 1: Name each question<a class="heading-anchor" href="#exercise-1-name-each-question" aria-label="Link to this section">#</a></h3>
 <p>The same HTTP status can trigger different effects depending on which probe consumed it. The lesson is about those controller/kubelet policies rather than treating health as one undifferentiated Boolean.</p>
 <p><strong>Expected:</strong> Initialization gate, traffic eligibility and restart policy are distinguished.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> For each probe, name the component that acts on failure and the action it takes.</li>
+<li><strong>Why it is correct:</strong> Startup failure past its threshold kills the container, readiness failure removes the Pod from endpoints and liveness failure restarts the container.</li>
+<li><strong>Plausible wrong approach:</strong> Treating all three as one health flag would predict a restart for a readiness failure, which never restarts anything.</li>
+<li><strong>How to verify:</strong> Three different actions are listed: gate later probes, withhold traffic, restart.</li>
+</ul>
 <h3 id="exercise-2-run-the-healthy-delayed-fixture">Exercise 2: Run the healthy delayed fixture<a class="heading-anchor" href="#exercise-2-run-the-healthy-delayed-fixture" aria-label="Link to this section">#</a></h3>
 <p>The fixture and probe are deliberately finite. A successful initial run supports that observed startup/readiness path under the qualified environment, but not a universal initialization duration or all later liveness behavior.</p>
 <p><strong>Expected:</strong> Startup delay is configured 3; controller/backend/client checks eventually establish the observed healthy baseline.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Add the delay variable and both probes, compute the startup budget, then Run.</li>
+<li><strong>Why it is correct:</strong> The startupProbe allows 1 times 10 equals 10 seconds, more than the 3-second delay, and liveness only begins after startup succeeds.</li>
+<li><strong>Plausible wrong approach:</strong> Putting failureThreshold 2 on the startupProbe would give 2 seconds, so the kubelet would kill the container before /startup ever succeeds.</li>
+<li><strong>How to verify:</strong> Configured budget 10 seconds exceeds delay 3, and observed times are reported separately.</li>
+</ul>
 <h3 id="exercise-3-trace-readiness-removal">Exercise 3: Trace readiness removal<a class="heading-anchor" href="#exercise-3-trace-readiness-removal" aria-label="Link to this section">#</a></h3>
 <p>A readiness failure can stop normal Service selection while the process remains alive. Recovery should be shown at the routing/application boundary, not inferred from the fact that the container never exited.</p>
 <p><strong>Expected:</strong> No direct restart claim; new Ready/endpoint/client observations are required after repair.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Classify case A as a readiness failure and list the recovery evidence it would need.</li>
+<li><strong>Why it is correct:</strong> Readiness failure only removes the Pod from EndpointSlices; the container keeps running with the same restartCount.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting a restart and waiting for restartCount to change watches the wrong field.</li>
+<li><strong>How to verify:</strong> The answer cites a Ready condition change and an endpoint or client observation, not a restart.</li>
+</ul>
 <h3 id="exercise-4-trace-liveness-restart">Exercise 4: Trace liveness restart<a class="heading-anchor" href="#exercise-4-trace-liveness-restart" aria-label="Link to this section">#</a></h3>
 <p>Liveness can restart a container inside an existing Pod. Its ephemeral volumes may therefore have different lifetime behavior from a new Pod, which the next chapter examines.</p>
 <p><strong>Expected:</strong> Same Pod UID with increased container restartCount.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare Pod UID and restartCount between the two case B records.</li>
+<li><strong>Why it is correct:</strong> A liveness failure makes the kubelet restart the container inside the same Pod, so UID stays and restartCount increases.</li>
+<li><strong>Plausible wrong approach:</strong> Calling it a replacement would expect a new UID and a reset count, neither of which appears.</li>
+<li><strong>How to verify:</strong> UID is identical and restartCount went up by at least one.</li>
+</ul>
 <h3 id="exercise-5-predict-a-wrong-fixed-path">Exercise 5: Predict a wrong fixed path<a class="heading-anchor" href="#exercise-5-predict-a-wrong-fixed-path" aria-label="Link to this section">#</a></h3>
 <p>The source remains inside the allowlist but requests a deliberately failing check. Depending on the observed window, the operation can show waiting, restarts or failure; the evidence should identify the phase and not overclaim a deterministic schedule.</p>
 <p><strong>Expected:</strong> The wrong path returns 404; the actual bounded result and cleanup must be recorded rather than inventing a fixed timing.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Change one probe path to /missing in a scratch copy, Run it and record what the bounded result actually shows.</li>
+<li><strong>Why it is correct:</strong> /missing returns 404, so a startup or liveness probe on it fails, but how many restarts or how long depends on timing you must observe.</li>
+<li><strong>Plausible wrong approach:</strong> Writing a fixed failure time from periodSeconds alone invents a measurement the result never contained.</li>
+<li><strong>How to verify:</strong> The record holds the actual Run outcome and cleanup and no unobserved timing.</li>
+</ul>
 <h3 id="exercise-6-choose-a-production-probe-policy">Exercise 6: Choose a production probe policy<a class="heading-anchor" href="#exercise-6-choose-a-production-probe-policy" aria-label="Link to this section">#</a></h3>
 <p>A liveness policy should target failures restart can plausibly resolve. Readiness can withhold traffic while preserving the process. The correct policy depends on application behavior and measured recovery evidence, not this fixture&#x27;s three-second value.</p>
 <p><strong>Expected:</strong> A concrete design separates process-deadlock detection from traffic readiness and dependency behavior.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Reserve liveness for states a restart fixes, such as a deadlock, and route dependency outages to readiness or degraded responses.</li>
+<li><strong>Why it is correct:</strong> Restarting every caller during a database outage adds cold starts without restoring the dependency.</li>
+<li><strong>Plausible wrong approach:</strong> Making liveness call the downstream dependency would restart every replica at once during that outage.</li>
+<li><strong>How to verify:</strong> The policy restarts only for repairable local failures and changes readiness or behavior for dependency loss.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Do not use a remote dependency check as liveness merely because it is convenient: restarting every caller may amplify the dependency outage. Do not call a Running Pod ready or assume a successful startup probe means all future requests succeed. A startup success is an initial milestone; readiness and liveness continue to have distinct roles.</p>
 <p>A source change alone is not evidence that the kubelet used the intended probe. Observe the current Pod template and identity, then the relevant conditions/events/restart counts. Preserve the bounded cleanup result even for an intentionally unhealthy configuration.</p></article>

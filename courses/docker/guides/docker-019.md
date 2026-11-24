@@ -16,6 +16,14 @@ An internal network reduces external connectivity for its attached network. A se
 
 Network mode none creates a container without ordinary external networking. This is useful for a pure computation that needs no DNS or HTTP. Host networking removes a major layer of network isolation and behaves differently across environments; it is not the beginner default or a repair for a wrong port mapping.
 
+### Key terms
+
+- **Gateway:** The router address that forwards a network's traffic to destinations beyond it.
+- **Internal network:** A Docker network marked internal, which blocks external connectivity for the containers attached to it.
+- **Outbound connectivity:** A container's ability to reach destinations outside its network, normally through routing and address translation.
+- **Network mode none:** A setting that gives a container no ordinary external networking, suited to pure computation.
+- **Host networking:** A mode where the container uses the host's network stack directly, removing a major layer of network isolation.
+
 ## Anatomy and a trace you can follow
 
 Compose networks are named model objects. Services explicitly join the networks they require. A database can live only on `backend`, while an API joins `frontend` and `backend`. Marking `backend` internal should be tested from the actual callers and engine because host connectivity and DNS details are operational facts.
@@ -96,11 +104,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Switching to host networking to make a port problem disappear. Treating a private network as authentication. Attaching every service to every network.
 
-Exercise 4 is this chapter's boundary case: Diagnose host-network mode used to hide a mapping error. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose host-network mode used to hide a mapping error. Restore the bridge network, reproduce the original refusal and read the published mapping and listen address that host mode was hiding. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using network isolation, internal network, gateway and outbound connectivity. Reconstruct worked example 2 (Run a network-free computation) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Predict the output of the computation under `--network none` and explain why no network was needed. Then reconstruct worked example 2 (Run a network-free computation) with one different value, predict what changes, and name which of network isolation, internal network, gateway and outbound connectivity the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

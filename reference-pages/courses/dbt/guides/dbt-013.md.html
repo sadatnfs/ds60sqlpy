@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Selection controls which resources a command considers. A tag-based selection expresses a group chosen by project metadata; graph operators expand to related resources. State selection compares current project metadata with a saved manifest. These mechanisms can reduce work, but they are not themselves tests of scientific correctness or deployment safety.</p>
 <p>The first case tags a base model and selects it with its downstream dependent. The unrelated model is excluded. The second saves a manifest, changes one source file and uses state:modified+ to include the changed model and its downstream consumer. The selected set is inspected explicitly before any claim about reduced validation is made.</p>
 <p>A state comparison depends on the baseline manifest. Keeping that baseline inside the directory that the next command overwrites can destroy the comparison. Save it separately with its source revision and environment identity. Also distinguish a changed definition from changed underlying data: a source can receive new records while the model file remains unchanged.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Node selection:</strong> The <code>--select</code> syntax that limits a command to named resources, tags, paths or graph neighborhoods.</li>
+<li><strong>Tag:</strong> A label assigned in configuration that <code>--select tag:name</code> uses to choose a group of resources.</li>
+<li><strong>Graph operator:</strong> A plus sign before or after a selector that adds the selected node&#x27;s ancestors or descendants.</li>
+<li><strong>state:modified:</strong> A selector that compares the project with a saved manifest given by <code>--state</code> and chooses the nodes whose definitions changed.</li>
+<li><strong>Manifest:</strong> The manifest.json artifact describing every parsed node, its configuration and its dependencies.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>ls returns the selected resource list without running model transformations. tag:feature+ adds downstream graph expansion. state:modified+ compares definitions against --state and includes downstream resources. The program uses --resource-type model and --output name so its expected set is explicit. Keep state artifacts outside the active target output directory.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "What the files actually contain",
+      "body": "The text written by `write.csv(records, path, na = \"\")` with the default row names:\n\n```text\n\"\",\"id\",\"amount\"\n\"1\",\"001\",2\n\"2\",\"002\",\n```\n\nand with `row.names = FALSE`:\n\n```text\n\"id\",\"amount\"\n\"001\",2\n\"002\",\n```\n\nReading the first file back gives three columns. The empty header becomes `X` and holds 1 and 2, so `identical(names(restored), c(\"id\", \"amount\"))` is FALSE, and code that selects columns by position now reads the row index where it expects the ID. The second file holds exactly the two business fields, and the missing amount is the empty field after the last comma.\n\nJSON has a similar hidden choice. With `auto_unbox = TRUE`, a vector of length one loses its brackets:\n\n```text\ntoJSON(list(values = 2), auto_unbox = TRUE)          {\"values\":2}\ntoJSON(list(values = I(2)), auto_unbox = TRUE)       {\"values\":[2]}\ntoJSON(list(values = c(2, 4)), auto_unbox = TRUE)    {\"values\":[2,4]}\n```\n\nA consumer that loops over `values` handles the third record and breaks on the first, so the shape would depend on how many measurements a record happens to have. Wrapping the vector in `I()` keeps it an array every time."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Write the starter frame with `row.names = FALSE`, read it back and compare the column names with the original.",
+      "why": "The frame's row names are the defaults 1 and 2, which carry no business meaning. With row.names = FALSE the file holds only id and amount, so the restored names match exactly.",
+      "wrong": "Accepting the default export. The file gains an unnamed first column, read.csv names it X, and the restored frame has three columns, so positional code reads the row index as the ID.",
+      "verify": "`names(restored)` returns \"id\", \"amount\" after the FALSE export, while the default export shows \"X\", \"id\", \"amount\"."
+    },
+    {
+      "approach": "Declare the ID column as character on read with `colClasses = c(\"character\", \"numeric\")`.",
+      "why": "\"001\" and \"002\" are identifiers, not quantities, so their characters must survive unchanged. Declaring the class means read.csv never guesses, and the leading zeros stay in place for joins and display.",
+      "wrong": "Reading with defaults and repairing afterward with `sprintf(\"%03d\", id)`. That assumes every ID is exactly three digits wide, which nothing in the contract promises, and it cannot restore an ID such as \"0001\".",
+      "verify": "`restored$id` returns \"001\" and \"002\", and `identical(restored, original)` returns TRUE."
+    },
+    {
+      "approach": "Save the object with `saveRDS(x, path)`, read it with `readRDS(path)` and compare with `identical()`, using RDS only for trusted files produced by R.",
+      "why": "The reference object is a numeric vector with names A and B, and Example 2 uses a factor with an unused level C. RDS serializes the complete object, so names, class and levels all come back.",
+      "wrong": "Writing the factor to CSV. Only the labels A and B are written, read.csv returns plain character, and both the factor class and level C are lost without any message.",
+      "verify": "`identical(readRDS(path), x)` returns TRUE, and for the factor `levels(readRDS(path))` shows \"A\", \"B\", \"C\"."
+    },
+    {
+      "approach": "State the required classes and missing markers in the read call, then validate the restored names, classes and NA counts before using the data.",
+      "why": "From these two rows read.csv would infer integer for both columns, because the amount 2 has no decimal point. The original amount is double, so identical() fails even though the printed values look the same.",
+      "wrong": "Treating the inferred types as the schema. A later file with 2.5 turns amount into double, and one with n/a turns it into character, so each new file can silently change the program's behavior.",
+      "verify": "`class(read.csv(path, na.strings = \"\")$amount)` returns \"integer\", while the typed read returns \"numeric\"."
+    },
+    {
+      "approach": "Decide that values is always an array, wrap it in `I()` before `toJSON(..., auto_unbox = TRUE)`, and read it back with `simplifyVector = FALSE`.",
+      "why": "The reference record has a single measurement, 2. I() protects it from unboxing, so the text is an array with one element, the same shape as a record with two measurements, and the restored value is a list.",
+      "wrong": "Relying on auto_unbox alone. The single value is written as the scalar 2, and a consumer expecting an array fails only on records that happen to have one measurement.",
+      "verify": "`as.character(encoded)` returns {\"values\":[2]}, and `is.list(restored$values)` returns TRUE."
+    },
+    {
+      "approach": "Treat every `tempfile()` path as owned by the current session, remove it with `unlink()` when finished, and keep anything worth saving as source code or as an artifact captured through the documented classroom interface.",
+      "why": "tempfile() returns a path inside tempdir(), a directory created for this R session and removed when the session ends. A later classroom run starts a new session with a different directory, and the saved classroom state does not include the run filesystem.",
+      "wrong": "Copying a path printed by an earlier run into a later script. That file is gone, so the read fails, or it finds an unrelated file if paths happen to be reused.",
+      "verify": "`file.exists(path)` returns FALSE after `unlink(path)`, and `tempdir()` shows a different directory in a new session."
+    }
+  ]
+}

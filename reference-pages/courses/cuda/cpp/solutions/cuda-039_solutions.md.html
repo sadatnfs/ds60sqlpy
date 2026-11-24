@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-039_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Stream A doubles <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1,2,3]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mclose">]</span></span></span></span> to <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>2</mn><mo separator="true">,</mo><mn>4</mn><mo separator="true">,</mo><mn>6</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[2,4,6]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">4</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">6</span><span class="mclose">]</span></span></span></span>, records an event, and stream B waits before adding one, producing <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>3</mn><mo separator="true">,</mo><mn>5</mn><mo separator="true">,</mo><mn>7</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[3,5,7]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">7</span><span class="mclose">]</span></span></span></span>. The event creates the producer-consumer edge. Without that edge, B might read old or incomplete data even though both launches individually succeed.</p>
+<p><strong>Approach:</strong> Record an event in stream A after doubling, and make stream B wait on it before adding one.</p>
+<p><strong>Why it is correct:</strong> The event edge guarantees [2, 4, 6] is complete before B reads it, giving [3, 5, 7].</p>
+<p><strong>A plausible wrong approach:</strong> Launching B&#x27;s kernel after A&#x27;s on the host assumes ordering that separate streams do not provide.</p>
+<p><strong>How to verify:</strong> The reference asserts b == [3, 5, 7] and lists the three order edges.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>Two independent vectors can be transformed in separate streams without a cross-stream dependency if they share no mutable storage. Their outputs remain correct even if hardware serializes them. Correctness must not depend on overlap being observed.</p>
+<p><strong>Approach:</strong> Run two independent vectors in separate streams with no shared mutable storage.</p>
+<p><strong>Why it is correct:</strong> With no shared data, any interleaving or serialization gives the same outputs.</p>
+<p><strong>A plausible wrong approach:</strong> Asserting that the streams must overlap turns a performance hope into a correctness requirement.</p>
+<p><strong>How to verify:</strong> Compare outputs from separate streams with a single-stream run.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Record after the upload in A; make B wait on that event before launching compute that reads the uploaded buffer.</p>
+<p><strong>Approach:</strong> Record an event after the upload in A and wait on it in B before compute.</p>
+<p><strong>Why it is correct:</strong> The wait prevents B&#x27;s kernel from reading a partially uploaded buffer.</p>
+<p><strong>A plausible wrong approach:</strong> Recording the event before the upload makes the edge order nothing useful.</p>
+<p><strong>How to verify:</strong> Draw upload, record, wait and compute in order and check the arrow direction.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>The buffer&#x27;s final consumer must complete before release or reuse. Stream names do not determine allocation lifetime.</p>
+<p><strong>Approach:</strong> Tie buffer release to its final consumer&#x27;s completion, not to a stream&#x27;s lifetime.</p>
+<p><strong>Why it is correct:</strong> Another stream may still read the buffer after the first stream is destroyed.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming destroying a stream waits for borrowers frees memory still in use.</p>
+<p><strong>How to verify:</strong> Wait on the consumer&#x27;s done event before release and run a sanitizer.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Skip unnecessary work while preserving dependencies needed by later nonempty chunks; do not record fabricated output completion.</p>
+<p><strong>Approach:</strong> Skip compute for an empty chunk but keep events later chunks depend on.</p>
+<p><strong>Why it is correct:</strong> Later work may still wait on that event position.</p>
+<p><strong>A plausible wrong approach:</strong> Recording a done event as if output exists fabricates completion of real data.</p>
+<p><strong>How to verify:</strong> Insert an empty chunk in the middle and confirm later chunks finish correctly.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Respect the producer framework&#x27;s stream and consumer synchronization contract, including lifetime. Sharing a pointer alone is insufficient.</p>
+<p><strong>Approach:</strong> Use the producer framework&#x27;s stream and synchronization contract when sharing buffers.</p>
+<p><strong>Why it is correct:</strong> A raw pointer says nothing about when writes are done or when memory is freed.</p>
+<p><strong>A plausible wrong approach:</strong> Passing only the pointer lets the consumer read before the producer finishes.</p>
+<p><strong>How to verify:</strong> Test with a delayed producer and confirm the consumer still sees final data.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-039_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

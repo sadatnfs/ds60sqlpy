@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Choose copying, moving or borrowing from an ownership contract.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Move semantics lets a value transfer expensive internal resources. An rvalue reference marks a candidate for transfer, while std::move is a cast that permits a move overload. The rule of zero means letting standard members manage their own copy, move and destruction behavior. A moved-from vector remains valid but its contents are unspecified.</p>
+<ul>
+<li><strong>move semantics:</strong> letting a destination take internal resources from a source that will no longer be used in the same way.</li>
+<li><strong>rvalue reference:</strong> a reference type written <code>T&amp;&amp;</code> that binds to objects eligible to be moved from.</li>
+<li><strong><code>std::move</code>:</strong> a cast that makes a move overload eligible; it does not transfer anything by itself.</li>
+<li><strong>rule of zero:</strong> relying on members such as vector and string to supply copy, move and destruction behavior instead of writing those operations.</li>
+<li><strong>moved-from state:</strong> a valid object whose exact contents are unspecified unless its type documents them.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>auto target=std::move(source)</code> can call a move constructor. Do not assert source.empty() for all standard types after moving; use only operations allowed by their post-move contract. Defining a destructor unnecessarily can interfere with automatically generated move operations.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

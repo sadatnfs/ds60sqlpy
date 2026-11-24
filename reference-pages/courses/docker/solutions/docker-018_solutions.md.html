@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-the-name-a-peer-uses-for-the-app">Exercise 1: Predict the name a peer uses for the app.<a class="heading-anchor" href="#exercise-1-predict-the-name-a-peer-uses-for-the-app" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The Compose service name app.</p>
 <p><strong>Why:</strong> The project network’s discovery maps that name to current service endpoints. A hardcoded IP creates unnecessary coupling to a container instance.</p>
+<p><strong>Approach:</strong> Read the client&#x27;s command in compose.yaml: it requests <code>http://app:8080/</code> using the service name.</p>
+<p><strong>Why this is correct:</strong> Compose registers app on the project network&#x27;s DNS, which resolves to whatever container serves app now.</p>
+<p><strong>A plausible wrong approach:</strong> Hardcoding the IP from docker inspect works until the container is recreated and receives a new address.</p>
+<p><strong>How to verify:</strong> Worked example 1 prints the app&#x27;s greeting from inside client without any IP in the model.</p>
 <h3 id="exercise-2-explain-why-a-peer-should-not-use-host-loopback">Exercise 2: Explain why a peer should not use host loopback.<a class="heading-anchor" href="#exercise-2-explain-why-a-peer-should-not-use-host-loopback" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Its loopback refers to the peer itself.</p>
 <p><strong>Why:</strong> Network namespace scope applies consistently. A copied browser URL is not a universal address for every caller.</p>
+<p><strong>Approach:</strong> Ask whose loopback 127.0.0.1 means: for the client container, it is the client&#x27;s own namespace.</p>
+<p><strong>Why this is correct:</strong> Nothing listens on 18080 or 8080 inside client, so a request to its loopback fails even with app healthy.</p>
+<p><strong>A plausible wrong approach:</strong> Pointing client at http://127.0.0.1:18080/ because it works in the browser produces connection refused.</p>
+<p><strong>How to verify:</strong> Run the client command with the loopback URL and observe refusal, then with <code>app:8080</code> and observe the greeting.</p>
 <h3 id="exercise-3-draw-the-dns-to-request-sequence">Exercise 3: Draw the DNS-to-request sequence.<a class="heading-anchor" href="#exercise-3-draw-the-dns-to-request-sequence" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Resolve app, connect to container port, send HTTP request, inspect body.</p>
 <p><strong>Why:</strong> Separate name resolution from transport and application processing so each failure has a minimal next observation.</p>
+<p><strong>Approach:</strong> Draw four steps: resolve app via project DNS, open TCP to that address on 8080, send GET /, read the JSON body.</p>
+<p><strong>Why this is correct:</strong> Each step fails differently: name not found, connection refused or timeout, HTTP error, or a wrong body.</p>
+<p><strong>A plausible wrong approach:</strong> Lumping every failure into network broken skips the step-specific check that would shorten diagnosis.</p>
+<p><strong>How to verify:</strong> Inside a peer, python socket.gethostbyname(&#x27;app&#x27;) returns an address, and the request then returns the body.</p>
 <h3 id="exercise-4-diagnose-dns-success-with-connection-refusal">Exercise 4: Diagnose DNS success with connection refusal.<a class="heading-anchor" href="#exercise-4-diagnose-dns-success-with-connection-refusal" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The destination resolved but no reachable listener accepted that port.</p>
 <p><strong>Why:</strong> Check app state, listen address and target port. Replacing DNS configuration is not justified by a successful resolution.</p>
+<p><strong>Approach:</strong> Separate the two facts: a resolved name proves DNS works; refused means nothing accepted on that address and port.</p>
+<p><strong>Why this is correct:</strong> Likely causes are app stopped, app listening on loopback only, or the wrong port. DNS settings are not among them.</p>
+<p><strong>A plausible wrong approach:</strong> Editing DNS settings or adding hosts entries changes the part that already succeeded.</p>
+<p><strong>How to verify:</strong> Check docker compose ps for app, then the listener address, then the port in the client URL; one shows the mismatch.</p>
 <h3 id="exercise-5-predict-a-reconnect-after-app-recreation">Exercise 5: Predict a reconnect after app recreation.<a class="heading-anchor" href="#exercise-5-predict-a-reconnect-after-app-recreation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A fresh lookup and connection can reach the new instance.</p>
 <p><strong>Why:</strong> An established connection can fail when its old backend disappears. Client recovery must match operation safety rather than blindly replay every request.</p>
+<p><strong>Approach:</strong> Separate new connections from existing ones: after recreation, a fresh lookup of app returns the new container&#x27;s address.</p>
+<p><strong>Why this is correct:</strong> An established connection pointed at the old container breaks when it is removed; a new connection reaches the replacement.</p>
+<p><strong>A plausible wrong approach:</strong> Retrying every failed request blindly can repeat a non-idempotent POST /increment.</p>
+<p><strong>How to verify:</strong> Run client after recreating app; it succeeds without changes because it resolves app again.</p>
 <h3 id="exercise-6-design-an-internal-only-database-connection">Exercise 6: Design an internal-only database connection.<a class="heading-anchor" href="#exercise-6-design-an-internal-only-database-connection" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Use service DNS and container port without host publication.</p>
 <p><strong>Why:</strong> Internal peers need a network path, not necessarily a host socket. Keep publication limited to intended user entrypoints and use application credentials as needed.</p>
+<p><strong>Approach:</strong> Give the database service no ports entry and have the app connect to it by service name and container port on the shared network.</p>
+<p><strong>Why this is correct:</strong> The app needs only a network path. Leaving out a host mapping removes an exposure without affecting the app.</p>
+<p><strong>A plausible wrong approach:</strong> Publishing the database on the host just in case lets any local process, or a remote one if bound widely, reach it.</p>
+<p><strong>How to verify:</strong> docker compose ps shows no published port for the database, and the app&#x27;s queries still succeed.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

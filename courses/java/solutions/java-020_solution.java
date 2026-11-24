@@ -16,7 +16,7 @@ public class Main {
   }
 
   static int minimumCoins(int amount, int[] coins) {
-    if (amount < 0 || amount > 1000) throw new IllegalArgumentException("amount0..1000 required");
+    if (amount < 0 || amount > 1000) throw new IllegalArgumentException("amount 0..1000 required");
     for (int coin : coins)
       if (coin <= 0) throw new IllegalArgumentException("positive coins required");
     int[] dp = new int[amount + 1];

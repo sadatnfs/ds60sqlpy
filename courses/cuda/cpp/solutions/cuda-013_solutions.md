@@ -10,29 +10,77 @@ The separate [CPU reference](../references/cuda-013_cpu.py) checks the chapter's
 
 Copy \([2,4,6,8]\) as float32. Four elements require 16 bytes. A request for four bytes copies only one float. Zero-initialized test data can hide that error, so use distinct nonzero entries and validate the entire result after the round trip.
 
+**Approach:** Multiply four float32 elements by sizeof(float), giving 16 bytes, and copy that many.
+
+**Why it is correct:** Copy APIs take bytes, so the size must be element count times element size.
+
+**A plausible wrong approach:** Passing 4 as the byte count copies one float and leaves three elements uninitialized.
+
+**How to verify:** The reference asserts 4 * 4 == 16; compare all of [2, 4, 6, 8] after the round trip.
+
 ## Exercise 2
 
 Place sentinel values around a three-element target: \([-99,1,2,3,-99]\). Transform only positions 1 through 3 by doubling, expecting \([-99,2,4,6,-99]\). Guards reveal writes beyond the intended subrange, but they do not prove absence of every possible invalid read; sanitizers add a different check.
+
+**Approach:** Surround the three targets with -99 sentinels and double only indices 1 to 3.
+
+**Why it is correct:** Unchanged sentinels show that no write escaped the intended subrange.
+
+**A plausible wrong approach:** Assuming sentinels prove no invalid reads ignores that reads leave no trace in memory.
+
+**How to verify:** The reference asserts storage == [-99, 2, 4, 6, -99]; run a sanitizer for read checks.
 
 ## Exercise 3
 
 \(33\times 8 = 264\) bytes for ordinary eight-byte double representation; use sizeof(double) in actual C++ rather than a copied literal.
 
+**Approach:** Multiply 33 by sizeof(double) instead of hardcoding 8.
+
+**Why it is correct:** Each double occupies eight bytes on ordinary platforms, giving 264.
+
+**A plausible wrong approach:** Using 33 * 4 copies only half the doubles, as if they were floats.
+
+**How to verify:** The reference asserts 33 * 8 == 264; also check sizeof(double) at compile time.
+
 ## Exercise 4
 
 Distinct nonzero values across the entire range, plus full host comparison. A one-element or all-zero example may conceal the partial copy.
+
+**Approach:** Fill the whole range with distinct nonzero values and compare the entire returned buffer.
+
+**Why it is correct:** Any element not copied keeps a stale value that differs from its unique expected entry.
+
+**A plausible wrong approach:** Using zero-filled buffers can hide a short copy because destination memory may also be zero.
+
+**How to verify:** Copy count instead of bytes in a test and confirm the full comparison fails at index 1.
 
 ## Exercise 5
 
 Return a valid empty result without allocation, copy or kernel launch; never dereference a missing data pointer.
 
+**Approach:** Detect zero length on the host and return an empty result before any API calls.
+
+**Why it is correct:** With no elements, allocation and copying have nothing to do and the data pointer may be null.
+
+**A plausible wrong approach:** Calling the copy with a null source and zero bytes still relies on unclear API behavior.
+
+**How to verify:** Call the wrapper with an empty vector and verify no allocation or copy is recorded.
+
 ## Exercise 6
 
 Release every earlier owned allocation and preserve the original error. Do not read nonexistent output or report a successful numerical comparison.
 
+**Approach:** Release earlier allocations through owners and return the original allocation error.
+
+**Why it is correct:** Owning wrappers free the input buffers on the error path without masking the cause.
+
+**A plausible wrong approach:** Continuing to copy results from an output pointer that was never allocated reads invalid memory.
+
+**How to verify:** Inject an output allocation failure and check that inputs are freed and the error is reported.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-013_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The complete CPU model is [here](../references/cuda-013_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide's model leaves for you to derive: `assert 33 * 8 == 264`. It does not claim CUDA execution, concurrency safety or a performance measurement.
 
 ## Transfer review
 

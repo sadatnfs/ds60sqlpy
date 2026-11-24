@@ -206,6 +206,10 @@ i <span class="syntax-operator">:=</span> sort<span class="syntax-punctuation">.
 check<span class="syntax-punctuation">(</span>i <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;boundary&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The changed run panics with <code>boundary</code> because <code>i == 2</code> no longer holds. Restoring the original line brings back the worked observation: the index is 2.</p>
 <p>Sorting makes the predicate monotone. The same expression over unsorted input violates the algorithm precondition.</p>
+<p><strong>Approach.</strong> Evaluate the predicate <code>items[i] &gt;= 5</code> over the edited sorted slice <code>2, 5, 6, 8</code>: it is false at index 0 and true from index 1, so <code>sort.Search</code> returns 1.</p>
+<p><strong>Why it holds here.</strong> <code>sort.Search</code> returns the smallest index where a monotone predicate becomes true. The new 5 itself satisfies <code>&gt;= 5</code>, so the boundary moves left and <code>i == 2</code> panics with <code>boundary</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Reading the predicate as &quot;greater than 5&quot; and predicting 2 again. With <code>&gt;=</code> the element equal to the target counts, which is exactly what makes this a lower bound.</p>
+<p><strong>Verify.</strong> Print <code>i</code> and see 1 before the panic; the restored input prints 2.</p>
 <h3 id="2-represent-no-match-debug-a-regression">2. Represent no match: debug a regression<a class="heading-anchor" href="#2-represent-no-match-debug-a-regression" aria-label="Link to this section">#</a></h3>
 <p>A regression changed one token in worked example 2, so one line now reads <code>items := []int{2, 4, 6, 9}</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
 <p>The unchanged code is worked example 2:</p>
@@ -214,6 +218,10 @@ i <span class="syntax-operator">:=</span> sort<span class="syntax-punctuation">.
 check<span class="syntax-punctuation">(</span>i <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;not found&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Before the repair the program panics with <code>not found</code>; after it the line reads <code>items := []int{2, 4, 6, 8}</code> again and the index equals the collection length.</p>
 <p>The sentinel is not a valid element index. Check it before indexing.</p>
+<p><strong>Approach.</strong> Search the regressed slice <code>2, 4, 6, 9</code> for the first value at least 9. The predicate is true at index 3, so the result is 3, not the not-found position 4.</p>
+<p><strong>Why it holds here.</strong> The check encodes that 9 is absent from the original data, so the expected answer is <code>len(items)</code>. The regression placed a 9 in the slice, and restoring 8 makes the predicate false everywhere and returns 4.</p>
+<p><strong>A plausible wrong approach.</strong> Using the result as an element index without checking it, as in <code>found := items[i] == 9</code>. With the repaired data <code>i</code> is 4 and that line panics with <code>index out of range [4] with length 4</code>.</p>
+<p><strong>Verify.</strong> Print <code>i, len(items)</code> and see <code>3 4</code> for the regression and <code>4 4</code> after the repair.</p>
 <h3 id="3-separate-length-and-capacity">3. Separate length and capacity<a class="heading-anchor" href="#3-separate-length-and-capacity" aria-label="Link to this section">#</a></h3>
 <p>Reserve capacity four, then append one value.</p>
 <pre class="highlighted-code"><code class="language-go">items <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
@@ -221,6 +229,10 @@ items <span class="syntax-punctuation">=</span> <span class="syntax-builtin">app
 check<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">cap</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span> <span class="syntax-operator">&amp;&amp;</span> items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;capacity&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Length is 1, capacity is 4.</p>
 <p>Starting with length four would create four logical zeros before the appended value.</p>
+<p><strong>Approach.</strong> Allocate with <code>make([]int, 0, 4)</code> so the slice starts empty with room for four, then append 7 into the first slot.</p>
+<p><strong>Why it holds here.</strong> Append writes into existing capacity without reallocating, so length becomes 1, capacity stays 4 and <code>items[0]</code> is 7.</p>
+<p><strong>A plausible wrong approach.</strong> Writing <code>make([]int, 4)</code> and then appending. The slice already holds four zeros, so the append produces <code>[0 0 0 0 7]</code> with length 5 and a reallocated capacity of 8, and the check panics with <code>capacity</code>.</p>
+<p><strong>Verify.</strong> Print <code>len(items), cap(items), items</code> and see <code>1 4 [7]</code>; the wrong version prints <code>5 8 [0 0 0 0 7]</code>.</p>
 <h3 id="4-count-linear-work">4. Count linear work<a class="heading-anchor" href="#4-count-linear-work" aria-label="Link to this section">#</a></h3>
 <p>Sum five values and count visits.</p>
 <pre class="highlighted-code"><code class="language-go">visits<span class="syntax-punctuation">,</span> sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span>
@@ -231,6 +243,10 @@ check<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</
 check<span class="syntax-punctuation">(</span>visits <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-operator">&amp;&amp;</span> sum <span class="syntax-operator">==</span> <span class="syntax-number">15</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;work&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> There are five visits and the sum is 15.</p>
 <p>Operation counting supplies structural evidence without inventing a universal wall-clock threshold.</p>
+<p><strong>Approach.</strong> Count one visit per element while summing, so the work count is measured, not assumed.</p>
+<p><strong>Why it holds here.</strong> The loop body runs once for each of the five values, giving 5 visits and a sum of 1 through 5, which is 15.</p>
+<p><strong>A plausible wrong approach.</strong> Recording work as the last index, <code>for i, v := range ... { visits = i }</code>. Indexes run 0 through 4, so <code>visits</code> ends at 4, an off-by-one that makes the <code>work</code> check panic.</p>
+<p><strong>Verify.</strong> Print <code>visits, sum</code> and see <code>5 15</code>. For timing, put the loop in a <code>BenchmarkSum</code> in a <code>_test.go</code> file and run <code>go test -bench=. -benchmem</code> rather than asserting a clock threshold.</p>
 <h3 id="5-handle-empty-search">5. Handle empty search<a class="heading-anchor" href="#5-handle-empty-search" aria-label="Link to this section">#</a></h3>
 <p>Search a zero-length interval.</p>
 <pre class="highlighted-code"><code class="language-go">calls <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
@@ -238,6 +254,10 @@ i <span class="syntax-operator">:=</span> sort<span class="syntax-punctuation">.
 check<span class="syntax-punctuation">(</span>i <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> calls <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;empty&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Index is 0 and the predicate is never called.</p>
 <p>The empty interval has a valid insertion position without accessing any element.</p>
+<p><strong>Approach.</strong> Call <code>sort.Search(0, f)</code> and count how often <code>f</code> runs.</p>
+<p><strong>Why it holds here.</strong> With an empty interval the search range is already closed, so <code>Search</code> returns 0 without calling the predicate, and <code>calls</code> stays 0.</p>
+<p><strong>A plausible wrong approach.</strong> Adding a fast path that inspects <code>items[0]</code> before searching. On an empty slice that read panics with <code>index out of range [0] with length 0</code>, while <code>sort.Search</code> handles the empty case without touching any element.</p>
+<p><strong>Verify.</strong> Print <code>i, calls</code> and see <code>0 0</code>.</p>
 <h3 id="6-transfer-duplicate-boundaries">6. Transfer duplicate boundaries<a class="heading-anchor" href="#6-transfer-duplicate-boundaries" aria-label="Link to this section">#</a></h3>
 <p>Find the first value at least 3 in 1, 3, 3, 5.</p>
 <pre class="highlighted-code"><code class="language-go">items <span class="syntax-operator">:=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span>
@@ -245,8 +265,12 @@ i <span class="syntax-operator">:=</span> sort<span class="syntax-punctuation">.
 check<span class="syntax-punctuation">(</span>i <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;duplicates&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The first duplicate has index 1.</p>
 <p>A lower bound is more precise than any matching index. That contract supports insertion and range queries.</p>
+<p><strong>Approach.</strong> Search <code>1, 3, 3, 5</code> with <code>items[i] &gt;= 3</code>, which is false only at index 0, so the lower bound is 1.</p>
+<p><strong>Why it holds here.</strong> <code>sort.Search</code> always returns the first index where the predicate turns true, so with duplicates it lands on the leftmost 3.</p>
+<p><strong>A plausible wrong approach.</strong> A classic binary search that returns as soon as <code>items[mid] == 3</code>. Starting from <code>lo = 0</code> and <code>hi = 4</code>, its first probe is index 2, which holds a 3, so it returns 2 and the check panics with <code>duplicates</code>.</p>
+<p><strong>Verify.</strong> Print <code>i</code> and see 1. Searching with <code>&gt; 3</code> returns 3, and 3 minus 1 gives the two copies of 3.</p>
 <h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+<p>Write <code>countInRange(items []int, lo, hi int) int</code> for a sorted slice as the difference of two <code>sort.Search</code> lower bounds. For <code>1, 3, 3, 5, 8</code> check that [3, 4) gives 2, [6, 8) gives 0 and [0, 9) gives 5, and that an empty slice gives 0. Explain which answer an any-match binary search or a <code>&gt;</code> predicate would get wrong.</p></article>
   </main>
 </body>
 </html>

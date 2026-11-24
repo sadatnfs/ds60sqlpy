@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "track_id": "csharp",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "csharp-006",
+      "title": "Summing, searching and a Try method with an out parameter",
+      "anchor": "reference",
+      "source_path": "courses/csharp/solutions/csharp-006_solution.cs",
+      "source_sha256": "1710e1e098b0edf74a509ea87eadd2056fcfc527cc8f0980aca0a0832533c308",
+      "expected_output": ["csharp-006: passed"],
+      "steps": [
+        {
+          "lines": [17, 23],
+          "excerpt": "internal static class Program {\n  private static void Check(bool condition, string reason) {\n    if (!condition)\n      throw new InvalidOperationException(reason);\n  }\n\n  private static async Task Main() {",
+          "title": "A Check helper and an async Main",
+          "explanation": "Program is a static class, so it holds only static members and is never instantiated. Check throws an InvalidOperationException with a reason whenever a condition is false. An unhandled exception ends a .NET program with a nonzero exit code and prints the reason, so a failed check can never be mistaken for success. Main is async Task so the same template can await work in later lessons.",
+          "observe": "No output appears until every Check has passed."
+        },
+        {
+          "lines": [24, 31],
+          "excerpt": "    {\n      int[] values = { 2, 4, 6 };\n      int sum = 0;\n      foreach (int value in values)\n        sum += value;\n      Check(sum == 12, \"sum of all values\");\n      Check(Array.Empty<int>().Sum() == 0, \"empty sum identity\");\n    }",
+          "title": "foreach and the empty sum",
+          "explanation": "foreach visits each element of the array exactly once, in order, without an index variable that could go out of range. sum starts at 0 and grows to 2, 6, then 12. The second check calls LINQ's Sum on an empty array and gets 0, because 0 is the identity for addition: adding nothing should not change a total.",
+          "observe": "sum is 12, and the empty array sums to 0 without any special case."
+        },
+        {
+          "lines": [32, 43],
+          "excerpt": "    {\n      int[] values = { 3, 8, 8 };\n      int found = -1;\n      for (int i = 0; i < values.Length; i++) {\n        if (values[i] == 8) {\n          found = i;\n          break;\n        }\n      }\n      Check(found == 1, \"first matching position\");\n      Check(!Array.Exists(values, value => value == 9), \"absent target\");\n    }",
+          "title": "Stop at the first match",
+          "explanation": "found starts at -1, a value no real index can have, meaning 'not found'. The for loop uses values.Length as its bound, so i stays in range. When it sees an 8 it records the index and break exits the loop, so the later 8 at index 2 is ignored. Array.Exists with a lambda answers the yes or no question for a value that is absent.",
+          "observe": "found is 1. Without break the loop would continue and report 2."
+        },
+        {
+          "lines": [44, 55],
+          "excerpt": "    {\n      // Task 2: Guided modification\n      int[] values = { 2, -3, 4, -1, 6 };\n      int sum = 0;\n      foreach (int value in values) {\n        if (value < 0)\n          continue;\n        sum += value;\n      }\n      Check(sum == 12, \"negatives skipped\");\n      Check(sum == values.Where(v => v >= 0).Sum(), \"same as filtered sum\");\n    }",
+          "title": "Skip negatives with continue",
+          "explanation": "This is the task 2 reference. Inside the foreach, continue jumps straight to the next element, so a negative value never reaches sum += value. The positives 2, 4 and 6 add up to 12. The second check computes the same total another way, filtering with LINQ's Where and then summing, so the loop is compared against an independent formulation instead of a number typed by hand.",
+          "observe": "sum is 12 from both the loop and the filtered LINQ sum."
+        },
+        {
+          "lines": [56, 67],
+          "excerpt": "    {\n      // Task 3: Independent construction\n      bool TryFirstIndex(int[] items, int target, out int index) {\n        for (int i = 0; i < items.Length; i++) {\n          if (items[i] == target) {\n            index = i;\n            return true;\n          }\n        }\n        index = -1;\n        return false;\n      }",
+          "title": "A local Try method that reports success and a result",
+          "explanation": "TryFirstIndex follows the .NET Try pattern: it returns a bool saying whether it succeeded and hands back the index through an out parameter. The compiler requires every path to assign index before returning, which is why the not found path sets index = -1 before return false. Callers check the bool first and only trust index when it is true.",
+          "observe": "The method is declared inside a block of Main, so it is only visible there."
+        },
+        {
+          "lines": [68, 72],
+          "excerpt": "      var values = new[] { 5, 7, 7 };\n      Check(TryFirstIndex(values, 7, out int at) && at == 1, \"first match\");\n      Check(!TryFirstIndex(values, 9, out _), \"not found\");\n      Check(!TryFirstIndex(Array.Empty<int>(), 1, out _), \"empty input\");\n    }",
+          "title": "Calling it for a hit, a miss and an empty array",
+          "explanation": "out int at declares the variable right in the call. Because && evaluates left to right and stops early, at == 1 is only tested when the method returned true. out _ is a discard that says 'I do not need this value'. Testing an empty array checks the loop's zero pass case.",
+          "observe": "All three calls behave as their checks state: a hit at index 1, a miss and an empty input."
+        },
+        {
+          "lines": [73, 90],
+          "excerpt": "    {\n      // Task 5: Boundary evidence\n      int FirstIndex(int[] items, int target) {\n        for (int i = 0; i < items.Length; i++) {\n          if (items[i] == target)\n            return i;\n        }\n        return -1;\n      }\n      int[] empty = Array.Empty<int>();\n      int[] single = { 4 };\n      int[] other = { 1, 2 };\n      int[] repeated = { 4, 9, 4 };\n      Check(FirstIndex(empty, 4) == -1, \"empty input\");\n      Check(FirstIndex(single, 4) == 0, \"singleton match\");\n      Check(FirstIndex(other, 4) == -1, \"no match\");\n      Check(FirstIndex(repeated, 4) == 0, \"repeated match returns the first\");\n    }",
+          "title": "Boundary cases for a first-index search",
+          "explanation": "This is the task 5 reference. FirstIndex returns as soon as it finds the target, and returns -1 only after the loop has seen every element. The four arrays cover the boundaries: an empty array never enters the loop, a single matching element is found at index 0, an array without the target falls through to -1, and a repeated target returns the first position because the method stops at the first match.",
+          "observe": "The results are -1, 0, -1 and 0."
+        },
+        {
+          "lines": [91, 94],
+          "excerpt": "    Console.WriteLine(\"csharp-006: passed\");\n    await Task.CompletedTask;\n  }\n}",
+          "title": "Reporting success",
+          "explanation": "Console.WriteLine runs only after every block above has finished without a failed Check, so the result line is evidence that all of them passed. await Task.CompletedTask keeps the async Main template valid even though this lesson awaits nothing else.",
+          "observe": "The program prints: csharp-006: passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "csharp-020",
+      "title": "When a LINQ query runs: deferred execution versus a materialized snapshot",
+      "anchor": "reference",
+      "source_path": "courses/csharp/solutions/csharp-020_solution.cs",
+      "source_sha256": "9480624df8abf2c1fe0bdba07723459d91c75b1318d392e0ff1a497f43234dad",
+      "expected_output": ["csharp-020: passed"],
+      "steps": [
+        {
+          "lines": [24, 30],
+          "excerpt": "    {\n      var values = new List<int> { 1, 2 };\n      var query = values.Where(value => value > 1);\n      values.Add(3);\n      Check(query.SequenceEqual(new[] { 2, 3 }),\n            \"query sees later source state\");\n    }",
+          "title": "A query is a recipe, not a result",
+          "explanation": "values.Where(...) does not filter anything when this line runs. It returns an object that remembers the source list and the condition, and the filtering happens each time something enumerates it. So adding 3 to the list after building the query still affects what the query yields. SequenceEqual is the moment the query actually runs.",
+          "observe": "The query produces 2 and 3, including the value added after it was defined."
+        },
+        {
+          "lines": [31, 38],
+          "excerpt": "    {\n      var values = new List<int> { 1, 2 };\n      int[] snapshot = values.Where(value => value > 1).ToArray();\n      values.Add(3);\n      Check(snapshot.SequenceEqual(new[] { 2 }), \"snapshot remains stable\");\n      Check(values.Select(value => value * 10).ToArray().Length == 3,\n            \"projection count\");\n    }",
+          "title": "ToArray takes a snapshot",
+          "explanation": "Calling ToArray forces the query to run immediately and copies the results into a new array. Later changes to the source list cannot reach that array. This is materialization: you choose it when you want results to stay fixed or when you would otherwise enumerate an expensive query several times. Select projects each element to a new value, here multiplying by 10, and keeps the count the same.",
+          "observe": "snapshot stays [2] even after 3 is added, and the projection has 3 elements."
+        },
+        {
+          "lines": [39, 47],
+          "excerpt": "    {\n      // Task 3: Independent construction\n      var stock = new Dictionary<string, int> { [\"pear\"] = 2, [\"fig\"] = 0 };\n      stock[\"apple\"] = 5;\n      var kept = stock.Where(row => row.Value > 0);\n      var ordered = kept.OrderBy(row => row.Key, StringComparer.Ordinal);\n      var report = ordered.Select(row => $\"{row.Key}={row.Value}\");\n      Check(report.SequenceEqual(new[] { \"apple=5\", \"pear=2\" }), \"report\");\n    }",
+          "title": "A filter, sort and format pipeline",
+          "explanation": "The dictionary starts with pear and fig, then apple is added by indexer assignment. Where keeps rows with stock above zero, which drops fig. OrderBy sorts by key using StringComparer.Ordinal, a culture-independent comparison so the order is the same on every machine. Select formats each row with string interpolation. Nothing runs until SequenceEqual enumerates report.",
+          "observe": "The report is apple=5 then pear=2; fig is excluded because its count is 0."
+        },
+        {
+          "lines": [48, 51],
+          "excerpt": "    Console.WriteLine(\"csharp-020: passed\");\n    await Task.CompletedTask;\n  }\n}",
+          "title": "The result line",
+          "explanation": "Reaching this line means every Check passed, because any failure would have thrown first. Console.WriteLine writes the text and a newline. The awaited Task.CompletedTask is an already finished task that keeps the async Main signature valid.",
+          "observe": "The program prints: csharp-020: passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "csharp-034",
+      "title": "Counting safely from many tasks with Interlocked and ConcurrentDictionary",
+      "anchor": "reference",
+      "source_path": "courses/csharp/solutions/csharp-034_solution.cs",
+      "source_sha256": "5613d9c6888ab10d1a79e3c83a75e0ea9978e0e0987a4792b9858fffea55bf92",
+      "expected_output": ["csharp-034: passed"],
+      "steps": [
+        {
+          "lines": [24, 32],
+          "excerpt": "    {\n      int count = 0;\n      await Task.WhenAll(Enumerable.Range(0, 4).Select(\n          _ => Task.Run(() => {\n            for (int i = 0; i < 100; i++)\n              Interlocked.Increment(ref count);\n          })));\n      Check(count == 400, \"atomic count\");\n    }",
+          "title": "An atomic increment shared by four tasks",
+          "explanation": "Enumerable.Range(0, 4) produces four numbers, and Select turns each into a Task.Run that may execute on a thread pool thread at the same time as the others. count++ is really read, add, write, so two threads can read the same old value and one update is lost. Interlocked.Increment(ref count) does all three steps as one indivisible operation. Task.WhenAll waits for every task before the check reads count.",
+          "observe": "count is exactly 400 (4 tasks times 100 increments) every time."
+        },
+        {
+          "lines": [33, 39],
+          "excerpt": "    {\n      var counts = new ConcurrentDictionary<string, int>();\n      await Task.WhenAll(Enumerable.Range(0, 20).Select(\n          _ => Task.Run(() => counts.AddOrUpdate(\n                            \"a\", 1, (_, previous) => previous + 1))));\n      Check(counts[\"a\"] == 20, \"concurrent key updates\");\n    }",
+          "title": "AddOrUpdate on a concurrent dictionary",
+          "explanation": "ConcurrentDictionary is safe to change from many threads. AddOrUpdate takes the key, the value to insert when the key is missing, and a function that computes the new value from the previous one. If two threads race on the same key, the dictionary retries the update function until its write wins, so no increment is lost. The discard _ ignores the key argument the function receives.",
+          "observe": "Twenty concurrent updates leave counts[\"a\"] at 20."
+        },
+        {
+          "lines": [40, 48],
+          "excerpt": "    {\n      // Task 3: Independent construction\n      var counts = new ConcurrentDictionary<string, int>();\n      string[] words = { \"a\", \"b\", \"a\", \"a\" };\n      int Next(string key, int before) => before + 1;\n      Task Add(string w) => Task.Run(() => counts.AddOrUpdate(w, 1, Next));\n      await Task.WhenAll(words.Select(Add));\n      Check(counts[\"a\"] == 3 && counts[\"b\"] == 1, \"concurrent frequencies\");\n    }",
+          "title": "Word frequencies with named local functions",
+          "explanation": "Next and Add are local functions declared with expression bodies (=>). Next is the update rule: add one to the previous count. Add starts one task per word that calls AddOrUpdate. words.Select(Add) builds those tasks and Task.WhenAll waits for all of them. Because the update function may be retried under contention, it must have no side effects, and Next only computes a value.",
+          "observe": "a is counted 3 times and b once, regardless of the order the tasks ran in."
+        },
+        {
+          "lines": [49, 52],
+          "excerpt": "    Console.WriteLine(\"csharp-034: passed\");\n    await Task.CompletedTask;\n  }\n}",
+          "title": "Print only after every task has finished",
+          "explanation": "Each block awaited Task.WhenAll before checking, so no task is still running when the success line is written. Reading shared results before all writers finish is a common source of flaky concurrent tests.",
+          "observe": "The program prints: csharp-034: passed"
+        }
+      ]
+    }
+  ]
+}

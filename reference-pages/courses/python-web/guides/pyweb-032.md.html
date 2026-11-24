@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-031</code>, <code>sql-found-01</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>An asynchronous database session is a unit of work, not a shared global connection that every request can mutate. This chapter creates an async SQLAlchemy engine during lifespan, borrows a session for each request and checks a uniqueness failure followed by successful recovery.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Async engine:</strong> The SQLAlchemy object that manages database connectivity and pooling for asyncio code; one engine is normally shared by the application.</li>
+<li><strong>AsyncSession:</strong> An asyncio SQLAlchemy session that tracks one unit of work and its transaction; each request borrows its own instead of sharing one.</li>
+<li><strong>async_sessionmaker:</strong> A factory bound to the engine that creates a new AsyncSession for each request.</li>
+<li><strong>aiosqlite:</strong> An asyncio driver for SQLite that lets the fixture run real SQL offline, although its locking behavior differs from PostgreSQL.</li>
+<li><strong>Rollback after failure:</strong> Ending the failed transaction once the database rejects a write, which is required before the session can be used again.</li>
+</ul>
 <h3 id="mechanism-engine-session-and-transaction-are-different-objects">Mechanism: engine, session and transaction are different objects<a class="heading-anchor" href="#mechanism-engine-session-and-transaction-are-different-objects" aria-label="Link to this section">#</a></h3>
 <p>The engine manages database connectivity and pooling. A session tracks a unit of work and its transaction state. A transaction defines which changes commit together. Sharing an engine is normal; sharing one mutable session concurrently across requests is not a substitute for a pool.</p>
 <p>The fixture uses SQLite through aiosqlite so it can run offline and terminate. It performs real SQL and constraint checks, but SQLite concurrency and locking are not identical to PostgreSQL. The larger workshop prepares PostgreSQL and qualifies service-level behavior separately instead of presenting this small fixture as a production database benchmark.</p>
@@ -209,6 +217,42 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The program submits a value that violates the unique constraint. It converts the expected integrity failure into a conflict response and rolls the transaction back. A later valid request succeeds, proving that the earlier failure did not leave the application permanently poisoned.</p>
 <p>The final assertion is essential. An error response alone does not establish recovery. If the session remains in a failed state or the engine was closed accidentally, subsequent operations will fail for reasons unrelated to the new input. Testing success after failure exposes that lifecycle defect.</p>
 <p>Do not catch every database exception and label it a duplicate. A network outage, malformed SQL or unexpected schema mismatch is not the same business condition. Map only understood failures to a public domain response, retain safe diagnostics internally and let unexpected defects remain visible to operators.</p>
+<h3 id="worked-example-what-expireoncommit-costs-after-a-commit">Worked example: what expire_on_commit costs after a commit<a class="heading-anchor" href="#worked-example-what-expireoncommit-costs-after-a-commit" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sqlalchemy <span class="syntax-keyword">import</span> String<span class="syntax-punctuation">,</span> create_engine<span class="syntax-punctuation">,</span> event
+<span class="syntax-keyword">from</span> sqlalchemy.orm <span class="syntax-keyword">import</span> DeclarativeBase<span class="syntax-punctuation">,</span> Mapped<span class="syntax-punctuation">,</span> Session<span class="syntax-punctuation">,</span> mapped_column
+
+
+<span class="syntax-keyword">class</span> <span class="syntax-class">Base</span><span class="syntax-punctuation">(</span>DeclarativeBase<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">pass</span>
+
+
+<span class="syntax-keyword">class</span> <span class="syntax-class">Item</span><span class="syntax-punctuation">(</span>Base<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    __tablename__ <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-builtin">id</span><span class="syntax-punctuation">:</span> Mapped<span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> mapped_column<span class="syntax-punctuation">(</span>primary_key<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+    name<span class="syntax-punctuation">:</span> Mapped<span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> mapped_column<span class="syntax-punctuation">(</span>String<span class="syntax-punctuation">(</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> unique<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+
+
+engine <span class="syntax-operator">=</span> create_engine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sqlite://</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+Base<span class="syntax-operator">.</span>metadata<span class="syntax-operator">.</span>create_all<span class="syntax-punctuation">(</span>engine<span class="syntax-punctuation">)</span>
+statements <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-decorator">@event</span><span class="syntax-operator">.</span>listens_for<span class="syntax-punctuation">(</span>engine<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">before_cursor_execute</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">record</span><span class="syntax-punctuation">(</span>conn<span class="syntax-punctuation">,</span> cursor<span class="syntax-punctuation">,</span> sql<span class="syntax-punctuation">,</span> params<span class="syntax-punctuation">,</span> context<span class="syntax-punctuation">,</span> many<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    statements<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>sql<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">for</span> expire <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> Session<span class="syntax-punctuation">(</span>engine<span class="syntax-punctuation">,</span> expire_on_commit<span class="syntax-operator">=</span>expire<span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> db<span class="syntax-punctuation">:</span>
+        item <span class="syntax-operator">=</span> Item<span class="syntax-punctuation">(</span>name<span class="syntax-operator">=</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">item-</span><span class="syntax-string">{</span>expire<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        db<span class="syntax-operator">.</span>add<span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">)</span>
+        db<span class="syntax-operator">.</span>commit<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        statements<span class="syntax-operator">.</span>clear<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>expire<span class="syntax-punctuation">,</span> item<span class="syntax-operator">.</span>name<span class="syntax-punctuation">,</span> statements<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">True item-True [&#x27;SELECT&#x27;]
+False item-False []</code></pre>
+<p>This synchronous session makes a hidden query visible. With the default <code>expire_on_commit=True</code>, every attribute is marked stale at commit, so simply reading <code>item.name</code> afterwards issued a fresh <code>SELECT</code>. A synchronous session can do that quietly, but an <code>AsyncSession</code> cannot perform implicit I/O on attribute access and raises <code>MissingGreenlet</code> instead. That is why the lesson&#x27;s <code>async_sessionmaker</code> passes <code>expire_on_commit=False</code>: objects returned from an async endpoint after commit must already hold their values.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why is a pre-insert existence query insufficient?</strong> Another transaction can insert between the query and the write. The final constraint is the authority; the application must handle its refusal.</p>
 <p><strong>Can one AsyncSession be used by all concurrently running tasks?</strong> No. Its mutable transaction state belongs to a unit of work. Give independent concurrent operations their own sessions or deliberately serialize a shared transaction.</p>

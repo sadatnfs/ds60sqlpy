@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-073-authorization-and-governance-workflows">apache-073: Authorization and governance workflows<a class="heading-anchor" href="#apache-073-authorization-and-governance-workflows" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-072</code>, <code>apache-069</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Authentication:</strong> Establishing who the caller is, for example with fixture credentials kept in an untracked environment file.</li>
+<li><strong>Authorization:</strong> Deciding which metadata operations an authenticated caller may perform. A failed login yields 401, while a permitted login without the needed permission yields 403.</li>
+<li><strong>Policy decision point:</strong> The component that evaluates a policy and decides whether an operation is allowed.</li>
+<li><strong>Policy enforcement point:</strong> The component that blocks or permits the protected operation. Permission to classify an asset is not permission to modify its data.</li>
+<li><strong>Governance workflow:</strong> A recorded process of ownership, classification review and approval decisions, which does not by itself control storage or query access.</li>
+</ul>
 <h3 id="governance-decisions-need-an-enforcement-boundary">Governance decisions need an enforcement boundary<a class="heading-anchor" href="#governance-decisions-need-an-enforcement-boundary" aria-label="Link to this section">#</a></h3>
 <p>Atlas authentication identifies a caller, while authorization determines which metadata operations that caller may perform. A governance workflow can also record an owner, classification review and approval decision. Those metadata policies do not automatically control every storage object or query engine that contains the underlying data.</p>
 <p>A complete design names the policy decision point, enforcement point and protected operation. Reading Atlas entity metadata, selecting table rows and downloading an already issued file URL are different operations. Permission to classify an asset should not be treated as permission to modify its data, and a denial from Atlas should not be reported as a denied Hive query.</p>
@@ -211,6 +219,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Separate authentication failure, authorization denial, metadata state and data engine behavior. Keep identity mapping, policy revision, classification origin and actual protected request in the evidence dossier. An approval record is a human decision with a scope; a zero exit code is not a substitute for that scope.</p>
 <p><strong>Interview discussion: what evidence proves a governance policy works?</strong> A clear policy/enforcement mapping plus actual allowed and denied protected operations, not merely a classification or configuration file. These cases verify a narrow API credential boundary and then explain the independent test required for a real data-access claim.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="an-invalid-credential-must-be-rejected">An invalid credential must be rejected<a class="heading-anchor" href="#an-invalid-credential-must-be-rejected" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash">curl -s -o /dev/null -w <span class="syntax-string">&quot;%{http_code}\n&quot;</span> -u <span class="syntax-string">&quot;invalid:fixture&quot;</span> <span class="syntax-string">\</span>
+  <span class="syntax-string">&quot;</span>$DS60_ATLAS_ENDPOINT<span class="syntax-string">/api/atlas/v2/types/typedef/name/ds60_&lt;owner&gt;_dataset</span><span class="syntax-string">&quot;</span></code></pre>
+<p>The expected code is 401 or 403; the check route fails if anything else comes back. A 200 here would mean authentication is disabled, which turns every metadata claim in the catalog into something anyone could have written. A redirect to a login page is also suspicious for an API client, which is why client.py refuses redirects before it forwards credentials. Note that this proves only that Atlas guards its own API, nothing about who can query the underlying tables.</p>
+<h4 id="label-review-versus-data-access">Label review versus data access<a class="heading-anchor" href="#label-review-versus-data-access" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  region<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  ds60<span class="syntax-punctuation">.</span>orders
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  region<span class="syntax-punctuation">;</span></code></pre>
+<p>Imagine the orders table carries a PII classification in Atlas. Whether this query succeeds depends on the engine and its authorizer, for example a Ranger tag policy that reads Atlas classifications, not on Atlas itself. To claim enforcement you need a recorded denial from the engine for a principal that lacks access, alongside a success for one that has it. Without that pair, the classification documents a decision but does not prove it is applied.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="atlas-apache-073-prepared-command-notebook">Atlas apache-073 prepared command notebook<a class="heading-anchor" href="#atlas-apache-073-prepared-command-notebook" aria-label="Link to this section">#</a></h2>

@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Reconstruct a mean from count 4, total 100.</p>
 <p>The mean is 25.</p>
+<p><strong>Approach:</strong> Divide the merged total by the merged count once: 100 over 4.</p>
+<p><strong>Why it holds here:</strong> The chunks hold 10, and 20, 30 and 40. Their counts and sums add to 4 and 100, so the mean is 25, the same as averaging all four values at once.</p>
+<p><strong>Tempting mistake:</strong> Averaging the chunk means 10 and 30 to get 20. The single value chunk counts as much as the three value chunk.</p>
+<p><strong>Verify:</strong> <code>a$mean</code> returns 25, while <code>mean(c(10, 30))</code> returns 20.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change chunk boundaries without changing observations.</p>
 <p>The semantic total/count remain unchanged, subject to floating-point tolerance.</p>
+<p><strong>Approach:</strong> Split the same four values differently, including an empty chunk, and compare the results.</p>
+<p><strong>Why it holds here:</strong> a uses 10 and then 20, 30, 40; b uses 10, 20, then nothing, then 30, 40. The state only adds counts and sums, so both reach count 4, missing 0 and total 100. These values are integers, so the comparison can be exact.</p>
+<p><strong>Tempting mistake:</strong> Using identical on fractional measurements. Grouping 0.1 and 0.2 apart from 0.3 can change the last bit of the total, so a correct implementation would fail; such data need all.equal.</p>
+<p><strong>Verify:</strong> <code>identical(a, b)</code> returns TRUE, and both <code>a$mean</code> and <code>b$mean</code> return 25.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Implement an all-missing finalization rule.</p>
 <p>Return an explicit missing mean when count is zero.</p>
+<p><strong>Approach:</strong> Check the observed count before dividing, and return NA_real_ when it is 0.</p>
+<p><strong>Why it holds here:</strong> For three missing values, observed is 0, missing is 3 and total is 0. A mean over no observations does not exist, and the missing count shows why.</p>
+<p><strong>Tempting mistake:</strong> Dividing without the check. 0 divided by 0 returns NaN, which passes downstream as a number and hides that every value was missing.</p>
+<p><strong>Verify:</strong> <code>is.na(missing$mean)</code> returns TRUE, and <code>missing$state[[&quot;missing&quot;]]</code> returns 3.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose averaging chunk medians.</p>
 <p>Keep sufficient distribution state or recompute the exact combined median.</p>
+<p><strong>Approach:</strong> Keep the values needed for the exact median, or count each distinct value across chunks, or make a second pass over the data.</p>
+<p><strong>Why it holds here:</strong> For a&#x27;s chunks the medians are 10 and 30, which average to 20. The four values 10, 20, 30 and 40 have median 25. With b&#x27;s boundaries the chunk medians 15 and 35 happen to average to 25, so the method can look right on one split and be wrong on another.</p>
+<p><strong>Tempting mistake:</strong> Averaging chunk medians. A median depends on where each value sits in the combined order, and one number per chunk loses that.</p>
+<p><strong>Verify:</strong> <code>median(c(10, 20, 30, 40))</code> returns 25, while <code>mean(c(10, 30))</code> returns 20.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Process an empty chunk among nonempty chunks.</p>
 <p>It leaves the accumulated state unchanged.</p>
+<p><strong>Approach:</strong> Let the loop add the empty chunk&#x27;s zero count, zero missing and zero total.</p>
+<p><strong>Why it holds here:</strong> For <code>numeric(0)</code>, valid is <code>logical(0)</code>, both sums are 0, and the sum of no values is 0. The state is unchanged, which is why b, which contains an empty chunk, still matches a.</p>
+<p><strong>Tempting mistake:</strong> Computing a mean per chunk before merging. <code>mean(numeric(0))</code> is NaN, and adding NaN to the state turns the final result into NaN as well.</p>
+<p><strong>Verify:</strong> <code>identical(a, b)</code> returns TRUE although b includes an empty chunk.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>State what a scalability claim still requires.</p>
 <p>Measure representative peak memory, elapsed work and equivalent outputs under controlled conditions.</p>
+<p><strong>Approach:</strong> State that the reference checks arithmetic equivalence only, and name what a scalability claim needs: a disk reader, realistic sizes, peak memory and timing.</p>
+<p><strong>Why it holds here:</strong> Here all chunks already sit in one R list, so memory is the same as for a single vector. Only a streamed source shows the benefit of keeping three numbers of state.</p>
+<p><strong>Tempting mistake:</strong> Claiming the function handles data larger than memory because it loops over chunks. The loop proves the merge is correct, not that the data were never fully loaded.</p>
+<p><strong>Verify:</strong> A run on a file many chunks long shows the same mean as an in memory calculation, with peak memory measured by a process monitor.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 3 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

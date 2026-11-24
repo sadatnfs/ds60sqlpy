@@ -251,7 +251,7 @@ add(
     ),
     (
         "Use if for a branch, for...of for values, and indexed for when positions matter. The expression "
-        "left&&right evaluates right only when left is truthy; left||right uses right only when left is "
+        "`left && right` evaluates right only when left is truthy; `left || right` uses right only when left is "
         "falsy. Neither necessarily returns a Boolean. The expression value??fallback preserves 0, false "
         "and empty string. A loop condition i<array.length excludes the invalid index length."
     ),

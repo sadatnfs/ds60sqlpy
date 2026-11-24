@@ -29,7 +29,7 @@ The optimizer estimate, the configuration threshold and the observed row count a
 
 Build an ordinary inner equality join on key, projecting fact_id, key, amount, factor. Execute logical metrics and record the physical plan chosen with the declared threshold.
 
-**Expected:** Metrics(20000,20000,79997,839916). The observed plan identifies a join strategy and is printed with current threshold.
+**Expected:** `Metrics(20000, 20000, 79997, 839916)`. The observed plan identifies a join strategy and is printed with current threshold.
 
 ```scala
 def ordinaryJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
@@ -96,7 +96,7 @@ The supported inner equijoin honors the requested broadcast strategy despite the
 
 Request a broadcast dimension in a full outer equality join and inspect the chosen plan. Explain why this fixture still has the same output rows as the inner join.
 
-**Expected:** No BroadcastHashJoin for this unsupported full-outer hash strategy. Metrics remain(20000,20000,79997,839916) because both key domains are fully covered.
+**Expected:** No BroadcastHashJoin for this unsupported full-outer hash strategy. Metrics remain `(20000, 20000, 79997, 839916)` because both key domains are fully covered.
 
 ```scala
 def unsupportedHint(facts: DataFrame, dimension: DataFrame): DataFrame = {
@@ -119,7 +119,7 @@ A physical hash strategy that cannot represent the required outer semantics must
 
 ### Exercise 6: Gate a broadcast candidate on explicit bounded evidence
 
-Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside(0,1 MiB]. Return the bounded dimension with a broadcast hint only after those checks.
+Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside (0, 1 MiB]. Return the bounded dimension with a broadcast hint only after those checks.
 
 **Expected:** The 20-row dimension passes; the same dimension with a duplicate key and a 101-row candidate fail. No unbounded input is collected or materialized by the gate.
 
@@ -163,4 +163,6 @@ The gate turns a casual hint into a declared finite input contract. Limit-plus-o
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Inspect statistics and the automatic threshold separately) is built inside the program, so opening the lesson fetches nothing; it expects: A positive finite estimate below 10485760 bytes, threshold 10485760 and actual row count 20. The estimate is not a peak-memory measurement. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

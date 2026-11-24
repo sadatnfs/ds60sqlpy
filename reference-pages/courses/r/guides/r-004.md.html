@@ -245,6 +245,27 @@ first_positive <span class="syntax-operator">&lt;-</span> <span class="syntax-fu
 <span class="syntax-function">print</span><span class="syntax-punctuation">(</span>first_positive<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> FALSE; no empty-vector extraction error.</p>
 <p>The first condition prevents an invalid extraction from an empty vector. The truth-table checks explain when uncertainty does and does not affect the combined answer.</p>
+<h4 id="example-3-counting-qualifying-amounts-when-one-is-unknown">Example 3: Counting qualifying amounts when one is unknown<a class="heading-anchor" href="#example-3-counting-qualifying-amounts-when-one-is-unknown" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-r">amount <span class="syntax-operator">&lt;-</span> <span class="syntax-function">c</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NA_real_</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span>
+naive <span class="syntax-operator">&lt;-</span> <span class="syntax-function">sum</span><span class="syntax-punctuation">(</span>amount <span class="syntax-operator">&gt;=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
+known_hits <span class="syntax-operator">&lt;-</span> <span class="syntax-function">sum</span><span class="syntax-punctuation">(</span>amount <span class="syntax-operator">&gt;=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> na.rm <span class="syntax-operator">=</span> <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">)</span>
+unknown <span class="syntax-operator">&lt;-</span> <span class="syntax-function">sum</span><span class="syntax-punctuation">(</span><span class="syntax-function">is.na</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-function">print</span><span class="syntax-punctuation">(</span><span class="syntax-function">c</span><span class="syntax-punctuation">(</span>naive <span class="syntax-operator">=</span> naive<span class="syntax-punctuation">,</span> known_hits <span class="syntax-operator">=</span> known_hits<span class="syntax-punctuation">,</span> unknown <span class="syntax-operator">=</span> unknown<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-function">stopifnot</span><span class="syntax-punctuation">(</span><span class="syntax-function">is.na</span><span class="syntax-punctuation">(</span>naive<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> known_hits <span class="syntax-operator">==</span> <span class="syntax-number">2L</span><span class="syntax-punctuation">,</span> unknown <span class="syntax-operator">==</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected observation:</strong> naive NA, known_hits 2, unknown 1.</p>
+<p>Summing a logical vector counts its TRUE entries, so sum(amount &gt;= 10) looks like a count of qualifying amounts. The comparison for the third amount is NA, and one NA makes the whole sum NA. Adding na.rm = TRUE returns 2, which is correct only as a statement about the three known amounts. Reporting unknown = 1 next to it keeps the gap visible: if the missing value later turns out to be 15, the true count is 3, and the 2 was never a complete answer.</p>
+<h3 id="trace-the-mask-and-the-truth-table">Trace the mask and the truth table<a class="heading-anchor" href="#trace-the-mask-and-the-truth-table" aria-label="Link to this section">#</a></h3>
+<p>Example 1 builds its mask from two pieces. Reading it one amount at a time shows why the missing amount ends up excluded rather than unknown.</p>
+<pre class="highlighted-code"><code class="language-text">amount  !is.na(amount)  amount &gt;= 10  keep
+5       TRUE            FALSE         FALSE
+12      TRUE            TRUE          TRUE
+NA      FALSE           NA            FALSE
+20      TRUE            TRUE          TRUE</code></pre>
+<p>The third row is the important one. The comparison is NA, but FALSE &amp; NA is FALSE, because a false operand already settles a conjunction. The same rule explains Example 2:</p>
+<pre class="highlighted-code"><code class="language-text">a      b    a &amp; b   a | b
+TRUE   NA   NA      TRUE
+FALSE  NA   FALSE   NA</code></pre>
+<p>A TRUE operand settles an or, and a FALSE operand settles an and; in the other two cells the unknown still matters, so R reports NA. Vectorized &amp; evaluates both sides for every element, so the order of the two pieces in the mask does not change keep. That is different from &amp;&amp;, which stops early and only accepts single values.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict TRUE &amp; NA and FALSE &amp; NA.</p>

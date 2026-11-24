@@ -38,6 +38,12 @@
       "code": "x <- c(\"a.b\", \"axb\")\nstopifnot(identical(grepl(\".\", x, fixed = TRUE), c(TRUE, FALSE)))\ntext <- enc2utf8(\"café\")\nstopifnot(nchar(text, type = \"chars\") == 4L, nchar(text, type = \"bytes\") == 5L)\nprint(c(characters = nchar(text), bytes = nchar(text, type = \"bytes\")))\n",
       "explanation": "Literal matching avoids regex wildcard semantics. The accented character uses multiple UTF-8 bytes while the string has four code-point characters.",
       "expected": "Four characters and five bytes."
+    },
+    {
+      "title": "A regex pipe splits every character",
+      "code": "row <- \"A|12\"\nwrong <- strsplit(row, \"|\")[[1]]\nstopifnot(identical(wrong, c(\"A\", \"|\", \"1\", \"2\")))\nright <- strsplit(row, \"|\", fixed = TRUE)[[1]]\nstopifnot(identical(right, c(\"A\", \"12\")))\nrows <- strsplit(c(\"A|12\", \"B|\"), \"|\", fixed = TRUE)\nstopifnot(identical(lengths(rows), c(2L, 1L)))\nprint(wrong)\n",
+      "explanation": "In a regular expression the pipe means or, and an alternation of two empty patterns matches the empty string everywhere. strsplit then cuts between every character, so the delimiter itself comes back as a field and 12 is broken into 1 and 2. With fixed = TRUE the pipe is an ordinary character and the row splits into A and 12. The last check shows a separate boundary rule: \"B|\" yields one piece, not two, because strsplit drops a trailing empty field, so rows can disagree on their field count.",
+      "expected": "[1] \"A\" \"|\" \"1\" \"2\", four pieces from a two-field row."
     }
   ],
   "exercises": [

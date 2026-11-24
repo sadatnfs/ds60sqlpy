@@ -203,21 +203,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict length(c(NULL, NA_real_)).</p>
 <p>The length is one.</p>
+<p><strong>Approach:</strong> Count what each argument contributes to <code>c()</code>: NULL contributes nothing, and NA_real_ contributes one slot.</p>
+<p><strong>Why it holds here:</strong> NULL means absence of an object, so combining it adds no element. NA_real_ is a double whose value is unknown, and it still occupies a position.</p>
+<p><strong>Tempting mistake:</strong> Predicting 2 by treating NULL as one more missing entry, or 0 by assuming NA vanishes like NULL. Both blur the line between no element and an unknown element.</p>
+<p><strong>Verify:</strong> The reference asserts <code>length(c(NULL, NA_real_)) == 1L</code>, and <code>print()</code> shows <code>[1] NA</code>.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add zero to an all-missing measurement vector.</p>
 <p>The observed count becomes one and its observed mean is zero.</p>
+<p><strong>Approach:</strong> Append the zero, then count observed entries with <code>sum(!is.na(x))</code> and summarize with <code>mean(x, na.rm = TRUE)</code>.</p>
+<p><strong>Why it holds here:</strong> Zero is a measurement, not a gap. After removing the two unknowns one value remains, so the observed count is 1 and the observed mean is 0.</p>
+<p><strong>Tempting mistake:</strong> Treating zero as missing, for example by recoding it to NA. Then nothing is observed and <code>mean(x, na.rm = TRUE)</code> returns NaN, erasing the one real reading.</p>
+<p><strong>Verify:</strong> <code>sum(!is.na(x))</code> returns 1 and <code>mean(x, na.rm = TRUE)</code> returns 0, both asserted in the reference.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a finite-only mask for c(2, Inf, NA,4).</p>
 <p>is.finite retains two and four.</p>
+<p><strong>Approach:</strong> Build the mask with <code>is.finite(x)</code> and index with it.</p>
+<p><strong>Why it holds here:</strong> For c(2, Inf, NA, 4), <code>is.finite</code> is TRUE only for 2 and 4. It is FALSE for Inf and for NA, so one predicate removes both exceptional kinds.</p>
+<p><strong>Tempting mistake:</strong> Using <code>!is.na(x)</code> keeps Inf, so the selection is 2, Inf, 4 and any total over it becomes Inf.</p>
+<p><strong>Verify:</strong> The reference asserts <code>identical(x[is.finite(x)], c(2, 4))</code>, and <code>sum()</code> of that selection returns 6.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose calling an all-missing sum a measured zero.</p>
 <p>Report no observations and an explicit missing summary under the stated policy.</p>
+<p><strong>Approach:</strong> Check the observed count before summing. When nothing is observed, report NA together with the zero count.</p>
+<p><strong>Why it holds here:</strong> With both entries missing, <code>na.rm = TRUE</code> leaves an empty vector, and the sum of an empty vector is 0 by convention. That 0 describes no measurement at all.</p>
+<p><strong>Tempting mistake:</strong> Publishing <code>sum(all_missing, na.rm = TRUE)</code> as a total of 0. A reader would assume someone measured and found nothing.</p>
+<p><strong>Verify:</strong> In the reference, <code>is.na(reported)</code> is TRUE, while <code>sum(all_missing, na.rm = TRUE)</code> returns 0 for contrast.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Distinguish NA from NaN.</p>
 <p>is.na is true for both, but is.nan is true only for NaN.</p>
+<p><strong>Approach:</strong> Ask two separate questions: <code>is.na()</code> for any missing or undefined value and <code>is.nan()</code> only for undefined arithmetic.</p>
+<p><strong>Why it holds here:</strong> NaN arises from operations such as 0 / 0; NA marks a value that was never recorded. <code>is.na(NaN)</code> is TRUE, but <code>is.nan(NA_real_)</code> is FALSE.</p>
+<p><strong>Tempting mistake:</strong> Counting undefined results with <code>is.na()</code>. On the starter vector that reports 2, mixing the unrecorded value with the undefined one.</p>
+<p><strong>Verify:</strong> On the starter vector, <code>sum(is.na(x))</code> returns 2 and <code>sum(is.nan(x))</code> returns 1.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Document a division-by-zero policy in a data pipeline.</p>
 <p>Validate the denominator and retain a meaningful signal instead of silently replacing every exceptional result with zero.</p>
+<p><strong>Approach:</strong> Write the policy into a function: reject a zero or non-finite denominator by returning NA_real_, otherwise divide.</p>
+<p><strong>Why it holds here:</strong> Without the guard, <code>1 / 0</code> returns Inf, which passes an <code>is.na</code> check and inflates any later mean. Returning NA keeps the case visible as undefined.</p>
+<p><strong>Tempting mistake:</strong> Replacing every non-finite ratio with 0. That claims a measured zero rate for a case that had no denominator.</p>
+<p><strong>Verify:</strong> The reference checks that <code>ratio(1, 0)</code> returns NA and <code>ratio(4, 2)</code> returns 2.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

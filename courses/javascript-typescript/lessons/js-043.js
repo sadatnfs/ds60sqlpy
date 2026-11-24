@@ -3,7 +3,7 @@
 // Answer-free learner artifact. Save your own copy before editing.
 
 // Exercise 1: Predict the three bar widths.
-// Expected: 40, 100 and 160 units.
+// Expected: widths of 40 units, 100 units and 160 units.
 
 // Exercise 2: Change the multiplier to 10.
 // Expected: All widths halve while category values remain unchanged.

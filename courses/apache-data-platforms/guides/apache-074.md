@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-073`, `apache-069`.
 
+## Key terms
+
+- **Graph backend:** The store, JanusGraph in Atlas, that persists entities and relationships, commonly on HBase. Its durability decides what survives a restart.
+- **Search index:** The index backend, such as Solr, that serves Atlas discovery queries. It can lag or be unavailable while graph reads succeed.
+- **Restart retention:** Entities and lineage that remain readable by GUID after Atlas and its backing services restart, which holds only if the graph storage itself survived.
+- **Backup consistency:** Whether graph and index backups capture the same point in time, so a restore does not leave search out of step with stored entities.
+- **Failure domain:** The set of components that fail together. Containers on one Docker engine share one host, so restarting them cannot prove disaster recovery.
+
 ## Graph persistence and search availability are different states
 
 Atlas stores metadata relationships in a graph backend and uses indexes to
@@ -79,6 +87,29 @@ Direct graph/entity access and indexed discovery can have different readiness or
 consistency states. The first case requires durable identity/lineage survival,
 while the second tests search separately and keeps index maintenance distinct
 from graph restoration.
+
+## Worked examples
+
+### Record identities, restart, then check only
+
+```bash
+cd work/atlas
+bash run.sh check
+bash run.sh check
+```
+
+Run check once before the server lifecycle change and once after, without apply in between. Both receipts should list identical entity_guids and both expected edges. Because check is read-only, any difference points at persistence: the graph store in HBase or Cassandra lost writes, or the server came back attached to a different backend. Running apply to fix a gap would recreate entities with new GUIDs and destroy the evidence.
+
+### Graph read versus index search after recovery
+
+```bash
+curl -s -u "$ATLAS_USER:$ATLAS_PASSWORD" \
+  "$DS60_ATLAS_ENDPOINT/api/atlas/v2/entity/guid/<curated-guid>"
+curl -s -u "$ATLAS_USER:$ATLAS_PASSWORD" \
+  "$DS60_ATLAS_ENDPOINT/api/atlas/v2/search/basic?typeName=ds60_<owner>_dataset"
+```
+
+The first call reads from the graph store; the second goes through the Solr or Elasticsearch index. If the GUID read succeeds while search returns fewer entities, the data survived and the index is behind or needs a rebuild. If both fail, the graph is the problem. Keeping the two observations separate prevents a full restore when a reindex would have been enough.
 
 ## Complete worked source
 

@@ -205,6 +205,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A useful ownership drawing is <code>producer object -&gt; allocation &lt;- consumer view</code>. The arrows are lifetime dependencies, not copies. Deleting one Python name only removes one reference; another owner can keep storage alive. Conversely, a raw integer pointer is not necessarily an owner. Before passing a pointer to an asynchronous consumer, retain the appropriate owner through that consumer&#x27;s completion. Avoid modifying either view concurrently unless the algorithm explicitly defines that sharing.</p>
 <p>For modern DLPack object interchange, read the producer&#x27;s <code>__dlpack__</code> and <code>__dlpack_device__</code> protocol and the consumer&#x27;s documented import function. Stream negotiation exists so a consumer can ask for data ready on its execution stream. Legacy capsule interfaces can have different one-consumption ownership rules; do not copy an old capsule recipe into a modern object API without checking it. <code>copy=False</code> where supported expresses a copy constraint, not a promise that every other contract is automatically satisfied.</p>
 <p>Autograd adds a fourth agreement: the computation graph. Sharing a tensor&#x27;s storage with another library does not by itself add that library&#x27;s arithmetic to the first framework&#x27;s differentiation graph. A forward output may be numerically perfect while the gradient is absent or wrong. The test sequence is therefore storage/value parity, deliberate alias mutation, lifetime safety, non-default stream behavior, and then independent gradient behavior if gradients are part of the objective.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Zero-copy alias:</strong> A view in another library that shares the same device buffer, so writes through one are visible through the other.</li>
+<li><strong>Explicit copy:</strong> A new buffer with its own storage, independent of later changes to the original.</li>
+<li><strong>DLPack:</strong> A tensor exchange protocol that passes a pointer, shape, strides, dtype and device between libraries without copying.</li>
+<li><strong>Ownership lifetime:</strong> The rule that the original buffer must stay alive while any alias still references it.</li>
+<li><strong>Autograd boundary:</strong> The point where a tensor leaves the framework&#x27;s gradient tracking, so operations in another library are not differentiated.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A Python list alias sees a mutation made through the original name. A list copy retains the old value. This CPU analogy makes the ownership question visible before introducing device buffers.</p>
@@ -220,20 +228,44 @@ alias<span class="syntax-punctuation">[</span><span class="syntax-number">0</spa
 <span class="syntax-keyword">assert</span> copied <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU alias reference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> owner<span class="syntax-punctuation">,</span> copied<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Alias changes to 9 while copied value remains 1.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>owner</code></td>
+<td><code>[9, 2, 3]</code></td>
+</tr>
+<tr>
+<td><code>alias</code></td>
+<td><code>[9, 2, 3]</code></td>
+</tr>
+<tr>
+<td><code>copied</code></td>
+<td><code>[1, 2, 3]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-distinguish-copy-and-alias">Exercise 1: Distinguish copy and alias<a class="heading-anchor" href="#exercise-1-distinguish-copy-and-alias" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>distinguish copy and alias</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming any transfer between libraries copies data leads to surprises when a zero-copy exchange like DLPack shares storage and a later in-place edit changes both arrays.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-trace-owner-lifetime">Exercise 2: Trace owner lifetime<a class="heading-anchor" href="#exercise-2-trace-owner-lifetime" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>trace owner lifetime</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Deleting the original tensor right after the exchange to save memory assumes the consumer holds a copy.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-describe-metadata-requirements">Exercise 3: Describe metadata requirements<a class="heading-anchor" href="#exercise-3-describe-metadata-requirements" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>describe metadata requirements</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Passing only the pointer and the shape forces the consumer to guess dtype and layout.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-missing-autograd-edges">Exercise 4: Explain missing autograd edges<a class="heading-anchor" href="#exercise-4-explain-missing-autograd-edges" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>explain missing autograd edges</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming a forward result that matches means gradients are also correct conflates two different checks.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-name-stream-readiness-evidence">Exercise 5: Name stream readiness evidence<a class="heading-anchor" href="#exercise-5-name-stream-readiness-evidence" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>name stream readiness evidence</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Relying on the host call having returned treats Python completion as device completion.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-mutation-tests">Exercise 6: Design mutation tests<a class="heading-anchor" href="#exercise-6-design-mutation-tests" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design mutation tests</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing from both libraries at once to see what happens produces a race whose outcome proves nothing.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

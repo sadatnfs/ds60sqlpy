@@ -8,7 +8,7 @@ Types clarify an algorithm's interface, but correctness depends on its invariant
 
 Adjacency-list BFS performs \(O(V+E)\) work under ordinary Map lookup assumptions and stores O(V) extra state. An array plus a cursor avoids repeated shift operations that move remaining elements. Several shortest paths may exist; neighbor order defines this implementation's deterministic tie policy. Weighted edges need another algorithm, such as Dijkstra for nonnegative weights. BFS does not minimize arbitrary travel cost merely because its path has few edges.
 
-Dynamic programming reuses overlapping subproblem results. For minimum coin count, best[a] is the smallest number of allowed coins summing to amount a. best[0]=0. Each other state minimizes best[a-coin]+1 over usable denominations. Infinity represents an unreachable amount. The recurrence assumes unbounded reuse of positive integer coins. For coins 1,3,4 and target 6, greedy selection gives 4+1+1, while the recurrence discovers 3+3. The table has O(amount) memory and O(amount times number-of-coins) work, so numeric magnitude is part of its cost.
+Dynamic programming reuses overlapping subproblem results. For minimum coin count, `best[a]` is the smallest number of allowed coins summing to amount a, and `best[0] = 0`. Each other state minimizes `best[a - coin] + 1` over usable denominations. Infinity represents an unreachable amount. The recurrence assumes unbounded reuse of positive integer coins. For coins 1, 3 and 4 and target 6, greedy selection gives 4+1+1, while the recurrence discovers 3+3. The table has O(amount) memory and O(amount times number-of-coins) work, so numeric magnitude is part of its cost.
 
 **Breadth-first search:** Layered exploration finding fewest-edge paths in an unweighted graph.
 
@@ -57,7 +57,7 @@ assert.equal(minCoins([1, 3, 4], 6), 2);
 assert.equal(minCoins([1, 3, 4], 0), 0);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(minCoins([1, 3, 4], 0), 0)`; after it the line reads `assert.equal(minCoins([1, 3, 4], 0), 0);` again and two coins; amount zero needs zero coins.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(minCoins([1, 3, 4], 1), 0);`. Restoring `assert.equal(minCoins([1, 3, 4], 0), 0);` brings back: two coins; amount zero needs zero coins.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(minCoins([1, 3, 4], 0), 0)` accepts.
 

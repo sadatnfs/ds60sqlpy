@@ -181,8 +181,8 @@ assert precision==1 and recall==.75 and f1==6/7
     ],
     18: [
         r"""text='服务正常'
-print(len(text),len(text.encode('utf-8')),len(text.split()))
-assert (len(text),len(text.encode('utf-8')),len(text.split()))==(4,12,1)
+print(len(text), len(text.encode('utf-8')),len(text.split()))
+assert (len(text), len(text.encode('utf-8')),len(text.split()))==(4,12,1)
 """,
         r"""english_correct,english_n=9,10
 spanish_correct,spanish_n=1,2

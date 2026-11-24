@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Columnar execution groups values by column with accompanying validity and offset structures. Arrow defines interoperable columnar formats; it is not itself a guarantee of GPU residency or zero-copy across every process and device boundary. Variable-width strings need offsets and character storage, while nullable columns need validity information. A batch&#x27;s byte size can vary greatly with its schema.</p>
 <p>Spark&#x27;s row-to-columnar and columnar-to-row transitions can add work around unsupported operators. Host-to-device and device-to-host transfers are further boundaries. Plan batches by bytes as well as row counts and include temporary decoded representations. Increasing batch size can improve amortization while raising peak memory and spill risk. Preserve schema and null behavior through every conversion.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Columnar batch:</strong> A group of rows stored column by column with the validity and offset structures each column needs.</li>
+<li><strong>Apache Arrow:</strong> An interoperable columnar memory format that does not by itself guarantee GPU residency or zero copy.</li>
+<li><strong>Validity bitmap:</strong> A bit per row marking whether a value in a nullable column is present.</li>
+<li><strong>String offsets:</strong> An integer array giving where each variable-width string starts in the character buffer.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>One thousand float64 values occupy 8000 payload bytes, plus any null mask and metadata. One thousand strings can occupy widely different storage depending on lengths.</p>
@@ -215,20 +222,52 @@ strings <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>s<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> s <span class="syntax-operator">in</span> strings<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU columnar ledger:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">,</span> mask<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Fixed payload 8000 bytes, nine-row mask 2 bytes, string characters 7 bytes.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>rows</code></td>
+<td><code>1000</code></td>
+</tr>
+<tr>
+<td><code>itemsize</code></td>
+<td><code>8</code></td>
+</tr>
+<tr>
+<td><code>payload</code></td>
+<td><code>8000</code></td>
+</tr>
+<tr>
+<td><code>mask</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>strings</code></td>
+<td><code>[&#x27;a&#x27;, &#x27;longer&#x27;, &#x27;&#x27;]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-fixed-width-payload">Exercise 1: Count fixed-width payload<a class="heading-anchor" href="#exercise-1-count-fixed-width-payload" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>count fixed-width payload</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting 1000 values as 4000 bytes by assuming float32 underestimates the transfer by half when the schema says double. Schema inference from CSV or pandas commonly produces double even when the data looks like small decimals.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-count-validity-bytes">Exercise 2: Count validity bytes<a class="heading-anchor" href="#exercise-2-count-validity-bytes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>count validity bytes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using <code>9//8 = 1</code> floors the division and leaves the ninth row without a bit. The ninth row&#x27;s null state would then be read from whatever byte follows the mask.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-explain-string-offsets">Exercise 3: Explain string offsets<a class="heading-anchor" href="#exercise-3-explain-string-offsets" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>explain string offsets</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Estimating string columns as rows times an average length ignores the offset array and the UTF-8 encoding of multibyte characters.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-locate-row-column-transitions">Exercise 4: Locate row-column transitions<a class="heading-anchor" href="#exercise-4-locate-row-column-transitions" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>locate row-column transitions</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming the whole query is columnar because the source is a Parquet file ignores row-based operators later in the plan. A Python UDF or an unsupported expression in a later stage forces a conversion back to rows at that point.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-budget-transfer-payload">Exercise 5: Budget transfer payload<a class="heading-anchor" href="#exercise-5-budget-transfer-payload" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>budget transfer payload</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Budgeting only values underestimates both transfer time and peak memory. For string-heavy tables, offsets and variable character data can exceed the numeric payload by a wide margin.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-a-conversion-parity-test">Exercise 6: Design a conversion parity test<a class="heading-anchor" href="#exercise-6-design-a-conversion-parity-test" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design a conversion parity test</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing only values with nulls replaced by zero erases the distinction the mask exists to keep. A conversion bug that turns nulls into zeros would then pass the test unnoticed.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

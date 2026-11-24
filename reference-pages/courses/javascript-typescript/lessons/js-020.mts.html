@@ -201,17 +201,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// &#x27;failure&#x27;, message: &#x27;offline&#x27; }), &#x27;error:offline&#x27;);` to `assert.equal(formatResult({ kind:</span></span>
 <span class="source-line"><span class="syntax-comment">// &#x27;failure&#x27;, message: &#x27;offline!&#x27; }), &#x27;error:offline&#x27;);` inside its check. Before running it,</span></span>
 <span class="source-line"><span class="syntax-comment">// predict whether the check still passes and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(formatResult({ kind: &#x27;failure&#x27;, message: &#x27;offline&#x27; }), &#x27;error:offline&#x27;)`.</span></span>
-<span class="source-line"><span class="syntax-comment">// Restoring the original line brings back the worked observation: value:7 and error:offline.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(formatResult({</span></span>
+<span class="source-line"><span class="syntax-comment">// kind: &#x27;failure&#x27;, message: &#x27;offline!&#x27; }), &#x27;error:offline&#x27;);`. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(formatResult({ kind: &#x27;failure&#x27;, message: &#x27;offline&#x27; }), &#x27;error:offline&#x27;);`</span></span>
+<span class="source-line"><span class="syntax-comment">// brings back: `value:7` and `error:offline`.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Preserve an empty string during narrowing: diagnose an edited check</span></span>
 <span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(describe(undefined), &#x27;missing!&#x27;);`. Run Example B with that line, explain</span></span>
 <span class="source-line"><span class="syntax-comment">// why the edited check now fails for the same program state, and restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(describe(undefined), &#x27;missing&#x27;)`; after it the line reads</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(describe(undefined), &#x27;missing&#x27;);` again and empty string has length 0;</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(describe(undefined), &#x27;missing!&#x27;);`. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(describe(undefined), &#x27;missing&#x27;);` brings back: empty string has length 0;</span></span>
 <span class="source-line"><span class="syntax-comment">// absent value returns missing.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Reject access to another variant payload</span></span>

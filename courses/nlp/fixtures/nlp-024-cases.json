@@ -8,7 +8,7 @@
     },
     {
       "exercise": 2,
-      "task": "Accept one TKT-301 and reject missing,multiple or four-digit variants.",
+      "task": "Accept one TKT-301 and reject missing, multiple or four-digit variants.",
       "expected": "Canonical TKT-301; three malformed/ambiguous cases raise ValueError."
     },
     {
@@ -18,18 +18,18 @@
     },
     {
       "exercise": 4,
-      "task": "Run the supported network case for ops at time10.",
+      "task": "Run the supported network case for ops at time 10.",
       "expected": "Exactly network version2 and the unchanged approval-rule quote; old version absent."
     },
     {
       "exercise": 5,
-      "task": "Repeat under billing role,time30 and malformed-ID inputs.",
+      "task": "Repeat under billing role, time 30 and malformed-ID inputs.",
       "expected": "Insufficient-evidence for role/time changes; explicit parser failures; no unauthorized or stale quote."
     },
     {
       "exercise": 6,
-      "task": "Record normal and failure results with evidence hash,component identities and limitations.",
-      "expected": "A reviewer can reproduce parsing,prediction,source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus."
+      "task": "Record normal and failure results with evidence hash, component identities and limitations.",
+      "expected": "A reviewer can reproduce parsing, prediction, source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus."
     }
   ]
 }

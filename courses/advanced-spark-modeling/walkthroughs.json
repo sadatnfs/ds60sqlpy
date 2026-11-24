@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "track_id": "advanced-spark-modeling",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "asm-001",
+      "title": "One objective evaluation in Spark and partition independent results",
+      "anchor": "reference",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-001.py",
+      "source_sha256": "44c076d51f277c28c4775a1c75ed302508f840e92c78d6e2b84abdfcc2e97848",
+      "expected_output": [
+        "\"case_2_partition_parity\": [{\"requested_partitions\": 1, \"n\": 12, \"loss\": 506}, {\"requested_partitions\": 2, \"n\": 12, \"loss\": 506}, {\"requested_partitions\": 3, \"n\": 12, \"loss\": 506}]",
+        "== Physical Plan =="
+      ],
+      "steps": [
+        {
+          "lines": [6, 25],
+          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.0.1\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.0.1\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
+          "title": "A bounded local Spark session",
+          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.0.1, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
+          "observe": "PySpark is imported inside the function, so the file can be read without Spark installed."
+        },
+        {
+          "lines": [28, 33],
+          "excerpt": "def run(spark):\n    from pyspark.sql import functions as F\n\n    frame = spark.range(0, 12, 1, 3).withColumn(\"square\", F.col(\"id\") * F.col(\"id\"))\n    expected = sum(x * x for x in range(12))\n    assert expected == 506",
+          "title": "Build the data and a hand check",
+          "explanation": "spark.range(0, 12, 1, 3) creates ids 0 to 11 split into 3 partitions. withColumn adds a square column. The same sum is computed in plain Python as 506, so the Spark answer has an independent reference.",
+          "observe": "Nothing runs yet: Spark DataFrames are lazy until an action is called."
+        },
+        {
+          "lines": [34, 37],
+          "excerpt": "    spark.sparkContext.setJobGroup(\"asm-001-objective\", \"One bounded objective evaluation\")\n    result = frame.agg(F.count(\"*\").alias(\"n\"), F.sum(\"square\").alias(\"loss\")).first()\n    jobs = spark.sparkContext.statusTracker().getJobIdsForGroup(\"asm-001-objective\")\n    assert result.n == 12 and result.loss == expected and len(jobs) >= 1",
+          "title": "Run one aggregation and count the jobs",
+          "explanation": "setJobGroup tags the work that follows. agg with first() is an action, so Spark launches a job to compute the count and the sum of squares. statusTracker reports which job ids belong to the tag, proving at least one job actually ran.",
+          "observe": "result.n is 12 and result.loss is 506."
+        },
+        {
+          "lines": [38, 38],
+          "excerpt": "    frame.explain(\"formatted\")",
+          "title": "Print the physical plan",
+          "explanation": "explain(\"formatted\") prints how Spark will execute the DataFrame: a Range that generates ids and a Project that computes the square. Reading plans is how you check that Spark does what you think.",
+          "observe": "The output includes a section headed == Physical Plan ==."
+        },
+        {
+          "lines": [39, 47],
+          "excerpt": "    evidence = []\n    for partitions in (1, 2, 3):\n        row = (\n            frame.repartition(partitions)\n            .agg(F.count(\"*\").alias(\"n\"), F.sum(\"square\").alias(\"loss\"))\n            .first()\n        )\n        assert (row.n, row.loss) == (12, expected)\n        evidence.append({\"requested_partitions\": partitions, \"n\": row.n, \"loss\": row.loss})",
+          "title": "The answer must not depend on partitioning",
+          "explanation": "repartition shuffles the rows into 1, 2 and 3 partitions, and the same aggregate runs each time. Count and sum of integers are exact and order independent, so every layout must match. Each run is recorded as evidence.",
+          "observe": "All three entries show n 12 and loss 506."
+        },
+        {
+          "lines": [48, 48],
+          "excerpt": "    print(json.dumps({\"case_1_jobs_observed\": len(jobs), \"case_2_partition_parity\": evidence}))",
+          "title": "Print the evidence as JSON",
+          "explanation": "json.dumps produces one machine readable line that includes the job count and the partition parity results.",
+          "observe": "The JSON line ends with the three partition entries."
+        },
+        {
+          "lines": [51, 56],
+          "excerpt": "if __name__ == \"__main__\":\n    spark = session(\"asm-001\")\n    try:\n        run(spark)\n    finally:\n        spark.stop()",
+          "title": "Run and always stop Spark",
+          "explanation": "The guard creates a session, runs the lesson and always calls spark.stop() in the finally block, even if an assert fails, so the local JVM is shut down cleanly.",
+          "observe": "spark-submit exits with status 0 once the session stops."
+        }
+      ]
+    },
+    {
+      "lesson_id": "asm-003",
+      "title": "Group means versus a shared mean when group sizes differ",
+      "anchor": "reference",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-003.py",
+      "source_sha256": "ce2778b677e581bae7e05455f50391323b218746144acbb7770a9a43d55e005f",
+      "expected_output": [
+        "{\"independent_means\": {\"A\": 2.0, \"B\": 10.0}, \"shared_mean_mle\": 8.0, \"unweighted_model_mean\": 6.0"
+      ],
+      "steps": [
+        {
+          "lines": [7, 26],
+          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.0.1\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.0.1\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
+          "title": "A bounded local Spark session",
+          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.0.1, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
+          "observe": "Every lesson in this track uses the same session settings."
+        },
+        {
+          "lines": [29, 35],
+          "excerpt": "def run(spark):\n    from pyspark.sql import functions as F\n\n    a = [1.0, 3.0]\n    b = [8.0, 10.0, 10.0, 12.0, 9.0, 11.0]\n    rows = [(\"A\", x) for x in a] + [(\"B\", x) for x in b]\n    frame = spark.createDataFrame(rows, \"group string, y double\").repartition(3)",
+          "title": "Two groups of different sizes",
+          "explanation": "Group A has 2 observations and group B has 6. The rows become a Spark DataFrame with an explicit schema string, and repartition(3) spreads them over three partitions so the aggregation really combines partial results.",
+          "observe": "There are 8 rows in total."
+        },
+        {
+          "lines": [36, 45],
+          "excerpt": "    groups = (\n        frame.groupBy(\"group\")\n        .agg(F.count(\"*\").alias(\"n\"), F.sum(\"y\").alias(\"total\"), F.avg(\"y\").alias(\"mean\"))\n        .orderBy(\"group\")\n        .collect()\n    )\n    assert [(r.group, r.n, r.total, r.mean) for r in groups] == [\n        (\"A\", 2, 4.0, 2.0),\n        (\"B\", 6, 60.0, 10.0),\n    ]",
+          "title": "Per group count, total and mean",
+          "explanation": "groupBy and agg compute count, sum and average for each group, orderBy makes the order deterministic and collect brings the small result to the driver. The assert lists the exact expected tuples.",
+          "observe": "A has mean 2.0 and B has mean 10.0."
+        },
+        {
+          "lines": [46, 49],
+          "excerpt": "    pooled = math.fsum(r.total for r in groups) / sum(r.n for r in groups)\n    average_models = math.fsum(r.mean for r in groups) / len(groups)\n    assert pooled == 8.0 and average_models == 6.0\n    assert sum((y - pooled) ** 2 for _, y in rows) < sum((y - average_models) ** 2 for _, y in rows)",
+          "title": "Pooled mean versus the average of means",
+          "explanation": "The pooled mean divides the total of all values by the total count, giving 8.0. Averaging the two group means ignores group sizes and gives 6.0. The last assert checks that the pooled mean has a smaller total squared error, which is why it is the maximum likelihood estimate for one shared mean.",
+          "observe": "math.fsum adds floats accurately."
+        },
+        {
+          "lines": [50, 52],
+          "excerpt": "    duplicated_b = (sum(a) + 2 * sum(b)) / (len(a) + 2 * len(b))\n    equal_sized = (sum(a) + sum([9.0, 11.0])) / 4\n    assert math.isclose(duplicated_b, 124 / 14) and equal_sized == 6.0",
+          "title": "How replication and equal sizes change things",
+          "explanation": "Counting every B row twice pulls the pooled mean toward B, to 124 over 14. When both groups have the same size, the pooled mean and the average of means coincide at 6.0. math.isclose compares floats with a tolerance.",
+          "observe": "Weighting by count is a modeling choice, not a detail."
+        },
+        {
+          "lines": [53, 63],
+          "excerpt": "    print(\n        json.dumps(\n            {\n                \"independent_means\": {r.group: r.mean for r in groups},\n                \"shared_mean_mle\": pooled,\n                \"unweighted_model_mean\": average_models,\n                \"shared_mean_after_B_replication\": duplicated_b,\n                \"equal_group_sizes_coincide\": equal_sized,\n            }\n        )\n    )",
+          "title": "Report the comparison",
+          "explanation": "json.dumps prints all five quantities on one line.",
+          "observe": "The line starts with the independent means and then shared_mean_mle 8.0."
+        },
+        {
+          "lines": [66, 71],
+          "excerpt": "if __name__ == \"__main__\":\n    spark = session(\"asm-003\")\n    try:\n        run(spark)\n    finally:\n        spark.stop()",
+          "title": "Run and always stop Spark",
+          "explanation": "The guard creates a session, runs the lesson and always calls spark.stop() in the finally block, even if an assert fails, so the local JVM is shut down cleanly.",
+          "observe": "spark-submit exits with status 0."
+        }
+      ]
+    },
+    {
+      "lesson_id": "asm-009",
+      "title": "Reconciling repeated partition evaluations by identity",
+      "anchor": "reference",
+      "source_path": "courses/advanced-spark-modeling/examples/asm-009.py",
+      "source_sha256": "4cc76834da318d5446d39bfe53cc88a486bf8cc2a0809b90cb9fa98f7c8faded",
+      "expected_output": [
+        "{\"two_actual_evaluations\": 2, \"accepted_rows\": 4, \"naive_attempt_rows\": 8, \"conflict_rejected\": true, \"fault_injection\": false}"
+      ],
+      "steps": [
+        {
+          "lines": [7, 26],
+          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.0.1\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.0.1\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
+          "title": "A bounded local Spark session",
+          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.0.1, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
+          "observe": "The rest of the file only uses the RDD API through spark.sparkContext."
+        },
+        {
+          "lines": [29, 39],
+          "excerpt": "def summary(values):\n    return {\"count\": len(values), \"sum\": math.fsum(values)}\n\n\ndef reconcile(attempts):\n    accepted = {}\n    for identity, value in attempts:\n        if identity in accepted and accepted[identity] != value:\n            raise ValueError(\"Attempt content disagrees for the same immutable evaluation identity\")\n        accepted[identity] = value\n    return accepted",
+          "title": "Summaries and an identity keyed reconciler",
+          "explanation": "summary returns a count and an accurate sum for a list of values. reconcile stores results by an identity key. Seeing the same key twice with the same value is fine, which makes retries harmless; the same key with different content raises, because an immutable evaluation cannot have two answers.",
+          "observe": "accepted ends with one entry per unique identity."
+        },
+        {
+          "lines": [42, 51],
+          "excerpt": "def run(spark):\n    data = [1.0, 2.0, 3.0, 4.0]\n    rdd = spark.sparkContext.parallelize(data, 2)\n\n    def evaluate(index, iterator):\n        yield str(index), summary(list(iterator))\n\n    first = sorted(rdd.mapPartitionsWithIndex(evaluate).collect())\n    second = sorted(rdd.mapPartitionsWithIndex(evaluate).collect())\n    assert first == second",
+          "title": "Evaluate each partition twice",
+          "explanation": "parallelize splits four numbers into two partitions. mapPartitionsWithIndex calls evaluate once per partition with its index and an iterator over its rows. Running the job twice simulates a retried task, and sorting makes the two results comparable.",
+          "observe": "first and second are identical lists of two summaries."
+        },
+        {
+          "lines": [52, 55],
+          "excerpt": "    attempts = [((\"fixture-v1\", \"beta-zero\", key), value) for key, value in first + second]\n    accepted = reconcile(attempts)\n    assert sum(value[\"count\"] for value in accepted.values()) == 4\n    assert sum(value[\"count\"] for _, value in attempts) == 8",
+          "title": "Count rows naively versus by identity",
+          "explanation": "Each attempt is keyed by a fixture version, a parameter label and the partition index. Reconciling the eight attempts keeps four rows' worth of counts, while naively adding every attempt would count eight rows.",
+          "observe": "Retries must not double count."
+        },
+        {
+          "lines": [56, 62],
+          "excerpt": "    try:\n        reconcile(attempts + [(attempts[0][0], {\"count\": 999, \"sum\": 0.0})])\n    except ValueError:\n        rejected = True\n    else:\n        rejected = False\n    assert rejected",
+          "title": "A conflicting attempt is rejected",
+          "explanation": "Adding an attempt that reuses the first identity with different content makes reconcile raise ValueError. The try, except, else block records that and the assert requires it.",
+          "observe": "rejected is True."
+        },
+        {
+          "lines": [63, 73],
+          "excerpt": "    print(\n        json.dumps(\n            {\n                \"two_actual_evaluations\": 2,\n                \"accepted_rows\": 4,\n                \"naive_attempt_rows\": 8,\n                \"conflict_rejected\": rejected,\n                \"fault_injection\": False,\n            }\n        )\n    )",
+          "title": "Report the result",
+          "explanation": "The JSON line states the counts and that no fault injection was performed; retries were simulated by running the job twice, not by crashing executors.",
+          "observe": "The output is the single JSON line with accepted_rows 4."
+        },
+        {
+          "lines": [76, 81],
+          "excerpt": "if __name__ == \"__main__\":\n    spark = session(\"asm-009\")\n    try:\n        run(spark)\n    finally:\n        spark.stop()",
+          "title": "Run and always stop Spark",
+          "explanation": "The guard creates a session, runs the lesson and always calls spark.stop() in the finally block, even if an assert fails, so the local JVM is shut down cleanly.",
+          "observe": "spark-submit exits with status 0."
+        }
+      ]
+    }
+  ]
+}

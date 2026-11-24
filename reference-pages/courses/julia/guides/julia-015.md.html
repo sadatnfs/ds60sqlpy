@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Transform a typed table and compute grouped summaries while preserving names, missingness and row counts.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-015</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (select and transform named columns) and worked case B (summarize with missingness counts) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-015: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>DataFrame:</strong> A table from DataFrames.jl whose named columns are vectors that may each have a different element type.</li>
+<li><strong>Column selection:</strong> Choosing output columns explicitly, where <code>df[!, :x]</code> shares the stored vector and <code>df[:, :x]</code> returns a copy.</li>
+<li><strong>ByRow:</strong> A wrapper that makes a <code>select</code> or <code>transform</code> function receive one row&#x27;s values at a time instead of whole columns.</li>
+<li><strong>groupby:</strong> A function that splits a data frame by key columns, usually followed by <code>combine</code> to produce one row per group.</li>
+<li><strong>Row accounting:</strong> Recording row counts before and after each filter or reshaping step so every removed or duplicated row is explained.</li>
+</ul>
 <h3 id="a-table-needs-a-schema-and-a-grain">A table needs a schema and a grain<a class="heading-anchor" href="#a-table-needs-a-schema-and-a-grain" aria-label="Link to this section">#</a></h3>
 <p>A DataFrame organizes named columns into rows. Its grain states what one row represents. Column names and element types are useful schema information, but a table also needs semantic contracts such as unique request IDs, units and missingness rules. DataFrames does not infer those scientific meanings automatically.</p>
 <p>Selection chooses columns or creates derived ones. A row-wise transformation applies a function to corresponding values from each row, while a column transformation receives a whole column. <code>ByRow</code> makes that distinction explicit. Grouping creates subsets for an aggregation rule; it does not itself decide whether groups should receive equal weights in a later scientific summary.</p>

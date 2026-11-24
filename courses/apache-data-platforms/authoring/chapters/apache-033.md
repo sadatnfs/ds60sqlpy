@@ -79,7 +79,7 @@ cluster is involved. All operations stay inside the copied owned local workshop.
 Check bootstrap connectivity, advertised listeners, topic existence, partition
 metadata and consumer positions separately. A successful bootstrap connection is
 not enough if the broker advertises an unreachable address for later requests.
-The workshop uses kafka:9092 inside its private Compose network and publishes no
+The workshop uses `kafka:9092` inside its private Compose network and publishes no
 host listener.
 
 **Interview discussion: how does Kafka differ from a destructive queue?** Reading

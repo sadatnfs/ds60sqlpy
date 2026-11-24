@@ -1,6 +1,6 @@
 """Stage four: deliberate filter policies, iterators and totals."""
 
-from .common import lesson
+from .common import explain, lesson
 from .common import result as r
 from .common import task as t
 
@@ -873,3 +873,512 @@ LESSONS = [
         ],
     ),
 ]
+
+
+REASONING = {
+    19: [
+        (
+            (
+                "KEEPFILTERS intersects the new Blue condition with the existing Red selection. "
+                "The two color sets share nothing, so no product remains and revenue is BLANK."
+            ),
+            (
+                "A plain Blue filter replaces Red and returns 163 inside a Red-only report, "
+                "showing a number for products the user never selected."
+            ),
+            (
+                "Under Red, SelectedRevenue is 24, the KEEPFILTERS version is BLANK and the plain "
+                "version is 163."
+            ),
+        ),
+        (
+            (
+                "The intersection of {Blue, Green} with the selected {Blue, Red} is {Blue}, so "
+                "Notebook and Mug remain and revenue is 163."
+            ),
+            (
+                "A plain IN filter replaces the selection with Blue and Green and adds Bag. "
+                "Revenue still reads 163 because Bag has no sales, so revenue alone cannot show "
+                "the error."
+            ),
+            (
+                "Count products instead: COUNTROWS(Product) is 2 with KEEPFILTERS and 3 with the "
+                "plain filter."
+            ),
+        ),
+        (
+            (
+                "Cy (key 30) is the only Trade customer, at 56. KEEPFILTERS keeps Trade only where "
+                "the user's segment selection allows it."
+            ),
+            (
+                "A plain Segment filter under a Retail slicer replaces Retail and shows Cy's 56, a "
+                "Trade number in a Retail view."
+            ),
+            (
+                "Under Segment = Retail the KEEPFILTERS version is BLANK and the plain one is 56. "
+                "With no segment filter both return 56."
+            ),
+        ),
+        (
+            (
+                "BLANK in RedWithinSelection says that Red lies outside the selected Blue "
+                "products. That is the intended population rule, not a display flaw."
+            ),
+            (
+                "Switching to a plain filter fills the cell with ForcedRed's 24, so a Blue-only "
+                "report then shows Pen revenue the user excluded."
+            ),
+            (
+                "Case A shows the two policies side by side: 24 for replacement and BLANK for "
+                "intersection under the same Blue selection."
+            ),
+        ),
+        (
+            (
+                "KEEPFILTERS intersects with the context that exists when it is applied. If an "
+                "outer REMOVEFILTERS(Product[Color]) has already cleared Red, nothing is left to "
+                "intersect."
+            ),
+            (
+                "Expecting the user's earlier Red choice to come back predicts BLANK. The color "
+                "filter is gone, so the KEEPFILTERS Blue condition returns 163."
+            ),
+            (
+                "Under Red, `CALCULATE ( CALCULATE ( [NetRevenue], KEEPFILTERS ( Product[Color] = "
+                '"Blue" ) ), REMOVEFILTERS ( Product[Color] ) )` returns 163.'
+            ),
+        ),
+        (
+            (
+                "With a discounted line standing in for a failed event, count flagged lines inside "
+                "the selected cohort. North has five lines (S1, S2, S4, S5, S8), and three of them "
+                "(S2, S4 and S8) carry a discount, a rate of 0.6."
+            ),
+            (
+                "`FILTER ( ALL ( Sales ), Sales[Discount] > 0 )` ignores the cohort and returns 3 "
+                "under every region, so South looks discounted although Bo's lines had none."
+            ),
+            (
+                "The cohort version returns 3 under North and BLANK under South; the global "
+                "version, labeled as global, returns 3 everywhere."
+            ),
+        ),
+    ],
+    20: [
+        (
+            (
+                "REMOVEFILTERS(Product) clears both Category and Color. With no other filters, the "
+                "denominator becomes all sales, 187, and the share is 67 / 187, about 0.358."
+            ),
+            (
+                "Treating table removal as the same as removing Color keeps expecting 91, so the "
+                "label would still say share of Paper."
+            ),
+            (
+                "The row reads Numerator 67, denominator 187 and Share about 0.3583, compared with "
+                "0.7363 in case A."
+            ),
+        ),
+        (
+            (
+                "The year filter is not removed, so it applies to both parts. North Blue Paper in "
+                "2025 is S4 alone (27), and North 2025 is 83, for about 0.325."
+            ),
+            (
+                "Also removing the Date filter in the denominator uses all-years North, 107, and "
+                "gives 27 / 107, about 0.252, a ratio across different periods."
+            ),
+            "Expect Numerator 27, RegionalDenominator 83 and Share about 0.3253.",
+        ),
+        (
+            (
+                "The contract is: all products bought by North customers, with every other filter "
+                "unchanged. The numerator is Notebook's North lines S1 and S4 (47) and the "
+                "denominator is 107."
+            ),
+            (
+                "Writing the contract as all sales leads to REMOVEFILTERS() or ALL, a denominator "
+                "of 187 and a share of about 0.251 that ignores the region."
+            ),
+            (
+                "Case B returns numerator 47, denominator 107 and share about 0.4393, and each "
+                "removed and kept filter appears in the written contract."
+            ),
+        ),
+        (
+            (
+                "The denominator must be CALCULATE([NetRevenue], REMOVEFILTERS(Product[Color])) "
+                "evaluated in place, which returns 91 under Paper and Blue."
+            ),
+            (
+                "Binding `VAR D = [NetRevenue]` under Paper and Blue holds 67. Wrapping D in "
+                "REMOVEFILTERS keeps 67, and the share reads exactly 1."
+            ),
+            (
+                "Show the denominator as its own column: 91 is correct and 67 means it is frozen. "
+                "The share should be about 0.7363."
+            ),
+        ),
+        (
+            (
+                "Bag (key 4) has no sales, so its numerator is BLANK. With no other filters a "
+                "REMOVEFILTERS(Product) denominator is 187, and case A's color-only removal leaves "
+                "Travel, also BLANK. DIVIDE returns BLANK, which correctly says nothing was sold."
+            ),
+            (
+                "Treating the BLANK share as a denominator bug sends you to debug a healthy 187. "
+                "Coalescing it to 0 without saying so hides the difference between unsold and sold "
+                "at zero."
+            ),
+            (
+                "Under ProductKey 4 with the table-level removal, the numerator is BLANK, the "
+                "denominator 187 and the share BLANK; a deliberate COALESCE shows 0."
+            ),
+        ),
+        (
+            (
+                "For a category cost share within a year, remove only Category. In 2025 Paper cost "
+                "is Notebook 5 x 2 plus Pen 4 x 1, or 14, out of 29 in total, about 0.483."
+            ),
+            (
+                "Removing all filters in the denominator uses the all-years cost of 44, so Paper's "
+                "2025 share drops to 14 / 44, about 0.318."
+            ),
+            "Under 2025, Paper 14 / 29 and Home (Mug, 3 x 5 = 15) 15 / 29 add to 1.",
+        ),
+    ],
+    21: [
+        (
+            (
+                "Discount is a currency amount per line, so each line is Quantity x UnitPrice "
+                "minus Discount, once. The discounts are S2 1, S4 3 and S8 4, which add to 8."
+            ),
+            (
+                "Subtracting SUM(Sales[Discount]) again after a SUMX that already subtracted it "
+                "removes 16 and returns 179."
+            ),
+            "Net is 187, and S8 alone checks as 2 x 20 - 4 = 36.",
+        ),
+        (
+            (
+                "Blue keeps Notebook and Mug, lines S1, S3, S4, S6, S7 and S8. Their gross is 170, "
+                "their discounts are S4 3 and S8 4, and net is 163."
+            ),
+            (
+                "Treating Discount as a rate, Quantity x UnitPrice x (1 - Discount), turns S4 into "
+                "30 x (1 - 3) = -60 and S8 into -120, which are impossible line amounts."
+            ),
+            (
+                "Under Blue expect Gross 170 and Net 163; the difference, 7, equals the Blue "
+                "discounts."
+            ),
+        ),
+        (
+            (
+                "AVERAGEX over Customer transitions each row, so it averages Ada 51, Bo 80 and Cy "
+                "56. Di's BLANK is skipped, which gives 187 / 3, about 62.33."
+            ),
+            (
+                "DIVIDE([NetRevenue], COUNTROWS(Customer)) counts Di and returns 46.75. "
+                "AVERAGE(Sales[NetAmount]) gives 23.375, which is revenue per line, not per "
+                "customer."
+            ),
+            (
+                "Expect about 62.33, and a matching DIVIDE ( [NetRevenue], DISTINCTCOUNT ( "
+                "Sales[CustomerKey] ) )."
+            ),
+        ),
+        (
+            (
+                "AVERAGEX(Product, [NetRevenue]) divides 187 by three selling products, so it is "
+                "62.33 USD per product. A unit price divides revenue by units: 187 / 17 = 11."
+            ),
+            (
+                "Labeling 62.33 an average unit price overstates it more than five times, since "
+                "its denominator counts products, not the 17 units sold."
+            ),
+            (
+                "`DIVIDE ( [NetRevenue], SUM ( Sales[Quantity] ) )` returns 11, while the product "
+                "average stays about 62.33."
+            ),
+        ),
+        (
+            (
+                "AVERAGEX skips BLANK, so a new unsold product changes nothing in the nonblank "
+                "average, 187 / 3. COALESCE turns it into a 0, so the catalog average becomes 187 "
+                "/ 5 = 37.4."
+            ),
+            (
+                "Expecting both averages to stay put misses that the zero-filled version counts "
+                "every catalog member, as it already does for Bag (187 / 4 = 46.75)."
+            ),
+            (
+                "Today the results are about 62.33 and 46.75. With one more unsold product expect "
+                "about 62.33 and 37.4."
+            ),
+        ),
+        (
+            (
+                "Decide what gets equal weight. Regions give North 107 and South 80 (average "
+                "93.5). Customers give 187 / 3, about 62.33."
+            ),
+            (
+                "Averaging per-region customer averages, North (51 + 56) / 2 = 53.5 and South 80, "
+                "gives 66.75 and presents it as the average customer, which favors Bo."
+            ),
+            (
+                "AVERAGEX over regions of [NetRevenue] returns 93.5, and AVERAGEX over Customer "
+                "returns about 62.33; label each for what it weights."
+            ),
+        ),
+    ],
+    22: [
+        (
+            (
+                "Home has one product, Mug, so the shared scalar 96 is added once. That matches "
+                "the correct per-product sum by coincidence."
+            ),
+            (
+                "Passing this one-member test and shipping the formula is the mistake. Under "
+                "Paper, with two products, the shared version returns 182, not 91."
+            ),
+            "Test both: Home gives 96 and 96, and Paper gives 182 and 91.",
+        ),
+        (
+            (
+                "The variable outside SUMX holds 187 and is added once per Product row. With a "
+                "fifth row, an unsold product, the wrong sum becomes 5 x 187 = 935."
+            ),
+            (
+                "Expecting the extra product to do nothing applies the correct sum's behavior to "
+                "the shared scalar. Only the per-product version ignores the blank row."
+            ),
+            (
+                "Today the results are 748 (4 x 187) and 187. After adding the product expect 935 "
+                "and 187."
+            ),
+        ),
+        (
+            (
+                "Bind `VAR Total = [NetRevenue]` before SUMX, and evaluate [NetRevenue] inside the "
+                "body for each product. The shares are Notebook 0.358, Pen 0.128, Mug 0.513 and "
+                "Bag BLANK."
+            ),
+            (
+                "Binding the numerator outside too divides 187 by 187 on every row, and SUMX over "
+                "the four products returns 4 rather than 1."
+            ),
+            "The shares should add to 1, and each share times 187 should give 67, 24 and 96.",
+        ),
+        (
+            (
+                "Only values meant to stay constant belong above SUMX. The per-product "
+                "[NetRevenue] must be bound inside the body, so that each product's transition "
+                "happens there."
+            ),
+            (
+                "Moving ProductRevenue above SUMX makes the per-product column equal "
+                "SharedScalarSum, 748 unfiltered and 182 under Paper."
+            ),
+            "After any refactor, rerun both cases and expect PerProductSum to stay 187 and 91.",
+        ),
+        (
+            (
+                "A VAR is a name for one value within its scope. Each iteration that defines "
+                "ProductRevenue creates a new binding and changes nothing outside."
+            ),
+            (
+                "Writing `VAR Counter = 0` and expecting `Counter + 1` to number the products "
+                "gives 1 on every row, so SUMX returns 4, not 1 + 2 + 3 + 4 = 10."
+            ),
+            "`SUMX ( Product, Counter + 1 )` returns 4, which shows that nothing accumulated.",
+        ),
+        (
+            (
+                "Keep the target shared and compute each weight inside the iterator. In February "
+                "2025, Notebook has 20 and Mug 36, so an assumed 200 USD target splits as about "
+                "71.43 and 128.57."
+            ),
+            (
+                "Binding the weight [NetRevenue] outside the iterator gives every product a weight "
+                "of 1, and the full 200 is allocated to each of four products, 800 in total."
+            ),
+            (
+                "The allocations should add to 200, with Pen and Bag BLANK because they had no "
+                "February 2025 sales."
+            ),
+        ),
+    ],
+    23: [
+        (
+            (
+                "The pooled ratio weights each category's ratio by its units: Home 19.2 x 5 = 96 "
+                "and Paper (91 / 12) x 12 = 91, so 187 / 17 = 11."
+            ),
+            (
+                "A simple mean of 19.2 and about 7.583 is about 13.39. That gives Home's five "
+                "units as much weight as Paper's twelve."
+            ),
+            "The weighted formula returns 11, which matches PooledNetPerUnit in case B.",
+        ),
+        (
+            (
+                "Under Paper only one category contributes, so DIVIDE over the total and SUMX over "
+                "one category both give 91 / 12, about 7.583."
+            ),
+            (
+                "Concluding from this match that the sum of ratios is a valid total is the error. "
+                "With both categories present they differ: 11 against about 26.78."
+            ),
+            (
+                "Under Paper both measures return about 7.5833; with no filter they return 11 and "
+                "about 26.7833."
+            ),
+        ),
+        (
+            (
+                "AVERAGEX over VALUES(Product[Category]) gives each category equal weight. "
+                "Travel's ratio is BLANK and skipped, so the result is (19.2 + 7.583) / 2, about "
+                "13.39."
+            ),
+            (
+                "Adding a third argument of 0 to DIVIDE turns Travel into a 0 and drags the "
+                "average to about 8.93, as if Travel had sold units for free."
+            ),
+            (
+                "Expect about 13.3917 under a name such as Equal Category Net Per Unit, shown "
+                "beside the pooled 11."
+            ),
+        ),
+        (
+            (
+                "DISTINCTCOUNT(Sales[CustomerKey]) evaluated at the total counts Ada, Bo and Cy "
+                "once each, 3, even though Bo and Cy appear in both categories."
+            ),
+            (
+                "SUMX over categories adds Paper's 3 and Home's 2 and returns 5. The visual total "
+                "may match the sum of rows, but the measure now counts customer-category pairs."
+            ),
+            "The grand total of the distinct measure is 3, while the SUMX version is 5.",
+        ),
+        (
+            (
+                "Travel has only Bag, which has no sales, so Revenue, Units and NetPerUnit are all "
+                "BLANK and SUMMARIZECOLUMNS drops the row."
+            ),
+            (
+                "Adding COALESCE(..., 0) to make Travel appear changes the measures, so Travel now "
+                "shows 0 revenue and 0 units, which looks like an observed outcome."
+            ),
+            (
+                "The case returns two rows. `ADDCOLUMNS ( VALUES ( Product[Category] ), "
+                '"Revenue", [NetRevenue] )` returns three, with Travel BLANK.'
+            ),
+        ),
+        (
+            (
+                "A stock balance adds across products but not across dates. A closing-balance "
+                "total over a quarter should take the last snapshot, not the sum."
+            ),
+            (
+                "If Notebook held 10 units on January 31 and 6 on February 28, summing snapshots "
+                "reports 16 units in stock, which never existed on any day."
+            ),
+            (
+                "A closing-balance measure over both months returns 6, and an average balance "
+                "returns 8; the sum, 16, matches neither."
+            ),
+        ),
+    ],
+    24: [
+        (
+            (
+                "With only Notebook selected, ALLSELECTED(Product[Product]) gives the same single "
+                "product, so the denominator is 67 and the share is 1."
+            ),
+            (
+                "Reading 1 as Notebook's share of all sales ignores the denominator; against all "
+                "products Notebook is 67 / 187, about 0.358."
+            ),
+            "Expect a selected share of 1 and an all-product share of about 0.3583.",
+        ),
+        (
+            (
+                "ALLSELECTED restores the outer selection {Notebook, Mug}, so the denominator is "
+                "67 + 96 = 163. The shares are about 0.411 and 0.589."
+            ),
+            (
+                "Using REMOVEFILTERS here gives 187 and shares of about 0.358 and 0.513, which do "
+                "not add to 1 across the visible rows."
+            ),
+            (
+                "Under the Notebook and Mug selection, SelectedTotal reads 163 on both rows and "
+                "the shares add to 1."
+            ),
+        ),
+        (
+            (
+                "Say which filters stay: the year stays, and only the product grouping is widened. "
+                "In 2025 Notebook is 47 (S4, S7) and Pen 20 (S5), so the selected total is 67."
+            ),
+            (
+                "Also removing the Date filter in the denominator uses all-years 91 and gives "
+                "Notebook 47 / 91, about 0.516, comparing 2025 sales with a multiyear total."
+            ),
+            (
+                "Under 2025 and {Notebook, Pen}, expect a denominator of 67 and shares of about "
+                "0.701 and 0.299."
+            ),
+        ),
+        (
+            (
+                "Case A works because ALLSELECTED runs where the outer selection is the only "
+                "shadow context. Inside an iterator that sets its own filters, that simple account "
+                "no longer applies."
+            ),
+            (
+                "Assuming a nested SUMX over VALUES(Product[Product]) still sees 91 at every step "
+                "skips the trace, and the iterator's own context may change what ALLSELECTED "
+                "restores."
+            ),
+            (
+                "Bind `VAR SelectedTotal = CALCULATE ( [NetRevenue], ALLSELECTED ( "
+                "Product[Product] ) )` before the iterator, confirm it reads 91, then use it "
+                "inside."
+            ),
+        ),
+        (
+            (
+                "What is visible and what is in the query are different. In case B only Notebook "
+                "and Pen are visible, but REMOVEFILTERS widens the denominator to all products, "
+                "187."
+            ),
+            (
+                "Assuming the visible shares must add to 1 suggests a bug, but 0.358 + 0.128 is "
+                "about 0.487 because Mug's 96 is in the denominator without being shown."
+            ),
+            (
+                "Add the denominator as a column. Case B reads 187 on both rows, which explains "
+                "why the visible shares add to about 0.487."
+            ),
+        ),
+        (
+            (
+                "Within the Treatment arm, 2 of 2 assigned units converted (1.0). Over all four "
+                "assigned units, Treatment's conversions are 2 of 4 (0.5). Both are valid when "
+                "named."
+            ),
+            (
+                "Labeling 0.5 as Treatment's conversion rate puts Control's units into its "
+                "denominator and halves the reported effect."
+            ),
+            (
+                "ExperimentSummary shows Treatment Rate 1 and Control Rate 0.5, and the pooled "
+                "rate is (1 + 2) / 4 = 0.75."
+            ),
+        ),
+    ],
+}
+
+explain(LESSONS, REASONING)

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-calculate-median-speedup">Exercise 1: Calculate median speedup<a class="heading-anchor" href="#exercise-1-calculate-median-speedup" aria-label="Link to this section">#</a></h3>
 <p>Divide baseline median by candidate median.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate median speedup</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute the median speedup: baseline samples <code>[10, 11, 9]</code> have median 10 and candidate <code>[8, 8, 9]</code> has median 8, so the ratio is <code>10/8 = 1.25</code>.</p>
+<p><strong>Why it is correct here.</strong> Medians resist a single outlier sample, and the ratio of medians states how much faster the typical candidate run is in this fixture.</p>
+<p><strong>A plausible wrong approach.</strong> Computing the ratio of the fastest samples, <code>9/8</code>, picks favorable outliers, while three samples are too few to support a precise estimate either way.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>speedup == 1.25</code> and labels the report <code>gpu_benchmark: False</code>, since these are synthetic numbers rather than measurements.</p>
 <h3 id="exercise-2-preserve-raw-observations">Exercise 2: Preserve raw observations<a class="heading-anchor" href="#exercise-2-preserve-raw-observations" aria-label="Link to this section">#</a></h3>
 <p>Keep samples and conditions.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>preserve raw observations</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Preserve raw observations: store each sample together with the conditions under which it was measured, such as the device, clocks, versions and input shape.</p>
+<p><strong>Why it is correct here.</strong> Summaries can be recomputed from raw data, and conditions explain variation. Keeping only the median prevents checking spread or outliers later.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting only the speedup ratio discards the information needed to judge whether it is meaningful. With samples such as 9, 10 and 11, the spread is as large as part of the claimed gain, which a single ratio hides.</p>
+<p><strong>How to verify.</strong> Recompute the median from the stored samples and confirm it matches the reported value.</p>
 <h3 id="exercise-3-check-equivalence-first">Exercise 3: Check equivalence first<a class="heading-anchor" href="#exercise-3-check-equivalence-first" aria-label="Link to this section">#</a></h3>
 <p>Fail correctness before performance acceptance.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>check equivalence first</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Check equivalence first: compare candidate output with baseline output within tolerance before evaluating performance.</p>
+<p><strong>Why it is correct here.</strong> A faster kernel that computes something different is not an optimization. The speed ratio then measures two different behaviors.</p>
+<p><strong>A plausible wrong approach.</strong> Accepting a candidate on speed and checking correctness afterward risks deploying a wrong result if the check is skipped. A kernel that skips work, for example by mishandling the tail, will often look faster precisely because it is wrong.</p>
+<p><strong>How to verify.</strong> Make the correctness assertion a gate that stops the review before timing results are reported.</p>
 <h3 id="exercise-4-separate-cold-and-warm-costs">Exercise 4: Separate cold and warm costs<a class="heading-anchor" href="#exercise-4-separate-cold-and-warm-costs" aria-label="Link to this section">#</a></h3>
 <p>Report both boundaries.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate cold and warm costs</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate cold and warm costs: report the first run, with compilation, plan creation and allocation, separately from the steady-state median.</p>
+<p><strong>Why it is correct here.</strong> Short jobs pay cold costs every time, while long-running services amortize them. Both boundaries are needed for different uses.</p>
+<p><strong>A plausible wrong approach.</strong> Mixing the cold run into warm samples raises one sample sharply and can shift the median with only three samples.</p>
+<p><strong>How to verify.</strong> Label each sample cold or warm and compute statistics on warm samples only. Keep the cold sample in the report as its own number, since it is a real cost for short-lived processes.</p>
 <h3 id="exercise-5-write-supported-platform-scope">Exercise 5: Write supported platform scope<a class="heading-anchor" href="#exercise-5-write-supported-platform-scope" aria-label="Link to this section">#</a></h3>
 <p>Name exactly tested hardware and software.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>write supported platform scope</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write the supported platform scope naming exactly the tested hardware, driver, toolkit and framework versions.</p>
+<p><strong>Why it is correct here.</strong> Performance results apply to the tested platform. Naming it prevents readers from assuming the result holds on other GPUs.</p>
+<p><strong>A plausible wrong approach.</strong> Stating the speedup for all NVIDIA GPUs generalizes from one device. Memory bandwidth, cache size and clock behavior differ by architecture, so the ratio can change or reverse on other hardware.</p>
+<p><strong>How to verify.</strong> Compare the scope statement with the recorded environment from the run and confirm every item is listed.</p>
 <h3 id="exercise-6-prepare-a-reproducibility-checklist">Exercise 6: Prepare a reproducibility checklist<a class="heading-anchor" href="#exercise-6-prepare-a-reproducibility-checklist" aria-label="Link to this section">#</a></h3>
 <p>Include source data commands versions metrics and unresolved limits.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>prepare a reproducibility checklist</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Prepare a reproducibility checklist with source revision, input data or generator, exact commands, versions, metrics, and unresolved limitations such as small sample count.</p>
+<p><strong>Why it is correct here.</strong> A checklist allows someone else to rerun the review and see what is still uncertain.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving out the limits, such as only three samples, presents a fragile result as settled. A reader then cannot tell whether a follow-up run that disagrees reveals a regression or ordinary noise.</p>
+<p><strong>How to verify.</strong> Have another person or a clean environment follow the checklist and confirm it reproduces the medians. Any step that required undocumented knowledge to complete should be added to the checklist before the review is closed.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Synthetic median ratio 1.25; explicitly not a GPU benchmark.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-112_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

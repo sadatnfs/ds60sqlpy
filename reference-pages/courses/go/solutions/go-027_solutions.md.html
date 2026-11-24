@@ -216,6 +216,10 @@ wg<span class="syntax-punctuation">.</span>Wait<span class="syntax-punctuation">
 check<span class="syntax-punctuation">(</span>c<span class="syntax-punctuation">.</span>Value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">400</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;count&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The changed run panics with <code>count</code> because <code>c.Value() == 400</code> no longer holds. Restoring the original line brings back the worked observation: the joined final count is 400.</p>
 <p>Reads and writes use the same lock. The join establishes task completion before inspection.</p>
+<p><strong>Approach.</strong> Count goroutines in the edited loop: starting at 1 and stopping before 4 launches three workers, each calling <code>Inc</code> 100 times.</p>
+<p><strong>Why it holds here.</strong> Every increment holds the mutex and <code>wg.Wait</code> joins all workers before <code>Value</code> reads, so the result is exactly 300 on every run and <code>c.Value() == 400</code> panics with <code>count</code>.</p>
+<p><strong>A plausible wrong approach.</strong> Predicting a different total on each run because goroutines interleave. The lock makes each increment indivisible and the join waits for all of them, so the value is deterministic; only an unlocked <code>c.n++</code> would lose updates.</p>
+<p><strong>Verify.</strong> Print <code>c.Value()</code> and see 300 before the panic. <code>go run -race</code> on the restored program reports no data race and prints the success line.</p>
 <h3 id="2-use-a-typed-atomic-debug-a-regression">2. Use a typed atomic: debug a regression<a class="heading-anchor" href="#2-use-a-typed-atomic-debug-a-regression" aria-label="Link to this section">#</a></h3>
 <p>A regression changed <code>n.Add(3)</code> to <code>n.Add(4)</code> in worked example 2. Run worked example 2 with that change, use the failure to explain the defect and repair it without changing the check.</p>
 <p>The unchanged code is worked example 2:</p>
@@ -225,6 +229,10 @@ n<span class="syntax-punctuation">.</span>Add<span class="syntax-punctuation">(<
 check<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">.</span>Load<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;atomic&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Before the repair the program panics with <code>atomic</code>; after it the line reads <code>n.Add(3)</code> again and load returns 7.</p>
 <p>Use the atomic access API consistently. Mixing it with ordinary conflicting accesses undermines the protocol.</p>
+<p><strong>Approach.</strong> Add the two deltas: with the regression both calls add 4, so <code>Load</code> returns 8 instead of 7.</p>
+<p><strong>Why it holds here.</strong> Atomic adds compose exactly, so 8 is the true sum of the regressed deltas and the check panics with <code>atomic</code>. Restoring the first delta to 3 gives 7.</p>
+<p><strong>A plausible wrong approach.</strong> Moving the adds into a helper <code>func add(c atomic.Int64, d int64)</code> that takes the counter by value. The helper increments a copy, so <code>n</code> misses that delta and the check still panics; <code>go vet</code> reports that the helper passes a lock by value because <code>atomic.Int64</code> contains a no-copy guard.</p>
+<p><strong>Verify.</strong> Print <code>n.Load()</code> and see 8 with the regression and 7 after the repair.</p>
 <h3 id="3-protect-a-pair-relationship">3. Protect a pair relationship<a class="heading-anchor" href="#3-protect-a-pair-relationship" aria-label="Link to this section">#</a></h3>
 <p>Transfer 3 between two balances initially 5 and 5.</p>
 <pre class="highlighted-code"><code class="language-go">p <span class="syntax-operator">:=</span> <span class="syntax-operator">&amp;</span>Pair<span class="syntax-punctuation">{</span>A<span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> B<span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span>
@@ -233,6 +241,10 @@ a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">:=</s
 check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-number">8</span> <span class="syntax-operator">&amp;&amp;</span> a<span class="syntax-operator">+</span>b <span class="syntax-operator">==</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pair&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The balances become 2 and 8; their sum remains 10.</p>
 <p>One lock protects both fields. Independent updates could expose an intermediate state with the wrong total.</p>
+<p><strong>Approach.</strong> Move 3 from <code>A</code> to <code>B</code> inside one locked method, then read both fields with <code>Snapshot</code> under the same lock.</p>
+<p><strong>Why it holds here.</strong> Both fields change while the mutex is held, so no reader can see one update without the other: the snapshot is 2 and 8 and the sum stays 10.</p>
+<p><strong>A plausible wrong approach.</strong> Declaring <code>Transfer</code> with a value receiver. It locks and edits a copy of the <code>Pair</code>, the caller&#x27;s fields stay 5 and 5 and the check panics with <code>pair</code>; <code>go vet</code> also reports that the method passes a lock by value.</p>
+<p><strong>Verify.</strong> Print <code>a, b</code> and see <code>2 8</code>, and run <code>go vet</code> to confirm no copylocks warning.</p>
 <h3 id="4-initialize-once">4. Initialize once<a class="heading-anchor" href="#4-initialize-once" aria-label="Link to this section">#</a></h3>
 <p>Call the same sync.Once initializer three times.</p>
 <pre class="highlighted-code"><code class="language-go"><span class="syntax-keyword">var</span> once sync<span class="syntax-punctuation">.</span>Once
@@ -243,6 +255,10 @@ n <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;once&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Its body runs once.</p>
 <p>Once is not a retry mechanism. Fallible initialization requiring retries needs a separately designed state machine.</p>
+<p><strong>Approach.</strong> Call <code>once.Do</code> three times with the same <code>sync.Once</code>; only the first call runs the function.</p>
+<p><strong>Why it holds here.</strong> <code>Once</code> records that its function has run, so the second and third calls return immediately and <code>n</code> is 1.</p>
+<p><strong>A plausible wrong approach.</strong> Declaring <code>var once sync.Once</code> inside the loop. Each iteration gets a fresh <code>Once</code>, so the body runs three times, <code>n</code> is 3 and the check panics with <code>once</code>.</p>
+<p><strong>Verify.</strong> Print <code>n</code> and see 1; the in-loop declaration prints 3.</p>
 <h3 id="5-reject-a-stale-atomic-expectation">5. Reject a stale atomic expectation<a class="heading-anchor" href="#5-reject-a-stale-atomic-expectation" aria-label="Link to this section">#</a></h3>
 <p>Perform compare-and-swap twice using the original expected value.</p>
 <pre class="highlighted-code"><code class="language-go"><span class="syntax-keyword">var</span> n atomic<span class="syntax-punctuation">.</span>Int64
@@ -251,6 +267,10 @@ check<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">
 check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!</span>n<span class="syntax-punctuation">.</span>CompareAndSwap<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> n<span class="syntax-punctuation">.</span>Load<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;stale&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The first succeeds and the second fails.</p>
 <p>A stale expectation detects changed state. A single-value CAS does not validate unrelated fields.</p>
+<p><strong>Approach.</strong> Store 2, swap it for 3 with <code>CompareAndSwap(2, 3)</code>, then try <code>CompareAndSwap(2, 4)</code> with the now stale expectation.</p>
+<p><strong>Why it holds here.</strong> The first swap finds 2 and succeeds. The second finds 3, which does not match 2, so it returns false and leaves the value at 3.</p>
+<p><strong>A plausible wrong approach.</strong> Retrying the stale swap in a loop, <code>for !n.CompareAndSwap(2, 4) {}</code>. The value is 3 and nothing changes it back, so the loop spins forever. A correct retry reloads the expected value each time, as in <code>old := n.Load()</code> then <code>CompareAndSwap(old, old+1)</code>.</p>
+<p><strong>Verify.</strong> Print the first result, the second result and <code>n.Load()</code> and see <code>true false 3</code>.</p>
 <h3 id="6-transfer-safe-observation">6. Transfer safe observation<a class="heading-anchor" href="#6-transfer-safe-observation" aria-label="Link to this section">#</a></h3>
 <p>Read an unchanged protected pair twice.</p>
 <pre class="highlighted-code"><code class="language-go">p <span class="syntax-operator">:=</span> <span class="syntax-operator">&amp;</span>Pair<span class="syntax-punctuation">{</span>A<span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> B<span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">}</span>
@@ -259,8 +279,12 @@ c<span class="syntax-punctuation">,</span> d <span class="syntax-operator">:=</s
 check<span class="syntax-punctuation">(</span>a<span class="syntax-operator">+</span>b <span class="syntax-operator">==</span> <span class="syntax-number">10</span> <span class="syntax-operator">&amp;&amp;</span> c<span class="syntax-operator">+</span>d <span class="syntax-operator">==</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;snapshot&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Both snapshots preserve total 10.</p>
 <p>An accessor hides locking without exposing mutable internals. Returning pointers to fields would bypass that boundary.</p>
+<p><strong>Approach.</strong> Read the same <code>Pair{A: 4, B: 6}</code> twice through <code>Snapshot</code>, which locks, copies both fields and unlocks.</p>
+<p><strong>Why it holds here.</strong> Nothing modifies the pair between the reads and each read is consistent, so both totals are 10.</p>
+<p><strong>A plausible wrong approach.</strong> Adding a locked <code>Total</code> method and calling it from inside <code>Snapshot</code> while <code>p.mu</code> is held. <code>sync.Mutex</code> is not reentrant, so the second <code>Lock</code> waits forever and the runtime reports that all goroutines are asleep.</p>
+<p><strong>Verify.</strong> Print <code>a, b, c, d</code> and see <code>4 6 4 6</code>. Run a concurrent <code>Transfer</code> between the snapshots under <code>go run -race</code> and both totals are still 10.</p>
 <h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+<p>Start four goroutines that each call <code>Transfer(1)</code> 25 times on <code>Pair{A: 100, B: 0}</code>, join them and check the snapshot is 0 and 100. Add a locked <code>Swap</code> that exchanges the fields and check it gives 100 and 0. Explain which result a value receiver or a missing <code>wg.Wait</code> would produce.</p></article>
   </main>
 </body>
 </html>

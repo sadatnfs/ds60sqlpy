@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A shuffle redistributes records between tasks, often crossing executor and host boundaries. Its cost includes serialization or columnar handling, buffering, transport, disk and downstream processing. A GPU can accelerate supported local operators while the job remains limited by network or storage. Specialized shuffle managers and transports have their own compatibility, startup configuration and failure behavior.</p>
 <p>Do not infer RDMA, peer-to-peer or GPUDirect capability from an installed library. Those paths require actual hardware, topology and runtime support. Establish an ordinary supported shuffle baseline, then qualify an optional accelerated path. Record bytes, partitions, transfer time, retries and spill. Preserve query semantics and avoid exposing network services or changing cluster-wide settings from an ordinary lesson pad.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Shuffle:</strong> Redistribution of records between tasks, often across executors and hosts.</li>
+<li><strong>Serialization:</strong> Encoding records or columnar batches into bytes for transfer or storage.</li>
+<li><strong>Shuffle manager:</strong> The pluggable Spark component that writes and fetches shuffle data, with its own compatibility rules.</li>
+<li><strong>Pre-aggregation:</strong> Partial aggregation before a shuffle that reduces the bytes moved.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Moving 10 GiB over an effective 1 GiB/s path has a 10-second payload lower bound before other costs. Halving a 100 ms local kernel cannot remove that bottleneck.</p>
@@ -216,20 +223,52 @@ kernel_saving <span class="syntax-operator">=</span> <span class="syntax-number"
 <span class="syntax-keyword">assert</span> kernel_saving <span class="syntax-operator">/</span> seconds <span class="syntax-operator">&lt;</span> <span class="syntax-number">0.01</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU shuffle bound:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> seconds<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">seconds before additional overhead</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>gib</code></td>
+<td><code>1073741824</code></td>
+</tr>
+<tr>
+<td><code>payload</code></td>
+<td><code>10737418240</code></td>
+</tr>
+<tr>
+<td><code>bandwidth</code></td>
+<td><code>1073741824</code></td>
+</tr>
+<tr>
+<td><code>seconds</code></td>
+<td><code>10.0</code></td>
+</tr>
+<tr>
+<td><code>kernel_saving</code></td>
+<td><code>0.05</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-transfer-lower-bound">Exercise 1: Compute transfer lower bound<a class="heading-anchor" href="#exercise-1-compute-transfer-lower-bound" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute transfer lower bound</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Spending effort to halve a 100 ms kernel, saving 50 ms, addresses less than 1 percent of the 10-second floor, as the reference asserts with <code>kernel_saving/seconds &lt; 0.01</code>.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-identify-local-versus-network-time">Exercise 2: Identify local versus network time<a class="heading-anchor" href="#exercise-2-identify-local-versus-network-time" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>identify local versus network time</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Profiling only the GPU kernels shows local compute and misses fetch wait time, which may dominate. A GPU profile of a shuffle-bound stage can look idle for long stretches, and that idle time is exactly the network wait.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-explain-pre-aggregation">Exercise 3: Explain pre-aggregation<a class="heading-anchor" href="#exercise-3-explain-pre-aggregation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>explain pre-aggregation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Pre-aggregating a non-associative operation, such as a median computed from partial medians, produces wrong results.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-list-transport-qualification">Exercise 4: List transport qualification<a class="heading-anchor" href="#exercise-4-list-transport-qualification" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>list transport qualification</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Enabling the transport setting and assuming it is active skips checking whether it actually carried traffic. A missing library on one host can silently route that host&#x27;s traffic over the default path.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-startup-settings">Exercise 5: Separate startup settings<a class="heading-anchor" href="#exercise-5-separate-startup-settings" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>separate startup settings</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Setting a shuffle manager in an existing session and attributing later timing changes to it measures noise. Any improvement seen there comes from caching, warm JIT code or variation between runs.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-a-bounded-shuffle-comparison">Exercise 6: Design a bounded shuffle comparison<a class="heading-anchor" href="#exercise-6-design-a-bounded-shuffle-comparison" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design a bounded shuffle comparison</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing configurations on different data sizes confounds the transport effect with payload size. Different partition counts also change the number of shuffle blocks, which affects per-block overhead independently of bandwidth.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

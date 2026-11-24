@@ -14,13 +14,65 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Match each failure to its domain variant.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: A caller can decide from the type rather than inspect a fragile message substring. Negative and malformed inputs remain separate variants.
+**Written answer.** `"bad"` fails `parse`, and `map_err(|_| InputError::Malformed)` turns that into `Malformed` before `?` returns. `"-1"` parses to `-1`, then the sign test returns `Err(InputError::Negative)`. `"3"` passes both stages and returns `Ok(3)`. Empty text and numbers outside the `i32` range also fail `parse`, so they become `Malformed` as well.
+
+**Why it is correct.** The variant is chosen at the stage that detects the problem: syntax failures in `map_err`, the domain rule in the explicit branch. The caller then decides from the variant, as Example A does with `matches!`.
+
+**Plausible wrong approach.** Mapping `"-1"` to `Malformed` because it contains a sign confuses text shape with the domain rule, since `i32` parses negative numbers normally.
+
+**How to verify.** Add `assert!(matches!(validated(""), Err(InputError::Malformed)));` to Example A and run it.
 
 ### Task 2: Guided modification
 
 Add a maximum-quantity category.
 
-No separate reference answer has been written for this task. Start from Example B: Useful diagnostics can describe the contract while avoiding unnecessary payload disclosure. The message explains the rule without repeating raw input.
+**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file. It uses `validated` from the lesson's helpers, defined in the reference program.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    #[derive(Debug)]
+    enum QuantityError {
+        Input(InputError),
+        TooLarge { max: i32 },
+    }
+    impl From<InputError> for QuantityError {
+        fn from(error: InputError) -> Self {
+            Self::Input(error)
+        }
+    }
+    fn bounded(text: &str, max: i32) -> Result<i32, QuantityError> {
+        let value = validated(text)?;
+        if value > max {
+            return Err(QuantityError::TooLarge { max });
+        }
+        Ok(value)
+    }
+    assert_eq!(bounded("40", 50).unwrap(), 40);
+    assert!(matches!(
+        bounded("51", 50),
+        Err(QuantityError::TooLarge { max: 50 })
+    ));
+    let negative = bounded("-1", 50);
+    assert!(matches!(
+        negative,
+        Err(QuantityError::Input(InputError::Negative))
+    ));
+    let malformed = bounded("x", 50);
+    assert!(matches!(
+        malformed,
+        Err(QuantityError::Input(InputError::Malformed))
+    ));
+    Ok(())
+}
+```
+
+**Observe:** 40 is accepted, 51 is TooLarge with the limit 50, and the negative and malformed cases keep their original InputError variants.
+
+The new category wraps the existing one rather than editing it, and `impl From<InputError>` lets `?` convert automatically. The limit is a value, not a constant baked into the message, so the caller can report it without parsing text.
+
+**Plausible wrong approach.** Returning `Err(InputError::Negative)` for oversized values because it is the nearest existing variant compiles and shows a false message saying the quantity must be nonnegative.
+
+**How to verify.** Run the block. Remove the `From` impl and the `?` line fails with E0277, `?` couldn't convert the error to `QuantityError`.
 
 ### Task 3: Independent construction
 
@@ -70,13 +122,48 @@ Separate variants let callers fix input or retry storage, and source preserves t
 
 Diagnose branching on a translated message string.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A generic string loses structured recovery information. Unwrap belongs only where a nearby fixture invariant establishes success. Do not map cancellation or unknown outcomes into an ordinary empty result.
+**Written answer.** The defect is `if error.to_string().contains("nonnegative") { retry_with_absolute_value() }`. The branch depends on display text written for people, so rewording the message or translating it silently changes program behavior. Match the variant instead: `if let Err(InputError::Negative) = result`.
+
+**Why it is correct.** `Display` is presentation and the enum is the contract. Variants are checked by the compiler; a substring test still compiles after the message changes and just stops matching.
+
+**Plausible wrong approach.** Comparing the whole string with `==` instead of `contains` is stricter but has the same dependency on wording.
+
+**How to verify.** Change the `Negative` message to `quantity must be zero or more`: the string branch stops firing with no compiler error, while a `matches!` test still passes.
 
 ### Task 5: Boundary evidence
 
 Test zero, malformed and out-of-range text.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Preserve a domain category) and Example B (Render a safe message).
+**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `validated` from the lesson's helpers, defined in the reference program.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    assert_eq!(validated("0").unwrap(), 0);
+    assert!(matches!(validated("abc"), Err(InputError::Malformed)));
+    assert!(matches!(validated(""), Err(InputError::Malformed)));
+    assert!(matches!(
+        validated("2147483648"),
+        Err(InputError::Malformed)
+    ));
+    assert!(matches!(
+        validated("-2147483648"),
+        Err(InputError::Negative)
+    ));
+    assert!(matches!(
+        validated("-2147483649"),
+        Err(InputError::Malformed)
+    ));
+    Ok(())
+}
+```
+
+**Observe:** Zero is accepted, letters and empty text are malformed, i32::MIN is negative, and values just outside the i32 range in either direction are malformed.
+
+Zero sits on the accepted side of `value < 0`. Out-of-range text never becomes a number, so it lands in `Malformed` rather than in a range category; a real importer might add one, as task 2 did for the upper limit.
+
+**Plausible wrong approach.** Expecting `"-2147483649"` to be `Negative` assumes the sign is checked before the range. Parsing runs first and fails, so the domain check never sees it.
+
+**How to verify.** Run the block, then change `value < 0` to `value <= 0` and the first assertion fails.
 
 ### Task 6: Transfer and justify
 

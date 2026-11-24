@@ -124,6 +124,41 @@ def answer_block(task: dict) -> str:
     return f"\n\n```{language}\n{text.rstrip()}\n```"
 
 
+REASONING_LABELS = (
+    ("why", "Why it holds here"),
+    ("wrong", "Plausible wrong approach"),
+    ("verify", "How to verify"),
+)
+
+
+def reasoning_block(task: dict) -> str:
+    reasoning = task.get("reasoning")
+    if reasoning is None:
+        return ""
+    assert set(reasoning) == {key for key, _ in REASONING_LABELS}, task["title"]
+    parts = []
+    for key, label in REASONING_LABELS:
+        text = reasoning[key]
+        assert isinstance(text, str) and text.strip(), f"{task['title']}: empty {key}"
+        assert not any(dash in text for dash in ("\u2014", "\u2013")), task["title"]
+        parts.append(f"**{label}:** {text.strip()}")
+    return "\n\n" + "\n\n".join(parts)
+
+
+def key_terms_block(unit: dict) -> str:
+    terms = unit.get("key_terms")
+    if terms is None:
+        return ""
+    assert 3 <= len(terms) <= 5, f"{unit['id']}: key_terms needs 3 to 5 entries"
+    assert len({str(t[0]).lower() for t in terms}) == len(terms), f"{unit['id']}: repeated term"
+    lines = []
+    for entry in terms:
+        assert len(entry) == 2 and all(isinstance(v, str) and v.strip() for v in entry), unit["id"]
+        assert not any(dash in v for v in entry for dash in ("\u2014", "\u2013")), unit["id"]
+        lines.append(f"- **{entry[0].strip()}:** {entry[1].strip()}")
+    return "## Key terms\n\n" + "\n".join(lines) + "\n\n"
+
+
 def render(base: Path) -> dict[Path, str]:
     config = json.loads((base / "authoring/units.json").read_text("utf-8"))
     subject = config["id"]
@@ -146,6 +181,7 @@ def render(base: Path) -> dict[Path, str]:
             f"{prerequisites or 'No prior knowledge of this tool.'}\n\n"
             f"**Outcome:** {unit['outcome']}\n\n"
             f"## Question and mechanism\n\n{unit['theory'].strip()}\n\n"
+            f"{key_terms_block(unit)}"
             f"## Syntax and data contract\n\n{unit['syntax'].strip()}\n\n"
         )
         if unit.get("math"):
@@ -201,7 +237,12 @@ def render(base: Path) -> dict[Path, str]:
                 used = spoken_list(
                     [f"`{name}`" for name in helper_calls(source, function, helpers)]
                 )
-                template = harness["first_note"] if first else harness["note"]
+                if first:
+                    template = harness["first_note"]
+                elif key == harness["introduced_in"]:
+                    template = harness.get("introduced_note", harness["note"])
+                else:
+                    template = harness["note"]
                 note = template.format(key=key, helpers=used) + "\n\n"
             else:
                 program = extract_case(source, function)
@@ -254,7 +295,8 @@ def render(base: Path) -> dict[Path, str]:
         ]
         for i, task in enumerate(unit["exercises"], 1):
             answers.append(
-                f"## {i}. {task['title']}\n\n{task['answer']}{answer_block(task)}\n\n"
+                f"## {i}. {task['title']}\n\n{task['answer']}{answer_block(task)}"
+                f"{reasoning_block(task)}\n\n"
                 f"**Expected:** {task['check']}"
             )
         answers += [

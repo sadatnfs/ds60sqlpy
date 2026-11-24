@@ -1403,7 +1403,7 @@ static int comparisons(int[] values,int target){int count=0;for(int value:values
 add(
     20,
     """Algorithms connect a problem contract to a sequence of operations and invariants. Binary search relies on sorted input and repeatedly narrows a half-open interval containing the possible answer. Stable sorting preserves relative order among equal keys, which matters when records already have a meaningful prior order. Recursion solves a problem through smaller instances and needs a base case; memoization avoids recomputing repeated subproblems. Dynamic programming makes those dependencies explicit in a table. The coin-change fixture shows why a locally greedy choice can fail even when a valid combination exists.""",
-    "A lower-bound search returns the first index whose value is at least the target, or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming table dp[amount] stores the minimum coin count for that exact amount, with dp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.",
+    "A lower-bound search returns the first index whose value is at least the target, or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming table `dp[amount]` stores the minimum coin count for that exact amount, with `dp[0] = 0` and an unreachable sentinel. Each transition considers a smaller amount and one added coin.",
     [
         (
             "Binary-search invariant",
@@ -1466,7 +1466,7 @@ assert negative&&zeroCoin;""",
     helper="""record Item(String id,int key){}
 static int lowerBound(int[] values,int target){int low=0,high=values.length;while(low<high){int mid=low+(high-low)/2;if(values[mid]<target)low=mid+1;else high=mid;}return low;}
 static int minimumCoins(int amount,int[] coins){
-    if(amount<0||amount>1000)throw new IllegalArgumentException("amount0..1000 required");
+    if(amount<0||amount>1000)throw new IllegalArgumentException("amount 0..1000 required");
     for(int coin:coins)if(coin<=0)throw new IllegalArgumentException("positive coins required");
     int[] dp=new int[amount+1];Arrays.fill(dp,amount+1);dp[0]=0;
     for(int current=1;current<=amount;current++)for(int coin:coins)if(coin<=current)dp[current]=Math.min(dp[current],dp[current-coin]+1);
@@ -2731,6 +2731,12 @@ SPECS["java-026"]["run_notes"] = (
 SPECS["java-027"]["run_notes"] = (
     "## Manual build fixture\n\nThe [JAR fixture](../fixtures/java-027/README.md) provides the matching source and explicit javac/jar commands for a fresh learner-owned output directory. The reference's fixed-timestamp byte comparison applies only to its prepared JDK environment."
 )
+
+# Standalone references that end with one fixed success line. Walkthroughs
+# (courses/java/walkthroughs.json) assert this exact stdout text; guide examples
+# and variant qualification programs never include it.
+SPECS["java-014"]["success"] = "java-014: all six exercises passed"
+SPECS["java-034"]["success"] = "java-034: all six exercises passed"
 
 # Child JVM notices remain on stderr; inherited CPU/resource settings are preserved.
 for identity in ["java-026", "java-027", "java-036"]:

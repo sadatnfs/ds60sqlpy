@@ -43,6 +43,12 @@
       "code": "p_a <- 0.5\np_alert_a <- 0.3\np_alert_b <- 0.1\np_alert <- p_alert_a * p_a + p_alert_b * (1 - p_a)\nposterior <- p_alert_a * p_a / p_alert\nstopifnot(isTRUE(all.equal(p_alert, 0.2)), isTRUE(all.equal(posterior, 0.75)))\nprint(c(alert_probability = p_alert, a_given_alert = posterior))\n",
       "explanation": "The total alert probability combines both segments. Bayes rule reconstructs the same finite-table conditional rather than introducing new observations.",
       "expected": "Alert probability 0.2; reverse conditional 0.75."
+    },
+    {
+      "title": "Which margin prop.table divides by",
+      "code": "counts <- matrix(c(30, 70, 10, 90), nrow = 2, byrow = TRUE, dimnames = list(segment = c(\"A\", \"B\"), alert = c(\"yes\", \"no\")))\nby_row <- prop.table(counts, margin = 1)\nby_col <- prop.table(counts, margin = 2)\nstopifnot(by_row[\"A\", \"yes\"] == 0.3, by_col[\"A\", \"yes\"] == 0.75)\nstopifnot(isTRUE(all.equal(unname(rowSums(by_row)), c(1, 1))))\nstopifnot(isTRUE(all.equal(unname(colSums(by_col)), c(1, 1))))\nstopifnot(isTRUE(all.equal(by_col[\"A\", \"no\"], 70 / 160)))\nprint(by_col)\n",
+      "explanation": "With margin = 1, prop.table divides every cell by its row total, so A's row becomes 0.3 and 0.7: the alert rate within each segment. With margin = 2, it divides by column totals, so the yes column becomes 30 of 40 and 10 of 40: the segment mix among alerts. Reading 0.3 from the row table as the share of alerts that come from A understates it by more than half. The quickest check is which sums equal one. Rows sum to one in the first table, so it conditions on segment; columns sum to one in the second, so it conditions on the alert.",
+      "expected": "The yes column shows 0.75 for A and 0.25 for B; the no column shows 0.4375 and 0.5625."
     }
   ],
   "exercises": [

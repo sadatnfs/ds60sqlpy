@@ -198,9 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-019</code>, <code>cuda-046</code>, <code>cuda-053</code>, <code>cuda-056</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Configure a CUTLASS or CuTe kernel with correct layouts and benchmark it against a library baseline.</p>
 <p>Work through <em>CUTLASS, CuTe and tile abstractions</em> with the concrete cases below. Finish with this evidence: correct layouts, supported feature declaration and benchmark against an appropriate library baseline. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>CUTLASS supplies composable matrix-operation building blocks, while CuTe provides abstractions for shapes, strides and layout composition used in tiled algorithms. An operation atom describes a small supported operation; larger tiles organize repeated work and data movement. Epilogues transform accumulated results, often adding scale, bias or activation. Templates encode choices at compile time, but they do not absolve the programmer from understanding coordinates, alignment, resource costs and architecture support. Pin dependencies and begin with a prepared supported example. A novel tile DSL is an elective comparison, not a universal prerequisite for basic CUDA.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>CUTLASS:</strong> An NVIDIA C++ template library for building high-performance matrix multiply and related kernels.</li>
+<li><strong>CuTe layout:</strong> A pair of shape and stride that maps logical coordinates to memory offsets in CUTLASS 3.</li>
+<li><strong>Epilogue:</strong> The final stage of a GEMM kernel that applies scaling, bias or activation before storing results.</li>
+<li><strong>MMA atom:</strong> The smallest matrix-multiply-accumulate instruction shape that CuTe composes into larger tiles.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-058_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-058_cpu.py</code></pre>

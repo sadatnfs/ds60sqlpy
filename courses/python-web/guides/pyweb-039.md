@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-038`.
 
 Files cross several boundaries at once: multipart parsing, memory or temporary storage, content validation, filesystem identity and response transfer. This chapter handles a small upload, a fixed server-owned download and a finite streaming response. It reports exactly which parts are tested without claiming network backpressure from a buffered client.
 
+## Key terms
+
+- **UploadFile:** FastAPI's file-like wrapper for a multipart upload whose contents may be spooled to temporary storage rather than held in memory.
+- **Bounded read:** Reading at most one byte past the allowed size so an oversized upload is detected, here with 413, without reading the whole body.
+- **FileResponse:** A response that streams a server-chosen file and supplies its metadata and byte-range handling.
+- **Range request:** A request for part of a resource, answered with 206 Partial Content, or 416 when the requested range cannot be satisfied.
+- **StreamingResponse:** A response whose body is produced chunk by chunk from an iterator, here a finite sequence of CSV lines.
+
 ## Mechanism: bound content and keep path authority on the server
 
 UploadFile exposes a file-like object whose storage may be spooled rather than kept entirely in memory. The example reads at most one byte beyond its permitted content limit, enough to distinguish an accepted small value from an oversized value without reading an arbitrarily large body into application memory. It closes the upload in a finally block.
@@ -29,6 +37,36 @@ An upload one byte over the limit receives 413. Invalid UTF-8 receives 422. A ra
 The finite CSV stream is checked for its complete expected content. TestClient may buffer that content, so this observation does not prove that a remote consumer received each chunk promptly or that a slow consumer applies backpressure correctly. The network workshop includes a separately controlled streaming test.
 
 For large real files, also consider content type validation, antivirus or domain-specific parsing, storage quotas, atomic publication and safe cleanup after interruption. File extensions and browser-provided MIME types are hints, not trustworthy proof of content.
+
+## Worked example: three Range headers against one small file
+
+```python
+from pathlib import Path
+
+from starlette.applications import Starlette
+from starlette.responses import FileResponse
+from starlette.routing import Route
+from starlette.testclient import TestClient
+
+path = Path("report.txt")
+path.write_bytes(b"alpha\nbeta\n")
+app = Starlette(routes=[Route("/report", lambda request: FileResponse(path))])
+with TestClient(app) as client:
+    for value in ("bytes=0-4", "bytes=6-", "bytes=-3"):
+        response = client.get("/report", headers={"Range": value})
+        print(value, response.status_code, response.headers["content-range"], response.content)
+path.unlink()
+```
+
+Expected output:
+
+```text
+bytes=0-4 206 bytes 0-4/11 b'alpha'
+bytes=6- 206 bytes 6-10/11 b'beta\n'
+bytes=-3 206 bytes 8-10/11 b'ta\n'
+```
+
+The file is 11 bytes long, and each `Content-Range` header names the inclusive byte positions returned plus that total. An open ended range such as `bytes=6-` runs to the last byte, while `bytes=-3` is a suffix range meaning the final three bytes, not positions zero to three. Download managers and video players resume with these forms, so a hand-written range parser that only handles `start-end` breaks them. `FileResponse` in FastAPI inherits this parsing from Starlette, and the lesson's 416 case covers a start position past the end of the file.
 
 ## Failure diagnosis and discussion
 

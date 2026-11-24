@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-068-catalog-upgrades-and-operational-recovery">apache-068: Catalog upgrades and operational recovery<a class="heading-anchor" href="#apache-068-catalog-upgrades-and-operational-recovery" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-067</code>, <code>apache-063</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>schematool:</strong> The Hive tool that initializes, upgrades and verifies the Metastore&#x27;s relational schema version.</li>
+<li><strong>Schema migration:</strong> Upgrading the Metastore database schema for new binaries. Rolling the binaries back does not reverse the migration.</li>
+<li><strong>Schema verification:</strong> Checking at startup that the stored schema version matches the binaries, failing clearly instead of upgrading silently.</li>
+<li><strong>Metadata backup:</strong> A consistent dump of the Metastore database with its version information. It cannot restore warehouse files lost from a separate volume.</li>
+</ul>
 <h3 id="a-metadata-upgrade-changes-durable-state">A metadata upgrade changes durable state<a class="heading-anchor" href="#a-metadata-upgrade-changes-durable-state" aria-label="Link to this section">#</a></h3>
 <p>The Metastore&#x27;s relational schema is versioned independently from a container name. Upgrading application binaries can require a schema migration, and rolling back those binaries does not automatically reverse that migration. Plan an upgrade around compatible clients, the exact database schema, stored metadata, warehouse state and a tested restoration path.</p>
 <p>The prepared workshop overrides the official image&#x27;s automatic init-or-upgrade entrypoint. Explicit initialize-schema is for a fresh disposable database; verify-schema reads version information; ordinary startup verifies compatibility before serving. This separation prevents a routine resume from silently becoming a database migration. A missing schema should fail clearly instead of being filled in during readback.</p>
@@ -210,6 +217,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Retain the first schema failure, migration logs, dump identity, client/server versions and post-restore semantic comparison. Distinguish configuration error, unsupported schema, unavailable database and missing warehouse files. Automatic initialization or broad volume deletion can erase the condition that makes the failure explainable.</p>
 <p><strong>Interview discussion: why is replacing an old container image insufficient for rolling back a Metastore upgrade?</strong> Durable database changes can outlive the container and may be incompatible with the old binary. These cases require preflight schema verification and an independently tested owned restoration path before treating a migration as recoverable.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="verify-the-schema-version-before-startup">Verify the schema version before startup<a class="heading-anchor" href="#verify-the-schema-version-before-startup" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/hive
+bash run.sh verify-schema
+bash run.sh status</code></pre>
+<p>verify-schema runs schematool -dbType postgres -info in a separate admin container, which prints the Hive distribution version and the metastore schema version stored in the database. The two must agree before the metastore starts. A mismatch does not mean the data is broken; it means the binaries and the stored schema disagree, and starting anyway can let a newer metastore write rows that an older one cannot read back.</p>
+<h4 id="take-a-consistent-copy-before-any-upgrade">Take a consistent copy before any upgrade<a class="heading-anchor" href="#take-a-consistent-copy-before-any-upgrade" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash">pg_dump --format<span class="syntax-operator">=</span>custom --file<span class="syntax-operator">=</span>metastore-before-upgrade.dump metastore
+pg_restore --list metastore-before-upgrade.dump</code></pre>
+<p>Run against the owned PostgreSQL service, pg_dump takes a single consistent snapshot of the metastore database, and pg_restore --list confirms the archive is readable without restoring it. Test the upgrade against a restored copy in a separate database, never on the live one. If the trial fails, the original remains untouched and the failure output becomes the evidence for planning the real change.</p>
+<h4 id="read-why-the-metastore-refused-to-start">Read why the metastore refused to start<a class="heading-anchor" href="#read-why-the-metastore-refused-to-start" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/hive
+bash run.sh logs</code></pre>
+<p>When versions disagree, the metastore log names the expected and found schema versions and stops. Setting hive.metastore.schema.verification to false would hide that message and let the service run on an incompatible schema, which is the opposite of the safe response. The right fix is either matching binaries or a tested schematool upgrade on a copy, followed by verify-schema again before startup.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="hive-apache-068-command-notebook">Hive apache-068 command notebook<a class="heading-anchor" href="#hive-apache-068-command-notebook" aria-label="Link to this section">#</a></h2>

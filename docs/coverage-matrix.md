@@ -17,70 +17,71 @@ file drifts from the catalogs or a cataloged lesson is missing.
 - Authored: 1838; planned: 0
 - Execution: 1478 runnable, 348 reading, 12 operations
 - Module variants folded into canonical rows: 236 across 173 lessons
-- Lessons with no recorded gap: 534
+- Lessons with no recorded gap: 1838
+- Templated prose words: 835280
 
 ## Gap codes
 
 | Code | Meaning | Lessons |
 | --- | --- | ---: |
 | `missing-path` | A cataloged lesson, guide or solution file does not exist. | 0 |
-| `missing-outcome` | The catalog entry has no learner-facing outcome. | 31 |
+| `missing-outcome` | The catalog entry has no learner-facing outcome. | 0 |
 | `unknown-prerequisite` | A prerequisite names an id that is not in either catalog. | 0 |
-| `weak-outcome` | The catalog outcome is not a specific, observable statement led by an action verb. | 131 |
-| `thin-guide` | The guide has fewer than 1050 words. | 418 |
-| `few-examples` | The guide has fewer than 2 fenced examples. | 352 |
-| `few-terms` | The guide defines fewer than 3 terms. | 971 |
+| `weak-outcome` | The catalog outcome is not a specific, observable statement led by an action verb. | 0 |
+| `thin-guide` | The guide has fewer than 1050 words. | 0 |
+| `few-examples` | The guide has fewer than 2 fenced examples. | 0 |
+| `few-terms` | The guide defines fewer than 3 terms. | 0 |
 | `few-exercises` | A practice lesson has fewer than 6 exercises. | 0 |
 | `missing-solution` | A practice lesson has no solution artifact. | 0 |
-| `thin-solution` | A practice lesson's Markdown solution has fewer than 700 words. | 698 |
+| `thin-solution` | A practice lesson's Markdown solution has fewer than 700 words. | 0 |
 
 Exercise and solution gaps apply only to practice lessons. Tutorial
 lessons are complete worked chapters and carry no exercise contract.
 
 ## Tracks
 
-| Family | Track | Lessons | Practice | Tutorial | Runnable | Reading | Operations | Capstones | Median words | No gaps |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| core | Python and PostgreSQL engineering (`bridge`) | 13 | 13 | 0 | 13 | 0 | 0 | 0 | 2408 | 13 |
-| core | Python and data science (`python`) | 102 | 102 | 0 | 102 | 0 | 0 | 0 | 2217 | 77 |
-| core | PostgreSQL (`sql`) | 86 | 86 | 0 | 86 | 0 | 0 | 0 | 3007 | 77 |
-| module | Advanced Spark modeling: likelihoods, autodiff and engine internals (`advanced-spark-modeling`) | 38 | 0 | 38 | 21 | 17 | 0 | 0 | 960 | 0 |
-| module | Apache and open data platforms (`apache-data-platforms`) | 88 | 0 | 88 | 24 | 64 | 0 | 0 | 974 | 0 |
-| module | Applied science: identification, prediction and decisions (`applied-science`) | 24 | 0 | 24 | 24 | 0 | 0 | 0 | 1039 | 0 |
-| module | Bayesian computing: exact inference, PyMC and Stan (`bayesian-computing`) | 24 | 0 | 24 | 24 | 0 | 0 | 0 | 958 | 0 |
-| module | C: memory, systems and reliable native programs (`c`) | 42 | 42 | 0 | 42 | 0 | 0 | 0 | 2151 | 27 |
-| module | C++20: from first program to reliable systems (`cpp`) | 42 | 42 | 0 | 41 | 1 | 0 | 3 | 1424 | 4 |
-| module | C#: from the first program to reliable .NET applications (`csharp`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1319 | 25 |
-| module | GPU computing: CUDA, Python, machine learning and Spark (`cuda`) | 128 | 128 | 0 | 0 | 128 | 0 | 0 | 1211 | 0 |
-| module | Custom likelihoods in PyTorch (`custom-likelihood-pytorch`) | 20 | 0 | 20 | 20 | 0 | 0 | 0 | 1108 | 0 |
-| module | Data and ML Engineering (`data-ml-engineering`) | 72 | 0 | 72 | 72 | 0 | 0 | 0 | 1953 | 0 |
-| module | Scientific visualization with Plotly: Python and JavaScript (`data-visualization`) | 8 | 8 | 0 | 8 | 0 | 0 | 0 | 1044 | 0 |
-| module | DAX: semantic models, context and analytical reasoning (`dax`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1181 | 0 |
-| module | dbt and analytics engineering (`dbt`) | 26 | 26 | 0 | 26 | 0 | 0 | 0 | 1348 | 0 |
-| module | Deep Learning with PyTorch: tensors to reliable model releases (`deep-learning-pytorch`) | 36 | 36 | 0 | 35 | 1 | 0 | 0 | 2765 | 36 |
-| module | Deep learning with TensorFlow and Keras (`deep-learning-tensorflow`) | 36 | 36 | 0 | 35 | 1 | 0 | 3 | 1928 | 36 |
-| module | Docker: images, applications and operating containers (`docker`) | 42 | 42 | 0 | 0 | 42 | 0 | 0 | 1209 | 0 |
-| module | Go: practical programs, concurrency and Kubernetes controllers (`go`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 2209 | 31 |
-| module | Java: from the first compile to reliable applications (`java`) | 36 | 36 | 0 | 36 | 0 | 0 | 0 | 2271 | 36 |
-| module | JavaScript and TypeScript: language, browser and Node applications (`javascript-typescript`) | 66 | 66 | 0 | 63 | 3 | 0 | 0 | 2133 | 42 |
-| module | JAX: numerical functions to independent scientific work (`jax`) | 34 | 34 | 0 | 31 | 3 | 0 | 0 | 1449 | 0 |
-| module | Julia language and scientific computing (`julia`) | 32 | 32 | 0 | 32 | 0 | 0 | 0 | 1021 | 0 |
-| module | Kubernetes: from first object to platform reasoning (`kubernetes`) | 66 | 66 | 0 | 0 | 54 | 12 | 3 | 1587 | 4 |
-| module | Applied LLMs: subject assistants, retrieval and adaptation (`llm-applied`) | 24 | 24 | 0 | 23 | 1 | 0 | 0 | 3651 | 1 |
-| module | LLM evaluation and alignment (`llm-evaluation`) | 24 | 24 | 0 | 24 | 0 | 0 | 0 | 1446 | 0 |
-| module | Language models: mechanisms, training and evidence (`llm-theory`) | 48 | 48 | 0 | 43 | 5 | 0 | 3 | 3079 | 47 |
-| module | Machine learning engineering (`ml-engineering`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1095 | 0 |
-| module | Natural Language Processing: from text to reliable language systems (`nlp`) | 24 | 24 | 0 | 24 | 0 | 0 | 0 | 1790 | 0 |
-| module | Polars: columnar data engineering (`polars`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1057 | 0 |
-| module | Python web development: HTTP, Flask, FastAPI and Django (`python-web`) | 72 | 0 | 72 | 69 | 3 | 0 | 0 | 866 | 0 |
-| module | R: programming, statistical computing and visualization (`r`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1001 | 0 |
-| module | Rust: ownership, reliable systems and Arrow data engineering (`rust`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1163 | 30 |
-| module | Scala and Apache Spark: Correct Data, Measured Execution, Recoverable Products (`scala-spark`) | 42 | 42 | 0 | 39 | 3 | 0 | 3 | 2286 | 42 |
-| module | Spark deployment: Compose, notebooks and Kubernetes (`spark-deployment`) | 18 | 0 | 18 | 0 | 18 | 0 | 0 | 594 | 0 |
-| module | Statistics and Machine Learning for Data Scientists End To End (`statistics-ml`) | 69 | 0 | 69 | 69 | 0 | 0 | 0 | 2272 | 0 |
-| module | Swift: portable language foundations and Apple app architecture (`swift`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1163 | 6 |
-| module | TMB modeling with R and C++ (`tmb-modeling`) | 48 | 0 | 48 | 48 | 0 | 0 | 0 | 633 | 0 |
-| module | Web development: HTML, CSS and PHP (`web-development`) | 60 | 60 | 0 | 56 | 4 | 0 | 0 | 922 | 0 |
+| Family | Track | Lessons | Practice | Tutorial | Runnable | Reading | Operations | Capstones | Median words | Templated words | No gaps |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| core | Python and PostgreSQL engineering (`bridge`) | 13 | 13 | 0 | 13 | 0 | 0 | 0 | 2408 | 3192 | 13 |
+| core | Python and data science (`python`) | 102 | 102 | 0 | 102 | 0 | 0 | 0 | 2217 | 57268 | 102 |
+| core | PostgreSQL (`sql`) | 86 | 86 | 0 | 86 | 0 | 0 | 0 | 3007 | 194391 | 86 |
+| module | Advanced Spark modeling: likelihoods, autodiff and engine internals (`advanced-spark-modeling`) | 38 | 0 | 38 | 21 | 17 | 0 | 0 | 1356 | 2585 | 38 |
+| module | Apache and open data platforms (`apache-data-platforms`) | 88 | 0 | 88 | 24 | 64 | 0 | 0 | 1221 | 7970 | 88 |
+| module | Applied science: identification, prediction and decisions (`applied-science`) | 24 | 0 | 24 | 24 | 0 | 0 | 0 | 1497 | 1071 | 24 |
+| module | Bayesian computing: exact inference, PyMC and Stan (`bayesian-computing`) | 24 | 0 | 24 | 24 | 0 | 0 | 0 | 1397 | 1389 | 24 |
+| module | C: memory, systems and reliable native programs (`c`) | 42 | 42 | 0 | 42 | 0 | 0 | 0 | 2503 | 24148 | 42 |
+| module | C++20: from first program to reliable systems (`cpp`) | 42 | 42 | 0 | 41 | 1 | 0 | 3 | 1499 | 8105 | 42 |
+| module | C#: from the first program to reliable .NET applications (`csharp`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1314 | 26305 | 48 |
+| module | GPU computing: CUDA, Python, machine learning and Spark (`cuda`) | 128 | 128 | 0 | 0 | 128 | 0 | 0 | 1376 | 69931 | 128 |
+| module | Custom likelihoods in PyTorch (`custom-likelihood-pytorch`) | 20 | 0 | 20 | 20 | 0 | 0 | 0 | 1508 | 1067 | 20 |
+| module | Data and ML Engineering (`data-ml-engineering`) | 72 | 0 | 72 | 72 | 0 | 0 | 0 | 2253 | 2560 | 72 |
+| module | Scientific visualization with Plotly: Python and JavaScript (`data-visualization`) | 8 | 8 | 0 | 8 | 0 | 0 | 0 | 1157 | 640 | 8 |
+| module | DAX: semantic models, context and analytical reasoning (`dax`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1181 | 26172 | 60 |
+| module | dbt and analytics engineering (`dbt`) | 26 | 26 | 0 | 26 | 0 | 0 | 0 | 1439 | 10128 | 26 |
+| module | Deep Learning with PyTorch: tensors to reliable model releases (`deep-learning-pytorch`) | 36 | 36 | 0 | 35 | 1 | 0 | 0 | 2724 | 19980 | 36 |
+| module | Deep learning with TensorFlow and Keras (`deep-learning-tensorflow`) | 36 | 36 | 0 | 35 | 1 | 0 | 3 | 1912 | 17628 | 36 |
+| module | Docker: images, applications and operating containers (`docker`) | 42 | 42 | 0 | 0 | 42 | 0 | 0 | 1246 | 15734 | 42 |
+| module | Go: practical programs, concurrency and Kubernetes controllers (`go`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 2209 | 61712 | 48 |
+| module | Java: from the first compile to reliable applications (`java`) | 36 | 36 | 0 | 36 | 0 | 0 | 0 | 2271 | 54234 | 36 |
+| module | JavaScript and TypeScript: language, browser and Node applications (`javascript-typescript`) | 66 | 66 | 0 | 63 | 3 | 0 | 0 | 2122 | 69429 | 66 |
+| module | JAX: numerical functions to independent scientific work (`jax`) | 34 | 34 | 0 | 31 | 3 | 0 | 0 | 1552 | 5332 | 34 |
+| module | Julia language and scientific computing (`julia`) | 32 | 32 | 0 | 32 | 0 | 0 | 0 | 1121 | 4663 | 32 |
+| module | Kubernetes: from first object to platform reasoning (`kubernetes`) | 66 | 66 | 0 | 0 | 54 | 12 | 3 | 1687 | 31598 | 66 |
+| module | Applied LLMs: subject assistants, retrieval and adaptation (`llm-applied`) | 24 | 24 | 0 | 23 | 1 | 0 | 0 | 3619 | 640 | 24 |
+| module | LLM evaluation and alignment (`llm-evaluation`) | 24 | 24 | 0 | 24 | 0 | 0 | 0 | 1552 | 177 | 24 |
+| module | Language models: mechanisms, training and evidence (`llm-theory`) | 48 | 48 | 0 | 43 | 5 | 0 | 3 | 3116 | 651 | 48 |
+| module | Machine learning engineering (`ml-engineering`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1209 | 4301 | 18 |
+| module | Natural Language Processing: from text to reliable language systems (`nlp`) | 24 | 24 | 0 | 24 | 0 | 0 | 0 | 1906 | 2687 | 24 |
+| module | Polars: columnar data engineering (`polars`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1160 | 3719 | 18 |
+| module | Python web development: HTTP, Flask, FastAPI and Django (`python-web`) | 72 | 0 | 72 | 69 | 3 | 0 | 0 | 1184 | 3838 | 72 |
+| module | R: programming, statistical computing and visualization (`r`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1227 | 11266 | 60 |
+| module | Rust: ownership, reliable systems and Arrow data engineering (`rust`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1163 | 27935 | 48 |
+| module | Scala and Apache Spark: Correct Data, Measured Execution, Recoverable Products (`scala-spark`) | 42 | 42 | 0 | 39 | 3 | 0 | 3 | 2283 | 13549 | 42 |
+| module | Spark deployment: Compose, notebooks and Kubernetes (`spark-deployment`) | 18 | 0 | 18 | 0 | 18 | 0 | 0 | 1307 | 720 | 18 |
+| module | Statistics and Machine Learning for Data Scientists End To End (`statistics-ml`) | 69 | 0 | 69 | 69 | 0 | 0 | 0 | 2272 | 2020 | 69 |
+| module | Swift: portable language foundations and Apple app architecture (`swift`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1174 | 27932 | 48 |
+| module | TMB modeling with R and C++ (`tmb-modeling`) | 48 | 0 | 48 | 48 | 0 | 0 | 0 | 1138 | 848 | 48 |
+| module | Web development: HTML, CSS and PHP (`web-development`) | 60 | 60 | 0 | 56 | 4 | 0 | 0 | 1146 | 17765 | 60 |
 
 ## Gaps by track
 
@@ -88,41 +89,6 @@ Counts of lessons per gap code. Tracks with no gaps are omitted.
 
 | Track | `missing-path` | `missing-outcome` | `unknown-prerequisite` | `weak-outcome` | `thin-guide` | `few-examples` | `few-terms` | `few-exercises` | `missing-solution` | `thin-solution` |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python` | 0 | 25 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `sql` | 0 | 6 | 0 | 3 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `advanced-spark-modeling` | 0 | 0 | 0 | 0 | 26 | 38 | 38 | 0 | 0 | 0 |
-| `apache-data-platforms` | 0 | 0 | 0 | 1 | 75 | 41 | 88 | 0 | 0 | 0 |
-| `applied-science` | 0 | 0 | 0 | 0 | 13 | 24 | 24 | 0 | 0 | 0 |
-| `bayesian-computing` | 0 | 0 | 0 | 0 | 15 | 24 | 24 | 0 | 0 | 0 |
-| `c` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| `cpp` | 0 | 0 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 |
-| `csharp` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 23 |
-| `cuda` | 0 | 0 | 0 | 63 | 0 | 0 | 128 | 0 | 0 | 128 |
-| `custom-likelihood-pytorch` | 0 | 0 | 0 | 0 | 2 | 20 | 20 | 0 | 0 | 0 |
-| `data-ml-engineering` | 0 | 0 | 0 | 0 | 0 | 71 | 72 | 0 | 0 | 0 |
-| `data-visualization` | 0 | 0 | 0 | 0 | 4 | 0 | 8 | 0 | 0 | 8 |
-| `dax` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 60 |
-| `dbt` | 0 | 0 | 0 | 0 | 0 | 0 | 26 | 0 | 0 | 9 |
-| `docker` | 0 | 0 | 0 | 0 | 0 | 0 | 42 | 0 | 0 | 42 |
-| `go` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 17 |
-| `javascript-typescript` | 0 | 0 | 0 | 0 | 0 | 0 | 24 | 0 | 0 | 24 |
-| `jax` | 0 | 0 | 0 | 0 | 0 | 3 | 34 | 0 | 0 | 34 |
-| `julia` | 0 | 0 | 0 | 0 | 18 | 0 | 32 | 0 | 0 | 32 |
-| `kubernetes` | 0 | 0 | 0 | 0 | 0 | 0 | 62 | 0 | 0 | 60 |
-| `llm-applied` | 0 | 0 | 0 | 23 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `llm-evaluation` | 0 | 0 | 0 | 0 | 0 | 0 | 24 | 0 | 0 | 24 |
-| `llm-theory` | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `ml-engineering` | 0 | 0 | 0 | 0 | 5 | 0 | 18 | 0 | 0 | 15 |
-| `nlp` | 0 | 0 | 0 | 0 | 0 | 0 | 24 | 0 | 0 | 9 |
-| `polars` | 0 | 0 | 0 | 0 | 8 | 0 | 18 | 0 | 0 | 18 |
-| `python-web` | 0 | 0 | 0 | 0 | 67 | 72 | 72 | 0 | 0 | 0 |
-| `r` | 0 | 0 | 0 | 0 | 31 | 0 | 0 | 0 | 0 | 60 |
-| `rust` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 18 |
-| `spark-deployment` | 0 | 0 | 0 | 0 | 18 | 0 | 18 | 0 | 0 | 0 |
-| `statistics-ml` | 0 | 0 | 0 | 40 | 29 | 29 | 28 | 0 | 0 | 0 |
-| `swift` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 42 |
-| `tmb-modeling` | 0 | 0 | 0 | 0 | 48 | 30 | 48 | 0 | 0 | 0 |
-| `web-development` | 0 | 0 | 0 | 0 | 59 | 0 | 60 | 0 | 0 | 60 |
 
 ## Reading a row
 
@@ -135,3 +101,9 @@ lesson header renders each outcome and its direct prerequisites (or
 "Start here"), so `weak-outcome` and `unknown-prerequisite` are the
 orientation gaps. `states_prerequisites` and `states_objectives` record
 whether the guide text repeats them and are informational only.
+
+`templated_words` counts guide and solution prose in paragraphs of at
+least 20 words whose sampled 8-word phrases mostly
+also appear in 3 or more lessons. It measures generator
+boilerplate; the corpus total may not grow, so new explanations must be
+specific to their lesson.

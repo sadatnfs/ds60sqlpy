@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>List the columns of ~ x + group for a two-level factor.</p>
 <p>Intercept, x and groupB under the declared levels/contrasts.</p>
+<p><strong>Approach:</strong> Build <code>model.matrix(~ x + group, data)</code> and read its column names.</p>
+<p><strong>Why it holds here:</strong> The intercept stands for group A because A is the first declared level, x gets one column, and B gets one treatment contrast column, groupB, which is 1 for rows 3 and 4.</p>
+<p><strong>Tempting mistake:</strong> Expecting both groupA and groupB next to the intercept. With an intercept that design would be rank deficient. If the levels were declared as B then A, the single column would be groupA, so the level order decides the reference.</p>
+<p><strong>Verify:</strong> <code>identical(colnames(additive), c(&quot;(Intercept)&quot;, &quot;x&quot;, &quot;groupB&quot;))</code> returns TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add x:group through the * expansion.</p>
 <p>The design also includes x:groupB.</p>
+<p><strong>Approach:</strong> Write <code>~ x * group</code>, which expands to x + group + x:group, and check that the main effects stay in the design.</p>
+<p><strong>Why it holds here:</strong> The added x:groupB column is the product of x and groupB, so it is 0, 0, 0, 1: only the B row with x = 1 carries it. The coefficient is the difference between B&#x27;s slope and A&#x27;s.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>~ x:group</code> alone. Without the x and group main effects, R codes the term as x:groupA and x:groupB with one shared intercept, which forces both groups to have the same value at x = 0.</p>
+<p><strong>Verify:</strong> <code>colnames(interaction)</code> returns the four names ending in x:groupB, and <code>interaction[, &quot;x:groupB&quot;]</code> returns 0, 0, 0, 1.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Inspect and validate a design before fitting.</p>
 <p>Document the numeric meaning of every requested coefficient.</p>
+<p><strong>Approach:</strong> Before fitting, check the column names, the dimensions and that the rank equals the number of columns, and write down what each coefficient means.</p>
+<p><strong>Why it holds here:</strong> Here the design is 4 by 4 with rank 4, so every coefficient is identified, and the names say which comparison each one makes. With exactly as many rows as columns, though, no error can be estimated.</p>
+<p><strong>Tempting mistake:</strong> Fitting lm first and reading the coefficient table. lm does not stop on a rank deficient design; it reports NA for the aliased coefficient, which is easy to skim past.</p>
+<p><strong>Verify:</strong> <code>qr(interaction)$rank == ncol(interaction)</code> returns TRUE, and <code>dim(interaction)</code> returns 4 4.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose simultaneous x and 2*x predictors.</p>
 <p>Separate coefficients are not identifiable from this design.</p>
+<p><strong>Approach:</strong> Detect the dependency with the rank and keep only one of the two columns.</p>
+<p><strong>Why it holds here:</strong> <code>I(2 * x)</code> is exactly twice x in every row, so the design has three columns and rank two. Coefficients of 1 on x and 0 on the copy produce the same fitted values as 0 on x and 0.5 on the copy, so separate effects cannot be identified.</p>
+<p><strong>Tempting mistake:</strong> Reading the NA that lm reports for <code>I(2 * x)</code> as evidence that the doubled predictor has no effect. The NA means the data cannot separate the two columns, not that either effect is zero.</p>
+<p><strong>Verify:</strong> <code>qr(redundant)$rank &lt; ncol(redundant)</code> returns TRUE, since the rank is 2 and there are 3 columns.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Handle a factor level absent from training data.</p>
 <p>Do not silently invent a learned effect for an unseen category.</p>
+<p><strong>Approach:</strong> Decide in advance what happens to a category absent from training: reject the row, or route it to a stated fallback and report how many rows took that path.</p>
+<p><strong>Why it holds here:</strong> The model only has A and B. A row with group C has no column, and <code>factor(&quot;C&quot;, levels = c(&quot;A&quot;, &quot;B&quot;))</code> is NA; predict on an lm fit stops with a new level error.</p>
+<p><strong>Tempting mistake:</strong> Replacing the NA with A so that prediction runs. C then silently receives A&#x27;s intercept and slope, an effect the data never estimated.</p>
+<p><strong>Verify:</strong> <code>&quot;C&quot; %in% levels(data$group)</code> returns FALSE, and <code>factor(&quot;C&quot;, levels = c(&quot;A&quot;, &quot;B&quot;))</code> returns NA.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Separate algebraic fit from model validity.</p>
 <p>Use diagnostics and held-out evaluation after defining the statistical question.</p>
+<p><strong>Approach:</strong> State the statistical question first, then judge the model with residual diagnostics and held out data, not with the fact that the design is solvable.</p>
+<p><strong>Why it holds here:</strong> The interaction design has full rank with four observations, so a fit reproduces all four values with zero residuals. That is a property of the algebra, and it leaves no degrees of freedom to check anything.</p>
+<p><strong>Tempting mistake:</strong> Taking the perfect fit as support for the model. Any four values at these x and group settings would be fit perfectly.</p>
+<p><strong>Verify:</strong> <code>nrow(interaction) - qr(interaction)$rank</code> returns 0, which shows there is no residual information for checking the model.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the shared-scalar sum under Home.</p>
 <p>It is 96, coincidentally equal to the correct result. A one-member test hides the bug.</p>
+<p><strong>Why it fits this model:</strong> Home has one product, Mug, so the shared scalar 96 is added once. That matches the correct per-product sum by coincidence.</p>
+<p><strong>Tempting mistake:</strong> Passing this one-member test and shipping the formula is the mistake. Under Paper, with two products, the shared version returns 182, not 91.</p>
+<p><strong>How to confirm:</strong> Test both: Home gives 96 and 96, and Paper gives 182 and 91.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add a second unsold product to the unfiltered model.</p>
 <p>The incorrect sum rises to 5 * 187 = 935 while the per-product additive total remains 187.</p>
+<p><strong>Why it fits this model:</strong> The variable outside SUMX holds 187 and is added once per Product row. With a fifth row, an unsold product, the wrong sum becomes 5 x 187 = 935.</p>
+<p><strong>Tempting mistake:</strong> Expecting the extra product to do nothing applies the correct sum&#x27;s behavior to the shared scalar. Only the per-product version ignores the blank row.</p>
+<p><strong>How to confirm:</strong> Today the results are 748 (4 x 187) and 187. After adding the product expect 935 and 187.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write an iterator whose variable intentionally holds one global denominator.</p>
 <p>Bind a deliberate total outside, then evaluate each member&#x27;s [NetRevenue] inside and DIVIDE by that total.</p>
+<p><strong>Why it fits this model:</strong> Bind <code>VAR Total = [NetRevenue]</code> before SUMX, and evaluate [NetRevenue] inside the body for each product. The shares are Notebook 0.358, Pen 0.128, Mug 0.513 and Bag BLANK.</p>
+<p><strong>Tempting mistake:</strong> Binding the numerator outside too divides 187 by 187 on every row, and SUMX over the four products returns 4 rather than 1.</p>
+<p><strong>How to confirm:</strong> The shares should add to 1, and each share times 187 should give 67, 24 and 96.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a refactor that moves all variables above SUMX for readability.</p>
 <p>Move only expressions intended to be invariant. Keep row-dependent measure bindings in the iterator body.</p>
+<p><strong>Why it fits this model:</strong> Only values meant to stay constant belong above SUMX. The per-product [NetRevenue] must be bound inside the body, so that each product&#x27;s transition happens there.</p>
+<p><strong>Tempting mistake:</strong> Moving ProductRevenue above SUMX makes the per-product column equal SharedScalarSum, 748 unfiltered and 182 under Paper.</p>
+<p><strong>How to confirm:</strong> After any refactor, rerun both cases and expect PerProductSum to stay 187 and 91.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why the variables are not updated mutable loop counters.</p>
 <p>Each inner evaluation binds its own value; there is no assignment that mutates one outer variable across iterations.</p>
+<p><strong>Why it fits this model:</strong> A VAR is a name for one value within its scope. Each iteration that defines ProductRevenue creates a new binding and changes nothing outside.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>VAR Counter = 0</code> and expecting <code>Counter + 1</code> to number the products gives 1 on every row, so SUMX returns 4, not 1 + 2 + 3 + 4 = 10.</p>
+<p><strong>How to confirm:</strong> <code>SUMX ( Product, Counter + 1 )</code> returns 4, which shows that nothing accumulated.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the lesson to allocating a shared monthly target.</p>
 <p>Keep the target and validated weight denominator shared, but compute each member&#x27;s weight in the appropriate row/filter context.</p>
+<p><strong>Why it fits this model:</strong> Keep the target shared and compute each weight inside the iterator. In February 2025, Notebook has 20 and Mug 36, so an assumed 200 USD target splits as about 71.43 and 128.57.</p>
+<p><strong>Tempting mistake:</strong> Binding the weight [NetRevenue] outside the iterator gives every product a weight of 1, and the full 200 is allocated to each of four products, 800 in total.</p>
+<p><strong>How to confirm:</strong> The allocations should add to 200, with Pen and Bag BLANK because they had no February 2025 sales.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

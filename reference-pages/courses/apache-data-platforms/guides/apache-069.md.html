@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-069-types-entities-and-metadata-identity">apache-069: Types, entities and metadata identity<a class="heading-anchor" href="#apache-069-types-entities-and-metadata-identity" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-008</code>, <code>apache-063</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Entity type:</strong> An Atlas type definition that declares the attributes and relationships its instances can carry, often inheriting from DataSet or Process.</li>
+<li><strong>Entity:</strong> One instance of an entity type representing an asset or process, stored with a server-assigned GUID.</li>
+<li><strong>GUID:</strong> The globally unique identifier Atlas assigns to a stored entity instance.</li>
+<li><strong>qualifiedName:</strong> The unique attribute a producer sets so that retries can locate the same logical asset without knowing its GUID.</li>
+<li><strong>Relationship type:</strong> A typed definition of how two entity types connect, such as a process to its input and output datasets.</li>
+</ul>
 <h3 id="a-metadata-type-is-different-from-an-asset-instance">A metadata type is different from an asset instance<a class="heading-anchor" href="#a-metadata-type-is-different-from-an-asset-instance" aria-label="Link to this section">#</a></h3>
 <p>Atlas provides a type system for describing metadata. An entity type defines attributes and relationships that its instances can carry. An entity represents one asset or process and receives a GUID. A classification attaches a label and possibly attributes to an entity. A relationship connects entities under a specified relationship type. Keeping these concepts distinct prevents a catalog from becoming an unstructured collection of arbitrary strings.</p>
 <p>The inherited DataSet and Process concepts provide useful starting points for custom types. A dataset can represent an input table or published data product; a process can record a transformation between inputs and outputs. Subtyping should express a stable semantic contract. Creating a new type for every run usually confuses a type definition with an instance or version identity.</p>

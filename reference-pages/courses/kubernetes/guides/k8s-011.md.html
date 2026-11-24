@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A Job manages finite work toward a completion condition. A Deployment manages a continuing replica set. A CronJob creates Jobs according to a schedule. These controllers have different success and lifecycle meanings: an intentionally exiting task belongs in a Job, while a server that should remain available belongs in a continuing workload controller.</p>
 <p>The fixed hello-task Job runs a deterministic synthetic calculation and exits. Its success output records three accepted rows, two rejected rows and total 35. A separate allowed failure outcome exits 2. The worker checks the Job condition, its controlled Pod identity, the task container&#x27;s zero exit and the exact bounded JSON output before calling the success path complete.</p>
 <p>The CronJob example is suspended and remains a host-lab/reading fixture. The browser does not accept arbitrary schedules or leave recurring workloads behind. A scheduled configuration is not evidence that a run occurred, and a completed run is not evidence that future recurrence works.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Job:</strong> A workload controller that runs Pods until a specified number of them complete successfully.</li>
+<li><strong>CronJob:</strong> A controller that creates Jobs on a cron schedule. Its suspend field pauses future runs without deleting existing Jobs.</li>
+<li><strong>backoffLimit:</strong> The Job field that sets how many Pod failures are retried before the Job is marked failed.</li>
+<li><strong>activeDeadlineSeconds:</strong> The Job field that bounds total run time. When the deadline passes, the Job stops its Pods and records a failure.</li>
+<li><strong>Exit code:</strong> The integer a container process returns when it ends. In this lesson 0 means success and 2 is the allowed failure outcome.</li>
+</ul>
 <h3 id="read-completion-retry-and-deadline-semantics">Read completion, retry and deadline semantics<a class="heading-anchor" href="#read-completion-retry-and-deadline-semantics" aria-label="Link to this section">#</a></h3>
 <p>The admitted Job has completions 1, parallelism 1, restartPolicy Never, backoffLimit zero or one, and an active deadline between 5 and 30 seconds. These limits bound its intended work. A failed Pod can lead to another Pod attempt when retries are allowed; restartPolicy Never does not by itself mean the Job never retries.</p>
 <p>Observe terminal Complete or Failed conditions and relevant counters. A nonterminal failed count can appear while a retry remains possible, so the extended adapter waits for a terminal condition. A successful count alone is insufficient if the Pod belongs to another Job or namespace. The controller UID, Run nonce, container identity and exit status form the proof chain.</p>

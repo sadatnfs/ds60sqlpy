@@ -116,7 +116,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Cancel before observing a check) before changing anything, and confirm its observation: The task acknowledges cancellation and its completion is awaited.
 2. Compare Example B (Cancellation need not prevent a result) with Example A and name the first line whose behavior differs. Its observation is: This task still returns 9 because its body does not check cancellation.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Polling cancellation in a tight CPU loop without yielding can waste resources.
+3. Before opening the explanation, check your task 3 attempt (Write a bounded processing loop with cleanup on cancellation) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

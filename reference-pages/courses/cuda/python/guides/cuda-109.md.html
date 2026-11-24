@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Export translates a model into an interchange or runtime representation. Building an execution engine chooses supported implementations for target shapes, precision and hardware. Successful export is weaker evidence than successful execution, and one successful shape is weaker than a complete supported-shape contract. Calibration for selected quantization workflows must use representative data separate from evaluation.</p>
 <p>An optional TensorRT or another prepared runtime has its own operator, platform and version constraints. Engine caches may depend on hardware, toolkit and runtime versions. Preserve the source model and build recipe, then compare outputs and task quality over a bounded shape set. Report engine build, cold start and warm inference separately. The classroom&#x27;s default CPU workers do not imply an engine builder is installed.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Model export:</strong> Translating a model into an interchange or runtime representation, which is weaker evidence than successful execution.</li>
+<li><strong>Engine build:</strong> Selecting supported kernels for target shapes, precision and hardware to produce an executable inference engine.</li>
+<li><strong>Shape envelope:</strong> The range of input shapes an engine was built and tested to accept.</li>
+<li><strong>Calibration data:</strong> Representative inputs, kept separate from evaluation data, used to choose quantization ranges.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A deployment accepts batch sizes 1 through 8 and sequence lengths up to 32. Batch 9 should be rejected or handled by a separately documented path rather than silently truncating input.</p>
@@ -219,17 +226,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-define-the-shape-envelope">Exercise 1: Define the shape envelope<a class="heading-anchor" href="#exercise-1-define-the-shape-envelope" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>define the shape envelope</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Leaving the envelope implicit means unsupported shapes reach the engine and fail with internal errors or are padded and truncated without notice.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-reject-an-invalid-request">Exercise 2: Reject an invalid request<a class="heading-anchor" href="#exercise-2-reject-an-invalid-request" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>reject an invalid request</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Splitting batch 9 into 8 and 1 automatically may be reasonable, but only as a documented path. Doing it implicitly changes latency and behavior without a contract.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-separate-export-build-and-execution">Exercise 3: Separate export build and execution<a class="heading-anchor" href="#exercise-3-separate-export-build-and-execution" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>separate export build and execution</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the deployment as working because the export succeeded skips build and execution, where unsupported operators and precision problems usually appear.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-choose-calibration-data">Exercise 4: Choose calibration data<a class="heading-anchor" href="#exercise-4-choose-calibration-data" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>choose calibration data</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calibrating on a handful of constant inputs gives ranges that clip real activations, which lowers accuracy. Values outside the calibrated range saturate at the limit, so large activations lose their differences entirely.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-record-engine-compatibility">Exercise 5: Record engine compatibility<a class="heading-anchor" href="#exercise-5-record-engine-compatibility" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>record engine compatibility</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Copying an engine file to a different GPU model or runtime release can fail to load or behave differently. Rebuilding per target from the same exported graph is the safer pattern.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-compare-task-quality">Exercise 6: Compare task quality<a class="heading-anchor" href="#exercise-6-compare-task-quality" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>compare task quality</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing only a few output tensors for closeness can miss a quality drop concentrated in some classes.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -1,6 +1,6 @@
 # llm-applied-012: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for evaluating retrieval and answers with oracle controls only after attempting *Calculate recall and reciprocal rank* through *Reject duplicate result identities*. A discrepancy in *Measure a retrieval miss* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-012_solution.py` runs the assertions; this page explains why they test retrieval recall and reciprocal rank.
 
 ## Mechanism review
 
@@ -18,11 +18,11 @@ An oracle-context control supplies the authored relevant evidence directly while
 
 ## Reading the implementation
 
-Recall@k is the number of relevant IDs retrieved divided by total relevant IDs. Reciprocal rank is1 divided by the first relevant rank, or0 when none appears. For unanswerable questions, returnNone for recall and score abstention separately. Keep retrieval misses, unsupported claims, incorrect answers and appropriate abstentions as distinct counters. Compare observed and oracle results by the same question ID.
+Recall@k is the number of relevant IDs retrieved divided by total relevant IDs. Reciprocal rank is 1 divided by the first relevant rank, or 0 when none appears. For unanswerable questions, return None for recall and score abstention separately. Keep retrieval misses, unsupported claims, incorrect answers and appropriate abstentions as distinct counters. Compare observed and oracle results by the same question ID.
 
 ## Calculate metrics without losing the task's evidence structure
 
-For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall2/2=1. The first relevant item is at rank two, giving reciprocal rank \(\frac{1}{2}\). If the caller truncates to the first two items, recall becomes1/2 while reciprocal rank remains1/2. The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
+For relevant IDs R={a, c} and retrieved list `[b, c, a]`, both relevant documents appear, giving recall 2/2=1. The first relevant item is at rank two, giving reciprocal rank \(\frac{1}{2}\). If the caller truncates to the first two items, recall becomes \(\frac{1}{2}\) while reciprocal rank remains \(\frac{1}{2}\). The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
 
 A first-hit metric cannot establish multi-evidence sufficiency. If a question requires both a definition and its exclusion rule, retrieving only one can give reciprocal rank one but an incomplete answer context. Conversely, a relevance set may contain several interchangeable documents, where any one is sufficient. The evaluation label should distinguish all required evidence from alternative supporting sources. The set arithmetic alone cannot infer that logic.
 
@@ -30,9 +30,9 @@ Duplicate retrieved IDs are rejected before metrics. Without that boundary, a na
 
 For an unanswerable question, the relevant set is empty. Recall has a zero denominator, so the helper returns None and separately assigns reciprocal rank zero. Treating undefined recall as one would reward a system merely for facing a question with no evidence. Treating it as zero inside every average would confound retriever quality on answerable cases with the prevalence of unanswerable cases. Report the number of answerable cases and score abstention separately.
 
-Suppose one question has one relevant document and retrieves it, while another has nine relevant documents and retrieves one. Macro-average recall is(1+1/9)/2=5/9. Micro recall over all relevant IDs is2/10=0.2. Neither arithmetic result is inherently wrong: one weights questions equally, the other weights relevant-document opportunities equally. The population and task contract must choose the estimand before seeing which number looks better.
+Suppose one question has one relevant document and retrieves it, while another has nine relevant documents and retrieves one. Macro-average recall is (1+1/9)/2=5/9. Micro recall over all relevant IDs is 2/10=0.2. Neither arithmetic result is inherently wrong: one weights questions equally, the other weights relevant-document opportunities equally. The population and task contract must choose the estimand before seeing which number looks better.
 
-The oracle fixture contains saved labels observed={q1:0, q2:0} and oracle={q1:1, q2:0}. It calculates a paired gain of one for q1 and zero for q2, averaging0.5 over those two fixed IDs. No language model is invoked by those dictionaries, and the values are not empirical measurements of a named model. They demonstrate how an actual paired result would be represented and analyzed.
+The oracle fixture contains saved labels observed={q1:0, q2:0} and oracle={q1:1, q2:0}. It calculates a paired gain of one for q1 and zero for q2, averaging 0.5 over those two fixed IDs. No language model is invoked by those dictionaries, and the values are not empirical measurements of a named model. They demonstrate how an actual paired result would be represented and analyzed.
 
 In a real oracle run, improvement after supplying sufficient evidence suggests that context selection was a useful intervention. A remaining failure may concern answer behavior, prompt construction, source interpretation or an incorrect rubric. If oracle context is much shorter or removes conflicting passages, its improvement does not isolate missing-document recall alone. Preserve those differences and use narrower ablations when causal attribution between engineering components matters.
 
@@ -71,9 +71,9 @@ The answer stage cannot use evidence absent from its context. This is a retrieva
 assert retrieval_metrics(["b", "c"], {"a"}) == (0.0, 0.0)
 ```
 
-**Expected:** recall0; reciprocal rank 0.
+**Expected:** recall 0; reciprocal rank 0.
 
-**Verify:** Compare the computed values or written argument with recall0; reciprocal rank 0.
+**Verify:** Compare the computed values or written argument with recall 0; reciprocal rank 0.
 
 ## Exercise 3: Handle an unanswerable question
 
@@ -87,9 +87,9 @@ result = {"question": "q-missing", "answerable": False, "abstained": True}
 assert not result["answerable"] and result["abstained"]
 ```
 
-**Expected:** recallNone; appropriate abstentionTrue.
+**Expected:** recall None; appropriate abstention True.
 
-**Verify:** Compare the computed values or written argument with recallNone; appropriate abstentionTrue.
+**Verify:** Compare the computed values or written argument with recall None; appropriate abstention True.
 
 ## Exercise 4: Separate support from correctness
 
@@ -102,15 +102,15 @@ saved = {"question": "q1", "correct": True, "supported": False, "retrieval_miss"
 assert saved["correct"] and not saved["supported"]
 ```
 
-**Expected:** correctTrue but supportedFalse.
+**Expected:** correct True but supported False.
 
-**Verify:** Compare the computed values or written argument with correctTrue but supportedFalse.
+**Verify:** Compare the computed values or written argument with correct True but supported False.
 
 ## Exercise 5: Apply an oracle-context control
 
 The question is: Compare q1 observed incorrect with oracle-context correct under the same rubric.
 
-The unchanged failure onq2 shows that retrieval is not always the sole bottleneck. The control should not silently change the question or answer criteria.
+The unchanged failure onq 2 shows that retrieval is not always the sole bottleneck. The control should not silently change the question or answer criteria.
 
 ```python
 observed = {"q1": 0, "q2": 0}
@@ -118,13 +118,13 @@ oracle = {"q1": 1, "q2": 0}
 assert oracle["q1"] - observed["q1"] == 1 and oracle["q2"] - observed["q2"] == 0
 ```
 
-**Expected:** paired improvement1 for q1.
+**Expected:** paired improvement 1 for q1.
 
-**Verify:** Compare the computed values or written argument with paired improvement1 for q1.
+**Verify:** Compare the computed values or written argument with paired improvement 1 for q1.
 
 ## Exercise 6: Reject duplicate result identities
 
-The question is: Validate one score row per question and inject a duplicateq1.
+The question is: Validate one score row per question and inject a duplicateq 1.
 
 Duplicated question rows can inflate counts and distort paired comparisons. Identity checks belong before calculating aggregate metrics.
 
@@ -141,4 +141,4 @@ assert len(bad) != len(set(bad))
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Handle an unanswerable question* and predict how the result changes before checking it; the unchanged inputs give: recall None; appropriate abstention True. Keep the original *Reject duplicate result identities* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

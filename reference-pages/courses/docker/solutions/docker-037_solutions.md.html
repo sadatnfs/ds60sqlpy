@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-tls-and-application-authorization">Exercise 1: Distinguish TLS and application authorization.<a class="heading-anchor" href="#exercise-1-distinguish-tls-and-application-authorization" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Encrypted authenticated transport versus permission for an action.</p>
 <p><strong>Why:</strong> A correctly encrypted request can still be unauthorized. The application must decide who may read or change its data.</p>
+<p><strong>Approach:</strong> Separate two checks: TLS confirms the server&#x27;s name and encrypts the hop; the app decides whether this caller may change the counter.</p>
+<p><strong>Why this is correct:</strong> An encrypted POST /increment from any client reaches the same handler, and server.py checks no identity.</p>
+<p><strong>A plausible wrong approach:</strong> Treating HTTPS as access control publishes a writable counter to anyone who can connect.</p>
+<p><strong>How to verify:</strong> Send a request over TLS with no credentials; if it succeeds, authorization is still missing.</p>
 <h3 id="exercise-2-predict-the-effect-of-a-certificate-name-mismatch">Exercise 2: Predict the effect of a certificate name mismatch.<a class="heading-anchor" href="#exercise-2-predict-the-effect-of-a-certificate-name-mismatch" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The client cannot validate the requested server name normally.</p>
 <p><strong>Why:</strong> Do not disable verification as the default fix. Correct the intended hostname and certificate relationship.</p>
+<p><strong>Approach:</strong> Compare the hostname the browser used with the names in the certificate.</p>
+<p><strong>Why this is correct:</strong> If they differ, the client cannot confirm it reached the intended server, so it stops before sending HTTP.</p>
+<p><strong>A plausible wrong approach:</strong> Turning off verification makes the error vanish and also accepts an impostor with any certificate.</p>
+<p><strong>How to verify:</strong> Issue a certificate for the hostname clients use, or use the name on the certificate; verification then passes.</p>
 <h3 id="exercise-3-draw-proxy-and-upstream-trust-boundaries">Exercise 3: Draw proxy and upstream trust boundaries.<a class="heading-anchor" href="#exercise-3-draw-proxy-and-upstream-trust-boundaries" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Explicit client-facing and internal hops with identities and timeouts.</p>
 <p><strong>Why:</strong> The drawing should show where TLS terminates and which component validates each request or header.</p>
+<p><strong>Approach:</strong> Draw the client-to-proxy hop and the proxy-to-app hop separately, marking where TLS ends and which component checks headers.</p>
+<p><strong>Why this is correct:</strong> The proxy terminates TLS, so the second hop has its own trust and timeout settings.</p>
+<p><strong>A plausible wrong approach:</strong> Drawing one arrow from browser to app hides that the inner hop may be unencrypted and unauthenticated.</p>
+<p><strong>How to verify:</strong> The drawing names the certificate on hop one, the upstream address and timeout on hop two, and the header policy.</p>
 <h3 id="exercise-4-diagnose-a-proxy-502-separately-from-an-app-404">Exercise 4: Diagnose a proxy 502 separately from an app 404.<a class="heading-anchor" href="#exercise-4-diagnose-a-proxy-502-separately-from-an-app-404" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Upstream failure versus a completed app route response.</p>
 <p><strong>Why:</strong> Use logs and direct owned upstream observations to locate the first failing hop without exposing new ports unnecessarily.</p>
+<p><strong>Approach:</strong> Read the status source: 502 is the proxy saying its upstream failed; 404 with unknown route is server.py answering.</p>
+<p><strong>Why this is correct:</strong> A 404 proves the request reached the handler, while a 502 means it never did or the reply failed.</p>
+<p><strong>A plausible wrong approach:</strong> Republishing the app port on the host to bypass the proxy adds exposure instead of reading proxy logs.</p>
+<p><strong>How to verify:</strong> Proxy logs show the upstream error for the 502, and the app log shows the 404 route.</p>
 <h3 id="exercise-5-explain-forwarded-header-spoofing">Exercise 5: Explain forwarded-header spoofing.<a class="heading-anchor" href="#exercise-5-explain-forwarded-header-spoofing" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Untrusted clients can send headers unless the proxy boundary sanitizes them.</p>
 <p><strong>Why:</strong> Treat those values as claims, not facts. Trust only the configured proxy chain and document how original client identity is derived.</p>
+<p><strong>Approach:</strong> Treat X-Forwarded-For and similar headers as values a client can set unless the proxy overwrites them.</p>
+<p><strong>Why this is correct:</strong> Only a proxy you control that replaces the header gives the app a value worth using.</p>
+<p><strong>A plausible wrong approach:</strong> Rate limiting or logging by a header the client wrote lets anyone claim another address.</p>
+<p><strong>How to verify:</strong> Send a request with a forged header through the proxy; the app sees the proxy&#x27;s value, not the forged one.</p>
 <h3 id="exercise-6-state-what-would-be-required-before-public-exposure">Exercise 6: State what would be required before public exposure.<a class="heading-anchor" href="#exercise-6-state-what-would-be-required-before-public-exposure" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A separate deployment design covering access, TLS, limits, operations and data.</p>
 <p><strong>Why:</strong> The local fixture’s simplicity is intentional. Do not advertise a loopback teaching app as public production hosting merely by changing the bind address.</p>
+<p><strong>Approach:</strong> List what public use would need: authentication, TLS, request limits, monitoring, backups and an operator.</p>
+<p><strong>Why this is correct:</strong> The fixture binds 127.0.0.1:18080 because it has none of these, which is acceptable only locally.</p>
+<p><strong>A plausible wrong approach:</strong> Changing the bind to 0.0.0.0 and calling it published exposes an unauthenticated writable counter.</p>
+<p><strong>How to verify:</strong> The publication note marks each item as designed, tested or missing before any exposure.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

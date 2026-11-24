@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 Illustrative partition 0: id &lt; 5 OR id IS NULL
 Illustrative partition 1: id &gt;= 5
 Configured lowerBound=0, upperBound=10, numPartitions=2</code></pre>
-<p>Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source rows can be read. To select only [0,10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.</p>
+<p>Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.</p>
 <h4 id="worked-example-2-map-an-exact-decimal-instant-and-missing-field">Worked example 2: Map an exact decimal, instant and missing field<a class="heading-anchor" href="#worked-example-2-map-an-exact-decimal-instant-and-missing-field" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
   <span class="syntax-tag">&quot;event_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span>
@@ -210,42 +210,42 @@ Configured lowerBound=0, upperBound=10, numPartitions=2</code></pre>
   <span class="syntax-tag">&quot;event_time_with_offset&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2026-10-23T12:00:00-07:00&quot;</span><span class="syntax-punctuation">,</span>
   <span class="syntax-tag">&quot;note&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p>The proposed Spark contract retains cents 125 as bigint, price as decimal(10,2), the event instant as 19:00UTC under the UTC baseline, and note as NULL. This exact-value fixture can falsify a float conversion, timezone reinterpretation or null-to-empty-string shortcut before any large read is approved.</p>
+<p>The proposed Spark contract retains cents 125 as bigint, price as <code>decimal(10, 2)</code>, the event instant as 19:00UTC under the UTC baseline, and note as NULL. This exact-value fixture can falsify a float conversion, timezone reinterpretation or null-to-empty-string shortcut before any large read is approved.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-define-grain-population-and-bounded-read-scope">Exercise 1: Define grain, population and bounded read scope<a class="heading-anchor" href="#exercise-1-define-grain-population-and-bounded-read-scope" aria-label="Link to this section">#</a></h4>
 <p>Review the fixed approved_export design and state its unique row key, export identity, predicate and maximum row count before any JDBC operation.</p>
-<p><strong>Inputs/evidence:</strong> For spark-040 Exercise 1, Synthetic export_id demo-2026, unique event_id, at most 5000 rows, approved columns event_id, cents, price, event_time, note.</p>
-<p><strong>Expected result/shape:</strong> For spark-040 Exercise 1, One row per event_id within one immutable export_id; at most 5000 rows and no unbounded collect.</p>
+<p><strong>Inputs/evidence:</strong> Synthetic export_id demo-2026, unique event_id, at most 5000 rows, approved columns event_id, cents, price, event_time, note.</p>
+<p><strong>Expected result/shape:</strong> One row per event_id within one immutable export_id; at most 5000 rows and no unbounded collect.</p>
 <p><strong>Verify:</strong> Write the row-grain and population contract, plus the count/uniqueness/readback checks that would reject an oversized or duplicate export.</p>
 <p><strong>Progressive hint:</strong> A table name and a connection URL are not a data contract.</p>
 <h4 id="exercise-2-map-four-tricky-sql-values-without-losing-meaning">Exercise 2: Map four tricky SQL values without losing meaning<a class="heading-anchor" href="#exercise-2-map-four-tricky-sql-values-without-losing-meaning" aria-label="Link to this section">#</a></h4>
 <p>Map bigint cents, decimal price, timestamp with time zone and nullable note into the proposed Spark contract.</p>
-<p><strong>Inputs/evidence:</strong> For spark-040 Exercise 2, cents 125;price 12345678.90 as numeric(10,2); event_time 2026-10-23T12:00:00-07:00;note SQLNULL.</p>
-<p><strong>Expected result/shape:</strong> For spark-040 Exercise 2, LongType 125;DecimalType(10,2)12345678.90;the same instant rendered 19:00:00UTC under the baseline; NULL remains missing, not an empty string.</p>
+<p><strong>Inputs/evidence:</strong> <code>cents</code> 125; <code>price</code> 12345678.90 as <code>numeric(10,2)</code>; <code>event_time</code> 2026-10-23T12:00:00-07:00; <code>note</code> SQL NULL.</p>
+<p><strong>Expected result/shape:</strong> <code>LongType</code> 125; <code>DecimalType(10,2)</code> 12345678.90; the same instant rendered 19:00:00 UTC under the baseline; NULL remains missing, not an empty string.</p>
 <p><strong>Verify:</strong> State source and target type, unit, precision/timezone policy and one rejected conversion for each.</p>
 <p><strong>Progressive hint:</strong> Money, wall-clock text, instants and missingness have different semantics.</p>
 <h4 id="exercise-3-reject-the-lowerbound-upperbound-filter-misconception">Exercise 3: Reject the lowerBound/upperBound filter misconception<a class="heading-anchor" href="#exercise-3-reject-the-lowerbound-upperbound-filter-misconception" aria-label="Link to this section">#</a></h4>
 <p>Predict which IDs can be read when partitionColumn=id, lowerBound 0, upperBound 10, numPartitions 2 are used without a SQL row filter.</p>
-<p><strong>Inputs/evidence:</strong> For spark-040 Exercise 3, IDs [-10,0,5,10,99, NULL]. Illustrative partition predicates:id&lt;5 OR id IS NULL, and id&gt;=5.</p>
-<p><strong>Expected result/shape:</strong> For spark-040 Exercise 3, All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to [0,10).</p>
+<p><strong>Inputs/evidence:</strong> IDs <code>[-10, 0, 5, 10, 99, NULL]</code>. Illustrative partition predicates: <code>id&lt;5 OR id IS NULL</code> and <code>id&gt;=5</code>.</p>
+<p><strong>Expected result/shape:</strong> All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to [0, 10).</p>
 <p><strong>Verify:</strong> Assign each supplied ID to the two predicates and write an explicit SQL filter for the intended population if one is required.</p>
 <p><strong>Progressive hint:</strong> The first and last JDBC partitions cover outside the stride bounds.</p>
 <h4 id="exercise-4-bound-connection-concurrency-and-read-consistency">Exercise 4: Bound connection concurrency and read consistency<a class="heading-anchor" href="#exercise-4-bound-connection-concurrency-and-read-consistency" aria-label="Link to this section">#</a></h4>
 <p>Design a maximum-two-partition read and explain why separate repeatable-read transactions do not automatically share one snapshot.</p>
-<p><strong>Inputs/evidence:</strong> For spark-040 Exercise 4, Two JDBC partitions; source rows can change; no live snapshot-coordination adapter is provided.</p>
-<p><strong>Expected result/shape:</strong> For spark-040 Exercise 4, A nominal 2-partition connection bound plus an explicit immutable-export or separately qualified coordinated-snapshot strategy.</p>
+<p><strong>Inputs/evidence:</strong> Two JDBC partitions; source rows can change; no live snapshot-coordination adapter is provided.</p>
+<p><strong>Expected result/shape:</strong> A nominal 2-partition connection bound plus an explicit immutable-export or separately qualified coordinated-snapshot strategy.</p>
 <p><strong>Verify:</strong> Name connection/time/fetch controls and show how concurrent source updates would otherwise produce a mixed-time result.</p>
 <p><strong>Progressive hint:</strong> Isolation level per connection is not the same as one shared snapshot across connections.</p>
 <h4 id="exercise-5-remove-credentials-from-source-and-evidence">Exercise 5: Remove credentials from source and evidence<a class="heading-anchor" href="#exercise-5-remove-credentials-from-source-and-evidence" aria-label="Link to this section">#</a></h4>
 <p>Review a fake options record containing a URL, user, password and operational settings. Keep only the approved diagnostic fields.</p>
-<p><strong>Inputs/evidence:</strong> For spark-040 Exercise 5, Synthetic password DUMMY_LESSON_ONLY, URL jdbc:postgresql://db.invalid:5432/course, numPartitions 2, fetchsize 1000, queryTimeout 30.</p>
-<p><strong>Expected result/shape:</strong> For spark-040 Exercise 5, No password, user, URL or credential-bearing connection string in the saved source/evidence; only approved operational settings are retained.</p>
+<p><strong>Inputs/evidence:</strong> Synthetic password <code>DUMMY_LESSON_ONLY</code>, URL <code>jdbc:postgresql://db.invalid:5432/course</code>, numPartitions 2, fetchsize 1000, queryTimeout 30.</p>
+<p><strong>Expected result/shape:</strong> No password, user, URL or credential-bearing connection string in the saved source/evidence; only approved operational settings are retained.</p>
 <p><strong>Verify:</strong> Write the exact sanitized object and identify the approved runtime credential source without inventing a real account.</p>
 <p><strong>Progressive hint:</strong> Do not depend on one regex matching every possible secret-bearing string.</p>
 <h4 id="exercise-6-write-a-future-acceptance-and-failure-contract">Exercise 6: Write a future acceptance and failure contract<a class="heading-anchor" href="#exercise-6-write-a-future-acceptance-and-failure-contract" aria-label="Link to this section">#</a></h4>
 <p>Specify the evidence required before enabling a JDBC profile, including missing-driver, mapping, timeout, cancellation and least-privilege checks.</p>
-<p><strong>Inputs/evidence:</strong> For spark-040 Exercise 6, Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.</p>
-<p><strong>Expected result/shape:</strong> For spark-040 Exercise 6, A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.</p>
+<p><strong>Inputs/evidence:</strong> Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.</p>
+<p><strong>Expected result/shape:</strong> A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.</p>
 <p><strong>Verify:</strong> List positive and negative cases, exact version tuple, source identity, output oracle, connection closure and no-write privileges.</p>
 <p><strong>Progressive hint:</strong> A proposed option map is not a connector implementation.</p></article>
   </main>

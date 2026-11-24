@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The capstone joins the preceding mechanisms into one bounded analytics product. Raw order text is staged under a parsing policy, a customer dimension enriches accepted orders, and a mart summarizes totals at a declared customer/region grain. Tests check source and model identities before an accepted artifact is published. The complete program creates ordinary dbt files and executes the installed tool against an owned DuckDB database.</p>
 <p>The fixture contains one malformed amount, so the accepted mart must account for excluded input rather than silently describing itself as the whole source. The valid product totals 21 across three accepted orders. A second fixture duplicates a dimension key, and the build must block publication. This case connects an operational gate to the earlier fanout reasoning.</p>
 <p>The final receipt records grain, row count, a data hash and manifest dependencies. Those fields make an accepted artifact identifiable and reviewable. They do not establish authenticity or a deployed service-level objective on their own. A durable environment additionally needs ownership, atomic publication, storage/retention decisions and recovery after an uncertain operation.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Declared grain:</strong> The stated key of one output row, here one row per customer and region, which tests check for duplicates.</li>
+<li><strong>Fanout:</strong> Row multiplication caused by joining to a dimension with a duplicated key, which inflates sums.</li>
+<li><strong>Publication block:</strong> The rule that writes published.json only when the build and every row check pass.</li>
+<li><strong>Decision receipt:</strong> A record of the grain, row count, data hash and manifest dependencies that justified publication.</li>
+<li><strong>Data hash:</strong> A digest of a canonical serialization of the accepted result that identifies exactly which data was published.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The program writes seed CSVs, model SQL and YAML tests, runs build, inspects actual query results and generates documentation artifacts. Only the accepted path writes published.json. Its hash binds a canonical serialized result for this fixture. The manifest supplies declared model dependencies; the row checks and test outcomes provide separate evidence about the computation.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

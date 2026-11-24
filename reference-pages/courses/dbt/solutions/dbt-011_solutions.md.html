@@ -198,21 +198,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-remove-a-declared-column">1. Remove a declared column<a class="heading-anchor" href="#1-remove-a-declared-column" aria-label="Link to this section">#</a></h3>
 <p>A consumer cannot safely assume the missing field exists. Treat removal as a compatibility change rather than silently updating the contract.</p>
+<p><strong>Why it holds here:</strong> contract.enforced compares the model&#x27;s actual columns to the declared id and amount list before building. Dropping amount makes the actual list shorter than the declared one, so dbt refuses the run.</p>
+<p><strong>Plausible wrong approach:</strong> Deleting the amount entry from the YAML at the same time makes the build pass, but it silently removes a field that downstream readers of contracted still select.</p>
+<p><strong>How to verify:</strong> Change the SQL to select 1::integer as id and run dbt run --select contracted; expect a contract mismatch error naming amount, with the earlier table still holding (1, 42).</p>
 <p><strong>Expected:</strong> The enforced contract rejects the mismatch.</p>
 <h3 id="2-add-a-new-output-field">2. Add a new output field<a class="heading-anchor" href="#2-add-a-new-output-field" aria-label="Link to this section">#</a></h3>
 <p>Review the consumer interface and update/version the contract deliberately. Do not assume additional fields are harmless in every downstream system.</p>
+<p><strong>Why it holds here:</strong> An extra currency column is also a mismatch under an enforced contract, because the declared column list is the full interface, not a minimum.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming extra columns are always safe ignores consumers that read by position or write the relation into a fixed schema, which then break or misalign.</p>
+<p><strong>How to verify:</strong> Add &#x27;usd&#x27;::varchar as currency to the SQL without declaring it and run; expect a contract error naming currency, then declare it with data_type varchar and confirm the build passes.</p>
 <p><strong>Expected:</strong> The schema change is explicit.</p>
 <h3 id="3-test-a-null-identifier">3. Test a null identifier<a class="heading-anchor" href="#3-test-a-null-identifier" aria-label="Link to this section">#</a></h3>
 <p>Keep data tests as appropriate and inspect adapter constraint support. A declared constraint should not be advertised as enforced without actual evidence.</p>
+<p><strong>Why it holds here:</strong> example_one declares a not_null constraint on id. DuckDB supports not null in its table DDL, so returning null for id should fail when dbt creates the table with that constraint.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming every adapter enforces the same constraints is wrong; some warehouses accept primary key or foreign key declarations as metadata only.</p>
+<p><strong>How to verify:</strong> Change the SQL to select null::integer as id, 42::bigint as amount and run dbt build; expect a constraint violation, and query contracted to confirm whether the prior row survived.</p>
 <p><strong>Expected:</strong> The database/contract path reports the violation when supported.</p>
 <h3 id="4-distinguish-failure-stages">4. Distinguish failure stages<a class="heading-anchor" href="#4-distinguish-failure-stages" aria-label="Link to this section">#</a></h3>
 <p>A schema preflight may reject replacement earlier, while a data test can fail after materialization. Design publication around the actual sequence.</p>
+<p><strong>Why it holds here:</strong> In example_two the varchar amount is rejected before the table is replaced, so the earlier row (1, 42) is still readable. A unique test failure, by contrast, runs after the model is built.</p>
+<p><strong>Plausible wrong approach:</strong> Treating both failures as equally safe misses that the data-test failure leaves new rows materialized for anyone who reads the table directly.</p>
+<p><strong>How to verify:</strong> After the failed run, query select amount from contracted and expect 42; repeat with a duplicate id plus a unique test and observe that the new rows exist despite the test failure.</p>
 <p><strong>Expected:</strong> The two cases leave different observed state.</p>
 <h3 id="5-check-consumer-assumptions">5. Check consumer assumptions<a class="heading-anchor" href="#5-check-consumer-assumptions" aria-label="Link to this section">#</a></h3>
 <p>Add semantic contracts and tests. Schema enforcement does not establish that amount uses the expected currency or period.</p>
+<p><strong>Why it holds here:</strong> The contract checks names and types only. amount as bigint says nothing about whether it is cents or dollars, gross or net, or whether a null means zero.</p>
+<p><strong>Plausible wrong approach:</strong> Treating a passing enforced contract as proof that amount is correct confuses type compatibility with meaning.</p>
+<p><strong>How to verify:</strong> Write the column description with grain, unit, period and null policy, then add an accepted_range or custom test that a deliberately negative amount fails.</p>
 <p><strong>Expected:</strong> They include grain, units, time and missingness.</p>
 <h3 id="6-plan-an-incompatible-change">6. Plan an incompatible change<a class="heading-anchor" href="#6-plan-an-incompatible-change" aria-label="Link to this section">#</a></h3>
 <p>Publish a new version with its definition, compare results, migrate consumers and retain rollback evidence. The next lesson makes version selection explicit.</p>
+<p><strong>Why it holds here:</strong> Changing what amount means while keeping its name and bigint type passes the contract unchanged, so the contract alone cannot protect consumers from a meaning change.</p>
+<p><strong>Plausible wrong approach:</strong> Editing the existing model in place to compute net amount ships a semantic break that every reader receives at once with no rollback point.</p>
+<p><strong>How to verify:</strong> Create a second version with net_amount, run both side by side, compare totals per id, migrate readers, and confirm the old version still builds until it is retired.</p>
 <p><strong>Expected:</strong> It uses an explicit version and consumer migration.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;dbt-011: actual local dbt and DuckDB reference.&quot;&quot;&quot;</span>

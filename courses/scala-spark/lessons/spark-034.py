@@ -119,7 +119,7 @@ def main():
         impression_minute = 0
         assert 3 >= impression_minute and 3 < impression_minute + 10
         assert not (10 >= impression_minute and 10 < impression_minute + 10)
-        print("Minute3 matches;minute10 is outside the half-open window")
+        print("Minute 3 matches; minute 10 is outside the half-open window")
         impressions = [("i1", "A", 0), ("i2", "B", 0), ("i3", "C", 5)]
         clicks = [("c1", "A", 3), ("c2", "C", 10), ("c3", "A", 10), ("c4", "Z", 4)]
         pairs = [

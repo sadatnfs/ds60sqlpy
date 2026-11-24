@@ -14,6 +14,14 @@ A pool can reduce allocation latency and fragmentation but cannot shrink the set
 
 
 
+### Key terms
+
+- **Caching allocator:** A framework memory manager that keeps freed device blocks for reuse instead of returning them to the driver.
+- **Allocated memory:** Bytes currently held by live tensors or arrays.
+- **Reserved memory:** Bytes the allocator holds from the driver, including cached blocks that no live tensor uses.
+- **Retained reference:** A lingering Python name, list entry or graph edge that keeps a tensor alive and prevents its memory from being reused.
+- **Cache clearing:** Returning unused cached blocks to the driver, which lowers reserved memory but does not free live tensors.
+
 ## Worked examples
 
 ### Worked example 1
@@ -42,33 +50,53 @@ print("CPU allocator model:", live, reserved, sum(retained))
 
 **Expected observation:** Live 1024, reserved 1024, retained-output example 4096 bytes.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `reserved` | `1024` |
+| `live` | `1024` |
+| `retained` | `[1024, 1024, 1024, 1024]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Compute live and reserved totals
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute live and reserved totals** in the examples above.
+**Trap to avoid:** Reading the device memory report and concluding there is a 1024-byte leak confuses reserved with live. The block is free in the pool and will be reused.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Reuse a free block
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **reuse a free block** in the examples above.
+**Trap to avoid:** Expecting reserved to rise to 2048 after the second allocation assumes the pool never reuses blocks. That would make every loop iteration look like growth.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Diagnose a retained-output list
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **diagnose a retained-output list** in the examples above.
+**Trap to avoid:** Calling the pool's free-all function every step does not release arrays still referenced by the list. Live bytes stay at 4096 and the clearing just costs time.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain why cache clearing is insufficient
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain why cache clearing is insufficient** in the examples above.
+**Trap to avoid:** Adding `free_all_blocks()` after every step makes the memory report drop slightly while the actual leak continues, giving false confidence.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design bounded snapshots
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design bounded snapshots** in the examples above.
+**Trap to avoid:** Running until the device runs out of memory and reading the error message is unbounded and can disturb other users of a shared device.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Separate host RAM and VRAM
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **separate host RAM and VRAM** in the examples above.
+**Trap to avoid:** Setting a container memory limit and expecting it to prevent device out-of-memory errors gives no protection. The device can still fill up.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

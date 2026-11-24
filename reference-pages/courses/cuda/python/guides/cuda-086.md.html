@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Build a small normalize-and-score pipeline with an explicit schema: rows are observations, columns are features, inputs are finite, and the chosen accumulation dtype is documented. Compute means and scales from the training fixture only, preserve constant-feature behavior and keep transformed arrays on one backend where practical. A CPU oracle establishes expected values before any optimization.</p>
 <p>The capstone adds ownership and dependency diagrams. Show which library owns each allocation, whether each interchange aliases or copies, and when the consumer may read it. Report preparation, transfer and computation separately, then report complete latency. One backend can implement the full pipeline; introducing a second library needs a reason. The deliverable includes an unchanged baseline and an explanation of one failed optimization.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Fitted statistic:</strong> A value such as a mean or scale that is learned from data and then applied as a transform.</li>
+<li><strong>Data leakage:</strong> Information from validation or test data that influences training or preprocessing and inflates measured quality.</li>
+<li><strong>Constant feature:</strong> A column with zero variance, whose standardization divides by zero unless it is guarded.</li>
+<li><strong>Schema:</strong> The required column names, order and dtypes that every data split must share.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Center training rows [[1,2],[3,4]] to [[-1,-1],[1,1]]. Scoring with weights [2,-1] gives [-1,1]. The same means must be reused for later examples.</p>
@@ -214,20 +221,48 @@ scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <span class="syntax-keyword">assert</span> means <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> scores <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU pipeline oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> means<span class="syntax-punctuation">,</span> scores<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Fitted means [2,3] and scores [-1,1].</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>rows</code></td>
+<td><code>[[1, 2], [3, 4]]</code></td>
+</tr>
+<tr>
+<td><code>means</code></td>
+<td><code>[2.0, 3.0]</code></td>
+</tr>
+<tr>
+<td><code>centered</code></td>
+<td><code>[[-1.0, -1.0], [1.0, 1.0]]</code></td>
+</tr>
+<tr>
+<td><code>scores</code></td>
+<td><code>[-1.0, 1.0]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-derive-fitted-means">Exercise 1: Derive fitted means<a class="heading-anchor" href="#exercise-1-derive-fitted-means" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>derive fitted means</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Averaging along columns, the per-row means, gives <code>[1.5, 3.5]</code> and centers the wrong axis.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-score-the-centered-rows">Exercise 2: Score the centered rows<a class="heading-anchor" href="#exercise-2-score-the-centered-rows" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>score the centered rows</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Scoring the raw rows gives <code>[0, 2]</code>, which skips the fitted transformation.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-add-a-constant-column">Exercise 3: Add a constant column<a class="heading-anchor" href="#exercise-3-add-a-constant-column" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>add a constant column</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Dividing by the standard deviation without a check fills the column with NaN, which spreads into the scores.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-draw-owners-and-waits">Exercise 4: Draw owners and waits<a class="heading-anchor" href="#exercise-4-draw-owners-and-waits" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>draw owners and waits</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Drawing only the computation steps without owners loses track of when buffers can be freed.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-train-validation-separation">Exercise 5: Design train-validation separation<a class="heading-anchor" href="#exercise-5-design-train-validation-separation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design train-validation separation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Fitting on the concatenated train and validation data is a subtler leak with the same effect: validation scores look better than they would on truly unseen rows.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-write-the-capstone-acceptance-report">Exercise 6: Write the capstone acceptance report<a class="heading-anchor" href="#exercise-6-write-the-capstone-acceptance-report" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>write the capstone acceptance report</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting a single speedup number leaves out correctness and the scope of the claim, so readers cannot tell whether transfers were timed or whether the means were reused.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

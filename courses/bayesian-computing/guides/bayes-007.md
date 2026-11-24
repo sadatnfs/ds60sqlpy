@@ -10,6 +10,13 @@ For the one-dimensional standard-normal target with unit mass, \(U(q)=q^2/2\), \
 
 The program demonstrates the integrator only. It does not implement a complete HMC or NUTS inference engine, momentum-refresh policy, adaptation schedule or production diagnostic suite. The later prepared PyMC and Stan profiles perform actual library inference.
 
+## Key terms
+
+- **Hamiltonian:** The total energy H(q, p) = U(q) + K(p), with potential energy minus the log target density and kinetic energy from the momentum.
+- **Momentum:** An auxiliary variable p paired with position q whose kinetic energy depends on a positive-definite mass matrix.
+- **Leapfrog integrator:** A half momentum step, a full position step and another half momentum step; it is reversible and volume preserving.
+- **NUTS:** The No-U-Turn Sampler, which adaptively chooses how long each trajectory runs instead of fixing the number of leapfrog steps.
+
 ## Worked case 1: verify reversibility and energy behavior
 
 Starting from position .5 and momentum .7, ten steps of size .2 produce a small energy error. Integrating again from the endpoint with reversed momentum returns the original position and the negative original momentum within numerical tolerance.
@@ -39,6 +46,42 @@ Mass-matrix terminology varies across interfaces. Some expose a metric or invers
 **Does increasing the number of leapfrog steps fix an excessive step size?** Not generally. More unstable updates can amplify the numerical error. Step size and trajectory length affect different aspects of the transition.
 
 **Why use an analytic normal target before a complex posterior?** Its gradient and Hamiltonian are known, so reversibility, signs and numerical behavior can be checked directly. Those checks establish the integrator mechanism; actual posterior inference also needs correct density code, adaptation and diagnostic evidence.
+
+## Worked example: Leapfrog stability limit set by the narrowest direction
+
+```python
+import numpy as np
+
+sd = np.array([1.0, 0.1])  # independent Gaussian target, one narrow axis
+
+
+def energy_error(eps, steps=50):
+    q = np.array([1.0, 0.1])
+    p = np.array([0.5, 0.5])
+    H0 = 0.5 * np.sum((q / sd) ** 2) + 0.5 * p @ p
+    p = p - 0.5 * eps * q / sd**2
+    for i in range(steps):
+        q = q + eps * p
+        if i < steps - 1:
+            p = p - eps * q / sd**2
+    p = p - 0.5 * eps * q / sd**2
+    return 0.5 * np.sum((q / sd) ** 2) + 0.5 * p @ p - H0
+
+
+for eps in (0.05, 0.15, 0.19, 0.21):
+    print(f"step {eps:.2f}: eps/sd_min {eps / sd.min():.1f}, energy error {energy_error(eps):.3g}")
+```
+
+Observed output:
+
+```text
+step 0.05: eps/sd_min 0.5, energy error 0.00366
+step 0.15: eps/sd_min 1.5, energy error -0.00813
+step 0.19: eps/sd_min 1.9, energy error -0.376
+step 0.21: eps/sd_min 2.1, energy error 9.83e+25
+```
+
+The target is Gaussian with standard deviations 1 and 0.1. Leapfrog on a Gaussian with frequency \(\omega=1/\mathrm{sd}\) is stable only when \(\epsilon\omega<2\), so the narrow direction sets a limit of \(\epsilon<0.2\) no matter how wide the other direction is. Below that limit the energy error stays bounded and small, 0.00366 at \(\epsilon=0.05\) and \(-0.00813\) at 0.15, even over 50 steps, which is why HMC can take long trajectories with high acceptance. At 0.19, close to the limit, the error grows to \(-0.376\), and the acceptance probability \(\min(1,e^{-\Delta H})\) would still be acceptable but noisy. At 0.21 the integrator diverges and the energy error is \(9.83\times10^{25}\), so every proposal would be rejected. This is the geometry behind divergences in NUTS: a single narrow direction, such as a hierarchical scale near zero, forces a tiny step everywhere. Rescaling that direction, through a mass matrix or reparameterization, removes the bottleneck.
 
 ## Complete reproducible program
 

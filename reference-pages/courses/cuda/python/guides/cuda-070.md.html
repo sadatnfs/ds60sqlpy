@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A caching allocator distinguishes live allocations from reserved blocks. Releasing the last array reference can make a block reusable by the pool without returning it to the driver. Device-context overhead and library workspaces add further categories. A stable reserved total after repeated equal workloads can be normal. Growing live allocations after every step suggests retained tensors, outputs or computation graphs.</p>
 <p>A pool can reduce allocation latency and fragmentation but cannot shrink the set of live tensors required by a model. Clearing unused cache blocks is not a repair for a workload whose live set exceeds memory. Measure at consistent synchronization points, account for delayed asynchronous frees, and avoid intentionally exhausting a shared GPU to demonstrate an OOM. A bounded allocation ledger teaches the same ownership distinction safely.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Caching allocator:</strong> A framework memory manager that keeps freed device blocks for reuse instead of returning them to the driver.</li>
+<li><strong>Allocated memory:</strong> Bytes currently held by live tensors or arrays.</li>
+<li><strong>Reserved memory:</strong> Bytes the allocator holds from the driver, including cached blocks that no live tensor uses.</li>
+<li><strong>Retained reference:</strong> A lingering Python name, list entry or graph edge that keeps a tensor alive and prevents its memory from being reused.</li>
+<li><strong>Cache clearing:</strong> Returning unused cached blocks to the driver, which lowers reserved memory but does not free live tensors.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>An allocator reserves 1024 bytes, lends all 1024 to an array, then returns the array to its free list. Live bytes become zero while reserved bytes remain 1024.</p>
@@ -217,20 +225,44 @@ retained <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>retained<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4096</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU allocator model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> live<span class="syntax-punctuation">,</span> reserved<span class="syntax-punctuation">,</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>retained<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Live 1024, reserved 1024, retained-output example 4096 bytes.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>reserved</code></td>
+<td><code>1024</code></td>
+</tr>
+<tr>
+<td><code>live</code></td>
+<td><code>1024</code></td>
+</tr>
+<tr>
+<td><code>retained</code></td>
+<td><code>[1024, 1024, 1024, 1024]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-live-and-reserved-totals">Exercise 1: Compute live and reserved totals<a class="heading-anchor" href="#exercise-1-compute-live-and-reserved-totals" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute live and reserved totals</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reading the device memory report and concluding there is a 1024-byte leak confuses reserved with live. The block is free in the pool and will be reused.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-reuse-a-free-block">Exercise 2: Reuse a free block<a class="heading-anchor" href="#exercise-2-reuse-a-free-block" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>reuse a free block</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Expecting reserved to rise to 2048 after the second allocation assumes the pool never reuses blocks. That would make every loop iteration look like growth.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-diagnose-a-retained-output-list">Exercise 3: Diagnose a retained-output list<a class="heading-anchor" href="#exercise-3-diagnose-a-retained-output-list" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>diagnose a retained-output list</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calling the pool&#x27;s free-all function every step does not release arrays still referenced by the list. Live bytes stay at 4096 and the clearing just costs time.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-why-cache-clearing-is-insufficient">Exercise 4: Explain why cache clearing is insufficient<a class="heading-anchor" href="#exercise-4-explain-why-cache-clearing-is-insufficient" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>explain why cache clearing is insufficient</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Adding <code>free_all_blocks()</code> after every step makes the memory report drop slightly while the actual leak continues, giving false confidence.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-bounded-snapshots">Exercise 5: Design bounded snapshots<a class="heading-anchor" href="#exercise-5-design-bounded-snapshots" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design bounded snapshots</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Running until the device runs out of memory and reading the error message is unbounded and can disturb other users of a shared device.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-separate-host-ram-and-vram">Exercise 6: Separate host RAM and VRAM<a class="heading-anchor" href="#exercise-6-separate-host-ram-and-vram" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>separate host RAM and VRAM</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Setting a container memory limit and expecting it to prevent device out-of-memory errors gives no protection. The device can still fill up.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

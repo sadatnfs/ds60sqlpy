@@ -10,6 +10,13 @@ The example observes five count periods 2,3,2,5,4. A Gamma(2,1) prior uses the s
 
 Future demand integrates the Poisson likelihood over this gamma posterior, yielding a negative-binomial predictive distribution under the stated parameterization. The program uses that exact distribution as a decision oracle, rather than trusting a finite simulation to choose the final action automatically.
 
+## Key terms
+
+- **Gamma-Poisson posterior:** The conjugate update in which a Gamma(2, 1) prior and five counts summing to 16 give Gamma(18, 6).
+- **Negative-binomial predictive:** The distribution of future demand obtained by integrating the Poisson likelihood over the gamma posterior.
+- **Monte Carlo error:** Approximation error from finite sampling that can change the selected action when expected costs are close.
+- **Decision oracle:** The exact predictive distribution used to verify the optimal quantity instead of trusting a short simulation.
+
 ## Worked case 1: optimize an exact posterior predictive cost
 
 Underage costs four per unit and overage costs one. Candidate quantities range from zero through ten. The code evaluates expected cost under the exact predictive mass function, including enough count support that omitted tail mass is negligible for this fixture. The optimal quantity is four.
@@ -39,6 +46,44 @@ The finite program uses a fixed seed for reproducibility, but a fixed seed is no
 **Should an analyst always rerun until the simulated action matches an expected answer?** No. That selects favorable numerical noise. Use independent oracles where available, state a precision criterion and improve the computation transparently.
 
 **What transfers to a larger optimization system?** Preserve posterior uncertainty through the relevant loss, evaluate the precision of action comparisons, record the chosen rule and retain a rollback or reassessment condition. A successful sampling command is only one component of that scientific decision process.
+
+## Worked example: How flat the expected cost is around the optimal order
+
+```python
+import numpy as np
+from scipy import stats
+
+a, b = 2 + 41, 0.1 + 4  # Gamma posterior for a Poisson demand rate
+pred = stats.nbinom(a, b / (b + 1))  # posterior predictive demand for one period
+under, over = 5.0, 1.0
+d = np.arange(0, 60)
+pmf = pred.pmf(d)
+
+
+def cost(q):
+    return pmf @ (under * np.maximum(d - q, 0) + over * np.maximum(q - d, 0))
+
+
+q_star = int(pred.ppf(under / (under + over)))
+print(f"predictive mean {pred.mean():.2f}, sd {pred.std():.2f}, optimal order {q_star}")
+for q in range(q_star - 3, q_star + 4):
+    print(f"q={q}: expected cost {cost(q):.4f}, excess {cost(q) - cost(q_star):.4f}")
+```
+
+Observed output:
+
+```text
+predictive mean 10.49, sd 3.61, optimal order 14
+q=11: expected cost 7.7210, excess 2.0012
+q=12: expected cost 6.5275, excess 0.8076
+q=13: expected cost 5.8921, excess 0.1723
+q=14: expected cost 5.7198, excess 0.0000
+q=15: expected cost 5.9108, excess 0.1909
+q=16: expected cost 6.3723, excess 0.6525
+q=17: expected cost 7.0262, excess 1.3063
+```
+
+The gamma posterior for the demand rate gives a negative binomial predictive with mean 10.49 and standard deviation 3.61. With shortage cost 5 and overage cost 1, the critical fractile is \(5/6=0.833\), and the predictive quantile is 14, about three and a half units above the mean. The cost table shows how much precision that answer needs. Moving one unit either way costs only 0.17 or 0.19 per period, about 3 percent of the optimum 5.72. Moving three units costs between 1.3 and 2.0. The curve is flat near the optimum and asymmetric farther out, because running short is five times as expensive as overstocking: ordering 11 costs more extra than ordering 17. This flatness decides how much simulation effort is worthwhile. A Monte Carlo approximation that sometimes picks 13 or 15 loses less than 0.2 per period, so a modest number of predictive draws is usually enough, whereas an error that lands on 11 deserves attention. The Monte Carlo standard error should be judged on the cost scale, not on the quantity scale.
 
 ## Complete reproducible program
 

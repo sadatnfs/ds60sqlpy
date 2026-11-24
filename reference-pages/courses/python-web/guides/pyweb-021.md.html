@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-020</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A download endpoint must select files within its intended storage boundary. This chapter creates an owned temporary download directory and a separate synthetic file outside it. It verifies a valid download, a parent-directory traversal attempt and an outside-pointing symbolic link without touching any real private user file.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Path traversal:</strong> An attack that uses segments such as <code>..</code> or symbolic links to reach files outside the intended directory.</li>
+<li><strong>Canonical path:</strong> An absolute path with symbolic links and <code>..</code> segments resolved, obtained here with <code>Path.resolve()</code>.</li>
+<li><strong>Storage root:</strong> The owned directory that every served file must stay inside; it must itself be resolved before candidates are compared with it.</li>
+<li><strong>send_file:</strong> Flask&#x27;s helper for sending a file&#x27;s bytes as a response, called only after the resolved path passes the boundary check.</li>
+<li><strong>Time-of-check/time-of-use:</strong> A race in which the filesystem changes between validating a path and opening it, so the checked file is not the served file.</li>
+</ul>
 <h3 id="mechanism-compare-canonical-paths-against-a-canonical-root">Mechanism: compare canonical paths against a canonical root<a class="heading-anchor" href="#mechanism-compare-canonical-paths-against-a-canonical-root" aria-label="Link to this section">#</a></h3>
 <p>The trusted parent directory is resolved first. The handler resolves the requested candidate and requires it to remain relative to the owned download directory before calling <code>send_file</code>. It also requires an ordinary file. This separates the URL input from the final filesystem object the application intends to serve.</p>
 <p>Resolving only the candidate is insufficient when the configured root itself has a filesystem alias. The host test exposed exactly that issue on macOS: a temporary path under <code>/var</code> resolved through <code>/private/var</code>, so an otherwise valid file appeared outside an unresolved root. Resolving the trusted root repaired the comparison without allowing traversal or outside links.</p>
@@ -208,6 +216,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-case-traversal-and-an-outside-link-are-refused">Worked case: traversal and an outside link are refused<a class="heading-anchor" href="#worked-case-traversal-and-an-outside-link-are-refused" aria-label="Link to this section">#</a></h3>
 <p>The request for <code>../private.txt</code> resolves outside the allowed directory and receives 404. A file inside the allowed directory that is a symbolic link to that same outside target is also refused. Both cases exercise actual path resolution, rather than simply checking whether the submitted text contains a suspicious substring.</p>
 <p>A normalized path containing an earlier <code>..</code> segment can still end inside the allowed root; the application&#x27;s contract should define whether that syntax is allowed. Here the decisive boundary is the resolved file location. It is not a general claim that every dot-containing path string is rejected.</p>
+<h3 id="worked-example-why-a-string-prefix-check-is-not-a-path-boundary">Worked example: why a string prefix check is not a path boundary<a class="heading-anchor" href="#worked-example-why-a-string-prefix-check-is-not-a-path-boundary" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> PurePosixPath
+
+root <span class="syntax-operator">=</span> PurePosixPath<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/srv/uploads</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+candidates <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">/srv/uploads/report.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">/srv/uploads_old/secret.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">/srv/uploads/../private.txt</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> raw <span class="syntax-operator">in</span> candidates<span class="syntax-punctuation">:</span>
+    path <span class="syntax-operator">=</span> PurePosixPath<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>
+        raw<span class="syntax-punctuation">,</span>
+        <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        path<span class="syntax-operator">.</span>is_relative_to<span class="syntax-punctuation">(</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">/srv/uploads/report.txt True True
+/srv/uploads_old/secret.txt True False
+/srv/uploads/../private.txt True True</code></pre>
+<p>The second row shows the classic bug: <code>/srv/uploads_old</code> begins with the characters <code>/srv/uploads</code>, so a <code>startswith</code> check accepts a sibling directory. <code>is_relative_to</code> compares whole path components and correctly rejects it. The third row shows the limit of pure path objects: they do not interpret <code>..</code>, so even <code>is_relative_to</code> says the unresolved path is inside the root. That is why the lesson calls <code>resolve(strict=True)</code> first, which collapses <code>..</code>, follows symbolic links such as <code>linked.txt</code> and requires the file to exist, and only then checks containment. Checking before resolving, or resolving without the containment check, each leaves one of the lesson&#x27;s two 404 cases open.</p>
 <h3 id="failure-diagnosis">Failure diagnosis<a class="heading-anchor" href="#failure-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>If a valid file receives 404, compare canonical root and candidate paths, including platform aliases and symlinks. If a traversal succeeds, inspect whether the code compared only string prefixes or joined an absolute path that discarded the intended root. String prefix checks can confuse sibling names such as <code>uploads</code> and <code>uploads-old</code>.</p>
 <p>Uploaded filenames also need collision, authorization and content policies. A safe download path does not establish that the uploaded bytes are suitable for a later parser or that the caller owns the file. Keep those responsibilities visible in the application design.</p>

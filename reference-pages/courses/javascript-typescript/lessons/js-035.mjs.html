@@ -199,18 +199,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Date(&#x27;2024-01-01T00:00:00Z&#x27;);` to `const utc = new Date(&#x27;2025-01-01T00:00:00Z&#x27;);`. Before</span></span>
 <span class="source-line"><span class="syntax-comment">// running it, predict which check fails and which value it now sees; then run it and restore</span></span>
 <span class="source-line"><span class="syntax-comment">// the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(utc.getTime(), offset.getTime())`. Restoring the original line brings back</span></span>
-<span class="source-line"><span class="syntax-comment">// the worked observation: equal timestamps and UTC ISO output.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(utc.getTime(),</span></span>
+<span class="source-line"><span class="syntax-comment">// offset.getTime())`. Restoring `const utc = new Date(&#x27;2024-01-01T00:00:00Z&#x27;);` brings back:</span></span>
+<span class="source-line"><span class="syntax-comment">// equal timestamps and UTC ISO output.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Observe a spring-forward clock gap: diagnose an edited check</span></span>
 <span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Run Example B with</span></span>
 <span class="source-line"><span class="syntax-comment">// that line, explain why the edited check now fails for the same program state, and restore</span></span>
 <span class="source-line"><span class="syntax-comment">// it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000)`; after it the line</span></span>
-<span class="source-line"><span class="syntax-comment">// reads `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` again and local</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` brings back: local</span></span>
 <span class="source-line"><span class="syntax-comment">// hour changes from 01 to 03 while elapsed time is one hour.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Reject impossible or ambiguous calendar text</span></span>

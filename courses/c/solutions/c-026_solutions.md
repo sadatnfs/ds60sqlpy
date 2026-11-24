@@ -1,6 +1,6 @@
 # c-026: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-026_solution.c`, implements all six cases, from the "append two fragments" case to the "transfer a delimiter protocol" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -20,13 +20,13 @@ CHECK(append_text(&b, "red") && append_text(&b, " sky"));
 CHECK(b.len == 7 && strcmp(b.data, "red sky") == 0);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `b.len == 7 && strcmp(b.data, "red sky") == 0`. Restoring the original line brings back the worked observation: the result is red sky with length 7.
+**Expected:** With `CHECK(append_text(&b, "red!") && append_text(&b, " sky"));` the run stops with `Check failed` at the CHECK on `b.len == 7 && strcmp(b.data, "red sky") == 0`, because the "append two fragments" case no longer shows that the result is red sky with length 7. Restoring `CHECK(append_text(&b, "red") && append_text(&b, " sky"));` brings that observation back.
 
 The stored length avoids rescanning previous content before every append.
 
 ## Exercise 2: Append empty text: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(append_text(&b, "abc!") && append_text(&b, ""));`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+A careless edit changed the CHECK in worked example 2, the "append empty text" case, so that it reads `CHECK(append_text(&b, "abc!") && append_text(&b, ""));`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means length and content remain unchanged, and restore it.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +36,7 @@ CHECK(append_text(&b, "abc") && append_text(&b, ""));
 CHECK(b.len == 3 && strcmp(b.data, "abc") == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `b.len == 3 && strcmp(b.data, "abc") == 0`; after it the line reads `CHECK(append_text(&b, "abc") && append_text(&b, ""));` again and length and content remain unchanged.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `b.len == 3 && strcmp(b.data, "abc") == 0`. Once the line reads `CHECK(append_text(&b, "abc") && append_text(&b, ""));` again, the "append empty text" case again shows that length and content remain unchanged.
 
 The empty append is a successful no-op, not an error or a new terminator-free state.
 
@@ -100,4 +100,4 @@ This is a fixed synthetic delimiter example. General CSV output needs quoting ru
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a delimiter protocol" case to your own c-026 source. Explain why every access in `append_text` stays within a live object and each owned resource is released. An expected builder invariant failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "append empty text" case apart from ordinary output: the fixture proves its stated builder invariant, failure-atomic append and overlap contract assumptions, not universal safety.

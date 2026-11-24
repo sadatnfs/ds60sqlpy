@@ -50,61 +50,61 @@ int main() {
 
 ### Exercise 1: Predict integer division
 
-**Inputs/evidence:** For cpp-003 Exercise 1, 7/2 and 7.0/2.0.
+**Inputs/evidence:** 7/2 and 7.0/2.0.
 
-**Expected result/shape:** For cpp-003 Exercise 1, 3 and 3.5.
+**Expected result/shape:** 3 and 3.5.
 
-**Verify:** For cpp-003 Exercise 1, compare both numeric results and explain operand types.
+**Verify:** Compare both numeric results and explain operand types.
 
 Integer operands request integer division. One floating operand changes the operation; printing precision alone cannot repair a previously truncated integer.
 
 ### Exercise 2: Place the conversion correctly
 
-**Inputs/evidence:** For cpp-003 Exercise 2, static_cast<double>(7)/2 versus static_cast<double>(7/2).
+**Inputs/evidence:** Static_cast<double>(7)/2 versus static_cast<double>(7/2).
 
-**Expected result/shape:** For cpp-003 Exercise 2, 3.5 versus 3.0.
+**Expected result/shape:** 3.5 versus 3.0.
 
-**Verify:** For cpp-003 Exercise 2, assert both results and identify the inner expression evaluated first.
+**Verify:** Assert both results and identify the inner expression evaluated first.
 
 The parentheses make the operation order explicit. The late cast converts the already computed 3 to 3.0; it cannot recreate a lost fractional part.
 
 ### Exercise 3: Guard a signed count
 
-**Inputs/evidence:** For cpp-003 Exercise 3, long long external=-1.
+**Inputs/evidence:** Long long external=-1.
 
-**Expected result/shape:** For cpp-003 Exercise 3, rejected; no unsigned index or allocation follows.
+**Expected result/shape:** Rejected; no unsigned index or allocation follows.
 
-**Verify:** For cpp-003 Exercise 3, inspect the guard-before-cast order and a nonnegative control case 3.
+**Verify:** Inspect the guard-before-cast order and a nonnegative control case 3.
 
 Unsigned conversion can make negative values very large. A precondition is about input meaning, not merely whether the compiler accepts a cast.
 
 ### Exercise 4: Widen operands before multiplication
 
-**Inputs/evidence:** For cpp-003 Exercise 4, 1000000LL*10000LL.
+**Inputs/evidence:** 1000000LL*10000LL.
 
-**Expected result/shape:** For cpp-003 Exercise 4, 10000000000 in a 64-bit-capable type.
+**Expected result/shape:** 10000000000 in a 64-bit-capable type.
 
-**Verify:** For cpp-003 Exercise 4, assert the exact number; explain why casting an overflowing int product afterward is too late.
+**Verify:** Assert the exact number; explain why casting an overflowing int product afterward is too late.
 
 The literal suffixes make the multiplication wide. A wide destination alone does not determine how a narrower operand expression was evaluated.
 
 ### Exercise 5: Use exact cents for this fixture
 
-**Inputs/evidence:** For cpp-003 Exercise 5, 125 cents and 75 cents.
+**Inputs/evidence:** 125 cents and 75 cents.
 
-**Expected result/shape:** For cpp-003 Exercise 5, 200 cents.
+**Expected result/shape:** 200 cents.
 
-**Verify:** For cpp-003 Exercise 5, assert integral result 200 and label its unit explicitly.
+**Verify:** Assert integral result 200 and label its unit explicitly.
 
 An integer has an exact representation for these cents values. A later lesson can introduce decimal rules; this fixture does not need binary fractional money.
 
 ### Exercise 6: Transfer a valid small size
 
-**Inputs/evidence:** For cpp-003 Exercise 6, positive=3, known representable by size_t.
+**Inputs/evidence:** Positive=3, known representable by size_t.
 
-**Expected result/shape:** For cpp-003 Exercise 6, count 3; zero would also be valid, while -1 is not.
+**Expected result/shape:** Count 3; zero would also be valid, while -1 is not.
 
-**Verify:** For cpp-003 Exercise 6, test 3 and 0 after validation and explain that arbitrary huge values still need a range check.
+**Verify:** Test 3 and 0 after validation and explain that arbitrary huge values still need a range check.
 
 This bounded control demonstrates an intentional conversion. It does not justify casting arbitrary external long long values on every platform without representability validation.
 

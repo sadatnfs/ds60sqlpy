@@ -39,6 +39,16 @@ internal static class Program {
       Check(calls == 1, "unsubscribe ends observation");
     }
     {
+      // Task 2: Guided modification
+      int factor = 2;
+      int snapshot = factor;
+      Func<int, int> live = value => value * factor;
+      Func<int, int> frozen = value => value * snapshot;
+      factor = 4;
+      Check(live(3) == 12, "live capture sees the new factor");
+      Check(frozen(3) == 6, "snapshot keeps the old factor");
+    }
+    {
       // Task 3: Independent construction
       int[] Transform(int[] values, Func<int, int> change) {
         var result = new int[values.Length];
@@ -51,6 +61,18 @@ internal static class Program {
       int[] scaled = Transform(input, value => value * 10);
       Check(scaled.SequenceEqual(new[] { 10, 20, 30 }), "delegate applied");
       Check(input[0] == 1, "input unchanged");
+    }
+    {
+      // Task 5: Boundary evidence
+      var source = new Signal();
+      int first = 0;
+      int second = 0;
+      source.Emit();
+      Check(first == 0 && second == 0, "no subscribers, no calls");
+      source.Raised += (_, _) => first++;
+      source.Raised += (_, _) => second++;
+      source.Emit();
+      Check(first == 1 && second == 1, "both subscribers called once");
     }
     Console.WriteLine("csharp-019: passed");
     await Task.CompletedTask;

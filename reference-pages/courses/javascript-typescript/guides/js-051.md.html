@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A histogram groups quantitative observations into intervals and displays their counts or density. The bins are numerical intervals, not arbitrary categories. Their boundaries affect the apparent distribution, especially with small samples. A meaningful histogram states the sample, units, domain and binning policy.</p>
 <p>A bin usually includes its lower boundary and excludes its upper boundary, except the final bin includes its upper endpoint. This convention prevents double-counting values exactly on a threshold. Values outside the declared domain require a policy and should not disappear without explanation.</p>
 <p>Count and density are different vertical quantities. With unequal bin widths, equal counts do not imply equal density. A density histogram uses height proportional to count divided by sample size and bin width, so area represents probability mass. The reference uses equal-width bins and counts to keep the first reasoning explicit.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Histogram:</strong> A chart of counts or densities for quantitative observations grouped into adjacent numeric intervals.</li>
+<li><strong>Bin:</strong> One interval with lower edge <code>x0</code> and upper edge <code>x1</code>. <code>d3.bin</code> returns each bin as an array of its observations, so the count is the array length.</li>
+<li><strong>Threshold:</strong> A boundary value between bins. A value equal to a threshold belongs to the bin that starts there, and only the last bin includes its upper edge.</li>
+<li><strong>Density:</strong> Count divided by sample size and bin width, so bar area represents the share of observations; it is needed when bin widths differ.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>d3.bin().domain([0, 10]).thresholds([2, 4, 6, 8])</code> creates intervals with known edges. Each returned bin is an array of observations with x0 and x1 properties. The count is its length. A rectangle’s width follows x(x1)-x(x0), and its height follows the count scale.</p>
 <p>Test boundary values explicitly. The sample <code>[0, 2, 2, 4, 9, 10]</code> produces counts <code>[1, 2, 1, 0, 2]</code> for the chosen bins. The total count must equal the number of included finite observations. This simple conservation check catches many accidental exclusions.</p>

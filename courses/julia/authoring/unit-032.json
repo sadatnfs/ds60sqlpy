@@ -10,6 +10,28 @@
     "Plotly"
   ],
   "outcome": "Execute a complete synthetic modeling workflow from typed CSV to a source-identified decision record, exact numerical checks and an accessible Plotly report.",
+  "key_terms": [
+    [
+      "Data contract",
+      "Written checks on identifiers, types, finiteness and timing that reject an input file before any model is fitted."
+    ],
+    [
+      "Availability time",
+      "The time when a feature or label became known, which must precede its use for the row to be valid."
+    ],
+    [
+      "Frozen selection rule",
+      "A procedure fixed before scoring, such as choosing the lowest development error with ties broken by candidate order."
+    ],
+    [
+      "Holdout split",
+      "Rows reserved for a single final evaluation after selection and never used to choose the penalty."
+    ],
+    [
+      "Provenance",
+      "Recorded source identity, settings and split counts that link a reported result to its exact inputs."
+    ]
+  ],
   "level": "advanced",
   "minutes": 150,
   "prerequisites": ["julia-016", "julia-017", "julia-018", "julia-021", "julia-024", "julia-028"],
@@ -26,48 +48,67 @@
     ["JSON3 interface", "https://quinnj.github.io/JSON3.jl/stable/"]
   ],
   "figure": 1,
+  "approach": "`analyze` reads the eight-row `SENSOR_CSV` with declared types, runs `validate_sensor` for row count, unique ids, finite values, known splits, feature and label availability and split counts of 4, 2 and 2, then fits ridge lines on the four training rows. It selects the penalty by development MSE and writes a memo with the fixture SHA-256.",
   "exercises": [
     {
       "title": "Audit the grain",
       "task": "Explain what one row and one ID represent.",
       "expected": "One synthetic prediction record with declared availability evidence.",
       "hint": "Distinct IDs prevent accidental duplication.",
-      "answer": "The eight-row contract fixes grain and denominators; repeated entities in real data would need additional grouping."
+      "answer": "The eight-row contract fixes grain and denominators; repeated entities in real data would need additional grouping.",
+      "why": "Each row has a unique id such as `s01` and represents one synthetic prediction with its own feature and label availability dates.",
+      "wrong": "Treating the ids as entities that may repeat would require grouping rules that this fixture does not define.",
+      "verify": "The reference duplicates `id[8]` and asserts `validate_sensor` throws `ArgumentError`."
     },
     {
       "title": "Reproduce the selection",
       "task": "Compare development errors for the four fixed penalties.",
       "expected": "Penalty 2 is selected.",
       "hint": "Do not inspect final outcomes to choose candidates.",
-      "answer": "The declared rule chooses the minimum development MSE in fixed candidate order."
+      "answer": "The declared rule chooses the minimum development MSE in fixed candidate order.",
+      "why": "The training rows are the same x and y values as lesson julia-021, so the four penalties give the same development errors and penalty 2 wins.",
+      "wrong": "Choosing by final error reuses the assessment rows for selection and makes the reported final MSE optimistic.",
+      "verify": "Worked example A asserts `result.memo[\"penalty\"] == 2` and `development_mse ≈ 1/98`."
     },
     {
       "title": "Verify final arithmetic",
       "task": "Compute residuals for predictions 90/7 and 103/7 against 13 and 15.",
       "expected": "Residuals are -1/7 and -2/7; MSE is 5/98.",
       "hint": "Square and average the two errors.",
-      "answer": "This independent rational calculation verifies the reported floating result."
+      "answer": "This independent rational calculation verifies the reported floating result.",
+      "why": "Predictions 90/7 and 103/7 against 13 and 15 leave residuals -1/7 and -2/7, whose squares 1/49 and 4/49 average to 5/98.",
+      "wrong": "Averaging the absolute residuals gives 3/14, a different metric from the mean squared error stored in the memo.",
+      "verify": "Example A asserts `result.memo[\"final_mse\"] ≈ 5/98`; compute the fractions by hand beside it."
     },
     {
       "title": "Inject information leakage",
       "task": "Move a feature availability date after its prediction date.",
       "expected": "The data validator rejects the fixture.",
       "hint": "Event meaning and availability differ.",
-      "answer": "A future-known feature cannot enter the historical decision under the declared contract."
+      "answer": "A future-known feature cannot enter the historical decision under the declared contract.",
+      "why": "Setting row 7's feature date to 2024-02-01, after its prediction date 2024-01-07, breaks `feature_available_at .<= prediction_at`.",
+      "wrong": "Checking only that dates parse lets a future feature enter the model and makes the historical evaluation impossible in practice.",
+      "verify": "The reference asserts `ArgumentError` for that change and for a label date after the 2024-01-10 cutoff."
     },
     {
       "title": "Inspect accessible evidence",
       "task": "Compare each Plotly table row with its plotted observation and prediction.",
       "expected": "The values and IDs must match exactly.",
       "hint": "The chart is a view of the same final data.",
-      "answer": "Descriptions explain scope; exact tables support inspection without relying on visual position."
+      "answer": "Descriptions explain scope; exact tables support inspection without relying on visual position.",
+      "why": "The Plotly table and markers come from the same `final` rows and `predictions`, so ids, observations and predictions must match exactly.",
+      "wrong": "Reading values off the chart by eye introduces rounding and misses an id paired with the wrong row.",
+      "verify": "Compare each table row with `result.final` and `result.predictions` programmatically."
     },
     {
       "title": "Write the decision memo",
       "task": "State what passes and what evidence is still missing.",
       "expected": "Synthetic computation passes; deployment is not justified.",
       "hint": "Mention small final sample and selection history.",
-      "answer": "Require representative sampling, uncertainty, domain validation and monitoring before making a deployment claim."
+      "answer": "Require representative sampling, uncertainty, domain validation and monitoring before making a deployment claim.",
+      "why": "The synthetic workflow passes all checks, but two final rows and a hand-built fixture cannot support a deployment decision.",
+      "wrong": "Writing that the model is ready because the final MSE is small ignores sample size, selection history and domain validity.",
+      "verify": "Confirm the memo's decision text says deployment evidence is insufficient and that `fixture_sha256` matches `bytes2hex(sha256(SENSOR_CSV))`."
     }
   ]
 }

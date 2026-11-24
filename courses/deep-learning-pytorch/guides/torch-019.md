@@ -18,7 +18,7 @@ The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new 
 
 Convolution applies a shared local kernel across spatial positions. PyTorch Conv2d expects NCHW layout: batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.
 
-The operation is cross-correlation: the kernel slides without spatial rotation. VALID-style padding 0 includes only fully contained patches. Stride controls the gap between patch starts. The 3 x3ramp image and asymmetric 2 x2kernel produce an exact output of -4 at all four positions, making orientation and layout mistakes visible before introducing learned filters.
+The operation is cross-correlation: the kernel slides without spatial rotation. VALID-style padding 0 includes only fully contained patches. Stride controls the gap between patch starts. The 3x3 ramp image and asymmetric 2x2 kernel produce an exact output of -4 at all four positions, making orientation and layout mistakes visible before introducing learned filters.
 
 ## Design decisions and when to use this method
 
@@ -30,7 +30,7 @@ For a framework comparison, match the mathematical kernel and input axes before 
 
 Compare [tf-019](../../deep-learning-tensorflow/guides/tf-019.md) after deriving the shared numerical contract.
 
-TensorFlow's common C on v2D layout is NHWC with kernels HWIO; PyTorch uses NCHW and OIHW. Translate images with axis permutation and kernels with the corresponding permutation. Both use cross-correlation semantics despite the convolution name.
+TensorFlow's common `Conv2D` layout is NHWC with kernels HWIO; PyTorch uses NCHW and OIHW. Translate images with axis permutation and kernels with the corresponding permutation. Both use cross-correlation semantics despite the convolution name.
 
 ## Vocabulary and concepts
 
@@ -50,15 +50,15 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Build image with shape (1, 1, 3, 3) and kernel (1, 1, 2, 2), then use F.conv 2 d with stride 1, padding 0. nn.Conv2d registers weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.
+Build image with shape (1, 1, 3, 3) and kernel (1, 1, 2, 2), then use `F.conv2d` with stride 1, padding 0. nn.Conv2d registers weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.
 
 ## Derive the spatial map and its backward accumulation
 
-Write a PyTorch image as X with shape (N, C_in, H, W) and a grouped Conv2d kernel as K with shape(C_out, \(\frac{C_{\mathrm{in}}}{g}\), k_H, k_W), where g is groups. For the ordinary \(g=1\) case, each output channel sums over every input channel and one spatial patch. With stride s, symmetric numeric padding p and dilation d on one axis, the effective kernel width is \(k_{\mathrm{eff}}=d(k-1)+1\) and the output width is \(\left\lfloor\frac{W+2p-k_{\mathrm{eff}}}{s}\right\rfloor+1\). Apply the same calculation independently to height. This is a count of valid kernel-start positions, not a statement that the image has been resized. [PyTorch 2.9 Conv2d](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Conv2d.html).
+Write a PyTorch image as X with shape (N, C_in, H, W) and a grouped Conv2d kernel as K with shape (C_out, \(\frac{C_{\mathrm{in}}}{g}\), k_H, k_W), where g is groups. For the ordinary \(g=1\) case, each output channel sums over every input channel and one spatial patch. With stride s, symmetric numeric padding p and dilation d on one axis, the effective kernel width is \(k_{\mathrm{eff}}=d(k-1)+1\) and the output width is \(\left\lfloor\frac{W+2p-k_{\mathrm{eff}}}{s}\right\rfloor+1\). Apply the same calculation independently to height. This is a count of valid kernel-start positions, not a statement that the image has been resized. [PyTorch 2.9 Conv2d](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Conv2d.html).
 
 For \(W=H=3\), \(k=2\), \(d=1\), \(p=0\), \(s=1\), there are two starts on each axis. The tensor shape is therefore (1, 1, 2, 2). At the top-left start, the dot product is \(1\cdot 1+2\cdot 0+4\cdot 0+5\cdot (-1)=-4\). At the top-right start it is \(2-6=-4\). Equal outputs follow from this ramp and this kernel, not from a rule that every convolution outputs a constant. Stride 2 keeps only the start at zero and produces (1, 1, 1, 1).
 
-Parameter count and evaluated output count are different. With two output channels, one input channel, a2×2 kernel and no bias, there are \(2\cdot 1\cdot 2\cdot 2=8\) learned scalars regardless of spatial image size. Enabling bias adds one scalar per output channel, not one per output pixel. The same coefficient participates in multiple local dot products, so its gradient must accumulate contributions from all positions where it was used.
+Parameter count and evaluated output count are different. With two output channels, one input channel, a 2×2 kernel and no bias, there are \(2\cdot 1\cdot 2\cdot 2=8\) learned scalars regardless of spatial image size. Enabling bias adds one scalar per output channel, not one per output pixel. The same coefficient participates in multiple local dot products, so its gradient must accumulate contributions from all positions where it was used.
 
 A separate analytic backward trace makes that sharing explicit. Suppose L is the sum of the four output values, so every upstream output derivative is one. Each kernel derivative is the sum of the corresponding input positions across the four patches:
 
@@ -75,7 +75,7 @@ Receptive fields grow through compositions. Start with jump \(j=1\) and field si
 
 Layout conversion must preserve these meanings. NCHW to NHWC uses permutation (0, 2, 3, 1); the inverse is (0, 3, 1, 2). A TensorFlow HWIO kernel becomes PyTorch OIHW with permutation (3, 2, 0, 1) for this ordinary convolution. A reshape with the same element count can produce legal dimensions while pairing the wrong channels or pixels. PyTorch channels_last memory format is yet another concept: it can change strides while the public tensor shape still uses NCHW semantics.
 
-Both frameworks perform cross-correlation here. Rotating the asymmetric kernel changes the output to+4. A symmetric kernel could hide an accidental rotation; the asymmetric fixture exposes it. Weight sharing gives an equivariance relationship under suitable shifts and boundary assumptions, not unconditional invariance. Stride, padding and later reductions can break a simple shift correspondence. Likewise, the zero-sum kernel ignores a constant image offset on these VALID patches, but zero padding at edges or a different learned kernel changes that statement.
+Both frameworks perform cross-correlation here. Rotating the asymmetric kernel changes the output to +4. A symmetric kernel could hide an accidental rotation; the asymmetric fixture exposes it. Weight sharing gives an equivariance relationship under suitable shifts and boundary assumptions, not unconditional invariance. Stride, padding and later reductions can break a simple shift correspondence. Likewise, the zero-sum kernel ignores a constant image offset on these VALID patches, but zero padding at edges or a different learned kernel changes that statement.
 
 ## Worked example / walkthrough
 
@@ -124,7 +124,7 @@ assert torch.equal(nhwc.permute(0, 3, 1, 2), image)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The output has shape (1, 1, 2, 2) with every value -4, the flipped kernel gives +4, stride 2 gives shape (1, 1, 1, 1), a +10 top-left pixel changes only the top-left output, and the 1-to-2-channel 2-by-2 bias-free layer has 8 parameters. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Compute the fixed spatial filter. Predict exercise 6, Count shared parameters, from its prompt alone: Build a bias-free Conv2d with 1 input channel, 2 output channels and a 2-by-2 kernel. Then explain why this finish condition holds: The output has shape (1, 1, 2, 2) with every value -4, the flipped kernel gives +4, stride 2 gives shape (1, 1, 1, 1), a +10 top-left pixel changes only the top-left output, and the 1-to-2-channel 2-by-2 bias-free layer has 8 parameters. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -160,15 +160,15 @@ If a gradient differs by the number of positions, inspect whether shared contrib
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Rotate the kernel explicitly) alters one assumption of Example A (Compute the fixed spatial filter). Hint 2: exercise 4, Inspect stride output size, should end at output shape 1, 1, 1, 1. Work backward from it. Hint 3: exercise 5, Trace one pixel influence, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain NCHW, Shared kernel, Receptive field using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Translate image layout, from its inputs alone. Predict whether exercise 3, Permute a two-channel image, survives one changed input. Then explain NCHW, Shared kernel, Receptive field in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-018` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Compute the fixed spatial filter) cannot be rebuilt without help, revisit `torch-018` first. Otherwise keep your exercise 2 attempt, Predict the shape with padding, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

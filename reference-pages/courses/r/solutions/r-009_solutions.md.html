@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict is.list(x[1]) for a list x.</p>
 <p>It is TRUE.</p>
+<p><strong>Approach:</strong> Apply single brackets to the list and test the class of the result.</p>
+<p><strong>Why it holds here:</strong> Single brackets select a sub-list. <code>record[1]</code> is a list holding one element named id, not the string &quot;A&quot; itself.</p>
+<p><strong>Tempting mistake:</strong> Expecting the contained value, as <code>record[[1]]</code> would return. Code that then calls <code>nchar()</code> or <code>toupper()</code> on the result gets a list method or an error instead of text handling.</p>
+<p><strong>Verify:</strong> The reference asserts <code>is.list(record[1])</code>, and <code>length(record[1])</code> returns 1.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Extract the first number from a values field.</p>
 <p>Use record[[&quot;values&quot;]][[1]].</p>
+<p><strong>Approach:</strong> Extract in two stages: <code>record[[&quot;values&quot;]]</code> gives the numeric vector, then <code>[[1]]</code> gives its first element.</p>
+<p><strong>Why it holds here:</strong> The values field holds 2 and 4, so the first number is 2. Each stage has one clear job.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>record[&quot;values&quot;][[1]]</code>. The first step keeps the list wrapper, so <code>[[1]]</code> unwraps it and returns the whole vector 2, 4 instead of a single number.</p>
+<p><strong>Verify:</strong> The reference check <code>record[[&quot;values&quot;]][[1]] == 2</code> passes and the result has length 1.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Validate required id and values fields.</p>
 <p>Require both names, one character ID and a numeric values vector.</p>
+<p><strong>Approach:</strong> Check that both names exist, then check that id is one character string and values is numeric.</p>
+<p><strong>Why it holds here:</strong> Testing names first makes a missing field fail with a clear message. The type checks then confirm the starter&#x27;s id &quot;A&quot; is a single string and values 2, 4 are numbers.</p>
+<p><strong>Tempting mistake:</strong> Only testing <code>!is.null(record$id)</code>. That passes for an id of 7 or of c(&quot;A&quot;, &quot;B&quot;), neither of which identifies one record.</p>
+<p><strong>Verify:</strong> On the starter record every check passes; setting <code>record$id &lt;- 7</code> makes the stopifnot report <code>is.character(record$id) is not TRUE</code>.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose an accidental one-element list passed to mean.</p>
 <p>Use [[ to obtain the numeric field.</p>
+<p><strong>Approach:</strong> Replace the single-bracket argument with <code>record[[&quot;values&quot;]]</code> so mean receives the numeric vector.</p>
+<p><strong>Why it holds here:</strong> <code>record[&quot;values&quot;]</code> is a list containing the vector. mean does not look inside lists, so it cannot average 2 and 4 from it.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>mean(record[&quot;values&quot;])</code>. It returns NA with a warning that the argument is not numeric or logical, and a script that ignores warnings carries the NA forward.</p>
+<p><strong>Verify:</strong> <code>mean(record[[&quot;values&quot;]])</code> returns 3, which the reference asserts.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Retain an explicitly NULL note field.</p>
 <p>Use record[&quot;note&quot;] &lt;- list(NULL).</p>
+<p><strong>Approach:</strong> Assign a list containing NULL through single brackets: <code>record[&quot;note&quot;] &lt;- list(NULL)</code>.</p>
+<p><strong>Why it holds here:</strong> Single-bracket replacement sets list elements from the list on the right, so the note element is created and holds NULL. The record now has three fields.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>record$note &lt;- NULL</code>. Assigning NULL with the dollar or double-bracket form removes a field; here note does not exist yet, so nothing is added at all.</p>
+<p><strong>Verify:</strong> <code>&quot;note&quot; %in% names(record)</code> returns TRUE, <code>is.null(record$note)</code> is TRUE, and <code>length(record)</code> returns 3.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain a risk of unlist on a mixed record.</p>
 <p>A text ID can coerce numeric measurements to character and erase field structure.</p>
+<p><strong>Approach:</strong> Keep mixed records as lists and extract each field with its own type; flatten only fields that share one type.</p>
+<p><strong>Why it holds here:</strong> The id is text and values are numbers. <code>unlist()</code> needs a common type, so it converts everything to character, as Example 3 shows.</p>
+<p><strong>Tempting mistake:</strong> Flattening and then calling <code>as.numeric()</code> to recover the numbers. The id becomes NA with a coercion warning, so one field is destroyed to repair another.</p>
+<p><strong>Verify:</strong> The reference asserts <code>is.character(unlist(record[c(&quot;id&quot;, &quot;values&quot;)]))</code>, and the flattened result has length 3 from two fields.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

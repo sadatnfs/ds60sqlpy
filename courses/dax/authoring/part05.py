@@ -1,6 +1,6 @@
 """Stage five: table shape, lineage and relationship design."""
 
-from .common import lesson
+from .common import explain, lesson
 from .common import result as r
 from .common import task as t
 
@@ -878,3 +878,528 @@ LESSONS = [
         ],
     ),
 ]
+
+
+REASONING = {
+    25: [
+        (
+            (
+                "In the clean retail model every Sales ProductKey (1, 2 or 3) matches a stored "
+                "Product row, so the engine adds no blank member. VALUES and DISTINCT both return "
+                "the four stored keys."
+            ),
+            (
+                "Using the clean fixture as the only test and concluding that VALUES and DISTINCT "
+                "are interchangeable. The unknown-member model, with S9 on key 999, returns 5 and "
+                "4."
+            ),
+            "Run case A on both models: retail gives 4 and 4, unknown-member gives 5 and 4.",
+        ),
+        (
+            (
+                "Every unmatched code joins the same blank member. A hypothetical S10 on key 998 "
+                "with Net 5 leaves VALUES at 5, raises UnknownRevenue from 7 to 12 and AllRevenue "
+                "to 199."
+            ),
+            (
+                "Expecting COUNTROWS(VALUES(Product[ProductKey])) to reach 6, one per bad code, "
+                "mistakes the semantic bucket for a list of codes, so a key-quality count built "
+                "that way stays at one."
+            ),
+            (
+                "`COUNTROWS ( EXCEPT ( DISTINCT ( Sales[ProductKey] ), DISTINCT ( "
+                "Product[ProductKey] ) ) )` returns 2 for {998, 999}, while VALUES still counts 5."
+            ),
+        ),
+        (
+            (
+                "Known revenue is everything mapped to a stored key: Notebook 67 + Pen 24 + Mug 96 "
+                "= 187. Adding the blank bucket's 7 gives AllRevenue 194."
+            ),
+            (
+                "A product visual that hides the blank row lists rows that sum to 187 under a "
+                "grand total of 194, and a reader who adds the rows reports a 7 USD gap as a "
+                "calculation bug."
+            ),
+            (
+                "Case B returns UnknownRevenue 7 and AllRevenue 194, and `CALCULATE ( "
+                "[NetRevenue], NOT ISBLANK ( Product[ProductKey] ) )` returns 187."
+            ),
+        ),
+        (
+            (
+                "The sellable catalog is the stored Product table, four rows, or the three that "
+                "sold if the policy requires sales. The fifth VALUES member exists only because "
+                "S9's key 999 has no match."
+            ),
+            (
+                "Publishing 5 as the SKU count adds a product nobody can buy, and the count shifts "
+                "as soon as the bad key is repaired, although no catalog change occurred."
+            ),
+            (
+                "Under the unknown-member model, COUNTROWS(Product) is 4, DISTINCT is 4 and VALUES "
+                "is 5; only the first two belong in a catalog measure."
+            ),
+        ),
+        (
+            (
+                "Bag (key 4) is a real Product row with no Sales lines, so its revenue is BLANK. "
+                "The blank member holds S9's 7 USD, which has no valid product."
+            ),
+            (
+                "Treating Bag as the unknown bucket because both look empty in a report confuses "
+                "no facts with no dimension row, and sends the data-quality fix to the wrong "
+                "table."
+            ),
+            (
+                "`CALCULATE ( [NetRevenue], Product[ProductKey] = 4 )` is BLANK, and `CALCULATE ( "
+                "[NetRevenue], ISBLANK ( Product[ProductKey] ) )` is 7."
+            ),
+        ),
+        (
+            (
+                "A late product row is the same pattern over time. Until key 999 arrives, S9's 7 "
+                "sits in the blank bucket; afterward it moves to the new product, and the total "
+                "stays 194."
+            ),
+            (
+                "Filtering out unmatched facts until the dimension catches up reports 187 today "
+                "and 194 later, so the same period's total changes for no business reason."
+            ),
+            (
+                "Before the fix: unknown 7, total 194. After a Product row for 999 is loaded: "
+                "unknown BLANK, product 999 at 7, total still 194."
+            ),
+        ),
+    ],
+    26: [
+        (
+            (
+                "SUMMARIZECOLUMNS drops a group only when every expression is blank. COALESCE "
+                "makes Bag's value 0, a nonblank result, so key 4 returns with 0 and the table has "
+                "four rows."
+            ),
+            (
+                "Treating COALESCE as a display tweak hides that it changes row presence. An "
+                "AVERAGEX over the new rows drops from 187 / 3, about 62.33, to 187 / 4 = 46.75."
+            ),
+            "The summary returns keys 1 to 4 with revenues 67, 24, 96 and 0.",
+        ),
+        (
+            (
+                "SELECTCOLUMNS projects every input row and never groups. With the four-row first "
+                "result, projecting product names gives Notebook, Pen, Mug and Bag."
+            ),
+            (
+                "Assuming a projection deduplicates is the trap. Projecting Category instead "
+                "returns Paper, Paper, Home and Travel, four rows, not three."
+            ),
+            "COUNTROWS of the projection is 4, and DISTINCT over the Category projection is 3.",
+        ),
+        (
+            (
+                "Record each stage. Candidates are keys 1 to 4; extended revenues are 67, 24, 96 "
+                "and BLANK; a rule of revenue above 50 keeps keys 1 and 3; applying them as a "
+                "filter gives 163."
+            ),
+            (
+                "Testing the threshold on Sales lines with `FILTER ( Sales, Sales[NetAmount] > 50 "
+                ")` keeps nothing, since the largest line is S3 at 40, so the result is BLANK "
+                "instead of 163."
+            ),
+            (
+                "`CALCULATE ( [NetRevenue], FILTER ( VALUES ( Product[ProductKey] ), [NetRevenue] "
+                "> 50 ) )` returns 163."
+            ),
+        ),
+        (
+            (
+                "RevenueForKey is a column of the ADDCOLUMNS result and exists only inside that "
+                "query. The outer SELECTCOLUMNS can read it because it is iterating that table."
+            ),
+            (
+                "Writing a later measure that refers to Product[RevenueForKey] fails, because the "
+                "Product table has no such column, and copying the virtual name into a visual does "
+                "nothing."
+            ),
+            (
+                "Case A returns 67, 24, 96 and BLANK. For reuse, define a model measure such as "
+                "[NetRevenue] and evaluate it per product."
+            ),
+        ),
+        (
+            (
+                'A constant column is never blank. Adding "One", 1 to the SUMMARIZECOLUMNS call '
+                "means Bag's group has one nonblank expression, so its row returns with Revenue "
+                "BLANK."
+            ),
+            (
+                "Adding a helper constant for convenience and expecting three rows. The table now "
+                "lists Bag, and any COUNTROWS of the result reads 4."
+            ),
+            (
+                '`SUMMARIZECOLUMNS ( Product[ProductKey], "Revenue", [NetRevenue], "One", 1 )` '
+                "returns four rows, one of them key 4 with a BLANK revenue."
+            ),
+        ),
+        (
+            (
+                "Coverage needs every eligible customer as the denominator. Starting from all four "
+                "customers, three have sales (Ada 51, Bo 80, Cy 56), so coverage is 3 / 4 = 0.75."
+            ),
+            (
+                'Counting the rows of `SUMMARIZECOLUMNS ( Customer[Customer], "Revenue", '
+                "[NetRevenue] )` drops Di and reports 3 / 3 = 1.0, full coverage that does not "
+                "exist."
+            ),
+            (
+                "ADDCOLUMNS over VALUES(Customer[Customer]) returns four rows with Di BLANK, and "
+                "the coverage measure returns 0.75."
+            ),
+        ),
+    ],
+    27: [
+        (
+            (
+                "TREATAS applies only values that exist in the target column. Product has no key "
+                "999 in the clean model, so the filter keeps key 1 and returns Notebook's 67."
+            ),
+            (
+                "Reading 67 as proof that code 999 has no sales. TREATAS drops unmatched values "
+                "silently, so a code with real facts and no Product row would vanish from this "
+                "result too."
+            ),
+            (
+                "`CALCULATE ( [NetRevenue], TREATAS ( { 1, 999 }, Product[ProductKey] ) )` equals "
+                "`CALCULATE ( [NetRevenue], Product[ProductKey] = 1 )`, 67."
+            ),
+        ),
+        (
+            (
+                "Lineage follows the expression, not the name. A direct reference to "
+                "Product[ProductKey] renamed PaperKey still filters Product, so case A still "
+                "returns 2 rows and 91."
+            ),
+            (
+                "Expecting the rename to behave like the `+ 0` projection and return 187. Only the "
+                "arithmetic in case B creates new values without model lineage."
+            ),
+            "Rerun case A with the column renamed; CandidateRows stays 2 and Revenue stays 91.",
+        ),
+        (
+            (
+                "A table constructor has no lineage, so TREATAS must name Product[ProductKey] as "
+                "the target. Keys 1 and 3 are Notebook and Mug, 67 + 96 = 163."
+            ),
+            (
+                "Passing `{ 1, 3 }` straight to CALCULATE filters a column that is not in the "
+                "model, as in case B's WithoutTarget, so the result is 187."
+            ),
+            (
+                "The TREATAS measure returns 163, which matches the Blue revenue because Notebook "
+                "and Mug are the Blue products."
+            ),
+        ),
+        (
+            (
+                "The target must be the same entity. Customer codes 10 and 20 belong on "
+                "Customer[CustomerKey], where they select Ada and Bo for 51 + 80 = 131."
+            ),
+            (
+                "Mapping them to Product[ProductKey] because both are integers finds no matching "
+                "product and returns BLANK, which reads as no sales rather than a wrong domain. "
+                "With overlapping numbers it would filter the wrong products."
+            ),
+            (
+                "TREATAS({10, 20}, Customer[CustomerKey]) gives 131 and TREATAS({10, 20}, "
+                "Product[ProductKey]) gives BLANK."
+            ),
+        ),
+        (
+            (
+                "Columns map by position. `TREATAS ( { ( 2025, 1 ) }, 'Date'[Year], "
+                "'Date'[MonthNumber] )` filters January 2025, which is S4, S5 and S6, or 67."
+            ),
+            (
+                "Writing the tuple as (1, 2025) asks for year 1 and month 2025. Nothing matches, "
+                "and the result is BLANK with no error."
+            ),
+            "(2025, 1) returns 67, (2025, 2) returns 56 and the swapped tuple returns BLANK.",
+        ),
+        (
+            (
+                "An imported list of keys has no relationship. Check its domain and duplicates, "
+                "then map it with TREATAS. A list {20, 30, 50} selects Bo and Cy for 136 and "
+                "leaves 50 unmatched."
+            ),
+            (
+                "Using the list directly as a CALCULATE filter has no lineage and returns 187, as "
+                "DetachedKeys does in case B, so the segment silently becomes everyone."
+            ),
+            (
+                "The TREATAS measure returns 136, and `EXCEPT ( SegmentList, VALUES ( "
+                "Customer[CustomerKey] ) )` returns the orphan 50 for the diagnostics column."
+            ),
+        ),
+    ],
+    28: [
+        (
+            (
+                "EXCEPT keeps rows of its first argument that are absent from the second. Blue "
+                "keys are {1, 3}, Paper keys {1, 2}, so EXCEPT(BlueKeys, PaperKeys) is {3}, Mug."
+            ),
+            (
+                "Treating EXCEPT as symmetric and reusing case A's PaperOnlyRows, {2} Pen. Pen is "
+                "the answer to the opposite question."
+            ),
+            (
+                '`CONCATENATEX ( EXCEPT ( BlueKeys, PaperKeys ), Product[ProductKey], "," )` '
+                'returns "3", and using it as a filter returns Mug\'s 96.'
+            ),
+        ),
+        (
+            (
+                "UNION concatenates every row. With an extra key 1 the inputs contribute 3 + 2 = 5 "
+                "rows, while DISTINCT still finds keys 1, 2 and 3."
+            ),
+            (
+                "Expecting UNION to behave like SQL UNION and remove repeats, so CombinedRows "
+                "stays 4 or drops to 3."
+            ),
+            "CombinedRows reads 5 and DistinctKeys reads 3.",
+        ),
+        (
+            (
+                "The eligible list is an entity list, so uniqueness is part of its contract. "
+                "DISTINCT(UNION(PaperKeys, BlueKeys)) returns Notebook, Pen and Mug once each."
+            ),
+            (
+                "Iterating the raw union with SUMX adds Notebook twice, 67 + 67 + 24 + 96 = 254, "
+                "which exceeds total revenue 187."
+            ),
+            "The distinct list has 3 rows, and SUMX over it of [NetRevenue] returns 187.",
+        ),
+        (
+            (
+                "Sales is at line grain, and repeated ProductKey values are separate sales. "
+                "Notebook alone has S1, S4 and S7. A unique product list comes from "
+                "VALUES(Product[ProductKey]) or DISTINCT(Sales[ProductKey])."
+            ),
+            (
+                "Keeping only one line per key in Sales, say S1, S2 and S3, leaves 64 USD of the "
+                "187 and discards five real transactions."
+            ),
+            (
+                "DISTINCT(Sales[ProductKey]) returns 3 rows, while COUNTROWS(Sales) stays 8 and "
+                "revenue stays 187."
+            ),
+        ),
+        (
+            (
+                "UNION pairs columns by position, and both inputs must mean the same entity. Two "
+                "Product key lists are compatible; Product keys and Customer keys are not."
+            ),
+            (
+                "Unioning PaperKeys {1, 2} with customer keys {10, 20} gives four integer rows. "
+                "Mapped onto Product[ProductKey], only two of them filter anything, so the list "
+                "claims 4 eligible items while revenue covers 2."
+            ),
+            (
+                "COUNTROWS of the mixed union is 4, but `CALCULATE ( COUNTROWS ( Product ), "
+                "TREATAS ( MixedKeys, Product[ProductKey] ) )` is 2."
+            ),
+        ),
+        (
+            (
+                "Reach counts each person once, and memberships count each pair. In the analytics "
+                "model Newsletter has Ada and Bo and Prospects has Bo and Cy, so reach is 3 and "
+                "memberships are 4."
+            ),
+            (
+                "Reporting COUNTROWS(GroupMembership) as campaign reach counts Bo twice and "
+                "overstates the unique audience by a third."
+            ),
+            (
+                "COUNTROWS(DISTINCT(GroupMembership[CustomerKey])) returns 3, and "
+                "COUNTROWS(GroupMembership) returns 4."
+            ),
+        ),
+    ],
+    29: [
+        (
+            (
+                "Every 2025 order also ships in 2025 (the latest is S8, shipped 2025-02-04), so "
+                "the year contains the same five lines, S4 to S8, in both roles."
+            ),
+            (
+                "Testing ShipRevenue only at the year level and calling it validated. 123 against "
+                "123 passes even if the measure ignored the ship role completely."
+            ),
+            (
+                "For Year 2025 both return 123; January returns 67 against 47 and February 56 "
+                "against 76."
+            ),
+        ),
+        (
+            (
+                "Only the ship role reads ShipDate. Moving S6's 20 USD shipment to January makes "
+                "ship revenue 47 + 20 = 67 in January and 76 - 20 = 56 in February."
+            ),
+            (
+                "Editing S6's OrderDate instead moves OrderRevenue as well, so the comparison "
+                "loses the very difference it is meant to show."
+            ),
+            "After the change OrderRevenue stays 67 and 56, and ShipRevenue becomes 67 and 56.",
+        ),
+        (
+            (
+                "Put USERELATIONSHIP inside the measure, so every visual that uses ShipRevenue "
+                "attributes by ShipDate and the active OrderDate relationship is switched off."
+            ),
+            (
+                "Adding `TREATAS ( VALUES ( 'Date'[Date] ), Sales[ShipDate] )` while the order "
+                "relationship stays active requires both dates in the month. January still shows "
+                "47, but February drops S6 and shows 56 instead of 76."
+            ),
+            (
+                "Check February, not January: the measure must return 76 under Year 2025 and "
+                "MonthNumber 2."
+            ),
+        ),
+        (
+            (
+                "USERELATIONSHIP switches on a relationship already defined between two columns. "
+                "The inactive Sales[ShipDate] to 'Date'[Date] link exists, so case A works."
+            ),
+            (
+                "Passing an expression such as `Sales[OrderDate] + 7` for an expected delivery "
+                "date fails, because the arguments must be columns in an existing relationship."
+            ),
+            (
+                "Store an ExpectedDate column with an inactive relationship, then test it. Each "
+                "2025 order plus 7 days stays in its order month here (S6 lands on January 12), so "
+                "January reads 67 and February 56."
+            ),
+        ),
+        (
+            (
+                "Choosing a relationship changes which date a fact is filed under. It does not "
+                "change which rows a security role exposes, and Microsoft documents limits on "
+                "using USERELATIONSHIP where row-level security applies to a related table."
+            ),
+            (
+                "Assuming the ship role could reveal rows a North-only role hides, or that a "
+                "correct 67 against 47 proves the measure works under security, when that "
+                "comparison ran with no role at all."
+            ),
+            (
+                "Under a tested North-only role, January order and ship revenue should both be 47 "
+                "(S4 and S5); verify with the engine's role testing, not by hand."
+            ),
+        ),
+        (
+            (
+                "Separate OrderDate and ShipDate dimensions allow two independent selections. "
+                "Ordered in January 2025 and shipped in February 2025 selects S6 alone, 20."
+            ),
+            (
+                "Expecting one shared Date slicer to express that question. A single selection "
+                "applies to whichever role each measure activates, so no visual can show the 20."
+            ),
+            (
+                "With separate dimensions, OrderDate January 2025 and ShipDate February 2025 "
+                "return 20; with one Date table, use role measures for side-by-side comparisons "
+                "such as 67 against 47."
+            ),
+        ),
+    ],
+    30: [
+        (
+            (
+                "VALUES over GroupMembership[CustomerKey] returns each customer once. Selecting "
+                "both audiences yields {10, 20, 30}, and TREATAS sends that set to Customer: 51 + "
+                "80 + 56 = 187."
+            ),
+            (
+                "Adding the two audience totals, 131 + 136, gives 267 and counts Bo's 80 twice, "
+                "even though only 187 USD exists."
+            ),
+            (
+                "With both audiences selected AudienceRevenue is 187, and "
+                "COUNTROWS(VALUES(GroupMembership[CustomerKey])) is 3 while the bridge has 4 rows."
+            ),
+        ),
+        (
+            (
+                "Membership and revenue are separate measures. Adding Di (key 40) gives Newsletter "
+                "three members, while revenue stays 131 because Di has no sales."
+            ),
+            (
+                "Treating revenue as a check on membership loads. Unchanged revenue looks like the "
+                "load failed, and revenue per member silently falls from 65.5 to about 43.67."
+            ),
+            "Under Newsletter, distinct members read 3 and AudienceRevenue 131.",
+        ),
+        (
+            (
+                "Inclusion and exclusion: Newsletter 131 plus Prospects 136, minus the overlap, "
+                "which is Bo alone at 80, equals the union, 187."
+            ),
+            (
+                "Subtracting the overlap count, 1, instead of the overlap revenue leaves 266, "
+                "which mixes customers with USD."
+            ),
+            (
+                "`CALCULATE ( [NetRevenue], Customer[CustomerKey] = 20 )` returns 80, and 131 + "
+                "136 - 80 equals the both-audience result, 187."
+            ),
+        ),
+        (
+            (
+                "The bridge's grain is one row per group and customer. A second (1, 10) row breaks "
+                "that grain. VALUES hides it here, so Newsletter revenue still reads 131."
+            ),
+            (
+                "Accepting the duplicate because the revenue test passes. "
+                "COUNTROWS(GroupMembership) under Newsletter becomes 3 instead of 2, and a SUMX "
+                "over bridge rows gives 51 + 51 + 80 = 182."
+            ),
+            (
+                "Compare COUNTROWS(GroupMembership) with `COUNTROWS ( SUMMARIZE ( GroupMembership, "
+                "GroupMembership[GroupKey], GroupMembership[CustomerKey] ) )`; any difference is a "
+                "load defect."
+            ),
+        ),
+        (
+            (
+                "The audience mapping is a CALCULATE argument in a query. RawRevenue stays 187 "
+                "under each audience because Audience filters only the bridge."
+            ),
+            (
+                "Calling the TREATAS measure a security rule. A user who drops the Audience filter "
+                "or writes another measure on Sales sees 187, all customers."
+            ),
+            (
+                "Without the audience filter AudienceRevenue is 187. Real protection needs an "
+                "engine role, tested under each identity."
+            ),
+        ),
+        (
+            (
+                "Programs work like audiences: one row per program and patient, unique counts for "
+                "reach and pair counts for workload. Using the audience data as a stand-in, Bo is "
+                "in two groups."
+            ),
+            (
+                "Summing per-program patient counts, 2 + 2 = 4, as unique patients double-counts "
+                "the overlap; the true count is 3."
+            ),
+            (
+                "Distinct patients across both programs should equal the sum of program counts "
+                "minus the overlap: 2 + 2 - 1 = 3."
+            ),
+        ),
+    ],
+}
+
+explain(LESSONS, REASONING)

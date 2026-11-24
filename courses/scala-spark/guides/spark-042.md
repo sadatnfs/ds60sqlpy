@@ -8,7 +8,7 @@ Advanced; approximately 180 minutes. Direct prerequisites: `spark-041`. The prep
 
 ## How to run this lesson
 
-Open `spark-042` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-042` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-042.scala) and [PySpark learner](../lessons/spark-042.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-042_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-042_solution.scala) and [PySpark reference](../solutions/spark-042_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -34,21 +34,21 @@ The [Scala learner](../lessons/spark-042.scala) and [PySpark learner](../lessons
 
 This capstone delivers a bounded data product with actual Spark file streaming, an application-managed event policy, a local idempotent sink and a real injected restart. It combines late and duplicate events without using exactly once as a shortcut for explaining the protocol. The data product has one accepted value per business ID, while every raw source occurrence receives one accounting category.
 
-The source schema is delivery:bigint, id:string, event_second:bigint, cents:bigint, all nullable at the read boundary. A delivery number identifies a source occurrence and must be present, unique in its batch and within 1..12. The business fields can be invalid and are retained for classification. Each microbatch contains at most 8 rows and the complete product at most 12 occurrences. Only those checked tiny batches are collected to the driver for this teaching sink.
+The source schema is `delivery:bigint, id:string, event_second:bigint, cents:bigint`, all nullable at the read boundary. A delivery number identifies a source occurrence and must be present, unique in its batch and within 1..12. The business fields can be invalid and are retained for classification. Each microbatch contains at most 8 rows and the complete product at most 12 occurrences. Only those checked tiny batches are collected to the driver for this teaching sink.
 
 ## State the policy before running the stream
 
 Accepted IDs are single uppercase letters, event seconds are integers 0..1000 and cents are integers 0..1000. Zero cents is valid. Domain-invalid rows are counted invalid and never advance event time. For a domain-valid row, an existing ID with the same event time and amount is a duplicate; an existing ID with different payload is invalid conflict. A new ID older than the frozen cutoff is late. All remaining new IDs are accepted.
 
-The cutoff for a batch is previous committed maximum accepted event_second minus 10. It is inclusive:an event exactly at the cutoff is accepted. The cutoff does not move after each row in the current batch. This prevents the processing order of one batch from deciding whether another row in the same batch is late. Accepted events update the maximum for the next committed batch.
+The cutoff for a batch is previous committed maximum accepted event_second minus 10. It is inclusive: an event exactly at the cutoff is accepted. The cutoff does not move after each row in the current batch. This prevents the processing order of one batch from deciding whether another row in the same batch is late. Accepted events update the maximum for the next committed batch.
 
 This is an explicit application policy implemented in the bounded sink state. It is not Spark's native watermark or a demonstration of state-store eviction. The accepted-ID map retains all keys for the finite product. An unbounded deployment would need a different bounded state store, retention/conflict policy and transactional sink implementation. The course keeps that limitation visible instead of disguising a driver dictionary as a distributed state service.
 
 ## Work the three immutable input batches
 
-Batch A contains A(100,10), B(105,20), an equal A duplicate and a NULL business ID. It yields accepted 2, duplicate 1, invalid 1, late 0, total 30, max 105. The next cutoff is 95. Batch B deliberately presents E(120,40) before D(95,0), then C(94,7) and an equal B duplicate. D is accepted at the frozen 95 boundary even though E raises the next maximum to 120. C is late. The cumulative product becomes accepted 4, duplicate 2, late 1, invalid 1, total 70.
+Batch A contains `A(100, 10)`, `B(105, 20)`, an equal A duplicate and a NULL business ID. It yields accepted 2, duplicate 1, invalid 1, late 0, total 30, max 105. The next cutoff is 95. Batch B deliberately presents `E(120, 40)` before `D(95, 0)`, then `C(94, 7)` and an equal B duplicate. D is accepted at the frozen 95 boundary even though E raises the next maximum to 120. C is late. The cumulative product becomes accepted 4, duplicate 2, late 1, invalid 1, total 70.
 
-Batch C uses cutoff 110. A changed B amount 999 is an invalid conflict, and F(110,5) is accepted exactly at the boundary. The final accepted IDs are A, B, D, E, F, total 75, with duplicate 2, late 1, invalid 2. The conservation equation is 5+2+1+2=10 raw occurrences. A total-only check would miss dropping the valid zero-valued D, so the oracle includes every accepted identity and timestamp as well as counts and total.
+Batch C uses cutoff 110. A changed B amount 999 is an invalid conflict, and `F(110, 5)` is accepted exactly at the boundary. The final accepted IDs are A, B, D, E, F, total 75, with duplicate 2, late 1, invalid 2. The conservation equation is 5+2+1+2=10 raw occurrences. A total-only check would miss dropping the valid zero-valued D, so the oracle includes every accepted identity and timestamp as well as counts and total.
 
 ## Publish input and state together
 
@@ -60,7 +60,7 @@ This protocol provides the tested local visibility and replay behavior. It does 
 
 ## Fail after the effect exists
 
-The first actual foreachBatch callback publishes Batch A, then raises injected_after_publication before Spark records normal batch completion. The query fails, but the committed product is readable. That is an uncertain outcome from the caller's perspective:the effect happened even though the call did not return success.
+The first actual foreachBatch callback publishes Batch A, then raises injected_after_publication before Spark records normal batch completion. The query fails, but the committed product is readable. That is an uncertain outcome from the caller's perspective: the effect happened even though the call did not return success.
 
 Restarting the same compatible checkpoint delivers Batch 0 again. The sink validates the existing content and leaves its bytes and counters unchanged. Query identity persists while run identity changes. The attempt ledger is [0, 0], but there is only one committed first-batch effect. This is replay-safe publication, not exactly-once callback computation.
 
@@ -79,9 +79,7 @@ A reviewer should be able to explain the cutoff boundary, zero retention, confli
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
@@ -89,7 +87,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-042-")
 val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
@@ -109,20 +107,7 @@ val staticA = spark.read.schema(productSchema).json(input.toString)
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -130,7 +115,7 @@ import json
 import uuid
 
 if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark4.0.1 required")
+    raise ValueError("Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-042-", dir=Path.cwd()))
 input_path = owned_root / "input"
@@ -222,7 +207,7 @@ Run the actual foreachBatch query with one injected exception after the atomic c
 
 Restart the same compatible query and checkpoint. Validate the existing batch input/content/chain and reuse its state.
 
-**Expected result/shape:** Attempts 0,0 and callback rows 4,4;commit 0 bytes and logical state remain unchanged.
+**Expected result/shape:** Attempts 0,0 and callback rows 4,4; commit 0 bytes and logical state remain unchanged.
 
 **Verify:** Compare query/run identities, exact bytes and all first-state counters.
 
@@ -232,17 +217,17 @@ Restart the same compatible query and checkpoint. Validate the existing batch in
 
 Publish Batch B then Batch C as separate immutable files and run each finite invocation against the same checkpoint.
 
-**Expected result/shape:** Final accepted IDs A, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valued D and cutoff-boundary F remain accepted.
+**Expected result/shape:** Final accepted IDs A, B, D, E, F, total 75; duplicate 2, late 1, invalid 2; 10 logical occurrences. Zero-valued D and cutoff-boundary F remain accepted.
 
 **Verify:** Compare intermediate B counts and the final literal state; the high-time E must not make same-batch D late.
 
-**Progressive hint:** Freeze each cutoff from the previously committed state:95 for B and 110 for C.
+**Progressive hint:** Freeze each cutoff from the previously committed state: 95 for B and 110 for C.
 
 ### Exercise 6: Hand off correctness, recovery and resource evidence
 
 Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint.
 
-**Expected result/shape:** Literal golden state matches; attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup.
+**Expected result/shape:** Literal golden state matches; attempt IDs 0,0,1,2; callback rows 4,4,4,2; only owned inactive queries are eligible for cleanup.
 
 **Verify:** Compare the complete state JSON and namespace-refusal negative; state the single-writer/local-filesystem limitations.
 
@@ -254,7 +239,7 @@ Do not call a repeated callback exactly-once computation, advance the cutoff wit
 
 ## Self-check
 
-Explain the contract of `canonicalProductInput` / `canonical_product_input` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `canonicalProductInput` / `canonical_product_input` without reading its solution. Then, from memory, state what Exercise 6 (Hand off correctness, recovery and resource evidence) must produce: Literal golden state matches; attempt IDs `0, 0, 1, 2`; callback rows `4, 4, 4, 2`; only owned inactive queries are eligible for cleanup. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -262,9 +247,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark4.0.1 foreachBatch and recovery](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#using-foreach-and-foreachbatch)
+- [Spark 4.0.1 foreachBatch and recovery](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#using-foreach-and-foreachbatch)
 
-- [Spark4.0.1 event-time concepts](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#handling-late-data-and-watermarking)
+- [Spark 4.0.1 event-time concepts](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#handling-late-data-and-watermarking)
 
 - [Java 17 atomic file publication](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...))
 

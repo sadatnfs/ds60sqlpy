@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "track_id": "applied-science",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "science-001",
+      "title": "Standardizing a treatment effect to a target population",
+      "anchor": "reference",
+      "source_path": "courses/applied-science/examples/science-001.py",
+      "source_sha256": "62fafa0c638b1feb4dd8a55883dd9c921142118a95155385a1fdec20fae2eae7",
+      "expected_output": ["science-001 complete"],
+      "steps": [
+        {
+          "lines": [5, 8],
+          "excerpt": "import json\n\nimport numpy as np\n",
+          "title": "Imports",
+          "explanation": "json prints the evidence in a stable machine readable form and numpy does the vector arithmetic. Everything is synthetic, so no files or network are used.",
+          "observe": "No output yet."
+        },
+        {
+          "lines": [10, 21],
+          "excerpt": "def standardize(values, weights):\n    values, weights = np.asarray(values, float), np.asarray(weights, float)\n    if (\n        values.ndim != 1\n        or len(values) == 0\n        or not np.all(np.isfinite(values))\n        or not np.all(np.isfinite(weights))\n    ):\n        raise ValueError(\"Use finite nonempty one-dimensional values and weights\")\n    if values.shape != weights.shape or np.any(weights < 0) or not np.isclose(weights.sum(), 1):\n        raise ValueError(\"Use one nonnegative target distribution with total one\")\n    return float(values @ weights)",
+          "title": "A validated weighted average",
+          "explanation": "standardize computes values weighted by a population distribution, which is the dot product values @ weights. Before that it checks for a nonempty 1D array of finite numbers, matching shapes, nonnegative weights and weights that sum to 1 within floating point tolerance. Bad inputs raise ValueError instead of returning a misleading number.",
+          "observe": "The result is converted to a plain Python float."
+        },
+        {
+          "lines": [24, 28],
+          "excerpt": "def run_cases():\n    m0, m1 = np.array([1.0, 5.0]), np.array([3.0, 6.0])\n    trial, target = np.array([0.8, 0.2]), np.array([0.2, 0.8])\n    trial_ate = standardize(m1 - m0, trial)\n    target_ate = standardize(m1 - m0, target)",
+          "title": "Two strata, two populations",
+          "explanation": "m0 and m1 are the average outcomes without and with treatment in two strata. The effect is 2 in the first stratum and 1 in the second. The trial mostly enrolled the first stratum while the target population is mostly the second, so standardizing the same effects to each mix gives different average treatment effects: 1.8 for the trial and 1.2 for the target.",
+          "observe": "The effect estimate depends on whose population it describes."
+        },
+        {
+          "lines": [29, 33],
+          "excerpt": "    observed_treated = standardize(m1, [0.9, 0.1])\n    observed_control = standardize(m0, [0.1, 0.9])\n    crude = observed_treated - observed_control\n    assert np.isclose(trial_ate, 1.8) and np.isclose(target_ate, 1.2)\n    assert crude < 0 < target_ate",
+          "title": "A crude comparison can point the wrong way",
+          "explanation": "In observational data, treated people come mostly from the first stratum and controls mostly from the second, which has higher baseline outcomes. Subtracting their raw averages gives a negative difference even though treatment helps in every stratum. This sign reversal is an example of confounding.",
+          "observe": "crude is below zero while target_ate is above zero."
+        },
+        {
+          "lines": [34, 36],
+          "excerpt": "    shifted = standardize(m1 + 2 - (m0 + 2), target)\n    assert shifted == target_ate\n    return dict(trial_ate=trial_ate, target_ate=target_ate, crude_difference=crude)",
+          "title": "Shifting both outcomes leaves the effect unchanged",
+          "explanation": "Adding 2 to both treated and untreated outcomes cancels in the difference, so the standardized effect is identical. The function returns the three numbers in a dictionary.",
+          "observe": "shifted equals target_ate exactly."
+        },
+        {
+          "lines": [39, 42],
+          "excerpt": "if __name__ == \"__main__\":\n    evidence = run_cases()\n    print(\"science-001 complete\")\n    print(json.dumps(evidence, sort_keys=True, allow_nan=False))",
+          "title": "Print a completion marker and the evidence",
+          "explanation": "The script prints a fixed completion line, then the dictionary as JSON with sorted keys. allow_nan=False makes json refuse NaN or infinity rather than writing invalid JSON.",
+          "observe": "The first line is science-001 complete."
+        }
+      ]
+    },
+    {
+      "lesson_id": "science-007",
+      "title": "As of data vintages and leakage from later revisions",
+      "anchor": "reference",
+      "source_path": "courses/applied-science/examples/science-007.py",
+      "source_sha256": "122059c5b89f200668e6bff50d32086949ed0e3cb22a706906f3d9ff44648bc2",
+      "expected_output": ["science-007 complete", "\"unique_targets\": 3"],
+      "steps": [
+        {
+          "lines": [10, 15],
+          "excerpt": "def as_of(records, cutoff):\n    eligible = [r for r in records if r[1] <= cutoff]\n    latest = {}\n    for event, available, value in sorted(eligible, key=lambda r: (r[0], r[1])):\n        latest[event] = value\n    return latest",
+          "title": "Reconstruct what was known at a cutoff",
+          "explanation": "Each record is (event time, time it became available, value). as_of keeps only records available by the cutoff, sorts them and lets later availability overwrite earlier values for the same event. The result is the latest known value of each event as of that date.",
+          "observe": "Revisions published after the cutoff are ignored."
+        },
+        {
+          "lines": [18, 22],
+          "excerpt": "def run_cases():\n    records = [(0, 1, 10.0), (1, 2, 12.0), (2, 8, 50.0), (2, 3, 14.0), (3, 4, 16.0), (4, 5, 18.0)]\n    old = as_of(records, 4)\n    current = as_of(records, 9)\n    assert old[2] == 14 and current[2] == 50",
+          "title": "The same event, two vintages",
+          "explanation": "Event 2 was first reported as 14 at time 3 and revised to 50 at time 8. As of time 4 the value is 14; as of time 9 it is 50.",
+          "observe": "old[2] is 14 and current[2] is 50."
+        },
+        {
+          "lines": [24, 27],
+          "excerpt": "    def extrapolate(values):\n        t = np.array(sorted(values))\n        y = np.array([values[k] for k in t])\n        return float(np.polyval(np.polyfit(t, y, 1), 4))",
+          "title": "A straight line forecast",
+          "explanation": "extrapolate fits a line through the known points with np.polyfit and evaluates it at time 4 with np.polyval. Sorting the event times keeps x and y aligned.",
+          "observe": "It returns one forecast as a float."
+        },
+        {
+          "lines": [29, 31],
+          "excerpt": "    vintage = extrapolate(old)\n    leaked = extrapolate({k: v for k, v in current.items() if k <= 3})\n    assert np.isclose(vintage, 18) and not np.isclose(leaked, 18)",
+          "title": "A backtest with revised data leaks the future",
+          "explanation": "Forecasting with the data as known at time 4 gives 18. Re-running that same backtest with today's revised numbers gives a different answer, because the revision was not available back then. A backtest must use the vintage that existed at forecast time.",
+          "observe": "vintage is about 18 and leaked is not."
+        },
+        {
+          "lines": [32, 34],
+          "excerpt": "    # Overlapping two-step forecasts reuse a target and must not be iid resampled.\n    targets = [(origin, horizon, origin + horizon) for origin in (2, 3) for horizon in (1, 2)]\n    assert len({r[2] for r in targets}) < len(targets)",
+          "title": "Overlapping forecast targets",
+          "explanation": "Two origins with horizons 1 and 2 produce four forecasts but only three distinct target times, because origin 2 horizon 2 and origin 3 horizon 1 both forecast time 4. Those errors are correlated, so treating them as independent samples would overstate certainty.",
+          "observe": "There are 3 unique targets for 4 forecasts."
+        },
+        {
+          "lines": [35, 45],
+          "excerpt": "    return dict(\n        vintage_forecast=vintage,\n        revised_backtest=leaked,\n        unique_targets=len({r[2] for r in targets}),\n    )\n\n\nif __name__ == \"__main__\":\n    evidence = run_cases()\n    print(\"science-007 complete\")\n    print(json.dumps(evidence, sort_keys=True, allow_nan=False))",
+          "title": "Return and print the evidence",
+          "explanation": "The dictionary holds the vintage forecast, the leaked backtest and the target count. The script prints a completion line and the JSON.",
+          "observe": "The JSON includes \"unique_targets\": 3."
+        }
+      ]
+    },
+    {
+      "lesson_id": "science-017",
+      "title": "Integer optimization, its relaxation and why rounding fails",
+      "anchor": "reference",
+      "source_path": "courses/applied-science/examples/science-017.py",
+      "source_sha256": "aa0e3e9775b9e66515ef743239a3de2d6b0e04ef65d8659647a71ad1f659db16",
+      "expected_output": [
+        "science-017 complete",
+        "\"feasible\": true, \"integer_value\": 14.0, \"integral\": true"
+      ],
+      "steps": [
+        {
+          "lines": [11, 13],
+          "excerpt": "def run_cases():\n    value = np.array([10.0, 8.0, 6.0])\n    cost = np.array([6.0, 5.0, 4.0])",
+          "title": "A tiny knapsack problem",
+          "explanation": "Three projects have values 10, 8 and 6 and costs 6, 5 and 4. The budget is 9. Each project is either chosen or not, which makes this an integer problem.",
+          "observe": "The best affordable pair is projects 2 and 3 with value 14."
+        },
+        {
+          "lines": [14, 20],
+          "excerpt": "    fit = optimize.milp(\n        -value,\n        integrality=np.ones(3),\n        bounds=optimize.Bounds(0, 1),\n        constraints=optimize.LinearConstraint(cost, -np.inf, 9),\n    )\n    assert fit.success and np.allclose(fit.x, [0, 1, 1]) and np.isclose(-fit.fun, 14)",
+          "title": "Solve it exactly with milp",
+          "explanation": "scipy.optimize.milp minimizes, so the values are negated to maximize. integrality=np.ones(3) marks every variable as an integer, Bounds(0, 1) makes them yes or no, and LinearConstraint caps the total cost at 9. The assert checks success, the chosen set and the objective.",
+          "observe": "fit.x is close to [0, 1, 1] and the value is 14."
+        },
+        {
+          "lines": [21, 24],
+          "excerpt": "    relaxed = optimize.linprog(-value, A_ub=[cost], b_ub=[9], bounds=[(0, 1)] * 3, method=\"highs\")\n    rounded = np.rint(relaxed.x)\n    assert relaxed.success and -relaxed.fun > -fit.fun\n    assert cost @ rounded > 9",
+          "title": "Relax and round",
+          "explanation": "linprog solves the same problem but allows fractions. The relaxed answer is always at least as good as the integer one, which makes it an upper bound. Rounding the fractional solution to the nearest integers produces a plan that costs more than 9, so it is infeasible.",
+          "observe": "Rounding a relaxation is not a valid way to solve an integer problem."
+        },
+        {
+          "lines": [25, 27],
+          "excerpt": "    # Integrality and feasibility are checked separately from a solver status.\n    integral = np.allclose(fit.x, np.round(fit.x), atol=1e-7)\n    feasible = cost @ fit.x <= 9 + 1e-7",
+          "title": "Check the answer, not just the status",
+          "explanation": "A solver reporting success is not enough evidence. The code independently checks that the solution is integral within a small tolerance and that its cost respects the budget.",
+          "observe": "Both checks are True."
+        },
+        {
+          "lines": [28, 35],
+          "excerpt": "    return dict(\n        binary=fit.x.tolist(),\n        integer_value=-fit.fun,\n        relaxation_bound=-relaxed.fun,\n        rounded_cost=float(cost @ rounded),\n        integral=bool(integral),\n        feasible=bool(feasible),\n    )",
+          "title": "Collect the evidence",
+          "explanation": "The dictionary records the chosen projects, the integer value, the relaxation bound, the cost of the rounded plan and the two checks. bool() converts NumPy booleans so json can serialize them.",
+          "observe": "rounded_cost is above the budget of 9."
+        },
+        {
+          "lines": [38, 41],
+          "excerpt": "if __name__ == \"__main__\":\n    evidence = run_cases()\n    print(\"science-017 complete\")\n    print(json.dumps(evidence, sort_keys=True, allow_nan=False))",
+          "title": "Print the marker and the JSON",
+          "explanation": "Sorted keys keep the JSON field order stable from run to run.",
+          "observe": "The output starts with science-017 complete."
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-068`, `pyweb-070`, 
 
 The three frameworks solve overlapping problems with different abstractions. This final chapter compares them through concrete request, state and lifecycle contracts rather than declaring one universally best. The review uses the finite references and the owned service lab to explain what each layer contributes and what remains outside the local qualification boundary.
 
+## Key terms
+
+- **WSGI:** The synchronous Python web server interface that Flask is built on, in which one call handles one request.
+- **ASGI:** The asynchronous Python server interface that FastAPI uses, which also supports long-lived connections such as WebSockets.
+- **Integrated framework:** A framework such as Django that ships its own ORM, migrations, authentication, forms and admin.
+- **Ownership map:** A record of which component owns each piece of state: the database owns jobs, the worker owns progress and the browser owns its connection.
+
 ## Mechanism: choose abstractions around the application
 
 Flask provides a compact WSGI application model with explicit extension choices. FastAPI centers typed request/response contracts and ASGI capabilities. Django supplies an integrated application structure, ORM, migrations, authentication, forms and admin. All three still need correct authorization, transaction ownership, error handling and deployment configuration.
@@ -29,6 +36,54 @@ Create a held FastAPI job, observe an event, disconnect the stream and release t
 This case distinguishes transient connection state, process state and persistent data. It also explains why retries need identities: a client can lose the response even when the effect committed. Repeating creation is not a valid substitute for reading the prior outcome when proving recovery.
 
 The local lab does not establish public TLS, a distributed queue cluster, cross-region failover or production-scale throughput. Those are legitimate extensions with their own topology, workload and failure evidence. Naming those boundaries is part of sound engineering, not a reduction in the value of the local tests.
+
+## Worked example: the layer that refuses each request in the note flow
+
+```python
+def review(request, notes):
+    if not request.get("user"):
+        return 401, "authentication"
+    if request["method"] == "POST":
+        if request.get("csrf") != "issued-token":
+            return 403, "csrf"
+        if set(request["form"]) != {"title"} or not 1 <= len(request["form"]["title"]) <= 40:
+            return 400, "input"
+        notes.append({"owner": request["user"], "title": request["form"]["title"]})
+        return 201, "storage"
+    visible = [n["title"] for n in notes if n["owner"] == request["user"]]
+    return 200, visible
+
+
+notes = []
+cases = [
+    {"user": None, "method": "GET"},
+    {"user": "alice", "method": "POST", "csrf": None, "form": {"title": "Private"}},
+    {
+        "user": "alice",
+        "method": "POST",
+        "csrf": "issued-token",
+        "form": {"title": "Private", "owner": "bob"},
+    },
+    {"user": "alice", "method": "POST", "csrf": "issued-token", "form": {"title": "Private"}},
+    {"user": "bob", "method": "GET"},
+    {"user": "alice", "method": "GET"},
+]
+for case in cases:
+    print(review(case, notes))
+```
+
+Expected output:
+
+```text
+(401, 'authentication')
+(403, 'csrf')
+(400, 'input')
+(201, 'storage')
+(200, [])
+(200, ['Private'])
+```
+
+Each request is stopped by a different boundary, and the second value names it, which is the habit the review asks for when the integrated flow fails: say which layer decided. The order matters too. The CSRF check runs before input validation, so a cross site page learns nothing about which fields the form accepts, and the owner comes from the session, never the body. Bob's collection read returns an empty list rather than Alice's note because the listing applies the same owner scope as storage. Map each line to the framework you choose: Flask, FastAPI and Django all have a distinct place for every one of these decisions.
 
 ## Interview discussion and transfer
 

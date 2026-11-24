@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-010`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-010` (Query rewriting and bounded multi-hop retrieval). They introduce the notation this lesson needs for grounded claim and citation integrity.
 
 ## Learning objectives
 
@@ -34,7 +34,7 @@ The extractive baseline below deliberately makes only a narrow construction: it 
 
 ## Keep the computed artifact as the numerical authority
 
-Numerical explanations are especially easy to corrupt through paraphrase. The tool can return 0.3 while the prose rounds it incorrectly, changes the denominator, describes it as a30-percentage-point improvement or treats it as a treatment effect. Those are different statements even though they share the number 30.
+Numerical explanations are especially easy to corrupt through paraphrase. The tool can return 0.3 while the prose rounds it incorrectly, changes the denominator, describes it as a 30-percentage-point improvement or treats it as a treatment effect. Those are different statements even though they share the number 30.
 
 A report interface can bind a numerical claim to a result field and its units. The percentage representation of 0.3 is 30%; a difference of 0.03 between two rates is three percentage points; a relative change from 0.3 to 0.33 is 10%. The requested comparison determines which expression is appropriate. A language model should not choose among them solely because one sounds more persuasive.
 
@@ -80,9 +80,11 @@ Choose an abstention policy against the task's cost and coverage requirements. A
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-011/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-011.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-011.py` in the declared `python-core` profile. *Return a supported extractive answer*, *Reject a corrupted span* and *Abstain on missing evidence* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-011/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Reject a corrupted span* and *Abstain on missing evidence* reuse the helper and fixture introduced in *Return a supported extractive answer*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Status answered; one claim; citation slices the exact sentence. Example B should give: Citation integrity check returns False. Example C should give: Status unknown; claims empty; reason missing evidence. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -177,21 +179,24 @@ assert unknown == {"status": "unknown", "claims": [], "citations": [], "reason":
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: status answered; one claim; citation slices the exact sentence. rate.3 with input counts preserved. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Reject a corrupted span*, predict its result from the prompt alone: Change the stored quote while leaving citation offsets unchanged. Write the guess beside the stated outcome (citation integrity check returns False). Then predict how the decisive case, *Keep arithmetic separate from prose*, should end: Compute 3 purchases over 10 visits and attach the deterministic result to an explanation record. For grounded claims, citations and evidence-based abstention, the finish condition is: Status answered; one claim; citation slices the exact sentence. Rate 0.3 with input counts preserved.
 
 ## Exercises
 
 1. **Return a supported extractive answer.** Answer the conversion-definition question from the metric document and its first sentence.
    **Expected:** status answered; one claim; citation slices the exact sentence.
    **Verify:** Save the assertion results for exercise 1, including status answered; one claim; citation slices the exact sentence.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Reject a corrupted span.** Change the stored quote while leaving citation offsets unchanged.
    **Expected:** citation integrity check returns False.
    **Verify:** Save the assertion results for exercise 2, including citation integrity check returns False.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Abstain on missing evidence.** Request an unsupported comet-period answer with no admitted supporting document.
    **Expected:** status unknown; claims empty; reason missing evidence.
    **Verify:** Save the assertion results for exercise 3, including status unknown; claims empty; reason missing evidence.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Separate a valid citation from support.** Cite the metric document for a claim about statistical significance and inspect the authored support map.
    **Expected:** document exists but significance claim unsupported.
@@ -202,8 +207,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 5, including version mismatch blocks citation reuse.
 
 6. **Keep arithmetic separate from prose.** Compute 3 purchases over 10 visits and attach the deterministic result to an explanation record.
-   **Expected:** rate.3 with input counts preserved.
-   **Verify:** Save the assertion results for exercise 6, including rate.3 with input counts preserved.
+   **Expected:** rate 0.3 with input counts preserved.
+   **Verify:** Save the assertion results for exercise 6, including rate 0.3 with input counts preserved.
 
 ## Common pitfalls and diagnosis
 
@@ -213,19 +218,21 @@ If unsupported answers fall only because the system answers fewer questions, ins
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate grounded claim and citation integrity for the fixture in *Return a supported extractive answer*. Hint 2: change one literal in *Reject a corrupted span* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Separate a valid citation from support*, with its stated result (document exists but significance claim unsupported). If *Keep arithmetic separate from prose* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Grounded claim, Citation integrity, Entailment using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain grounded claim, citation integrity and entailment using *Return a supported extractive answer*. Recompute its result (status answered; one claim; citation slices the exact sentence) from the inputs. Change one input in *Abstain on missing evidence* and predict whether the stated result (status unknown; claims empty; reason missing evidence) still holds. Say which part of grounded claims, citations and evidence-based abstention the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-010` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Return a supported extractive answer* cannot be reconstructed without the solution, revisit `llm-applied-010` (Query rewriting and bounded multi-hop retrieval). Otherwise keep the six observations from grounded claims, citations and evidence-based abstention and continue to `llm-applied-012` (Evaluating retrieval and answers with oracle controls).
 
 ## Sources and verification status
 
-API and mechanism reference: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for grounded claim: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixtures for *Return a supported extractive answer*, *Reject a corrupted span* and *Abstain on missing evidence* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

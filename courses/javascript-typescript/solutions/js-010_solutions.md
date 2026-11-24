@@ -42,7 +42,7 @@ await withModules(
 );
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(module.count, 1)`. Restoring the original line brings back the worked observation: count changes from 0 to 1 through the imported namespace.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(module.count, 1)`. Restoring `1;` brings back: count changes from 0 to 1 through the imported namespace.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(module.count, 1)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -67,7 +67,7 @@ await withModules(
 );
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(module.answer, 8)`; after it the line reads `2` again and answer equals 8.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(module.answer, 8)`. Restoring `2` brings back: answer equals 8.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(module.answer, 8)` for this input.
 

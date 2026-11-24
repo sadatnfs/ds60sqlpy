@@ -8,7 +8,7 @@ Evaluate retrieval separately from answer quality with explicit relevance grades
 
 ## Classroom execution
 
-Choose **LLM evaluation and alignment** in `/classroom`, open `eval-008`, and use its `python-core` profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.
+Open `eval-008` under **LLM evaluation and alignment** in `/classroom`; its `python-core` profile runs each worked program for retrieval evaluation and ranking denominators in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about recall at k and MRR: An ideal top two still misses one relevant document, a miss scores 0 for recall, reciprocal rank and nDCG, duplicate and unjudged documents are rejected, and an empty relevant set reports missing values instead of 0 or 1. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.
 
 ## Locate the failure in the pipeline
 
@@ -23,6 +23,13 @@ For a query with a known nonempty relevant set \(G\), recall at \(k\) is the fra
 \]
 
 Normalized DCG divides by the ideal DCG obtained by sorting the known relevance grades. The gain convention and discount base are part of the metric definition. These examples use nonnegative integer grades and reject unjudged documents instead of silently assigning them zero relevance. The scikit-learn function discounts the relevance values it receives directly. To reproduce this exponential-gain convention with that API, supply `2**grade - 1` as its relevance values in the same document order. Comparing raw-grade and exponential-gain nDCG without naming the difference changes the metric.
+
+## Key terms
+
+- **Recall at k:** The fraction of the known relevant documents that appear in the first k distinct results.
+- **Reciprocal rank:** One divided by the position of the first relevant result, averaged across queries as MRR.
+- **nDCG:** Discounted cumulative gain at k divided by the ideal DCG from sorting known relevance grades.
+- **Judgment pool:** The set of judged documents; relevant documents outside it can change recall and the ideal ranking.
 
 ## Worked case A: a strong top ranking
 

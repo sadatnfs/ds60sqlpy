@@ -372,14 +372,14 @@ Check that all seven IDs are non-null and unique. Derive `paid` by filtering
 `status == "paid"` without projecting away `event_id`. Inspect a sorted list of
 retained IDs and the separate excluded-ID list.
 
-**Inputs/evidence:** For spark-013 Exercise 1, use the seven-row main fixture,
+**Inputs/evidence:** Use the seven-row main fixture,
 `raw` and your retained/excluded event-ID lists.
 
-**Expected result/shape:** For spark-013 Exercise 1, input IDs are
+**Expected result/shape:** Input IDs are
 `[1, 2, 3, 4, 5, 6, 7]`; paid IDs are `[1, 2, 3, 4, 6, 7]`; excluded IDs are
 `[5]`. The raw count and distinct-ID count both equal 7.
 
-**Verify:** For spark-013 Exercise 1, assert the exact sorted ID lists and both
+**Verify:** Assert the exact sorted ID lists and both
 raw counts; assert `paid.count() == 6` and retain `event_id` in the paid schema.
 
 ### Exercise 2: count rows and observed amounts separately
@@ -387,14 +387,14 @@ raw counts; assert `paid.count() == 6` and retain `event_id` in the paid schema.
 Compute `rows`, `valued` and `total_cents` for both `raw` and `paid`. Explain why
 counting a nullable field cannot verify how many events survived a filter.
 
-**Inputs/evidence:** For spark-013 Exercise 2, use the raw and paid DataFrames
+**Inputs/evidence:** Use the raw and paid DataFrames
 and named count/sum aggregate fields.
 
-**Expected result/shape:** For spark-013 Exercise 2, raw metrics are
+**Expected result/shape:** Raw metrics are
 `(7, 5, 400)` and paid metrics are `(6, 4, 250)` in the field order
 `(rows, valued, total_cents)`.
 
-**Verify:** For spark-013 Exercise 2, assert both exact tuples and explain the
+**Verify:** Assert both exact tuples and explain the
 100-cent contributions of IDs 1 and 6 and the absent contributions of IDs 2 and 7.
 
 ### Exercise 3: keep NULL-only, zero and NULL-key groups
@@ -403,13 +403,13 @@ Group paid rows by `team`. Return exactly `team`, `rows`, `valued`,
 `total_cents`, ordered by team ascending with NULL keys last. Do not replace
 missing amounts or group keys before aggregating.
 
-**Inputs/evidence:** For spark-013 Exercise 3, use paid events and a four-column
+**Inputs/evidence:** Use paid events and a four-column
 canonical summary, with an explicit NULL-aware final order.
 
-**Expected result/shape:** For spark-013 Exercise 3, ordered tuples are
+**Expected result/shape:** Ordered tuples are
 `[("A", 3, 2, 200), ("B", 1, 1, 0), ("C", 1, 0, NULL), (NULL, 1, 1, 50)]`.
 
-**Verify:** For spark-013 Exercise 3, compare all four tuples with a hand-written
+**Verify:** Compare all four tuples with a hand-written
 golden list, checking the NULL sum for C separately from the observed zero for B.
 
 ### Exercise 4: choose the right predicate
@@ -418,14 +418,14 @@ Find paid rows with missing amounts, paid rows with amount zero, and paid rows
 whose team is missing. Compare ordinary equality with a NULL literal against
 NULL-safe equality on the team column. Explain which filter retains TRUE.
 
-**Inputs/evidence:** For spark-013 Exercise 4, use paid events and five sorted
+**Inputs/evidence:** Use paid events and five sorted
 ID lists from missing-amount, zero, missing-team, ordinary-NULL-equality and
 NULL-safe-team predicates.
 
-**Expected result/shape:** For spark-013 Exercise 4, the lists are `[2, 7]`,
+**Expected result/shape:** The lists are `[2, 7]`,
 `[3]`, `[4]`, `[]` and `[4]`, respectively.
 
-**Verify:** For spark-013 Exercise 4, assert the five lists exactly; explain
+**Verify:** Assert the five lists exactly; explain
 that an unknown ordinary comparison is not TRUE and zero is an observed value.
 
 ### Exercise 5: expose an attractive incorrect shortcut
@@ -435,14 +435,14 @@ calculate its row count and total. Explain which event identity was lost.
 Separately repartition the original paid DataFrame to three partitions and
 recompute the correct team summary with its explicit final order.
 
-**Inputs/evidence:** For spark-013 Exercise 5, compare the original paid bag,
+**Inputs/evidence:** Compare the original paid bag,
 the two-column distinct projection and a correctly summarized repartitioned bag.
 
-**Expected result/shape:** For spark-013 Exercise 5, the distinct projection
+**Expected result/shape:** The distinct projection
 has 5 rows and totals 150 cents; the original bag has 6 rows and totals 250 cents.
 Repartitioning preserves the four golden group tuples from Exercise 3.
 
-**Verify:** For spark-013 Exercise 5, assert both count/total pairs and the full
+**Verify:** Assert both count/total pairs and the full
 canonical summary after repartitioning; identify IDs 1 and 6 as the legitimate
 pair collapsed by the projection-plus-distinct shortcut.
 
@@ -454,14 +454,14 @@ and `ORDER BY team ASC NULLS LAST`. Compare the Scala, PySpark and SQL contracts
 against the golden fixture, not merely against each other. Record the input,
 retained and excluded event counts as a small reconciliation ledger.
 
-**Inputs/evidence:** For spark-013 Exercise 6, use the four golden group tuples,
+**Inputs/evidence:** Use the four golden group tuples,
 a SQL temporary view, paired API results and the raw/paid/excluded ledger.
 
-**Expected result/shape:** For spark-013 Exercise 6, every implementation has
+**Expected result/shape:** Every implementation has
 columns `team:string`, `rows:long`, `valued:long`, `total_cents:long`, the same
 four canonical tuples, and a count ledger `7 = 6 + 1` with paid total 250 cents.
 
-**Verify:** For spark-013 Exercise 6, assert names, data types, complete tuples
+**Verify:** Assert names, data types, complete tuples
 and the ledger against independent literals; keep both language assertions in
 the evidence packet and explain why two implementations can share the same bug.
 

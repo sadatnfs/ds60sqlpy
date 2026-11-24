@@ -6,6 +6,13 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-067`.
 
 A streaming generator can be correct while a client, server or proxy buffers its output. This chapter moves from in-process clients to the owned Docker web lab and uses an explicit ordering condition to test actual SSE delivery. It also compares the lifetime of a connection with the lifetime of a durable job.
 
+## Key terms
+
+- **Buffering:** Holding streamed output in a client, server or proxy before forwarding it, which can delay events even when the generator is correct.
+- **Delivery-order test:** Waiting for an actual queued or running event before releasing the held job, which proves bytes arrived before completion.
+- **Connection lifetime:** The span of one HTTP stream; closing it does not cancel or take ownership of the durable job it reports on.
+- **Job-scoped cursor:** A resume position that refers to persistent event rows of the selected job, so reconnecting cannot read another job's events.
+
 ## Mechanism: transport and work have different owners
 
 The FastAPI service accepts a bounded calculation into PostgreSQL. A separate worker changes the job's state and commits event rows. The HTTP connection reads those events and formats SSE frames. Disconnecting that reader does not remove the database job or transfer ownership of the calculation back to the browser.
@@ -29,6 +36,45 @@ After the first event, the test closes the SSE connection, releases the job and 
 A cursor that does not belong to the job is refused. This prevents a client from silently applying a global counter from another stream and missing its own history. A production service also needs an explicit policy for expired history, snapshots and client deduplication.
 
 The browser offers separate Disconnect and Reconnect controls. Disconnect closes only the reader. It does not cancel the durable job. A product that supports job cancellation would need its own authenticated command and worker-state transition, not an assumption that closing a tab reverses work.
+
+## Worked example: a bounded queue makes a fast producer wait
+
+```python
+import asyncio
+
+
+async def main():
+    queue = asyncio.Queue(maxsize=2)
+    deepest = 0
+
+    async def producer():
+        nonlocal deepest
+        for chunk in range(6):
+            await queue.put(chunk)
+            deepest = max(deepest, queue.qsize())
+        await queue.put(None)
+
+    async def consumer():
+        received = []
+        while (chunk := await queue.get()) is not None:
+            received.append(chunk)
+            await asyncio.sleep(0.01)
+        return received
+
+    _, received = await asyncio.gather(producer(), consumer())
+    return received, deepest
+
+
+print(asyncio.run(main()))
+```
+
+Expected output:
+
+```text
+([0, 1, 2, 3, 4, 5], 2)
+```
+
+The producer could generate all six chunks instantly, but `put` suspends whenever two items are waiting, so memory held between the stages never exceeds two chunks while the slow consumer catches up. That suspension is backpressure: the slowest party sets the pace. An unbounded queue would accept everything and grow with every slow client. In a streaming endpoint the consumer is the network socket, and awaiting the send or drain step plays the role of the full queue. When the client disconnects, that await is where cancellation arrives.
 
 ## Failure diagnosis and discussion
 

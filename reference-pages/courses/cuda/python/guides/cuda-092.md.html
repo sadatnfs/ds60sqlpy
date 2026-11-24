@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A profiler records events and dependencies, but a table of operator totals is not itself the critical path. CPU preparation, copies, kernels, synchronization and logging may overlap. Summing all event durations can exceed wall time when events run concurrently. Instrumentation also adds overhead, especially with shapes, stacks or memory capture enabled.</p>
 <p>PyTorch profiler activities and named ranges make forward, backward and update visible; TensorFlow Profiler adds graph and input-pipeline views. Capture a short bounded schedule after warmup, inspect a timeline, then test one hypothesis with ordinary timing. Preserve a trace&#x27;s hardware, software and workload context. A busy GPU can spend time on wasteful copies or redundant kernels, so utilization alone is not useful-work evidence.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Profiler trace:</strong> A timeline of host calls, kernel launches, copies and synchronizations recorded during a bounded run.</li>
+<li><strong>Critical path:</strong> The longest chain of dependent work in the timeline, which determines total elapsed time.</li>
+<li><strong>Forced synchronization:</strong> A host wait inserted by operations such as <code>.item()</code> or printing, which appears as an idle gap in the trace.</li>
+<li><strong>Profiler overhead:</strong> Extra time introduced by instrumentation, so profiled timings should not be reported as performance.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>CPU preparation from 0 to 6 ms overlaps GPU work from 2 to 10 ms. The complete interval is 10 ms, not 14 ms obtained by summing durations.</p>
@@ -213,6 +220,24 @@ wall <span class="syntax-operator">=</span> <span class="syntax-builtin">max</sp
 <span class="syntax-keyword">assert</span> summed <span class="syntax-operator">==</span> <span class="syntax-number">14</span> <span class="syntax-operator">and</span> wall <span class="syntax-operator">==</span> <span class="syntax-number">10</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU timeline analysis:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> summed<span class="syntax-punctuation">,</span> wall<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Summed event durations 14 ms, complete interval 10 ms.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>events</code></td>
+<td><code>[(&#x27;prepare&#x27;, 0, 6), (&#x27;gpu&#x27;, 2, 10)]</code></td>
+</tr>
+<tr>
+<td><code>summed</code></td>
+<td><code>14</code></td>
+</tr>
+<tr>
+<td><code>wall</code></td>
+<td><code>10</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -222,17 +247,23 @@ wall <span class="syntax-operator">=</span> <span class="syntax-builtin">max</sp
 <p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-timeline-wall-time">Exercise 1: Compute timeline wall time<a class="heading-anchor" href="#exercise-1-compute-timeline-wall-time" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute timeline wall time</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Summing durations, <code>6 + 8 = 14</code> ms, double counts the 4 ms overlap and overstates the step.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-identify-an-overlap">Exercise 2: Identify an overlap<a class="heading-anchor" href="#exercise-2-identify-an-overlap" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>identify an overlap</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating events on different rows of the trace as sequential hides the concurrency that is already happening. The step then looks like it needs a faster GPU when the existing overlap is already working.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-find-a-forced-synchronization">Exercise 3: Find a forced synchronization<a class="heading-anchor" href="#exercise-3-find-a-forced-synchronization" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>find a forced synchronization</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Blaming the gaps on slow kernels leads to optimizing compute while the host dependency stays. Faster kernels only make the GPU wait longer for the next enqueue.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-name-profiler-overhead">Exercise 4: Name profiler overhead<a class="heading-anchor" href="#exercise-4-name-profiler-overhead" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>name profiler overhead</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Quoting step times from a detailed profiler run as production numbers overstates the step time.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-propose-one-targeted-change">Exercise 5: Propose one targeted change<a class="heading-anchor" href="#exercise-5-propose-one-targeted-change" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>propose one targeted change</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Applying several optimizations at once makes it impossible to tell which helped or which hurt. One change might help while another reintroduces a synchronization.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-verify-outside-profiling">Exercise 6: Verify outside profiling<a class="heading-anchor" href="#exercise-6-verify-outside-profiling" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>verify outside profiling</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the speedup measured under the profiler assumes overhead is equal in both versions. Removing host reads also removes instrumented events, so overhead itself changes.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

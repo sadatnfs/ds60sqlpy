@@ -1,6 +1,6 @@
 # torch-001: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting A bounded PyTorch investigation and framework comparison yourself. They reuse the guide's literal inputs, starting from Example A, Define a prediction unit, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Prediction unit, Training, Holdout. After a pass, choose a new input for exercise 6, Bound the conclusion, without looking.
 
 ## Mechanism review
 
@@ -68,7 +68,7 @@ The constant comes only from training targets. Using the holdout mean 8 would gi
 
 ```text
 Training mean=(1+3+5)/3=3
-Holdout residuals=7-3, 9-3 = 4, 6
+Holdout residuals (target minus prediction)=7-3, 9-3 = 4, 6
 Squared errors=16, 36
 MSE=52/2=26
 ```
@@ -144,4 +144,4 @@ Next evidence: representative independent units and task-specific acceptance tes
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Audit selection leakage, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Align a framework comparison, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

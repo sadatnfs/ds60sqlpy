@@ -27,6 +27,14 @@ During prefill, many query positions are processed together. During decode, each
 Cache correctness requires position and mask consistency. Compare uncached and cached logits at every step for a small deterministic model, with dropout disabled and the same input prefix. Test batch members with different valid lengths and an explicit maximum generation length. If quantization is introduced, compare output quality and numerical error independently. A fake-quantization rounding exercise remains an educational approximation until a real packed low-bit backend executes and its memory/performance are measured.
 
 
+### Key terms
+
+- **Prefill:** The phase that processes the whole prompt in parallel and fills the KV cache.
+- **Decode:** The token-by-token generation phase, usually limited by memory bandwidth.
+- **KV cache:** Stored key and value tensors for earlier tokens, growing with layers, KV heads, head size and sequence length.
+- **Grouped-query attention:** Sharing each key and value head across several query heads to shrink the KV cache.
+- **Fake quantization:** Rounding values to a low-precision grid while keeping float storage, which models accuracy but not memory savings.
+
 ## Worked examples
 
 ### Worked example 1
@@ -51,6 +59,17 @@ print("CPU KV-cache ledger:", cache, "bytes")
 
 **Expected observation:** 4096 bytes, doubling to 8192 at twice the sequence length.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `layers` | `2` |
+| `batch` | `1` |
+| `seq` | `16` |
+| `heads` | `4` |
+| `dim` | `8` |
+| `width` | `2` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -69,27 +88,39 @@ Choose either lane first, then compare the other using identical mathematical in
 
 ### Exercise 1: Derive cache bytes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **derive cache bytes** in the examples above.
+**Trap to avoid:** Leaving out the factor two for keys and values gives 2048 bytes and underestimates the cache by half.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Double the sequence
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **double the sequence** in the examples above.
+**Trap to avoid:** Lowering weight precision to reduce memory does nothing for this term, since the cache precision is set separately.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Distinguish query and KV heads
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **distinguish query and KV heads** in the examples above.
+**Trap to avoid:** Assuming KV heads equal attention heads for every model gives a 4 times overestimate here.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Compare cached logits
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **compare cached logits** in the examples above.
+**Trap to avoid:** Comparing only the final generated text hides small differences that alter sampling later. A wrong position offset in the cache can produce plausible text for many tokens before the output visibly drifts.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate prefill and decode timing
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **separate prefill and decode timing** in the examples above.
+**Trap to avoid:** Reporting a single tokens-per-second number mixes two regimes. A long prompt with short output looks very different from a short prompt with long output under one combined number.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Label fake versus real quantization
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **label fake versus real quantization** in the examples above.
+**Trap to avoid:** Reporting speed or memory gains from a simulation claims benefits only a deployed kernel can show. Memory can even rise under simulation, because both the original float weights and rounding scales may be held.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

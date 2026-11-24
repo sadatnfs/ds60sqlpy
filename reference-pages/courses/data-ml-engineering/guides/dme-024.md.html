@@ -198,6 +198,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Direct prerequisites:</strong> <code>dme-015</code>, <code>dme-020</code>, <code>dme-021</code>, <code>dme-023</code>.</p>
 <p><strong>Outcome:</strong> Restore a versioned checkpoint and compare with a full replay oracle.</p>
 <p>Open the worked program in the classroom code pad. This tutorial exposes complete examples and answered discussions without an exam gate. The pad has fresh temporary state; separately documented projects use their own owned lifecycle.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Checkpoint:</strong> A cursor committed together with its effects in one SQLite transaction, so a restart resumes from a consistent cut of work.</li>
+<li><strong>Consistent prefix:</strong> The guarantee that cursor k means events at positions zero through k minus one are committed and nothing beyond.</li>
+<li><strong>Replay:</strong> Delivering an event again after a crash, recognized by its identity so that it is not counted twice.</li>
+<li><strong>State-schema version:</strong> The version of the derived state layout, bound into the checkpoint so incompatible state is not resumed.</li>
+</ul>
 <h3 id="a-checkpoint-must-describe-a-consistent-cut-of-work">A checkpoint must describe a consistent cut of work<a class="heading-anchor" href="#a-checkpoint-must-describe-a-consistent-cut-of-work" aria-label="Link to this section">#</a></h3>
 <p>A checkpoint records enough information to resume a computation without forgetting accepted work or applying it twice. For a finite source tape, that includes a position in the tape and the derived state produced by all accepted positions before it. Saving only a cursor is dangerous: it may skip effects that were never committed. Saving only effects is also dangerous: replay may apply them again unless the effect identities are recognized.</p>
 <p>The source in this chapter is an ordered list of identified integer events: A with two, B with three, A with two again, and C with one. The repeated A is a replay of the same event, not a second business event. There are four source positions but three unique accepted effects. A correct final projection totals six. Adding every tape position would produce eight, which confuses transport repetition with new information.</p>
@@ -402,6 +409,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="worked-example-saving-the-offset-before-the-state-loses-a-value">Worked example: Saving the offset before the state loses a value<a class="heading-anchor" href="#worked-example-saving-the-offset-before-the-state-loses-a-value" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python">source <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">run</span><span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">,</span> crash_after<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    offset<span class="syntax-punctuation">,</span> total<span class="syntax-punctuation">,</span> processed <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span>
+    <span class="syntax-keyword">for</span> _attempt <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        position <span class="syntax-operator">=</span> offset
+        <span class="syntax-keyword">while</span> position <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            value <span class="syntax-operator">=</span> source<span class="syntax-punctuation">[</span>position<span class="syntax-punctuation">]</span>
+            <span class="syntax-keyword">if</span> order <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">offset-first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+                offset <span class="syntax-operator">=</span> position <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+                <span class="syntax-keyword">if</span> processed <span class="syntax-operator">==</span> crash_after<span class="syntax-punctuation">:</span>
+                    processed <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+                    <span class="syntax-keyword">break</span>
+                total <span class="syntax-operator">+</span><span class="syntax-operator">=</span> value
+            <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+                new_total <span class="syntax-operator">=</span> total <span class="syntax-operator">+</span> value
+                <span class="syntax-keyword">if</span> processed <span class="syntax-operator">==</span> crash_after<span class="syntax-punctuation">:</span>
+                    processed <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+                    <span class="syntax-keyword">break</span>
+                total<span class="syntax-punctuation">,</span> offset <span class="syntax-operator">=</span> new_total<span class="syntax-punctuation">,</span> position <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+            processed <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+            position <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> total
+
+
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">expected:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">offset saved before state:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> run<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">offset-first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> crash_after<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">state and offset together:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> run<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">together</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> crash_after<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-text">expected: 18
+offset saved before state: 14
+state and offset together: 18</code></pre>
+<p>The four source values sum to 18. When the job records offset 2 before adding the value 4 to its total and then crashes, the restart begins at position 2, so the 4 is never counted and the result is 14. Saving the new total and the offset as one step makes the crash harmless: the restart repeats position 1 and the total reaches 18. The opposite mistake, saving state first and the offset later, would count a value twice. That is why the chapter&#x27;s SQLite job writes both in one transaction.</p>
 <h3 id="state-migration-needs-evidence">State migration needs evidence<a class="heading-anchor" href="#state-migration-needs-evidence" aria-label="Link to this section">#</a></h3>
 <p>A new application version may need to add a field, change an aggregation or split one state table into several. Decide whether old state can be transformed safely, whether it should be rebuilt from retained source, or whether both readers must coexist during a transition. The decision depends on semantics, not merely whether a SQL <code>ALTER TABLE</code> statement succeeds.</p>
 <p>For example, changing from a sum to a mean requires both sum and count. If the old state stored only a sum and the source is no longer retained, the count cannot generally be reconstructed. No schema migration can invent the missing information. If the source remains available, rebuild under a new checkpoint identity and compare with an independent oracle before switching consumers. Keep the old accepted version until the new one is qualified and rollback requirements are understood.</p>

@@ -102,6 +102,24 @@ y = 2 * x""",
         "If a loss differs, inspect shapes and the denominator before changing tolerance. If a variable is undefined, reconstruct the complete program rather than assuming state survived an earlier Run. A successful import is not a passed numerical check.",
         "Revisit python-05, python-16 and python-numpy-02 if function arguments or shapes are unfamiliar. Explain this fixture to another learner without using the word model as a substitute for the actual multiplication and reduction.",
         (("How to think in JAX", "https://docs.jax.dev/en/latest/notebooks/thinking_in_jax.html"),),
+        key_terms=(
+            (
+                "Numerical contract",
+                "The stated inputs, operation, shapes and expected value that a computation must satisfy before its result is trusted.",
+            ),
+            (
+                "Prediction unit",
+                "The quantity one output describes, here one prediction for one observation, which sets the denominator of the mean loss.",
+            ),
+            (
+                "Array shape",
+                "The tuple of axis lengths, such as (3,) for a vector or (3,1) for a column, which decides how arrays pair and broadcast.",
+            ),
+            (
+                "Independent oracle",
+                "An expected value derived without the code under test, such as a hand-calculated loss of 56/3, used to check that code.",
+            ),
+        ),
     ),
     Unit(
         2,
@@ -196,6 +214,28 @@ def replace_at(values, index, value):
         "A shape-correct result may still reduce the wrong population. Check a row-specific invariant and use nonsquare fixtures. Keep index validation outside transformed numerical code until the tracing rules have been taught.",
         "Compare this value-oriented update with NumPy mutation in python-numpy-01. Explain why an implementation's possible in-place optimization does not make arbitrary Python mutation part of JAX's public array contract.",
         (("JAX NumPy", "https://docs.jax.dev/en/latest/jax.numpy.html"),),
+        key_terms=(
+            (
+                "Axis",
+                "One dimension of an array with both a length and a meaning, such as observations on axis zero and features on axis one.",
+            ),
+            (
+                "Broadcasting",
+                "The rule that aligns trailing dimensions so a smaller array combines with a larger one, which can silently express an unintended pairing.",
+            ),
+            (
+                "Reduction",
+                "An operation such as a sum or mean that collapses a chosen axis, so the axis argument decides which question the result answers.",
+            ),
+            (
+                "Functional update",
+                "An expression such as x.at[index].set(value) that returns a new array and leaves the original value unchanged.",
+            ),
+            (
+                "Index contract",
+                "A declared rule for which positions are legal, checked before a gather or scatter instead of assuming list or NumPy behavior.",
+            ),
+        ),
     ),
 ]
 
@@ -298,6 +338,28 @@ Precision is also a resource and hardware choice. A CPU demonstration of float64
                 ),
                 ("Numerical accuracy", "https://docs.jax.dev/en/latest/accuracy.html"),
             ),
+            key_terms=(
+                (
+                    "Dtype",
+                    "The element type of an array, such as float32 or float64, which determines which numbers the array can represent.",
+                ),
+                (
+                    "Machine epsilon",
+                    "The gap from 1 to the next larger representable value, which is two to the power negative 23 for float32.",
+                ),
+                (
+                    "X64 mode",
+                    "The JAX setting that allows 64-bit arrays, which this course enables before creating arrays because the usual default is 32 bit.",
+                ),
+                (
+                    "Absolute and relative tolerance",
+                    "Error bounds that allow a fixed distance or a distance proportional to the expected magnitude when comparing floating-point results.",
+                ),
+                (
+                    "Log-sum-exp shift",
+                    "Subtracting the maximum score before exponentiating so every exponential is at most one and the logarithm of the sum stays finite.",
+                ),
+            ),
         ),
         Unit(
             4,
@@ -310,7 +372,7 @@ Precision is also a resource and hardware choice. A CPU demonstration of float64
 
 This separation matters for JAX transformations. Tracing observes numerical operations and static Python structure. Mutating a global list or a Python object's field is not an ordinary numerical state transition that a transformation can reliably replay for every execution. We will investigate that failure under JIT later. First, learn to make the state visible without using any transformation.
 
-The representation should contain what the next step needs. A mean alone is insufficient to combine groups of unequal size. The pair (sum,count) is enough to calculate the mean and to merge another such pair. The same principle later determines a training checkpoint: parameters alone may reproduce today's predictions while failing to reproduce tomorrow's optimizer update.
+The representation should contain what the next step needs. A mean alone is insufficient to combine groups of unequal size. The pair (sum, count) is enough to calculate the mean and to merge another such pair. The same principle later determines a training checkpoint: parameters alone may reproduce today's predictions while failing to reproduce tomorrow's optimizer update.
 
 Immutability does not mean that nothing changes. It means a change is represented by a new value with an explicit relationship to the old one. Keeping both values enables a useful test: apply the same transition twice to the same old state and verify equal results. Applying the transition to its own returned state is a different experiment because the input state has changed.
 
@@ -402,6 +464,28 @@ initial = (jnp.float64(0.), jnp.int64(0))""",
                 (
                     "Stateful computations",
                     "https://docs.jax.dev/en/latest/stateful-computations.html",
+                ),
+            ),
+            key_terms=(
+                (
+                    "Pure function",
+                    "A function whose output depends only on its inputs and which changes nothing outside itself, so a transformation can replay it.",
+                ),
+                (
+                    "Explicit state",
+                    "Values such as a running sum and count that are passed in and returned rather than hidden in a global or object field.",
+                ),
+                (
+                    "State transition",
+                    "A function that maps the current state and one observation to a new state, such as adding x to the sum and one to the count.",
+                ),
+                (
+                    "Replay",
+                    "Applying the same transition to the same old state again and checking that the results are equal.",
+                ),
+                (
+                    "Mergeable summary",
+                    "A state such as (sum, count) that can combine two groups exactly, unlike averaging two means without their counts.",
                 ),
             ),
         ),
@@ -503,6 +587,28 @@ def same_key(left, right):
                 ("Random numbers", "https://docs.jax.dev/en/latest/random-numbers.html"),
                 ("fold_in", "https://docs.jax.dev/en/latest/_autosummary/jax.random.fold_in.html"),
             ),
+            key_terms=(
+                (
+                    "PRNG key",
+                    "A typed JAX value created with jax.random.key that determines a pseudorandom draw together with the random function, shape and dtype.",
+                ),
+                (
+                    "Key split",
+                    "An operation that derives several new keys from one key so separate draws use deliberately separate streams.",
+                ),
+                (
+                    "fold_in",
+                    "An operation that mixes an integer identity, such as a step or record number, into a key so the identity determines the draw.",
+                ),
+                (
+                    "Key reuse",
+                    "Passing the same key to the same random function again, which reproduces the same sample rather than giving a new one.",
+                ),
+                (
+                    "Randomness contract",
+                    "The documented policy for which key each operation receives and which key is carried forward as the next state.",
+                ),
+            ),
         ),
         Unit(
             6,
@@ -602,6 +708,28 @@ def checked_update(parameters, gradients, rate):
             "A mismatch can come from container structure, leaf shape, dtype or semantic identity. Diagnose them separately. Do not assume that every leaf in a state tree should receive a gradient or optimizer update; counters and random keys have different roles.",
             "Design separate parameter, optimizer and diagnostic trees for a two-layer model. Explain what must be preserved to resume one update and which metadata should remain static. Compare this explicit representation with registered parameter objects in torch-003.",
             (("Pytrees", "https://docs.jax.dev/en/latest/pytrees.html"),),
+            key_terms=(
+                (
+                    "Pytree",
+                    "A nested structure of supported containers such as dicts, lists and tuples whose numerical leaves JAX transformations can process.",
+                ),
+                (
+                    "Leaf",
+                    "A value at the bottom of a pytree, usually an array, that tree operations transform while preserving the surrounding containers.",
+                ),
+                (
+                    "Tree structure",
+                    "The arrangement of containers and keys around the leaves, which must match when mapping over several trees together.",
+                ),
+                (
+                    "jax.tree.map",
+                    "A function that applies one leaf-level operation to corresponding leaves of one or more trees and returns a tree of the same structure.",
+                ),
+                (
+                    "Flatten and unflatten",
+                    "Splitting a tree into a list of leaves plus a structure description, then rebuilding the original tree from both parts.",
+                ),
+            ),
         ),
     ]
 )

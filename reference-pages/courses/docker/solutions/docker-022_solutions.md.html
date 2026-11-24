@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-compare-a-cpu-limit-with-dedicated-hardware">Exercise 1: Compare a CPU limit with dedicated hardware.<a class="heading-anchor" href="#exercise-1-compare-a-cpu-limit-with-dedicated-hardware" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A quota constrains time; it does not grant exclusive cores.</p>
 <p><strong>Why:</strong> Shared scheduling and host contention remain. State the actual control rather than translating it into an unsupported performance guarantee.</p>
+<p><strong>Approach:</strong> Read cpus: 0.5 as a scheduler quota: the app may use up to half a CPU&#x27;s worth of time per period, spread across whatever cores run it.</p>
+<p><strong>Why this is correct:</strong> The kernel still shares those cores with other containers and host processes, so the quota caps usage without reserving hardware.</p>
+<p><strong>A plausible wrong approach:</strong> Advertising the fixture as having half a dedicated core promises isolation that the quota never provides.</p>
+<p><strong>How to verify:</strong> Run a busy loop under cpus 0.5 next to another busy container; both slow, and docker stats shows the capped share rather than a reserved core.</p>
 <h3 id="exercise-2-predict-the-effect-of-insufficient-engine-vm-memory">Exercise 2: Predict the effect of insufficient engine VM memory.<a class="heading-anchor" href="#exercise-2-predict-the-effect-of-insufficient-engine-vm-memory" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Container limits cannot compensate for missing host capacity.</p>
 <p><strong>Why:</strong> The VM allocation bounds the resources the engine can manage. Inspect that layer when several individually modest containers compete.</p>
+<p><strong>Approach:</strong> Add up the configured limits, such as 128m for app and 64m for client, and compare the total with the memory given to the engine&#x27;s VM.</p>
+<p><strong>Why this is correct:</strong> A limit is a ceiling the engine enforces inside its own allocation; it cannot create memory the VM was never given.</p>
+<p><strong>A plausible wrong approach:</strong> Raising mem_limit on each service when several containers crash together ignores that the VM itself is exhausted.</p>
+<p><strong>How to verify:</strong> Check the VM&#x27;s memory in the engine settings or docker info; once it covers the sum plus overhead, the shared failures stop.</p>
 <h3 id="exercise-3-design-a-controlled-cpu-comparison">Exercise 3: Design a controlled CPU comparison.<a class="heading-anchor" href="#exercise-3-design-a-controlled-cpu-comparison" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Same input and image, one changed limit, several bounded measurements.</p>
 <p><strong>Why:</strong> Control enough variables to make the comparison interpretable. Keep architecture and cache state in the evidence record.</p>
+<p><strong>Approach:</strong> Keep the image, input and cache state fixed, change only cpus, and repeat each timed run several times with a timeout.</p>
+<p><strong>Why this is correct:</strong> One changed variable lets a difference in timing be attributed to the limit and not to a cold cache or a new image.</p>
+<p><strong>A plausible wrong approach:</strong> Comparing one run at cpus 0.5 on a laptop with one run at cpus 2 on another machine mixes architecture and host load into the result.</p>
+<p><strong>How to verify:</strong> The record lists the image ID, platform, cache state and every repeated timing, so someone else can rerun the same comparison.</p>
 <h3 id="exercise-4-diagnose-slowness-without-assuming-memory-failure">Exercise 4: Diagnose slowness without assuming memory failure.<a class="heading-anchor" href="#exercise-4-diagnose-slowness-without-assuming-memory-failure" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Compare CPU throttling, I/O, requests and memory observations.</p>
 <p><strong>Why:</strong> Multiple mechanisms produce slow responses. A memory increase is unjustified when the first failing observation is elsewhere.</p>
+<p><strong>Approach:</strong> Collect several observations before changing anything: CPU throttling, disk I/O, request rate and memory near the 128m ceiling.</p>
+<p><strong>Why this is correct:</strong> Slowness can come from CPU quota, blocking file writes to /data or extra traffic. Memory is just one candidate among them.</p>
+<p><strong>A plausible wrong approach:</strong> Doubling mem_limit at the first slow request leaves a CPU-bound or I/O-bound cause untouched.</p>
+<p><strong>How to verify:</strong> The first observation that departs from normal, such as high throttled time, points to the setting worth changing next.</p>
 <h3 id="exercise-5-explain-why-a-single-docker-stats-sample-is-limited">Exercise 5: Explain why a single docker stats sample is limited.<a class="heading-anchor" href="#exercise-5-explain-why-a-single-docker-stats-sample-is-limited" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It does not capture the whole workload or historical peaks.</p>
 <p><strong>Why:</strong> Sampling frequency and timing influence what is visible. Use a bounded series and application timings when investigating an intermittent issue.</p>
+<p><strong>Approach:</strong> Treat the --no-stream output as one snapshot taken at the moment the command ran.</p>
+<p><strong>Why this is correct:</strong> A short spike between snapshots, or a peak an hour ago, does not appear in it, so it cannot describe the whole workload.</p>
+<p><strong>A plausible wrong approach:</strong> Concluding that memory is fine from one quiet sample misses the spike that triggered the reported failure.</p>
+<p><strong>How to verify:</strong> Collect a bounded series at a fixed interval during the workload, alongside application timings, and compare peaks with the limits.</p>
 <h3 id="exercise-6-define-a-safe-resource-stress-boundary">Exercise 6: Define a safe resource stress boundary.<a class="heading-anchor" href="#exercise-6-define-a-safe-resource-stress-boundary" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Small fixed workload, timeout and owned disposable target.</p>
 <p><strong>Why:</strong> The goal is to observe a mechanism, not to consume all host resources. Stop when the named failure or performance condition is established.</p>
+<p><strong>Approach:</strong> Choose a small fixed workload against a container you own, wrap it in a timeout, and name the condition that ends the test.</p>
+<p><strong>Why this is correct:</strong> The goal is to see one mechanism, such as throttling under the 0.5 quota, which a short bounded load already shows.</p>
+<p><strong>A plausible wrong approach:</strong> Running an unbounded fork bomb to find the limit risks the whole host; pids_limit 64 helps but is not a reason to try.</p>
+<p><strong>How to verify:</strong> The test stops at its timeout or named condition, and docker compose ps shows only the owned container affected.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

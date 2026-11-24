@@ -8,7 +8,7 @@ Intermediate; approximately 105 minutes. Direct prerequisites: `spark-017`. The 
 
 ## How to run this lesson
 
-Open `spark-018` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-018` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-018.scala) and [PySpark learner](../lessons/spark-018.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-018_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-018_solution.scala) and [PySpark reference](../solutions/spark-018_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -51,7 +51,7 @@ The lesson uses exact historical fixtures, not a claim that every business zone 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -76,20 +76,8 @@ val raw = spark.createDataFrame(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 spark.conf.set("spark.sql.timestampType", "TIMESTAMP_LTZ")
 schema = StructType(
@@ -167,7 +155,7 @@ Return event_id, text, event_time by parsing the declared offset pattern yyyy-MM
 
 ### Exercise 2: Render a zone without changing the underlying instant
 
-Return ordered(event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH: mm: ss. Set the zone only during materialization and restore the previous setting in finally.
+Return ordered (event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH: mm: ss. Set the zone only during materialization and restore the previous setting in finally.
 
 **Expected result/shape:** Events 2 and 3 render 08:30 and 09:30 under UTC but both 01:30 under America/Los_Angeles. Session zone is UTC afterward.
 
@@ -177,7 +165,7 @@ Return ordered(event_id, formatted_clock) pairs for a requested zone, formatting
 
 ### Exercise 3: Filter a complete local day with instant boundaries
 
-Select events in the half-open interval [2024-11-03T07:00:00Z,2024-11-04T08:00:00Z). Return all event columns.
+Select events in the half-open interval [2024-11-03T07:00:00Z, 2024-11-04T08:00:00Z). Return all event columns.
 
 **Expected result/shape:** Ordered event IDs [1, 2, 3, 5]. Lower-bound ID 1 included, upper-bound ID 4 excluded and prior-second ID 6 excluded.
 
@@ -197,11 +185,11 @@ Under both UTC and America/Los_Angeles, cast 2024-11-03 01:30:00 explicitly to T
 
 ### Exercise 5: Expose the information lost by a local clock key
 
-For the two fold events 2 and 3, compare local formatted labels with their epoch values. Return(label_count, instant_count), retaining original event identity.
+For the two fold events 2 and 3, compare local formatted labels with their epoch values. Return (label_count, instant_count), retaining original event identity.
 
 **Expected result/shape:** One distinct local label but two distinct instants. They must not be deduplicated by the displayed clock.
 
-**Verify:** Assert(1,2) using separately materialized local labels and original epoch evidence.
+**Verify:** Assert `(1, 2)` using separately materialized local labels and original epoch evidence.
 
 **Progressive hint:** A rendering can be many-to-one; compare distinct counts without overwriting event_time.
 
@@ -221,7 +209,7 @@ Do not confuse a timestamp's displayed timezone with its original textual offset
 
 ## Self-check
 
-Explain the contract of `parseInstants` / `parse_instants` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `parseInstants` / `parse_instants` without reading its solution. Then, from memory, state what Exercise 6 (Quarantine invalid timestamps without confusing missingness) must produce: IDs 1, 2, 3 have those reasons respectively; only 1 is accepted while ANSI remains true. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

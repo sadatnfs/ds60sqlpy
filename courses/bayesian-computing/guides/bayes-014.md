@@ -8,6 +8,14 @@ A posterior predictive density evaluated on data used for fitting can be optimis
 
 The example compares an intercept-only normal model with a linear normal model on 12 synthetic observations. Observation scale is known, and both coefficient priors are normal. This creates an analytic refitting oracle in addition to actual PyMC sampling and ArviZ's Pareto-smoothed importance-sampling approximation.
 
+## Key terms
+
+- **Leave-one-out evaluation:** Scoring each held-out unit by its predictive density under a posterior fitted without that unit.
+- **ELPD:** The expected log predictive density for new data under a stated evaluation scheme, which LOO estimates and larger values favor.
+- **PSIS:** Pareto-smoothed importance sampling, which approximates LOO from one full-data posterior instead of refitting.
+- **Pareto k:** The estimated tail shape of the importance weights; large values flag an unreliable approximation for that unit.
+- **Evaluation unit:** What is held out, such as a row, user, cluster or time block, which defines the prediction question.
+
 ## Worked case 1: compare PSIS with exact refitting
 
 Both models produce pointwise log-likelihood arrays, and `az.loo` returns an estimated expected log predictive density together with Pareto-k diagnostics. Large Pareto-k values indicate unreliable importance-weight behavior for the approximation. ArviZ 0.23.4 sets `warning` when any observation's k exceeds \(\min(1-1/\log_{10}S,\,0.7)\), where \(S\) is the total number of posterior draws; for this program's \(S=240\) draws the cutoff is about 0.58. Values above 0.7 make the PSIS estimate for that observation unreliable however many draws are used, while values between the sample-size cutoff and 0.7 can improve with more draws. Compare the printed `pareto_k_max` with that cutoff as well as reading `psis_warning`. A returned score is not automatically a trustworthy estimate merely because the function completed.
@@ -46,6 +54,39 @@ The demonstration uses short chains and retains imperfect diagnostics; its R-hat
 **Is a high Pareto k merely a warning to hide in the appendix?** It can challenge the numerical reliability of the approximation itself. Investigate influential observations, model misspecification and the need for a different evaluation computation.
 
 **Why calculate exact leave-one-out in a small example?** It supplies an independent reference that reveals approximation error. The same discipline can be applied through targeted refits or simplified models when developing a larger Bayesian evaluation workflow.
+
+## Worked example: Raw importance LOO for an ordinary point and an outlier
+
+```python
+import numpy as np
+from scipy import stats
+
+rng = np.random.default_rng(14)
+y = np.array([-0.4, 0.3, 0.1, -0.2, 0.6, 0.0, -0.5, 0.2, 0.4, 8.0])
+n, S = len(y), 4000
+draws = rng.normal(y.mean(), np.sqrt(1 / n), S)  # exact posterior, flat prior, sigma = 1
+
+for i in (1, 9):
+    lik = stats.norm.pdf(y[i], draws, 1)
+    w = 1 / lik
+    is_loo = np.log(1 / np.mean(w))
+    rest = np.delete(y, i)
+    exact = stats.norm.logpdf(y[i], rest.mean(), np.sqrt(1 + 1 / (n - 1)))
+    tail = np.sort(w)[-S // 5 :]
+    k_hat = stats.genpareto.fit(tail - tail.min(), floc=0)[0]
+    print(
+        f"y={y[i]:>4}: IS-LOO {is_loo:.3f}, exact {exact:.3f}, max weight share {w.max() / w.sum():.3f}, tail k {k_hat:.2f}"
+    )
+```
+
+Observed output:
+
+```text
+y= 0.3: IS-LOO -1.141, exact -1.140, max weight share 0.001, tail k 0.09
+y= 8.0: IS-LOO -29.149, exact -29.373, max weight share 0.072, tail k 0.98
+```
+
+For an ordinary observation, 0.3, raw importance sampling with weights \(1/p(y_i\mid\theta^{(s)})\) recovers the leave-one-out log density, \(-1.141\) against an exact \(-1.140\). No draw holds more than 0.001 of the weight, and the fitted Pareto tail shape is 0.09. The outlier at 8.0 tells a different story. Removing it moves the posterior noticeably, so the full-data draws rarely visit the region that would predict it well; the largest single weight carries 0.072 of the total, and the tail shape estimate is 0.98, far above the 0.7 level at which PSIS warns that the estimate is unreliable. The point estimate is off by 0.22 nats, \(-29.149\) versus the exact \(-29.373\), and with an infinite-variance weight distribution it could have been much further off on another seed. The tail shape is therefore a property of the observation and the model together. It says where exact refitting is needed, here for one point out of ten.
 
 ## Complete reproducible program
 

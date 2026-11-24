@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-015`, `python-1
 
 A database transaction groups changes that must succeed or fail together. An ORM session coordinates Python objects with that database work, but its lifecycle must still be explicit. This chapter uses real SQLAlchemy sessions and SQLite to compare a committed batch with a batch that violates a uniqueness constraint.
 
+## Key terms
+
+- **Transaction:** A group of database changes that commit together or roll back together, so a batch never partially succeeds.
+- **ORM session:** The SQLAlchemy object that tracks Python objects and issues their SQL; this example creates one per operation from a session factory.
+- **Session.begin():** A SQLAlchemy context manager that commits when its block exits normally and rolls back when an exception escapes.
+- **Flush:** Sending pending changes to the database inside the current transaction without committing them, which can surface a constraint failure early.
+- **IntegrityError:** The SQLAlchemy exception raised when a statement violates a database constraint, translated here into a 409 Conflict response.
+
 ## Mechanism: transaction boundaries belong around the operation
 
 The Item table has a generated primary key and a unique title. A session factory creates a session for each operation. `Session.begin()` supplies a transaction context: normal exit commits, while an exception rolls back. The handler catches an IntegrityError outside that context and translates it to a controlled 409 response.
@@ -25,6 +33,57 @@ The input is also bounded before database work: the handler accepts one to three
 The next request contains `temporary` followed by the already existing title. The database rejects the duplicate. The handler returns 409, and a subsequent read confirms that `temporary` was not committed either. This is the important invariant: failure of the operation does not leave a partial result that looks like a successful creation.
 
 A transaction is not an automatic solution for effects outside the database. Sending an email between two statements would not be undone by rolling back those statements. The later outbox chapter addresses that coordination problem explicitly.
+
+## Worked example: one transaction versus a commit per row
+
+```python
+from sqlalchemy import String, create_engine, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class Item(Base):
+    __tablename__ = "items"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(40), unique=True)
+
+
+def titles(engine):
+    with Session(engine) as db:
+        return list(db.scalars(select(Item.title).order_by(Item.id)))
+
+
+for style in ("per_row", "one_transaction"):
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as db, db.begin():
+        db.add(Item(title="existing"))
+    batch = ["temporary", "existing"]
+    try:
+        if style == "per_row":
+            for title in batch:
+                with Session(engine) as db, db.begin():
+                    db.add(Item(title=title))
+        else:
+            with Session(engine) as db, db.begin():
+                db.add_all([Item(title=t) for t in batch])
+    except IntegrityError:
+        pass
+    print(style, titles(engine))
+```
+
+Expected output:
+
+```text
+per_row ['existing', 'temporary']
+one_transaction ['existing']
+```
+
+Both runs submitted the same batch, `temporary` followed by the duplicate `existing`, and both hit the unique constraint. Committing each row separately left `temporary` behind, a half-applied request that the client was told had failed. Wrapping the whole batch in one `db.begin()` block made the failure roll back everything, so the table returned to its prior single row. That is the ownership rule the lesson's `/batch` view follows: one HTTP request owns one transaction, and the handler translates `IntegrityError` into 409 only after the rollback has happened. Reordering the batch to put `existing` first would make the per-row version fail before inserting anything, which is why a passing test with one ordering does not prove the per-row design is safe.
 
 ## Failure diagnosis
 

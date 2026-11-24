@@ -22,6 +22,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     {
+        // Task 2: Guided modification
+        let first = String::from("pear");
+        let second = String::from("plum");
+        let chosen = longer(&first, &second);
+        assert!(std::ptr::eq(chosen, first.as_str()));
+        assert_eq!(longer("fig", "kiwi"), "kiwi");
+        assert_eq!(longer("", ""), "");
+    }
+
+    {
         // Task 3: Independent construction
         fn split_prefix<'a>(text: &'a str, prefix: &str) -> Option<&'a str> {
             text.strip_prefix(prefix)
@@ -32,6 +42,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             split_prefix(&line, &prefix)
         };
         assert_eq!(rest, Some("42"));
+    }
+
+    {
+        // Task 5: Boundary evidence
+        assert_eq!(longer("", "x"), "x");
+        assert_eq!(longer("x", ""), "x");
+        let outer = String::from("outer value");
+        let kept = {
+            let inner = String::from("in");
+            longer(&outer, &inner).to_owned()
+        };
+        assert_eq!(kept, "outer value");
     }
     println!("rust-019: passed");
     Ok(())

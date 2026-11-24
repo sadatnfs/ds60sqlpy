@@ -65,7 +65,7 @@ object Main {
       locally {
         assert(facts.count() == 20000L && dimension.count() == 20L)
         assert(dimension.select("key").distinct().count() == 20L)
-        println("Known finite build side:20 unique keys")
+        println("Known finite build side: 20 unique keys")
       }
       locally {
         val total = (0L until 20000L).map(i => (i % 7L + 1L) * (i % 20L + 1L)).sum

@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-027-dags-tasks-and-data-intervals">apache-027: DAGs, tasks and data intervals<a class="heading-anchor" href="#apache-027-dags-tasks-and-data-intervals" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-008</code>, <code>apache-007</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>DAG:</strong> An Airflow workflow definition that declares tasks and their dependency relationships as a directed acyclic graph.</li>
+<li><strong>Dag Run:</strong> One instantiation of a DAG for a specific data interval, whose task instances record the state of each task&#x27;s work for that run.</li>
+<li><strong>TaskFlow:</strong> Airflow&#x27;s decorator API, imported from airflow.sdk, that turns Python functions into tasks. Calling a decorated task while defining a DAG creates a dependency, not an immediate function call.</li>
+<li><strong>Data interval:</strong> The time range of data a scheduled Dag Run is responsible for. The logical date names the run and is not the wall-clock time it executed.</li>
+<li><strong>XCom:</strong> Airflow&#x27;s metadata channel for small values passed between tasks. Large tables stay in a data system, and only a bounded reference travels through XCom.</li>
+</ul>
 <h3 id="orchestration-records-work-and-dependencies">Orchestration records work and dependencies<a class="heading-anchor" href="#orchestration-records-work-and-dependencies" aria-label="Link to this section">#</a></h3>
 <p>Airflow schedules and tracks workflows. A DAG describes tasks and their dependency relationships; a Dag Run is one instantiation, and task instances carry the state of individual work for that run. Airflow is not the bulk-data processing engine inside every task. A task can submit a query, write one partition or call another system while Airflow records its attempt, dependencies and outcome.</p>
 <p>TaskFlow decorators turn Python functions into scheduled task definitions. Calling a decorated task while defining the DAG creates a dependency object rather than immediately running the function&#x27;s body. Small return values can travel through XCom metadata; large tables should remain in an explicitly managed data system, with a bounded reference passed between tasks.</p>

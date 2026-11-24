@@ -378,7 +378,7 @@ The pad uses precondition for dependency-free executable checks. The JourneyCore
     [
         "Name a wrong implementation rejected by each fixture.",
         "Add the minimum Int case without unsafe negation.",
-        "Add a real JourneyCore test for rejected negative quantity.",
+        "Add a real JourneyCore test that rejects a blank item title.",
         "Diagnose a test comparing the same function call on both sides.",
         "Test empty, duplicate and malformed inputs separately.",
         "Create a verification plan distinguishing unit, package, UI and device evidence.",

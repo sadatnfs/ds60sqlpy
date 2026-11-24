@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "track_id": "deep-learning-pytorch",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "torch-002",
+      "title": "Tensor shape, stride, views and copies",
+      "anchor": "reference",
+      "source_path": "courses/deep-learning-pytorch/solutions/torch-002_solution.py",
+      "source_sha256": "c3d554944e2a2c216904beb4c8aab9f44b4a51f6b4ee20eb22abea58d8b8e23f",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [9, 17],
+          "excerpt": "def verify():\n    # Worked example A: Inspect shape and stride\n    x = torch.arange(6, dtype=torch.float64, device=\"cpu\").reshape(2, 3)\n    assert (\n        tuple(x.shape) == (2, 3)\n        and x.stride() == (3, 1)\n        and x.device.type == \"cpu\"\n        and x.dtype == torch.float64\n    )",
+          "title": "Worked example A: shape, stride, device and dtype",
+          "explanation": "torch.arange(6) makes the values 0 to 5, and reshape(2, 3) arranges them as two rows of three. The shape is the logical size. The stride says how many elements to skip in memory to move one step along each axis: 3 to the next row, 1 to the next column. Device and dtype are checked explicitly so nothing is assumed.",
+          "observe": "stride() returns (3, 1) for a row major 2 by 3 tensor."
+        },
+        {
+          "lines": [19, 27],
+          "excerpt": "    # Worked example B: Expose shared storage\n    row = x[0]\n    row[0] = 99\n    assert x[0, 0].item() == 99\n\n    # Worked example C: Create an independent copy\n    owned = x.clone()\n    owned[0, 0] = -1\n    assert owned[0, 0].item() == -1 and x[0, 0].item() == 99",
+          "title": "Worked examples B and C: views share memory, clones do not",
+          "explanation": "x[0] is a view of the first row, not a copy. Writing 99 into the view also changes x. clone allocates new memory, so writing -1 into owned leaves x unchanged. .item() converts a one element tensor to a Python number.",
+          "observe": "Silent writes through views are a common source of bugs."
+        },
+        {
+          "lines": [29, 36],
+          "excerpt": "    # Exercise 4: Trace a transposed layout\n    transposed = x.T\n    assert (\n        tuple(transposed.shape) == (3, 2)\n        and transposed.stride() == (1, 3)\n        and not transposed.is_contiguous()\n    )\n    assert transposed.contiguous().is_contiguous()",
+          "title": "Exercise 4: transposing changes strides, not data",
+          "explanation": "x.T swaps the axes by swapping the strides to (1, 3). The data is not moved, so the tensor is no longer contiguous in memory. contiguous() makes a compact copy when an operation needs one.",
+          "observe": "transposed.is_contiguous() is False."
+        },
+        {
+          "lines": [38, 49],
+          "excerpt": "    # Exercise 5: Detect a pairing broadcast\n    v = torch.tensor([1.0, 2.0, 3.0])\n    column = v[:, None]\n    assert tuple((v - column).shape) == (3, 3) and tuple((v - v).shape) == (3,)\n\n    # Exercise 6: Reject incompatible arithmetic\n    try:\n        torch.zeros((2, 3)) + torch.zeros(4)\n    except RuntimeError:\n        pass\n    else:\n        raise AssertionError(\"incompatible shapes accepted\")",
+          "title": "Exercises 5 and 6: broadcasting and its limits",
+          "explanation": "v[:, None] turns a length 3 vector into a 3 by 1 column. Subtracting a column from a row broadcasts both to 3 by 3, which is easy to do by accident when you meant elementwise. Shapes (2, 3) and (4,) cannot broadcast, and PyTorch raises RuntimeError.",
+          "observe": "Check result shapes whenever two tensors meet."
+        },
+        {
+          "lines": [51, 63],
+          "excerpt": "    # Exercise 1: Predict a 3-by-2 layout\n    grid = torch.arange(6, dtype=torch.float32).reshape(3, 2)\n    assert (\n        tuple(grid.shape) == (3, 2)\n        and grid.stride() == (2, 1)\n        and grid.dtype == torch.float32\n        and grid.device.type == \"cpu\"\n    )\n\n    # Exercise 2: Write through a column view\n    column = grid[:, 1]\n    column[2] = -7\n    assert grid[2, 1].item() == -7 and column.stride() == (2,)",
+          "title": "Exercises 1 and 2: a 3 by 2 grid and a column view",
+          "explanation": "A 3 by 2 float32 grid has strides (2, 1). grid[:, 1] selects the second column as a view with stride 2, and writing through it changes the grid.",
+          "observe": "grid[2, 1] becomes -7."
+        },
+        {
+          "lines": [65, 79],
+          "excerpt": "    # Exercise 3: Separate contiguous from clone\n    same = grid.contiguous()\n    owned = grid.clone()\n    same[0, 0] = 100\n    owned[0, 0] = -100\n    assert (\n        same.data_ptr() == grid.data_ptr()\n        and grid[0, 0].item() == 100\n        and owned[0, 0].item() == -100\n    )\n    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercise 3: contiguous may return the same tensor",
+          "explanation": "When a tensor is already contiguous, contiguous() returns it unchanged, so it shares data_ptr, the memory address. Only clone guarantees independent storage. The script prints the summary after all checks pass.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    },
+    {
+      "lesson_id": "torch-014",
+      "title": "Multiclass versus multilabel targets and losses",
+      "anchor": "reference",
+      "source_path": "courses/deep-learning-pytorch/solutions/torch-014_solution.py",
+      "source_sha256": "a2233c5a52259183af3debf858813281d3fa288b6549a5267745652ed9f677f7",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [9, 15],
+          "excerpt": "def verify():\n    # Exercise 1: Calculate uniform multiclass loss\n    logits = torch.zeros((1, 3), dtype=torch.float64)\n    target = torch.tensor([1], dtype=torch.long)\n    np.testing.assert_allclose(\n        F.cross_entropy(logits, target).item(), np.log(3), atol=1e-12, rtol=0\n    )",
+          "title": "Exercise 1: uniform multiclass loss",
+          "explanation": "Three equal logits mean softmax assigns probability one third to each class. F.cross_entropy expects raw logits and an integer class index, and returns the negative log of the true class probability, which is log 3 here.",
+          "observe": "The loss is about 1.0986."
+        },
+        {
+          "lines": [17, 19],
+          "excerpt": "    # Exercise 2: Contrast independent binary outputs\n    independent = torch.sigmoid(logits)\n    assert independent.tolist() == [[0.5, 0.5, 0.5]] and independent.sum().item() == 1.5",
+          "title": "Exercise 2: independent sigmoids do not sum to 1",
+          "explanation": "Applying sigmoid to each logit separately treats each class as its own yes or no question. With all zero logits every output is 0.5, so they sum to 1.5. That is correct for multilabel problems but wrong for picking exactly one class.",
+          "observe": "independent.sum() is 1.5."
+        },
+        {
+          "lines": [21, 29],
+          "excerpt": "    # Exercise 3: Inspect target shapes and types\n    classes = torch.tensor([2, 0], dtype=torch.long)\n    labels = torch.tensor([[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]])\n    assert (\n        tuple(classes.shape) == (2,)\n        and tuple(labels.shape) == (2, 3)\n        and classes.dtype == torch.long\n        and labels.is_floating_point()\n    )",
+          "title": "Exercise 3: target shapes and dtypes",
+          "explanation": "Multiclass targets are a 1D tensor of long integers, one class per row. Multilabel targets are a 2D float tensor with one 0 or 1 per class. Mixing these up is a common error.",
+          "observe": "classes has shape (2,) and labels has shape (2, 3)."
+        },
+        {
+          "lines": [31, 34],
+          "excerpt": "    # Exercise 4: Check class-axis normalization\n    scores = torch.tensor([[2.0, 0.0, -2.0], [0.0, 1.0, 3.0]])\n    probs = torch.softmax(scores, dim=1)\n    torch.testing.assert_close(probs.sum(1), torch.ones(2), atol=1e-6, rtol=0)",
+          "title": "Exercise 4: softmax along the class axis",
+          "explanation": "dim=1 normalizes across classes within each row. Using dim=0 would normalize across examples, which is wrong. assert_close checks each row sums to 1 within float32 tolerance.",
+          "observe": "Both row sums are 1."
+        },
+        {
+          "lines": [36, 45],
+          "excerpt": "    # Exercise 5: Name the multilabel denominator\n    per_entry = F.binary_cross_entropy_with_logits(\n        torch.zeros_like(labels), labels, reduction=\"none\"\n    )\n    np.testing.assert_allclose(\n        [per_entry.sum().item(), per_entry.mean().item()],\n        [6 * np.log(2), np.log(2)],\n        atol=1e-6,\n        rtol=0,\n    )",
+          "title": "Exercise 5: the multilabel denominator",
+          "explanation": "binary_cross_entropy_with_logits with reduction=\"none\" returns one loss per entry. Zero logits give log 2 for each of 6 entries. The sum is 6 log 2 while the mean is log 2, so always state whether a reported loss is summed or averaged.",
+          "observe": "Different reductions change the scale, not the ranking."
+        },
+        {
+          "lines": [47, 58],
+          "excerpt": "    # Exercise 6: Reject an out-of-vocabulary class\n    try:\n        F.cross_entropy(torch.zeros((1, 3)), torch.tensor([3]))\n    except (IndexError, RuntimeError):\n        pass\n    else:\n        raise AssertionError(\"unknown class accepted\")\n    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercise 6: reject an unknown class",
+          "explanation": "With three classes, valid indices are 0 to 2. Index 3 makes cross_entropy raise, and the test accepts either IndexError or RuntimeError. The script then prints the summary.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    },
+    {
+      "lesson_id": "torch-026",
+      "title": "Custom modules, buffers and a custom autograd function",
+      "anchor": "reference",
+      "source_path": "courses/deep-learning-pytorch/solutions/torch-026_solution.py",
+      "source_sha256": "93ede549c6a284be6468c068a43b28e4a87fc6c6aa93642a0f182357b783199a",
+      "expected_output": ["{'checks': 6, 'status': 'passed'}"],
+      "steps": [
+        {
+          "lines": [9, 19],
+          "excerpt": "class Residual(nn.Module):\n    def __init__(self, width):\n        super().__init__()\n        self.width = width\n        self.kernel = nn.Parameter(torch.zeros((width, width), dtype=torch.float64))\n        self.register_buffer(\"scale\", torch.tensor(1.0, dtype=torch.float64))\n\n    def forward(self, x):\n        if x.ndim != 2 or x.shape[1] != self.width:\n            raise ValueError(\"feature width mismatch\")\n        return x + self.scale * (x @ self.kernel)",
+          "title": "A residual module with a parameter and a buffer",
+          "explanation": "Residual subclasses nn.Module. kernel is wrapped in nn.Parameter, so optimizers will train it. register_buffer stores scale as module state that moves with the module and is saved, but is not trained. forward validates input width, then returns x plus a scaled linear transform of x.",
+          "observe": "With a zero kernel the module returns its input unchanged."
+        },
+        {
+          "lines": [22, 31],
+          "excerpt": "class Cube(torch.autograd.Function):\n    @staticmethod\n    def forward(ctx, x):\n        ctx.save_for_backward(x)\n        return x**3\n\n    @staticmethod\n    def backward(ctx, grad_output):\n        (x,) = ctx.saved_tensors\n        return grad_output * 3 * x * x",
+          "title": "A custom autograd function",
+          "explanation": "Cube defines both directions by hand. forward saves its input with ctx.save_for_backward and returns x cubed. backward receives the gradient flowing in from later layers and multiplies it by the local derivative 3x squared.",
+          "observe": "The function is called with Cube.apply."
+        },
+        {
+          "lines": [34, 46],
+          "excerpt": "def verify():\n    # Worked example A: Build an identity residual\n    module = Residual(2)\n    x = torch.tensor([[1.0, 2.0], [3.0, 4.0]], dtype=torch.float64)\n    assert torch.equal(module(x), x)\n    assert set(dict(module.named_parameters())) == {\"kernel\"} and set(\n        dict(module.named_buffers())\n    ) == {\"scale\"}\n\n    # Worked example B: Keep state stable across calls\n    identity = id(module.kernel)\n    module(torch.ones((1, 2), dtype=torch.float64))\n    assert id(module.kernel) == identity and sum(p.numel() for p in module.parameters()) == 4",
+          "title": "Worked examples A and B: inspect the state",
+          "explanation": "named_parameters lists only kernel, while named_buffers lists only scale. Calling the module again must not replace its parameter object, which id() confirms. A 2 by 2 kernel has 4 trainable numbers.",
+          "observe": "Parameter identity stays stable between calls."
+        },
+        {
+          "lines": [48, 60],
+          "excerpt": "    # Worked example C: Check a known residual transform\n    with torch.no_grad():\n        module.kernel.copy_(torch.eye(2, dtype=torch.float64))\n        module.scale.fill_(0.5)\n    torch.testing.assert_close(module(x), 1.5 * x, atol=1e-12, rtol=0)\n\n    # Exercise 4: Reject incompatible feature width\n    try:\n        module(torch.ones((1, 3), dtype=torch.float64))\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"incompatible residual accepted\")",
+          "title": "Worked example C and Exercise 4: set state safely",
+          "explanation": "torch.no_grad() lets the code overwrite a parameter without recording that edit for gradients. With an identity kernel and scale 0.5 the output is 1.5 times x. A 3 column input is rejected by forward.",
+          "observe": "Wrong widths raise ValueError."
+        },
+        {
+          "lines": [62, 69],
+          "excerpt": "    # Exercise 5: Validate a custom cube derivative\n    probe = torch.tensor([0.2, -0.7], dtype=torch.float64, requires_grad=True)\n    assert torch.autograd.gradcheck(Cube.apply, (probe,), eps=1e-6, atol=1e-5, rtol=1e-3)\n\n    # Exercise 6: Inspect the incoming-gradient factor\n    value = torch.tensor([2.0], dtype=torch.float64, requires_grad=True)\n    (2 * Cube.apply(value)).sum().backward()\n    assert value.grad.item() == 24",
+          "title": "Exercises 5 and 6: check the hand written gradient",
+          "explanation": "gradcheck compares backward with a numeric estimate using tiny finite differences; float64 is needed for that precision. Multiplying the output by 2 shows the incoming gradient factor: 2 times 3 times 2 squared is 24.",
+          "observe": "value.grad is exactly 24."
+        },
+        {
+          "lines": [71, 94],
+          "excerpt": "    # Exercise 1: Apply a swapping kernel\n    swap = Residual(2)\n    xs = torch.tensor([[1.0, 2.0]], dtype=torch.float64)\n    with torch.no_grad():\n        swap.kernel.copy_(torch.tensor([[0.0, 1.0], [1.0, 0.0]], dtype=torch.float64))\n        swap.scale.fill_(2.0)\n    assert swap(xs).tolist() == [[5.0, 4.0]]\n\n    # Exercise 2: Predict state for a wider module\n    wide_residual = Residual(3)\n    assert (\n        sum(p.numel() for p in wide_residual.parameters()) == 9\n        and len(list(wide_residual.buffers())) == 1\n    )\n\n    # Exercise 3: Differentiate Cube at a new point\n    point = torch.tensor([-1.0], dtype=torch.float64, requires_grad=True)\n    (3 * Cube.apply(point)).sum().backward()\n    assert point.grad.item() == 9\n    return {\"checks\": 6, \"status\": \"passed\"}\n\n\nif __name__ == \"__main__\":\n    print(verify())",
+          "title": "Exercises 1 to 3: predict outputs and gradients",
+          "explanation": "A swapping kernel with scale 2 turns [1, 2] into [1 + 4, 2 + 2]. A width 3 module has 9 parameters and one buffer. At x = -1 with a factor of 3, the gradient is 3 times 3 times 1, which is 9. The script prints the summary.",
+          "observe": "The output is {'checks': 6, 'status': 'passed'}."
+        }
+      ]
+    }
+  ]
+}

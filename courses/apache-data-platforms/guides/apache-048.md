@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-047`, `apache-036`.
 
+## Key terms
+
+- **Checkpoint:** A consistent snapshot of operator state and source positions that Flink can restore after a failure.
+- **Checkpoint barrier:** A marker injected into the streams that separates records before and after a checkpoint, defining a consistent cut through the graph.
+- **Barrier alignment:** Buffering input from channels whose barrier already arrived until barriers reach every input, which can add latency under backpressure.
+- **Replayable source:** A source that can restore its read position from a checkpoint so records after that point are read again.
+- **Transactional sink:** A sink that commits output only when a checkpoint completes, which is needed for end-to-end exactly-once results.
+
 ## A checkpoint is a consistent recovery boundary
 
 Flink checkpoints coordinated operator and source state so a job can recover from

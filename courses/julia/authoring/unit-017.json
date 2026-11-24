@@ -3,6 +3,28 @@
   "title": "Typed CSV input and round-trip data contracts",
   "concepts": ["CSV", "schema", "strict parsing", "identifier", "round trip"],
   "outcome": "Parse and export bounded CSV data using explicit types and missingness rules rather than accidental inference.",
+  "key_terms": [
+    [
+      "Schema",
+      "The expected column names and element types of a file, declared up front instead of inferred from whatever rows appear."
+    ],
+    [
+      "Strict parsing",
+      "Reading with `strict = true` so a malformed field raises an error instead of quietly becoming `missing`."
+    ],
+    [
+      "Identifier column",
+      "A code such as an account number that must be read as a `String`, because numeric parsing drops leading zeros."
+    ],
+    [
+      "Round trip",
+      "Writing a table and reading it back to confirm that names, types and values survive serialization unchanged."
+    ],
+    [
+      "IOBuffer",
+      "An in-memory stream that stands in for a file, so literal CSV text can be parsed without touching the disk."
+    ]
+  ],
   "level": "intermediate",
   "minutes": 150,
   "prerequisites": ["julia-015", "julia-016"],
@@ -14,48 +36,68 @@
     ["DataFrames IO", "https://dataframes.juliadata.org/stable/man/importing_and_exporting/"]
   ],
   "figure": 0,
+  "approach": "Write the schema before reading. Worked example A passes `types` for `id`, `amount` and `date`, `missingstring = \"NA\"`, a date format and `strict = true` to `CSV.read`, so every column has a declared meaning. Round trips use `CSV.write` into an `IOBuffer` and `take!` to collect the bytes, and relational checks come after parsing.",
   "exercises": [
     {
       "title": "Preserve a textual ID",
       "task": "Read 001 as a declared string.",
       "expected": "Its leading zeros remain.",
       "hint": "Identity is not necessarily a measurement.",
-      "answer": "Numeric-looking keys can lose meaning when inference converts them to integers."
+      "answer": "Numeric-looking keys can lose meaning when inference converts them to integers.",
+      "why": "Declaring `:id => String` keeps the text `001` exactly, so `String.(table.id)` equals `[\"001\", \"002\"]`.",
+      "wrong": "Letting CSV.jl infer the column type reads `001` as the integer 1, and a later join against string keys then matches nothing.",
+      "verify": "Example A asserts the restored ids; print `eltype(table.id)` to see a string type rather than `Int`."
     },
     {
       "title": "Declare missingness",
       "task": "Parse the authored NA amount marker.",
       "expected": "The second amount is missing.",
       "hint": "Use the agreed source-format policy.",
-      "answer": "A missing marker should not silently become a valid numeric zero."
+      "answer": "A missing marker should not silently become a valid numeric zero.",
+      "why": "`missingstring = \"NA\"` tells the parser that `NA` means unknown, so the second amount is `missing` and the column stays `Float64` otherwise.",
+      "wrong": "Replacing NA with 0 in a text editor before reading turns an absent amount into a recorded zero dollars.",
+      "verify": "Example A asserts `ismissing(table.amount[2])` and `table.amount[1] == 2.5`."
     },
     {
       "title": "Reject a wrong type",
       "task": "Parse 1.5 as a strict integer field.",
       "expected": "The parser raises its typed-input error.",
       "hint": "A decimal value violates this declared schema.",
-      "answer": "Changing the schema or using a repair policy requires an explicit decision."
+      "answer": "Changing the schema or using a repair policy requires an explicit decision.",
+      "why": "With `types = Int` and `strict = true`, the value `1.5` cannot be parsed as an integer, so `CSV.read` raises `CSV.Error`.",
+      "wrong": "Dropping `strict = true` lets the parser substitute `missing` for the bad cell, so the schema violation becomes an apparently ordinary gap.",
+      "verify": "The reference asserts `@test_throws CSV.Error` for this input and a passing strict read of `1` and `2` that sums to 3."
     },
     {
       "title": "Retain quoted content",
       "task": "Round-trip a string containing a comma or quotation marks.",
       "expected": "The restored field values agree.",
       "hint": "Use the CSV writer instead of hand-concatenating fields.",
-      "answer": "Correct quoting preserves structure without promising byte-identical formatting to every original file."
+      "answer": "Correct quoting preserves structure without promising byte-identical formatting to every original file.",
+      "why": "`CSV.write` quotes fields that contain the delimiter or quotation marks, so `contains,comma` and `quoted \"value\"` return intact.",
+      "wrong": "Building lines with `join(fields, \",\")` splits `contains,comma` into two columns on reread.",
+      "verify": "Example B asserts `String.(restored.note) == original.note` after the round trip."
     },
     {
       "title": "Handle buffer position",
       "task": "Write to an IOBuffer and then read its contents.",
       "expected": "Reset or take the bytes explicitly.",
       "hint": "The buffer has state.",
-      "answer": "An empty read after a write can reflect the current position rather than missing source data."
+      "answer": "An empty read after a write can reflect the current position rather than missing source data.",
+      "why": "After `CSV.write(output, ...)` the buffer position sits at the end, so `take!(output)` is the call that returns all written bytes.",
+      "wrong": "Calling `read(output, String)` right after writing returns an empty string, which looks like a failed export.",
+      "verify": "Compare `String(take!(output))` with a fresh `read` at the end position and note which one is empty."
     },
     {
       "title": "Separate parsing and meaning",
       "task": "A file parses successfully but has duplicate entity IDs.",
       "expected": "The relational data contract still needs validation.",
       "hint": "Parsing proves only part of the input boundary.",
-      "answer": "Types and delimiters do not establish grain, units or scientific validity."
+      "answer": "Types and delimiters do not establish grain, units or scientific validity.",
+      "why": "A file can parse cleanly yet contain the id `001` twice, which breaks a one-row-per-entity assumption that types cannot express.",
+      "wrong": "Treating a successful `CSV.read` as full validation lets duplicate keys fan out later joins.",
+      "verify": "Check `length(unique(table.id)) == nrow(table)` after parsing and report any duplicated ids."
     }
-  ]
+  ],
+  "checks_note": "Parsing with `types = Int` and `strict = true` reads the two integer rows and sums them to 3, and the same settings turn `1.5` into a `CSV.Error` instead of a silent conversion. The date lines show that 2024-02-29 is a valid leap day while 2023-02-29 raises `ArgumentError`, so a declared format catches impossible dates at the boundary."
 }

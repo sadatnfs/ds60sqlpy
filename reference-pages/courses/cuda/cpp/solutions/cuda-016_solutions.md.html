@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-016_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>In a three-tap filter, the input and output images live in global allocations. A thread&#x27;s running sum is a scalar candidate for a register. A cooperatively loaded tile belongs in shared memory. Three common coefficients may use read-only or constant storage. These are choices to validate, not declarations that force a faster program.</p>
+<p><strong>Approach:</strong> Map each object to a space: images in global, sum in a register, tile in shared, taps in constant.</p>
+<p><strong>Why it is correct:</strong> Each choice follows the scope and reuse of the data, not a speed promise.</p>
+<p><strong>A plausible wrong approach:</strong> Declaring every value <strong>shared</strong> wastes shared capacity on per-thread sums and limits resident blocks.</p>
+<p><strong>How to verify:</strong> Inspect compiler resource output and confirm the tile size matches the shared bytes reported.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A per-thread temporary array with 1,024 floats needs 4,096 bytes per thread. At 128 threads that is 524,288 bytes of logical temporary data, before other resources. Calling it &#x27;local&#x27; does not make it inexpensive. Reduce live working state or choose a different algorithm, then inspect compiler and runtime evidence.</p>
+<p><strong>Approach:</strong> Multiply 1,024 floats by 4 bytes, then by 128 threads.</p>
+<p><strong>Why it is correct:</strong> 4,096 bytes per thread far exceeds register capacity, so it lives in device-backed local memory.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming &#x27;local&#x27; means on-chip predicts fast access for 524,288 bytes that actually travel to DRAM.</p>
+<p><strong>How to verify:</strong> The reference asserts 4096 and 524288; compare with spill or stack size in compiler output.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Global allocation for the image, shared memory for cooperating block data, and a local scalar that the compiler may keep in a register.</p>
+<p><strong>Approach:</strong> Match each object&#x27;s scope: grid-wide image, block-wide tile, per-thread scalar.</p>
+<p><strong>Why it is correct:</strong> Global memory outlives blocks, shared memory lives per block, and a scalar suits registers.</p>
+<p><strong>A plausible wrong approach:</strong> Putting the image tile in global memory and reloading it per thread forgoes the reuse that motivated tiling.</p>
+<p><strong>How to verify:</strong> Check that the reference&#x27;s storage_roles dictionary matches your three assignments.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>The compiler can place local data in device-backed local memory or spill registers. Inspect generated resource information and measured behavior.</p>
+<p><strong>Approach:</strong> Replace &#x27;guaranteed&#x27; with &#x27;may be kept in registers&#x27; and cite the compiler&#x27;s spill report.</p>
+<p><strong>Why it is correct:</strong> Register allocation is a compiler decision constrained by the per-thread register limit.</p>
+<p><strong>A plausible wrong approach:</strong> Adding register keywords to force placement has no effect on modern CUDA compilers.</p>
+<p><strong>How to verify:</strong> Compile with resource usage reporting and look for local memory or spill bytes.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>No. Ordinary block shared memory has block scope. Specialized cluster mechanisms have separate feature and synchronization contracts.</p>
+<p><strong>Approach:</strong> State that ordinary shared memory is visible only within one block.</p>
+<p><strong>Why it is correct:</strong> Each block gets its own shared allocation, which ends when that block exits.</p>
+<p><strong>A plausible wrong approach:</strong> Passing a shared array address to another block and reading it yields undefined results.</p>
+<p><strong>How to verify:</strong> Write one value per block to global memory instead and read it in a later kernel.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Compare whether neighboring lanes read the same entries or divergent entries, access frequency and update needs; measure against a suitable read-only/global alternative.</p>
+<p><strong>Approach:</strong> Compare access pattern: constant cache broadcasts when a warp reads one address, serializes otherwise.</p>
+<p><strong>Why it is correct:</strong> A 64-entry table fits easily, so the deciding factor is whether lanes read the same entry.</p>
+<p><strong>A plausible wrong approach:</strong> Choosing constant storage for data-dependent lookups serializes divergent reads in the warp.</p>
+<p><strong>How to verify:</strong> Measure both variants on inputs with uniform and divergent indices.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-016_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A namespace groups names so two libraries can use similar class names without colliding. It is a naming mechanism, not a directory, a security sandbox or an automatic package installer. Autoloading is a separate mechanism that resolves a class name to source when needed. Composer commonly manages package dependencies and generates an autoloader for a project.</p>
 <p>A dependency manifest describes requirements, while a lockfile records a resolved dependency set. Reproducible deployment uses the reviewed lockfile and installed artifacts, with an explicit update process for security and compatibility. Opening a lesson must not download packages. The classroom single-file PHP worker has no arbitrary Composer project support, so the runnable example demonstrates how a fully qualified class name such as \DateTimeImmutable resolves from the global namespace, and the multi-file project workflow remains an external design.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Namespace:</strong> A prefix such as <code>App\Billing</code> that groups names so classes from different packages do not collide.</li>
+<li><strong>Autoloading:</strong> Loading a class file automatically the first time the class is used, following a mapping such as PSR-4.</li>
+<li><strong>Composer:</strong> PHP&#x27;s dependency manager, which installs packages declared in <code>composer.json</code> and generates an autoloader.</li>
+<li><strong>Lockfile:</strong> The <code>composer.lock</code> file, which records exact installed versions so every install reproduces the same dependencies.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>PHP namespace declarations have placement rules. A bracketed namespace block can coexist with an explicitly bracketed global namespace in a single-file teaching program. Production projects should use a coherent autoloading convention rather than a manual chain of untrusted includes. A user-controlled include path can become code execution, so package and file resolution belong to reviewed application code.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -215,6 +222,19 @@ final class Label { public static function text(): string { return &#x27;Study&#
 <p>This is configuration for a separately prepared project, not a pad command.</p>
 <pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span> <span class="syntax-tag">&quot;autoload&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span> <span class="syntax-tag">&quot;psr-4&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span> <span class="syntax-tag">&quot;Learning\\&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;src/&quot;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The convention maps a namespace prefix to the project&#x27;s source directory after autoloader generation.</p>
+<h3 id="contrast-case-an-include-path-built-from-request-input">Contrast case: an include path built from request input<a class="heading-anchor" href="#contrast-case-an-include-path-built-from-request-input" aria-label="Link to this section">#</a></h3>
+<p>The first router loads whatever page name the request supplies. The second maps names through a reviewed list.</p>
+<pre class="highlighted-code"><code class="language-php">// unsafe
+$page = $_GET[&#x27;page&#x27;] ?? &#x27;home&#x27;;
+include __DIR__ . &#x27;/pages/&#x27; . $page . &#x27;.php&#x27;;
+
+// allowlisted
+$file = match ($_GET[&#x27;page&#x27;] ?? &#x27;home&#x27;) {
+  &#x27;home&#x27; =&gt; &#x27;home.php&#x27;,
+  &#x27;about&#x27; =&gt; &#x27;about.php&#x27;,
+  default =&gt; null,
+};</code></pre>
+<p>In the first version a request with page set to ../config/secrets loads ../config/secrets.php relative to the pages folder, and any PHP file reachable that way is executed with the application&#x27;s permissions. Namespaces and autoloading do not prevent this, because <code>include</code> runs whatever path it receives. The allowlisted version accepts only the two names it lists. Every other value maps to null, so the caller can return a 404 response without touching the file system. The same rule applies to autoloaders: class names map to paths through reviewed code, never through raw input.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-what-a-namespace-does-and-does-not-install">Exercise 1: Explain what a namespace does and does not install.<a class="heading-anchor" href="#exercise-1-explain-what-a-namespace-does-and-does-not-install" aria-label="Link to this section">#</a></h4>

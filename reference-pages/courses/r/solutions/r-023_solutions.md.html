@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Predict two readings after a=Counter$new(2), b=a and b$add(3).</p>
 <p>Both names refer to one counter and read 5.</p>
 <p><strong>Expected evidence:</strong> Both readings 5.</p>
+<p><strong>Approach:</strong> Track objects rather than names: <code>Counter$new(2)</code> creates one object, <code>b &lt;- a</code> binds a second name to it, and <code>b$add(3)</code> changes the private value of that single object.</p>
+<p><strong>Why it holds here:</strong> An R6 object is an environment, and assigning an environment copies only the reference. Both names therefore lead to the same private value, which goes from 2 to 5.</p>
+<p><strong>Tempting mistake:</strong> Reasoning as for a list and expecting a to stay at 2. That is how the r-021 measurement behaves, but there is no copy here for the change to land in.</p>
+<p><strong>Verify:</strong> <code>a$read()</code> and <code>b$read()</code> both return 5, and <code>identical(a, b)</code> returns TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Make a separate scalar counter with clone and add four.</p>
 <p>The clone reads 9 while the original remains 5.</p>
 <p><strong>Expected evidence:</strong> Original 5, clone 9.</p>
+<p><strong>Approach:</strong> Call <code>copy &lt;- a$clone()</code> first, then <code>copy$add(4)</code>.</p>
+<p><strong>Why it holds here:</strong> clone() creates a new object whose private value starts at the current 5. The addition touches only that new object, so it reads 9 and a still reads 5.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>copy &lt;- a</code> and then adding. Both names point at one counter, so both read 9 and the original value is lost.</p>
+<p><strong>Verify:</strong> <code>copy$read()</code> returns 9, and <code>a$read()</code> returns 5.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Verify that a rejected negative increment leaves the counter unchanged.</p>
 <p>add(-1) fails and both readings remain equal.</p>
 <p><strong>Expected evidence:</strong> Validation error and unchanged state.</p>
+<p><strong>Approach:</strong> Record <code>before &lt;- a$read()</code>, call <code>a$add(-1)</code> inside a handler that expects &quot;nonnegative finite&quot;, then read again and compare.</p>
+<p><strong>Why it holds here:</strong> add() validates the amount before it assigns private$value, so the error stops the method before any change. NA_real_ fails the same is.finite test.</p>
+<p><strong>Tempting mistake:</strong> Updating first and validating afterward. The counter would already read 4 when the error is raised, leaving a half-applied change that the caller cannot see.</p>
+<p><strong>Verify:</strong> <code>a$read()</code> returns 5 after the failed call, the same value as <code>before</code>.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Construct a box containing a Counter and compare shallow and deep copies.</p>
 <p>The shallow copy shares its nested counter with the original; deep=TRUE clones that R6 member.</p>
 <p><strong>Expected evidence:</strong> Three readings demonstrate the stated identities.</p>
+<p><strong>Approach:</strong> Clone the Box both ways, add 2 through the shallow copy and 5 through the deep copy, then read all three counters.</p>
+<p><strong>Why it holds here:</strong> A shallow clone copies the Box but its counter field still refers to the same Counter, so adding 2 changes the original too: 1 plus 2 is 3. With deep = TRUE, R6 clones fields that are R6 objects, so the deep counter goes from 1 to 6 alone.</p>
+<p><strong>Tempting mistake:</strong> Assuming clone() isolates nested objects and expecting the original to stay at 1.</p>
+<p><strong>Verify:</strong> <code>original$counter$read()</code> returns 3, <code>shallow$counter$read()</code> returns 3, and <code>deep$counter$read()</code> returns 6.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Diagnose using one mutable counter for every resampling fold.</p>
 <p>Construct a fresh counter per fold or define and test a reset policy. Reassignment alone does not isolate it.</p>
 <p><strong>Expected evidence:</strong> No cross-fold state leakage.</p>
+<p><strong>Approach:</strong> Construct a new Counter inside the function applied to each fold, as the reference does in <code>vapply(c(2, 5, 1), ...)</code>.</p>
+<p><strong>Why it holds here:</strong> Each call creates its own counter starting at 0, so the readings are 2, 5 and 1, and the result for a fold does not depend on which folds ran before it.</p>
+<p><strong>Tempting mistake:</strong> Creating one counter outside the loop and adding each fold&#x27;s amount to it. The readings become 2, 7 and 8, so later folds report inflated values and reordering the folds changes the results.</p>
+<p><strong>Verify:</strong> <code>fold_values</code> returns 2, 5, 1, and running the folds in reverse returns 1, 5, 2.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>State the limit of clone(deep=TRUE) for an arbitrary environment member.</p>
 <p>Default deep cloning does not promise a full snapshot of arbitrary environments or connections. Design and test a custom deep_clone policy if such resources are allowed.</p>
 <p><strong>Expected evidence:</strong> A bounded cloning claim.</p>
+<p><strong>Approach:</strong> Limit the claim: <code>clone(deep = TRUE)</code> deep copies fields that are R6 objects. For a plain environment or a connection, write a private deep_clone method that states what is copied, and test it.</p>
+<p><strong>Why it holds here:</strong> The Box test shows R6 fields being copied. R6&#x27;s default deep copy leaves other environments shared, and a connection to a file cannot be duplicated at all.</p>
+<p><strong>Tempting mistake:</strong> Describing deep = TRUE as a full snapshot. A cache environment field would still be shared, and a change made through the clone would appear in the original.</p>
+<p><strong>Verify:</strong> For a class with a plain environment field env, <code>identical(obj$clone(deep = TRUE)$env, obj$env)</code> returns TRUE, showing that it is still shared.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

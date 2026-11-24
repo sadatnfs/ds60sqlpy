@@ -14,6 +14,13 @@ A grid-stride loop lets a bounded launch cover larger arrays: after processing i
 
 
 
+### Key terms
+
+- **Global thread index:** The value `blockIdx.x * blockDim.x + threadIdx.x`, the unique element position assigned to a thread across the grid.
+- **Tail guard:** A bounds check that stops threads whose index is past the last element when the grid is larger than the data.
+- **Ceiling division:** The block count `(n + block - 1) // block`, which covers every element when n is not a multiple of the block size.
+- **Grid-stride loop:** A loop in which each thread advances by the total thread count, letting a fixed grid process any input length.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,6 +46,16 @@ print("CPU indexing model:", visits)
 ```
 
 **Expected observation:** Every valid index appears exactly once.
+
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `n` | `10` |
+| `block` | `4` |
+| `blocks` | `3` |
+| `visits` | `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]` |
+| `strided` | `[0, 6, 12, 1, 7, 13, 2, 8, 3, 9, 4, 10, 5, 11]` |
 
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
@@ -78,27 +95,39 @@ print("CUDA tail tests passed for zero, singleton and nonmultiples")
 
 ### Exercise 1: Compute launch size for n=17
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute launch size for n=17** in the examples above.
+**Trap to avoid:** Computing `n // block = 4` blocks is the floor-division mistake; the program runs without error and the last element is never written, so its output slot keeps whatever value was in the allocation.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Trace the last block
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **trace the last block** in the examples above.
+**Trap to avoid:** Assuming only one lane is out of range, or guarding with `i <= n`, lets index 17 through. That reads one element past the end, which may return a neighbor's data or trip a memory checker.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Test zero without launching
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **test zero without launching** in the examples above.
+**Trap to avoid:** Clamping the grid to at least one block avoids the launch error but runs lanes whose guard is always false. That works, but it hides the empty case inside the kernel and still pays launch overhead for no work.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Implement grid-stride coverage
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **implement grid-stride coverage** in the examples above.
+**Trap to avoid:** Advancing by `block_size` instead of the total thread count makes threads in different blocks visit the same indices. The output may still look right for idempotent writes, but accumulations double count.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Find floor-division data loss
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **find floor-division data loss** in the examples above.
+**Trap to avoid:** Fixing it by launching `n // block + 1` blocks always adds a block even when `n` is a multiple of the block size. That is safe with a guard but launches an entire idle block for `n = 8`.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Specify a sanitizer check
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **specify a sanitizer check** in the examples above.
+**Trap to avoid:** Treating the passing CPU model as proof that the kernel is memory safe confuses the model of the formula with the code a compiler generated.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

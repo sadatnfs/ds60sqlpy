@@ -195,24 +195,61 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-017-explained-reference">julia-017: explained reference<a class="heading-anchor" href="#julia-017-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-017_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Write the schema before reading. Worked example A passes <code>types</code> for <code>id</code>, <code>amount</code> and <code>date</code>, <code>missingstring = &quot;NA&quot;</code>, a date format and <code>strict = true</code> to <code>CSV.read</code>, so every column has a declared meaning. Round trips use <code>CSV.write</code> into an <code>IOBuffer</code> and <code>take!</code> to collect the bytes, and relational checks come after parsing.</p>
 <h3 id="1-preserve-a-textual-id">1. Preserve a textual ID<a class="heading-anchor" href="#1-preserve-a-textual-id" aria-label="Link to this section">#</a></h3>
 <p>Numeric-looking keys can lose meaning when inference converts them to integers.</p>
 <p><strong>Expected observation:</strong> Its leading zeros remain.</p>
+<p><strong>Why it holds here:</strong> Declaring <code>:id =&gt; String</code> keeps the text <code>001</code> exactly, so <code>String.(table.id)</code> equals <code>[&quot;001&quot;, &quot;002&quot;]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Letting CSV.jl infer the column type reads <code>001</code> as the integer 1, and a later join against string keys then matches nothing.</p>
+<p><strong>How to verify:</strong> Example A asserts the restored ids; print <code>eltype(table.id)</code> to see a string type rather than <code>Int</code>.</p>
 <h3 id="2-declare-missingness">2. Declare missingness<a class="heading-anchor" href="#2-declare-missingness" aria-label="Link to this section">#</a></h3>
 <p>A missing marker should not silently become a valid numeric zero.</p>
 <p><strong>Expected observation:</strong> The second amount is missing.</p>
+<p><strong>Why it holds here:</strong> <code>missingstring = &quot;NA&quot;</code> tells the parser that <code>NA</code> means unknown, so the second amount is <code>missing</code> and the column stays <code>Float64</code> otherwise.</p>
+<p><strong>Plausible wrong approach:</strong> Replacing NA with 0 in a text editor before reading turns an absent amount into a recorded zero dollars.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>ismissing(table.amount[2])</code> and <code>table.amount[1] == 2.5</code>.</p>
 <h3 id="3-reject-a-wrong-type">3. Reject a wrong type<a class="heading-anchor" href="#3-reject-a-wrong-type" aria-label="Link to this section">#</a></h3>
 <p>Changing the schema or using a repair policy requires an explicit decision.</p>
 <p><strong>Expected observation:</strong> The parser raises its typed-input error.</p>
+<p><strong>Why it holds here:</strong> With <code>types = Int</code> and <code>strict = true</code>, the value <code>1.5</code> cannot be parsed as an integer, so <code>CSV.read</code> raises <code>CSV.Error</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Dropping <code>strict = true</code> lets the parser substitute <code>missing</code> for the bad cell, so the schema violation becomes an apparently ordinary gap.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>@test_throws CSV.Error</code> for this input and a passing strict read of <code>1</code> and <code>2</code> that sums to 3.</p>
 <h3 id="4-retain-quoted-content">4. Retain quoted content<a class="heading-anchor" href="#4-retain-quoted-content" aria-label="Link to this section">#</a></h3>
 <p>Correct quoting preserves structure without promising byte-identical formatting to every original file.</p>
 <p><strong>Expected observation:</strong> The restored field values agree.</p>
+<p><strong>Why it holds here:</strong> <code>CSV.write</code> quotes fields that contain the delimiter or quotation marks, so <code>contains,comma</code> and <code>quoted &quot;value&quot;</code> return intact.</p>
+<p><strong>Plausible wrong approach:</strong> Building lines with <code>join(fields, &quot;,&quot;)</code> splits <code>contains,comma</code> into two columns on reread.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>String.(restored.note) == original.note</code> after the round trip.</p>
 <h3 id="5-handle-buffer-position">5. Handle buffer position<a class="heading-anchor" href="#5-handle-buffer-position" aria-label="Link to this section">#</a></h3>
 <p>An empty read after a write can reflect the current position rather than missing source data.</p>
 <p><strong>Expected observation:</strong> Reset or take the bytes explicitly.</p>
+<p><strong>Why it holds here:</strong> After <code>CSV.write(output, ...)</code> the buffer position sits at the end, so <code>take!(output)</code> is the call that returns all written bytes.</p>
+<p><strong>Plausible wrong approach:</strong> Calling <code>read(output, String)</code> right after writing returns an empty string, which looks like a failed export.</p>
+<p><strong>How to verify:</strong> Compare <code>String(take!(output))</code> with a fresh <code>read</code> at the end position and note which one is empty.</p>
 <h3 id="6-separate-parsing-and-meaning">6. Separate parsing and meaning<a class="heading-anchor" href="#6-separate-parsing-and-meaning" aria-label="Link to this section">#</a></h3>
 <p>Types and delimiters do not establish grain, units or scientific validity.</p>
-<p><strong>Expected observation:</strong> The relational data contract still needs validation.</p></article>
+<p><strong>Expected observation:</strong> The relational data contract still needs validation.</p>
+<p><strong>Why it holds here:</strong> A file can parse cleanly yet contain the id <code>001</code> twice, which breaks a one-row-per-entity assumption that types cannot express.</p>
+<p><strong>Plausible wrong approach:</strong> Treating a successful <code>CSV.read</code> as full validation lets duplicate keys fan out later joins.</p>
+<p><strong>How to verify:</strong> Check <code>length(unique(table.id)) == nrow(table)</code> after parsing and report any duplicated ids.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-017: all reference checks passed</code>:</p>
+<p>Parsing with <code>types = Int</code> and <code>strict = true</code> reads the two integer rows and sums them to 3, and the same settings turn <code>1.5</code> into a <code>CSV.Error</code> instead of a silent conversion. The date lines show that 2024-02-29 is a valid leap day while 2023-02-29 raises <code>ArgumentError</code>, so a declared format catches impossible dates at the boundary.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    table <span class="syntax-operator">=</span> CSV<span class="syntax-operator">.</span>read<span class="syntax-punctuation">(</span><span class="syntax-keyword">IOBuffer</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span>
+<span class="syntax-string">1</span>
+<span class="syntax-string">2</span>
+<span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> DataFrame<span class="syntax-punctuation">;</span> types <span class="syntax-operator">=</span> <span class="syntax-keyword">Int</span><span class="syntax-punctuation">,</span> strict <span class="syntax-operator">=</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> sum<span class="syntax-punctuation">(</span>table<span class="syntax-operator">.</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> nrow<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+    <span class="syntax-decorator">@test</span> names<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test_throws</span> CSV<span class="syntax-operator">.</span>Error CSV<span class="syntax-operator">.</span>read<span class="syntax-punctuation">(</span><span class="syntax-keyword">IOBuffer</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">value</span>
+<span class="syntax-string">1.5</span>
+<span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> DataFrame<span class="syntax-punctuation">;</span> types <span class="syntax-operator">=</span> <span class="syntax-keyword">Int</span><span class="syntax-punctuation">,</span> strict <span class="syntax-operator">=</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> Date<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-02-29</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">dateformat</span><span class="syntax-string">&quot;</span><span class="syntax-string">yyyy-mm-dd</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> Date<span class="syntax-punctuation">(</span><span class="syntax-number">2024</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">29</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> Date<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2023-02-29</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">dateformat</span><span class="syntax-string">&quot;</span><span class="syntax-string">yyyy-mm-dd</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

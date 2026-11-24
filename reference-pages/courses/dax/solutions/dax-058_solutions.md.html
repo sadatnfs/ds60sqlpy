@@ -245,23 +245,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Reconcile adjusted core revenue by year.</p>
 <p>2024 contributes 64 - 4 = 60; 2025 contributes 123 - 9 = 114; together they total 174.</p>
+<p><strong>Why it fits this model:</strong> Each refund is attributed through its SaleID, so it lands in the year of its sale: R1 (4) on S2 in 2024 and R2 (9) on S4 in 2025.</p>
+<p><strong>Tempting mistake:</strong> Including the 270 USD of foreign sales in the yearly totals. They are a separate population with their own currency rules.</p>
+<p><strong>How to confirm:</strong> 2024 gives 64 - 4 = 60 and 2025 gives 123 - 9 = 114; they add to 174, matching case A.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Request a report by actual refund-event month.</p>
 <p>It cannot be derived from this fixture. Add a properly grained return-event date and explicit date role rather than reusing OrderDate without disclosure.</p>
+<p><strong>Why it fits this model:</strong> Returns has ReturnID, SaleID and Refund. It has no date, so a refund-event month cannot be derived.</p>
+<p><strong>Tempting mistake:</strong> Reporting refunds by the original order month without saying so. R2 would appear in January 2025 because S4 was ordered then, whenever the refund happened.</p>
+<p><strong>How to confirm:</strong> Check the Returns columns (ReturnID, SaleID, Refund). Until a ReturnDate is added with its own relationship, label any monthly refund view by sale date.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write the capstone&#x27;s metric and model specification.</p>
 <p>Document core sales, linked refunds, separate foreign transactions/rates, monthly-category budget, observation coverage, unknown-key policy and context-result regression cases.</p>
+<p><strong>Why it fits this model:</strong> The specification states the grain, keys, currency and date role of each input so that core 187, refunds 13, adjusted core 174 and foreign 270 can be rebuilt.</p>
+<p><strong>Tempting mistake:</strong> Publishing one &quot;revenue&quot; figure of 444 (174 + 270) that mixes adjusted core sales with converted foreign sales.</p>
+<p><strong>How to confirm:</strong> The spec lists the regression rows: case A (core 187, refunds 13, adjusted 174, foreign 270) and case B (core 123, refunds 9, adjusted 114, budget 165, variance -51).</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose subtracting the line Discount again from NetAmount.</p>
 <p>It would double-count discounts and understate core revenue. Reconcile 195 gross -8 discount =187 net before applying refunds.</p>
+<p><strong>Why it fits this model:</strong> NetAmount is already net of line discounts: 195 gross minus 8 discount is 187.</p>
+<p><strong>Tempting mistake:</strong> Subtracting Discount again gives 179, and 166 after refunds, understating adjusted core revenue by 8.</p>
+<p><strong>How to confirm:</strong> SUMX of Quantity x UnitPrice returns 195, SUM of Discount returns 8, and NetRevenue returns 187 before the 13 in refunds.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why 174 is not automatically accounting profit.</p>
 <p>Costs, return-related inventory/COGS changes, tax and other expenses need explicit data and accounting policy.</p>
+<p><strong>Why it fits this model:</strong> 174 is revenue after refunds. Profit needs costs and a policy for what happens to returned goods.</p>
+<p><strong>Tempting mistake:</strong> Calling 174 profit. Even the simple product cost here is 44 for all lines, and the returned Pen (S2) and Notebook (S4) need a cost treatment.</p>
+<p><strong>How to confirm:</strong> List the missing inputs: cost of goods (44 before returns), returned-unit policy, tax and other expenses.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Design an external acceptance plan for the capstone.</p>
 <p>Validate model loading, exact measures/context matrix, missing keys/rates, role restrictions, refresh behavior and qualified performance before any deployment claim.</p>
+<p><strong>Why it fits this model:</strong> Each acceptance gate needs its own evidence: model loading, measures in context, data quality, security, refresh and performance.</p>
+<p><strong>Tempting mistake:</strong> Treating the offline reference rows as deployment approval because they match the expected values.</p>
+<p><strong>How to confirm:</strong> In the target engine, run cases A and B and expect the spec&#x27;s regression rows (case A from core 187 to foreign 270, case B from core 123 to variance -51); then add role, missing-rate and refresh tests.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # llm-applied-004: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for corpus provenance, versions and evaluation isolation only after attempting *Fingerprint authored sources* through *Keep instruction-like documents inert*. A discrepancy in *Detect a changed definition* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-004_solution.py` runs the assertions; this page explains why they test corpus manifest and content hash.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Canonical JSON with sorted keys makes manifest hashing stable across dictionary 
 
 ## Follow a corpus update through its derived artifacts
 
-The fixture changes conversion from purchases divided by eligible visits to purchases divided by eligible accounts. Even if the same numerator is used, those denominators can differ. With three purchases, ten eligible visits and five eligible accounts, the two definitions yield0.3 and 0.6. A system using the newer text with older computation code may produce a coherent-looking answer that combines incompatible versions.
+The fixture changes conversion from purchases divided by eligible visits to purchases divided by eligible accounts. Even if the same numerator is used, those denominators can differ. With three purchases, ten eligible visits and five eligible accounts, the two definitions yield 0.3 and 0.6. A system using the newer text with older computation code may produce a coherent-looking answer that combines incompatible versions.
 
 A content fingerprint detects a byte change under the chosen encoding. Here SHA256 is applied to UTF-8 text. It does not establish who wrote the text, whether it is accurate, whether its permission statement is legitimate or which date it applies to. Likewise, permission='course-fixture' is an explicit fixture value; the code does not consult a real policy owner. These distinctions are why dataset documentation should retain purpose, collection and intended-use information beside integrity metadata. [Datasheets for Datasets](https://arxiv.org/abs/1803.09010).
 
@@ -90,9 +90,9 @@ new["sha256"] = fingerprint(new["text"])
 assert new["sha256"] != old["sha256"] and new["family"] == old["family"] and new["version"] == 2
 ```
 
-**Expected:** hash differs; family remains metric; version is2.
+**Expected:** hash differs; family remains metric; version is 2.
 
-**Verify:** Compare the computed values or written argument with hash differs; family remains metric; version is2.
+**Verify:** Compare the computed values or written argument with hash differs; family remains metric; version is 2.
 
 ## Exercise 3: Choose an active version explicitly
 
@@ -167,4 +167,4 @@ assert private["scope"] == "restricted"
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Choose an active version explicitly* and predict how the result changes before checking it; the unchanged inputs give: active IDs metric-v2 and trial-v1. Keep the original *Keep instruction-like documents inert* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-define-the-shape-envelope">Exercise 1: Define the shape envelope<a class="heading-anchor" href="#exercise-1-define-the-shape-envelope" aria-label="Link to this section">#</a></h3>
 <p>List bounded dimensions and dtypes.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define the shape envelope</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define the shape envelope: batch from 1 to 8, sequence length from 1 to 32 and the accepted dtypes, written as explicit bounds the service checks.</p>
+<p><strong>Why it is correct here.</strong> Deployment engines are often built for bounded dimensions. A declared envelope tells callers what is supported and lets the service reject anything outside it.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving the envelope implicit means unsupported shapes reach the engine and fail with internal errors or are padded and truncated without notice.</p>
+<p><strong>How to verify.</strong> The reference <code>accepted(batch, sequence)</code> asserts that <code>(1, 32)</code> is accepted and <code>(9, 16)</code> and <code>(2, 0)</code> are rejected. Add both boundary values to the test.</p>
 <h3 id="exercise-2-reject-an-invalid-request">Exercise 2: Reject an invalid request<a class="heading-anchor" href="#exercise-2-reject-an-invalid-request" aria-label="Link to this section">#</a></h3>
 <p>Return a clear error before unsafe execution.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>reject an invalid request</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Reject an invalid request such as batch 9 before execution with an error naming the violated bound, rather than truncating input to 8.</p>
+<p><strong>Why it is correct here.</strong> Silent truncation returns results for fewer examples than requested and the caller cannot tell. An explicit error is safe and actionable.</p>
+<p><strong>A plausible wrong approach.</strong> Splitting batch 9 into 8 and 1 automatically may be reasonable, but only as a documented path. Doing it implicitly changes latency and behavior without a contract.</p>
+<p><strong>How to verify.</strong> Send a batch of 9 and assert the error message, then send 8 and confirm success.</p>
 <h3 id="exercise-3-separate-export-build-and-execution">Exercise 3: Separate export build and execution<a class="heading-anchor" href="#exercise-3-separate-export-build-and-execution" aria-label="Link to this section">#</a></h3>
 <p>Each is a separate evidence step.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate export build and execution</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate export, engine build and execution as distinct evidence steps: exporting the model graph, building an engine for a device and running inference each can fail independently.</p>
+<p><strong>Why it is correct here.</strong> A successful export does not mean the engine builds, and a successful build does not mean outputs are correct. Recording each step shows how far validation reached.</p>
+<p><strong>A plausible wrong approach.</strong> Reporting the deployment as working because the export succeeded skips build and execution, where unsupported operators and precision problems usually appear.</p>
+<p><strong>How to verify.</strong> Record pass or fail for each step with its version, and run inference on known inputs before calling the deployment validated.</p>
 <h3 id="exercise-4-choose-calibration-data">Exercise 4: Choose calibration data<a class="heading-anchor" href="#exercise-4-choose-calibration-data" aria-label="Link to this section">#</a></h3>
 <p>Use representative training-side data without evaluation leakage.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose calibration data</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Choose calibration data for lower precision from representative training-side samples, never from the held-out evaluation set.</p>
+<p><strong>Why it is correct here.</strong> Calibration sets scale factors from observed value ranges, so unrepresentative data gives poor ranges. Using evaluation data leaks it into the build.</p>
+<p><strong>A plausible wrong approach.</strong> Calibrating on a handful of constant inputs gives ranges that clip real activations, which lowers accuracy. Values outside the calibrated range saturate at the limit, so large activations lose their differences entirely.</p>
+<p><strong>How to verify.</strong> Record which samples were used and assert no overlap with evaluation example IDs.</p>
 <h3 id="exercise-5-record-engine-compatibility">Exercise 5: Record engine compatibility<a class="heading-anchor" href="#exercise-5-record-engine-compatibility" aria-label="Link to this section">#</a></h3>
 <p>Store runtime device and build metadata.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>record engine compatibility</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Record engine compatibility metadata: the runtime version, device model and compute capability, precision mode and shape envelope used during the build.</p>
+<p><strong>Why it is correct here.</strong> Built engines are often tied to a runtime version and GPU architecture. Metadata allows a service to refuse an engine built for a different setup.</p>
+<p><strong>A plausible wrong approach.</strong> Copying an engine file to a different GPU model or runtime release can fail to load or behave differently. Rebuilding per target from the same exported graph is the safer pattern.</p>
+<p><strong>How to verify.</strong> Check stored metadata against the current environment when loading and fail clearly on mismatch.</p>
 <h3 id="exercise-6-compare-task-quality">Exercise 6: Compare task quality<a class="heading-anchor" href="#exercise-6-compare-task-quality" aria-label="Link to this section">#</a></h3>
 <p>Evaluate the same held-out examples and metrics.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare task quality</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare task quality between the original model and the built engine on the same held-out examples with the same metric, such as classification accuracy.</p>
+<p><strong>Why it is correct here.</strong> Lower precision can change outputs. A successful build only shows the engine runs, so quality must be measured against the application&#x27;s tolerance.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing only a few output tensors for closeness can miss a quality drop concentrated in some classes.</p>
+<p><strong>How to verify.</strong> Report both accuracies on the same examples and accept only if the drop is within the declared tolerance.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Declared shape envelope enforced.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-109_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

@@ -14,13 +14,39 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Write the accumulator value before and after every iteration in Example A.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: Before each iteration, sum equals the sum of values already visited. Zero is the identity that makes the invariant true initially. The sum is 12 and the empty sum is zero.
+**Written answer.** Before the loop `sum` is 0. After visiting 2 it is 2, after 4 it is 6, and after 6 it is 12. At every point `sum` equals the total of the elements visited so far: 0 for none, then 2, 2 + 4 and 2 + 4 + 6.
+
+**Why it is correct.** The loop body adds exactly the current element and nothing else, so if the invariant holds before an iteration it holds after it. It holds at the start because the total of no elements is 0, and when the loop ends every element has been visited, so `sum` is the full total.
+
+**Plausible wrong approach.** Starting the trace at 2 skips the state before the first iteration, which is the state that explains why an empty array correctly sums to 0. Writing 12 after the first step confuses the final result with an intermediate value.
+
+**How to verify.** Insert `Console.WriteLine($"{value} -> {sum}");` after `sum += value;` and confirm the lines `2 -> 2`, `4 -> 6` and `6 -> 12`. Remove the line afterwards so the lesson output is unchanged.
 
 ### Task 2: Guided modification
 
 Skip negative values while preserving the sum invariant.
 
-No separate reference answer has been written for this task. Start from Example B: Stopping at the first match is part of the contract. Without break, the same loop could return the last match. The first 8 is at index 1; 9 is absent.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```csharp
+int[] values = { 2, -3, 4, -1, 6 };
+int sum = 0;
+foreach (int value in values) {
+  if (value < 0)
+    continue;
+  sum += value;
+}
+Check(sum == 12, "negatives skipped");
+Check(sum == values.Where(v => v >= 0).Sum(), "same as filtered sum");
+```
+
+**Observe:** The sum is 12: the -3 and -1 are skipped and 2, 4 and 6 are added.
+
+The invariant becomes: `sum` equals the total of the nonnegative elements visited so far. `continue` leaves `sum` untouched for a negative value, so the invariant still holds after that iteration, and the final sum matches a separately computed filtered sum.
+
+**Plausible wrong approach.** Writing `sum += Math.Max(value, 0)` gives the same total here but hides the policy inside arithmetic. Writing `if (value < 0) break;` stops at -3 and returns 2, silently dropping every later value.
+
+**How to verify.** Make every value negative and check that `sum` is 0, the same identity as the empty array. Then put a 0 in the array and confirm it is kept, because the rule skips only values below zero.
 
 ### Task 3: Independent construction
 
@@ -53,13 +79,45 @@ The loop stops at the first match, and the Try pattern reports not-found through
 
 Diagnose the condition i <= values.Length using a one-element array.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Loop indices count from zero while lengths count elements. A sentinel such as -1 must be checked before indexing. Mutating a collection during enumeration can invalidate the traversal contract.
+**Written answer.** With `values = { 5 }` the loop `for (int i = 0; i <= values.Length; i++)` runs for `i = 0` and reads 5, then tests `1 <= 1`, which is true, and reads `values[1]`. That index does not exist, so the program throws `IndexOutOfRangeException`. The bound must be `i < values.Length`.
+
+**Why it is correct.** A one-element array has length 1 and only index 0. Valid indices run from 0 to `Length - 1`, so the loop must stop when `i` reaches `Length`. With `<=` the loop always makes one extra iteration.
+
+**Plausible wrong approach.** Catching `IndexOutOfRangeException` around the loop hides the off-by-one error while still doing the extra iteration. Changing the start to `i = 1` avoids the crash for this input but skips the first element.
+
+**How to verify.** Run the `<=` version with `{ 5 }` and observe the exception. With `<`, check that a search for 5 returns index 0 and that the loop body runs exactly once.
 
 ### Task 5: Boundary evidence
 
 Check empty, singleton, no-match and repeated-match inputs.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Sum with a maintained invariant) and Example B (Locate the first match).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```csharp
+int FirstIndex(int[] items, int target) {
+  for (int i = 0; i < items.Length; i++) {
+    if (items[i] == target)
+      return i;
+  }
+  return -1;
+}
+int[] empty = Array.Empty<int>();
+int[] single = { 4 };
+int[] other = { 1, 2 };
+int[] repeated = { 4, 9, 4 };
+Check(FirstIndex(empty, 4) == -1, "empty input");
+Check(FirstIndex(single, 4) == 0, "singleton match");
+Check(FirstIndex(other, 4) == -1, "no match");
+Check(FirstIndex(repeated, 4) == 0, "repeated match returns the first");
+```
+
+**Observe:** The empty and no-match inputs give -1; the singleton and the repeated input give index 0.
+
+Each input guards a different mistake. The empty array checks that the loop body may run zero times. The singleton checks the first and last index at once. The no-match array checks that the loop ends without inventing a result. The repeated array checks that the search stops at the first 4 instead of reporting index 2.
+
+**Plausible wrong approach.** Testing only `{ 3, 8, 8 }` as in Example B never runs the loop zero times and never reaches the final `return -1`, so a version that returns 0 when nothing matches would pass it while pointing callers at a real element.
+
+**How to verify.** Change `return i;` to remember `i` and continue the loop; the repeated check must then fail with index 2. Restore the early return and all four checks pass.
 
 ### Task 6: Transfer and justify
 

@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-006`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-006` (Lexical retrieval and BM25 from first principles). They introduce the notation this lesson needs for embedding and cosine similarity.
 
 ## Learning objectives
 
@@ -78,9 +78,11 @@ Treat model/tokenizer/pooling/normalization identity as part of the vector inter
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-007/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-007.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-007.py` in the declared `python-core` profile. *Rank fixed topic vectors*, *Separate cosine from magnitude* and *Expose hand-authored synonym knowledge* need only NumPy and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-007/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Separate cosine from magnitude* and *Expose hand-authored synonym knowledge* reuse the helper and fixture introduced in *Rank fixed topic vectors*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Purchase ranks first, mixed second, geometry last. Example B should give: Cosine unchanged within 1e-12; raw dot product multiplies by 10. Example C should give: Vector scores match; literal word overlap is empty. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -88,13 +90,13 @@ Convert vectors to a float64 matrix with documents on rows and features on colum
 
 ## Derive the ranking and distinguish geometry from meaning
 
-For nonzero vectors q and d, cosine is \(\frac{q^{\mathsf T}d}{\lVert q\rVert_2\lVert d\rVert_2}\). The query[1, 0, 0] already has norm one. The purchase vector[1, 0.1, 0] has norm \(\sqrt{1.01}\), so its cosine is \(\frac{1}{\sqrt{1.01}}\), about 0.995037. The mixed vector[0.5, 0.5, 0] has norm \(\sqrt{0.5}\), giving cosine \(\frac{1}{\sqrt{2}}\), about 0.707107. Geometry[0, 1, 0] gives zero. These calculations establish purchase, mixed, geometry as the order under the authored coordinates.
+For nonzero vectors q and d, cosine is \(\frac{q^{\mathsf T}d}{\lVert q\rVert_2\lVert d\rVert_2}\). The query `[1, 0, 0]` already has norm one. The purchase vector `[1, 0.1, 0]` has norm \(\sqrt{1.01}\), so its cosine is \(\frac{1}{\sqrt{1.01}}\), about 0.995037. The mixed vector `[0.5, 0.5, 0]` has norm \(\sqrt{0.5}\), giving cosine \(\frac{1}{\sqrt{2}}\), about 0.707107. Geometry `[0, 1, 0]` gives zero. These calculations establish purchase, mixed, geometry as the order under the authored coordinates.
 
 Positive scaling preserves direction: replacing d by 10d multiplies both numerator and norm by ten, leaving cosine unchanged. A raw dot product multiplies by ten. Negative scaling reverses direction and changes the cosine's sign, so the invariance claim is specifically about positive magnitude scaling. A document with a large norm can dominate dot-product search even when its direction is less aligned; whether that norm carries useful information depends on the encoder's training contract.
 
 For unit-normalized vectors, squared Euclidean distance is \(\lVert q-d\rVert_2^2=2-2q^{\mathsf T}d\). Thus sorting by decreasing cosine and increasing squared distance gives the same exact order when both sides are unit vectors. This identity is conditional on normalization; it does not make every distance metric interchangeable on raw embeddings.
 
-An embedding coordinate system has no universal axis meaning. Apply the same orthogonal rotation R to both q and d, and their dot product is unchanged because \({R}^{T}\) R is identity. Rotate only one side, and the cross-space comparison changes. For example, one encoder may represent the relevant concept by[1, 0] while another represents it by[0, 1]. Both vectors have width two and each can work correctly within its own space, but their cross-model dot product is zero. Equal width is therefore a shape check, not a semantic compatibility proof.
+An embedding coordinate system has no universal axis meaning. Apply the same orthogonal rotation R to both q and d, and their dot product is unchanged because \({R}^{T}\) R is identity. Rotate only one side, and the cross-space comparison changes. For example, one encoder may represent the relevant concept by `[1, 0]` while another represents it by `[0, 1]`. Both vectors have width two and each can work correctly within its own space, but their cross-model dot product is zero. Equal width is therefore a shape check, not a semantic compatibility proof.
 
 The fixture assigns buy and purchase the same literal vector. Their equivalence is authored knowledge, not a measured generalization by a language model. Sentence-BERT is an example of learning sentence representations suitable for efficient similarity comparison; the local table does not reproduce its training or encode arbitrary text. [Sentence-BERT](https://arxiv.org/abs/1908.10084).
 
@@ -182,23 +184,26 @@ np.testing.assert_array_equal(word_vectors["buy"], word_vectors["purchase"])
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: purchase ranks first, mixed second, geometry last. top-ranked ID wrong is outside the authored relevant set. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Separate cosine from magnitude*, predict its result from the prompt alone: Scale the purchase vector by 10 and compare its cosine score with the original. Write the guess beside the stated outcome (cosine unchanged within 1e-12; raw dot product multiplies by 10). Then predict how the decisive case, *Measure a domain failure*, should end: Give an irrelevant document a high-scoring vector and record that geometric rank does not establish relevance. For embedding retrieval, similarity and representation limits, the finish condition is: Purchase ranks first, mixed second, geometry last. top-ranked ID wrong is outside the authored relevant set.
 
 ## Exercises
 
-1. **Rank fixed topic vectors.** Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5, 0].
+1. **Rank fixed topic vectors.** Use query `[1, 0, 0]` and documents purchase `[1, .1, 0]`, geometry `[0, 1, 0]`, mixed `[.5, .5, 0]`.
    **Expected:** purchase ranks first, mixed second, geometry last.
    **Verify:** Save the assertion results for exercise 1, including purchase ranks first, mixed second, geometry last.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Separate cosine from magnitude.** Scale the purchase vector by 10 and compare its cosine score with the original.
    **Expected:** cosine unchanged within 1e-12; raw dot product multiplies by 10.
    **Verify:** Save the assertion results for exercise 2, including cosine unchanged within 1e-12; raw dot product multiplies by 10.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Expose hand-authored synonym knowledge.** Assign buy the same literal vector as purchase and compare retrieval with an exact-token overlap baseline.
    **Expected:** vector scores match; literal word overlap is empty.
    **Verify:** Save the assertion results for exercise 3, including vector scores match; literal word overlap is empty.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-4. **Reject zero and nonfinite vectors.** Normalize[0, 0] and[1, NaN] through the checked helper.
+4. **Reject zero and nonfinite vectors.** Normalize `[0, 0]` and `[1, NaN]` through the checked helper.
    **Expected:** both raise ValueError.
    **Verify:** Save the assertion results for exercise 4, including both raise ValueError.
 
@@ -218,19 +223,21 @@ If exact search succeeds but approximate search misses, inspect index/search par
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate embedding and cosine similarity for the fixture in *Rank fixed topic vectors*. Hint 2: change one literal in *Separate cosine from magnitude* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Reject zero and nonfinite vectors*, with its stated result (both raise ValueError). If *Measure a domain failure* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Embedding, Cosine similarity, Embedding space using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain embedding, cosine similarity and embedding space using *Rank fixed topic vectors*. Recompute its result (purchase ranks first, mixed second, geometry last) from the inputs. Change one input in *Expose hand-authored synonym knowledge* and predict whether the stated result (vector scores match; literal word overlap is empty) still holds. Say which part of embedding retrieval, similarity and representation limits the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-006` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Rank fixed topic vectors* cannot be reconstructed without the solution, revisit `llm-applied-006` (Lexical retrieval and BM25 from first principles). Otherwise keep the six observations from embedding retrieval, similarity and representation limits and continue to `llm-applied-008` (Hybrid retrieval, reciprocal-rank fusion and reranking).
 
 ## Sources and verification status
 
-API and mechanism reference: [Sentence-BERT](https://arxiv.org/abs/1908.10084), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for embedding: [Sentence-BERT](https://arxiv.org/abs/1908.10084), reviewed 2026-10-22. The fixtures for *Rank fixed topic vectors*, *Separate cosine from magnitude* and *Expose hand-authored synonym knowledge* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

@@ -237,23 +237,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict ALL(Product) under the North/year 2025 starting context.</p>
 <p>With no initial Product restriction, the measure remains 83; unrelated Customer and Date filters remain.</p>
+<p><strong>Why it fits this model:</strong> ALL(Product) removes Product filters only, and none are active. North (Ada and Cy) and 2025 still select S4, S5 and S8.</p>
+<p><strong>Tempting mistake:</strong> Expecting 187 as with ALL(Sales). ALL(Sales) clears the expanded fact table, including Customer and Date, but ALL(Product) cannot reach them.</p>
+<p><strong>How to confirm:</strong> Under Region North and Year 2025, CALCULATE([NetRevenue], ALL(Product)) returns 83.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change requested color from Red to Blue.</p>
 <p>Requested and existing pair counts both become two.</p>
+<p><strong>Why it fits this model:</strong> Notebook is Paper and Blue, and Mug is Home and Blue, so both requested pairs exist in Product.</p>
+<p><strong>Tempting mistake:</strong> Concluding from this case that a cross product of valid values always exists. Case B&#x27;s Home and Red has no product.</p>
+<p><strong>How to confirm:</strong> RequestedPairs 2 and ExistingPairs 2 for Blue, against 2 and 1 for Red.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a denominator-debugging ledger.</p>
 <p>Record incoming filters, regular/limited relationships, expanded-table scope, requested versus surviving combinations and the exact query&#x27;s value-filter behavior.</p>
+<p><strong>Why it fits this model:</strong> The ledger lists the incoming filters (North, 2025), the modifier and the tables it covers, the relationship type, the requested and existing pairs, and the value at each step.</p>
+<p><strong>Tempting mistake:</strong> Writing only &quot;used ALL&quot; in the ledger, which does not say whether 187 or 83 is expected.</p>
+<p><strong>How to confirm:</strong> For case A the ledger reads Original 83, ALL(Sales) 187 and REMOVEFILTERS(Sales[NetAmount]) 83, each with its reason.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose using ALL(Sales) to remove only a product-color selection.</p>
 <p>It can remove related dimension filters that should remain. Prefer a deliberately scoped modifier when that is the intended question.</p>
+<p><strong>Why it fits this model:</strong> To remove only the color filter, name that column. Under Blue, North and 2025, the lines are S4 and S8.</p>
+<p><strong>Tempting mistake:</strong> Using ALL(Sales) also clears North and 2025, so the measure jumps to the whole-model 187.</p>
+<p><strong>How to confirm:</strong> Blue, North and 2025 give 63. REMOVEFILTERS(Product[Color]) gives 83, while ALL(Sales) gives 187.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why an Independent versus Coalesced value-filter setting needs explicit qualification.</p>
 <p>Record the setting and engine/version, then test same-table filter combinations and totals; do not invent an execution result from the setting&#x27;s name.</p>
+<p><strong>Why it fits this model:</strong> Independent and Coalesced settings control how filters on columns of the same table combine. Formulas do not show the setting.</p>
+<p><strong>Tempting mistake:</strong> Predicting a result from the setting&#x27;s name, such as assuming Independent means filters never interact, without testing.</p>
+<p><strong>How to confirm:</strong> Record the setting and engine version, then test case B&#x27;s Paper or Home with Red selection and the totals in the target model.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the domain check to size/color inventory selections.</p>
 <p>Keep requested values, existing combinations and unavailable inventory distinct, especially when calculating shares or removing only one filter.</p>
+<p><strong>Why it fits this model:</strong> Size and color selections work like Category and Color here. Each label exists, but the pair may not: Home and Red has no product.</p>
+<p><strong>Tempting mistake:</strong> Computing a share where the denominator counts requested pairs. For Paper or Home with Red, only Pen exists, so the share must be based on 1 pair, not 2.</p>
+<p><strong>How to confirm:</strong> Count existing combinations with SUMMARIZE over the dimension before computing shares; Pen&#x27;s 24 USD is the only Red revenue.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

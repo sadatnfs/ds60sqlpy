@@ -37,7 +37,7 @@ assert.equal(Object.hasOwn(child, 'kind'), false);
 assert.equal(Object.hasOwn(child, 'name'), true);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(Object.hasOwn(child, 'name'), true)`. Restoring the original line brings back the worked observation: kind found by in but not hasOwn; name is own.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(Object.hasOwn(child, 'name!'), true);`. Restoring `assert.equal(Object.hasOwn(child, 'name'), true);` brings back: kind found by in but not hasOwn; name is own.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Object.hasOwn(child, 'name'), true)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -57,7 +57,7 @@ assert.deepEqual(Object.keys(copy), ['name']);
 assert.equal(copy.kind, undefined);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(Object.keys(copy), ['name'])`; after it the line reads `assert.deepEqual(Object.keys(copy), ['name']);` again and only name copied.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(Object.keys(copy), ['name!']);`. Restoring `assert.deepEqual(Object.keys(copy), ['name']);` brings back: only name copied.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(Object.keys(copy), ['name'])` accepts.
 

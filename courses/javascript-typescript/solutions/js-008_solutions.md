@@ -35,7 +35,7 @@ assert.equal([...text].length, 2);
 assert.equal(text.codePointAt(1), 0x1f642);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(text.codePointAt(1), 0x1f642)`. Restoring the original line brings back the worked observation: length 3; spread count 2.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(text.codePointAt(2), 0x1f642);`. Restoring `assert.equal(text.codePointAt(1), 0x1f642);` brings back: length 3; spread count 2.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(text.codePointAt(1), 0x1f642)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -54,7 +54,7 @@ assert.notEqual(composed, decomposed);
 assert.equal(decomposed.normalize('NFC'), composed);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(decomposed.normalize('NFC'), composed)`; after it the line reads `const composed = 'é';` again and raw strings differ; normalized strings equal.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(decomposed.normalize('NFC'), composed)`. Restoring `const composed = 'é';` brings back: raw strings differ; normalized strings equal.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(decomposed.normalize('NFC'), composed)` for this input.
 

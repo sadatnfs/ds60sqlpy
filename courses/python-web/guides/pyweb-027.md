@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-012`, `python-12`.
 
 FastAPI connects Python type information to HTTP input parsing, validation and documentation. A route is still an ordinary function, but the framework examines its signature before receiving requests. This chapter follows one identifier and one query value from a URL into that function, then compares malformed requests with a successful response.
 
+## Key terms
+
+- **Path parameter:** A typed function argument named in the route path, such as `item_id`, that FastAPI converts and validates before the handler runs.
+- **Query parameter:** A function argument that is not part of the path, read from the query string to modify the requested representation, such as `limit`.
+- **Annotated:** The `typing.Annotated` form that pairs a Python type with FastAPI metadata such as `Path(ge=1)`, from which the framework builds validation.
+- **response_model:** The declared output schema FastAPI uses to validate and serialize the returned value and to document the response.
+- **OpenAPI:** The machine-readable API description FastAPI generates from route declarations, including parameters, constraints and response schemas.
+
 ## Mechanism: declarations become a boundary
 
 A path parameter identifies a resource within the route. A query parameter modifies the requested representation or operation. `Annotated` pairs the Python type with FastAPI metadata such as a numerical lower bound. The annotation does not execute the request itself; the framework builds a validation pipeline from it.
@@ -29,6 +37,43 @@ The program submits invalid identifiers and query values. A word where an intege
 The distinction matters for debugging. If an endpoint returns validation errors, first inspect the request location, spelling and type. Do not immediately debug the database. Conversely, a valid request followed by a missing-resource response is evidence that the parsing boundary was crossed and lookup semantics now matter.
 
 Framework defaults may allow coercion, such as converting a numeric string into an integer. That behavior is useful for URL text, but may be inappropriate for a strict JSON command. The next chapter treats coercion and partial bodies explicitly instead of assuming every input location should have identical rules.
+
+## Worked example: path and query constraints as one pydantic model
+
+```python
+from typing import Annotated
+
+from pydantic import BaseModel, Field, ValidationError
+
+
+class ItemQuery(BaseModel):
+    item_id: Annotated[int, Field(ge=1)]
+    limit: Annotated[int, Field(ge=1, le=5)] = 2
+
+
+raw_inputs = (
+    {"item_id": "7", "limit": "3"},
+    {"item_id": "7"},
+    {"item_id": "seven"},
+    {"item_id": "0", "limit": "6"},
+)
+for raw in raw_inputs:
+    try:
+        print("200", ItemQuery.model_validate(raw).model_dump())
+    except ValidationError as error:
+        print("422", [(e["loc"][0], e["type"]) for e in error.errors()])
+```
+
+Expected output:
+
+```text
+200 {'item_id': 7, 'limit': 3}
+200 {'item_id': 7, 'limit': 2}
+422 [('item_id', 'int_parsing')]
+422 [('item_id', 'greater_than_equal'), ('limit', 'less_than_equal')]
+```
+
+Path segments and query strings arrive as text, so the inputs here are strings on purpose. Pydantic's default lax mode turns `"7"` into the integer 7, fills the missing `limit` with its default of 2 and rejects `"seven"` before any bounds are checked. The last input breaks two rules at once and pydantic reports both, which is why a FastAPI 422 body lists every failing parameter instead of stopping at the first. `Path(ge=1)` and `Query(ge=1, le=5)` in the lesson's route compile down to these same constraints, so the error types you see here are the ones a client of `/items/{item_id}` receives.
 
 ## Failure diagnosis and discussion
 

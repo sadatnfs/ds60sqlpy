@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict BlueWithinSelection if only Red is selected.</p>
 <p>It is BLANK because {Red} and {Blue} do not overlap.</p>
+<p><strong>Why it fits this model:</strong> KEEPFILTERS intersects the new Blue condition with the existing Red selection. The two color sets share nothing, so no product remains and revenue is BLANK.</p>
+<p><strong>Tempting mistake:</strong> A plain Blue filter replaces Red and returns 163 inside a Red-only report, showing a number for products the user never selected.</p>
+<p><strong>How to confirm:</strong> Under Red, SelectedRevenue is 24, the KEEPFILTERS version is BLANK and the plain version is 163.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Replace the new subgroup by Color IN {Blue, Green}.</p>
 <p>The intersection is Blue; Green does not get added. Revenue remains 163.</p>
+<p><strong>Why it fits this model:</strong> The intersection of {Blue, Green} with the selected {Blue, Red} is {Blue}, so Notebook and Mug remain and revenue is 163.</p>
+<p><strong>Tempting mistake:</strong> A plain IN filter replaces the selection with Blue and Green and adds Bag. Revenue still reads 163 because Bag has no sales, so revenue alone cannot show the error.</p>
+<p><strong>How to confirm:</strong> Count products instead: COUNTROWS(Product) is 2 with KEEPFILTERS and 3 with the plain filter.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a selected-subgroup measure for Trade customers.</p>
 <p>CALCULATE([NetRevenue],KEEPFILTERS(Customer[Segment]=&quot;Trade&quot;)) retains only selected Trade customers.</p>
+<p><strong>Why it fits this model:</strong> Cy (key 30) is the only Trade customer, at 56. KEEPFILTERS keeps Trade only where the user&#x27;s segment selection allows it.</p>
+<p><strong>Tempting mistake:</strong> A plain Segment filter under a Retail slicer replaces Retail and shows Cy&#x27;s 56, a Trade number in a Retail view.</p>
+<p><strong>How to confirm:</strong> Under Segment = Retail the KEEPFILTERS version is BLANK and the plain one is 56. With no segment filter both return 56.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose changing KEEPFILTERS to a plain filter because blanks look untidy.</p>
 <p>A disjoint selection would be replaced rather than respected. Decide the intended metric before changing its appearance.</p>
+<p><strong>Why it fits this model:</strong> BLANK in RedWithinSelection says that Red lies outside the selected Blue products. That is the intended population rule, not a display flaw.</p>
+<p><strong>Tempting mistake:</strong> Switching to a plain filter fills the cell with ForcedRed&#x27;s 24, so a Blue-only report then shows Pen revenue the user excluded.</p>
+<p><strong>How to confirm:</strong> Case A shows the two policies side by side: 24 for replacement and BLANK for intersection under the same Blue selection.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain whether KEEPFILTERS restores a removed earlier filter.</p>
 <p>It does not remember arbitrary historical selections or undo unrelated filter-removal operations.</p>
+<p><strong>Why it fits this model:</strong> KEEPFILTERS intersects with the context that exists when it is applied. If an outer REMOVEFILTERS(Product[Color]) has already cleared Red, nothing is left to intersect.</p>
+<p><strong>Tempting mistake:</strong> Expecting the user&#x27;s earlier Red choice to come back predicts BLANK. The color filter is gone, so the KEEPFILTERS Blue condition returns 163.</p>
+<p><strong>How to confirm:</strong> Under Red, <code>CALCULATE ( CALCULATE ( [NetRevenue], KEEPFILTERS ( Product[Color] = &quot;Blue&quot; ) ), REMOVEFILTERS ( Product[Color] ) )</code> returns 163.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the policy to a quality metric for failed events.</p>
 <p>Intersect a failure subgroup with the selected cohort when reporting failures among that population; label any intentionally global failure metric separately.</p>
+<p><strong>Why it fits this model:</strong> With a discounted line standing in for a failed event, count flagged lines inside the selected cohort. North has five lines (S1, S2, S4, S5, S8), and three of them (S2, S4 and S8) carry a discount, a rate of 0.6.</p>
+<p><strong>Tempting mistake:</strong> <code>FILTER ( ALL ( Sales ), Sales[Discount] &gt; 0 )</code> ignores the cohort and returns 3 under every region, so South looks discounted although Bo&#x27;s lines had none.</p>
+<p><strong>How to confirm:</strong> The cohort version returns 3 under North and BLANK under South; the global version, labeled as global, returns 3 everywhere.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

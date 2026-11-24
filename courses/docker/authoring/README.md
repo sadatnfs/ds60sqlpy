@@ -2,6 +2,10 @@
 
 `python courses/docker/authoring/build.py` regenerates all 42 lesson bundles and metadata from `chapters.py`. It writes explicit UTF-8/LF and performs no engine operations, network requests or installation. Edit durable specifications, regenerate, then run shared normalization and module/render checks.
 
+`KEY_TERMS` in `chapters.py` maps each lesson title to 3 to 5 `(term, definition)` pairs. The builder rejects missing or extra titles, duplicate terms, terms containing `:` or `*`, and definitions without a final period, then renders the pairs as a `### Key terms` list inside the guide's vocabulary section. Choose terms the lesson actually uses and keep each definition to one or two accurate sentences.
+
+`REASONING` in `reasoning.py` maps each lesson title to one `(approach, why it is correct, a plausible wrong approach and why it fails, how to verify)` tuple per exercise, in exercise order. The builder rejects missing or extra titles, a tuple count that differs from the lesson's exercises, tuples without exactly four parts, empty parts, parts that do not end with a period or question mark, and em or en dashes. Each part is rendered as its own labelled paragraph after the exercise's **Why:** line in the solutions file. Write every part about the lesson's own Dockerfile, compose or CLI behavior and the fixture files; do not invent command output or digests, and do not reuse a sentence frame across lessons, because the templated-prose metric counts repeated paragraphs.
+
 `fixtures/compose-lab/` is maintained directly. Its standard-library app, Compose model, Dockerfile and README form the bounded optional host lab. Reading registration does not claim in-browser engine execution. The fixture inventory records expected observations, not invented qualification results.
 
 ## Shared maintenance gates

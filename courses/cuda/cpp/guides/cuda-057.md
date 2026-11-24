@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a feature-gated cluster or TMA path with a fallback and explain its data visibility rules.
+
 Work through *Clusters, TMA and newer GPU execution features* with the concrete cases below. Finish with this evidence:
 a feature-gated implementation with fallback and a correct explanation of data visibility. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Thread-block clusters and tensor memory accelerator mechanisms expand cooperation and data movement on supported newer architectures. Distributed shared memory changes which participating blocks can access certain shared regions, but introduces cluster lifetime and synchronization requirements. TMA transfers use descriptors and completion protocols; they are not ordinary memcpy calls with a new name. Different instructions can require architecture-specific targets beyond a broad compute-capability family. Maintain a feature table for the exact operation, compiler and GPU, and retain a portable fallback. Learning the ownership diagram is useful without executing architecture-specific code.
+
+### Key terms
+
+- **Thread block cluster:** A group of blocks scheduled together on nearby SMs, available on compute capability 9.0 and later.
+- **Distributed shared memory:** Access by one block in a cluster to the shared memory of another block in the same cluster.
+- **Tensor Memory Accelerator (TMA):** A hardware unit that copies multidimensional tiles described by a tensor map descriptor.
+- **Feature gate:** A compile-time and runtime check that selects an advanced path only on supported devices and keeps a fallback.
 
 ## How to run and study this lesson
 

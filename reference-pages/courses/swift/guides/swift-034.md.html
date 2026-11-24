@@ -281,7 +281,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li>Reproduce Example A (Consume a finite stream) before changing anything, and confirm its observation: The finite stream totals 5 and terminates.</li>
 <li>Compare Example B (Make drop behavior observable) with Example A and name the first line whose behavior differs. Its observation is: The newest-one policy retains 2 and drops the older buffered value.</li>
-<li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: AsyncStream buffering is not automatically backpressure.</li>
+<li>Before opening the explanation, check your task 3 attempt (Build a finite event stream with explicit completion ownership) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
 <p>Explain AsyncSequence, Buffer policy, Termination without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>

@@ -228,13 +228,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 	<span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span>
 
-<span class="syntax-keyword">func</span> contextValue<span class="syntax-punctuation">(</span>ctx context<span class="syntax-punctuation">.</span>Context<span class="syntax-punctuation">,</span> x <span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">error</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">if</span> err <span class="syntax-operator">:=</span> ctx<span class="syntax-punctuation">.</span>Err<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> err <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span> <span class="syntax-punctuation">{</span>
-		<span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> err
-	<span class="syntax-punctuation">}</span>
-	<span class="syntax-keyword">return</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">nil</span>
-<span class="syntax-punctuation">}</span>
-
 <span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
 	<span class="syntax-comment">// Cancel a child</span>
 	<span class="syntax-punctuation">{</span>
@@ -259,13 +252,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 	<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>ok <span class="syntax-punctuation">{</span>
 		<span class="syntax-builtin">panic</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-
-<span class="syntax-keyword">func</span> contextValue<span class="syntax-punctuation">(</span>ctx context<span class="syntax-punctuation">.</span>Context<span class="syntax-punctuation">,</span> x <span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">error</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">if</span> err <span class="syntax-operator">:=</span> ctx<span class="syntax-punctuation">.</span>Err<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> err <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span> <span class="syntax-punctuation">{</span>
-		<span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> err
-	<span class="syntax-punctuation">}</span>
-	<span class="syntax-keyword">return</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">nil</span>
 <span class="syntax-punctuation">}</span>
 
 <span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>

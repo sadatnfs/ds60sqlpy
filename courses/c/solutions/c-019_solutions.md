@@ -1,6 +1,6 @@
 # c-019: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-019_solution.c`, implements all six cases, from the "encode a known word" case to the "transfer a framed payload" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -20,13 +20,13 @@ encode_u32(UINT32_C(0x12345678), out);
 CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78`. Restoring the original line brings back the worked observation: the bytes are 12, 34, 56, 78 in hexadecimal.
+**Expected:** With `CHECK(out[1] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` the run stops with `Check failed` at the CHECK on `out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78`, because the "encode a known word" case no longer shows that the bytes are 12, 34, 56, 78 in hexadecimal. Restoring `CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` brings that observation back.
 
 The explicit byte contract does not depend on host endianness.
 
 ## Exercise 2: Decode a known word: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `unsigned char data[] = {1, 0, 1, 0};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "decode a known word" case, so one line now reads `unsigned char data[] = {1, 0, 1, 0};`. Run the example with that line, use the failing CHECK to find why the numeric value is 256 no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +36,7 @@ uint32_t value = 0;
 CHECK(decode_u32(data, 4, &value) && value == 256);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `decode_u32(data, 4, &value) && value == 256`; after it the line reads `unsigned char data[] = {0, 0, 1, 0};` again and the numeric value is 256.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `decode_u32(data, 4, &value) && value == 256`. Once the line reads `unsigned char data[] = {0, 0, 1, 0};` again, the "decode a known word" case again shows that the numeric value is 256.
 
 Each byte is promoted to the intended unsigned width before shifting.
 
@@ -101,4 +101,4 @@ A format should reject unsupported versions before interpreting fields under the
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a framed payload" case to your own c-019 source. Explain why every access in `encode_u32` or `decode_u32` stays within a live object and each owned resource is released. An expected endianness failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "decode a known word" case apart from ordinary output: the fixture proves its stated endianness, wire format and alignment assumptions, not universal safety.

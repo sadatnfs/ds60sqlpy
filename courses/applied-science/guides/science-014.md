@@ -15,6 +15,13 @@ For a linear score \(s(x)=\mathbf w^{\mathsf T}x\), let \(d=x^+-x^-\) be a posit
 
 The implementation uses `logaddexp` for the loss and the logistic function for its gradient. Computing a naive exponential at a very large margin can overflow even when the mathematical loss is finite. Numerical stability is part of a correct implementation, but it does not validate the sampled comparisons.
 
+## Key terms
+
+- **Pairwise logistic objective:** The BPR-style loss log(1 + exp(-d^T w)) on positive-minus-negative feature differences, plus an L2 penalty.
+- **Preference pair:** A positive and a negative item for one context; an unobserved item is not automatically a known negative.
+- **Negative sampling:** The rule that chooses which unobserved items become negatives, which defines what the training comparison means.
+- **Temporal leakage:** Use of information from after the training cutoff, for example through item statistics or an index built from future interactions.
+
 ## Worked case 1: learn and independently check the gradient
 
 Three synthetic pair differences have known positive directions. Starting from zero weights gives equal scores and a loss near the logarithm of two. Gradient descent lowers the objective and makes every training margin positive. The code verifies both properties.
@@ -44,6 +51,47 @@ A system may need constraints on diversity, eligibility, repetition or provider 
 **Does a positive margin for every training pair prove the recommendation is good?** It proves that the supplied comparisons are ordered in-sample. Those comparisons may be biased, sparse or unrepresentative, and their features may not be available at serving time.
 
 **Why compare a gradient with finite differences when an autodiff library is available?** A finite-difference check can validate the intended objective and reduction against an independent calculation. Autodiff faithfully differentiates the program supplied to it, including an incorrectly signed or incorrectly weighted objective.
+
+## Worked example: BPR gradient check and leakage-free negatives
+
+```python
+import numpy as np
+
+u = np.array([0.5, -0.2])
+items = {"p": np.array([0.4, 0.1]), "n": np.array([-0.3, 0.6])}
+
+
+def loss(u):
+    s = u @ (items["p"] - items["n"])
+    return np.log1p(np.exp(-s))
+
+
+s = u @ (items["p"] - items["n"])
+analytic = -(1 / (1 + np.exp(s))) * (items["p"] - items["n"])
+h = 1e-6
+numeric = np.array([(loss(u + h * e) - loss(u - h * e)) / (2 * h) for e in np.eye(2)])
+print("score difference:", round(float(s), 4), " loss:", round(float(loss(u)), 6))
+print("analytic grad:", analytic.round(6), " numeric grad:", numeric.round(6))
+
+events = [("u1", "p", 1), ("u1", "q", 3), ("u1", "r", 6)]  # (user, item, day)
+catalog = {"p", "q", "r", "s", "t"}
+cutoff = 2
+ever = {i for _, i, _ in events}
+seen_by_cutoff = {i for _, i, day in events if day <= cutoff}
+print("negatives if future is excluded:", sorted(catalog - ever))
+print("negatives using only past positives:", sorted(catalog - seen_by_cutoff))
+```
+
+Observed output:
+
+```text
+score difference: 0.45  loss: 0.493249
+analytic grad: [-0.272553  0.19468 ]  numeric grad: [-0.272553  0.19468 ]
+negatives if future is excluded: ['s', 't']
+negatives using only past positives: ['q', 'r', 's', 't']
+```
+
+The BPR loss for one triple is \(\log(1+e^{-s})\) where \(s\) is the score of the positive item minus the negative item, here 0.45, giving 0.493249. The analytic gradient with respect to the user vector is \(-\sigma(-s)(v_p-v_n)\). With \(v_p-v_n=(0.7,-0.5)\) and \(\sigma(-0.45)=0.3894\) that is \((-0.2726, 0.1947)\), and the central finite difference agrees to six decimals. Agreement at this one point justifies trusting the analytic gradient in a training loop; a sign error would show up immediately as opposite signs. The sampling lines show leakage. With a training cutoff at day 2, the user has only interacted with p. Excluding every item the user ever touched removes q and r, which leaks the future: the training set now knows those items will become positives. Sampling from the catalog minus past positives keeps q and r as legitimate negatives, which is what an online system would have seen on day 2.
 
 ## Complete reproducible program
 

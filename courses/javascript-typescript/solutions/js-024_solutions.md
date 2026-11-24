@@ -6,7 +6,7 @@ Use these answers after an attempt or an explicit reveal. The reference uses the
 
 An external payload should enter typed code as unknown. JSON parsing establishes syntactic validity, but the result may be null, an array, a primitive or an object with the wrong fields. A runtime validator must inspect the shape and domain constraints before producing a trusted typed value. A type assertion skips this work; it cannot turn malformed input into valid data.
 
-This lesson validates a small order with an id and an array of line items. Each item has a nonempty SKU and a positive safe-integer quantity. The validator returns a discriminated result instead of throwing for expected user-data errors, and includes a path such as items[1].quantity so the caller can identify the failing field. It copies accepted records so later edits to the original JSON object do not invalidate the already validated value.
+This lesson validates a small order with an id and an array of line items. Each item has a nonempty SKU and a positive safe-integer quantity. The validator returns a discriminated result instead of throwing for expected user-data errors, and includes a path such as `items[1].quantity` so the caller can identify the failing field. It copies accepted records so later edits to the original JSON object do not invalidate the already validated value.
 
 Validation depth and resource budgets must be chosen together. An arbitrary recursive schema can consume excessive stack, CPU or memory. Here the structure has two bounded levels, at most twenty items, and bounded string lengths. Unknown extra keys are rejected deliberately. This is an exact fixture schema, not a claim that every API should reject forward-compatible fields. A permissive protocol might retain or ignore extras under a documented versioning policy.
 
@@ -48,7 +48,7 @@ assert.equal(
 assert.notEqual(result.value, raw);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5)`. Restoring the original line brings back the worked observation: success with total quantity 5; independent copied item records.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5)`. Restoring `{ sku: 'X', quantity: 2 },` brings back: success with total quantity 5; independent copied item records.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -74,7 +74,7 @@ assert.equal(result.code, 'schema');
 assert.equal(result.path, 'items[1].quantity');
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(result.ok, false)`; after it the line reads `{ sku: 'Y', quantity: 0 },` again and failure code schema and path items[1].quantity.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(result.ok, false)`. Restoring `{ sku: 'Y', quantity: 0 },` brings back: failure code schema and path `items[1].quantity`.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(result.ok, false)` for this input.
 

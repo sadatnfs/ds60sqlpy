@@ -207,6 +207,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The purpose is to change intermediate representability in finite precision, not change the intended learning rate. Dynamic scaling detects nonfinite gradients and adjusts according to the framework&#x27;s supported procedure. A skipped optimizer update and a completed batch are different counters; a training report should not hide repeated overflow by reporting only loop iterations.</p>
 <p>Gradient clipping belongs after unscaling because its threshold is defined in the original gradient units. Likewise, accumulating multiple microbatches needs a consistent scaling/normalization strategy across the effective batch. Do not update the scale halfway through a set of gradients that will be combined under one scale assumption.</p>
 <p>For PyTorch, place forward and loss computation in the selected autocast context and follow the pinned <code>torch.amp</code> scaler sequence. For TensorFlow/Keras, select the dtype policy before layer construction, inspect variable dtype versus compute dtype, and follow that release&#x27;s loss-scaling optimizer API. The supplied CPU scaling model is a mathematical explanation; it does not claim that either framework selected tensor cores. Qualification compares finite gradients, update direction, short loss trajectory, held-out metric, memory and synchronized completed-step timing against full precision.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Float16 (fp16):</strong> A 16-bit float with 5 exponent bits and a narrow range, so small gradients can underflow.</li>
+<li><strong>Bfloat16 (bf16):</strong> A 16-bit float with the same 8 exponent bits as float32 but fewer mantissa bits, trading precision for range.</li>
+<li><strong>Loss scaling:</strong> Multiplying the loss before backward so fp16 gradients stay representable, then unscaling gradients before clipping and the update.</li>
+<li><strong>Overflow detection:</strong> Checking unscaled gradients for infinity or NaN, skipping that step and lowering the scale.</li>
+<li><strong>Master weights:</strong> A float32 copy of parameters that receives updates so small increments are not lost to low precision.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Multiplying a small gradient by scale 1024 before backpropagation can keep intermediate values away from underflow. Dividing the computed gradient by 1024 before the optimizer restores the intended update.</p>
@@ -222,6 +230,32 @@ wrong <span class="syntax-operator">=</span> <span class="syntax-builtin">min</s
 <span class="syntax-keyword">assert</span> correct <span class="syntax-operator">==</span> <span class="syntax-number">0.5</span> <span class="syntax-operator">and</span> wrong <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">/</span> <span class="syntax-number">1024</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU scaling model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> correct<span class="syntax-punctuation">,</span> wrong<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Correct gradient 0.5; incorrect clipping order yields 0.0009765625.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>gradient</code></td>
+<td><code>0.5</code></td>
+</tr>
+<tr>
+<td><code>scale</code></td>
+<td><code>1024</code></td>
+</tr>
+<tr>
+<td><code>scaled</code></td>
+<td><code>512.0</code></td>
+</tr>
+<tr>
+<td><code>correct</code></td>
+<td><code>0.5</code></td>
+</tr>
+<tr>
+<td><code>wrong</code></td>
+<td><code>0.0009765625</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -231,17 +265,23 @@ wrong <span class="syntax-operator">=</span> <span class="syntax-builtin">min</s
 <p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-calculate-scaled-and-unscaled-values">Exercise 1: Calculate scaled and unscaled values<a class="heading-anchor" href="#exercise-1-calculate-scaled-and-unscaled-values" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>calculate scaled and unscaled values</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Unscaling twice, once manually and once by the scaler, produces <code>0.5/1024</code>, an update so small that training appears to stall without any error.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-explain-overflow-detection">Exercise 2: Explain overflow detection<a class="heading-anchor" href="#exercise-2-explain-overflow-detection" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>explain overflow detection</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Replacing infinities with zero, or clipping them, so the step can proceed corrupts the update with values unrelated to the true gradient.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-place-clipping-correctly">Exercise 3: Place clipping correctly<a class="heading-anchor" href="#exercise-3-place-clipping-correctly" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>place clipping correctly</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Clipping the scaled 512 to 1 and then unscaling gives <code>1/1024 = 0.0009765625</code>, the wrong value the reference asserts for the reversed order. Training then barely moves.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-fp16-and-bf16-concepts">Exercise 4: Compare fp16 and bf16 concepts<a class="heading-anchor" href="#exercise-4-compare-fp16-and-bf16-concepts" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>compare fp16 and bf16 concepts</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming both 16-bit formats behave the same leads to dropping loss scaling for float16, where small gradients flush to zero.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-full-precision-baseline">Exercise 5: Design a full-precision baseline<a class="heading-anchor" href="#exercise-5-design-a-full-precision-baseline" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design a full-precision baseline</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing the mixed-precision run with an older float32 run using a different seed attributes noise to precision.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-record-quality-and-throughput-separately">Exercise 6: Record quality and throughput separately<a class="heading-anchor" href="#exercise-6-record-quality-and-throughput-separately" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>record quality and throughput separately</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the speedup without the quality comparison can justify a configuration that fails to train properly.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-072`, `apache-069`.
 
+## Key terms
+
+- **Authentication:** Establishing who the caller is, for example with fixture credentials kept in an untracked environment file.
+- **Authorization:** Deciding which metadata operations an authenticated caller may perform. A failed login yields 401, while a permitted login without the needed permission yields 403.
+- **Policy decision point:** The component that evaluates a policy and decides whether an operation is allowed.
+- **Policy enforcement point:** The component that blocks or permits the protected operation. Permission to classify an asset is not permission to modify its data.
+- **Governance workflow:** A recorded process of ownership, classification review and approval decisions, which does not by itself control storage or query access.
+
 ## Governance decisions need an enforcement boundary
 
 Atlas authentication identifies a caller, while authorization determines which
@@ -77,6 +85,31 @@ policy/enforcement mapping plus actual allowed and denied protected operations,
 not merely a classification or configuration file. These cases verify a narrow
 API credential boundary and then explain the independent test required for a
 real data-access claim.
+
+## Worked examples
+
+### An invalid credential must be rejected
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" -u "invalid:fixture" \
+  "$DS60_ATLAS_ENDPOINT/api/atlas/v2/types/typedef/name/ds60_<owner>_dataset"
+```
+
+The expected code is 401 or 403; the check route fails if anything else comes back. A 200 here would mean authentication is disabled, which turns every metadata claim in the catalog into something anyone could have written. A redirect to a login page is also suspicious for an API client, which is why client.py refuses redirects before it forwards credentials. Note that this proves only that Atlas guards its own API, nothing about who can query the underlying tables.
+
+### Label review versus data access
+
+```sql
+SELECT
+  region,
+  SUM(amount)
+FROM
+  ds60.orders
+GROUP BY
+  region;
+```
+
+Imagine the orders table carries a PII classification in Atlas. Whether this query succeeds depends on the engine and its authorizer, for example a Ranger tag policy that reads Atlas classifications, not on Atlas itself. To claim enforcement you need a recorded denial from the engine for a principal that lacks access, alongside a success for one that has it. Without that pair, the classification documents a decision but does not prove it is applied.
 
 ## Complete worked source
 

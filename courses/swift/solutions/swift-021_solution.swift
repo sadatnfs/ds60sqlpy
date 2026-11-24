@@ -26,6 +26,39 @@ struct LessonMain {
     }
 
     do {
+      // Task 1: Predict and explain
+      func trace(_ text: String) -> String {
+        do {
+          let value = try parseQuantity(text)
+          return "returned \(value)"
+        } catch {
+          return "threw"
+        }
+      }
+      precondition(trace("3") == "returned 3")
+      precondition(trace("-1") == "threw" && trace("x") == "threw")
+    }
+
+    do {
+      // Task 2: Guided modification
+      enum QuantityProblem: Error, Equatable {
+        case malformed
+        case negative
+      }
+      func strictQuantity(_ text: String) throws(QuantityProblem) -> Int {
+        guard let value = Int(text) else { throw .malformed }
+        guard value >= 0 else { throw .negative }
+        return value
+      }
+      func problem(_ text: String) -> QuantityProblem? {
+        do { _ = try strictQuantity(text) } catch { return error }
+        return nil
+      }
+      precondition(problem("x") == .malformed && problem("-1") == .negative)
+      precondition(problem("4") == nil)
+    }
+
+    do {
       // Task 3: Independent construction
       struct Record {
         let name: String
@@ -49,6 +82,23 @@ struct LessonMain {
         caught = error
       }
       precondition(caught == .emptyName)
+    }
+
+    do {
+      // Task 4: Diagnose a defect
+      precondition((try? parseQuantity("x")) == nil)
+      precondition((try? parseQuantity("-1")) == nil)
+      let kept = Result { try parseQuantity("-1") }
+      if case .failure(let error) = kept { precondition(error is QuantityError) }
+    }
+
+    do {
+      // Task 5: Boundary evidence
+      func accepts(_ text: String) -> Bool { (try? parseQuantity(text)) != nil }
+      precondition(!accepts(""))
+      let zero = try parseQuantity("0")
+      precondition(zero == 0)
+      precondition(!accepts("99999999999999999999"))
     }
     print("swift-021: passed")
   }

@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-build-the-state-table">Exercise 1: Build the state table<a class="heading-anchor" href="#exercise-1-build-the-state-table" aria-label="Link to this section">#</a></h3>
 <p>The table separates an allowed convergence action from a collision. Choosing update based only on a name would mutate a resource outside the parent ownership graph, even if the desired spec seems harmless.</p>
 <p><strong>Expected:</strong> create, no-op, update and refuse respectively.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check whether the child exists, then compare its owner UID, then its configuration.</li>
+<li><strong>Why it is correct:</strong> Ownership decides whether the controller may act at all, so a foreign child is refused before any comparison of fields.</li>
+<li><strong>Plausible wrong approach:</strong> Comparing configuration first would update a foreign child that only happens to share a name.</li>
+<li><strong>How to verify:</strong> Absent creates, owned equal is no op, owned different updates and foreign refuses.</li>
+</ul>
 <h3 id="exercise-2-replay-repeated-reconciliation">Exercise 2: Replay repeated reconciliation<a class="heading-anchor" href="#exercise-2-replay-repeated-reconciliation" aria-label="Link to this section">#</a></h3>
 <p>A level-driven controller reconstructs the result from state. It does not need the event stream to prove which event was first. The stable child identity is evidence against a create-on-every-event bug.</p>
 <p><strong>Expected:</strong> One create followed by two no-ops, with one child.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Replay the same desired state three times and count create calls and children.</li>
+<li><strong>Why it is correct:</strong> An idempotent reconcile creates once, and later passes find an owned equal child and do nothing.</li>
+<li><strong>Plausible wrong approach:</strong> A reconcile that creates on every pass ends with three children for one desired object.</li>
+<li><strong>How to verify:</strong> One create, two no ops and one child.</li>
+</ul>
 <h3 id="exercise-3-change-desired-replicas">Exercise 3: Change desired replicas<a class="heading-anchor" href="#exercise-3-change-desired-replicas" aria-label="Link to this section">#</a></h3>
 <p>The model demonstrates decision idempotence only. A live controller still needs to wait for Deployment observation, readiness and any required application gate before recording a successful changed generation.</p>
 <p><strong>Expected:</strong> update then no-op after observed state matches.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Change desired replicas from 1 to 2 and read observed state after each decision.</li>
+<li><strong>Why it is correct:</strong> The first pass sees owned different and updates; the next sees owned equal and does nothing.</li>
+<li><strong>Plausible wrong approach:</strong> Updating on every pass regardless of observed state never settles and floods the API.</li>
+<li><strong>How to verify:</strong> Update then no op, with the second decision following the first&#x27;s effect.</li>
+</ul>
 <h3 id="exercise-4-test-replacement-identity">Exercise 4: Test replacement identity<a class="heading-anchor" href="#exercise-4-test-replacement-identity" aria-label="Link to this section">#</a></h3>
 <p>The safe default is a collision report. Adoption would require an explicit separately reviewed policy. Automatic takeover could erase resources belonging to a different operation or a previous partially completed cleanup.</p>
 <p><strong>Expected:</strong> The old child is foreign to the new parent under this contract.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare the old child&#x27;s owner reference UID with the new parent&#x27;s UID.</li>
+<li><strong>Why it is correct:</strong> Ownership is by UID, so a recreated parent with the same name does not own the old child.</li>
+<li><strong>Plausible wrong approach:</strong> Matching on parent name would adopt a child that belongs to a deleted object.</li>
+<li><strong>How to verify:</strong> The UIDs differ, so the old child is foreign.</li>
+</ul>
 <h3 id="exercise-5-review-retry-and-status">Exercise 5: Review retry and status<a class="heading-anchor" href="#exercise-5-review-retry-and-status" aria-label="Link to this section">#</a></h3>
 <p>A useful condition carries a reason tied to the current generation and retry state. Repeating a permanently invalid request without feedback wastes capacity, while treating every temporary failure as terminal prevents convergence.</p>
 <p><strong>Expected:</strong> Bounded backoff for transient failure; corrected intent for invalid input; stale readiness does not pass.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Classify each case by whether retrying the same request unchanged could succeed.</li>
+<li><strong>Why it is correct:</strong> Transient API errors can clear on retry with backoff, while invalid input fails the same way until intent changes.</li>
+<li><strong>Plausible wrong approach:</strong> Retrying an invalid value with backoff loops forever without progress.</li>
+<li><strong>How to verify:</strong> Backoff applies to the transient case, corrected intent to invalid input, and stale status does not pass.</li>
+</ul>
 <h3 id="exercise-6-complete-a-finalizer-obligation">Exercise 6: Complete a finalizer obligation<a class="heading-anchor" href="#exercise-6-complete-a-finalizer-obligation" aria-label="Link to this section">#</a></h3>
 <p>The controller must know its obligation completed before removing its marker. A bounded failure should surface the missing action and retain recoverable evidence. Clearing unrelated finalizers is outside this controller ownership.</p>
 <p><strong>Expected:</strong> other.cleanup remains; failed cleanup retains lesson.cleanup.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Remove lesson.cleanup only after the external cleanup succeeds, leaving other.cleanup.</li>
+<li><strong>Why it is correct:</strong> Each finalizer marks one owner&#x27;s obligation, and the object is deleted only when the list is empty.</li>
+<li><strong>Plausible wrong approach:</strong> Clearing the whole finalizer list skips other.cleanup&#x27;s obligation and deletes the object early.</li>
+<li><strong>How to verify:</strong> After success only lesson.cleanup is gone; after failure the list is unchanged.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A status field supplied by the learner or copied from a synthetic trace is not a live controller observation. A child Ready condition with an old observed generation is insufficient for a changed message. Compare parent generation, intended child fields, owned identities and application output.</p>
 <p>Do not debug a stuck finalizer by indiscriminately clearing metadata.finalizers. Identify the responsible controller, its cleanup contract and the missing evidence. If the required controller is not provisioned, label the live activity unavailable rather than impersonating it with a sequence of manual creates.</p></article>

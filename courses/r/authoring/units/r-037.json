@@ -43,6 +43,12 @@
       "code": "p <- 0.3\nsmall <- sqrt(p * (1 - p) / 100)\nlarge <- sqrt(p * (1 - p) / 400)\nstopifnot(isTRUE(all.equal(large, small / 2)))\nprint(c(repetitions100 = small, repetitions400 = large))\n",
       "explanation": "Quadrupling independent repetitions halves this standard error. It does not imply that a biased real-world model becomes correct.",
       "expected": "Approximately 0.0458 and 0.0229."
+    },
+    {
+      "title": "At least three is not more than three",
+      "code": "flips <- expand.grid(a = 0:1, b = 0:1, c = 0:1, d = 0:1)\nheads <- rowSums(flips)\nstopifnot(nrow(flips) == 16L, sum(heads >= 3) == 5L, sum(heads > 3) == 1L)\nupper_wrong <- pbinom(3, 4, 0.5, lower.tail = FALSE)\nupper_right <- pbinom(2, 4, 0.5, lower.tail = FALSE)\nstopifnot(isTRUE(all.equal(upper_wrong, 1 / 16)), isTRUE(all.equal(upper_right, 5 / 16)))\nstopifnot(isTRUE(all.equal(sum(dbinom(3:4, 4, 0.5)), 5 / 16)))\nprint(table(heads))\n",
+      "explanation": "Listing all 16 equally likely sequences gives an exact answer that needs no random draws, and the head counts follow the 1, 4, 6, 4, 1 pattern. The event in this lesson is three or more heads, which is 4 plus 1 sequences. With lower.tail = FALSE, pbinom returns the probability of exceeding its first argument, so pbinom(3, ...) gives only the four head case, 1/16. The correct call uses 2. A simulation that tests heads > 3 makes the same mistake and settles near 0.0625, and no number of repetitions would reveal it, because the simulated answer is precise for the wrong event.",
+      "expected": "The table shows 1, 4, 6, 4 and 1 sequences with 0 to 4 heads; five sequences have three or more heads."
     }
   ],
   "exercises": [

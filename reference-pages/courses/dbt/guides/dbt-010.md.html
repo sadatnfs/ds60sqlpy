@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A snapshot records changes in a mutable source as observed by successive snapshot runs. It can support slowly changing dimension history, but it cannot recover states that were never observed between runs. Its validity intervals describe the snapshot&#x27;s chosen strategy and clock. Those intervals should not automatically be treated as the true business-effective time of every change.</p>
 <p>The example uses the check strategy to detect a change in region for a stable customer identifier. dbt stores a closed historical version and a current version. The second case also removes a customer from the source and uses hard_deletes=&#x27;invalidate&#x27; so the previously current record is closed. Without a declared deletion policy, consumers can misinterpret missing source records.</p>
 <p>History is meaningful only with a stable identity and clear column choices. A changed display name, a corrected attribute and a genuinely new entity are different events. Decide which changes create new versions and which time interpretation the downstream consumer requires.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Snapshot:</strong> A dbt resource that records a mutable source&#x27;s state each time it runs, adding a version row when a tracked row has changed.</li>
+<li><strong>Type 2 slowly changing dimension:</strong> A history table that keeps one row per observed version of an entity, each with its own validity interval.</li>
+<li><strong>check strategy:</strong> A snapshot strategy that detects a change by comparing the listed <code>check_cols</code> with the current version.</li>
+<li><strong>dbt_valid_from and dbt_valid_to:</strong> The columns bounding when a row was the observed version; dbt_valid_to is null for the current version.</li>
+<li><strong>hard_deletes:</strong> The snapshot setting for rows that vanish from the source; <code>invalidate</code> closes the current version by setting its dbt_valid_to.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The modern YAML snapshot declares a relation, unique_key, strategy, check_cols and deletion policy. The example obtains the actual relation name from the generated manifest because custom schema naming can depend on the adapter/profile. dbt_valid_to is null for current versions under this contract. Query both all historical rows and the active subset.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

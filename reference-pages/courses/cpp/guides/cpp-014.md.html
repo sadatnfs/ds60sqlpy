@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Deliver a deterministic small CLI from source and explain its failure behavior.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>An auditable CLI is a command-line program whose inputs, accepted values, rejected records and output can be reconciled. Parsing and business validation are separate steps. Integer cents avoid decimal rounding ambiguity. The ledger keeps every input accounted for instead of silently discarding bad text.</p>
+<ul>
+<li><strong>auditable CLI:</strong> a command-line program whose inputs, accepted values, rejected records and output can be reconciled.</li>
+<li><strong>business validation:</strong> the domain rule applied after a field parses as an integer, such as rejecting a negative reading.</li>
+<li><strong>conservation check:</strong> the equation accepted plus rejected equals input rows, which catches dropped or uncounted records.</li>
+<li><strong>fatal operation failure:</strong> an error such as a missing input file or an exceeded input budget that stops the run instead of counting as a rejected row.</li>
+<li><strong>integer cents:</strong> whole-number currency units that avoid decimal rounding ambiguity.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Parse each complete field with from_chars, require the entire string to be consumed, then add only valid nonnegative values. Maintain accepted and rejected counts independently from the sum. Returning nonzero is appropriate for a fatal file failure; per-row rejection can be a documented partial-report policy.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

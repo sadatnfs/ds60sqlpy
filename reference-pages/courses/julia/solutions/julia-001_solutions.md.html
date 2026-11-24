@@ -195,24 +195,54 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-001-explained-reference">julia-001: explained reference<a class="heading-anchor" href="#julia-001-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-001_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Treat each script as a fresh top-to-bottom evaluation. Read the source values, follow which name points at which value after every assignment, and only count something as output when <code>println</code> or <code>print</code> writes it. Timing questions are answered inside one process, because the classroom starts a new one for every Run.</p>
 <h3 id="1-change-a-count">1. Change a count<a class="heading-anchor" href="#1-change-a-count" aria-label="Link to this section">#</a></h3>
 <p>The output follows the current source values. A previous Run does not supply hidden counts.</p>
 <p><strong>Expected observation:</strong> The total is 23.</p>
+<p><strong>Why it holds here:</strong> Twenty accepted plus three rejected is 23, and the script recomputes that sum from the literals currently in the file each time it runs.</p>
+<p><strong>Plausible wrong approach:</strong> Editing the numbers but trusting the transcript from the previous Run reports the old total, because nothing from that earlier process is carried into the new one.</p>
+<p><strong>How to verify:</strong> Change the two literals, press Run, and confirm the printed total equals the new sum; <code>@test 20 + 3 == 23</code> states it as an assertion.</p>
 <h3 id="2-keep-a-scalar-snapshot">2. Keep a scalar snapshot<a class="heading-anchor" href="#2-keep-a-scalar-snapshot" aria-label="Link to this section">#</a></h3>
 <p>Integers are immutable values; rebinding x does not rewrite the earlier value associated with y.</p>
 <p><strong>Expected observation:</strong> y remains 4.</p>
+<p><strong>Why it holds here:</strong> <code>y = x</code> makes <code>y</code> name the value 4. Assigning 10 to <code>x</code> afterward moves only the name <code>x</code>, so <code>y</code> still names 4.</p>
+<p><strong>Plausible wrong approach:</strong> Picturing <code>y</code> as a live link to the variable <code>x</code> predicts that <code>y</code> becomes 10, which treats names as storage cells rather than labels on values.</p>
+<p><strong>How to verify:</strong> Print both names after the rebinding and expect <code>x = 10</code> and <code>y = 4</code>; adding <code>@test y == 4</code> makes the snapshot permanent.</p>
 <h3 id="3-print-deliberately">3. Print deliberately<a class="heading-anchor" href="#3-print-deliberately" aria-label="Link to this section">#</a></h3>
 <p>The REPL has display behavior that is not equivalent to running a source file.</p>
 <p><strong>Expected observation:</strong> Only explicit output is guaranteed to appear in the script transcript.</p>
+<p><strong>Why it holds here:</strong> A bare <code>2 + 3</code> line inside <code>main.jl</code> is evaluated and then discarded, since script mode has no automatic display; <code>println(2 + 3)</code> writes 5.</p>
+<p><strong>Plausible wrong approach:</strong> Copying a REPL session into a file and expecting each result to echo leaves an empty transcript and a wrong belief that the line failed.</p>
+<p><strong>How to verify:</strong> Run a file containing only <code>2 + 3</code>, then one containing <code>println(2 + 3)</code>, and compare the two transcripts line by line.</p>
 <h3 id="4-inspect-a-type">4. Inspect a type<a class="heading-anchor" href="#4-inspect-a-type" aria-label="Link to this section">#</a></h3>
 <p>The type describes the value representation and available methods, not whether the value is scientifically meaningful.</p>
 <p><strong>Expected observation:</strong> They are the environment integer type and Float64.</p>
+<p><strong>Why it holds here:</strong> The literal <code>2</code> has no decimal point, so it is the platform integer, <code>Int64</code> on the 64-bit classroom runtime; <code>2.5</code> is a <code>Float64</code> literal.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming every number is a float, as in some other languages, leads to <code>typeof(2) == Float64</code>, which is false and hides integer overflow behavior.</p>
+<p><strong>How to verify:</strong> Print <code>typeof(2)</code> and <code>typeof(2.5)</code>; the reference asserts <code>typeof(2.5) == Float64</code> among its exercise checks.</p>
 <h3 id="5-diagnose-a-name">5. Diagnose a name<a class="heading-anchor" href="#5-diagnose-a-name" aria-label="Link to this section">#</a></h3>
 <p>The diagnostic is evidence about a missing binding, not a reason to reinstall the runtime.</p>
 <p><strong>Expected observation:</strong> An undefined-variable error identifies the failed name and source location.</p>
+<p><strong>Why it holds here:</strong> Misspelling <code>accepted</code> as <code>acepted</code> leaves a name with no binding, so Julia raises <code>UndefVarError</code> and points at the line that used it.</p>
+<p><strong>Plausible wrong approach:</strong> Reinstalling packages or restarting the runtime after this error treats a typo as an environment fault; the message already names the unbound identifier.</p>
+<p><strong>How to verify:</strong> Introduce the typo in an owned copy, read the first stack frame for the file and line, fix the spelling and confirm the run passes.</p>
 <h3 id="6-explain-first-call-timing">6. Explain first-call timing<a class="heading-anchor" href="#6-explain-first-call-timing" aria-label="Link to this section">#</a></h3>
 <p>Report the timing protocol; a cold call is not interchangeable with steady-state performance.</p>
-<p><strong>Expected observation:</strong> Their costs can include different amounts of compilation.</p></article>
+<p><strong>Expected observation:</strong> Their costs can include different amounts of compilation.</p>
+<p><strong>Why it holds here:</strong> The first call compiles a method for its argument types, so <code>@time f(1)</code> on first use includes compilation that the second call in the same process skips.</p>
+<p><strong>Plausible wrong approach:</strong> Timing one call per Run and comparing it with a repeated call elsewhere mixes cold and warm measurements, since every classroom Run starts cold.</p>
+<p><strong>How to verify:</strong> Call <code>@time f(1)</code> twice inside one script and compare the reported allocations and time; report which call each number came from.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-001: all reference checks passed</code>:</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-number">0</span> <span class="syntax-operator">+</span> <span class="syntax-number">0</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-number">10</span> <span class="syntax-operator">-</span> <span class="syntax-number">3</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-number">6</span> <span class="syntax-operator">*</span> <span class="syntax-number">7</span> <span class="syntax-operator">==</span> <span class="syntax-number">42</span>
+    <span class="syntax-decorator">@test</span> typeof<span class="syntax-punctuation">(</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-keyword">Float64</span>
+    <span class="syntax-decorator">@test</span> string<span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">42</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-decorator">@test</span> sprint<span class="syntax-punctuation">(</span>print<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score=3</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

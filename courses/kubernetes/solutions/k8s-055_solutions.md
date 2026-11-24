@@ -20,11 +20,25 @@ An IP route and an authenticated DNS identity are different properties. Use the 
 
 **Expected:** The requested name must satisfy certificate identity validation.
 
+**Solution reasoning**
+
+- **Approach:** Check that the requested DNS name appears in the certificate's subject alternative names.
+- **Why it is correct:** Clients validate the name they asked for against the certificate, regardless of which IP answered.
+- **Plausible wrong approach:** Assuming the right IP is enough ignores that hostname verification is name based.
+- **How to verify:** The prediction says the requested name must match the certificate identity.
+
 ## Exercise 2: Locate the TLS termination point.
 
 Everything after that point has a separate transport policy. Draw the upstream hop explicitly.
 
 **Expected:** The component that decrypts the client connection.
+
+**Solution reasoning**
+
+- **Approach:** Find the component that holds the private key and decrypts the client's TLS session.
+- **Why it is correct:** Termination happens where the key lives, such as the Ingress proxy, and traffic beyond it may be plain or re-encrypted.
+- **Plausible wrong approach:** Assuming the app terminates TLS because the client sees HTTPS can be wrong when a proxy holds the key.
+- **How to verify:** The answer names the decrypting component.
 
 ## Exercise 3: Design a no-secret TLS evidence record.
 
@@ -32,11 +46,25 @@ Useful validation does not require publishing sensitive material. Keep credentia
 
 **Expected:** Names, certificate metadata and status without private key bytes.
 
+**Solution reasoning**
+
+- **Approach:** Record host names, issuer, validity dates, SAN entries and Secret name, leaving out key bytes.
+- **Why it is correct:** This metadata is enough to check identity and expiry without exposing what an attacker would need.
+- **Plausible wrong approach:** Pasting the full Secret YAML into notes copies the private key with it.
+- **How to verify:** The record has names, certificate metadata and status, with no key bytes.
+
 ## Exercise 4: Diagnose certificate mismatch separately from 404.
 
 Repair the first failing layer. Changing backend selectors cannot fix an invalid certificate name.
 
 **Expected:** Identity validation versus HTTP routing/content.
+
+**Solution reasoning**
+
+- **Approach:** Classify a handshake failure as identity validation and a 404 as an HTTP response from a routed component.
+- **Why it is correct:** A certificate mismatch stops the connection before any HTTP request, while a 404 means routing ran.
+- **Plausible wrong approach:** Fixing routes to cure a certificate error changes a layer that was never reached.
+- **How to verify:** The two failures are diagnosed at different layers.
 
 ## Exercise 5: Explain why base64 Secret data is not encrypted protection.
 
@@ -44,8 +72,22 @@ Protection depends on access controls, storage encryption and operational handli
 
 **Expected:** Encoding is reversible representation, not confidentiality.
 
+**Solution reasoning**
+
+- **Approach:** Decode a Secret value with base64 to show anyone with read access gets the plaintext.
+- **Why it is correct:** Base64 is a reversible encoding, so protection must come from RBAC and encryption at rest.
+- **Plausible wrong approach:** Treating encoded Secret data as encrypted encourages wider read access than intended.
+- **How to verify:** The answer calls the encoding reversible and not confidential.
+
 ## Exercise 6: Plan a two-hop trust policy.
 
 The design should say where encryption is required and which peer each component trusts, then test those claims separately.
 
 **Expected:** Client-facing identity and upstream identity are both explicit.
+
+**Solution reasoning**
+
+- **Approach:** State the identity clients validate at the proxy and the identity the proxy validates upstream.
+- **Why it is correct:** Each hop is a separate TLS session with its own certificate and trust settings.
+- **Plausible wrong approach:** Securing only the client hop and assuming the upstream is trusted leaves the second hop unverified.
+- **How to verify:** Both client-facing and upstream identities are written down.

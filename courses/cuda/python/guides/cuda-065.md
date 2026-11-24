@@ -14,6 +14,13 @@ Use four separate questions: which process issued the operation, which allocatio
 
 
 
+### Key terms
+
+- **Host memory:** Memory attached to the CPU, where ordinary Python objects and NumPy arrays live.
+- **Device memory:** Memory on the GPU board that kernels read and write; data must be allocated or copied there before a kernel can use it.
+- **Asynchronous launch:** A kernel or copy request that returns control to Python before the GPU finishes the work.
+- **Implicit synchronization:** A host wait triggered by an operation such as printing a scalar or converting to a host value, which blocks until queued device work completes.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,6 +46,14 @@ print("CPU reference:", result, ledger)
 ```
 
 **Expected observation:** CPU reference: 6; every ledger event is CPU.
+
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `values` | `[1, 2, 3]` |
+| `result` | `6` |
+| `ledger` | `[('input', 'CPU'), ('sum', 'CPU'), ('result', 'CPU')]` |
 
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
@@ -66,27 +81,39 @@ print("CUDA array sum:", float(y.get()), "device", x.device.id)
 
 ### Exercise 1: Trace the five events
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **trace the five events** in the examples above.
+**Trap to avoid:** Listing only three events (build, sum, print) merges the upload into construction and the download into printing. That hides exactly the two transfers worked example 2 names, so a later timing or residency question has no event to attach to.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Explain why import is insufficient
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **explain why import is insufficient** in the examples above.
+**Trap to avoid:** Treating a clean import as proof of GPU execution is the common shortcut. It fails on a CPU-only laptop where the import succeeds but the first allocation raises, and it fails silently when a framework falls back to CPU for unsupported work.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Change the input to an empty list
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **change the input to an empty list** in the examples above.
+**Trap to avoid:** Launching a reduction with a grid computed from `n = 0` and then reading `out[0]` can return whatever bytes the allocation held. Another wrong move is raising an error, which breaks callers that legitimately pass empty batches.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Find the hidden transfer in scalar printing
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **find the hidden transfer in scalar printing** in the examples above.
+**Trap to avoid:** Assuming `print(total)` is free because it is one line leads to placing it inside a loop. Each iteration then stalls the host until the device catches up, and a timing taken around the loop measures synchronization rather than the reduction.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a residency ledger
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design a residency ledger** in the examples above.
+**Trap to avoid:** A ledger keyed by package name ("numpy", "cupy") instead of by object fails as soon as one library holds both host and device arrays, and it cannot record whether the device result was actually ready when read.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain how a CPU fallback must be labeled
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **explain how a CPU fallback must be labeled** in the examples above.
+**Trap to avoid:** Catching the CUDA error and silently computing with NumPy makes the program exit with status zero and the same answer. A dashboard reading only exit codes would then count a GPU lesson as qualified on a machine with no GPU.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

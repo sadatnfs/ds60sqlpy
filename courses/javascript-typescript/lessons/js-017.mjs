@@ -3,17 +3,17 @@
 // Copy Example A into a scratch `main.mjs` and change `new URL('/sum?a=2&b=3', base)` to
 // `new URL('/sum?a=3&b=3', base)`. Before running it, predict which check fails and which
 // value it now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.deepEqual(await response.json(), { total: 5 })`. Restoring the original line
-// brings back the worked observation: status 200; application/json; total 5.
+// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(await
+// response.json(), { total: 5 })`. Restoring `new URL('/sum?a=2&b=3', base)` brings back:
+// status 200; application/json; total 5.
 
 // Exercise 2: Inspect an HTTP error without expecting fetch rejection: diagnose an edited check
 // A careless edit changed a check in Example B so that it reads `assert.deepEqual(await
 // response.json(), { error: 'not_found!' });`. Run Example B with that line, explain why the
 // edited check now fails for the same program state, and restore it.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.deepEqual(await response.json(), { error: 'not_found' })`; after it the line reads
-// `assert.deepEqual(await response.json(), { error: 'not_found' });` again and fetch
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.deepEqual(await response.json(), { error: 'not_found!' });`. Restoring
+// `assert.deepEqual(await response.json(), { error: 'not_found' });` brings back: fetch
 // resolves; status 404, ok false, error not_found.
 
 // Exercise 3: Encode query values through the URL API

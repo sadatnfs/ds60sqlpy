@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-027_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="tf-027-explanatory-solutions">tf-027: explanatory solutions<a class="heading-anchor" href="#tf-027-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers for Transfer learning without a model download after your own attempt at Example A, Construct the local base, or after an explicit reveal. Each answer reuses the guide&#x27;s literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Base, Head, Freeze. After matching exercise 6, Detect changed base state, invent a new input without looking here.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Transfer learning reuses a representation for a related task. Freezing a base means its parameters should not receive optimizer updates while a new head learns from its outputs. The base can still perform computation; frozen does not mean bypassed. Normalization and dropout also have mode-dependent behavior, so a frozen base should be called with a deliberate training flag. Here a small deterministic two-feature transform stands in for the locally trained base from the classifier capstone. No pretrained weights are downloaded. A relabelled target tests whether the new head can change without altering the base. Unfreezing is a new phase with an explicit optimizer policy.</p>
 <p><strong>Base:</strong> The reused representation-producing part of a model.</p>
@@ -260,7 +260,7 @@ tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</sp
 <p><strong>Expected:</strong> base is no longer identical.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>not np.array_equal(base.get_weights()[0], np.eye(2, dtype=&#x27;float32&#x27;))</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one fixture value in exercise 4, Compare predictions, and predict the new result before running it. Keep the failing version of exercise 5, Begin an explicit unfreeze phase, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>
 </body>
 </html>

@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "track_id": "cpp",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "cpp-007",
+      "title": "Sorting a copy, then counting, summing and deduplicating with standard algorithms",
+      "anchor": "reference",
+      "source_path": "courses/cpp/solutions/cpp-007_solution.cpp",
+      "source_sha256": "85b6084f69bb8b548accdf6634484ae204b258287583a554fb95e9a4caf510ff",
+      "expected_output": ["cpp-007 examples passed"],
+      "steps": [
+        {
+          "lines": [1, 31],
+          "excerpt": "#include <algorithm>\n#include <atomic>\n#include <cassert>\n#include <charconv>\n#include <chrono>\n#include <cmath>\n#include <condition_variable>\n#include <cstdint>\n#include <filesystem>\n#include <fstream>\n#include <functional>\n#include <future>\n#include <iostream>\n#include <limits>\n#include <map>\n#include <memory>\n#include <mutex>\n#include <numeric>\n#include <optional>\n#include <queue>\n#include <ranges>\n#include <span>\n#include <sstream>\n#include <stdexcept>\n#include <string>\n#include <string_view>\n#include <thread>\n#include <type_traits>\n#include <utility>\n#include <variant>\n#include <vector>",
+          "title": "A shared include block",
+          "explanation": "Every reference in this track starts with the same list of standard headers so that one file can use any library feature it needs. This lesson relies on <vector> for the container, <algorithm> for sort, count, count_if and unique, <numeric> for accumulate, <cassert> for assert and <iostream> for the final line. The other headers are unused here and cost nothing at run time.",
+          "observe": "Only standard library headers appear. The program needs no external libraries."
+        },
+        {
+          "lines": [33, 38],
+          "excerpt": "int main() {\n  std::vector<int> original{3, 1, 3, 0};\n  auto sorted = original;\n  std::sort(sorted.begin(), sorted.end());\n  assert((sorted == std::vector<int>{0, 1, 3, 3}));\n  assert(original[0] == 3);",
+          "title": "Sort a copy so the original is kept",
+          "explanation": "auto sorted = original; makes a full, independent copy, because std::vector has value semantics in C++: assignment copies the elements rather than sharing them. std::sort takes a pair of iterators, begin() and end(), that mark a half-open range, meaning it includes the first element and stops just before end(). Sorting the copy leaves original untouched, which the check on original[0] confirms.",
+          "observe": "sorted holds 0, 1, 3, 3 while original still begins with 3."
+        },
+        {
+          "lines": [39, 40],
+          "excerpt": "  assert(std::accumulate(sorted.begin(), sorted.end(), 0LL) == 7);\n  assert(std::count(sorted.begin(), sorted.end(), 3) == 2);",
+          "title": "Sum and count over the same range",
+          "explanation": "std::accumulate adds every element to a starting value. The start value 0LL is a long long, and its type decides the type of the running total, so a big vector of ints would not overflow an int accumulator. std::count returns how many elements equal 3. Both take the same begin and end pair, which is the common shape of standard algorithms.",
+          "observe": "The sum is 7 and the value 3 appears twice. Starting accumulate at 10LL would give 17, a classic wrong total."
+        },
+        {
+          "lines": [41, 45],
+          "excerpt": "  // Reference extension checks for the exercise changes.\n  auto unique_values = sorted;\n  unique_values.erase(std::unique(unique_values.begin(), unique_values.end()),\n                      unique_values.end());\n  assert((unique_values == std::vector<int>{0, 1, 3}));",
+          "title": "Erase the duplicates that unique moves to the end",
+          "explanation": "std::unique does not shrink a vector. It only removes adjacent duplicates by shifting the kept elements forward and returns an iterator to the new logical end. The leftover tail still exists, so the code passes that iterator to erase to really remove it. This erase(unique(...), end()) pair is a standard idiom, and it only works on sorted input because unique compares neighbors.",
+          "observe": "unique_values becomes 0, 1, 3 with size 3."
+        },
+        {
+          "lines": [46, 50],
+          "excerpt": "  assert(std::count_if(sorted.begin(), sorted.end(),\n                       [](int x) { return x >= 3; }) == 2);\n  std::cout << \"cpp-007 examples passed\\n\";\n  return 0;\n}",
+          "title": "Count with a condition, then report",
+          "explanation": "count_if takes a predicate instead of a value. The lambda [](int x) { return x >= 3; } is a small unnamed function that returns true for elements at or above the boundary, so the boundary value 3 is included. assert stops the program with a message if any condition is false; the worker compiles without NDEBUG, so these asserts are active. When every assert holds, the program writes its one line.",
+          "observe": "The program prints: cpp-007 examples passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "cpp-016",
+      "title": "Copy versus move for a struct that follows the rule of zero",
+      "anchor": "reference",
+      "source_path": "courses/cpp/solutions/cpp-016_solution.cpp",
+      "source_sha256": "4fb8461ee4a949a45f5ff36086b0f294905e5b2597efa9a79d156c1a1fa029d7",
+      "expected_output": ["cpp-016 examples passed"],
+      "steps": [
+        {
+          "lines": [33, 36],
+          "excerpt": "struct Batch {\n  std::vector<int> values;\n  std::string label;\n};",
+          "title": "A struct made only of owning members",
+          "explanation": "Batch holds a std::vector<int> and a std::string. Both already know how to copy, move and free their own memory. Because Batch declares no destructor, copy constructor or move constructor of its own, the compiler generates correct ones that simply copy or move each member. This is the rule of zero: let members that manage resources do the work.",
+          "observe": "There is no custom special member function anywhere in the file."
+        },
+        {
+          "lines": [37, 41],
+          "excerpt": "int main() {\n  Batch a{{1, 2, 3}, \"first\"};\n  Batch copy = a;\n  copy.values[0] = 9;\n  assert(a.values[0] == 1);",
+          "title": "A copy is fully independent",
+          "explanation": "Batch copy = a; copies the vector's elements and the label into new storage. Changing copy.values[0] to 9 therefore cannot affect a. This is what value semantics means in C++, and it is different from languages where assigning an object only copies a reference to it.",
+          "observe": "a.values[0] is still 1 after the copy is changed."
+        },
+        {
+          "lines": [42, 45],
+          "excerpt": "  Batch moved = std::move(a);\n  assert((moved.values == std::vector<int>{1, 2, 3}));\n  a = Batch{{4}, \"reused\"};\n  assert(a.values[0] == 4);",
+          "title": "Move transfers ownership, then the source is reused",
+          "explanation": "std::move(a) does not move anything by itself. It casts a to an rvalue so the compiler picks Batch's move constructor, which steals the vector's internal buffer instead of copying the elements. After a move, the standard only promises that a is in a valid but unspecified state, so you must not rely on it being empty. Assigning a brand new Batch to a is always safe and gives it a known value again.",
+          "observe": "moved holds 1, 2, 3, and a can be reassigned and then holds 4."
+        },
+        {
+          "lines": [46, 52],
+          "excerpt": "  // Reference extension checks for the exercise changes.\n  auto make_batch = []() { return Batch{{8, 9}, \"factory\"}; };\n  auto returned = make_batch();\n  assert((returned.values == std::vector<int>{8, 9}));\n  std::cout << \"cpp-016 examples passed\\n\";\n  return 0;\n}",
+          "title": "Returning an owner from a function",
+          "explanation": "make_batch is a lambda that builds a Batch and returns it by value. Returning by value is cheap in modern C++ because the compiler constructs the result directly in the caller or moves it, never copying the vector element by element. The returned object owns its data, so it stays valid after the lambda's scope ends.",
+          "observe": "returned.values is 8, 9, and the program prints: cpp-016 examples passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "cpp-030",
+      "title": "A producer and consumer sharing a queue under one mutex",
+      "anchor": "reference",
+      "source_path": "courses/cpp/solutions/cpp-030_solution.cpp",
+      "source_sha256": "54108c6c38ee540665d8912d4fe55aef2f670d430583cdf4b1b00541b5b00703",
+      "expected_output": ["cpp-030 examples passed"],
+      "steps": [
+        {
+          "lines": [33, 38],
+          "excerpt": "int main() {\n  std::mutex m;\n  std::condition_variable cv;\n  std::queue<int> q;\n  bool closed = false;\n  int total = 0;",
+          "title": "Shared state and the lock that guards it",
+          "explanation": "The queue q, the closed flag and total are shared between two threads. The invariant is that q and closed are only read or changed while holding mutex m. The condition_variable cv is how one thread tells another that the shared state changed, so the waiting thread does not have to spin in a busy loop.",
+          "observe": "Every later access to q and closed happens inside a lock on m."
+        },
+        {
+          "lines": [39, 48],
+          "excerpt": "  std::thread consumer([&] {\n    std::unique_lock<std::mutex> lock(m);\n    for (;;) {\n      cv.wait(lock, [&] { return !q.empty() || closed; });\n      if (q.empty() && closed)\n        break;\n      total += q.front();\n      q.pop();\n    }\n  });",
+          "title": "The consumer waits on a predicate",
+          "explanation": "The consumer thread takes a unique_lock, which can be released and reacquired. cv.wait(lock, predicate) releases the lock while sleeping and wakes only when the predicate is true: there is an item, or the queue was closed. Waiting with a predicate also protects against spurious wakeups. If the queue is empty and closed, the loop ends; otherwise it adds the front item and pops it.",
+          "observe": "The consumer never calls front() on an empty queue, because the predicate guarantees an item or a close."
+        },
+        {
+          "lines": [49, 56],
+          "excerpt": "  {\n    std::lock_guard<std::mutex> lock(m);\n    q.push(2);\n    q.push(3);\n    closed = true;\n  }\n  cv.notify_all();\n  consumer.join();",
+          "title": "Produce, close, notify, then join",
+          "explanation": "The main thread locks m with a lock_guard, pushes 2 and 3, and sets closed, all as one protected update. The braces end the lock_guard's scope, which unlocks m before notify_all wakes the consumer. join() then blocks until the consumer thread has finished. Every std::thread must be joined or detached before it is destroyed, or the program terminates.",
+          "observe": "Because the close happens after both pushes, the consumer drains both items before it exits."
+        },
+        {
+          "lines": [57, 64],
+          "excerpt": "  assert(total == 5);\n  // Reference extension checks for the exercise changes.\n  std::queue<int> empty_queue;\n  bool empty_closed = true;\n  assert(empty_queue.empty() && empty_closed);\n  std::cout << \"cpp-030 examples passed\\n\";\n  return 0;\n}",
+          "title": "Check the total after join",
+          "explanation": "Reading total is only safe after join, because join makes every write done by the consumer visible to the main thread. The assert confirms that both items were consumed. The extension check covers the close-before-any-item case at the data level. Then the program prints its line.",
+          "observe": "total is 5, and the program prints: cpp-030 examples passed"
+        }
+      ]
+    }
+  ]
+}

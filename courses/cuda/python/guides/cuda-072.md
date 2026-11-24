@@ -14,6 +14,13 @@ Fail clearly instead of silently substituting CPU execution in a GPU evidence ru
 
 
 
+### Key terms
+
+- **Readiness ladder:** An ordered sequence of claims from package import through device visibility, allocation, launch and a correct answer, where an earlier step cannot prove a later one.
+- **Fail-closed device selection:** A policy that stops with a clear error when the requested GPU is unavailable instead of silently running on the CPU.
+- **Device-side assertion:** A failure raised inside a kernel that can leave the CUDA context unusable, so later operations in the same process also fail.
+- **Process boundary:** The point at which a fresh process obtains a new context after a fatal device error, since the old context cannot be recovered.
+
 ## Worked examples
 
 ### Worked example 1
@@ -40,33 +47,51 @@ print("CPU diagnostic fixture: failed at", failed)
 
 **Expected observation:** Fixture fails at correctness, not readiness success.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `failed` | `'correctness'` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Order the evidence levels
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **order the evidence levels** in the examples above.
+**Trap to avoid:** Collapsing all stages into one boolean `gpu_ok` hides where a failure happened and makes a correctness failure look like a missing driver.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Classify missing device
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **classify missing device** in the examples above.
+**Trap to avoid:** Reinstalling CuPy treats the problem as a package issue when the package is fine; the missing piece is device exposure or hardware.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Classify wrong output
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **classify wrong output** in the examples above.
+**Trap to avoid:** Reporting the probe as ready because the exit code was zero ignores the value check. A probe that prints wrong numbers and exits normally is worse than one that crashes, because nothing downstream notices.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Design fail-closed device selection
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **design fail-closed device selection** in the examples above.
+**Trap to avoid:** Defaulting to CPU with a warning lets automated runs record a GPU pass for a CPU result.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain process restart after fatal device error
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **explain process restart after fatal device error** in the examples above.
+**Trap to avoid:** Catching the exception and retrying in the same process often fails again, and if it seems to succeed the evidence is suspect.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Compare alternative backend labels
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **compare alternative backend labels** in the examples above.
+**Trap to avoid:** Calling any accelerator run a GPU pass loses which runtime produced it, so a CUDA requirement can be satisfied by an Apple run on paper.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

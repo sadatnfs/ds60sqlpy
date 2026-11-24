@@ -20,11 +20,25 @@ Isolation and additive policy semantics still apply. Review every policy selecti
 
 **Expected:** It contributes no allowed outgoing flows for selected Pods.
 
+**Solution reasoning**
+
+- **Approach:** Note that policyTypes includes Egress and the egress list is empty for the selected Pods.
+- **Why it is correct:** Once a policy selects Pods for egress, only listed rules allow outgoing traffic, and an empty list allows none.
+- **Plausible wrong approach:** Reading an empty list as no restriction gets the meaning backward.
+- **How to verify:** The prediction says it contributes no allowed outgoing flows.
+
 ## Exercise 2: Include DNS in a dependency map.
 
 A hostname-based app dependency starts with a DNS leg. Ignoring it produces confusing broad failures.
 
 **Expected:** Resolver destination and UDP/TCP requirements are explicit.
+
+**Solution reasoning**
+
+- **Approach:** Add the cluster DNS Pods or Service and port 53 over UDP and TCP to the dependency map.
+- **Why it is correct:** Name lookups happen before any request, so blocking DNS breaks every named call.
+- **Plausible wrong approach:** Allowing only UDP 53 can break large responses that fall back to TCP.
+- **How to verify:** The map names the resolver destination with both UDP and TCP.
 
 ## Exercise 3: Design a minimal egress matrix.
 
@@ -32,11 +46,25 @@ Use the actual prepared topology. A generic allow-all DNS rule may target the wr
 
 **Expected:** Only named required internal or external flows are permitted.
 
+**Solution reasoning**
+
+- **Approach:** Permit only the internal and external flows the workload needs, each with destination and port.
+- **Why it is correct:** A minimal list limits what a compromised Pod can reach while keeping required calls working.
+- **Plausible wrong approach:** Allowing all egress to simplify testing removes the control the policy was meant to add.
+- **How to verify:** Every allowed flow in the matrix is named and required.
+
 ## Exercise 4: Diagnose named-request failure with direct-IP success.
 
 This contrast is stronger evidence than changing application credentials or opening every port.
 
 **Expected:** Inspect DNS egress and resolver behavior first.
+
+**Solution reasoning**
+
+- **Approach:** Check DNS egress rules and the Pod's resolver before checking the destination.
+- **Why it is correct:** If the IP works, the path to the service is open, which points to blocked or failed name resolution.
+- **Plausible wrong approach:** Opening egress to the destination again fixes nothing when the lookup fails.
+- **How to verify:** The first checks are DNS egress and resolver behavior.
 
 ## Exercise 5: Explain why an IP block is not a hostname policy.
 
@@ -44,8 +72,22 @@ Domain-level control needs a named supported extension or proxy design. Do not i
 
 **Expected:** It matches addresses, which may not be stable or exclusive to one service.
 
+**Solution reasoning**
+
+- **Approach:** Explain that ipBlock matches addresses, not names.
+- **Why it is correct:** A hostname can resolve to changing or shared addresses, so a CIDR may miss new ones or include other services.
+- **Plausible wrong approach:** Using a CIDR from one lookup as a permanent hostname allow can break later or overreach.
+- **How to verify:** The answer says addresses may not be stable or exclusive.
+
 ## Exercise 6: Plan an egress qualification after NAT.
 
 Policy evaluation details can differ. Test the actual path before relying on a conceptual address match.
 
 **Expected:** Record implementation, observed addresses and both allowed/denied cases.
+
+**Solution reasoning**
+
+- **Approach:** Record the CNI, the source address observed at the destination and one allowed and one denied case.
+- **Why it is correct:** NAT can change the source the external side sees, so observed addresses explain matching results.
+- **Plausible wrong approach:** Testing only an allowed destination cannot show the policy denies anything.
+- **How to verify:** The record has implementation, observed addresses and both outcomes.

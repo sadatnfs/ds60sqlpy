@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-compare-controller-intent">Exercise 1: Compare controller intent<a class="heading-anchor" href="#exercise-1-compare-controller-intent" aria-label="Link to this section">#</a></h3>
 <p>A Deployment can place several replicas on one node unless other constraints prevent it. A DaemonSet reconciles toward node eligibility. Neither object name alone proves a particular topology.</p>
 <p><strong>Expected:</strong> Fixed replica count versus topology-derived desired placement.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Contrast replicas 2 on the Deployment with the DaemonSet&#x27;s one Pod per eligible node.</li>
+<li><strong>Why it is correct:</strong> A Deployment&#x27;s count is fixed by spec.replicas, while a DaemonSet&#x27;s desired count follows how many nodes pass its placement rules.</li>
+<li><strong>Plausible wrong approach:</strong> Expecting the DaemonSet to honor a replicas field misreads its spec, which has none.</li>
+<li><strong>How to verify:</strong> On three nodes with two eligible, the Deployment yields 2 Pods and the DaemonSet yields 2, for different reasons.</li>
+</ul>
 <h3 id="exercise-2-evaluate-node-labels">Exercise 2: Evaluate node labels<a class="heading-anchor" href="#exercise-2-evaluate-node-labels" aria-label="Link to this section">#</a></h3>
 <p>The first filter narrows candidates but does not finish scheduling. Keeping the stages separate helps explain why a matching node may still not receive the Pod.</p>
 <p><strong>Expected:</strong> node-a and node-c pass the label condition; node-b does not.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check zone=a against each node&#x27;s labels one at a time.</li>
+<li><strong>Why it is correct:</strong> A nodeSelector requires an exact key and value match, so only nodes labeled zone=a pass.</li>
+<li><strong>Plausible wrong approach:</strong> Treating a node with zone=b as close enough, or one missing the key as a wildcard, admits node-b wrongly.</li>
+<li><strong>How to verify:</strong> node-a yes, node-b no, node-c yes.</li>
+</ul>
 <h3 id="exercise-3-evaluate-the-custom-taint">Exercise 3: Evaluate the custom taint<a class="heading-anchor" href="#exercise-3-evaluate-the-custom-taint" aria-label="Link to this section">#</a></h3>
 <p>The custom taint blocks a new Pod lacking the matching toleration. The model intentionally omits other scheduler behavior and should not be presented as a complete placement predictor.</p>
 <p><strong>Expected:</strong> Only node-a remains eligible in the simplified model.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> For node-a and node-c, compare each node&#x27;s taints with the Pod&#x27;s tolerations.</li>
+<li><strong>Why it is correct:</strong> A NoSchedule taint repels any Pod lacking a matching toleration, so node-c with the dedicated taint drops out.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming DaemonSets ignore all taints overgeneralizes; their automatic tolerations cover node condition taints, not a custom dedicated taint.</li>
+<li><strong>How to verify:</strong> Only node-a remains after both checks.</li>
+</ul>
 <h3 id="exercise-4-observe-actual-placement">Exercise 4: Observe actual placement<a class="heading-anchor" href="#exercise-4-observe-actual-placement" aria-label="Link to this section">#</a></h3>
 <p>Static facts and desired status are not enough to prove a running Pod on each intended node. The live graph should identify controlled Pods and their observed placement without exposing unrelated Node data.</p>
 <p><strong>Expected:</strong> Observed eligible-node and controller evidence agree or a specific condition explains the gap.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare desiredNumberScheduled, numberReady and each Pod&#x27;s nodeName with your predicted node list.</li>
+<li><strong>Why it is correct:</strong> The DaemonSet controller computes desired placement itself, so its status and Pod nodeNames show whether reality matches your model.</li>
+<li><strong>Plausible wrong approach:</strong> Checking only numberReady equals desiredNumberScheduled could pass even if the controller chose nodes you did not predict.</li>
+<li><strong>How to verify:</strong> Pod nodeNames match the predicted nodes, or a specific condition explains each difference.</li>
+</ul>
 <h3 id="exercise-5-reject-automatic-node-edits">Exercise 5: Reject automatic node edits<a class="heading-anchor" href="#exercise-5-reject-automatic-node-edits" aria-label="Link to this section">#</a></h3>
 <p>Changing a shared node can affect unrelated workloads. The ordinary worker has no such permission. A dedicated host rehearsal needs explicit ownership and restoration evidence.</p>
 <p><strong>Expected:</strong> No learner Node mutation; request the correct owned capability or report unavailable placement.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Replace the taint removal with a capability request or an unavailable placement report.</li>
+<li><strong>Why it is correct:</strong> Node taints are shared cluster configuration, and removing one changes scheduling for every workload, not just this lab.</li>
+<li><strong>Plausible wrong approach:</strong> Running kubectl taint with a trailing minus to make the Pod land edits a Node the learner does not own.</li>
+<li><strong>How to verify:</strong> The proposal modifies no Node and names the request or report used instead.</li>
+</ul>
 <h3 id="exercise-6-clean-up-the-right-resources">Exercise 6: Clean up the right resources<a class="heading-anchor" href="#exercise-6-clean-up-the-right-resources" aria-label="Link to this section">#</a></h3>
 <p>The workload may run on nodes it does not own. Cleanup must follow its resource receipt rather than deleting every node-local Pod or reverting unrelated scheduling policy.</p>
 <p><strong>Expected:</strong> Only the owned DaemonSet/controller children are removed; unrelated agents and node settings preserved.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Delete the DaemonSet by recorded UID and confirm its child Pods go with it.</li>
+<li><strong>Why it is correct:</strong> Child Pods carry an ownerReference to the DaemonSet, so garbage collection removes them while node labels and taints stay as they were.</li>
+<li><strong>Plausible wrong approach:</strong> Deleting Pods by label app could remove another agent&#x27;s Pods, and the DaemonSet would just recreate its own.</li>
+<li><strong>How to verify:</strong> Owned UIDs are gone, and node labels and taints match the pre-run record.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>Pending can result from selector mismatch, untolerated taint or insufficient requested resources. A toleration does not grant host access, and a DaemonSet is not inherently privileged. The restricted fixture demonstrates the controller shape without exposing node files or network namespaces.</p>
 <p>The static predicate explains supplied facts only. Actual desired/ready counts and node placement must be read from the exclusive host lab. Cleanup targets the recorded DaemonSet UID and its controlled Pods, not node labels or unrelated node-local agents.</p></article>

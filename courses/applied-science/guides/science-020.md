@@ -17,6 +17,13 @@ If a vector of estimates \(\mathbf y\) shares a common mean under a specified mo
 
 The covariance matrix is part of the statistical model. It must represent the dependencies and the scale of the estimates. A matrix chosen for numerical convenience should not be presented as measured sampling covariance.
 
+## Key terms
+
+- **Dependent effects:** Several estimates that share participants, controls or measurements and therefore have correlated errors.
+- **Sampling covariance matrix:** The matrix V giving variances and covariances of the estimates; it is part of the model, not a numerical convenience.
+- **Generalized least squares:** Pooling estimates with weights from V inverse, which accounts for correlation instead of treating rows as independent.
+- **Missing-study scenario:** A sensitivity analysis that adds hypothetical effects to show how conclusions would change, without estimating real missing studies.
+
 ## Worked case 1: retain the same mean, change the uncertainty
 
 Two effect estimates are .4 and .6, with variance .04 each. Treating them as independent gives a mean of .5 and variance .02. When their covariance is .03, the mean remains .5 but its variance rises to .035. The code checks both exact results.
@@ -46,6 +53,43 @@ Keep observed evidence separate from imputed or hypothetical evidence. A machine
 **Can we simply average several outcomes within each study?** Sometimes that defines a meaningful composite, but the scientific target, outcome scales and within-study covariance must support the combination. Averaging is not a universal way to remove dependence.
 
 **Does a sensitivity scenario that leaves the decision unchanged prove robustness?** It establishes stability under that stated scenario. Other selection mechanisms, stronger dependence or different effect definitions can still matter. A defensible conclusion names the alternatives examined and the assumptions left unresolved.
+
+## Worked example: Correlated outcomes from one study and an added null study
+
+```python
+import numpy as np
+
+
+def gls(y, V):
+    ones = np.ones(len(y))
+    Vi = np.linalg.inv(V)
+    var = 1 / (ones @ Vi @ ones)
+    return var * (ones @ Vi @ y), np.sqrt(var), var * (ones @ Vi)
+
+
+y = np.array([0.40, 0.44, 0.10])  # study 1 reports two outcomes; study 2 one
+se = np.array([0.10, 0.10, 0.10])
+for rho in (0.0, 0.8):
+    V = np.diag(se**2)
+    V[0, 1] = V[1, 0] = rho * se[0] * se[1]
+    est, s, weights = gls(y, V)
+    print(f"rho={rho}: pooled {est:.4f}, SE {s:.4f}, weights {weights.round(3)}")
+
+V = np.diag(np.r_[se, 0.10] ** 2)
+V[0, 1] = V[1, 0] = 0.8 * 0.01
+est, s, _ = gls(np.r_[y, 0.0], V)
+print(f"with an unpublished null study (0.0, SE 0.10): pooled {est:.4f}, SE {s:.4f}")
+```
+
+Observed output:
+
+```text
+rho=0.0: pooled 0.3133, SE 0.0577, weights [0.333 0.333 0.333]
+rho=0.8: pooled 0.2684, SE 0.0688, weights [0.263 0.263 0.474]
+with an unpublished null study (0.0, SE 0.10): pooled 0.1821, SE 0.0567
+```
+
+Study 1 reports two outcomes, 0.40 and 0.44, and study 2 reports 0.10, all with standard error 0.10. Ignoring the dependence gives each row weight one third, so study 1 effectively counts twice, and the pooled value 0.3133 sits near its results. With within-study correlation 0.8, the two study-1 rows carry nearly the same information. GLS recognizes this and gives them weight 0.263 each, while study 2 rises to 0.474. The pooled estimate falls to 0.2684 and the standard error rises from 0.0577 to 0.0688, which is the honest precision of what are almost two studies, not three. The last line is a sensitivity scenario rather than an estimate: if one unpublished study with effect 0.0 and the same precision existed, the pooled value would fall to 0.1821. Stating that scenario explicitly lets a reader judge whether a single missing null study is plausible enough to change a decision that depends on the effect exceeding 0.25.
 
 ## Complete reproducible program
 

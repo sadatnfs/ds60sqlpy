@@ -3,6 +3,28 @@
   "title": "Threads, ownership and deterministic reductions",
   "concepts": ["Threads.@spawn", "race conditions", "locks", "task migration", "reductions"],
   "outcome": "Run independent chunks on the prepared two-thread runtime, combine results deterministically and protect shared state with an explicit lock.",
+  "key_terms": [
+    [
+      "Threads.@spawn",
+      "A macro that schedules a task on any available thread and returns a task whose result `fetch` retrieves."
+    ],
+    [
+      "Race condition",
+      "Unsynchronized access to shared memory by concurrent tasks, at least one of them writing, which can lose updates."
+    ],
+    [
+      "ReentrantLock",
+      "A lock that serializes access to shared state, released in a `finally` block or by the `lock` do-block form."
+    ],
+    [
+      "Task migration",
+      "A task can resume on a different thread after yielding, so scratch storage indexed by `threadid()` is unsafe."
+    ],
+    [
+      "Parallel reduction",
+      "Combining partial results from several tasks, where floating-point regrouping can change the last digits of a sum."
+    ]
+  ],
   "level": "advanced",
   "minutes": 150,
   "prerequisites": ["julia-026", "julia-029"],
@@ -11,48 +33,68 @@
     ["Task-local ownership guidance", "https://julialang.org/blog/2023/07/PSA-dont-use-threadid/"]
   ],
   "figure": 0,
+  "approach": "`chunk_squares` splits the input into two index ranges, spawns one task per range that sums squares with `init = 0`, then fetches and adds the two partial sums in a fixed order. `locked_counter` spawns workers that each increment a shared `Ref` inside `lock(guard)`, so every read and write of the counter is protected.",
   "exercises": [
     {
       "title": "Derive the reduction oracle",
       "task": "Compute the sum of squares through 100 from the closed-form formula.",
       "expected": "The result is 338350.",
       "hint": "Use \\(n(n+1)(2n+1)/6\\).",
-      "answer": "The independent formula checks the reduction without copying its loop."
+      "answer": "The independent formula checks the reduction without copying its loop.",
+      "why": "The formula n(n+1)(2n+1)/6 with n = 100 gives 100 times 101 times 201 divided by 6, which is 338350.",
+      "wrong": "Checking the threaded result against a serial loop written by the same author shares any indexing mistake with the parallel code.",
+      "verify": "Example A asserts `chunk_squares(collect(1:100)) == 338350` five times in a row."
     },
     {
       "title": "Trace an empty chunk",
       "task": "Explain how the single-element input handles its second range.",
       "expected": "The empty range contributes 0.",
       "hint": "sum uses an explicit init.",
-      "answer": "The additive identity makes the empty partial result well-defined."
+      "answer": "The additive identity makes the empty partial result well-defined.",
+      "why": "For `[3]`, `middle = cld(1, 2) = 1`, so the second range is `2:1`, which is empty, and `sum` with `init = 0` returns 0.",
+      "wrong": "Dropping `init = 0` makes `sum` over an empty view throw, so a one-element input fails.",
+      "verify": "Example A asserts `chunk_squares([3]) == 9`, and the reference checks `chunk_squares([-2, 3]) == 13`."
     },
     {
       "title": "Explain lost updates",
       "task": "Trace two unprotected increments that read the same value.",
       "expected": "One update can overwrite the other.",
       "hint": "An increment is not one abstract atomic step.",
-      "answer": "Locking the full read-modify-write operation prevents this schedule under the stated protocol."
+      "answer": "Locking the full read-modify-write operation prevents this schedule under the stated protocol.",
+      "why": "Two tasks can both read 5, both compute 6 and both write 6, so one increment is lost without a lock.",
+      "wrong": "Assuming `counter[] += 1` is a single indivisible step predicts the full count even without the lock.",
+      "verify": "Example B asserts `locked_counter(4, 100) == 400`; an unprotected owned copy may sometimes print less."
     },
     {
       "title": "Review scratch ownership",
       "task": "Explain why threadid-indexed buffers can be unsafe.",
       "expected": "Tasks may migrate or interleave.",
       "hint": "A thread ID is not permanent task ownership.",
-      "answer": "Task-owned state or explicit synchronization is safer than undocumented schedule assumptions."
+      "answer": "Task-owned state or explicit synchronization is safer than undocumented schedule assumptions.",
+      "why": "Tasks can move between threads, so a buffer indexed by `Threads.threadid()` may be shared by two tasks that both start on one thread.",
+      "wrong": "Allocating per-thread buffers by `threadid()` assumes a task keeps its thread for life, which the scheduler does not promise.",
+      "verify": "Give each spawned task its own local buffer and confirm results do not depend on the thread count."
     },
     {
       "title": "Analyze floating reduction",
       "task": "Explain why changing grouping can change floating results.",
       "expected": "Floating addition rounds intermediate values.",
       "hint": "Associativity holds for real arithmetic, not all machine arithmetic.",
-      "answer": "Use a justified tolerance or a numerically stable reduction when extending the integer example."
+      "answer": "Use a justified tolerance or a numerically stable reduction when extending the integer example.",
+      "why": "Floating addition rounds each partial result, so grouping the sum into two chunks can change the last bits compared with a serial sum.",
+      "wrong": "Asserting exact equality between a threaded float reduction and a serial one fails or passes by luck depending on the data.",
+      "verify": "Compare float sums with `isapprox` and a stated tolerance; the integer example can stay exact."
     },
     {
       "title": "Design a performance comparison",
       "task": "State the boundaries needed to claim a parallel speedup.",
       "expected": "Include scheduling, work, reduction and thread configuration.",
       "hint": "Small workloads can be slower.",
-      "answer": "Measure the full warmed operation with identical correct outputs and representative data."
+      "answer": "Measure the full warmed operation with identical correct outputs and representative data.",
+      "why": "A speedup claim must compare warmed runs of the whole operation, with identical correct outputs, on the same thread configuration.",
+      "wrong": "Timing 100 small integers once on two threads and calling it faster ignores the scheduling cost that dominates tiny workloads.",
+      "verify": "Report the thread count from `Threads.nthreads()`, input size and repeated timings for one and two threads."
     }
-  ]
+  ],
+  "checks_note": "`[0, 0]` gives 0 through the zero contributions, while `locked_counter(1, 7) == 7` is the serial baseline with no contention. The `before` copy confirms that splitting work into views reads the input without changing it, and the sum of squares of 1, 2 and 3 is 14."
 }

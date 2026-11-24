@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Prove that a grid-stride loop writes every output element exactly once, including the tail.
+
 Work through *One-dimensional indexing that survives awkward sizes* with the concrete cases below. Finish with this evidence:
 every output element is written exactly once and tails match the CPU reference. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A one-dimensional launch gives a thread the starting index blockIdx.x*blockDim.x+threadIdx.x. A grid-stride loop advances that index by blockDim.x*gridDim.x until it reaches n. Every nonnegative index has one remainder modulo the positive stride, so exactly one starting thread owns it. Cast to a sufficiently wide integer before multiplying dimensions; widening after an overflow is too late. Ceiling division supplies enough threads for one-element mapping, but a grid-stride loop also allows a bounded grid to cover a much larger input. A bounds test is required even when most demonstration sizes divide evenly.
+
+### Key terms
+
+- **Global thread index:** The value `blockIdx.x * blockDim.x + threadIdx.x` that identifies one thread across the whole grid.
+- **Ceiling division:** The calculation (n + b - 1) / b that gives enough blocks of size b to cover n elements.
+- **Grid-stride loop:** A loop that advances each thread's index by the total number of threads in the grid until it reaches n.
+- **Bounds predicate:** A condition such as `i < n` that keeps threads beyond the data from reading or writing memory.
 
 ## Mathematical contract
 

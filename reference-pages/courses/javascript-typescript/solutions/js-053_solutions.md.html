@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>d3.stack().keys([&#x27;a&#x27;,&#x27;b&#x27;])</code> reads the named components from each record and returns one series for each key. A point is <code>[lower, upper]</code> and retains its original row in <code>.data</code>. Use y(lower)-y(upper) for positive vertical height.</p>
 <p><code>stackOffsetExpand</code> normalizes each row to unit total when appropriate. Validate finite nonnegative components for this introductory positive stack. Signed values need a different design, such as a diverging stack with explicit positive and negative baselines.</p>
 <h3 id="exercise-1-predict-the-stack-endpoints">Exercise 1: Predict the stack endpoints.<a class="heading-anchor" href="#exercise-1-predict-the-stack-endpoints" aria-label="Link to this section">#</a></h3>
-<p>Endpoints are cumulative positions. The second segment height represents3, not5.</p>
+<p>Endpoints are cumulative positions. The second segment height represents 3, not 5. For X, d3.stack gives series a as [0, 2] and series b as [2, 5]; the b segment&#x27;s height is y(2) - y(5), which corresponds to 3. Reading the endpoint 5 as b&#x27;s value would double count a. The reference checks that <code>series[1][0]</code> is <code>[2, 5]</code>.</p>
 <p><strong>Expected:</strong> First segment 0..2, second 2..5.</p>
 <h3 id="exercise-2-normalize-two-proportional-rows">Exercise 2: Normalize two proportional rows.<a class="heading-anchor" href="#exercise-2-normalize-two-proportional-rows" aria-label="Link to this section">#</a></h3>
-<p>Normalization removes absolute scale. Preserve totals if they matter to the analytical question.</p>
+<p>Normalization removes absolute scale. Preserve totals if they matter to the analytical question. Rows (2, 3) and (4, 6) have totals 5 and 10 but the same 40% and 60% shares; d3.stackOffsetExpand would draw both as full-height bars. If absolute volume matters, keep a separate total label because the normalized view erases it.</p>
 <p><strong>Expected:</strong> Both have 40% and 60% shares despite different totals.</p>
 <h3 id="exercise-3-build-a-two-series-stacked-chart">Exercise 3: Build a two-series stacked chart.<a class="heading-anchor" href="#exercise-3-build-a-two-series-stacked-chart" aria-label="Link to this section">#</a></h3>
-<p>Check both component and total invariants. A plausible total can hide an incorrect internal segment calculation.</p>
+<p>Check both component and total invariants. A plausible total can hide an incorrect internal segment calculation. The reference draws four rects: X gets heights for 2 and 3 (total 5) and Y for 4 and 2 (total 6) on a [0, 7] domain. Verify each rect&#x27;s height converts back to its component and that each column&#x27;s top sits at y of the row total.</p>
 <p><strong>Expected:</strong> Segment heights match component values and total heights match row sums.</p>
 <h3 id="exercise-4-diagnose-using-upper-endpoint-as-segment-height">Exercise 4: Diagnose using upper endpoint as segment height.<a class="heading-anchor" href="#exercise-4-diagnose-using-upper-endpoint-as-segment-height" aria-label="Link to this section">#</a></h3>
-<p>Compute the interval length in scale coordinates. Stack output is geometry input, not a direct height field.</p>
+<p>Compute the interval length in scale coordinates. Stack output is geometry input, not a direct height field. Setting height to y(0) - y(d[1]) makes X&#x27;s b segment as tall as 5 and overlap a. Subtract the lower endpoint: y(d[0]) - y(d[1]).</p>
 <p><strong>Expected:</strong> Later segments are exaggerated because the lower endpoint was ignored.</p>
 <h3 id="exercise-5-handle-a-zero-total-group">Exercise 5: Handle a zero-total group.<a class="heading-anchor" href="#exercise-5-handle-a-zero-total-group" aria-label="Link to this section">#</a></h3>
-<p>Dividing by zero does not produce an interpretable percentage. Do not invent shares to fill the chart.</p>
+<p>Dividing by zero does not produce an interpretable percentage. Do not invent shares to fill the chart. A group with a 0 and b 0 would yield 0/0 = NaN shares under normalization. Show &quot;no observations&quot; for that group instead of an empty or invented bar.</p>
 <p><strong>Expected:</strong> Show an explicit no-composition state or documented zero representation.</p>
 <h3 id="exercise-6-choose-grouped-or-stacked-bars-for-subgroup-comparison">Exercise 6: Choose grouped or stacked bars for subgroup comparison.<a class="heading-anchor" href="#exercise-6-choose-grouped-or-stacked-bars-for-subgroup-comparison" aria-label="Link to this section">#</a></h3>
-<p>A stack can still be useful for total composition, but the tradeoff should be explicit.</p>
+<p>A stack can still be useful for total composition, but the tradeoff should be explicit. Comparing b across X (3) and Y (2) is easier in grouped bars, which share a zero baseline, than in stacks where b starts at 2 and 4. Stacks still suit the question of how each group&#x27;s total of 5 or 6 splits. Pick the layout from the comparison readers need most and name that choice in the caption.</p>
 <p><strong>Expected:</strong> Use shared baselines when precise subgroup comparison is the primary task.</p></article>
   </main>
 </body>

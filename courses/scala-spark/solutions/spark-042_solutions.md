@@ -212,7 +212,7 @@ The external effect exists even though the streaming query reports failure. That
 
 Restart the same compatible query and checkpoint. Validate the existing batch input/content/chain and reuse its state.
 
-**Expected:** Attempts 0,0 and callback rows 4,4;commit 0 bytes and logical state remain unchanged.
+**Expected:** Attempts 0,0 and callback rows 4,4; commit 0 bytes and logical state remain unchanged.
 
 ```scala
 def recoverProduct(spark: SparkSession, input: Path, checkpoint: Path, sink: Path): RunReceipt = {
@@ -233,7 +233,7 @@ The same batch is delivered again because Spark did not record its successful co
 
 Publish Batch B then Batch C as separate immutable files and run each finite invocation against the same checkpoint.
 
-**Expected:** Final accepted IDs A, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valued D and cutoff-boundary F remain accepted.
+**Expected:** Final accepted IDs A, B, D, E, F, total 75; duplicate 2, late 1, invalid 2; 10 logical occurrences. Zero-valued D and cutoff-boundary F remain accepted.
 
 ```scala
 def finishProduct(
@@ -318,7 +318,7 @@ Batch B deliberately presents event E at 120 before event D at 95. A mistaken mo
 
 Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint.
 
-**Expected:** Literal golden state matches; attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup.
+**Expected:** Literal golden state matches; attempt IDs 0,0,1,2; callback rows 4,4,4,2; only owned inactive queries are eligible for cleanup.
 
 ```scala
 def handoffState(state: ProductState): String = {
@@ -344,4 +344,6 @@ The final state is compared with an independent literal JSON oracle, not only wi
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Validate and canonicalize each raw microbatch) is built inside the program, so opening the lesson fetches nothing; it expects: Batch A has four occurrences with IDs A, B, A, NULL; NULL is preserved in canonical input. An oversized batch is rejected before collection. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

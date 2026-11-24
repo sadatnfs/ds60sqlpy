@@ -22,11 +22,25 @@ A declarative request is constrained by cluster capabilities. Report the missing
 
 **Expected:** The intended requirement cannot be satisfied.
 
+**Solution reasoning**
+
+- **Approach:** Compare ipFamilyPolicy RequireDualStack with a cluster that has only one address family.
+- **Why it is correct:** RequireDualStack demands addresses from both families, which a single-stack cluster cannot allocate.
+- **Plausible wrong approach:** Expecting a silent fallback to one family confuses RequireDualStack with PreferDualStack.
+- **How to verify:** The prediction says the requirement cannot be satisfied.
+
 ## Exercise 2: Distinguish A and AAAA records.
 
 DNS availability and transport reachability are separate checks for each family.
 
 **Expected:** IPv4 addresses versus IPv6 addresses.
+
+**Solution reasoning**
+
+- **Approach:** Match A records to IPv4 addresses and AAAA records to IPv6 addresses.
+- **Why it is correct:** Clients request each record type separately, so one family can resolve while the other is missing.
+- **Plausible wrong approach:** Checking only A records hides a missing IPv6 address.
+- **How to verify:** The answer pairs A with IPv4 and AAAA with IPv6.
 
 ## Exercise 3: Build a family-specific acceptance table.
 
@@ -34,11 +48,25 @@ A single successful request may use only one family. Make coverage explicit.
 
 **Expected:** DNS, Service, endpoints, policy and app response for both families.
 
+**Solution reasoning**
+
+- **Approach:** Build rows for DNS, Service clusterIPs, endpoints, policy and app response, with one column per family.
+- **Why it is correct:** Each layer can work for one family and fail for the other, so both need separate evidence.
+- **Plausible wrong approach:** One passing IPv4 test cannot show the IPv6 path works.
+- **How to verify:** Every row has evidence for both families.
+
 ## Exercise 4: Diagnose IPv4 success with IPv6 timeout.
 
 Do not treat the shared hostname as proof that both network paths work.
 
 **Expected:** Inspect the IPv6 route, listener, endpoints and policy path.
+
+**Solution reasoning**
+
+- **Approach:** Check the IPv6 route, the app's IPv6 listener, IPv6 endpoints and IPv6 policy rules.
+- **Why it is correct:** IPv4 success proves only the IPv4 path, and an app bound to IPv4 alone times out over IPv6.
+- **Plausible wrong approach:** Blaming the Service because IPv4 works skips the family-specific layers.
+- **How to verify:** The diagnosis covers route, listener, endpoints and policy for IPv6.
 
 ## Exercise 5: Explain bracketed IPv6 URL syntax.
 
@@ -46,8 +74,22 @@ Without the delimiters a parser cannot interpret the same structure as an IPv4 h
 
 **Expected:** Brackets delimit the address before a colon-prefixed port.
 
+**Solution reasoning**
+
+- **Approach:** Wrap an IPv6 address in brackets before adding a colon and port in a URL.
+- **Why it is correct:** IPv6 addresses contain colons, so brackets show where the address ends and the port starts.
+- **Plausible wrong approach:** Writing the address without brackets makes the last group look like a port.
+- **How to verify:** The answer shows the bracketed form and why it is needed.
+
 ## Exercise 6: Review dual-stack security coverage.
 
 A policy that works for one address family does not automatically establish the other path’s exposure or isolation.
 
 **Expected:** Intended allow/deny rules and observations cover both families.
+
+**Solution reasoning**
+
+- **Approach:** Compare each intended allow and deny rule against observations for both families.
+- **Why it is correct:** A policy written with IPv4 CIDRs alone may leave IPv6 traffic unrestricted.
+- **Plausible wrong approach:** Testing denial only over IPv4 can miss an open IPv6 path.
+- **How to verify:** Rules and observations cover IPv4 and IPv6.

@@ -198,15 +198,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-change-the-decision-clock">1. Change the decision clock<a class="heading-anchor" href="#1-change-the-decision-clock" aria-label="Link to this section">#</a></h3>
 <p>State whether the maximum is inclusive. Keep the boundary test with the policy so future changes are visible.</p>
+<p>With decision at 2024-01-05 the ages become 172,800 and 345,600 seconds. The first equals max_age exactly and is accepted only because the comparison is &lt;=; switching to &lt; would reject it. The second is stale either way. Assert [True, False] again so the boundary is pinned.</p>
 <p><strong>Expected:</strong> The first value reaches the boundary and the second remains stale.</p>
 <h3 id="2-reject-future-metadata">2. Reject future metadata<a class="heading-anchor" href="#2-reject-future-metadata" aria-label="Link to this section">#</a></h3>
 <p>A negative age is not evidence of very fresh data. Investigate clock skew or an incorrect timestamp definition.</p>
+<p>Set the decision to 2024-01-02 while customer 1&#x27;s epoch is 2024-01-03: its age is -86,400. The 0 &lt;= age term rejects it. Keeping only age &lt;= max_age would accept a value from the future as the freshest feature in the batch.</p>
 <p><strong>Expected:</strong> The age check rejects it.</p>
 <h3 id="3-separate-publication-and-observation">3. Separate publication and observation<a class="heading-anchor" href="#3-separate-publication-and-observation" aria-label="Link to this section">#</a></h3>
 <p>Keep the timestamp that the policy actually measures. Changing only publication metadata can hide stale information.</p>
 <p><strong>Expected:</strong> The answer retains the measurement/availability clock.</p>
 <h3 id="4-handle-missing-entities">4. Handle missing entities<a class="heading-anchor" href="#4-handle-missing-entities" aria-label="Link to this section">#</a></h3>
 <p>Use a declared fallback, abstention or failure. Record coverage and avoid comparing scores from different missingness policies without explanation.</p>
+<p>Ask for customer_id 3. Feast returns None for usage and feature_epoch, and decision - int(None) raises TypeError, so the reference&#x27;s age line is itself a missing-entity detector, only an unfriendly one. Check for None first and return an explicit &quot;unavailable&quot; decision; do not substitute epoch 0, which would yield an age of about 54 years and hide the cause.</p>
 <p><strong>Expected:</strong> Missing inputs do not silently become observed zeros.</p>
 <h3 id="5-inspect-materialization-scope">5. Inspect materialization scope<a class="heading-anchor" href="#5-inspect-materialization-scope" aria-label="Link to this section">#</a></h3>
 <p>Use owned state and known fixtures before applying a materialization command to a durable environment. Do not infer completeness from the command name.</p>

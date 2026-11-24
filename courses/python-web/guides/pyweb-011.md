@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-010`, `python-10`.
 
 A repeatable web test needs a clear owner for every piece of state. A client cookie jar, an application object's in-memory data and a persistent database have different lifetimes. This chapter uses a real application factory to show which state is shared and which is isolated.
 
+## Key terms
+
+- **Application factory:** A function such as `make_app()` that builds and returns a new application, with its own state, every time it is called.
+- **Fixture:** A known starting state, such as a fresh item list, that a test creates explicitly instead of inheriting from earlier code or runs.
+- **Cookie jar:** The store of cookies a test client keeps and sends on its later requests; each client owns a separate jar.
+- **Closure:** A function that captures variables from its enclosing scope, which is how the route functions share the factory's item list.
+- **State isolation:** Arranging tests so each one owns its state and cannot pass or fail because of what another test or client left behind.
+
 ## Mechanism: create the application deliberately
 
 `make_app()` constructs a Flask application, a fresh item list and its route functions. The functions close over that list, so clients of the same application see the same server-side fixture. Each test client separately owns its cookies. The session's created-count therefore belongs to the client's signed session, while the total item count belongs to the application fixture.
@@ -27,6 +35,42 @@ When testing authentication, create distinct client instances for different user
 A third client belongs to a newly constructed application. Both counts start at zero. This verifies the factory's state boundary. It would fail if the list were defined as a module global and every factory invocation reused it unintentionally.
 
 The example intentionally reports that the item list does not survive process restart. Later workshops use an explicitly persistent database and test stop/resume behavior. An in-memory dictionary should not be presented as a production storage layer merely because a client test passes.
+
+## Worked example: a module-level list leaks between tests
+
+```python
+from flask import Flask
+
+shared_items = []
+
+
+def make_app(items):
+    app = Flask(__name__)
+
+    @app.post("/items")
+    def create():
+        items.append("item")
+        return {"count": len(items)}, 201
+
+    return app
+
+
+def test_create(items):
+    return make_app(items).test_client().post("/items").json["count"]
+
+
+print("shared:", test_create(shared_items), test_create(shared_items))
+print("isolated:", test_create([]), test_create([]))
+```
+
+Expected output:
+
+```text
+shared: 1 2
+isolated: 1 1
+```
+
+Both calls to `test_create` assert the same story, that creating one item yields a count of 1, but with a module-level list the second run saw 2 because state from the first run survived. The test would pass or fail depending on order, which is the classic flaky-test symptom. Passing a fresh list into each factory call reproduces what the lesson's `make_app` does with its local `items`: every application fixture starts empty. The lesson's `session` counter adds a second boundary, since two clients of one application share server state but not cookies. In pytest, a fixture that calls the factory gives every test its own application; scoping that fixture to `module` would reintroduce the leak.
 
 ## Failure diagnosis
 

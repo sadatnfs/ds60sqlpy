@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-list-checkpoint-fields">Exercise 1: List checkpoint fields<a class="heading-anchor" href="#exercise-1-list-checkpoint-fields" aria-label="Link to this section">#</a></h3>
 <p>Include all state affecting the next update.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>list checkpoint fields</strong> is qualified there.</p>
+<p><strong>Approach.</strong> List every field that affects the next update: model weights, optimizer state such as the momentum buffer <code>v</code>, the learning-rate scheduler state, the gradient scaler state, the step counter, random generator states and the position of the data sampler.</p>
+<p><strong>Why it is correct here.</strong> Exact continuation means the resumed run computes the same next update as the uninterrupted run. Any omitted field that influences that update makes the two runs diverge.</p>
+<p><strong>A plausible wrong approach.</strong> Saving only <code>model.state_dict()</code> because that is what inference needs leaves out optimizer and sampler state, which training needs.</p>
+<p><strong>How to verify.</strong> Save, reload, take one step, and compare with one step of the uninterrupted run. Every saved field should be justified by a change it causes when omitted.</p>
 <h3 id="exercise-2-compute-momentum-continuation">Exercise 2: Compute momentum continuation<a class="heading-anchor" href="#exercise-2-compute-momentum-continuation" aria-label="Link to this section">#</a></h3>
 <p>Carry the previous velocity.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute momentum continuation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Carry the velocity through the restart: with <code>w = 1.0</code>, <code>v = 0.5</code> and gradient 0.2, the next velocity is <code>0.9*0.5 + 0.2 = 0.65</code> and the new weight is <code>1.0 - 0.1*0.65 = 0.935</code>.</p>
+<p><strong>Why it is correct here.</strong> Momentum SGD updates <code>v = 0.9*v + g</code> and then <code>w = w - lr*v</code>, so the previous velocity contributes <code>0.45</code> of the step. The reference asserts the continued weight is 0.935.</p>
+<p><strong>A plausible wrong approach.</strong> Recomputing velocity from the current gradient alone, <code>v = g</code>, gives <code>1.0 - 0.1*0.2 = 0.98</code>, the weights-only value, which ignores accumulated history.</p>
+<p><strong>How to verify.</strong> Check <code>abs(continued - 0.935) &lt; 1e-12</code> from the reference and that it differs from <code>weights_only</code>.</p>
 <h3 id="exercise-3-diagnose-weights-only-restart">Exercise 3: Diagnose weights-only restart<a class="heading-anchor" href="#exercise-3-diagnose-weights-only-restart" aria-label="Link to this section">#</a></h3>
 <p>The optimizer trajectory changes.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>diagnose weights-only restart</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Diagnose a weights-only restart: velocity restarts at zero, so the first resumed step moves <code>w</code> to 0.98 instead of 0.935, and the trajectory differs from then on.</p>
+<p><strong>Why it is correct here.</strong> The momentum state is part of the optimizer trajectory. Resetting it produces a different, slower update after each restart, so training curves show a visible discontinuity.</p>
+<p><strong>A plausible wrong approach.</strong> Treating the difference as random noise from reloading misses that it is deterministic: the same restart always produces the same wrong value.</p>
+<p><strong>How to verify.</strong> Compare the first resumed step with the uninterrupted step. A difference equal to <code>lr*0.9*v</code>, 0.045 here, identifies the missing velocity.</p>
 <h3 id="exercise-4-record-sampler-position">Exercise 4: Record sampler position<a class="heading-anchor" href="#exercise-4-record-sampler-position" aria-label="Link to this section">#</a></h3>
 <p>Persist the next unconsumed example or reproducible sampler state.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>record sampler position</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Persist the sampler position, such as the next unconsumed batch index 3 or the sampler&#x27;s random state plus epoch, so the resumed run starts at batch 3.</p>
+<p><strong>Why it is correct here.</strong> A checkpoint taken after batch 2 represents a model that has seen batches 1 and 2. Resuming at batch 3 preserves exact data exposure.</p>
+<p><strong>A plausible wrong approach.</strong> Restarting the epoch from the beginning replays batches 1 and 2, which double counts them, while skipping to a new shuffle may omit batch 3 entirely.</p>
+<p><strong>How to verify.</strong> Record the batch indices consumed before and after resume and assert their union is one complete pass with no repeats.</p>
 <h3 id="exercise-5-choose-a-safe-save-boundary">Exercise 5: Choose a safe save boundary<a class="heading-anchor" href="#exercise-5-choose-a-safe-save-boundary" aria-label="Link to this section">#</a></h3>
 <p>Save after a completed consistent optimizer step.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose a safe save boundary</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Save only at a boundary after a completed optimizer step, when weights, optimizer state and step counter are all consistent, not between <code>backward()</code> and <code>optimizer.step()</code>.</p>
+<p><strong>Why it is correct here.</strong> Between backward and step, gradients exist but weights do not yet reflect them. A checkpoint there pairs updated statistics with old weights or loses gradients entirely.</p>
+<p><strong>A plausible wrong approach.</strong> Saving from a signal handler at an arbitrary moment can capture a half-updated state.</p>
+<p><strong>How to verify.</strong> Add a check that the saved step counter equals the number of completed optimizer steps, and resume from a checkpoint to confirm the next step matches.</p>
 <h3 id="exercise-6-define-cross-hardware-tolerance">Exercise 6: Define cross-hardware tolerance<a class="heading-anchor" href="#exercise-6-define-cross-hardware-tolerance" aria-label="Link to this section">#</a></h3>
 <p>Document numerical agreement rather than universal byte equality.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define cross-hardware tolerance</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define tolerance for resuming on different hardware: document an expected agreement, such as relative difference below a stated threshold on loss after N steps, instead of byte equality.</p>
+<p><strong>Why it is correct here.</strong> Different GPUs and libraries may choose different kernels and summation orders, so floating results differ slightly even with identical state.</p>
+<p><strong>A plausible wrong approach.</strong> Requiring byte-identical weights across hardware leads to false failures that obscure real restart bugs.</p>
+<p><strong>How to verify.</strong> Resume the same checkpoint on two machines and compare loss curves within the documented tolerance, recording both environments.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Correct restored update 0.935 differs from weights-only 0.98.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-094_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

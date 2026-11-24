@@ -117,7 +117,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Classify thresholds) before changing anything, and confirm its observation: 59 retries, 60 passes and 101 is invalid.
 2. Compare Example B (Use a guard for a required value) with Example A and name the first line whose behavior differs. Its observation is: The early exit excludes missing and empty values before the valid path.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A default can hide future cases.
+3. Before opening the explanation, check your task 3 attempt (Write a three-way classifier for negative, zero and positive quantities) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-030_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="llm-030-explanatory-solutions">llm-030: explanatory solutions<a class="heading-anchor" href="#llm-030-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Read these pretraining data provenance and evaluation contamination answers after attempting <em>Complete a validation row</em> through <em>Record an unresolved source</em>, or after asking for a reveal. They reuse the guide&#x27;s literals, so a mismatch in <em>Follow a paraphrase family</em> points to one step. <code>llm-030_solution.py</code> holds the assertions; this page explains how they test provenance. Then try <em>Record an unresolved source</em> on a fresh input you chose before looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Pretraining data provenance records where a document came from, what use is permitted and how it enters the experiment. A filename or download timestamp alone cannot answer these questions. Evaluation contamination includes exact benchmark answers and derived paraphrases entering training or selection sources. Deduplication helps but does not establish permission, privacy or semantic independence. The local fixture contains authored snippets so no external collection or permission decision is required. The goal is to design a reviewable manifest and identify when a source should be excluded or investigated, not to issue legal conclusions about an unknown corpus.</p>
 <p><strong>Provenance:</strong> A record of origin and transformations for a data item.</p>
@@ -252,7 +252,7 @@ Action: obtain evidence before admitting to the experiment.</code></pre>
 <p><strong>Expected:</strong> origin unresolved; permission unresolved; admission blocked.</p>
 <p><strong>Verify:</strong> Check that the d5 row keeps origin, permission and family unresolved, requires the actual hash and leaves the document unadmitted.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one input to <em>Separate permission and cleanliness</em> and predict the result first; keep <em>Audit preprocessing inputs</em> failing beside the repair. Log a missing the Python standard library separately from a wrong provenance value in <code>llm-030</code>.</p></article>
   </main>
 </body>
 </html>

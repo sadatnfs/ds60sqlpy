@@ -239,23 +239,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict 2 + 3 <em> 4 and (2 + 3) </em> 4.</p>
 <p>The results are 14 and 20. Parentheses change the expression&#x27;s structure.</p>
+<p><strong>Why it fits this model:</strong> DAX binds multiplication tighter than addition, so 2 + 3 * 4 first forms 12 and then adds 2. The parentheses build a different tree whose sum 5 is multiplied by 4.</p>
+<p><strong>Tempting mistake:</strong> Reading the expression strictly left to right gives 20 for both forms, which hides the fact that the parentheses changed the structure rather than the style.</p>
+<p><strong>How to confirm:</strong> <code>EVALUATE ROW ( &quot;Plain&quot;, 2 + 3 * 4, &quot;Grouped&quot;, ( 2 + 3 ) * 4 )</code> returns 14 and 20.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the displayed currency prefix without changing NumericRevenue.</p>
 <p>A different label or format string changes text only; it does not convert USD into another currency.</p>
+<p><strong>Why it fits this model:</strong> NumericRevenue is SUM(Sales[NetAmount]), a USD number of 187. FORMAT only produces DisplayText, so a euro sign in place of the dollar sign changes a string and leaves the number alone.</p>
+<p><strong>Tempting mistake:</strong> Showing 187.00 with a euro sign claims a conversion that never happened. At an assumed 1.10 USD per EUR the same sales would be about 170 EUR, so the label would overstate them.</p>
+<p><strong>How to confirm:</strong> Both rows keep NumericRevenue at 187; only the DisplayText column differs, and no rate table appears anywhere in the query.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a result row containing quantity, revenue and revenue per unit.</p>
-<p>Use SUM(Sales[Quantity]), [NetRevenue] and DIVIDE([NetRevenue],SUM(Sales[Quantity])); the values are 17, 187 and 11.</p>
+<p>Use SUM(Sales[Quantity]), [NetRevenue] and DIVIDE([NetRevenue],SUM(Sales[Quantity])); quantity is 17, revenue is 187 and revenue per unit is 11.</p>
+<p><strong>Why it fits this model:</strong> Each output keeps its own unit: 17 units, 187 USD and their ratio of totals, 11 USD per unit. The ratio pools all eight lines, so heavy lines such as S5&#x27;s four Pens weigh more.</p>
+<p><strong>Tempting mistake:</strong> AVERAGE(Sales[UnitPrice]) returns 100 / 8 = 12.5. It averages list prices per line and ignores both quantities and the 8 USD of discounts.</p>
+<p><strong>How to confirm:</strong> The row reads quantity 17, revenue 187 and per unit 11, and 11 x 17 reproduces 187.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose sorting currency text alphabetically.</p>
 <p>Lexical order need not match numeric order. Sort by the numeric measure rather than its formatted string.</p>
+<p><strong>Why it fits this model:</strong> FORMAT returns text, and text compares character by character. The line amounts 4, 20, 27, 36 and 40 become strings whose order follows their first digits, not their size.</p>
+<p><strong>Tempting mistake:</strong> Sorting the DisplayText column puts S2&#x27;s &quot;$4.00&quot; after &quot;$36.00&quot; and before &quot;$40.00&quot;, because &quot;.&quot; sorts before &quot;0&quot;. The smallest line then looks mid-sized.</p>
+<p><strong>How to confirm:</strong> Order the rows by Sales[NetAmount] and expect 4, 20, 20, 20, 20, 27, 36, 40; the text labels can then follow that numeric order.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain whether multiplying a percentage by an amount preserves a meaningful unit.</p>
 <p>Multiplying 0.1 by 187 gives 18.7 USD. Multiplying by 10 instead would be a hundredfold scaling error.</p>
+<p><strong>Why it fits this model:</strong> A rate of 0.1 is dimensionless, so 0.1 x 187 USD stays in USD and gives 18.7. The percent sign in a label is only a display convention for that fraction.</p>
+<p><strong>Tempting mistake:</strong> Typing the displayed &quot;10&quot; into the formula multiplies 187 by 10 and reports 1,870 USD, a hundredfold error that still looks like a plausible dollar figure.</p>
+<p><strong>How to confirm:</strong> <code>ROW ( &quot;Fee&quot;, 0.1 * [NetRevenue] )</code> returns 18.7, and 18.7 / 187 returns the 0.1 rate back.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the distinction to a duration shown as 02:30.</p>
 <p>Define the stored numeric duration and unit separately from the formatted label before aggregation.</p>
+<p><strong>Why it fits this model:</strong> The label 02:30 could mean 150 minutes, 150 seconds or half past two at night. Storing a number with a declared unit, such as 150 minutes, lets SUM and AVERAGE mean something.</p>
+<p><strong>Tempting mistake:</strong> Parsing the string as minutes and seconds gives 150 seconds while hours and minutes gives 150 minutes, a sixtyfold disagreement that no formatting choice reveals.</p>
+<p><strong>How to confirm:</strong> Two stored durations of 150 minutes sum to 300 minutes, which you may then format as 05:00 after an explicit conversion from minutes to hours.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A feature contract includes more than column names. It describes types, permitted values, units, identity and missingness policy. A table can satisfy a dtype schema while violating a domain rule or changing units. Validation should therefore retain both structural and semantic evidence.</p>
 <p>The first case checks nonnegative usage and a declared region vocabulary. It preserves rejected identifiers and reasons rather than silently dropping rows or replacing every unfamiliar value. Different failures may require different actions: a malformed measurement, a new legitimate category and an unavailable observation should not automatically receive the same treatment.</p>
 <p>The second case keeps the same field names but changes usage from hours to minutes. A contract identity changes even though a superficial column-set check would pass. Downstream models may react strongly to that difference. A semantic change needs reviewed versioning and revalidation, not merely a successful parser.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Structural contract:</strong> Requirements on column names, types and identity that a dtype schema check can verify.</li>
+<li><strong>Semantic contract:</strong> Requirements on meaning, such as units, permitted domains and missingness policy, which a table can violate while still matching its schema.</li>
+<li><strong>Quarantine:</strong> Keeping rejected records with their identifiers and named reasons instead of silently dropping or overwriting them.</li>
+<li><strong>Semantic version:</strong> A contract version that changes when meaning changes, such as usage moving from hours to minutes under the same field name.</li>
+<li><strong>Contract hash:</strong> A digest of the canonical serialized contract. It detects any change but cannot judge whether the new meaning is valid or authorized.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Use explicit conditions for each domain and collect named rejection reasons. Reconcile accepted and rejected records against the original count. A canonical serialized contract can be hashed to identify a version, but the hash only detects change; it cannot determine whether the new meaning is scientifically valid or authorized.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

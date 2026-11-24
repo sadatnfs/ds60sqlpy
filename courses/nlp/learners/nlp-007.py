@@ -12,7 +12,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-# Exercise 1: Count documents, not occurrences. Calculate DF for the three sorted terms from the two-document corpus. Expected: [1,2,1] for [coffee,cup,tea].
+# Exercise 1: Count documents, not occurrences. Calculate DF for the three sorted terms from the two-document corpus. Expected: [1, 2, 1] for [coffee, cup, tea].
 # Exercise 2: Match the IDF formula. Implement the stated smoothed IDF and compare with vectorizer.idf_. Expected: [log(3/2)+1,1,log(3/2)+1] in the verified vocabulary order.
 # Exercise 3: Build the normalized rows. Construct both weighted rows manually and normalize each nonzero row. Expected: Manual dense oracle matches the 2-by-3 sparse result within tolerance.
 # Exercise 4: Compute sparse cosine. Transform query tea and multiply X by its transpose. Expected: First score 2a/sqrt(1+4a^2); second score zero.

@@ -14,13 +14,37 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Explain the optional result of each dictionary lookup.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: Optional lookup prevents missing information from being confused with a stored value. Pear is present with zero and apple is absent.
+**Reference answer.** It runs as the `Task 1` block of the reference program.
+
+```swift
+let counts = ["pear": 0]
+let pear: Int? = counts["pear"]
+let apple: Int? = counts["apple"]
+precondition(pear == .some(0))
+precondition(apple == .none)
+precondition(counts["apple", default: 0] == 0)
+```
+
+**Observe:** Looking up pear gives .some(0), apple gives .none, and only the default subscript turns apple into 0.
+
+A lookup returns Int? because the key may be missing; the optional keeps a stored zero apart from absence until the caller deliberately supplies a default.
 
 ### Task 2: Guided modification
 
 Count repeated tags using the default-value subscript.
 
-No separate reference answer has been written for this task. Start from Example B: Set semantics establish uniqueness while sorting separately establishes order. Duplicate red is not inserted and sorted output is deterministic.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+let tags = ["red", "blue", "red", "red"]
+var counts: [String: Int] = [:]
+for tag in tags { counts[tag, default: 0] += 1 }
+precondition(counts == ["red": 3, "blue": 1])
+```
+
+**Observe:** Counting the four tags gives red: 3 and blue: 1.
+
+counts[tag, default: 0] reads 0 for a new tag and the += writes the incremented value back, inserting the key on its first occurrence.
 
 ### Task 3: Independent construction
 
@@ -42,19 +66,56 @@ Empty names are rejected first, the Set removes duplicates, and sorted() gives a
 
 Diagnose persisting hashValue as a cross-run identifier.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Hash collisions do not mean values are equal; equality resolves them. Dictionary order should not be treated as a report contract. A default subscript can insert values during mutation, so inspect side effects.
+**Reference answer.** It runs as the `Task 4` block of the reference program.
+
+```swift
+struct Product: Hashable {
+  let sku: String
+}
+let product = Product(sku: "A-17")
+let storedKey = product.sku
+precondition(Product(sku: storedKey) == product)
+precondition(product.hashValue == Product(sku: "A-17").hashValue)
+```
+
+**Observe:** The stored SKU A-17 rebuilds an equal Product; hashValue matches only between values inside this same run.
+
+Swift seeds hashing randomly per process, so a hashValue written to disk will not match in the next run. Persist the stable field (the SKU) and let Hashable compute hashes in memory.
 
 ### Task 5: Boundary evidence
 
 Test missing, present-zero and duplicate keys.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Preserve absence and zero) and Example B (Deduplicate and order deliberately).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+var stock = ["pear": 0]
+precondition(stock["kiwi"] == nil && stock["pear"] == 0)
+stock["pear"] = 5
+precondition(stock.count == 1 && stock["pear"] == 5)
+let merged = Dictionary([("fig", 1), ("fig", 2)], uniquingKeysWith: +)
+precondition(merged == ["fig": 3])
+```
+
+**Observe:** kiwi is missing, pear is present at 0 and then replaced by 5 without a second entry, and duplicate fig pairs merge to 3.
+
+Assigning to an existing key replaces its value, and Dictionary(_:uniquingKeysWith:) makes the duplicate-key policy explicit instead of trapping.
 
 ### Task 6: Transfer and justify
 
 Design a custom Hashable key using only stable identity fields.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Hashable**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build a unique sorted list of accepted inventory names) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** Example A stores pear with a count of zero and reads both pear and the missing apple through the dictionary subscript, which returns `Int?`. Example B inserts into a `Set<String>` and reads the `inserted` flag, then sorts for a stable order. The task 3 answer builds a unique sorted list of accepted inventory names.
+
+**Why it is correct.** `counts["pear"]` is `.some(0)` and `counts["apple"]` is nil, so absence and a stored zero stay distinct. Inserting red a second time returns `inserted == false` because sets keep one copy per equal element. Sorting turns the unordered set into `["blue", "red"]`, a deterministic report order.
+
+**A plausible wrong approach.** Iterating the set directly and expecting `["red", "blue"]` because that was the insertion order is a common error; Swift sets and dictionaries have no order contract, and the order can change between runs. Persisting `hashValue` as an identifier fails for the same reason, because hashing is seeded per process.
+
+**How to verify.** The task 3 output is apple, fig and pear, each once and sorted. For task 2, use `tally[tag, default: 0] += 1` over a list with red twice and confirm red maps to 2 while an unseen key still reads as nil.
 
 ## Mechanism and diagnostic reasoning
 

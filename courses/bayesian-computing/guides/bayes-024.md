@@ -8,6 +8,13 @@ The final Stan model combines a positive event-time distribution, covariates, ri
 
 A Weibull distribution has shape a and scale s. The model sets \(s_i=\exp(\beta_0+\beta_1x_i)\), so a covariate acts on the time scale. An event row contributes a density at its observed time; a right-censored row contributes survival beyond that time. Conditioning on survival to entry divides either contribution by the survival probability at the entry time.
 
+## Key terms
+
+- **Weibull AFT model:** A Weibull event-time model whose scale exp(beta_0 + beta_1 x) lets a covariate stretch the time axis.
+- **Right-censored contribution:** The survival probability beyond the last observed time, used instead of a density when no event was seen.
+- **Left truncation:** Delayed entry handled by dividing each contribution by the survival probability at the entry time.
+- **Hazard ratio:** The multiplicative change in hazard per unit of the covariate, which under this Weibull AFT model equals exp(-a beta_1), not exp(beta_1).
+
 ## Worked case 1: write the censored and truncated contribution
 
 For event indicator delta and entry e before endpoint t, the log contribution is
@@ -43,6 +50,44 @@ Retain model source, data definition, compiler/runtime version, sampling setting
 **Why not treat censoring times as failures and rely on a flexible distribution?** That supplies the wrong likelihood information. Flexibility cannot repair a data record whose meaning has been changed incorrectly.
 
 **What establishes readiness for an external use?** A defensible observation model, identification of the target, adequate computational diagnostics, predictive criticism, sensitivity analysis and an appropriate decision evaluation. This tutorial supplies a complete reproducible example of those distinctions, while making clear that its tiny synthetic dataset and short chains do not certify a real deployment.
+
+## Worked example: Weibull AFT contributions for event, censored and truncated records
+
+```python
+import numpy as np
+from scipy import integrate
+
+k, b0, b1 = 1.5, np.log(10.0), 0.4  # shape, log scale intercept, treatment shift
+
+
+def log_f(t, x):
+    lam = np.exp(b0 + b1 * x)
+    return np.log(k / lam) + (k - 1) * np.log(t / lam) - (t / lam) ** k
+
+
+def log_S(t, x):
+    return -((t / np.exp(b0 + b1 * x)) ** k)
+
+
+print(f"event at 6, control:       {log_f(6.0, 0):.4f}")
+print(f"censored at 12, treated:   {log_S(12.0, 1):.4f}")
+print(f"event at 9, entered at 4:  {log_f(9.0, 0) - log_S(4.0, 0):.4f}")
+mass = integrate.quad(lambda t: np.exp(log_f(t, 0) - log_S(4.0, 0)), 4.0, np.inf)[0]
+print(f"truncated density integrates to {mass:.6f} over t > 4")
+print(f"acceleration factor {np.exp(b1):.4f}, hazard ratio {np.exp(-k * b1):.4f}")
+```
+
+Observed output:
+
+```text
+event at 6, control:       -2.6173
+censored at 12, treated:   -0.7214
+event at 9, entered at 4:  -2.5506
+truncated density integrates to 1.000000 over t > 4
+acceleration factor 1.4918, hazard ratio 0.5488
+```
+
+Each record contributes a different piece of the Weibull model. A control event at time 6 adds the log density, \(-2.6173\). A treated subject still event-free at 12 adds only the log survival, \(-0.7214\), because all we know is that the event time exceeds 12. A control event at 9 for someone who entered observation at 4 adds the log density minus the log survival at entry, \(-2.5506\): people who failed before 4 could never have been enrolled, so the likelihood must condition on surviving to 4. The quadrature check confirms that this conditional density integrates to 1.000000 over times after 4. Omitting the truncation term would treat late entrants as if their early risk had been observed, making early survival look better than it is. The summary line converts the coefficient 0.4 into two scales. On the time scale treatment multiplies survival times by \(e^{0.4}=1.4918\); on the hazard scale the same Weibull model implies a hazard ratio of \(1.4918^{-1.5}=0.5488\).
 
 ## Complete reproducible program
 

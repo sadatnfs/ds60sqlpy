@@ -16,11 +16,25 @@ A template change drives a new ReplicaSet. The synthetic marker is configuration
 
 **Expected:** Pod-template content changes while Deployment name/UID can remain fixed in a stateful lab.
 
+**Solution reasoning**
+
+- **Approach:** Diff revision A against B and classify each changed path as inside or outside spec.template.
+- **Why it is correct:** The Deployment controller hashes only the Pod template, so a changed template annotation creates a new ReplicaSet while the Deployment name and UID stay the same.
+- **Plausible wrong approach:** Treating a changed spec.replicas or a Deployment-level annotation as a new revision would expect a ReplicaSet that never appears.
+- **How to verify:** Every change in the B example falls under spec.template, so one new pod-template-hash is expected.
+
 ## Exercise 2: Interpret mixed replicas
 
 Counts can mix old and new revisions. An independent client can still reach old Pods while the desired candidate is failing readiness. Acceptance must name the intended version and its owned Ready population.
 
 **Expected:** Candidate B incomplete despite aggregate ready traffic.
+
+**Solution reasoning**
+
+- **Approach:** Group Pods by ownerReference to their ReplicaSet and count Ready Pods per pod-template-hash.
+- **Why it is correct:** At generation 5 the old ReplicaSet still holds Ready Pods that serve traffic while the candidate's Pods fail readiness.
+- **Plausible wrong approach:** Accepting the aggregate readyReplicas count would call the rollout healthy while every Ready Pod still runs revision A.
+- **How to verify:** The candidate hash has zero or too few Ready Pods, so B is incomplete.
 
 ## Exercise 3: Define a failure gate
 
@@ -28,11 +42,25 @@ The gate prevents indefinite waiting and avoids treating a partial rollout as su
 
 **Expected:** Generation observed, desired updated/ready candidate counts and expected application marker are required.
 
+**Solution reasoning**
+
+- **Approach:** Write the gate as named conditions with a single deadline: observedGeneration, updatedReplicas, candidate ready count and the application marker.
+- **Why it is correct:** Together these show the controller processed the spec, the new template is fully replaced and the served response belongs to B.
+- **Plausible wrong approach:** Waiting with no deadline lets a stalled rollout block the lease, and accepting on Available alone ignores which version is available.
+- **How to verify:** Each condition maps to one readback or request and reports its own failure when the deadline passes.
+
 ## Exercise 4: Recover the desired source
 
 Recovery is another controlled change. The report should say whether it reverted or fixed the candidate, and show the new observation rather than only the command used to request it.
 
 **Expected:** A new generation converges to the selected intent; source and observed marker agree.
+
+**Solution reasoning**
+
+- **Approach:** Pick revert or fix explicitly, apply it as a new change and reobserve generation and marker.
+- **Why it is correct:** Both choices bump metadata.generation, so success needs observedGeneration to catch up and the served marker to match the chosen source.
+- **Plausible wrong approach:** Reporting the rollout undo command as the outcome describes the request, not whether the controller converged.
+- **How to verify:** observedGeneration equals the new generation and the response marker matches the restored or fixed source.
 
 ## Exercise 5: Plan a genuine image-version rehearsal
 
@@ -40,11 +68,25 @@ The host must provide both exact artifacts before the live rehearsal. The learne
 
 **Expected:** Two qualified preloaded image digests, compatible manifests and an application-version response check.
 
+**Solution reasoning**
+
+- **Approach:** List both image digests, the manifests that reference them and a response that differs between the two binaries.
+- **Why it is correct:** Only digests pin exact artifacts, and a version endpoint that returns different values per binary proves which one served the request.
+- **Plausible wrong approach:** Changing a message in one image and calling it a version roll proves configuration, not a binary change.
+- **How to verify:** The plan names two digests and a response check that distinguishes them.
+
 ## Exercise 6: Separate final state from availability
 
 A bounded client trace can show what its sampled requests experienced. It complements the controller proof and can reveal old-version traffic during a stalled rollout. It does not establish behavior for all clients or an entire production load profile.
 
 **Expected:** Observed version/error samples over the transition, with no universal uptime or exact-ratio claim.
+
+**Solution reasoning**
+
+- **Approach:** Describe periodic client requests during the rollout with interval, per-request version and error tallies.
+- **Why it is correct:** Only sampled requests show which revision answered and whether any failed while old and new Pods coexisted.
+- **Plausible wrong approach:** Quoting the final rollout status as zero downtime claims continuity no snapshot recorded.
+- **How to verify:** The answer names interval, per-sample result and error count, and makes no universal uptime claim.
 
 ## Boundary and troubleshooting review
 

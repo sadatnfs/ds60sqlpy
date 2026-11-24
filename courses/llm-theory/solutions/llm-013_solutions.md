@@ -1,6 +1,6 @@
 # llm-013: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these a leakage audit before a model score answers after attempting *Shift a batch of two sequences* through *Count active targets*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Detect exact duplicates* points to one step. `llm-013_solution.py` holds the assertions; this page explains how they test shifted target. Then try *Count active targets* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -32,7 +32,7 @@ np.testing.assert_array_equal(y_out, [[1, 6, 2, 9], [3, 8, 0, 5]])
 
 **Expected:** inputs and labels both shape (2, 4); labels [[1, 6, 2, 9], [3, 8, 0, 5]].
 
-**Verify:** In a fresh process, the exercise checks confirm `x_in.shape == y_out.shape == (2, 4)` and `y_out` equals `[[1, 6, 2, 9], [3, 8, 0, 5]]`.
+**Verify:** For *Shift a batch of two sequences*, a fresh-process check confirms `x_in.shape == y_out.shape == (2, 4)` and `y_out` equals `[[1, 6, 2, 9], [3, 8, 0, 5]]`.
 
 ## Exercise 2: Predict a partly hidden label bug
 
@@ -50,7 +50,7 @@ assert int(np.count_nonzero(copied_row != target_row)) == 3
 
 **Expected:** copied labels agree once (the repeated 3) and differ at the other 3 positions.
 
-**Verify:** In a fresh process, the exercise checks confirm `int(np.count_nonzero(copied_row == target_row)) == 1` and `int(np.count_nonzero(copied_row != target_row)) == 3`.
+**Verify:** For *Predict a partly hidden label bug*, a fresh-process check confirms `int(np.count_nonzero(copied_row == target_row)) == 1` and `int(np.count_nonzero(copied_row != target_row)) == 3`.
 
 ## Exercise 3: Detect exact duplicates
 
@@ -69,7 +69,7 @@ assert {hash_text(t) for t in train.values()} & {hash_text(t) for t in valid.val
 
 **Expected:** same SHA256 despite different filenames.
 
-**Verify:** In a fresh process, the exercise checks confirm `{hash_text(t) for t in train.values()} & {hash_text(t) for t in valid.values()}`.
+**Verify:** For *Detect exact duplicates*, a fresh-process check confirms `{hash_text(t) for t in train.values()} & {hash_text(t) for t in valid.values()}`.
 
 ## Exercise 4: Detect family leakage
 
@@ -84,7 +84,7 @@ assert {families["a"]} & {families["b"]} == {"F"}
 
 **Expected:** family intersection contains F.
 
-**Verify:** In a fresh process, the exercise checks confirm `{families['a']} & {families['b']} == {'F'}`.
+**Verify:** For *Detect family leakage*, a fresh-process check confirms `{families['a']} & {families['b']} == {'F'}`.
 
 ## Exercise 5: Freeze a vocabulary
 
@@ -101,7 +101,7 @@ assert unknown == -1 and vocab == before
 
 **Expected:** vocabulary remains alpha, beta; gamma is unknown.
 
-**Verify:** In a fresh process, the exercise checks confirm `unknown == -1` and `vocab == before`.
+**Verify:** For *Freeze a vocabulary*, a fresh-process check confirms `unknown == -1` and `vocab == before`.
 
 ## Exercise 6: Count active targets
 
@@ -117,8 +117,8 @@ assert len(pairs) == 4 and (3, 8) not in pairs
 
 **Expected:** \(3+1=4\) targets, not 5.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(pairs) == 4` and `(3, 8) not in pairs`.
+**Verify:** For *Count active targets*, a fresh-process check confirms `len(pairs) == 4` and `(3, 8) not in pairs`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Detect family leakage* and predict the result first; keep *Freeze a vocabulary* failing beside the repair. Log a missing NumPy separately from a wrong shifted target value in `llm-013`.

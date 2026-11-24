@@ -41,6 +41,18 @@ internal static class Program {
             "successful empty report");
     }
     {
+      // Task 2: Guided modification
+      string pear2 = "{\"Name\":\"pear\",\"Quantity\":2}";
+      string pear3 = "{\"Name\":\"pear\",\"Quantity\":3}";
+      string json = $"[{pear2},{pear3}]";
+      var result = await ImportAsync(json, CancellationToken.None);
+      Check(result.Total == 5 && result.Rejected == 0, "quantities summed");
+      var items = JsonSerializer.Deserialize<ImportItem[]>(json)!;
+      var names = items.Select(item => item.Name);
+      int distinct = names.Distinct(StringComparer.Ordinal).Count();
+      Check(distinct == 1, "distinct item count is a separate measure");
+    }
+    {
       // Task 3: Independent construction
       string pear = "{\"Name\":\"pear\",\"Quantity\":2}";
       string blank = "{\"Name\":\"\",\"Quantity\":1}";
@@ -58,6 +70,26 @@ internal static class Program {
       }
       Check(accepted["pear"] == 2 && accepted.Count == 1, "per-item result");
       Check(rejected == 1, "rejection preserved");
+    }
+    {
+      // Task 5: Boundary evidence
+      async Task<string> Outcome(string json) {
+        try {
+          var result = await ImportAsync(json, CancellationToken.None);
+          return $"total {result.Total} rejected {result.Rejected}";
+        } catch (JsonException) {
+          return "malformed";
+        } catch (ArgumentException) {
+          return "not an array";
+        }
+      }
+      string negative = "[{\"Name\":\"pear\",\"Quantity\":-1}]";
+      string fraction = "[{\"Name\":\"pear\",\"Quantity\":2.5}]";
+      Check(await Outcome("[{") == "malformed", "malformed JSON");
+      Check(await Outcome("null") == "not an array", "JSON null");
+      Check(await Outcome("[]") == "total 0 rejected 0", "empty list");
+      Check(await Outcome(negative) == "total 0 rejected 1", "negative");
+      Check(await Outcome(fraction) == "malformed", "non-integer quantity");
     }
     Console.WriteLine("csharp-032: passed");
     await Task.CompletedTask;

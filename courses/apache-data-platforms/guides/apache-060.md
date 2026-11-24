@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-059`, `apache-057`.
 
+## Key terms
+
+- **Hybrid table:** A logical Pinot table backed by an OFFLINE table for historical data and a REALTIME table for fresh data.
+- **Time boundary:** The timestamp the broker uses to split a hybrid query, reading older data from the offline side and newer data from the real-time side.
+- **Upsert:** A real-time table mode that keeps only the latest record for each primary key.
+- **Comparison column:** The column an upsert table uses to decide which record for a primary key is newest.
+
 ## Historical and fresh data need an explicit boundary
 
 A hybrid Pinot table combines OFFLINE and REALTIME tables under a shared logical

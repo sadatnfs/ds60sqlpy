@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>dbt transforms data by executing project-defined SQL through a database adapter. A project contains model files, configuration, tests and dependency declarations. A profile tells the adapter which owned database and execution settings to use. The classroom examples write ordinary project files into a temporary directory, invoke the installed dbt CLI through its Python interface and inspect a real DuckDB database. They do not simulate a dbt run.</p>
 <p>Parsing, compilation and execution establish different facts. Parsing builds a graph and checks project structure. Compilation resolves template expressions into SQL. Running materializes model relations in the database. Building also includes selected tests and other dependency-aware resources. A compiled SQL file is therefore useful evidence of what would be submitted, but it does not prove that the relation exists or that its contents passed tests.</p>
 <p>The Python wrapper is necessary because the classroom has one Python pad. Its file writes are explicit and local; you can inspect the normal dbt filenames in the source. An external multi-file project uses the same concepts, but persistence, credentials and orchestration require their own owned setup. Nothing in this lesson selects a cloud warehouse or installs packages while running.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Profile:</strong> A named entry in profiles.yml that tells dbt which adapter, database path and execution settings to use; dbt_project.yml selects it by name.</li>
+<li><strong>Adapter:</strong> The plugin, here dbt-duckdb, that translates dbt operations into statements for one database engine.</li>
+<li><strong>Parse:</strong> The stage that reads project files, checks their structure and records the dependency graph in manifest.json without running model SQL.</li>
+<li><strong>Compile:</strong> The stage that resolves Jinja such as <code>ref</code> into plain SQL under target/compiled without creating any relation.</li>
+<li><strong>dbt build:</strong> The command that runs seeds, models, snapshots and tests in dependency order, skipping resources downstream of a failure.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>dbt_project.yml declares the project name, version, profile name and resource directories. profiles.yml declares the local DuckDB path and bounded threading settings. Model SQL belongs under models/. dbtRunner.invoke receives a list of CLI arguments; calls run serially in this program. The result&#x27;s success flag is checked before interpreting artifacts, and the database is queried independently after execution.</p>
 <h3 id="full-project-python-workspace">Full-project Python workspace<a class="heading-anchor" href="#full-project-python-workspace" aria-label="Link to this section">#</a></h3>
@@ -352,8 +360,8 @@ dbt build</code></pre>
 <p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt compile
 dbt run</code></pre>
-<p><strong>Expected evidence:</strong> Compiled SQL contains 6*7; the answer relation appears only after run.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-001.py.html">starter</a>.</p>
+<p><strong>Expected evidence:</strong> Compiled SQL contains <code>6 * 7</code>; the answer relation appears only after run.</p>
+<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are listed in full in Worked case 1 above and at the top of this lesson&#x27;s <a href="../lessons/dbt-001.py.html">starter</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 

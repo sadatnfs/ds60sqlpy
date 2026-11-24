@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-055.md</code>.</p>
 <h3 id="exercise-1-explain-why-pagination-needs-an-explicit-stable-order">Exercise 1: Explain why pagination needs an explicit stable order.<a class="heading-anchor" href="#exercise-1-explain-why-pagination-needs-an-explicit-stable-order" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Without it, page boundaries can duplicate or omit records unpredictably.</p>
+<p><strong>Approach:</strong> Note that a database may return rows in any order without ORDER BY, so page boundaries are only defined for a fixed sort.</p>
 <p><strong>Why:</strong> Without an explicit order the database may return rows in any order, so pages can overlap or skip rows.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on insertion order because it looks stable in a small test fails because the engine may change order after updates or plan changes.</p>
+<p><strong>How to verify:</strong> Your explanation shows ORDER BY on a unique key such as id in every page query.</p>
 <h3 id="exercise-2-add-a-maximum-page-size-rule">Exercise 2: Add a maximum page-size rule.<a class="heading-anchor" href="#exercise-2-add-a-maximum-page-size-rule" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A caller cannot request an unbounded result.</p>
+<p><strong>Approach:</strong> Reject page sizes below 1 or above a maximum such as 50 before any records are sliced.</p>
 <p><strong>Why:</strong> A maximum page size bounds memory, time and response size per request.</p>
+<p><strong>Plausible wrong approach:</strong> Silently clamping 100000 down to 50 without telling the caller fails because the client may assume it received everything.</p>
+<p><strong>How to verify:</strong> A size of 0 and a size of 1000 both return a validation error, while 50 succeeds.</p>
 <h3 id="exercise-3-implement-a-cursor-based-slice-over-synthetic-records">Exercise 3: Implement a cursor-based slice over synthetic records.<a class="heading-anchor" href="#exercise-3-implement-a-cursor-based-slice-over-synthetic-records" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The second page continues after the last id and the final page can be shorter.</p>
+<p><strong>Approach:</strong> Filter records with id greater than the cursor, keep the first size items, and return the last id as the next cursor.</p>
 <p><strong>Why:</strong> A keyset cursor resumes exactly after the last seen row, and the final page may hold fewer rows than the limit.</p>
+<p><strong>Plausible wrong approach:</strong> Using the page number times size as the next starting position fails because it is offset paging with a different name.</p>
+<p><strong>How to verify:</strong> With ids 1 through 5 and size 2, the pages are [1, 2], [3, 4] and [5], then an empty page.</p>
 <h3 id="exercise-4-diagnose-a-cache-key-shared-by-all-authenticated-users">Exercise 4: Diagnose a cache key shared by all authenticated users.<a class="heading-anchor" href="#exercise-4-diagnose-a-cache-key-shared-by-all-authenticated-users" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The key omits an authorization-dependent dimension and risks data leakage.</p>
+<p><strong>Approach:</strong> Add the actor id and any permission dimension to the cache key so each user&#x27;s data gets its own entry.</p>
 <p><strong>Why:</strong> A cache key must include every authorization dimension, such as the user id, or one user may receive another&#x27;s data.</p>
+<p><strong>Plausible wrong approach:</strong> Shortening the cache lifetime to one second fails because another user can still receive the cached data within that second.</p>
+<p><strong>How to verify:</strong> Two actors requesting the same page produce two different keys and two separate entries.</p>
 <h3 id="exercise-5-test-an-empty-page-and-an-invalid-page-size">Exercise 5: Test an empty page and an invalid page size.<a class="heading-anchor" href="#exercise-5-test-an-empty-page-and-an-invalid-page-size" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Empty results are represented normally while invalid budgets are rejected.</p>
+<p><strong>Approach:</strong> Request a page after the last id and a page with size -1, and compare the two responses.</p>
 <p><strong>Why:</strong> An empty page is a normal result, while a page size outside the allowed range is an invalid request.</p>
+<p><strong>Plausible wrong approach:</strong> Returning an error for an empty page fails because reaching the end of the list is a normal outcome, not a client mistake.</p>
+<p><strong>How to verify:</strong> The empty page returns an empty items list with status success, while size -1 returns a validation error.</p>
 <h3 id="exercise-6-explain-what-must-be-measured-before-claiming-a-faster-database-endpoint">Exercise 6: Explain what must be measured before claiming a faster database endpoint.<a class="heading-anchor" href="#exercise-6-explain-what-must-be-measured-before-claiming-a-faster-database-endpoint" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect the actual query plan, index, workload, latency distribution and correctness under the target engine.</p>
+<p><strong>Approach:</strong> Run EXPLAIN on the target engine, check that the cursor uses an index, and measure latency percentiles under a realistic workload.</p>
 <p><strong>Why:</strong> Query plans, index use, workload mix, latency percentiles and correct results on the target engine show whether a change helps.</p>
+<p><strong>Plausible wrong approach:</strong> Timing the in memory slice and calling the database endpoint fast fails because no query plan or index was involved.</p>
+<p><strong>How to verify:</strong> Your plan names the index, the EXPLAIN output to check and a latency percentile to record.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-055_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

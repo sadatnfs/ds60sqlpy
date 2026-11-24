@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-derive-expected-affine-output">Exercise 1: Derive expected affine output<a class="heading-anchor" href="#exercise-1-derive-expected-affine-output" aria-label="Link to this section">#</a></h3>
 <p>Apply the formula elementwise.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>derive expected affine output</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Apply <code>y = 2*x + 1</code> to <code>[-1, 0, 3]</code>: <code>2*(-1)+1 = -1</code>, <code>2*0+1 = 1</code>, <code>2*3+1 = 7</code>, so the expected output is <code>[-1, 1, 7]</code>.</p>
+<p><strong>Why it is correct here.</strong> The kernel is elementwise and the inputs are small integers representable exactly in <code>float32</code>, so the device result should match the oracle exactly.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing against <code>2*(x+1)</code> by mistake gives <code>[0, 2, 8]</code> and suggests the kernel is wrong when the oracle is.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>affine([-1, 0, 3]) == [-1, 1, 7]</code>. Compare the CuPy result with <code>numpy.array_equal</code> after converting to host.</p>
 <h3 id="exercise-2-calculate-a-nonmultiple-launch">Exercise 2: Calculate a nonmultiple launch<a class="heading-anchor" href="#exercise-2-calculate-a-nonmultiple-launch" aria-label="Link to this section">#</a></h3>
 <p>Ceiling division gives three blocks.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>calculate a nonmultiple launch</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute the launch for 257 elements with 128 threads per block: <code>(257 + 127) // 128 = 3</code> blocks, which provide 384 lanes.</p>
+<p><strong>Why it is correct here.</strong> Two blocks give 256 lanes, one short. The third block covers index 256 plus 127 lanes beyond the data, and the guard <code>if (i &lt; n)</code> inside the raw kernel source must skip them.</p>
+<p><strong>A plausible wrong approach.</strong> Using <code>257 // 128 = 2</code> blocks loses the final element silently, a bug invisible on sizes like 256.</p>
+<p><strong>How to verify.</strong> The reference asserts the block count is 3. A device test with 257 elements must show the last output equals <code>2*x[256] + 1</code>.</p>
 <h3 id="exercise-3-explain-symbol-lookup">Exercise 3: Explain symbol lookup<a class="heading-anchor" href="#exercise-3-explain-symbol-lookup" aria-label="Link to this section">#</a></h3>
 <p>The compiled exported name must match.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain symbol lookup</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain that <code>cupy.RawKernel(code, name)</code> compiles the source and then looks up the function by <code>name</code>, so the name must match the exported symbol, which usually means declaring the kernel <code>extern &quot;C&quot;</code>.</p>
+<p><strong>Why it is correct here.</strong> C++ compilers mangle function names to encode argument types. Without <code>extern &quot;C&quot;</code>, the exported symbol differs from the plain name and the lookup fails.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming a lookup error means the source failed to compile misdirects debugging to the kernel body.</p>
+<p><strong>How to verify.</strong> Compile once with <code>extern &quot;C&quot;</code> and once without, and observe that only the first lookup by plain name succeeds.</p>
 <h3 id="exercise-4-reject-noncontiguous-input-or-support-strides">Exercise 4: Reject noncontiguous input or support strides<a class="heading-anchor" href="#exercise-4-reject-noncontiguous-input-or-support-strides" aria-label="Link to this section">#</a></h3>
 <p>State one layout contract explicitly.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>reject noncontiguous input or support strides</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Decide the layout contract: either require C-contiguous input, checking <code>x.flags.c_contiguous</code> and raising otherwise, or pass strides to the kernel and index with them.</p>
+<p><strong>Why it is correct here.</strong> The raw kernel indexes <code>x[i]</code> assuming consecutive elements. A view like <code>x[::2]</code> has a larger stride, so the kernel would read the wrong elements.</p>
+<p><strong>A plausible wrong approach.</strong> Silently calling <code>cupy.ascontiguousarray</code> inside the wrapper fixes correctness but hides a copy, and with in-place updates it writes to the copy instead of the caller&#x27;s array.</p>
+<p><strong>How to verify.</strong> Pass <code>x[::2]</code> and confirm the wrapper either raises or returns the same result as applying the formula to the strided view.</p>
 <h3 id="exercise-5-separate-compile-timing">Exercise 5: Separate compile timing<a class="heading-anchor" href="#exercise-5-separate-compile-timing" aria-label="Link to this section">#</a></h3>
 <p>Warm the same code before steady-state samples.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate compile timing</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Time the first call separately because it includes compilation and module loading. Warm up the same kernel with the same types, then time steady-state launches with synchronization.</p>
+<p><strong>Why it is correct here.</strong> CuPy compiles raw kernels lazily and caches them, so the first call measures compilation. Mixing it into an average distorts steady-state numbers.</p>
+<p><strong>A plausible wrong approach.</strong> Timing a single call and reporting it as kernel speed mostly measures the compiler.</p>
+<p><strong>How to verify.</strong> Record first-call and steady-state times separately. Timing without synchronization should be avoided, since it only measures the enqueue.</p>
 <h3 id="exercise-6-compare-raw-and-library-paths">Exercise 6: Compare raw and library paths<a class="heading-anchor" href="#exercise-6-compare-raw-and-library-paths" aria-label="Link to this section">#</a></h3>
 <p>Compare outputs and complete work under the same tolerance.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare raw and library paths</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare the raw kernel with the library expression <code>2*x + 1</code> in CuPy using the same input, dtype and tolerance, and time both on completed work.</p>
+<p><strong>Why it is correct here.</strong> The library path may fuse operations or launch one or two kernels. A fair comparison needs identical outputs first, then timings with synchronization.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing a float32 raw kernel against a float64 library expression measures dtype rather than implementation.</p>
+<p><strong>How to verify.</strong> Assert both outputs are equal for the test input, record dtype, size and the timing method, and report the result as measured on a named device.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Affine result [-1,1,7], with three blocks for 257 elements.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-084_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

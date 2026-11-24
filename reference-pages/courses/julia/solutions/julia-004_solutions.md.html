@@ -195,24 +195,59 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-004-explained-reference">julia-004: explained reference<a class="heading-anchor" href="#julia-004-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-004_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Make every decision an explicit <code>Bool</code>. <code>rate_or_nothing</code> returns <code>nothing</code> unless the denominator is positive, so zero and absence stay distinct. Guards come first in short-circuit expressions, and the equality function is chosen by purpose: <code>==</code> for numeric comparison, <code>isequal</code> for keys, and explicit handling for <code>missing</code>.</p>
 <h3 id="1-distinguish-zero-and-absent">1. Distinguish zero and absent<a class="heading-anchor" href="#1-distinguish-zero-and-absent" aria-label="Link to this section">#</a></h3>
 <p>A real zero rate is different from having no valid denominator.</p>
 <p><strong>Expected observation:</strong> The first is 0; the second is nothing.</p>
+<p><strong>Why it holds here:</strong> <code>rate_or_nothing(0, 5)</code> passes the <code>denominator &gt; 0</code> guard and returns <code>0 / 5</code>, which is 0.0; with denominator 0 the guard returns <code>nothing</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Returning 0 for <code>0 / 0</code> merges no data with a measured zero rate, so a summary could average in a value that was never observed.</p>
+<p><strong>How to verify:</strong> Assert <code>rate_or_nothing(0, 5) == 0</code> and <code>rate_or_nothing(0, 0) === nothing</code>, using <code>===</code> for the <code>nothing</code> comparison.</p>
 <h3 id="2-check-a-predicate">2. Check a predicate<a class="heading-anchor" href="#2-check-a-predicate" aria-label="Link to this section">#</a></h3>
 <p>The language requires a Boolean decision rather than an implicit truthiness conversion.</p>
 <p><strong>Expected observation:</strong> Julia raises a type error.</p>
+<p><strong>Why it holds here:</strong> Julia&#x27;s <code>if</code> accepts only a <code>Bool</code>; given the integer 1 it raises <code>TypeError</code> rather than treating nonzero as true.</p>
+<p><strong>Plausible wrong approach:</strong> Porting a C or Python habit like <code>if count</code> assumes truthiness, which Julia rejects at run time with a non-Boolean error.</p>
+<p><strong>How to verify:</strong> The reference wraps <code>if 1</code> in <code>@test_throws TypeError</code>; rewrite the condition as <code>count &gt; 0</code> and confirm it runs.</p>
 <h3 id="3-protect-an-access">3. Protect an access<a class="heading-anchor" href="#3-protect-an-access" aria-label="Link to this section">#</a></h3>
 <p>This makes the precondition visible and prevents a predictable boundary error.</p>
 <p><strong>Expected observation:</strong> The access occurs only when the collection is nonempty.</p>
+<p><strong>Why it holds here:</strong> In <code>!isempty(v) &amp;&amp; first(v) &gt; 0</code>, the right side runs only when the left is true, so <code>first</code> never sees an empty vector.</p>
+<p><strong>Plausible wrong approach:</strong> Writing the comparison before the emptiness test evaluates <code>first(Int[])</code> and throws before the guard can help.</p>
+<p><strong>How to verify:</strong> Evaluate the guarded expression on <code>Int[]</code> and on <code>[0]</code>; the reference checks <code>isempty(Int[])</code> and <code>!isempty([0])</code>.</p>
 <h3 id="4-compare-nan-keys">4. Compare NaN keys<a class="heading-anchor" href="#4-compare-nan-keys" aria-label="Link to this section">#</a></h3>
 <p>Dictionary-oriented equality needs consistent treatment of special values.</p>
 <p><strong>Expected observation:</strong> The data-key equality result is true.</p>
+<p><strong>Why it holds here:</strong> <code>isequal(NaN, NaN)</code> is true because key equality must be reflexive, while <code>NaN == NaN</code> is false by IEEE rules.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>==</code> to look up NaN keys means a stored NaN can never be found, because no comparison with it succeeds.</p>
+<p><strong>How to verify:</strong> Print <code>NaN == NaN</code> and <code>isequal(NaN, NaN)</code> side by side, expecting <code>false</code> and <code>true</code>.</p>
 <h3 id="5-inspect-signed-zero">5. Inspect signed zero<a class="heading-anchor" href="#5-inspect-signed-zero" aria-label="Link to this section">#</a></h3>
 <p>Choose the relation required by the application rather than assuming all equality operations are interchangeable.</p>
 <p><strong>Expected observation:</strong> == agrees; isequal distinguishes them.</p>
+<p><strong>Why it holds here:</strong> <code>0.0 == -0.0</code> is true numerically, while <code>isequal(0.0, -0.0)</code> is false because the sign bit differs.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming <code>isequal</code> is just a slower <code>==</code> would merge or split dictionary keys differently than intended for signed zeros.</p>
+<p><strong>How to verify:</strong> Assert <code>0.0 == -0.0</code> and <code>!isequal(0.0, -0.0)</code>, then build <code>Dict(0.0 =&gt; 1, -0.0 =&gt; 2)</code> and check its length is 2.</p>
 <h3 id="6-keep-an-unknown-decision">6. Keep an unknown decision<a class="heading-anchor" href="#6-keep-an-unknown-decision" aria-label="Link to this section">#</a></h3>
 <p>A data policy must decide whether to reject, defer or explicitly replace the unknown value.</p>
-<p><strong>Expected observation:</strong> Its result can remain missing.</p></article>
+<p><strong>Expected observation:</strong> Its result can remain missing.</p>
+<p><strong>Why it holds here:</strong> <code>missing &gt; 1</code> returns <code>missing</code>, since the answer is unknown, and using that result in <code>if</code> raises <code>TypeError</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Treating missing as false with a silent default drops unknown rows from a filter without recording that a decision was made.</p>
+<p><strong>How to verify:</strong> Print <code>missing &gt; 1</code>, then use <code>coalesce(missing &gt; 1, false)</code> only where the policy explicitly chooses false.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-004: all reference checks passed</code>:</p>
+<p>The checks pin down truthiness rules that Julia does not share with Python. <code>isempty(Int[])</code> and <code>!isempty([0])</code> show that emptiness is tested explicitly, since a vector holding zero is not empty. <code>rate_or_nothing(0, 5) == 0</code> proves a zero numerator is a valid rate, while the negative denominator returns <code>nothing</code> rather than a number. The final <code>TypeError</code> confirms that <code>if 1</code> is rejected because a condition must be a <code>Bool</code>.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> isempty<span class="syntax-punctuation">(</span><span class="syntax-keyword">Int</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-operator">!</span>isempty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> rate_or_nothing<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test</span> rate_or_nothing<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">===</span> <span class="syntax-builtin">nothing</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">2</span> <span class="syntax-operator">?</span> <span class="syntax-string">&quot;</span><span class="syntax-string">larger</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">other</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">larger</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">TypeError</span> <span class="syntax-keyword">if</span> <span class="syntax-number">1</span>
+        <span class="syntax-builtin">true</span>
+    <span class="syntax-keyword">else</span>
+        <span class="syntax-builtin">false</span>
+    <span class="syntax-keyword">end</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

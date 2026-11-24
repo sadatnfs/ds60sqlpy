@@ -14,6 +14,13 @@ Use a distribution rather than one flattering minimum. Median summarizes the mid
 
 
 
+### Key terms
+
+- **Enqueue latency:** The host time needed to submit work to the device queue, which can be much shorter than the time the work takes to execute.
+- **GPU event:** A marker recorded in a stream whose timestamps measure elapsed device time between two points.
+- **Warmup:** Initial runs that absorb one-time costs such as context creation, JIT compilation and allocator growth before timing starts.
+- **Median timing:** The middle value of repeated measurements, which resists outliers better than a single run or the mean.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,6 +46,14 @@ print("CPU trace analysis: median", statistics.median(samples), "ms; tail", max(
 ```
 
 **Expected observation:** Median 11 ms and maximum 100 ms, from synthetic trace data.
+
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `samples` | `[10, 11, 10, 12, 100]` |
+| `submit_us` | `2` |
+| `finish_us` | `102` |
 
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
@@ -76,27 +91,39 @@ print(
 
 ### Exercise 1: Identify the timing boundary
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **identify the timing boundary** in the examples above.
+**Trap to avoid:** Stopping the timer at the return reports 2 microseconds and undercounts by the factor of 51 the reference computes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Compute the median
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **compute the median** in the examples above.
+**Trap to avoid:** Reporting the mean, 28.6 ms, mixes the tail into the center and overstates the typical case by a factor of about 2.6.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Add transfer cost
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **add transfer cost** in the examples above.
+**Trap to avoid:** Reporting only the kernel interval as latency makes a GPU path look faster than a CPU path that includes its own I/O.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Separate first-call compile time
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **separate first-call compile time** in the examples above.
+**Trap to avoid:** Discarding the first call without reporting it hides a cost a real user pays at process start.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design equal-work comparison
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design equal-work comparison** in the examples above.
+**Trap to avoid:** Comparing a float32 GPU run with a float64 CPU run reports a speedup that is partly a precision change.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain why CPU trace is not a benchmark
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **explain why CPU trace is not a benchmark** in the examples above.
+**Trap to avoid:** Copying the 11 ms median into a report as GPU latency misrepresents a CPU script's constant as a hardware result.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

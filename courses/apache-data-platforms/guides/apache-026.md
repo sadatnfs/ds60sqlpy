@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-023`, `apache-025`, `apache-018`.
 
+## Key terms
+
+- **Task slot:** One unit of executor concurrency in which a task can run. Adding slots helps only if the plan exposes enough parallel work.
+- **Critical path:** The chain of dependent stages that bounds a query's completion time, so speeding up any work off this path does not shorten the query.
+- **Capacity experiment:** A controlled comparison, such as one versus two task slots on the same fixture, that records versions, source identity, partitions, CPU and memory with each timing.
+- **Bounded collect:** Returning a result to the client only when its size is known to be small, since collection moves every result row into one process.
+
 ## Capacity is constrained by the workload's critical path
 
 A distributed engine can use more executors only when its plan and source layout
@@ -79,6 +86,31 @@ and bounded-output cases provide concrete evidence to discuss that tradeoff
 without claiming that a tutorial benchmark proves production capacity.
 
 The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+
+## Worked examples
+
+### Compare one and two task slots on a fixed host
+
+```bash
+cd work/ballista
+bash run.sh one-slot
+bash run.sh check
+bash run.sh two-slots
+bash run.sh check
+bash run.sh evidence
+```
+
+Each check writes a receipt with elapsed_seconds and the same source_sha256, so the two runs can be compared on identical input. Expect the rows to match exactly and the timings to differ by an amount that is noisy at this tiny scale. The container CPU and memory limits do not change between runs, so two slots compete for the same cores; a lack of speedup is evidence about the critical path, not a broken cluster.
+
+### Limit rows and bytes before collecting
+
+```python
+records = ctx.sql("SELECT id, amount FROM orders ORDER BY id LIMIT 3").to_arrow_table().to_pylist()
+if len(json.dumps(records).encode()) > 2048:
+    raise ValueError("Output exceeds byte budget")
+```
+
+This fragment from the project client puts the LIMIT in the query so executors stop early and the client receives at most three rows, then enforces a byte budget on what it will print. Collecting a full table and slicing in Python would move every row through the scheduler first. Treat a row limit and a byte limit as separate controls, since three rows with large text values can still exceed a safe response size.
 
 ## Complete worked source
 

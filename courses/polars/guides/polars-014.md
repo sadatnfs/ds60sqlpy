@@ -14,6 +14,14 @@ A time key must be ordered within the relevant entity. A tolerance can prevent a
 
 The second case uses a deliberately small candidate join to demonstrate the two-clock rule. It is inspectable, but a large unrestricted join can be expensive. The goal is to establish correct semantics first, then design an indexed or versioned implementation that preserves them. A feature-store product must be evaluated against this contract rather than assumed to solve every form of historical leakage.
 
+## Key terms
+
+- **join_asof:** A join that matches each left row to the nearest right row by a sorted key instead of requiring equal keys.
+- **Backward strategy:** The as-of rule that takes the last right row whose key is at or before the left key, so no later row is used.
+- **Tolerance:** The largest allowed distance between matched keys; when the nearest eligible right row is farther away, the result is null.
+- **Availability time:** When a value became known; matching on it rather than event time keeps facts out until they were knowable.
+- **Leakage:** A feature that uses information not available at the prediction cutoff, which inflates measured accuracy.
+
 ## Syntax and data contract
 
 join_asof uses sorted keys, a strategy and optional tolerance. For a backward lookup, verify that the matched feature time does not exceed the request cutoff. For bitemporal selection, filter candidates by both event<=cutoff and known<=cutoff, then choose the latest eligible version using a complete tie-break rule. Preserve requests with no eligible feature under an explicit missing-value policy.

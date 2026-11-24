@@ -220,7 +220,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
   label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> The changed run fails with an <code>AssertionError</code> at the check <code>assert.equal(wider.count, 2)</code>. Restoring the original line brings back the worked observation: label A; original count remains 2.</p>
+<p><strong>Expected:</strong> The changed run fails with an <code>AssertionError</code> at <code>assert.equal(wider.count, 2)</code>. Restoring <code>const wider = { id: &#x27;A&#x27;, count: 2 };</code> brings back: label A; original count remains 2.</p>
 <p><strong>Verify:</strong> Compare your written prediction with the reported <code>AssertionError</code>, including its actual and expected values, and name the value that made <code>assert.equal(wider.count, 2)</code> fail. After restoring the line, the program prints its <code>{&quot;checks&quot;:1,&quot;status&quot;:&quot;passed&quot;}</code> receipt again.</p>
 <h3 id="exercise-2-observe-mutation-through-an-alias-debug-a-regression">Exercise 2: Observe mutation through an alias: debug a regression<a class="heading-anchor" href="#exercise-2-observe-mutation-through-an-alias-debug-a-regression" aria-label="Link to this section">#</a></h3>
 <p>Task: A regression changed one token in Example B, so one line now reads <code>mutable.count = 5;</code>. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.</p>
@@ -235,7 +235,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
   view<span class="syntax-punctuation">.</span>count <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the run fails with an <code>AssertionError</code> at the check <code>assert.equal(view.count, 4)</code>; after it the line reads <code>mutable.count = 4;</code> again and readonly view observes count changing from 1 to 4.</p>
+<p><strong>Expected:</strong> Before the repair the run fails with an <code>AssertionError</code> at <code>assert.equal(view.count, 4)</code>. Restoring <code>mutable.count = 4;</code> brings back: readonly view observes count changing from 1 to 4.</p>
 <p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>assert.equal(view.count, 4)</code> for this input.</p>
 <h3 id="exercise-3-handle-absent-and-zero-valued-optional-counts">Exercise 3: Handle absent and zero-valued optional counts<a class="heading-anchor" href="#exercise-3-handle-absent-and-zero-valued-optional-counts" aria-label="Link to this section">#</a></h3>
 <p>Task: Use a nullish fallback on an optional count.</p>

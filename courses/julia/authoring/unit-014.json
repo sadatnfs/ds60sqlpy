@@ -3,6 +3,28 @@
   "title": "Missing values, absence and nonfinite measurements",
   "concepts": ["missing", "nothing", "NaN", "Union", "coverage"],
   "outcome": "Keep missingness and numerical failure distinct and report the denominator used by each aggregation policy.",
+  "key_terms": [
+    [
+      "missing",
+      "The value for an unknown data entry, which propagates through arithmetic and comparisons using three-valued logic."
+    ],
+    [
+      "nothing",
+      "The singleton meaning that no value exists, such as a failed search result, which does not propagate the way `missing` does."
+    ],
+    [
+      "NaN",
+      "A floating-point value produced by an undefined operation such as `0.0 / 0.0` that is still a number and is distinct from `missing`."
+    ],
+    [
+      "Union type",
+      "A type such as `Union{Missing, Float64}` that lets one container hold either alternative."
+    ],
+    [
+      "Coverage",
+      "The count or fraction of observations actually present, reported beside any summary that skipped missing values."
+    ]
+  ],
   "level": "intermediate",
   "minutes": 150,
   "prerequisites": ["julia-004", "julia-012"],
@@ -11,48 +33,68 @@
     ["Statistics standard library", "https://docs.julialang.org/en/v1/stdlib/Statistics/"]
   ],
   "figure": 0,
+  "approach": "`observed_summary` drops `missing` with `skipmissing`, rejects any nonfinite observed value with `DomainError`, and returns a named tuple of `total`, `observed` and `estimate`. When nothing is observed the estimate is `missing`. Treat `missing` as unknown data and `nothing` as an absent result, using `coalesce` and `something` for each.",
   "exercises": [
     {
       "title": "Retain the denominator",
       "task": "Summarize `[1, missing, 3]` using observed values.",
       "expected": "Total 3, observed 2 and mean 2.",
       "hint": "Keep counts alongside the statistic.",
-      "answer": "The result describes the observed measurements, not an assumed completed dataset."
+      "answer": "The result describes the observed measurements, not an assumed completed dataset.",
+      "why": "`[1, missing, 3]` has 3 entries and 2 observed values, so the mean of observed values is (1 + 3) / 2 = 2.0.",
+      "wrong": "Calling `mean` directly on the vector propagates `missing`, and reporting only a cleaned mean drops the fact that one row lacked data.",
+      "verify": "Example A asserts `summary == (total = 3, observed = 2, estimate = 2.0)`."
     },
     {
       "title": "Replace explicitly",
       "task": "Fill the missing value with zero.",
       "expected": "The mean becomes 4/3.",
       "hint": "Recalculate the denominator and numerator.",
-      "answer": "The replacement policy changes the quantity being summarized."
+      "answer": "The replacement policy changes the quantity being summarized.",
+      "why": "`coalesce.(values, 0.0)` replaces the gap with 0, so the mean becomes (1 + 0 + 3) / 3 = 4/3.",
+      "wrong": "Presenting 4/3 as if it were the observed mean changes both numerator and denominator without stating the imputation.",
+      "verify": "Example A asserts `mean(replaced) ≈ 4/3`; print both means beside their policies."
     },
     {
       "title": "Reject numerical failure",
       "task": "Include NaN among otherwise observed values.",
       "expected": "The finite-value guard rejects it.",
       "hint": "skipmissing does not remove NaN.",
-      "answer": "Unknown data and undefined floating arithmetic need distinct handling."
+      "answer": "Unknown data and undefined floating arithmetic need distinct handling.",
+      "why": "`skipmissing` removes only `missing`, so NaN remains and the `isfinite` check throws `DomainError`.",
+      "wrong": "Assuming `skipmissing` also discards NaN lets a numerical failure pass through as if it were an unknown measurement.",
+      "verify": "Example B asserts `@test_throws DomainError observed_summary([1.0, NaN, missing])`."
     },
     {
       "title": "Handle all-missing data",
       "task": "Summarize two missing observations.",
       "expected": "The observed count is 0 and estimate is missing.",
       "hint": "Do not fabricate a mean from an empty observed set.",
-      "answer": "The output preserves unavailable information while retaining the eligible count."
+      "answer": "The output preserves unavailable information while retaining the eligible count.",
+      "why": "Two missing values leave `observed` empty, so the function reports observed count 0 and estimate `missing` while keeping total 2.",
+      "wrong": "Returning 0 as the estimate fabricates a mean of no data and could be averaged into later group results.",
+      "verify": "Example B asserts `empty_observed.observed == 0` and `ismissing(empty_observed.estimate)`."
     },
     {
       "title": "Distinguish absence",
       "task": "Compare `something(nothing, 7)` with `coalesce(nothing, 7)`.",
       "expected": "The former returns 7; the latter retains `nothing`.",
       "hint": "The helpers target different sentinel meanings.",
-      "answer": "An absent return and a missing measurement should not be conflated accidentally."
+      "answer": "An absent return and a missing measurement should not be conflated accidentally.",
+      "why": "`something` skips `nothing` and returns 7, while `coalesce` skips only `missing` and returns its first argument `nothing` unchanged.",
+      "wrong": "Using `coalesce` to fill an absent lookup result keeps `nothing`, which later fails in arithmetic with a confusing error.",
+      "verify": "Example B asserts `something(nothing, 7) == 7` and `coalesce(nothing, 7) === nothing`."
     },
     {
       "title": "Assess a real policy",
       "task": "Choose deletion or imputation for a scientific dataset.",
       "expected": "State assumptions, affected population and uncertainty.",
       "hint": "Correct manipulation does not prove valid inference.",
-      "answer": "The missingness mechanism and decision target determine which policy is defensible."
+      "answer": "The missingness mechanism and decision target determine which policy is defensible.",
+      "why": "Deletion targets observed units only, while imputation needs a model; neither choice is justified by the code alone.",
+      "wrong": "Choosing whichever policy makes results look stable treats a scientific assumption about why data is missing as a formatting decision.",
+      "verify": "Write the assumed missingness mechanism and affected rows, then report both totals from `observed_summary`."
     }
-  ]
+  ],
+  "checks_note": "`coalesce` replaces missing with 4, but `something` does not treat missing as absent, so the result stays missing. `missing + 1` propagates as expected. `observed_summary([2, 4])` reports an estimate of 3 with every value observed, an empty `Float64[]` still returns a total of 0, and `Inf` raises `DomainError`, because missing and invalid values are different problems that need different handling. Notice that each line asks a separate question. Replacement, propagation, summary counts and invalid input are not tested by one example, so a change to the missing policy cannot hide behind a passing NaN check, and a change to the NaN policy cannot hide behind a passing missing check. A summary that silently dropped `Inf` would report an estimate from fewer values than its total suggests."
 }

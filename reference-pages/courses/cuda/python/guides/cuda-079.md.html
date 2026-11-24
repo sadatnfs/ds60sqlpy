@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Neighboring lanes accessing neighboring elements can be served by fewer memory transactions than widely strided accesses. Count bytes requested by useful data and compare them with the transactions the layout forces. Alignment, transaction granularity and cache behavior depend on architecture, so a simple segment model is educational rather than a complete GPU simulator.</p>
 <p>A transpose illustrates the conflict: contiguous reads can lead to strided writes. Shared-memory tiling can reorganize the data before output. Padding may reduce bank conflicts for specific layouts, but it consumes shared capacity. Measure the entire kernel and inspect profiler counters before attributing speed to one mechanism. Increased occupancy is a means to hide latency, not an unconditional goal.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Warp:</strong> A group of 32 threads that the scheduler issues together.</li>
+<li><strong>Coalesced access:</strong> A pattern in which consecutive threads of a warp touch consecutive addresses, so the hardware combines them into few memory transactions.</li>
+<li><strong>Memory transaction:</strong> The aligned segment of memory the hardware moves to serve a warp&#x27;s request; scattered addresses need more transactions.</li>
+<li><strong>Alignment:</strong> Placement of data at an address that is a multiple of the transaction size, so a request does not straddle extra segments.</li>
+<li><strong>Tiled transpose:</strong> A transpose that stages a tile in shared memory so both the global read and the global write are coalesced.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Eight four-byte lanes reading offsets 0,4,...,28 fit one aligned 32-byte segment in the simplified model. Offsets 0,32,...,224 touch eight segments.</p>
@@ -216,20 +224,40 @@ strided <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> segments<span class="syntax-punctuation">(</span>contiguous<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">and</span> segments<span class="syntax-punctuation">(</span>strided<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU segment model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> segments<span class="syntax-punctuation">(</span>contiguous<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> segments<span class="syntax-punctuation">(</span>strided<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Simplified segment counts 1 and 8, not hardware measurements.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>contiguous</code></td>
+<td><code>[0, 4, 8, 12, 16, 20, 24, 28]</code></td>
+</tr>
+<tr>
+<td><code>strided</code></td>
+<td><code>[0, 32, 64, 96, 128, 160, 192, 224]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-touched-segments">Exercise 1: Count touched segments<a class="heading-anchor" href="#exercise-1-count-touched-segments" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>count touched segments</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting one transaction per lane, eight here, treats every load as independent and ignores coalescing. That would make the contiguous and strided patterns look equally expensive.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-shift-the-base-by-four-bytes">Exercise 2: Shift the base by four bytes<a class="heading-anchor" href="#exercise-2-shift-the-base-by-four-bytes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>shift the base by four bytes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming contiguity alone guarantees one segment ignores the boundary. A misaligned base can double the modeled transactions for the same amount of useful data.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-model-a-stride-of-two">Exercise 3: Model a stride of two<a class="heading-anchor" href="#exercise-3-model-a-stride-of-two" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>model a stride of two</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Thinking stride only matters when it reaches the segment size misses the intermediate cost. Stride two already doubles the transactions in this model.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-tiled-transpose">Exercise 4: Explain tiled transpose<a class="heading-anchor" href="#exercise-4-explain-tiled-transpose" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>explain tiled transpose</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Expecting the shared-memory version to change the output values, or to need a different verification, confuses reorganized traffic with a different algorithm.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-occupancy-from-throughput">Exercise 5: Separate occupancy from throughput<a class="heading-anchor" href="#exercise-5-separate-occupancy-from-throughput" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>separate occupancy from throughput</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating the occupancy number as the performance goal leads to changes that raise the percentage while total runtime stays the same or rises.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-propose-a-matched-profiler-experiment">Exercise 6: Propose a matched profiler experiment<a class="heading-anchor" href="#exercise-6-propose-a-matched-profiler-experiment" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>propose a matched profiler experiment</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing kernels that differ in dtype or element count mixes several causes. A float64 strided kernel against a float32 contiguous one cannot attribute the difference to stride.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

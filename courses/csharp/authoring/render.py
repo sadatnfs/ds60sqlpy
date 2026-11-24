@@ -39,7 +39,19 @@ SPECS = []
 
 
 def lesson(
-    title, mental, anatomy, terms, a, b, tasks, pitfalls, *, helpers="", notes="", source=""
+    title,
+    mental,
+    anatomy,
+    terms,
+    a,
+    b,
+    tasks,
+    pitfalls,
+    *,
+    helpers="",
+    notes="",
+    source="",
+    usings=(),
 ):
     """Each example is (title, code, observation, reasoning)."""
     assert len(tasks) == 6
@@ -57,6 +69,7 @@ def lesson(
             "helpers": textwrap.dedent(helpers).strip(),
             "notes": notes,
             "source": source,
+            "usings": tuple(usings),
         }
     )
 
@@ -71,7 +84,9 @@ def program(spec, examples, identity, answers=()):
         [spec["helpers"], *(answer["helpers"] for _, answer in answers if answer.get("helpers"))]
     ).strip()
     if SUBJECT == "csharp":
-        imports = """using System;
+        imports = (
+            "".join(f"using {name};\n" for name in spec["usings"])
+            or """using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -87,6 +102,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 """
+        )
         body = "\n".join(
             "        {\n" + textwrap.indent(code, "            ") + "\n        }" for code in bodies
         )
@@ -119,6 +135,18 @@ def first_sentence(text):
     return text.split(". ")[0].rstrip(".") + "."
 
 
+def reasoning(answer):
+    """The optional correctness, wrong-approach and verification paragraphs of one answer."""
+    parts = []
+    if answer.get("why"):
+        parts.append(f"**Why it is correct.** {answer['why']}")
+    if answer.get("wrong"):
+        parts.append(f"**Plausible wrong approach.** {answer['wrong']}")
+    if answer.get("verify"):
+        parts.append(f"**How to verify.** {answer['verify']}")
+    return "".join(f"\n\n{part}" for part in parts)
+
+
 def answer_text(number, task, spec, identity):
     """The explanation for one task: its reference answer or an honest pointer."""
     answer = ANSWERS.get(number, {}).get(task)
@@ -126,10 +154,10 @@ def answer_text(number, task, spec, identity):
         return (
             f"**Reference answer.** It runs as the `Task {task}` block of the reference program.\n\n"
             f"```{LANGUAGE}\n{answer['code'].strip()}\n```\n\n"
-            f"**Observe:** {answer['observe']}\n\n{answer['explain']}"
+            f"**Observe:** {answer['observe']}\n\n{answer['explain']}" + reasoning(answer)
         )
     if answer:
-        return f"**Written answer.** {answer['explain']}"
+        return f"**Written answer.** {answer['explain']}" + reasoning(answer)
     a, b = spec["a"], spec["b"]
     return {
         1: f"No separate reference answer has been written for this task. Example A is the evidence to compare with: {a[3]} {a[2]}",

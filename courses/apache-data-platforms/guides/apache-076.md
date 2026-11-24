@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-075`.
 
+## Key terms
+
+- **Control plane:** The sharing server's API that authorizes a recipient and returns table metadata and eligible files.
+- **Pre-signed URL:** A temporary object-store URL the server returns for one data file, letting the client read bytes directly without the bearer token.
+- **Data plane:** The path by which the client downloads Parquet bytes from object storage, separate from the control requests.
+- **minReaderVersion:** The protocol field stating the lowest reader version a response requires. The course client accepts only version 1 and refuses anything else.
+- **Host allowlist:** The explicit set of data hosts the client may fetch from, which keeps it from following arbitrary URLs or redirects.
+
 ## Control responses and data bytes travel different paths
 
 A sharing client first asks the service for table metadata and eligible files.

@@ -16,6 +16,14 @@ Instruction order creates a dependency chain. If a source copy changes before an
 
 A cache hit is visible in build logs. A fast build is not automatically cached, and a cache miss is not automatically a bug. Reproducibility requires identifying inputs, versions and build settings. The same text can still download different bytes if it refers to mutable remote dependencies.
 
+### Key terms
+
+- **Layer:** The recorded filesystem changes produced by one build step.
+- **Build cache:** Stored results of earlier build steps that the builder reuses when an instruction and its inputs are unchanged.
+- **Cache invalidation:** The point where a changed instruction or input forces that step and every later step to run again.
+- **Instruction order:** The sequence of Dockerfile steps, which decides how much work a single changed input invalidates.
+- **Dependency layer:** A layer built from dependency metadata such as a lockfile, placed before frequently edited source so it stays cached.
+
 ## Anatomy and a trace you can follow
 
 Compare an unchanged rebuild with a rebuild after changing only a harmless source string in your learner copy. Record which instruction first stops being cached. A build with `--no-cache` intentionally ignores build-step cache, but it does not inherently replace every already available base image. Fetching newer bases is a separate operation.
@@ -91,11 +99,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Copying the whole source tree before installing dependencies, so every edit reinstalls them. Assuming a cached download step fetched fresh bytes. Using `--no-cache` when the stale part was the base image.
 
-Exercise 4 is this chapter's boundary case: Diagnose a cached step that downloads a mutable dependency. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a cached step that downloads a mutable dependency. Compare the text of the cached `RUN` instruction with the bytes it downloads; an unchanged instruction can be served from cache even when the remote file changed. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using build cache, cache invalidation, instruction order and dependency layer. Reconstruct worked example 2 (Compare an explicit cache bypass) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Predict which build steps rerun after editing only `server.py` with the dependency file copied first. Then reconstruct worked example 2 (Compare an explicit cache bypass) with one different value, predict what changes, and name which of build cache, cache invalidation, instruction order and dependency layer the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

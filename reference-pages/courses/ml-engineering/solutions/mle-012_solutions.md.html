@@ -198,21 +198,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-test-a-boundary-value">1. Test a boundary value<a class="heading-anchor" href="#1-test-a-boundary-value" aria-label="Link to this section">#</a></h3>
 <p>Check both accepted boundaries and values immediately outside them. Do not infer request validation from the model&#x27;s numerical output.</p>
+<p>The Request model declares usage with ge=0 and le=10000, so usage 0 and usage 10000 should both return 200, while -0.01 and 10000.01 should return 422. The same holds for tickets at 0 and 100 versus 101. Seeing a sensible probability for a value is no proof it was inside the contract: the logistic model would score usage 50000 without complaint.</p>
 <p><strong>Expected:</strong> The response follows the documented bounds.</p>
 <h3 id="2-reject-a-hidden-target">2. Reject a hidden target<a class="heading-anchor" href="#2-reject-a-hidden-target" aria-label="Link to this section">#</a></h3>
 <p>Extra-field rejection helps catch client mistakes and accidental leakage. It does not replace broader data and access controls.</p>
+<p>Example_two already posts label 1 and gets 422 because of extra=&quot;forbid&quot;. Remove that line from model_config and pydantic&#x27;s default is to ignore unknown fields, so the same request returns 200 and the client never learns it was sending its target. Assert the status code, not just that a probability came back.</p>
 <p><strong>Expected:</strong> The API rejects the undeclared field.</p>
 <h3 id="3-inspect-the-model-version">3. Inspect the model version<a class="heading-anchor" href="#3-inspect-the-model-version" aria-label="Link to this section">#</a></h3>
 <p>Bind the version to the accepted artifact and feature contract. A display label should not diverge from the actual loaded state.</p>
+<p>Notice that &quot;fixture-v1&quot; is a literal string in predict(), not a value read from the fitted pipeline. Refitting with a different training cutoff would still answer fixture-v1. Store the version on the loaded bundle and return that attribute, then verify two different fits produce two different versions.</p>
 <p><strong>Expected:</strong> The observation identifies its model.</p>
 <h3 id="4-test-categorical-policy">4. Test categorical policy<a class="heading-anchor" href="#4-test-categorical-policy" aria-label="Link to this section">#</a></h3>
 <p>Document that choice and ensure clients know the accepted vocabulary. A hidden fallback can create train/serve inconsistency.</p>
+<p>region is Literal[&quot;north&quot;, &quot;south&quot;], so &quot;east&quot; returns 422 at the HTTP layer even though the pipeline underneath uses OneHotEncoder(handle_unknown=&quot;ignore&quot;) and would have scored it as all zeros. The API contract is stricter than the model; send &quot;east&quot; through both paths to see 422 versus a probability.</p>
 <p><strong>Expected:</strong> It is rejected under this interface contract.</p>
 <h3 id="5-separate-test-boundaries">5. Separate test boundaries<a class="heading-anchor" href="#5-separate-test-boundaries" aria-label="Link to this section">#</a></h3>
 <p>Use the owned local-system checker for actual HTTP, startup, monitoring, rollback and replacement. Do not claim an external deployment from this unit alone.</p>
 <p><strong>Expected:</strong> It has not tested real network/container lifecycle.</p>
 <h3 id="6-preserve-safe-errors">6. Preserve safe errors<a class="heading-anchor" href="#6-preserve-safe-errors" aria-label="Link to this section">#</a></h3>
 <p>Return a bounded public error and retain appropriate owned operational evidence. Do not echo arbitrary secrets or expose an administrative mutation route casually.</p>
+<p>Recent FastAPI versions include each offending input in the 422 detail. If a client sent a token in an undeclared field, the error body could echo it back into a log. Return the field name and constraint, such as &quot;usage must be &lt;= 10000&quot;, and keep the full request only in owned, access-controlled evidence.</p>
 <p><strong>Expected:</strong> It is actionable without unnecessary sensitive detail.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;mle-012: local, bounded ML engineering investigation.&quot;&quot;&quot;</span>

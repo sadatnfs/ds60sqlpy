@@ -16,6 +16,13 @@ Idempotent startup means repeating initialization does not create duplicate or c
 
 The study fixture avoids an automatic endless restart loop so a learner can inspect failures directly. In another service, choose a restart policy according to operational intent and test both clean shutdown and crash behavior. Preserve logs and a clear failure condition rather than making the container appear perpetually recovering.
 
+### Key terms
+
+- **Restart policy:** A rule telling the engine when to restart an exited container, such as on-failure or unless-stopped.
+- **Crash loop:** Repeated restarts of a process that fails on every startup, consuming resources and repeating side effects.
+- **Idempotent startup:** Initialization that can run again without creating duplicate or conflicting state.
+- **Backoff:** A growing delay between restart attempts that limits how quickly a failing service is retried.
+
 ## Anatomy and a trace you can follow
 
 Policies such as no, on-failure and unless-stopped have different lifecycle semantics. Their exact behavior also depends on successful startup conditions and manual stops. Compose’s dependency restart option is a separate feature from the container restart policy. Do not treat similarly named fields as interchangeable.
@@ -96,11 +103,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Using a restart policy to hide a configuration error. Writing initialization that inserts data on every start. Assuming a timed-out write did not happen.
 
-Exercise 4 is this chapter's boundary case: Diagnose duplicate records after repeated startup. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose duplicate records after repeated startup. Count the seed records after each start and read the initializer to see whether it checks for existing state before writing. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using restart policy, crash loop, idempotent startup and backoff. Reconstruct worked example 2 (Trace an unsafe initializer) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Rewrite the unsafe initializer as the safe sequence from memory. Then reconstruct worked example 2 (Trace an unsafe initializer) with one different value, predict what changes, and name which of restart policy, crash loop, idempotent startup and backoff the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

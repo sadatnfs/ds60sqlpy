@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-068`, `apache-074`.
 
+## Key terms
+
+- **Qualified identity:** A name that includes environment, catalog, namespace, table and, where needed, snapshot, so lineage cannot connect the wrong asset.
+- **Catalog entry:** A Hive Metastore or Iceberg catalog record that lets readers locate and interpret a table. It is not a governance policy.
+- **Recorded governance:** Atlas entities, classifications and lineage that describe assets. They are not table commits and do not enforce access.
+- **Manual registration:** Submitting catalog assets to Atlas through its API, which must state its source and scope rather than claim instrumented lineage.
+
 ## Catalog metadata and governance metadata describe different contracts
 
 Hive Metastore or an Iceberg catalog helps a reader locate and interpret tables
@@ -73,6 +80,33 @@ integration?** Correct cross-system identity and provenance plus actual protecte
 operations at the stated enforcement boundary. These cases connect observed
 catalog state to recorded lineage and then test governance effects separately
 instead of treating a metadata label as a universal control.
+
+## Worked examples
+
+### Pin the table snapshot in the lineage record
+
+```json
+{
+  "typeName": "ds60_<owner>_dataset",
+  "attributes": {
+    "qualifiedName": "ds60://<owner>/curated",
+    "name": "curated",
+    "description": "demo.orders snapshot <snapshot-id>"
+  }
+}
+```
+
+Iceberg already records which snapshot is current, and Atlas records who produced what. Writing the snapshot ID into the Atlas description, or into a custom attribute, lets a reviewer connect a lineage edge to the exact table state that existed. Without it, lineage says the process wrote curated but not which version, and a later overwrite makes the record ambiguous.
+
+### Read the snapshot from the table catalog
+
+```python
+table = catalog.load_table("demo.orders")
+snapshot = table.current_snapshot()
+print(snapshot.snapshot_id, snapshot.summary.operation)
+```
+
+This PyIceberg fragment reads the current snapshot ID and its operation, such as append, from the same catalog that batch_snapshot.py uses. Compare it with the ID stored in Atlas: a mismatch means the table moved after lineage was registered. Catalog metadata says what the table is; governance metadata says what someone decided about it, and both need to name the same state.
 
 ## Complete worked source
 

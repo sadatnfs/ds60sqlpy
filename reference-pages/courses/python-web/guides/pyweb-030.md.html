@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-029</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A web application often needs a pool, model, cache client or other resource before it can serve requests. FastAPI&#x27;s lifespan interface gives that resource an explicit startup and shutdown boundary. This chapter shows why a TestClient context manager matters and why a request failure should not accidentally destroy a shared application resource.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Lifespan:</strong> An async context manager given to FastAPI that performs setup before the application serves requests and cleanup at shutdown.</li>
+<li><strong>app.state:</strong> An attribute namespace on the application where lifespan setup stores prepared resources for routes to use.</li>
+<li><strong>TestClient context:</strong> Entering <code>with TestClient(app)</code> so that lifespan startup and shutdown actually run around the test&#x27;s requests.</li>
+<li><strong>Process-local state:</strong> Data owned by one server process; four workers create four lifespans and therefore four separate copies.</li>
+<li><strong>Readiness:</strong> A service&#x27;s ability to perform work that needs its dependencies, which is a stronger claim than the process merely being alive.</li>
+</ul>
 <h3 id="mechanism-process-resources-surround-requests">Mechanism: process resources surround requests<a class="heading-anchor" href="#mechanism-process-resources-surround-requests" aria-label="Link to this section">#</a></h3>
 <p>An asynchronous context manager performs setup, yields control while the application serves, then performs cleanup. The application can store the prepared resource in <code>app.state</code>. Route code accesses that resource after startup rather than creating an unrelated copy on every call.</p>
 <p>This is a process-local contract. Starting four server workers normally creates four application lifespans and therefore four copies of process-owned state. A list or cache in one worker is not shared with the other workers. A database or external coordination service is needed when the state must be consistent across processes or survive replacement.</p>
@@ -209,6 +217,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Inside a running lifespan, one request fails while a later valid request still uses the same prepared resource. The application resource remains available until the whole client context ends. The assertions distinguish request completion from application shutdown.</p>
 <p>That distinction informs database design. A shared connection pool may survive request failures, while a request-scoped transaction must roll back and release its borrowed connection. Closing the entire pool inside a request error handler can cause unrelated clients to fail. Conversely, keeping a failed transaction alive for the next request can expose inconsistent state.</p>
 <p>The finite example uses a bounded controlled object, so it proves the actual FastAPI/Starlette lifecycle ordering. The owned workshop adds a real server process and checks shutdown, resume and persistent database behavior separately. A client context alone does not establish signal handling or container restart behavior.</p>
+<h3 id="worked-example-lifespan-state-delivered-on-every-request">Worked example: lifespan state delivered on every request<a class="heading-anchor" href="#worked-example-lifespan-state-delivered-on-every-request" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> contextlib <span class="syntax-keyword">import</span> asynccontextmanager
+
+<span class="syntax-keyword">from</span> starlette.applications <span class="syntax-keyword">import</span> Starlette
+<span class="syntax-keyword">from</span> starlette.responses <span class="syntax-keyword">import</span> JSONResponse
+<span class="syntax-keyword">from</span> starlette.routing <span class="syntax-keyword">import</span> Route
+<span class="syntax-keyword">from</span> starlette.testclient <span class="syntax-keyword">import</span> TestClient
+
+log <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-decorator">@asynccontextmanager</span>
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">lifespan</span><span class="syntax-punctuation">(</span>app<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">startup</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">yield</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">pool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">}</span>
+    log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">shutdown</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">pool</span><span class="syntax-punctuation">(</span>request<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> JSONResponse<span class="syntax-punctuation">(</span>request<span class="syntax-operator">.</span>state<span class="syntax-operator">.</span>pool<span class="syntax-punctuation">)</span>
+
+
+app <span class="syntax-operator">=</span> Starlette<span class="syntax-punctuation">(</span>routes<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>Route<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/pool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> pool<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> lifespan<span class="syntax-operator">=</span>lifespan<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> TestClient<span class="syntax-punctuation">(</span>app<span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> client<span class="syntax-punctuation">:</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>client<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/pool</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> log<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>log<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">{&#x27;size&#x27;: 2} [&#x27;startup&#x27;]
+[&#x27;startup&#x27;, &#x27;shutdown&#x27;]</code></pre>
+<p>FastAPI is built on Starlette, and this snippet uses Starlette directly to show a second way to share a lifespan resource. The lesson&#x27;s program stores its resource on <code>app.state</code>; here the lifespan yields a dictionary instead, and Starlette copies it onto <code>request.state</code> for every request. Either way the resource is created once at startup, not per request. The two <code>log</code> prints show the boundary: inside the <code>with TestClient(app)</code> block only startup has run, and shutdown fires when the block exits. Creating the client without <code>with</code> would skip the lifespan entirely, which is the <code>AttributeError</code> the lesson deliberately provokes.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why does the route work under the server but fail in a unit test?</strong> The test may have skipped lifespan startup. Reproduce the intended lifecycle rather than manually assigning the missing state and hiding the integration error.</p>
 <p><strong>Why does adding workers multiply resource use?</strong> Each process has its own memory and startup path. Size connection pools and model copies against total workers, not just the per-process setting.</p>

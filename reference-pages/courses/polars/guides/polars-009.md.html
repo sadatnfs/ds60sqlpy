@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A grouped aggregation reduces a group to fewer rows. A window expression computes using a group and maps a result back to the original row grain. This distinction lets a feature pipeline attach group means, previous values or running totals without losing the identity of each event. It also creates opportunities for leakage if the group includes information unavailable at the row&#x27;s decision time.</p>
 <p>Order-sensitive windows need a total ordering rule. Sorting by customer and time is insufficient when two events share a timestamp and their relative order matters. A stable event identifier can serve as a tie-breaker, but only if that order has a meaningful interpretation. The worked fixture uses customer, time and id explicitly. The resulting previous value refers to that sorted sequence, not to an arbitrary input order.</p>
 <p>Group centering illustrates a different kind of window. Subtracting a group mean keeps one output per row while using all measurements in that group. It is useful for descriptive analysis, but computing the mean from future or held-out rows would contaminate a deployed feature. Training-time fitting and online application therefore need an additional temporal or split boundary.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Window expression:</strong> An expression with <code>.over(keys)</code> that computes within each group but returns one value per input row.</li>
+<li><strong>Lag:</strong> The previous row&#x27;s value within an ordered group, computed with <code>shift(1)</code>; the first row of each group gets null.</li>
+<li><strong>Cumulative sum:</strong> A running total along the row order from <code>cum_sum</code>, restarting in each group when used with <code>over</code>.</li>
+<li><strong>Total ordering:</strong> A sort rule with a tie-breaker column so that every row has one position and order-sensitive results are deterministic.</li>
+<li><strong>Leakage:</strong> A feature that uses information unavailable at the row&#x27;s decision time, such as a group mean that includes later events.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>over(&quot;customer&quot;) assigns the expression to customer groups. cum_sum and shift(1) depend on the order established before the window operation. A reduction such as mean().over(&quot;group&quot;) broadcasts a group statistic back to each group row. Give the derived column a distinct alias and verify both its values and the unchanged row count.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

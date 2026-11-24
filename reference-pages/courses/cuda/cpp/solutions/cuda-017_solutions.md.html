@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-017_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Four threads load <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>3</mn><mo separator="true">,</mo><mn>6</mn><mo separator="true">,</mo><mn>9</mn><mo separator="true">,</mo><mn>12</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[3,6,9,12]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">6</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">9</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">12</span><span class="mclose">]</span></span></span></span> into a shared tile, synchronize, then thread t reads tile[3-t]. The reversed output is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>12</mn><mo separator="true">,</mo><mn>9</mn><mo separator="true">,</mo><mn>6</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[12,9,6,3]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">12</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">9</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">6</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mclose">]</span></span></span></span>. Without the barrier, a consumer could read before another thread loads its value. An apparent success on one execution is not a synchronization proof.</p>
+<p><strong>Approach:</strong> Load [3, 6, 9, 12] into the tile, synchronize, then read tile[3 - t].</p>
+<p><strong>Why it is correct:</strong> The barrier guarantees every load completes before any thread reads another&#x27;s slot.</p>
+<p><strong>A plausible wrong approach:</strong> Dropping the barrier because one test run gave [12, 9, 6, 3] trusts luck over a guarantee.</p>
+<p><strong>How to verify:</strong> The reference asserts the reversal [12, 9, 6, 3]; run racecheck on a GPU for evidence.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>For a three-element tail in a four-thread block, lane three loads a neutral zero and still participates in the barrier. Only valid lanes store output. A conditional <code>if (i&lt;n) { load; barrier; }</code> can violate the barrier contract when some block threads skip it.</p>
+<p><strong>Approach:</strong> Load zero for lane three, have all four threads reach the barrier, store only valid lanes.</p>
+<p><strong>Why it is correct:</strong> Every thread in the block must reach __syncthreads, and zero adds nothing to the sum.</p>
+<p><strong>A plausible wrong approach:</strong> Wrapping both the load and the barrier in if (i &lt; n) leaves lane three skipping it.</p>
+<p><strong>How to verify:</strong> The reference asserts the neutralized sum is 18 for [3, 6, 9, 0].</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Thread three produces tile<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>3</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[3]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">3</span><span class="mclose">]</span></span></span></span>, the barrier establishes availability, and thread zero consumes it.</p>
+<p><strong>Approach:</strong> Trace output 0: it reads tile[3], which thread 3 wrote before the barrier.</p>
+<p><strong>Why it is correct:</strong> The barrier orders thread 3&#x27;s store before thread 0&#x27;s load.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming thread 0 wrote tile[3] confuses output ownership with input ownership.</p>
+<p><strong>How to verify:</strong> Label every producer-consumer pair and confirm each crosses the barrier.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Move the required barrier outside the bounds condition, neutralize invalid loads and predicate only accesses that need valid indices.</p>
+<p><strong>Approach:</strong> Move __syncthreads outside the bound check and load a neutral value for invalid lanes.</p>
+<p><strong>Why it is correct:</strong> All threads then reach the barrier, and invalid lanes contribute harmless values.</p>
+<p><strong>A plausible wrong approach:</strong> Adding a second barrier inside the else branch still splits threads across two distinct barriers.</p>
+<p><strong>How to verify:</strong> Run a ragged size such as 3 and confirm completion and correct output.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Other blocks do not participate. Use separate dependent kernel stages or a qualified cooperative launch design.</p>
+<p><strong>Approach:</strong> Explain that __syncthreads orders only threads in one block.</p>
+<p><strong>Why it is correct:</strong> Blocks may run at different times, so a block barrier cannot wait for them.</p>
+<p><strong>A plausible wrong approach:</strong> Spinning on a global flag for other blocks can deadlock when those blocks are not resident.</p>
+<p><strong>How to verify:</strong> Split the reduction into two kernels and validate the final sum on the host.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Name owners for interior and halo loads, synchronize before consumption, define boundary values and keep output separate from input.</p>
+<p><strong>Approach:</strong> Assign interior loads to their own threads and halo loads to edge threads, then synchronize.</p>
+<p><strong>Why it is correct:</strong> Each neighbor value must be in the tile before any average reads it.</p>
+<p><strong>A plausible wrong approach:</strong> Writing averages back into the input tile lets neighbors read already-updated values.</p>
+<p><strong>How to verify:</strong> Compare tile results with a host stencil, including edges with the defined boundary.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-017_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

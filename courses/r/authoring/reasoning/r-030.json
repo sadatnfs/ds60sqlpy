@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Count all rows, then the non-missing values, then average only the observed ones: 3 rows, 2 observed, 1 missing, mean of 2 and 6.",
+      "why": "summary.metric_batch uses `!is.na(x$values)` as its denominator, so the mean is 8 divided by 2, which is 4, and the missing value stays visible in its own count with unit ms.",
+      "wrong": "Dividing the observed sum by all 3 rows, giving 8/3. The NA is silently treated as zero and the average drops by a third.",
+      "verify": "`identical(s, list(rows = 3L, observed = 2L, missing = 1L, mean = 4, unit = \"ms\"))` returns TRUE."
+    },
+    {
+      "approach": "Build `metric_batch(\"d\", 8, \"ms\")`, combine it with a, and summarize the new batch.",
+      "why": "combine_batches concatenates ids and values, so the observed values are 2, 6 and 8 with sum 16 over 3 observed, about 5.33 ms. The row count is 4 and one value is still missing.",
+      "wrong": "Averaging the two batch means, 4 and 8, to get 6. That gives the one value batch the same weight as the two observed values in a.",
+      "verify": "`isTRUE(all.equal(summary(b)$mean, 16 / 3))` returns TRUE, and `summary(b)$rows` returns 4L."
+    },
+    {
+      "approach": "Check ids for type, NA, empty strings and duplicates, then check equal lengths, all before `structure()` attaches the class.",
+      "why": "`c(\"a\", \"a\")` fails the uniqueness rule, and `c(\"a\", \"b\")` with a single value fails the length rule. Each shape reaches its own message, so neither produces a labeled object.",
+      "wrong": "Skipping the length check. A batch with two ids and one value would report rows 2, observed 1 and missing 0, a ledger whose parts do not add up.",
+      "verify": "assert_error matches \"unique nonempty\" for the duplicates and \"equal length\" for the short vector."
+    },
+    {
+      "approach": "Return mean `NA_real_` with observed 0, keeping the missing count and the unit.",
+      "why": "With values NA and NA, nothing was measured, so no mean exists. The `if (any(observed))` guard also avoids `mean(numeric(0))`, which returns NaN, and the empty batch gets rows 0 and mean NA the same way.",
+      "wrong": "Returning 0. A reader sees a measured latency of 0 ms, and averaging it with other batches pulls their result down.",
+      "verify": "`is.na(summary(all_missing)$mean)` returns TRUE, and `summary(all_missing)$missing` returns 2L."
+    },
+    {
+      "approach": "Revalidate inside every public function, then compare units with identical() and stop on a mismatch.",
+      "why": "The forged object skips the constructor, but summary calls validate_batch, which reruns it and rejects Inf. A seconds batch fails the unit check, and a's id \"a\" repeated in another batch fails uniqueness.",
+      "wrong": "Checking only `inherits(x, \"metric_batch\")`. The forged batch would report mean Inf, and concatenating 1 s with values in ms would mix scales a thousand times apart.",
+      "verify": "assert_error matches \"incompatible batch units\", and `identical(a, before)` returns TRUE."
+    },
+    {
+      "approach": "Export metric_batch and combine_batches, register `S3method(summary,metric_batch)`, and keep validate_batch internal. State that passing checks describe these fixtures only.",
+      "why": "Registration lets `summary()` dispatch to the method without exporting it. validate_batch is a helper, so leaving it out keeps the interface small.",
+      "wrong": "Using an exportPattern that matches every name, which publishes validate_batch too, or saying the passing checks show latency improved.",
+      "verify": "`grepl(\"validate_batch\", namespace, fixed = TRUE)` returns FALSE for all three lines."
+    }
+  ]
+}

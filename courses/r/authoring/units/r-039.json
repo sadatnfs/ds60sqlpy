@@ -38,6 +38,12 @@
       "code": "data <- data.frame(x = 0:3)\ndata$twice_x <- 2 * data$x\ndesign <- model.matrix(~ x + twice_x, data = data)\nstopifnot(ncol(design) == 3L, qr(design)$rank == 2L)\nprint(c(columns = ncol(design), rank = qr(design)$rank))\n",
       "explanation": "twice_x is exactly determined by x. More column names do not create more independent information.",
       "expected": "Three columns, rank two."
+    },
+    {
+      "title": "One indicator per level plus an intercept",
+      "code": "data <- data.frame(group = factor(c(\"A\", \"A\", \"B\", \"B\"), levels = c(\"A\", \"B\")))\nmanual <- cbind(intercept = 1, is_a = as.numeric(data$group == \"A\"), is_b = as.numeric(data$group == \"B\"))\nstopifnot(ncol(manual) == 3L, qr(manual)$rank == 2L)\nstopifnot(all(manual[, \"is_a\"] + manual[, \"is_b\"] == manual[, \"intercept\"]))\nauto <- model.matrix(~group, data = data)\nstopifnot(identical(colnames(auto), c(\"(Intercept)\", \"groupB\")), qr(auto)$rank == 2L)\ncell_means <- model.matrix(~ 0 + group, data = data)\nstopifnot(identical(colnames(cell_means), c(\"groupA\", \"groupB\")), qr(cell_means)$rank == 2L)\nprint(auto)\n",
+      "explanation": "The hand built matrix has three columns but rank two, because in every row is_a plus is_b equals the intercept column. A fit with lm would report NA for is_b, since no data can say how much of the shared level belongs to the intercept and how much to the indicators. model.matrix avoids this under treatment contrasts by dropping the first declared level, so groupB measures B minus A. Removing the intercept with ~ 0 + group keeps both indicators, and each coefficient becomes a group mean. Both full rank designs give the same fitted values; they differ only in what each coefficient means.",
+      "expected": "Four rows with (Intercept) equal to 1 and groupB equal to 0, 0, 1, 1, followed by the assign and contrasts attributes."
     }
   ],
   "exercises": [

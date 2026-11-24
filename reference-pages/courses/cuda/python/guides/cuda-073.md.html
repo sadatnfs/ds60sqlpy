@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A Python GPU kernel is compiled from a restricted typed subset; the Python interpreter does not run independently on every GPU thread. Host-side allocation, file access, arbitrary objects and unsupported library calls stay outside the device function. Compilation specializes supported argument types and shapes or layouts according to the selected toolchain. The same syntax can therefore have different legality on host and device.</p>
 <p>Keep allocation and validation in a host wrapper. The kernel receives fixed buffers and scalar parameters, calculates its index, checks bounds and writes only its assigned output. That separation makes errors easier to locate. The maintained numba-cuda distribution uses the numba.cuda namespace, so the import spelling alone does not identify which package supplied the implementation. Pin and record the distribution in a prepared environment.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Restricted typed subset:</strong> The portion of Python that a kernel compiler can translate, with fixed scalar and array types and no arbitrary objects.</li>
+<li><strong>Device function:</strong> A function compiled for the GPU that kernels can call but the host cannot launch directly.</li>
+<li><strong>Type specialization:</strong> Compiling a separate machine-code version for each combination of argument types a function receives.</li>
+<li><strong>CPU oracle:</strong> An independent, simple CPU implementation whose results serve as the expected values for a GPU kernel.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A host wrapper allocates an output and checks equal input lengths. A device kernel writes <code>y[i] = 2*x[i]</code> only when i is in range.</p>
@@ -218,17 +225,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-host-and-device-statements">Exercise 1: Separate host and device statements<a class="heading-anchor" href="#exercise-1-separate-host-and-device-statements" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>separate host and device statements</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Moving the length check into the kernel, where each thread compares lengths and returns early, means a mismatch produces partial output instead of an error. The host never learns anything went wrong because a kernel cannot raise a Python exception.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-implement-the-cpu-oracle">Exercise 2: Implement the CPU oracle<a class="heading-anchor" href="#exercise-2-implement-the-cpu-oracle" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>implement the CPU oracle</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing the oracle with the same indexing code as the kernel, for example looping <code>i</code> over a launch-size range with the same guard, copies the kernel&#x27;s bugs into the reference, so both can agree and still be wrong.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-reject-mismatched-lengths">Exercise 3: Reject mismatched lengths<a class="heading-anchor" href="#exercise-3-reject-mismatched-lengths" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>reject mismatched lengths</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using <code>n = min(len(x), len(y))</code> to avoid the overflow silently drops elements. The program then returns a result of the wrong length, and the mismatch surfaces far from the call that caused it.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-move-an-allocation-out-of-a-kernel">Exercise 4: Move an allocation out of a kernel<a class="heading-anchor" href="#exercise-4-move-an-allocation-out-of-a-kernel" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>move an allocation out of a kernel</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Creating a list or calling <code>numpy.zeros</code> inside a <code>@cuda.jit</code> function fails to compile because those objects do not exist in device code. Working around it with a fixed-size local array caps the problem size silently.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-type-specialization">Exercise 5: Explain type specialization<a class="heading-anchor" href="#exercise-5-explain-type-specialization" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>explain type specialization</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming the decorated function still behaves like ordinary Python leads to passing mixed types or calling unsupported library functions; the result is a typing error at compile time, or an unintended second specialization with different precision.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-list-a-prepared-toolchain-ledger">Exercise 6: List a prepared toolchain ledger<a class="heading-anchor" href="#exercise-6-list-a-prepared-toolchain-ledger" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>list a prepared toolchain ledger</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing only the package name and the word CUDA tells a reader nothing about which runtime and driver were present, so a later failure on another machine cannot be compared with the original success.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

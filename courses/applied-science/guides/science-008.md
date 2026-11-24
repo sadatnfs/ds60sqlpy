@@ -16,6 +16,13 @@ Let \(\mathbf b\) contain bottom-level series and let \(\mathbf S\) map them to 
 
 The code uses linear solves rather than explicitly forming the inverse of the smaller normal-equation matrix. The mathematical expression describes the solution; implementation should still consider conditioning and matrix structure. A covariance estimate from very little data may be unstable, singular or misleadingly precise.
 
+## Key terms
+
+- **Coherence:** The requirement that forecasts respect aggregation constraints, so every total equals the sum of its components.
+- **Summing matrix:** The matrix S that maps bottom-level series b to every level of the hierarchy, so a coherent vector satisfies y = Sb.
+- **MinT reconciliation:** Weighted least squares that adjusts base forecasts to a coherent set using an error covariance approximation W.
+- **Error covariance approximation:** The positive-definite matrix W expressing relative forecast uncertainty; a small-sample estimate can be unstable or singular.
+
 ## Worked case 1: reconcile an inconsistent total
 
 There are two bottom-level series and one total, so the rows of \(\mathbf S\) are \([1,1]\), \([1,0]\) and \([0,1]\). The base forecast is \([12,4,5]\). Under an identity covariance matrix, reconciliation produces \([11,5,6]\). The total moves down by one and each component moves up by one. All three predictions contribute to the compromise.
@@ -43,6 +50,42 @@ Evaluate reconciled and unreconciled procedures at the same origins, with losses
 **Why use aggregate forecasts if bottom-level forecasts already sum correctly?** Aggregates can contain a stronger signal-to-noise ratio or different useful predictors. Reconciliation combines their information under an explicit uncertainty model. It is not a theorem that every aggregate forecast improves every component.
 
 **What should be delivered with a reconciled forecast?** Retain the hierarchy matrix, series definitions, base forecasts, covariance method, constraints, adjusted predictions and backtest. If a business reorganization changes the hierarchy, revise that structural contract before comparing the new output with an old series definition.
+
+## Worked example: OLS and WLS reconciliation of a two-region total
+
+```python
+import numpy as np
+
+S = np.array([[1, 1], [1, 0], [0, 1]], float)  # rows: total, region A, region B
+base = np.array([100.0, 70.0, 20.0])  # incoherent: 70 + 20 != 100
+
+
+def reconcile(W):
+    Wi = np.linalg.inv(W)
+    P = np.linalg.solve(S.T @ Wi @ S, S.T @ Wi)
+    return S @ P @ base
+
+
+ols = reconcile(np.eye(3))
+wls = reconcile(np.diag([1.0, 25.0, 1.0]))  # region A forecast is noisy
+print("base:", base, " incoherence", base[0] - base[1:].sum())
+print("OLS :", ols.round(3))
+print("WLS :", wls.round(3))
+
+low_total = np.array([10.0, 2.0, 20.0])  # total far below children
+print("OLS with small total:", (S @ np.linalg.solve(S.T @ S, S.T @ low_total)).round(3))
+```
+
+Observed output:
+
+```text
+base: [100.  70.  20.]  incoherence 10.0
+OLS : [96.667 73.333 23.333]
+WLS : [99.63  79.259 20.37 ]
+OLS with small total: [14. -2. 16.]
+```
+
+The base forecasts are incoherent by 10 units, since the regions sum to 90 while the total says 100. Ordinary least-squares reconciliation splits that gap evenly over the three series: the total drops by \(10/3\) to 96.667 and each region rises by the same amount, to 73.333 and 23.333. That is reasonable only if every base forecast is equally reliable. Giving region A a variance 25 times larger makes it the cheap place to absorb error, so the weighted projection moves A by more than 9 units to 79.259 and barely touches the total (99.63) and region B (20.37). The final line shows why coherence is not plausibility. With a total of 10 and children of 2 and 20, the gap is \(-12\) and OLS shifts each series by 4, producing a region A forecast of \(-2\). The result adds up perfectly and is impossible for nonnegative demand. A nonnegativity constraint, or a better base forecast for the total, is needed.
 
 ## Complete reproducible program
 

@@ -20,11 +20,25 @@ A complete path distinguishes node, Pod, Service and public entrypoint addresses
 
 **Expected:** Every hop names its caller, destination and responsible component.
 
+**Solution reasoning**
+
+- **Approach:** Name the caller, destination address and port and responsible component at every hop.
+- **Why it is correct:** Each hop can rewrite addresses or ports, so naming them shows where a mismatch would occur.
+- **Plausible wrong approach:** Describing the path as client to app hides the Service, proxy and Pod hops.
+- **How to verify:** Every hop has caller, destination and component.
+
 ## Exercise 2: Classify available and unavailable lab capabilities.
 
 An honest capability inventory prevents fake runtime claims and accidental installation or cloud provisioning.
 
 **Expected:** Controllers, policy enforcement, dual-stack and external routing are explicit.
+
+**Solution reasoning**
+
+- **Approach:** Mark which controllers, policy enforcement, dual-stack support and external routing the lab really has.
+- **Why it is correct:** Lessons can only verify capabilities that are present, so missing ones must be labeled.
+- **Plausible wrong approach:** Assuming a LoadBalancer or policy enforcer exists leads to claims nothing tested.
+- **How to verify:** Each capability is marked available or unavailable.
 
 ## Exercise 3: Produce a complete architecture and acceptance packet.
 
@@ -32,11 +46,25 @@ The packet should be usable by another learner with the documented prepared envi
 
 **Expected:** Diagram, manifests, ownership ledger, checks and limitations align.
 
+**Solution reasoning**
+
+- **Approach:** Assemble the diagram, manifests, ownership ledger, checks and limitations so they agree.
+- **Why it is correct:** Each part must describe the same resources and ports, or the packet contradicts itself.
+- **Plausible wrong approach:** Updating manifests without the diagram leaves reviewers checking a different system.
+- **How to verify:** The parts are consistent with each other.
+
 ## Exercise 4: Diagnose and repair the single target-port fault.
 
 Preserve the failure and keep other fields unchanged. This establishes causality more clearly than recreating every resource.
 
 **Expected:** The first incorrect mapping is found and a fresh request verifies repair.
+
+**Solution reasoning**
+
+- **Approach:** Walk the path until the Service targetPort no longer matches the container listener, then fix that field.
+- **Why it is correct:** The first incorrect mapping is the fault, and a fresh request after the fix proves repair.
+- **Plausible wrong approach:** Changing the container port and the Service together can hide which side was wrong.
+- **How to verify:** The fix touches one field, and a new request succeeds.
 
 ## Exercise 5: Verify isolation with both positive and negative flows.
 
@@ -44,8 +72,22 @@ A policy object existing or one successful request cannot establish isolation. K
 
 **Expected:** Allowed traffic succeeds and the denied owned case fails under an enforcing CNI.
 
+**Solution reasoning**
+
+- **Approach:** Run one flow the policy allows and one owned flow it denies, under a named enforcing CNI.
+- **Why it is correct:** Only the denied result shows enforcement, since allowed traffic also passes without any policy.
+- **Plausible wrong approach:** Testing only the allowed flow proves nothing on a CNI that ignores policies.
+- **How to verify:** The allowed flow succeeds and the denied flow fails.
+
 ## Exercise 6: Teach the system and defend its evidence limits.
 
 Independent understanding includes recognizing what remains unqualified. A good operator can stop at a missing capability without inventing success or widening authority.
 
 **Expected:** Explain mechanisms, current results, untested platforms and scoped cleanup.
+
+**Solution reasoning**
+
+- **Approach:** Explain mechanisms, present current results, list untested platforms and describe scoped cleanup.
+- **Why it is correct:** Clear limits let readers know which claims are proven here and which still need testing.
+- **Plausible wrong approach:** Presenting local lab results as valid for every cloud platform overclaims.
+- **How to verify:** The explanation covers mechanisms, results, untested platforms and cleanup.

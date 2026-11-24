@@ -9,11 +9,23 @@ The executable reference contains the two complete worked cases with assertions.
 
 Define the condition and verify a designed negative fixture. Do not treat every possible warning as equivalent to an accepted result.
 
+**Why it holds here:** In this lesson ready is materialized from events before tests run. An accepted_range test with min_value 0 on value makes a negative row a meaningful failure that blocks publication.
+
+**Plausible wrong approach:** Treating any warning as a block mixes noise with real failures and trains people to ignore the gate.
+
+**How to verify:** Seed a row with value -3, run build, and confirm the range test fails and published.json is not written.
+
 **Expected:** The candidate can be blocked by a meaningful semantic failure.
 
 ## 2. Inspect candidate state
 
 Use this observation to design consumer isolation. Hiding an error message does not remove invalid data from a relation.
+
+**Why it holds here:** After the duplicate-id build fails, the ready table still holds 2 rows. The reference asserts this count in both cases.
+
+**Plausible wrong approach:** Assuming a failed build removes the table hides that its bad rows are still readable.
+
+**How to verify:** Query select count(*) from ready after the failure and expect 2.
 
 **Expected:** Its materialized rows are still observable.
 
@@ -21,11 +33,23 @@ Use this observation to design consumer isolation. Hiding an error message does 
 
 A consumer should follow a declared accepted version or pointer, not whichever file was most recently written.
 
+**Why it holds here:** Consumers should read a named accepted version, not the newest file. The failed candidate must not replace the prior accepted output.
+
+**Plausible wrong approach:** Overwriting published.json before tests finish would replace good data with a candidate that later fails.
+
+**How to verify:** Publish the good case, then run the bad case and confirm the earlier published.json is still present and unchanged.
+
 **Expected:** The accepted version remains identifiable.
 
 ## 4. Handle an uncertain write
 
 Read the intended publication identifier or hash and determine whether it exists. Blind retries can duplicate side effects in less idempotent systems.
+
+**Why it holds here:** A timeout after writing leaves it unknown whether the file exists. Checking its identifier or hash resolves this before retrying.
+
+**Plausible wrong approach:** Retrying blindly can publish twice in a system where writes are not idempotent.
+
+**How to verify:** Compute the expected hash, check the destination for that hash, and retry only if it is missing.
 
 **Expected:** The response reconciles identity before retrying.
 
@@ -33,11 +57,23 @@ Read the intended publication identifier or hash and determine whether it exists
 
 Retain input and model versions, schema/grain, executed test outcomes and output identity. Keep provenance and semantic quality as distinct claims.
 
+**Why it holds here:** A receipt beside the data records input version, model version, test outcomes and output hash.
+
+**Plausible wrong approach:** Recording only a timestamp says nothing about which data or checks were accepted.
+
+**How to verify:** Write the receipt, then confirm each field matches run_results.json and the published file's hash.
+
 **Expected:** It identifies source, checks and data identity.
 
 ## 6. Test a stale artifact
 
 Use invocation and source/data identities. A successful result from a different run cannot justify publication of changed data.
+
+**Why it holds here:** A stale run_results.json describes an earlier invocation. Reusing it after changing the source would accept data that was never tested.
+
+**Plausible wrong approach:** Checking only that statuses say pass, without matching the invocation id, lets old evidence approve new data.
+
+**How to verify:** Change the seed, keep the old run_results, and confirm a gate that compares invocation ids rejects publication.
 
 **Expected:** A reviewed gate rejects the mismatched evidence.
 

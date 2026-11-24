@@ -44,7 +44,7 @@ await withBundle(async (directory) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.status, 0, result.stderr)`. Restoring the original line brings back the worked observation: three checks passed; actual Node version reported.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.status, 0, result.stderr)`. Restoring `const result = runBundle(directory, ['--self-test']);` brings back: three checks passed; actual Node version reported.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.status, 0, result.stderr)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -63,7 +63,7 @@ await withBundle(async (directory) => {
 });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.rejects(verifyBundle(directory), /digest mismatch/u)`; after it the line reads `await appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');` again and digest verification fails.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.rejects(verifyBundle(directory), /digest mismatch/u)`. Restoring `await appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');` brings back: digest verification fails.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.rejects(verifyBundle(directory), /digest mismatch/u)` for this input.
 

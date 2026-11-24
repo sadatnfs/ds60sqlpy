@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-030-assets-mapping-and-bounded-concurrency">apache-030: Assets, mapping and bounded concurrency<a class="heading-anchor" href="#apache-030-assets-mapping-and-bounded-concurrency" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-027</code>, <code>apache-029</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Asset:</strong> An Airflow object that names a logical data product by URI. Its update event is orchestration metadata, not a copy of the data.</li>
+<li><strong>Asset event:</strong> A record that a producer task updated an asset, which can trigger a consumer DAG scheduled on that asset.</li>
+<li><strong>Dynamic task mapping:</strong> Creating task instances at runtime from a collection, unlike a Python loop that runs when the DAG file is parsed.</li>
+<li><strong>Pool:</strong> A named limit on how many task instances can run at once. The workshop uses a one-slot pool to make its concurrency policy explicit.</li>
+<li><strong>Source-version readback:</strong> A consumer reading the actual retained files and recording their source identities, rather than trusting the asset event alone.</li>
+</ul>
 <h3 id="a-data-signal-does-not-transport-the-dataset">A data signal does not transport the dataset<a class="heading-anchor" href="#a-data-signal-does-not-transport-the-dataset" aria-label="Link to this section">#</a></h3>
 <p>An Airflow asset identifies a logical data product through an explicit URI. A successful producer task can emit an update event, and a consumer DAG can use that event as a scheduling condition. The event is orchestration metadata. It does not copy the data, verify its entire quality contract or guarantee that a consumer&#x27;s credentials can read the underlying storage.</p>
 <p>The workshop uses an explicitly synthetic asset URI for the owned daily-order output. The producer publishes the signal only after its atomic partition write succeeds. The consumer reads the actual retained files and records their source identities in its own bounded summaries. This connects the scheduling event to independent data readback without pretending the event itself contains the table.</p>

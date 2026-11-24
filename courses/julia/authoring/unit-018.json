@@ -3,6 +3,28 @@
   "title": "Dates, availability time and historical features",
   "concepts": ["Dates", "calendar period", "duration", "point-in-time", "tie rule"],
   "outcome": "Use calendar arithmetic deliberately and reconstruct features using both event and availability time.",
+  "key_terms": [
+    [
+      "Calendar period",
+      "A unit such as `Month(1)` whose length in days depends on the date it is added to, unlike `Day(30)`."
+    ],
+    [
+      "Month clamping",
+      "Adding one month to January 31 yields the last valid day of February instead of spilling into March."
+    ],
+    [
+      "Duration",
+      "Elapsed time in fixed units, such as the milliseconds produced by subtracting one `DateTime` from another."
+    ],
+    [
+      "Point-in-time correctness",
+      "Using only records whose availability time is at or before the decision time, rather than filtering by event time alone."
+    ],
+    [
+      "Tie rule",
+      "An explicit decision about whether a record available exactly at the cutoff counts as known, encoded and tested."
+    ]
+  ],
   "level": "intermediate",
   "minutes": 150,
   "prerequisites": ["julia-017"],
@@ -11,48 +33,67 @@
     ["Existing point-in-time data workflows", "../../../python/professional/README.md"]
   ],
   "figure": 0,
+  "approach": "Calendar periods and fixed durations are different types: `Month(1)` clamps to the end of a shorter month while `Day(30)` counts days. `historical_value` keeps only rows for the requested entity whose event time and availability time are both at or before the lookup time, then takes the last row ordered by event, availability and version.",
   "exercises": [
     {
       "title": "Choose a calendar window",
       "task": "Compare one month with thirty days from January 31 in the fixture.",
       "expected": "They end on February 29 and March 1.",
       "hint": "A month is not a fixed day duration.",
-      "answer": "The window definition changes which observations belong to a period."
+      "answer": "The window definition changes which observations belong to a period.",
+      "why": "Starting at 2024-01-31, `Month(1)` clamps to the leap-year end of February, 2024-02-29, while `Day(30)` lands on 2024-03-01.",
+      "wrong": "Using `Day(30)` as a month makes reporting windows drift and, here, skips the last day of February entirely.",
+      "verify": "Example A asserts both dates; the reference also checks `Date(2024, 2, 28) + Day(1) == Date(2024, 2, 29)`."
     },
     {
       "title": "Inspect repeated month addition",
       "task": "Compare two successive month additions with one two-month addition.",
       "expected": "The fixture ends on March 29 versus March 31.",
       "hint": "End-of-month clamping affects the intermediate state.",
-      "answer": "Calendar operations should follow the intended business rule rather than an assumed arithmetic identity."
+      "answer": "Calendar operations should follow the intended business rule rather than an assumed arithmetic identity.",
+      "why": "Adding one month twice goes January 31 to February 29 and then to March 29, while `Month(2)` jumps straight to March 31.",
+      "wrong": "Assuming `start + Month(1) + Month(1)` and `start + Month(2)` always agree ignores that the first form stores a clamped intermediate.",
+      "verify": "Example A asserts `february + Month(1) == Date(2024, 3, 29)` and `start + Month(2) == Date(2024, 3, 31)`."
     },
     {
       "title": "Exclude a future correction",
       "task": "Look up the feature on January 3.",
       "expected": "The available value is 10.",
       "hint": "Filter availability as well as event time.",
-      "answer": "A correction about a past event can still be future information."
+      "answer": "A correction about a past event can still be future information.",
+      "why": "On January 3, the version 2 row is not yet available because its availability time is January 4, so only the value 10 qualifies.",
+      "wrong": "Filtering on event time alone returns 20, using a correction that nobody could have known on January 3.",
+      "verify": "Example B asserts `historical_value(rows, \"a\", DateTime(2024, 1, 3)) == 10`."
     },
     {
       "title": "State cutoff equality",
       "task": "Look up at the exact availability timestamp.",
       "expected": "The inclusive cutoff returns the row whose availability time equals the lookup time.",
       "hint": "Use the declared boundary policy.",
-      "answer": "Real ingestion timing may require another rule, which must be documented and tested."
+      "answer": "Real ingestion timing may require another rule, which must be documented and tested.",
+      "why": "The filter uses `row.available <= at`, so at exactly January 4 the version 2 row is eligible and the result is 20.",
+      "wrong": "Switching to `<` without saying so moves every boundary lookup one row earlier and changes the training features.",
+      "verify": "The reference asserts the single-row case returns `missing` on January 3 and 7 on January 4."
     },
     {
       "title": "Preserve entity identity",
       "task": "Look up an absent entity.",
       "expected": "The result is missing.",
       "hint": "Do not choose the latest row from another entity.",
-      "answer": "An information boundary also needs the correct relational key."
+      "answer": "An information boundary also needs the correct relational key.",
+      "why": "Entity `b` has no rows, so the eligible list is empty and the function returns `missing`.",
+      "wrong": "Dropping the entity condition would return the latest value of entity `a`, assigning one subject's history to another.",
+      "verify": "Example B asserts `ismissing(historical_value(rows, \"b\", DateTime(2024, 1, 5)))`."
     },
     {
       "title": "Handle local civil time",
       "task": "Receive a daylight-saving-ambiguous local timestamp.",
       "expected": "The standard fixture does not resolve it.",
       "hint": "Dates alone does not supply timezone identity.",
-      "answer": "Use a separately prepared timezone-aware policy rather than silently labeling a local clock value as UTC."
+      "answer": "Use a separately prepared timezone-aware policy rather than silently labeling a local clock value as UTC.",
+      "why": "A `DateTime` from the Dates standard library has no zone, so a local time repeated by a daylight-saving change is just two equal-looking values.",
+      "wrong": "Treating local clock readings as UTC shifts availability by the offset and can reorder events across the change.",
+      "verify": "Record the source zone, convert with a timezone-aware package outside this fixture and test both occurrences of the repeated hour."
     }
   ]
 }

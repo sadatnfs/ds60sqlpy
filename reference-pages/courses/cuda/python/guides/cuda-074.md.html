@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A launch creates blocks containing threads. For one-dimensional indexing, global index equals block index times threads per block plus thread index. The last block often contains lanes beyond the input length. Guard every load and store that would otherwise access those lanes. Ceiling division creates enough blocks, while floor division silently omits a tail.</p>
 <p>A grid-stride loop lets a bounded launch cover larger arrays: after processing index i, advance by the total number of launched threads. Every valid index should be visited exactly once for an elementwise operation. Test zero, one, block size minus one, block size, block size plus one and a nonmultiple. CPU scheduling models can prove the intended integer mapping, but cannot prove race freedom or GPU memory safety.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Global thread index:</strong> The value <code>blockIdx.x * blockDim.x + threadIdx.x</code>, the unique element position assigned to a thread across the grid.</li>
+<li><strong>Tail guard:</strong> A bounds check that stops threads whose index is past the last element when the grid is larger than the data.</li>
+<li><strong>Ceiling division:</strong> The block count <code>(n + block - 1) // block</code>, which covers every element when n is not a multiple of the block size.</li>
+<li><strong>Grid-stride loop:</strong> A loop in which each thread advances by the total thread count, letting a fixed grid process any input length.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>For n=10 and block size 4, three blocks launch 12 lanes. Indices 0 through 9 are valid, while 10 and 11 must not access the buffer.</p>
@@ -215,6 +222,32 @@ strided <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>strided<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU indexing model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> visits<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Every valid index appears exactly once.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>n</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>block</code></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>blocks</code></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>visits</code></td>
+<td><code>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</code></td>
+</tr>
+<tr>
+<td><code>strided</code></td>
+<td><code>[0, 6, 12, 1, 7, 13, 2, 8, 3, 9, 4, 10, 5, 11]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
 <p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
@@ -245,17 +278,23 @@ kernel <span class="syntax-operator">=</span> cp<span class="syntax-operator">.<
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA tail tests passed for zero, singleton and nonmultiples</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-launch-size-for-n-17">Exercise 1: Compute launch size for n=17<a class="heading-anchor" href="#exercise-1-compute-launch-size-for-n-17" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute launch size for n=17</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Computing <code>n // block = 4</code> blocks is the floor-division mistake; the program runs without error and the last element is never written, so its output slot keeps whatever value was in the allocation.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-trace-the-last-block">Exercise 2: Trace the last block<a class="heading-anchor" href="#exercise-2-trace-the-last-block" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>trace the last block</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming only one lane is out of range, or guarding with <code>i &lt;= n</code>, lets index 17 through. That reads one element past the end, which may return a neighbor&#x27;s data or trip a memory checker.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-test-zero-without-launching">Exercise 3: Test zero without launching<a class="heading-anchor" href="#exercise-3-test-zero-without-launching" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>test zero without launching</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Clamping the grid to at least one block avoids the launch error but runs lanes whose guard is always false. That works, but it hides the empty case inside the kernel and still pays launch overhead for no work.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-implement-grid-stride-coverage">Exercise 4: Implement grid-stride coverage<a class="heading-anchor" href="#exercise-4-implement-grid-stride-coverage" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>implement grid-stride coverage</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Advancing by <code>block_size</code> instead of the total thread count makes threads in different blocks visit the same indices. The output may still look right for idempotent writes, but accumulations double count.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-find-floor-division-data-loss">Exercise 5: Find floor-division data loss<a class="heading-anchor" href="#exercise-5-find-floor-division-data-loss" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>find floor-division data loss</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Fixing it by launching <code>n // block + 1</code> blocks always adds a block even when <code>n</code> is a multiple of the block size. That is safe with a guard but launches an entire idle block for <code>n = 8</code>.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-specify-a-sanitizer-check">Exercise 6: Specify a sanitizer check<a class="heading-anchor" href="#exercise-6-specify-a-sanitizer-check" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>specify a sanitizer check</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating the passing CPU model as proof that the kernel is memory safe confuses the model of the formula with the code a compiler generated.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

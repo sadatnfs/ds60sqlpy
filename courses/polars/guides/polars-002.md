@@ -14,6 +14,14 @@ This is a data-dependency rule, not a promise about the machine's execution orde
 
 Strings require equal care. In many expression positions a bare string denotes a column name. pl.lit("paid") unambiguously describes a literal value. Conditions should state what happens for every row, including missing conditions, and each output should have a deliberate name. The purpose of an alias is to define a result schema, not merely to improve a printed table.
 
+## Key terms
+
+- **select:** The context that returns only the columns or reductions its expressions produce.
+- **with_columns:** The context that keeps every existing column and adds or replaces the columns its expressions produce.
+- **alias:** The expression method that names the output column instead of the name Polars would derive.
+- **Literal:** A constant wrapped as an expression with `pl.lit`, so it can be combined with columns or broadcast to every row.
+- **Dependency ordering:** Every expression in one call reads the input frame, so a column created in a call is visible only to a later call.
+
 ## Syntax and data contract
 
 In pl.col("x")+1, x is selected from the current input. alias("x") asks the result to use that name, replacing the returned x column. Two calls form two contexts: frame.with_columns(...).with_columns(...). A when/then/otherwise expression constructs conditional values; pl.lit distinguishes a constant from a column reference. Prefer readable intermediate names when a calculation has several stages.

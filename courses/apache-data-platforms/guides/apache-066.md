@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-065`, `apache-063`.
 
+## Key terms
+
+- **EXPLAIN:** A Hive statement that shows the planned stages, scans, filters, joins and aggregations for a query without running it.
+- **Table statistics:** Row counts, sizes and column distributions stored for planning. Stale or missing statistics can produce a correct but inefficient plan.
+- **Map join:** A join in which the small table is loaded into memory on each task so the large table needs no shuffle.
+- **Join cardinality:** How many rows a join produces. Duplicate keys can multiply rows without any error, so it must be checked independently.
+- **Execution engine:** The runtime, such as Tez or a local path, that Hive uses to carry out a plan. Having Tez installed does not prove a query used it.
+
 ## A SQL plan describes work, not just a desired answer
 
 Hive SQL expresses a relational result. The selected execution engine, optimizer,

@@ -1,6 +1,6 @@
 """Stage one: explain the model and the question before manipulating context."""
 
-from .common import lesson
+from .common import explain, lesson
 from .common import result as r
 from .common import task as t
 
@@ -837,3 +837,571 @@ LESSONS = [
         ],
     ),
 ]
+
+
+REASONING = {
+    1: [
+        (
+            (
+                "QuantitySold sums Sales[Quantity] over the same eight unfiltered lines that "
+                "produce 187, so both measures share one context: 2 + 1 + 2 + 3 + 4 + 1 + 2 + 2 = "
+                "17 units beside 187 USD of NetAmount."
+            ),
+            (
+                "Counting distinct Sales[ProductKey] values returns 3 and COUNTROWS(Sales) returns "
+                "8. Neither is a unit total, and placing 17 and 187 in one sum would add units to "
+                "dollars."
+            ),
+            (
+                "`DEFINE MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] ) MEASURE "
+                "Sales[QuantitySold] = SUM ( Sales[Quantity] ) EVALUATE ROW ( "
+                '"Revenue", [NetRevenue], "Units", [QuantitySold] )` should return 187 and 17 '
+                "in a single row."
+            ),
+        ),
+        (
+            (
+                "Mug is ProductKey 3, and the active one-to-many Product relationship carries that "
+                "key to Sales, keeping S3 (40), S6 (20) and S8 (36). The worked Notebook case "
+                "follows the same path through S1, S4 and S7 to reach 67."
+            ),
+            (
+                'Filtering Product[Category] = "Home" also gives 96 today only because Mug is '
+                "the sole Home product. It answers a category question and would drift silently "
+                "once another Home item sells."
+            ),
+            (
+                'Run `CALCULATETABLE ( VALUES ( Sales[SaleID] ), Product[Product] = "Mug" )` and '
+                "expect exactly S3, S6 and S8, then confirm the revenue row shows 96."
+            ),
+        ),
+        (
+            (
+                "EVALUATE needs a table, so ROW turns one named scalar into a one-row result. "
+                "SUM(Sales[Quantity]) has no filters here, so it sees all eight lines and returns "
+                "17."
+            ),
+            (
+                "Writing SUMX(Sales, Sales[Quantity] * Sales[UnitPrice]) under the QuantitySold "
+                "label returns 195, which is gross revenue in dollars, not a count of units."
+            ),
+            (
+                "The result has one column named QuantitySold and one value, 17. Add "
+                "`DEFINE MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )` to the query and "
+                "return `[QuantitySold]` beside it under the same empty filter context: both "
+                "columns read 17."
+            ),
+        ),
+        (
+            (
+                "NetAmount already subtracts line discounts: gross revenue is 195 and the "
+                "discounts on S2, S4 and S8 are 1 + 3 + 4 = 8, so 187 is discounted sales. Product "
+                "cost is a separate column on Product."
+            ),
+            (
+                "Relabeling 187 as profit ignores UnitCost entirely. Cost on these lines is "
+                "Notebook 7 x 2, Pen 5 x 1 and Mug 5 x 5, or 44 in total, so a margin before "
+                "returns and tax would be 143."
+            ),
+            (
+                "`SUMX ( Sales, Sales[Quantity] * RELATED ( Product[UnitCost] ) )` returns 44, and "
+                "[NetRevenue] minus that cost returns 143 rather than 187."
+            ),
+        ),
+        (
+            (
+                "The worked result table is tied to the saved reference file and model.json, which "
+                "are the only inputs that reference-results.json hashes. A comment in a draft is "
+                "neither."
+            ),
+            (
+                "Seeing 187 in the reference table after editing the draft and concluding that the "
+                "draft formula ran. The table did not change because nothing it depends on "
+                "changed."
+            ),
+            (
+                "Compare reference-results.json before and after the edit; its hash and its 187 "
+                "stay identical, while only the draft file timestamp moves."
+            ),
+        ),
+        (
+            (
+                "Engine testing is a claim about an execution, so it needs the observations an "
+                "execution produces: which engine and version, which model file, what filter "
+                "context, which exact query text and what value came back."
+            ),
+            (
+                "Treating an offline match of 187 as an engine result. The comparison checks "
+                "arithmetic against a hand-derived table and never submits the formula to any "
+                "engine."
+            ),
+            (
+                "A complete record reads like: engine and build, retail model, no filters, the "
+                "exact submitted ROW query and an observed 187. A missing field means the claim is "
+                "unverified."
+            ),
+        ),
+    ],
+    2: [
+        (
+            (
+                "DISTINCTCOUNT(Sales[CustomerKey]) counts keys that actually appear on fact rows. "
+                "Sales carries keys 10, 20 and 30, so three customers bought something even though "
+                "the dimension holds four."
+            ),
+            (
+                "COUNTROWS(Customer) returns 4 because it counts Di (key 40), who has no sales. It "
+                "answers how many customers exist, not how many purchased."
+            ),
+            (
+                '`EVALUATE ROW ( "Buyers", DISTINCTCOUNT ( Sales[CustomerKey] ), "Customers", '
+                "COUNTROWS ( Customer ) )` should return 3 and 4."
+            ),
+        ),
+        (
+            (
+                "SaleID is the row identity for this grain. A second S2 adds one line and its "
+                "NetAmount of 4, so lines become 9 and revenue 191, while order 101 still counts "
+                "once."
+            ),
+            (
+                "Using DISTINCTCOUNT(Sales[OrderID]) as the health check. It still returns 7 after "
+                "the duplicate, so the test passes while revenue is overstated by 4."
+            ),
+            (
+                "Compare COUNTROWS(Sales) with DISTINCTCOUNT(Sales[SaleID]); 9 against 8 exposes "
+                "the duplicate, and clean data gives 8 and 8."
+            ),
+        ),
+        (
+            (
+                "Revenue per order is a ratio of two totals computed in the same context: 187 / 7 "
+                "is about 26.71 for the whole model, and 24 / 1 = 24 for order 101. DIVIDE returns "
+                "BLANK instead of an error when no order is visible."
+            ),
+            (
+                "AVERAGE(Sales[NetAmount]) gives 187 / 8 = 23.375, the average line, because it "
+                "divides by eight sale lines rather than seven orders."
+            ),
+            (
+                "AVERAGEX ( VALUES ( Sales[OrderID] ), [NetRevenue] ) also returns about 26.71 "
+                "overall, a useful cross-check that both forms average at order grain."
+            ),
+        ),
+        (
+            (
+                "Notebook appears in orders 101, 201 and 204, Pen in 101 and 202, and Mug in 102, "
+                "203 and 205. Order 101 holds both a Notebook and a Pen line, so it belongs to two "
+                "product rows."
+            ),
+            (
+                "Adding the product rows with SUMX ( VALUES ( Product[Product] ), [OrderCount] ) "
+                "returns 8 and counts order 101 twice."
+            ),
+            (
+                "The matrix total row should still read 7, because DISTINCTCOUNT is evaluated "
+                "again in the total context instead of summing 3 + 2 + 3."
+            ),
+        ),
+        (
+            (
+                "DISTINCTCOUNT treats BLANK as one more distinct value. A ninth line with an empty "
+                "OrderID would raise the order count from 7 to 8 even though no new known order "
+                "exists."
+            ),
+            (
+                "Assuming DISTINCTCOUNT skips blanks the way COUNT skips empty cells. That "
+                "inflates the order count by one and quietly lowers revenue per order."
+            ),
+            (
+                "Report COUNTBLANK(Sales[OrderID]) beside both DISTINCTCOUNT and "
+                "DISTINCTCOUNTNOBLANK; with one blank line they should read 1, 8 and 7, making the "
+                "policy visible."
+            ),
+        ),
+        (
+            (
+                "A visit with several charge lines has the same shape as order 101 with two sale "
+                "lines. Visits are counted by distinct visit ID, money is summed at charge-line "
+                "grain, and each line keeps its own key."
+            ),
+            (
+                "Using COUNTROWS(Charges) as the visit count, which turns a visit with three "
+                "charges into three visits, just as COUNTROWS(Sales) gives 8 instead of 7 orders."
+            ),
+            (
+                "Check that the distinct visit count never exceeds the charge-line count and that "
+                "COUNTROWS(Charges) equals DISTINCTCOUNT(Charges[LineID])."
+            ),
+        ),
+    ],
+    3: [
+        (
+            (
+                'Product[Category] = "Home" keeps only ProductKey 3, and Customer[Region] = '
+                '"North" keeps keys 10 and 30. Each filter flows down its own active '
+                "relationship, and Sales keeps only rows that pass both, which leaves S8."
+            ),
+            (
+                'CALCULATE ( [NetRevenue], ALL ( Customer ), Product[Category] = "Home" ) on a '
+                "North row returns 96, because ALL removes the region filter that should restrict "
+                "the Mug lines."
+            ),
+            (
+                '`CALCULATETABLE ( VALUES ( Sales[SaleID] ), Product[Category] = "Home", '
+                'Customer[Region] = "North" )` should list S8 alone, worth 36.'
+            ),
+        ),
+        (
+            (
+                "Filters on Product and on Customer are independent, so replacing Paper with Home "
+                "changes only the product side. The North customer filter stays and still removes "
+                "Bo's Mug lines S3 and S6."
+            ),
+            (
+                "Reading the Home figure from a card that has no region filter shows 96 and "
+                "silently drops the North condition that the question still carries."
+            ),
+            (
+                "Paper in North (71) plus Home in North (36) should equal North revenue: S1, S2, "
+                "S4, S5 and S8 give 107."
+            ),
+        ),
+        (
+            (
+                "Each dimension sits on the one side of a single-direction relationship and "
+                "filters Sales on the many side. Product and Customer meet at Sales but never "
+                "filter each other."
+            ),
+            (
+                "Drawing an arrow from Product through Sales into Customer. That would mean a "
+                "Paper filter shrinks the Customer table, which single-direction relationships do "
+                "not do."
+            ),
+            (
+                'Under Product[Category] = "Paper", COUNTROWS(Customer) still returns 4, while '
+                "DISTINCTCOUNT(Sales[CustomerKey]) returns 3 for customers 10, 20 and 30."
+            ),
+        ),
+        (
+            (
+                "Paper rows (S1, S2, S4, S5, S7) and North rows (S1, S2, S4, S5, S8) share four "
+                "lines worth 71. The question asks for that intersection, which one CALCULATE with "
+                "both filters returns."
+            ),
+            (
+                "Adding 91 and 107 to get 198 counts the shared 71 twice and also includes Paper "
+                "sales to Bo and Mug sales to Cy, neither of which is Paper in the North."
+            ),
+            (
+                "The union is 91 + 107 - 71 = 127, and the intersection query returns 71; neither "
+                "equals 198."
+            ),
+        ),
+        (
+            (
+                'Customer[Region] = "West" keeps Di, key 40, but no Sales row carries key 40. '
+                "SUM over zero eligible rows returns BLANK, which means no sales, not a missing "
+                "dimension member."
+            ),
+            (
+                "Wrapping the measure as [NetRevenue] + 0 to show zero. It turns every empty "
+                "combination, such as Bag in the West, into a visible row and erases the "
+                "difference between no activity and a zero amount."
+            ),
+            (
+                "Under the West filter, COUNTROWS(Customer) returns 1, COUNTROWS(Sales) returns "
+                "BLANK and ISBLANK([NetRevenue]) returns TRUE."
+            ),
+        ),
+        (
+            (
+                "Region is a current attribute on a single Customer row. If Bo moved from South to "
+                "North, every Bo line (S3, S6 and S7, worth 80) would move into North history, "
+                "including 2024."
+            ),
+            (
+                "Editing Customer[Region] in place for the move. North 2024 revenue would jump "
+                "from 24 to 64, rewriting a year that has already been reported."
+            ),
+            (
+                "With a historical key or an event-time region on Sales, North 2024 should stay at "
+                "24 (S1 and S2) after the change, while new sales follow the new region."
+            ),
+        ),
+    ],
+    4: [
+        (
+            (
+                "The filter sits on Sales[SaleID], so the fact table is reduced to the S4 line and "
+                "counting keys in that filtered fact sees ProductKey 1 only. Product itself is "
+                "untouched because the relationship flows from Product to Sales."
+            ),
+            (
+                "Reading COUNTROWS(Product) = 4 in the same context as four products involved in "
+                "S4. That count measures the unfiltered dimension, not the line."
+            ),
+            (
+                'Under Sales[SaleID] = "S4", ROW("FactKeys", DISTINCTCOUNT(Sales[ProductKey]), '
+                '"DimRows", COUNTROWS(Product)) returns 1 and 4.'
+            ),
+        ),
+        (
+            (
+                "The dimension lists Notebook, Pen, Mug and Bag, but Sales only carries keys 1, 2 "
+                "and 3. Bag is a catalog member with no fact rows, so the two counts answer "
+                "different questions."
+            ),
+            (
+                "Labeling DISTINCTCOUNT(Product[ProductKey]) as products sold. It returns 4 and "
+                "counts Bag, which has never sold."
+            ),
+            (
+                "`EXCEPT ( VALUES ( Product[ProductKey] ), VALUES ( Sales[ProductKey] ) )` should "
+                "return key 4 alone, explaining the gap between 4 and 3."
+            ),
+        ),
+        (
+            (
+                "Each count names its population, so the result stays readable under any filter. "
+                'With no filter it returns 4 and 3; under Product[Color] = "Blue" both become 2 '
+                "(Notebook and Mug), and under SaleID S4 they read 4 and 1."
+            ),
+            (
+                "Giving both columns the label Products. A reader then sees 4 and 3 side by side "
+                "with no way to tell catalog size from sold assortment."
+            ),
+            (
+                "Run the query three times (no filter, Blue, S4) and expect 4 and 3, 2 and 2, then "
+                "4 and 1."
+            ),
+        ),
+        (
+            (
+                "Setting the Product relationship to both directions changes every measure that "
+                "counts Product: under SaleID S4, COUNTROWS(Product) would fall from 4 to 1. With "
+                "Customer also bidirectional, Product and Customer gain a path through Sales."
+            ),
+            (
+                "Flipping the relationship to Both so one empty cell fills in. The other visuals "
+                "that relied on single-direction behavior then change silently."
+            ),
+            (
+                "Prefer CALCULATE ( COUNTROWS ( Product ), CROSSFILTER ( Sales[ProductKey], "
+                "Product[ProductKey], BOTH ) ) inside one measure, and confirm that the plain "
+                "COUNTROWS(Product) under S4 still returns 4."
+            ),
+        ),
+        (
+            (
+                "A one-to-many relationship requires each ProductKey once on the Product side. Two "
+                "rows for key 1 mean Notebook's 67 has two candidate labels, and display order "
+                "cannot choose one."
+            ),
+            (
+                "Sorting the dimension so the preferred label appears first. Relationships and "
+                "lookups do not read rows in display order, so the ambiguity remains."
+            ),
+            (
+                "COUNTROWS(Product) must equal DISTINCTCOUNT(Product[ProductKey]); on the clean "
+                "fixture both are 4."
+            ),
+        ),
+        (
+            (
+                "An inner join keeps only matched rows. In the unknown-member variant, S9 has "
+                "ProductKey 999 and amount 7, and the regular relationship assigns it to the blank "
+                "Product member instead of dropping it."
+            ),
+            (
+                "Using the inner-join total of 187 as the oracle for the model. The model reports "
+                "194, and the 7 difference is S9 under the blank member, not a DAX bug."
+            ),
+            (
+                "A SQL LEFT JOIN that labels unmatched keys Unknown returns 187 for known products "
+                "plus 7 for Unknown, matching the model grand total of 194."
+            ),
+        ),
+    ],
+    5: [
+        (
+            (
+                "EVALUATE accepts a table expression, while SUM returns a scalar. ROW builds a "
+                "one-row table with a named column, so the corrected query returns Revenue = 187."
+            ),
+            (
+                "Wrapping the scalar in CALCULATE instead, as in EVALUATE CALCULATE ( SUM ( "
+                "Sales[NetAmount] ) ). The expression is still a scalar, so the query fails the "
+                "same way."
+            ),
+            (
+                "The repaired result has exactly one row and one column, Revenue, with the value "
+                "187."
+            ),
+        ),
+        (
+            (
+                'SELECTCOLUMNS takes name and expression pairs, so adding "Quantity", '
+                "Sales[Quantity] extends the projection without changing which two rows TOPN "
+                "selected."
+            ),
+            (
+                'Replacing the Amount pair with Quantity, or writing "Amount", Sales[Quantity]. '
+                "The second form keeps a revenue label on a unit column."
+            ),
+            "The result should show three columns: S1 with 20 and 2, then S2 with 4 and 1.",
+        ),
+        (
+            (
+                "TOPN with DESC chooses the set S8, S7 and S6, but TOPN does not promise an output "
+                "order. The outer ORDER BY [Line] DESC states the display order explicitly."
+            ),
+            (
+                "Keeping TOPN on ASC and only changing ORDER BY to DESC. That shows S3, S2 and S1 "
+                "in descending order, which is the wrong set displayed backward."
+            ),
+            "The rows should read S8 with 36, S7 with 20 and S6 with 20, in that order.",
+        ),
+        (
+            (
+                "The name RevenueUSD lives only in that one result table. A later query sees only "
+                "the model's measures, so it must define its own measure or reuse [NetRevenue]."
+            ),
+            (
+                "Referencing [RevenueUSD] in a second EVALUATE as if it were a measure. The query "
+                "fails because no model object has that name."
+            ),
+            (
+                "Starting the second query with DEFINE MEASURE Sales[RevenueUSD] = [NetRevenue] "
+                'and evaluating ROW ( "RevenueUSD", [RevenueUSD] ) returns 187.'
+            ),
+        ),
+        (
+            (
+                "TOPN keeps every row tied with the last value it accepts. Ranked by NetAmount, "
+                "the top values are 40, 36 and 27, and then four lines (S1, S5, S6 and S7) all "
+                "share 20."
+            ),
+            (
+                "Expecting TOPN ( 4, Sales, Sales[NetAmount], DESC ) to return four rows. It "
+                "returns seven because all four tied lines at 20 enter together."
+            ),
+            (
+                "COUNTROWS on that TOPN returns 7; adding Sales[SaleID], ASC as a second ordering "
+                "key returns exactly S3, S8, S4 and S1."
+            ),
+        ),
+        (
+            (
+                "A query is evaluated when it is submitted, under the filters it states. A "
+                "calculated table is computed during model refresh and stored, so its values do "
+                "not respond to report filters."
+            ),
+            (
+                "Building a calculated table of category revenue to feed a region slicer. Its "
+                "stored Paper 91 and Home 96 stay fixed when North is chosen."
+            ),
+            (
+                'The query evaluated with Customer[Region] = "North" returns Paper 71 and Home '
+                "36, while the stored calculated table still shows 91 and 96."
+            ),
+        ),
+    ],
+    6: [
+        (
+            (
+                "S9 is a real sale whose key 999 has no Product row. The regular relationship "
+                "places it under the blank Product member, so known products still total 187 and "
+                "the fact total becomes 194."
+            ),
+            (
+                "Filtering out the blank product, or trusting an inner join, and calling 187 the "
+                "total. That hides Ada's seventh dollar of 2025 revenue."
+            ),
+            (
+                'ROW("Total", [NetRevenue]) returns 194, and CALCULATE ( [NetRevenue], '
+                "Sales[ProductKey] = 999 ) returns 7."
+            ),
+        ),
+        (
+            (
+                "Adding Product key 999 gives S9 a matching row, so EXCEPT has nothing left to "
+                "return and the blank member disappears. The total stays 194; only the attribution "
+                "changes."
+            ),
+            (
+                "Expecting the grand total to move when the member is added. The rows in Sales are "
+                "the same, so only the label on 7 of revenue changes."
+            ),
+            (
+                "EXCEPT returns an empty table, COUNTROWS(Product) becomes 5, and the grand total "
+                "still reads 194."
+            ),
+        ),
+        (
+            (
+                "The two findings fail different contracts. The candidate table has 3 rows but 2 "
+                "unique keys because key 1 carries two labels, while key 999 exists in Sales "
+                "without any Product member."
+            ),
+            (
+                "Logging one generic data-quality issue and repairing it by removing duplicates "
+                "from Sales. Neither problem is a duplicate fact row, so the ledger would close "
+                "the wrong ticket."
+            ),
+            (
+                "The ledger has two rows: duplicate key 1 with evidence 3 rows and 2 unique keys, "
+                "and unmatched key 999 on S9 with amount 7. Each row names a separate owner and "
+                "decision."
+            ),
+        ),
+        (
+            (
+                "Category totals cover only matched products, Paper 91 and Home 96, which is 187, "
+                "while the fact total is 194. The 7 difference is a known, explainable population, "
+                "not an error in the measure."
+            ),
+            (
+                "Deleting S9 so the categories reconcile. Ada's revenue then falls from 58 (S1, "
+                "S2, S4 and S9) to 51, and the report no longer matches recorded sales."
+            ),
+            (
+                "Show an Unknown row worth 7 beside Paper and Home; the three rows add to 194 and "
+                "Ada still totals 58."
+            ),
+        ),
+        (
+            (
+                "Bag is the mirror image of S9: a dimension row with no fact rows, not a fact row "
+                "with no dimension. EXCEPT in the other direction, from Product to Sales keys, "
+                "returns 4."
+            ),
+            (
+                "Treating Bag as a data error and deleting it. That shrinks the catalog to three "
+                "products and removes a legitimate zero-sales item from assortment reports."
+            ),
+            (
+                "Bag's [NetRevenue] is BLANK, COUNTROWS(Product) is 4, and "
+                "DISTINCTCOUNT(Sales[ProductKey]) is also 4 here, but for keys 1, 2, 3 and 999."
+            ),
+        ),
+        (
+            (
+                "Assignments hold the randomized units U1 to U4, one row each, while Exposures "
+                "repeat U3 twice and never mention U4. The unit list is the identity table; "
+                "exposures are events against it."
+            ),
+            (
+                "Counting exposure rows as units. That gives 4 exposures but only 3 exposed units, "
+                "and it would count U3 twice in any per-unit rate."
+            ),
+            (
+                "COUNTROWS(Assignments) and DISTINCTCOUNT(Assignments[UnitID]) both return 4, "
+                "DISTINCTCOUNT(Exposures[UnitID]) returns 3, and EXCEPT from exposure keys to "
+                "assignment keys is empty."
+            ),
+        ),
+    ],
+}
+
+explain(LESSONS, REASONING)

@@ -38,6 +38,12 @@
       "code": "total_net <- function(data) {\n  stopifnot(!anyNA(data$id), !anyDuplicated(data$id))\n  amount <- data$quantity * data$price - data$discount\n  stopifnot(all(is.finite(amount)))\n  sum(amount)\n}\nlines <- data.frame(id = c(\"L1\", \"L2\"), quantity = c(2, 3), price = c(4, 5), discount = c(1, 2))\nstopifnot(total_net(lines) == 20, total_net(lines[2:1, ]) == 20)\nprint(total_net(lines))\n",
       "explanation": "The total is seven plus thirteen regardless of input row order. This invariant would not apply unchanged to a sequence-dependent lag calculation.",
       "expected": "20 in either order."
+    },
+    {
+      "title": "Sorting one column tears records apart",
+      "code": "lines <- data.frame(id = c(\"C\", \"A\", \"B\"), quantity = c(2, 1, 3), price = c(5, 8, 4), discount = c(1, 0, 0))\nwrong <- lines\nwrong$price <- sort(wrong$price)\nwrong_net <- wrong$quantity * wrong$price - wrong$discount\nright <- lines[order(lines$id), , drop = FALSE]\nright_net <- right$quantity * right$price - right$discount\nstopifnot(identical(wrong_net, c(7, 5, 24)), sum(wrong_net) == 36)\nstopifnot(identical(right$id, c(\"A\", \"B\", \"C\")), identical(right_net, c(8, 12, 9)))\nstopifnot(sum(right_net) == 29)\nprint(data.frame(id = right$id, net = right_net))\n",
+      "explanation": "Sorting the price column alone pairs C's quantity 2 with price 4, A's quantity 1 with price 5 and B's quantity 3 with price 8, so the nets become 7, 5 and 24 and the total rises from 29 to 36. Nothing errors, because every column is still numeric and three values long. Ordering the whole data frame with `lines[order(lines$id), ]` moves all fields of a record together, giving 8, 12 and 9, and the total stays 29 because a sum does not depend on row order. Comparing a total before and after any reorder is a cheap check that no record was split.",
+      "expected": "Rows A, B and C with nets 8, 12 and 9; the torn version totals 36 instead of 29."
     }
   ],
   "exercises": [

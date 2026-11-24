@@ -1,6 +1,6 @@
 # c-033: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-033_solution.c`, implements all six cases, from the "create a trailing payload" case to the "transfer source independence" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ struct Packet { size_t length; unsigned char data[]; } declares a flexible membe
 
 ## Exercise 1: Create a trailing payload: change one input
 
-Copy worked example 1 into a scratch pad and change `unsigned char data[] = {1, 2, 3};` to `unsigned char data[] = {2, 2, 3};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "create a trailing payload" case, into a scratch pad and change `unsigned char data[] = {1, 2, 3};` to `unsigned char data[] = {2, 2, 3};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (length and all three bytes are retained); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +21,13 @@ CHECK(p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3);
 free(p);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3`. Restoring the original line brings back the worked observation: length and all three bytes are retained.
+**Expected:** With `unsigned char data[] = {2, 2, 3};` the run stops with `Check failed` at the CHECK on `p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3`, because the "create a trailing payload" case no longer shows that length and all three bytes are retained. Restoring `unsigned char data[] = {1, 2, 3};` brings that observation back.
 
 One owner releases header and payload together.
 
 ## Exercise 2: Create an empty packet: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `struct Packet *p = packet_create(NULL, 1);`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "create an empty packet" case, so one line now reads `struct Packet *p = packet_create(NULL, 1);`. Run the example with that line, use the failing CHECK to find why the header exists and records zero length no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -37,7 +37,7 @@ CHECK(p != NULL && p->length == 0);
 free(p);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `p != NULL && p->length == 0`; after it the line reads `struct Packet *p = packet_create(NULL, 0);` again and the header exists and records zero length.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `p != NULL && p->length == 0`. Once the line reads `struct Packet *p = packet_create(NULL, 0);` again, the "create an empty packet" case again shows that the header exists and records zero length.
 
 The helper avoids calling memcpy on absent payload pointers when no bytes are requested.
 
@@ -105,4 +105,4 @@ Construction copies input bytes. A borrowed-view API would require a different l
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer source independence" case to your own c-033 source. Explain why every access in `packet_create` stays within a live object and each owned resource is released. An expected flexible array member failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "create an empty packet" case apart from ordinary output: the fixture proves its stated flexible array member, header size and contiguous ownership assumptions, not universal safety.

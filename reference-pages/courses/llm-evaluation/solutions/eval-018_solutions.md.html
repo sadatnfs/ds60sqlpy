@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-018_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-018-explained-reference">eval-018: explained reference<a class="heading-anchor" href="#eval-018-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-018_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-018_reference.py</code> asserts each answer below, from <em>Verify the initial gradient</em> to <em>State the model boundary</em>, on the authored PyTorch reward model and pairwise training fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Reverse a comparison</em> tests.</p>
 <h3 id="1-verify-the-initial-gradient">1. Verify the initial gradient<a class="heading-anchor" href="#1-verify-the-initial-gradient" aria-label="Link to this section">#</a></h3>
 <p>The check tests the implemented likelihood and reduction denominator independently of whether the labels are meaningful.</p>
+<p><strong>Approach.</strong> Set weights to zero, compute <code>binary_cross_entropy_with_logits(x @ weights, y)</code> for the two rows, call <code>backward</code>, and compare <code>weights.grad</code> with <code>x.T @ (0.5 - y) / n</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> At zero weights every logit is 0 and every predicted probability is 0.5. With y = 1 for both rows and n = 2, the analytic gradient is [(0.5 - 1) / 2, (0.5 - 1) / 2, 0] = [-0.25, -0.25, 0]. Autograd must produce the same vector.</p>
+<p><strong>A tempting wrong approach.</strong> Forgetting the mean reduction gives [-0.5, -0.5, 0], twice the correct value. The check confirms both the likelihood and the denominator the framework uses.</p>
+<p><strong>How to verify.</strong> The reference uses <code>torch.testing.assert_close(weights.grad, x.T @ (torch.full_like(y, 0.5) - y) / len(y))</code> in float64.</p>
 <p><strong>Expected observation:</strong> The two vectors match in float64.</p>
 <h3 id="2-inspect-the-length-coefficient">2. Inspect the length coefficient<a class="heading-anchor" href="#2-inspect-the-length-coefficient" aria-label="Link to this section">#</a></h3>
 <p>The authored design provides no systematic signal that longer is preferable, so the symmetric initialization and updates preserve the zero length direction.</p>
+<p><strong>Approach.</strong> Train <code>fit_reward</code> on case A&#x27;s design: rows [1, 0, 0] and [0, 1, 0] with label 1, and rows [0, 0, 1] and [0, 0, -1] with label 0.5. Inspect the third weight.</p>
+<p><strong>Why it holds for this fixture.</strong> The length rows appear in both directions with label 0.5, so their gradient contributions cancel at every step. Starting from zero, the length weight stays at 0 throughout training.</p>
+<p><strong>A tempting wrong approach.</strong> Expecting a small positive length weight because longer answers are often preferred is the mistake. The model learns only what this design supports, and this design is balanced on length.</p>
+<p><strong>How to verify.</strong> Case A asserts <code>abs(float(model.weight[0, 2].detach())) &lt; 1e-12</code> and a held-out margin above 2 for the probe [1, 1, -3].</p>
 <p><strong>Expected observation:</strong> The length coefficient remains approximately zero.</p>
 <h3 id="3-reverse-a-comparison">3. Reverse a comparison<a class="heading-anchor" href="#3-reverse-a-comparison" aria-label="Link to this section">#</a></h3>
 <p>This is a useful implementation invariant for a pairwise difference model.</p>
+<p><strong>Approach.</strong> Evaluate the trained model on [1, 1, -3] and on its negation [-1, -1, 3].</p>
+<p><strong>Why it holds for this fixture.</strong> The model is linear with no bias, so f(-x) = -f(x). Reversing which response is first should flip the sign of the margin exactly, which this architecture guarantees.</p>
+<p><strong>A tempting wrong approach.</strong> Adding a bias term would break this invariant: the bias would then favor whichever response appears first. Order effects like that are a known problem in pairwise judges.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>torch.testing.assert_close(forward, -reverse)</code> for these two probes.</p>
 <p><strong>Expected observation:</strong> The linear reward margin changes sign.</p>
 <h3 id="4-find-a-training-shortcut">4. Find a training shortcut<a class="heading-anchor" href="#4-find-a-training-shortcut" aria-label="Link to this section">#</a></h3>
 <p>An optimizer fits the provided associations. It cannot infer the intended target when the comparison design leaves that target confounded.</p>
+<p><strong>Approach.</strong> Train on case B&#x27;s rows [1, 0, 3] and [0, 1, 3], both labeled 1, and compare the learned weights.</p>
+<p><strong>Why it holds for this fixture.</strong> Every preferred response is also 3 units longer, so length explains the labels as well as evidence does. Because the length feature has a larger value, gradient descent puts more weight on it, and the held-out probe with a shorter but better answer gets a negative margin.</p>
+<p><strong>A tempting wrong approach.</strong> Concluding the model learned to value evidence because training loss fell is the mistake. Loss fell in both designs; only the held-out probe reveals which feature carries the decision.</p>
+<p><strong>How to verify.</strong> Case B asserts <code>final &lt; initial</code>, a negative probe margin, and that the length weight exceeds the first evidence weight.</p>
 <p><strong>Expected observation:</strong> Length receives more weight than either evidence coordinate.</p>
 <h3 id="5-recompute-the-final-loss">5. Recompute the final loss<a class="heading-anchor" href="#5-recompute-the-final-loss" aria-label="Link to this section">#</a></h3>
 <p>A reported result should identify the model state that produced it, especially when comparing training and held-out measurements.</p>
+<p><strong>Approach.</strong> Compute the objective once more after the final optimizer step, as <code>fit_reward</code> does when it returns <code>final</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> The <code>loss</code> variable inside the loop was computed before the last <code>optimizer.step()</code>, so it describes the second-to-last parameter state. The returned <code>final</code> matches the weights the model actually holds.</p>
+<p><strong>A tempting wrong approach.</strong> Reporting the last in-loop loss as the training loss of the returned model is the mistake. The difference is small after many steps but can mislead when comparing to a held-out loss computed on the final weights.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>final &lt; initial</code> for the balanced design. Print both the last in-loop loss and <code>final</code> to see they differ.</p>
 <p><strong>Expected observation:</strong> The final-state loss is distinct from the last pre-update loss.</p>
 <h3 id="6-state-the-model-boundary">6. State the model boundary<a class="heading-anchor" href="#6-state-the-model-boundary" aria-label="Link to this section">#</a></h3>
 <p>The exercise uses authored features. It does not train a language encoder, judge real responses or establish the preferences of an external population.</p>
+<p><strong>Approach.</strong> Describe the model as a three-weight linear logistic reward fit on authored feature differences, trained on CPU in float64.</p>
+<p><strong>Why it holds for this fixture.</strong> The three features are hand-written numbers standing for evidence and length. No text is encoded, no real response is judged, and no annotator population supplied the labels.</p>
+<p><strong>A tempting wrong approach.</strong> Calling it a reward model for language responses overstates it. The lesson demonstrates the training mechanics and the shortcut risk, not capability on real text.</p>
+<p><strong>How to verify.</strong> The reference asserts every parameter is on the <code>cpu</code> device. A claim in a write-up should mention the feature definitions and the four or two training rows.</p>
 <p><strong>Expected observation:</strong> A real small CPU reward fit, with no natural-language capability claim.</p></article>
   </main>
 </body>

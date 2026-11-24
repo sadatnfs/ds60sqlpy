@@ -10,6 +10,14 @@ Compare explicit numerical approximations with known solutions and distinguish s
 
 Open `julia-024` in `/classroom` with its prepared `julia` runtime. Worked case A (refine a decay approximation) and worked case B (bracket a root) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-024: all reference checks passed`. One program in this unit publishes a bounded Plotly figure with its description and exact table. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Euler method:** An explicit time stepper that advances a differential equation using the current slope, so decay multiplies each step by one minus lambda dt.
+- **Stability:** Keeping the Euler multiplier no larger than one in magnitude, which is a different condition from preserving positivity.
+- **Bisection:** A root finder that halves a bracket whose endpoints have opposite signs, so the bracket width bounds the remaining error.
+- **Trapezoidal quadrature:** Approximating an integral by summing trapezoids under the curve, with error shrinking as the spacing shrinks for smooth integrands.
+- **Error budget:** An accounting of discretization, rounding and tolerance errors that states which source limits the final answer.
+
 ## A finite answer is not necessarily an accurate answer
 
 Numerical methods approximate mathematical problems under finite computation and representation. Their errors can come from discretization, roundoff, conditioning or a mismatch between the mathematical model and the real process. These sources should not be collapsed into one vague claim that a solver worked.

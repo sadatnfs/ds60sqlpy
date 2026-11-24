@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A Deployment asks for a replica count; a DaemonSet asks for a Pod on each eligible node under its controller and placement rules. Eligibility depends on selectors, affinity, taints/tolerations and other constraints. A desired DaemonSet count therefore cannot be predicted from cluster node count alone.</p>
 <p>The host fixture uses a restricted nonroot server with no host network, privileged mode or host mounts. It selects nodes labeled lesson.ds60sqlpy/zone=a. The normal worker does not create DaemonSets, read arbitrary Node details or patch node labels/taints. The host supplies sanitized node facts and an exclusive qualified placement scope.</p>
 <p>The offline calculation models only the explicitly listed label and custom-taint conditions. It is not a full scheduler simulator. Resource capacity, automatic controller tolerations and runtime behavior still require actual cluster evidence.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>DaemonSet:</strong> A workload controller that runs one copy of a Pod on each eligible node, such as a log or network agent.</li>
+<li><strong>nodeSelector:</strong> A Pod field listing node labels that a node must carry for the Pod to be scheduled there.</li>
+<li><strong>Node affinity:</strong> Scheduling rules that require or prefer nodes by label expressions, more expressive than nodeSelector.</li>
+<li><strong>Taint:</strong> A node property that repels Pods that do not tolerate it, for example to reserve a node for special workloads.</li>
+<li><strong>Toleration:</strong> A Pod field that allows, but does not require, scheduling onto a node with a matching taint.</li>
+</ul>
 <h3 id="read-selectors-affinity-and-tolerations">Read selectors, affinity and tolerations<a class="heading-anchor" href="#read-selectors-affinity-and-tolerations" aria-label="Link to this section">#</a></h3>
 <p>nodeSelector requires matching label key/value pairs. Required node affinity expresses a richer eligibility condition, while preferred affinity influences scoring without guaranteeing a placement. Scheduling rules named IgnoredDuringExecution do not generally imply that an ordinary running Pod is evicted immediately when a node label later changes.</p>
 <p>A NoSchedule taint repels new Pods unless a matching toleration permits them. A toleration allows placement; it does not force the Pod onto that node. DaemonSet controllers add some standard tolerations for their operational role, but an arbitrary custom dedicated-node taint is not automatically an invitation to run there.</p>

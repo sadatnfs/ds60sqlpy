@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-021`, `apache-003`.
 
+## Key terms
+
+- **Filesystem visibility:** Whether a path names the same bytes in every process that must read it. A path present in the client may not exist in an executor's mount namespace.
+- **Plan versus action:** Registering a table or building a query only constructs a plan; executors read data when an action such as collect runs it, which is when a missing file appears.
+- **Immutable fixture identity:** The recorded checksum of the shared Parquet fixture. The project refuses to replace a fixture whose checksum differs, preserving it for inspection.
+- **Object storage URI:** An address that lets each executor request an object over the network with credentials, which adds endpoint, authorization, consistency and version concerns.
+
 ## A path names bytes only within a filesystem contract
 
 A client can inspect a Parquet schema while registering a table, but executor
@@ -84,6 +91,30 @@ The two cases demonstrate both the valid shared-file contract and a real source-
 condition detected after planning, with explicit limits on the single-host topology's conclusions.
 
 The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+
+## Worked examples
+
+### Print the paths each process sees
+
+```bash
+cd work/ballista
+bash run.sh start
+bash run.sh paths
+```
+
+In an owned workshop, the paths report should show actual_ballista and embedded_control as true and removed_source_rejected as true. The first two confirm the shared Parquet fixture was readable from the scheduler and executor path and matched the local oracle. The third shows the removed copy did not silently return the original rows. If paths passes on one host but fails after moving storage, the new mount is not visible to every executor under the same name.
+
+### Register a file, delete it, then query
+
+```python
+missing = Path(temporary) / "removed.parquet"
+pq.write_table(pa.Table.from_pylist(ROWS[:3]), missing)
+ctx.register_parquet("removed_source", str(missing))
+missing.unlink()
+selected = ctx.sql("SELECT id, region, amount FROM removed_source ORDER BY id")
+```
+
+This fragment from the project client shows why registration is not proof of availability: the table name exists after the delete, and the failure surfaces only when execution opens the file. Depending on the release, the query either raises a not-found error or returns an empty result, so the client accepts both but rejects any return of the original three rows. Validate file presence at the point of execution, and keep the canonical fixture checksum unchanged.
 
 ## Complete worked source
 

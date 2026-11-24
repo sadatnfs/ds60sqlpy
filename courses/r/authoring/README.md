@@ -2,8 +2,17 @@
 
 The sixty `units/r-*.json` records are the durable source. Each includes a title,
 level, direct prerequisites, observable outcome, mechanism, vocabulary, syntax
-explanation, two standalone worked programs, six varied tasks, hints, a starter,
-a complete reference, explained answers and primary references.
+explanation, at least two standalone worked programs, six varied tasks, hints, a
+starter, a complete reference, explained answers and primary references.
+
+Lesson-specific teaching prose lives beside them in `reasoning/r-*.json`, so the
+unit field contract stays fixed. `guide_sections` holds extra guide sections
+(heading and body, with only `text` fences) placed after the worked programs.
+`exercises` holds one entry per task, in task order, with `approach`, `why`, `wrong`
+and `verify` strings. They become the Approach, Why it holds here, Tempting
+mistake and Verify paragraphs of the solution. Each must name this lesson's data,
+numbers and failure modes, and each `verify` must point at an observable check
+against objects that exist in the reference.
 
 Edit those records and preserve every stable ID. Each worked program and reference
 must start from its own local input in a fresh R process. The reference uses

@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-a-restart-loop-with-invalid-configuration">Exercise 1: Predict a restart loop with invalid configuration.<a class="heading-anchor" href="#exercise-1-predict-a-restart-loop-with-invalid-configuration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The same failure can repeat without fixing its cause.</p>
 <p><strong>Why:</strong> Automatic restarts can mitigate transient failures but cannot make a malformed required value valid. Preserve the earliest useful error.</p>
+<p><strong>Approach:</strong> Ask whether a restart changes the cause: an invalid required value is read again the same way on every start.</p>
+<p><strong>Why this is correct:</strong> Each restart repeats the error, and the first log entry is the most useful one.</p>
+<p><strong>A plausible wrong approach:</strong> Adding an always-restart policy to make the service look up hides a permanent fault behind constant restarts.</p>
+<p><strong>How to verify:</strong> docker compose logs show the same error on each attempt, and fixing the value stops the loop.</p>
 <h3 id="exercise-2-distinguish-the-two-restart-fields">Exercise 2: Distinguish the two restart fields.<a class="heading-anchor" href="#exercise-2-distinguish-the-two-restart-fields" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Container lifecycle policy versus dependency update behavior.</p>
 <p><strong>Why:</strong> Read the scope and documentation for each field. Similar words in different parts of the model do not imply identical semantics.</p>
+<p><strong>Approach:</strong> Read where each field sits: restart under app is a container policy; restart under depends_on.app controls whether client restarts when app is updated.</p>
+<p><strong>Why this is correct:</strong> Same word, different blocks, different meanings, as in the worked example&#x27;s YAML.</p>
+<p><strong>A plausible wrong approach:</strong> Setting depends_on restart: true to make app restart after a crash edits the wrong field.</p>
+<p><strong>How to verify:</strong> docker compose config shows both fields in their blocks, and the documentation for each describes different triggers.</p>
 <h3 id="exercise-3-design-idempotent-counter-initialization">Exercise 3: Design idempotent counter initialization.<a class="heading-anchor" href="#exercise-3-design-idempotent-counter-initialization" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Create absent state once and validate existing state.</p>
 <p><strong>Why:</strong> Existing data should not be reset merely because the app process restarts. Invalid existing data should produce an explicit recovery decision rather than silent overwrite.</p>
+<p><strong>Approach:</strong> Follow read_counter: a missing counter.json means zero, nothing is written at startup, and existing files are validated.</p>
+<p><strong>Why this is correct:</strong> Starting twice writes nothing extra, and an invalid file raises ValueError rather than being replaced.</p>
+<p><strong>A plausible wrong approach:</strong> Writing a fresh counter.json at every start would reset real counts after each restart.</p>
+<p><strong>How to verify:</strong> Restart the app several times after increments; GET /counter returns the same value.</p>
 <h3 id="exercise-4-diagnose-duplicate-records-after-repeated-startup">Exercise 4: Diagnose duplicate records after repeated startup.<a class="heading-anchor" href="#exercise-4-diagnose-duplicate-records-after-repeated-startup" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Initialization performs a non-idempotent side effect.</p>
 <p><strong>Why:</strong> Repair the initialization protocol and reconcile existing data. Increasing restart delays alone does not remove the duplication mechanism.</p>
+<p><strong>Approach:</strong> Find the code that adds data at startup and check whether it looks for existing data first.</p>
+<p><strong>Why this is correct:</strong> An unconditional append adds a copy per start, so restarts and duplicates rise together.</p>
+<p><strong>A plausible wrong approach:</strong> Lengthening the restart delay makes duplicates arrive more slowly but still arrive.</p>
+<p><strong>How to verify:</strong> After guarding the step, repeated starts leave the record count unchanged, and existing duplicates are removed by a reviewed cleanup.</p>
 <h3 id="exercise-5-explain-unknown-write-outcomes">Exercise 5: Explain unknown write outcomes.<a class="heading-anchor" href="#exercise-5-explain-unknown-write-outcomes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A timed-out client may not know whether the server committed.</p>
 <p><strong>Why:</strong> Blindly retrying can duplicate the action. Use an operation identity, queryable result or other explicit reconciliation design.</p>
+<p><strong>Approach:</strong> Consider a POST /increment whose response is lost: the server may have committed the new counter before the client timed out.</p>
+<p><strong>Why this is correct:</strong> The client cannot tell commit from failure, so blindly retrying may increment twice.</p>
+<p><strong>A plausible wrong approach:</strong> Retrying POST until one response arrives can skip a counter value.</p>
+<p><strong>How to verify:</strong> Read GET /counter before retrying, or add an operation ID so the server can recognize a repeat.</p>
 <h3 id="exercise-6-define-restart-acceptance-for-a-stateful-app">Exercise 6: Define restart acceptance for a stateful app.<a class="heading-anchor" href="#exercise-6-define-restart-acceptance-for-a-stateful-app" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Repeated starts preserve valid data and expose unrecoverable failures clearly.</p>
 <p><strong>Why:</strong> The test should cover both normal restarts and a controlled failure. A container continuously running says little about whether startup has corrupted its state.</p>
+<p><strong>Approach:</strong> Test both cases: restarts with valid data preserve the counter, and restarts with an invalid counter.json fail visibly.</p>
+<p><strong>Why this is correct:</strong> Both outcomes matter; one shows state survives, the other that corruption is not hidden.</p>
+<p><strong>A plausible wrong approach:</strong> Checking that the container shows Up says nothing about whether the counter is still right.</p>
+<p><strong>How to verify:</strong> The valid case keeps its value across restarts; the invalid case logs a ValueError and the file is left unchanged for recovery.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

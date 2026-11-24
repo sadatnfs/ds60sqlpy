@@ -47,7 +47,7 @@ await withProject(
 );
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true)`. Restoring the original line brings back the worked observation: both processes succeed; output 8; math.mjs is emitted.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(await exists(join(directory, 'compiled!', 'math.mjs')), true);`. Restoring `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true);` brings back: both processes succeed; output 8; math.mjs is emitted.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -76,7 +76,7 @@ await withProject(
 );
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`; after it the line reads `'model.mts': 'export type Item = { id: string };',` again and no model import in emitted entry; output A.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. Restoring `'model.mts': 'export type Item = { id: string };',` brings back: no model import in emitted entry; output A.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)` for this input.
 

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-count-touched-segments">Exercise 1: Count touched segments<a class="heading-anchor" href="#exercise-1-count-touched-segments" aria-label="Link to this section">#</a></h3>
 <p>Count distinct integer offsets divided by segment size.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count touched segments</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Apply the simplified rule: divide each byte offset by the 32-byte segment width with integer division and count the distinct quotients. Offsets <code>0, 4, ..., 28</code> all give quotient 0, so one segment is touched.</p>
+<p><strong>Why it is correct here.</strong> Within this model a memory transaction moves an aligned 32-byte segment, so eight 4-byte loads that fall inside one segment cost one transaction. The <code>segments</code> helper implements exactly the set-of-quotients rule.</p>
+<p><strong>A plausible wrong approach.</strong> Counting one transaction per lane, eight here, treats every load as independent and ignores coalescing. That would make the contiguous and strided patterns look equally expensive.</p>
+<p><strong>How to verify.</strong> Call <code>segments([4*i for i in range(8)])</code> and confirm 1; call it on <code>[32*i for i in range(8)]</code> and confirm 8. Label both numbers as model outputs, not profiler counters.</p>
 <h3 id="exercise-2-shift-the-base-by-four-bytes">Exercise 2: Shift the base by four bytes<a class="heading-anchor" href="#exercise-2-shift-the-base-by-four-bytes" aria-label="Link to this section">#</a></h3>
 <p>The shift may cross a boundary.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>shift the base by four bytes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Shift the contiguous offsets by four bytes, giving <code>4, 8, ..., 32</code>, and recount: offsets 4 to 28 have quotient 0 and offset 32 has quotient 1, so two segments are touched.</p>
+<p><strong>Why it is correct here.</strong> Only the last lane crosses the aligned boundary at byte 32, but that is enough to require a second segment. Alignment of the base address matters even when the access is perfectly contiguous.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming contiguity alone guarantees one segment ignores the boundary. A misaligned base can double the modeled transactions for the same amount of useful data.</p>
+<p><strong>How to verify.</strong> Compute <code>segments([4 + 4*i for i in range(8)])</code> and confirm 2. A shift of 0 or 32 bytes keeps the count at 1, which checks that only misalignment causes the change.</p>
 <h3 id="exercise-3-model-a-stride-of-two">Exercise 3: Model a stride of two<a class="heading-anchor" href="#exercise-3-model-a-stride-of-two" aria-label="Link to this section">#</a></h3>
 <p>Stride can increase transaction count.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>model a stride of two</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Model a stride of two elements: offsets <code>0, 8, ..., 56</code>. Integer division by 32 yields quotients 0 and 1, so two segments are touched to deliver 32 useful bytes.</p>
+<p><strong>Why it is correct here.</strong> Half the bytes in each fetched segment are unused, so the useful fraction drops to one half. Larger strides keep spreading lanes until each one touches its own segment, as the 32-byte stride shows.</p>
+<p><strong>A plausible wrong approach.</strong> Thinking stride only matters when it reaches the segment size misses the intermediate cost. Stride two already doubles the transactions in this model.</p>
+<p><strong>How to verify.</strong> Compute segments for strides 1, 2, 4 and 8 elements and confirm counts 1, 2, 4 and 8. The trend must be monotone for these aligned offsets.</p>
 <h3 id="exercise-4-explain-tiled-transpose">Exercise 4: Explain tiled transpose<a class="heading-anchor" href="#exercise-4-explain-tiled-transpose" aria-label="Link to this section">#</a></h3>
 <p>Shared storage rearranges cooperative ownership.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain tiled transpose</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain a tiled transpose: a block loads a tile with row-contiguous reads into a shared array, synchronizes, then writes the tile out with row-contiguous writes in the transposed position, reading shared memory by column.</p>
+<p><strong>Why it is correct here.</strong> A naive transpose has either reads or writes with a stride of the matrix width. Staging through shared memory makes both global accesses contiguous, while the strided part happens in fast on-chip storage. The mathematical result is unchanged.</p>
+<p><strong>A plausible wrong approach.</strong> Expecting the shared-memory version to change the output values, or to need a different verification, confuses reorganized traffic with a different algorithm.</p>
+<p><strong>How to verify.</strong> Compare the tiled result with <code>numpy.transpose</code> on a non-square matrix such as 3 by 5, including partial tiles. The outputs must be equal exactly.</p>
 <h3 id="exercise-5-separate-occupancy-from-throughput">Exercise 5: Separate occupancy from throughput<a class="heading-anchor" href="#exercise-5-separate-occupancy-from-throughput" aria-label="Link to this section">#</a></h3>
 <p>More resident work can still compete for resources.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate occupancy from throughput</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate occupancy, the number of resident warps relative to the maximum, from throughput, the useful work per second. Raising occupancy helps hide latency only when warps are waiting on memory and resources allow.</p>
+<p><strong>Why it is correct here.</strong> More resident warps also share registers, shared memory and memory bandwidth. A kernel that already saturates bandwidth gains nothing from more warps, and register pressure can force spills that slow it down.</p>
+<p><strong>A plausible wrong approach.</strong> Treating the occupancy number as the performance goal leads to changes that raise the percentage while total runtime stays the same or rises.</p>
+<p><strong>How to verify.</strong> In a profiler, record achieved occupancy together with memory throughput and runtime for two block sizes. Only the runtime of a correct output decides which is better.</p>
 <h3 id="exercise-6-propose-a-matched-profiler-experiment">Exercise 6: Propose a matched profiler experiment<a class="heading-anchor" href="#exercise-6-propose-a-matched-profiler-experiment" aria-label="Link to this section">#</a></h3>
 <p>Hold dtype shape and output fixed and inspect real counters.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>propose a matched profiler experiment</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a profiler experiment that compares contiguous and strided kernels with the same dtype, element count, output and launch configuration, collecting real memory transaction and throughput counters.</p>
+<p><strong>Why it is correct here.</strong> Holding everything else fixed isolates the access pattern as the cause. The CPU segment model predicts a direction, and only hardware counters can confirm it.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing kernels that differ in dtype or element count mixes several causes. A float64 strided kernel against a float32 contiguous one cannot attribute the difference to stride.</p>
+<p><strong>How to verify.</strong> Before reading counters, check both kernels produce the same output. Record GPU model, driver and profiler versions; without a GPU, report the experiment as designed but not run.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Simplified segment counts 1 and 8, not hardware measurements.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-079_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

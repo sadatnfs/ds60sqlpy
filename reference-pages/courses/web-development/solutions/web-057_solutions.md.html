@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-057.md</code>.</p>
 <h3 id="exercise-1-draw-the-lifecycle-from-browser-cookie-to-server-session-to-stored-note">Exercise 1: Draw the lifecycle from browser cookie to server session to stored note.<a class="heading-anchor" href="#exercise-1-draw-the-lifecycle-from-browser-cookie-to-server-session-to-stored-note" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The cookie identifies session state; the session supplies an owner key and CSRF token; the database stores the owned note.</p>
+<p><strong>Approach:</strong> Trace one note: the browser sends the session cookie, the server finds the session, reads its owner key and token, and stores the note under that owner.</p>
 <p><strong>Why:</strong> The cookie selects the server session, the session provides the owner key and CSRF token, and the database stores the note under that owner.</p>
+<p><strong>Plausible wrong approach:</strong> Drawing the note text inside the cookie fails because the lab keeps notes in its database and the cookie holds only an identifier.</p>
+<p><strong>How to verify:</strong> Your diagram has three boxes, cookie, session and database, with the note only in the database.</p>
 <h3 id="exercise-2-inspect-the-real-content-type-and-redirect-status">Exercise 2: Inspect the real Content-Type and redirect status.<a class="heading-anchor" href="#exercise-2-inspect-the-real-content-type-and-redirect-status" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Record actual response headers instead of inferring them from PHP source.</p>
+<p><strong>Approach:</strong> Run <code>curl --include</code> against the form page and against a valid POST, and copy the status line and Content-Type header.</p>
 <p><strong>Why:</strong> Observed headers show what the server really sent, which can differ from what the source suggests.</p>
+<p><strong>Plausible wrong approach:</strong> Writing down the header values from <code>header()</code> calls in the PHP source fails because proxies or errors can change what is actually sent.</p>
+<p><strong>How to verify:</strong> Your notes include the real status line and headers copied from the curl output.</p>
 <h3 id="exercise-3-run-the-owned-lab-and-create-one-synthetic-note-through-the-browser">Exercise 3: Run the owned lab and create one synthetic note through the browser.<a class="heading-anchor" href="#exercise-3-run-the-owned-lab-and-create-one-synthetic-note-through-the-browser" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The note survives a page reload and appears after a successful POST-redirect-GET sequence.</p>
+<p><strong>Approach:</strong> Start the lab with the documented command, open the page, submit one synthetic note, then reload and check it is still listed.</p>
 <p><strong>Why:</strong> POST/redirect/GET makes the reload repeat a safe GET, so the note appears once and is not submitted twice.</p>
+<p><strong>Plausible wrong approach:</strong> Starting a second copy on another port fails because it uses different volumes, so the notes you check are not the ones you created.</p>
+<p><strong>How to verify:</strong> The note appears after the 303 redirect, and still appears after a manual reload.</p>
 <h3 id="exercise-4-submit-a-request-with-a-missing-or-wrong-csrf-token">Exercise 4: Submit a request with a missing or wrong CSRF token.<a class="heading-anchor" href="#exercise-4-submit-a-request-with-a-missing-or-wrong-csrf-token" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The server returns a rejection and inserts no note.</p>
+<p><strong>Approach:</strong> Submit the form with the token field removed or changed in browser tools, then reload the list.</p>
 <p><strong>Why:</strong> The server compares the submitted token with the session token and rejects mismatches before writing.</p>
+<p><strong>Plausible wrong approach:</strong> Judging success by the absence of an error page fails because a broken check might accept the request silently.</p>
+<p><strong>How to verify:</strong> The server answers with a rejection status, and the note list has the same entries as before.</p>
 <h3 id="exercise-5-stop-and-resume-the-lab-without-deleting-volumes">Exercise 5: Stop and resume the lab without deleting volumes.<a class="heading-anchor" href="#exercise-5-stop-and-resume-the-lab-without-deleting-volumes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The same browser session can recover its notes while the named data and session volumes remain.</p>
+<p><strong>Approach:</strong> Stop the containers with <code>docker compose stop</code> for the ds60-web-study project, start them again, and reload the page in the same browser.</p>
 <p><strong>Why:</strong> Named volumes keep the database and session files, so the same browser session can see its notes after resume.</p>
+<p><strong>Plausible wrong approach:</strong> Running <code>down --volumes</code> to restart fails because it deletes the named volumes that hold the notes and sessions.</p>
+<p><strong>How to verify:</strong> <code>docker volume ls</code> still lists the lab volumes, and the earlier note is still on the page.</p>
 <h3 id="exercise-6-explain-which-properties-this-local-server-has-not-qualified">Exercise 6: Explain which properties this local server has not qualified.<a class="heading-anchor" href="#exercise-6-explain-which-properties-this-local-server-has-not-qualified" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It does not establish production TLS, verified accounts, multi-instance concurrency, internet hardening or high availability.</p>
+<p><strong>Approach:</strong> Compare the lab&#x27;s setup with a production deployment and list what is absent, such as TLS, accounts and multiple instances.</p>
 <p><strong>Why:</strong> Production needs TLS, verified accounts, horizontal scaling, hardening and monitored availability, none of which a loopback lab provides.</p>
+<p><strong>Plausible wrong approach:</strong> Calling the lab production ready because notes persist fails because persistence on one machine says nothing about outages or attackers.</p>
+<p><strong>How to verify:</strong> Your list names at least four missing properties and the evidence each would need.</p>
 <h3 id="comparing-your-worksheet">Comparing your worksheet<a class="heading-anchor" href="#comparing-your-worksheet" aria-label="Link to this section">#</a></h3>
 <p>This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in <code>courses/web-development/fixtures/php-http-lab/</code> gives real request evidence only when you deliberately run it.</p></article>
   </main>

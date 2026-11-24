@@ -26,7 +26,7 @@ final case class Refunded(id: String, cents: Long) extends Event {
 
 Return the event's identity for every domain state. Test two paid events with equal cents but different IDs and verify constructor rejection of a blank ID.
 
-**Expected:** Paid(p1,100), Paid(p2,100), Voided(v1, duplicate), Refunded(r1,25) retain IDs p1, p2, v1, r1. A blank-ID Paid cannot be constructed.
+**Expected:** `Paid(p1, 100)`, `Paid(p2, 100)`, `Voided(v1, duplicate)`, `Refunded(r1, 25)` retain IDs p1, p2, v1, r1. A blank-ID Paid cannot be constructed.
 
 ```scala
 def eventId(event: Event): String = {
@@ -70,7 +70,7 @@ assert(kind(Paid("zero", 0L)) == "paid")
 
 Return positive cents for Paid, negative cents for Refunded, and zero for Voided. Stored payment/refund magnitudes must remain within constructor bounds. Test observed zero and a rejected negative magnitude.
 
-**Expected:** The fixture contributes 100, 100, 0, -25. Refunded(r0,0) contributes 0 but remains refunded; Paid with -1 cents is rejected.
+**Expected:** The fixture contributes `100`, `100`, `0` and `-25`. `Refunded(r0, 0)` contributes 0 but remains refunded; Paid with -1 cents is rejected.
 
 ```scala
 def signedCents(event: Event): Long = {
@@ -94,7 +94,7 @@ expectIllegalArgument(Paid("bad", -1L))
 
 Return a new Paid value with the same ID and a revised amount, leaving the original unchanged. Use copy and preserve constructor validation for an out-of-domain amount.
 
-**Expected:** Paid(p1,100) revised to 125 becomes Paid(p1,125), while the original remains 100. Amount 1000001 is rejected.
+**Expected:** `Paid(p1, 100)` revised to 125 becomes `Paid(p1, 125)`, while the original remains 100. Amount 1000001 is rejected.
 
 ```scala
 def revisePaid(event: Paid, newCents: Long): Paid = {
@@ -115,7 +115,7 @@ expectIllegalArgument(revisePaid(original, 1000001L))
 
 Compute the checked Long sum of signedCents for every event. Empty input returns 0. Preserve all domain states in the source even when their numerical contribution is zero.
 
-**Expected:** The four-event fixture nets 175 cents. Paid(z,0) and Voided(v, reason) together net 0 while remaining two distinct events.
+**Expected:** The four-event fixture nets 175 cents. `Paid(z, 0)` and Voided(v, reason) together net 0 while remaining two distinct events.
 
 ```scala
 def netTotal(events: Seq[Event]): Long = {

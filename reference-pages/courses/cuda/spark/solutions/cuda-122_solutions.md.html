@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-transfer-lower-bound">Exercise 1: Compute transfer lower bound<a class="heading-anchor" href="#exercise-1-compute-transfer-lower-bound" aria-label="Link to this section">#</a></h3>
 <p>Bytes divided by effective bandwidth.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute transfer lower bound</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute the transfer lower bound as bytes over effective bandwidth: 10 GiB at 1 GiB/s takes at least 10 seconds before serialization, connection setup or retries.</p>
+<p><strong>Why it is correct here.</strong> No implementation can move the payload faster than the link allows, so this bound is a floor on the shuffle stage regardless of kernel speed.</p>
+<p><strong>A plausible wrong approach.</strong> Spending effort to halve a 100 ms kernel, saving 50 ms, addresses less than 1 percent of the 10-second floor, as the reference asserts with <code>kernel_saving/seconds &lt; 0.01</code>.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>seconds == 10</code>. Compare with measured shuffle read and write time for the stage.</p>
 <h3 id="exercise-2-identify-local-versus-network-time">Exercise 2: Identify local versus network time<a class="heading-anchor" href="#exercise-2-identify-local-versus-network-time" aria-label="Link to this section">#</a></h3>
 <p>Measure the complete stage.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>identify local versus network time</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Identify local versus network time by measuring the whole stage, including shuffle write, fetch wait time and local compute, from Spark stage metrics.</p>
+<p><strong>Why it is correct here.</strong> Stage metrics separate time spent waiting for remote blocks from time spent computing. The larger component is the target for optimization.</p>
+<p><strong>A plausible wrong approach.</strong> Profiling only the GPU kernels shows local compute and misses fetch wait time, which may dominate. A GPU profile of a shuffle-bound stage can look idle for long stretches, and that idle time is exactly the network wait.</p>
+<p><strong>How to verify.</strong> Read shuffle fetch wait time and executor compute time from the stage summary and compare them.</p>
 <h3 id="exercise-3-explain-pre-aggregation">Exercise 3: Explain pre-aggregation<a class="heading-anchor" href="#exercise-3-explain-pre-aggregation" aria-label="Link to this section">#</a></h3>
 <p>Combine only when mathematical semantics allow.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain pre-aggregation</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain pre-aggregation: computing partial sums on each map task before the shuffle sends one value per key per task rather than every row.</p>
+<p><strong>Why it is correct here.</strong> Sum is associative and commutative, so combining partial sums gives the same total and greatly reduces shuffled bytes for keys with many rows.</p>
+<p><strong>A plausible wrong approach.</strong> Pre-aggregating a non-associative operation, such as a median computed from partial medians, produces wrong results.</p>
+<p><strong>How to verify.</strong> Compare shuffle bytes and results with and without pre-aggregation on the same data, and confirm totals match.</p>
 <h3 id="exercise-4-list-transport-qualification">Exercise 4: List transport qualification<a class="heading-anchor" href="#exercise-4-list-transport-qualification" aria-label="Link to this section">#</a></h3>
 <p>Verify devices topology libraries and real traffic.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>list transport qualification</strong> is qualified there.</p>
+<p><strong>Approach.</strong> List transport qualification for an accelerated shuffle transport: supported network devices, topology, matching library versions and a test with real traffic between hosts.</p>
+<p><strong>Why it is correct here.</strong> Accelerated transports depend on specific hardware and libraries, and a misconfiguration may fall back to a slower path without obvious errors.</p>
+<p><strong>A plausible wrong approach.</strong> Enabling the transport setting and assuming it is active skips checking whether it actually carried traffic. A missing library on one host can silently route that host&#x27;s traffic over the default path.</p>
+<p><strong>How to verify.</strong> Check transport logs or metrics on both sides of a test shuffle and confirm bytes went over the intended path.</p>
 <h3 id="exercise-5-separate-startup-settings">Exercise 5: Separate startup settings<a class="heading-anchor" href="#exercise-5-separate-startup-settings" aria-label="Link to this section">#</a></h3>
 <p>Some shuffle choices require fresh executors.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate startup settings</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate startup settings: some shuffle manager and transport choices are read when executors start, so changing them requires a fresh application.</p>
+<p><strong>Why it is correct here.</strong> Settings fixed at startup cannot change for a running session. Changing them mid-session has no effect.</p>
+<p><strong>A plausible wrong approach.</strong> Setting a shuffle manager in an existing session and attributing later timing changes to it measures noise. Any improvement seen there comes from caching, warm JIT code or variation between runs.</p>
+<p><strong>How to verify.</strong> Restart the application with the new setting and confirm it appears in the environment tab.</p>
 <h3 id="exercise-6-design-a-bounded-shuffle-comparison">Exercise 6: Design a bounded shuffle comparison<a class="heading-anchor" href="#exercise-6-design-a-bounded-shuffle-comparison" aria-label="Link to this section">#</a></h3>
 <p>Use identical partitioned fixtures and capture bytes spills and output.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design a bounded shuffle comparison</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design a bounded shuffle comparison using identical partitioned fixtures for both configurations, capturing shuffle bytes, spills and output.</p>
+<p><strong>Why it is correct here.</strong> Same data and partitioning make byte counts comparable, and equal outputs confirm the change preserved results.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing configurations on different data sizes confounds the transport effect with payload size. Different partition counts also change the number of shuffle blocks, which affects per-block overhead independently of bandwidth.</p>
+<p><strong>How to verify.</strong> Assert outputs are equal, then report bytes and stage times side by side. Repeat each configuration at least three times and keep every sample, since network contention varies between runs.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-122_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

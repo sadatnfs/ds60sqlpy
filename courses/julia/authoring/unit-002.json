@@ -3,6 +3,28 @@
   "title": "Numbers, promotion, overflow and exactness",
   "concepts": ["integer overflow", "Float64", "Rational", "BigInt", "promotion"],
   "outcome": "Choose and validate numeric representations while distinguishing exact arithmetic, overflow and floating-point approximation.",
+  "key_terms": [
+    [
+      "Integer overflow",
+      "Fixed-width integer arithmetic wraps around silently when an exact result exceeds the type's range, giving a wrong value without an error."
+    ],
+    [
+      "Checked arithmetic",
+      "Functions such as `Base.Checked.checked_add` that throw an `OverflowError` instead of wrapping when the exact result does not fit."
+    ],
+    [
+      "Float64",
+      "The 64-bit binary floating-point type whose values such as `0.1` are rounded approximations, so comparisons need a stated tolerance."
+    ],
+    [
+      "Rational",
+      "An exact fraction type built with `//`, such as `1//3`, that stores an integer numerator and denominator."
+    ],
+    [
+      "Promotion",
+      "The rule that converts mixed numeric arguments to a common type before arithmetic, so an `Int` plus a `Float64` gives a `Float64`."
+    ]
+  ],
   "level": "beginner",
   "minutes": 90,
   "prerequisites": ["julia-001"],
@@ -17,48 +39,67 @@
     ]
   ],
   "figure": 0,
+  "approach": "Pick the numeric type from the question being asked. Integer division and remainder use `div` and `rem`; exact ratios use `Rational`; values past `typemax(Int)` need `BigInt` before the operation; and floating-point checks use tolerances tied to units. Every conversion that cannot hold its value should fail loudly rather than wrap.",
   "exercises": [
     {
       "title": "Retain a remainder",
       "task": "Compute quotient and remainder for 7 divided by 2.",
       "expected": "The integer quotient is 3 and remainder 1.",
       "hint": "Use div and rem explicitly.",
-      "answer": "Integer division answers another question from floating-point division."
+      "answer": "Integer division answers another question from floating-point division.",
+      "why": "Seven equals 2 times 3 plus 1, so `div(7, 2)` returns 3 and `rem(7, 2)` returns 1, both as integers.",
+      "wrong": "Writing `7 / 2` and truncating the float answers a different question; it returns 3.5 and loses the remainder unless it is recomputed separately.",
+      "verify": "Assert `div(7, 2) == 3` and `rem(7, 2) == 1`; the reference already checks `rem(7, 2) == 1`."
     },
     {
       "title": "Reject a narrowing conversion",
       "task": "Convert 128 to Int8.",
       "expected": "The conversion raises InexactError.",
       "hint": "Inspect the target range.",
-      "answer": "A constructor conversion that cannot represent the value must not be confused with wrapping arithmetic."
+      "answer": "A constructor conversion that cannot represent the value must not be confused with wrapping arithmetic.",
+      "why": "`Int8` covers -128 through 127, so the constructor `Int8(128)` has no exact result and throws `InexactError`.",
+      "wrong": "Expecting -128 confuses conversion with wrapping arithmetic; `typemax(Int8) + Int8(1)` wraps, but a checked constructor refuses an unrepresentable value.",
+      "verify": "Use `@test_throws InexactError Int8(128)` as the reference does, then confirm `Int8(127)` succeeds."
     },
     {
       "title": "Keep an exact ratio",
       "task": "Add 1//10 and 2//10.",
       "expected": "The result equals 3//10 exactly.",
       "hint": "Use rational syntax.",
-      "answer": "This preserves the intended ratio instead of first rounding decimal-looking binary floats."
+      "answer": "This preserves the intended ratio instead of first rounding decimal-looking binary floats.",
+      "why": "`1//10 + 2//10` is computed as integer numerators over a common denominator, giving `3//10` with no rounding at any step.",
+      "wrong": "Using `0.1 + 0.2` and comparing with `0.3` fails, because both decimals are rounded binary floats and the sum is `0.30000000000000004`.",
+      "verify": "Check `1//10 + 2//10 == 3//10` and, for contrast, `0.1 + 0.2 == 0.3`, which is false."
     },
     {
       "title": "Choose a precision",
       "task": "Compare 1.0f0 and 1.0.",
       "expected": "Their types are Float32 and Float64.",
       "hint": "Literal syntax is part of the contract.",
-      "answer": "More precision changes representation cost and error; it does not validate the model."
+      "answer": "More precision changes representation cost and error; it does not validate the model.",
+      "why": "The suffix `f0` makes `1.0f0` a `Float32`; plain `1.0` is `Float64`, with roughly 7 versus 16 significant decimal digits.",
+      "wrong": "Treating the two literals as the same value with different spelling ignores precision; `eps(1.0f0)` is about 1.2e-7 while `eps(1.0)` is about 2.2e-16.",
+      "verify": "Print `typeof(1.0f0)` and `typeof(1.0)`; the reference asserts `typeof(1.0f0) == Float32`."
     },
     {
       "title": "Check a large integer",
       "task": "Compute `BigInt(2)^100`.",
       "expected": "The mathematical integer is retained beyond the machine Int range.",
       "hint": "Promote before exponentiation.",
-      "answer": "Converting a wrapped machine result afterward cannot reconstruct the lost value."
+      "answer": "Converting a wrapped machine result afterward cannot reconstruct the lost value.",
+      "why": "`BigInt(2)^100` promotes before multiplying, so the exact 31-digit value survives; machine `2^100` wraps modulo 2 to the 64 and yields 0.",
+      "wrong": "Computing `2^100` first and calling `BigInt` on the result gives `BigInt(0)`, since the overflow happened before the conversion.",
+      "verify": "Assert `BigInt(2)^100 > typemax(Int)` as the reference does, and print `2^100` beside it to see the wrapped 0."
     },
     {
       "title": "Explain a tolerance",
       "task": "Justify an absolute tolerance for a measured quantity.",
       "expected": "The bound uses that quantity units and required accuracy.",
       "hint": "Do not substitute a larger bound for a diagnosis.",
-      "answer": "Representation, conditioning and algorithmic error inform a tolerance; passing an arbitrary bound proves little."
+      "answer": "Representation, conditioning and algorithmic error inform a tolerance; passing an arbitrary bound proves little.",
+      "why": "A measured length in meters with a stated 1 millimeter requirement justifies an absolute tolerance of 0.001, tied to units rather than to float precision alone.",
+      "wrong": "Raising `atol` until a failing comparison passes hides whether the error came from representation, conditioning or a wrong formula.",
+      "verify": "Write the tolerance next to its unit and source, then confirm `isapprox(x, y; atol = 0.001)` fails for a deliberately perturbed value."
     }
   ]
 }

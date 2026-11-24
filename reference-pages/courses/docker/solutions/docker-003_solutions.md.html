@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-classify-app-server-py-in-the-fixture">Exercise 1: Classify /app/server.py in the fixture.<a class="heading-anchor" href="#exercise-1-classify-app-server-py-in-the-fixture" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> An image-provided application file.</p>
 <p><strong>Why:</strong> The Dockerfile COPY instruction places it into a build layer. Reading it from a container demonstrates that the image content is visible through the container filesystem view.</p>
+<p><strong>Approach:</strong> Trace /app/server.py to the Dockerfile line COPY server.py /app/server.py, which places it in a read-only image layer below every container&#x27;s writable layer.</p>
+<p><strong>Why this is correct:</strong> Because the file comes from a build instruction, every container started from the tag sees it, and only a rebuild with a changed source can alter it.</p>
+<p><strong>A plausible wrong approach:</strong> Calling it a runtime file created by the server fails here, since server.py never writes into /app; it only writes counter files under /data.</p>
+<p><strong>How to verify:</strong> Worked example 1 prints True for Path(&#x27;/app/server.py&#x27;).is_file() even with --rm and no mounts, which only image content can explain.</p>
 <h3 id="exercise-2-predict-whether-a-sibling-container-sees-an-unmounted-new-file">Exercise 2: Predict whether a sibling container sees an unmounted new file.<a class="heading-anchor" href="#exercise-2-predict-whether-a-sibling-container-sees-an-unmounted-new-file" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It does not share the first container writable layer.</p>
 <p><strong>Why:</strong> Both instances start from the image. Changes in one private writable layer are not broadcast into another container simply because both use the same tag.</p>
+<p><strong>Approach:</strong> Picture each container&#x27;s writable layer as private copy-on-write storage over the shared image layers, then check whether any mount links the two containers.</p>
+<p><strong>Why this is correct:</strong> Without a shared volume or bind mount, a file written by one container exists only in that container&#x27;s upper layer, so the sibling&#x27;s view of the path is unchanged.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming the shared tag means a shared filesystem fails, because the tag only names the read-only lower layers that both containers began from.</p>
+<p><strong>How to verify:</strong> Write a marker file in /tmp of one long-running container, then list the same path in a second container from the same image; the marker is absent.</p>
 <h3 id="exercise-3-make-a-restart-versus-recreate-persistence-table">Exercise 3: Make a restart-versus-recreate persistence table.<a class="heading-anchor" href="#exercise-3-make-a-restart-versus-recreate-persistence-table" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Writable layer survives restart but not removal; volumes follow their own lifetime.</p>
 <p><strong>Why:</strong> A restart preserves the container object. A recreate replaces it. A mounted volume is independent, so the table must name storage rather than make one blanket persistence claim.</p>
+<p><strong>Approach:</strong> Build a table with rows for the writable layer, the study-data volume and the /tmp tmpfs, and columns for restart, recreate and image rebuild.</p>
+<p><strong>Why this is correct:</strong> Restart keeps the container ID and its writable layer; recreate discards both. The volume survives both because compose.yaml mounts it by name; tmpfs is empty after either.</p>
+<p><strong>A plausible wrong approach:</strong> A single blanket rule such as data survives restarts misses that the fixture&#x27;s /tmp is tmpfs, which is wiped on every restart even though the container persists.</p>
+<p><strong>How to verify:</strong> Increment the counter, restart the app service, read /counter, then recreate and read again; the value persists both times because counter.json lives in /data.</p>
 <h3 id="exercise-4-diagnose-a-missing-file-after-compose-up-recreates-a-service">Exercise 4: Diagnose a missing file after compose up recreates a service.<a class="heading-anchor" href="#exercise-4-diagnose-a-missing-file-after-compose-up-recreates-a-service" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Check whether it was written to the old disposable layer.</p>
 <p><strong>Why:</strong> The service name can stay the same while the container ID changes. A familiar name is not proof that the underlying writable layer or process is the same object.</p>
+<p><strong>Approach:</strong> Compare the container ID before and after compose up, then ask where the missing file was written: the writable layer, /tmp, or the /data volume.</p>
+<p><strong>Why this is correct:</strong> Compose recreates a service when its configuration or image changes. The new container starts with a fresh writable layer, so files outside volumes disappear.</p>
+<p><strong>A plausible wrong approach:</strong> Restoring the image or reinstalling Compose fails to recover the file, because the image never held it and the old writable layer was removed with the old container.</p>
+<p><strong>How to verify:</strong> docker compose -p ds60-docker-study ps -q app prints a different ID after recreation, and a file written to /data before it is still present afterward.</p>
 <h3 id="exercise-5-explain-why-read-only-plus-tmpfs-permits-temporary-writes">Exercise 5: Explain why read-only plus tmpfs permits temporary writes.<a class="heading-anchor" href="#exercise-5-explain-why-read-only-plus-tmpfs-permits-temporary-writes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The root mount and tmpfs have different write policies.</p>
 <p><strong>Why:</strong> Read-only is evaluated for the target mount. A bounded tmpfs intentionally supplies volatile writable storage without making the application directory writable.</p>
+<p><strong>Approach:</strong> Look at each mount separately: compose.yaml sets read_only: true for the root filesystem and adds a tmpfs at /tmp with <code>rw,noexec,nosuid</code> and <code>size=16m</code>.</p>
+<p><strong>Why this is correct:</strong> The read-only flag applies to the root mount. The tmpfs is its own mount with its own options, so writes under /tmp succeed while writes under /app fail.</p>
+<p><strong>A plausible wrong approach:</strong> Removing read_only to silence an application write error fails the lesson goal, because it makes /app and every other path writable to a compromised process.</p>
+<p><strong>How to verify:</strong> With the stack running, a python -c write to /tmp/x succeeds through docker compose exec, while the same write to /app/x raises a read-only filesystem error.</p>
 <h3 id="exercise-6-choose-storage-for-user-progress-and-transient-scratch-data">Exercise 6: Choose storage for user progress and transient scratch data.<a class="heading-anchor" href="#exercise-6-choose-storage-for-user-progress-and-transient-scratch-data" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A named volume for progress and bounded temporary storage for scratch.</p>
 <p><strong>Why:</strong> The choice should follow retention and recovery requirements. Keeping every file forever increases cleanup and privacy costs; discarding user progress on replacement violates the product contract.</p>
+<p><strong>Approach:</strong> Classify each kind of data by whether a learner would lose work if it vanished, and then pick a volume, tmpfs or writable layer to match.</p>
+<p><strong>Why this is correct:</strong> Progress such as counter.json must survive container replacement, which only the study-data volume guarantees. Scratch files gain from tmpfs, which is bounded and cleared automatically.</p>
+<p><strong>A plausible wrong approach:</strong> Putting everything into the volume keeps stale scratch files forever and widens what a backup or privacy review must cover, while the writable layer loses progress on recreate.</p>
+<p><strong>How to verify:</strong> Recreate the app service and check that /data/counter.json still exists and /tmp is empty, matching the retention rule you wrote for each.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

@@ -1,16 +1,16 @@
 # llm-applied-017: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for quantized frozen bases, adapter gradients and QLoRA limits only after attempting *Quantize a fixed matrix* through *State what was not measured*. A discrepancy in *Pack and unpack real nibbles* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-017_solution.py` runs the assertions; this page explains why they test quantized base and nibble packing.
 
 ## Mechanism review
 
 QLoRA combines a quantized frozen base with trainable low-rank adapters, allowing gradients to flow through computations involving the dequantized base into adapter parameters. The original method includes specific NormalFloat4 quantization, double quantization and paged optimizer mechanisms. A small CPU example cannot establish those GPU implementation or peak-memory properties.
 
-This chapter deliberately implements a narrower mechanism: symmetric uniform signed4-bit quantization of a2x2 matrix, explicit packing of two nibbles per byte, dequantization tofloat32 for computation, and an actual adapter update while the packed base remains unchanged. The uniform codebook is notNF4, and the temporary float32 dequantized matrix means runtime memory does not equal packed storage. The distinction is part of the lesson. Measure output approximation error before training an adapter, then separate that error from the improvement achieved by the adapter objective.
+This chapter deliberately implements a narrower mechanism: symmetric uniform signed 4-bit quantization of a 2-by-2 matrix, explicit packing of two nibbles per byte, dequantization to float32 for computation, and an actual adapter update while the packed base remains unchanged. The uniform codebook is not NF4, and the temporary float32 dequantized matrix means runtime memory does not equal packed storage. The distinction is part of the lesson. Measure output approximation error before training an adapter, then separate that error from the improvement achieved by the adapter objective.
 
 **Quantized base:** Frozen weights represented by discrete codes and scale metadata.
 
-**Nibble packing:** Storing two4-bit codes in one8-bit byte.
+**Nibble packing:** Storing two 4-bit codes in one 8-bit byte.
 
 **Dequantization:** Reconstructing approximate floating-point values for computation.
 
@@ -18,19 +18,19 @@ This chapter deliberately implements a narrower mechanism: symmetric uniform sig
 
 ## Reading the implementation
 
-Use scale=maxabs/7 and integer codes-7..7. Offset each code by 8 to fit a4-bit nibble, then pack low and high nibbles into oneuint8. Unpack with bit masks and shifts, subtract8, and multiply by the stored scale. The model uses the reconstructed frozen tensor plus a low-rank delta. Only adapterParameters enter the optimizer; packed bytes and scale are immutable fixture state.
+Use scale=maxabs/7 and integer codes-7..7. Offset each code by 8 to fit a 4-bit nibble, then pack low and high nibbles into one uint8. Unpack with bit masks and shifts, subtract 8, and multiply by the stored scale. The model uses the reconstructed frozen tensor plus a low-rank delta. Only adapter parameters enter the optimizer; packed bytes and scale are immutable fixture state.
 
 ## Derive the codes, bytes and forward error
 
-The maximum absolute matrix entry is1.7, so the uniform scale is1.7/7=17/70, about0.242857. Dividing the entries by that scale and rounding gives codes[[0, -4], [7, -1]]. The allowed signed range contains15 values from-7 through7. Offsetting by eight produces unsigned nibbles[8, 4, 15, 7]; one of the16 possible nibble values is unused by this chosen symmetric scheme.
+The maximum absolute matrix entry is 1.7, so the uniform scale is 1.7/7=17/70, about 0.242857. Dividing the entries by that scale and rounding gives codes `[[0, -4], [7, -1]]`. The allowed signed range contains 15 values from -7 through 7. Offsetting by eight produces unsigned nibbles `[8, 4, 15, 7]`; one of the 16 possible nibble values is unused by this chosen symmetric scheme.
 
-The first packed byte is8+(4 shifted left by 4)=8+64=72. The second is15+(7 shifted left by 4)=15+112=127. Unpacking the low four bits and then the high four bits restores those integer codes exactly. This is a lossless representation change of the already quantized integers. The information loss happened earlier when the original floating weights were rounded.
+The first packed byte is 8+(4 shifted left by 4)=8+64=72. The second is 15+(7 shifted left by 4)=15+112=127. Unpacking the low four bits and then the high four bits restores those integer codes exactly. This is a lossless representation change of the already quantized integers. The information loss happened earlier when the original floating weights were rounded.
 
-Using ideal decimal arithmetic, the reconstructed matrix is[[0, -34/35], [17/10, -17/70]]. Multiplying by x=[1, -2] gives[68/35, 153/70], about[1.942857, 2.185714]. The original output is[1.9, 2.1], so the errors are[3/70, 6/70], about[0.042857, 0.085714]. Actual float32 operations can differ slightly from these ideal-decimal values, which is why the executable comparison uses explicit tolerances.
+Using ideal decimal arithmetic, the reconstructed matrix is `[[0, -34/35], [17/10, -17/70]]`. Multiplying by x=[1, -2] gives `[68/35, 153/70]`, about `[1.942857, 2.185714]`. The original output is `[1.9, 2.1]`, so the errors are `[3/70, 6/70]`, about `[0.042857, 0.085714]`. Actual float32 operations can differ slightly from these ideal-decimal values, which is why the executable comparison uses explicit tolerances.
 
-Without clipping, nearest-grid rounding has per-weight absolute error at most \(\frac{\mathrm{scale}}{2}\). For a fixed output row, the triangle inequality gives an output error bound of(\(\frac{\mathrm{scale}}{2}\))*sum(abs(x)). Here that is(17/140)*3=51/140, about0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
+Without clipping, nearest-grid rounding has per-weight absolute error at most \(\frac{\mathrm{scale}}{2}\). For a fixed output row, the triangle inequality gives an output error bound of(\(\frac{\mathrm{scale}}{2}\))*sum(abs(x)). Here that is (17/140)*3=51/140, about 0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
 
-The adapter code uses the stored output-by-input matrix convention: \(Y=X(W+AB)^{\mathsf T}\). A has shape[2, 1] and B[1, 2]. At \(B=0\), the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are 0.1, the first B gradient is 0.1*sum(Y)*X, approximately[0.412857, -0.825714]. The packed codes stay fixed while that differentiable branch changes.
+The adapter code uses the stored output-by-input matrix convention: \(Y=X(W+AB)^{\mathsf T}\). A has shape `[2, 1]` and B[1, 2]. At \(B=0\), the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are 0.1, the first B gradient is 0.1*sum(Y)*X, approximately `[0.412857, -0.825714]`. The packed codes stay fixed while that differentiable branch changes.
 
 The adapter's target is zero output on one input, not the original full-precision output. A falling loss therefore demonstrates optimization of the stated task; it does not prove recovery of the original weight matrix or correction of quantization on other inputs. A rank-one update fitting one vector leaves many unconstrained directions.
 
@@ -48,9 +48,9 @@ The original QLoRA method includes NF4, double quantization and paged-optimizer 
 
 ## Exercise 1: Quantize a fixed matrix
 
-The question is: QuantizeW[[.1, -.9], [1.7, -.2]] with scale 1.7/7 andnearest-even rounding.
+The question is: Quantize W = [[0.1, -0.9], [1.7, -0.2]] with scale 1.7/7 and round-half-to-even.
 
-The shared scale is set by the largest magnitude. This is a simple uniform quantizer, not the distribution-awareNF4 codebook used in the referenced method.
+The shared scale is set by the largest magnitude. This is a simple uniform quantizer, not the distribution-aware NF4 codebook used in the referenced method.
 
 ```python
 original = np.array([[0.1, -0.9], [1.7, -0.2]], dtype=np.float32)
@@ -59,15 +59,15 @@ codes = np.clip(np.rint(original / scale), -7, 7).astype(np.int8)
 np.testing.assert_array_equal(codes, [[0, -4], [7, -1]])
 ```
 
-**Expected:** codes[[0, -4], [7, -1]].
+**Expected:** codes `[[0, -4], [7, -1]]`.
 
-**Verify:** Compare the computed values or written argument with codes[[0, -4], [7, -1]].
+**Verify:** Compare the computed values or written argument with codes `[[0, -4], [7, -1]]`.
 
 ## Exercise 2: Pack and unpack real nibbles
 
 The question is: Offset codes by 8, pack adjacent values into two bytes, then unpack.
 
-The storage calculation is backed by actual byte packing. Keeping fourint8 codes without packing would use eight bits per code despite a nominal4-bit value range.
+The storage calculation is backed by actual byte packing. Keeping four int8 codes without packing would use eight bits per code despite a nominal 4-bit value range.
 
 ```python
 unsigned = (codes.reshape(-1).astype(np.int16) + 8).astype(np.uint8)
@@ -80,13 +80,13 @@ np.testing.assert_array_equal(packed, [72, 127])
 np.testing.assert_array_equal(restored_codes, codes)
 ```
 
-**Expected:** packed bytes[72, 127]; round-trip codes exact.
+**Expected:** packed bytes `[72, 127]`; round-trip codes exact.
 
-**Verify:** Compare the computed values or written argument with packed bytes[72, 127]; round-trip codes exact.
+**Verify:** Compare the computed values or written argument with packed bytes `[72, 127]`; round-trip codes exact.
 
 ## Exercise 3: Measure dequantization error
 
-The question is: Reconstructfloat32weights and compareW@x forx[1, -2] with full precision.
+The question is: Reconstruct float32 weights and compare W@x for x [1, -2] with full precision.
 
 A compact representation changes numerical behavior before any adaptation. The adapter experiment should not conceal that initial approximation error.
 
@@ -99,13 +99,13 @@ np.testing.assert_allclose(reference, [1.9, 2.1], atol=1e-6, rtol=0)
 assert np.isfinite(approximate).all() and np.max(np.abs(approximate - reference)) > 0
 ```
 
-**Expected:** reference[1.9, 2.1]; finite nonzero approximation error.
+**Expected:** reference `[1.9, 2.1]`; finite nonzero approximation error.
 
-**Verify:** Compare the computed values or written argument with reference[1.9, 2.1]; finite nonzero approximation error.
+**Verify:** Compare the computed values or written argument with reference `[1.9, 2.1]`; finite nonzero approximation error.
 
 ## Exercise 4: Train only a small adapter
 
-The question is: Use frozen dequantizedW, rank 1 A/B and10SGD updates toward zero output.
+The question is: Use frozen dequantized W, rank 1 A/B and 10SGD updates toward zero output.
 
 Gradients reach adapter factors through a computation using fixed approximate weights. The base codes are not being optimized in this example.
 
@@ -133,7 +133,7 @@ np.testing.assert_array_equal(packed, saved)
 
 ## Exercise 5: Account for storage honestly
 
-The question is: Count2 packed bytes plusonefloat32scale, and separately count the dequantized2x2float32buffer.
+The question is: Count 2 packed bytes plus one float32 scale, and separately count the dequantized 2x2float32buffer.
 
 Packed artifact size is not peak training memory. The computation materializes floating-point weights and also uses adapters, gradients and optimizer state.
 
@@ -143,13 +143,13 @@ compute_buffer = dequantized.nbytes
 assert storage == 6 and compute_buffer == 16
 ```
 
-**Expected:** packed representation6 bytes; dequantizedbuffer16 bytes; overhead excluded.
+**Expected:** packed representation 6 bytes; dequantized buffer 16 bytes; overhead excluded.
 
-**Verify:** Compare the computed values or written argument with packed representation6 bytes; dequantizedbuffer16 bytes; overhead excluded.
+**Verify:** Compare the computed values or written argument with packed representation 6 bytes; dequantized buffer 16 bytes; overhead excluded.
 
 ## Exercise 6: State what was not measured
 
-The question is: Write a receipt distinguishing uniform4-bitCPU packing from NF4, double quantization, paged optimizers and GPU memory.
+The question is: Write a receipt distinguishing uniform 4-bit CPU packing from NF4, double quantization, paged optimizers and GPU memory.
 
 An accurate partial implementation is more useful than a misleading full-method label. The optional scale recipe must use its actual backend and produce separate measurements before making hardware claims.
 
@@ -174,4 +174,4 @@ assert receipt["actual_adapter_update"] and not any(
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Measure dequantization error* and predict how the result changes before checking it; the unchanged inputs give: reference `[1.9, 2.1]`; finite nonzero approximation error. Keep the original *State what was not measured* failure beside the repaired result; a missing PyTorch and NumPy runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

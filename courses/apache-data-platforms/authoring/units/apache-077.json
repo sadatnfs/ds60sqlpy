@@ -5,6 +5,38 @@
   "minutes": 75,
   "prerequisites": ["apache-076", "apache-075"],
   "concepts": ["snapshot version", "predicate hint", "correctness"],
+  "key_terms": [
+    [
+      "Table version",
+      "A specific committed state of a shared Delta table. Requesting it pins the result so later commits do not change the answer."
+    ],
+    [
+      "Predicate hint",
+      "A filter the client sends so the server may skip files. The server can ignore it, so the client must still apply the full filter."
+    ],
+    [
+      "History sharing",
+      "A provider option that makes earlier table versions readable, still subject to the table's retention rules."
+    ],
+    [
+      "Result identity",
+      "The recorded table, version, schema and row values that let a later read be compared with the original one."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Query the table at a pinned version",
+      "language": "bash",
+      "code": "curl -s -H \"Authorization: Bearer $RECIPIENT_TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"version\": 0, \"predicateHints\": []}' \\\n  \"$SHARING_ENDPOINT/shares/ds60_fixture/schemas/tutorial/tables/orders/query\"",
+      "interpretation": "The response is newline-delimited JSON: a protocol line, a metaData line and one file line per data file, each with a short-lived presigned URL. The delta-table-version response header must equal 0, or the reader cannot claim it saw the pinned state. Two reads at version 0 return the same files; a read without a version follows the latest commit and can change between calls, which is why reproducible reports always pin."
+    },
+    {
+      "title": "Predicate hints do not filter rows",
+      "language": "json",
+      "code": "{\n  \"version\": 0,\n  \"predicateHints\": [\"region = 'east'\"]\n}",
+      "interpretation": "A server may use hints to skip files whose statistics cannot match, but it is allowed to ignore them, and the reference configuration sets evaluatePredicateHints to false. The client must therefore apply the filter itself after reading. If a recipient relied on hints to hide west rows, it would receive them anyway, so hints are an optimization and never an access boundary."
+    }
+  ],
   "evidence": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred.",
   "sources": [
     ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"],

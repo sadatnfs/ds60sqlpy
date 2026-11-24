@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-064`, `apache-063`.
 
+## Key terms
+
+- **Remote Metastore:** A standalone Metastore service that clients reach over Thrift, separate from the database that persists its records.
+- **Thrift:** The RPC framework and protocol that Hive Metastore clients use. Shared protocol names do not guarantee compatibility across arbitrary releases.
+- **Backing database:** The relational database, here PostgreSQL, that persists Metastore records. Restarting the Thrift service keeps tables only because this database survives.
+- **Schema initialization:** Creating the Metastore's tables in an empty database with schematool, an explicit action that ordinary startup does not perform.
+
 ## Metastore availability and metadata durability are separate
 
 A remote Metastore service exposes metadata operations while PostgreSQL persists
@@ -76,6 +83,48 @@ backup?** No. Process state can be replaceable while its backing database remain
 authoritative. These cases preserve PostgreSQL metadata and warehouse bytes
 separately, then require independent fresh-client readback after exact resume
 and replacement.
+
+## Worked examples
+
+### Metadata before and after a stop
+
+```bash
+cd work/hive
+bash run.sh metadata
+bash run.sh stop
+bash run.sh resume
+bash run.sh metadata
+bash run.sh check
+```
+
+The two metadata reports should match, since the table and partition rows live in PostgreSQL, not in the metastore process. The metastore service itself is stateless; restarting it only proves it can reconnect to the database. The final check then confirms that the data files still answer through HiveServer2. Never run initialize during this test, because it would recreate missing definitions and make a real loss look like success.
+
+### The metastore database connection
+
+```xml
+<property>
+  <name>javax.jdo.option.ConnectionURL</name>
+  <value>jdbc:postgresql://postgres:5432/metastore</value>
+</property>
+<property>
+  <name>hive.metastore.warehouse.dir</name>
+  <value>file:///warehouse</value>
+</property>
+```
+
+This excerpt of conf/hive-site.xml shows the two places that must survive separately: the PostgreSQL metastore database and the warehouse directory. Backing up only one is a common mistake. Restoring the database without the files leaves tables that point at empty locations, and restoring files without the database leaves Parquet that no query can find. Use a consistent pg_dump with the matching file copy and record both identities together.
+
+### Replacement with a fresh metadata client
+
+```bash
+cd work/hive
+bash run.sh down
+bash run.sh start
+bash run.sh metadata
+bash run.sh check
+```
+
+Down removes the containers but keeps the named volumes for PostgreSQL and the warehouse, so start brings up new processes over old state. The metadata probe then reads the table through a brand new Thrift client, which rules out a cached answer from the previous session. If metadata succeeds but check fails, the definitions survived while the warehouse volume did not; if both fail, inspect logs for a database connection or schema version error before trying anything else.
 
 ## Complete worked source
 

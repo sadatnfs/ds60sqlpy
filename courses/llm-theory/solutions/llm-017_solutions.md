@@ -1,6 +1,6 @@
 # llm-017: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these shifted batches, padding and token loss answers after attempting *Shift the sequence* through *Reject all-padding batches*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Append ignored targets* points to one step. `llm-017_solution.py` holds the assertions; this page explains how they test active target. Then try *Reject all-padding batches* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -31,7 +31,7 @@ assert inputs.tolist() == [[2, 5, 7]] and targets.tolist() == [[5, 7, 3]]
 
 **Expected:** inputs 2, 5, 7 and targets 5, 7, 3.
 
-**Verify:** In a fresh process, the exercise checks confirm `inputs.tolist() == [[2, 5, 7]]` and `targets.tolist() == [[5, 7, 3]]`.
+**Verify:** For *Shift the sequence*, a fresh-process check confirms `inputs.tolist() == [[2, 5, 7]]` and `targets.tolist() == [[5, 7, 3]]`.
 
 ## Exercise 2: Score uniform logits
 
@@ -47,7 +47,7 @@ np.testing.assert_allclose(loss.item(), np.log(8), atol=1e-6, rtol=0)
 
 **Expected:** mean loss \(\log 8\) and count 3.
 
-**Verify:** In a fresh process, the exercise checks confirm `loss.item()` matches `np.log(8)` within 1e-6.
+**Verify:** For *Score uniform logits*, a fresh-process check confirms `loss.item()` matches `np.log(8)` within 1e-6.
 
 ## Exercise 3: Append ignored targets
 
@@ -65,7 +65,7 @@ torch.testing.assert_close(new, loss, atol=1e-6, rtol=0)
 
 **Expected:** mean loss unchanged; active count 3.
 
-**Verify:** In a fresh process, the exercise checks confirm `int((padded != -100).sum()) == 3` and `new` matches `loss` within 1e-6.
+**Verify:** For *Append ignored targets*, a fresh-process check confirms `int((padded != -100).sum()) == 3` and `new` matches `loss` within 1e-6.
 
 ## Exercise 4: Expose the wrong denominator
 
@@ -84,7 +84,7 @@ assert wrong < loss
 
 **Expected:** wrong loss \(3\log 8/5\), below the correct loss.
 
-**Verify:** In a fresh process, the exercise checks confirm `wrong.item()` matches `3 * np.log(8) / 5` within 1e-6 and `wrong < loss`.
+**Verify:** For *Expose the wrong denominator*, a fresh-process check confirms `wrong.item()` matches `3 * np.log(8) / 5` within 1e-6 and `wrong < loss`.
 
 ## Exercise 5: Check gradient masking
 
@@ -103,7 +103,7 @@ assert torch.count_nonzero(v.grad[:, 3:]).item() == 0
 
 **Expected:** ignored-position gradients exactly zero.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.count_nonzero(v.grad[:, 3:]).item() == 0`.
+**Verify:** For *Check gradient masking*, a fresh-process check confirms `torch.count_nonzero(v.grad[:, 3:]).item() == 0`.
 
 ## Exercise 6: Reject all-padding batches
 
@@ -124,8 +124,8 @@ except ValueError:
 
 **Expected:** zero active count triggers an explicit failure policy.
 
-**Verify:** In a fresh process, the exercise checks confirm `active == 0` and `active != 0`.
+**Verify:** For *Reject all-padding batches*, a fresh-process check confirms `active == 0` and `active != 0`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Expose the wrong denominator* and predict the result first; keep *Check gradient masking* failing beside the repair. Log a missing PyTorch separately from a wrong active target value in `llm-017`.

@@ -205,6 +205,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The Scala and PySpark programs should use the same explicit schemas and sorted output. Both build local finite fixtures, perform a declarative join and aggregate, collect only the tiny final table and stop the owned Spark session in a finally block. Printing the formatted plan teaches physical execution, but the result assertions remain independent literal expectations. Changing input cardinality or null rules requires updating the mathematical derivation, not merely copying observed output into the expected result.</p>
 <p>On an optional GPU environment, repeat the same query and input. Add plugin release, jar checksum, Spark/Scala/JDK versions, CUDA variant, driver, GPU model and executor-resource configuration to the notebook. Capture the final executed plan after materialization and record operator fallback reasons, device use, task concurrency, spill and total completion time. Keep GPU evidence separate from the already completed CPU language parity tests.</p>
 <p>The capstone is complete when another learner can reproduce the CPU semantics, explain the plan and understand exactly what remains unqualified. Real GPU performance is an additional evidence layer. A useful report can conclude that the tiny fixture is too small for a meaningful speed comparison while still demonstrating correct setup and operator execution on prepared hardware.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>CPU oracle:</strong> An exact, simple implementation whose output serves as the expected result for both Spark languages.</li>
+<li><strong>Declarative expression:</strong> A DataFrame or SQL expression that Spark can optimize, unlike opaque procedural code.</li>
+<li><strong>Explicit schema:</strong> A declared set of column names, types and nullability that avoids inference differences.</li>
+<li><strong>Duplicate dimension keys:</strong> Repeated keys in a lookup table that multiply joined rows and change aggregates.</li>
+<li><strong>Executed plan:</strong> The plan Spark actually ran for an action, which is the evidence for GPU operator use.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Sales (A,2),(A,4),(B,3) joined to prices (A,10),(B,20) yield revenue A 60 and B 60. The fixture has deterministic exact integer output.</p>
@@ -220,23 +228,55 @@ revenue <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU ETL oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Sorted revenue [(A,60),(B,60)].</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>sales</code></td>
+<td><code>[(&#x27;A&#x27;, 2), (&#x27;A&#x27;, 4), (&#x27;B&#x27;, 3)]</code></td>
+</tr>
+<tr>
+<td><code>prices</code></td>
+<td><code>{&#x27;A&#x27;: 10, &#x27;B&#x27;: 20}</code></td>
+</tr>
+<tr>
+<td><code>revenue</code></td>
+<td><code>{&#x27;A&#x27;: 60, &#x27;B&#x27;: 60}</code></td>
+</tr>
+<tr>
+<td><code>product</code></td>
+<td><code>&#x27;B&#x27;</code></td>
+</tr>
+<tr>
+<td><code>quantity</code></td>
+<td><code>3</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="scala-and-pyspark-parity-lab">Scala and PySpark parity lab<a class="heading-anchor" href="#scala-and-pyspark-parity-lab" aria-label="Link to this section">#</a></h3>
 <p>Choose <strong>Scala Spark on CPU</strong> or <strong>PySpark on CPU</strong> to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.</p>
 <p>For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-derive-expected-revenue">Exercise 1: Derive expected revenue<a class="heading-anchor" href="#exercise-1-derive-expected-revenue" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>derive expected revenue</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Summing prices per product before multiplying, or multiplying the total quantity by the sum of all prices, mixes products and gives wrong totals such as 180 for A.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-write-scala-expressions">Exercise 2: Write Scala expressions<a class="heading-anchor" href="#exercise-2-write-scala-expressions" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>write Scala expressions</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Relying on schema inference from text files can type numbers as strings or doubles, changing join behavior or output types between runs.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-write-pyspark-expressions">Exercise 3: Write PySpark expressions<a class="heading-anchor" href="#exercise-3-write-pyspark-expressions" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>write PySpark expressions</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Collecting rows into Python and summing in a loop changes where the work runs and stops being a Spark pipeline comparison.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-test-duplicate-dimension-keys">Exercise 4: Test duplicate dimension keys<a class="heading-anchor" href="#exercise-4-test-duplicate-dimension-keys" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>test duplicate dimension keys</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Running the join without checking lets a duplicate price row double A to 120 with no error, which looks like a real sales increase.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-capture-executed-gpu-evidence">Exercise 5: Capture executed GPU evidence<a class="heading-anchor" href="#exercise-5-capture-executed-gpu-evidence" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>capture executed GPU evidence</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Claiming GPU execution from a CPU-only environment, or from a configuration file alone, reports evidence that does not exist.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-prepare-a-balanced-capstone-report">Exercise 6: Prepare a balanced capstone report<a class="heading-anchor" href="#exercise-6-prepare-a-balanced-capstone-report" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>prepare a balanced capstone report</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing the report as if GPU acceleration was demonstrated when only CPU runs happened misleads anyone deciding on deployment.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -8,7 +8,7 @@ Advanced; approximately 120 minutes. Direct prerequisites: `spark-034`. The prep
 
 ## How to run this lesson
 
-Open `spark-035` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-035` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-035.scala) and [PySpark learner](../lessons/spark-035.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-035_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-035_solution.scala) and [PySpark reference](../solutions/spark-035_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -34,7 +34,7 @@ The [Scala learner](../lessons/spark-035.scala) and [PySpark learner](../lessons
 
 A streaming query is a long-lived logical computation, even when this lesson uses a finite invocation. Its recovery story spans input identity, query state and output publication. A checkpoint records progress so a compatible restart can continue rather than treating every available input as new. The output sink must also implement a suitable commit protocol. A checkpoint file alone does not make arbitrary HTTP calls, emails or database inserts exactly once.
 
-The fixture has two immutable JSON files with an explicit id:bigint, cents:bigint schema. File A contains 1:100 and 2:200. File B contains 2:200 and 3:300. Each row is an input occurrence; ID 2 appears in two occurrences. This deliberately separates replay of an already processed file from repetition of a business identity in a new file. Correct source recovery retains four occurrences and total 800, not three rows and 600.
+The fixture has two immutable JSON files with an explicit `id:bigint, cents:bigint` schema. File A contains 1:100 and 2:200. File B contains 2:200 and 3:300. Each row is an input occurrence; ID 2 appears in two occurrences. This deliberately separates replay of an already processed file from repetition of a business identity in a new file. Correct source recovery retains four occurrences and total 800, not three rows and 600.
 
 ## Follow the three histories
 
@@ -52,7 +52,7 @@ The first run sees File A. After it finishes, the producer publishes File B and 
 
 ## New checkpoint means a new processing history
 
-A fourth run uses a new checkpoint and a different output directory. It replays both source files, which is expected because its source history is empty. It must never reuse the original append output casually:that would combine a new history with old side effects and could duplicate data. The separate output lets the learner compare the same four-row product without altering the prior checkpoint.
+A fourth run uses a new checkpoint and a different output directory. It replays both source files, which is expected because its source history is empty. It must never reuse the original append output casually: that would combine a new history with old side effects and could duplicate data. The separate output lets the learner compare the same four-row product without altering the prior checkpoint.
 
 The complete guarantee ledger names source immutability, checkpoint compatibility, sink protocol, business key policy and the tested failure boundary. This lesson demonstrates compatible restarts within one bounded local program and prepared filesystem. It does not simulate process death, power loss, object-store consistency or arbitrary external transactions. Those claims need their own environment and fault receipts. The important habit is to describe the exact guarantee you observed instead of applying exactly once as an undifferentiated label.
 
@@ -61,9 +61,7 @@ The complete guarantee ledger names source immutability, checkpoint compatibilit
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
@@ -71,7 +69,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-035-")
 val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
@@ -85,20 +83,7 @@ publishFile(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -106,7 +91,7 @@ import json
 import uuid
 
 if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark4.0.1 required")
+    raise ValueError("Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-035-", dir=Path.cwd()))
 input_path = owned_root / "input"
@@ -267,7 +252,7 @@ Do not reuse an old output with a new checkpoint without an idempotency plan. Do
 
 ## Self-check
 
-Explain the contract of `validatedBag` / `validated_bag` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `validatedBag` / `validated_bag` without reading its solution. Then, from memory, state what Exercise 6 (Write a guarantee ledger from exact counts) must produce: 4 occurrences, 3 distinct IDs, total 800. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -275,9 +260,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark4.0.1 checkpoint and recovery semantics](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#recovering-from-failures-with-checkpointing)
+- [Spark 4.0.1 checkpoint and recovery semantics](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#recovering-from-failures-with-checkpointing)
 
-- [Spark4.0.1 query identity and lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#managing-streaming-queries)
+- [Spark 4.0.1 query identity and lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#managing-streaming-queries)
 
 ## Ask an AI tutor about this lesson
 

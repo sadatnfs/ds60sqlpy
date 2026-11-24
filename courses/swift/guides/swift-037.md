@@ -141,7 +141,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Apply a bounded display policy) before changing anything, and confirm its observation: Assignments are clamped into zero through ten.
 2. Compare Example B (Retain valid interior values) with Example A and name the first line whose behavior differs. Its observation is: A valid interior value is unchanged and the projection exposes the range.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A wrapper is not a substitute for validating external input.
+3. Before opening the explanation, check your task 3 attempt (Create a wrapper with an explicit normalization policy for a local display field) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

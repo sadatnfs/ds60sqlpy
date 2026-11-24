@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-059_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A high-level multiply-plus-add may become a fused instruction depending on types, options and target. If generated code changes, retain the numerical test because one rounding differs from two. A shorter instruction sequence is useful evidence only in combination with the workload&#x27;s actual behavior.</p>
+<p><strong>Approach:</strong> Inspect generated code to see whether multiply and add became one fused instruction, and keep the numerical test either way.</p>
+<p><strong>Why it is correct:</strong> A fused multiply-add rounds once instead of twice, so results can differ slightly from separate operations.</p>
+<p><strong>A plausible wrong approach:</strong> Accepting a shorter instruction sequence as automatically better skips checking that its rounding still meets the tolerance.</p>
+<p><strong>How to verify:</strong> Compare outputs from fused and unfused builds against a high-precision reference within a stated tolerance.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A per-thread array causes reported local-memory traffic. Reducing its live range may remove spills, but it can also add recomputation. Compare the compiler report, output and uninstrumented timing under the same target. Do not edit assembly until the source-level cause is understood.</p>
+<p><strong>Approach:</strong> Read the compiler&#x27;s local-memory report, shorten the array&#x27;s live range, and rebuild for the same target.</p>
+<p><strong>Why it is correct:</strong> Fewer live values can remove spills, though recomputation may add instructions.</p>
+<p><strong>A plausible wrong approach:</strong> Hand-editing SASS to remove spills makes code that cannot be rebuilt or maintained.</p>
+<p><strong>How to verify:</strong> Compare the spill report, outputs and uninstrumented timings before and after.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>A native image targets a hardware family; PTX requires a driver/toolchain path able to understand and compile that virtual version for the device.</p>
+<p><strong>Approach:</strong> Separate native cubin compatibility with a hardware family from PTX that the driver JIT-compiles.</p>
+<p><strong>Why it is correct:</strong> A cubin runs only on matching hardware, while PTX needs a driver that understands its virtual version.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming any PTX runs on any driver ignores version requirements.</p>
+<p><strong>How to verify:</strong> Check the embedded targets with cuobjdump and the installed driver version.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Translation, instruction latency, memory behavior, parallel scheduling and repeated execution all intervene.</p>
+<p><strong>Approach:</strong> Measure time directly rather than counting PTX instructions.</p>
+<p><strong>Why it is correct:</strong> Translation to SASS, latency, memory stalls and scheduling all change real cost.</p>
+<p><strong>A plausible wrong approach:</strong> Ranking kernels by PTX length can pick a slower kernel with more memory stalls.</p>
+<p><strong>How to verify:</strong> Time both kernels under the same conditions and compare.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Revisit the supported architecture policy and toolchain, preserving a valid fallback; do not guess an architecture flag until the error disappears.</p>
+<p><strong>Approach:</strong> Revisit the supported architecture list and toolchain, and keep a fallback.</p>
+<p><strong>Why it is correct:</strong> The diagnostic means the target is not supported by this build.</p>
+<p><strong>A plausible wrong approach:</strong> Trying architecture flags until the error disappears can produce code for the wrong device.</p>
+<p><strong>How to verify:</strong> Rebuild with the documented targets and confirm the probe kernel runs.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Measure first load/JIT separately from warmed execution with source/target/driver identities and unchanged correctness fixtures.</p>
+<p><strong>Approach:</strong> Time the first load including JIT separately from later warmed runs, recording source, target and driver.</p>
+<p><strong>Why it is correct:</strong> Cold start includes compilation and module loading that warmed runs skip.</p>
+<p><strong>A plausible wrong approach:</strong> Averaging the first run with later runs hides the startup cost.</p>
+<p><strong>How to verify:</strong> Run fresh processes repeatedly and compare first-run times.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-059_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

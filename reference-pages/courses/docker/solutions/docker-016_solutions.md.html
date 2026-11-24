@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-locate-the-filesystem-used-by-copy-from">Exercise 1: Locate the filesystem used by COPY --from.<a class="heading-anchor" href="#exercise-1-locate-the-filesystem-used-by-copy-from" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The named build stage.</p>
 <p><strong>Why:</strong> It is not a host path. This distinction lets the final stage copy exactly the artifact created by the build without relying on a developer’s local output directory.</p>
+<p><strong>Approach:</strong> Follow --from=build back to the stage declared <code>FROM python:3.12-slim AS build</code>, and its file /out/message.txt written by the RUN.</p>
+<p><strong>Why this is correct:</strong> COPY --from reads from that stage&#x27;s finished filesystem, not from the host, so the final stage needs nothing from the developer&#x27;s directory.</p>
+<p><strong>A plausible wrong approach:</strong> Creating out/message.txt on the host first to help the copy changes nothing, because COPY --from never looks at the context.</p>
+<p><strong>How to verify:</strong> Build the example and run the final image; it prints prepared, which can only come from the build stage.</p>
 <h3 id="exercise-2-predict-failure-when-a-shared-library-is-omitted">Exercise 2: Predict failure when a shared library is omitted.<a class="heading-anchor" href="#exercise-2-predict-failure-when-a-shared-library-is-omitted" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The final process fails even if builder tests passed.</p>
 <p><strong>Why:</strong> The loader and dependencies are part of runtime requirements. A successful compile does not prove the executable can start in a different filesystem.</p>
+<p><strong>Approach:</strong> Ask what the final executable needs to start: its dynamic loader and every shared library it links, all present in the final stage.</p>
+<p><strong>Why this is correct:</strong> Builder tests run in the builder filesystem, where those libraries exist. The final stage holds only what COPY --from placed there.</p>
+<p><strong>A plausible wrong approach:</strong> Trusting the builder&#x27;s passing tests and shipping fails at container start with a missing library error before main runs.</p>
+<p><strong>How to verify:</strong> Run the final image directly; a missing library shows up at once, and running ldd in a debug copy of the final stage lists what is absent.</p>
 <h3 id="exercise-3-design-a-builder-to-runtime-artifact-list">Exercise 3: Design a builder-to-runtime artifact list.<a class="heading-anchor" href="#exercise-3-design-a-builder-to-runtime-artifact-list" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Executable or package plus explicit required runtime assets.</p>
 <p><strong>Why:</strong> Include certificates or configuration defaults only when needed. The list should be small enough to review and broad enough to run correctly.</p>
+<p><strong>Approach:</strong> List each artifact the final stage needs by path: the executable or package, certificates if it makes TLS calls, and config defaults it reads.</p>
+<p><strong>Why this is correct:</strong> An explicit list keeps the final stage reviewable and makes each COPY --from line match one runtime requirement.</p>
+<p><strong>A plausible wrong approach:</strong> Copying the whole /out or the builder&#x27;s /usr tree ships compilers and test files.</p>
+<p><strong>How to verify:</strong> The final image&#x27;s file listing matches the artifact list, and the acceptance request passes with nothing more added.</p>
 <h3 id="exercise-4-diagnose-an-accidentally-shipped-debug-target">Exercise 4: Diagnose an accidentally shipped debug target.<a class="heading-anchor" href="#exercise-4-diagnose-an-accidentally-shipped-debug-target" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect final stage selection and image contents.</p>
 <p><strong>Why:</strong> A named target changes what is built. Verify the release command and artifact rather than assuming the last intended stage was selected.</p>
+<p><strong>Approach:</strong> Check which target the release build selected with --target, and inspect the resulting image&#x27;s files and command.</p>
+<p><strong>Why this is correct:</strong> Without --target the last stage is built; with --target debug a debug stage is built. Either way the content shows what shipped.</p>
+<p><strong>A plausible wrong approach:</strong> Reading the Dockerfile and assuming the release stage was used fails when a CI script still passes --target debug.</p>
+<p><strong>How to verify:</strong> The CI command line names the intended target, and the image lacks debug tools when listed.</p>
 <h3 id="exercise-5-explain-why-a-smaller-image-is-not-automatically-safer">Exercise 5: Explain why a smaller image is not automatically safer.<a class="heading-anchor" href="#exercise-5-explain-why-a-smaller-image-is-not-automatically-safer" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Correct dependencies, patching and privileges still matter.</p>
 <p><strong>Why:</strong> Size is one useful measurement, but security also depends on what executes, what it can access and how its dependencies are maintained.</p>
+<p><strong>Approach:</strong> Separate the size metric from the risks that matter: which binaries can run, what user runs them, and whether dependencies receive patches.</p>
+<p><strong>Why this is correct:</strong> A small image running as root with an unpatched library is smaller but no safer. Size cuts attack surface only when removed parts were risky.</p>
+<p><strong>A plausible wrong approach:</strong> Choosing the smallest base regardless of its update cadence can leave known vulnerabilities in place longer.</p>
+<p><strong>How to verify:</strong> Compare candidates on size, configured user, and scanner findings for the same date, and record all three.</p>
 <h3 id="exercise-6-specify-final-image-acceptance">Exercise 6: Specify final-image acceptance.<a class="heading-anchor" href="#exercise-6-specify-final-image-acceptance" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Run the exact final image under intended user, mounts and network.</p>
 <p><strong>Why:</strong> This exposes missing libraries, permissions and files that builder tests can hide. Preserve the exact tested image identity for delivery.</p>
+<p><strong>Approach:</strong> Run the exact final image with the user, read-only root, mounts and network it will have in use, then send the acceptance request.</p>
+<p><strong>Why this is correct:</strong> Final-stage problems such as missing files, wrong ownership or a missing library show up only in that configuration.</p>
+<p><strong>A plausible wrong approach:</strong> Accepting the release because the builder stage tests passed checks a filesystem that will never ship.</p>
+<p><strong>How to verify:</strong> Record the image ID used in the acceptance run and deploy that same ID, not a rebuilt tag.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

@@ -5,19 +5,18 @@ export {};
 // Copy Example A into a scratch `main.mts` and change `{ group: 'A', value: 2 },` to `{
 // group: 'A', value: 3 },`. Before running it, predict which check fails and which value it
 // now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
+// Expected: The changed run fails with an `AssertionError` at
 // `assert.deepEqual([...result.groups], [['A', { count: 2, sum: 5 }], ['B', { count: 1, sum:
-// 4 }]])`. Restoring the original line brings back the worked observation: A count 2 sum 5;
-// B count 1 sum 4; zero rejected.
+// 4 }]])`. Restoring `{ group: 'A', value: 2 },` brings back: A count 2 sum 5; B count 1 sum
+// 4; zero rejected.
 
 // Exercise 2: Quarantine syntax and domain failures with physical line numbers: debug a regression
 // A regression changed one token in Example B, so one line now reads `"value":3`. Run
 // Example B with that line, use the failing check to locate the defect and repair it without
 // changing the check.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 })`; after it the line reads
-// `"value":2` again and one accepted row; diagnostics at lines 2 and 3 with json/schema
-// categories.
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 })`. Restoring `"value":2`
+// brings back: one accepted row; diagnostics at lines 2 and 3 with json/schema categories.
 
 // Exercise 3: Preserve a multi-byte group name across single-byte chunks
 // Use an emoji group and split every UTF-8 byte.

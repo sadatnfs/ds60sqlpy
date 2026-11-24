@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Choose one operation, such as a bounded LayerNorm or segmented reduction, and derive an operation-count and byte-traffic model. Arithmetic intensity is operations divided by transferred bytes. A bandwidth-limited hypothesis suggests reducing traffic; a compute-limited hypothesis suggests improving arithmetic utilization. These bounds are simplified and need real profiler evidence for the target shape.</p>
 <p>Change one mechanism at a time and keep an unchanged library baseline. Resource usage can reverse an apparent optimization: extra fusion may increase register pressure, and a larger tile may reduce active blocks. Test numerical behavior and boundary shapes after every change. Include a failed optimization because explaining why a hypothesis failed is part of independent performance engineering.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Arithmetic intensity:</strong> Floating-point operations performed per byte of memory traffic.</li>
+<li><strong>Bandwidth-limited kernel:</strong> A kernel whose time is set by memory traffic because its arithmetic intensity is below the device&#x27;s balance point.</li>
+<li><strong>Compute-limited kernel:</strong> A kernel whose time is set by arithmetic throughput because its arithmetic intensity is above the balance point.</li>
+<li><strong>Controlled change:</strong> Changing one variable at a time so a measured difference can be attributed to it.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>An operation performs 4096 arithmetic operations while moving 8192 bytes, giving intensity 0.5 operations/byte in the model. This low ratio motivates examining memory traffic.</p>
@@ -214,20 +221,52 @@ saved <span class="syntax-operator">=</span> <span class="syntax-number">2</span
 <span class="syntax-keyword">assert</span> intensity <span class="syntax-operator">==</span> <span class="syntax-number">0.5</span> <span class="syntax-operator">and</span> saved <span class="syntax-operator">==</span> <span class="syntax-number">8192</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU roofline inputs:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> intensity<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operations/byte; removable traffic</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> saved<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Intensity 0.5 and hypothetical 8192 bytes removable traffic.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>operations</code></td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><code>bytes_moved</code></td>
+<td><code>8192</code></td>
+</tr>
+<tr>
+<td><code>intensity</code></td>
+<td><code>0.5</code></td>
+</tr>
+<tr>
+<td><code>intermediate</code></td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><code>saved</code></td>
+<td><code>8192</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-calculate-arithmetic-intensity">Exercise 1: Calculate arithmetic intensity<a class="heading-anchor" href="#exercise-1-calculate-arithmetic-intensity" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>calculate arithmetic intensity</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Dividing bytes by operations gives 2 and inverts the conclusion, suggesting the kernel is compute-heavy.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-count-eliminated-bytes">Exercise 2: Count eliminated bytes<a class="heading-anchor" href="#exercise-2-count-eliminated-bytes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>count eliminated bytes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting only the avoided write gives 4096 bytes and underestimates the saving by half.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-name-a-profiler-counter">Exercise 3: Name a profiler counter<a class="heading-anchor" href="#exercise-3-name-a-profiler-counter" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>name a profiler counter</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using only total kernel time cannot separate fewer bytes from other effects. Time can also change because of clock variation or a different compiled instruction mix, so a timing-only comparison leaves the mechanism unknown.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-one-controlled-change">Exercise 4: Design one controlled change<a class="heading-anchor" href="#exercise-4-design-one-controlled-change" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>design one controlled change</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Applying fusion and a new block size together leaves the source of a speedup ambiguous. If one change helps and the other hurts, the combined result may even show no difference and hide both effects.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-test-a-boundary-shape">Exercise 5: Test a boundary shape<a class="heading-anchor" href="#exercise-5-test-a-boundary-shape" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>test a boundary shape</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Testing only 1024 elements misses an off-by-one bounds check that writes past the end on 1023.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-a-failed-optimization">Exercise 6: Explain a failed optimization<a class="heading-anchor" href="#exercise-6-explain-a-failed-optimization" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>explain a failed optimization</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the fused version as an improvement because bytes fell ignores the measured timing. The bytes counter confirms the mechanism worked, but the goal was throughput, and that goal was not met for this shape.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

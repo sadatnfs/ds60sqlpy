@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-037-retention-compaction-and-schemas">apache-037: Retention, compaction and schemas<a class="heading-anchor" href="#apache-037-retention-compaction-and-schemas" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-033</code>, <code>apache-006</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Deletion retention:</strong> The policy that removes old log segments once they exceed a configured age or size.</li>
+<li><strong>Log compaction:</strong> Background cleaning that retains at least the latest value for each key. It is asynchronous, so a reader can still see several versions of one key.</li>
+<li><strong>Tombstone:</strong> A record with a key and a null value that marks the key as deleted under compaction. An empty string is not a tombstone.</li>
+<li><strong>Schema registry:</strong> A separate service that stores payload schemas and checks compatibility. Kafka itself transports bytes and does not enforce payload types.</li>
+<li><strong>Reader contract:</strong> The validation a consuming application applies to payloads. The workshop uses a small local validator, not a registry or broker enforcement.</li>
+</ul>
 <h3 id="retention-policies-decide-which-history-remains-available">Retention policies decide which history remains available<a class="heading-anchor" href="#retention-policies-decide-which-history-remains-available" aria-label="Link to this section">#</a></h3>
 <p>Deletion retention removes old log segments according to configured size or time policies. Compaction retains the latest value for each key as older eligible log segments are cleaned, with tombstones expressing keyed deletion under their own retention conditions. Compaction is asynchronous and does not promise that every old value disappears immediately after a newer record is acknowledged.</p>
 <p>A compacted topic can therefore contain several versions of a key when a consumer reads it. An application rebuilding state should apply the ordered keyed updates rather than assume exactly one physical record per key. Null values and null keys have different meanings, and an empty string is not a tombstone. The workshop uses ordinary string updates for the actual compacted-policy check and discusses tombstones without claiming an unimplemented physical-cleaner experiment.</p>

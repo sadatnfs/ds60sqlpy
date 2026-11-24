@@ -8,6 +8,25 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["record grain", "input contract", "publication decision", "observable evidence"],
+    "key_terms": [
+      {
+        "term": "Record",
+        "definition": "One structured observation, such as one delivery row, whose fields are read together."
+      },
+      {
+        "term": "Record grain",
+        "definition": "The statement of what exactly one record represents, which decides what may be counted or summed."
+      },
+      {
+        "term": "Contract",
+        "definition": "The stated conditions under which a transformation is meaningful, such as an identified delivery and a positive integer package count."
+      },
+      {
+        "term": "Publication decision",
+        "definition": "The explicit choice to release or withhold a computed number after its checks pass or fail."
+      }
+    ],
+    "worked_examples": [],
     "outcome": "Trace a small record-to-metric pipeline and define its observable contract.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-001.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-001.py",
@@ -37,6 +56,37 @@
       "stdout and stderr",
       "exit status"
     ],
+    "key_terms": [
+      {
+        "term": "Process",
+        "definition": "A running program instance with its own execution state, including a working directory and environment."
+      },
+      {
+        "term": "Working directory",
+        "definition": "The directory a process uses to interpret relative paths."
+      },
+      {
+        "term": "Environment variable",
+        "definition": "A named string supplied to a process when it starts, often used for configuration."
+      },
+      {
+        "term": "Exit status",
+        "definition": "The integer a process returns when it ends, where zero conventionally reports success and nonzero reports failure."
+      },
+      {
+        "term": "Standard error",
+        "definition": "The process stream reserved for diagnostics, kept separate from standard output so data and messages do not mix."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A relative path depends on the child's working directory",
+        "language": "python",
+        "code": "import subprocess\nimport sys\nimport tempfile\nfrom pathlib import Path\n\nreader = \"import pathlib; print(pathlib.Path('incoming/route.txt').read_text().strip())\"\nwith tempfile.TemporaryDirectory() as directory:\n    root = Path(directory)\n    (root / \"incoming\").mkdir()\n    (root / \"incoming\" / \"route.txt\").write_text(\"north\\n\")\n    (root / \"elsewhere\").mkdir()\n    for label, cwd in ((\"root\", root), (\"elsewhere\", root / \"elsewhere\")):\n        result = subprocess.run(\n            [sys.executable, \"-c\", reader], cwd=cwd, capture_output=True, text=True, timeout=5\n        )\n        last_error_line = result.stderr.strip().splitlines()[-1] if result.stderr else \"\"\n        print(label, result.returncode, repr(result.stdout.strip()), last_error_line)\n",
+        "output": "root 0 'north' \nelsewhere 1 '' FileNotFoundError: [Errno 2] No such file or directory: 'incoming/route.txt'\n",
+        "interpretation": "The same one-line reader prints north with exit status 0 when cwd is the temporary root, and exits with status 1 and a FileNotFoundError for incoming/route.txt when cwd is the sibling elsewhere directory. Nothing about the file changed; only the process attribute that resolves relative names did. That is why the chapter's first case passes an absolute path argument instead of trusting the caller's location. Notice also that stdout is empty in the failing run, so a scheduler that only looked for output would see silence rather than an error; the nonzero status and the stderr line are the evidence. If you rewrite the reader to accept `sys.argv[1]` and pass `str(root / \"incoming/route.txt\")`, both rows print north with status 0."
+      }
+    ],
     "outcome": "Read and write owned UTF-8 files through explicit paths.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-002.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-002.py",
@@ -60,6 +110,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["types", "units", "missingness", "aware timestamps", "denominators"],
+    "key_terms": [
+      {
+        "term": "Data type",
+        "definition": "A value's representation together with the operations it supports."
+      },
+      {
+        "term": "Unit",
+        "definition": "The scale attached to a number, such as cents or hours, which must match before values are compared or added."
+      },
+      {
+        "term": "Missingness policy",
+        "definition": "The declared rule for unknown values, which keeps unknown distinct from zero."
+      },
+      {
+        "term": "Aware timestamp",
+        "definition": "A timestamp that carries a UTC offset and therefore names one instant, unlike a naive timestamp."
+      },
+      {
+        "term": "Denominator",
+        "definition": "The population a rate divides by, which must be stated before the rate means anything."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Summing minutes and seconds without a unit field",
+        "language": "python",
+        "code": "from decimal import Decimal\n\nreadings = [\n    {\"stop\": \"A\", \"wait\": Decimal(\"90\"), \"unit\": \"s\"},\n    {\"stop\": \"B\", \"wait\": Decimal(\"2\"), \"unit\": \"min\"},\n    {\"stop\": \"C\", \"wait\": None, \"unit\": \"s\"},\n]\nto_seconds = {\"s\": Decimal(\"1\"), \"min\": Decimal(\"60\")}\n\nnaive_total = sum(r[\"wait\"] for r in readings if r[\"wait\"] is not None)\nknown = [r[\"wait\"] * to_seconds[r[\"unit\"]] for r in readings if r[\"wait\"] is not None]\nprint(\"naive total:\", naive_total)\nprint(\"seconds total:\", sum(known), \"from\", len(known), \"of\", len(readings), \"rows\")\nprint(\"mean known wait (s):\", sum(known) / len(known))\n",
+        "output": "naive total: 92\nseconds total: 210 from 2 of 3 rows\nmean known wait (s): 105\n",
+        "interpretation": "Adding the raw numbers gives 92, a value with no unit at all: 90 seconds plus 2 minutes is not 92 of anything. Converting each known reading through its declared unit gives 210 seconds from the two measured stops, and the mean over those two is 105 seconds. Stop C stays out of both the numerator and the denominator because its wait was never observed, so the report says \"2 of 3 rows\" instead of silently averaging over three. If stop B's producer later switched to seconds without changing the unit column, the conversion table would multiply 2 by 60 again and overstate the total, which is why the unit must travel with each value rather than being assumed per feed."
+      }
+    ],
     "outcome": "Normalize aware timestamps and retain the meaning of missing values.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-003.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-003.py",
@@ -87,6 +168,37 @@
     "runtime_profile": "data-engineering",
     "language": "python",
     "concepts": ["relational grain", "primary keys", "join cardinality", "aggregation", "SQL NULL"],
+    "key_terms": [
+      {
+        "term": "Row grain",
+        "definition": "What exactly one row of a table means, such as one delivery or one customer day."
+      },
+      {
+        "term": "Primary key",
+        "definition": "A column set that identifies exactly one row under the declared contract."
+      },
+      {
+        "term": "Join cardinality",
+        "definition": "How many rows on each side of a join can match, which decides whether facts are preserved, duplicated or dropped."
+      },
+      {
+        "term": "Inner join",
+        "definition": "A join that keeps only rows with a match on both sides, so unmatched facts silently disappear."
+      },
+      {
+        "term": "SQL NULL",
+        "definition": "The SQL marker for an unknown value, which aggregate functions such as SUM skip rather than treat as zero."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Aggregate before joining when the dimension repeats a key",
+        "language": "python",
+        "code": "import duckdb\n\ncon = duckdb.connect(\":memory:\")\ncon.execute(\"create table deliveries(id integer, route_id integer, packages integer)\")\ncon.execute(\"insert into deliveries values (1,10,2),(2,10,3),(3,20,1),(4,30,7)\")\ncon.execute(\"create table route_names(route_id integer, name varchar)\")\ncon.execute(\"insert into route_names values (10,'north'),(10,'north-old'),(20,'south')\")\n\njoined = con.execute(\n    \"select sum(packages) from deliveries join route_names using(route_id)\"\n).fetchone()[0]\nper_route = con.execute(\n    \"select d.route_id, d.packages, count(r.name) as name_rows \"\n    \"from (select route_id, sum(packages) as packages from deliveries group by route_id) d \"\n    \"left join route_names r using(route_id) group by d.route_id, d.packages order by d.route_id\"\n).fetchall()\nprint(\"inner join total:\", joined)\nprint(\"route_id, packages, matching name rows:\", per_route)\nprint(\"source total:\", con.execute(\"select sum(packages) from deliveries\").fetchone()[0])\n",
+        "output": "inner join total: 11\nroute_id, packages, matching name rows: [(10, 5, 2), (20, 1, 1), (30, 7, 0)]\nsource total: 13\n",
+        "interpretation": "The inner join reports 11 packages, but the deliveries table holds 13. Two errors cancel only partly: route 10 has two name rows, so its 5 packages are counted twice (10), and route 30 has no name row, so its 7 packages disappear. The second query aggregates deliveries to route grain first, then left joins, and the name_rows column exposes both problems directly: 2 matches for route 10, 0 for route 30. Reconciling each result against the source total of 13 is the check that catches this before publication. If route_names were deduplicated to one row per route_id and route 30 were added, the inner join total would also be 13."
+      }
+    ],
     "outcome": "Execute real DuckDB joins and grouped metrics with an independent row oracle.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-004.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-004.py",
@@ -110,6 +222,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["function interface", "mutation", "iterator lifetime", "replay", "complexity"],
+    "key_terms": [
+      {
+        "term": "Parameter",
+        "definition": "A name in a function definition that receives the argument value passed at the call."
+      },
+      {
+        "term": "Pure transformation",
+        "definition": "A function that returns the same result for the same inputs and has no observable side effects."
+      },
+      {
+        "term": "Iterator",
+        "definition": "A single-pass object that yields values on demand and is exhausted once consumed."
+      },
+      {
+        "term": "Shallow copy",
+        "definition": "A new outer container whose inner objects, such as nested dictionaries, are still shared with the original."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A mutable default argument leaks state between calls",
+        "language": "python",
+        "code": "def collect_late(identity, late=[]):\n    late.append(identity)\n    return late\n\n\ndef collect_late_fresh(identity, late=None):\n    late = [] if late is None else list(late)\n    late.append(identity)\n    return late\n\n\nfirst = collect_late(\"B\")\nsecond = collect_late(\"D\")\nprint(\"shared default:\", first, second, first is second)\nprint(\"fresh default:\", collect_late_fresh(\"B\"), collect_late_fresh(\"D\"))\nprint(\"default object now holds:\", collect_late.__defaults__[0])\n",
+        "output": "shared default: ['B', 'D'] ['B', 'D'] True\nfresh default: ['B'] ['D']\ndefault object now holds: ['B', 'D']\n",
+        "interpretation": "Python evaluates the default list once, when the function is defined, so the call for D appends to the same object that already holds B. Both returned names point at one list (the identity check prints True), and the function's __defaults__ still holds ['B', 'D'] after the calls finish. In a long-running worker this means a delay report for one batch silently includes identities from earlier batches. The fresh version uses None as the sentinel and copies any caller list, so each call returns only its own identity. This is the same state-boundary rule as the chapter's append_identity helper, shown here with the defect it prevents rather than only the safe form."
+      }
+    ],
     "outcome": "Build a pure transformation with explicit inputs and outputs.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-005.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-005.py",
@@ -134,6 +273,37 @@
       "invariants",
       "negative cases",
       "evidence boundaries"
+    ],
+    "key_terms": [
+      {
+        "term": "Assertion",
+        "definition": "A statement in code that a condition holds, which fails loudly when it does not."
+      },
+      {
+        "term": "Invariant",
+        "definition": "A property that must stay true for every valid input, whatever the specific values."
+      },
+      {
+        "term": "Regression test",
+        "definition": "A test kept after a defect is found so that the same defect cannot return unnoticed."
+      },
+      {
+        "term": "Metamorphic relation",
+        "definition": "A rule linking the outputs of related inputs, such as reordering rows leaving a sum unchanged."
+      },
+      {
+        "term": "Oracle",
+        "definition": "A separate way to know the correct answer, such as a small hand-derived example, against which code is compared."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A property check finds the input a fixed example misses",
+        "language": "python",
+        "code": "import random\n\n\ndef package_total(records):\n    total = 0\n    for _, packages in records:\n        if type(packages) is not int or packages < 1:\n            raise ValueError(\"Expected a positive integer package count\")\n        total += packages\n    return total\n\n\ndef capped_total(records):\n    return sum(min(packages, 5) for _, packages in records)\n\n\ngenerator = random.Random(7)\nfor trial in range(200):\n    rows = [(str(i), generator.randint(1, 8)) for i in range(generator.randint(0, 4))]\n    if capped_total(rows) != package_total(rows):\n        print(\"counterexample at trial\", trial, rows)\n        print(\"oracle:\", package_total(rows), \"candidate:\", capped_total(rows))\n        break\nprint(\"fixed example agrees:\", capped_total([(\"A\", 2), (\"B\", 3), (\"C\", 1)]) == 6)\n",
+        "output": "counterexample at trial 0 [('0', 3), ('1', 7)]\noracle: 10 candidate: 8\nfixed example agrees: True\n",
+        "interpretation": "The capped candidate agrees with the oracle on the chapter's fixed rows (2, 3 and 1), so a single example test would pass. A seeded generator that draws counts from 1 to 8 finds a disagreement on the first trial: rows with 3 and 7 packages, where the oracle reports 10 and the candidate reports 8 because 7 was clipped to 5. The seed 7 makes the counterexample reproducible, which matters when you paste it into a permanent regression test. Narrowing the generator to counts from 1 to 5 would hide the defect again, so the input range of a property check is itself an assumption that should match the contract."
+      }
     ],
     "outcome": "Check hand-derived outputs, boundaries and changed inputs.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-006.md",
@@ -160,6 +330,33 @@
       "units",
       "consumer contract"
     ],
+    "key_terms": [
+      {
+        "term": "Structural schema",
+        "definition": "Rules about the shape of data, such as field names, types and required presence."
+      },
+      {
+        "term": "Semantic contract",
+        "definition": "Rules about the meaning of data that a schema alone cannot express, such as units, ranges and cross-field consistency."
+      },
+      {
+        "term": "Strict validation",
+        "definition": "Validation that refuses type coercion and unknown fields, as with Pydantic strict mode and extra set to forbid."
+      },
+      {
+        "term": "Compatibility direction",
+        "definition": "Which side must keep working through a change, since a new reader accepting old data is not the same as an old reader accepting new data."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Read every validation error, not just the first",
+        "language": "python",
+        "code": "from pydantic import BaseModel, ConfigDict, Field, ValidationError\n\n\nclass DeliveryV1(BaseModel):\n    model_config = ConfigDict(strict=True, extra=\"forbid\")\n    delivery_id: str = Field(min_length=1, pattern=r\".*\\S.*\")\n    packages: int = Field(ge=1)\n\n\ncandidate = {\"delivery_id\": \"   \", \"packages\": \"4\", \"route\": \"north\"}\ntry:\n    DeliveryV1.model_validate(candidate)\nexcept ValidationError as error:\n    for item in error.errors():\n        print(item[\"loc\"], item[\"type\"])\n\nlax = DeliveryV1.model_validate({\"delivery_id\": \"E\", \"packages\": \"4\"}, strict=False)\nprint(\"lax override:\", lax.packages, type(lax.packages).__name__)\n",
+        "output": "('delivery_id',) string_pattern_mismatch\n('packages',) int_type\n('route',) extra_forbidden\nlax override: 4 int\n",
+        "interpretation": "One candidate record carries three independent contract violations, and pydantic reports all of them in one ValidationError: the blank delivery_id fails the non-whitespace pattern, the quoted \"4\" fails the strict int check with type int_type, and the undeclared route key fails extra_forbidden. A rejection receipt should store this whole list, because fixing only the first message and resubmitting would fail again on the next one. The last line shows how strictness is a policy choice rather than a property of the class: passing strict=False at the call site turns \"4\" into the int 4. If a pipeline needs that coercion, it should be a declared, versioned conversion step, not a per-call override that some readers use and others do not."
+      }
+    ],
     "outcome": "Validate a strict typed input and a compatible additive schema change.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-007.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-007.py",
@@ -184,6 +381,37 @@
       "dependency identity",
       "reproducibility",
       "provenance"
+    ],
+    "key_terms": [
+      {
+        "term": "Published artifact",
+        "definition": "A file or bundle released for others to consume, identified by more than its file name."
+      },
+      {
+        "term": "Manifest",
+        "definition": "A description of the objects expected in a collection, listing each member under a stable name with its digest."
+      },
+      {
+        "term": "Content hash",
+        "definition": "A digest such as SHA-256 computed from exact bytes, which detects change but does not authenticate who produced the bytes."
+      },
+      {
+        "term": "Canonical serialization",
+        "definition": "A fixed encoding rule, such as sorted keys and fixed separators, so equal data always produces identical bytes."
+      },
+      {
+        "term": "Version label",
+        "definition": "A human-chosen name for a release, which is trustworthy only when bound to a content hash."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Hashing parsed values versus hashing bytes",
+        "language": "python",
+        "code": "import hashlib\nimport json\n\ndeliveries = [\"[2, 3, 4]\\n\", \"[2,3,4]\\n\", \"[2, 3, 4]\\r\\n\"]\nfor text in deliveries:\n    raw = hashlib.sha256(text.encode(\"utf-8\")).hexdigest()[:12]\n    canonical = json.dumps(json.loads(text), separators=(\",\", \":\"), sort_keys=True)\n    semantic = hashlib.sha256(canonical.encode(\"utf-8\")).hexdigest()[:12]\n    print(repr(text), \"bytes\", raw, \"canonical\", semantic)\n",
+        "output": "'[2, 3, 4]\\n' bytes d897f2d87522 canonical d7eefc196ef0\n'[2,3,4]\\n' bytes 85aabd9fb946 canonical d7eefc196ef0\n'[2, 3, 4]\\r\\n' bytes 6e950e8f7ada canonical d7eefc196ef0\n",
+        "interpretation": "The three deliveries describe the same list of packages, yet each has a different byte digest (d897f2d87522, 85aabd9fb946 and 6e950e8f7ada) because spaces and a Windows line ending change the bytes. After parsing and re-serializing with fixed separators and sorted keys, all three share the canonical digest d7eefc196ef0. Both identities are useful for different questions. The byte digest answers \"is this exactly the file we recorded?\", which is what the chapter's verify() function needs before trusting an old result. The canonical digest answers \"did the meaning change?\", which lets a pipeline skip recomputation after a harmless reformat. Using the canonical form for provenance would be a mistake: it cannot detect that a producer started sending a different encoding."
+      }
     ],
     "outcome": "Build a reviewable source/data/configuration hash manifest.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-008.md",
@@ -210,6 +438,37 @@
       "transactional acceptance",
       "replay"
     ],
+    "key_terms": [
+      {
+        "term": "Delivery identity",
+        "definition": "The business key that names one real delivery, independent of which batch carried it."
+      },
+      {
+        "term": "Batch identity",
+        "definition": "The name of one submitted batch, used to tell an honest replay from a conflicting reuse."
+      },
+      {
+        "term": "Replay",
+        "definition": "A resubmission of the same batch identity with the same content, acknowledged without applying it twice."
+      },
+      {
+        "term": "Content digest",
+        "definition": "A hash of a batch's canonical content, used to detect a reused batch identity that carries different data."
+      },
+      {
+        "term": "Transactional acceptance",
+        "definition": "Writing accepted records and their receipt in one database transaction, so neither can exist without the other."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Why the ingest pattern rejects numeric text that int() accepts",
+        "language": "python",
+        "code": "import re\n\nsamples = [\"4\", \"04\", \" 4\", \"4.0\", \"+4\", \"0\", \"1_000\"]\nfor text in samples:\n    try:\n        python_int = int(text)\n    except ValueError:\n        python_int = \"ValueError\"\n    canonical = re.fullmatch(r\"[1-9][0-9]*\", text) is not None\n    print(f\"{text!r:9} int()={python_int!s:10} canonical={canonical}\")\n",
+        "output": "'4'       int()=4          canonical=True\n'04'      int()=4          canonical=False\n' 4'      int()=4          canonical=False\n'4.0'     int()=ValueError canonical=False\n'+4'      int()=4          canonical=False\n'0'       int()=0          canonical=False\n'1_000'   int()=1000       canonical=False\n",
+        "interpretation": "Python's int() is far more permissive than the delivery contract. It accepts a leading zero ('04'), surrounding whitespace (' 4'), an explicit plus sign ('+4') and digit separators ('1_000'), and it happily returns 0, which the contract forbids as a package count. Only '4' matches the canonical pattern [1-9][0-9]*. This is why the chapter's ingest() checks the text before converting it: once int() has run, the evidence that a producer sent '04' or '1_000' is gone, and two different source spellings would collapse into one accepted value. '4.0' fails both checks, but only the pattern explains why in terms of the published contract rather than a Python parsing rule."
+      }
+    ],
     "outcome": "Ingest a declared CSV/JSON delivery with checksums and row reconciliation.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-009.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-009.py",
@@ -234,6 +493,37 @@
       "idempotency key",
       "unknown outcome",
       "ASGI boundary"
+    ],
+    "key_terms": [
+      {
+        "term": "Idempotency key",
+        "definition": "A client-chosen key that lets a server recognize a retried request and return the original response instead of repeating the effect."
+      },
+      {
+        "term": "Snapshot pagination",
+        "definition": "Paging that pins every page to one dataset snapshot so concurrent writes cannot shift rows between pages."
+      },
+      {
+        "term": "Cursor",
+        "definition": "An opaque token naming the snapshot and position from which the next page continues."
+      },
+      {
+        "term": "HTTP 409 Conflict",
+        "definition": "The status returned when a known idempotency key arrives with different content."
+      },
+      {
+        "term": "TestClient",
+        "definition": "FastAPI's client that calls the ASGI application directly in process, without opening a network socket."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A lost response retried with and without an idempotency key",
+        "language": "python",
+        "code": "store, receipts = {}, {}\n\n\ndef post(delivery_id, packages, key=None):\n    if key is not None and key in receipts:\n        if receipts[key] != (delivery_id, packages):\n            return 409\n        return 200\n    store.setdefault(delivery_id, []).append(packages)\n    if key is not None:\n        receipts[key] = (delivery_id, packages)\n    return 201\n\n\n# Each \"attempt\" applies the write; the client only learns the last status.\nprint(\"no key:\", [post(\"D\", 4) for _ in range(3)], store[\"D\"])\nprint(\"keyed:\", [post(\"E\", 4, key=\"req-E\") for _ in range(3)], store[\"E\"])\nprint(\"key reused with new body:\", post(\"E\", 9, key=\"req-E\"), store[\"E\"])\n",
+        "output": "no key: [201, 201, 201] [4, 4, 4]\nkeyed: [201, 200, 200] [4]\nkey reused with new body: 409 [4]\n",
+        "interpretation": "This plain-Python model labels each retry as a fresh attempt that reaches the server, which is exactly the situation when a client times out after the write was applied. Without a key, three attempts return 201 three times and store D ends up holding [4, 4, 4]: the client sees success and the data is tripled. With the key req-E, the first attempt creates the row and the next two return 200 replays, leaving [4]. Reusing req-E with 9 packages returns 409 and leaves the stored value at 4, because a key must name one request body. The chapter's FastAPI version enforces the same rule by hashing the validated document; this model only shows the state transitions, not HTTP behavior."
+      }
     ],
     "outcome": "Exercise an actual local ASGI pagination contract without network access.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-010.md",
@@ -264,6 +554,37 @@
       "transaction ownership",
       "capture versus application"
     ],
+    "key_terms": [
+      {
+        "term": "Change-data capture",
+        "definition": "Capturing inserts, updates and deletes from a source system as an ordered stream of change records."
+      },
+      {
+        "term": "Absolute change",
+        "definition": "A change that carries the full new value, such as the package count, rather than a delta to add."
+      },
+      {
+        "term": "Entity version",
+        "definition": "A per-entity counter that orders the changes for one key, not a global log position."
+      },
+      {
+        "term": "Tombstone",
+        "definition": "A delete marker that is remembered so a stale older change cannot resurrect the deleted entity."
+      },
+      {
+        "term": "Stale change",
+        "definition": "A change whose version is lower than the stored version, which must be ignored rather than applied."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Out-of-order delivery with and without version memory",
+        "language": "python",
+        "code": "events = [(\"A\", 1, \"upsert\", 2), (\"A\", 3, \"delete\", None), (\"A\", 2, \"upsert\", 99)]\n\nlast_write = {}\nfor delivery_id, _version, operation, packages in events:\n    if operation == \"delete\":\n        last_write.pop(delivery_id, None)\n    else:\n        last_write[delivery_id] = packages\n\nversioned = {}\nfor delivery_id, version, operation, packages in events:\n    prior = versioned.get(delivery_id)\n    if prior is not None and version <= prior[0]:\n        print(\"skip stale\", delivery_id, \"v\", version, \"behind v\", prior[0])\n        continue\n    versioned[delivery_id] = (version, operation == \"delete\", packages)\n\nprint(\"arrival order:\", last_write)\nprint(\"versioned visible:\", {k: v[2] for k, v in versioned.items() if not v[1]})\nprint(\"tombstone kept:\", versioned[\"A\"])\n",
+        "output": "skip stale A v 2 behind v 3\narrival order: {'A': 99}\nversioned visible: {}\ntombstone kept: (3, True, None)\n",
+        "interpretation": "The three events arrive in the order version 1, version 3 delete, version 2 upsert, which a partitioned log or retried consumer can easily produce. Applying them by arrival order resurrects delivery A with 99 packages after it was deleted. The versioned applier skips version 2 because it is behind version 3, keeps A's tombstone as (3, True, None) and shows no visible rows. The tombstone is what makes the skip possible: if the delete had removed A's row entirely, the late version 2 would look like a brand-new record. That is the same reason the chapter's SQLite state keeps a deleted flag and source_version instead of issuing a physical delete."
+      }
+    ],
     "outcome": "Apply synthetic insert/update/delete events to a real local SQLite table.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-011.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-011.py",
@@ -289,6 +610,37 @@
       "cardinality",
       "historical meaning"
     ],
+    "key_terms": [
+      {
+        "term": "Fact grain",
+        "definition": "What one fact row records, such as one delivery event."
+      },
+      {
+        "term": "Dimension",
+        "definition": "A table of descriptive attributes, such as a depot's region, that fact rows reference."
+      },
+      {
+        "term": "Half-open validity interval",
+        "definition": "A range that includes its start date and excludes its end date, so adjacent versions meet at a boundary without both matching it."
+      },
+      {
+        "term": "Surrogate key",
+        "definition": "A system-assigned key that identifies one dimension version rather than the business entity."
+      },
+      {
+        "term": "Overlapping history",
+        "definition": "Two versions of the same entity whose valid intervals intersect, which must block acceptance."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "An inclusive end date double-counts the boundary day",
+        "language": "python",
+        "code": "import duckdb\n\ncon = duckdb.connect(\":memory:\")\ncon.execute(\"create table history(route_id int, region varchar, valid_from date, valid_to date)\")\ncon.execute(\n    \"insert into history values (10,'north','2024-01-01','2024-02-01'),\"\n    \"(10,'west','2024-02-01',NULL)\"\n)\nday = \"2024-02-01\"\ninclusive = con.execute(\n    \"select region from history where route_id=10 and ? between valid_from \"\n    \"and coalesce(valid_to, date '9999-12-31') order by valid_from\",\n    [day],\n).fetchall()\nhalf_open = con.execute(\n    \"select region from history where route_id=10 and ? >= valid_from \"\n    \"and (valid_to is null or ? < valid_to)\",\n    [day, day],\n).fetchall()\nprint(\"BETWEEN:\", inclusive)\nprint(\"half-open:\", half_open)\n",
+        "output": "BETWEEN: [('north',), ('west',)]\nhalf-open: [('west',)]\n",
+        "interpretation": "On 2024-02-01, the day route 10 moved from north to west, BETWEEN returns both regions because it includes the north interval's end date. Any fact on that day would join twice and its packages would be counted in two regions. The half-open predicate, valid_from at or before the day and the day strictly before valid_to, returns only west, matching the chapter's rule that the boundary day belongs to the new interval. The coalesce to 9999-12-31 is a second hidden assumption: it works only while no real date reaches that sentinel. If the history table stored inclusive end dates instead, valid_to for north would be 2024-01-31 and BETWEEN would be correct, so the convention must be written into the table contract."
+      }
+    ],
     "outcome": "Build and query a real dimensional product at a declared grain.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-012.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-012.py",
@@ -313,6 +665,37 @@
       "Parquet",
       "validity bitmap",
       "JSON representation"
+    ],
+    "key_terms": [
+      {
+        "term": "Columnar layout",
+        "definition": "Storage that keeps each column's values together, which favors scans that read a few columns."
+      },
+      {
+        "term": "Apache Arrow",
+        "definition": "An in-memory columnar format for exchanging typed data between libraries without per-row conversion."
+      },
+      {
+        "term": "Parquet",
+        "definition": "A columnar file format with row groups, encodings and embedded schema metadata."
+      },
+      {
+        "term": "Validity bitmap",
+        "definition": "The per-value bits in Arrow that mark null versus present, so an empty string stays distinct from null."
+      },
+      {
+        "term": "Leading-zero identifier",
+        "definition": "An identifier such as 00123 that must stay a string, because a numeric type would drop the zeros."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Integer columns become floats when a null crosses into pandas",
+        "language": "python",
+        "code": "import pandas as pd\nimport pyarrow as pa\n\ntable = pa.table({\"packages\": pa.array([2, None, 3], type=pa.int16())})\ndefault = table.to_pandas()\nnullable = table.to_pandas(types_mapper={pa.int16(): pd.Int16Dtype()}.get)\ncolumn = table.column(\"packages\")\nprint(\"arrow type:\", column.type, \"nulls:\", column.null_count)\nprint(\"default pandas:\", default[\"packages\"].dtype, default[\"packages\"].tolist())\nprint(\"nullable pandas:\", nullable[\"packages\"].dtype, nullable[\"packages\"].tolist())\nprint(\"back to arrow:\", pa.Table.from_pandas(default).schema.field(\"packages\").type)\n",
+        "output": "arrow type: int16 nulls: 1\ndefault pandas: float64 [2.0, nan, 3.0]\nnullable pandas: Int16 [2, <NA>, 3]\nback to arrow: double\n",
+        "interpretation": "Arrow keeps packages as int16 with one null tracked in the validity bitmap. The default pandas conversion has no integer null, so it promotes the whole column to float64 and stores NaN, giving [2.0, nan, 3.0]. Converting that frame back to Arrow produces a double column, so a round trip through default pandas silently changed the published type. Mapping int16 to pandas' nullable Int16 keeps the integers and shows the missing value as <NA>. If the column had no nulls, the default conversion would have stayed integer, which is why this defect often appears only after the first incomplete delivery arrives."
+      }
     ],
     "outcome": "Round-trip typed columnar records and inspect actual Arrow/Parquet schemas.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-013.md",
@@ -343,6 +726,37 @@
       "temporal leakage",
       "request coverage"
     ],
+    "key_terms": [
+      {
+        "term": "Event time",
+        "definition": "When the real-world event happened."
+      },
+      {
+        "term": "Known time",
+        "definition": "When the system first learned a fact, which can be later than its event time."
+      },
+      {
+        "term": "Processing time",
+        "definition": "When a pipeline happened to handle a record, which does not by itself say whether the fact was usable."
+      },
+      {
+        "term": "Decision cutoff",
+        "definition": "The instant a decision is made, where a fact is eligible only if both its event time and known time are no later."
+      },
+      {
+        "term": "Coverage",
+        "definition": "The share of the request population that has an eligible fact, reported so missing facts stay visible."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A feature that was true at noon but only known at two",
+        "language": "python",
+        "code": "facts = [\n    {\"route\": 10, \"event_hour\": 9, \"known_hour\": 9, \"late_count\": 1},\n    {\"route\": 10, \"event_hour\": 12, \"known_hour\": 14, \"late_count\": 6},\n]\n\n\ndef as_of(cutoff, use_known_hour):\n    usable = [\n        f\n        for f in facts\n        if f[\"event_hour\"] <= cutoff and (not use_known_hour or f[\"known_hour\"] <= cutoff)\n    ]\n    return max(usable, key=lambda f: f[\"event_hour\"])[\"late_count\"] if usable else None\n\n\nfor cutoff in (12, 13, 14):\n    print(\n        cutoff,\n        \"event clock only:\",\n        as_of(cutoff, False),\n        \"with knowledge clock:\",\n        as_of(cutoff, True),\n    )\n",
+        "output": "12 event clock only: 6 with knowledge clock: 1\n13 event clock only: 6 with knowledge clock: 1\n14 event clock only: 6 with knowledge clock: 6\n",
+        "interpretation": "At cutoffs 12 and 13 the event clock alone returns a late count of 6, a fact about noon that the warehouse did not learn until hour 14. A training row built that way would teach the model to rely on information it will never have at prediction time. Adding the knowledge clock returns 1 until hour 14 and switches to 6 exactly when the fact became available. Both answers are reproducible, so a unit test that only checks determinism would pass either; the test has to name the cutoff and the clock that limits it."
+      }
+    ],
     "outcome": "Select only information known at a decision cutoff.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-014.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-014.py",
@@ -372,6 +786,37 @@
       "failure phase",
       "consistent reader"
     ],
+    "key_terms": [
+      {
+        "term": "Immutable version directory",
+        "definition": "A directory written once together with its manifest and never modified after preparation."
+      },
+      {
+        "term": "Current pointer",
+        "definition": "A small file naming the active version and its manifest digest, which a reader resolves once."
+      },
+      {
+        "term": "Atomic rename",
+        "definition": "Using os.replace to swap a fully written file into place, so readers see either the old or the new pointer and never a partial one."
+      },
+      {
+        "term": "Activation",
+        "definition": "The separate phase that switches the pointer after preparation succeeds, so a failure can be located as preparing or activating."
+      },
+      {
+        "term": "Retention",
+        "definition": "The policy for deleting old versions, which must not remove a version an active reader still uses."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A reader that lists files sees a half-written version",
+        "language": "python",
+        "code": "import json\nimport os\nfrom pathlib import Path\n\nroot = Path(\"publish-demo\")\nfor name in (\"v1\", \"v2\"):\n    (root / name).mkdir(parents=True, exist_ok=True)\n(root / \"v1\" / \"part-0.json\").write_text(json.dumps([1, 2]))\n(root / \"v1\" / \"part-1.json\").write_text(json.dumps([3]))\n(root / \"v2\" / \"part-0.json\").write_text(json.dumps([10, 20]))\n# v2 part-1 has not been written yet\n\n\ndef glob_reader():\n    newest = max(p.name for p in root.iterdir() if p.is_dir())\n    return newest, sum(\n        sum(json.loads(f.read_text())) for f in sorted((root / newest).glob(\"part-*.json\"))\n    )\n\n\npointer = root / \"CURRENT\"\ntemporary = root / \"CURRENT.tmp\"\ntemporary.write_text(\"v1\")\nos.replace(temporary, pointer)\n\n\ndef pointer_reader():\n    name = pointer.read_text()\n    return name, sum(\n        sum(json.loads(f.read_text())) for f in sorted((root / name).glob(\"part-*.json\"))\n    )\n\n\nprint(\"newest directory:\", glob_reader())\nprint(\"published pointer:\", pointer_reader())\n",
+        "output": "newest directory: ('v2', 30)\npublished pointer: ('v1', 6)\n",
+        "interpretation": "The listing reader picks v2 because it is the newest directory, then sums the only part that exists so far and reports 30, a total that no producer ever published. Reading CURRENT returns v1 and its complete sum of 6. The pointer works because os.replace swaps one small file in a single filesystem operation, so a reader sees the old name or the new name and never a half-built directory. The producer is responsible for writing every part and its checksums before replacing the pointer; if it moves the pointer early, the same partial read comes back."
+      }
+    ],
     "outcome": "Publish a checked local manifest through an atomic pointer replacement.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-015.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-015.py",
@@ -397,6 +842,37 @@
       "source-version conflict",
       "current snapshot"
     ],
+    "key_terms": [
+      {
+        "term": "Quarantine",
+        "definition": "Holding rejected rows aside with a recorded reason instead of silently dropping them."
+      },
+      {
+        "term": "Reason rule",
+        "definition": "An ordered rule, built here with Polars when and then expressions, that assigns the first matching rejection reason."
+      },
+      {
+        "term": "Audit row ID",
+        "definition": "A per-arrival identifier for tracing a row, separate from the business delivery identity."
+      },
+      {
+        "term": "Current snapshot",
+        "definition": "The latest accepted state for each entity after valid changes are applied in order."
+      },
+      {
+        "term": "Equal-version conflict",
+        "definition": "Two changes with the same version but different payloads, which are rejected rather than guessed between."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Deduplicating on the key alone drops a correction",
+        "language": "python",
+        "code": "import duckdb\n\ncon = duckdb.connect()\ncon.execute(\n    \"create table raw as select * from (values \"\n    \"('D1', 1, 4), ('D1', 1, 4), ('D1', 2, 5), ('D2', 1, -3)) \"\n    \"t(delivery_id, source_version, packages)\"\n)\nfirst_seen = con.execute(\n    \"select delivery_id, packages from raw qualify row_number() over \"\n    \"(partition by delivery_id order by source_version) = 1 order by 1\"\n).fetchall()\nexact_dupes = con.execute(\n    \"select count(*) - count(distinct (delivery_id, source_version, packages)) from raw\"\n).fetchone()[0]\nlatest = con.execute(\n    \"select delivery_id, packages, packages < 0 as quarantine from raw qualify row_number() over \"\n    \"(partition by delivery_id order by source_version desc) = 1 order by 1\"\n).fetchall()\nprint(\"first per key:\", first_seen)\nprint(\"exact duplicates:\", exact_dupes)\nprint(\"latest version, flagged:\", latest)\n",
+        "output": "first per key: [('D1', 4), ('D2', -3)]\nexact duplicates: 1\nlatest version, flagged: [('D1', 5, False), ('D2', -3, True)]\n",
+        "interpretation": "Keeping the first row per delivery_id yields D1 with 4 packages, but source version 2 corrected that delivery to 5. Only one of the four rows is an exact duplicate, so a key-only rule removed a legitimate correction along with the redundant copy. Ordering by source_version descending keeps 5 for D1. D2 still arrives with -3 packages, and the latest-version query flags it for quarantine instead of dropping it, which leaves a row someone can inspect and count. A later version of D2 with a valid count would replace the quarantined row through the same ordering."
+      }
+    ],
     "outcome": "Retain valid and rejected Polars records with concrete reason codes.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-016.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-016.py",
@@ -416,6 +892,33 @@
     "runtime_profile": "data-engineering",
     "language": "python",
     "concepts": ["query engine", "null aggregate", "independent oracle", "row grain"],
+    "key_terms": [
+      {
+        "term": "Query engine",
+        "definition": "The component that plans and executes queries, such as SQLite, DuckDB or Polars."
+      },
+      {
+        "term": "Embedded database",
+        "definition": "A database library running inside the program's own process, such as SQLite or DuckDB, with no separate server."
+      },
+      {
+        "term": "All-null group",
+        "definition": "A group whose values are all unknown, where SUM returns NULL rather than zero unless a policy says otherwise."
+      },
+      {
+        "term": "Known count",
+        "definition": "The number of non-null observations behind an aggregate, reported so unknown values stay visible."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Three engines skip the null; a fill changes the mean",
+        "language": "python",
+        "code": "import sqlite3\n\nimport duckdb\nimport pandas as pd\n\nrows = [(\"north\", 4), (\"north\", None), (\"north\", 2)]\nsqlite = sqlite3.connect(\":memory:\")\nsqlite.execute(\"create table d(region text, packages int)\")\nsqlite.executemany(\"insert into d values (?, ?)\", rows)\nframe = pd.DataFrame(rows, columns=[\"region\", \"packages\"])\nprint(\"sqlite avg:\", sqlite.execute(\"select avg(packages) from d\").fetchone()[0])\nprint(\"duckdb avg:\", duckdb.sql(\"select avg(packages) from frame\").fetchone()[0])\nprint(\"pandas mean:\", frame[\"packages\"].mean())\nprint(\"pandas fillna(0) mean:\", frame[\"packages\"].fillna(0).mean())\nprint(\n    \"count(*) vs count(col):\", sqlite.execute(\"select count(*), count(packages) from d\").fetchone()\n)\n",
+        "output": "sqlite avg: 3.0\nduckdb avg: 3.0\npandas mean: 3.0\npandas fillna(0) mean: 2.0\ncount(*) vs count(col): (3, 2)\n",
+        "interpretation": "SQLite, DuckDB and pandas all report 3.0 for the north region because each ignores the missing value and averages 4 and 2. The disagreement appears when someone fills the null with zero to make a chart work: the mean drops to 2.0 and now claims a delivery with no packages. The count(*) versus count(packages) pair, 3 against 2, shows the denominator each policy uses. When comparing engines, write the null policy into the query or test rather than relying on matching defaults, since a CSV reader or a join can turn missing values into zeros before any engine sees them."
+      }
+    ],
     "outcome": "Compare actual SQLite, DuckDB and Polars results under one contract.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-017.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-017.py",
@@ -435,6 +938,37 @@
     "runtime_profile": "data-engineering",
     "language": "python",
     "concepts": ["Parquet fragment", "partition pruning", "projection", "small files"],
+    "key_terms": [
+      {
+        "term": "Row group",
+        "definition": "A horizontal slice of a Parquet file whose columns are stored as separate column chunks."
+      },
+      {
+        "term": "Hive-style partition",
+        "definition": "A directory named key=value, such as day=2024-01-01, that encodes a column value in the path."
+      },
+      {
+        "term": "Partition pruning",
+        "definition": "Skipping files whose partition path value cannot satisfy the query filter."
+      },
+      {
+        "term": "Projection",
+        "definition": "Reading only the columns a query actually needs."
+      },
+      {
+        "term": "Small files",
+        "definition": "Many tiny files that create more objects to discover and open and can add scheduling overhead even when the row count is unchanged."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A partition filter chooses directories before rows",
+        "language": "python",
+        "code": "import shutil\nfrom pathlib import Path\n\nimport pyarrow as pa\nimport pyarrow.dataset as ds\n\nroot = Path(\"layout-demo\")\nshutil.rmtree(root, ignore_errors=True)\ntable = pa.table({\"day\": [\"2024-01-01\", \"2024-01-02\", \"2024-01-02\"], \"packages\": [3, 4, 5]})\nds.write_dataset(table, root, format=\"parquet\", partitioning=[\"day\"], partitioning_flavor=\"hive\")\ndataset = ds.dataset(root, format=\"parquet\", partitioning=\"hive\")\nprint(\"partition type:\", dataset.schema.field(\"day\").type)\nmatch = dataset.to_table(filter=ds.field(\"day\") == \"2024-01-02\")\nprint(\"string filter rows:\", match.num_rows, \"packages:\", match.column(\"packages\").to_pylist())\nfragments = list(dataset.get_fragments(filter=ds.field(\"day\") == \"2024-01-02\"))\nprint(\"fragments opened:\", len(fragments), \"of\", len(list(dataset.get_fragments())))\n",
+        "output": "partition type: string\nstring filter rows: 2 packages: [4, 5]\nfragments opened: 1 of 2\n",
+        "interpretation": "pyarrow wrote one directory per day, and the hive partition column came back typed as string. The filter on 2024-01-02 matched 2 rows with packages [4, 5], and the fragment listing shows that only 1 of the 2 files needed to be opened. The selection happened from the path, before any Parquet bytes were read. That benefit depends on filtering the partition column itself. A filter on a derived expression, such as a substring of day or a timestamp cast, cannot be matched against the directory names and falls back to scanning every fragment."
+      }
+    ],
     "outcome": "Inspect real partitioned Parquet fragments selected by a predicate.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-018.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-018.py",
@@ -454,6 +988,37 @@
     "runtime_profile": "spark-local-python",
     "language": "python",
     "concepts": ["Spark partition", "shuffle exchange", "key skew", "partial aggregation"],
+    "key_terms": [
+      {
+        "term": "Spark partition",
+        "definition": "The slice of data that one task processes at one stage."
+      },
+      {
+        "term": "Driver",
+        "definition": "The Spark process that plans a job and schedules its tasks on executors."
+      },
+      {
+        "term": "Shuffle",
+        "definition": "Redistributing rows across partitions by key, shown as an Exchange node in the physical plan."
+      },
+      {
+        "term": "Skew",
+        "definition": "An uneven distribution in which some partitions cost far more than others, such as when a hot key sends all its rows to one partition."
+      },
+      {
+        "term": "Salting",
+        "definition": "Splitting a hot key into several sub-keys for partial aggregation, followed by a reconciling aggregation."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Salting a hot key in a pure-Python shuffle model",
+        "language": "python",
+        "code": "from collections import Counter\n\nrecords = [(\"R1\", 1)] * 9 + [(\"R2\", 1), (\"R3\", 1), (\"R4\", 1)]\npartitions = 4\nplain = Counter(sum(ord(c) for c in key) % partitions for key, _ in records)\nsalted_keys = [(key, i % 3) if key == \"R1\" else (key, 0) for i, (key, _) in enumerate(records)]\nsalted = Counter((sum(ord(c) for c in key) + salt) % partitions for key, salt in salted_keys)\npartial = Counter()\nfor (key, salt), (_, value) in zip(salted_keys, records):\n    partial[(key, salt)] += value\nfinal = Counter()\nfor (key, _salt), value in partial.items():\n    final[key] += value\nprint(\"rows per partition, plain:\", sorted(plain.items()))\nprint(\"rows per partition, salted:\", sorted(salted.items()))\nprint(\"R1 partials:\", sorted(v for (k, _), v in partial.items() if k == \"R1\"))\nprint(\"final totals:\", dict(sorted(final.items())))\n",
+        "output": "rows per partition, plain: [(0, 1), (1, 1), (2, 1), (3, 9)]\nrows per partition, salted: [(0, 4), (1, 4), (2, 1), (3, 3)]\nR1 partials: [3, 3, 3]\nfinal totals: {'R1': 9, 'R2': 1, 'R3': 1, 'R4': 1}\n",
+        "interpretation": "This model replaces Spark's hash with a character sum, because PySpark is not installed here, but the arithmetic shows the same effect. Without salt, all nine R1 rows land in partition 3, so one task does nine units of work while the others do one each. Splitting R1 across three salt values spreads the load to [4, 4, 1, 3] and produces three partial sums of 3. The second aggregation removes the salt and restores R1 to 9. Salting is only correct for associative aggregations such as sums and counts. A median or a distinct count cannot be merged from partials this way."
+      }
+    ],
     "outcome": "Execute and inspect a real Spark aggregation and its physical shuffle boundary.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-019.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-019.py",
@@ -473,6 +1038,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["dependency DAG", "checkpoint identity", "reconciliation", "task attempt"],
+    "key_terms": [
+      {
+        "term": "Directed acyclic graph",
+        "definition": "Tasks connected by dependency edges with no cycles, so at least one valid execution order exists."
+      },
+      {
+        "term": "Topological order",
+        "definition": "An ordering in which every task appears after all of its dependencies, as produced by graphlib.TopologicalSorter."
+      },
+      {
+        "term": "Attempt",
+        "definition": "One try at executing a task, which may fail or be retried and is not the same as a completed checkpoint."
+      },
+      {
+        "term": "Completed checkpoint",
+        "definition": "A durable record that a task finished for one run identity, which lets a rerun skip it."
+      },
+      {
+        "term": "Reconciliation",
+        "definition": "Inspecting the actual target state after an uncertain publication to decide whether the effect happened."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A retry that reruns a finished step versus one that checks a marker",
+        "language": "python",
+        "code": "from graphlib import TopologicalSorter\n\ngraph = {\"extract\": set(), \"clean\": {\"extract\"}, \"aggregate\": {\"clean\"}, \"publish\": {\"aggregate\"}}\norder = list(TopologicalSorter(graph).static_order())\nside_effects = []\n\n\ndef run(done, fail_at=None):\n    for step in order:\n        if step in done:\n            continue\n        if step == fail_at:\n            return \"failed at \" + step\n        side_effects.append(step)\n        done.add(step)\n    return \"ok\"\n\n\nmarkers = set()\nprint(\"order:\", order)\nprint(\"attempt 1:\", run(markers, fail_at=\"aggregate\"))\nprint(\"attempt 2:\", run(markers))\nprint(\"effects with markers:\", side_effects)\nside_effects.clear()\nrun(set(), fail_at=\"aggregate\")\nrun(set())\nprint(\"effects without markers:\", side_effects)\n",
+        "output": "order: ['extract', 'clean', 'aggregate', 'publish']\nattempt 1: failed at aggregate\nattempt 2: ok\neffects with markers: ['extract', 'clean', 'aggregate', 'publish']\neffects without markers: ['extract', 'clean', 'extract', 'clean', 'aggregate', 'publish']\n",
+        "interpretation": "graphlib orders the four steps from extract to publish. The first attempt fails at aggregate after extract and clean have already run. With completion markers, the retry skips those two and the side-effect log shows each step exactly once. Without markers, extract and clean appear twice, which is harmless only if both steps overwrite their output by key. A marker is only safe if it is written after the step's output is durable, and if it records which inputs produced that output; otherwise a retry after an upstream change would wrongly skip work."
+      }
+    ],
     "outcome": "Execute a bounded local DAG with recorded completed artifact identities.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-020.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-020.py",
@@ -501,6 +1097,33 @@
       "idempotency",
       "uncertain acknowledgement"
     ],
+    "key_terms": [
+      {
+        "term": "Transactional outbox",
+        "definition": "Writing a business change and its pending event in the same database transaction."
+      },
+      {
+        "term": "Consumer inbox",
+        "definition": "A deduplication table in which the consumer records each event ID together with its effect."
+      },
+      {
+        "term": "Event identity",
+        "definition": "The stable ID that lets a consumer recognize a redelivered event, where the same ID with different content is a conflict."
+      },
+      {
+        "term": "Uncertain acknowledgment",
+        "definition": "A lost or timed-out acknowledgment after which the publisher cannot tell whether the consumer applied the event."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A crash between commit and send, with and without an outbox",
+        "language": "python",
+        "code": "import sqlite3\n\ndb = sqlite3.connect(\":memory:\")\ndb.execute(\"create table orders(id text primary key)\")\ndb.execute(\"create table outbox(event_id text primary key, sent int default 0)\")\nbroker = []\n\nwith db:\n    db.execute(\"insert into orders values ('O1')\")\n# the process stops here, before any broker call\nprint(\"dual write, broker after crash:\", broker)\n\nwith db:\n    db.execute(\"insert into orders values ('O2')\")\n    db.execute(\"insert into outbox(event_id) values ('evt-O2')\")\nfor (event_id,) in db.execute(\"select event_id from outbox where sent = 0\").fetchall():\n    broker.append(event_id)\n    # crash before marking sent: the relay will publish again\nfor (event_id,) in db.execute(\"select event_id from outbox where sent = 0\").fetchall():\n    broker.append(event_id)\n    with db:\n        db.execute(\"update outbox set sent = 1 where event_id = ?\", (event_id,))\ninbox = set()\napplied = [e for e in broker if not (e in inbox or inbox.add(e))]\nprint(\"broker deliveries:\", broker)\nprint(\"consumer applied once:\", applied)\nprint(\"orders:\", [r[0] for r in db.execute(\"select id from orders order by id\")])\n",
+        "output": "dual write, broker after crash: []\nbroker deliveries: ['evt-O2', 'evt-O2']\nconsumer applied once: ['evt-O2']\norders: ['O1', 'O2']\n",
+        "interpretation": "Order O1 committed, then the process stopped before calling the broker, so the broker list stays empty and downstream systems never hear about O1. With the outbox, O2 and its event row commit in one transaction. The relay publishes evt-O2, crashes before setting sent, and publishes it again, so the broker holds two copies. The consumer's inbox set keeps the event ID and applies it once. The outbox does not prevent duplicates; it trades a lost event for a repeated one, and that trade only works because the consumer deduplicates on a stable event ID."
+      }
+    ],
     "outcome": "Commit a state change and an outbox event in one actual SQLite transaction.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-021.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-021.py",
@@ -520,6 +1143,33 @@
     "runtime_profile": "data-engineering",
     "language": "python",
     "concepts": ["half-open interval", "partition revision", "backfill", "replacement semantics"],
+    "key_terms": [
+      {
+        "term": "Backfill",
+        "definition": "A bounded recomputation of historical partitions."
+      },
+      {
+        "term": "Half-open interval",
+        "definition": "A range that includes its start and excludes its end, so adjacent ranges neither overlap nor leave gaps."
+      },
+      {
+        "term": "Partition revision",
+        "definition": "An ordered version of a partition's source snapshot, stored with the target so a newer correction wins."
+      },
+      {
+        "term": "Replacement write",
+        "definition": "Overwriting a partition's derived value rather than adding to it, so a rerun cannot double count."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Overlapping backfill windows double-count the shared day",
+        "language": "python",
+        "code": "import duckdb\n\ncon = duckdb.connect()\ncon.execute(\n    \"create table events as select * from (values (date '2024-03-01', 2), \"\n    \"(date '2024-03-02', 5), (date '2024-03-03', 7)) t(day, packages)\"\n)\nclosed = [(\"2024-03-01\", \"2024-03-02\"), (\"2024-03-02\", \"2024-03-03\")]\nhalf_open = [(\"2024-03-01\", \"2024-03-02\"), (\"2024-03-02\", \"2024-03-04\")]\nclosed_total = sum(\n    con.execute(\n        \"select coalesce(sum(packages), 0) from events where day between ? and ?\", w\n    ).fetchone()[0]\n    for w in closed\n)\nopen_total = sum(\n    con.execute(\n        \"select coalesce(sum(packages), 0) from events where day >= ? and day < ?\", w\n    ).fetchone()[0]\n    for w in half_open\n)\nprint(\"source total:\", con.execute(\"select sum(packages) from events\").fetchone()[0])\nprint(\"closed windows total:\", closed_total)\nprint(\"half-open windows total:\", open_total)\n",
+        "output": "source total: 14\nclosed windows total: 19\nhalf-open windows total: 14\n",
+        "interpretation": "The source holds 14 packages across three days. The two BETWEEN windows both include March 2, so its 5 packages are counted twice and the backfill reports 19. The half-open windows, each ending before the next one starts, cover every day once and sum to 14. The second half-open window must end on March 4 to include March 3. That detail is easy to miss when converting from inclusive end dates, so a reconciliation that compares the backfill total with the source total belongs in the run itself, not in a later review."
+      }
+    ],
     "outcome": "Rebuild a declared half-open historical interval and reconcile it.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-022.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-022.py",
@@ -539,6 +1189,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["event time", "watermark", "allowed lateness", "revision-aware sink"],
+    "key_terms": [
+      {
+        "term": "Tumbling window",
+        "definition": "Fixed, non-overlapping time intervals in which each event belongs to exactly one window."
+      },
+      {
+        "term": "Watermark",
+        "definition": "A progress assertion that earlier events have probably arrived, which is not proof of completeness."
+      },
+      {
+        "term": "Allowed lateness",
+        "definition": "How long after the watermark a window still accepts late events."
+      },
+      {
+        "term": "Late event",
+        "definition": "An event that arrives after its window's watermark and is handled by an explicit policy."
+      },
+      {
+        "term": "Revision-aware sink",
+        "definition": "A destination that records updated window totals as revisions rather than as duplicate rows."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Allowed lateness decides whether one event is counted",
+        "language": "python",
+        "code": "events = [(1, 2), (4, 3), (12, 1), (6, 5), (15, 2)]\n\n\ndef run(lateness):\n    windows, watermark, dropped = {}, 0, []\n    for arrival, (event_time, packages) in enumerate(events):\n        watermark = max(watermark, event_time - lateness)\n        start = event_time // 10 * 10\n        if start + 10 <= watermark:\n            dropped.append((event_time, arrival))\n            continue\n        windows[start] = windows.get(start, 0) + packages\n    return windows, watermark, dropped\n\n\nfor lateness in (2, 6):\n    print(\"lateness\", lateness, \"->\", run(lateness))\n",
+        "output": "lateness 2 -> ({0: 5, 10: 3}, 13, [(6, 3)])\nlateness 6 -> ({0: 10, 10: 3}, 9, [])\n",
+        "interpretation": "This is a model of event-time windows, not a streaming engine. With 2 hours of allowed lateness, the event at time 12 moves the watermark to 10, so window [0, 10) closes. The event at time 6, which arrives fourth, is dropped and recorded as (6, 3), leaving window 0 with 5 packages. With 6 hours of lateness the watermark is only 9 after the same arrivals, so time 6 is accepted and window 0 holds 10. More lateness gives a more complete answer, but each window must be held in state longer and results are published later."
+      }
+    ],
     "outcome": "Trace a bounded event-time window mechanism under out-of-order arrivals.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-023.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-023.py",
@@ -563,6 +1244,33 @@
       "source identity",
       "state-schema evolution"
     ],
+    "key_terms": [
+      {
+        "term": "Checkpoint",
+        "definition": "A cursor committed together with its effects in one SQLite transaction, so a restart resumes from a consistent cut of work."
+      },
+      {
+        "term": "Consistent prefix",
+        "definition": "The guarantee that cursor k means events at positions zero through k minus one are committed and nothing beyond."
+      },
+      {
+        "term": "Replay",
+        "definition": "Delivering an event again after a crash, recognized by its identity so that it is not counted twice."
+      },
+      {
+        "term": "State-schema version",
+        "definition": "The version of the derived state layout, bound into the checkpoint so incompatible state is not resumed."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Saving the offset before the state loses a value",
+        "language": "python",
+        "code": "source = [3, 4, 5, 6]\n\n\ndef run(order, crash_after):\n    offset, total, processed = 0, 0, 0\n    for _attempt in range(2):\n        position = offset\n        while position < len(source):\n            value = source[position]\n            if order == \"offset-first\":\n                offset = position + 1\n                if processed == crash_after:\n                    processed += 1\n                    break\n                total += value\n            else:\n                new_total = total + value\n                if processed == crash_after:\n                    processed += 1\n                    break\n                total, offset = new_total, position + 1\n            processed += 1\n            position += 1\n    return total\n\n\nprint(\"expected:\", sum(source))\nprint(\"offset saved before state:\", run(\"offset-first\", crash_after=1))\nprint(\"state and offset together:\", run(\"together\", crash_after=1))\n",
+        "output": "expected: 18\noffset saved before state: 14\nstate and offset together: 18\n",
+        "interpretation": "The four source values sum to 18. When the job records offset 2 before adding the value 4 to its total and then crashes, the restart begins at position 2, so the 4 is never counted and the result is 14. Saving the new total and the offset as one step makes the crash harmless: the restart repeats position 1 and the total reaches 18. The opposite mistake, saving state first and the offset later, would count a value twice. That is why the chapter's SQLite job writes both in one transaction."
+      }
+    ],
     "outcome": "Restore a versioned checkpoint and compare with a full replay oracle.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-024.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-024.py",
@@ -582,6 +1290,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["object key", "generation precondition", "manifest publication", "ABA conflict"],
+    "key_terms": [
+      {
+        "term": "Object key",
+        "definition": "The mutable name of an object in a store, which can point to different content over time."
+      },
+      {
+        "term": "Generation",
+        "definition": "A number that increases with each write to an object key."
+      },
+      {
+        "term": "Precondition",
+        "definition": "A write condition, such as if-generation-match, whose failure means the writer's assumptions are stale."
+      },
+      {
+        "term": "ABA problem",
+        "definition": "A value that changes from A to B and back to A, which looks unchanged to a check that compares only values."
+      },
+      {
+        "term": "Create-if-absent",
+        "definition": "A write that succeeds only when the key does not exist yet, which protects immutable data keys."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Two writers and a generation precondition",
+        "language": "python",
+        "code": "store = {\"manifest.json\": (\"v1\", 1)}\n\n\ndef put_if(key, body, expected_generation):\n    _current_body, generation = store[key]\n    if expected_generation is not None and generation != expected_generation:\n        return \"412 precondition failed (generation \" + str(generation) + \")\"\n    store[key] = (body, generation + 1)\n    return \"200 generation \" + str(generation + 1)\n\n\nseen = store[\"manifest.json\"][1]\nprint(\"writer A:\", put_if(\"manifest.json\", \"v1+a\", seen))\nprint(\"writer B, blind:\", put_if(\"manifest.json\", \"v1+b\", None))\nprint(\"after blind write:\", store[\"manifest.json\"])\nstore[\"manifest.json\"] = (\"v1\", 1)\nprint(\"writer A:\", put_if(\"manifest.json\", \"v1+a\", seen))\nprint(\"writer B, conditional:\", put_if(\"manifest.json\", \"v1+b\", seen))\nprint(\"after conditional writes:\", store[\"manifest.json\"])\n",
+        "output": "writer A: 200 generation 2\nwriter B, blind: 200 generation 3\nafter blind write: ('v1+b', 3)\nwriter A: 200 generation 2\nwriter B, conditional: 412 precondition failed (generation 2)\nafter conditional writes: ('v1+a', 2)\n",
+        "interpretation": "Both writers read generation 1. In the first round writer B writes without a precondition, so its v1+b replaces writer A's change at generation 3 with no error. Writer A's update is lost, and nothing records the loss. In the second round writer B sends the generation it read, the store has already moved to 2, and the write fails with 412, leaving v1+a in place. Writer B must now read again, merge its change into the new manifest and retry. The precondition does not resolve the conflict; it guarantees that the conflict is noticed."
+      }
+    ],
     "outcome": "Model versioned object publication and conditional pointer updates explicitly.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-025.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-025.py",
@@ -605,6 +1344,33 @@
       "directional schema evolution",
       "union by name",
       "dataset grain"
+    ],
+    "key_terms": [
+      {
+        "term": "Dataset manifest",
+        "definition": "An inventory of the files in a dataset with each basename, SHA-256 digest and row count."
+      },
+      {
+        "term": "Schema evolution",
+        "definition": "Changing a schema over time in a declared direction, such as adding an optional column."
+      },
+      {
+        "term": "Union by name",
+        "definition": "Combining files by matching column names rather than positions, filling absent columns with nulls."
+      },
+      {
+        "term": "Contract violation",
+        "definition": "Data that an engine can read but that breaks declared rules, such as duplicate delivery identities."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Reading old and new Parquet files under one widened schema",
+        "language": "python",
+        "code": "import shutil\nfrom pathlib import Path\n\nimport duckdb\nimport pyarrow as pa\nimport pyarrow.parquet as pq\n\nroot = Path(\"lake-demo\")\nshutil.rmtree(root, ignore_errors=True)\nroot.mkdir()\npq.write_table(\n    pa.table({\"delivery_id\": [\"D1\"], \"packages\": pa.array([4], pa.int32())}),\n    root / \"part-0.parquet\",\n)\npq.write_table(\n    pa.table({\"delivery_id\": [\"D2\"], \"packages\": pa.array([5], pa.int64()), \"region\": [\"west\"]}),\n    root / \"part-1.parquet\",\n)\nquery = (\n    \"select * from read_parquet('lake-demo/*.parquet', union_by_name = true) order by delivery_id\"\n)\nrelation = duckdb.sql(query)\nprint(\"columns:\", list(zip(relation.columns, [str(t) for t in relation.types])))\nprint(\"rows:\", relation.fetchall())\n",
+        "output": "columns: [('delivery_id', 'VARCHAR'), ('packages', 'BIGINT'), ('region', 'VARCHAR')]\nrows: [('D1', 4, None), ('D2', 5, 'west')]\n",
+        "interpretation": "The older file stores packages as int32 and has no region column; the newer one uses int64 and adds region. With union_by_name, DuckDB matches columns by name, widens packages to BIGINT and fills the missing region for D1 with NULL. That NULL means \"this file predates the column\", not \"region unknown for this delivery\", and a manifest should record which files have which schema so analysts can tell the two apart. The opposite direction, narrowing int64 back to int32 or dropping a column old readers depend on, would not be safe, which is why schema evolution has a direction."
+      }
     ],
     "outcome": "Query an actual versioned Parquet manifest with DuckDB.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-026.md",
@@ -630,6 +1396,37 @@
       "logical delete",
       "orphan reachability"
     ],
+    "key_terms": [
+      {
+        "term": "Table format",
+        "definition": "A metadata layer such as Apache Iceberg, Delta Lake or Apache Hudi that defines which files make up a table state."
+      },
+      {
+        "term": "Snapshot",
+        "definition": "One accepted logical table state that lists exactly the data files it contains."
+      },
+      {
+        "term": "Optimistic commit",
+        "definition": "A commit that succeeds only if its parent snapshot is still current and otherwise must be redone against the new state."
+      },
+      {
+        "term": "Logical delete",
+        "definition": "Removing rows from the current snapshot while their bytes remain in files referenced by older snapshots."
+      },
+      {
+        "term": "Orphan file",
+        "definition": "A data file unreachable from any retained snapshot, which is therefore safe to remove."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Snapshot isolation for a reader during a commit",
+        "language": "python",
+        "code": "snapshots = {1: [\"a.parquet\", \"b.parquet\"]}\ncurrent = 1\n\n\ndef commit(base, add, remove):\n    global current\n    if base != current:\n        return \"conflict: based on \" + str(base) + \", current is \" + str(current)\n    files = [f for f in snapshots[base] if f not in remove] + add\n    current = base + 1\n    snapshots[current] = files\n    return \"committed snapshot \" + str(current)\n\n\nreader_snapshot = current\nprint(commit(1, [\"c.parquet\"], [\"a.parquet\"]))\nprint(\"reader still sees:\", snapshots[reader_snapshot])\nprint(\"new reader sees:\", snapshots[current])\nprint(commit(1, [\"d.parquet\"], []))\n",
+        "output": "committed snapshot 2\nreader still sees: ['a.parquet', 'b.parquet']\nnew reader sees: ['b.parquet', 'c.parquet']\nconflict: based on 1, current is 2\n",
+        "interpretation": "The reader pinned snapshot 1 before the commit, so it keeps seeing a.parquet and b.parquet even though snapshot 2 removed a.parquet and added c.parquet. That is why the old data file cannot be deleted while any reader might still hold snapshot 1. The second writer also began from snapshot 1. Its commit is rejected because the current snapshot is already 2, so it cannot silently drop c.parquet by writing a file list built from stale state. The writer must rebase on snapshot 2 and decide whether its change still applies."
+      }
+    ],
     "outcome": "Investigate snapshot and delete invariants using real local files and a clearly labelled table-format model.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-027.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-027.py",
@@ -653,6 +1450,37 @@
       "accepted version",
       "resource action",
       "semantic compatibility"
+    ],
+    "key_terms": [
+      {
+        "term": "Data catalog",
+        "definition": "A registry describing datasets with their versions, owners and access policies."
+      },
+      {
+        "term": "Registered version",
+        "definition": "A dataset version known to the catalog that has not necessarily passed acceptance."
+      },
+      {
+        "term": "Accepted-version pointer",
+        "definition": "The catalog entry naming which registered version consumers should read."
+      },
+      {
+        "term": "Resource action",
+        "definition": "A permission such as read or publish on a specific resource, granted to roles by policy."
+      },
+      {
+        "term": "Semantic compatibility",
+        "definition": "Whether a new version keeps the same meaning for consumers, beyond matching column types."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Resolving a table name that has three catalog entries",
+        "language": "python",
+        "code": "import duckdb\n\ncon = duckdb.connect()\ncon.execute(\n    \"create table catalog(name varchar, version int, owner varchar, status varchar, classification varchar)\"\n)\ncon.execute(\n    \"insert into catalog values ('deliveries', 1, 'logistics', 'active', 'internal'),\"\n    \"('deliveries', 2, 'logistics', 'draft', 'internal'),\"\n    \"('deliveries', 3, 'unknown', 'active', 'restricted')\"\n)\nnaive = con.execute(\"select max(version) from catalog where name = 'deliveries'\").fetchone()[0]\ngoverned = con.execute(\n    \"select version, owner from catalog where name = 'deliveries' and status = 'active' \"\n    \"and owner <> 'unknown' order by version desc limit 1\"\n).fetchall()\nduplicates = con.execute(\n    \"select count(*) from catalog where name = 'deliveries' and status = 'active'\"\n).fetchone()[0]\nprint(\"highest version:\", naive)\nprint(\"active with an owner:\", governed)\nprint(\"active entries:\", duplicates)\n",
+        "output": "highest version: 3\nactive with an owner: [(1, 'logistics')]\nactive entries: 2\n",
+        "interpretation": "Taking the highest version returns 3, an entry whose owner is unknown and whose classification is restricted, so the most permissive lookup would route readers to data nobody is accountable for. Filtering for an active entry with a named owner returns version 1 from logistics; version 2 is still a draft. The count of 2 active entries for one name is itself the defect: a catalog should allow at most one active version per name, enforced when an entry is activated, so that resolution never depends on query order."
+      }
     ],
     "outcome": "Query a real local metadata catalog and resolve a versioned dataset contract.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-028.md",
@@ -678,6 +1506,37 @@
       "replica intersection",
       "tombstone retention"
     ],
+    "key_terms": [
+      {
+        "term": "Partition key",
+        "definition": "The column set that decides which partition, and therefore which replicas, store a row."
+      },
+      {
+        "term": "Clustering column",
+        "definition": "A column that orders rows within one partition."
+      },
+      {
+        "term": "Time bucket",
+        "definition": "A coarse time value added to a partition key to bound partition growth, at the cost of more partitions per long-range query."
+      },
+      {
+        "term": "Quorum overlap",
+        "definition": "Read and write replica sets that intersect, so a read reaches at least one replica holding the latest acknowledged write."
+      },
+      {
+        "term": "Tombstone retention",
+        "definition": "How long delete markers are kept, which must cover repair so a replica that missed the delete cannot resurrect the value."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Quorum overlap with three replicas",
+        "language": "python",
+        "code": "from itertools import combinations\n\nreplicas = [\"r1\", \"r2\", \"r3\"]\nfor write_count, read_count in ((1, 1), (2, 1), (2, 2), (3, 1)):\n    writes = list(combinations(replicas, write_count))\n    reads = list(combinations(replicas, read_count))\n    misses = sum(1 for w in writes for r in reads if not set(w) & set(r))\n    print(\n        \"W\",\n        write_count,\n        \"R\",\n        read_count,\n        \"W+R>N\",\n        write_count + read_count > 3,\n        \"non-overlapping pairs\",\n        misses,\n        \"of\",\n        len(writes) * len(reads),\n    )\n",
+        "output": "W 1 R 1 W+R>N False non-overlapping pairs 6 of 9\nW 2 R 1 W+R>N False non-overlapping pairs 3 of 9\nW 2 R 2 W+R>N True non-overlapping pairs 0 of 9\nW 3 R 1 W+R>N True non-overlapping pairs 0 of 3\n",
+        "interpretation": "With three replicas, a write acknowledged by one replica and a read from one replica miss each other in 6 of the 9 possible pairings, so the read may return old data. W=2 with R=1 still misses in 3 of 9. Once W plus R exceeds 3, as with 2 and 2 or 3 and 1, every read set shares at least one replica with every write set. Overlap alone does not finish the job: the reader must still pick the newest value among the replicas it contacted, which needs a timestamp or version on each write."
+      }
+    ],
     "outcome": "Derive query-shaped partition keys and quantify a hot-partition case.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-029.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-029.py",
@@ -702,6 +1561,33 @@
       "comparison revision",
       "aggregate retraction"
     ],
+    "key_terms": [
+      {
+        "term": "Analytical serving",
+        "definition": "Answering many repeated low-latency analytical queries, the workload Apache Pinot is designed for."
+      },
+      {
+        "term": "Upsert",
+        "definition": "Keeping one current row per primary key, with a comparison column deciding which record wins."
+      },
+      {
+        "term": "Comparison column",
+        "definition": "The configured column that decides which record for a primary key is newest."
+      },
+      {
+        "term": "Aggregate retraction",
+        "definition": "Removing an old contribution from an aggregate when a record is superseded or changes group."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "An upsert table versus an append table for current status",
+        "language": "python",
+        "code": "import duckdb\n\ncon = duckdb.connect()\ncon.execute(\n    \"create table events as select * from (values ('D1', 1, 'created'), ('D1', 2, 'loaded'), \"\n    \"('D1', 3, 'delivered'), ('D2', 1, 'created')) t(delivery_id, seq, status)\"\n)\nappend_count = con.execute(\"select status, count(*) from events group by 1 order by 1\").fetchall()\ncurrent = con.execute(\n    \"select status, count(*) from (select * from events qualify row_number() over \"\n    \"(partition by delivery_id order by seq desc) = 1) group by 1 order by 1\"\n).fetchall()\nprint(\"append-table counts:\", append_count)\nprint(\"latest-per-key counts:\", current)\n",
+        "output": "append-table counts: [('created', 2), ('delivered', 1), ('loaded', 1)]\nlatest-per-key counts: [('created', 1), ('delivered', 1)]\n",
+        "interpretation": "Counting rows in the append table reports two created deliveries, one loaded and one delivered, as if four deliveries existed. D1 has moved through three states, so it is counted three times. Keeping only the highest sequence per delivery gives the current status: one created (D2) and one delivered (D1). A real-time serving table that answers \"how many deliveries are in each state now\" needs that latest-per-key semantics, which Pinot provides with upsert tables keyed on delivery_id. An append table is still the right shape for questions about transitions over time."
+      }
+    ],
     "outcome": "Compute a query oracle and choose a compatible ingestion grain.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-030.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-030.py",
@@ -721,6 +1607,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["artifact lineage", "recipe identity", "dependency invalidation", "provenance"],
+    "key_terms": [
+      {
+        "term": "Lineage",
+        "definition": "The recorded dependencies between datasets and the transformations that produce them."
+      },
+      {
+        "term": "Provenance",
+        "definition": "The account of how a result was made, by which activity and from which identified inputs."
+      },
+      {
+        "term": "Recipe",
+        "definition": "The declared computation for a node, here an actual JSON file such as a grouping key, whose change makes that node stale."
+      },
+      {
+        "term": "Selective invalidation",
+        "definition": "Marking only a changed node and its descendants as stale, rather than rebuilding everything indiscriminately."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Which outputs a changed input invalidates",
+        "language": "python",
+        "code": "from graphlib import TopologicalSorter\n\ninputs = {\n    \"raw_orders\": [\"clean_orders\"],\n    \"raw_routes\": [\"clean_routes\"],\n    \"clean_orders\": [\"daily_totals\", \"late_report\"],\n    \"clean_routes\": [\"late_report\"],\n    \"daily_totals\": [\"dashboard\"],\n    \"late_report\": [],\n    \"dashboard\": [],\n}\n\n\ndef downstream(changed):\n    found, stack = set(), [changed]\n    while stack:\n        for child in inputs[stack.pop()]:\n            if child not in found:\n                found.add(child)\n                stack.append(child)\n    return found\n\n\norder = list(\n    TopologicalSorter(\n        {k: {p for p, cs in inputs.items() if k in cs} for k in inputs}\n    ).static_order()\n)\nfor changed in (\"raw_routes\", \"raw_orders\"):\n    stale = downstream(changed)\n    print(changed, \"->\", [node for node in order if node in stale])\n",
+        "output": "raw_routes -> ['clean_routes', 'late_report']\nraw_orders -> ['clean_orders', 'daily_totals', 'late_report', 'dashboard']\n",
+        "interpretation": "A change to raw_routes invalidates only clean_routes and late_report, so daily_totals and the dashboard can keep their current versions. A change to raw_orders reaches four outputs, including late_report through clean_orders. The output follows topological order, so rebuilding in the printed sequence never uses a stale parent. Rerunning everything would also be correct but would hide which outputs actually changed. Recording these edges with content hashes is what lets an investigation say exactly which published numbers depended on a bad input."
+      }
+    ],
     "outcome": "Trace an actual artifact dependency graph using content identities.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-031.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-031.py",
@@ -740,6 +1653,37 @@
     "runtime_profile": "data-engineering",
     "language": "python",
     "concepts": ["purpose restriction", "minimization", "pseudonym linkage", "retention audit"],
+    "key_terms": [
+      {
+        "term": "Data minimization",
+        "definition": "Collecting and keeping only the fields a declared purpose needs."
+      },
+      {
+        "term": "Purpose restriction",
+        "definition": "Limiting the use of data to the purposes for which it was collected."
+      },
+      {
+        "term": "Retention period",
+        "definition": "How long a copy of data may be kept before it must be deleted."
+      },
+      {
+        "term": "Pseudonym",
+        "definition": "A deterministic replacement identifier, such as an HMAC-derived label, which stays linkable and therefore is not anonymization."
+      },
+      {
+        "term": "Data inventory",
+        "definition": "A list of every copy of a dataset, needed because deletion is local to each copy."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A keyed hash still joins; an unkeyed hash can be reversed by lookup",
+        "language": "python",
+        "code": "import hashlib\nimport hmac\n\ncustomers = [\"C001\", \"C002\", \"C003\"]\ntarget = hashlib.sha256(b\"C002\").hexdigest()\nrecovered = [c for c in customers if hashlib.sha256(c.encode()).hexdigest() == target]\nkey = b\"pipeline-secret-held-by-governance\"\n\n\ndef token(customer, secret):\n    return hmac.new(secret, customer.encode(), hashlib.sha256).hexdigest()[:12]\n\n\nprint(\"unkeyed hash recovered by guessing:\", recovered)\nprint(\"keyed tokens:\", [token(c, key) for c in customers])\nprint(\"same customer, same token:\", token(\"C002\", key) == token(\"C002\", key))\nprint(\"rotated key changes token:\", token(\"C002\", key) != token(\"C002\", b\"next-key\"))\n",
+        "output": "unkeyed hash recovered by guessing: ['C002']\nkeyed tokens: ['584efb2879f1', 'f3facceb4596', 'a998087594ae']\nsame customer, same token: True\nrotated key changes token: True\n",
+        "interpretation": "A plain SHA-256 of the customer ID looks anonymous, but customer IDs come from a small, guessable set, so hashing every candidate recovers C002 immediately. The HMAC tokens still give the same value for the same customer, so joins across tables keep working, while someone without the key cannot test guesses. Rotating the key changes every token, which breaks joins with older data. That is useful when retention requires old links to stop working, but it must be planned. Neither scheme reduces the data itself: if a table only needs a count per region, the customer ID should not be kept at all."
+      }
+    ],
     "outcome": "Enforce a declared synthetic access/retention policy and preserve an audit record.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-032.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-032.py",
@@ -763,6 +1707,33 @@
       "online request contract",
       "feature event time",
       "accepted model version"
+    ],
+    "key_terms": [
+      {
+        "term": "Batch inference",
+        "definition": "Scoring a declared population, often from a versioned snapshot, rather than individual requests."
+      },
+      {
+        "term": "Online inference",
+        "definition": "Scoring individual requests under a service contract with bounded validation and response latency."
+      },
+      {
+        "term": "Known time",
+        "definition": "When an observation became available to the system, which can differ from when it was observed and decides whether a decision could use it."
+      },
+      {
+        "term": "Active model version",
+        "definition": "The model version a prediction product declares active, returned in each response so consumers can reconcile outputs."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A batch score and an online score disagree on a stale feature",
+        "language": "python",
+        "code": "import numpy as np\nfrom sklearn.linear_model import LogisticRegression\n\nX = np.array([[0.0], [1.0], [2.0], [3.0], [4.0], [5.0]])\ny = np.array([0, 0, 0, 1, 1, 1])\nmodel = LogisticRegression().fit(X, y)\nfeatures = {\n    \"batch\": {\"late_last_7d\": 4.0, \"as_of\": \"2024-05-01\"},\n    \"online\": {\"late_last_7d\": 1.0, \"as_of\": \"2024-04-24\"},\n}\nfor path, row in features.items():\n    probability = model.predict_proba([[row[\"late_last_7d\"]]])[0, 1]\n    print(\n        path,\n        row[\"as_of\"],\n        round(float(probability), 3),\n        \"flag\" if probability >= 0.5 else \"no flag\",\n    )\n",
+        "output": "batch 2024-05-01 0.843 flag\nonline 2024-04-24 0.157 no flag\n",
+        "interpretation": "The same fitted logistic regression gives 0.843 for the batch path and 0.157 for the online path, so one flags the delivery and the other does not. The model is identical; the difference is the input. Online serving read a feature computed on 2024-04-24 with 1 late delivery, while the batch job used the 2024-05-01 value of 4. Parity tests that compare the two paths should log the feature values and their as-of dates. Without them, a disagreement looks like a model bug when it is actually a freshness gap in the feature pipeline."
+      }
     ],
     "outcome": "Compare real batch predictions with a local ASGI request contract.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-041.md",
@@ -788,6 +1759,33 @@
       "resource cleanup",
       "uncertain effects"
     ],
+    "key_terms": [
+      {
+        "term": "Coroutine",
+        "definition": "An async function's execution, which can pause at await points while other work runs."
+      },
+      {
+        "term": "Bounded admission",
+        "definition": "Limiting concurrent work to a fixed number of slots, here two, and rejecting extra requests with HTTP 429 instead of queueing without bound."
+      },
+      {
+        "term": "Cancellation",
+        "definition": "A caller disconnecting or a task being stopped mid-request, after which cleanup must still release what the request held."
+      },
+      {
+        "term": "Cleanup in finally",
+        "definition": "Releasing resources in a finally block so they are freed on success, failure or cancellation."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Cancelling a request mid-write leaves an uncertain effect",
+        "language": "python",
+        "code": "import asyncio\n\nledger = []\n\n\nasync def handler(request_id):\n    ledger.append((request_id, \"started\"))\n    try:\n        await asyncio.sleep(0.05)\n        ledger.append((request_id, \"committed\"))\n    except asyncio.CancelledError:\n        ledger.append((request_id, \"cancelled\"))\n        raise\n\n\nasync def main():\n    task = asyncio.create_task(handler(\"req-1\"))\n    await asyncio.sleep(0.01)\n    task.cancel()\n    try:\n        await task\n    except asyncio.CancelledError:\n        print(\"client saw: cancelled\")\n    shielded = asyncio.create_task(handler(\"req-2\"))\n    try:\n        await asyncio.wait_for(asyncio.shield(shielded), timeout=0.01)\n    except TimeoutError:\n        print(\"client saw: timeout\")\n    await shielded\n    print(\"ledger:\", ledger)\n\n\nasyncio.run(main())\n",
+        "output": "client saw: cancelled\nclient saw: timeout\nledger: [('req-1', 'started'), ('req-1', 'cancelled'), ('req-2', 'started'), ('req-2', 'committed')]\n",
+        "interpretation": "Request req-1 was cancelled after 10 ms, so its ledger shows started then cancelled and no commit. That case is clean only because the commit had not happened yet; the client cannot tell this from a cancel that arrives just after a commit. Request req-2 uses asyncio.shield, so the client's 10 ms timeout ends its wait but the handler keeps running and commits. The client saw a timeout, yet the effect happened. The only way to tell these cases apart is to read the ledger by request ID, which is why the chapter reconciles uncertain outcomes by reading back instead of retrying blindly."
+      }
+    ],
     "outcome": "Exercise a bounded real ASGI contract and resource cleanup.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-042.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-042.py",
@@ -807,6 +1805,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["eligible denominator", "timely success", "error budget", "multi-window burn"],
+    "key_terms": [
+      {
+        "term": "SLI",
+        "definition": "A service level indicator, the measured ratio of good events to eligible events."
+      },
+      {
+        "term": "SLO",
+        "definition": "A service level objective, the target value for an SLI over a time window."
+      },
+      {
+        "term": "Error budget",
+        "definition": "The allowed share of bad events, equal to one minus the SLO target."
+      },
+      {
+        "term": "Burn rate",
+        "definition": "The observed bad-event fraction divided by the error budget fraction."
+      },
+      {
+        "term": "Multi-window alert",
+        "definition": "An alert that requires a high burn rate in both a short and a long window, because a broad window alone dilutes a burst."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Burn rate over a short and a long window",
+        "language": "python",
+        "code": "from fractions import Fraction\n\nobjective = Fraction(999, 1000)\nbudget = 1 - objective\nwindows = {\"5m\": (2000, 30), \"1h\": (24000, 48), \"30d\": (17280000, 9000)}\nfor name, (requests, failures) in windows.items():\n    error_rate = Fraction(failures, requests)\n    print(name, \"error rate\", float(error_rate), \"burn rate\", float(error_rate / budget))\nprint(\"budget for 30d:\", int(17280000 * budget), \"failed requests\")\n",
+        "output": "5m error rate 0.015 burn rate 15.0\n1h error rate 0.002 burn rate 2.0\n30d error rate 0.0005208333333333333 burn rate 0.5208333333333334\nbudget for 30d: 17280 failed requests\n",
+        "interpretation": "A 99.9 percent objective allows a 0.001 error rate. The last five minutes show 30 failures in 2000 requests, a burn rate of 15, which would exhaust a 30-day budget in two days if it continued. The past hour burns at 2, and the full 30 days at about 0.52, so the month as a whole is well within its budget of 17280 failed requests. Alerting on the five-minute window alone would page on short spikes, and the 30-day window alone would react too late. Requiring both a short and a longer window to exceed a threshold is the usual compromise."
+      }
+    ],
     "outcome": "Compute request-based service indicators with explicit eligible denominators.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-043.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-043.py",
@@ -826,6 +1855,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["distribution drift", "matured cohort", "label availability", "coverage"],
+    "key_terms": [
+      {
+        "term": "Data drift",
+        "definition": "A change in the distribution of model inputs."
+      },
+      {
+        "term": "Model quality",
+        "definition": "How predictions perform against relevant outcomes, which can decline without a large shift in the monitored inputs."
+      },
+      {
+        "term": "Prevalence",
+        "definition": "The share of positive labels in a population."
+      },
+      {
+        "term": "Total variation distance",
+        "definition": "Half the sum of absolute differences between two distributions, ranging from zero to one."
+      },
+      {
+        "term": "Matured population",
+        "definition": "The predictions whose outcomes have had time to arrive, so evaluation is not biased by incomplete recent labels."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Drift without a quality drop, and a quality drop without drift",
+        "language": "python",
+        "code": "from collections import Counter\n\n\ndef total_variation(a, b):\n    pa, pb = Counter(a), Counter(b)\n    keys = set(pa) | set(pb)\n    return sum(abs(pa[k] / len(a) - pb[k] / len(b)) for k in keys) / 2\n\n\nreference = [\"urban\"] * 8 + [\"rural\"] * 2\nweek_a = [\"urban\"] * 4 + [\"rural\"] * 6\nweek_b = [\"urban\"] * 8 + [\"rural\"] * 2\naccuracy = {\"week_a\": (9, 10), \"week_b\": (6, 10)}\nfor name, sample in ((\"week_a\", week_a), (\"week_b\", week_b)):\n    right, matured = accuracy[name]\n    print(\n        name,\n        \"TV distance\",\n        round(total_variation(reference, sample), 2),\n        \"accuracy\",\n        right / matured,\n    )\n",
+        "output": "week_a TV distance 0.4 accuracy 0.9\nweek_b TV distance 0.0 accuracy 0.6\n",
+        "interpretation": "Week A moved from 80 percent urban deliveries to 40 percent, a total variation distance of 0.4, yet the matured labels show 0.9 accuracy. Week B has the reference mix exactly, a distance of 0.0, but accuracy fell to 0.6. A drift monitor alone would raise an alarm for the healthy week and stay silent for the broken one. Accuracy here depends on labels that arrive only after deliveries complete, so it lags behind. Distribution checks are the early signal, and matured-label evaluation is what confirms whether the model actually got worse."
+      }
+    ],
     "outcome": "Measure a changed input distribution without inferring quality loss automatically.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-044.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-044.py",
@@ -850,6 +1910,37 @@
       "POSIX descriptor",
       "strict payload"
     ],
+    "key_terms": [
+      {
+        "term": "Authentication",
+        "definition": "Establishing who sent a request."
+      },
+      {
+        "term": "Authorization",
+        "definition": "Deciding whether an authenticated caller may perform an action on a resource."
+      },
+      {
+        "term": "Payload validation",
+        "definition": "Checking that a request body has the required shape and values, which says nothing about who sent it."
+      },
+      {
+        "term": "Fixed file mapping",
+        "definition": "Resolving requests through a fixed table of allowed files instead of trusting a caller-supplied path."
+      },
+      {
+        "term": "Symlink rejection",
+        "definition": "Opening a file relative to a directory descriptor with O_NOFOLLOW so a symbolic link cannot redirect the read."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A path check that a symlink defeats",
+        "language": "python",
+        "code": "import os\nimport shutil\nfrom pathlib import Path\n\nbase = Path(\"security-demo\")\nshutil.rmtree(base, ignore_errors=True)\n(base / \"reports\").mkdir(parents=True)\n(base / \"secret.txt\").write_text(\"token\")\n(base / \"reports\" / \"daily.txt\").write_text(\"ok\")\nos.symlink(\"../secret.txt\", base / \"reports\" / \"link.txt\")\nroot = (base / \"reports\").resolve()\nfor name in (\"daily.txt\", \"link.txt\", \"../secret.txt\"):\n    candidate = base / \"reports\" / name\n    prefix_ok = str(candidate).startswith(str(base / \"reports\"))\n    resolved_ok = candidate.resolve().is_relative_to(root)\n    print(name, \"prefix check:\", prefix_ok, \"resolved check:\", resolved_ok)\n",
+        "output": "daily.txt prefix check: True resolved check: True\nlink.txt prefix check: True resolved check: False\n../secret.txt prefix check: True resolved check: False\n",
+        "interpretation": "All three names pass the string prefix check because each candidate path is built by appending to reports, so the text always starts with that directory. Only daily.txt passes after resolving the path. link.txt is a symlink that points at secret.txt, and ../secret.txt climbs out with a parent reference; both resolve outside the reports root. Resolution must happen at the moment of the read, since a symlink can be swapped between check and open. The chapter's reader opens the file and then checks the opened descriptor to close that gap."
+      }
+    ],
     "outcome": "Enforce a synthetic resource-authorization contract and safe request validation.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-045.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-045.py",
@@ -869,6 +1960,33 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["queue model", "tail latency", "scan amplification", "cost units"],
+    "key_terms": [
+      {
+        "term": "Tail latency",
+        "definition": "The slow end of the latency distribution, such as the 99th percentile."
+      },
+      {
+        "term": "Saturation",
+        "definition": "Operating so close to capacity that small variations create queues faster than they drain."
+      },
+      {
+        "term": "Scan amplification",
+        "definition": "Bytes scanned divided by bytes needed, such as reading 30 partitions when one would do."
+      },
+      {
+        "term": "Cost unit",
+        "definition": "An invented accounting unit, such as 0.02 per decimal gigabyte, used for sensitivity analysis rather than as a provider price."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Utilization near one in a single-server queue model",
+        "language": "python",
+        "code": "service_ms = 10\nfor utilization in (0.5, 0.8, 0.9, 0.95):\n    waiting = utilization / (1 - utilization) * service_ms\n    print(\n        \"utilization\",\n        utilization,\n        \"mean wait ms\",\n        round(waiting, 1),\n        \"mean response ms\",\n        round(waiting + service_ms, 1),\n    )\n",
+        "output": "utilization 0.5 mean wait ms 10.0 mean response ms 20.0\nutilization 0.8 mean wait ms 40.0 mean response ms 50.0\nutilization 0.9 mean wait ms 90.0 mean response ms 100.0\nutilization 0.95 mean wait ms 190.0 mean response ms 200.0\n",
+        "interpretation": "This uses the textbook single-server queue with random arrivals, so the numbers describe shape, not a measured service. With 10 ms of work per request, raising utilization from 0.5 to 0.8 quadruples the mean wait from 10 ms to 40 ms. Going from 0.9 to 0.95 adds only five percentage points of load but doubles the wait from 90 to 190 ms. Capacity plans that target 95 percent busy servers therefore buy small savings with large latency. Tail latency grows even faster than the mean in this regime."
+      }
+    ],
     "outcome": "Compute a bounded workload/capacity model and check its assumptions.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-046.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-046.py",
@@ -888,6 +2006,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["retry budget", "circuit breaker", "failure domain", "degraded mode"],
+    "key_terms": [
+      {
+        "term": "Timeout",
+        "definition": "The maximum time a caller waits before treating a call as failed."
+      },
+      {
+        "term": "Backoff",
+        "definition": "Spacing repeated attempts, for example with delays that grow with attempt number up to a cap and jitter that desynchronizes callers."
+      },
+      {
+        "term": "Circuit breaker",
+        "definition": "A guard that stops calls to a dependency after observed failures, then allows a controlled recovery probe, moving through closed, open and half-open states."
+      },
+      {
+        "term": "Nested retries",
+        "definition": "Retries at several independent layers, whose attempt counts multiply the calls reaching a dependency."
+      },
+      {
+        "term": "Degraded service",
+        "definition": "A reduced response, explicitly labeled as a fallback, returned while a dependency is avoided or unavailable."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Three layers of three retries",
+        "language": "python",
+        "code": "def calls(layers, attempts):\n    return attempts**layers\n\n\nfor layers in (1, 2, 3):\n    print(\n        \"layers\", layers, \"attempts per layer 3 -> backend calls per user request\", calls(layers, 3)\n    )\nbudget, spent, outcomes = 10, 0, []\nfor request in range(20):\n    if spent < budget:\n        spent += 1\n        outcomes.append(\"retried\")\n    else:\n        outcomes.append(\"failed fast\")\nprint(\n    \"retry budget of 10 across 20 failing requests:\",\n    outcomes.count(\"retried\"),\n    \"retried,\",\n    outcomes.count(\"failed fast\"),\n    \"failed fast\",\n)\n",
+        "output": "layers 1 attempts per layer 3 -> backend calls per user request 3\nlayers 2 attempts per layer 3 -> backend calls per user request 9\nlayers 3 attempts per layer 3 -> backend calls per user request 27\nretry budget of 10 across 20 failing requests: 10 retried, 10 failed fast\n",
+        "interpretation": "A single layer that tries three times sends 3 calls to the backend for one user request. When a gateway, a service and a client library each retry three times, one failure becomes 27 backend calls, just when the backend is already struggling. The budget shown here limits retries across all requests: of 20 failing requests, the first 10 are retried and the remaining 10 fail immediately. Retrying at only one layer, usually the outermost one, and sharing a retry budget keeps a partial outage from being multiplied into a full one."
+      }
+    ],
     "outcome": "Trace a declared circuit-breaker/retry mechanism with bounded probes.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-047.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-047.py",
@@ -911,6 +2060,33 @@
       "backfill readiness",
       "consumer version",
       "compatible rollback"
+    ],
+    "key_terms": [
+      {
+        "term": "Expand and contract",
+        "definition": "A schema change in phases that first adds the new form, then migrates data and readers, and only then removes the old form."
+      },
+      {
+        "term": "Backfill",
+        "definition": "Populating the expanded structure for existing rows before any consumer depends on it."
+      },
+      {
+        "term": "Consumer activation",
+        "definition": "Switching the active consumer version in a transaction, only after its contract is satisfied."
+      },
+      {
+        "term": "Compatible rollback",
+        "definition": "Returning to old code that can still read the state left by the new version."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Renaming a column in place breaks the old reader",
+        "language": "python",
+        "code": "import sqlite3\n\ndb = sqlite3.connect(\":memory:\")\ndb.execute(\"create table deliveries(id text, region text)\")\ndb.execute(\"insert into deliveries values ('D1', 'north')\")\n\n\ndef old_reader():\n    return db.execute(\"select id, region from deliveries\").fetchall()\n\n\ndb.execute(\"alter table deliveries add column region_code text\")\ndb.execute(\"update deliveries set region_code = upper(substr(region, 1, 1))\")\nprint(\"after expand, old reader:\", old_reader())\nprint(\"new reader:\", db.execute(\"select id, region_code from deliveries\").fetchall())\ndb.execute(\"alter table deliveries rename column region to region_name\")\ntry:\n    old_reader()\nexcept sqlite3.OperationalError as error:\n    print(\"after rename, old reader:\", error)\n",
+        "output": "after expand, old reader: [('D1', 'north')]\nnew reader: [('D1', 'N')]\nafter rename, old reader: no such column: region\n",
+        "interpretation": "Adding region_code and filling it with 'N' leaves the old reader working: it still gets ('D1', 'north'), and a new reader can use the code. That is the expand step, and it is safe because nothing existing changed. Renaming region in place is a contract change, and the old reader fails with \"no such column: region\". The safe sequence keeps region until every consumer has moved to the new column and their versions are recorded. Only then is the old column removed, and rollback means switching readers back, not restoring a dropped column."
+      }
     ],
     "outcome": "Perform a compatible local schema migration and accepted-version switch.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-048.md",
@@ -936,6 +2112,33 @@
       "Parquet publication",
       "quality rejection"
     ],
+    "key_terms": [
+      {
+        "term": "Accepted pointer",
+        "definition": "The pointer naming the publication consumers read, moved only after reconciliation succeeds."
+      },
+      {
+        "term": "Quality gate",
+        "definition": "Checks that must pass before a candidate is accepted, so a quality failure preserves the previous publication."
+      },
+      {
+        "term": "Parquet publication",
+        "definition": "Writing the aggregate to Parquet and reading those bytes back to compare rows before a manifest is written and the pointer moves."
+      },
+      {
+        "term": "Publication reconciliation",
+        "definition": "Checking that source package totals equal output totals, together with schema, population, key uniqueness and exact rows, before the pointer moves."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Validating CSV text before any type conversion",
+        "language": "python",
+        "code": "import csv\nimport io\nimport re\n\ntext = \"delivery_id,packages,day\\nD1,4,2024-06-01\\nD2,4.0,2024-06-01\\nD3,,2024-06-02\\nD1,4,2024-06-01\\n\"\nrows = list(csv.DictReader(io.StringIO(text)))\naccepted, rejected, seen = [], [], set()\nfor line, row in enumerate(rows, start=2):\n    if not re.fullmatch(r\"[1-9][0-9]*\", row[\"packages\"]):\n        rejected.append((line, \"packages=\" + repr(row[\"packages\"])))\n    elif row[\"delivery_id\"] in seen:\n        rejected.append((line, \"duplicate \" + row[\"delivery_id\"]))\n    else:\n        seen.add(row[\"delivery_id\"])\n        accepted.append((row[\"delivery_id\"], int(row[\"packages\"])))\nprint(\"accepted:\", accepted)\nprint(\"rejected:\", rejected)\nprint(\"rows in = accepted + rejected:\", len(rows) == len(accepted) + len(rejected))\n",
+        "output": "accepted: [('D1', 4)]\nrejected: [(3, \"packages='4.0'\"), (4, \"packages=''\"), (5, 'duplicate D1')]\nrows in = accepted + rejected: True\n",
+        "interpretation": "Of four data rows, only D1 with 4 packages is accepted. Line 3 sends '4.0' and line 4 sends an empty string; both fail the text pattern before int() could either reject them with a less useful error or, for a float conversion, quietly accept 4.0. Line 5 repeats D1 and is rejected as a duplicate, with the line number kept so the producer can find it. The final check confirms that every input row is accounted for as accepted or rejected. A publication that cannot make that statement may have dropped rows silently."
+      }
+    ],
     "outcome": "Connect ingestion, quarantine, real analytical transformation and an accepted publication manifest.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-049.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-049.py",
@@ -959,6 +2162,37 @@
       "current entity state",
       "full-history oracle",
       "atomic correction"
+    ],
+    "key_terms": [
+      {
+        "term": "Event ID",
+        "definition": "The identity of one delivered change, used to recognize a replayed delivery."
+      },
+      {
+        "term": "Entity ID",
+        "definition": "The identity of the business object that an event changes."
+      },
+      {
+        "term": "Revision",
+        "definition": "The per-entity source ordering value that decides which replacement is newer."
+      },
+      {
+        "term": "Append sum",
+        "definition": "A sum over every event, which wrongly includes superseded values and repeated deliveries."
+      },
+      {
+        "term": "Full-history oracle",
+        "definition": "A recomputation that selects the latest consistent revision of each entity, used to verify incrementally maintained state."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "An incremental total that forgets a late correction",
+        "language": "python",
+        "code": "from collections import defaultdict\n\nevents = [\n    (\"D1\", \"2024-07-01\", 1, 3),\n    (\"D2\", \"2024-07-01\", 1, 2),\n    (\"D1\", \"2024-07-01\", 2, 5),\n    (\"D3\", \"2024-07-02\", 1, 4),\n]\nrunning = defaultdict(int)\nfor _delivery, day, _version, packages in events:\n    running[day] += packages\nlatest = {}\nfor delivery, day, version, packages in events:\n    if delivery not in latest or version > latest[delivery][1]:\n        latest[delivery] = (day, version, packages)\noracle = defaultdict(int)\nfor day, _version, packages in latest.values():\n    oracle[day] += packages\nprint(\"summing every event:\", dict(running))\nprint(\"full-history oracle:\", dict(oracle))\nprint(\"mismatched days:\", [d for d in oracle if oracle[d] != running[d]])\n",
+        "output": "summing every event: {'2024-07-01': 10, '2024-07-02': 4}\nfull-history oracle: {'2024-07-01': 7, '2024-07-02': 4}\nmismatched days: ['2024-07-01']\n",
+        "interpretation": "The incremental job adds every event to its day, so July 1 reaches 10: D1's original 3 packages plus D2's 2 plus D1's correction to 5. The oracle rebuilds from full history, keeps only D1's version 2 and reports 7. July 2 agrees at 4, so only July 1 needs repair. The incremental logic could be fixed by subtracting the previous version's value when a correction arrives, which requires storing per-delivery state. The independent oracle is still worth running, because it is the only check that does not share the incremental code's assumptions."
+      }
     ],
     "outcome": "Reconcile identified streaming-style updates with a full batch recomputation.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-050.md",
@@ -988,6 +2222,33 @@
       "MLflow artifact reload",
       "ASGI inference"
     ],
+    "key_terms": [
+      {
+        "term": "Online store",
+        "definition": "Feast's local SQLite store, into which a reviewed snapshot is materialized for current online retrieval."
+      },
+      {
+        "term": "Model flavor",
+        "definition": "The saved format, such as the sklearn flavor, that tells MLflow how to load a model."
+      },
+      {
+        "term": "Model reload",
+        "definition": "Loading the model again from its actual artifact, resolved through the accepted alias, before it serves predictions."
+      },
+      {
+        "term": "Inference endpoint",
+        "definition": "The FastAPI route that retrieves online features for a request and returns a prediction from the accepted model."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A random split leaks the future into training",
+        "language": "python",
+        "code": "import numpy as np\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.metrics import mean_absolute_error\n\ndays = np.arange(40).reshape(-1, 1)\nload = 10 + 0.5 * days.ravel() + np.where(days.ravel() >= 30, 8.0, 0.0)\nrng = np.random.default_rng(0)\norder = rng.permutation(40)\nrandom_train, random_test = order[:30], order[30:]\ntime_train, time_test = np.arange(30), np.arange(30, 40)\nfor name, train, test in ((\"random\", random_train, random_test), (\"time\", time_train, time_test)):\n    model = LinearRegression().fit(days[train], load[train])\n    error = mean_absolute_error(load[test], model.predict(days[test]))\n    print(name, \"split MAE\", round(float(error), 2))\n",
+        "output": "random split MAE 1.73\ntime split MAE 8.0\n",
+        "interpretation": "Load grows by half a unit per day and jumps by 8 from day 30. A random split puts some post-jump days into training, so the linear model partly learns the shift and scores a mean absolute error of 1.73 on the held-out days. Training on days 0 to 29 and testing on 30 to 39 reproduces what deployment faces, a future the model has not seen, and the error is 8.0, exactly the size of the jump. The random-split number would overstate quality by a factor of more than four. The capstone's feature store retrieves features as of each training row's time for the same reason."
+      }
+    ],
     "outcome": "Connect actual Feast, fitted training, MLflow evidence and local inference.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-051.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-051.py",
@@ -1007,6 +2268,37 @@
     "runtime_profile": "python-core",
     "language": "python",
     "concepts": ["SQLite online backup", "restore readback", "recovery point", "recovery time"],
+    "key_terms": [
+      {
+        "term": "Online backup API",
+        "definition": "SQLite's interface for copying a consistent database view while the source database remains open."
+      },
+      {
+        "term": "Write-ahead log",
+        "definition": "A SQLite journal mode in which recent commits live in a separate WAL file, so copying only the main file can lose them."
+      },
+      {
+        "term": "Consumer readback",
+        "definition": "Reading the restored data through the consumer path to verify it before declaring recovery complete."
+      },
+      {
+        "term": "Recovery point objective",
+        "definition": "The allowed data-loss window under a declared failure scenario, abbreviated RPO."
+      },
+      {
+        "term": "Recovery time objective",
+        "definition": "The target time to restore the required service, abbreviated RTO."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Copying a WAL-mode database file versus the backup API",
+        "language": "python",
+        "code": "import shutil\nimport sqlite3\nfrom pathlib import Path\n\nbase = Path(\"backup-demo\")\nshutil.rmtree(base, ignore_errors=True)\nbase.mkdir()\nlive = sqlite3.connect(base / \"live.db\")\nlive.execute(\"pragma journal_mode=wal\")\nlive.execute(\"create table t(n int)\")\nlive.executemany(\"insert into t values (?)\", [(i,) for i in range(100)])\nlive.commit()\nshutil.copyfile(base / \"live.db\", base / \"copied.db\")\ntarget = sqlite3.connect(base / \"backup.db\")\nlive.backup(target)\ntarget.close()\nfor name in (\"copied.db\", \"backup.db\"):\n    count = (\n        sqlite3.connect(base / name)\n        .execute(\"select count(*) from sqlite_master where name='t'\")\n        .fetchone()[0]\n    )\n    rows = (\n        sqlite3.connect(base / name).execute(\"select count(*) from t\").fetchone()[0]\n        if count\n        else \"missing\"\n    )\n    print(name, \"table present:\", bool(count), \"rows:\", rows)\n",
+        "output": "copied.db table present: False rows: missing\nbackup.db table present: True rows: 100\n",
+        "interpretation": "In WAL mode, committed changes sit in a separate -wal file until a checkpoint copies them into the main database file. shutil.copyfile copied only live.db, which did not yet contain the table, so the copy has no table t at all even though every insert was committed. The backup API reads through SQLite and produces a file with all 100 rows. A file copy can therefore look successful and restore to an older state. A backup only counts as one after it is restored and checked against something recorded at backup time, such as the row count."
+      }
+    ],
     "outcome": "Create and restore an actual consistent SQLite backup with checked evidence.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-052.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-052.py",
@@ -1030,6 +2322,33 @@
       "minor currency units",
       "dual readers",
       "controlled cutover"
+    ],
+    "key_terms": [
+      {
+        "term": "Canonical comparison",
+        "definition": "Comparing old and new outputs after normalizing both to one representation."
+      },
+      {
+        "term": "Minor currency unit",
+        "definition": "The smallest unit of a currency, such as cents, stored as an integer like 449."
+      },
+      {
+        "term": "Dual readers",
+        "definition": "Running the old and new readers on the same source so their canonical records can be compared exactly."
+      },
+      {
+        "term": "Acceptance boundary",
+        "definition": "The point at which consumers switch, here an accepted pointer that changes only after old and new canonical records agree exactly."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Float currency conversion that fails reconciliation",
+        "language": "python",
+        "code": "from decimal import Decimal\n\nprices = [\"0.10\", \"0.20\", \"19.99\", \"0.07\"]\nas_float_cents = [int(float(p) * 100) for p in prices]\nas_decimal_cents = [int(Decimal(p) * 100) for p in prices]\nprint(\"float cents:\", as_float_cents, \"sum\", sum(as_float_cents))\nprint(\"decimal cents:\", as_decimal_cents, \"sum\", sum(as_decimal_cents))\nprint(\"source sum:\", sum(Decimal(p) for p in prices))\n",
+        "output": "float cents: [10, 20, 1998, 7] sum 2035\ndecimal cents: [10, 20, 1999, 7] sum 2036\nsource sum: 20.36\n",
+        "interpretation": "The source prices add up to 20.36. Converting through float and truncating with int() turns 19.99 into 1998 cents, because 19.99 times 100 is stored as slightly less than 1999. The float total is 2035, one cent short. Decimal arithmetic keeps the written value exactly and gives 2036, which reconciles. A migration that changes currency to integer cents should compare per-row and total amounts between the old and new formats before switching readers. A single cent off in a large table is easy to miss without that comparison."
+      }
     ],
     "outcome": "Maintain simultaneous compatible readers during a real local migration.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-053.md",
@@ -1055,6 +2374,33 @@
       "accepted-state readback",
       "conditional rollback"
     ],
+    "key_terms": [
+      {
+        "term": "Operation receipt",
+        "definition": "A record that binds a change to the exact proposal bytes that were applied."
+      },
+      {
+        "term": "Database readback",
+        "definition": "Reading back the committed product content and the receipt for the exact source before deciding how to recover."
+      },
+      {
+        "term": "Explicit rollback",
+        "definition": "A transaction that checks the expected version is still current and the target exists before it moves the pointer and records the recovery."
+      },
+      {
+        "term": "Child process",
+        "definition": "A separate program started by a parent, whose nonzero exit after a commit leaves an effect that must be reconciled."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Exit code says failure, the database says committed",
+        "language": "python",
+        "code": "import sqlite3\nimport subprocess\nimport sys\nfrom pathlib import Path\n\npath = Path(\"drill-demo.db\")\npath.unlink(missing_ok=True)\nsqlite3.connect(path).execute(\"create table releases(version text)\").connection.commit()\nchild = (\n    \"import sqlite3, sys\\n\"\n    \"db = sqlite3.connect('drill-demo.db')\\n\"\n    \"db.execute(\\\"insert into releases values ('v2')\\\")\\n\"\n    \"db.commit()\\n\"\n    \"sys.exit(3)\\n\"\n)\nresult = subprocess.run([sys.executable, \"-c\", child], check=False)\nprint(\"child exit code:\", result.returncode)\nprint(\n    \"rows after failure:\", sqlite3.connect(path).execute(\"select version from releases\").fetchall()\n)\n",
+        "output": "child exit code: 3\nrows after failure: [('v2',)]\n",
+        "interpretation": "The child process committed v2 and then exited with code 3. A supervisor that reads only the exit code would treat the release as failed and might retry it, adding v2 again, or roll back something it believes never happened. Reading the database shows that v2 is present. During an incident, the state of the system is the evidence, and the process exit status is a hint about where to look. The chapter's drill reads back before deciding whether to roll back, and records both observations."
+      }
+    ],
     "outcome": "Diagnose a bounded fault using actual recorded workflow/service evidence.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-054.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-054.py",
@@ -1079,6 +2425,33 @@
       "architecture alternatives",
       "qualification evidence"
     ],
+    "key_terms": [
+      {
+        "term": "Hard constraint",
+        "definition": "A non-negotiable requirement, such as a retention or latency boundary, that a weighted score must not let other strengths cancel."
+      },
+      {
+        "term": "Workload assumption",
+        "definition": "A stated estimate, such as records per interval, row size or concurrent demand, on which a design depends."
+      },
+      {
+        "term": "Preference score",
+        "definition": "A weighted ranking applied only after options that violate hard constraints are removed."
+      },
+      {
+        "term": "Unqualified proposal",
+        "definition": "A design that looks feasible on paper but lacks actual qualification evidence, so it must not become a production claim."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Ranking designs against stated constraints instead of popularity",
+        "language": "python",
+        "code": "designs = {\n    \"nightly batch\": {\"freshness_min\": 1440, \"monthly_cost\": 200, \"ops_people\": 0.2},\n    \"micro-batch\": {\"freshness_min\": 15, \"monthly_cost\": 900, \"ops_people\": 0.5},\n    \"streaming\": {\"freshness_min\": 1, \"monthly_cost\": 3000, \"ops_people\": 1.5},\n}\nfor constraints in (\n    {\"freshness_min\": 60, \"monthly_cost\": 1000, \"ops_people\": 1.0},\n    {\"freshness_min\": 1440, \"monthly_cost\": 500, \"ops_people\": 0.5},\n):\n    feasible = [\n        name for name, d in designs.items() if all(d[k] <= v for k, v in constraints.items())\n    ]\n    cheapest = min(feasible, key=lambda name: designs[name][\"monthly_cost\"]) if feasible else None\n    print(constraints, \"feasible:\", feasible, \"choose:\", cheapest)\n",
+        "output": "{'freshness_min': 60, 'monthly_cost': 1000, 'ops_people': 1.0} feasible: ['micro-batch'] choose: micro-batch\n{'freshness_min': 1440, 'monthly_cost': 500, 'ops_people': 0.5} feasible: ['nightly batch'] choose: nightly batch\n",
+        "interpretation": "Under the first set of constraints, a 60-minute freshness target, 1000 per month and one person of operations time, only micro-batch is feasible: nightly batch is too stale and streaming is too expensive and needs too many people. Relaxing freshness to a day and tightening the budget to 500 leaves only nightly batch. Streaming never wins here, even though it has the best freshness, because no stated requirement asks for one-minute data. In an interview the useful move is to ask which constraint is binding before naming a design."
+      }
+    ],
     "outcome": "Compare two defensible designs using explicit workload and correctness requirements.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-055.md",
     "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-055.py",
@@ -1102,6 +2475,33 @@
       "independent oracle",
       "source-bound receipt",
       "evidence tiers"
+    ],
+    "key_terms": [
+      {
+        "term": "Reproducible bundle",
+        "definition": "A package of source, input data, README and receipt from which another person can rerun the work."
+      },
+      {
+        "term": "Receipt",
+        "definition": "A record binding a completed execution to the exact source and input digests that produced it."
+      },
+      {
+        "term": "Zero exit code",
+        "definition": "A successful process exit, which shows that the program finished but not that its output is correct."
+      },
+      {
+        "term": "Tiered evidence",
+        "definition": "Separate levels of proof, such as static checks, unit tests, native runtime tests and service tests, none of which automatically implies a later tier."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A claim checked against a recorded run",
+        "language": "python",
+        "code": "import hashlib\nimport json\nimport subprocess\nimport sys\n\nprogram = \"print(sum(range(1, 101)))\\n\"\nrun = subprocess.run([sys.executable, \"-c\", program], capture_output=True, text=True, check=True)\nevidence = {\n    \"program_sha\": hashlib.sha256(program.encode()).hexdigest()[:12],\n    \"stdout\": run.stdout.strip(),\n    \"python\": f\"{sys.version_info.major}.{sys.version_info.minor}\",\n}\nclaims = {\"sums 1..100 to 5050\": evidence[\"stdout\"] == \"5050\", \"runs in under 1 ms\": None}\nprint(json.dumps(evidence, sort_keys=True))\nfor claim, supported in claims.items():\n    print(\n        claim,\n        \"->\",\n        {True: \"supported\", False: \"contradicted\", None: \"no evidence recorded\"}[supported],\n    )\n",
+        "output": "{\"program_sha\": \"9e8692bfbc55\", \"python\": \"3.12\", \"stdout\": \"5050\"}\nsums 1..100 to 5050 -> supported\nruns in under 1 ms -> no evidence recorded\n",
+        "interpretation": "The evidence record ties a 12-character program hash, 9e8692bfbc55, to the observed stdout 5050 and the Python version 3.12. The claim that the program sums 1 to 100 is supported by that record. The claim about running in under a millisecond has no matching measurement, so it is reported as having no evidence rather than being guessed as true. A portfolio built this way can be rerun by a reviewer: if the hash differs, the program changed, and if the stdout differs, the claim needs revisiting."
+      }
     ],
     "outcome": "Assemble a reproducible local investigation with source, input, test and runtime evidence.",
     "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-056.md",

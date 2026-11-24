@@ -8,7 +8,7 @@ Intermediate; approximately 90 minutes. Direct prerequisites: `spark-016`. The p
 
 ## How to run this lesson
 
-Open `spark-017` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-017` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-017.scala) and [PySpark learner](../lessons/spark-017.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-017_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-017_solution.scala) and [PySpark reference](../solutions/spark-017_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -49,7 +49,7 @@ The final comparison separates two legitimate array relationships. Exploding an 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -74,20 +74,8 @@ val raw = spark.createDataFrame(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 input_schema = StructType(
     [StructField("source_id", LongType(), False), StructField("raw", StringType(), True)]
@@ -152,7 +140,7 @@ The typed empty array and typed null array are intentionally different inputs. T
 
 Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw.
 
-**Expected result/shape:** Sources 1-4 accepted;5 malformed_json;6 missing_parent;7 missing_payload. No source disappears and accepted count is 4.
+**Expected result/shape:** Sources 1-4 accepted; 5 malformed_json; 6 missing_parent; 7 missing_payload. No source disappears and accepted count is 4.
 
 **Verify:** Assert all seven ordered source/reason rows and reconcile accepted 4 plus rejected 3 with input 7.
 
@@ -172,9 +160,9 @@ For accepted records return source_id, parent_id, items, array_state, with array
 
 Use posexplode to return parent_id, position, sku, qty for actual items. Order by parent_id and position, and retain repeated SKU a.
 
-**Expected result/shape:** Rows(10,0, a,2),(10,1, a,3),(40,0, b, NULL). Exactly 3 children; parents 20 and 30 produce none.
+**Expected result/shape:** `Rows(10, 0, a, 2)`, `(10, 1, a, 3)`, `(40, 0, b, NULL)`. Exactly 3 children; parents 20 and 30 produce none.
 
-**Verify:** Assert the entire three-row occurrence list and unique(parent_id, position) count 3.
+**Verify:** Assert the entire three-row occurrence list and unique (parent_id, position) count 3.
 
 **Progressive hint:** A child identity includes its position rather than only the SKU value.
 
@@ -182,7 +170,7 @@ Use posexplode to return parent_id, position, sku, qty for actual items. Order b
 
 Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays.
 
-**Expected result/shape:** Five rows: the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL).
+**Expected result/shape:** Five rows: the three observed children plus `(20, empty, NULL, NULL, NULL)` and `(30, unknown, NULL, NULL, NULL)`.
 
 **Verify:** Assert five rows, four distinct parents and exactly three nonnull generated positions.
 
@@ -192,7 +180,7 @@ Use posexplode_outer, preserving parent_id and array_state along with position, 
 
 Aggregate the outer relation to parent_id, array_state, child_count, known_qty_count, total_qty. Count positions for children and preserve SUM NULL when there are no known quantities.
 
-**Expected result/shape:** Parent 10:(2,2,5);20:(0,0, NULL);30:(0,0, NULL);40:(1,0, NULL). Empty and unknown collection states remain visible.
+**Expected result/shape:** Parent `10:(2, 2, 5)`; `20:(0, 0, NULL)`; `30:(0, 0, NULL)`; `40:(1, 0, NULL)`. Empty and unknown collection states remain visible.
 
 **Verify:** Assert each parent count tuple and that summed child_count is 3 while known_qty_count is 2.
 
@@ -202,7 +190,7 @@ Aggregate the outer relation to parent_id, array_state, child_count, known_qty_c
 
 For one parent with SKUs [a, b] and channels [web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.
 
-**Expected result/shape:** Independent generators produce 6 pairs; zip produces(a, web), (b, shop),(NULL, api), three rows.
+**Expected result/shape:** Independent generators produce 6 pairs; zip produces (a, web), (b, shop), (NULL, api), three rows.
 
 **Verify:** Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.
 
@@ -214,7 +202,7 @@ Do not use inferred JSON schema as a substitute for an explicit producer contrac
 
 ## Self-check
 
-Explain the contract of `parseRecords` / `parse_records` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `parseRecords` / `parse_records` without reading its solution. Then, from memory, state what Exercise 6 (Choose Cartesian or positional array semantics) must produce: Independent generators produce 6 pairs; zip produces `(a, web)`, `(b, shop)`, `(NULL, api)`, three rows. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

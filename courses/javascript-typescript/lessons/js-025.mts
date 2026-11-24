@@ -6,17 +6,18 @@ export {};
 // exists(join(directory, 'compiled', 'math.mjs')), true);` to `assert.equal(await
 // exists(join(directory, 'compiled!', 'math.mjs')), true);` inside its check. Before running
 // it, predict whether the check still passes and explain why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at the check `assert.equal(await
-// exists(join(directory, 'compiled', 'math.mjs')), true)`. Restoring the original line
-// brings back the worked observation: both processes succeed; output 8; math.mjs is emitted.
+// Expected: The changed run fails with an `AssertionError` at `assert.equal(await
+// exists(join(directory, 'compiled!', 'math.mjs')), true);`. Restoring `assert.equal(await
+// exists(join(directory, 'compiled', 'math.mjs')), true);` brings back: both processes
+// succeed; output 8; math.mjs is emitted.
 
 // Exercise 2: Inspect type-only erasure: debug a regression
 // A regression changed one token in Example B, so one line now reads `'model.mts!': 'export
 // type Item = { id: string };',`. Run Example B with that line, use the failing check to
 // locate the defect and repair it without changing the check.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`; after it the line
-// reads `'model.mts': 'export type Item = { id: string };',` again and no model import in
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. Restoring
+// `'model.mts': 'export type Item = { id: string };',` brings back: no model import in
 // emitted entry; output A.
 
 // Exercise 3: Reject a type mismatch without output

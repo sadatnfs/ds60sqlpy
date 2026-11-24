@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "track_id": "ml-engineering",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "mle-002",
+      "title": "Point in time feature selection and labels that are not known yet",
+      "anchor": "reference",
+      "source_path": "courses/ml-engineering/references/mle-002_reference.py",
+      "source_sha256": "d17e8c8732e1f7f917ea0124a441314e6de92c72d25ba284353b57a993dda7c1",
+      "expected_output": [
+        "'event_only_leak': 999",
+        "'mature_training_rows': 77",
+        "mle-002 reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [7, 16],
+          "excerpt": "def dataset():\n    rng = np.random.default_rng(17)\n    n = 120\n    usage = rng.uniform(1, 100, n)\n    tickets = rng.poisson(2, n)\n    region = np.where(np.arange(n) % 2 == 0, \"north\", \"south\")\n    logit = 0.9 * tickets - 0.035 * usage + (region == \"north\") * 0.3\n    probability = 1 / (1 + np.exp(-logit))\n    label = (rng.random(n) < probability).astype(int)\n    cutoff = np.arange(n) + 100",
+          "title": "A seeded synthetic dataset",
+          "explanation": "default_rng(17) creates a random generator with a fixed seed, so the same 120 rows appear every run. usage and tickets drive a logistic formula, and label is drawn from the resulting probability. Each row also gets a cutoff, the moment a prediction would be made.",
+          "observe": "The randomness only shapes usage, tickets and label. The time columns below are plain arithmetic."
+        },
+        {
+          "lines": [17, 29],
+          "excerpt": "    return pd.DataFrame(\n        {\n            \"id\": np.arange(n),\n            \"customer_id\": np.arange(n) % 12,\n            \"cutoff\": cutoff,\n            \"available_at\": cutoff - 2,\n            \"label_available_at\": cutoff + 4,\n            \"usage\": usage,\n            \"tickets\": tickets,\n            \"region\": region,\n            \"label\": label,\n        }\n    )",
+          "title": "Three timestamps per row",
+          "explanation": "available_at is two time units before the cutoff, when the features were ready. label_available_at is four units after the cutoff, when the outcome becomes known. Training code must respect both: you may only use features available by the cutoff and labels known by the time you train.",
+          "observe": "Every row's label arrives four units after its cutoff."
+        },
+        {
+          "lines": [32, 41],
+          "excerpt": "def example_one():\n    records = [\n        {\"id\": 1, \"event_at\": 2, \"known_at\": 3, \"value\": 10},\n        {\"id\": 2, \"event_at\": 4, \"known_at\": 7, \"value\": 999},\n        {\"id\": 3, \"event_at\": 8, \"known_at\": 8, \"value\": 30},\n    ]\n\n    def select(cutoff):\n        valid = [r for r in records if r[\"event_at\"] <= cutoff and r[\"known_at\"] <= cutoff]\n        return max(valid, key=lambda r: (r[\"event_at\"], r[\"known_at\"]))[\"value\"]",
+          "title": "Pick the latest feature known by a cutoff",
+          "explanation": "Each record has an event time and a known time. The nested select function keeps records where both are at or before the cutoff, then max with a key tuple picks the most recent one. Defining a function inside another is fine when only that outer function needs it.",
+          "observe": "For cutoff 5 the eligible value is 10; for cutoff 9 it is 30."
+        },
+        {
+          "lines": [43, 47],
+          "excerpt": "    assert [select(5), select(9)] == [10, 30]\n    assert (\n        max([r for r in records if r[\"event_at\"] <= 5], key=lambda r: r[\"event_at\"])[\"value\"] == 999\n    )\n    return {\"eligible\": [10, 30], \"event_only_leak\": 999}",
+          "title": "The leak you get from event time alone",
+          "explanation": "The second assert repeats the selection using only event time. The 999 record happened at time 4 but was not known until 7, so using it for a cutoff 5 prediction would train on information the system did not have.",
+          "observe": "The returned dictionary reports event_only_leak 999 as the counterexample."
+        },
+        {
+          "lines": [50, 57],
+          "excerpt": "def example_two():\n    frame = dataset()\n    training_cutoff = 180\n    mature = frame[(frame.cutoff < training_cutoff) & (frame.label_available_at <= training_cutoff)]\n    premature = frame[frame.cutoff < training_cutoff]\n    assert len(mature) == 77 and len(premature) == 80\n    assert set(premature.id) - set(mature.id) == {77, 78, 79}\n    return {\"mature_training_rows\": 77, \"not_yet_known_labels\": [77, 78, 79]}",
+          "title": "Only mature labels may enter training",
+          "explanation": "With a training cutoff of 180, 80 rows had their prediction moment before it. But rows 77, 78 and 79 have labels that arrive after 180, so a model trained at 180 could not have seen them. Boolean masks combined with & keep only rows meeting both conditions.",
+          "observe": "mature has 77 rows; the three excluded ids are 77, 78 and 79."
+        },
+        {
+          "lines": [60, 67],
+          "excerpt": "def main():\n    print(example_one())\n    print(example_two())\n    print(\"mle-002 reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Print results and the pass marker",
+          "explanation": "main prints both dictionaries, then the marker line after every check passes.",
+          "observe": "The last line is mle-002 reference checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "mle-006",
+      "title": "A real local Feast store and point in time historical retrieval",
+      "anchor": "reference",
+      "source_path": "courses/ml-engineering/references/mle-006_reference.py",
+      "source_sha256": "83ceeffaa0898d84a9ea1437a22bb95bfa8fea6e0ea7aecb7c5632b85be407ed",
+      "expected_output": [
+        "'registered_feature_views': 1",
+        "'nulls_for_unknown_or_expired': 2",
+        "mle-006 reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [11, 18],
+          "excerpt": "def configure_local_tools():\n    os.environ.update(\n        FEAST_USAGE=\"False\",\n        DO_NOT_TRACK=\"true\",\n        MLFLOW_ENABLE_TELEMETRY=\"false\",\n        MLFLOW_DISABLE_AGENT_HINT=\"1\",\n        DBT_SEND_ANONYMOUS_USAGE_STATS=\"false\",\n    )",
+          "title": "Turn off telemetry before importing tools",
+          "explanation": "Several ML tools try to report usage over the network. Setting these environment variables first keeps the run offline and quiet. os.environ.update sets several variables at once.",
+          "observe": "Nothing is sent anywhere; the variables only change tool behavior inside this process."
+        },
+        {
+          "lines": [21, 33],
+          "excerpt": "def make_store(directory):\n    configure_local_tools()\n    from feast import Entity, FeatureStore, FeatureView, Field, FileSource, ValueType\n    from feast.types import Float32, Int64\n\n    root = Path(directory)\n    root.mkdir(parents=True, exist_ok=True)\n    (root / \"feature_store.yaml\").write_text(\n        \"project: classroom\\nprovider: local\\nregistry: \"\n        \"registry.db\\nonline_store:\\n  type: sqlite\\n  path: \"\n        \"online.db\\nentity_key_serialization_version: \"\n        \"3\\n\"\n    )",
+          "title": "Create a Feast repository on disk",
+          "explanation": "Feast is imported inside the function so the telemetry settings above apply first. feature_store.yaml tells Feast to use a local provider, a local registry file and a SQLite online store, all inside a temporary directory.",
+          "observe": "The store lives entirely in a throwaway folder that is deleted afterward."
+        },
+        {
+          "lines": [34, 44],
+          "excerpt": "    stamps = pd.to_datetime([\"2024-01-01\", \"2024-01-03\", \"2024-01-01\"], utc=True)\n    data = pd.DataFrame(\n        {\n            \"customer_id\": [1, 1, 2],\n            \"feature_time\": stamps,\n            \"usage\": [10.0, 20.0, 5.0],\n            \"tickets\": [1, 2, 3],\n            \"feature_epoch\": [int(t.timestamp()) for t in stamps],\n        }\n    )\n    data.to_parquet(root / \"features.parquet\", index=False)",
+          "title": "Write timestamped feature rows",
+          "explanation": "Customer 1 has usage 10 on January 1 and 20 on January 3. Customer 2 has usage 5 on January 1. to_parquet writes the frame as a columnar file that Feast reads as its offline source.",
+          "observe": "Three feature rows exist, each with a UTC feature_time."
+        },
+        {
+          "lines": [45, 59],
+          "excerpt": "    customer = Entity(name=\"customer\", join_keys=[\"customer_id\"], value_type=ValueType.INT64)\n    view = FeatureView(\n        name=\"customer_features\",\n        entities=[customer],\n        ttl=timedelta(days=30),\n        schema=[\n            Field(name=\"usage\", dtype=Float32),\n            Field(name=\"tickets\", dtype=Int64),\n            Field(name=\"feature_epoch\", dtype=Int64),\n        ],\n        source=FileSource(path=str(root / \"features.parquet\"), timestamp_field=\"feature_time\"),\n    )\n    store = FeatureStore(repo_path=str(root))\n    store.apply([customer, view])\n    return store",
+          "title": "Register an entity and a feature view",
+          "explanation": "The Entity says rows are keyed by customer_id. The FeatureView names the features, their types and their source, and ttl=timedelta(days=30) says a value older than 30 days is too stale to use. store.apply registers both definitions.",
+          "observe": "Exactly one feature view, customer_features, is registered."
+        },
+        {
+          "lines": [62, 76],
+          "excerpt": "def historical(store):\n    requests = pd.DataFrame(\n        {\n            \"request_id\": [1, 2, 3],\n            \"customer_id\": [1, 1, 2],\n            \"event_timestamp\": pd.to_datetime([\"2024-01-02\", \"2024-01-04\", \"2024-01-02\"], utc=True),\n        }\n    )\n    return (\n        store.get_historical_features(\n            entity_df=requests, features=[\"customer_features:usage\", \"customer_features:tickets\"]\n        )\n        .to_df()\n        .sort_values(\"request_id\")\n    )",
+          "title": "Ask for features as of each request time",
+          "explanation": "get_historical_features performs a point in time join: for each request it finds the latest feature row at or before the request's event_timestamp and within the ttl. Sorting by request_id makes the result order predictable for the checks.",
+          "observe": "Request 2 on January 4 gets usage 20, the value recorded on January 3."
+        },
+        {
+          "lines": [79, 89],
+          "excerpt": "def example_one():\n    with tempfile.TemporaryDirectory() as d:\n        store = make_store(Path(d) / \"features\")\n        try:\n            result = historical(store)\n            assert result.usage.tolist() == [10.0, 20.0, 5.0]\n            assert result.request_id.tolist() == [1, 2, 3]\n            assert len(store.list_feature_views()) == 1\n            return {\"historical_usage\": result.usage.tolist(), \"registered_feature_views\": 1}\n        finally:\n            store.teardown()",
+          "title": "First example: retrieval matches expectations",
+          "explanation": "The with block creates a temporary directory that is removed on exit. try and finally make sure teardown runs even if an assert fails.",
+          "observe": "historical_usage is [10.0, 20.0, 5.0] and registered_feature_views is 1."
+        },
+        {
+          "lines": [92, 115],
+          "excerpt": "def example_two():\n    with tempfile.TemporaryDirectory() as d:\n        store = make_store(Path(d) / \"features\")\n        try:\n            requests = pd.DataFrame(\n                {\n                    \"request_id\": [1, 2, 3],\n                    \"customer_id\": [1, 1, 1],\n                    \"event_timestamp\": pd.to_datetime(\n                        [\"2024-01-02\", \"2023-12-01\", \"2024-03-01\"], utc=True\n                    ),\n                }\n            )\n            retrieved = store.get_historical_features(\n                entity_df=requests, features=[\"customer_features:usage\"]\n            ).to_df()\n            assert retrieved.request_id.is_unique\n            assert set(retrieved.request_id) <= set(requests.request_id)\n            # Restore the authoritative request population, including unmatched/expired rows.\n            result = requests.merge(\n                retrieved[[\"request_id\", \"usage\"]], on=\"request_id\", how=\"left\", validate=\"1:1\"\n            ).sort_values(\"request_id\")\n            assert len(result) == len(requests) == 3\n            assert result.usage.iloc[0] == 10.0 and result.usage.iloc[1:].isna().all()",
+          "title": "Second example: requests before history or after expiry",
+          "explanation": "Request 2 is before any feature exists and request 3 is more than 30 days after the last one. Retrieval may drop or null such rows, so the code left joins the results back onto the original requests with validate=\"1:1\". That restores every requested row and makes the missing values explicit.",
+          "observe": "result keeps all three requests; two of them have no usage value."
+        },
+        {
+          "lines": [116, 134],
+          "excerpt": "            return {\n                \"requested_rows\": 3,\n                \"retrieval_returned_rows\": len(retrieved),\n                \"normalized_rows\": 3,\n                \"nulls_for_unknown_or_expired\": int(result.usage.isna().sum()),\n                \"before_history_or_outside_ttl_missing\": True,\n            }\n        finally:\n            store.teardown()\n\n\ndef main():\n    print(example_one())\n    print(example_two())\n    print(\"mle-006 reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Report and finish",
+          "explanation": "The returned counts describe the request population and the gaps. int converts the NumPy count into a plain Python integer for clean printing.",
+          "observe": "The second dictionary includes nulls_for_unknown_or_expired 2, then mle-006 reference checks passed is printed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "mle-014",
+      "title": "Stable hashed rollout cohorts and a shadow comparison",
+      "anchor": "reference",
+      "source_path": "courses/ml-engineering/references/mle-014_reference.py",
+      "source_sha256": "a5ee56be282337323d5a1129e8fc330c5647884bcdb32516aab8a3007065c4ca",
+      "expected_output": [
+        "'small_n': 8, 'larger_n': 19",
+        "'shadow_disagreement': 0",
+        "mle-014 reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [8, 11],
+          "excerpt": "def example_one():\n    assignments = [\n        int(hashlib.sha256(f\"entity:{i}\".encode()).hexdigest()[:8], 16) % 100 for i in range(100)\n    ]",
+          "title": "Assign each entity to a stable bucket",
+          "explanation": "Each entity id is hashed with SHA-256, the first eight hex digits are read as an integer and the remainder after dividing by 100 gives a bucket from 0 to 99. Unlike random assignment, the same id always lands in the same bucket, on any machine and in any run.",
+          "observe": "assignments is a list of 100 bucket numbers, one per entity."
+        },
+        {
+          "lines": [12, 14],
+          "excerpt": "    small = {i for i, bucket in enumerate(assignments) if bucket < 10}\n    larger = {i for i, bucket in enumerate(assignments) if bucket < 25}\n    assert small <= larger and len(small) > 0 and len(larger) < 100",
+          "title": "Nested ramps",
+          "explanation": "small takes buckets below 10, about 10 percent, and larger takes buckets below 25. Because a bucket below 10 is also below 25, everyone in the small ramp stays in the larger one. Growing a rollout this way never removes users who already have the new model.",
+          "observe": "small <= larger checks the subset relation between the two sets."
+        },
+        {
+          "lines": [15, 23],
+          "excerpt": "    assert assignments == [\n        int(hashlib.sha256(f\"entity:{i}\".encode()).hexdigest()[:8], 16) % 100 for i in range(100)\n    ]\n    return {\n        \"stable_cohort\": True,\n        \"nested_ramp\": True,\n        \"small_n\": len(small),\n        \"larger_n\": len(larger),\n    }",
+          "title": "Recompute to prove stability",
+          "explanation": "Rebuilding the list and comparing it with the original confirms the assignment is deterministic. The actual counts depend on how the hashes fall, so they are close to, but not exactly, 10 and 25.",
+          "observe": "small_n is 8 and larger_n is 19."
+        },
+        {
+          "lines": [26, 32],
+          "excerpt": "def example_two():\n    old = np.array([0.1, 0.3, 0.6, 0.9])\n    candidate = np.array([0.2, 0.4, 0.7, 0.8])\n    disagreement = int(np.sum((old >= 0.5) != (candidate >= 0.5)))\n    assert disagreement == 0 and np.max(np.abs(old - candidate)) > 0\n    accepted = bool(np.max(np.abs(old - candidate)) <= 0.15)\n    assert accepted",
+          "title": "Shadow scoring: compare decisions, not just scores",
+          "explanation": "In shadow mode the candidate model scores the same requests but its output is not used. Comparing each score against 0.5 turns scores into decisions. The scores all differ, yet no decision changes, and the largest change is within the 0.15 tolerance.",
+          "observe": "disagreement is 0 even though every prediction moved a little."
+        },
+        {
+          "lines": [33, 47],
+          "excerpt": "    return {\n        \"shadow_disagreement\": disagreement,\n        \"prediction_change_exists\": True,\n        \"no_causal_effect_claim\": True,\n    }\n\n\ndef main():\n    print(example_one())\n    print(example_two())\n    print(\"mle-014 reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Report honestly and finish",
+          "explanation": "The returned dictionary records that predictions changed and that no causal effect is claimed: a shadow run shows how the models differ, not how users would respond. main prints both dictionaries and the marker.",
+          "observe": "The output includes shadow_disagreement 0 and ends with mle-014 reference checks passed."
+        }
+      ]
+    }
+  ]
+}

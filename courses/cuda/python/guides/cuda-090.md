@@ -29,6 +29,14 @@ Gradient clipping belongs after unscaling because its threshold is defined in th
 For PyTorch, place forward and loss computation in the selected autocast context and follow the pinned `torch.amp` scaler sequence. For TensorFlow/Keras, select the dtype policy before layer construction, inspect variable dtype versus compute dtype, and follow that release's loss-scaling optimizer API. The supplied CPU scaling model is a mathematical explanation; it does not claim that either framework selected tensor cores. Qualification compares finite gradients, update direction, short loss trajectory, held-out metric, memory and synchronized completed-step timing against full precision.
 
 
+### Key terms
+
+- **Float16 (fp16):** A 16-bit float with 5 exponent bits and a narrow range, so small gradients can underflow.
+- **Bfloat16 (bf16):** A 16-bit float with the same 8 exponent bits as float32 but fewer mantissa bits, trading precision for range.
+- **Loss scaling:** Multiplying the loss before backward so fp16 gradients stay representable, then unscaling gradients before clipping and the update.
+- **Overflow detection:** Checking unscaled gradients for infinity or NaN, skipping that step and lowering the scale.
+- **Master weights:** A float32 copy of parameters that receives updates so small increments are not lost to low precision.
+
 ## Worked examples
 
 ### Worked example 1
@@ -55,6 +63,16 @@ print("CPU scaling model:", correct, wrong)
 
 **Expected observation:** Correct gradient 0.5; incorrect clipping order yields 0.0009765625.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `gradient` | `0.5` |
+| `scale` | `1024` |
+| `scaled` | `512.0` |
+| `correct` | `0.5` |
+| `wrong` | `0.0009765625` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -73,27 +91,39 @@ Choose either lane first, then compare the other using identical mathematical in
 
 ### Exercise 1: Calculate scaled and unscaled values
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **calculate scaled and unscaled values** in the examples above.
+**Trap to avoid:** Unscaling twice, once manually and once by the scaler, produces `0.5/1024`, an update so small that training appears to stall without any error.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Explain overflow detection
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **explain overflow detection** in the examples above.
+**Trap to avoid:** Replacing infinities with zero, or clipping them, so the step can proceed corrupts the update with values unrelated to the true gradient.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Place clipping correctly
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **place clipping correctly** in the examples above.
+**Trap to avoid:** Clipping the scaled 512 to 1 and then unscaling gives `1/1024 = 0.0009765625`, the wrong value the reference asserts for the reversed order. Training then barely moves.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Compare fp16 and bf16 concepts
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **compare fp16 and bf16 concepts** in the examples above.
+**Trap to avoid:** Assuming both 16-bit formats behave the same leads to dropping loss scaling for float16, where small gradients flush to zero.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a full-precision baseline
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design a full-precision baseline** in the examples above.
+**Trap to avoid:** Comparing the mixed-precision run with an older float32 run using a different seed attributes noise to precision.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Record quality and throughput separately
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **record quality and throughput separately** in the examples above.
+**Trap to avoid:** Reporting the speedup without the quality comparison can justify a configuration that fails to train properly.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

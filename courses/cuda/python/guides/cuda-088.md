@@ -14,6 +14,13 @@ PyTorch's DataLoader and pinned-memory options express one host pipeline; Tensor
 
 
 
+### Key terms
+
+- **Producer-consumer pipeline:** An arrangement where loader workers prepare batches while the device trains on earlier ones.
+- **DataLoader worker:** A separate process that reads and transforms samples in parallel with training.
+- **Prefetch queue:** A bounded buffer of ready batches that hides loading latency while it stays nonempty.
+- **Pipeline bottleneck:** The slowest stage, which bounds overall throughput regardless of how fast the other stages are.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,6 +46,16 @@ print("CPU pipeline model:", serial, ideal, queued)
 
 **Expected observation:** Serial 10 ms, ideal steady-state 6 ms, queued payload 25165824 bytes.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `prepare` | `6` |
+| `compute` | `4` |
+| `serial` | `10` |
+| `ideal` | `6` |
+| `queued` | `25165824` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -63,27 +80,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: Compute serial time
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute serial time** in the examples above.
+**Trap to avoid:** Reporting the 4 ms GPU compute time as the step time ignores the 6 ms the GPU spends idle waiting for input.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Compute an ideal bottleneck bound
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **compute an ideal bottleneck bound** in the examples above.
+**Trap to avoid:** Claiming overlap reduces the step to 4 ms assumes the input stage becomes free. Only a faster or more parallel preparation stage can move the bound below 6 ms.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Budget the queue
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **budget the queue** in the examples above.
+**Trap to avoid:** Budgeting one batch because only one is used at a time ignores that all queued batches are resident at once.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain pinned versus ordinary host storage
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain pinned versus ordinary host storage** in the examples above.
+**Trap to avoid:** Pinning every buffer by default can starve the host and slow the whole machine.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare resident-data diagnostic
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **compare resident-data diagnostic** in the examples above.
+**Trap to avoid:** Reporting the resident-data speed as production throughput ignores that real training must load new data every step.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Choose bounded worker experiments
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **choose bounded worker experiments** in the examples above.
+**Trap to avoid:** Raising all settings to their maximum at once may exhaust host memory or CPU cores and still hide which change helped.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

@@ -8,6 +8,13 @@ A hierarchical model lets group parameters vary while sharing information throug
 
 Groups have different sample sizes: two, eight and 25. The small first group has an extreme observed mean. The larger third group has an observed mean near one. A sensible explanation should distinguish what each group says directly from what is learned through the shared hierarchy.
 
+## Key terms
+
+- **Hierarchical model:** A model in which group parameters vary around a population distribution, here theta_j ~ Normal(mu, tau^2).
+- **Partial pooling:** Shrinking each group estimate toward the population mean by an amount set by its data and the modeled scale tau.
+- **Noncentered parameterization:** Writing theta_j = mu + tau z_j with standard-normal z_j instead of sampling theta_j directly.
+- **Funnel geometry:** A posterior whose width in theta shrinks sharply as tau approaches zero, which defeats one fixed step size.
+
 ## Worked case 1: derive a conditional shrinkage oracle
 
 If mu is zero, tau is one and observation variance is one, the conditional posterior group mean is
@@ -44,6 +51,45 @@ Compare diagnostics for the parameters and derived quantities that matter. A sam
 **Does shrinkage imply that the raw group estimate was wrong?** It represents a model-based combination of group evidence and population information. Its usefulness depends on the model and the decision. Report both the observed group data and the assumptions supporting partial pooling.
 
 **Should centered and noncentered sampled means be exactly equal?** No. They are Monte Carlo approximations, possibly with different computational errors. Large differences should motivate investigation, but closeness alone cannot prove that both runs explored the complete posterior.
+
+## Worked example: Marginal posterior of tau on a grid for eight groups
+
+```python
+import numpy as np
+
+y = np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0])
+s = np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0])
+tau = np.linspace(0.01, 40, 4000)
+
+
+def log_marg(t):  # mu integrated out under a flat prior
+    v = s**2 + t**2
+    V = 1 / np.sum(1 / v)
+    mu = V * np.sum(y / v)
+    return 0.5 * np.log(V) - 0.5 * np.sum(np.log(v)) - 0.5 * np.sum((y - mu) ** 2 / v)
+
+
+lp = np.array([log_marg(t) for t in tau]) + np.log(1 / (1 + (tau / 5) ** 2))  # half-Cauchy(0, 5)
+w = np.exp(lp - lp.max())
+w /= w.sum()
+cdf = np.cumsum(w)
+print(
+    f"P(tau < 2 | y) = {cdf[tau < 2][-1]:.3f}; posterior median tau {tau[np.searchsorted(cdf, 0.5)]:.2f}"
+)
+for t in (0.5, 2.0, 10.0):
+    print(f"tau {t:>4}: pooling weight on group 1's own estimate {t**2 / (t**2 + s[0] ** 2):.4f}")
+```
+
+Observed output:
+
+```text
+P(tau < 2 | y) = 0.378; posterior median tau 2.78
+tau  0.5: pooling weight on group 1's own estimate 0.0011
+tau  2.0: pooling weight on group 1's own estimate 0.0175
+tau 10.0: pooling weight on group 1's own estimate 0.3077
+```
+
+Integrating the group mean out analytically leaves a one-dimensional posterior for the between-group scale \(\tau\), which a fine grid can evaluate exactly. Under a half-Cauchy(0, 5) prior these eight groups put 0.378 of the posterior mass below \(\tau=2\), and the median is only 2.78. The data are consistent with very little between-group variation. That matters for computation because of the pooling weights. Group 1's estimate has standard error 15, so its own data receive weight \(\tau^2/(\tau^2+225)\): 0.0011 at \(\tau=0.5\), 0.0175 at 2 and 0.3077 at 10. In the region the posterior visits often, each group effect is pinned tightly to the common mean, with conditional standard deviation close to \(\tau\) itself. A centered sampler must move \(\tau\) and every group effect together through that narrow neck, which is the funnel. The noncentered form samples standardized deviations whose scale does not change with \(\tau\), so the same posterior becomes much easier to explore.
 
 ## Complete reproducible program
 

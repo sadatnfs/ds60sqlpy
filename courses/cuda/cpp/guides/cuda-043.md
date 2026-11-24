@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Capture and replay a CUDA Graph correctly and compare its submission cost against ordinary stream launches.
+
 Work through *CUDA Graphs for repeated workflows* with the concrete cases below. Finish with this evidence:
 correct replay, safe resource lifetimes, a scoped comparison and explicit unsupported changes. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A CUDA Graph represents a dependency graph that can be instantiated and replayed. It can reduce repeated host submission overhead for suitable workflows, but graph creation and instantiation cost time. Resources referenced by nodes must remain valid across execution, and updates must obey the selected graph API's rules. Stream capture records supported operations in a defined capture context; it is not permission to capture arbitrary host control flow. A CUDA Graph differs from an autograd graph: one schedules execution dependencies, while the other tracks differentiation relationships. Graph replay does not automatically fuse kernels.
+
+### Key terms
+
+- **CUDA Graph:** A recorded set of kernels, copies and dependencies that can be launched as one unit.
+- **Stream capture:** Recording work submitted to a stream into a graph instead of executing it.
+- **Graph instantiation:** Turning a graph into an executable form once so later launches avoid most per-operation overhead.
+- **Graph update:** Changing parameters of an executable graph without rebuilding it, when the topology stays the same.
 
 ## Mathematical contract
 

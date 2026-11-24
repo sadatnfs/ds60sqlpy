@@ -14,6 +14,14 @@ Let \(A\) denote a binary intervention, \(X\) a pretreatment stratum and \(Y^a\)
 
 The target weights describe people or units in the target population, not treatment propensities or numerical convenience. To identify this expression from an observational sample, consistency, conditional exchangeability and treatment positivity are needed. Transport from a separate study additionally requires suitable conditional outcome or effect comparability and overlap between study and target covariates. The finite synthetic table below supplies the potential-outcome means directly; it demonstrates standardization arithmetic, not evidence that those assumptions hold in a real study.
 
+## Key terms
+
+- **Estimand:** The exact quantity a scientific question asks for, fixing the population, intervention contrast, outcome and summary scale before any estimator is chosen.
+- **Estimator:** A rule that turns observed data into a numerical approximation of the estimand under stated assumptions.
+- **Standardization:** Averaging stratum-specific effects with the stratum weights of a declared population instead of the sample's own mix.
+- **Transport:** Carrying effects estimated in one population, such as a trial mix, to a different target population whose covariate distribution is known.
+- **Effect modification:** Variation of the treatment effect across strata, which makes a population average depend on the stratum mix it uses.
+
 ## Worked case 1: one mechanism, two populations
 
 The untreated means are one and five in two strata. Treated means are three and six. The effects are therefore two and one. A study population containing 80% of the first stratum has effect \(.8(2)+.2(1)=1.8\). A target population containing only 20% of the first stratum has effect \(.2(2)+.8(1)=1.2\). Nothing about the intervention's stratum-specific behavior changed. The population composition changed.
@@ -39,6 +47,42 @@ The example contains no sampling error because it supplies a complete finite mec
 **Does a larger study automatically transport better?** No. More observations can improve precision inside its support while leaving a target subgroup completely unrepresented. A transparent sensitivity analysis for effect modification may be more useful than another decimal place in an extrapolated estimate.
 
 **What should an analyst deliver?** Supply both the conditional effects and the target-weighted result, define the intervention and horizon, describe identification assumptions, and show how the conclusion changes under relevant target populations. The complete program provides independently inspectable arithmetic for those distinctions. Its positive causal effects are built into the fixture; observational evidence would have to justify them.
+
+## Worked example: Two target populations, one set of stratum effects
+
+```python
+import numpy as np
+
+# Risk under treatment and control in two age strata of a source trial.
+risk_treated = np.array([0.30, 0.60])
+risk_control = np.array([0.20, 0.56])
+effect = risk_treated - risk_control
+
+targets = {
+    "clinic (70% young)": np.array([0.7, 0.3]),
+    "nursing home (10% young)": np.array([0.1, 0.9]),
+}
+for name, share in targets.items():
+    print(f"{name}: standardized risk difference {share @ effect:.3f}")
+
+# Observational allocation: the old, high-risk stratum is mostly treated.
+n_treated = np.array([100, 900])
+n_control = np.array([900, 100])
+crude = (n_treated @ risk_treated) / n_treated.sum() - (n_control @ risk_control) / n_control.sum()
+print("stratum effects:", effect.round(2))
+print(f"crude treated-minus-control difference: {crude:.3f}")
+```
+
+Observed output:
+
+```text
+clinic (70% young): standardized risk difference 0.082
+nursing home (10% young): standardized risk difference 0.046
+stratum effects: [0.1  0.04]
+crude treated-minus-control difference: 0.334
+```
+
+The same two stratum effects, 0.10 among the young and 0.04 among the old, produce different answers for different declared targets. The clinic, with 70 percent young patients, gets \(0.7(0.10)+0.3(0.04)=0.082\); the nursing home, with 10 percent young residents, gets \(0.1(0.10)+0.9(0.04)=0.046\). Neither number is wrong: each answers a question about a specific population, which is why the estimand must name its target before any averaging. The crude difference of 0.334 answers no causal question at all. It is eight times the old-stratum effect because 900 of the 1,000 treated people are old, with baseline risk 0.56, while 900 of the 1,000 controls are young, with baseline risk 0.20. Most of the gap is age, not treatment. If the allocation were reversed, with the young mostly treated, the crude contrast would compare low-risk treated people with high-risk controls and could fall below zero even though both stratum effects stay positive.
 
 ## Complete reproducible program
 

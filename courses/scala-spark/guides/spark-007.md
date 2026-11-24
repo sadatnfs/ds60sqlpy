@@ -78,7 +78,7 @@ Each generator binds a value only from a successful Right. The yield expression 
 
 Trim an ID token and return Right for nonempty text. Return Left(missing_id) for null, empty or whitespace-only tokens. Do not invent an identifier.
 
-**Expected result/shape:** " a1 " gives Right("a1"); null,"" and"  " each give Left("missing_id").
+**Expected result/shape:** `" a1 "` gives `Right("a1")`; `null`, `""` and `"  "` each give `Left("missing_id")`.
 
 **Verify:** Assert one normalized identity and all three missing representations without throwing.
 
@@ -108,7 +108,7 @@ Accept trimmed ASCII digits representing 0 through 1000000 as a Long. Return Lef
 
 Require exactly three pipe-separated fields and compose ID, status, amount validation in that order using a for comprehension. Return Left(malformed_record) for null or wrong field count. Preserve empty trailing fields for validation.
 
-**Expected result/shape:** a1|paid|100 becomes Right(Record(a1, paid,100)); a2|paid| becomes invalid_amount; an empty-ID malformed-status record reports missing_id first; two fields report malformed_record.
+**Expected result/shape:** `a1|paid|100` becomes `Right(Record(a1, paid, 100))`; `a2|paid|` becomes `invalid_amount`; an empty-ID malformed-status record reports missing_id first; two fields report malformed_record.
 
 **Verify:** Assert a valid record, trailing-empty rejection, first-error precedence and field-count failure.
 
@@ -116,11 +116,11 @@ Require exactly three pipe-separated fields and compose ID, status, amount valid
 
 ### Exercise 5: Retain a complete rejection ledger
 
-Parse every input line and return accepted records plus rejected(position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left.
+Parse every input line and return accepted records plus rejected (position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left.
 
 **Expected result/shape:** The six-line fixture has three accepted records and rejections at positions 3,4,5 with missing_id, invalid_amount, unknown_status. Accepted plus rejected equals six.
 
-**Verify:** Assert accepted IDs [a1, a2, a3], the exact rejected positions/reasons and count conservation.
+**Verify:** Assert accepted IDs `[a1, a2, a3]`, the exact rejected positions/reasons and count conservation.
 
 **Progressive hint:** Use zipWithIndex and pattern-match each Either inside a fold.
 
@@ -130,7 +130,7 @@ From already accepted records, return paid-event count and checked paid cents to
 
 **Expected result/shape:** The three accepted records yield paid count 2, total 100. A void record with malformed amount must have been rejected by parseRecord before this function can run.
 
-**Verify:** Assert the paid metrics and show that a4|void|bad produces Left(invalid_amount), not a silently skipped valid void.
+**Verify:** Assert the paid metrics and show that `a4|void|bad` produces `Left(invalid_amount)`, not a silently skipped valid void.
 
 **Progressive hint:** Filter accepted status paid, then fold both occurrence count and amount total.
 

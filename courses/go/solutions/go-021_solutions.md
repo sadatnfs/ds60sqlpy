@@ -23,6 +23,14 @@ check(err == nil && n == 3 && len(args) == 0, "flag")
 
 The synthetic argument slice tests the actual parser while remaining independent of the classroom process arguments.
 
+**Approach.** Run the edited slice through `parseArgs`. The flag set parses `-count=4` into `n`, finds no positional arguments and passes the range check, so it returns 4, an empty slice and nil.
+
+**Why it holds here.** Only `n == 3` changes: `err == nil` and `len(args) == 0` still hold, so the conjunction fails on the count and panics with `flag`.
+
+**A plausible wrong approach.** Writing the argument as one element `"-count 4"` because that is how it looks in a shell. No shell splits a synthetic slice, so the flag package reads the name `count 4` and returns `flag provided but not defined: -count 4`. The space form needs two elements, `"-count", "4"`.
+
+**Verify.** Print `n, args, err` and see `4 [] <nil>` before the panic. Restoring `-count=3` restores the success line.
+
 ## 2. Retain a default: diagnose an edited check
 
 A careless edit changed the check in worked example 2 so that it reads `check(err != nil && n == 1, "default")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
@@ -38,6 +46,14 @@ check(err == nil && n == 1, "default")
 
 A default is an intentional contract, not an accidental zero value. Changing it can alter existing workflows even when parsing code is unchanged.
 
+**Approach.** Call `parseArgs(nil)`. `IntVar` stores the default 1 in `n`, `Parse` succeeds with no arguments and 1 passes the range check, so the results are 1 and nil.
+
+**Why it holds here.** The edited `err != nil` is false for that same state, so the check panics with `default`. The parse and the count are unchanged; only the expectation about the error was inverted.
+
+**A plausible wrong approach.** Changing the `IntVar` default to 0 so that "unset" is visible. The domain check then rejects 0, and the bare command returns `positive count required`, so every existing invocation without `-count` breaks.
+
+**Verify.** Print `n, err` for `parseArgs(nil)` and see `1 <nil>`, then restore the original check and read the success line.
+
 ## 3. Reject an unknown option
 
 Parse -mystery=2.
@@ -50,6 +66,14 @@ check(err != nil, "unknown option")
 **Expected:** Parsing returns an error.
 
 Unknown-flag rejection catches misspellings. Ignoring them would make users believe a setting was applied when it was not.
+
+**Approach.** Parse `-mystery=2` with a flag set built using `flag.ContinueOnError` and output sent to `io.Discard`, so `Parse` returns an error instead of exiting or printing usage.
+
+**Why it holds here.** No flag named `mystery` is defined, so `Parse` returns `flag provided but not defined: -mystery` and `parseArgs` passes it through, making `err != nil` true.
+
+**A plausible wrong approach.** Building the set with `flag.ExitOnError`. On the unknown flag the package calls `os.Exit(2)`, so the program ends before `check` runs and nothing in the example can observe the error.
+
+**Verify.** Print `err` and see `flag provided but not defined: -mystery`. A defined flag such as `-count=2` returns nil.
 
 ## 4. Preserve positional arguments
 
@@ -64,6 +88,14 @@ check(err == nil && len(args) == 1 && args[0] == "input.csv", "positionals")
 
 Flags and positional arguments have distinct roles. Validate their count and interpretation before opening any file.
 
+**Approach.** Parse `-count=2` followed by `input.csv`. Flag parsing stops at the first argument that is not a flag, and `f.Args()` returns the rest.
+
+**Why it holds here.** `-count=2` sets `n`, then `input.csv` ends flag parsing, so `args` is `[input.csv]` and the count of 2 passes the range check.
+
+**A plausible wrong approach.** Putting the filename first: `[]string{"input.csv", "-count=2"}`. Parsing stops at `input.csv`, so `-count=2` stays in `args` as a second positional and `n` keeps the default 1. `len(args) == 1` fails and the check panics with `positionals`.
+
+**Verify.** Print `n, args` and see `2 [input.csv]`; the reversed order prints `1 [input.csv -count=2]`.
+
 ## 5. Reject a domain-invalid count
 
 Parse -count=-1 and perform range validation.
@@ -76,6 +108,14 @@ check(err != nil, "range")
 **Expected:** The operation returns a domain error.
 
 Successful integer parsing does not imply an acceptable concurrency, retry or item-count budget.
+
+**Approach.** Parse `-count=-1`. `IntVar` accepts any signed integer, so parsing succeeds, and the separate check `n < 1` rejects the value.
+
+**Why it holds here.** -1 is a well-formed `int`, so the flag package reports no error; only the domain check returns `positive count required`, which makes `err != nil` true.
+
+**A plausible wrong approach.** Switching to `flag.UintVar` so the parser rejects negatives. That does reject `-1`, but `-count=0` parses as a valid `uint` and slips through, even though zero items is outside the domain.
+
+**Verify.** Print `err` for `-count=-1` and for `-count=0` and see `positive count required` both times, while `-count=1` returns nil.
 
 ## 6. Transfer precedence
 
@@ -90,6 +130,14 @@ check(err == nil && n == 4, "precedence")
 
 In a larger program, document whether flags override environment or files. Avoid repeated environment reads deep inside business logic.
 
+**Approach.** Parse `-count=4`. The flag set started with the default 1, and the explicit flag overwrites it during `Parse`.
+
+**Why it holds here.** An explicit value is applied after the default, so `n` is 4 with no error. If the flag repeats, the last occurrence wins: `-count=4 -count=2` gives 2.
+
+**A plausible wrong approach.** Deciding whether the user set the flag by comparing `n` with the default 1. An explicit `-count=1` looks identical to no flag, so a lower-priority environment value would wrongly win. `f.Visit` reports only the flags actually set.
+
+**Verify.** Print `n` for `-count=4` and for `-count=4 -count=2` and see `4` and `2`.
+
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Write `resolveCount(args []string, env map[string]string) (int, error)` with precedence flag, then `env["COUNT"]`, then the default 1, using `f.Visit` to learn whether `-count` was set. Check no flag and no env gives 1, env 3 gives 3, env 3 with `-count=1` gives 1 and `-count=0` returns an error. Explain why comparing with the default would get the third case wrong.

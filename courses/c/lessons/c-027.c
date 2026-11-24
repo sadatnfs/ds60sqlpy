@@ -6,17 +6,22 @@ int main(void) {
      `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` to
      `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));` inside its
      CHECK. Before running, predict whether the CHECK still holds and explain
-     why; then restore it. Expected: The changed run stops with `Check failed`
-     at the CHECK on `strcmp(out, "abc") == 0`. Restoring the original line
-     brings back the worked observation: the output owns an equal string. */
+     why; then restore it. Expected: With `CHECK(copy_with_allocator("abc!",
+     &out, controlled_alloc));` the run stops with `Check failed` at the CHECK
+     on `strcmp(out, "abc") == 0`, because the "exercise successful allocation"
+     case no longer shows that the output owns an equal string. Restoring
+     `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` brings that
+     observation back. */
 
   /* Exercise 2: Inject allocation failure: debug a regression
      A regression changed `fail_allocation = true;` to `fail_allocation =
-     false;` in worked example 2. Run worked example 2 with that change, use the
-     failing CHECK to explain the defect and repair it without changing the
-     CHECK. Expected: Before the repair the run stops with `Check failed` at the
-     CHECK on `!copy_with_allocator("abc", &out, controlled_alloc)`; after it
-     the line reads `fail_allocation = true;` again and the copy fails and
+     false;` in worked example 2, the "inject allocation failure" case. Run the
+     example with that change, use the failing CHECK to explain why the copy
+     fails and output remains NULL no longer holds and repair it without
+     changing the CHECK. Expected: Before the repair the run stops with `Check
+     failed` at the CHECK on `!copy_with_allocator("abc", &out,
+     controlled_alloc)`. Once the line reads `fail_allocation = true;` again,
+     the "inject allocation failure" case again shows that the copy fails and
      output remains NULL. */
 
   /* Exercise 3: Preserve an existing output pointer

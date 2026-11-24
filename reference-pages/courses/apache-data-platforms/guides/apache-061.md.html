@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-061-multistage-queries-and-capacity">apache-061: Multistage queries and capacity<a class="heading-anchor" href="#apache-061-multistage-queries-and-capacity" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-060</code>, <code>apache-057</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Multistage engine:</strong> Pinot&#x27;s distributed query engine that supports joins and exchanges data between stages, beyond a single broker scatter and gather.</li>
+<li><strong>Data exchange:</strong> Moving intermediate rows between servers between query stages, which costs network and memory.</li>
+<li><strong>Join key semantics:</strong> The rule for which values match in a join. Integer 1, string 1 and null are not automatically the same business identity.</li>
+<li><strong>Response exceptions:</strong> Errors Pinot reports inside a query response, which a client must check instead of trusting an HTTP success alone.</li>
+</ul>
 <h3 id="a-distributed-analytical-query-still-has-a-resource-contract">A distributed analytical query still has a resource contract<a class="heading-anchor" href="#a-distributed-analytical-query-still-has-a-resource-contract" aria-label="Link to this section">#</a></h3>
 <p>Pinot&#x27;s multistage engine supports distributed execution patterns beyond a simple broker-to-segment aggregation, including supported joins. That additional capability introduces exchange, intermediate-state and scheduling costs. An interactive query can have a short desired latency while still requiring enough memory and network capacity to execute its chosen plan.</p>
 <p>A join requires compatible key semantics. Integer 1, string &quot;1&quot; and a null key are not automatically the same business identity. Duplicate dimension keys can multiply fact rows and inflate aggregates without producing a syntax error. Validate cardinality expectations before interpreting a successful join as a correct enrichment.</p>

@@ -14,6 +14,14 @@ Polars expressions describe a computation over columns. pl.col("units") is a req
 
 Start by writing the row grain and unit for every numeric column. Units are counts and price is whole currency units per item in this fixture, so their product is revenue per order. Summing that product answers an aggregate question without changing the meaning of the underlying rows. In a real dataset, discounts, returns and taxes would require a more explicit revenue definition.
 
+## Key terms
+
+- **DataFrame:** A table of named, equal-length columns, each stored as a typed Series.
+- **Series:** One named column of values that all share a single data type.
+- **Schema:** The ordered mapping from column names to data types that fixes what each column may hold.
+- **Expression:** A description of a column computation, such as `pl.col("units") * pl.col("price")`, that Polars evaluates inside a context like `select` or `with_columns`.
+- **Row grain:** What one row represents, such as one order line, which decides how sums and counts may be interpreted.
+
 ## Syntax and data contract
 
 The constructor pl.DataFrame receives a mapping from column names to equally sized Python sequences. The expression (pl.col("units") * pl.col("price")).alias("revenue") has three parts: two column selections, multiplication and a name for the result. select chooses the columns or reductions returned; with_columns retains existing columns. item() is appropriate only when a result contains exactly one cell. Inspect schema, shape and to_dicts() before making a claim about the analysis.

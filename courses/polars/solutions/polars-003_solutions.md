@@ -24,6 +24,12 @@ classified = raw.with_columns(
 assert classified["category"].to_list() == ["text", "blank", "missing", "text"]
 ```
 
+**Why it holds here:** A whitespace-only string is neither null nor parseable. Classifying it before any cast gives it its own blank category, separate from missing (id 3) and from text.
+
+**Plausible wrong approach:** Casting directly with strict=False turns the blank into null, which merges it with the genuinely missing row and loses the reason.
+
+**How to verify:** Run the answer code and assert category is ['text', 'blank', 'missing', 'text'].
+
 **Expected:** Your policy explicitly classifies it before numeric conversion.
 
 ## 2. Keep a rejection denominator
@@ -42,11 +48,23 @@ shares = parsed.select(
 assert shares.row(0) == (0.25, 0.25)
 ```
 
+**Why it holds here:** The rejection share uses all four original records as the denominator. One malformed token (bad) and one null each give 0.25.
+
+**Plausible wrong approach:** Dividing the one rejected row by only the three non-missing rows gives 1/3, which mixes two categories into the denominator.
+
+**How to verify:** Run the answer code and assert shares.row(0) == (0.25, 0.25).
+
 **Expected:** Malformed share is 1/4, separately from 1/4 missing.
 
 ## 3. Make rejection fail closed
 
 Check the quarantine height and raise a descriptive error. A successful query is not equivalent to an accepted data contract.
+
+**Why it holds here:** Fail closed means a parsing gap stops the pipeline. Here the rejected filter returns id 2, so a check on its height must raise.
+
+**Plausible wrong approach:** Letting strict=False finish and reporting success hides that one value was dropped.
+
+**How to verify:** Add a guard that raises ValueError listing rejected['id'].to_list() whenever rejected.height is above 0, and confirm the original fixture stops with id 2 named in the message.
 
 **Expected:** The original fixture raises a deliberate validation error.
 
@@ -54,17 +72,35 @@ Check the quarantine height and raise a descriptive error. A successful query is
 
 The permitted interval is [-128, 127]. Keep strict mode for a mandatory bound or retain null plus a rejection reason under a permissive policy.
 
+**Why it holds here:** Int8 holds -128 through 127. With strict=False, -129 and 128 become null, while -128 and 127 survive.
+
+**Plausible wrong approach:** Assuming the cast wraps around, as in some C code, would predict 128 becomes -128; Polars returns null instead.
+
+**How to verify:** Cast `pl.Series([-129, -128, 127, 128])` with `strict=False` and expect `[None, -128, 127, None]`.
+
 **Expected:** Only -128 and 127 are representable.
 
 ## 5. Avoid early float conversion
 
 Use Decimal("0.10") and a declared scale. This states the data representation; it does not infer a currency or a rounding policy.
 
+**Why it holds here:** Decimal('0.10') stores exactly two hundredths, so the sum is exactly 0.30, as example_two asserts.
+
+**Plausible wrong approach:** Adding floats 0.1 and 0.2 gives 0.30000000000000004, and Decimal(0.1) carries the long binary expansion of the float.
+
+**How to verify:** Build the Series from strings with scale 2 and assert sum == Decimal('0.30').
+
 **Expected:** The 0.10+0.20 result remains exactly 0.30.
 
 ## 6. Specify rounding
 
 Use a deliberate rounding operation at the business boundary, then validate range and scale. Test positive and negative tie cases, not only convenient non-ties.
+
+**Why it holds here:** A value like 0.125 must be rounded to two places before storage. The rule must say how ties go: half-even gives 0.12 and half-up gives 0.13.
+
+**Plausible wrong approach:** Letting storage truncate or round silently means the result depends on the engine.
+
+**How to verify:** Quantize Decimal('0.125') and Decimal('-0.125') to Decimal('0.01') in Python: ROUND_HALF_EVEN gives 0.12 and -0.12, ROUND_HALF_UP gives 0.13 and -0.13. Your test should pin one of those pairs.
 
 **Expected:** The rule names rounding mode and treatment of ties.
 

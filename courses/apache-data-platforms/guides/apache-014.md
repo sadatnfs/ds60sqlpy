@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-012`, `apache-004`, `rust-042`.
 
+## Key terms
+
+- **C Data Interface:** Arrow's in-process ABI for passing arrays between languages through C structures. A release callback tells the producer when the consumer no longer needs the buffers.
+- **IPC interoperability:** Exchanging Arrow data as IPC bytes between independent implementations, here Python Arrow 23 and Rust Arrow 60, which must agree on the schema and data.
+- **Arrow Flight:** An RPC framework over gRPC that streams Arrow record batches between a client and a server, with descriptors naming datasets and tickets authorizing one retrieval.
+- **Flight ticket:** An opaque token returned by get_flight_info that the client presents to do_get to stream the data. The workshop server rejects every ticket it did not issue.
+
 ## Interchange is a contract between independently owned processes
 
 Arrow describes typed columnar memory and related interchange protocols. It is

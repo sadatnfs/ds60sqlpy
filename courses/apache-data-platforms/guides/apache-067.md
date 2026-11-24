@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-066`, `apache-063`.
 
+## Key terms
+
+- **Hive ACID table:** A transactional managed table that uses write IDs, delta directories and compaction to support insert, update and delete.
+- **Write ID:** The identifier Hive assigns to each transactional write so readers can determine which deltas are visible.
+- **Iceberg storage handler:** The Hive 4 integration that lets Hive create and query Iceberg tables through Iceberg's snapshot commit protocol.
+- **Reader compatibility:** Whether a given engine can correctly read a table's transaction protocol, file layout and delete representation.
+
 ## A catalog does not choose a transaction protocol for every table
 
 Hive can describe tables with different storage and transaction mechanisms.
@@ -93,6 +100,35 @@ transactionally compatible?** No. The catalog identifies metadata while readers
 must implement the table's actual visibility and commit protocol. These cases
 compare the mechanisms and require a tested integration rather than equating a
 shared table name with shared semantics.
+
+## Worked examples
+
+### Declare an Iceberg table through Hive
+
+```sql
+CREATE EXTERNAL TABLE ds60.orders_iceberg (id INT, region STRING, amount INT)
+STORED BY ICEBERG
+LOCATION 'file:///warehouse/orders_iceberg';
+
+INSERT INTO ds60.orders_iceberg
+VALUES
+  (1, 'east', 4),
+  (2, 'west', 9),
+  (3, 'east', 7);
+```
+
+From the prepared iceberg.hql, STORED BY ICEBERG means commits go through Iceberg metadata files and a pointer swap, not through Hive ACID delta directories. The Hive metastore stores only the table name and the current metadata_location property. After the insert, a metadata JSON and a snapshot should appear under the table location; if only data files appear, the Iceberg handler was not active and the result is not an Iceberg table.
+
+### Confirm a second reader sees the same snapshot
+
+```python
+table = catalog.load_table("ds60.orders_iceberg")
+snapshot = table.current_snapshot()
+print(snapshot.snapshot_id, table.metadata_location)
+print(sorted(table.scan().to_arrow()["id"].to_pylist()))
+```
+
+This PyIceberg fragment assumes a catalog object already configured against the same Hive metastore. A compatible second reader should print the same metadata_location that Hive stored and the IDs [1, 2, 3]. Matching rows with a different metadata location means the reader used another catalog or a stale pointer. Treat this as a prepared extension until both readers have actually run against the owned table.
 
 ## Complete worked source
 

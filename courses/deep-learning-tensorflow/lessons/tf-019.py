@@ -4,13 +4,16 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Compute local differences
-# Apply kernel [[1, 0], [0, -1]] to the image 1..9 arranged 3x3.
-# Expected: all four outputs -4.
+# Exercise 1: Detect a horizontal difference
+# Keep the 1..9 ramp image but use the kernel `[[1, -1], [0, 0]]`, which compares each
+# pixel with its right neighbor. Predict the four VALID outputs before running it.
+# Expected: all four outputs -1.
 
-# Exercise 2: Rotate the kernel
-# Reverse both spatial axes and repeat the calculation.
-# Expected: all outputs+4.
+# Exercise 2: Predict SAME padding
+# Repeat the diagonal-kernel calculation with `padding='SAME'`. Predict the output shape
+# and the nine values, remembering that TensorFlow pads a 2x2 kernel with zeros on the
+# bottom and right.
+# Expected: shape (1, 3, 3, 1); values [[-4, -4, 3], [-4, -4, 6], [7, 8, 9]].
 
 # Exercise 3: Count output positions
 # Compare VALID stride 1 and stride 2.

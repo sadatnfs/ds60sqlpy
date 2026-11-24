@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-list-exact-version-inputs">Exercise 1: List exact version inputs<a class="heading-anchor" href="#exercise-1-list-exact-version-inputs" aria-label="Link to this section">#</a></h3>
 <p>The core skew policy is only one part of the environment. A reproducible rehearsal identifies the actual components and immutable artifacts so another host can understand what was tested and what remains outside scope.</p>
 <p><strong>Expected:</strong> A concrete pinned stack rather than a generic latest label.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record exact versions for API server, node image, kubelet, kubectl, controllers, CSI driver and CNI.</li>
+<li><strong>Why it is correct:</strong> Behavior differs across versions, and the skew policy says kubelet must not be newer than the API server and kubectl stays within one minor version.</li>
+<li><strong>Plausible wrong approach:</strong> Writing latest or the minor line only cannot reproduce the stack once a new patch ships.</li>
+<li><strong>How to verify:</strong> Every component has an exact version, and kubelet and kubectl fall inside the supported skew.</li>
+</ul>
 <h3 id="exercise-2-audit-api-usage">Exercise 2: Audit API usage<a class="heading-anchor" href="#exercise-2-audit-api-usage" aria-label="Link to this section">#</a></h3>
 <p>This inventory exposes removed APIs and feature fields before application testing. A simple textual version replacement can miss changed schemas or semantics, so validation needs the actual destination API contract.</p>
 <p><strong>Expected:</strong> Every used API/feature has a server acceptance row.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> List each apiVersion and kind from the manifests, then check each against the destination server.</li>
+<li><strong>Why it is correct:</strong> A server serves only the API versions it has enabled, so a removed beta version fails there even if it worked on the source.</li>
+<li><strong>Plausible wrong approach:</strong> Checking manifests against the source cluster proves nothing about the destination&#x27;s served versions.</li>
+<li><strong>How to verify:</strong> Each row is marked accepted or missing from the destination&#x27;s api-resources or dry run.</li>
+</ul>
 <h3 id="exercise-3-evaluate-the-incomplete-matrix">Exercise 3: Evaluate the incomplete matrix<a class="heading-anchor" href="#exercise-3-evaluate-the-incomplete-matrix" aria-label="Link to this section">#</a></h3>
 <p>The matrix prevents an early check from being inflated into overall readiness. A missing controller is explicit work for the host qualification process, not an excuse to invent its effects in a worksheet.</p>
 <p><strong>Expected:</strong> Destination not accepted; controller capability remains missing.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read destination B&#x27;s API row and controller row separately.</li>
+<li><strong>Why it is correct:</strong> Serving the API means objects are stored, but without the controller nothing reconciles them.</li>
+<li><strong>Plausible wrong approach:</strong> Accepting B because the API dry run passed would deploy objects that never act.</li>
+<li><strong>How to verify:</strong> B is not accepted, and the controller capability is listed as missing.</li>
+</ul>
 <h3 id="exercise-4-compare-synthetic-data">Exercise 4: Compare synthetic data<a class="heading-anchor" href="#exercise-4-compare-synthetic-data" aria-label="Link to this section">#</a></h3>
 <p>The application can run with empty or wrong storage. The marker is a small but concrete data contract that catches this class of migration defect without pretending to represent a full database migration.</p>
 <p><strong>Expected:</strong> Mismatch blocks promotion even when /version succeeds.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare the destination marker hash with the independently captured source hash.</li>
+<li><strong>Why it is correct:</strong> The marker hash checks that data was copied correctly, which a working <code>/version</code> response does not show.</li>
+<li><strong>Plausible wrong approach:</strong> Accepting promotion because <code>/version</code> responds shows only that the binary runs, not that the data arrived intact.</li>
+<li><strong>How to verify:</strong> A mismatch is recorded, and promotion is blocked.</li>
+</ul>
 <h3 id="exercise-5-design-a-rollback-boundary">Exercise 5: Design a rollback boundary<a class="heading-anchor" href="#exercise-5-design-a-rollback-boundary" aria-label="Link to this section">#</a></h3>
 <p>The controlled example has a fixed marker, so rollback reasoning is simple. A real write-producing workload requires a plan for divergence and data compatibility, which cannot be solved by keeping an old cluster name alone.</p>
 <p><strong>Expected:</strong> Source retained through the stated window; mutable-data rollback is outside this immutable fixture.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> State the retention window for the source and which destination writes a reversal would discard.</li>
+<li><strong>Why it is correct:</strong> Once the destination accepts writes, switching back loses them unless they are copied, and this immutable fixture has none.</li>
+<li><strong>Plausible wrong approach:</strong> Releasing the source immediately after cutover removes the only fallback during the window.</li>
+<li><strong>How to verify:</strong> The answer names the window and the writes a rollback would lose.</li>
+</ul>
 <h3 id="exercise-6-write-the-qualification-conclusion">Exercise 6: Write the qualification conclusion<a class="heading-anchor" href="#exercise-6-write-the-qualification-conclusion" aria-label="Link to this section">#</a></h3>
 <p>The conclusion should be useful without exaggeration: it can establish specific API and application compatibility, expose missing capabilities and preserve a repeatable packet, while leaving broader production upgrade design to its own procedure.</p>
 <p><strong>Expected:</strong> Only the exact tested stack and synthetic workload gates are claimed.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Name the tested versions and workload gates and list untested plugins and failure modes.</li>
+<li><strong>Why it is correct:</strong> A rehearsal on a fresh cluster says nothing about upgrading nodes in place or surviving control plane failure.</li>
+<li><strong>Plausible wrong approach:</strong> Calling the platform upgrade ready generalizes from one replacement rehearsal to every upgrade path.</li>
+<li><strong>How to verify:</strong> The conclusion names exact versions and lists what was not tested.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>The example matrix is a method for organizing evidence, not a certification for arbitrary Kubernetes releases. A passed A/B marker test says nothing about untested plugins, workload APIs or production failure domains.</p>
 <p>Do not treat replacement as a universal substitute for an upgrade procedure. Production systems require their own maintenance order, availability, storage, rollback and support decisions. Here the deliverable is a concrete compatibility packet for a bounded synthetic workload and exact host-qualified versions.</p></article>

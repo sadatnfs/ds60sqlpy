@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "A minimal report for a dropped dimension",
+      "body": "A report a reviewer can act on without access to the original data:\n\n```text\nSummary:  first_row() returns a vector; callers expect a 1 by 3 matrix\nInput:    m <- matrix(1:6, nrow = 2)        dim(m) is 2 3\nCall:     first_row(m)                      body is m[1, ]\nObserved: dim(first_row(m)) is NULL; values 1 3 5\nExpected: dim(first_row(m)) is 1 3, as the function's contract states\nFix:      m[1, , drop = FALSE]\nSession:  output of getRversion(); no packages attached\n```\n\nEach line answers a question the reviewer would otherwise have to ask. The input is one line of synthetic data instead of the private table where the failure was noticed, yet it reproduces the same problem, because the dimension is dropped whenever a single row is selected, whatever the values are. Observed and expected are written as shapes, so checking the fix means printing `dim()` and comparing two short results. The session line costs one line and rules out a version question before anyone asks it.\n\nA report that says \"the summary is wrong since my change\" and attaches the full data set gives none of this. The reviewer has to rebuild the environment, guess which call misbehaved and decide what correct output would have looked like."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Derive the answer by hand first: the numerator is 10 times 1 plus 20 times 3, which is 70, and the denominator is the total weight 4, so the expected value is 17.5.",
+      "why": "A weight of 3 on 20 means 20 counts three times, so the result equals the plain mean of 10, 20, 20 and 20. Every intermediate value is an integer and 17.5 is exact in binary, so exact equality is safe for this fixture.",
+      "wrong": "Dividing by the number of values, `sum(x * w) / length(x)`. That returns 35, which is larger than both inputs and cannot be a weighted average of them.",
+      "verify": "`weighted_average(c(10, 20), c(1, 3))` returns 17.5, matching the hand-derived 70 divided by 4."
+    },
+    {
+      "approach": "Call the function with the weights 5 and 15 and compare the result with the unscaled call.",
+      "why": "Multiplying every weight by five multiplies the numerator to 350 and the denominator to 20, and the ratio is still 17.5. The test checks a property of weighted means rather than restating the formula, so it catches implementations that merely look right.",
+      "wrong": "Testing only the original weights. The division-by-count bug returns 35 for weights 1 and 3 but 175 for 5 and 15; the scaling test exposes it because a correct result cannot change with scale.",
+      "verify": "`weighted_average(c(10, 20), c(5, 15))` returns 17.5, the same value as the unscaled call."
+    },
+    {
+      "approach": "Call the function through a narrow `tryCatch(..., error = function(e) TRUE)` helper for weights `1` and for weights `c(0, 0)`, and require TRUE for both.",
+      "why": "These break different parts of the contract. A single weight would otherwise be recycled across both values, and two zero weights would divide 0 by 0, so each needs its own stopifnot condition and its own test.",
+      "wrong": "Assuming R stops on its own. Without the checks the length mismatch silently returns 30, because the weight 1 is reused for 20, and the zero weights return NaN instead of an error.",
+      "verify": "`rejected(c(10, 20), 1)` and `rejected(c(10, 20), c(0, 0))` both return TRUE."
+    },
+    {
+      "approach": "Replace the copied formula in the test with hand-derived constants and with invariants whose answers are known without running the function.",
+      "why": "If the function divided by `length(w)` and the test computed its expected value with the same line, both sides would return 35 and the test would pass. 17.5 comes from arithmetic done separately, and the special cases below have obvious answers.",
+      "wrong": "Writing `expected <- sum(x * w) / length(w)` in the test. Any mistake in the function is copied into the expectation, so the test can never fail for that mistake.",
+      "verify": "`weighted_average(c(10, 20), c(0, 1))` returns 20, and `weighted_average(c(10, 20), c(1, 1))` returns 15, the plain mean."
+    },
+    {
+      "approach": "Call `set.seed(17)` immediately before each `runif(4)` and compare the two vectors with `identical()`.",
+      "why": "Resetting the seed puts the generator back in the same state, so both draws read the same four numbers in this R version with this generator. The range check is a separate property that holds for any seed.",
+      "wrong": "Setting the seed once and then drawing twice. The second call continues the stream, so the vectors differ. Comparing across R versions can also fail: R 3.6.0 changed how sample() uses the stream.",
+      "verify": "`identical(first, second)` returns TRUE, and `RNGkind()` shows the generator names to record with the result."
+    },
+    {
+      "approach": "Write the report with a synthetic input, the exact call, the observed shape, the expected shape, the fix and the R version, as in the guide section.",
+      "why": "The dimension is dropped whenever one row is selected, so a 2 by 3 matrix built from 1:6 reproduces the failure without the private data. Shapes give the reviewer a check they can run in seconds.",
+      "wrong": "Reporting that the summary broke and attaching the full data. The reviewer cannot share or run it, and nothing says which call changed the shape.",
+      "verify": "`dim(m[1, ])` returns NULL, while `dim(m[1, , drop = FALSE])` returns 1 3 in a fresh session."
+    }
+  ]
+}

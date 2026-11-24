@@ -22,11 +22,25 @@ The Pod boundary determines the loopback scope. This is why a proxy sidecar can 
 
 **Expected:** The sidecar shares the app network namespace.
 
+**Solution reasoning**
+
+- **Approach:** Note that containers in one Pod share a single network namespace and therefore one loopback interface.
+- **Why it is correct:** The sidecar's request to localhost reaches the app's listener because both run inside the same Pod network namespace.
+- **Plausible wrong approach:** Assuming each container has its own loopback would predict the sidecar cannot reach a loopback-only app, which is wrong.
+- **How to verify:** The prediction says the sidecar reaches the app over localhost.
+
 ## Exercise 2: Predict different-Pod localhost access.
 
 Use the target Pod or Service address for inter-Pod traffic. Copying a same-Pod URL changes its meaning.
 
 **Expected:** The client reaches its own Pod namespace.
+
+**Solution reasoning**
+
+- **Approach:** Note that the client Pod has its own network namespace and therefore its own loopback.
+- **Why it is correct:** localhost in the client Pod refers to that Pod, so a request there never leaves it to reach the target.
+- **Plausible wrong approach:** Copying a same-Pod localhost URL into another Pod's config changes its meaning silently.
+- **How to verify:** The prediction says the client reaches its own Pod, and the fix names the target Pod or Service address.
 
 ## Exercise 3: Draw a sidecar and app port allocation.
 
@@ -34,11 +48,25 @@ Specify address and port for every listener so a collision is visible before run
 
 **Expected:** Distinct listeners share one Pod port space.
 
+**Solution reasoning**
+
+- **Approach:** List each container's listener with address and port and check for duplicates in the shared space.
+- **Why it is correct:** All containers share one port space, so two listeners must differ in port or bind address.
+- **Plausible wrong approach:** Assigning the same port per container because each has its own image ignores the shared namespace.
+- **How to verify:** Each listener has a distinct address and port pair.
+
 ## Exercise 4: Diagnose two containers binding 0.0.0.0:8080.
 
 The container boundary does not create a second network namespace inside the Pod. Assign distinct listener roles.
 
 **Expected:** They compete for the same socket within one Pod namespace.
+
+**Solution reasoning**
+
+- **Approach:** Identify that both containers try to bind the same socket in one network namespace.
+- **Why it is correct:** Only one process can bind 0.0.0.0:8080 there, so the second fails with an address in use error.
+- **Plausible wrong approach:** Expecting each container to get its own 8080 assumes a separate network namespace per container.
+- **How to verify:** The answer names the shared socket conflict and assigns distinct ports.
 
 ## Exercise 5: Explain containerPort versus a real listener.
 
@@ -46,8 +74,22 @@ A correct manifest can still run a program listening on another port. Observe th
 
 **Expected:** One is declared metadata; the other is process behavior.
 
+**Solution reasoning**
+
+- **Approach:** Contrast the containerPort field in the spec with the port the process actually opens.
+- **Why it is correct:** containerPort is declarative metadata and does not open or restrict any socket, so the process can listen elsewhere.
+- **Plausible wrong approach:** Trusting containerPort to prove the app listens on 8080 skips observing the process.
+- **How to verify:** The answer labels one as metadata and the other as observed process behavior.
+
 ## Exercise 6: Defend whether a helper belongs in a sidecar or separate Deployment.
 
 Co-location is useful when tight coupling is intended. Independent scaling or failure isolation may favor a separate workload.
 
 **Expected:** Consider shared lifecycle, scaling, networking and failure requirements.
+
+**Solution reasoning**
+
+- **Approach:** Weigh lifecycle, scaling, networking and failure isolation for the helper.
+- **Why it is correct:** A sidecar shares the Pod's lifecycle and network, which suits a tightly coupled proxy but prevents scaling it independently.
+- **Plausible wrong approach:** Putting every helper in a sidecar to save Services couples their failures and replica counts to the app.
+- **How to verify:** The decision cites at least lifecycle, scaling, networking and failure as factors.

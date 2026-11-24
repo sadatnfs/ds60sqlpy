@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Compare a Thrust or CUB primitive against a handwritten kernel and justify the library or custom choice.
+
 Work through *CCCL, Thrust and CUB before writing everything by hand* with the concrete cases below. Finish with this evidence:
 equivalent semantics, stated temporary-memory needs and a justified library/custom decision. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 CUDA Core Compute Libraries bring maintained building blocks such as Thrust algorithms, CUB primitives and CUDA-oriented standard-library facilities. Their abstractions do not remove ownership, stream or temporary-storage obligations. Prefer a tested library primitive when it matches semantics, and keep a handwritten version as a learning baseline or for a demonstrated special requirement. Some primitive interfaces separate workspace-size queries from execution; read the pinned interface rather than guessing. Iterator adapters can avoid materializing intermediate arrays, but they must preserve valid lifetimes and access patterns.
+
+### Key terms
+
+- **Thrust:** A C++ template library of parallel algorithms, such as sort and reduce, over host and device containers.
+- **CUB:** A CUDA library of block-level, warp-level and device-wide primitives with explicit temporary storage.
+- **Temporary storage query:** A first CUB call with a null workspace pointer that returns the number of bytes the algorithm needs.
+- **Execution policy:** An argument such as `thrust::cuda::par.on(stream)` that selects where and on which stream a Thrust algorithm runs.
 
 ## How to run and study this lesson
 

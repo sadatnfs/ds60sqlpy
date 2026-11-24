@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Across hosts, the network joins GPU compute and storage as a first-class resource. A rendezvous establishes participants; collectives require compatible ordering and membership. Data parallelism replicates parameters, tensor parallelism partitions operations, pipeline parallelism partitions layers, and state sharding distributes selected model or optimizer state. Their communication patterns differ.</p>
 <p>Stragglers delay synchronized steps. Worker failure requires a coordinated stop or a deliberately implemented recovery protocol; independently retrying one rank can hang the rest. Checkpoints need a consistent global boundary and data-position contract. This lesson uses diagrams and synthetic timelines by default. Actual multi-host work requires explicitly owned hosts, bounded access, suitable networking and separate PyTorch/TensorFlow qualification. Nothing in the browser creates a cluster.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Rendezvous:</strong> The startup step in which processes discover each other and agree on ranks and world size.</li>
+<li><strong>Tensor parallelism:</strong> Splitting individual layer weights across devices, which requires communication inside each layer.</li>
+<li><strong>Pipeline parallelism:</strong> Placing consecutive layer groups on different devices and streaming microbatches through them.</li>
+<li><strong>State sharding:</strong> Partitioning parameters, gradients or optimizer state across ranks to reduce per-device memory.</li>
+<li><strong>Communication budget:</strong> The time and bandwidth available for collectives relative to compute in each step.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Three ranks taking 10,12 and 30 ms before a barrier yield at least 30 ms compute-phase latency, even though their average is 17.3 ms.</p>
@@ -214,20 +222,44 @@ consistent <span class="syntax-operator">=</span> <span class="syntax-builtin">l
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> consistent
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU distributed trace: barrier</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>rank_ms<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ms; checkpoint consistent</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> consistent<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Barrier 30 ms; mixed-step checkpoint rejected.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>rank_ms</code></td>
+<td><code>[10, 12, 30]</code></td>
+</tr>
+<tr>
+<td><code>steps</code></td>
+<td><code>{&#x27;rank0&#x27;: 10, &#x27;rank1&#x27;: 11}</code></td>
+</tr>
+<tr>
+<td><code>consistent</code></td>
+<td><code>False</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-barrier-time">Exercise 1: Compute barrier time<a class="heading-anchor" href="#exercise-1-compute-barrier-time" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute barrier time</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the average rank time predicts 17.3 ms and hides 13 ms of idle time per step, which makes adding ranks look more efficient than it is.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-compare-parallelism-types">Exercise 2: Compare parallelism types<a class="heading-anchor" href="#exercise-2-compare-parallelism-types" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>compare parallelism types</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using data parallelism for a model that does not fit on one device fails immediately, because each replica needs all parameters, gradients and optimizer state.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-diagnose-a-missing-rank">Exercise 3: Diagnose a missing rank<a class="heading-anchor" href="#exercise-3-diagnose-a-missing-rank" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>diagnose a missing rank</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Restarting only the missing rank while the others wait in a collective fails, because the new process does not join the existing communicator state.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-define-checkpoint-consistency">Exercise 4: Define checkpoint consistency<a class="heading-anchor" href="#exercise-4-define-checkpoint-consistency" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>define checkpoint consistency</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Accepting each rank&#x27;s latest file independently produces mixed-step checkpoints whenever a failure occurs during saving.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-budget-communication">Exercise 5: Budget communication<a class="heading-anchor" href="#exercise-5-budget-communication" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>budget communication</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Estimating communication from the parameter count without element size or frequency misses that float32 gradients are four bytes and some collectives run several times per step.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-owned-host-cleanup">Exercise 6: Design owned-host cleanup<a class="heading-anchor" href="#exercise-6-design-owned-host-cleanup" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design owned-host cleanup</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Killing every GPU process on a host stops other users&#x27; jobs, while deleting the output directory loses valid checkpoints.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

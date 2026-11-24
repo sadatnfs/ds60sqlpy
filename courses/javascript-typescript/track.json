@@ -227,7 +227,7 @@
       ],
       "outcome": "Predict Promise and microtask ordering and combine Promises with all, allSettled and race correctly.",
       "lab": "Resolve the second deferred Promise first, then the first.",
-      "verification": "result remains first,second."
+      "verification": "result remains `['first', 'second']`."
     },
     {
       "id": "js-013",
@@ -247,7 +247,7 @@
       ],
       "outcome": "Cancel async work cooperatively with AbortSignal and release timers and listeners exactly once, including with using.",
       "lab": "Run the custom operation without aborting, then abort its signal after completion.",
-      "verification": "value 7; started,completed,cleaned exactly once."
+      "verification": "value 7; trace `started`, `completed`, `cleaned`, with cleanup exactly once."
     },
     {
       "id": "js-014",

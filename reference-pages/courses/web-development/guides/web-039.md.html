@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>An exception interrupts the ordinary flow and can be handled by a matching catch block. It is useful when a function cannot fulfill its contract. A catch block should either recover meaningfully, translate the error into an appropriate boundary response or rethrow it. Catching every failure and returning a normal-looking value can corrupt downstream reasoning.</p>
 <p>PHP has different error categories, and not every warning automatically becomes an exception. Runtime configuration and library behavior matter. A production error boundary should avoid exposing stack traces, secrets or internal paths to visitors while retaining an appropriate diagnostic record for maintainers. The local classroom output is a teaching surface, not a production logging policy.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Exception:</strong> An object thrown to signal an error, which unwinds the call stack until a matching <code>catch</code> handles it.</li>
+<li><strong>Throwable:</strong> The interface implemented by both <code>Exception</code> and <code>Error</code>, so catching it handles any thrown object.</li>
+<li><strong>Finally block:</strong> Code after <code>try</code> and <code>catch</code> that runs whether or not an exception was thrown, used for cleanup.</li>
+<li><strong>Error boundary:</strong> The one place, usually near the entry point, that catches unexpected failures, records them and returns a safe message.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Catch specific exceptions near an operation when a specific recovery exists. Use finally for cleanup that should happen whether the operation succeeds or fails. Keep validation errors distinct from unexpected internal failures. An invalid user field can produce a clear correction; an unavailable database may require a generic retry message and internal diagnosis.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -219,6 +226,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 catch (InvalidArgumentException $error) { echo $error-&gt;getMessage(); }
 finally { echo &quot;\nAttempt finished\n&quot;; }</code></pre>
 <p><strong>Expected observation:</strong> The useful error is shown and the final step still runs.</p>
+<h3 id="contrast-case-a-catch-all-that-invents-a-zero">Contrast case: a catch-all that invents a zero<a class="heading-anchor" href="#contrast-case-a-catch-all-that-invents-a-zero" aria-label="Link to this section">#</a></h3>
+<p>This wrapper was added so the summary page never shows an error. Feed it a valid 0, the text abc and a parser bug.</p>
+<pre class="highlighted-code"><code class="language-php">function minutesOrZero(string $text): int {
+  try {
+    return parseMinutes($text);
+  } catch (Throwable) {
+    return 0;
+  }
+}
+
+echo minutesOrZero(&#x27;0&#x27;), &quot;\n&quot;;
+echo minutesOrZero(&#x27;abc&#x27;), &quot;\n&quot;;</code></pre>
+<p>Both calls print 0. The first is a real value, the second is a validation failure, and a typo or a TypeError inside <code>parseMinutes</code> would also print 0. Because <code>Throwable</code> catches errors as well as exceptions, even a programming mistake becomes a normal looking duration, and totals quietly undercount. Catching <code>InvalidArgumentException</code> only, and returning a result that carries the error message, keeps 0 meaningful and lets unexpected errors still stop the run where they can be diagnosed.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-trace-the-statements-executed-after-requirepositive-0">Exercise 1: Trace the statements executed after requirePositive(0).<a class="heading-anchor" href="#exercise-1-trace-the-statements-executed-after-requirepositive-0" aria-label="Link to this section">#</a></h4>

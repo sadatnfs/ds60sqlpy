@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Capture actual finite streaming progress",
       "input_contract": "Run the supplied three-occurrence stream with ID deduplication and return a bounded observation record.",
-      "expected": "Input count 3, state rows 2 and exact committed bag 1:100,2:200.",
+      "expected": "Input count 3, state rows 2 and exact committed bag 1:100, 2:200.",
       "verification": "Join the progress record with actual readback and inactive-query evidence."
     },
     {

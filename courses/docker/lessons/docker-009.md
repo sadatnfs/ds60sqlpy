@@ -10,7 +10,7 @@ My evidence:
 
 My explanation and remaining limitation:
 
-## Exercise 2: Predict whether localhost:18080 inside app reaches the host browser endpoint.
+## Exercise 2: Predict whether `localhost:18080` inside app reaches the host browser endpoint.
 
 My prediction:
 

@@ -14,6 +14,13 @@ Change one mechanism at a time and keep an unchanged library baseline. Resource 
 
 
 
+### Key terms
+
+- **Arithmetic intensity:** Floating-point operations performed per byte of memory traffic.
+- **Bandwidth-limited kernel:** A kernel whose time is set by memory traffic because its arithmetic intensity is below the device's balance point.
+- **Compute-limited kernel:** A kernel whose time is set by arithmetic throughput because its arithmetic intensity is above the balance point.
+- **Controlled change:** Changing one variable at a time so a measured difference can be attributed to it.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,33 +46,55 @@ print("CPU roofline inputs:", intensity, "operations/byte; removable traffic", s
 
 **Expected observation:** Intensity 0.5 and hypothetical 8192 bytes removable traffic.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `operations` | `4096` |
+| `bytes_moved` | `8192` |
+| `intensity` | `0.5` |
+| `intermediate` | `4096` |
+| `saved` | `8192` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Calculate arithmetic intensity
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **calculate arithmetic intensity** in the examples above.
+**Trap to avoid:** Dividing bytes by operations gives 2 and inverts the conclusion, suggesting the kernel is compute-heavy.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Count eliminated bytes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **count eliminated bytes** in the examples above.
+**Trap to avoid:** Counting only the avoided write gives 4096 bytes and underestimates the saving by half.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Name a profiler counter
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **name a profiler counter** in the examples above.
+**Trap to avoid:** Using only total kernel time cannot separate fewer bytes from other effects. Time can also change because of clock variation or a different compiled instruction mix, so a timing-only comparison leaves the mechanism unknown.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Design one controlled change
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **design one controlled change** in the examples above.
+**Trap to avoid:** Applying fusion and a new block size together leaves the source of a speedup ambiguous. If one change helps and the other hurts, the combined result may even show no difference and hide both effects.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Test a boundary shape
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **test a boundary shape** in the examples above.
+**Trap to avoid:** Testing only 1024 elements misses an off-by-one bounds check that writes past the end on 1023.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain a failed optimization
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **explain a failed optimization** in the examples above.
+**Trap to avoid:** Reporting the fused version as an improvement because bytes fell ignores the measured timing. The bytes counter confirms the mechanism worked, but the goal was throughput, and that goal was not met for this shape.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

@@ -1,6 +1,6 @@
 # swift-048: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-048_solution.swift](swift-048_solution.swift). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-048_solution.swift](swift-048_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -14,37 +14,100 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Trace one user action from view through model to domain state.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The report checks state and identity rather than only a formatted label. One of two uniquely identified items is complete.
+**Written answer.** In JourneyApp, tapping Save changes in ItemEditor calls store.update(id:title:completed:). PlanStore copies the plan into a candidate and calls StudyPlan.update, which finds the item by id and validates the new title. commit then writes the encoded candidate atomically and only afterward assigns plan, so @Observable publishes the change and PlanView redraws the row and the progress count.
 
 ### Task 2: Guided modification
 
 Add a derived progress summary without duplicating stored completion counts.
 
-No separate reference answer has been written for this task. Start from Example B: These are the core semantics needed by undo, navigation and persistence. The update retains identity and the prior snapshot.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+let items = [
+  CapstoneItem(id: "a", complete: true),
+  CapstoneItem(id: "b", complete: false),
+  CapstoneItem(id: "c", complete: true),
+]
+var progress: String { "\(items.filter(\.complete).count)/\(items.count) complete" }
+precondition(progress == "2/3 complete")
+```
+
+**Observe:** Two of three items are complete, so the summary reads 2/3 complete.
+
+The count is computed from the items each time, so there is no second stored number that could drift out of sync after an edit.
 
 ### Task 3: Independent construction
 
 Build and test JourneyCore, then run the complete JourneyApp on a prepared Apple destination.
 
-No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Offline-first** and the lesson notes.
+**Written answer.** The JourneyCore half was run: on swift:6.3.3-noble, swift build ended with Build complete!, swift test reported Executed 4 tests, with 0 failures, and swift run journey-demo printed JourneyCore: 1/2 complete; round trip passed. Running the full JourneyApp needs a prepared Apple destination and was not done for this reference; follow its README and record the destination you actually used.
 
 ### Task 4: Diagnose a defect
 
 Introduce and repair a stale-binding, duplicate-identity or failed-save defect.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A passing portable reference does not qualify simulator interaction or app signing. Preserve user data when testing failure recovery. Keep scope and evidence honest when adding new frameworks or deployment targets.
+**Reference answer.** It runs as the `Task 4` block of the reference program.
+
+```swift
+enum CapstoneError: Error { case duplicate }
+func buggyAdd(_ item: CapstoneItem, to items: [CapstoneItem]) -> [CapstoneItem] { items + [item] }
+func add(_ item: CapstoneItem, to items: [CapstoneItem]) throws -> [CapstoneItem] {
+  guard !items.contains(where: { $0.id == item.id }) else { throw CapstoneError.duplicate }
+  return items + [item]
+}
+let start = [CapstoneItem(id: "a", complete: false)]
+let broken = buggyAdd(CapstoneItem(id: "a", complete: true), to: start)
+precondition(Set(broken.map(\.id)).count != broken.count)
+precondition((try? add(CapstoneItem(id: "a", complete: true), to: start)) == nil)
+```
+
+**Observe:** The buggy add lets two items share id a, and the repaired add refuses the duplicate.
+
+Duplicate identity breaks lookup, navigation and saving, because one id now names two items. The repair checks identity before admitting a value, as StudyPlan.validate does.
 
 ### Task 5: Boundary evidence
 
 Verify empty state, long titles, duplicate IDs, malformed storage and save/reload.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Produce a stable completion summary) and Example B (Preserve identity across a value update).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+struct StoredItem: Codable, Equatable {
+  let id: String
+  let title: String
+}
+func validated(_ items: [StoredItem]) -> Bool {
+  Set(items.map(\.id)).count == items.count && items.allSatisfy { !$0.title.isEmpty }
+}
+precondition(validated([]))
+let long = StoredItem(id: "l", title: String(repeating: "word ", count: 200))
+precondition(validated([long]))
+precondition(!validated([StoredItem(id: "x", title: "A"), StoredItem(id: "x", title: "B")]))
+precondition((try? JSONDecoder().decode([StoredItem].self, from: Data("{".utf8))) == nil)
+let saved = try JSONEncoder().encode([long])
+let reloaded = try JSONDecoder().decode([StoredItem].self, from: saved)
+precondition(reloaded == [long])
+```
+
+**Observe:** Empty and long-title plans are valid, duplicate ids fail, malformed storage does not decode, and a save then reload returns the same item.
+
+These portable checks cover the data rules. How long titles wrap and how the app reports malformed storage still have to be checked in JourneyApp itself.
 
 ### Task 6: Transfer and justify
 
 Deliver a project README with architecture, actual platform evidence, accessibility observations, recovery policy and one independently implemented extension.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Offline-first**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build and test JourneyCore, then run the complete JourneyApp on a prepared Apple destination) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** `CapstoneItem` is a struct with a constant `id` and a mutable `complete` flag. Example A counts completed items and checks that ids are unique by comparing a `Set` of ids with the array count. Example B copies an item, marks the copy complete and checks that the id is kept and the original is unchanged. The capstone builds the full JourneyApp around these rules.
+
+**Why it is correct.** In Example A only item a is complete, so `filter(\.complete).count` is 1. The ids "a" and "b" are distinct, so the set has two elements, equal to the array count; a duplicate would make the set smaller. In Example B `var changed = original` copies the struct, so setting `changed.complete` leaves `original.complete` false while both share id "a". Those two facts support undo, navigation by id and save and reload.
+
+**A plausible wrong approach.** Storing a separate `completedCount` and incrementing it in the button action duplicates state: after a reload or an undo the stored count and the items can disagree. Task 2 asks for a derived summary instead. Allowing two items with id "a" would let a deep link or save open or overwrite the wrong one, which is why the uniqueness check is in Example A.
+
+**How to verify.** Duplicate id "a" in Example A and confirm the set check fails. For tasks 3 and 5, test JourneyCore with `swift test`, then run JourneyApp on an Apple destination with an empty list, a long title, a corrupted save file and a save and relaunch, and record what happened in each case in the project README.
 
 ## Mechanism and diagnostic reasoning
 

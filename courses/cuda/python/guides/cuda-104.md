@@ -14,6 +14,13 @@ Retain source, environment, data recipe, checkpoint and rollback instructions. R
 
 
 
+### Key terms
+
+- **Explicit constraint:** A stated limit on correctness, quality, latency, memory, cost or maintainability that a decision must respect.
+- **Bottleneck hypothesis:** A testable claim about which stage limits performance, stated before code changes.
+- **Rollback instructions:** A recorded way to return to the last known good configuration if a change fails.
+- **Acceptance matrix:** A table showing which claims have live evidence and which are still hypotheses.
+
 ## Worked examples
 
 ### Worked example 1
@@ -43,6 +50,12 @@ print("CPU decision fixture:", valid)
 
 **Expected observation:** Only candidate A satisfies all three constraints.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `valid` | `['A']` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -61,27 +74,39 @@ Choose either lane first, then compare the other using identical mathematical in
 
 ### Exercise 1: Write three constraints
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **write three constraints** in the examples above.
+**Trap to avoid:** Writing a single goal of maximizing speed ignores memory and quality, so the fastest candidate wins even when it cannot run on the device or produces worse answers.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Filter infeasible candidates
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **filter infeasible candidates** in the examples above.
+**Trap to avoid:** Ranking all candidates by latency first and picking B, then trying to make it fit later, wastes effort and treats a hard constraint as a preference.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Choose a bottleneck hypothesis
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **choose a bottleneck hypothesis** in the examples above.
+**Trap to avoid:** Making several optimizations at once without a hypothesis means any improvement cannot be attributed to a cause, and regressions get hidden by gains elsewhere.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Preserve rollback
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **preserve rollback** in the examples above.
+**Trap to avoid:** Replacing the baseline code in place leaves no way to reproduce earlier results or revert quickly.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design failure tests
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design failure tests** in the examples above.
+**Trap to avoid:** Testing only valid inputs leaves error paths untested, and those paths are where GPU services typically fail in production.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: State evidence gaps
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **state evidence gaps** in the examples above.
+**Trap to avoid:** Presenting fixture numbers such as 18 ms as measured performance claims evidence that does not exist.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

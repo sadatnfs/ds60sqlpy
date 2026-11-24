@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the first row of matrix(1:6, nrow=2).</p>
 <p>The first row is 1,3,5.</p>
+<p><strong>Approach:</strong> Build the matrix with the default fill and read its first row with <code>m[1, ]</code>.</p>
+<p><strong>Why it holds here:</strong> R fills down columns: the first column takes 1 and 2, the second 3 and 4, the third 5 and 6. The first row is therefore 1, 3, 5.</p>
+<p><strong>Tempting mistake:</strong> Reading the input order 1, 2, 3 as the first row, which assumes filling across rows. That only happens with <code>byrow = TRUE</code>.</p>
+<p><strong>Verify:</strong> The reference asserts <code>identical(m[1, ], c(1L, 3L, 5L))</code>, and <code>print(m)</code> shows row <code>[1,]</code> as 1 3 5.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Construct the same dimensions with byrow=TRUE.</p>
 <p>The first row becomes 1,2,3.</p>
+<p><strong>Approach:</strong> Pass <code>byrow = TRUE</code> with the same <code>nrow = 2</code>.</p>
+<p><strong>Why it holds here:</strong> The shape stays 2 by 3, but the six values now fill across, so the first row is 1, 2, 3 and the second 4, 5, 6.</p>
+<p><strong>Tempting mistake:</strong> Transposing with <code>t(m)</code> instead. That produces a 3 by 2 matrix whose first row is 1, 2, a different shape from the one requested.</p>
+<p><strong>Verify:</strong> <code>by_row[1, ]</code> returns 1, 2, 3 as the reference checks, and <code>dim(by_row)</code> returns 2 and 3.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Compute predictions for intercept two and slope three at x=3,4.</p>
 <p>The predictions are 11 and 14.</p>
+<p><strong>Approach:</strong> Bind a column of ones to the feature values and multiply: <code>cbind(1, c(3, 4)) %*% c(2, 3)</code>.</p>
+<p><strong>Why it holds here:</strong> Each row computes 2 <em> 1 + 3 </em> x, so x = 3 gives 11 and x = 4 gives 14. The column of ones is what lets the intercept enter every row.</p>
+<p><strong>Tempting mistake:</strong> Leaving out the ones column. <code>c(3, 4) %*% c(2, 3)</code> treats both as vectors and returns their inner product, a 1 by 1 matrix holding 18.</p>
+<p><strong>Verify:</strong> <code>as.numeric(design %*% c(2, 3))</code> returns 11 and 14, and <code>dim()</code> of the product shows 2 and 1.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose replacing %<em>% with </em>.</p>
 <p>Keep the matrix product and validate dimensions.</p>
+<p><strong>Approach:</strong> Keep <code>%*%</code> and add a shape guard, <code>ncol(design) == length(beta)</code>, before multiplying.</p>
+<p><strong>Why it holds here:</strong> The matrix product sums feature times coefficient within each row. The elementwise <code>*</code> in Example 3 recycles beta by row instead, so no feature receives its own coefficient.</p>
+<p><strong>Tempting mistake:</strong> Patching the elementwise result with <code>rowSums(design * beta)</code>. It returns a plausible-looking 8 and 15, but those are not the predictions.</p>
+<p><strong>Verify:</strong> The matrix product returns 11 and 14, while <code>rowSums(design * beta)</code> returns 8 and 15 for the same inputs.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Retain one selected column as a matrix.</p>
 <p>Use drop=FALSE and test dim.</p>
+<p><strong>Approach:</strong> Extract with <code>design[, 1, drop = FALSE]</code> and test the dimensions of the result.</p>
+<p><strong>Why it holds here:</strong> The intercept column is one column of two rows. Keeping it as a matrix means later matrix code still sees a 2 by 1 object.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>design[, 1]</code>. R simplifies to the vector 1, 1, <code>dim()</code> becomes NULL, and <code>nrow()</code> of it returns NULL.</p>
+<p><strong>Verify:</strong> The reference asserts <code>identical(dim(one), c(2L, 1L))</code>, so <code>nrow(one)</code> returns 2 rather than NULL.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain why a residual check is useful after solve.</p>
 <p>A small residual supports this numerical solution but does not by itself establish good conditioning or correct model assumptions.</p>
+<p><strong>Approach:</strong> After <code>solve(a, b)</code>, substitute the solution back and measure the largest absolute residual.</p>
+<p><strong>Why it holds here:</strong> For <code>diag(c(2, 4))</code> and b = 6, 8, the solution is 3 and 2, and multiplying back reproduces b exactly. The check tests the returned numbers against the equation itself.</p>
+<p><strong>Tempting mistake:</strong> Treating a tiny residual as proof the coefficients are trustworthy. A nearly singular matrix can return a solution with a small residual that changes wildly when b moves slightly, and the check says nothing about whether the model is right.</p>
+<p><strong>Verify:</strong> The residual value here is 0, below the 1e-12 threshold; <code>kappa(a, exact = TRUE)</code> returns 2, showing this system is well conditioned.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

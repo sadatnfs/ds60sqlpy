@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Predict the difference between a global median and stats::median.</p>
 <p>The masked function can return -999 while stats::median(c(1,4,9)) remains 4.</p>
 <p><strong>Expected evidence:</strong> Two deliberately different results.</p>
+<p><strong>Approach:</strong> Define <code>median &lt;- function(x, ...) -999</code> in the global environment, then call both <code>median(c(1, 4, 9))</code> and <code>stats::median(c(1, 4, 9))</code>.</p>
+<p><strong>Why it holds here:</strong> An unqualified name is looked up from the global environment outward, so the mask is found first. <code>stats::</code> goes straight to the stats exports, which return the middle value, 4.</p>
+<p><strong>Tempting mistake:</strong> Assuming the package function wins because stats is attached. A script run in a session where someone defined median gets -999 and no warning.</p>
+<p><strong>Verify:</strong> <code>median(c(1, 4, 9))</code> returns -999, while <code>stats::median(c(1, 4, 9))</code> returns 4.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Retrieve the public median function without attaching stats names.</p>
 <p>getExportedValue(&quot;stats&quot;,&quot;median&quot;)(c(1,4,9)) returns 4.</p>
 <p><strong>Expected evidence:</strong> Public result 4.</p>
+<p><strong>Approach:</strong> Call <code>public &lt;- getExportedValue(&quot;stats&quot;, &quot;median&quot;)</code> and then <code>public(c(1, 4, 9))</code>.</p>
+<p><strong>Why it holds here:</strong> The lookup goes through the stats export list, not the search path, so the global mask is never consulted and the median of 1, 4 and 9 is 4.</p>
+<p><strong>Tempting mistake:</strong> Using <code>get(&quot;median&quot;)</code>. It searches from the calling environment and returns the -999 mask; calling library(stats) does not help, since the global environment is still searched first.</p>
+<p><strong>Verify:</strong> <code>public(c(1, 4, 9))</code> returns 4, and <code>&quot;median&quot; %in% getNamespaceExports(&quot;stats&quot;)</code> returns TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Create and inspect DESCRIPTION, NAMESPACE and one R source file in a temporary tree.</p>
 <p>The source tree contains package metadata, export(observed_mean), and R/summary.R. Parse and evaluate only the known authored definitions.</p>
 <p><strong>Expected evidence:</strong> Exact three-file inventory and checked local behavior.</p>
+<p><strong>Approach:</strong> Create the tree under <code>tempfile()</code> with <code>on.exit(unlink(root, recursive = TRUE))</code>, write the three files, read them back with read.dcf, readLines and parse, then <code>sys.source()</code> the R file into an environment whose parent is baseenv().</p>
+<p><strong>Why it holds here:</strong> parse confirms two top-level definitions before anything runs, and the fresh environment holds only those definitions, so the mean of 2 and 4, which is 3, comes from the authored code alone.</p>
+<p><strong>Tempting mistake:</strong> Running <code>source()</code> into the global environment. The definitions would overwrite the session&#x27;s observed_mean, and a stray global helper could satisfy a missing reference and hide the bug.</p>
+<p><strong>Verify:</strong> <code>result$files</code> returns &quot;DESCRIPTION&quot;, &quot;NAMESPACE&quot;, &quot;R/summary.R&quot;, and <code>result$mean</code> returns 3.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a helper being considered private merely because its name starts with a dot.</p>
 <p>The NAMESPACE export list controls ordinary public access. A dot name alone neither registers nor hides an export.</p>
 <p><strong>Expected evidence:</strong> Separate naming convention and public interface.</p>
+<p><strong>Approach:</strong> Read NAMESPACE to decide what is public: it lists only <code>export(observed_mean)</code>, so .validate is internal because it is not exported.</p>
+<p><strong>Why it holds here:</strong> A leading dot only hides a name from a default ls() listing; it has no effect on exports. A NAMESPACE using <code>exportPattern(&quot;.&quot;)</code> would export .validate despite the dot.</p>
+<p><strong>Tempting mistake:</strong> Treating the dot as the access rule. Under a broad export pattern, the helper becomes part of the public interface while its author still thinks it is private.</p>
+<p><strong>Verify:</strong> <code>readLines(file.path(root, &quot;NAMESPACE&quot;))</code> returns only &quot;export(observed_mean)&quot;, and <code>ls(environment)</code> omits .validate while <code>ls(environment, all.names = TRUE)</code> shows it.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Test empty and nonfinite values in the local observed_mean function.</p>
 <p>Empty input returnsNA_real_; nonfinite input raises the finite-values error.</p>
 <p><strong>Expected evidence:</strong> Two distinct boundary cases.</p>
+<p><strong>Approach:</strong> Test <code>observed_mean(numeric(0))</code> and <code>observed_mean(c(1, Inf))</code> as two separate cases with different expected outcomes.</p>
+<p><strong>Why it holds here:</strong> An empty vector passes the finite check, because any() of nothing is FALSE, and the length guard returns NA_real_. Inf fails is.finite, so the function stops before averaging.</p>
+<p><strong>Tempting mistake:</strong> Dropping the length guard and relying on mean. The empty case would return NaN, which differs from the documented NA_real_, and filtering out Inf would silently average 1 alone.</p>
+<p><strong>Verify:</strong> <code>is.na(observed_mean(numeric(0)))</code> returns TRUE, and <code>observed_mean(c(1, Inf))</code> stops with &quot;finite numeric values required&quot;.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Describe what remains before claiming that the temporary tree is an installed, checked package.</p>
 <p>Use a separate multi-file project to document, build, install and run R CMD check. Preserve tests and dependency declarations; do not run network installation from this pad.</p>
 <p><strong>Expected evidence:</strong> Explicit optional contributor continuation.</p>
+<p><strong>Approach:</strong> List the remaining steps for a separate project: document, build, install into a library, run R CMD check with tests, and confirm that Imports: stats resolves when the namespace loads.</p>
+<p><strong>Why it holds here:</strong> parse and sys.source only evaluated one file. No namespace was created, so the export list was never applied and the DESCRIPTION fields were never checked by R.</p>
+<p><strong>Tempting mistake:</strong> Claiming a working package because observed_mean returned 3. That proves one function evaluates, not that the package installs or checks; network installation also does not belong in this pad.</p>
+<p><strong>Verify:</strong> <code>exists(&quot;.validate&quot;, envir = environment)</code> returns TRUE in the sys.source environment, which shows that the export list was not enforced.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 10 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

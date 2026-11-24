@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-stable-softmax">Exercise 1: Compute stable softmax<a class="heading-anchor" href="#exercise-1-compute-stable-softmax" aria-label="Link to this section">#</a></h3>
 <p>Subtract the maximum first.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute stable softmax</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Subtract the row maximum before exponentiating: scores <code>[1000, 1001]</code> become <code>[-1, 0]</code>, giving <code>exp</code> values about <code>[0.368, 1]</code> and probabilities about <code>[0.269, 0.731]</code>.</p>
+<p><strong>Why it is correct here.</strong> Softmax is unchanged by subtracting a constant from every score, since the factor cancels in the ratio. Shifting by the maximum keeps exponents at or below zero, so nothing overflows.</p>
+<p><strong>A plausible wrong approach.</strong> Exponentiating directly, <code>math.exp(1000)</code>, overflows to infinity in float64 and the division produces NaN. In float16 the overflow happens above about 11.</p>
+<p><strong>How to verify.</strong> The reference asserts the weights sum to 1 and that the second weight is larger. Compare with <code>torch.softmax</code> on the same scores.</p>
 <h3 id="exercise-2-draw-a-causal-mask">Exercise 2: Draw a causal mask<a class="heading-anchor" href="#exercise-2-draw-a-causal-mask" aria-label="Link to this section">#</a></h3>
 <p>Allow key positions no greater than query position.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>draw a causal mask</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Build a causal mask where query position <code>i</code> may attend to key position <code>j</code> only if <code>j &lt;= i</code>; for three tokens this is <code>[[1,0,0],[1,1,0],[1,1,1]]</code>.</p>
+<p><strong>Why it is correct here.</strong> A causal model must not use future tokens. The lower-triangular pattern allows each token to see itself and earlier tokens. Token 0 sees only itself and gets weight 1.</p>
+<p><strong>A plausible wrong approach.</strong> Using <code>j &lt; i</code> excludes the diagonal, leaving row 0 with no allowed positions and producing NaN in softmax.</p>
+<p><strong>How to verify.</strong> The reference asserts the lower-triangular matrix. Apply it to random scores and confirm each row&#x27;s weights above the diagonal are exactly zero.</p>
 <h3 id="exercise-3-count-score-matrix-bytes">Exercise 3: Count score-matrix bytes<a class="heading-anchor" href="#exercise-3-count-score-matrix-bytes" aria-label="Link to this section">#</a></h3>
 <p>Batch times heads times sequence squared times itemsize.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count score-matrix bytes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Count score-matrix bytes as batch times heads times sequence squared times itemsize: batch 2, 8 heads, sequence 1024 in float16 gives <code>2*8*1024*1024*2 = 33554432</code> bytes, 32 MiB.</p>
+<p><strong>Why it is correct here.</strong> Naive attention materializes a score for every query and key pair, so memory grows with the square of sequence length. Doubling the sequence quadruples this term.</p>
+<p><strong>A plausible wrong approach.</strong> Estimating attention memory as linear in sequence length misses the quadratic term, which dominates for long sequences.</p>
+<p><strong>How to verify.</strong> Recompute with sequence 2048 and confirm 128 MiB. Fused kernels avoid storing this matrix.</p>
 <h3 id="exercise-4-define-fully-masked-behavior">Exercise 4: Define fully masked behavior<a class="heading-anchor" href="#exercise-4-define-fully-masked-behavior" aria-label="Link to this section">#</a></h3>
 <p>Reject or use documented zero-output behavior.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define fully masked behavior</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define behavior for a fully masked row: either reject inputs where some query has no allowed keys, or document a specific output such as zeros.</p>
+<p><strong>Why it is correct here.</strong> Softmax over a row of negative infinity divides zero by zero and yields NaN. Different kernels may handle this case differently, so the contract must say what is expected.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving it undefined lets NaN appear only with certain padding patterns.</p>
+<p><strong>How to verify.</strong> Construct a batch with one padded sequence that masks every key for some query and assert the documented result.</p>
 <h3 id="exercise-5-compare-fused-and-reference-gradients">Exercise 5: Compare fused and reference gradients<a class="heading-anchor" href="#exercise-5-compare-fused-and-reference-gradients" aria-label="Link to this section">#</a></h3>
 <p>Check masks dtypes and tolerances.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare fused and reference gradients</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare fused attention against a reference implementation for forward outputs and gradients, using identical masks, dtypes and tolerances appropriate for float16 or bfloat16.</p>
+<p><strong>Why it is correct here.</strong> Fused kernels reorder computations and may use different accumulation precision. Agreement must hold within a tolerance chosen for the dtype, for both directions.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing only forward outputs leaves backward bugs undetected, and comparing a float16 fused result to a float32 reference with float32 tolerance reports false failures.</p>
+<p><strong>How to verify.</strong> Use the same random inputs, run backward with the same upstream gradient, and compare with <code>torch.testing.assert_close</code> using dtype-specific tolerances.</p>
 <h3 id="exercise-6-separate-backend-selection-from-api-name">Exercise 6: Separate backend selection from API name<a class="heading-anchor" href="#exercise-6-separate-backend-selection-from-api-name" aria-label="Link to this section">#</a></h3>
 <p>Inspect supported runtime evidence rather than guessing.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate backend selection from API name</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate the API name from the backend: <code>scaled_dot_product_attention</code> may dispatch to a flash, memory-efficient or math backend depending on hardware, dtype and mask.</p>
+<p><strong>Why it is correct here.</strong> The same call can run different kernels on different machines, so claims about memory or speed must name the backend actually selected.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming the flash backend ran because the function was called leads to wrong memory estimates when it silently fell back to math.</p>
+<p><strong>How to verify.</strong> Restrict the allowed backends in a test and observe which configurations succeed, or inspect profiler kernel names.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Stable probabilities sum to 1; lower-triangular causal mask.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-100_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

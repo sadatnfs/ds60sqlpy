@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-035-consumers-offsets-and-rebalances">apache-035: Consumers, offsets and rebalances<a class="heading-anchor" href="#apache-035-consumers-offsets-and-rebalances" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-033</code>, <code>apache-006</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Consumer position:</strong> The offset of the next record a consumer instance will fetch, which advances as it reads.</li>
+<li><strong>Committed offset:</strong> The stored offset where a later consumer in the same group resumes. Committing n means the next record to read is n.</li>
+<li><strong>At-least-once processing:</strong> Committing an offset only after the record&#x27;s effect succeeds, so a crash can replay the effect but never skip it.</li>
+<li><strong>Manual assignment:</strong> Assigning specific partitions to a consumer without group subscription, which isolates offset behavior from rebalancing.</li>
+<li><strong>Rebalance:</strong> The coordinator&#x27;s reassignment of partitions among group members when a member joins, leaves or fails.</li>
+</ul>
 <h3 id="a-consumer-position-and-a-committed-offset-are-different-state">A consumer position and a committed offset are different state<a class="heading-anchor" href="#a-consumer-position-and-a-committed-offset-are-different-state" aria-label="Link to this section">#</a></h3>
 <p>A consumer advances its current position while fetching records. Its committed offset records where a later consumer instance in that group should resume. Committing offset n conventionally means the next record to read is n, not that record n has just been processed. Every topic partition has its own offset space, so one integer cannot describe progress through a multi-partition topic.</p>
 <p>The order of effect and commit determines failure behavior. Processing a record then committing can replay the effect if the process crashes between them. Committing first can skip an effect if the process crashes afterward. At-least-once processing therefore normally commits after a successful effect and makes that effect idempotent or transactional within its intended boundary.</p>

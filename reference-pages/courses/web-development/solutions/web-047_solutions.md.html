@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-047.md</code>.</p>
 <h3 id="exercise-1-predict-what-happens-when-a-caller-sends-topic-html">Exercise 1: Predict what happens when a caller sends topic[]=HTML.<a class="heading-anchor" href="#exercise-1-predict-what-happens-when-a-caller-sends-topic-html" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The server can receive an array, so a string-shape check is required.</p>
+<p><strong>Approach:</strong> Recall that PHP turns <code>name[]=value</code> into an array element, so <code>$input[&#x27;topic&#x27;]</code> holds an array instead of a string.</p>
 <p><strong>Why:</strong> PHP turns topic[]=HTML into an array, so code that assumes a string can crash or misbehave.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting the string HTML fails because the bracket syntax in the field name changes the parsed type.</p>
+<p><strong>How to verify:</strong> Dumping the synthetic input shows <code>topic</code> as an array containing one string. Sending <code>topic=HTML</code> without brackets shows a plain string in the same dump.</p>
 <h3 id="exercise-2-add-an-allowlist-for-supported-topics">Exercise 2: Add an allowlist for supported topics.<a class="heading-anchor" href="#exercise-2-add-an-allowlist-for-supported-topics" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Only explicitly declared topic values are accepted.</p>
+<p><strong>Approach:</strong> Map the raw string through <code>Topic::tryFrom</code> from the backed enum and record an error when it returns null.</p>
 <p><strong>Why:</strong> An allowlist, here a backed enum, rejects every value that was not explicitly declared.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>in_array($raw, $topics)</code> without the strict flag fails because loose comparison can accept unexpected values.</p>
+<p><strong>How to verify:</strong> Topic::tryFrom(&#x27;HTML&#x27;) returns the enum case, while &#x27;Rust&#x27; produces the Choose a topic error.</p>
 <h3 id="exercise-3-build-a-validator-returning-cleaned-values-and-field-specific-errors">Exercise 3: Build a validator returning cleaned values and field-specific errors.<a class="heading-anchor" href="#exercise-3-build-a-validator-returning-cleaned-values-and-field-specific-errors" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Valid data has a complete domain value; invalid data has actionable errors and no partial write.</p>
+<p><strong>Approach:</strong> Return <code>[&#x27;value&#x27; =&gt; ..., &#x27;errors&#x27; =&gt; [...]]</code>, filling value only when every field passes and keeping one message per field.</p>
 <p><strong>Why:</strong> Returning either a complete value or a set of errors prevents partial writes and tells the user what to fix.</p>
+<p><strong>Plausible wrong approach:</strong> Returning a half filled value with some errors fails because a caller might store the valid fields and lose the rest.</p>
+<p><strong>How to verify:</strong> Invalid input returns an empty value and two keyed errors, and valid input returns a complete value and no errors. The caller can redisplay the submitted text next to each message without losing it.</p>
 <h3 id="exercise-4-diagnose-trimming-an-array-shaped-request-value">Exercise 4: Diagnose trimming an array-shaped request value.<a class="heading-anchor" href="#exercise-4-diagnose-trimming-an-array-shaped-request-value" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Validate its type before calling a string function.</p>
+<p><strong>Approach:</strong> Move the <code>is_string</code> check before <code>trim</code> and return a field error when the value has any other type.</p>
 <p><strong>Why:</strong> In PHP 8, passing an array to trim throws a TypeError, so the shape check must come first.</p>
+<p><strong>Plausible wrong approach:</strong> Casting with <code>(string)</code> before trimming fails because converting an array to string produces Array and a warning.</p>
+<p><strong>How to verify:</strong> The array shaped input now returns Choose a topic. as an error, and no TypeError reaches the caller.</p>
 <h3 id="exercise-5-test-missing-fields-arrays-out-of-range-minutes-and-valid-data">Exercise 5: Test missing fields, arrays, out-of-range minutes and valid data.<a class="heading-anchor" href="#exercise-5-test-missing-fields-arrays-out-of-range-minutes-and-valid-data" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Each case returns a deliberate validation result without an uncaught type error.</p>
+<p><strong>Approach:</strong> Run four synthetic inputs: no fields, array fields, minutes of 500 and a valid record, and print each result.</p>
 <p><strong>Why:</strong> Each case should return a deliberate error or value; none should throw an uncaught TypeError.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only the valid record fails because the uncaught type errors appear only with unusual shapes.</p>
+<p><strong>How to verify:</strong> Each of the four inputs returns a result array, and only the valid record has an empty errors map. Minutes of 500 produce a range message rather than a syntax message.</p>
 <h3 id="exercise-6-explain-the-limits-of-post-redirect-get">Exercise 6: Explain the limits of POST redirect GET.<a class="heading-anchor" href="#exercise-6-explain-the-limits-of-post-redirect-get" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It helps refresh behavior but does not replace authorization, CSRF checks or duplicate-operation design.</p>
+<p><strong>Approach:</strong> Describe what the redirect does, turning a refresh into a GET, and list protections it leaves to other code.</p>
 <p><strong>Why:</strong> It stops a browser refresh from resubmitting a form, but it does not check who sent the request or whether the operation already happened.</p>
+<p><strong>Plausible wrong approach:</strong> Treating the redirect as a defense against forged submissions fails because the original POST is still processed first.</p>
+<p><strong>How to verify:</strong> Your answer names authorization, a CSRF token check and an idempotency key as separate measures.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-047_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

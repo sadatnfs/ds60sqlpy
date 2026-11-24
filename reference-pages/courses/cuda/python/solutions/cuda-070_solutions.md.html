@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-live-and-reserved-totals">Exercise 1: Compute live and reserved totals<a class="heading-anchor" href="#exercise-1-compute-live-and-reserved-totals" aria-label="Link to this section">#</a></h3>
 <p>Free pool blocks are reserved but not live.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute live and reserved totals</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Track two counters: reserved bytes held by the pool and live bytes owned by arrays. After the array is released, live drops to 0 and reserved stays at 1024.</p>
+<p><strong>Why it is correct here.</strong> A memory pool keeps freed blocks to serve later requests without asking the driver again. The reference asserts <code>live == 0 and reserved == 1024</code> after the release.</p>
+<p><strong>A plausible wrong approach.</strong> Reading the device memory report and concluding there is a 1024-byte leak confuses reserved with live. The block is free in the pool and will be reused.</p>
+<p><strong>How to verify.</strong> Run the cuda-070 reference and check the first assertion. With CuPy on a device, <code>pool.used_bytes()</code> and <code>pool.total_bytes()</code> would show the same split.</p>
 <h3 id="exercise-2-reuse-a-free-block">Exercise 2: Reuse a free block<a class="heading-anchor" href="#exercise-2-reuse-a-free-block" aria-label="Link to this section">#</a></h3>
 <p>Equal-sized reuse need not grow reserve.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>reuse a free block</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Request a new 1024-byte array after the release and observe that the pool hands back the free block, so live returns to 1024 and reserved stays 1024.</p>
+<p><strong>Why it is correct here.</strong> The request size matches the free block exactly. The reference asserts <code>live &lt;= reserved</code> after reuse, which holds because no new reservation was needed.</p>
+<p><strong>A plausible wrong approach.</strong> Expecting reserved to rise to 2048 after the second allocation assumes the pool never reuses blocks. That would make every loop iteration look like growth.</p>
+<p><strong>How to verify.</strong> Model the allocate, release, allocate sequence and confirm reserved never exceeds 1024. On a device, repeat the cycle a few times and check that total pool bytes stay flat.</p>
 <h3 id="exercise-3-diagnose-a-retained-output-list">Exercise 3: Diagnose a retained-output list<a class="heading-anchor" href="#exercise-3-diagnose-a-retained-output-list" aria-label="Link to this section">#</a></h3>
 <p>Drop unneeded owners and detached summaries.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>diagnose a retained-output list</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Find the list that appends each step&#x27;s output and replace it with a detached scalar summary, or drop the reference when the step ends.</p>
+<p><strong>Why it is correct here.</strong> Worked example 2 keeps four 1024-byte results live, so live bytes are 4096 and keep growing. Pool reuse cannot help because none of those arrays is ever freed.</p>
+<p><strong>A plausible wrong approach.</strong> Calling the pool&#x27;s free-all function every step does not release arrays still referenced by the list. Live bytes stay at 4096 and the clearing just costs time.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>sum(retained) == 4096</code> for four steps. After the fix, record live bytes for steps 1 to 4 and confirm they stay at 1024.</p>
 <h3 id="exercise-4-explain-why-cache-clearing-is-insufficient">Exercise 4: Explain why cache clearing is insufficient<a class="heading-anchor" href="#exercise-4-explain-why-cache-clearing-is-insufficient" aria-label="Link to this section">#</a></h3>
 <p>Live objects still require storage.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain why cache clearing is insufficient</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain that clearing a cache returns only free blocks to the driver; arrays that are still referenced keep their storage no matter how often the cache is cleared.</p>
+<p><strong>Why it is correct here.</strong> In the retained-list case all 4096 bytes are live. Clearing the cache may reduce reserved bytes in the healthy case of worked example 1 but cannot touch live bytes.</p>
+<p><strong>A plausible wrong approach.</strong> Adding <code>free_all_blocks()</code> after every step makes the memory report drop slightly while the actual leak continues, giving false confidence.</p>
+<p><strong>How to verify.</strong> Compare live bytes before and after clearing in the retained-output model; they must be equal. The fix that changes live bytes is dropping references.</p>
 <h3 id="exercise-5-design-bounded-snapshots">Exercise 5: Design bounded snapshots<a class="heading-anchor" href="#exercise-5-design-bounded-snapshots" aria-label="Link to this section">#</a></h3>
 <p>Record before and after fixed small steps.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design bounded snapshots</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Take a memory snapshot before and after a fixed small number of steps, such as four, each with the same input size, and compare live and reserved separately.</p>
+<p><strong>Why it is correct here.</strong> A bounded loop with a fixed size shows the pattern: healthy reuse keeps live at one result, retention grows by one result per step, exactly 1024 bytes in this chapter&#x27;s model.</p>
+<p><strong>A plausible wrong approach.</strong> Running until the device runs out of memory and reading the error message is unbounded and can disturb other users of a shared device.</p>
+<p><strong>How to verify.</strong> Record four snapshots; growth of 1024 live bytes per step identifies retention, flat live with flat reserved identifies reuse.</p>
 <h3 id="exercise-6-separate-host-ram-and-vram">Exercise 6: Separate host RAM and VRAM<a class="heading-anchor" href="#exercise-6-separate-host-ram-and-vram" aria-label="Link to this section">#</a></h3>
 <p>Container host-memory limits do not generally cap VRAM.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate host RAM and VRAM</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate host RAM limits from device memory: a container memory limit constrains host allocations, while VRAM is managed by the GPU driver.</p>
+<p><strong>Why it is correct here.</strong> The pool in this chapter manages device memory. A container that limits RAM to 4 GB does not, in general, stop a process from reserving device memory.</p>
+<p><strong>A plausible wrong approach.</strong> Setting a container memory limit and expecting it to prevent device out-of-memory errors gives no protection. The device can still fill up.</p>
+<p><strong>How to verify.</strong> List which tool reports each: host RSS from the OS, device usage from the GPU driver or the library pool. A correct note names both separately.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Live 1024, reserved 1024, retained-output example 4096 bytes.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-070_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

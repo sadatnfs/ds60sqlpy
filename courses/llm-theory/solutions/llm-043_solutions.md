@@ -1,6 +1,6 @@
 # llm-043: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these encoder, decoder and encoder-decoder architectures and objectives answers after attempting *Compare bidirectional and causal mixtures* through *Combine source padding with cross-attention*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Build shifted decoder targets* points to one step. `llm-043_solution.py` holds the assertions; this page explains how they test encoder. Then try *Combine source padding with cross-attention* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -41,7 +41,7 @@ np.testing.assert_allclose(decoder, [[2, 0], [1, 1], [8 / 3, 8 / 3]], atol=1e-12
 
 **Expected:** encoder rows all [8/3, 8/3]; decoder rows [2, 0], [1, 1], [8/3, 8/3].
 
-**Verify:** In a fresh process, the exercise checks confirm `encoder` matches `np.tile([8 / 3, 8 / 3], (3, 1))` within 1e-12 and `decoder` matches `[[2, 0], [1, 1], [8 / 3, 8 / 3]]` within 1e-12.
+**Verify:** For *Compare bidirectional and causal mixtures*, a fresh-process check confirms `encoder` matches `np.tile([8 / 3, 8 / 3], (3, 1))` within 1e-12 and `decoder` matches `[[2, 0], [1, 1], [8 / 3, 8 / 3]]` within 1e-12.
 
 ## Exercise 2: Trace rectangular cross-attention
 
@@ -59,7 +59,7 @@ np.testing.assert_allclose(cross, np.tile([8 / 3, 8 / 3], (2, 1)), atol=1e-12, r
 
 **Expected:** score and weight shape (2, 3); output shape (2, 2); both outputs [8/3, 8/3].
 
-**Verify:** In a fresh process, the exercise checks confirm `weights.shape == (2, 3)`; `cross.shape == (2, 2)` and `cross` matches `np.tile([8 / 3, 8 / 3], (2, 1))` within 1e-12.
+**Verify:** For *Trace rectangular cross-attention*, a fresh-process check confirms `weights.shape == (2, 3)`; `cross.shape == (2, 2)` and `cross` matches `np.tile([8 / 3, 8 / 3], (2, 1))` within 1e-12.
 
 ## Exercise 3: Build shifted decoder targets
 
@@ -79,7 +79,7 @@ assert mask[0, 0] and not mask[0, 1]
 
 **Expected:** inputs [1, 5, 7]; labels [5, 7, 3]; the diagonal is allowed without seeing the target itself.
 
-**Verify:** In a fresh process, the exercise checks confirm `inputs` equals `[1, 5, 7]`; `labels` equals `[5, 7, 3]`; `mask[0, 0]` and `not mask[0, 1]`.
+**Verify:** For *Build shifted decoder targets*, a fresh-process check confirms `inputs` equals `[1, 5, 7]`; `labels` equals `[5, 7, 3]`; `mask[0, 0]` and `not mask[0, 1]`.
 
 ## Exercise 4: Separate masked-token supervision
 
@@ -99,7 +99,7 @@ assert np.ones((3, 3), dtype=bool)[1].all()
 
 **Expected:** input [2, 0, 7]; one active label 5; bidirectional context remains allowed.
 
-**Verify:** In a fresh process, the exercise checks confirm `corrupted` equals `[2, 0, 7]`; `original[active].tolist() == [5]` and `np.ones((3, 3), dtype=bool)[1].all()`.
+**Verify:** For *Separate masked-token supervision*, a fresh-process check confirms `corrupted` equals `[2, 0, 7]`; `original[active].tolist() == [5]` and `np.ones((3, 3), dtype=bool)[1].all()`.
 
 ## Exercise 5: Perturb future target values
 
@@ -118,7 +118,7 @@ np.testing.assert_allclose(new_decoder[:2], decoder[:2], atol=1e-12, rtol=0)
 
 **Expected:** encoder prefix changes; causal decoder prefix stays fixed.
 
-**Verify:** In a fresh process, the exercise checks confirm `not np.allclose(new_encoder[:2], encoder[:2])` and `new_decoder[:2]` matches `decoder[:2]` within 1e-12.
+**Verify:** For *Perturb future target values*, a fresh-process check confirms `not np.allclose(new_encoder[:2], encoder[:2])` and `new_decoder[:2]` matches `decoder[:2]` within 1e-12.
 
 ## Exercise 6: Combine source padding with cross-attention
 
@@ -135,8 +135,8 @@ np.testing.assert_array_equal(weights[:, 2], [0, 0])
 
 **Expected:** both cross outputs [1, 1]; padded source weight 0.
 
-**Verify:** In a fresh process, the exercise checks confirm `masked` matches `[[1, 1], [1, 1]]` within 1e-12 and `weights[:, 2]` equals `[0, 0]`.
+**Verify:** For *Combine source padding with cross-attention*, a fresh-process check confirms `masked` matches `[[1, 1], [1, 1]]` within 1e-12 and `weights[:, 2]` equals `[0, 0]`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Separate masked-token supervision* and predict the result first; keep *Perturb future target values* failing beside the repair. Log a missing NumPy separately from a wrong encoder value in `llm-043`.

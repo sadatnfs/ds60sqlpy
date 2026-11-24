@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Make thread lifetime and cancellation ownership explicit.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A thread executes a function concurrently with its caller. Joining waits for that function to finish before borrowed state is destroyed. Cancellation is a request that cooperative code checks, not a forced kill. C++20 jthread adds joining destruction and stop_token support, while std::thread requires explicit joining on every path.</p>
+<ul>
+<li><strong><code>std::thread</code>:</strong> starts a function on a new thread of execution and must be joined or detached before it is destroyed.</li>
+<li><strong>join:</strong> waits for a thread&#x27;s function to finish, so the state it borrows can then be safely read or destroyed.</li>
+<li><strong>cooperative cancellation:</strong> a stop request that the running code checks and honors, not a forced kill.</li>
+<li><strong><code>std::jthread</code>:</strong> a C++20 thread that requests a stop and joins automatically in its destructor.</li>
+<li><strong><code>stop_token</code>:</strong> the object a jthread&#x27;s function checks to learn whether a stop was requested.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Capture a variable by reference only while the owner outlives the worker. Calling join creates the synchronization needed before reading the worker result. The portable demonstration uses thread and an atomic stop flag; the guide contrasts the equivalent jthread pattern because some host standard libraries lack jthread.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

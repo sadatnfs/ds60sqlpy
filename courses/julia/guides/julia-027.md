@@ -10,6 +10,14 @@ Separate namespaces from source files, execute a tiny owned multi-file project o
 
 Open `julia-027` in `/classroom` with its prepared `julia` runtime. Worked case A (a small reusable namespace) and worked case B (exercise a real multi-file layout) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-027: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Module:** A separate global namespace declared with `module`, so names defined inside it do not collide with names elsewhere.
+- **Export:** A declaration that makes selected module names available unqualified after `using`, while other names still need qualification.
+- **include:** A call that evaluates another source file in the current module as if its code were written there.
+- **Project.toml:** The environment file listing direct dependencies by name and UUID, along with compatibility bounds.
+- **Manifest.toml:** The environment file recording the exact resolved version of every direct and indirect dependency.
+
 ## A namespace and a file are different things
 
 A `module` creates a namespace with its own bindings. `export` declares names that a caller can bring into scope with `using`; it does not make other names private or inaccessible. Qualified access such as `LocalStats.center` makes ownership visible. `import` is useful when deliberately extending another module's function, while defining your own function with the same short name can instead create a different generic function.

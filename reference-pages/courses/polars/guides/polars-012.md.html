@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Arrow is a language-independent columnar representation with explicit types and validity information. It can reduce serialization overhead when systems share compatible buffers, but a blanket claim of zero-copy interoperability is too strong. Casting, rechunking, string representation changes and conversion to Python objects can allocate new memory. Test values and types first, then inspect memory behavior for the particular path when it matters.</p>
 <p>The first case demonstrates a value-preserving conversion between Polars and an Arrow table, including a null. It proves a logical round trip on the fixture. It does not measure every allocation or guarantee that another library will preserve all metadata. A data engineer should distinguish representation compatibility from the semantics of the fields being transported.</p>
 <p>Categories introduce a further contract. A closed business vocabulary can have an order that differs from alphabetical order. Enum declares that vocabulary explicitly. It is useful for states such as new, paid and shipped, where unknown values should be rejected or quarantined. Physical category codes are implementation details and should not replace stable labels in an external interface.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Apache Arrow:</strong> A language-independent columnar memory format that Polars uses and can exchange with other libraries.</li>
+<li><strong>Validity bitmap:</strong> The Arrow bit array that marks which slots of a column hold values and which are null.</li>
+<li><strong>Zero-copy:</strong> Sharing compatible buffers without copying; casting, rechunking or conversion to Python objects can still allocate memory.</li>
+<li><strong>Enum:</strong> A Polars categorical type with a fixed, ordered list of allowed labels; a strict cast of an unknown label raises an error.</li>
+<li><strong>Category order:</strong> The declared order of Enum labels, which sorting and comparisons use instead of alphabetical order.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>to_arrow returns an Arrow Table; pl.from_arrow constructs a Polars result. Arrow columns expose type and null information, and to_pylist is a convenient small-fixture inspection method that creates Python objects. pl.Enum takes the ordered allowed labels. Casting an unknown label under strict behavior raises a real conversion error.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

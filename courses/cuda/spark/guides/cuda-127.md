@@ -23,6 +23,14 @@ On an optional GPU environment, repeat the same query and input. Add plugin rele
 The capstone is complete when another learner can reproduce the CPU semantics, explain the plan and understand exactly what remains unqualified. Real GPU performance is an additional evidence layer. A useful report can conclude that the tiny fixture is too small for a meaningful speed comparison while still demonstrating correct setup and operator execution on prepared hardware.
 
 
+### Key terms
+
+- **CPU oracle:** An exact, simple implementation whose output serves as the expected result for both Spark languages.
+- **Declarative expression:** A DataFrame or SQL expression that Spark can optimize, unlike opaque procedural code.
+- **Explicit schema:** A declared set of column names, types and nullability that avoids inference differences.
+- **Duplicate dimension keys:** Repeated keys in a lookup table that multiply joined rows and change aggregates.
+- **Executed plan:** The plan Spark actually ran for an action, which is the evidence for GPU operator use.
+
 ## Worked examples
 
 ### Worked example 1
@@ -49,6 +57,16 @@ print("CPU ETL oracle:", sorted(revenue.items()))
 
 **Expected observation:** Sorted revenue [(A,60),(B,60)].
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `sales` | `[('A', 2), ('A', 4), ('B', 3)]` |
+| `prices` | `{'A': 10, 'B': 20}` |
+| `revenue` | `{'A': 60, 'B': 60}` |
+| `product` | `'B'` |
+| `quantity` | `3` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Scala and PySpark parity lab
@@ -61,27 +79,39 @@ For external GPU comparison, retain the same relational expressions and expected
 
 ### Exercise 1: Derive expected revenue
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **derive expected revenue** in the examples above.
+**Trap to avoid:** Summing prices per product before multiplying, or multiplying the total quantity by the sum of all prices, mixes products and gives wrong totals such as 180 for A.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Write Scala expressions
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **write Scala expressions** in the examples above.
+**Trap to avoid:** Relying on schema inference from text files can type numbers as strings or doubles, changing join behavior or output types between runs.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Write PySpark expressions
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **write PySpark expressions** in the examples above.
+**Trap to avoid:** Collecting rows into Python and summing in a loop changes where the work runs and stops being a Spark pipeline comparison.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Test duplicate dimension keys
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **test duplicate dimension keys** in the examples above.
+**Trap to avoid:** Running the join without checking lets a duplicate price row double A to 120 with no error, which looks like a real sales increase.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Capture executed GPU evidence
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **capture executed GPU evidence** in the examples above.
+**Trap to avoid:** Claiming GPU execution from a CPU-only environment, or from a configuration file alone, reports evidence that does not exist.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Prepare a balanced capstone report
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **prepare a balanced capstone report** in the examples above.
+**Trap to avoid:** Writing the report as if GPU acceleration was demonstrated when only CPU runs happened misleads anyone deciding on deployment.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

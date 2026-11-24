@@ -13,7 +13,7 @@
       "exercise": 2,
       "title": "Locate the evaluation boundary",
       "input_contract": "Return a lazy even-filter/double-map iterator with local trace messages filter:value and map:value. Validate the same numeric domain before construction. The trace should remain empty until consumption.",
-      "expected": "Taking one output from 1,2,3,4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4.",
+      "expected": "Taking one output from 1, 2, 3, 4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4.",
       "verification": "Assert the empty initial trace, both exact output pieces and all six messages in order."
     },
     {

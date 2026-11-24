@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Compare a divergence-reducing strategy against the baseline with end-to-end evidence that includes sorting or compaction.
+
 Work through *Divergence, irregular work and algorithm choice* with the concrete cases below. Finish with this evidence:
 a correctness-preserving strategy and end-to-end evidence that includes sorting or compaction when used. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Divergence occurs when lanes in a warp follow different control-flow paths. It can reduce useful parallel execution, but branches that are uniform across a warp or skip substantial work can be beneficial. Irregular workloads also suffer from imbalance when some lanes have much longer loops. Reordering or compacting work can improve grouping at the cost of an extra pass and changed order. Preserve semantic ordering where required and include preprocessing in end-to-end measurement. Branch elimination that evaluates both expensive sides can make the program slower even when it reduces control flow.
+
+### Key terms
+
+- **Warp divergence:** Lanes of one warp taking different branch paths, so the paths execute one after another with lanes masked.
+- **Load imbalance:** Uneven work per thread or block that leaves some hardware idle while the slowest work finishes.
+- **Warp-uniform branch:** A branch whose condition has the same value for every lane of a warp, so it causes no divergence.
+- **Work reordering:** Sorting or grouping items so lanes with similar paths or costs run together, at the price of the reorder step.
 
 ## How to run and study this lesson
 

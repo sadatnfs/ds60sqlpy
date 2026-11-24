@@ -47,7 +47,7 @@ def reviewDimension(raw: DataFrame): DataFrame = {
   val rows = reviewed.limit(101).count()
   require(
     rows <= 100L && reviewed.agg(countDistinct("key")).first().getLong(0) == rows,
-    "Approved keys must be known,unique and bounded"
+    "Approved keys must be known, unique and bounded"
   )
   reviewed
 }
@@ -58,7 +58,7 @@ def review_dimension(raw):
     reviewed = raw.filter(F.col("approved")).select("key", "factor")
     rows = reviewed.limit(101).count()
     if rows > 100 or reviewed.agg(F.countDistinct("key")).first()[0] != rows:
-        raise ValueError("Approved keys must be known,unique and bounded")
+        raise ValueError("Approved keys must be known, unique and bounded")
     return reviewed
 ```
 
@@ -70,7 +70,7 @@ Review establishes the build-side grain before either join strategy is evaluated
 
 Build the ordinary equality join over accepted facts and reviewed dimension, projecting source_id, fact_id, key, amount, factor. Summarize per key with rows, known amounts, total amount and weighted total.
 
-**Expected:** Key 0:(1600,1440,5755,11510);1:(100,100,401,1203);2:(100,80,321,1284);3:(100,100,398,1990);4:(100,80,321,1926).
+**Expected:** Key `0:(1600, 1440, 5755, 11510)`; `1:(100, 100, 401, 1203)`; `2:(100, 80, 321, 1284)`; `3:(100, 100, 398, 1990)`; `4:(100, 80, 321, 1926)`.
 
 ```scala
 def baselineProduct(facts: DataFrame, dimension: DataFrame): DataFrame = {
@@ -120,7 +120,7 @@ The candidate changes physical execution while retaining the same selected input
 
 Return version, master, AQE and automatic broadcast threshold as named fields. Attach key frequencies, the baseline/candidate plans and each observed summary-query exchange metric map.
 
-**Expected:** Spark 4.0.1, local[2], AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
+**Expected:** Spark 4.0.1, `local[2]`, AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
 
 ```scala
 def configurationReceipt(spark: SparkSession): Map[String, String] = {
@@ -174,4 +174,6 @@ The rollback boundary is deliberately narrower than the business-data contract. 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Classify facts and reconcile the whole source population) is built inside the program, so opening the lesson fetches nothing; it expects: Accepted 2000, rejected 2 with source 2001 `missing_identity` and 2002 `negative_amount`. Accepted unique fact IDs 2000 and known amounts 1800. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

@@ -14,6 +14,13 @@ This is a manual external lab for a named disposable cluster and namespace. Neve
 
 
 
+### Key terms
+
+- **Pod:** The smallest Kubernetes scheduling unit, holding one or more containers.
+- **Device plugin:** A Kubernetes component that advertises node GPUs as schedulable resources.
+- **Resource discovery script:** A script Spark runs in each executor to report the GPU addresses that container can access.
+- **Namespace:** A Kubernetes scope that isolates names and permissions for a named, owned environment.
+
 ## Worked examples
 
 ### Worked example 1
@@ -37,33 +44,51 @@ print("CPU scheduling worksheet:", eligible)
 
 **Expected observation:** Only the illustrative GPU node is eligible; no cluster operation occurs.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `eligible` | `['gpu-node']` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Draw scheduler layers
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **draw scheduler layers** in the examples above.
+**Trap to avoid:** Debugging Spark task settings when executors never started confuses the two layers, since the problem sits at pod placement.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Name ownership boundaries
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **name ownership boundaries** in the examples above.
+**Trap to avoid:** Running in the default namespace without labels mixes lab resources with others, making safe cleanup impossible. It also makes the cluster context easy to get wrong, so commands meant for a lab cluster can reach a shared one.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Diagnose Pending executors
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **diagnose Pending executors** in the examples above.
+**Trap to avoid:** Changing Spark code or increasing memory without reading events addresses the wrong layer. Raising executor memory can even make placement harder, since larger requests fit on fewer nodes.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Verify device visibility
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **verify device visibility** in the examples above.
+**Trap to avoid:** Assuming visibility because the node has a GPU misses runtime misconfiguration that leaves the container without the device. The executor would then start and the plugin would fail at initialization, or the job would run entirely on CPU.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design private networking
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **design private networking** in the examples above.
+**Trap to avoid:** Exposing the driver UI with a public load balancer for convenience makes job data reachable from outside. Query plans and configuration can include paths, table names and connection details.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Write scoped cleanup
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **write scoped cleanup** in the examples above.
+**Trap to avoid:** Deleting by broad name patterns or whole namespaces you did not create can remove unrelated work. Deleting before saving logs also destroys the evidence needed to explain a failed run.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

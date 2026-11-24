@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Publish complete input files atomically",
       "input_contract": "Write each declared file in the owned staging directory, then atomically move it into input under a new batch-N.json name. Reject invalid names or an existing destination.",
-      "expected": "Three input files, each with 3 completeJSON records;no staging temporary file remains. Reusing batch-0.json is rejected.",
+      "expected": "Three input files, each with 3 complete JSON records;no staging temporary file remains. Reusing batch-0.json is rejected.",
       "verification": "Assert the file count and explicit existing-name rejection before starting any query."
     },
     {
@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Compare final streaming output with batch and literal oracles",
       "input_contract": "Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literalA/B/C oracle.",
-      "expected": "ExactlyA(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.",
+      "expected": "Exactly A(4, 3, 15), B(3, 2, 35), C(2, 2, 30), whose record counts sum 9, known counts 7 and amounts 80.",
       "verification": "Assert both path comparisons and the independent literal tuple list;confirm no active query remains before cleanup."
     }
   ],

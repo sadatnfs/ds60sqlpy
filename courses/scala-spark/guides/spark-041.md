@@ -8,7 +8,7 @@ Advanced; approximately 120 minutes. Direct prerequisites: `spark-040`. The prep
 
 ## How to run this lesson
 
-Open `spark-041` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-041` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-041.scala) and [PySpark learner](../lessons/spark-041.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-041_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-041_solution.scala) and [PySpark reference](../solutions/spark-041_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -34,11 +34,11 @@ The [Scala learner](../lessons/spark-041.scala) and [PySpark learner](../lessons
 
 A runtime change can affect binary loading, SQL semantics, Python dependencies, state schemas and sink behavior. A successful version print proves only which runtime answered that request. A credible change review joins the actual version tuple with independent golden results and a recovery plan. This lesson executes the current prepared Spark 4.0.1 stack and rehearses a query-shape change without pretending a second runtime has been provisioned.
 
-The receipt records Scala binary family and actual patch, JDK major and runtime patch, Python version and optional PyArrow distribution presence. Scala invokes only the bundled python 3 with a fixed five-second metadata probe; it does not install or import Arrow. PySpark records its own interpreter and JVM. An absent optional dependency is recorded as not-installed rather than silently fetched. These values matter at different boundaries:Scala binary compatibility is not the same as Python wheel compatibility or a valid persisted state schema.
+The receipt records Scala binary family and actual patch, JDK major and runtime patch, Python version and optional PyArrow distribution presence. Scala invokes only the bundled python 3 with a fixed five-second metadata probe; it does not install or import Arrow. PySpark records its own interpreter and JVM. An absent optional dependency is recorded as not-installed rather than silently fetched. These values matter at different boundaries: Scala binary compatibility is not the same as Python wheel compatibility or a valid persisted state schema.
 
 ## Test semantics before considering promotion
 
-The golden suite has four rows:two equal 100-cent occurrences under one ID, a NULL amount under another, and a zero under a third. Expected rows 4, known amounts 3, total 200 and distinct IDs 3 catch different defects. Dropping duplicate occurrences can preserve some aggregates while changing the population; replacing NULL with zero changes known-value counts. The suite also checks exact decimal 12345678.90 and a timezone-offset instant rendered 19:00UTC under the baseline.
+The golden suite has four rows: two equal 100-cent occurrences under one ID, a NULL amount under another, and a zero under a third. Expected rows 4, known amounts 3, total 200 and distinct IDs 3 catch different defects. Dropping duplicate occurrences can preserve some aggregates while changing the population; replacing NULL with zero changes known-value counts. The suite also checks exact decimal 12345678.90 and a timezone-offset instant rendered 19:00UTC under the baseline.
 
 The tests are deliberately tiny so their expected results are independently inspectable. They are not a complete compatibility certification. A production workload adds its own UDFs, connectors, data formats, optimizer-sensitive expectations and performance bounds. The important discipline is to run the same semantic contract in both actual environments and preserve failures, rather than comparing only two version labels.
 
@@ -60,16 +60,15 @@ A production first-seen policy may itself be insufficient when conflicting updat
 
 The proposal gate requires actual target qualification, golden pass, recovery review and product acceptance. A missing target profile remains unavailable even if the proposed Spark/Scala/JDK strings look plausible. The lesson never downloads a second runtime or resets an existing learner checkpoint. All files are created inside one fresh root and removed only after owned queries terminate.
 
-The final packet records source and target claims separately. For this run, the source runtime and query-shape rehearsal have actual evidence; the hypothetical target runtime does not. That distinction makes a migration review actionable:it says exactly which acceptance work remains instead of giving an unsupported compatibility approval.
+The final packet records source and target claims separately. For this run, the source runtime and query-shape rehearsal have actual evidence; the hypothetical target runtime does not. That distinction makes a migration review actionable: it says exactly which acceptance work remains instead of giving an unsupported compatibility approval.
 
 ## Supplied local fixture
 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
@@ -77,7 +76,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-041-")
 val input = ownedRoot.resolve("input");
@@ -96,20 +95,7 @@ val golden = spark.createDataFrame(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -117,7 +103,7 @@ import json
 import uuid
 
 if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark4.0.1 required")
+    raise ValueError("Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-041-", dir=Path.cwd()))
 input_path = owned_root / "input"
@@ -170,7 +156,7 @@ The actual SQL expression checks the instant under the UTC session. Preserving d
 
 Record Spark, Scala binary and patch, JDK major and patch, Python version and optional PyArrow distribution version without installing anything.
 
-**Expected result/shape:** Spark 4.0.1, Scala 2.13 family, JDK 17;actual patch strings and explicit not-installed Arrow when absent.
+**Expected result/shape:** Spark 4.0.1, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent.
 
 **Verify:** Inspect actual values and reject a claimed target qualification based only on a proposed version string.
 
@@ -180,7 +166,7 @@ Record Spark, Scala binary and patch, JDK major and patch, Python version and op
 
 Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
-**Expected result/shape:** 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90;instant 19:00UTC.
+**Expected result/shape:** 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90; instant 19:00UTC.
 
 **Verify:** Compare exact metrics and rendered values under the UTC baseline.
 
@@ -190,7 +176,7 @@ Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
 Run the baseline ID-only deduplication query, then reject a request to change its state keys to id, cents while retaining that checkpoint.
 
-**Expected result/shape:** Baseline output 1:100,2:200;preflight rejects changed keys before starting a new query.
+**Expected result/shape:** Baseline output 1:100,2:200; preflight rejects changed keys before starting a new query.
 
 **Verify:** Compare owned-query count before/after the refusal and confirm the old checkpoint/output remain present and unchanged.
 
@@ -232,7 +218,7 @@ Do not compare only version strings, assume Scala binary compatibility implies c
 
 ## Self-check
 
-Explain the contract of `versionReceipt` / `version_receipt` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `versionReceipt` / `version_receipt` without reading its solution. Then, from memory, state what Exercise 6 (Gate a proposed runtime change on actual evidence) must produce: The supplied unqualified target or failed candidate is rejected; all four true permits a proposal in this pure decision model. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -240,9 +226,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark4.0.1 recovery after query changes](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#recovery-semantics-after-changes-in-a-streaming-query)
+- [Spark 4.0.1 recovery after query changes](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#recovery-semantics-after-changes-in-a-streaming-query)
 
-- [Spark4.0.1 SQL migration guide](https://spark.apache.org/docs/4.0.1/sql-migration-guide.html)
+- [Spark 4.0.1 SQL migration guide](https://spark.apache.org/docs/4.0.1/sql-migration-guide.html)
 
 ## Ask an AI tutor about this lesson
 

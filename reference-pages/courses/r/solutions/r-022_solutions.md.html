@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Predict the result of combining c(1,3) ms with 5 ms.</p>
 <p>The result is a FormalMeasure containing c(1,3,5), unit ms.</p>
 <p><strong>Expected evidence:</strong> Three observations in original order.</p>
+<p><strong>Approach:</strong> Trace the dispatch on both arguments: x and y are FormalMeasure objects, so the (FormalMeasure, FormalMeasure) method runs, validates both, compares units and builds a new object from <code>c(x@values, y@values)</code>.</p>
+<p><strong>Why it holds here:</strong> Both units are &quot;ms&quot;, so the method concatenates the observations in argument order, 1, 3 and then 5, and the new object passes validity again on construction.</p>
+<p><strong>Tempting mistake:</strong> Expecting arithmetic. <code>c(1, 3) + 5</code> recycles the 5 and gives 6 and 8, but combine_measure joins observations; it never adds them.</p>
+<p><strong>Verify:</strong> <code>z@values</code> returns 1, 3, 5, and <code>z@unit</code> returns &quot;ms&quot;.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the second input to seconds and test the failure.</p>
 <p>The typed-pair method raises incompatible units. Dispatch is not a unit conversion system.</p>
 <p><strong>Expected evidence:</strong> The incompatible-units error.</p>
+<p><strong>Approach:</strong> Build <code>seconds &lt;- new(&quot;FormalMeasure&quot;, values = 2, unit = &quot;s&quot;)</code> and call <code>combine_measure(x, seconds)</code> inside a handler that expects &quot;incompatible units&quot;.</p>
+<p><strong>Why it holds here:</strong> Both arguments are still FormalMeasure objects, so the same method is selected; dispatch looks at classes, not slot contents. The <code>identical(x@unit, y@unit)</code> check inside the method is what rejects ms against s.</p>
+<p><strong>Tempting mistake:</strong> Expecting dispatch to choose another method or to convert. Without the unit check the result would be 1, 3 and 2 labeled ms, treating two seconds as two milliseconds, an error by a factor of 1000.</p>
+<p><strong>Verify:</strong> <code>tryCatch(combine_measure(x, seconds), error = conditionMessage)</code> returns &quot;incompatible units&quot;.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a new object with an infinite measurement.</p>
 <p>new invokes validity and rejects the nonfinite value.</p>
 <p><strong>Expected evidence:</strong> Finite-vector error.</p>
+<p><strong>Approach:</strong> Call <code>new(&quot;FormalMeasure&quot;, values = Inf, unit = &quot;ms&quot;)</code> and capture the error message.</p>
+<p><strong>Why it holds here:</strong> The slot type is numeric and Inf is numeric, so the slot check passes. new() then runs the function registered with setValidity, which finds a nonfinite value and returns its message, so construction stops.</p>
+<p><strong>Tempting mistake:</strong> Relying on <code>slots = c(values = &quot;numeric&quot;)</code> as the guard. Inf, negative Inf and NaN are all numeric, so a type-only class would accept them and every later total would be infinite or NaN.</p>
+<p><strong>Verify:</strong> The captured message contains &quot;values must be a finite vector&quot; after the invalid class prefix.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a direct x@unit &lt;- character(0) assignment.</p>
 <p>Run validObject before exposing the changed value; the domain check fails. Prefer a validated replacement interface.</p>
 <p><strong>Expected evidence:</strong> A semantic validity failure.</p>
+<p><strong>Approach:</strong> After a direct slot assignment, call <code>validObject(broken)</code> before the object leaves the code that changed it, and prefer a replacement function that validates for callers.</p>
+<p><strong>Why it holds here:</strong> <code>@&lt;-</code> checks only that the new value has the slot&#x27;s class. character(0) is character, so the assignment succeeds, and only the validity function notices that the unit is not one string.</p>
+<p><strong>Tempting mistake:</strong> Assuming <code>@&lt;-</code> runs validity. Code that reads <code>broken@unit</code> without validating gets a zero-length value, and <code>paste(2, broken@unit)</code> quietly returns &quot;2 &quot; with the unit missing.</p>
+<p><strong>Verify:</strong> <code>tryCatch(validObject(broken), error = conditionMessage)</code> returns a message containing &quot;unit must be one nonempty string&quot;.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Test the FormalMeasure,numeric method separately.</p>
 <p>combine_measure(x,2) raises the no-declared-unit error rather than accepting it as milliseconds.</p>
 <p><strong>Expected evidence:</strong> Distinct explicit rejection path.</p>
+<p><strong>Approach:</strong> Call <code>combine_measure(x, 2)</code> on its own and assert its specific message, separately from the unit mismatch test.</p>
+<p><strong>Why it holds here:</strong> The signature (FormalMeasure, numeric) matches exactly, so that method runs and stops with &quot;numeric input has no declared unit&quot;. It is a different branch from the mismatch check, so it needs its own test.</p>
+<p><strong>Tempting mistake:</strong> Treating the bare 2 as milliseconds because x is in ms. If that method were missing, dispatch would fail with a missing method error, and a test that matched any error would pass for the wrong reason.</p>
+<p><strong>Verify:</strong> <code>tryCatch(combine_measure(x, 2), error = conditionMessage)</code> returns &quot;numeric input has no declared unit&quot;.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Design a safe seconds-to-milliseconds conversion boundary.</p>
 <p>A dedicated conversion function checks the original unit, multiplies values by 1000, sets unit ms, and constructs a validated new FormalMeasure. It must reject unknown units.</p>
 <p><strong>Expected evidence:</strong> Two seconds converts to 2000 ms without changing the input.</p>
+<p><strong>Approach:</strong> Write <code>to_ms()</code> to validate its input, require unit &quot;s&quot;, multiply the values by 1000 and construct a new FormalMeasure with unit &quot;ms&quot;.</p>
+<p><strong>Why it holds here:</strong> A conversion must change values and unit together. Building a new object runs validity again, and the input is never modified, so 2 seconds becomes 2000 ms while seconds still holds 2 and &quot;s&quot;.</p>
+<p><strong>Tempting mistake:</strong> Changing only the unit with <code>seconds@unit &lt;- &quot;ms&quot;</code>. That relabels 2 as 2 ms, wrong by a factor of 1000, and the same mistake repeats if a ms object is converted without the unit check.</p>
+<p><strong>Verify:</strong> <code>to_ms(seconds)@values</code> returns 2000, <code>seconds@values</code> still returns 2, and <code>to_ms(x)</code> stops with &quot;conversion requires seconds&quot;.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 3 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-071-classifications-and-discovery">apache-071: Classifications and discovery<a class="heading-anchor" href="#apache-071-classifications-and-discovery" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-070</code>, <code>apache-069</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Classification:</strong> An Atlas label, optionally with attributes, attached to entities. Its meaning, owner and review process must be defined outside the string.</li>
+<li><strong>Discovery search:</strong> Finding entities by type, classification or attribute through Atlas&#x27;s search index rather than by GUID.</li>
+<li><strong>Index lag:</strong> The delay between a successful mutation and its appearance in search results while direct GUID reads already show it.</li>
+<li><strong>Classification propagation:</strong> Atlas&#x27;s option to pass a classification along lineage to downstream entities.</li>
+<li><strong>Enforcement point:</strong> The data-access boundary, such as a query engine authorizer, that must map a classification to a policy for any access to be denied.</li>
+</ul>
 <h3 id="a-classification-is-metadata-with-a-defined-meaning">A classification is metadata with a defined meaning<a class="heading-anchor" href="#a-classification-is-metadata-with-a-defined-meaning" aria-label="Link to this section">#</a></h3>
 <p>Atlas classifications label entities and can carry attributes. Examples might represent a review status, a sensitivity category or a business classification. The label&#x27;s meaning, owner and revision process must be defined outside the string itself. Two teams using the same word with different criteria can produce a misleading catalog even when every API request is syntactically valid.</p>
 <p>Discovery uses type, classification and other indexed metadata to locate assets. An entity read by GUID and a search result can exercise different backend paths. Search can lag behind a successful mutation, so a new classification may be visible in direct entity readback before every discovery query reflects it. Use bounded polling and retain that timing distinction.</p>
@@ -211,6 +219,25 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Record type identity, assigned versus propagated origin, exact entity GUID, mutation response, direct readback and discovery timing. Distinguish a failed label write from search lag and distinguish both from authorization behavior. Use an owner review with explicit criteria when classifications drive decisions.</p>
 <p><strong>Interview discussion: why can an asset remain readable after being classified as sensitive?</strong> Classification and enforcement are separate components unless a tested integration connects them. The two cases attach and remove a metadata statement while preserving asset identity and requiring independent evidence for search and actual data-access effects.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="define-and-attach-a-review-classification">Define and attach a review classification<a class="heading-anchor" href="#define-and-attach-a-review-classification" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">&quot;classificationDefs&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span>
+      <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ds60_&lt;owner&gt;_reviewed&quot;</span><span class="syntax-punctuation">,</span>
+      <span class="syntax-tag">&quot;superTypes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[],</span>
+      <span class="syntax-tag">&quot;typeVersion&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;1.0&quot;</span><span class="syntax-punctuation">,</span>
+      <span class="syntax-tag">&quot;attributeDefs&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[]</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>The classification type must exist before any entity can carry it, which is why apply creates missing typedefs first and refuses to alter an existing one with different super types. The curated entity then lists the label under classifications. A classification is a statement that someone reviewed the asset; it does not change who can read the data unless a separate policy engine acts on it.</p>
+<h4 id="find-assets-by-label-then-remove-one-label">Find assets by label, then remove one label<a class="heading-anchor" href="#find-assets-by-label-then-remove-one-label" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash">curl -s -u <span class="syntax-string">&quot;</span>$ATLAS_USER<span class="syntax-string">:</span>$ATLAS_PASSWORD<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  <span class="syntax-string">&quot;</span>$DS60_ATLAS_ENDPOINT<span class="syntax-string">/api/atlas/v2/search/basic?classification=ds60_&lt;owner&gt;_reviewed</span><span class="syntax-string">&quot;</span>
+curl -s -X DELETE -u <span class="syntax-string">&quot;</span>$ATLAS_USER<span class="syntax-string">:</span>$ATLAS_PASSWORD<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  <span class="syntax-string">&quot;</span>$DS60_ATLAS_ENDPOINT<span class="syntax-string">/api/atlas/v2/entity/guid/&lt;curated-guid&gt;/classification/ds60_&lt;owner&gt;_reviewed</span><span class="syntax-string">&quot;</span></code></pre>
+<p>Basic search goes through the search index, so a label attached a moment ago may not appear yet even though reading the entity by GUID already shows it. After the DELETE, the entity should remain ACTIVE with an empty classifications list; only the label is gone. If the entity itself disappears, the wrong endpoint was called. Poll search with a deadline before concluding the index is wrong.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="atlas-apache-071-prepared-command-notebook">Atlas apache-071 prepared command notebook<a class="heading-anchor" href="#atlas-apache-071-prepared-command-notebook" aria-label="Link to this section">#</a></h2>

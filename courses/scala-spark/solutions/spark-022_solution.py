@@ -31,7 +31,7 @@ def source_metrics(source):
 
 def build_grouped(source, partitions):
     if isinstance(partitions, bool) or not isinstance(partitions, int) or not 1 <= partitions <= 16:
-        raise ValueError("Partition budget is1..16")
+        raise ValueError("Partition budget is 1..16")
     source.sparkSession.conf.set("spark.sql.shuffle.partitions", str(partitions))
     return source.groupBy("key").agg(F.count(F.lit(1)).alias("n"))
 

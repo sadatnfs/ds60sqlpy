@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Build a multiplicity ledger before joining facts",
       "input_contract": "Return key, fact_rows, dimension_rows, predicted_inner for the union of key buckets. Merge NULL diagnostic buckets explicitly, but predict zero ordinary-equality pairs for NULL. Order keys with NULL last.",
-      "expected": "A:(2,3,6), B:(1,1,1), C:(1,0,0), D:(1,0,0), E:(0,1,0), NULL:(1,1,0). Predicted inner rows sum to 7.",
+      "expected": "A:(2, 3, 6), B:(1, 1, 1), C:(1, 0, 0), D:(1, 0, 0), E:(0, 1, 0), NULL:(1, 1, 0). Predicted inner rows sum to 7.",
       "verification": "Assert the full ledger and its summed predicted count, including unmatched right-only E and the NULL bucket."
     },
     {

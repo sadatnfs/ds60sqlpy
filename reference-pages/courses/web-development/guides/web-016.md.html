@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Grid arranges items along rows and columns. A track is the space between two adjacent grid lines. Fractional fr units share remaining space after fixed sizes and gaps have been considered. They are not a fixed percentage of the full container. An item&#x27;s minimum content contribution can still affect track size, which explains why a long unbroken value may widen an apparently equal grid.</p>
 <p>Grid is useful when rows and columns must align across a collection. An auto-fit repeat with minmax can create as many columns as fit a preferred minimum, then distribute remaining room. The minimum must still fit a narrow viewport. A layout should adapt to its content, not depend on one device model or a fixed card count.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Grid container:</strong> An element with <code>display: grid</code> that places its children into rows and columns.</li>
+<li><strong>Track:</strong> One row or column of a grid, sized by <code>grid-template-columns</code> or <code>grid-template-rows</code>.</li>
+<li><strong>Fr unit:</strong> A flexible length that shares a grid container&#x27;s free space among tracks in proportion to their fr values.</li>
+<li><strong>Minmax:</strong> The <code>minmax()</code> function that gives a track a minimum and a maximum size, such as <code>minmax(12rem, 1fr)</code>.</li>
+<li><strong>Auto-fit:</strong> The <code>repeat()</code> keyword that creates as many tracks as fit and collapses empty ones so the filled tracks stretch.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use <code>grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))</code> for a resilient card collection. The inner min permits a track to fit a container narrower than the preferred minimum. <code>gap</code> adds separation without changing source order. Named grid areas are useful for a page shell, but the source order must remain understandable when the layout collapses.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -222,6 +230,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">gap</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The column count adapts to available space.</p>
+<h3 id="contrast-case-a-1fr-track-widened-by-a-long-value">Contrast case: a 1fr track widened by a long value<a class="heading-anchor" href="#contrast-case-a-1fr-track-widened-by-a-long-value" aria-label="Link to this section">#</a></h3>
+<p>The first rule looks equivalent to worked example 1 but omits <code>minmax(0, 1fr)</code>. Place a long URL in the first cell.</p>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">grid-a</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">grid</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">grid-template-columns</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span>fr <span class="syntax-number">1</span>fr<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">gap</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">.</span><span class="syntax-class">grid-b</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">grid</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">grid-template-columns</span><span class="syntax-punctuation">:</span> <span class="syntax-function">repeat</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-function">minmax</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span>fr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">gap</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>A plain <code>1fr</code> track has an automatic minimum equal to its min-content size, so a long unbroken URL makes the first column wider than the second and can push the grid past its container. In <code>.grid-b</code> the minimum is 0, so both columns stay equal and the URL overflows inside its own cell, where you can add <code>overflow-wrap: anywhere</code> to keep it readable. With short words both grids look identical, which is why this difference only appears when you test with long content.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-why-two-1fr-tracks-plus-a-gap-are-not-two-50-widths-plus-a-gap">Exercise 1: Explain why two 1fr tracks plus a gap are not two 50% widths plus a gap.<a class="heading-anchor" href="#exercise-1-explain-why-two-1fr-tracks-plus-a-gap-are-not-two-50-widths-plus-a-gap" aria-label="Link to this section">#</a></h4>

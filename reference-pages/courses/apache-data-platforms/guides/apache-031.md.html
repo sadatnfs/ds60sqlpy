@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-031-connections-providers-and-security">apache-031: Connections, providers and security<a class="heading-anchor" href="#apache-031-connections-providers-and-security" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-027</code>, <code>apache-004</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Connection identifier:</strong> A name a task uses to request endpoint, login, credential and extra settings at runtime, keeping deployment values out of DAG code.</li>
+<li><strong>Secrets backend:</strong> A configured external store from which Airflow can resolve connections and variables instead of reading them from metadata storage.</li>
+<li><strong>Provider package:</strong> An installable package that supplies integration-specific hooks and operators. A connection record cannot create a missing provider.</li>
+<li><strong>Redacted diagnostics:</strong> A bounded observation that records which connection fields were present and valid without printing credential values.</li>
+</ul>
 <h3 id="a-connection-reference-separates-code-from-deployment-values">A connection reference separates code from deployment values<a class="heading-anchor" href="#a-connection-reference-separates-code-from-deployment-values" aria-label="Link to this section">#</a></h3>
 <p>A connection identifier names configuration that a task can request at runtime. It can hold endpoint, type, login, credential or extra settings, depending on the integration. Keeping the identifier in a DAG avoids embedding deployment-specific values directly into business logic. It does not itself make those values safe to print or grant the task permission to use every external system.</p>
 <p>Airflow can resolve connections from environment variables, metadata storage or a configured secrets backend. Providers supply integration-specific hooks and operators. Installing a provider and defining a connection are separate actions: a connection record cannot create a missing Python package, and an installed provider cannot invent valid credentials or network access.</p>

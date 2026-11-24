@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Draw per-lane address diagrams and compare useful bandwidth for array-of-structures and structure-of-arrays layouts.
+
 Work through *Coalescing, layouts and useful bandwidth* with the concrete cases below. Finish with this evidence:
 address diagrams, correctness, and a bandwidth interpretation using the actual input and timing scope. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Coalescing concerns how neighboring lanes' memory requests combine into transactions. The source loop may look sequential while lane addresses are far apart. Write the address for each lane first. Structure-of-arrays often helps a kernel that reads one field from many records, while array-of-structures can suit consumers that need complete records. Alignment, transaction size, cache and architecture affect the exact cost. Count useful bytes separately from fetched bytes and include conversion cost if layout changes. A layout beneficial for one kernel can hurt the full pipeline if every boundary requires reshuffling.
+
+### Key terms
+
+- **Coalesced access:** A warp access pattern in which neighboring lanes touch neighboring addresses, so few memory transactions serve the whole warp.
+- **Memory sector:** A 32-byte unit of global memory access; touching any byte of a sector moves the whole sector.
+- **Structure of arrays (SoA):** A layout that stores each field in its own contiguous array, so lanes reading one field read adjacent values.
+- **Array of structures (AoS):** A layout that stores whole records contiguously, so lanes reading one field read strided addresses.
+- **Useful bytes:** The bytes the algorithm actually needs, compared with the bytes moved to estimate wasted bandwidth.
 
 ## Mathematical contract
 

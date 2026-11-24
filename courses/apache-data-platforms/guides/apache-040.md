@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-039`, `apache-010`.
 
+## Key terms
+
+- **Field ID:** A stable numeric identifier Iceberg assigns to each column, so a rename or reorder keeps the same identity for existing data files.
+- **Schema evolution:** Committing a new table schema, such as adding, renaming or dropping a column, without rewriting existing data files.
+- **Optional field:** A column that may be null. Adding one is safe because older files that lack it read as missing.
+- **Required field:** A column that may not be null. Adding one without a valid default is unsafe because older files contain no value for it.
+- **Type promotion:** A widening type change, such as int to long, that Iceberg allows because every old value remains valid under the new type.
+
 ## A field name is not its identity
 
 A table column can be renamed, reordered or removed while older data files remain.
@@ -76,6 +84,33 @@ for applications?** The files remain interpretable through stable field IDs, but
 application text still refers to display names and business contracts. These
 cases demonstrate both the storage-level safety of a rename and the need for
 explicit compatibility rules when adding values that old rows never contained.
+
+## Worked examples
+
+### Confirm a rename keeps the field identifier
+
+```python
+before = table.schema().find_field("amount").field_id
+with table.update_schema() as update:
+    update.rename_column("amount", "revenue")
+after = table.schema().find_field("revenue").field_id
+print(before, after, before == after)
+```
+
+Both identifiers print the same small integer and the comparison is True, because Iceberg resolves columns by field ID and the rename only changes metadata. The Parquet files written before the rename still say amount in their own schema, and readers map them through the ID. A tool that matches by name instead of ID would read nulls for revenue in old files, so test renames with the reader you actually deploy.
+
+### Add an optional column without rewriting old rows
+
+```python
+from pyiceberg.types import LongType
+
+with table.update_schema() as update:
+    update.add_column("quality", LongType())
+rows = table.scan().to_arrow().to_pylist()
+print([row["quality"] for row in rows])
+```
+
+Existing rows report None for quality because the new field ID is absent from their files, and no data file is rewritten. Adding a required column to a table that already has rows is rejected, since old rows could not satisfy it. If a reader shows zeros instead of None for old rows, a default is being applied downstream and should be documented rather than assumed.
 
 ## Complete worked source
 

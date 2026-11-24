@@ -8,7 +8,7 @@ Advanced; approximately 105 minutes. Direct prerequisites: `spark-030`. The prep
 
 ## How to run this lesson
 
-Open `spark-031` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-031` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-031.scala) and [PySpark learner](../lessons/spark-031.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-031_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-031_solution.scala) and [PySpark reference](../solutions/spark-031_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -55,9 +55,7 @@ This finite example does not establish an indefinitely bounded aggregate state. 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
@@ -90,20 +88,7 @@ val batches = Seq(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -199,7 +184,7 @@ Read the owned JSON input through readStream with the declared schema and maxFil
 
 Group by team and compute row_count, known_amounts and total_amount. Use the same expression for streaming and batch relations without filling unknown amounts.
 
-**Expected result/shape:** The streaming result remains streaming and has one state/result row per team. Its eventual literal result is A(4,3,15), B(3,2,35), C(2,2,30).
+**Expected result/shape:** The streaming result remains streaming and has one state/result row per team. Its eventual literal result is `A(4, 3, 15)`, `B(3, 2, 35)`, `C(2, 2, 30)`.
 
 **Verify:** Assert output columns and streaming status now; verify the exact final tuples after bounded execution.
 
@@ -217,7 +202,7 @@ Start the aggregate in a uniquely named memory sink with complete mode, a fresh 
 
 ### Exercise 5: Reconcile processed input through progress evidence
 
-Return(batch_id, num_input_rows) from retained query progress. Sum input rows and inspect positive-input batches without confusing cumulative sink snapshots with new input.
+Return (batch_id, num_input_rows) from retained query progress. Sum input rows and inspect positive-input batches without confusing cumulative sink snapshots with new input.
 
 **Expected result/shape:** Three positive-input batches of 3 records and total input 9. Any zero-input progress entry contributes zero to that total.
 
@@ -229,7 +214,7 @@ Return(batch_id, num_input_rows) from retained query progress. Sum input rows an
 
 Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literal A/B/C oracle.
 
-**Expected result/shape:** Exactly A(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.
+**Expected result/shape:** Exactly `A(4, 3, 15)`, `B(3, 2, 35)`, `C(2, 2, 30)`, whose record counts sum 9, known counts 7 and amounts 80.
 
 **Verify:** Assert both path comparisons and the independent literal tuple list; confirm no active query remains before cleanup.
 
@@ -241,7 +226,7 @@ Do not write partially completed files into the watched input directory or reuse
 
 ## Self-check
 
-Explain the contract of `publishFile` / `publish_file` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `publishFile` / `publish_file` without reading its solution. Then, from memory, state what Exercise 6 (Compare final streaming output with batch and literal oracles) must produce: exactly `A(4, 3, 15)`, `B(3, 2, 35)`, `C(2, 2, 30)`, whose record counts sum 9, known counts 7 and amounts 80. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

@@ -9,11 +9,23 @@ The executable reference contains the two complete worked cases with assertions.
 
 Use graph operators deliberately and inspect the returned set. A tag on one model does not automatically label every downstream consumer.
 
+**Why it holds here:** tag:feature matches only base, the one model with the tag. The plus suffix adds descendants, which is why example_one returns base and child.
+
+**Plausible wrong approach:** Assuming that child inherits the tag because it reads from base would leave child out of a run that needs it, or include it in an audit list incorrectly.
+
+**How to verify:** Run dbt ls --select tag:feature --resource-type model --output name and expect only base.
+
 **Expected:** Only the explicitly tagged model is selected.
 
 ## 2. Add an unrelated change
 
 Record the baseline revision and exact selection expression. The expected scope should be reviewed rather than inferred from a successful command.
+
+**Why it holds here:** state:modified compares the current manifest to the stored copy. Editing unrelated adds it to the modified set, while unrelated has no children to add with the plus.
+
+**Plausible wrong approach:** Assuming a command that ran successfully selected what was intended skips the check of the actual returned names.
+
+**How to verify:** Edit unrelated.sql to select 10 as x and run ls with --state previous_state --select state:modified+; expect unrelated in the list alongside any other edited models.
 
 **Expected:** The changed node appears under the matching state selector.
 
@@ -21,11 +33,23 @@ Record the baseline revision and exact selection expression. The expected scope 
 
 Use a dedicated state directory or immutable CI artifact. A self-overwritten baseline can incorrectly make changes appear absent.
 
+**Why it holds here:** The reference copies target/manifest.json into previous_state before editing base. If the baseline lived in target/, the next parse would overwrite it with the new manifest.
+
+**Plausible wrong approach:** Pointing --state at target itself compares a manifest to itself and returns no modified nodes, which looks like nothing changed.
+
+**How to verify:** Run parse again after the edit, then check that previous_state/manifest.json still has base's original checksum and the state selection still returns base and child.
+
 **Expected:** The next invocation does not overwrite it.
 
 ## 4. Change only data
 
 Use the selection appropriate to the data update and validate relevant outputs. Definition comparison alone cannot establish that existing materializations are current.
+
+**Why it holds here:** state:modified compares definitions like SQL text and config. New rows in a seed or source change the data but not the definition.
+
+**Plausible wrong approach:** Running only modified models after a data load would skip models that depend on the new data and leave their tables out of date.
+
+**How to verify:** Append a row to a seed without editing any SQL, run state:modified+, and observe that no model is selected even though downstream results would change.
 
 **Expected:** The answer distinguishes definitions from data state.
 
@@ -33,11 +57,23 @@ Use the selection appropriate to the data update and validate relevant outputs. 
 
 Review indirect-selection policy and the actual result list. An empty test selection must not be reported as a successful validation suite.
 
+**Why it holds here:** Dropping --resource-type model and adding a test on base lets ls return tests attached to selected models. This depends on the indirect selection mode.
+
+**Plausible wrong approach:** Running dbt test --select state:modified when no tests are attached returns success with zero tests, which is not a validation.
+
+**How to verify:** Add a not_null test on base.x, run ls --select state:modified+ without the resource filter, and expect the test node next to base and child.
+
 **Expected:** The intended tests are visible in the selection.
 
 ## 6. Record a CI decision
 
 Keep the source revision, manifest identity, selected node set, commands and actual outcomes. Use a broader gate when the change affects shared semantics or operational assumptions.
+
+**Why it holds here:** A reduced build is justified only when the baseline, selection expression, selected nodes and actual outcomes are all recorded together.
+
+**Plausible wrong approach:** Recording only that CI passed hides which models were skipped and why.
+
+**How to verify:** Store the baseline manifest hash, the exact command, the ls output and run_results statuses, and check that a reviewer can rebuild the same list.
 
 **Expected:** It includes baseline, selection, dependencies and executed results.
 

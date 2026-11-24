@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Grouped bars support comparison of categories within several groups using a shared baseline for each bar. Stacked bars emphasize totals and composition, but interior segments do not share a common baseline. The choice depends on whether the reader needs precise subgroup comparisons or an overview of parts and whole.</p>
 <p>A stack layout computes interval endpoints for each series in each row. The rectangle represents the distance between the lower and upper endpoints, not the upper endpoint alone. A normalized stack transforms each row to shares, which can hide differences in total magnitude.</p>
 <p>A zero total has no meaningful fraction composition unless a policy is stated. Missing components also differ from known zeros. Preserve the original totals alongside a 100% chart so the reader can see whether a large-looking share represents two observations or two million.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Stack layout:</strong> The <code>d3.stack().keys(...)</code> layout that returns, for each series and row, a <code>[lower, upper]</code> pair of cumulative endpoints. A segment&#x27;s height is the distance between the two endpoints.</li>
+<li><strong>Grouped bars:</strong> Subgroup bars placed side by side within each group so every bar shares a common baseline for precise comparison.</li>
+<li><strong>Normalization:</strong> Rescaling each row so its components sum to one, as <code>d3.stackOffsetExpand</code> does. It shows shares but hides differences in totals.</li>
+<li><strong>Denominator:</strong> The total that a share is computed against. A zero total makes a composition undefined and requires an explicit policy.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>d3.stack().keys([&#x27;a&#x27;,&#x27;b&#x27;])</code> reads the named components from each record and returns one series for each key. A point is <code>[lower, upper]</code> and retains its original row in <code>.data</code>. Use y(lower)-y(upper) for positive vertical height.</p>
 <p><code>stackOffsetExpand</code> normalizes each row to unit total when appropriate. Validate finite nonnegative components for this introductory positive stack. Signed values need a different design, such as a diverging stack with explicit positive and negative baselines.</p>

@@ -1,6 +1,6 @@
 # c-040: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-040_solution.c`, implements all six cases, from the "use caller-owned output" case to the "transfer an empty payload" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -21,13 +21,13 @@ CHECK(copy_api("hello", out, sizeof out, &required) == API_OK);
 CHECK(required == 5 && strcmp(out, "hello") == 0);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `required == 5 && strcmp(out, "hello") == 0`. Restoring the original line brings back the worked observation: the output is complete and required length is 5.
+**Expected:** With `CHECK(copy_api("hello!", out, sizeof out, &required) == API_OK);` the run stops with `Check failed` at the CHECK on `required == 5 && strcmp(out, "hello") == 0`, because the "use caller-owned output" case no longer shows that the output is complete and required length is 5. Restoring `CHECK(copy_api("hello", out, sizeof out, &required) == API_OK);` brings that observation back.
 
 Caller-owned storage avoids requiring the foreign runtime to guess a deallocator.
 
 ## Exercise 2: Report insufficient capacity: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `char out[4] = "old!";`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "report insufficient capacity" case, so one line now reads `char out[4] = "old!";`. Run the example with that line, use the failing CHECK to find why the status is too-small and required length is 5 no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -38,7 +38,7 @@ CHECK(copy_api("hello", out, sizeof out, &required) == API_TOO_SMALL);
 CHECK(required == 5 && strcmp(out, "old") == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `required == 5 && strcmp(out, "old") == 0`; after it the line reads `char out[4] = "old";` again and the status is too-small and required length is 5.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `required == 5 && strcmp(out, "old") == 0`. Once the line reads `char out[4] = "old";` again, the "report insufficient capacity" case again shows that the status is too-small and required length is 5.
 
 The API reports the required payload length and preserves output on failure. The caller must reserve one more byte for termination.
 
@@ -98,4 +98,4 @@ The empty payload still requires one writable byte under this null-terminated AB
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer an empty payload" case to your own c-040 source. Explain why every access in `copy_api` or `identity_u32` stays within a live object and each owned resource is released. An expected ABI failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "report insufficient capacity" case apart from ordinary output: the fixture proves its stated ABI, calling convention and allocator boundary assumptions, not universal safety.

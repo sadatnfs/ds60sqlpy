@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict Course.NetAfterFee(50,0).</p>
 <p>The result is 50.</p>
+<p><strong>Why it fits this model:</strong> A rate of 0 is inside the 0 to 1 domain, so the function returns amount x (1 - 0).</p>
+<p><strong>Tempting mistake:</strong> Expecting 0 to count as omitted and trigger the 0.1 default, which gives 45. The default applies only when the argument is missing.</p>
+<p><strong>How to confirm:</strong> Course.NetAfterFee(50, 0) returns 50.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the default rate to 0.15 in a hypothetical version.</p>
 <p>The 187 default call would become 158.95; the explicit 0.2 call would remain 149.6.</p>
+<p><strong>Why it fits this model:</strong> Calls that omit the rate use the default, so only the first column moves: 187 x 0.85. The explicit 0.2 call still computes 187 x 0.8.</p>
+<p><strong>Tempting mistake:</strong> Expecting both columns to change because both call the same function. An explicit argument always overrides the default.</p>
+<p><strong>How to confirm:</strong> DefaultFee becomes 158.95 and ExplicitTwentyPercent stays 149.6.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a function contract with units and domain.</p>
 <p>Amount is a numeric value in one declared currency; feeRate is a dimensionless fraction in 0..1; output uses the same currency and invalid rates return BLANK.</p>
+<p><strong>Why it fits this model:</strong> The contract names the amount&#x27;s currency (USD for NetRevenue), the rate as a fraction from 0 to 1, the output in the same currency, and BLANK for invalid rates.</p>
+<p><strong>Tempting mistake:</strong> A caller passing 10 for 10 percent gets BLANK, because 10 is outside the domain. Without the contract, that looks like a bug.</p>
+<p><strong>How to confirm:</strong> Course.NetAfterFee(187, 0.1) returns 168.3 and Course.NetAfterFee(187, 10) returns BLANK, both as documented.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose treating a measure reference as a function that accepts a rate argument.</p>
 <p>Use a defined UDF for explicit parameters, or model a disconnected parameter selection for a measure; do not invent measure-call syntax.</p>
+<p><strong>Why it fits this model:</strong> Measures take no arguments. A rate that varies by caller is either a UDF parameter or a selection from a disconnected parameter table read with SELECTEDVALUE.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>[NetRevenue](0.2)</code> as if a measure accepted a rate. It is not valid DAX.</p>
+<p><strong>How to confirm:</strong> Course.NetAfterFee([NetRevenue], 0.2) returns 149.6; a parameter table with 0.2 selected should give the same.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why function text alone does not prove an external model supports UDFs.</p>
 <p>Verify the documented product release and database compatibility level before external use; this offline file is not a compiler receipt.</p>
+<p><strong>Why it fits this model:</strong> Whether UDFs are available depends on the product release, the feature&#x27;s status and the model&#x27;s compatibility level. Valid function text does not show that support.</p>
+<p><strong>Tempting mistake:</strong> Copying the FUNCTION definition into an older model and assuming that, since it ran in this course, it will deploy.</p>
+<p><strong>How to confirm:</strong> Check the target release and compatibility level in the documentation, then run case A in that model and expect 168.3 and 149.6.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the rule to reusable metric normalization.</p>
 <p>Document units, accepted domains, missingness and evaluation-mode assumptions, then test boundary calls and the caller&#x27;s context separately.</p>
+<p><strong>Why it fits this model:</strong> A normalization function, such as revenue per unit, should take both values as parameters: 187 / 17 = 11 USD per unit overall.</p>
+<p><strong>Tempting mistake:</strong> A function that applies ALL(Product) inside its body. Every caller then gets the overall figure, 11, even under Blue, where 163 / 12 is about 13.58.</p>
+<p><strong>How to confirm:</strong> Call it under Blue and expect about 13.58; any population change belongs in the caller&#x27;s filters, where it is visible.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

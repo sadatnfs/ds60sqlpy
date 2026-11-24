@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A Kubernetes manifest describes a typed API request. <code>apiVersion</code> chooses a resource API version; <code>kind</code> chooses the object type; metadata names and labels the object. For a Deployment, spec expresses desired state, including replica count and a Pod template. Status is an observed server/controller report, not a field to invent in the learner source.</p>
-<p>YAML indentation defines nesting. A number such as replicas:1 must be a number, not a quoted string. The Deployment selector must match the Pod-template labels. Some API kinds, such as ConfigMap, use data rather than spec: do not force every object into a memorized shape. The source intentionally omits namespace so the reviewed operation binds it from a valid owned lease. It may not use current-context, accept an arbitrary host target or silently broaden credentials. <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment concepts</a> explain the desired-state structure.</p>
+<p>YAML indentation defines nesting. A number such as <code>replicas: 1</code> must be a number, not a quoted string. The Deployment selector must match the Pod-template labels. Some API kinds, such as ConfigMap, use data rather than spec: do not force every object into a memorized shape. The source intentionally omits namespace so the reviewed operation binds it from a valid owned lease. It may not use current-context, accept an arbitrary host target or silently broaden credentials. <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment concepts</a> explain the desired-state structure.</p>
 <ul>
 <li><strong>apiVersion:</strong> the API group/version for a resource type</li>
 <li><strong>kind:</strong> the requested resource category</li>
@@ -248,7 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Do not confuse a container name with the Deployment name.</li>
 </ol>
 <h4 id="exercise-2-validate-a-numeric-field">Exercise 2: Validate a numeric field<a class="heading-anchor" href="#exercise-2-validate-a-numeric-field" aria-label="Link to this section">#</a></h4>
-<p>Compare replicas:1 with replicas:&quot;two&quot; in a scratch copy.</p>
+<p>Compare <code>replicas: 1</code> with <code>replicas: &quot;two&quot;</code> in a scratch copy.</p>
 <p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 2, one valid number and one invalid string.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 2, numeric 1 is the intended request; the string is rejected by schema validation.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 2, retain the validation phase/result and do not claim a rejected object has a new UID.</p>

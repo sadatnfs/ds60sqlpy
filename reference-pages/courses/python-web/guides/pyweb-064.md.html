@@ -197,6 +197,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>pyweb-063</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A service can commit a business change and crash before notifying another component. It can also send a notification successfully and lose the acknowledgement. This chapter implements a small transactional outbox and an idempotent consumer using actual SQLite transactions to expose both problems clearly.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Transactional outbox:</strong> A table written in the same transaction as the business change, so the change and its notification intent commit or roll back together.</li>
+<li><strong>Dispatcher:</strong> A separate process that reads outbox entries and delivers them, retrying when delivery is not confirmed.</li>
+<li><strong>At-least-once delivery:</strong> A guarantee that a message is delivered one or more times, because a lost acknowledgement leads to a retry.</li>
+<li><strong>Idempotent consumer:</strong> A receiver that records each event identity with its effect, here with <code>INSERT OR IGNORE</code>, so a repeated delivery changes nothing.</li>
+</ul>
 <h3 id="mechanism-commit-intent-alongside-the-business-effect">Mechanism: commit intent alongside the business effect<a class="heading-anchor" href="#mechanism-commit-intent-alongside-the-business-effect" aria-label="Link to this section">#</a></h3>
 <p>An outbox stores a message or event in the same database transaction as the business operation. If the transaction commits, both the operation and the notification intent exist. If it rolls back, neither exists. A separate dispatcher can later read the outbox and deliver its entries.</p>
 <p>This pattern does not make external delivery exactly once. A dispatcher can deliver and crash before marking completion, causing a retry. The consumer therefore records an event identity in the same transaction as its own effect. Repeated delivery of that identity has no second effect.</p>
@@ -209,6 +216,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The consumer first inserts the event identity into the applied table. Only when that insert is new does it update the total. Both actions occur in one transaction. Two deliveries produce inserted counts 1 and 0, and the total increases only once.</p>
 <p>The order of those operations matters. Recording the identity and then updating the total in separate transactions could lose the effect after a crash. Updating the total first and recording the identity later could duplicate it after a retry. Atomicity joins the decision and effect.</p>
 <p>An external effect that cannot participate in the consumer&#x27;s transaction needs its own idempotency/reconciliation mechanism. The outbox pattern does not magically make an arbitrary email or third-party API call transactional with the local database.</p>
+<h3 id="worked-example-a-capped-backoff-schedule-that-respects-a-deadline">Worked example: a capped backoff schedule that respects a deadline<a class="heading-anchor" href="#worked-example-a-capped-backoff-schedule-that-respects-a-deadline" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">schedule</span><span class="syntax-punctuation">(</span>base<span class="syntax-punctuation">,</span> cap<span class="syntax-punctuation">,</span> attempts<span class="syntax-punctuation">,</span> budget<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    delays<span class="syntax-punctuation">,</span> spent <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span>
+    <span class="syntax-keyword">for</span> attempt <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>attempts<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        ceiling <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>cap<span class="syntax-punctuation">,</span> base <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>attempt<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> spent <span class="syntax-operator">+</span> ceiling <span class="syntax-operator">&gt;</span> budget<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">break</span>
+        delays<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>ceiling<span class="syntax-punctuation">)</span>
+        spent <span class="syntax-operator">+</span><span class="syntax-operator">=</span> ceiling
+    <span class="syntax-keyword">return</span> delays
+
+
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>schedule<span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>schedule<span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">[0.1, 0.2, 0.4, 0.8, 1.6]
+[0.1, 0.2, 0.4]</code></pre>
+<p>Each delay doubles until the two second cap, and the loop stops before the total wait would pass the caller&#x27;s budget, so eight permitted attempts shrink to five under a five second deadline and to three under one second. In production each ceiling would be the upper bound of a random full jitter delay, so many clients do not retry in lockstep. A schedule only makes retries polite; it does not make them safe. They are safe in the lesson because <code>accept</code> looks up the order identifier first and returns <code>replayed</code> instead of inserting a second order.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Does at-least-once delivery mean duplicate business effects are inevitable?</strong> No. A consumer can make its effect idempotent with a stable identity and atomic storage rule, as this fixture demonstrates.</p>
 <p><strong>Can outbox entries be deleted immediately after sending?</strong> Only under a deliberate delivery and retention policy. A lost acknowledgement, delayed retry or audit requirement may need the identity and outcome to remain available.</p>

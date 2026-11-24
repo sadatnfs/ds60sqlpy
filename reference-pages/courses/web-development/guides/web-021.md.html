@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A media query responds to the viewport or device environment. A container query can respond to an ancestor container&#x27;s size, which is useful when the same component appears in a wide article and a narrow sidebar on the same page. The component should adapt to the space it receives instead of assuming it always spans the viewport.</p>
 <p>Size containment changes how a container participates in sizing. Declare it deliberately on an appropriate wrapper, not on every element. A size query targets an eligible ancestor, not the queried element itself. Keep a useful base layout so the component remains readable in environments where the query is unsupported or never matches.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Container query:</strong> An <code>@container</code> rule that applies styles based on the size of an ancestor container rather than the viewport.</li>
+<li><strong>Query container:</strong> An ancestor with <code>container-type</code> set, such as <code>inline-size</code>, whose dimensions container queries measure.</li>
+<li><strong>Size containment:</strong> The isolation <code>container-type: inline-size</code> applies so the container&#x27;s inline size does not depend on its children, preventing a query loop.</li>
+<li><strong>Inline size:</strong> The dimension along the direction text runs, which is the width in a horizontal writing mode.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Set <code>container-type:inline-size</code> on a wrapper, optionally with a container-name. Inside <code>@container</code>, adjust the descendant component when its wrapper is wide enough. Prefer logical dimensions so the design does not unnecessarily assume a writing direction. This chapter demonstrates progressive enhancement; the unqueried stacked card remains functional.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -224,6 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Only cards in sufficiently wide containers switch layout.</p>
+<h3 id="contrast-case-a-component-that-tries-to-query-itself">Contrast case: a component that tries to query itself<a class="heading-anchor" href="#contrast-case-a-component-that-tries-to-query-itself" aria-label="Link to this section">#</a></h3>
+<p>Here the containment declaration moved from the wrapper onto the card. The query text is unchanged from worked example 2.</p>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">card</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">container-type</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">inline</span><span class="syntax-operator">-</span>size<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">grid</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">gap</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">@</span><span class="syntax-keyword">container</span> <span class="syntax-operator">(</span><span class="syntax-tag">inline-size</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-tag">28rem</span><span class="syntax-operator">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">card</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">grid-template-columns</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8</span><span class="syntax-keyword">rem</span> <span class="syntax-function">minmax</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span>fr<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>A container query selects the nearest ancestor that is a query container, never the element being styled. Because <code>.card</code> is now the container and no ancestor is, the <code>@container</code> rule finds nothing to measure for <code>.card</code> and the card stays stacked at every width. Children of the card could respond to its size, but the card itself cannot. Put the declaration back on <code>.slot</code>, keep the card as a descendant, and the two slots from worked example 2 again choose their layouts independently. The Styles panel marks the container rule as not applied while it is broken.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-why-two-cards-on-the-same-viewport-can-use-different-layouts">Exercise 1: Explain why two cards on the same viewport can use different layouts.<a class="heading-anchor" href="#exercise-1-explain-why-two-cards-on-the-same-viewport-can-use-different-layouts" aria-label="Link to this section">#</a></h4>

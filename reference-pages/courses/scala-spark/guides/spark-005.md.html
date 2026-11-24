@@ -254,7 +254,7 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Progressive hint:</strong> Pattern-match the original Option first; only supplied tokens need the parse-result decision.</p>
 <h4 id="exercise-3-collect-only-observed-numerical-values">Exercise 3: Collect only observed numerical values<a class="heading-anchor" href="#exercise-3-collect-only-observed-numerical-values" aria-label="Link to this section">#</a></h4>
 <p>Return valid parsed amounts in original order using flatMap. Preserve zero and duplicate amounts; do not substitute defaults for missing or rejected tokens.</p>
-<p><strong>Expected result/shape:</strong> The five-token fixture yields Seq(0L, 25L). Adding another Some(&quot;25&quot;) yields two 25-cent occurrences.</p>
+<p><strong>Expected result/shape:</strong> The five-token fixture yields <code>Seq(0L, 25L)</code>. Adding another Some(&quot;25&quot;) yields two 25-cent occurrences.</p>
 <p><strong>Verify:</strong> Assert exact observed sequences and an all-missing/rejected fixture returning empty.</p>
 <p><strong>Progressive hint:</strong> A sequence flatMap can concatenate zero-or-one results from each Option parser.</p>
 <h4 id="exercise-4-reconcile-all-input-states">Exercise 4: Reconcile all input states<a class="heading-anchor" href="#exercise-4-reconcile-all-input-states" aria-label="Link to this section">#</a></h4>

@@ -237,23 +237,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict February Home actual and budget.</p>
 <p>Actual 36, budget 50 and variance -14.</p>
+<p><strong>Why it fits this model:</strong> February Home has one sale, S8 at 36, and one monthly budget row, 202502 Home 50. The full-month guard holds, so variance is 36 - 50.</p>
+<p><strong>Tempting mistake:</strong> Leaving out the Category TREATAS assigns the whole February budget, 25 + 50 = 75, to Home.</p>
+<p><strong>How to confirm:</strong> With MonthNumber 2 and Category Home, expect Actual 36, ComparableBudget 50 and Variance -14.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Combine both January categories.</p>
 <p>Actual 67, budget 90 and variance -23.</p>
+<p><strong>Why it fits this model:</strong> Without a category filter, VALUES(Product[Category]) returns every category, so TREATAS picks both January budget rows, 60 + 30. Actuals are 47 + 20.</p>
+<p><strong>Tempting mistake:</strong> Averaging the category attainment ratios, 47 / 60 (0.783) and 20 / 30 (0.667), gives 0.725 instead of the combined 67 / 90, about 0.744.</p>
+<p><strong>How to confirm:</strong> For full January 2025 without a category filter, expect Actual 67, ComparableBudget 90 and Variance -23.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Specify a uniform daily allocation for January Paper.</p>
 <p>Each of 31 calendar days receives 60/31; the complete-month allocation reconciles to 60. This is a chosen policy, not an observed daily target.</p>
+<p><strong>Why it fits this model:</strong> A uniform policy gives each of January&#x27;s 31 days 60 / 31, about 1.94, and the days add back to 60.</p>
+<p><strong>Tempting mistake:</strong> Dividing by the 2 days with Paper sales (January 2 and 3) puts 30 on each, so the target depends on when sales happened.</p>
+<p><strong>How to confirm:</strong> January 2 gets about 1.94 against an actual of 27; the 31 daily allocations sum to 60.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose attaching 60 to every January sales line then summing.</p>
 <p>The result depends on transaction count and overstates the budget. Aggregate or allocate at a compatible grain.</p>
+<p><strong>Why it fits this model:</strong> Budget is monthly by category. January Paper has two lines, S4 and S5, so attaching the target to each line repeats it.</p>
+<p><strong>Tempting mistake:</strong> Using <code>SUMX ( Sales, 60 )</code> for January Paper gives 120, double the target, and would grow with every extra line.</p>
+<p><strong>How to confirm:</strong> The compatible-grain target is 60; compare it with an actual of 47.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain a missing category-budget row.</p>
 <p>Keep an unavailable-budget signal or a declared exclusion; do not invent a variance by silently coalescing the target to zero.</p>
+<p><strong>Why it fits this model:</strong> Travel has no budget row, and if 202502 Home were missing, February Home would have no target either.</p>
+<p><strong>Tempting mistake:</strong> Coalescing a missing target to 0 turns February Home into a variance of +36 when it has no target.</p>
+<p><strong>How to confirm:</strong> With the row removed, ComparableBudget should be BLANK and the measure should flag a missing budget rather than return 36.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the rule to headcount plans and employee events.</p>
 <p>Define comparable populations and allocation before joining or summing them, and reconcile the allocated total to the plan.</p>
+<p><strong>Why it fits this model:</strong> Headcount plans are often by department and quarter, while hires and exits are individual events with dates. Like Budget against Sales, compare them at the plan&#x27;s grain.</p>
+<p><strong>Tempting mistake:</strong> Joining the quarterly plan to each hire event and summing repeats the plan per hire, just as 60 per sales line did.</p>
+<p><strong>How to confirm:</strong> Aggregate events to department and quarter, compare with the plan, and if allocating to months, check that the months add back to the plan.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

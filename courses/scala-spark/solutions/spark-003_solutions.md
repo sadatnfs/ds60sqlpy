@@ -44,61 +44,61 @@ assert(bonus(10L) == 2L)
 
 ### Exercise 1: Separate definition and call
 
-**Inputs/evidence:** For spark-003 Exercise 1, addCents(100L, 25L), addCents(0L, 25L).
+**Inputs/evidence:** `AddCents(100L, 25L)`, `addCents(0L, 25L)`.
 
-**Expected result/shape:** For spark-003 Exercise 1, 125L and 25L.
+**Expected result/shape:** 125L and 25L.
 
-**Verify:** For spark-003 Exercise 1, assert both returned values; distinguish parameter names from arguments.
+**Verify:** Assert both returned values; distinguish parameter names from arguments.
 
 left/right name inputs in the definition. 100L and 25L are arguments in a call. The function definition is reused rather than copied and edited.
 
 ### Exercise 2: Implement branch order
 
-**Inputs/evidence:** For spark-003 Exercise 2, 0L with both membership values;100L with both values.
+**Inputs/evidence:** 0L with both membership values; 100L with both values.
 
-**Expected result/shape:** For spark-003 Exercise 2, fees 0/0 for zero and 0/20 for 100.
+**Expected result/shape:** Fees 0/0 for zero and 0/20 for 100.
 
-**Verify:** For spark-003 Exercise 2, assert all four cases and inspect guard order.
+**Verify:** Assert all four cases and inspect guard order.
 
 If nonmember is checked first, zero can incorrectly receive the flat 20-cent fee. The boundary guard must take precedence over membership.
 
 ### Exercise 3: Test the membership threshold
 
-**Inputs/evidence:** For spark-003 Exercise 3, member 499L, 500L, 501L.
+**Inputs/evidence:** Member 499L, 500L, 501L.
 
-**Expected result/shape:** For spark-003 Exercise 3, fees 0L, 25L, 25L.
+**Expected result/shape:** Fees 0L, 25L, 25L.
 
-**Verify:** For spark-003 Exercise 3, assert the exact three outputs and explain integer division.
+**Verify:** Assert the exact three outputs and explain integer division.
 
 The 500 equality belongs to the percentage branch. 501*5/100 floors 25.05 to 25 integer cents under the stated policy; this is a deliberate rounding rule.
 
 ### Exercise 4: Use named arguments
 
-**Inputs/evidence:** For spark-003 Exercise 4, feeCents(isMember=true, amount=1000L).
+**Inputs/evidence:** `feeCents(isMember=true, amount=1000L)`.
 
-**Expected result/shape:** For spark-003 Exercise 4, 50L, equal to the positional call.
+**Expected result/shape:** 50L, equal to the positional call.
 
-**Verify:** For spark-003 Exercise 4, assert both calls give 50L; do not change the definition.
+**Verify:** Assert both calls give 50L; do not change the definition.
 
 Named arguments bind by parameter name. Reordering them is a readability choice and does not change the fee rule or types.
 
 ### Exercise 5: Reject hidden state
 
-**Inputs/evidence:** For spark-003 Exercise 5, two consecutive feeCents(1000L, true) calls and negative amount-1L.
+**Inputs/evidence:** Two consecutive `feeCents(1000L, true)` calls and negative amount-1L.
 
-**Expected result/shape:** For spark-003 Exercise 5, both calls 50L; negative amount yields 0L even for a nonmember.
+**Expected result/shape:** Both calls 50L; negative amount yields 0L even for a nonmember.
 
-**Verify:** For spark-003 Exercise 5, repeat exact calls and explain why a call counter must not alter the returned fee.
+**Verify:** Repeat exact calls and explain why a call counter must not alter the returned fee.
 
 Counting calls inside a pricing rule can make retries change business output. Preserve a pure calculation and keep operational counting separate.
 
 ### Exercise 6: Transfer and explain the domain
 
-**Inputs/evidence:** For spark-003 Exercise 6, 2000L, true/false and 2000000L.
+**Inputs/evidence:** 2000L, true/false and 2000000L.
 
-**Expected result/shape:** For spark-003 Exercise 6, 100L/20L; the out-of-domain input is rejected by the reference precondition.
+**Expected result/shape:** 100L/20L; the out-of-domain input is rejected by the reference precondition.
 
-**Verify:** For spark-003 Exercise 6, assert the two valid results and identify the violated bound for the third.
+**Verify:** Assert the two valid results and identify the violated bound for the third.
 
 The rule scales within the bounded domain. The require guard is evidence of that domain, not a claim that all financial products can use this rounding or fee policy.
 

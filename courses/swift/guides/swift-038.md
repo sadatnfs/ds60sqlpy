@@ -22,6 +22,10 @@ Build only the operations the small language needs. Supporting conditionals, loo
 
 **Intermediate result:** A value produced by one expression before combination.
 
+**Builder method:** A static function such as buildExpression or buildBlock that the compiler calls to convert and combine the block's expressions.
+
+**buildOptional:** The builder method that turns an if without else into a component, supplying an empty contribution when the condition is false.
+
 ## How to run this lesson
 
 The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
@@ -113,11 +117,11 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Compose report sections) before changing anything, and confirm its observation: Two expressions become an ordered array of sections.
 2. Compare Example B (Include a conditional section) with Example A and name the first line whose behavior differs. Its observation is: The conditional contributes its section when true.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A result builder is not runtime reflection or arbitrary syntax parsing.
+3. Before opening the explanation, check your task 3 attempt (Build a small report declaration using the existing builder) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 
-Explain Result builder, Declarative composition, Intermediate result without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain Result builder, Declarative composition, Intermediate result, Builder method, buildOptional without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
 
 ## Sources and execution boundary
 

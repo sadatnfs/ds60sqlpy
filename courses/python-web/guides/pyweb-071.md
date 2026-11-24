@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-070`.
 
 A useful test suite combines successful boundary cases, invalid inputs, side-effect checks and recovery after failure. This chapter executes a small unittest suite against a real FastAPI application. It deliberately does not call those tests a load benchmark or a deployed-service acceptance test.
 
+## Key terms
+
+- **Test isolation:** Giving each test its own fresh application and state so results do not depend on the order tests run in.
+- **Boundary value:** An input at or just beyond an accepted limit, such as quantity 0, 1, 5 or 6, which is where validation errors usually hide.
+- **subTest:** A unittest context manager that reports each related input separately so a failure names the exact value.
+- **Side-effect assertion:** Checking stored effects after a request, since a status code alone cannot prove that a refused request changed nothing.
+- **Dependency failure:** A simulated unavailable dependency that returns 503 before any effect, followed by a check that the service recovers.
+
 ## Mechanism: each test states a behavioral claim
 
 The fixture accepts a strict integer quantity between 1 and 5. A successful request appends one effect and returns 201. An unavailable dependency causes 503 before the append. Each test creates a fresh application and effects list, then closes its TestClient during teardown.
@@ -29,6 +37,41 @@ The second behavior disables the controlled dependency flag, sends a valid reque
 This checks recovery, which a failure-only test can miss. A resource may remain poisoned after an error, or an exception handler may close shared state accidentally. A successful operation after the failure demonstrates that the finite fixture returned to a usable state.
 
 The dependency flag is an explicit fault-injection seam, not a simulated network outage presented as one. The owned workshop separately stops/restarts actual service components and observes durable state. Both kinds of tests are useful when their claims remain distinct.
+
+## Worked example: lax coercion accepts values the strict contract refuses
+
+```python
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+
+class Lax(BaseModel):
+    quantity: int = Field(ge=1, le=5)
+
+
+class Strict(Lax):
+    model_config = ConfigDict(strict=True)
+
+
+for value in (2, "2", True, 2.0):
+    results = []
+    for model in (Lax, Strict):
+        try:
+            results.append(model(quantity=value).quantity)
+        except ValidationError as error:
+            results.append(error.errors()[0]["type"])
+    print(repr(value), results)
+```
+
+Expected output:
+
+```text
+2 [2, 2]
+'2' [2, 'int_type']
+True [1, 'int_type']
+2.0 [2, 'int_type']
+```
+
+In lax mode pydantic converts the string `"2"`, the float `2.0` and even `True`, which becomes a reservation of quantity 1. The lesson's `Input` model sets `strict=True`, and its `test_invalid_values_have_no_effect` case lists `True` and `"2"` for this reason: a boundary test that only tried 0 and 6 would pass against either model and miss the coercion. Running each value inside `subTest` lets one failing input be reported without hiding the others, and checking `self.effects` afterward proves that a 422 also left no side effect.
 
 ## Failure diagnosis and discussion
 

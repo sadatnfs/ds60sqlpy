@@ -198,21 +198,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-compute-a-denominator">1. Compute a denominator<a class="heading-anchor" href="#1-compute-a-denominator" aria-label="Link to this section">#</a></h3>
 <p>Use tp+fn and retain the underlying counts. Accuracy uses a different denominator and can tell a different story.</p>
+<p>Slice A has tp 8 and fn 2, so TPR is 8/10 = 0.8; slice B has tp 2 and fn 3, so TPR is 2/5 = 0.4. Dividing by n (20 and 10) would give 0.4 and 0.2, which are positive counts over all rows rather than recall. Accuracy is 17/20 = 0.85 for A and 6/10 = 0.6 for B. Notice that accuracy and TPR both rank A above B here, but they need not: a slice with many true negatives can have high accuracy and poor recall.</p>
 <p><strong>Expected:</strong> It counts actual positives, not all rows.</p>
 <h3 id="2-add-uncertainty">2. Add uncertainty<a class="heading-anchor" href="#2-add-uncertainty" aria-label="Link to this section">#</a></h3>
 <p>Use a method appropriate to the cohort and dependence structure, with the original denominators. Avoid a universal fairness conclusion from one noisy metric.</p>
+<p>With only 10 and 5 actual positives, 95 percent Wilson intervals are roughly 0.49 to 0.94 for A and 0.12 to 0.77 for B, so they overlap substantially. A bootstrap over rows or an exact interval are reasonable choices, as long as the counts are reported.</p>
 <p><strong>Expected:</strong> It acknowledges small samples and the sampling/design assumptions.</p>
 <h3 id="3-review-the-purpose">3. Review the purpose<a class="heading-anchor" href="#3-review-the-purpose" aria-label="Link to this section">#</a></h3>
 <p>Name the population, action, alternatives and limitations. Changes in intended use require fresh evaluation rather than reusing the same card automatically.</p>
+<p>The card names &quot;optional support prioritization&quot;: the model ranks who might be offered help. Using the same scores to deny service would be a different decision with different harms and needs its own evaluation. Check the card against each proposed use and record a new review when the action changes.</p>
 <p><strong>Expected:</strong> The intended use is concrete.</p>
 <h3 id="4-minimize-inputs">4. Minimize inputs<a class="heading-anchor" href="#4-minimize-inputs" aria-label="Link to this section">#</a></h3>
 <p>Review feature necessity and potential harms. Preserve the decision and test rejected fields, rather than accepting arbitrary payloads.</p>
+<p>Example_two compares request keys with card[&quot;features&quot;] and gets {&quot;email&quot;}. Keep the allowlist in the card and the API schema and test that email is refused; quietly dropping it would hide that clients are sending it.</p>
 <p><strong>Expected:</strong> The accepted schema remains explicit.</p>
 <h3 id="5-record-operational-ownership">5. Record operational ownership<a class="heading-anchor" href="#5-record-operational-ownership" aria-label="Link to this section">#</a></h3>
 <p>Connect it to actual procedures, permissions and retained evidence. Do not describe this synthetic label as an implemented organizational process.</p>
+<p>The card says owner &quot;learning team&quot; and rollback_version &quot;v1&quot;. In a real setting name the role that may approve activation and the one that may roll back, and where that decision is logged. Writing &quot;learning team&quot; into a production card would imply an on-call rota and approval process that this fixture never implemented.</p>
 <p><strong>Expected:</strong> The responsibility is acknowledged outside the fixture.</p>
 <h3 id="6-bound-the-claim">6. Bound the claim<a class="heading-anchor" href="#6-bound-the-claim" aria-label="Link to this section">#</a></h3>
 <p>Use qualified governance processes and appropriate expertise for the real context. Keep this lesson&#x27;s technical and statistical observations explicit.</p>
+<p>The card records purpose, features, limits and a rollback version. Nothing in it shows legal review, consent or regulatory scope, so it supports review but does not replace it. A reader who sees a tidy card might assume approval happened; the field &quot;not_a_legal_compliance_certificate&quot; in example_two exists to block that reading, and the final report should repeat it in prose.</p>
 <p><strong>Expected:</strong> The answer separates documentation from external requirements and review.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;mle-017: local, bounded ML engineering investigation.&quot;&quot;&quot;</span>

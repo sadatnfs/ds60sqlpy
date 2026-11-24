@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-004-processes-networks-and-ownership">apache-004: Processes, networks and ownership<a class="heading-anchor" href="#apache-004-processes-networks-and-ownership" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: beginner. Direct prerequisites: <code>apache-003</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Network namespace:</strong> An isolated set of network interfaces, routes and ports. Inside a container, localhost refers to that container&#x27;s own loopback, not the host or a neighboring service.</li>
+<li><strong>Listener:</strong> A process bound to an address, port and protocol that accepts connections. Listeners in different namespaces can use the same port number without conflict.</li>
+<li><strong>Compose service DNS:</strong> The name resolution Docker Compose provides on a project network, so a client reaches a service by its service name instead of a container IP address that can change on replacement.</li>
+<li><strong>Published port:</strong> A host address and port mapped to a container port. It creates a separate path from the host and does not change what localhost means inside another container.</li>
+<li><strong>Arrow Flight:</strong> An Arrow RPC framework built on gRPC that streams record batches between a client and a server. The chapter runs a bounded Flight server and a short-lived client on a private network.</li>
+</ul>
 <h3 id="localhost-belongs-to-the-process-s-network-namespace">Localhost belongs to the process&#x27;s network namespace<a class="heading-anchor" href="#localhost-belongs-to-the-process-s-network-namespace" aria-label="Link to this section">#</a></h3>
 <p>A client connects to a listener through an address, port and protocol. Before that connection succeeds, it may need a DNS lookup, network route and protocol handshake. Each layer can fail independently. A container normally has its own network namespace, so its loopback address refers to that container, not to the host and not to a neighboring service. Two processes can both use port 8815 in different namespaces without referring to the same listener.</p>
 <p>Compose supplies service-name discovery on a project network. A client in that network can resolve server to the current container address and use the server&#x27;s container port. A host browser cannot generally resolve that private service name. Publishing a host port creates a separate access path with its own host address and port; it does not change what localhost means inside another container. Hardcoding a current container IP is fragile because replacement can change it.</p>
@@ -210,6 +218,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Follow DNS, route, listener, handshake and application result in that order. Inspect the namespace where a command actually runs. Keep network ownership, service health and persisted data separate: a healthy network cannot recover a deleted volume, and retained data cannot make a stopped single server available. Use the workshop&#x27;s status and bounded logs commands before changing configuration.</p>
 <p><strong>Interview discussion: why does localhost work in a container healthcheck but fail in another container&#x27;s client?</strong> The healthcheck runs in the server&#x27;s own namespace, while the client loopback names itself. The two cases observe both paths on the real topology and connect the address distinction to an actual successful read and a bounded expected failure.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="keep-the-flight-server-on-an-internal-network">Keep the Flight server on an internal network<a class="heading-anchor" href="#keep-the-flight-server-on-an-internal-network" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">server</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>service.py<span class="syntax-punctuation">,</span> serve<span class="syntax-punctuation">,</span> --state<span class="syntax-punctuation">,</span> /state<span class="syntax-punctuation">]</span>
+  <span class="syntax-tag">healthcheck</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">test</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>CMD<span class="syntax-punctuation">,</span> python3<span class="syntax-punctuation">,</span> client.py<span class="syntax-punctuation">,</span> --endpoint<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">grpc://127.0.0.1:8815</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> --health<span class="syntax-punctuation">]</span>
+<span class="syntax-tag">networks</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">default</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">internal</span><span class="syntax-punctuation">:</span> true</code></pre>
+<p>This excerpt from the arrow-flight compose file has no ports entry, so nothing on the host can reach port 8815, and the internal network blocks outbound traffic as well. The healthcheck runs inside the server container, which is why loopback works there and nowhere else. If a review adds a published port to make debugging easier, it widens the attack surface the lesson deliberately closed; use the tools profile client instead.</p>
+<h4 id="probe-service-dns-and-loopback-from-the-client">Probe service DNS and loopback from the client<a class="heading-anchor" href="#probe-service-dns-and-loopback-from-the-client" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash">mkdir -p work
+cp -R courses/apache-data-platforms/projects/arrow-flight work/arrow-flight
+<span class="syntax-builtin">cd</span> work/arrow-flight
+bash run.sh start
+bash run.sh network-check</code></pre>
+<p>Run this only in an owned workshop. The network check should report service_dns_read_passed as true, meaning the client resolved the name server and fetched the east total of 11, and client_loopback_rejected as true, meaning grpc://127.0.0.1:8815 inside the client container found no listener. Both must hold. A loopback success would mean the client and server share a network namespace, which breaks the isolation claim.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="actual-namespace-and-flight-observations">Actual namespace and Flight observations<a class="heading-anchor" href="#actual-namespace-and-flight-observations" aria-label="Link to this section">#</a></h2>

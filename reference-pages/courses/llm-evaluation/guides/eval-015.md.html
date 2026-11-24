@@ -198,11 +198,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; approximately 120 minutes. Direct prerequisites: <code>eval-007</code>, <code>eval-012</code>, <code>eval-014</code>.</p>
 <p>Monitor mature cohorts and service behavior without confusing delayed outcomes or changing traffic with model improvement.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>LLM evaluation and alignment</strong> in <code>/classroom</code>, open <code>eval-015</code>, and use its <code>python-core</code> profile. A Run starts a fresh Python process. Both worked programs below include their own setup and can be copied in full. Save your draft first. The examples use small authored fixtures and explicit numerical checks. Process success establishes those checks, not population validity, safety certification or natural-language competence. Code and notes persist; temporary program files do not. No network call or model download is needed.</p>
+<p>Open <code>eval-015</code> under <strong>LLM evaluation and alignment</strong> in <code>/classroom</code>; its <code>python-core</code> profile runs each worked program for monitoring, delayed labels and online experiments in a fresh Python process, so save your draft before a Run. The checks prove only what the authored fixture shows about label delay and distribution shift: Immature labels give accuracy 1 at coverage 0.5 while the mature cohort gives accuracy 0.5 at coverage 1; identical distributions have JS divergence 0 and disjoint support log 2; an alert triggers a composition and coverage check before any degradation claim. They do not certify population validity, safety or natural-language competence, and nothing is downloaded.</p>
 <h3 id="monitoring-observes-a-changing-process">Monitoring observes a changing process<a class="heading-anchor" href="#monitoring-observes-a-changing-process" aria-label="Link to this section">#</a></h3>
 <p>A deployed assistant receives a changing mix of requests, permissions, documents and user behavior. Its model may stay fixed while its inputs or evaluation labels change. Monitoring should therefore retain the system version, event time, label-availability time, eligibility rules and denominator for every reported metric.</p>
 <p>Fast labels can be selected labels. Easy successful requests may receive immediate confirmation, while difficult failures are investigated later. Reporting correctness only among currently labeled items can make early performance look favorable even when the full cohort will not be. A mature-cohort rule can compare outcomes after a common follow-up window, but its assumptions must match the actual label process.</p>
 <p>Distribution shift and quality degradation are also distinct. An input histogram can change without altering conditional task performance. Quality can deteriorate with an unchanged coarse histogram if the model or an unmonitored feature changes. Use drift measures as diagnostic signals alongside outcome, coverage, latency and critical-error measurements.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Label delay:</strong> The lag between an event and the arrival of its label, which can make early observed accuracy look favorable.</li>
+<li><strong>Mature cohort:</strong> A group of requests compared after a common follow-up window so delayed labels have arrived.</li>
+<li><strong>Distribution shift:</strong> A change in the input or label distribution, which is distinct from a change in conditional task quality.</li>
+<li><strong>Jensen-Shannon divergence:</strong> A symmetric, bounded divergence between two distributions used as a drift diagnostic.</li>
+<li><strong>Randomization unit:</strong> The entity assigned to treatment in an online experiment, such as a user rather than a request.</li>
+</ul>
 <h3 id="worked-case-a-the-same-cohort-changes-as-labels-arrive">Worked case A: the same cohort changes as labels arrive<a class="heading-anchor" href="#worked-case-a-the-same-cohort-changes-as-labels-arrive" aria-label="Link to this section">#</a></h3>
 <p>Two requests occur on day 1. The success label arrives on day 2; the failure label arrives on day 10. At day 2 the observed-label accuracy is one with half the cohort labeled. At day 10 it is one half with complete label coverage. No model changed between these reports. Comparing the two numbers without maturity information would create a false story about performance decay.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -328,7 +336,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Expected:</strong> JS divergence 0.</p>
 <p><strong>Hint:</strong> Every log ratio is 1 before taking the logarithm.</p>
 <h4 id="4-disjoint-support">4. Disjoint support<a class="heading-anchor" href="#4-disjoint-support" aria-label="Link to this section">#</a></h4>
-<p>Compare[1,0] with[0,1] using natural logarithms.</p>
+<p>Compare <code>[1, 0]</code> with <code>[0, 1]</code> using natural logarithms.</p>
 <p><strong>Expected:</strong> JS divergence is log 2.</p>
 <p><strong>Hint:</strong> Both are compared to their midpoint.</p>
 <h4 id="5-choose-assignment-units">5. Choose assignment units<a class="heading-anchor" href="#5-choose-assignment-units" aria-label="Link to this section">#</a></h4>

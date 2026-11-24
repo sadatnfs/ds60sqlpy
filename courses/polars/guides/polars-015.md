@@ -14,6 +14,14 @@ The first case compares two engines on the same lazy query and independently che
 
 A sink can write a result directly to a file, while collect returns a DataFrame to the caller. The second case contrasts a row-preserving transformation with a global reduction. Both can be evaluated through a streaming path, but they produce different shapes and require different state. Output shape and operator semantics should guide the resource plan.
 
+## Key terms
+
+- **Streaming engine:** The engine selected with `collect(engine="streaming")` that processes a lazy query in batches.
+- **In-memory engine:** The engine selected with `collect(engine="in-memory")` that materializes whole intermediate results in memory.
+- **Sink:** A method such as `sink_parquet` that writes a lazy query's output to a file instead of returning a DataFrame.
+- **Stateful operator:** An operation such as a join, sort or group aggregation that must retain state across batches, so memory can still grow.
+- **Resource budget:** The declared memory and time limit a run must respect, confirmed by measurement rather than assumed from the engine name.
+
 ## Syntax and data contract
 
 Specify collect(engine="streaming") or collect(engine="in-memory") to make the experiment reproducible against the prepared version. sink_parquet writes the result artifact. Use explicit sorting for equality checks when output order is not otherwise guaranteed. A streamable custom batch function must preserve the result under valid batch partitions; it cannot secretly depend on the full dataset.

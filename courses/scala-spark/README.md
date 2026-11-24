@@ -20,7 +20,7 @@ The framework's prerequisite graph currently expresses AND conditions, so spark-
 
 Use the [Docker classroom workflow](../../docs/docker-classroom.md) and explicitly prepare the profile needed for the selected source. Language foundations use scala-jvm. Paired engine lessons use spark-local-scala or spark-local-python. Reading lessons need no runtime. The [execution baseline](execution-baseline.md) targets the prepared Spark 4.0.1, Scala binary 2.13 and JDK 17 family, with exact patch versions read from actual runs.
 
-Scala programs stage as Main.scala with object Main; Python programs stage as main.py with a main guard. Default Spark programs create an owned local[2] session, use loopback driver binding, disable the UI, keep UTC time semantics explicit and stop the session in finally. No lesson opens a remote cluster, downloads data or installs a dependency. pandas/Arrow and external connectors remain separately labeled optional capabilities until provisioned and tested.
+Scala programs stage as Main.scala with object Main; Python programs stage as main.py with a main guard. Default Spark programs create an owned `local[2]` session, use loopback driver binding, disable the UI, keep UTC time semantics explicit and stop the session in finally. No lesson opens a remote cluster, downloads data or installs a dependency. pandas/Arrow and external connectors remain separately labeled optional capabilities until provisioned and tested.
 
 ## Learn from evidence
 

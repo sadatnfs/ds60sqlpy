@@ -8,6 +8,12 @@
     "minimum effect",
     "unknown gates"
   ],
+  "key_terms": {
+    "Decision packet": "A reconstructable report of protocol, versions, data identity, estimates, gates and the resulting decision.",
+    "Content digest": "A hash binding serialized bytes under a declared encoding, which detects modification but not authorship or validity.",
+    "Release gate": "A named criterion with an evidence status that must pass for a go decision.",
+    "Minimum effect": "The smallest improvement that matters for the decision, distinct from statistical detectability."
+  },
   "outcome": "Compute and seal a complete held-out decision packet from the connected synthetic ledger, preserving all failed and unknown conditions.",
   "verification": "Changing one constraint passes only the coverage gate, a missing protocol result and a critical failure each fail their gates, editing the artifact invalidates the old digest, and the memo states no-go with all four failing conditions.",
   "level": "advanced",
@@ -20,42 +26,78 @@
       "task": "Raise coverage to 0.9 while keeping the other authored inputs.",
       "expected": "Only the coverage gate passes; quality, critical cases and latency still fail.",
       "hint": "Recompute each named gate.",
-      "answer": "Changing one policy input cannot erase the other failures. The reference then constructs a separate all-pass input only to check the decision-rule logic; it does not invent improved observed model outcomes."
+      "answer": "Changing one policy input cannot erase the other failures. The reference then constructs a separate all-pass input only to check the decision-rule logic; it does not invent improved observed model outcomes.",
+      "reasoning": {
+        "approach": "Copy the packet from `fixture()`, set `coverage` to 0.9 and call `decide`. All other inputs stay as authored.",
+        "why": "Coverage 0.9 now exceeds the required 0.85, so that gate passes. The quality gate still fails (lower bound -0.25 is below 0.02), the critical gate fails (one critical error) and latency fails (160 ms above 150). The failed list is `[\"quality\", \"critical_cases\", \"latency\"]`.",
+        "pitfall": "Treating the coverage fix as progress toward go without addressing the others is the mistake. Each gate is independent, and the reference's later all-pass packet is a logic check on invented values, not an improved model.",
+        "verify": "The reference asserts `decide(p)[\"failed\"] == [\"quality\", \"critical_cases\", \"latency\"]` after setting coverage 0.9. Updating the other three inputs then makes the decision `go`."
+      }
     },
     {
       "title": "Keep a missing protocol result",
       "task": "Replace protocol_frozen with None.",
       "expected": "The protocol gate fails.",
       "hint": "Unknown evidence cannot satisfy an explicit True requirement.",
-      "answer": "A missing confirmation is reported as an unresolved condition rather than silently accepted."
+      "answer": "A missing confirmation is reported as an unresolved condition rather than silently accepted.",
+      "reasoning": {
+        "approach": "Set `protocol_frozen` to `None` in the packet and call `decide`. The gate expression is `packet[\"protocol_frozen\"] is True`.",
+        "why": "`None is True` is false, so the protocol gate fails and appears in the failed list. An unconfirmed protocol freeze is handled exactly like a failed one.",
+        "pitfall": "Using a truthiness test such as `bool(packet[\"protocol_frozen\"])` would still fail for `None` here, but would accept strings like `\"pending\"`. The identity check accepts only an explicit `True`.",
+        "verify": "The reference asserts `\"protocol_frozen\" in decide(p)[\"failed\"]` after setting it to `None`."
+      }
     },
     {
       "title": "Preserve a critical failure",
       "task": "Set critical_failures to 1.",
       "expected": "The critical-case gate fails even if quality improves.",
       "hint": "Required constraints are not weighted into an average.",
-      "answer": "The policy gives this condition independent force; a favorable mean effect cannot cancel it."
+      "answer": "The policy gives this condition independent force; a favorable mean effect cannot cancel it.",
+      "reasoning": {
+        "approach": "Set `critical_failures` to 1, then raise `effect_lower` above the minimum effect, and call `decide`.",
+        "why": "The critical gate is `critical_failures == 0`, so it fails regardless of quality. The authored ledger has exactly one critical error, `operations-3`, where the baseline was correct and the candidate was wrong.",
+        "pitfall": "Combining all gates into one weighted score would let a strong quality improvement offset the critical error. This policy deliberately gives the critical gate independent force.",
+        "verify": "Case A asserts `packet[\"critical_failures\"] == 1`. Change `effect_lower` to 0.03 alone and confirm `critical_cases` is still in the failed list."
+      }
     },
     {
       "title": "Interpret zero incidents",
       "task": "Explain the positive bound for a separate hypothetical campaign with zero failures in 200 trials.",
       "expected": "Finite observations do not imply zero population risk.",
       "hint": "State the binomial and sampling assumptions.",
-      "answer": "The expression \\(1-\\alpha^{1/n}\\) assumes independent representative Bernoulli trials. It is separate from the actual authored held-out ledger, which contains one critical failure, and supplies no real-population estimate."
+      "answer": "The expression \\(1-\\alpha^{1/n}\\) assumes independent representative Bernoulli trials. It is separate from the actual authored held-out ledger, which contains one critical failure, and supplies no real-population estimate.",
+      "reasoning": {
+        "approach": "For a hypothetical campaign with zero failures in n = 200 independent trials, the one-sided 95 percent upper bound on the failure rate is 1 - 0.05 to the power 1 / 200.",
+        "why": "That evaluates to about 0.0149, which is above 0. Zero observed failures in 200 trials is consistent with a true failure rate up to roughly 1.5 percent. The formula requires independent, representative trials.",
+        "pitfall": "Reporting \"zero failures, so risk is zero\" is the mistake. Also, applying this bound to the authored ledger would be wrong twice: the ledger has one critical failure, and its rows are not representative trials.",
+        "verify": "Case B asserts `0 < upper < 0.02` for `upper = 1 - 0.05 ** (1 / 200)`. Compute it yourself and state that it describes a hypothetical campaign, not this packet."
+      }
     },
     {
       "title": "Detect an artifact edit",
       "task": "Change coverage after sealing the packet.",
       "expected": "Verification rejects the old digest.",
       "hint": "Recompute canonical serialized bytes.",
-      "answer": "Integrity helps reconstruct evidence but is separate from authentication and scientific validity."
+      "answer": "Integrity helps reconstruct evidence but is separate from authentication and scientific validity.",
+      "reasoning": {
+        "approach": "Compute `digest(packet)` before any change, then edit `coverage` to 0.95 on a deep copy and call `verified_packet(changed, original_digest)`.",
+        "why": "`digest` hashes a canonical JSON encoding with sorted keys, so any value change produces a different SHA-256. The function raises `Evidence artifact changed`, and the original packet still has coverage 0.75.",
+        "pitfall": "Treating a matching digest as proof the evidence is correct is the mistake. A digest shows the bytes did not change since sealing; it does not show who sealed them or that the numbers inside were valid.",
+        "verify": "Case B checks that the mutated copy is rejected and that `original[\"coverage\"] == 0.75`. The exercise checks also confirm key order does not affect the digest and different values do."
+      }
     },
     {
       "title": "Write a bounded memo",
       "task": "Summarize the failed packet in three sentences.",
       "expected": "State no-go, all four failing conditions and the independent evidence needed next.",
       "hint": "Do not remove unfavorable results.",
-      "answer": "A useful memo identifies the decision, its supporting limits and a concrete next assessment without claiming universal quality or safety."
+      "answer": "A useful memo identifies the decision, its supporting limits and a concrete next assessment without claiming universal quality or safety.",
+      "reasoning": {
+        "approach": "Write three sentences: the decision, the failing conditions with their numbers, and the next assessment needed.",
+        "why": "A bounded memo might read: \"Decision: no-go for candidate-v1 under desk-eval-v1. Quality lower bound is -0.25 against a 0.02 minimum, coverage is 0.75 against 0.85, one critical error occurred and maximum latency is 160 ms against 150 ms. Next, collect a new held-out set with more than two families after fixing the critical case and latency.\"",
+        "pitfall": "Summarizing as \"the candidate is not better\" is too vague, and \"the candidate is worse\" is unsupported: the estimate is 0 with an interval from -0.25 to 0.25 over only two families.",
+        "verify": "Check the memo against `decide(fixture())`: it must list all four failed gates (quality, coverage, critical cases, latency) and must not claim anything beyond the two synthetic families."
+      }
     }
   ],
   "sources": [

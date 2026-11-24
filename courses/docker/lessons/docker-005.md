@@ -34,7 +34,7 @@ My evidence:
 
 My explanation and remaining limitation:
 
-## Exercise 5: Explain why EXPOSE does not make localhost:8080 work.
+## Exercise 5: Explain why EXPOSE does not make `localhost:8080` work.
 
 My prediction:
 

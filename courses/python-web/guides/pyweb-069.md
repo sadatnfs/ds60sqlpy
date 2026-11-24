@@ -6,6 +6,14 @@ Tutorial mode. Stage: advanced. Direct prerequisites: `pyweb-068`.
 
 A reverse proxy can terminate TLS and forward requests to an application over another connection. The application may need to know the original scheme or host, but trusting forwarded headers from arbitrary clients is unsafe. This chapter demonstrates the exact effect of proxy trust configuration and a separate host allowlist.
 
+## Key terms
+
+- **Reverse proxy:** A server in front of the application that can terminate TLS and forward requests to it over another connection.
+- **X-Forwarded-Proto:** A header describing the scheme of the original request, trustworthy only when a trusted proxy set or sanitized it.
+- **ProxyFix:** Werkzeug middleware that applies forwarded values for a configured number of trusted hops per field, here `x_proto=1` and `x_host=0`.
+- **TrustedHostMiddleware:** Starlette middleware that refuses requests whose Host header is not on the allowed list, here with 400.
+- **TLS termination:** Ending the encrypted HTTPS connection at a proxy, which then forwards the request over a separate connection.
+
 ## Mechanism: a header is a claim until its source is trusted
 
 X-Forwarded-Proto describes an earlier request scheme only when a trusted proxy set or sanitized it. A direct client can send the same header. ProxyFix changes which forwarded values Flask uses according to a configured number of trusted hops for each field.
@@ -29,6 +37,31 @@ A separate FastAPI app allows testserver. A normal request succeeds; a request w
 Host validation can protect URL generation and routing assumptions, but it is not authorization for data access. An allowed Host with an invalid user credential must still be refused by the authentication layer. Likewise, a correct user credential should not make arbitrary forwarded infrastructure claims trustworthy.
 
 Public deployment also needs certificate management, secure cookies, origin/CSRF policy, request-size bounds and secret handling. The local Docker workshop exposes loopback HTTP deliberately and does not claim to qualify a public TLS edge. The chapter explains the extension boundary without inventing a deployed proxy.
+
+## Worked example: which X-Forwarded-For entry to believe
+
+```python
+def client_ip(forwarded_for, peer, trusted_hops):
+    chain = [part.strip() for part in forwarded_for.split(",")] + [peer]
+    return chain[-(trusted_hops + 1)]
+
+
+header = "6.6.6.6, 203.0.113.9"
+peer = "10.0.0.2"
+print("leftmost:", header.split(",")[0])
+print("one trusted proxy:", client_ip(header, peer, 1))
+print("two trusted proxies:", client_ip(header, peer, 2))
+```
+
+Expected output:
+
+```text
+leftmost: 6.6.6.6
+one trusted proxy: 203.0.113.9
+two trusted proxies: 6.6.6.6
+```
+
+The client sent a forged `X-Forwarded-For: 6.6.6.6`, and the one real proxy at 10.0.0.2 appended the address it actually saw. Reading the leftmost entry trusts the attacker. Counting back one hop from the connected peer gives 203.0.113.9, which is what Werkzeug's `ProxyFix(x_for=1)` does. Claiming two hops when only one proxy exists hands the choice back to the client. The lesson applies the same reasoning to `x_proto=1`: the count must match the real deployment, and the app must not be reachable without passing through that proxy.
 
 ## Failure diagnosis and discussion
 

@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "track_id": "julia",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "julia-007",
+      "title": "Julia arrays: column-major shapes, slices that copy, views that share",
+      "anchor": "reference",
+      "source_path": "courses/julia/solutions/julia-007_reference.jl",
+      "source_sha256": "22af93fba67800c7cbee4ba45f7c95edc1e765a0da231dccb17f06cd8ab76e19",
+      "expected_output": [
+        "Matrix: [1 3 5; 2 4 6]",
+        "Source after view mutation: [1, 80, 3]",
+        "julia-007: all reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [1, 13],
+          "excerpt": "using Test\n\n# === EXAMPLE A ===\nfunction worked_a()\n    values = collect(1:6)\n    matrix = reshape(values, 2, 3)\n    @test size(matrix) == (2, 3)\n    @test matrix[:, 1] == [1, 2]\n    @test matrix[1, 3] == 5\n    @test length(matrix) == 6\n    @test sum(matrix) == 21\n    println(\"Matrix: \", matrix)\nend",
+          "title": "reshape fills columns first",
+          "explanation": "using Test brings in @test, which checks a condition and raises an error if it fails outside a test set. collect(1:6) turns the range into a real Vector. reshape(values, 2, 3) reinterprets those six numbers as 2 rows by 3 columns without copying them. Julia arrays are column-major: the first column is filled first, so column 1 is [1, 2] and row 1, column 3 is 5. Indexing starts at 1, and matrix[:, 1] means every row of column 1.",
+          "observe": "The matrix prints as [1 3 5; 2 4 6]: spaces separate columns and semicolons separate rows."
+        },
+        {
+          "lines": [15, 28],
+          "excerpt": "# === EXAMPLE B ===\nfunction worked_b()\n    values = [1, 2, 3]\n    snapshot = values[1:2]\n    window = @view values[1:2]\n    snapshot[1] = 90\n    @test values[1] == 1\n    window[2] = 80\n    @test values == [1, 80, 3]\n    alias = values\n    @test alias === values\n    @test copy(values) !== values\n    println(\"Source after view mutation: \", values)\nend",
+          "title": "A slice copies, a view shares, a name aliases",
+          "explanation": "values[1:2] creates a new array, so changing snapshot leaves values alone. @view values[1:2] instead creates a window onto the same memory; writing window[2] = 80 changes values[2]. Plain assignment alias = values does not copy anything: both names refer to the same object, which === (identity) confirms. copy creates a new array, so it is not === to the original even though its contents are equal.",
+          "observe": "After writing through the view, values is [1, 80, 3]."
+        },
+        {
+          "lines": [30, 43],
+          "excerpt": "# === EXERCISES ===\nfunction exercise_checks()\n    @test size(zeros(2, 1)) == (2, 1)\n    @test size(zeros(2)) == (2,)\n    @test eltype([1.0, 2.0]) == Float64\n    @test_throws BoundsError [1, 2][0]\n    nested = [[1], [2]]\n    shallow = copy(nested)\n    shallow[1][1] = 9\n    @test nested[1][1] == 9\n    deep = deepcopy(nested)\n    deep[1][1] = 4\n    @test nested[1][1] == 9\nend",
+          "title": "Shapes, element types, bounds and nested copies",
+          "explanation": "zeros(2, 1) is a 2 by 1 matrix, while zeros(2) is a vector whose size is the one-element tuple (2,). eltype reports the element type. Index 0 is outside a 1-based array and raises BoundsError, which @test_throws expects. For an array of arrays, copy duplicates only the outer array, so the inner vectors are still shared and editing shallow[1][1] changes nested. deepcopy duplicates the inner arrays too, so the later edit leaves nested at 9.",
+          "observe": "A shallow copy of nested data still shares the inner arrays."
+        },
+        {
+          "lines": [45, 55],
+          "excerpt": "# === MAIN ===\nfunction main()\n    worked_a()\n    worked_b()\n    exercise_checks()\n    println(\"julia-007: all reference checks passed\")\nend\n\nif abspath(PROGRAM_FILE) == @__FILE__\n    main()\nend",
+          "title": "main and the script guard",
+          "explanation": "main calls the two worked examples and the exercises in order, then prints the success line. The last block runs main only when this file is the program being executed; PROGRAM_FILE is the script path given to julia and @__FILE__ is the current file. If another file includes this one, the checks do not run automatically.",
+          "observe": "The final line is julia-007: all reference checks passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "julia-011",
+      "title": "Multiple dispatch: abstract types, validated constructors and method ambiguity",
+      "anchor": "reference",
+      "source_path": "courses/julia/solutions/julia-011_reference.jl",
+      "source_sha256": "c9080385bb17dc12e6ab815f3f6691d0e628581aa8c11d4f4e698b7481aea581",
+      "expected_output": [
+        "Intersection method: both_integers",
+        "julia-011: all reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [3, 22],
+          "excerpt": "abstract type Shape end\nstruct Circle <: Shape\n    radius::Float64\n    function Circle(radius::Real)\n        stored = Float64(radius)\n        isfinite(stored) && stored >= 0 ||\n            throw(ArgumentError(\"Finite nonnegative radius required\"))\n        return new(stored)\n    end\nend\nstruct Rectangle <: Shape\n    width::Float64\n    height::Float64\n    function Rectangle(width::Real, height::Real)\n        w, h = Float64(width), Float64(height)\n        all(isfinite, (w, h)) && w >= 0 && h >= 0 ||\n            throw(ArgumentError(\"Finite nonnegative dimensions required\"))\n        return new(w, h)\n    end\nend",
+          "title": "Concrete shapes under an abstract type",
+          "explanation": "abstract type Shape end declares a type that cannot be instantiated; it exists to group related types. Circle <: Shape makes Circle a subtype. Each struct has an inner constructor: it converts any Real to Float64, rejects NaN, Inf and negative values with an ArgumentError, and only then calls new. Because the inner constructor replaces the default one, an invalid Circle cannot be created at all. The a && b || throw(...) pattern throws whenever the combined condition is false.",
+          "observe": "Circle(-1) and Rectangle(1, -1) raise ArgumentError."
+        },
+        {
+          "lines": [23, 29],
+          "excerpt": "area(shape::Circle) = pi * shape.radius^2\narea(shape::Rectangle) = shape.width * shape.height\ntotal_area(shapes) = sum((area(shape) for shape in shapes); init = 0.0)\n\nclassify(first::Integer, second) = :first_integer\nclassify(first, second::Integer) = :second_integer\nclassify(first::Integer, second::Integer) = :both_integers",
+          "title": "Methods chosen by argument types",
+          "explanation": "area has one method per concrete type, and Julia picks the method from the runtime type of the argument; that is multiple dispatch. total_area sums a generator, and init = 0.0 gives sum a starting value so an empty collection returns 0.0 instead of throwing. classify has three methods. A call with two integers matches all three, and Julia chooses the most specific, (Integer, Integer). Without that third method, the first two would be equally specific and the call would be ambiguous.",
+          "observe": "classify(1, 2) returns :both_integers because of the intersection method."
+        },
+        {
+          "lines": [31, 48],
+          "excerpt": "# === EXAMPLE A ===\nfunction worked_a()\n    shapes = Shape[Circle(2), Rectangle(2, 3)]\n    @test area(shapes[1]) ≈ 4pi\n    @test area(shapes[2]) == 6\n    @test total_area(shapes) ≈ 4pi + 6\n    @test total_area(Shape[]) == 0\n    println(\"Total area: \", total_area(shapes))\nend\n\n# === EXAMPLE B ===\nfunction worked_b()\n    @test classify(1, \"x\") == :first_integer\n    @test classify(\"x\", 1) == :second_integer\n    @test classify(1, 2) == :both_integers\n    @test_throws MethodError classify(1.0, 2.0)\n    println(\"Intersection method: \", classify(1, 2))\nend",
+          "title": "Dispatch in action",
+          "explanation": "Shape[...] builds a vector whose element type is the abstract Shape, so it can hold circles and rectangles together. The ≈ operator (isapprox) compares floating point results with a tolerance, which is the right check for pi times 4. For classify, a non-integer first or second argument chooses the matching one-sided method, and two Float64 values match none of them, which raises MethodError.",
+          "observe": "The program prints the total area and Intersection method: both_integers"
+        },
+        {
+          "lines": [50, 70],
+          "excerpt": "# === EXERCISES ===\nfunction exercise_checks()\n    @test area(Circle(0)) == 0\n    @test area(Rectangle(0, 5)) == 0\n    @test_throws ArgumentError Circle(-1)\n    @test_throws ArgumentError Rectangle(1, -1)\n    @test Circle <: Shape\n    @test isconcretetype(Circle) && !isconcretetype(Shape)\nend\n\n# === MAIN ===\nfunction main()\n    worked_a()\n    worked_b()\n    exercise_checks()\n    println(\"julia-011: all reference checks passed\")\nend\n\nif abspath(PROGRAM_FILE) == @__FILE__\n    main()\nend",
+          "title": "Edge cases, type checks and the result line",
+          "explanation": "Zero radius and zero width give zero area, and negative sizes are rejected. Circle <: Shape confirms the subtype relation; isconcretetype is true for Circle, which can have instances, and false for the abstract Shape. main runs everything and prints the success line, guarded so it only runs when the file is executed directly.",
+          "observe": "The final line is julia-011: all reference checks passed"
+        }
+      ]
+    },
+    {
+      "lesson_id": "julia-026",
+      "title": "In-place numerical work: reusing outputs safely and rejecting aliased inputs",
+      "anchor": "reference",
+      "source_path": "courses/julia/solutions/julia-026_reference.jl",
+      "source_sha256": "b919b42dbac5c3d2d78712093840684ae045f2426ff4f202987b8da201144115",
+      "expected_output": [
+        "Overlapping call rejected before mutation",
+        "julia-026: all reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [1, 14],
+          "excerpt": "using Test\nusing LinearAlgebra\nBLAS.set_num_threads(1)\n\nfunction affine!(destination, matrix, input, bias)\n    size(matrix, 2) == length(input) || throw(DimensionMismatch(\"Input width\"))\n    size(matrix, 1) == length(destination) == length(bias) ||\n        throw(DimensionMismatch(\"Output height\"))\n    any(source -> Base.mightalias(destination, source), (matrix, input, bias)) &&\n        throw(ArgumentError(\"Destination must not overlap inputs\"))\n    mul!(destination, matrix, input)\n    destination .+= bias\n    return destination\nend",
+          "title": "An in-place affine function that checks before writing",
+          "explanation": "By convention, a name ending in ! modifies one of its arguments, here destination. Pinning BLAS to one thread keeps results repeatable. The function checks every dimension first and throws DimensionMismatch on a mismatch. Base.mightalias reports whether destination could share memory with an input; if it did, writing results would corrupt values still being read, so the call is refused. Only then does mul! write matrix times input into destination without allocating, and .+= adds the bias element by element in place.",
+          "observe": "All validation happens before the first write to destination."
+        },
+        {
+          "lines": [16, 30],
+          "excerpt": "# === EXAMPLE A ===\nfunction worked_a()\n    matrix = [2.0 1.0; 0.0 3.0]\n    input = [3.0, 4.0]\n    bias = [1.0, -1.0]\n    destination = zeros(2)\n    @test affine!(destination, matrix, input, bias) === destination\n    @test destination == [11, 11]\n    @test input == [3, 4]\n    affine!(destination, matrix, [1.0, 2.0], bias)\n    @test destination == [5, 5]\n    bytes = @allocated affine!(destination, matrix, input, bias)\n    @test bytes >= 0\n    println(\"Reused output: \", destination, \"; measured allocation bytes: \", bytes)\nend",
+          "title": "Reusing one output buffer",
+          "explanation": "The function returns the very same destination object, which === checks. The result is [11, 11] and input is unchanged. Calling again with different input overwrites the buffer with [5, 5]; this reuse is what saves allocations in tight loops. @allocated reports how many bytes one call allocated. That number depends on the Julia version and compilation, so the test only requires it to be zero or more and the lesson does not treat it as a fixed result.",
+          "observe": "The printed byte count may differ between machines; the values [11.0, 11.0] do not."
+        },
+        {
+          "lines": [32, 45],
+          "excerpt": "# === EXAMPLE B ===\nfunction worked_b()\n    storage = [1.0, 2.0, 3.0, 4.0]\n    middle = view(storage, 2:3)\n    middle[1] = 20\n    @test storage == [1, 20, 3, 4]\n    matrix = Matrix{Float64}(I, 2, 2)\n    destination = view(storage, 1:2)\n    input = view(storage, 2:3)\n    snapshot = copy(storage)\n    @test_throws ArgumentError affine!(destination, matrix, input, zeros(2))\n    @test storage == snapshot\n    println(\"Overlapping call rejected before mutation\")\nend",
+          "title": "Overlapping views are rejected before mutation",
+          "explanation": "view(storage, 2:3) refers to part of storage, so writing middle[1] = 20 changes storage[2]. Next, destination is the view of slots 1 and 2 and input is the view of slots 2 and 3, so they overlap at slot 2. The call must raise ArgumentError, and comparing storage with a snapshot taken before the call proves nothing was half written.",
+          "observe": "The program prints Overlapping call rejected before mutation"
+        },
+        {
+          "lines": [47, 70],
+          "excerpt": "# === EXERCISES ===\nfunction exercise_checks()\n    output = fill(7.0, 2)\n    @test_throws DimensionMismatch affine!(output, ones(2, 3), ones(2), ones(2))\n    @test output == [7, 7]\n    @test_throws ArgumentError affine!(output, Matrix{Float64}(I, 2, 2), ones(2), output)\n    @test affine!(zeros(2), [1.0 2.0; 3.0 4.0], [2.0, 1.0], [0.0, 0.0]) == [4, 10]\n    original = [1.0, 2.0]\n    separate = copy(original)\n    separate[1] = 9\n    @test original == [1, 2]\nend\n\n# === MAIN ===\nfunction main()\n    worked_a()\n    worked_b()\n    exercise_checks()\n    println(\"julia-026: all reference checks passed\")\nend\n\nif abspath(PROGRAM_FILE) == @__FILE__\n    main()\nend",
+          "title": "Failed calls leave the output untouched",
+          "explanation": "A 2 by 3 matrix with a length 2 input raises DimensionMismatch, and the output still holds its original 7s. Passing the output itself as the bias is aliasing and is rejected. A normal call gives [4, 10]. The last check is a reminder that copy creates independent storage. main then prints the success line.",
+          "observe": "The final line is julia-026: all reference checks passed"
+        }
+      ]
+    }
+  ]
+}

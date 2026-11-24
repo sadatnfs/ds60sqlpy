@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-057-segments-and-serving-topology">apache-057: Segments and serving topology<a class="heading-anchor" href="#apache-057-segments-and-serving-topology" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-004</code>, <code>apache-038</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Segment:</strong> A column-oriented Pinot unit of data and indexes that servers load and query.</li>
+<li><strong>Controller:</strong> The Pinot role that manages table configuration, segment metadata and segment assignment to servers.</li>
+<li><strong>Broker:</strong> The Pinot role that accepts a query, routes it to the servers holding relevant segments and merges their responses.</li>
+<li><strong>Server:</strong> The Pinot role that stores or consumes segments and executes query work on them.</li>
+<li><strong>ZooKeeper:</strong> The coordination service through which Pinot&#x27;s cluster manager stores cluster state and segment assignment.</li>
+</ul>
 <h3 id="an-analytical-serving-system-has-distinct-roles">An analytical serving system has distinct roles<a class="heading-anchor" href="#an-analytical-serving-system-has-distinct-roles" aria-label="Link to this section">#</a></h3>
 <p>Pinot serves analytical queries from segments, which are column-oriented units containing data and indexes. A controller manages table configuration, segment metadata and assignment. A server stores or consumes segments and evaluates query work. A broker accepts a query, determines relevant servers and combines their responses. ZooKeeper supplies coordination state through the cluster-management layer. These roles can share a small machine for instruction while retaining different responsibilities and failure behavior.</p>
 <p>A data file is not yet a served segment. Offline ingestion reads a supported input format, applies schema and transformation rules, builds a segment and uploads it through the configured controller path. The controller records and assigns that segment, and servers must make it available before a broker query can return its rows. A successful upload response alone does not establish that all expected rows are queryable.</p>
@@ -204,13 +212,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The independent oracle expects the exact three identities and values. A count of three is weaker: duplicated ID 1 and missing ID 3 could preserve that count. An amount sum is also insufficient because different missing/duplicated values can cancel. The checker therefore requests ordered primitive columns and compares complete rows before accepting the aggregate east 11 and west 9.</p>
 <p>Initialization and readback are separate operations. If initialization was interrupted after creating an empty table, the next check reports that state. It does not delete the table or replay ingestion to manufacture a successful lifecycle result. Inspect controller metadata, segment state and ingestion output before deciding whether an explicit recovery action is safe.</p>
 <h3 id="worked-case-b-a-broker-query-crosses-the-serving-topology">Worked case B: a broker query crosses the serving topology<a class="heading-anchor" href="#worked-case-b-a-broker-query-crosses-the-serving-topology" aria-label="Link to this section">#</a></h3>
-<p>The client sends SQL to broker:8099, not directly to a data file. The broker routes work to the assigned serving instance and combines the result. The project also reads controller segment and instance metadata so the result can be tied to the actual serving topology. A query against an unknown column must return an explicit exception rather than being mistaken for an empty successful result.</p>
+<p>The client sends SQL to <code>broker:8099</code>, not directly to a data file. The broker routes work to the assigned serving instance and combines the result. The project also reads controller segment and instance metadata so the result can be tied to the actual serving topology. A query against an unknown column must return an explicit exception rather than being mistaken for an empty successful result.</p>
 <p>All role addresses belong to the project&#x27;s private Docker network. Host localhost and container localhost have different meanings, as established in the networking foundations. A broker advertising an unreachable address can accept an initial request yet fail a later data exchange. Record both listener and advertised identities while diagnosing connection failures.</p>
 <p>One broker and one server provide no high availability. All containers also share the same Docker engine and disk. The project teaches role boundaries and retained state without claiming rack-level replication, production latency or fault tolerance. Increasing a replica count requires actual placement and query availability checks, not merely a new integer in a JSON file.</p>
 <p>The pinned server release eagerly evaluates a default address-discovery call that tries to find a public UDP route, even when an explicit server hostname is present. An internal Docker network has no such route, and the first owned run failed with Network is unreachable before loading any data. The workshop pins hostname-based instance addressing while retaining the explicit service DNS name. This configuration keeps startup inside the private network; enabling external egress is not required merely to discover the server&#x27;s own address.</p>
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Follow input file, ingestion output, controller metadata, assignment, server availability and broker exceptions in that order. Missing rows can originate at any of those boundaries. Preserve the original source fixture and segment identity when investigating; resetting volumes discards the evidence needed to distinguish ingestion loss from a routing failure.</p>
 <p><strong>Interview discussion: why can segment upload succeed while a query is incomplete?</strong> Upload, assignment and server readiness are separate stages. A complete diagnosis compares expected source identities with segment state and actual broker results. The two cases establish a reproducible segment contract and explain the serving path that must be healthy before the contract can be observed.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="batch-ingestion-job-specification">Batch ingestion job specification<a class="heading-anchor" href="#batch-ingestion-job-specification" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">jobType</span><span class="syntax-punctuation">:</span> SegmentCreationAndTarPush
+<span class="syntax-tag">inputDirURI</span><span class="syntax-punctuation">:</span> file:///project/input
+<span class="syntax-tag">includeFileNamePattern</span><span class="syntax-punctuation">:</span> glob:**/*.jsonl
+<span class="syntax-tag">outputDirURI</span><span class="syntax-punctuation">:</span> file:///staging/segments
+<span class="syntax-tag">overwriteOutput</span><span class="syntax-punctuation">:</span> false
+<span class="syntax-tag">tableSpec</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">tableName</span><span class="syntax-punctuation">:</span> ds60_orders
+  <span class="syntax-tag">schemaURI</span><span class="syntax-punctuation">:</span> file:///project/schema.json
+  <span class="syntax-tag">tableConfigURI</span><span class="syntax-punctuation">:</span> file:///project/table.json
+<span class="syntax-tag">pinotClusterSpecs</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-punctuation">-</span> <span class="syntax-tag">controllerURI</span><span class="syntax-punctuation">:</span> http://controller:9000</code></pre>
+<p>This excerpt of ingestion.yaml shows the two halves of offline loading: build a segment from the JSON lines input, then push the tar file to the controller. The controller records segment metadata and assigns it to servers, while the broker only learns routing from that assignment. overwriteOutput false keeps a second run from replacing a staged segment silently, so a rerun that fails on an existing output is protecting evidence rather than misbehaving.</p>
+<h4 id="query-through-the-broker-and-compare-totals">Query through the broker and compare totals<a class="heading-anchor" href="#query-through-the-broker-and-compare-totals" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  region<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  ds60_orders
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  region
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  region
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span></code></pre>
+<p>Sent to the broker at /query/sql, this should return east 11 and west 9 for the three fixture rows. The response metadata also reports numServersQueried and numSegmentsQueried, which tell you whether the broker reached the server holding the segment. A correct total from zero segments is impossible, so if those counts are zero while rows appear, you are reading a different table or cluster. The client checks the exact ID list before trusting the aggregate.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="pinot-apache-057-command-notebook">Pinot apache-057 command notebook<a class="heading-anchor" href="#pinot-apache-057-command-notebook" aria-label="Link to this section">#</a></h2>

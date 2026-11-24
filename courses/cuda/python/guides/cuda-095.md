@@ -14,6 +14,14 @@ Latency per request, batch throughput, tail latency, cold start and memory are s
 
 
 
+### Key terms
+
+- **Evaluation mode:** The `model.eval()` setting that switches layers such as dropout and batch normalization to inference behavior.
+- **Inference mode:** A PyTorch context that disables gradient tracking and version counters to reduce inference overhead.
+- **Throughput:** Samples or requests completed per unit time, often improved by batching.
+- **Request latency:** Time from receiving one request to returning its answer, which batching can increase.
+- **Cold start:** The cost of the first request, including loading, compilation and allocation before steady state.
+
 ## Worked examples
 
 ### Worked example 1
@@ -39,6 +47,15 @@ print("CPU serving model:", throughput, "items/s; batch latency", seconds, "s")
 
 **Expected observation:** 4000 items/s with 8 ms batch latency, not 0.25 ms request latency.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `batch` | `32` |
+| `seconds` | `0.008` |
+| `throughput` | `4000.0` |
+| `amortized` | `0.00025` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -63,27 +80,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: Compute throughput
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute throughput** in the examples above.
+**Trap to avoid:** Dividing by the time until the batch was enqueued rather than completed inflates throughput, because GPU work is asynchronous and the enqueue returns almost immediately.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Separate per-item cost and request latency
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **separate per-item cost and request latency** in the examples above.
+**Trap to avoid:** Reporting 0.25 ms as request latency promises response times that no request experiences, and service level objectives built on it will fail.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Set both PyTorch inference controls
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **set both PyTorch inference controls** in the examples above.
+**Trap to avoid:** Using only `torch.no_grad()` keeps dropout active, so predictions vary between calls, and batch normalization keeps updating running statistics.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Specify TensorFlow training behavior
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **specify TensorFlow training behavior** in the examples above.
+**Trap to avoid:** Assuming `model.predict` and `model(x)` behave the same in every custom layer is risky when a layer reads `training` differently.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Measure cold start
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **measure cold start** in the examples above.
+**Trap to avoid:** Averaging cold start into steady-state latency hides a multi-second first response. Autoscaling services start new replicas often, so cold start can affect many users.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Test an exported signature boundary
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **test an exported signature boundary** in the examples above.
+**Trap to avoid:** Letting the runtime cast silently makes accepted inputs ambiguous. A float64 request cast to float32 loses precision without anyone noticing.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

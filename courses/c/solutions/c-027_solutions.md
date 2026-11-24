@@ -1,6 +1,6 @@
 # c-027: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-027_solution.c`, implements all six cases, from the "exercise successful allocation" case to the "transfer a distinguishing content check" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -22,13 +22,13 @@ CHECK(strcmp(out, "abc") == 0);
 free(out);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `strcmp(out, "abc") == 0`. Restoring the original line brings back the worked observation: the output owns an equal string.
+**Expected:** With `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));` the run stops with `Check failed` at the CHECK on `strcmp(out, "abc") == 0`, because the "exercise successful allocation" case no longer shows that the output owns an equal string. Restoring `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` brings that observation back.
 
 The test checks content and then releases the owned result.
 
 ## Exercise 2: Inject allocation failure: debug a regression
 
-A regression changed `fail_allocation = true;` to `fail_allocation = false;` in worked example 2. Run worked example 2 with that change, use the failing CHECK to explain the defect and repair it without changing the CHECK.
+A regression changed `fail_allocation = true;` to `fail_allocation = false;` in worked example 2, the "inject allocation failure" case. Run the example with that change, use the failing CHECK to explain why the copy fails and output remains NULL no longer holds and repair it without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -40,7 +40,7 @@ CHECK(out == NULL);
 fail_allocation = false;
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!copy_with_allocator("abc", &out, controlled_alloc)`; after it the line reads `fail_allocation = true;` again and the copy fails and output remains NULL.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!copy_with_allocator("abc", &out, controlled_alloc)`. Once the line reads `fail_allocation = true;` again, the "inject allocation failure" case again shows that the copy fails and output remains NULL.
 
 No real memory pressure is required. The failure is reproducible and isolated to this operation.
 
@@ -111,4 +111,4 @@ A weak length-only check would accept the wrong letters. Choose an oracle strong
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a distinguishing content check" case to your own c-027 source. Explain why every access in `controlled_alloc` or `copy_with_allocator` stays within a live object and each owned resource is released. An expected fault injection failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "inject allocation failure" case apart from ordinary output: the fixture proves its stated fault injection, test oracle and failure-path coverage assumptions, not universal safety.

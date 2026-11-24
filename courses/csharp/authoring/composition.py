@@ -294,9 +294,9 @@ Writing a file creates a side effect with a lifetime. Tiny examples should creat
     ],
     (
         "Round-trip an owned text file",
-        'string root = Path.Combine(Path.GetTempPath(), "lesson-" + Guid.NewGuid().ToString("N"));\nDirectory.CreateDirectory(root);\ntry { string path = Path.Combine(root, "note.txt"); File.WriteAllText(path, "café", Encoding.UTF8); Check(File.ReadAllText(path, Encoding.UTF8) == "café", "UTF-8 round trip"); }\nfinally { Directory.Delete(root, true); }\nCheck(!Directory.Exists(root), "owned cleanup");',
-        "The Unicode text round-trips and the owned directory is removed.",
-        "The random name prevents collisions while the observable content remains deterministic.",
+        'string root = Path.Combine(Path.GetTempPath(), "lesson-" + Guid.NewGuid().ToString("N"));\nDirectory.CreateDirectory(root);\nvar utf8 = new UTF8Encoding(false);\ntry { string path = Path.Combine(root, "note.txt"); File.WriteAllText(path, "café", utf8); Check(File.ReadAllBytes(path).Length == 5, "five UTF-8 bytes, no BOM"); Check(File.ReadAllText(path, utf8) == "café", "UTF-8 round trip"); }\nfinally { Directory.Delete(root, true); }\nCheck(!Directory.Exists(root), "owned cleanup");',
+        "The file holds exactly five bytes, the Unicode text round-trips and the owned directory is removed.",
+        "The random name prevents collisions while the observable content remains deterministic. `new UTF8Encoding(false)` writes UTF-8 without a byte order mark: `é` takes two bytes, so `café` is five bytes. `Encoding.UTF8` would prepend the three-byte BOM EF BB BF and make the file eight bytes long.",
     ),
     (
         "Separate logical and filesystem names",

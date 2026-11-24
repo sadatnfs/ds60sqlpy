@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-derive-the-input-vjp">Exercise 1: Derive the input VJP<a class="heading-anchor" href="#exercise-1-derive-the-input-vjp" aria-label="Link to this section">#</a></h3>
 <p>Multiply upstream by a and the positive mask.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>derive the input VJP</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Derive the input vector-Jacobian product for <code>y = max(0, a*x + b)</code>: the gradient of x is <code>upstream * a * mask</code>, where <code>mask</code> is 1 where the preactivation is positive and 0 otherwise.</p>
+<p><strong>Why it is correct here.</strong> The chain rule multiplies the upstream gradient by the derivative of the ReLU, the mask, and by the derivative of the affine part, <code>a</code>. At <code>x = 2</code> with <code>a = 2</code>, <code>b = 1</code>, the preactivation is 5 and the derivative is 2.</p>
+<p><strong>A plausible wrong approach.</strong> Using the output <code>y</code> instead of a mask, <code>upstream * a * y</code>, scales gradients by activation values and is wrong for every positive input not equal to 1.</p>
+<p><strong>How to verify.</strong> Compare the custom backward with autograd of the reference expression on random inputs away from the kink.</p>
 <h3 id="exercise-2-derive-bias-gradient">Exercise 2: Derive bias gradient<a class="heading-anchor" href="#exercise-2-derive-bias-gradient" aria-label="Link to this section">#</a></h3>
 <p>Sum masked upstream values.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>derive bias gradient</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Derive the bias gradient as the sum of masked upstream values: with upstream <code>[1, 3]</code> and mask <code>[0, 1]</code>, it is <code>1*0 + 3*1 = 3</code>.</p>
+<p><strong>Why it is correct here.</strong> The bias is shared across all elements, so its gradient accumulates over them. Only positions with positive preactivation pass gradient through the ReLU.</p>
+<p><strong>A plausible wrong approach.</strong> Returning the upstream sum without masking gives 4, including a contribution from a position where the ReLU blocked gradient.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>bias_grad == 3</code>. Compare against autograd for a tensor with mixed signs.</p>
 <h3 id="exercise-3-run-finite-differences-away-from-a-kink">Exercise 3: Run finite differences away from a kink<a class="heading-anchor" href="#exercise-3-run-finite-differences-away-from-a-kink" aria-label="Link to this section">#</a></h3>
 <p>Use symmetric perturbations and a suitable epsilon.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>run finite differences away from a kink</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Run central finite differences away from the kink: at <code>x = 2</code> with <code>eps = 1e-5</code>, <code>(f(x+eps) - f(x-eps)) / (2*eps)</code> is about 2.</p>
+<p><strong>Why it is correct here.</strong> Both perturbations stay in the linear region, so the central difference equals the derivative up to rounding. The reference asserts agreement within <code>1e-8</code> in float64.</p>
+<p><strong>A plausible wrong approach.</strong> Running the check in float32 with a tiny epsilon loses precision to cancellation and fails even when the analytic gradient is right.</p>
+<p><strong>How to verify.</strong> Use float64 inputs, as <code>torch.autograd.gradcheck</code> expects, and check a few points on both sides of the kink.</p>
 <h3 id="exercise-4-explain-a-failed-kink-gradcheck">Exercise 4: Explain a failed kink gradcheck<a class="heading-anchor" href="#exercise-4-explain-a-failed-kink-gradcheck" aria-label="Link to this section">#</a></h3>
 <p>The derivative is not unique at the boundary.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>explain a failed kink gradcheck</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Explain a gradcheck failure at <code>x = -0.5</code>, where the preactivation is 0: the central difference straddles the kink and gives <code>(2*eps - 0)/(2*eps) = 1</code>, while PyTorch&#x27;s ReLU chooses subgradient 0 there.</p>
+<p><strong>Why it is correct here.</strong> The derivative is not unique at the kink, so any value between 0 and the right derivative is a valid subgradient choice. Finite differences pick an average.</p>
+<p><strong>A plausible wrong approach.</strong> Changing the backward to return 1 at the kink so the check passes chooses a convention for the test&#x27;s sake.</p>
+<p><strong>How to verify.</strong> Test the kink separately with the documented subgradient, and run gradcheck only at points away from it.</p>
 <h3 id="exercise-5-specify-higher-order-support">Exercise 5: Specify higher-order support<a class="heading-anchor" href="#exercise-5-specify-higher-order-support" aria-label="Link to this section">#</a></h3>
 <p>Do not imply it from first-order success.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>specify higher-order support</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Specify higher-order support explicitly: if the backward is not itself differentiable, mark the operator as first-order only, for example with <code>once_differentiable</code>.</p>
+<p><strong>Why it is correct here.</strong> A correct first derivative says nothing about whether the backward function supports differentiation again, which methods like gradient penalties require.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming double backward works because first-order gradcheck passed leads to silent zero second derivatives.</p>
+<p><strong>How to verify.</strong> Run <code>gradgradcheck</code> if second order is supported, or confirm a clear error is raised.</p>
 <h3 id="exercise-6-compare-each-framework-reference">Exercise 6: Compare each framework reference<a class="heading-anchor" href="#exercise-6-compare-each-framework-reference" aria-label="Link to this section">#</a></h3>
 <p>Compare native forward and backward independently.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare each framework reference</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare each framework&#x27;s native reference separately: PyTorch autograd of the reference expression and TensorFlow&#x27;s <code>GradientTape</code> of the same expression, each for forward and backward.</p>
+<p><strong>Why it is correct here.</strong> Each framework binding may differ in subgradient conventions or dtype handling. Separate comparisons localize a mismatch.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing PyTorch&#x27;s custom op with TensorFlow&#x27;s custom op only checks they agree with each other.</p>
+<p><strong>How to verify.</strong> Use the same inputs and upstream values in both frameworks and compare forward and backward results within tolerance.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Finite-difference derivative approximately 2 and bias VJP 3.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-098_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

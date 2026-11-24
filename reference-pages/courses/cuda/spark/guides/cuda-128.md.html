@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A good acceleration decision includes a credible no-change outcome. Tiny data, unsupported expressions, expensive transfers, external I/O, severe skew or a memory-constrained device can make CPU Spark or a single-process dataframe the better choice. Distributed scheduling overhead can dominate a workload that fits comfortably in one local process. GPU capability is one input to architecture, not a requirement to use it.</p>
 <p>Compare total completion time, resource cost, operational complexity and output quality under actual constraints. Maintain a CPU fallback installation separately from plugin operator fallback. Revisit the decision when data size, workload mix or hardware changes. The final review should identify the smallest supported system that solves the problem and the evidence that would justify expanding it.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>No-change outcome:</strong> A credible decision to keep the existing CPU approach when acceleration does not pay off.</li>
+<li><strong>Steady-state cost:</strong> Recurring time per run after setup, compared separately from one-time startup cost.</li>
+<li><strong>Operational complexity:</strong> The ongoing effort to deploy, monitor and support a system, which counts toward total cost.</li>
+<li><strong>Reevaluation trigger:</strong> A recorded condition, such as data growth or a new release, that justifies revisiting the decision.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A local CPU dataframe finishes a tiny analysis in 0.1 seconds while Spark startup takes several seconds. No kernel speedup can erase startup for a one-off job without changing the execution model.</p>
@@ -214,20 +221,48 @@ candidates <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <span class="syntax-keyword">assert</span> candidates<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">local_cpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span> candidates<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark_startup_only</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU architecture decision: GPU candidate adds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> net<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> GPU candidate adds 10 modeled seconds end to end.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>saved_compute</code></td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>added_transfer</code></td>
+<td><code>40</code></td>
+</tr>
+<tr>
+<td><code>net</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>candidates</code></td>
+<td><code>{&#x27;local_cpu&#x27;: 0.1, &#x27;spark_startup_only&#x27;: 3.0}</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-end-to-end-tradeoff">Exercise 1: Compute end-to-end tradeoff<a class="heading-anchor" href="#exercise-1-compute-end-to-end-tradeoff" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute end-to-end tradeoff</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the 30-second compute saving alone recommends a change that makes the application slower overall.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-choose-a-tiny-data-tool">Exercise 2: Choose a tiny-data tool<a class="heading-anchor" href="#exercise-2-choose-a-tiny-data-tool" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>choose a tiny-data tool</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using GPU Spark for every analysis because it is available adds startup and operational overhead to jobs that never needed distribution.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-separate-setup-and-steady-state">Exercise 3: Separate setup and steady state<a class="heading-anchor" href="#exercise-3-separate-setup-and-steady-state" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>separate setup and steady state</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting only steady-state throughput favors GPU Spark for interactive one-off use, where setup actually dominates.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-include-operational-cost">Exercise 4: Include operational cost<a class="heading-anchor" href="#exercise-4-include-operational-cost" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>include operational cost</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing only query time ignores the work of keeping a GPU Spark stack compatible across upgrades. A Spark upgrade can be blocked until a matching plugin release exists, which delays security patches.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-define-a-reevaluation-trigger">Exercise 5: Define a reevaluation trigger<a class="heading-anchor" href="#exercise-5-define-a-reevaluation-trigger" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>define a reevaluation trigger</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Rejecting GPU Spark permanently ignores that the tradeoff can change, while revisiting constantly wastes effort. A trigger such as transfer time falling below compute savings ties the revisit to the exact term that decided the current outcome.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-write-an-evidence-based-recommendation">Exercise 6: Write an evidence-based recommendation<a class="heading-anchor" href="#exercise-6-write-an-evidence-based-recommendation" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>write an evidence-based recommendation</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Recommending the most powerful technology by default ignores the measured tradeoff and the operational cost. It also skips stating missing evidence, so the decision cannot be corrected when new data arrives.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

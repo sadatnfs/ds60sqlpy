@@ -105,7 +105,7 @@ object Main {
       locally {
         val predictedRawJoinRows = 1600L * 2L + 400L
         assert(predictedRawJoinRows == 3600L)
-        println("Raw dimension multiplicity predicts3600 pairs for2000 accepted facts")
+        println("Raw dimension multiplicity predicts 3600 pairs for 2000 accepted facts")
       }
       locally {
         val known = (1L to 2000L).filter(_ % 10L != 0L)

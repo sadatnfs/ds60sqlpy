@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A workflow coordinator decides which stages can run, what evidence is complete and what should happen after interruption. Repeating a command is not automatically a safe retry. An operation may already have written an artifact before its response was lost, and a changed input may make an old checkpoint invalid.</p>
 <p>The local example uses an explicit ledger to expose these mechanisms. It records the input identity, derived features, model state and publication identity. A deliberate interruption occurs after the feature checkpoint. Resuming with the same input reuses that completed stage and reaches the same publication identity on another run.</p>
 <p>The second case changes the input and invalidates the prior derived state. This is a small Python workflow model, not a disguised Prefect deployment. The existing Python orchestration lessons introduce actual framework execution. The purpose here is to make the state and retry contract explicit before choosing a scheduler or distributing work.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>DAG:</strong> A directed acyclic graph of workflow stages in which each stage runs only after its predecessors have completed.</li>
+<li><strong>Checkpoint:</strong> A recorded completed artifact in the ledger that a resumed run reuses instead of recomputing.</li>
+<li><strong>Idempotency:</strong> The property that repeating an operation with the same input yields the same result, such as the same publication identity, without duplicate effects.</li>
+<li><strong>Input identity:</strong> A stable digest of the input data that ties derived artifacts to their source; a changed digest invalidates prior derived state.</li>
+<li><strong>Safe retry:</strong> Repeating a stage only when recorded evidence and input identity show that repetition cannot create a conflicting or duplicate result.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The ledger keys represent completed artifacts. A stable input digest identifies which data those artifacts belong to. Publication is created only after model state exists, and repeat execution with the same input returns the same identity. An input change clears derived state under this simple policy; a larger system may invalidate only affected descendants.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

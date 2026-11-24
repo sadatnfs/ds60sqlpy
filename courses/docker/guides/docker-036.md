@@ -16,6 +16,14 @@ Orchestration systems coordinate desired state across resources and failure doma
 
 The correct choice follows the workload. A local learning classroom benefits from a simple single-engine model with explicit volumes. A public service with strict availability and scaling requirements may need a different operational architecture. More infrastructure is not automatically a better educational or production experience.
 
+### Key terms
+
+- **Single-host Compose:** Defining and operating a related application on one selected engine, with no multi-node recovery.
+- **Orchestration:** Coordinating desired state for workloads across many resources and failure domains.
+- **Scheduling:** Deciding which node runs each workload based on resources, constraints and policy.
+- **Failure domain:** A set of resources, such as one host, that can fail together and take every workload on it down.
+- **Desired state:** The declared configuration that an orchestrator's controllers continually work to make true.
+
 ## Anatomy and a trace you can follow
 
 Map concepts carefully: an image is reused; a container process still runs; Compose service configuration may inform a Pod template; a named local volume does not automatically become a portable replicated database. Published host ports and Kubernetes Services have different routing and ownership semantics.
@@ -92,11 +100,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Treating Compose restart policies as host-failure recovery. Translating volumes to Kubernetes without a storage and backup design. Expecting a load balancer to replicate data.
 
-Exercise 4 is this chapter's boundary case: Diagnose a mechanical volume translation to Kubernetes. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a mechanical volume translation to Kubernetes. Name the storage class and provisioner the translated claim depends on, and check whether a restore procedure exists for its data. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using single-host Compose, orchestration, scheduling and failure domain. Reconstruct worked example 2 (Map only what actually transfers) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Map each Compose concept to the requirement it becomes on a cluster without looking at the table. Then reconstruct worked example 2 (Map only what actually transfers) with one different value, predict what changes, and name which of single-host Compose, orchestration, scheduling and failure domain the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

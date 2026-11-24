@@ -160,7 +160,7 @@ def main():
         except ValueError:
             pass
         else:
-            raise AssertionError("Invalid31-row product accepted")
+            raise AssertionError("Invalid 31-row product accepted")
         # Exercise 2: Stage a run and validate the persisted readback
         staged_a = stage_run(spark, owned_root, "run-a", source)
         assert (owned_root / "runs/run-a/receipt.json").is_file()

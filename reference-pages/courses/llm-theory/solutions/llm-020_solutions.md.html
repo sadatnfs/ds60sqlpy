@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="llm-020-explanatory-solutions">llm-020: explanatory solutions<a class="heading-anchor" href="#llm-020-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Read these initialization and residual scale answers after attempting <em>Measure a small linear layer</em> through <em>Check residual dimensions</em>, or after asking for a reveal. They reuse the guide&#x27;s literals, so a mismatch in <em>Trace gradients</em> points to one step. <code>llm-020_solution.py</code> holds the assertions; this page explains how they test activation norm. Then try <em>Check residual dimensions</em> on a fresh input you chose before looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Initialization determines the scale of signals entering a network before learning. Large weights can create large activations, saturated probabilities or unstable gradients. Residual connections add another contribution to an existing representation, so scale and shape both matter. A single global norm can hide the first layer where a problem begins. Inspect intermediate activation norms and the gradients of named parameters on the same fixture. The comparison here changes only a fixed linear scale, making the resulting norm change calculable. A repair is meaningful when it restores finite behavior on the exact input that failed, not merely on a new easier input.</p>
 <p><strong>Activation norm:</strong> Magnitude of an intermediate representation.</p>
@@ -223,7 +223,7 @@ H400000v40H845.2724
 s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
 c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
 M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1328em;"><span></span></span></span></span></span></span></span></span>.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>torch.linalg.vector_norm(out).item()</code> matches <code>0.01 * np.sqrt(10)</code> within 1e-6.</p>
+<p><strong>Verify:</strong> For <em>Measure a small linear layer</em>, a fresh-process check confirms <code>torch.linalg.vector_norm(out).item()</code> matches <code>0.01 * np.sqrt(10)</code> within 1e-6.</p>
 <h3 id="exercise-2-increase-only-the-scale">Exercise 2: Increase only the scale<a class="heading-anchor" href="#exercise-2-increase-only-the-scale" aria-label="Link to this section">#</a></h3>
 <p>The question is: Replace 0.01<em>identity with 100</em>identity.</p>
 <p>Changing both scale and random orientation would confound the comparison. Here the factor follows directly from linearity.</p>
@@ -236,7 +236,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
     rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> activation norm increases by factor 10000.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>(torch.linalg.vector_norm(bigger) / torch.linalg.vector_norm(out)).item()</code> matches <code>10000</code> within 0.01.</p>
+<p><strong>Verify:</strong> For <em>Increase only the scale</em>, a fresh-process check confirms <code>(torch.linalg.vector_norm(bigger) / torch.linalg.vector_norm(out)).item()</code> matches <code>10000</code> within 0.01.</p>
 <h3 id="exercise-3-trace-gradients">Exercise 3: Trace gradients<a class="heading-anchor" href="#exercise-3-trace-gradients" aria-label="Link to this section">#</a></h3>
 <p>The question is: Differentiate mean squared output for the small and large matrices and compare norms.</p>
 <p>A finite forward output does not guarantee a useful gradient scale. Logging both makes a potential optimization problem visible before updates are applied.</p>
@@ -248,7 +248,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
     norms<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>norms<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> norms<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> both finite; large-scale gradient norm is larger.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>np.isfinite(norms).all()</code> and <code>norms[1] &gt; norms[0]</code>.</p>
+<p><strong>Verify:</strong> For <em>Trace gradients</em>, a fresh-process check confirms <code>np.isfinite(norms).all()</code> and <code>norms[1] &gt; norms[0]</code>.</p>
 <h3 id="exercise-4-find-the-first-overflow">Exercise 4: Find the first overflow<a class="heading-anchor" href="#exercise-4-find-the-first-overflow" aria-label="Link to this section">#</a></h3>
 <p>The question is: Apply a float32 matrix scaled 1e38, then inspect matrix product and squared loss.</p>
 <p>The diagnostic should identify the squared objective as nonfinite, while separately recording whether its input product already overflowed. One unlabelled NaN at the end is insufficient.</p>
@@ -256,14 +256,14 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 objective <span class="syntax-operator">=</span> extreme<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>objective<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> squared loss is nonfinite.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>not torch.isfinite(objective)</code>.</p>
+<p><strong>Verify:</strong> For <em>Find the first overflow</em>, a fresh-process check confirms <code>not torch.isfinite(objective)</code>.</p>
 <h3 id="exercise-5-repair-on-the-same-input">Exercise 5: Repair on the same input<a class="heading-anchor" href="#exercise-5-repair-on-the-same-input" aria-label="Link to this section">#</a></h3>
 <p>The question is: Restore the small scale and recalculate output and loss for the unchanged x.</p>
 <p>Changing the fixture would not test the proposed repair. Reusing the original input isolates the effect of the initialization scale.</p>
 <pre class="highlighted-code"><code class="language-python">repaired <span class="syntax-operator">=</span> x <span class="syntax-operator">@</span> small
 <span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>repaired<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>repaired<span class="syntax-operator">.</span>square<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both output and loss finite.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>torch.isfinite(repaired).all()</code> and <code>torch.isfinite(repaired.square().mean())</code>.</p>
+<p><strong>Verify:</strong> For <em>Repair on the same input</em>, a fresh-process check confirms <code>torch.isfinite(repaired).all()</code> and <code>torch.isfinite(repaired.square().mean())</code>.</p>
 <h3 id="exercise-6-check-residual-dimensions">Exercise 6: Check residual dimensions<a class="heading-anchor" href="#exercise-6-check-residual-dimensions" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare residual x+x@small with an incompatible three-feature branch.</p>
 <p>Numeric scale and dimension compatibility are independent contracts. A stable norm cannot compensate for adding quantities with incompatible feature meaning.</p>
@@ -275,9 +275,9 @@ objective <span class="syntax-operator">=</span> extreme<span class="syntax-oper
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">incompatible residual accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> valid residual shape (1, 4); width 3 branch rejected.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>tuple((x + x @ small).shape) == (1, 4)</code> and <code>x + torch.ones((1, 3))</code> raises <code>RuntimeError</code>.</p>
+<p><strong>Verify:</strong> For <em>Check residual dimensions</em>, a fresh-process check confirms <code>tuple((x + x @ small).shape) == (1, 4)</code> and <code>x + torch.ones((1, 3))</code> raises <code>RuntimeError</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one input to <em>Find the first overflow</em> and predict the result first; keep <em>Check residual dimensions</em> failing beside the repair. Log a missing PyTorch separately from a wrong activation norm value in <code>llm-020</code>.</p></article>
   </main>
 </body>
 </html>

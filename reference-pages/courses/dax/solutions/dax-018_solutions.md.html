@@ -235,23 +235,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the retained products at threshold 24 using &gt;.</p>
 <p>Notebook and Mug qualify; Pen at exactly 24 does not.</p>
+<p><strong>Why it fits this model:</strong> FILTER evaluates [NetRevenue] once per ProductKey. Notebook (67) and Mug (96) exceed 24, while Pen equals 24 and Bag is BLANK, so revenue is 163.</p>
+<p><strong>Tempting mistake:</strong> Filtering lines with Sales[NetAmount] &gt; 24 answers a different question. It keeps S3, S4 and S8 for 103, because it tests lines, not product totals.</p>
+<p><strong>How to confirm:</strong> The candidate table has 2 rows and CALCULATE over it returns 163.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change &gt; 24 to &gt;= 24.</p>
 <p>Pen is added, so three products qualify and their revenue is 187.</p>
+<p><strong>Why it fits this model:</strong> With &gt;= 24, Pen&#x27;s 24 also qualifies. Bag&#x27;s BLANK compares as 0, which is below 24, so three products qualify and revenue is 187.</p>
+<p><strong>Tempting mistake:</strong> Lowering the threshold to &gt;= 0 would also admit Bag, because BLANK &gt;= 0 is TRUE, so a product with no sales would join the list.</p>
+<p><strong>How to confirm:</strong> Expect Products 3 and Revenue 187, and check that Bag is not in the list.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a selection for customers with revenue above 55.</p>
 <p>Bo at 80 and Cy at 56 qualify; Ada at 51 and Di at BLANK do not. Their total is 136.</p>
+<p><strong>Why it fits this model:</strong> Iterate VALUES(Customer[CustomerKey]) and invoke [NetRevenue] per key. Bo (80) and Cy (56) exceed 55, Ada (51) does not and Di is BLANK.</p>
+<p><strong>Tempting mistake:</strong> <code>FILTER ( Sales, Sales[NetAmount] &gt; 55 )</code> checks single lines, and the largest line is 40, so the result is BLANK.</p>
+<p><strong>How to confirm:</strong> Expect 2 customers with revenue 80 + 56 = 136.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose CALCULATE([NetRevenue], [NetRevenue] &gt; 50).</p>
 <p>Use FILTER over a deliberate candidate table so the measure has a per-candidate evaluation context.</p>
+<p><strong>Why it fits this model:</strong> A simple Boolean filter in CALCULATE must test a column. FILTER over VALUES(Product[ProductKey]) gives the measure one product context per candidate.</p>
+<p><strong>Tempting mistake:</strong> <code>FILTER ( Sales, [NetRevenue] &gt; 50 )</code> runs but transitions to single lines, and since no line exceeds 50 it returns an empty table and BLANK.</p>
+<p><strong>How to confirm:</strong> The ProductKey candidate version returns 2 products and 163, as in case A.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Predict a threshold above every product&#x27;s revenue.</p>
 <p>No product qualifies. COUNTROWS(Qualifying) and the final SUM result are BLANK in this case.</p>
+<p><strong>Why it fits this model:</strong> Mug&#x27;s 96 is the largest product total, so a threshold of 100 leaves the candidate table empty. CALCULATE with an empty filter table sees no rows.</p>
+<p><strong>Tempting mistake:</strong> Assuming an empty filter means no filter predicts 187. It actually admits no products, so revenue is BLANK.</p>
+<p><strong>How to confirm:</strong> At &gt; 100 the row should read Products BLANK and Revenue BLANK.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the pattern to dynamic customer segments.</p>
 <p>A segment based on current-period revenue must state its period and whether unsold or previously filtered customers are eligible candidates.</p>
+<p><strong>Why it fits this model:</strong> State the period and the candidates. Under 2025, Ada has 27, Bo 40 and Cy 56, so only Cy exceeds 50. Over all years, Ada (51), Bo (80) and Cy (56) all do.</p>
+<p><strong>Tempting mistake:</strong> Building the segment over all years but reporting it in a 2025 view labels Ada high value, though her 2025 revenue is 27.</p>
+<p><strong>How to confirm:</strong> Under 2025 the FILTER returns Cy alone with 56; with no year filter it returns three customers and 187.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-011-explained-reference">julia-011: explained reference<a class="heading-anchor" href="#julia-011-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-011_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Dispatch chooses a method from the types of all positional arguments, while each constructor still checks its own numeric domain. <code>Circle</code> and <code>Rectangle</code> accept finite nonnegative sizes, <code>area</code> has one method per shape, and <code>classify</code> has two one-sided integer methods plus an explicit <code>(Integer, Integer)</code> method that resolves their overlap.</p>
 <h3 id="1-add-a-zero-size-shape">1. Add a zero-size shape<a class="heading-anchor" href="#1-add-a-zero-size-shape" aria-label="Link to this section">#</a></h3>
 <p>The constructor permits nonnegative dimensions, including zero.</p>
 <p><strong>Expected observation:</strong> Its area is 0.</p>
+<p><strong>Why it holds here:</strong> Radius 0 satisfies <code>stored &gt;= 0</code>, so <code>Circle(0)</code> is valid and <code>pi * 0^2</code> is 0.</p>
+<p><strong>Plausible wrong approach:</strong> Rejecting zero as if it were negative removes a legitimate degenerate case and makes empty shapes impossible to represent.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>area(Circle(0)) == 0</code> and <code>area(Rectangle(0, 5)) == 0</code>.</p>
 <h3 id="2-reject-an-invalid-dimension">2. Reject an invalid dimension<a class="heading-anchor" href="#2-reject-an-invalid-dimension" aria-label="Link to this section">#</a></h3>
 <p>A method for the right type can still receive scientifically invalid values unless its contract prevents them.</p>
 <p><strong>Expected observation:</strong> Construction raises ArgumentError.</p>
+<p><strong>Why it holds here:</strong> <code>Rectangle(1, -1)</code> fails <code>h &gt;= 0</code>, so the constructor throws <code>ArgumentError</code> even though the argument types are valid reals.</p>
+<p><strong>Plausible wrong approach:</strong> Relying on the <code>Real</code> type annotation to block bad sizes misses that -1 is a perfectly good <code>Real</code>.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>@test_throws ArgumentError Rectangle(1, -1)</code> and the same for <code>Circle(-1)</code>.</p>
 <h3 id="3-trace-both-arguments">3. Trace both arguments<a class="heading-anchor" href="#3-trace-both-arguments" aria-label="Link to this section">#</a></h3>
 <p>There is no requirement that one argument be a special receiver.</p>
 <p><strong>Expected observation:</strong> Different methods handle the two cases.</p>
+<p><strong>Why it holds here:</strong> <code>classify(1, &quot;x&quot;)</code> matches only <code>(Integer, Any)</code> and <code>classify(&quot;x&quot;, 1)</code> matches only <code>(Any, Integer)</code>, so they return different symbols.</p>
+<p><strong>Plausible wrong approach:</strong> Reasoning as in single-dispatch languages, where only the first argument selects behavior, predicts the same method for both calls.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>:first_integer</code> and <code>:second_integer</code> for these two calls.</p>
 <h3 id="4-resolve-the-overlap">4. Resolve the overlap<a class="heading-anchor" href="#4-resolve-the-overlap" aria-label="Link to this section">#</a></h3>
 <p>An intersection method documents behavior and prevents ambiguity.</p>
 <p><strong>Expected observation:</strong> The explicit intersection method is selected.</p>
+<p><strong>Why it holds here:</strong> Both one-sided methods match <code>(1, 2)</code>, and neither is more specific; the <code>(Integer, Integer)</code> method is more specific than both and is chosen.</p>
+<p><strong>Plausible wrong approach:</strong> Deleting the intersection method to simplify the code turns <code>classify(1, 2)</code> into a <code>MethodError</code> reporting ambiguity.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>classify(1, 2) == :both_integers</code>; <code>methods(classify)</code> lists all three signatures.</p>
 <h3 id="5-keep-an-unsupported-case-visible">5. Keep an unsupported case visible<a class="heading-anchor" href="#5-keep-an-unsupported-case-visible" aria-label="Link to this section">#</a></h3>
 <p>A catch-all fallback should be added only when its semantics are defined.</p>
 <p><strong>Expected observation:</strong> A MethodError is raised.</p>
+<p><strong>Why it holds here:</strong> <code>(1.0, 2.0)</code> matches none of the three signatures, so Julia raises <code>MethodError</code> rather than guessing a result.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>classify(a, b) = :other</code> to silence the error claims a meaning for float pairs that the design never defined.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>@test_throws MethodError classify(1.0, 2.0)</code>.</p>
 <h3 id="6-extend-an-owned-interface">6. Extend an owned interface<a class="heading-anchor" href="#6-extend-an-owned-interface" aria-label="Link to this section">#</a></h3>
 <p>Test the new method and invariants rather than assuming subtype membership proves interface correctness.</p>
-<p><strong>Expected observation:</strong> The generic total can use the operation if its laws hold.</p></article>
+<p><strong>Expected observation:</strong> The generic total can use the operation if its laws hold.</p>
+<p><strong>Why it holds here:</strong> A new <code>struct Square &lt;: Shape</code> with an <code>area</code> method lets <code>total_area</code> include it, because the sum only calls <code>area</code> on each element.</p>
+<p><strong>Plausible wrong approach:</strong> Declaring the subtype without an <code>area</code> method compiles, but <code>total_area</code> then fails with <code>MethodError</code> at the first square.</p>
+<p><strong>How to verify:</strong> Test the new <code>area</code> on a known side length and include it in a <code>Shape[]</code> passed to <code>total_area</code>.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-011: all reference checks passed</code>:</p>
+<p>Zero-size shapes are allowed, so <code>Circle(0)</code> and <code>Rectangle(0, 5)</code> both have area 0, while negative radius or height fails in the inner constructor with <code>ArgumentError</code>. The subtype line shows <code>Circle &lt;: Shape</code>, and the concreteness check explains why: <code>Circle</code> can be instantiated with fields, while <code>Shape</code> is an abstract node that only groups methods. A new shape must define its own <code>area</code> method to join the dispatch table.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> area<span class="syntax-punctuation">(</span>Circle<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test</span> area<span class="syntax-punctuation">(</span>Rectangle<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> Circle<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">ArgumentError</span> Rectangle<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-keyword">Circle</span> <span class="syntax-operator">&lt;:</span> <span class="syntax-keyword">Shape</span>
+    <span class="syntax-decorator">@test</span> isconcretetype<span class="syntax-punctuation">(</span>Circle<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">!</span>isconcretetype<span class="syntax-punctuation">(</span>Shape<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

@@ -16,6 +16,13 @@ The app and client in the fixture communicate using `app:8080`. The client does 
 
 Network attachment and authorization are different concerns. Sharing a network can permit connectivity, but an application still needs authentication when serving sensitive operations. Conversely, a private network is not a reason to publish every internal port on the host.
 
+### Key terms
+
+- **Bridge network:** A virtual network on one engine that connects container interfaces; Compose creates a user-defined one per project.
+- **Service DNS:** Name resolution that maps a Compose service name such as `app` to a current container address on the network.
+- **Container-to-container traffic:** Requests between peers on a shared network, such as client to `app:8080`, that never use the host's published port.
+- **Network vantage point:** The namespace a request starts from, which decides what names and addresses such as localhost mean.
+
 ## Anatomy and a trace you can follow
 
 The optional client uses Python’s HTTP library and a short timeout. `docker compose run --rm client` creates a short-lived container attached to the project’s network. It resolves `app`, connects to 8080 and prints the JSON response. The fixture marks that service with a tools profile so it does not remain as another server during ordinary startup.
@@ -40,7 +47,7 @@ Run after the app is healthy in the copied fixture.
 docker compose -p ds60-docker-study --profile tools run --rm client
 ```
 
-**Expected observation:** The peer prints the app response using app:8080 without relying on host port 18080.
+**Expected observation:** The peer prints the app response using `app:8080` without relying on host port 18080.
 
 ### Worked example 2: Contrast destination scopes
 
@@ -88,11 +95,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Connecting from one container to another through `localhost`. Using the host port instead of the container port between services. Hard-coding a container IP that changes when the service is recreated.
 
-Exercise 4 is this chapter's boundary case: Diagnose DNS success with connection refusal. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose DNS success with connection refusal. Record the resolved address, then test whether anything listens on that address and port inside the target container before touching DNS settings. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using bridge network, service DNS, container port and network vantage point. Reconstruct worked example 2 (Contrast destination scopes) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Recall which destination the host browser, a peer client and the app healthcheck each use, and why they differ. Then reconstruct worked example 2 (Contrast destination scopes) with one different value, predict what changes, and name which of bridge network, service DNS, container port and network vantage point the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

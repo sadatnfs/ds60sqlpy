@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "track_id": "data-ml-engineering",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "dme-001",
+      "title": "A delivery summary that refuses to publish when any input row is rejected",
+      "anchor": "reference",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-001.py",
+      "source_sha256": "692899b38d96047a86ce192be7c48aa90620dfecd1b5c300d0970e57c7ba7928",
+      "expected_output": [
+        "Complete valid delivery: {'input_rows': 3, 'accepted_rows': 3, 'candidate_packages': 6, 'rejected': [], 'publishable': True}",
+        "'rejected': [{'position': 3, 'reason': 'packages must be a positive integer'}], 'publishable': False}"
+      ],
+      "steps": [
+        {
+          "lines": [4, 11],
+          "excerpt": "def summarize(records):\n    accepted = []\n    rejected = []\n    seen = set()\n    for position, record in enumerate(records):\n        if not isinstance(record, dict):\n            rejected.append({\"position\": position, \"reason\": \"record must be a mapping\"})\n            continue",
+          "title": "Walk every record and keep its position",
+          "explanation": "summarize keeps three collections: accepted rows, rejected rows and a set of delivery ids already seen. enumerate supplies each record's position so a rejection can point back to the exact input row. A record that is not a dictionary is rejected immediately and continue skips to the next one.",
+          "observe": "Every input row ends up in exactly one place: accepted or rejected."
+        },
+        {
+          "lines": [12, 22],
+          "excerpt": "        delivery_id = record.get(\"delivery_id\")\n        packages = record.get(\"packages\")\n        if not isinstance(delivery_id, str) or not delivery_id.strip():\n            rejected.append({\"position\": position, \"reason\": \"missing delivery identity\"})\n        elif delivery_id in seen:\n            rejected.append({\"position\": position, \"reason\": \"duplicate delivery identity\"})\n        elif type(packages) is not int or packages < 1:\n            rejected.append({\"position\": position, \"reason\": \"packages must be a positive integer\"})\n        else:\n            seen.add(delivery_id)\n            accepted.append({\"delivery_id\": delivery_id, \"packages\": packages})",
+          "title": "Validate identity, duplicates and package counts",
+          "explanation": "record.get returns None instead of raising when a key is missing. The checks run in order: a delivery id must be nonblank text, must not repeat and must have a positive integer package count. type(packages) is not int is stricter than isinstance, because in Python True counts as an int and would otherwise pass.",
+          "observe": "Only rows that pass every check are added to accepted and to seen."
+        },
+        {
+          "lines": [23, 32],
+          "excerpt": "    total = 0\n    for record in accepted:\n        total += record[\"packages\"]\n    return {\n        \"input_rows\": len(records),\n        \"accepted_rows\": len(accepted),\n        \"candidate_packages\": total,\n        \"rejected\": rejected,\n        \"publishable\": not rejected,\n    }",
+          "title": "Total accepted packages and decide publishability",
+          "explanation": "The loop sums packages from accepted rows only. The returned dictionary reports input, accepted and rejected counts so a reader can confirm that nothing vanished. publishable is not rejected, which is True only when the rejected list is empty.",
+          "observe": "A single bad row flips publishable to False even though a partial total exists."
+        },
+        {
+          "lines": [35, 44],
+          "excerpt": "def example_one():\n    records = [\n        {\"delivery_id\": \"A\", \"packages\": 2},\n        {\"delivery_id\": \"B\", \"packages\": 3},\n        {\"delivery_id\": \"C\", \"packages\": 1},\n    ]\n    result = summarize(records)\n    assert result[\"candidate_packages\"] == 6 and result[\"accepted_rows\"] == 3\n    assert result[\"publishable\"] is True\n    return result",
+          "title": "A clean delivery",
+          "explanation": "Three valid records produce a total of 6 packages and no rejections. The asserts make the expected result explicit before anything is printed.",
+          "observe": "publishable is True and rejected is an empty list."
+        },
+        {
+          "lines": [47, 59],
+          "excerpt": "def example_two():\n    records = [\n        {\"delivery_id\": \"A\", \"packages\": 2},\n        {\"delivery_id\": \"B\", \"packages\": 3},\n        {\"delivery_id\": \"C\", \"packages\": 1},\n        {\"delivery_id\": \"D\", \"packages\": \"4\"},\n    ]\n    result = summarize(records)\n    assert result[\"input_rows\"] == result[\"accepted_rows\"] + len(result[\"rejected\"]) == 4\n    assert result[\"candidate_packages\"] == 6 and result[\"publishable\"] is False\n    assert result[\"rejected\"][0][\"position\"] == 3\n    assert summarize([{\"delivery_id\": \"Z\", \"packages\": True}])[\"publishable\"] is False\n    return result",
+          "title": "One changed field withholds publication",
+          "explanation": "The fourth record stores packages as the text \"4\" instead of the number 4. It is rejected at position 3, the total stays 6 and publication is withheld. The last assert shows the boolean trap: packages=True is rejected too.",
+          "observe": "input_rows equals accepted_rows plus rejections, which is 4, and publishable is False."
+        },
+        {
+          "lines": [62, 68],
+          "excerpt": "def main():\n    print(\"Complete valid delivery:\", example_one())\n    print(\"Changed input, publication withheld:\", example_two())\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Print both investigations",
+          "explanation": "main labels each result so the two cases are easy to tell apart in the output.",
+          "observe": "Two lines are printed: Complete valid delivery: and Changed input, publication withheld:."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dme-014",
+      "title": "Event time, knowledge time and keeping every prediction request",
+      "anchor": "reference",
+      "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-014.py",
+      "source_sha256": "ff6662dc58385e46f737d7c62c6eae76493731641324f8c27db530dbe4438d2a",
+      "expected_output": [
+        "Values at decision hours 5, 7, 9: [10, 20, 20]",
+        "Retained request population: [{'request_id': 'early', 'cutoff': 1, 'value': None}, {'request_id': 'zero', 'cutoff': 5, 'value': 0}, {'request_id': 'later', 'cutoff': 7, 'value': 20}]"
+      ],
+      "steps": [
+        {
+          "lines": [4, 9],
+          "excerpt": "def select_known(records, cutoff):\n    eligible = [\n        row for row in records if row[\"event_hour\"] <= cutoff and row[\"known_hour\"] <= cutoff\n    ]\n    if not eligible:\n        return None",
+          "title": "Only facts that happened and were known by the cutoff",
+          "explanation": "Each record has an event_hour, when the fact happened, and a known_hour, when the system learned it. A list comprehension keeps rows where both are at or before the cutoff. If nothing qualifies, the function returns None to mean unknown.",
+          "observe": "None is different from a value of 0; it means there was nothing to use."
+        },
+        {
+          "lines": [10, 18],
+          "excerpt": "    latest = max(eligible, key=lambda row: (row[\"event_hour\"], row[\"known_hour\"]))\n    tied = [\n        row[\"value\"]\n        for row in eligible\n        if (row[\"event_hour\"], row[\"known_hour\"]) == (latest[\"event_hour\"], latest[\"known_hour\"])\n    ]\n    if len(set(tied)) != 1:\n        raise ValueError(\"Conflicting values share the same declared event/version clocks\")\n    return latest[\"value\"]",
+          "title": "Pick the latest and refuse ambiguous ties",
+          "explanation": "max with a key tuple picks the row with the latest event hour, breaking ties by known hour. The function then collects every value sharing that exact pair of clocks. If they disagree, the answer would depend on input order, so it raises ValueError instead of guessing.",
+          "observe": "A clean selection returns one value; a conflict raises an error."
+        },
+        {
+          "lines": [21, 28],
+          "excerpt": "def example_one():\n    records = [\n        {\"event_hour\": 2, \"known_hour\": 3, \"value\": 10},\n        {\"event_hour\": 4, \"known_hour\": 8, \"value\": 999},\n        {\"event_hour\": 6, \"known_hour\": 6, \"value\": 20},\n    ]\n    values = [select_known(records, cutoff) for cutoff in (5, 7, 9)]\n    assert values == [10, 20, 20]",
+          "title": "Selections at three decision hours",
+          "explanation": "The 999 record happened at hour 4 but was not known until hour 8. At hour 5 only the first record is eligible. By hours 7 and 9 the record from hour 6 is the latest eligible fact.",
+          "observe": "values is [10, 20, 20]; 999 is never selected."
+        },
+        {
+          "lines": [29, 40],
+          "excerpt": "    event_only = max(\n        (row for row in records if row[\"event_hour\"] <= 5), key=lambda row: row[\"event_hour\"]\n    )[\"value\"]\n    last_arrived = max(records, key=lambda row: row[\"known_hour\"])[\"value\"]\n    assert event_only == last_arrived == 999\n    return {\n        \"records\": records,\n        \"cutoffs\": [5, 7, 9],\n        \"eligible_values\": values,\n        \"event_only_leak_at_hour_5\": event_only,\n        \"last_arrival_is_not_latest_event\": last_arrived,\n    }",
+          "title": "Two tempting but wrong rules",
+          "explanation": "event_only picks the latest event at or before hour 5 while ignoring when it was known. last_arrived picks whichever record arrived last. Both return 999, which shows that neither rule is safe on its own.",
+          "observe": "event_only and last_arrived both equal 999, the leaked value."
+        },
+        {
+          "lines": [43, 59],
+          "excerpt": "def example_two():\n    records = [\n        {\"event_hour\": 2, \"known_hour\": 3, \"value\": 0},\n        {\"event_hour\": 6, \"known_hour\": 6, \"value\": 20},\n    ]\n    requests = [\n        {\"request_id\": \"early\", \"cutoff\": 1},\n        {\"request_id\": \"zero\", \"cutoff\": 5},\n        {\"request_id\": \"later\", \"cutoff\": 7},\n    ]\n    result = [\n        {**request, \"value\": select_known(records, request[\"cutoff\"])} for request in requests\n    ]\n    known = [row for row in result if row[\"value\"] is not None]\n    assert [row[\"value\"] for row in result] == [None, 0, 20]\n    assert len(result) == 3 and len(known) == 2\n    assert [row[\"request_id\"] for row in known] == [\"zero\", \"later\"]",
+          "title": "Keep the whole request population",
+          "explanation": "Each request is copied with {**request} and given a value. The early request has no eligible fact, so its value is None, but the row is kept. A known zero is a real measurement and must not be confused with missing.",
+          "observe": "result has three rows; two have known values, 0 and 20."
+        },
+        {
+          "lines": [60, 72],
+          "excerpt": "    conflicting = [*records, {\"event_hour\": 6, \"known_hour\": 6, \"value\": 99}]\n    try:\n        select_known(conflicting, 7)\n    except ValueError:\n        conflict_rejected = True\n    else:\n        raise AssertionError(\"Ambiguous same-clock facts must not depend on input order\")\n    return {\n        \"requests\": result,\n        \"known_coverage\": len(known) / len(result),\n        \"zero_is_a_known_value\": True,\n        \"same_clock_conflict_rejected\": conflict_rejected,\n    }",
+          "title": "Reject conflicting facts with the same clocks",
+          "explanation": "A second record at event 6, known 6 with a different value makes the latest fact ambiguous. The try, except, else block expects the ValueError and fails loudly if it does not happen.",
+          "observe": "same_clock_conflict_rejected is True and known_coverage is two thirds."
+        },
+        {
+          "lines": [75, 111],
+          "excerpt": "def main():\n    import plotly.graph_objects as go\n\n    from ds60sqlpy.plot_artifacts import publish_report\n\n    first, second = example_one(), example_two()\n    records = first[\"records\"]\n    figure = go.Figure(\n        go.Scatter(\n            x=[row[\"event_hour\"] for row in records],\n            y=[row[\"known_hour\"] for row in records],\n            mode=\"markers+text\",\n            text=[str(row[\"value\"]) for row in records],\n            textposition=\"top center\",\n            name=\"Synthetic observations\",\n        )\n    )\n    figure.add_vline(x=5, line_dash=\"dash\")\n    figure.add_hline(y=5, line_dash=\"dash\")\n    figure.update_layout(\n        template=None,\n        title=\"Two clocks at decision hour 5\",\n        xaxis_title=\"Event hour\",\n        yaxis_title=\"Known hour\",\n        meta={\n            \"description\": (\n                \"Only the observation with event hour 2 and known hour \"\n                \"3 is eligible at hour 5; the late-known value 999 is \"\n                \"excluded.\"\n            ),\n            \"table\": {\n                \"columns\": [\"event_hour\", \"known_hour\", \"value\"],\n                \"rows\": [[row[\"event_hour\"], row[\"known_hour\"], row[\"value\"]] for row in records],\n            },\n        },\n    )\n    figure.show()",
+          "title": "A two clock chart with a readable table",
+          "explanation": "main imports Plotly and a course helper only when the program runs. The scatter plots event hour against known hour, and the dashed lines at 5 mark the decision time, so only points in the lower left box are eligible. layout.meta carries a description and a data table for readers who cannot use the chart.",
+          "observe": "One figure is shown with three labeled points."
+        },
+        {
+          "lines": [112, 119],
+          "excerpt": "    publish_report(\n        second,\n        description=(\n            \"All three prediction requests are retained; unknown and measured zero are distinct.\"\n        ),\n    )\n    print(\"Values at decision hours 5, 7, 9:\", first[\"eligible_values\"])\n    print(\"Retained request population:\", second[\"requests\"])",
+          "title": "Publish the report and print the results",
+          "explanation": "publish_report hands the second result to the classroom as a report artifact. The two print calls write the selections and the retained population as text.",
+          "observe": "The output ends with the Values at decision hours line and the Retained request population line."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dme-058",
+      "title": "Byte pair merges and decoding streamed UTF-8 bytes safely",
+      "anchor": "reference",
+      "source_path": "courses/data-ml-engineering/authoring/serving/examples/dme-058.py",
+      "source_sha256": "79fecf6c0f7814853c6235bb044ed3e1b98a369e51d05e237b2fd4ec24e80d8e",
+      "expected_output": [
+        "Merge-ranked tokens: [259, 32, 258] byte lengths: [3, 1, 2]",
+        "Byte deliveries: [195, 169, 240, 159, 153, 130]",
+        "Invalid UTF-8 rejected; a serving display may explicitly choose replacement instead."
+      ],
+      "steps": [
+        {
+          "lines": [6, 16],
+          "excerpt": "def replace(tokens, pair, identity):\n    result = []\n    index = 0\n    while index < len(tokens):\n        if tuple(tokens[index : index + 2]) == pair:\n            result.append(identity)\n            index += 2\n        else:\n            result.append(tokens[index])\n            index += 1\n    return result",
+          "title": "Replace one adjacent pair everywhere",
+          "explanation": "replace scans the token list left to right. When the current token and the next one form the target pair, it emits the merged identity and jumps ahead by two; otherwise it copies one token. A while loop with a manual index is used because the step size changes.",
+          "observe": "Matches never overlap: after a merge the scan resumes after both tokens."
+        },
+        {
+          "lines": [19, 25],
+          "excerpt": "def example_one():\n    pieces = {value: bytes([value]) for value in range(256)}\n    pieces[258] = b\"ab\"\n    pieces[259] = b\"aba\"\n    tokens = list(b\"aba ab\")\n    for pair, identity in [((97, 98), 258), ((258, 97), 259)]:\n        tokens = replace(tokens, pair, identity)",
+          "title": "Apply merges in rank order",
+          "explanation": "Every byte value 0 to 255 starts as its own token. list(b\"aba ab\") turns the text into byte values. The first merge combines a and b into 258; the second combines 258 and a into 259. Order matters: the second merge only exists because the first created 258.",
+          "observe": "tokens becomes [259, 32, 258], where 32 is the space."
+        },
+        {
+          "lines": [26, 29],
+          "excerpt": "    assert tokens == [259, 32, 258]\n    assert b\"\".join(pieces[value] for value in tokens) == b\"aba ab\"\n    print(\"Merge-ranked tokens:\", tokens, \"byte lengths:\", [len(pieces[value]) for value in tokens])\n    assert replace([97, 97, 97], (97, 97), 258) == [258, 97]",
+          "title": "Decode back to the original bytes",
+          "explanation": "Joining the byte pieces for each token must give back the exact input, which is the property that makes byte level tokenization lossless. The final assert shows non overlap: three a bytes become one merged pair and one leftover a.",
+          "observe": "The printed byte lengths are [3, 1, 2]."
+        },
+        {
+          "lines": [32, 36],
+          "excerpt": "def example_two():\n    data = \"é🙂\".encode()\n    decoder = codecs.getincrementaldecoder(\"utf-8\")(errors=\"strict\")\n    deltas = [decoder.decode(bytes([value]), final=False) for value in data]\n    deltas.append(decoder.decode(b\"\", final=True))",
+          "title": "Feed bytes one at a time to an incremental decoder",
+          "explanation": "The string has two characters but six UTF-8 bytes: two for the accented e and four for the emoji. An incremental decoder keeps partial characters in an internal buffer and only returns text once a character is complete. final=True at the end flushes and checks for leftovers.",
+          "observe": "Most deltas are empty strings because a partial character cannot be shown yet."
+        },
+        {
+          "lines": [37, 40],
+          "excerpt": "    assert len(data) == 6 and len(\"é🙂\") == 2\n    assert deltas == [\"\", \"é\", \"\", \"\", \"\", \"🙂\", \"\"]\n    assert \"\".join(deltas) == \"é🙂\"\n    print(\"Byte deliveries:\", list(data), \"text deltas:\", deltas)",
+          "title": "Check the deltas",
+          "explanation": "The asserts confirm six bytes, two characters and the exact positions where text appears. Joining the deltas rebuilds the original string.",
+          "observe": "The output shows the six byte values and the list of text deltas."
+        },
+        {
+          "lines": [41, 47],
+          "excerpt": "    strict = codecs.getincrementaldecoder(\"utf-8\")(errors=\"strict\")\n    try:\n        strict.decode(b\"\\xff\", final=True)\n    except UnicodeDecodeError:\n        print(\n            \"Invalid UTF-8 rejected; a serving display may explicitly choose replacement instead.\"\n        )",
+          "title": "Invalid bytes are an error, not silent garbage",
+          "explanation": "With errors=\"strict\", the byte 0xff, which can never appear in valid UTF-8, raises UnicodeDecodeError. A server streaming text should detect this, and a display may choose replacement characters on purpose.",
+          "observe": "The final line says Invalid UTF-8 rejected."
+        },
+        {
+          "lines": [50, 56],
+          "excerpt": "def main():\n    example_one()\n    example_two()\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Run both examples",
+          "explanation": "main runs the tokenizer example and then the decoder example. Each prints its own lines.",
+          "observe": "Three output lines are printed in total."
+        }
+      ]
+    }
+  ]
+}

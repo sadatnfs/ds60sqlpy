@@ -197,19 +197,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Compare integer and floating division: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `int whole = 7 / 2;` to</span></span>
-<span class="source-line"><span class="syntax-comment">     `int whole = 8 / 2;`. Before running, predict which CHECK fails and which</span></span>
-<span class="source-line"><span class="syntax-comment">     value it now sees; then run it and restore the original line. Expected: The</span></span>
-<span class="source-line"><span class="syntax-comment">     changed run stops with `Check failed` at the CHECK on `whole == 3 &amp;&amp;</span></span>
-<span class="source-line"><span class="syntax-comment">     fraction == 3.5`. Restoring the original line brings back the worked</span></span>
-<span class="source-line"><span class="syntax-comment">     observation: the results are 3 and 3.5. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;compare integer and floating division&quot; case,</span></span>
+<span class="source-line"><span class="syntax-comment">     into a scratch pad and change `int whole = 7 / 2;` to `int whole = 8 / 2;`.</span></span>
+<span class="source-line"><span class="syntax-comment">     Before running, predict which CHECK fails and which value it sees in place</span></span>
+<span class="source-line"><span class="syntax-comment">     of the worked result (the results are 3 and 3.5); then run it and restore</span></span>
+<span class="source-line"><span class="syntax-comment">     the original line. Expected: With `int whole = 8 / 2;` the run stops with</span></span>
+<span class="source-line"><span class="syntax-comment">     `Check failed` at the CHECK on `whole == 3 &amp;&amp; fraction == 3.5`, because the</span></span>
+<span class="source-line"><span class="syntax-comment">     &quot;compare integer and floating division&quot; case no longer shows that the</span></span>
+<span class="source-line"><span class="syntax-comment">     results are 3 and 3.5. Restoring `int whole = 7 / 2;` brings that</span></span>
+<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Observe defined unsigned wrap: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, so one line now reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `n -= 1U;`. Run worked example 2 with that line, use the failing CHECK to</span></span>
-<span class="source-line"><span class="syntax-comment">     locate the defect and repair it without changing the CHECK. Expected:</span></span>
-<span class="source-line"><span class="syntax-comment">     Before the repair the run stops with `Check failed` at the CHECK on `n ==</span></span>
-<span class="source-line"><span class="syntax-comment">     0U`; after it the line reads `n += 1U;` again and the result is zero. */</span></span>
+<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;observe defined</span></span>
+<span class="source-line"><span class="syntax-comment">     unsigned wrap&quot; case, so one line now reads `n -= 1U;`. Run the example with</span></span>
+<span class="source-line"><span class="syntax-comment">     that line, use the failing CHECK to find why the result is zero no longer</span></span>
+<span class="source-line"><span class="syntax-comment">     holds and repair the line without changing the CHECK. Expected: Before the</span></span>
+<span class="source-line"><span class="syntax-comment">     repair the run stops with `Check failed` at the CHECK on `n == 0U`. Once</span></span>
+<span class="source-line"><span class="syntax-comment">     the line reads `n += 1U;` again, the &quot;observe defined unsigned wrap&quot; case</span></span>
+<span class="source-line"><span class="syntax-comment">     again shows that the result is zero. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Inspect representation facts</span></span>
 <span class="source-line"><span class="syntax-comment">     Check sizeof(char) and minimum CHAR_BIT.</span></span>

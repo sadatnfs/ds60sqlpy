@@ -15,7 +15,7 @@
         "What a GPU accelerates, and what it cannot make fast",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a decomposition diagram and a justified decision to accelerate or keep two tasks on CPU.",
+      "outcome": "Decide whether to accelerate or keep each of two tasks on the CPU using an end-to-end Amdahl model.",
       "lab": "Construct a 100-second workload with 60 seconds parallelizable and no transfer cost; compute the best possible speedup.",
       "verification": "The 40-second serial part remains. The upper bound is \\(\\frac{100}{40} = 2.5\\), even with an infinitely fast parallel part."
     },
@@ -32,7 +32,7 @@
         "Meet the hardware without memorizing a product catalog",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "labeled hardware/software map and a capability report if hardware exists.",
+      "outcome": "Label a hardware and software map that separates SMs, warps, memory levels and compute capability.",
       "lab": "Calculate the warp count for blocks with 31, 32 and 33 threads.",
       "verification": "Ceiling division by 32 yields one, one and two warps. The second warp in the last case has one program thread."
     },
@@ -49,7 +49,7 @@
         "The software stack from application to driver",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correctly place six failure messages at their responsible layer.",
+      "outcome": "Place six CUDA failure messages at the responsible layer of the stack, from application to host driver.",
       "lab": "Order these layers: kernel driver, application, CUDA runtime, GPU.",
       "verification": "Application calls runtime; runtime uses the kernel driver; the driver controls the GPU. Libraries and framework dispatch can add intermediate layers."
     },
@@ -67,7 +67,7 @@
         "Parallel decomposition before launch syntax",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a decomposition that covers every element once and states synchronization requirements.",
+      "outcome": "Design a decomposition that covers every element exactly once and states each synchronization requirement.",
       "lab": "Tile a width-7, height-3 image with conceptual 4-by-2 tiles.",
       "verification": "Four tiles cover it. Predicate both x<7 and y<3; the right and bottom tiles contain invalid lane positions."
     },
@@ -84,7 +84,7 @@
         "Memory as addresses, ownership, shape and stride",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a correct offset table and explicit ownership/lifetime diagram.",
+      "outcome": "Calculate element and byte offsets for strided views and draw an explicit ownership and lifetime diagram.",
       "lab": "Compute the byte offset of (2,3) in a padded float64 matrix with row stride 8.",
       "verification": "The element offset is \\(2\\times 8+3=19\\); at eight bytes per element the offset is 152 bytes."
     },
@@ -101,7 +101,7 @@
         "Numbers, units and a trustworthy answer",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a testing policy specifying reference precision, tolerance and adversarial cases.",
+      "outcome": "Write a testing policy that specifies reference precision, tolerances and adversarial floating-point cases.",
       "lab": "With \\(\\mathrm{atol}=0.001\\) and \\(\\mathrm{rtol}=0.01\\), find the allowed error at reference 20.",
       "verification": "The bound is \\(0.001+0.01\\times 20=0.201\\). This is a chosen acceptance policy, not a universal CUDA tolerance."
     },
@@ -120,7 +120,7 @@
         "From elapsed time to a performance model",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a units-correct model and an experiment that could disprove it.",
+      "outcome": "Build a units-correct roofline estimate and design an experiment that could disprove it.",
       "lab": "Estimate useful bytes for adding two length-1,000 float64 vectors.",
       "verification": "Two eight-byte reads and one eight-byte write per element gives 24,000 useful bytes. Measured transactions and cache traffic can differ."
     },
@@ -139,7 +139,7 @@
         "Reproducibility, safety and the first evidence notebook",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a reusable experiment template and correctly labeled capability status.",
+      "outcome": "Create a reusable experiment template that records inputs, environment, timing scope and capability status.",
       "lab": "Write five required fields for a correctness receipt.",
       "verification": "Source identity, exact bounded input, reference method, observed result or error, and execution environment/capability are a useful minimum."
     },
@@ -156,7 +156,7 @@
         "C++ essentials specifically needed at the GPU boundary",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "CPU reference tests and a lifetime explanation.",
+      "outcome": "Write CPU reference tests for a pointer-and-size interface and explain the lifetime of each buffer.",
       "lab": "Describe a row-sum function's minimum buffer metadata for padded storage.",
       "verification": "Input pointer, row count, column count and leading dimension, plus an output buffer and capacity. State element type and accessibility."
     },
@@ -173,7 +173,7 @@
         "Resource ownership and failure-safe cleanup",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "no double release, no leaked first allocation, and clear owner/borrower relationships.",
+      "outcome": "Implement a move-only buffer owner that never double releases and never leaks a partially initialized allocation.",
       "lab": "Write the ownership invariant for a device-buffer wrapper.",
       "verification": "Each live nonempty allocation has exactly one owner; borrowers never release it, moves empty the source, and destruction happens after outstanding uses finish."
     },
@@ -191,7 +191,7 @@
         "The `.cu` file, compiler driver and executable",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "preserved compiler output plus a source-to-executable diagram.",
+      "outcome": "Compile one `main.cu` with a reviewed `nvcc` command and draw its source-to-executable artifact diagram.",
       "lab": "Distinguish a .cu source file, PTX file and host executable.",
       "verification": "Source is authored C++/CUDA, PTX is virtual device instructions, and the executable contains host code plus packaged device code and link dependencies."
     },
@@ -210,7 +210,7 @@
         "The first bounded kernel and the truth about completion",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "host validates the returned values and reports both launch and completion status.",
+      "outcome": "Launch a bounded kernel, check launch and completion status separately and validate returned values on the host.",
       "lab": "Identify the configuration and arguments in fill<<<2,32>>>(out,50).",
       "verification": "Two blocks with 32 threads each are launched, and out plus count 50 are kernel arguments. Fourteen thread positions must avoid writing."
     },
@@ -228,7 +228,7 @@
         "Explicit device allocation and transfer",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "unchanged guard values, correct output, checked statuses and cleanup after an injected host-side failure.",
+      "outcome": "Implement checked device allocation and transfers that preserve guard values and clean up after an injected failure.",
       "lab": "How many bytes hold 33 double values?",
       "verification": "\\(33\\times 8 = 264\\) bytes for ordinary eight-byte double representation; use sizeof(double) in actual C++ rather than a copied literal."
     },
@@ -246,7 +246,7 @@
         "One-dimensional indexing that survives awkward sizes",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "every output element is written exactly once and tails match the CPU reference.",
+      "outcome": "Prove that a grid-stride loop writes every output element exactly once, including the tail.",
       "lab": "Give the indices owned by starting thread 5 when \\(\\mathrm{stride}=8\\) and \\(\\mathrm{n}=22\\).",
       "verification": "The indices are 5,13,21. The next value 29 is outside the range."
     },
@@ -264,7 +264,7 @@
         "Two-dimensional indexing and image kernels",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct non-square results, preserved padding and explicit edge behavior.",
+      "outcome": "Compute correct results on non-square images while preserving padding and stating the edge policy.",
       "lab": "Find grid dimensions for width 17, height 9 and blocks 8-by-4.",
       "verification": "Ceiling division gives grid x=3 and y=3. Predicate each coordinate because both axes have tails."
     },
@@ -282,7 +282,7 @@
         "GPU memory spaces in one working program",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a justified storage choice for each variable and a correct result across two input shapes.",
+      "outcome": "Justify a storage space for each kernel variable and verify the result on two input shapes.",
       "lab": "Assign storage for a reused image, a block tile and a scalar sum.",
       "verification": "Global allocation for the image, shared memory for cooperating block data, and a local scalar that the compiler may keep in a register."
     },
@@ -300,7 +300,7 @@
         "Shared memory and block synchronization",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct boundary behavior and a synchronization explanation naming producer and consumer threads.",
+      "outcome": "Trace producer and consumer threads through each block barrier and verify correct tail behavior.",
       "lab": "Draw the producer and consumer for reversed output index zero.",
       "verification": "Thread three produces tile\\([3]\\), the barrier establishes availability, and thread zero consumes it."
     },
@@ -319,7 +319,7 @@
         "A simple matrix multiplication with a complete specification",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correctness across the shape suite and a transparent operation/byte estimate.",
+      "outcome": "Verify a one-thread-per-output matrix multiplication across a rectangular shape suite and estimate its operations and bytes.",
       "lab": "Compute entry (0,1) in the worked product.",
       "verification": "\\(1\\times 2+2\\times 1+3\\times 0=4\\). The summation axis is k, not the output column axis."
     },
@@ -337,7 +337,7 @@
         "Tiled matrix multiplication and reuse",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correctness plus a measured, scoped comparison with a reasoned interpretation even if the tile loses on a small input.",
+      "outcome": "Implement a tiled matrix multiplication and report a scoped timing comparison with a reasoned interpretation.",
       "lab": "Count phases for \\(\\mathrm{k}=5\\) and tile width two.",
       "verification": "Three phases. The final phase contributes one valid inner coordinate and one neutral zero coordinate."
     },
@@ -355,7 +355,7 @@
         "Parallel reductions and the order of arithmetic",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct tails and a justified tolerance, with no assumption of a fixed block completion order.",
+      "outcome": "Implement a two-stage block reduction with correct tails and a justified floating-point tolerance.",
       "lab": "Choose an identity for maximum over \\([-7,-3,-9]\\).",
       "verification": "Negative infinity is the general floating maximum identity; zero would incorrectly dominate this entirely negative input."
     },
@@ -373,7 +373,7 @@
         "Scans and stream compaction",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "exact output counts and element order for empty, all-match and no-match cases.",
+      "outcome": "Implement stable stream compaction with exact counts and order for empty, all-match and no-match inputs.",
       "lab": "Compact \\([5,2,7,8]\\) for values greater than four.",
       "verification": "Flags \\([1,0,1,1]\\), positions \\([0,1,1,2]\\), output \\([5,7,8]\\). The preserved order is part of the contract."
     },
@@ -391,7 +391,7 @@
         "Histograms, atomics and contention",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "exact counts and a contention-based explanation of two timing regimes.",
+      "outcome": "Compute exact histogram counts with atomics and explain two timing regimes through contention.",
       "lab": "Build a four-bin histogram of \\([3,3,0,1,3]\\).",
       "verification": "\\([1,1,0,3]\\), with total five. Include the empty bin in validation."
     },
@@ -409,7 +409,7 @@
         "Stencils and boundary conditions",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct interior and boundary values plus a conserved or monotonic quantity appropriate to the chosen model.",
+      "outcome": "Implement a stencil time step with a declared boundary condition and verify interior, boundary and conserved values.",
       "lab": "Compute the periodic neighbor mean for \\([2,4,8]\\).",
       "verification": "Every three-element neighborhood contains all three values, so each output is \\(\\frac{14}{3}\\)."
     },
@@ -430,7 +430,7 @@
         "First capstone: a reliable GPU data pipeline",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a specification, CPU oracle, adversarial fixtures, checked error paths, actual GPU output and honest end-to-end report.",
+      "outcome": "Build a multi-stage GPU data pipeline with a CPU oracle, adversarial fixtures and an honest end-to-end report.",
       "lab": "Specify the pipeline output for \\([0,0,3]\\).",
       "verification": "Count three, sum three, mean one and histogram \\([2,0,0,1]\\) under four bins."
     },
@@ -450,7 +450,7 @@
         "A disciplined CUDA error taxonomy",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a useful bug report that includes the smallest reproducer and the responsible phase.",
+      "outcome": "Classify a CUDA failure by its phase and write a bug report around the smallest reproducer.",
       "lab": "Classify an undefined reference to a host helper.",
       "verification": "Host linking failed; provide the helper definition or link the correct object/library before investigating GPU execution."
     },
@@ -468,7 +468,7 @@
         "Compute Sanitizer as evidence, with its limits",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "the broken fixture produces the intended diagnostic, the repair passes that check and numerical tests still pass.",
+      "outcome": "Run Compute Sanitizer on a broken fixture, confirm the intended diagnostic and verify that the repair passes numerical tests.",
       "lab": "Choose a checker for an uninitialized global output read.",
       "verification": "Initcheck addresses that class; retain ordinary result checks because initialization alone does not prove the formula is correct."
     },
@@ -487,7 +487,7 @@
         "Race reasoning, masks and warp cooperation",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct results across all tail sizes and a written participation invariant.",
+      "outcome": "Implement a warp shuffle reduction that is correct for every tail size and state its participation invariant.",
       "lab": "Construct a ballot mask for lanes 1,3 and 4.",
       "verification": "The bits contribute \\(2+8+16=26\\); the selected-lane count is three."
     },
@@ -505,7 +505,7 @@
         "Memory ordering and atomic scope",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "the learner can explain what each synchronization operation establishes and what it does not.",
+      "outcome": "Explain what each fence, acquire and release operation establishes in a flag publication protocol and what it does not.",
       "lab": "Name the four events in the publication chain.",
       "verification": "Payload write, release publication, matching acquire observation and payload read, with the required ordering relationship between them."
     },
@@ -524,7 +524,7 @@
         "Floating point under optimization",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a documented policy for accepted error and rejected non-finite output, plus measured differences under reviewed compiler configurations.",
+      "outcome": "Document an accepted error policy and measure numerical differences under reviewed compiler options such as fast math.",
       "lab": "Compute population variance of \\([2,2,2]\\).",
       "verification": "Zero. A normalization later still needs a deliberate epsilon or constant-row policy."
     },
@@ -543,7 +543,7 @@
         "Debugging difficult failures without harming the session",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a repair with a regression case and preserved learner source/results.",
+      "outcome": "Reduce a shape-dependent failure to a minimal reproducer and repair it with a regression case.",
       "lab": "List the smallest fields to retain before restarting a failed worker.",
       "verification": "Learner source, exact input/shape, compile and runtime diagnostics, operation phase, environment identity and whether output validation completed."
     },
@@ -563,7 +563,7 @@
         "Timing asynchronous work correctly",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "raw samples, a reported distribution and an honest comparison with CPU execution.",
+      "outcome": "Measure asynchronous GPU work with CUDA events and report the sample distribution beside a CPU baseline.",
       "lab": "Compute speedup for matching end-to-end times 12 ms and 4 ms.",
       "verification": "Three times. Do not substitute an isolated kernel time into one side of that comparison."
     },
@@ -581,7 +581,7 @@
         "Nsight Systems: understand the application's timeline",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a timeline-supported bottleneck hypothesis and one experiment that tests it.",
+      "outcome": "Interpret an Nsight Systems timeline to form a bottleneck hypothesis and test it with one experiment.",
       "lab": "Annotate the four phases of the 10 ms request.",
       "verification": "Label upload, kernel, download and host processing with their stated intervals and identify that all are sequential in this synthetic model."
     },
@@ -600,7 +600,7 @@
         "Nsight Compute: interpret kernel counters carefully",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "two supported claims and one explicitly unresolved hypothesis.",
+      "outcome": "Interpret Nsight Compute counters to support two claims and state one unresolved hypothesis.",
       "lab": "Calculate useful throughput for 12 MB processed in 0.2 ms.",
       "verification": "60 GB/s in decimal units. State useful-byte accounting separately from measured hardware traffic."
     },
@@ -619,7 +619,7 @@
         "Coalescing, layouts and useful bandwidth",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "address diagrams, correctness, and a bandwidth interpretation using the actual input and timing scope.",
+      "outcome": "Draw per-lane address diagrams and compare useful bandwidth for array-of-structures and structure-of-arrays layouts.",
       "lab": "List the first four byte addresses for float32 stride three from base zero.",
       "verification": "0,12,24,36. Element stride must be multiplied by element size."
     },
@@ -638,7 +638,7 @@
         "Shared-memory banks and a transpose case study",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct output and a measured explanation of the selected layout.",
+      "outcome": "Implement a tiled transpose with correct output and explain the measured effect of the chosen shared-memory layout.",
       "lab": "Compute bank indices for rows 0 through 3 at stride 33 in the model.",
       "verification": "0,1,2,3. The modulo calculation changes because 33 mod 32 is one."
     },
@@ -657,7 +657,7 @@
         "Occupancy, registers and latency hiding",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a justified configuration choice for a stated workload and device, including an explanation when the highest-occupancy setting loses.",
+      "outcome": "Choose a launch configuration for a stated workload and justify it even when the highest-occupancy setting loses.",
       "lab": "Estimate register-limited blocks for 128 threads at 64 registers using 65,536 registers.",
       "verification": "Eight blocks under the simplified division, before block/thread/shared-memory/granularity limits."
     },
@@ -676,7 +676,7 @@
         "Divergence, irregular work and algorithm choice",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a correctness-preserving strategy and end-to-end evidence that includes sorting or compaction when used.",
+      "outcome": "Compare a divergence-reducing strategy against the baseline with end-to-end evidence that includes sorting or compaction.",
       "lab": "Compute the same simplified utilization for \\([3,3,3,3]\\).",
       "verification": "Twelve useful lane-rounds over twelve positions gives one, while total work equals the first example's twelve."
     },
@@ -700,7 +700,7 @@
         "Optimization review and a defensible benchmark",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "reproducible report, retained raw data, error budget and a recommendation with its limits.",
+      "outcome": "Produce a reproducible benchmark report with retained raw data, an error budget and a limited recommendation.",
       "lab": "Write a benchmark contract for a 1,024-by-1,024 matrix product.",
       "verification": "Specify exact input generation, dtype/layout, accumulation, alpha/beta semantics, output tolerance, residency, setup inclusion and sample policy."
     },
@@ -719,7 +719,7 @@
         "Streams as dependency-ordered work queues",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct results with explicit dependencies and an annotated timeline.",
+      "outcome": "Implement two-stream work with explicit event dependencies and annotate the resulting timeline.",
       "lab": "Draw the event edge for upload in A followed by compute in B.",
       "verification": "Record after the upload in A; make B wait on that event before launching compute that reads the uploaded buffer."
     },
@@ -738,7 +738,7 @@
         "Pinned memory and overlapping transfer with compute",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct chunk boundaries and a timeline that either demonstrates overlap or explains why the current device/workload does not overlap.",
+      "outcome": "Implement chunked double buffering with pinned host memory and show or explain the overlap on a timeline.",
       "lab": "Compute ideal time for five chunks under the same stage costs.",
       "verification": "First result seven milliseconds plus four intervals of three gives nineteen milliseconds, versus thirty-five serially."
     },
@@ -757,7 +757,7 @@
         "Stream-ordered allocation and memory pools",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "no use-after-free, correct event ordering and an explained retained-versus-live memory report.",
+      "outcome": "Verify that stream-ordered allocations have no use-after-free and explain retained versus live pool memory.",
       "lab": "Name both event dependencies in the cross-stream example.",
       "verification": "Ready orders production before consumption; done orders final consumption before free or reuse."
     },
@@ -776,7 +776,7 @@
         "Unified memory, residency and migration",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correctness and a report tied to actual memory capabilities and observed movement.",
+      "outcome": "Report unified memory behavior tied to queried device capabilities and observed page migration.",
       "lab": "Distinguish a pointer value from physical residency.",
       "verification": "The address identifies a virtual allocation; residency describes where backing data currently lives or is accessible under the platform's memory system."
     },
@@ -796,7 +796,7 @@
         "CUDA Graphs for repeated workflows",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct replay, safe resource lifetimes, a scoped comparison and explicit unsupported changes.",
+      "outcome": "Capture and replay a CUDA Graph correctly and compare its submission cost against ordinary stream launches.",
       "lab": "Compute break-even if setup is 600 microseconds and savings 10 per replay.",
       "verification": "Sixty repeats repay setup; more than sixty are needed for a strict improvement under the simplified model."
     },
@@ -818,7 +818,7 @@
         "Second capstone: a streaming numerical service core",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "all outputs match, no chunk is dropped or reused early, memory stays within the budget, and the report separates request latency from throughput.",
+      "outcome": "Build a bounded streaming compute core that keeps memory within budget and reports latency separately from throughput.",
       "lab": "Write legal transitions for a two-slot pipeline.",
       "verification": "Free to filling to computing to copying to consumed to free, with explicit completion conditions and rejection of reuse from intermediate states."
     },
@@ -838,7 +838,7 @@
         "CCCL, Thrust and CUB before writing everything by hand",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "equivalent semantics, stated temporary-memory needs and a justified library/custom decision.",
+      "outcome": "Compare a Thrust or CUB primitive against a handwritten kernel and justify the library or custom choice.",
       "lab": "Compare reduce and transform-reduce for sum of squares.",
       "verification": "Both can produce thirty for the fixture, but transform-reduce can express transformation without a materialized full intermediate."
     },
@@ -857,7 +857,7 @@
         "cuBLAS and cuBLASLt without layout confusion",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct shapes/layouts and a fair comparison including setup where relevant.",
+      "outcome": "Call cuBLAS GEMM with correct column-major shapes and leading dimensions and compare it fairly, including setup.",
       "lab": "Compute the result when \\(\\alpha=0\\) and \\(\\beta=2\\) for initial C=\\([[1,3],[2,4]]\\).",
       "verification": "\\([[2,6],[4,8]]\\), subject to the selected API's documented requirements for unused operands."
     },
@@ -875,7 +875,7 @@
         "cuFFT and a complete signal-processing example",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct frequencies and round-trip error, explicit normalization and measured plan-versus-execution cost.",
+      "outcome": "Verify cuFFT frequencies and round-trip error with explicit normalization and measure plan versus execution cost.",
       "lab": "Find the minimum linear-convolution length for arrays of lengths five and three.",
       "verification": "Five plus three minus one equals seven."
     },
@@ -894,7 +894,7 @@
         "cuSPARSE and sparsity as a data structure",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct result and a reasoned choice considering conversion, reuse and distribution.",
+      "outcome": "Build a CSR matrix and decide whether sparse storage pays off after conversion, reuse and row distribution.",
       "lab": "Build CSR row offsets from row lengths \\([0,1,3]\\).",
       "verification": "\\([0,0,1,4]\\), with final offset four stored entries."
     },
@@ -913,7 +913,7 @@
         "cuSOLVER, conditioning and robust linear algebra",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "checked solver status, residual report and a numerically justified interpretation.",
+      "outcome": "Check solver status and report residual and condition estimates to interpret the accuracy of a linear solve.",
       "lab": "Compute the residual for candidate x=\\([2,2]\\) in the first system.",
       "verification": "A*x=\\([8,6]\\), so b-A*x=\\([1,2]\\). A successful API status cannot excuse this wrong result."
     },
@@ -932,7 +932,7 @@
         "Randomness and parallel Monte Carlo",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "reproducible setup metadata, uncertainty intervals and correct stream partitioning.",
+      "outcome": "Implement reproducible parallel Monte Carlo sampling with independent streams and report uncertainty intervals.",
       "lab": "How does standard error change with four times as many independent samples?",
       "verification": "It is approximately halved under the usual finite-variance assumptions, not divided by four."
     },
@@ -951,7 +951,7 @@
         "Softmax and reductions for model workloads",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "finite outputs, row sums within justified tolerance and comparison with the CPU reference.",
+      "outcome": "Implement a numerically stable row softmax and verify finite outputs and row sums against the CPU reference.",
       "lab": "Compute softmax for \\([0,0]\\).",
       "verification": "\\([0.5,0.5]\\), with each entry nonnegative and the sum one."
     },
@@ -971,7 +971,7 @@
         "Normalization, fusion and memory traffic",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "an error-budgeted result plus measured bytes/launch reduction and an honest performance comparison.",
+      "outcome": "Compare fused and unfused normalization kernels on error, bytes moved, launch count and measured time.",
       "lab": "Compute fused bias-plus-ReLU for x=\\([-2,1]\\), bias=1.",
       "verification": "First \\([-1,2]\\), then max with zero gives \\([0,2]\\). Fusion must preserve this operation order."
     },
@@ -991,7 +991,7 @@
         "Tensor cores and mixed precision from first principles",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "reported type and compute mode, numerical error and confirmed execution path where available.",
+      "outcome": "Report the data type, compute mode, numerical error and confirmed execution path of a mixed-precision matrix multiply.",
       "lab": "What information belongs in a tensor-core experiment record?",
       "verification": "Device capability, toolkit/library, operand/output/accumulator types, shape/layout/alignment, chosen compute mode, error and observed execution path."
     },
@@ -1011,7 +1011,7 @@
         "Attention and memory-aware algorithm design",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "agreement with the reference and a memory/time report that states supported shapes and masks.",
+      "outcome": "Implement tiled attention with online softmax that matches the reference and report memory use and supported masks.",
       "lab": "Apply a causal mask that leaves only the first key in the worked row.",
       "verification": "The surviving probability is one, so output is \\([2,0]\\) under the defined valid-row policy."
     },
@@ -1030,7 +1030,7 @@
         "Cooperative Groups and global coordination",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a correct participation argument and runtime capability report.",
+      "outcome": "Justify cooperative group participation with a written argument and a runtime capability report.",
       "lab": "Explain group size versus input count.",
       "verification": "A group defines participants; input count defines valid data. Tail participants may contribute neutral values while still honoring collective participation."
     },
@@ -1050,7 +1050,7 @@
         "Asynchronous copies, barriers and software pipelines",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct tails, synchronization checks and a measured explanation of whether overlap helped.",
+      "outcome": "Implement a two-stage asynchronous copy pipeline with correct tails and explain whether the overlap helped.",
       "lab": "List the lifetime states of one tile slot.",
       "verification": "Free, copy in progress, copy complete, being consumed, consumption complete, then free for reuse."
     },
@@ -1068,7 +1068,7 @@
         "Clusters, TMA and newer GPU execution features",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a feature-gated implementation with fallback and a correct explanation of data visibility.",
+      "outcome": "Implement a feature-gated cluster or TMA path with a fallback and explain its data visibility rules.",
       "lab": "List fields for an architecture-specific capability record.",
       "verification": "Operation, exact target requirement, device properties, compiler/library versions, launch constraints and actual execution evidence."
     },
@@ -1088,7 +1088,7 @@
         "CUTLASS, CuTe and tile abstractions",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct layouts, supported feature declaration and benchmark against an appropriate library baseline.",
+      "outcome": "Configure a CUTLASS or CuTe kernel with correct layouts and benchmark it against a library baseline.",
       "lab": "Compute offset (1,1) under shape (2,3), strides (3,1).",
       "verification": "Four. Shape controls valid coordinates; strides control physical mapping."
     },
@@ -1108,7 +1108,7 @@
         "PTX, SASS, JIT and inspecting generated code",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "explain a selected instruction sequence and validate any optimization with the existing tests.",
+      "outcome": "Inspect generated PTX and SASS to explain a selected instruction sequence and validate any change with existing tests.",
       "lab": "Distinguish native image compatibility from PTX JIT compatibility.",
       "verification": "A native image targets a hardware family; PTX requires a driver/toolchain path able to understand and compile that virtual version for the device."
     },
@@ -1128,7 +1128,7 @@
         "Multiple GPUs, topology and collective communication",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "correct combined result, observed topology, collective completion and strong/weak scaling interpretation where meaningful.",
+      "outcome": "Verify a multi-GPU all-reduce result, record the observed topology and interpret strong or weak scaling.",
       "lab": "Compute strong-scaling efficiency for speedup 1.6 on two GPUs.",
       "verification": "Efficiency is \\(\\frac{1.6}{2}=0.8\\), or 80%, for the same total problem size and timing scope."
     },
@@ -1148,7 +1148,7 @@
         "From one pad to a maintainable CUDA project",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a clean reproducible build and actual runtime tests on a declared target.",
+      "outcome": "Build a CMake CUDA project cleanly from source and pass its runtime tests on a declared target architecture.",
       "lab": "Name source and build directories in a clean out-of-source project.",
       "verification": "Keep authored files in the project root/src/include and generated files under a separate build directory; never confuse generated binaries with maintained source."
     },
@@ -1168,7 +1168,7 @@
         "Portability, operations and the cost of a GPU dependency",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "a deployment checklist tied to supported evidence tiers and graceful failures.",
+      "outcome": "Write a deployment checklist tied to evidence tiers that fails gracefully when no supported GPU is present.",
       "lab": "Write a supported-surface table for Linux, WSL 2 and Mac learners.",
       "verification": "Reading/CPU references remain available across the Docker classroom. NVIDIA execution needs a separately supported Linux or WSL path and hardware; Mac local CUDA is not promised."
     },
@@ -1188,7 +1188,7 @@
         "Capstone: a measured scientific or data application",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "CPU baseline, adversarial tests, sanitizer results where applicable, profiling artifacts, reproducible benchmark, failure behavior and a report stating when CPU is preferable.",
+      "outcome": "Deliver a measured scientific application with a CPU baseline, adversarial tests, profiling artifacts and a reproducible benchmark.",
       "lab": "Write a minimal acceptance contract for Project A.",
       "verification": "Fixed boundary policy, input dtype/length range, full filtered output, post-filter energy, error budget, memory bound and empty-input behavior."
     },
@@ -1207,7 +1207,7 @@
         "Capstone: a custom ML operator that earns its existence",
         "CPU reference and explicit GPU evidence"
       ],
-      "outcome": "supported-contract documentation, forward and backward tests, invalid-input behavior, end-to-end measurement and an honest decision to keep or reject the custom kernel.",
+      "outcome": "Implement a custom ML operator with forward and backward tests, input validation and an end-to-end keep or reject decision.",
       "lab": "Compute input gradients for loss=sum(3*x+1).",
       "verification": "Every component is three. Also test parameter gradients if a and b are learnable in the declared interface."
     },

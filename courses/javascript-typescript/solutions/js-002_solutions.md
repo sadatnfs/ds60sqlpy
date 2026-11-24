@@ -34,7 +34,7 @@ assert.equal(2 + '3', '23');
 assert.equal(Number('3') + 2, 5);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(Number('3') + 2, 5)`. Restoring the original line brings back the worked observation: 5, string 23, and 5.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(Number('3') + 3, 5);`. Restoring `assert.equal(Number('3') + 2, 5);` brings back: 5, string 23, and 5.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Number('3') + 2, 5)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -53,7 +53,7 @@ assert.equal(Number.isNaN(NaN), true);
 assert.equal(Number.isNaN('not a number'), false);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(Number.isNaN('not a number'), false)`; after it the line reads `assert.equal(Number.isNaN('not a number'), false);` again and null reports object; undefined reports undefined; only numeric NaN passes isNaN.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(Number.isNaN('not a number'), true);`. Restoring `assert.equal(Number.isNaN('not a number'), false);` brings back: null reports object; undefined reports undefined; only numeric NaN passes isNaN.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(Number.isNaN('not a number'), false)` accepts.
 

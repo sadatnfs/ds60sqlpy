@@ -16,36 +16,36 @@ A ResizeObserver can detect actual container size, but it has a lifecycle and ca
 
 ## Exercise 1: Predict mark count after two renders.
 
-A component updates its owned nodes. Repeated calls should not accumulate entire charts.
+A component updates its owned nodes. Repeated calls should not accumulate entire charts. render is called with two rows and then with one; the keyed join removes A, so layer has one rect. An implementation that appends a fresh svg per call would show three rects across two trees. The reference checks layer.selectAll("rect").size() === 1.
 
 **Expected:** It equals current record count, not the sum of all prior counts.
 
 ## Exercise 2: Change width while retaining data.
 
-Responsive layout is a presentation transformation. It should not silently alter aggregation or records.
+Responsive layout is a presentation transformation. It should not silently alter aggregation or records. At width 450, B (6) is 270 pixels; at width 300 it becomes 180, while its id and value stay the same. Recomputing the data from width, for instance rounding values to fit, would change meaning. The reference asserts the width attribute is 180.
 
 **Expected:** Geometry changes while values and identity remain stable.
 
 ## Exercise 3: Implement a reusable bar renderer.
 
-A small contract makes the component testable outside a large dashboard. Avoid hidden globals for data and dimensions.
+A small contract makes the component testable outside a large dashboard. Avoid hidden globals for data and dimensions. The reference render takes rows and width as arguments, keys by id and owns one layer g. Reading data from a global makes the function untestable with a second dataset. Call it with two different inputs and check both results.
 
 **Expected:** Explicit inputs, keyed marks and a documented empty state.
 
 ## Exercise 4: Diagnose duplicate SVG trees after resize.
 
-Choose a single owner for the SVG root and reconcile its children. Cleanup is part of component behavior.
+Choose a single owner for the SVG root and reconcile its children. Cleanup is part of component behavior. If the resize handler calls svg.append("g") each time, every resize adds a layer and old bars remain beneath new ones. Count g elements after several resizes; the reference creates layer once outside render.
 
 **Expected:** The update path creates new roots rather than updating an owned tree.
 
 ## Exercise 5: Render an empty dataset after nonempty data.
 
-Empty-state behavior must work on updates, not just initial load. Check both transitions.
+Empty-state behavior must work on updates, not just initial load. Check both transitions. render([], 300) removes the rect and joins a single text.empty reading "No observations". Rendering two rows again removes that message because the empty-state data becomes []. Check both transitions.
 
 **Expected:** Stale marks disappear and the no-data message appears.
 
 ## Exercise 6: Plan real narrow-screen acceptance.
 
-A scaled screenshot alone can conceal unreadable text. Inspect the actual interaction and label layout at the intended size.
+A scaled screenshot alone can conceal unreadable text. Inspect the actual interaction and label layout at the intended size. Shrink the viewport and check labels are readable and not clipped, then tab through any controls; the 180-pixel bar should still match its value. Use the browser's responsive mode at 320 pixels and record what you saw, including any label that overflowed.
 
 **Expected:** Readable labels, no clipping, keyboard access and stable data meaning.

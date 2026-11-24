@@ -109,7 +109,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Measure a fixed duration) before changing anything, and confirm its observation: The elapsed interval is 5,400 seconds.
 2. Compare Example B (Parse equal instants with different offsets) with Example A and name the first line whose behavior differs. Its observation is: Both strings represent the same instant.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Date has no inherent display time zone.
+3. Before opening the explanation, check your task 3 attempt (Build a report from fixed timestamp fixtures) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

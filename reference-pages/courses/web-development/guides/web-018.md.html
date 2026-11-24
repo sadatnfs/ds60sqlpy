@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A design token names a recurring design decision such as a spacing step, text color or border radius. CSS custom properties store values that participate in the cascade and can be scoped to a component. A variable name should communicate its purpose, such as --surface or --space-small, rather than merely its current value. That allows the value to change while the role remains stable.</p>
 <p>Custom properties are resolved where they are used and usually inherit. A card can override a small set of tokens while retaining the same component rules. A fallback in var supplies a value when a variable is missing or invalid in the relevant way, but a custom property can still produce an invalid declaration at computed-value time. Test the final computed result instead of assuming any string is suitable for any property.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Custom property:</strong> A property whose name starts with two hyphens, such as <code>--space-2</code>, read with <code>var()</code> and inherited by descendants.</li>
+<li><strong>Design token:</strong> A named design decision, such as a color or spacing step, defined once and reused across components.</li>
+<li><strong>Var fallback:</strong> The second argument of <code>var()</code>, used when the referenced custom property is not defined.</li>
+<li><strong>Theme:</strong> A set of token values, often scoped to a class or attribute, that changes a component&#x27;s appearance without changing its rules.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Define shared defaults at :root and override them on a component class. <code>background:var(--surface,white)</code> uses the current scope&#x27;s value. Keep semantic text labels independent of theme color. A theme change must preserve contrast and focus behavior, not merely update an accent swatch.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -226,6 +233,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   --space<span class="syntax-punctuation">:</span> <span class="syntax-number">1.5</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The featured card changes without copying its full rule set.</p>
+<h3 id="contrast-case-a-token-holding-the-wrong-kind-of-value">Contrast case: a token holding the wrong kind of value<a class="heading-anchor" href="#contrast-case-a-token-holding-the-wrong-kind-of-value" aria-label="Link to this section">#</a></h3>
+<p>Custom properties accept almost anything, so the error appears only where the token is used. Inspect the card&#x27;s padding.</p>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">:</span><span class="syntax-decorator">root</span> <span class="syntax-punctuation">{</span>
+  --space<span class="syntax-punctuation">:</span> <span class="syntax-keyword">blue</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">.</span><span class="syntax-class">card</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">padding</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">padding</span><span class="syntax-punctuation">:</span> <span class="syntax-function">var</span><span class="syntax-punctuation">(</span>--space<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>Defining <code>--space: blue</code> is valid, because a custom property holds any token sequence. The problem appears at computed-value time: <code>padding: blue</code> is invalid, and because the declaration used <code>var()</code>, the browser cannot fall back to the earlier <code>padding: 2rem</code> line. Instead padding behaves as if it were unset, which for padding means 0. The Computed panel shows padding 0px while <code>--space</code> still appears as a defined variable, which is why checking that the token exists is not enough.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-which-card-inherits-a-scoped-token-override">Exercise 1: Predict which card inherits a scoped token override.<a class="heading-anchor" href="#exercise-1-predict-which-card-inherits-a-scoped-token-override" aria-label="Link to this section">#</a></h4>

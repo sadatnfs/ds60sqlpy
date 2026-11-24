@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Trace finite iteration and scope rules while using explicit empty-input and indexing policies.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-005</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (accumulate inside a function) and worked case B (transform and filter explicitly) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-005: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Range:</strong> A lazy arithmetic sequence such as <code>1:n</code> that stores its start, step and stop instead of every element.</li>
+<li><strong>Comprehension:</strong> Bracketed loop syntax such as <code>[x^2 for x in xs]</code> that eagerly builds a new array from an iteration.</li>
+<li><strong>Generator:</strong> Parenthesized loop syntax such as <code>(x^2 for x in xs)</code> that produces values on demand, so a reduction needs no intermediate array.</li>
+<li><strong>Soft scope:</strong> The rule governing assignment to a global name inside a top-level loop, which behaves differently in a script file than in the REPL.</li>
+<li><strong>Function scope:</strong> Variables assigned inside a function body are local to each call, which keeps an accumulator free of global ambiguity.</li>
+</ul>
 <h3 id="iteration-follows-a-collection-contract">Iteration follows a collection contract<a class="heading-anchor" href="#iteration-follows-a-collection-contract" aria-label="Link to this section">#</a></h3>
 <p>A loop visits values supplied by an iterable. A range can describe many values without storing a full array, while a comprehension constructs a collection from an iteration rule. A generator can feed a reduction without first materializing every result. These choices affect representation and memory, not just syntax.</p>
 <p>Julia&#x27;s ordinary ranges include their endpoint when the step reaches it. A descending range needs a negative step. An empty range can be valid and produce no iterations. Standard arrays use one-based indices, but generic algorithms should use <code>eachindex</code> or <code>axes</code> rather than assuming that every possible array type shares the same index origin.</p>

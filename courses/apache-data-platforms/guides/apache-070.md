@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-069`.
 
+## Key terms
+
+- **Lineage:** The graph of datasets and processes that Atlas builds from recorded inputs and outputs. A missing edge does not prove that data never moved.
+- **Process entity:** An Atlas entity whose inputs and outputs lists record that a transformation related specific datasets.
+- **Lineage granularity:** The level, such as table or column, at which lineage relates assets. Table-level edges do not show which rows or columns contributed.
+- **Instrumentation scope:** The operations an integration actually reports. Lineage is complete only for activity within this scope.
+
 ## Lineage records a claim about an operation
 
 Atlas lineage connects dataset and process metadata. A process with input and
@@ -80,6 +87,34 @@ source data?** Only if the relevant transformations, granularity and instrumenta
 coverage support that conclusion, which a small recorded path cannot establish.
 These cases show a positive process path and a deliberately absent edge while
 keeping graph evidence bounded to what was actually reported.
+
+## Worked examples
+
+### A process entity that names its inputs and outputs
+
+```json
+{
+  "guid": "-4",
+  "typeName": "ds60_<owner>_process",
+  "attributes": {
+    "qualifiedName": "ds60://<owner>/transform",
+    "name": "transform",
+    "inputs": [{ "guid": "-1", "typeName": "ds60_<owner>_dataset" }],
+    "outputs": [{ "guid": "-2", "typeName": "ds60_<owner>_dataset" }]
+  }
+}
+```
+
+This is the shape client.py sends to /api/atlas/v2/entity/bulk, with the owner prefix shown as a placeholder. Negative GUIDs are temporary references within one request; Atlas replaces them with real GUIDs and links the process to the raw and curated datasets. Lineage in Atlas exists only because something submitted this record, so a missing edge means nobody reported the operation, not that it never happened.
+
+### Read lineage around the curated asset
+
+```bash
+curl -s -u "$ATLAS_USER:$ATLAS_PASSWORD" \
+  "$DS60_ATLAS_ENDPOINT/api/atlas/v2/lineage/<curated-guid>?direction=BOTH&depth=3"
+```
+
+The response holds a guidEntityMap and a relations list of fromEntityId and toEntityId pairs. The check route requires the pairs raw to transform and transform to curated, and requires that the unrecorded dataset appears in no pair. That third rule matters: an asset that was really used but never registered stays invisible, so a clean lineage graph can still be incomplete. Use the credentials from your untracked environment, never a literal in shell history.
 
 ## Complete worked source
 

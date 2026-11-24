@@ -3,6 +3,28 @@
   "title": "Functions, keywords, closures and argument sharing",
   "concepts": ["function", "keyword argument", "closure", "higher-order function", "mutation"],
   "outcome": "Write reusable functions with explicit contracts and distinguish local rebinding from mutation of a passed object.",
+  "key_terms": [
+    [
+      "Keyword argument",
+      "A named argument declared after a semicolon, such as `tol = 1e-8`, that callers pass by name and that does not take part in dispatch."
+    ],
+    [
+      "Closure",
+      "A function that captures variables from the scope where it is defined and can read them after that scope ends."
+    ],
+    [
+      "Higher-order function",
+      "A function such as `map`, `filter` or `reduce` that accepts another function as an argument."
+    ],
+    [
+      "Pass by sharing",
+      "A function receives the caller's object itself, so mutating an array argument changes what the caller sees."
+    ],
+    [
+      "Bang convention",
+      "A trailing `!` in a name such as `sort!` warns that the function mutates one or more of its arguments."
+    ]
+  ],
   "level": "beginner",
   "minutes": 90,
   "prerequisites": ["julia-005"],
@@ -11,48 +33,68 @@
     ["Julia methods", "https://docs.julialang.org/en/v1/manual/methods/"]
   ],
   "figure": 0,
+  "approach": "Read each function's contract from its signature. `affine` uses keywords `scale = 1` and `shift = 0`, `make_scaler` returns a closure over `scale`, `rebind` assigns a new array to its local name, and `change_first!` mutates the caller's array after rejecting empty input. Compare contents with `==` and identity with `===`.",
   "exercises": [
     {
       "title": "Use defaults",
       "task": "Call affine on 5 without keywords.",
       "expected": "The result is 5.",
       "hint": "Inspect both default parameters.",
-      "answer": "A default is part of the function contract and should be recorded when it matters scientifically."
+      "answer": "A default is part of the function contract and should be recorded when it matters scientifically.",
+      "why": "With `scale = 1` and `shift = 0`, `affine(5)` computes `1 * 5 + 0`, which is 5.",
+      "wrong": "Assuming unspecified keywords become zero predicts `0 * 5 + 0 = 0`; the defaults in the signature decide.",
+      "verify": "The reference asserts `affine(5) == 5`; compare it with `affine(5; scale = 0)`, which is 0."
     },
     {
       "title": "Override one choice",
       "task": "Set shift=-2 for input 5.",
       "expected": "The result is 3.",
       "hint": "Unspecified keywords retain their defaults.",
-      "answer": "Explicit keyword configuration makes a transformation reproducible."
+      "answer": "Explicit keyword configuration makes a transformation reproducible.",
+      "why": "`affine(5; shift = -2)` keeps `scale = 1` and gives `5 - 2 = 3`.",
+      "wrong": "Passing -2 positionally, as `affine(5, -2)`, raises `MethodError` because `affine` has one positional argument.",
+      "verify": "Assert `affine(5; shift = -2) == 3` as the reference does, then confirm the positional call fails."
     },
     {
       "title": "Build a closure",
       "task": "Create a scale 3 function and apply it to 2.",
       "expected": "The result is 6.",
       "hint": "The returned function retains its scale binding.",
-      "answer": "A closure packages a transformation and context; it does not necessarily copy mutable captured objects."
+      "answer": "A closure packages a transformation and context; it does not necessarily copy mutable captured objects.",
+      "why": "`make_scaler(3)` returns `x -> 3 * x`, which remembers `scale = 3`, so applying it to 2 gives 6.",
+      "wrong": "Expecting the closure to read a global named `scale` at call time would make its result depend on unrelated script state.",
+      "verify": "The reference asserts `make_scaler(3)(2) == 6`; also map it over `[1, 2]` and expect `[3, 6]`."
     },
     {
       "title": "Trace a rebound argument",
       "task": "Call rebind on a caller array.",
       "expected": "The caller array remains unchanged.",
       "hint": "The local name is assigned another array.",
-      "answer": "Rebinding the argument name is different from mutating the shared object."
+      "answer": "Rebinding the argument name is different from mutating the shared object.",
+      "why": "In `rebind`, `values = [99]` points the local name at a new array, so the caller's `[1]` is untouched.",
+      "wrong": "Expecting the caller to see `[99]` assumes assignment writes through the argument, which only element mutation such as `values[1] = 99` does.",
+      "verify": "The reference checks `replacement == [99]`, `replacement !== original` and `original == [1]`."
     },
     {
       "title": "Trace a mutated argument",
       "task": "Call change_first! on a nonempty vector.",
       "expected": "Its first element becomes 99 and the returned object aliases it.",
       "hint": "Compare identity as well as contents.",
-      "answer": "The naming convention warns callers that the operation changes shared state."
+      "answer": "The naming convention warns callers that the operation changes shared state.",
+      "why": "`change_first!` writes `values[1] = 99` into the caller's array and returns that same object.",
+      "wrong": "Testing only `returned == [99, 2]` cannot tell a mutated original from a modified copy; identity needs `===`.",
+      "verify": "As in worked example B, assert both `values == [99, 2]` and `returned === values`."
     },
     {
       "title": "Reject an empty mutation",
       "task": "Call change_first! on an empty vector.",
       "expected": "An explicit ArgumentError is raised.",
       "hint": "State the first-element precondition.",
-      "answer": "A clear input contract produces a more useful diagnostic than an accidental indexing failure."
+      "answer": "A clear input contract produces a more useful diagnostic than an accidental indexing failure.",
+      "why": "The guard `isempty(values) && throw(ArgumentError(...))` runs before indexing, so an empty input gets a named precondition error.",
+      "wrong": "Dropping the guard lets `values[1] = 99` raise `BoundsError`, which describes an index rather than the violated contract.",
+      "verify": "Assert `@test_throws ArgumentError change_first!(Int[])` as the reference does."
     }
-  ]
+  ],
+  "checks_note": "The keyword default leaves `affine(5)` unchanged while `shift = -2` moves it to 3, and `make_scaler(3)(2) == 6` shows the closure remembering its factor after the outer call returns. The last group is the important one: `rebind` assigns a new vector to its local name, so the caller's `original` stays `[1]` while the returned `replacement` holds 99 and is a different object. Mutation through `change_first!` is the only way to change the caller's array, and it refuses an empty one."
 }

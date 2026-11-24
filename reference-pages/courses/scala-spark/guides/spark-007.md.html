@@ -249,7 +249,7 @@ println<span class="syntax-punctuation">(</span>combined<span class="syntax-punc
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-validate-source-identity-explicitly">Exercise 1: Validate source identity explicitly<a class="heading-anchor" href="#exercise-1-validate-source-identity-explicitly" aria-label="Link to this section">#</a></h4>
 <p>Trim an ID token and return Right for nonempty text. Return Left(missing_id) for null, empty or whitespace-only tokens. Do not invent an identifier.</p>
-<p><strong>Expected result/shape:</strong> &quot; a1 &quot; gives Right(&quot;a1&quot;); null,&quot;&quot; and&quot;  &quot; each give Left(&quot;missing_id&quot;).</p>
+<p><strong>Expected result/shape:</strong> <code>&quot; a1 &quot;</code> gives <code>Right(&quot;a1&quot;)</code>; <code>null</code>, <code>&quot;&quot;</code> and <code>&quot;  &quot;</code> each give <code>Left(&quot;missing_id&quot;)</code>.</p>
 <p><strong>Verify:</strong> Assert one normalized identity and all three missing representations without throwing.</p>
 <p><strong>Progressive hint:</strong> Option(raw) protects the JVM null boundary before trimming.</p>
 <h4 id="exercise-2-reject-unsupported-domain-states">Exercise 2: Reject unsupported domain states<a class="heading-anchor" href="#exercise-2-reject-unsupported-domain-states" aria-label="Link to this section">#</a></h4>
@@ -264,18 +264,18 @@ println<span class="syntax-punctuation">(</span>combined<span class="syntax-punc
 <p><strong>Progressive hint:</strong> Apply grammar and range checks around toLongOption, then convert the Option to Either.</p>
 <h4 id="exercise-4-compose-fields-with-declared-error-precedence">Exercise 4: Compose fields with declared error precedence<a class="heading-anchor" href="#exercise-4-compose-fields-with-declared-error-precedence" aria-label="Link to this section">#</a></h4>
 <p>Require exactly three pipe-separated fields and compose ID, status, amount validation in that order using a for comprehension. Return Left(malformed_record) for null or wrong field count. Preserve empty trailing fields for validation.</p>
-<p><strong>Expected result/shape:</strong> a1|paid|100 becomes Right(Record(a1, paid,100)); a2|paid| becomes invalid_amount; an empty-ID malformed-status record reports missing_id first; two fields report malformed_record.</p>
+<p><strong>Expected result/shape:</strong> <code>a1|paid|100</code> becomes <code>Right(Record(a1, paid, 100))</code>; <code>a2|paid|</code> becomes <code>invalid_amount</code>; an empty-ID malformed-status record reports missing_id first; two fields report malformed_record.</p>
 <p><strong>Verify:</strong> Assert a valid record, trailing-empty rejection, first-error precedence and field-count failure.</p>
 <p><strong>Progressive hint:</strong> Use split(&quot;\\|&quot;,-1) before the for comprehension so a trailing empty amount is not lost.</p>
 <h4 id="exercise-5-retain-a-complete-rejection-ledger">Exercise 5: Retain a complete rejection ledger<a class="heading-anchor" href="#exercise-5-retain-a-complete-rejection-ledger" aria-label="Link to this section">#</a></h4>
-<p>Parse every input line and return accepted records plus rejected(position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left.</p>
+<p>Parse every input line and return accepted records plus rejected (position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left.</p>
 <p><strong>Expected result/shape:</strong> The six-line fixture has three accepted records and rejections at positions 3,4,5 with missing_id, invalid_amount, unknown_status. Accepted plus rejected equals six.</p>
-<p><strong>Verify:</strong> Assert accepted IDs [a1, a2, a3], the exact rejected positions/reasons and count conservation.</p>
+<p><strong>Verify:</strong> Assert accepted IDs <code>[a1, a2, a3]</code>, the exact rejected positions/reasons and count conservation.</p>
 <p><strong>Progressive hint:</strong> Use zipWithIndex and pattern-match each Either inside a fold.</p>
 <h4 id="exercise-6-separate-valid-records-from-eligible-revenue">Exercise 6: Separate valid records from eligible revenue<a class="heading-anchor" href="#exercise-6-separate-valid-records-from-eligible-revenue" aria-label="Link to this section">#</a></h4>
 <p>From already accepted records, return paid-event count and checked paid cents total. Retain an observed zero paid event in the count and exclude valid void records only at this business-report stage.</p>
 <p><strong>Expected result/shape:</strong> The three accepted records yield paid count 2, total 100. A void record with malformed amount must have been rejected by parseRecord before this function can run.</p>
-<p><strong>Verify:</strong> Assert the paid metrics and show that a4|void|bad produces Left(invalid_amount), not a silently skipped valid void.</p>
+<p><strong>Verify:</strong> Assert the paid metrics and show that <code>a4|void|bad</code> produces <code>Left(invalid_amount)</code>, not a silently skipped valid void.</p>
 <p><strong>Progressive hint:</strong> Filter accepted status paid, then fold both occurrence count and amount total.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If rejected rows vanish, look for converting Either to Option and flatMapping only Right values without a separate ledger. If a trailing empty amount is misclassified as the wrong field count, inspect the split limit. If different errors appear after refactoring, review validation precedence. If void rows bypass amount validation, move source validation before business filtering. If a report total matches but accepted plus rejected count does not, trace every source position rather than inventing replacement zeros.</p>

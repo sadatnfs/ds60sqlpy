@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-055`, `apache-051`.
 
+## Key terms
+
+- **Snapshot:** A point-in-time set of hard links to a table's SSTables created by nodetool snapshot. It lives on the same disk and is not an off-site backup.
+- **SSTable import:** Loading SSTable files from a snapshot into a table with a compatible schema, as the project does in an owned restore target.
+- **Hinted handoff:** Writes a coordinator stores for a temporarily unavailable replica and replays when it returns. It does not cover indefinite outages.
+- **Retained volume:** A persistent container volume that keeps a node's state across process replacement but shares the failure domain of its host disk.
+- **Restore verification:** Independently checking the schema, version and exact rows after a restore, since a backup is unproven until its restore has been exercised.
+
 ## Recovery needs data, schema and an operational boundary
 
 A persistent container volume can retain a node's state across process replacement,

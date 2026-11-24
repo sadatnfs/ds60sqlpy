@@ -201,6 +201,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Represent a record and distinguish valid states from arbitrary strings.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A struct groups related fields into one value. An enum class defines a closed vocabulary of named states and prevents accidental integer mixing. An invariant describes combinations that make sense, such as a settled payment carrying nonnegative cents. Domain names make invalid combinations visible at the boundary.</p>
+<ul>
+<li><strong>struct:</strong> a type that groups related fields, such as id, cents and status, into one value.</li>
+<li><strong><code>enum class</code>:</strong> a scoped enumeration of named states that does not convert implicitly to an integer.</li>
+<li><strong>domain invariant:</strong> a rule about which field combinations make sense, such as a settled payment carrying nonnegative cents.</li>
+<li><strong>aggregate initialization:</strong> brace initialization that assigns fields in their declared order.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>enum class Status { pending, paid };</code> scopes enumerators under Status. <code>Payment{7,200,Status::paid}</code> uses aggregate initialization in field order. Check invariants before aggregating fields; a raw integer state 3 is not automatically meaningful.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
@@ -208,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="records-named-states-and-domain-invariants">Records, named states and domain invariants<a class="heading-anchor" href="#records-named-states-and-domain-invariants" aria-label="Link to this section">#</a></h3>
 <p>A struct turns related fields into one value, but C++ does not automatically know their business meaning. Payment.id identifies an event, cents gives an amount and status determines contribution to the settled total. Two payments with the same amount are not duplicates merely because one field matches. Keeping identity and amount separate is a data-model decision that the aggregation must preserve.</p>
 <p>enum class gives named, scoped alternatives. Status::paid and Status::pending are easier to review than magic integers, and accidental implicit conversion to an integer is restricted. This still does not validate arbitrary external bytes: a parser must map permitted input names or numbers to the intended enum values and reject unsupported states. A type with named states is useful only when the boundary respects that vocabulary.</p>
-<p>Aggregate initialization follows field order in the shown definition. Payment{7, 200, Status::paid} binds 7 to id and 200 to cents. If fields of the same type are accidentally swapped, the compiler may accept the program while its meaning changes. Named construction functions or stronger distinct types can help when that risk becomes important. For the small fixture, trace each field explicitly before aggregating.</p>
+<p>Aggregate initialization follows field order in the shown definition. <code>Payment{7, 200, Status::paid}</code> binds 7 to id and 200 to cents. If fields of the same type are accidentally swapped, the compiler may accept the program while its meaning changes. Named construction functions or stronger distinct types can help when that risk becomes important. For the small fixture, trace each field explicitly before aggregating.</p>
 <p>The amount invariant is checked before state filtering. A pending payment with negative cents should not evade validation merely because it currently contributes zero. Validation asks whether the record is meaningful; contribution asks how a meaningful record participates in the requested statistic. Combining those questions into a single conditional can hide invalid data in excluded categories.</p>
 <p>Zero paid cents is valid and contributes zero. Pending 200 also contributes zero, but for a different reason. A total alone cannot distinguish those cases, so retain count and state evidence when diagnosing the calculation. When adding refunded, define its business contribution deliberately and test it. A default branch that silently returns zero for every future state can mask a missing policy decision.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
@@ -271,7 +277,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-text">cpp-010 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-read-the-record">Exercise 1: Read the record<a class="heading-anchor" href="#exercise-1-read-the-record" aria-label="Link to this section">#</a></h4>
-<p>Describe each field of Payment{7, 200, paid}.</p>
+<p>Describe each field of <code>Payment{7, 200, Status::paid}</code>.</p>
 <p><strong>Expected result/shape:</strong> Identity 7, integer cents 200, named state paid.</p>
 <p><strong>Verify:</strong> Check each part of your description against the declaration: <code>id</code> holds 7, <code>cents</code> holds 200 cents rather than dollars, and <code>status</code> is the enumerator <code>Status::paid</code>, not a string.</p>
 <p><strong>Progressive hints:</strong> Identity and amount serve different purposes.</p>

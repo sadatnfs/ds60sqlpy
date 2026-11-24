@@ -194,14 +194,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-014_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="tf-014-explanatory-solutions">tf-014: explanatory solutions<a class="heading-anchor" href="#tf-014-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers for Multiclass and multilabel are different tasks after your own attempt at Example A, Uniform class uncertainty, or after an explicit reveal. Each answer reuses the guide&#x27;s literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Multiclass, Multilabel, Sparse target. After matching exercise 6, Reject an impossible class, invent a new input without looking here.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Multiclass and multilabel prediction answer different questions. In a multiclass task exactly one class is chosen, so a softmax distributes one unit of probability across mutually exclusive outcomes. In a multilabel task several labels may hold at once, so each label gets its own binary decision. A tensor with three outputs does not by itself tell you which task is intended. The target contract determines the activation, loss and denominator. Integer sparse targets name one class index; a vector such as [1, 0, 1] names two independently present labels. Converting one task into the other changes the meaning of the data.</p>
 <p><strong>Multiclass:</strong> One outcome among mutually exclusive categories.</p>
 <p><strong>Multilabel:</strong> Independent binary outcomes that may coexist.</p>
 <p><strong>Sparse target:</strong> An integer index of the observed class.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Sparse categorical cross entropy takes class indices with shape(batch,), alongside logits shaped(batch, classes). Sigmoid cross entropy instead takes a binary matrix matching logits. Softmax reduces across the class axis. Explicitly check which axes a loss function reduces before comparing mean losses, particularly when multilabel losses are averaged across both labels and examples.</p>
+<p>Sparse categorical cross entropy takes class indices with shape (batch,), alongside logits shaped (batch, classes). Sigmoid cross entropy instead takes a binary matrix matching logits. Softmax reduces across the class axis. Explicitly check which axes a loss function reduces before comparing mean losses, particularly when multilabel losses are averaged across both labels and examples.</p>
 <h3 id="exercise-1-uniform-class-uncertainty">Exercise 1: Uniform class uncertainty<a class="heading-anchor" href="#exercise-1-uniform-class-uncertainty" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compute sparse cross entropy for target 1 and three zero logits.</p>
 <p>Three equal scores create a uniform distribution. The target probability is one third, so the negative log likelihood is log 3, independent of which class index is chosen.</p>
@@ -264,7 +264,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <p><strong>Expected:</strong> index 3 is outside legal indices 0, 1, 2.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>validate_class(2) == 2</code> and <code>validate_class(3)</code> raises <code>ValueError</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one fixture value in exercise 4, Verify softmax mass, and predict the new result before running it. Keep the failing version of exercise 5, Choose the denominator, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>
 </body>
 </html>

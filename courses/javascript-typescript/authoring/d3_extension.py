@@ -17,9 +17,12 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
+from d3_solution_notes import NOTES  # noqa: E402
 from outcomes import MINUTES, OUTCOMES  # noqa: E402
 
-SPECS = runpy.run_path(str(Path(__file__).with_name("d3_specs.py")))["LESSONS"]
+_NAMESPACE = runpy.run_path(str(Path(__file__).with_name("d3_specs.py")))
+SPECS = _NAMESPACE["LESSONS"]
+KEY_TERMS = _NAMESPACE["KEY_TERMS"]
 LABELS = (
     ("https://d3js.org/", "D3 documentation"),
     ("https://developer.mozilla.org/en-US/docs/", "MDN"),
@@ -34,6 +37,24 @@ def reference_label(url):
         if url.startswith(prefix):
             return f"{name}: {url[len(prefix) :].strip('/')}"
     return url
+
+
+def key_terms_block(key):
+    """Render a lesson's Key terms list after checking it is complete and specific."""
+    pairs = KEY_TERMS.get(key)
+    if not pairs or not 3 <= len(pairs) <= 5:
+        raise ValueError(key + " needs 3 to 5 key terms")
+    names = [name.lower() for name, _ in pairs]
+    if len(set(names)) != len(names):
+        raise ValueError(key + " repeats a key term")
+    for name, meaning in pairs:
+        if (
+            not name.strip()
+            or len(meaning.split()) < 6
+            or re.search("[\u2013\u2014]", name + meaning)
+        ):
+            raise ValueError(f"{key} has an incomplete key term: {name}")
+    return "\n".join(f"- **{name}:** {meaning}" for name, meaning in pairs)
 
 
 def first_sentence(text):
@@ -74,6 +95,8 @@ def build():
     plan["lessons"] = [r for r in plan["lessons"] if int(r["id"].split("-")[-1]) <= 42]
     manifest["lessons"] = [r for r in manifest["lessons"] if int(r["id"].split("-")[-1]) <= 42]
     inventory = []
+    if set(KEY_TERMS) != {f"js-{n:03d}" for n in range(43, 43 + len(SPECS))}:
+        raise ValueError("KEY_TERMS must cover exactly the D3 lessons")
     for n, spec in enumerate(SPECS, 43):
         title, concepts, mental, anatomy, examples, tasks, reference, refs = spec
         key = f"js-{n:03d}"
@@ -102,6 +125,10 @@ def build():
 
 {mental}
 
+### Key terms
+
+{key_terms_block(key)}
+
 ## Syntax anatomy and mechanism
 
 {anatomy}
@@ -126,7 +153,9 @@ The visual output belongs inside `#chart`. Use `.text()` or `textContent` for un
         for i, (prompt, expected, reason) in enumerate(tasks, 1):
             text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Progressive hint:** {first_sentence(reason)}\n"
             starter += f"// Exercise {i}: {prompt}\n// Expected: {expected}\n\n"
-            answer += f"\n## Exercise {i}: {prompt}\n\n{reason}\n\n**Expected:** {expected}\n"
+            note = NOTES.get(key, {}).get(i)
+            body = f"{reason} {' '.join(note.split())}" if note else reason
+            answer += f"\n## Exercise {i}: {prompt}\n\n{body}\n\n**Expected:** {expected}\n"
         starter += 'throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");\n'
         text += (
             f"""

@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-031.md</code>.</p>
 <h3 id="exercise-1-predict-which-characters-in-the-greeting-source-appear-in-output">Exercise 1: Predict which characters in the greeting source appear in output.<a class="heading-anchor" href="#exercise-1-predict-which-characters-in-the-greeting-source-appear-in-output" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The opening tag and echo keyword do not appear; the string content does.</p>
+<p><strong>Approach:</strong> Separate the PHP syntax from the data: the tag and the <code>echo</code> keyword are instructions, while the quoted string is what gets written.</p>
 <p><strong>Why:</strong> The <code>&lt;?php</code> tag and <code>echo</code> are PHP syntax, so only the string&#x27;s characters, including the newline written as <code>\n</code>, reach the output.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting <code>&lt;?php</code> to appear in the output fails because the interpreter consumes the opening tag and never prints it.</p>
+<p><strong>How to verify:</strong> Running the file in the CLI worker prints Hello, classroom. followed by a single newline and nothing else.</p>
 <h3 id="exercise-2-change-the-planned-minutes-while-preserving-the-label">Exercise 2: Change the planned minutes while preserving the label.<a class="heading-anchor" href="#exercise-2-change-the-planned-minutes-while-preserving-the-label" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Only the numeric portion changes.</p>
+<p><strong>Approach:</strong> Change only the value assigned to <code>$minutes</code> and leave the label string and the concatenation unchanged.</p>
 <p><strong>Why:</strong> The label is a separate string literal, so changing <code>$minutes</code> alters only the number that concatenation inserts.</p>
+<p><strong>Plausible wrong approach:</strong> Editing the number inside the label string fails because the variable still holds 30, so the printed value disagrees with the plan.</p>
+<p><strong>How to verify:</strong> After setting <code>$minutes = 45;</code>, the output reads Planned minutes: 45 with the label exactly as before.</p>
 <h3 id="exercise-3-write-a-php-program-that-prints-a-study-topic-and-computed-duration">Exercise 3: Write a PHP program that prints a study topic and computed duration.<a class="heading-anchor" href="#exercise-3-write-a-php-program-that-prints-a-study-topic-and-computed-duration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The program runs in the CLI worker and produces two clearly labeled values.</p>
+<p><strong>Approach:</strong> Assign the topic and the session length to variables, compute the duration with an expression, and echo two labeled lines.</p>
 <p><strong>Why:</strong> Named values and one computation keep the program readable and let you verify the output by hand.</p>
+<p><strong>Plausible wrong approach:</strong> Printing the raw number without a label fails because a reader of the CLI output cannot tell which value is which.</p>
+<p><strong>How to verify:</strong> The worker output shows two lines, each beginning with its label, and the computed value matches a hand calculation.</p>
 <h3 id="exercise-4-diagnose-a-missing-semicolon-as-a-parse-error">Exercise 4: Diagnose a missing semicolon as a parse error.<a class="heading-anchor" href="#exercise-4-diagnose-a-missing-semicolon-as-a-parse-error" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The interpreter cannot execute the intended statement sequence until syntax is repaired.</p>
+<p><strong>Approach:</strong> Read the line number in the parse error, look at the end of the previous statement, and add the missing semicolon.</p>
 <p><strong>Why:</strong> PHP parses the whole file before running it, so a syntax error stops execution and the reported line is often the one after the missing semicolon.</p>
+<p><strong>Plausible wrong approach:</strong> Searching the output for a partial result fails because a parse error stops the file before any statement runs at all.</p>
+<p><strong>How to verify:</strong> After adding the semicolon, the program runs and prints every line instead of a single parse error.</p>
 <h3 id="exercise-5-print-literal-angle-brackets-and-explain-the-output-surface">Exercise 5: Print literal angle brackets and explain the output surface.<a class="heading-anchor" href="#exercise-5-print-literal-angle-brackets-and-explain-the-output-surface" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The CLI displays text; it does not automatically render a web page.</p>
+<p><strong>Approach:</strong> Echo a string such as <code>&lt;strong&gt;</code> and note that the CLI worker prints characters to a text stream rather than rendering markup.</p>
 <p><strong>Why:</strong> The CLI writes plain text to standard output, so angle brackets are printed as characters; no browser parses them as HTML.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting bold text in the CLI output fails because no browser parses the string, so the tags appear as plain characters.</p>
+<p><strong>How to verify:</strong> The worker output shows the literal text &lt;strong&gt; unchanged, with no change in font weight.</p>
 <h3 id="exercise-6-compare-the-cli-lifecycle-with-a-server-request-lifecycle">Exercise 6: Compare the CLI lifecycle with a server request lifecycle.<a class="heading-anchor" href="#exercise-6-compare-the-cli-lifecycle-with-a-server-request-lifecycle" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A CLI process receives its prepared inputs; a server integration supplies HTTP context and response handling.</p>
+<p><strong>Approach:</strong> Describe where inputs come from in each case: prepared arguments for the CLI process, and request data plus headers for a server request.</p>
 <p><strong>Why:</strong> A server integration supplies the request method, headers, cookies and a response channel for each request, while a CLI run receives only its own fixed inputs and exits.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming <code>$_GET</code> is filled when running the CLI worker fails because no HTTP request exists, so those arrays stay empty.</p>
+<p><strong>How to verify:</strong> Dumping <code>$_GET</code> in the CLI worker prints an empty array, while the program&#x27;s prepared input values are present.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-031_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>

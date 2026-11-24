@@ -30,7 +30,7 @@ it is separate from evidence that your current worker executed successfully.
 - **JVM:** the process executing compatible bytecode
 - **binary line:** a compatibility family such as Scala 2.13, reflected by artifact suffix _2.13
 - **driver:** the program coordinating a Spark application
-- **local[2]:** a local Spark master using two worker threads, not two remote computers
+- **`local[2]`:** a local Spark master using two worker threads, not two remote computers
 
 ## Worked example / walkthrough
 
@@ -42,6 +42,22 @@ The arrows are different phases. A source edit does not retroactively modify a p
 Main.scala -> Scala compiler -> Main.class -> JVM process -> stdout: 42
 ```
 
+The source file is the only thing you edit. A minimal version looks like this:
+
+```scala
+object Main {
+  def main(args: Array[String]): Unit = {
+    println(40 + 2)
+  }
+}
+```
+
+```text
+$ scalac Main.scala   # writes Main.class
+$ scala Main          # starts a JVM process
+42
+```
+
 **Expected:** The editable input is Main.scala; 42 is an observation from the process.
 
 ### Worked example 2: Distinguish a candidate from a receipt
@@ -49,9 +65,28 @@ Main.scala -> Scala compiler -> Main.class -> JVM process -> stdout: 42
 A supported version range cannot prove that dependencies were downloaded, matched or executed on this machine. The following deliberately hypothetical report illustrates that distinction; it is not a report of your running classroom.
 
 ```text
-candidate: Spark4.2.0 / Scala2.13.18 / JDK21
+candidate: Spark 4.2.0 / Scala 2.13.18 / JDK 21
 receipt: profile absent; no executed probe
 ```
+
+A receipt only exists after a probe actually runs. This small program would produce one, because every printed value comes from the running driver rather than from a planning document:
+
+```scala
+import org.apache.spark.sql.SparkSession
+
+object VersionProbe {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder().master("local[2]").appName("version-probe").getOrCreate()
+    try {
+      println(s"spark=${spark.version}")
+      println(s"scala=${scala.util.Properties.versionNumberString}")
+      println(s"java=${System.getProperty("java.version")}")
+    } finally spark.stop()
+  }
+}
+```
+
+Until that program has been compiled and executed on the machine in question, the report above stays a candidate.
 
 **Expected:** Compatibility-informed, execution not established.
 
@@ -61,11 +96,11 @@ receipt: profile absent; no executed probe
 
 Label each artifact and explain what can be edited.
 
-**Inputs/evidence:** For spark-001 Exercise 1, Main.scala, Main.class, stdout 42 and exit 0.
+**Inputs/evidence:** Main.scala, Main.class, stdout 42 and exit 0.
 
-**Expected result/shape:** For spark-001 Exercise 1, source, compiled bytecode, observed output and process status are four different categories.
+**Expected result/shape:** Source, compiled bytecode, observed output and process status are four different categories.
 
-**Verify:** For spark-001 Exercise 1, label all four; do not call stdout a source file.
+**Verify:** Label all four; do not call stdout a source file.
 
 **Progressive hints:**
 
@@ -77,11 +112,11 @@ Label each artifact and explain what can be edited.
 
 Choose a route for two learners: no programming background, and tested Python skills.
 
-**Inputs/evidence:** For spark-001 Exercise 2, Learner A has no prior language; B can write functions and pytest tests.
+**Inputs/evidence:** Learner A has no prior language; B can write functions and pytest tests.
 
-**Expected result/shape:** For spark-001 Exercise 2, A takes spark-002 to spark-010; B takes spark-011 after a python-10 competency check; both enter spark-012.
+**Expected result/shape:** A takes spark-002 to spark-010; B takes spark-011 after a python-10 competency check; both enter spark-012.
 
-**Verify:** For spark-001 Exercise 2, name both routes and explain why Scala-first needs no Python.
+**Verify:** Name both routes and explain why Scala-first needs no Python.
 
 **Progressive hints:**
 
@@ -93,11 +128,11 @@ Choose a route for two learners: no programming background, and tested Python sk
 
 Review dependency labels before any download.
 
-**Inputs/evidence:** For spark-001 Exercise 3, spark-sql_2.13 at 4.2.0 versus a proposed spark-sql_3 substitution.
+**Inputs/evidence:** `spark-sql_2.13` at 4.2.0 versus a proposed `spark-sql_3` substitution.
 
-**Expected result/shape:** For spark-001 Exercise 3, retain the documented Scala 2.13 line; reject the unsupported Scala3 substitution for this profile.
+**Expected result/shape:** Retain the documented Scala 2.13 line; reject the unsupported Scala 3 substitution for this profile.
 
-**Verify:** For spark-001 Exercise 3, cite the binary suffix and actual profile receipt separately.
+**Verify:** Cite the binary suffix and actual profile receipt separately.
 
 **Progressive hints:**
 
@@ -109,11 +144,11 @@ Review dependency labels before any download.
 
 Classify candidate, missing and verified readiness.
 
-**Inputs/evidence:** For spark-001 Exercise 4, candidate tuple; absent image; executed probe with digest and versions.
+**Inputs/evidence:** Candidate tuple; absent image; executed probe with digest and versions.
 
-**Expected result/shape:** For spark-001 Exercise 4, candidate=proposed, absent=unavailable, executed matching receipt=qualified only for its tested platform.
+**Expected result/shape:** `candidate=proposed`, `absent=unavailable`, executed matching `receipt=qualified` only for its tested platform.
 
-**Verify:** For spark-001 Exercise 4, write all three labels without inventing an execution.
+**Verify:** Write all three labels without inventing an execution.
 
 **Progressive hints:**
 
@@ -125,27 +160,27 @@ Classify candidate, missing and verified readiness.
 
 Compare local mode with a remote master.
 
-**Inputs/evidence:** For spark-001 Exercise 5, local[2] and spark://shared.example:7077.
+**Inputs/evidence:** `local[2]` and `spark://shared.example:7077`.
 
-**Expected result/shape:** For spark-001 Exercise 5, only the bounded local profile is eligible for this lesson; the remote master is outside its scope.
+**Expected result/shape:** Only the bounded local profile is eligible for this lesson; the remote master is outside its scope.
 
-**Verify:** For spark-001 Exercise 5, identify the remote address and keep the saved attempt without connecting.
+**Verify:** Identify the remote address and keep the saved attempt without connecting.
 
 **Progressive hints:**
 
 1. Read the master string.
 2. A remote hostname changes the resource boundary.
-3. Keep local[2] and refuse ambient remote settings.
+3. Keep `local[2]` and refuse ambient remote settings.
 
 ### Exercise 6: Transfer a version report
 
 Explain a report that has Python but no JVM.
 
-**Inputs/evidence:** For spark-001 Exercise 6, Python 3.12 present; java unavailable; Spark profile absent.
+**Inputs/evidence:** Python 3.12 present; java unavailable; Spark profile absent.
 
-**Expected result/shape:** For spark-001 Exercise 6, ordinary Python may run, but Scala/Spark is unavailable; no installation occurs on Run.
+**Expected result/shape:** Ordinary Python may run, but Scala/Spark is unavailable; no installation occurs on Run.
 
-**Verify:** For spark-001 Exercise 6, name the missing layer and preserve your route/prediction notes.
+**Verify:** Name the missing layer and preserve your route/prediction notes.
 
 **Progressive hints:**
 
@@ -164,7 +199,7 @@ Close the source. Explain the mechanism in your own words, name the boundary tha
 
 ## Common pitfalls
 
-Do not confuse Scala3 with the selected Scala 2.13 Spark binary family. Do not treat a proposed tuple or an exit 0 from another program as a Spark qualification receipt. Never route this lesson to an ambient remote master.
+Do not confuse Scala 3 with the selected Scala 2.13 Spark binary family. Do not treat a proposed tuple or an exit 0 from another program as a Spark qualification receipt. Never route this lesson to an ambient remote master.
 
 ## Next step
 

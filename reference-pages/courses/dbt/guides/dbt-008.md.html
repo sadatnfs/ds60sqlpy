@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An incremental model reuses an existing relation and processes selected new or changed records. This can reduce work, but it introduces state into the transformation. The result now depends on the previous materialization, the new source and the selection rule. A full recomputation and an incremental update should agree under the assumptions of that rule.</p>
 <p>A strict maximum watermark is appropriate only when relevant records arrive with a monotonically increasing key and previously processed records do not change. The first case uses that narrow assumption and demonstrates a repeatable append. The second adds a record whose update key falls behind the current maximum. It is new to the pipeline but not newer under the chosen predicate, so it is missed.</p>
 <p>The defect is not fixed by repeatedly running the same query. The program explicitly compares the incremental result with a full refresh to expose the missing record. A production strategy needs a late-arrival policy, a backfill process or a different source/change-tracking contract. Performance savings must be evaluated alongside those correctness assumptions.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Incremental model:</strong> A table model that, after its first build, adds or updates only the rows selected by its incremental filter.</li>
+<li><strong>is_incremental():</strong> A macro that is true only when the target relation exists, the model is incremental and the run is not a full refresh.</li>
+<li><strong>Watermark:</strong> The largest event or load value already in the target, used to choose which source rows the next run processes.</li>
+<li><strong>Late-arriving record:</strong> A record that arrives after a run whose watermark already passed its value, so a strict greater-than filter never selects it.</li>
+<li><strong>Full refresh:</strong> A run with <code>--full-refresh</code> that rebuilds an incremental model from all source rows instead of applying an increment.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>config(materialized=&#x27;incremental&#x27;) declares the representation. is_incremental() identifies runs with an existing incremental relation, and this refers to that relation. The example selects source rows with updated_at greater than the target maximum. --full-refresh deliberately rebuilds the model; it is not the same operation as a normal rerun.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

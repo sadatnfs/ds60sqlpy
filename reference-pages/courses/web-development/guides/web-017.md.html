@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Responsive design lets one document work across available sizes and user settings. A breakpoint is a condition where a layout needs to change, not a permanent name for a device. A phone can have a wide landscape viewport; a desktop window can be narrow. Start with content that works in a small space and add more complex arrangements only when enough room exists.</p>
 <p>The viewport metadata tells mobile browsers to use the device&#x27;s layout width rather than a historical wide page assumption. Flexible widths, wrapping and content-driven heights solve many problems before a media query is necessary. A responsive page must also survive enlarged text, translations and long values, not merely a list of screen widths.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Responsive design:</strong> Building one page that adapts its layout to the available space instead of making separate pages for each device.</li>
+<li><strong>Viewport meta element:</strong> The <code>meta name=&quot;viewport&quot;</code> element that tells mobile browsers to lay out at the device width rather than a wide virtual page.</li>
+<li><strong>Media query:</strong> An <code>@media</code> condition, such as a minimum width, that applies rules only when the environment matches.</li>
+<li><strong>Breakpoint:</strong> A width at which the layout changes, chosen where the content starts to break rather than to match a particular device.</li>
+<li><strong>Mobile first:</strong> Writing the narrow layout as the default and adding minimum-width media queries for wider screens.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use a base single-column layout and a min-width media query for a wider arrangement. Relative units in queries support a design tied to text scale. Inspect where the content becomes cramped and choose the breakpoint from that evidence. Keep the navigation visible or provide a fully accessible disclosure rather than simply hiding it on small screens.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -221,6 +229,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The wider layout gives navigation a bounded column.</p>
+<h3 id="contrast-case-a-missing-viewport-meta-tag">Contrast case: a missing viewport meta tag<a class="heading-anchor" href="#contrast-case-a-missing-viewport-meta-tag" aria-label="Link to this section">#</a></h3>
+<p>The responsive CSS from both worked examples is identical in these two documents. Only the head differs.</p>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!-- A: no viewport metadata --&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;utf-8&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Outline<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span>
+
+<span class="syntax-comment">&lt;!-- B: layout viewport follows the device --&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;utf-8&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;viewport&quot;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;width=device-width, initial-scale=1&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span>
+  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Outline<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span></code></pre>
+<p>Mobile browsers render document A as if the screen were roughly 980 CSS pixels wide and then scale it down, so the <code>min-width: 48rem</code> query matches and readers see a tiny two-column desktop page. Document B sets the layout viewport to the device width, so a phone stays below 48rem and gets the single-column base layout. A desktop preview resized by hand may not show this difference, so use a device emulation preset when you test it.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-predict-the-base-layout-below-the-breakpoint">Exercise 1: Predict the base layout below the breakpoint.<a class="heading-anchor" href="#exercise-1-predict-the-base-layout-below-the-breakpoint" aria-label="Link to this section">#</a></h4>

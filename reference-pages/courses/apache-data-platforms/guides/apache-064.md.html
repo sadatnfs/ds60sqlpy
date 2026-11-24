@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-064-schemas-partitions-and-serialization">apache-064: Schemas, partitions and serialization<a class="heading-anchor" href="#apache-064-schemas-partitions-and-serialization" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-063</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Storage descriptor:</strong> The Metastore record that ties a table&#x27;s columns to a file format, input and output classes, SerDe and location.</li>
+<li><strong>SerDe:</strong> Serializer and deserializer, the component that translates between stored bytes and Hive column values.</li>
+<li><strong>Partition registration:</strong> Adding a partition value and its location to the Metastore, for example with ALTER TABLE ADD PARTITION. Creating a directory alone does not register it.</li>
+<li><strong>Physical schema:</strong> The column names and types actually written in the Parquet files, which must stay compatible with the catalog&#x27;s declared types.</li>
+</ul>
 <h3 id="a-table-schema-interprets-physical-bytes">A table schema interprets physical bytes<a class="heading-anchor" href="#a-table-schema-interprets-physical-bytes" aria-label="Link to this section">#</a></h3>
 <p>Hive&#x27;s storage descriptor connects logical columns with a file format, input and output implementation, serialization/deserialization rules and a location. SerDe means serializer/deserializer: the component translating between stored representations and engine values. Parquet also carries a physical schema, so logical declarations must remain compatible with the actual files and reader. A catalog type name does not rewrite existing bytes.</p>
 <p>Partition columns are often represented in directory names and catalog values rather than repeated in each file. Registering a partition tells the engine which location corresponds to a logical value. Merely creating a directory does not always register it, and registering a location does not establish that the files contain the expected rows. Partition discovery is an operational choice with its own scope and safety requirements.</p>
@@ -210,6 +217,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Inspect DESCRIBE output, partition values and locations, physical Parquet schema, reader implementation and actual exceptions. Keep string dates, UTC timestamps and epoch units explicit. Preserve the original valid table while testing wrong schemas under a distinct owned name, then remove only the experimental resources when their evidence has been retained.</p>
 <p><strong>Interview discussion: why can a directory exist but a partition query return no rows?</strong> The catalog may not register it, may point elsewhere, or may interpret its contents differently. The two cases connect logical registration to physical schema and location, without treating file discovery as a transactional commit.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="generate-the-parquet-file-for-one-day">Generate the Parquet file for one day<a class="heading-anchor" href="#generate-the-parquet-file-for-one-day" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pyarrow <span class="syntax-keyword">as</span> pa
+<span class="syntax-keyword">import</span> pyarrow.parquet <span class="syntax-keyword">as</span> pq
+
+table <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</span>table<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pa<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>int32<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">east</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">east</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> pa<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> pa<span class="syntax-operator">.</span>int32<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">)</span>
+sink <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</span>BufferOutputStream<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+pq<span class="syntax-operator">.</span>write_table<span class="syntax-punctuation">(</span>table<span class="syntax-punctuation">,</span> sink<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>pq<span class="syntax-operator">.</span>read_schema<span class="syntax-punctuation">(</span>pa<span class="syntax-operator">.</span>BufferReader<span class="syntax-punctuation">(</span>sink<span class="syntax-operator">.</span>getvalue<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-text">id: int32
+region: string
+amount: int32</code></pre>
+<p>The printed schema shows id and amount as int32 and region as string, which match INT and STRING in the Hive declaration. The day column is absent on purpose: Hive derives it from the directory name day=2026-01-01, not from the file. If the file were written with int64 columns, a reader expecting INT can fail or convert depending on the engine version, which is why the schema should be inspected before blaming the query.</p>
+<h4 id="project-from-the-registered-day">Project from the registered day<a class="heading-anchor" href="#project-from-the-registered-day" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  region<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  ds60<span class="syntax-punctuation">.</span>orders
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">day</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  region
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  region<span class="syntax-punctuation">;</span></code></pre>
+<p>From explain.sql, this should return east 11 and west 9. The EXPLAIN version of the same query shows the partition filter applied before the scan, so only one directory is read. Two different failures look alike here: a missing partition returns zero rows with no error, while a wrong column type in a separately named table produces a reader error or nulls. Record which one you saw before changing anything, because the fixes are different.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="hive-apache-064-command-notebook">Hive apache-064 command notebook<a class="heading-anchor" href="#hive-apache-064-command-notebook" aria-label="Link to this section">#</a></h2>

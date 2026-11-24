@@ -10,6 +10,14 @@ Validate scientific inputs, test expected failures and preserve unexpected error
 
 Open `julia-009` in `/classroom` with its prepared `julia` runtime. Worked case A (a finite nonempty mean) and worked case B (a bounded outcome record) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-009: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **ArgumentError:** The exception thrown when a caller supplies an unacceptable argument, such as an empty vector where data are required.
+- **DomainError:** The exception thrown when a numeric value lies outside a function's mathematical domain, such as `sqrt(-1.0)` on real inputs.
+- **Test set:** A `@testset` block from the `Test` standard library that groups related `@test` checks and reports their results together.
+- **Boundary case:** An input at the edge of the valid domain, such as zero or one element, where validation and off-by-one mistakes appear.
+- **Rethrow:** Calling `rethrow()` inside a `catch` block reraises the current exception with its original backtrace after local handling.
+
 ## An error policy is part of an API
 
 A calculation can fail because its input is outside the intended domain, because information is absent, or because the implementation has a defect. These situations deserve different handling. Returning an ordinary numeric value for every failure can make an invalid result look scientifically meaningful.

@@ -875,7 +875,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">&quot;concepts&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Result builder&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Declarative composition&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">        <span class="syntax-string">&quot;Intermediate result&quot;</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Intermediate result&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;Builder method&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-string">&quot;buildOptional&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compose declarative structures with result builders, including optional parts.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a small report declaration using the existing builder.&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -968,8 +970,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Transport adapter&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model loading states and discard stale network results with a deterministic fake transport.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Accept the current request result) and Example B (Ignore a superseded result) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The matching generation updates current state. The stale response cannot overwrite the newer value.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a deterministic fake transport returning success and failure values.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The fake returns Read for /ok and a status 503 failure for /down, the same way on every run.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-044&quot;</span><span class="syntax-punctuation">,</span></span>

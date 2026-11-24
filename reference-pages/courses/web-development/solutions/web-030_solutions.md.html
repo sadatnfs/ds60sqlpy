@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-030.md</code>.</p>
 <h3 id="exercise-1-map-a-label-interaction-and-layout-claim-to-different-evidence">Exercise 1: Map a label, interaction and layout claim to different evidence.<a class="heading-anchor" href="#exercise-1-map-a-label-interaction-and-layout-claim-to-different-evidence" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Use structural checks, actual interaction and visual inspection respectively.</p>
+<p><strong>Approach:</strong> Assign each claim a matching method: query the DOM for labels, press keys for interaction, and look at the rendered page for layout.</p>
 <p><strong>Why:</strong> Structure can be checked in the DOM, behavior needs a real interaction and appearance needs visual inspection.</p>
+<p><strong>Plausible wrong approach:</strong> Using a DOM query to prove that a layout fits fails because the structure can be correct while elements overflow visually.</p>
+<p><strong>How to verify:</strong> Your table pairs the label, interaction and layout claims with three different methods, and each row has its own recorded result and date.</p>
 <h3 id="exercise-2-turn-one-silent-assumption-into-a-throwing-assertion">Exercise 2: Turn one silent assumption into a throwing assertion.<a class="heading-anchor" href="#exercise-2-turn-one-silent-assumption-into-a-throwing-assertion" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A violated invariant produces a clear failure message.</p>
+<p><strong>Approach:</strong> Write <code>if (!condition) throw new Error(&#x27;...&#x27;)</code> with a message that names the expected and the actual value.</p>
 <p><strong>Why:</strong> An explicit assertion turns a silent wrong state into a visible failure with a useful message.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>console.assert</code> fails because it only logs the problem and lets the run end looking successful.</p>
+<p><strong>How to verify:</strong> Breaking the condition makes the script stop with your message instead of reaching the final log line.</p>
 <h3 id="exercise-3-create-a-quality-report-for-the-portal-from-web-024">Exercise 3: Create a quality report for the portal from web-024.<a class="heading-anchor" href="#exercise-3-create-a-quality-report-for-the-portal-from-web-024" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The report records source revision, tested conditions, observations and remaining limitations.</p>
+<p><strong>Approach:</strong> Record the source revision or file date, the browser and window size, and a line for each check with what happened.</p>
 <p><strong>Why:</strong> A dated, scoped report lets someone else repeat the review and see its limits.</p>
+<p><strong>Plausible wrong approach:</strong> Writing a report that says only all good fails because no reader can tell which conditions were checked or when.</p>
+<p><strong>How to verify:</strong> Another person can repeat each check from your report alone and compare their results line by line.</p>
 <h3 id="exercise-4-diagnose-a-test-that-passes-before-an-interaction-later-throws">Exercise 4: Diagnose a test that passes before an interaction later throws.<a class="heading-anchor" href="#exercise-4-diagnose-a-test-that-passes-before-an-interaction-later-throws" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect the settled state and errors after all representative actions.</p>
+<p><strong>Approach:</strong> Run every representative interaction first, then read the console and DOM in the settled state before declaring a result.</p>
 <p><strong>Why:</strong> A check that runs before the interaction misses errors that only happen after it.</p>
+<p><strong>Plausible wrong approach:</strong> Asserting only on initial load fails because an error thrown after the first click never reaches the test.</p>
+<p><strong>How to verify:</strong> After the full interaction sequence, the console shows no uncaught errors and the final state matches expectations.</p>
 <h3 id="exercise-5-repeat-the-review-after-narrow-resizing-and-a-saved-page-reload">Exercise 5: Repeat the review after narrow resizing and a saved-page reload.<a class="heading-anchor" href="#exercise-5-repeat-the-review-after-narrow-resizing-and-a-saved-page-reload" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The interface remains usable and the learner distinguishes persisted source from transient preview state.</p>
+<p><strong>Approach:</strong> Resize to the narrow preset, interact, save the source, reload, and compare which values persist and which reset.</p>
 <p><strong>Why:</strong> Reloading separates what was saved, the source, from transient preview state.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming a counter value survives reload fails because in-memory state is cleared and only saved source remains.</p>
+<p><strong>How to verify:</strong> After reload the counter shows its starting value again, while your edited source changes are still present and the narrow layout still has no sideways scrolling.</p>
 <h3 id="exercise-6-explain-what-evidence-would-justify-a-production-readiness-claim">Exercise 6: Explain what evidence would justify a production readiness claim.<a class="heading-anchor" href="#exercise-6-explain-what-evidence-would-justify-a-production-readiness-claim" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It requires broader integration, security, accessibility, operational and workload-specific performance evidence than one local reference run.</p>
+<p><strong>Approach:</strong> List evidence types a production claim needs: integration tests, security review, accessibility audit, operations plan and load measurements.</p>
 <p><strong>Why:</strong> Production readiness needs integration, security, accessibility, operational and real-workload performance evidence that a single preview cannot supply.</p>
+<p><strong>Plausible wrong approach:</strong> Citing a fast <code>performance.now</code> timing fails because one tiny sort says nothing about real traffic, devices or data sizes.</p>
+<p><strong>How to verify:</strong> Your answer names at least four evidence types, none of which this local reference run provides.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-030_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

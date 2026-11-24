@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-008`, `apache-039`, `apache-073`.
 
+## Key terms
+
+- **Delta Sharing:** An open protocol from the Delta Lake project under the Linux Foundation, not the Apache Software Foundation, through which a recipient discovers and reads shared tables.
+- **Share:** The top-level object a provider grants to a recipient, containing schemas that contain shared tables.
+- **Recipient:** The party granted access to shares, identified by the credentials in its profile file.
+- **Profile file:** A JSON file holding the sharing server endpoint, a bearer token and the profile format version.
+- **Reference server:** The Scala and JVM server implementation intended for development and interoperability testing, not a production deployment.
+
 ## Sharing a table is a protocol interaction
 
 Delta Sharing defines an open protocol through which a recipient discovers and

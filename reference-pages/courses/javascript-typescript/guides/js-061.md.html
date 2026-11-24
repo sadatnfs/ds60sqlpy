@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A network or graph contains nodes and edges. Unlike a tree, it can contain cycles and multiple routes. A force-directed layout assigns positions by iteratively applying simulated forces such as attraction along links and repulsion between nodes. The result is a layout heuristic, not evidence that geometric distance is a measured relationship strength.</p>
 <p>D3 force simulation mutates node objects with position and velocity fields and can replace link endpoint IDs with node references. Copy input records before giving them to a simulation if another component owns immutable source data. Stable node IDs define link identity.</p>
 <p>An automatically running simulation has a timer and a lifecycle. For a small deterministic lesson, stop it and advance a fixed number of ticks with a seeded random source. This makes checks repeatable and prevents a background timer from continuing after the lesson result is recorded.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Graph:</strong> A set of nodes connected by edges that, unlike a tree, can contain cycles and several routes between the same nodes.</li>
+<li><strong>Force simulation:</strong> A <code>d3.forceSimulation</code> that iteratively updates node positions and velocities under simulated forces such as link attraction and charge repulsion.</li>
+<li><strong>Input mutation:</strong> The simulation writes <code>x</code>, <code>y</code>, <code>vx</code> and <code>vy</code> into node objects and replaces link endpoint IDs with node references, so records owned elsewhere must be copied first.</li>
+<li><strong>Layout convergence:</strong> The simulation cooling toward a stable arrangement. Stopping its timer and calling a fixed number of ticks with a seeded random source makes the layout repeatable.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Create node and link copies, configure <code>forceLink(...).id(d=&gt;d.id)</code>, charge and centering forces, and call <code>.stop()</code> before manual ticks. Each tick updates the layout. A finite position check verifies basic numerical health but does not prove the chosen force parameters produce a useful explanation.</p>
 <p>Render links from their resolved source and target nodes and render labeled circles for nodes. A larger graph needs aggregation, filtering, interaction and performance planning. Do not call a dense hairball an informative visualization merely because every edge is drawn.</p>

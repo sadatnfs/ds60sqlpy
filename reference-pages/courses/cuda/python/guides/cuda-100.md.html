@@ -222,6 +222,14 @@ O=PV.</code></pre></details></figure>
 <p>A straightforward implementation writes the entire score matrix, reads it for normalization, writes probabilities, then reads those for the value product. When sequence length doubles, a square score matrix has four times as many elements. Memory-efficient attention reorganizes tiling and normalization to avoid some full intermediates. This is an algorithmic memory-traffic improvement, not a claim that all attention has linear arithmetic complexity.</p>
 <p>For a row, subtracting the maximum leaves softmax unchanged because the same exponential factor divides out. A streaming/tiled implementation must combine partial normalization state correctly when a later tile changes that maximum. That state consists of a running maximum, a normalized exponential sum and a correspondingly rescaled weighted-value accumulator. Losing one rescaling factor can produce plausible-looking but wrong outputs.</p>
 <p>Validation should include unequal query/key lengths, a causal case, padding, non-unit upstream gradients, and the explicitly defined fully masked behavior. The small PyTorch variant compares a supported attention API to the explicit reference; the TensorFlow variant builds the same reference arithmetic. Neither prints a fictitious fused-kernel identity. A real fast-backend comparison requires the prepared implementation, device trace and accepted dtype/head-size matrix.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Score matrix:</strong> The query-key dot products for every pair of positions, with sequence length squared entries per head.</li>
+<li><strong>Causal mask:</strong> A mask that blocks each position from attending to later positions.</li>
+<li><strong>Quadratic memory:</strong> Memory growth proportional to the square of sequence length when the score matrix is materialized.</li>
+<li><strong>Fused attention kernel:</strong> An implementation that computes softmax attention in tiles without storing the full score matrix.</li>
+<li><strong>Fully masked row:</strong> A query row with every score masked, whose softmax is undefined and can produce NaN unless handled.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>For scores [1000,1001], direct exponentiation can overflow. Subtracting 1001 yields [-1,0] and well-behaved probabilities summing to one.</p>
@@ -241,6 +249,32 @@ causal <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <span class="syntax-keyword">assert</span> causal <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU attention oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> weights<span class="syntax-punctuation">,</span> causal<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Stable probabilities sum to 1; lower-triangular causal mask.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>scores</code></td>
+<td><code>[1000.0, 1001.0]</code></td>
+</tr>
+<tr>
+<td><code>shift</code></td>
+<td><code>1001.0</code></td>
+</tr>
+<tr>
+<td><code>exp</code></td>
+<td><code>[0.36787944117144233, 1.0]</code></td>
+</tr>
+<tr>
+<td><code>weights</code></td>
+<td><code>[0.2689414213699951, 0.7310585786300049]</code></td>
+</tr>
+<tr>
+<td><code>causal</code></td>
+<td><code>[[1, 0, 0], [1, 1, 0], [1, 1, 1]]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -253,17 +287,23 @@ causal <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-stable-softmax">Exercise 1: Compute stable softmax<a class="heading-anchor" href="#exercise-1-compute-stable-softmax" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute stable softmax</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Exponentiating directly, <code>math.exp(1000)</code>, overflows to infinity in float64 and the division produces NaN. In float16 the overflow happens above about 11.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-draw-a-causal-mask">Exercise 2: Draw a causal mask<a class="heading-anchor" href="#exercise-2-draw-a-causal-mask" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>draw a causal mask</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using <code>j &lt; i</code> excludes the diagonal, leaving row 0 with no allowed positions and producing NaN in softmax.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-count-score-matrix-bytes">Exercise 3: Count score-matrix bytes<a class="heading-anchor" href="#exercise-3-count-score-matrix-bytes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>count score-matrix bytes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Estimating attention memory as linear in sequence length misses the quadratic term, which dominates for long sequences.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-define-fully-masked-behavior">Exercise 4: Define fully masked behavior<a class="heading-anchor" href="#exercise-4-define-fully-masked-behavior" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>define fully masked behavior</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Leaving it undefined lets NaN appear only with certain padding patterns.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-compare-fused-and-reference-gradients">Exercise 5: Compare fused and reference gradients<a class="heading-anchor" href="#exercise-5-compare-fused-and-reference-gradients" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>compare fused and reference gradients</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing only forward outputs leaves backward bugs undetected, and comparing a float16 fused result to a float32 reference with float32 tolerance reports false failures.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-separate-backend-selection-from-api-name">Exercise 6: Separate backend selection from API name<a class="heading-anchor" href="#exercise-6-separate-backend-selection-from-api-name" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>separate backend selection from API name</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming the flash backend ran because the function was called leads to wrong memory estimates when it silently fell back to math.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

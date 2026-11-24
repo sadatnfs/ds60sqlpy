@@ -11,7 +11,7 @@
       "runtime": "javascript-browser",
       "input": "inline synthetic",
       "no_network": true,
-      "expected": "40, 100 and 160 units."
+      "expected": "widths of 40 units, 100 units and 160 units."
     },
     {
       "id": "js-044",

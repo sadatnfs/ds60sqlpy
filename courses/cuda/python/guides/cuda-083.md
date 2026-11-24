@@ -14,6 +14,13 @@ Keep beginners on a small reviewed host wrapper before exposing every binding. T
 
 
 
+### Key terms
+
+- **Low-level binding:** A thin Python interface that exposes driver or runtime API calls nearly one to one.
+- **Handle:** An opaque value identifying a context, module, stream or allocation that must be created and destroyed explicitly.
+- **Status code:** The result value every low-level call returns, which must be checked because errors do not raise exceptions automatically.
+- **Application binary interface (ABI):** The binary contract, including symbol names, calling conventions and data layouts, that compiled components must agree on.
+
 ## Worked examples
 
 ### Worked example 1
@@ -51,27 +58,39 @@ Treat printed timing values as synthetic whenever the program says model, fixtur
 
 ### Exercise 1: Specify the kernel signature
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **specify the kernel signature** in the examples above.
+**Trap to avoid:** Passing a plain Python `int` for `n` and letting the wrapper guess the width may package it as 64 bits. On some interfaces that shifts the following arguments or truncates the value.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Count allocation bytes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **count allocation bytes** in the examples above.
+**Trap to avoid:** Sizing a buffer by element count alone, as if every element were one byte, under-allocates by the itemsize factor and lets the kernel write past the end.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Classify compile versus launch errors
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **classify compile versus launch errors** in the examples above.
+**Trap to avoid:** Reporting compile success as working code treats the first stage as the whole contract. A module built for one architecture may still fail to load on another.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Design cleanup order
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **design cleanup order** in the examples above.
+**Trap to avoid:** Releasing resources in reverse creation order without waiting looks tidy, but order of creation says nothing about device completion.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain ABI mismatch
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **explain ABI mismatch** in the examples above.
+**Trap to avoid:** Expecting a type error from the device is the mistake: device code has no runtime type information about its arguments.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Define release-pinned evidence
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **define release-pinned evidence** in the examples above.
+**Trap to avoid:** Recording only the Python package version omits the toolkit, driver and architecture, which are the usual causes of cross-machine failures.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

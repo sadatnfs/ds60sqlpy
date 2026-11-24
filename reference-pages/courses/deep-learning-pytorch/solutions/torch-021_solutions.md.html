@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="torch-021-explanatory-solutions">torch-021: explanatory solutions<a class="heading-anchor" href="#torch-021-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers only after attempting Embeddings, padded sequences and recurrent models yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Lookup and mark padding, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Padding index, Packed sequence, Final valid state. After a pass, choose a new input for exercise 6, Reject zero-length recurrent input, without looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A padded sequence contains real positions and artificial storage positions. Embedding lookup takes token IDs to feature vectors, but padding does not become an observation merely because it has a vector. PyTorch Embedding can use <code>padding_idx</code> to prevent gradient updates for that row, but a recurrent network still needs length or mask information to avoid processing padding as real time steps.</p>
 <p>pack_padded_sequence lets an RNN or GRU process the valid prefixes and return a final state after the last real position. Without packing, a GRU can continue to update on padding because its biases and recurrent state are still active, even when padding embeddings are zero. Loss averages must also divide by valid target count, not padded width. The lesson uses a literal embedding table and fixed GRU weights so the distinction is observable.</p>
@@ -280,7 +280,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <p><strong>Expected:</strong> RuntimeError for invalid length.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm the invalid call raises <code>RuntimeError</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Repeat exercise 4, Expose an unmasked recurrent tail, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Average only valid token losses, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
   </main>
 </body>
 </html>

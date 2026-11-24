@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a tiled transpose with correct output and explain the measured effect of the chosen shared-memory layout.
+
 Work through *Shared-memory banks and a transpose case study* with the concrete cases below. Finish with this evidence:
 correct output and a measured explanation of the selected layout. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Shared memory is organized into banks. Different lanes accessing different words in the same bank can serialize under the relevant hardware rules, while some same-address reads can broadcast. Global coalescing and shared-bank behavior are different layers. A transpose benefits from loading rows coalesced into a tile and storing columns through a coordinated layout. Padding can alter the bank mapping of columns, but it also changes storage usage and is not a universal speed rule. Use a simplified bank model to reason, then check the actual element width and architecture before treating the model as a performance prediction.
+
+### Key terms
+
+- **Shared memory bank:** One of 32 four-byte-wide divisions of shared memory that can each serve one address per cycle.
+- **Bank conflict:** Several lanes of a warp accessing different addresses in the same bank, which serializes the access.
+- **Broadcast:** Many lanes reading the same shared-memory word, which is served at once without a conflict.
+- **Padding column:** One extra element per tile row, as in `tile[32][33]`, that shifts columns into different banks.
 
 ## How to run and study this lesson
 

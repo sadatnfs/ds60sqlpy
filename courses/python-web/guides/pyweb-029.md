@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-028`.
 
 Dependencies let a FastAPI route request a resource or decision without manually constructing it in every handler. This chapter follows acquisition, use and cleanup through successful and failing requests. It also demonstrates a test override and the importance of removing that override afterward.
 
+## Key terms
+
+- **Dependency:** A callable that FastAPI resolves for a request and injects into the route, after first resolving that callable's own dependencies.
+- **Depends:** The FastAPI marker, usually written inside `Annotated`, declaring that a parameter's value comes from a dependency callable.
+- **Yield dependency:** A generator dependency in which code before `yield` acquires a resource and code after it performs cleanup, even when the route raises.
+- **Dependency override:** An entry in `app.dependency_overrides` that replaces one dependency for a test; it must be removed afterward so later tests use the real dependency.
+- **Request scope:** The lifetime of one request, appropriate for a database session, in contrast to the application lifespan suited to a shared client pool.
+
 ## Mechanism: the dependency graph owns lifetimes
 
 A dependency is a callable whose inputs can themselves be dependencies. FastAPI resolves that graph for a request. A generator dependency with `yield` separates acquisition before the yield from cleanup after it. This is suitable for a request-scoped connection or unit of work whose lifetime must end even when the route raises an exception.
@@ -29,6 +37,60 @@ A failing request still enters the cleanup portion of the generator. The program
 An exception does not automatically decide whether a transaction should commit. A dependency may manage rollback on failure, but the application must define that policy. Catching an exception inside a handler and returning an error response can look like normal completion to surrounding cleanup code. Transaction ownership must therefore be designed alongside exception handling.
 
 Overrides are especially useful for clocks, outbound clients and authenticated identity in focused tests. They are less useful when they replace the exact behavior the test claims to validate. An authentication test that overrides the authentication dependency proves route behavior under an assumed identity, not password or token verification.
+
+## Worked example: how a yield dependency sees a handler failure
+
+```python
+from contextlib import contextmanager
+
+events = []
+
+
+@contextmanager
+def repository():
+    events.append("open")
+    try:
+        yield {"value": 7}
+    except LookupError:
+        events.append("rollback")
+        raise
+    finally:
+        events.append("close")
+
+
+@contextmanager
+def fake_repository():
+    yield {"value": 42}
+
+
+def handle(endpoint, provider=repository):
+    try:
+        with provider() as repo:
+            return 200, endpoint(repo)
+    except LookupError:
+        return 404, None
+
+
+def read(repo):
+    return repo["value"]
+
+
+def missing(repo):
+    raise LookupError("no such row")
+
+
+print(handle(read), handle(missing), handle(read, fake_repository))
+print(events)
+```
+
+Expected output:
+
+```text
+(200, 7) (404, None) (200, 42)
+['open', 'close', 'open', 'rollback', 'close']
+```
+
+This is a plain Python model of what FastAPI does with a `yield` dependency: run the code before `yield`, hand the value to the endpoint, then resume the generator when the request ends. When the endpoint raises, the exception is thrown back in at the `yield`, so the dependency can roll back before `finally` closes the resource. The third call swaps in a fake provider, the job `app.dependency_overrides` does in the lesson, and the event list proves the real repository never opened. Notice that `rollback` appears once: a successful read reached `close` without passing through the `except` branch.
 
 ## Failure diagnosis and discussion
 

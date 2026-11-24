@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Tracing records a representation of operations; compilation transforms that representation; replay reuses prepared work. These are related but different. Python side effects, data-dependent control flow and changing shapes may trigger graph breaks or new specializations. A compiled path can spend substantial time before steady-state execution, which matters for short-lived jobs.</p>
 <p>PyTorch torch.compile has guards and graph-break behavior; TensorFlow tf.function uses tracing and signatures, with XLA an additional choice. Explain them through each framework&#x27;s idioms. Compare eager and compiled outputs and gradients over the accepted shape set. CUDA Graph replay has further restrictions around allocations and stable execution, so a generic graph API is not proof of CUDA Graph use.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Tracing:</strong> Recording the operations executed on sample inputs to build a graph for compilation.</li>
+<li><strong>Graph break:</strong> A point where the compiler cannot capture code, so execution falls back to eager Python.</li>
+<li><strong>Shape specialization:</strong> Compiling for specific input shapes, so a new shape can trigger recompilation.</li>
+<li><strong>Break-even call count:</strong> The number of calls after which compile time is repaid by faster steady-state execution.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A specialization cache sees shapes (4,8),(4,8),(8,8) and compiles twice in a simplified model. Repeating the first shape reuses its entry.</p>
@@ -213,6 +220,24 @@ compile_ms<span class="syntax-punctuation">,</span> saving_ms <span class="synta
 <span class="syntax-keyword">assert</span> compile_ms <span class="syntax-operator">/</span> saving_ms <span class="syntax-operator">==</span> <span class="syntax-number">500</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU compilation model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>shapes<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">specializations; break-even</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Two modeled specializations;500-call break-even.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>shapes</code></td>
+<td><code>[(4, 8), (4, 8), (8, 8)]</code></td>
+</tr>
+<tr>
+<td><code>compile_ms</code></td>
+<td><code>500</code></td>
+</tr>
+<tr>
+<td><code>saving_ms</code></td>
+<td><code>1</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -222,17 +247,23 @@ compile_ms<span class="syntax-punctuation">,</span> saving_ms <span class="synta
 <p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-specializations">Exercise 1: Count specializations<a class="heading-anchor" href="#exercise-1-count-specializations" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>count specializations</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting one compilation per call, three here, ignores the cache and overestimates startup cost. Counting one compilation total assumes the compiler generalizes across shapes, which static specialization does not.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-calculate-break-even-calls">Exercise 2: Calculate break-even calls<a class="heading-anchor" href="#exercise-2-calculate-break-even-calls" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>calculate break-even calls</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming compilation pays off immediately because each call is faster ignores the startup cost. A short-lived job of 100 calls loses 400 ms overall.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-describe-a-graph-break">Exercise 3: Describe a graph break<a class="heading-anchor" href="#exercise-3-describe-a-graph-break" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>describe a graph break</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming a program that ran without errors under the compiler was compiled as one graph overlooks silent breaks, which are reported only when logging is enabled.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-specify-an-accepted-shape-set">Exercise 4: Specify an accepted shape set<a class="heading-anchor" href="#exercise-4-specify-an-accepted-shape-set" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>specify an accepted shape set</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Accepting arbitrary shapes in production lets each new batch size trigger a recompilation, causing latency spikes.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-compare-gradients">Exercise 5: Compare gradients<a class="heading-anchor" href="#exercise-5-compare-gradients" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>compare gradients</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Checking only that forward outputs match and assuming gradients follow can miss a backward bug that shows up only as slower training.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-separate-compilation-and-replay">Exercise 6: Separate compilation and replay<a class="heading-anchor" href="#exercise-6-separate-compilation-and-replay" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>separate compilation and replay</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Expecting graph replay to speed up compute-bound kernels confuses launch overhead with kernel time.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

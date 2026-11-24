@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-020`, `apache-014`.
 
+## Key terms
+
+- **Ballista:** The Apache DataFusion subproject that executes DataFusion query plans across a scheduler and executor processes.
+- **Scheduler:** The Ballista process that receives a client's query, divides its plan into stages and tasks, and assigns the tasks to executors.
+- **Executor:** A Ballista process that runs assigned tasks, scanning input and producing intermediate shuffle output or final batches.
+- **Plan serialization:** Encoding a query plan so the client, scheduler and executors can exchange it. A custom expression or provider without a registered codec cannot be shipped.
+- **Version contract:** The exact supported pairing of the released Ballista 54.1.0 package with DataFusion 54, kept separate from the classroom DataFusion 55 profile.
+
 ## A distributed engine adds placement and coordination
 
 DataFusion plans and executes analytical operators inside an embedding application.

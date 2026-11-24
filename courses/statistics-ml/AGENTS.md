@@ -14,6 +14,10 @@ Use `--check` to detect drift without writing. A missing or ambiguous match
 requires reviewing the chapter and example together; never overwrite unrelated
 or intentionally invalid teaching snippets. The full formatter runs this step.
 
+Each manifest chapter needs an `outcome`: one specific sentence that starts
+with an observable action verb (never Understand, Know or Learn). The classroom
+shows it as the chapter outcome and refuses a missing or empty value.
+
 Chapters, examples, manifest and coverage are maintained sources. Keep the
 shared renderer, source-prose normalizer and statistics fence synchronizer as
 separate owners. Use [the book's guide](README.md) and focused tests before

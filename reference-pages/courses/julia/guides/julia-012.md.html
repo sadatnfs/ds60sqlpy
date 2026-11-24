@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Express useful type relationships without confusing subtype relations, storage representation or a method signature.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-012</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (preserve the element representation) and worked case B (distinguish invariance from a method family) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-012: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Parametric type:</strong> A type with parameters, such as <code>Point{T}</code>, where each concrete instance like <code>Point{Float64}</code> is a distinct type.</li>
+<li><strong>where clause:</strong> Syntax such as <code>where {T&lt;:Real}</code> that introduces a type variable and bounds the types a method accepts.</li>
+<li><strong>Parametric invariance:</strong> A <code>Vector{Float64}</code> is not a subtype of <code>Vector{Real}</code>, even though <code>Float64</code> is a subtype of <code>Real</code>.</li>
+<li><strong>AbstractVector:</strong> The supertype of vectors, ranges and views, so methods annotated with it accept more containers than <code>Vector</code> does.</li>
+<li><strong>Type stability:</strong> A function is type stable when its argument types determine one concrete return type, which lets the compiler specialize it.</li>
+</ul>
 <h3 id="a-type-parameter-records-a-relationship">A type parameter records a relationship<a class="heading-anchor" href="#a-type-parameter-records-a-relationship" aria-label="Link to this section">#</a></h3>
 <p>A parametric type can represent the same structure with different element types. A record containing <code>Vector{T}</code> retains a relationship between its parameter and its stored elements. A parametric method can use that relationship to construct compatible accumulators or outputs.</p>
 <p>A type bound such as <code>T&lt;:Real</code> restricts the domain to real-number types. It should reflect the intended mathematical operation, not be added as decoration. A generic numerical algorithm often needs fewer restrictions than a beginner expects. Excessively narrow signatures can prevent rational, arbitrary-precision or automatic-differentiation values from using otherwise compatible arithmetic.</p>

@@ -59,6 +59,8 @@ def apply(
             else:
                 print("Direct source layout remains owned by format-repo:", relative)
         path.write_text(after, encoding="utf-8")
+        load_layer("specialize").run(identity)
+        after = path.read_text(encoding="utf-8")
         result[identity] = {
             "before_sha256": hashlib.sha256(before.encode()).hexdigest(),
             "after_sha256": hashlib.sha256(after.encode()).hexdigest(),

@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-trace-selector-equality">Exercise 1: Trace selector equality<a class="heading-anchor" href="#exercise-1-trace-selector-equality" aria-label="Link to this section">#</a></h3>
 <p>A selector is a set query over labels. It does not establish ownership by itself and it does not create missing Pods. The owned-controller UID check remains necessary after selection.</p>
 <p><strong>Expected:</strong> Matching selector finds the intended set; wrong selector has no intended backends.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare each key and value in the Service spec.selector with the labels in the Deployment Pod template, treating the selector as a set query.</li>
+<li><strong>Why it is correct:</strong> A Service selects every Pod in its namespace whose labels contain all selector pairs, so app=hello matches the template label and app=wrong matches nothing in this manifest.</li>
+<li><strong>Plausible wrong approach:</strong> Checking only that a Service named hello exists misses the selector entirely; the object is accepted with app=wrong and simply has zero endpoints.</li>
+<li><strong>How to verify:</strong> Key and value agree exactly for app=hello; for app=wrong the value differs, so the intended set is empty.</li>
+</ul>
 <h3 id="exercise-2-resolve-the-port-chain">Exercise 2: Resolve the port chain<a class="heading-anchor" href="#exercise-2-resolve-the-port-chain" aria-label="Link to this section">#</a></h3>
 <p>The chain connects client-facing and backend ports. A Service object can exist even if this mapping is wrong, so object creation alone is insufficient routing evidence.</p>
 <p><strong>Expected:</strong> Client 8080 -&gt; targetPort http -&gt; container 8080.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Follow the chain from the Service port to targetPort, then resolve the name <code>http</code> against the container ports list.</li>
+<li><strong>Why it is correct:</strong> A string targetPort is looked up by name on each selected container, and this container declares <code>http</code> once as containerPort 8080.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming targetPort must equal port numerically would break as soon as the Service port changes, and a misspelled port name still creates a valid Service that routes nowhere.</li>
+<li><strong>How to verify:</strong> The chain reads 8080 to <code>http</code> to 8080, and <code>http</code> appears exactly once in the container ports list.</li>
+</ul>
 <h3 id="exercise-3-count-unique-backends">Exercise 3: Count unique backends<a class="heading-anchor" href="#exercise-3-count-unique-backends" aria-label="Link to this section">#</a></h3>
 <p>Multiple slices or IP families can repeat a Pod identity. Set comparison avoids inflated backend counts and also detects an unrelated endpoint with the wrong UID.</p>
 <p><strong>Expected:</strong> Exactly two unique Pod UIDs matching the owned Ready set.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Collect every targetRef.uid from the four EndpointSlice entries and reduce them to a set before comparing with the owned Ready Pods.</li>
+<li><strong>Why it is correct:</strong> The same Pod can appear in more than one slice or once per IP family, so only distinct UIDs measure distinct backends.</li>
+<li><strong>Plausible wrong approach:</strong> Counting endpoint rows reports four backends and would also hide a foreign UID among them.</li>
+<li><strong>How to verify:</strong> The set holds exactly two UIDs, and it equals the owned Ready Pod UIDs recorded independently.</li>
+</ul>
 <h3 id="exercise-4-run-a-selector-negative-case">Exercise 4: Run a selector negative case<a class="heading-anchor" href="#exercise-4-run-a-selector-negative-case" aria-label="Link to this section">#</a></h3>
 <p>The negative case tests the connection between selection and routing. A later successful Run is a fresh operation with its own UIDs, not evidence that the earlier Service persisted and was patched.</p>
 <p><strong>Expected:</strong> The unchanged starter has no matching ready backends and fails within its bound, with cleanup; the restored source can pass in a separate Run.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Run the starter with selector app=wrong unchanged, keep its failure record, then restore app=hello and submit a separate Run.</li>
+<li><strong>Why it is correct:</strong> No Pod carries app=wrong, so the Service never gains a ready endpoint and the bounded backend check fails before the client step.</li>
+<li><strong>Plausible wrong approach:</strong> Editing the selector and rerunning without first recording the failure loses the negative evidence, and treating the second Run as a patch of the first ignores that each Run creates and deletes its own Service.</li>
+<li><strong>How to verify:</strong> The record shows the exact app=wrong selector, the failed check name and cleanup, then a separate passing Run with new UIDs.</li>
+</ul>
 <h3 id="exercise-5-verify-an-independent-client">Exercise 5: Verify an independent client<a class="heading-anchor" href="#exercise-5-verify-an-independent-client" aria-label="Link to this section">#</a></h3>
 <p>The independent request establishes that the Service path reaches the expected fixture response. Job completion alone is tied to owned Pod identity and the fixed checker behavior; the result remains bounded to the observed request.</p>
 <p><strong>Expected:</strong> Job/Pod ownership and exit 0 accompany the expected ds60-fixture-v1 payload contract.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check that the client Job&#x27;s UID belongs to this Run, then compare its output with the <code>/version</code> payload contract.</li>
+<li><strong>Why it is correct:</strong> The client Pod resolves the Service name and receives the fixture response only if selector, port chain and readiness all line up.</li>
+<li><strong>Plausible wrong approach:</strong> Accepting Job completion alone would pass a client that called <code>/ready</code>, which proves probe health, not the version payload.</li>
+<li><strong>How to verify:</strong> Job and Pod ownership match this Run, exit status is 0 and the output equals ds60-fixture-v1.</li>
+</ul>
 <h3 id="exercise-6-design-a-second-service-transfer">Exercise 6: Design a second-Service transfer<a class="heading-anchor" href="#exercise-6-design-a-second-service-transfer" aria-label="Link to this section">#</a></h3>
 <p>Generalizing the mechanism requires a deliberate new resource scope, not changing the browser validator to accept arbitrary names. The same evidence chain applies, but actual execution remains unavailable until the host capability is provided.</p>
 <p><strong>Expected:</strong> A separate capability, unique owned resource receipt, selector/port/backend/client checks and UID-aware cleanup are specified.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Specify a new Service name with its own receipt and repeat the selector, port, backend and client checks against that object only.</li>
+<li><strong>Why it is correct:</strong> A distinct owned receipt and UID-aware cleanup keep the experiment from mutating the shared <code>hello</code> Service or another learner&#x27;s objects.</li>
+<li><strong>Plausible wrong approach:</strong> Editing the hello Service selector in place to test the idea would change the baseline other checks depend on and cannot be undone by UID.</li>
+<li><strong>How to verify:</strong> The design names its own Service, its own receipt and a UID-scoped delete, and never edits hello.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A Service with no endpoints is different from a Service with ready endpoints but a wrong application response. A wrong selector is not repaired by changing the container image without evidence. A named-port mismatch is not a DNS failure. Record the discriminating field or client result before choosing a repair.</p>
 <p>The browser source uses only its fixed port contract. Experiments with a second Service or arbitrary ports require a separate scoped host capability. Do not claim that the one-shot operation executed those transfer cases, or that finite client success proves long-term traffic availability.</p></article>

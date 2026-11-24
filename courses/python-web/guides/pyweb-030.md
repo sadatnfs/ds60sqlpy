@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-029`.
 
 A web application often needs a pool, model, cache client or other resource before it can serve requests. FastAPI's lifespan interface gives that resource an explicit startup and shutdown boundary. This chapter shows why a TestClient context manager matters and why a request failure should not accidentally destroy a shared application resource.
 
+## Key terms
+
+- **Lifespan:** An async context manager given to FastAPI that performs setup before the application serves requests and cleanup at shutdown.
+- **app.state:** An attribute namespace on the application where lifespan setup stores prepared resources for routes to use.
+- **TestClient context:** Entering `with TestClient(app)` so that lifespan startup and shutdown actually run around the test's requests.
+- **Process-local state:** Data owned by one server process; four workers create four lifespans and therefore four separate copies.
+- **Readiness:** A service's ability to perform work that needs its dependencies, which is a stronger claim than the process merely being alive.
+
 ## Mechanism: process resources surround requests
 
 An asynchronous context manager performs setup, yields control while the application serves, then performs cleanup. The application can store the prepared resource in `app.state`. Route code accesses that resource after startup rather than creating an unrelated copy on every call.
@@ -29,6 +37,45 @@ Inside a running lifespan, one request fails while a later valid request still u
 That distinction informs database design. A shared connection pool may survive request failures, while a request-scoped transaction must roll back and release its borrowed connection. Closing the entire pool inside a request error handler can cause unrelated clients to fail. Conversely, keeping a failed transaction alive for the next request can expose inconsistent state.
 
 The finite example uses a bounded controlled object, so it proves the actual FastAPI/Starlette lifecycle ordering. The owned workshop adds a real server process and checks shutdown, resume and persistent database behavior separately. A client context alone does not establish signal handling or container restart behavior.
+
+## Worked example: lifespan state delivered on every request
+
+```python
+from contextlib import asynccontextmanager
+
+from starlette.applications import Starlette
+from starlette.responses import JSONResponse
+from starlette.routing import Route
+from starlette.testclient import TestClient
+
+log = []
+
+
+@asynccontextmanager
+async def lifespan(app):
+    log.append("startup")
+    yield {"pool": {"size": 2}}
+    log.append("shutdown")
+
+
+async def pool(request):
+    return JSONResponse(request.state.pool)
+
+
+app = Starlette(routes=[Route("/pool", pool)], lifespan=lifespan)
+with TestClient(app) as client:
+    print(client.get("/pool").json(), log)
+print(log)
+```
+
+Expected output:
+
+```text
+{'size': 2} ['startup']
+['startup', 'shutdown']
+```
+
+FastAPI is built on Starlette, and this snippet uses Starlette directly to show a second way to share a lifespan resource. The lesson's program stores its resource on `app.state`; here the lifespan yields a dictionary instead, and Starlette copies it onto `request.state` for every request. Either way the resource is created once at startup, not per request. The two `log` prints show the boundary: inside the `with TestClient(app)` block only startup has run, and shutdown fires when the block exits. Creating the client without `with` would skip the lifespan entirely, which is the `AttributeError` the lesson deliberately provokes.
 
 ## Failure diagnosis and discussion
 

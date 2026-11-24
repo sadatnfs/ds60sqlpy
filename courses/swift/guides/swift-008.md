@@ -109,7 +109,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Name the dimensions) before changing anything, and confirm its observation: Labels show which dimension each argument supplies.
 2. Compare Example B (Make mutation explicit) with Example A and name the first line whose behavior differs. Its observation is: The caller explicitly grants mutation and observes 5.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Labels are part of API usability.
+3. Before opening the explanation, check your task 3 attempt (Write a pure function normalizing a quantity without mutating its caller) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

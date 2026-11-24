@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict a ten-percent fee on 50.</p>
 <p>The result is 45.</p>
+<p><strong>Approach:</strong> Call <code>after_fee(50)</code> and let the default rate of 0.1 apply.</p>
+<p><strong>Why it holds here:</strong> Omitting rate uses 0.1, so the function keeps 90 percent of the amount: 50 times 0.9 is 45.</p>
+<p><strong>Tempting mistake:</strong> Computing <code>50 * 0.1</code>, which is 5. That is the fee itself, not the amount after the fee, and it is off by a factor of nine.</p>
+<p><strong>Verify:</strong> <code>after_fee(50)</code> returns 45, matching the reference check.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Override the rate with zero.</p>
 <p>The amount is unchanged.</p>
+<p><strong>Approach:</strong> Pass the rate by name: <code>after_fee(50, rate = 0)</code>.</p>
+<p><strong>Why it holds here:</strong> The explicit value replaces the default, and 0 passes the range check because the interface allows 0 through 1. Nothing is deducted, so 50 comes back.</p>
+<p><strong>Tempting mistake:</strong> Calling <code>after_fee(0, 50)</code> with the values in the wrong positions. Amount becomes 0 and rate becomes 50, which the range check rejects, so the caller gets an error rather than the unchanged amount.</p>
+<p><strong>Verify:</strong> <code>after_fee(50, rate = 0)</code> returns 50.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a function returning count and total.</p>
 <p>The caller can inspect count and total separately.</p>
+<p><strong>Approach:</strong> Return <code>list(count = length(x), total = sum(x))</code> and let the caller read the fields.</p>
+<p><strong>Why it holds here:</strong> For c(2, 4) the count is 2 and the total is 6. length returns an integer, so the expected object is <code>list(count = 2L, total = 6)</code>.</p>
+<p><strong>Tempting mistake:</strong> Printing with <code>cat()</code> inside the function. The caller sees text on the console, but the function returns NULL, so <code>result$count</code> is NULL and cannot be tested.</p>
+<p><strong>Verify:</strong> <code>identical(summary(c(2, 4)), list(count = 2L, total = 6))</code> returns TRUE.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a two-element rate for a scalar-rate interface.</p>
 <p>Reject it before computing.</p>
+<p><strong>Approach:</strong> Include <code>length(rate) != 1L</code> in the validation so a vector rate stops before any arithmetic runs.</p>
+<p><strong>Why it holds here:</strong> With amount 50 and rate c(0.1, 0.2), arithmetic would recycle the amount and return 45 and 40, two answers to a one-policy question.</p>
+<p><strong>Tempting mistake:</strong> Relying on R to warn. Lengths 1 and 2 divide evenly, so recycling produces no warning, and Example 3 shows that two amounts with two rates are silent too.</p>
+<p><strong>Verify:</strong> In the reference <code>bad</code> returns TRUE, which only happens when the error handler ran.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Test an empty amount vector.</p>
 <p>The vector fee function returns numeric(0); a summary can return count 0, total 0.</p>
+<p><strong>Approach:</strong> Pass <code>numeric(0)</code> and let vectorized arithmetic return an empty result.</p>
+<p><strong>Why it holds here:</strong> <code>numeric(0)</code> is numeric, so validation passes, and multiplying it by 0.9 gives numeric(0). The summary function gives count 0 and total 0 because <code>sum(numeric(0))</code> is 0.</p>
+<p><strong>Tempting mistake:</strong> Adding a check that the amount has at least one element. An empty batch is a normal input here, and rejecting it turns a quiet day into a failure.</p>
+<p><strong>Verify:</strong> <code>identical(after_fee(numeric(0)), numeric(0))</code> returns TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain a default-rate change during maintenance.</p>
 <p>Treat the change as an interface change and test existing default callers.</p>
+<p><strong>Approach:</strong> Treat a new default as an interface change: find callers that omit rate and keep a test that pins <code>after_fee(50) == 45</code>.</p>
+<p><strong>Why it holds here:</strong> The reference shows <code>after_fee(50, rate = 0.2)</code> and <code>after_fee(50)</code> differ, 40 against 45. Every omitted-rate call would move if the default became 0.2.</p>
+<p><strong>Tempting mistake:</strong> Rerunning only tests that pass rate explicitly. They never exercise the default, so all of them stay green while every default caller changes.</p>
+<p><strong>Verify:</strong> The reference check <code>after_fee(50, rate = 0.2) != after_fee(50)</code> returns TRUE today; with a default of 0.2 it would return FALSE and stop.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

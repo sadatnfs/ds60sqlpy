@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A timing number becomes useful only when the measured work is defined. Query construction, schema discovery, file I/O, computation, conversion to Python objects and serialization can contribute different costs. A benchmark that times only construction of a lazy object has not measured execution. A warm repeated query over an in-memory frame is also different from a cold read of a newly opened dataset.</p>
 <p>The first case collects the query on every repetition and checks its answer. It reports a median across a small number of observations rather than declaring the smallest observed value to be a stable property. The fixture is deliberately modest so it can run inside the classroom budget. No assertion says that one engine must beat another, because tiny timings are noisy and hardware dependent.</p>
 <p>Performance comparisons must preserve the output contract. An unordered result can be compared as a set or multiset when order is irrelevant; an ordered consumer needs the sorting cost included. The second case distinguishes bag equality from sequence equality. This prevents a supposed optimization from silently removing an ordering requirement.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Measurement interval:</strong> The timed region, here <code>perf_counter</code> readings around only the <code>collect</code> call, that a reported duration covers.</li>
+<li><strong>Cache regime:</strong> Whether a timing ran warm, with data and code already cached, or cold; timings from different regimes are not comparable.</li>
+<li><strong>Median:</strong> The middle of repeated timings, which resists occasional slow outliers better than the mean.</li>
+<li><strong>Bag versus sequence equality:</strong> Bag equality compares rows as a multiset, ignoring order; sequence equality also requires the same order.</li>
+<li><strong>estimated_size:</strong> A DataFrame method that estimates the frame&#x27;s buffer size in bytes, not the process peak or every temporary allocation.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>perf_counter measures elapsed time around the actual collect call. Record the engine and the number of repetitions. estimated_size describes the frame&#x27;s buffer estimate, not the whole process peak or every temporary allocation. Sort only when that is part of the intended comparison, and account for its cost explicitly.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

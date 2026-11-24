@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: beginner. Direct prerequisites: `apache-002`.
 
+## Key terms
+
+- **Parquet file:** A columnar file format that stores data in row groups and column chunks, with a footer holding the schema and statistics, so a reader can project only the columns it needs.
+- **Iceberg snapshot:** An immutable record of an Iceberg table's state after one commit, identifying through manifests exactly which data files belong to that version.
+- **Manifest:** An Iceberg metadata file listing data files with their partition values and column statistics. A snapshot reaches its manifests through a manifest list.
+- **Catalog:** The component that maps a table name to the table's current metadata location and enforces its commit concurrency contract. This chapter uses PyIceberg's local SQL catalog backed by SQLite.
+
 ## A file is not automatically a committed table
 
 A Parquet file stores rows in a documented physical format. A directory can hold
@@ -81,6 +88,30 @@ The exact guarantees depend on the chosen format, catalog and engine versions.
 This worked example verifies real local snapshot selection and membership, while
 leaving shared-service availability and cross-engine compatibility to their own
 explicit workshops.
+
+## Worked examples
+
+### Read a retained snapshot by identifier
+
+```python
+initial = table.current_snapshot()
+table.append(pa.Table.from_pylist([{"id": 3, "amount": 7}], schema=schema))
+old = table.scan(snapshot_id=initial.snapshot_id).to_arrow()
+now = table.scan().to_arrow()
+print(initial.snapshot_id, len(old), len(now))
+```
+
+This fragment continues the lesson program after the first append, so table and schema are the PyIceberg objects it created. The printed line has the shape of a large integer snapshot identifier followed by 2 and 3: the retained snapshot still shows two rows while the current one shows three. The identifier value differs on every run, so compare row counts and contents rather than the number itself. If the old scan returns three rows, the identifier was captured after the second commit.
+
+### List the snapshot log after two appends
+
+```python
+for entry in table.history():
+    print(entry.snapshot_id, entry.timestamp_ms)
+print(table.metadata_location)
+```
+
+The history should list two entries in commit order, one per append, and the metadata location should point at a JSON file under the warehouse metadata directory. A stray Parquet file copied into the warehouse never appears here because nothing committed it. When someone claims data is in the table, ask which snapshot lists the file in its manifests; a readable file on disk is evidence of bytes, not of table membership.
 
 ## Complete worked source
 

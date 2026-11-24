@@ -14,13 +14,38 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Identify the inferred type of every binding.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The code exposes which part is state and which part is a stable input. The accumulator becomes 8 while the fixed amount remains 4.
+**Reference answer.** It runs as the `Task 1` block of the reference program.
+
+```swift
+let perBox = 4
+var total = 0
+total += perBox
+let whole = 7 / 2
+let fractional = Double(7) / Double(2)
+precondition(type(of: perBox) == Int.self && type(of: total) == Int.self)
+precondition(type(of: whole) == Int.self && type(of: fractional) == Double.self)
+```
+
+**Observe:** perBox, total and whole are inferred as Int and fractional as Double.
+
+Integer literals default to Int, so 7 / 2 stays Int; the explicit Double conversions make the division and its result Double. type(of:) confirms the static choice at run time.
 
 ### Task 2: Guided modification
 
 Replace an unnecessary var with let and explain why it still compiles.
 
-No separate reference answer has been written for this task. Start from Example B: Converting after integer division would preserve the already truncated result. Integer division yields 3; floating division yields 3.5.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+let perBox = 4
+let boxes = 2
+let total = perBox * boxes
+precondition(total == 8 && perBox == 4)
+```
+
+**Observe:** Computing the total once as perBox * boxes gives 8 with every binding declared let.
+
+Example A needs var because += reassigns total twice. When the total is produced by one expression it is assigned exactly once, so let compiles, and swiftc's never-mutated warning disappears.
 
 ### Task 3: Independent construction
 
@@ -44,19 +69,52 @@ Converting both operands to Double before dividing is the deliberate step; divid
 
 Diagnose conversion performed after integer division.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Let protects the binding, not necessarily every object reachable from it. Avoid forced conversions at a boundary without validating range. A floating type is not automatically more appropriate for a count.
+**Reference answer.** It runs as the `Task 4` block of the reference program.
+
+```swift
+let total = 7
+let count = 2
+let late = Double(total / count)
+let early = Double(total) / Double(count)
+precondition(late == 3.0)
+precondition(early == 3.5)
+```
+
+**Observe:** Converting after the division gives 3.0; converting the operands first gives 3.5.
+
+total / count is Int division and has already discarded the half before Double(...) sees it; the conversion must happen to the operands, not to the truncated quotient.
 
 ### Task 5: Boundary evidence
 
 Test an exactly divisible and a non-divisible pair.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Reassign only mutable state) and Example B (Convert before division).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+func mean(_ total: Int, _ count: Int) -> Double { Double(total) / Double(count) }
+precondition(mean(8, 2) == 4.0 && 8 / 2 == 4)
+precondition(mean(7, 2) == 3.5 && 7 / 2 == 3)
+```
+
+**Observe:** 8 and 2 give 4.0 by both routes, while 7 and 2 give 3.5 only with the conversion (Int division gives 3).
+
+An exactly divisible pair cannot reveal truncation, so the non-divisible pair is the case that distinguishes the deliberate conversion from integer division.
 
 ### Task 6: Transfer and justify
 
 Choose units and types for a small measurement model.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Binding**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Compute a mean from an integer total and count using a deliberate conversion) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** Example A separates a fixed input, `let perBox = 4`, from an accumulator, `var total`, and adds the box size twice. Example B divides 7 by 2 twice: once with `Int` operands and once after converting both operands to `Double`. The task 3 answer converts a total and count before dividing to get a mean.
+
+**Why it is correct.** `total` ends at 8 because two additions of 4 occur, while `perBox` cannot change since it is a `let` binding. `7 / 2` on integers truncates toward zero and yields 3; `Double(7) / Double(2)` keeps the fraction and yields 3.5. The conversion happens before the operator, so no information is lost.
+
+**A plausible wrong approach.** Writing `Double(7 / 2)` looks like a conversion to floating point, but the integer division has already produced 3, so the result is 3.0, not 3.5. The `fractional == 3.5` check rejects it. Declaring `perBox` with `var` would compile but would hide which value is supposed to stay fixed.
+
+**How to verify.** Run the reference and expect only the marker, since successful checks are silent. Then edit Example B to `Double(7 / 2)` and confirm the precondition on 3.5 fails. For the inferred types, add `let _: Int = whole` and `let _: Double = fractional`; both lines compile.
 
 ## Mechanism and diagnostic reasoning
 

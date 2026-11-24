@@ -27,11 +27,13 @@ export async function verify() {
       assert.equal(sumTo(1000), 500500);
       samples.push(performance.now() - start);
     }
-    const sorted = [...samples].sort((a, b) => a - b);
-    const median = sorted[2];
+    const byValue = (a, b) => a - b;
+    const medianOf = (values) => [...values].sort(byValue)[Math.floor(values.length / 2)];
+    const median = medianOf(samples);
     assert.equal(samples.length, 5);
     assert.ok(samples.every((value) => Number.isFinite(value) && value >= 0));
-    assert.ok(median >= sorted[0] && median <= sorted[4]);
+    assert.ok(median >= Math.min(...samples) && median <= Math.max(...samples));
+    assert.equal(medianOf([9, 10, 100, 2, 30]), 10);
     console.log(JSON.stringify({ samplesMs: samples, medianMs: median }));
   }
 

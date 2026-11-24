@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-020`, `llm-applied-022`, `llm-applied-023`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 240 minutes. Direct prerequisites: `llm-applied-020` (Fine-tuning embeddings and a small reranker), `llm-applied-022` (Structured tools for extraction, aggregation and data-science work) and `llm-applied-023` (Domain assistant boundaries: freshness, injection, budgets and traces). They introduce the notation this lesson needs for end-to-end evidence path and extractive baseline.
 
 ## Learning objectives
 
@@ -88,13 +88,15 @@ A generative candidate can later replace the proposal stage only while preservin
 
 **Acceptance gate:** A required condition for a bounded release decision.
 
-**Subject-assistant artifact:** The corpus,policies,code,evaluation and model identities needed for review.
+**Subject-assistant artifact:** The corpus, policies, code, evaluation and model identities needed for review.
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-024/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-024.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-024.py` in the declared `python-core` profile. *Answer a supported domain definition*, *Abstain on missing evidence* and *Enforce access before answering* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-024/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Abstain on missing evidence* and *Enforce access before answering* reuse the helper and fixture introduced in *Answer a supported domain definition*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Answered with metric-v1 citation and source text. Example B should give: Unknown with missing evidence reason. Example C should give: Public unknown; authorized answer cites private-v1. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -262,29 +264,32 @@ privileged = Assistant(DOCUMENTS, {"public", "restricted"}, "corpus-v1").answer(
 assert public["status"] == "unknown" and privileged["citation"]["document_id"] == "private-v1"
 ```
 
-**Expected:** public unknown; authorizedanswercitesprivate-v1.
+**Expected:** public unknown; authorized answer cites private-v1.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: answered with metric-v1 citation and source text. local_fixture_pass True; production_go no-go. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Abstain on missing evidence*, predict its result from the prompt alone: Ask for `comet_period`, which has no supporting corpus entry. Write the guess beside the stated outcome (unknown with missing evidence reason). Then predict how the decisive case, *Issue a bounded capstone decision*, should end: Record local fixture acceptance while leaving pretrained generation, real identity integration and production readiness unverified. For a grounded and evaluated data-science subject assistant, the finish condition is: Answered with metric-v1 citation and source text. local_fixture_pass True; production_go no-go.
 
 ## Exercises
 
 1. **Answer a supported domain definition.** Ask the public assistant for conversion_definition.
    **Expected:** answered with metric-v1 citation and source text.
    **Verify:** Save the assertion results for exercise 1, including answered with metric-v1 citation and source text.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-2. **Abstain on missing evidence.** Ask forcomet_period, which has no supporting corpus entry.
+2. **Abstain on missing evidence.** Ask for `comet_period`, which has no supporting corpus entry.
    **Expected:** unknown with missing evidence reason.
    **Verify:** Save the assertion results for exercise 2, including unknown with missing evidence reason.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
-3. **Enforce access before answering.** Ask a public-only assistant forrestricted_threshold, then ask a separately authorized assistant.
-   **Expected:** public unknown; authorizedanswercitesprivate-v1.
-   **Verify:** Save the assertion results for exercise 3, including public unknown; authorizedanswercitesprivate-v1.
+3. **Enforce access before answering.** Ask a public-only assistant for `restricted_threshold`, then ask a separately authorized assistant.
+   **Expected:** public unknown; authorized answer cites private-v1.
+   **Verify:** Save the assertion results for exercise 3, including public unknown; authorized answer cites private-v1.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Compute a data-science result deterministically.** Calculate 3 purchases over 10 eligible visits and reject 11 purchases over 10 visits.
-   **Expected:** rate.3; invalid counts raise ValueError.
-   **Verify:** Save the assertion results for exercise 4, including rate.3; invalid counts raise ValueError.
+   **Expected:** rate 0.3; invalid counts raise ValueError.
+   **Verify:** Save the assertion results for exercise 4, including rate 0.3; invalid counts raise ValueError.
 
 5. **Evaluate fixed task and boundary cases.** Score supported, missing andrestricted-public questions against their expected statuses.
    **Expected:** 3 of 3 status contracts pass; citation integrity checked separately.
@@ -302,19 +307,21 @@ If a report claims trained generation, freshness checks or dynamic revocation ra
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate end-to-end evidence path and extractive baseline for the fixture in *Answer a supported domain definition*. Hint 2: change one literal in *Abstain on missing evidence* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Compute a data-science result deterministically*, with its stated result (rate 0.3; invalid counts raise ValueError). If *Issue a bounded capstone decision* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain End-to-end evidence path, Extractive baseline, Acceptance gate using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain end-to-end evidence path, extractive baseline and acceptance gate using *Answer a supported domain definition*. Recompute its result (answered with metric-v1 citation and source text) from the inputs. Change one input in *Enforce access before answering* and predict whether the stated result (public unknown; authorized answer cites private-v1) still holds. Say which part of a grounded and evaluated data-science subject assistant the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-020`, `llm-applied-022`, `llm-applied-023` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Answer a supported domain definition* cannot be reconstructed without the solution, revisit `llm-applied-020` (Fine-tuning embeddings and a small reranker), `llm-applied-022` (Structured tools for extraction, aggregation and data-science work) and `llm-applied-023` (Domain assistant boundaries: freshness, injection, budgets and traces). As the capstone, a failed *Issue a bounded capstone decision* check is a valid no-go decision; state which evidence would reopen it.
 
 ## Sources and verification status
 
-API and mechanism reference: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for end-to-end evidence path: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixtures for *Answer a supported domain definition*, *Abstain on missing evidence* and *Enforce access before answering* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

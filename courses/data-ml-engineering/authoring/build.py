@@ -28,6 +28,8 @@ FIELDS = {
     "runtime_profile",
     "language",
     "concepts",
+    "key_terms",
+    "worked_examples",
     "outcome",
     "guide_source",
     "source_path",
@@ -35,6 +37,9 @@ FIELDS = {
 }
 PROFILES = {"python-core", "data-engineering", "spark-local-python", "llm-torch-cpu"}
 MARKER = "<!-- worked-program -->"
+EXAMPLE_FIELDS = {"title", "language", "code", "output", "interpretation"}
+EXAMPLE_LANGUAGES = {"python", "sql", "sh", "yaml", "json", "text"}
+MIN_GUIDE_EXAMPLES = 2
 
 
 def source_path(root: Path, value: Any) -> Path:
@@ -55,10 +60,103 @@ def source_path(root: Path, value: Any) -> Path:
     return result
 
 
+def check_key_terms(key: str, values: Any) -> None:
+    if not isinstance(values, list) or not 3 <= len(values) <= 5:
+        raise ValueError(key + " needs three to five key terms")
+    seen: set[str] = set()
+    for value in values:
+        if not isinstance(value, dict) or set(value) != {"term", "definition"}:
+            raise ValueError(key + " has an invalid key term record")
+        term, definition = value["term"], value["definition"]
+        if (
+            not isinstance(term, str)
+            or not isinstance(definition, str)
+            or term != term.strip()
+            or definition != definition.strip()
+            or not term
+            or len(term) > 80
+            or any(character in term for character in ":*\n")
+            or not definition.endswith(".")
+            or "\n" in definition
+            or any(character in term + definition for character in "\u2013\u2014")
+        ):
+            raise ValueError(key + " has an invalid key term or definition")
+        if term.casefold() in seen:
+            raise ValueError(key + " repeats a key term")
+        seen.add(term.casefold())
+
+
+def key_terms_section(values: list[dict[str, str]]) -> str:
+    lines = (f"- **{value['term']}:** {value['definition']}" for value in values)
+    return "## Key terms\n\n" + "\n".join(lines) + "\n\n"
+
+
+def check_worked_examples(key: str, values: Any, seen: set[str]) -> None:
+    """Validate structured examples; seen holds book-wide code and interpretation text."""
+    if not isinstance(values, list):
+        raise ValueError(key + " needs a worked_examples list")
+    titles: set[str] = set()
+    for value in values:
+        if not isinstance(value, dict) or set(value) != EXAMPLE_FIELDS:
+            raise ValueError(key + " has an invalid worked example record")
+        if not all(isinstance(value[name], str) for name in EXAMPLE_FIELDS):
+            raise ValueError(key + " worked example fields must be text")
+        title, language, code = value["title"], value["language"], value["code"]
+        output, interpretation = value["output"], value["interpretation"]
+        if (
+            not title
+            or title != title.strip()
+            or len(title) > 100
+            or "\n" in title
+            or language not in EXAMPLE_LANGUAGES
+            or not code.strip()
+            or not code.endswith("\n")
+            or (output and not output.endswith("\n"))
+            or any("```" in text for text in (code, output))
+            or len(interpretation.split()) < 40
+            or interpretation != interpretation.strip()
+        ):
+            raise ValueError(key + " has an incomplete worked example")
+        if any(character in "".join(value.values()) for character in "\u2013\u2014"):
+            raise ValueError(key + " worked example contains a prohibited dash")
+        if language == "python":
+            ast.parse(code)
+        if title.casefold() in titles:
+            raise ValueError(key + " repeats a worked example title")
+        titles.add(title.casefold())
+        for text in (code.strip(), interpretation):
+            if text in seen:
+                raise ValueError(key + " repeats worked example text used elsewhere")
+            seen.add(text)
+
+
+def worked_examples_section(values: list[dict[str, str]]) -> str:
+    parts = []
+    for value in values:
+        part = f"## Worked example: {value['title']}\n\n"
+        part += f"```{value['language']}\n{value['code']}```\n\n"
+        if value["output"]:
+            part += f"```text\n{value['output']}```\n\n"
+        parts.append(part + value["interpretation"] + "\n\n")
+    return "".join(parts)
+
+
+def insert_worked_examples(guide: str, values: list[dict[str, str]]) -> str:
+    """Place structured examples after the section that holds the complete program."""
+    if not values:
+        return guide
+    start = guide.index(MARKER)
+    following = re.search(r"^## ", guide[start:], flags=re.M)
+    cut = len(guide) if following is None else start + following.start()
+    head = guide[:cut].rstrip("\n") + "\n\n"
+    return head + worked_examples_section(values) + guide[cut:].lstrip("\n")
+
+
 def load_chapters(root: Path = ROOT, *, complete: bool = True) -> list[dict[str, Any]]:
     base = root / "courses/data-ml-engineering"
     chapters: list[dict[str, Any]] = []
     seen: set[str] = set()
+    example_text: set[str] = set()
     for fragment, numbers in FRAGMENTS.items():
         path = base / "authoring" / fragment / "chapters.json"
         if not path.exists():
@@ -110,16 +208,30 @@ def load_chapters(root: Path = ROOT, *, complete: bool = True) -> list[dict[str,
                 not isinstance(value, str) or not value.strip() for value in chapter["concepts"]
             ):
                 raise ValueError("Each chapter needs explicit named concepts")
+            check_key_terms(key, chapter["key_terms"])
+            check_worked_examples(key, chapter["worked_examples"], example_text)
             guide = source_path(root, chapter["guide_source"]).read_text("utf-8")
             program = source_path(root, chapter["source_path"]).read_text("utf-8")
             if not guide.startswith(f"# {key}: {chapter['title']}\n") or guide.count(MARKER) != 1:
                 raise ValueError(key + " needs its exact chapter title and one program marker")
             if any(guide.count(f"## Worked case {i}:") != 1 for i in (1, 2)):
                 raise ValueError(key + " requires two separately explained complete cases")
+            first_section = re.search(r"^## ", guide, flags=re.M)
+            if (
+                first_section is None
+                or first_section.start() > guide.index(MARKER)
+                or re.search(r"^## Key terms\s*$", guide, flags=re.M)
+            ):
+                raise ValueError(key + " needs an early section and no authored Key terms")
             if len(re.sub(r"```.*?```", "", guide, flags=re.S).split()) < 800:
                 raise ValueError(key + " needs a substantive original teaching chapter")
             if "\u2014" in guide or "\u2014" in program:
                 raise ValueError(key + " contains a prohibited punctuation character")
+            authored_fences = (
+                sum(line.lstrip().startswith("```") for line in guide.splitlines()) // 2
+            )
+            if authored_fences + 1 + len(chapter["worked_examples"]) < MIN_GUIDE_EXAMPLES:
+                raise ValueError(key + " needs a worked example beyond the complete program")
             tree = ast.parse(program)
             functions = {
                 node.name
@@ -336,6 +448,14 @@ def render(root: Path = ROOT) -> dict[Path, str]:
         source = source_path(root, chapter["guide_source"])
         target = base / "guides" / (key + ".md")
         guide = relocate_links(source.read_text("utf-8"), source, target, root)
+        guide = insert_worked_examples(guide, chapter["worked_examples"])
+        first_section = re.search(r"^## ", guide, flags=re.M)
+        assert first_section is not None
+        guide = (
+            guide[: first_section.start()]
+            + key_terms_section(chapter["key_terms"])
+            + guide[first_section.start() :]
+        )
         program = source_path(root, chapter["source_path"]).read_text("utf-8")
         guide = guide.replace(MARKER, "```python\n" + program + "```")
         head, rest = guide.split("\n", 1)

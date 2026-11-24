@@ -195,24 +195,56 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-029-explained-reference">julia-029: explained reference<a class="heading-anchor" href="#julia-029-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-029_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>squared_pipeline</code> connects one producer task and one consumer task through <code>Channel{Int}(2)</code> inside <code>@sync</code>. The producer closes the channel in <code>finally</code>, so the consumer&#x27;s loop always ends, and <code>@sync</code> waits for both tasks and rethrows any failure as <code>CompositeException</code>. Tasks interleave on one thread here; they do not run simultaneously.</p>
 <h3 id="1-trace-the-queue">1. Trace the queue<a class="heading-anchor" href="#1-trace-the-queue" aria-label="Link to this section">#</a></h3>
 <p>The consumer drains a value, allowing the producer to continue without unbounded queue growth.</p>
 <p><strong>Expected observation:</strong> The next put! waits until space is available.</p>
+<p><strong>Why it holds here:</strong> With capacity 2, a third <code>put!</code> blocks until the consumer takes a value, so at most two values wait in the channel.</p>
+<p><strong>Plausible wrong approach:</strong> Using an unbounded channel removes the wait but lets a fast producer fill memory when the consumer is slow.</p>
+<p><strong>How to verify:</strong> Print a message before each <code>put!</code> and <code>take!</code> in an owned copy and observe that puts never run more than two ahead.</p>
 <h3 id="2-preserve-output-meaning">2. Preserve output meaning<a class="heading-anchor" href="#2-preserve-output-meaning" aria-label="Link to this section">#</a></h3>
 <p>Squares are emitted into the result in channel-consumption order; broader parallel pipelines need explicit ordering.</p>
 <p><strong>Expected observation:</strong> The result is <code>[4, 0, 9]</code>.</p>
+<p><strong>Why it holds here:</strong> A single producer puts -2, 0 and 3 in order and the single consumer appends their squares in the same order, giving <code>[4, 0, 9]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming the same order holds with several consumers ignores that each can take values at different times.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>squared_pipeline([-2, 0, 3]) == [4, 0, 9]</code> and <code>[2, 2]</code> gives <code>[4, 4]</code>.</p>
 <h3 id="3-inject-a-failure">3. Inject a failure<a class="heading-anchor" href="#3-inject-a-failure" aria-label="Link to this section">#</a></h3>
 <p>No shortened result is mislabeled success; joining propagates the producer failure.</p>
 <p><strong>Expected observation:</strong> A CompositeException reaches the caller.</p>
+<p><strong>Why it holds here:</strong> <code>fail_after = 0</code> makes the producer raise on index 1 before any <code>put!</code>; <code>finally</code> closes the channel and <code>@sync</code> reports <code>CompositeException</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Wrapping the producer in <code>try</code> and swallowing the error returns an empty list that looks like a successful run.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>@test_throws CompositeException squared_pipeline([1]; fail_after = 0)</code>.</p>
 <h3 id="4-drain-a-closed-channel">4. Drain a closed channel<a class="heading-anchor" href="#4-drain-a-closed-channel" aria-label="Link to this section">#</a></h3>
 <p>Buffered values can be drained before iteration terminates.</p>
 <p><strong>Expected observation:</strong> The buffered value is still returned.</p>
+<p><strong>Why it holds here:</strong> Closing a channel stops future <code>put!</code> calls, but the buffered 7 can still be read, so <code>collect</code> returns <code>[7]</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting <code>close</code> to discard buffered values loses the last items a producer sent before finishing.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>collect(channel) == [7]</code>, <code>!isopen(channel)</code> and an <code>InvalidStateException</code> on a later <code>put!</code>.</p>
 <h3 id="5-identify-an-unsupported-generalization">5. Identify an unsupported generalization<a class="heading-anchor" href="#5-identify-an-unsupported-generalization" aria-label="Link to this section">#</a></h3>
 <p>The bounded example proves its stated simple consumer path; a generic pipeline needs both failure directions designed.</p>
 <p><strong>Expected observation:</strong> A producer can remain blocked without coordinated cancellation.</p>
+<p><strong>Why it holds here:</strong> If the consumer throws, nothing takes from the channel, so a producer blocked on a full buffer waits forever and <code>@sync</code> never returns.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming the <code>finally</code> in the producer handles every failure ignores that it only runs when the producer itself finishes.</p>
+<p><strong>How to verify:</strong> Inject a consumer error in an owned copy with a timeout and design who closes the channel in that direction.</p>
 <h3 id="6-transfer-to-file-processing">6. Transfer to file processing<a class="heading-anchor" href="#6-transfer-to-file-processing" aria-label="Link to this section">#</a></h3>
 <p>Define ordering, retries and partial failure semantics before introducing concurrency.</p>
-<p><strong>Expected observation:</strong> Use stable file IDs and explicit per-file outcomes.</p></article>
+<p><strong>Expected observation:</strong> Use stable file IDs and explicit per-file outcomes.</p>
+<p><strong>Why it holds here:</strong> For files, each result should carry a stable file id and an explicit success or failure outcome so retries and partial runs can be audited.</p>
+<p><strong>Plausible wrong approach:</strong> Treating a printed <code>done</code> line as completion loses the record if the process stops before output is flushed.</p>
+<p><strong>How to verify:</strong> Write one outcome row per file id and check that the count of rows equals the count of input files.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-029: all reference checks passed</code>:</p>
+<p><code>[2, 2]</code> and <code>[4]</code> add repeated and single-value cases. The <code>@async 6 * 7</code> lines show that <code>fetch</code> waits for the task and returns 42, after which <code>istaskdone(job)</code> is true, which is the same join that <code>@sync</code> performs for the pipeline.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> squared_pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> squared_pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">CompositeException</span> squared_pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> fail_after <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    job <span class="syntax-operator">=</span> <span class="syntax-decorator">@async</span> <span class="syntax-number">6</span> <span class="syntax-operator">*</span> <span class="syntax-number">7</span>
+    <span class="syntax-decorator">@test</span> fetch<span class="syntax-punctuation">(</span>job<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">42</span>
+    <span class="syntax-decorator">@test</span> istaskdone<span class="syntax-punctuation">(</span>job<span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> squared_pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">16</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

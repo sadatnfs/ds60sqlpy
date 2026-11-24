@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A metric is a defined quantity, not merely a SQL expression. Its contract names the population, unit of analysis, numerator, denominator, time window and treatment of missing or invalid records. Two expressions can both execute and still answer different questions. The first responsibility is to define the desired quantity.</p>
 <p>The worked fixture pools successes and trials by cohort. Cohort A contains rows with very different trial counts, so averaging row-level rates gives a misleading result for the pooled-trial question. This is the same statistical issue seen in the Polars path, now expressed in a tested warehouse model. The transfer matters because a semantic error can survive changes in language or tooling.</p>
 <p>The examples use ordinary dbt models and SQL. They do not claim to run a hosted semantic layer or MetricFlow service. A future semantic-layer integration should preserve these contracts and test its actual query semantics. Installing another tool would not decide the correct denominator.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Metric contract:</strong> A declaration of a metric&#x27;s numerator, denominator, grain and edge-case policy so every consumer computes it the same way.</li>
+<li><strong>Grain:</strong> The entity and time level at which one metric row is defined, such as one region per day.</li>
+<li><strong>Pooled rate:</strong> Total numerator divided by total denominator, which weights each group by its denominator.</li>
+<li><strong>Average of rates:</strong> The unweighted mean of group rates, which gives a small group the same weight as a large one and usually differs from the pooled rate.</li>
+<li><strong>Zero-denominator policy:</strong> The declared result, such as null, for a group whose denominator is zero.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Aggregate numerator and denominator separately, then divide with a declared zero-denominator policy. Keep the denominator in the output for review and uncertainty calculations. A GROUP BY changes result grain, so identify its keys explicitly. Avoid using an unweighted AVG of precomputed rates unless equal-row weighting is the intended estimand.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

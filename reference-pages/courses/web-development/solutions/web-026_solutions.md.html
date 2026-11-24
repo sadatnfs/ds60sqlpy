@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-026.md</code>.</p>
 <h3 id="exercise-1-choose-a-disclosure-or-dialog-for-an-optional-explanation">Exercise 1: Choose a disclosure or dialog for an optional explanation.<a class="heading-anchor" href="#exercise-1-choose-a-disclosure-or-dialog-for-an-optional-explanation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A disclosure usually fits because it preserves the surrounding reading context.</p>
+<p><strong>Approach:</strong> Ask whether the reader must stop and act before continuing; optional explanation should stay inline, beside the text it explains.</p>
 <p><strong>Why:</strong> A disclosure keeps the explanation in place and does not interrupt the task, while a modal dialog blocks the rest of the page.</p>
+<p><strong>Plausible wrong approach:</strong> Choosing a modal dialog fails because it blocks the page and hides the paragraph the reader was trying to understand.</p>
+<p><strong>How to verify:</strong> With <code>details</code>, the reader can expand the explanation and still scroll and read the surrounding text.</p>
 <h3 id="exercise-2-give-a-dialog-a-visible-heading-and-accessible-name">Exercise 2: Give a dialog a visible heading and accessible name.<a class="heading-anchor" href="#exercise-2-give-a-dialog-a-visible-heading-and-accessible-name" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> aria-labelledby connects it to the heading&#x27;s unique id.</p>
+<p><strong>Approach:</strong> Put an <code>h2</code> with a unique <code>id</code> inside the dialog and point the dialog&#x27;s <code>aria-labelledby</code> at that <code>id</code>.</p>
 <p><strong>Why:</strong> aria-labelledby makes the visible heading the dialog&#x27;s accessible name, so it is announced when the dialog opens.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>aria-label</code> with text that differs from the visible heading fails because speech and screen output then disagree.</p>
+<p><strong>How to verify:</strong> The accessibility tree lists the dialog with the visible heading text as its name.</p>
 <h3 id="exercise-3-build-a-disclosure-and-a-deliberately-opened-local-dialog">Exercise 3: Build a disclosure and a deliberately opened local dialog.<a class="heading-anchor" href="#exercise-3-build-a-disclosure-and-a-deliberately-opened-local-dialog" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Both are labeled, keyboard operable and can be closed without losing the task.</p>
+<p><strong>Approach:</strong> Combine a <code>details</code> element for the explanation with a <code>dialog</code> opened by <code>showModal()</code> from a button and closed by <code>close()</code> from another.</p>
 <p><strong>Why:</strong> Native details and dialog elements provide keyboard support, Escape handling and the top layer without custom focus code.</p>
+<p><strong>Plausible wrong approach:</strong> Opening the dialog automatically on page load fails because it interrupts reading before the learner asked for anything.</p>
+<p><strong>How to verify:</strong> The dialog appears only after activating the open button, and both closing methods return the page to normal.</p>
 <h3 id="exercise-4-diagnose-focus-returning-to-an-unrelated-control-after-closure">Exercise 4: Diagnose focus returning to an unrelated control after closure.<a class="heading-anchor" href="#exercise-4-diagnose-focus-returning-to-an-unrelated-control-after-closure" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Track the opener and restore focus when appropriate.</p>
+<p><strong>Approach:</strong> Store the opener element when opening, and on the dialog&#x27;s <code>close</code> event call <code>opener.focus()</code> if it is still in the document.</p>
 <p><strong>Why:</strong> Returning focus to the opener keeps keyboard users at the same place in the task.</p>
+<p><strong>Plausible wrong approach:</strong> Focusing the first link on the page after closing fails because the reader loses their place and must tab back.</p>
+<p><strong>How to verify:</strong> After closing, <code>document.activeElement</code> is the button that opened the dialog.</p>
 <h3 id="exercise-5-test-escape-close-button-activation-and-repeated-opening">Exercise 5: Test Escape, close-button activation and repeated opening.<a class="heading-anchor" href="#exercise-5-test-escape-close-button-activation-and-repeated-opening" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The interaction remains consistent across repeated cycles and does not trap focus.</p>
+<p><strong>Approach:</strong> Open and close the dialog three times, alternating Escape and the close button, and press Tab inside it each cycle.</p>
 <p><strong>Why:</strong> Repeated cycles reveal leaks such as duplicate listeners or focus moving to the page start.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only one open and close fails because duplicate listeners or stale state often appear only on the second cycle.</p>
+<p><strong>How to verify:</strong> Each cycle opens the dialog once, keeps Tab inside it, and returns focus to the opener after closing.</p>
 <h3 id="exercise-6-explain-why-a-modal-is-inappropriate-for-every-small-message">Exercise 6: Explain why a modal is inappropriate for every small message.<a class="heading-anchor" href="#exercise-6-explain-why-a-modal-is-inappropriate-for-every-small-message" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It interrupts context and imposes focus management costs that a simple inline message avoids.</p>
+<p><strong>Approach:</strong> Weigh the cost of interruption, inert background and focus handling against the message, and use inline text for small confirmations.</p>
 <p><strong>Why:</strong> A modal blocks the page and requires focus management, which a short inline message does not need.</p>
+<p><strong>Plausible wrong approach:</strong> Using a modal for a Saved locally note fails because the reader must dismiss it before continuing, for no decision.</p>
+<p><strong>How to verify:</strong> An inline status message beside the button is read without any extra keystroke and leaves focus where it was.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-026_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

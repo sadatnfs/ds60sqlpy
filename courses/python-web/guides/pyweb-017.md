@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-016`.
 
 A result page needs a defined order and a defined continuation rule. This chapter joins items to owners, returns a bounded page and compares keyset continuation with an offset after earlier data is deleted. The database operations actually execute through SQLAlchemy and SQLite.
 
+## Key terms
+
+- **Deterministic ordering:** An ORDER BY on a unique key, such as item ID, so every request sees the rows in the same sequence.
+- **Keyset pagination:** Fetching the next page with a condition such as `Item.id > after`, where the last observed ordering key serves as the cursor.
+- **Offset pagination:** Skipping a counted number of rows in the ordered result, which can skip or repeat rows when earlier data changes between requests.
+- **Explicit join:** A single query that combines items with their owners and selects only the needed columns, avoiding one extra owner query per item.
+- **Tie-breaker:** A unique column appended to a nonunique sort key, such as a timestamp, so the ordering and any cursor built from it are unambiguous.
+
 ## Mechanism: pagination depends on ordering
 
 The query selects the item ID and owner name in one explicit join, orders by item ID and limits the result to two rows. It does not load an object and then issue an extra owner query for every item. The projection makes the needed columns and relationship explicit.
@@ -25,6 +33,44 @@ The fixture defines a foreign-key relationship but tests the query behavior here
 After the first page, item one is deleted. Continuing with cursor two returns IDs three and four. Applying offset two to the changed result instead skips IDs two and three and returns only four. The program reproduces both results.
 
 This does not make every offset API invalid. Offset pagination can be reasonable for small, stable results or explicit page-number navigation. The tradeoff becomes important when data changes, pages grow large or clients require a predictable traversal. A snapshot or other consistency contract may also be necessary for the product's meaning of a complete listing.
+
+## Worked example: a tie-breaker makes keyset pages deterministic
+
+```python
+from sqlalchemy import create_engine, text
+
+engine = create_engine("sqlite://")
+with engine.begin() as db:
+    db.execute(text("CREATE TABLE items (id INTEGER PRIMARY KEY, score INTEGER)"))
+    db.execute(text("INSERT INTO items VALUES (1, 50), (2, 70), (3, 50), (4, 70), (5, 90)"))
+
+
+def page(after_score, after_id, size=2):
+    with engine.connect() as db:
+        return db.execute(
+            text(
+                "SELECT score, id FROM items WHERE (score, id) > (:s, :i) "
+                "ORDER BY score, id LIMIT :n"
+            ),
+            {"s": after_score, "i": after_id, "n": size},
+        ).all()
+
+
+first = page(-1, 0)
+second = page(*first[-1])
+third = page(*second[-1])
+print(first, second, third, sep="\n")
+```
+
+Expected output:
+
+```text
+[(50, 1), (50, 3)]
+[(70, 2), (70, 4)]
+[(90, 5)]
+```
+
+Sorting only by `score` would leave the order of rows 1 and 3, and of 2 and 4, undefined, so a database could return them differently between requests and a cursor of `score > 50` would skip row 3 entirely. Adding `id` as a unique tie-breaker gives a total order, and the row-value comparison `(score, id) > (:s, :i)` resumes exactly after the last row the client saw. The three pages cover all five rows once with no duplicates. The lesson's simpler cursor uses `Item.id` alone because its order is already the primary key. If a new item with score 60 were inserted between page requests, it would appear on the second page without shifting any other row, which offset pagination cannot promise.
 
 ## Failure diagnosis
 

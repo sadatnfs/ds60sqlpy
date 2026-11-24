@@ -29,6 +29,13 @@ In PyTorch, `requires_grad=True` requests gradient tracking on the parameter. `l
 In TensorFlow, `GradientTape` records operations involving watched trainable variables in its scope. `tape.gradient(loss, w)` returns the derivative, which is then paired with the variable for `apply_gradients`. A missing derivative is different from a zero derivative. Check that the intended variable was watched and that the forward computation stayed connected to it. Both frameworks need parameters, inputs and relevant optimizer state on compatible devices; neither makes a cross-device mismatch mathematically meaningful.
 
 
+### Key terms
+
+- **Device placement:** Assigning tensors and model parameters to a device; all operands of one operation must be on the same device.
+- **Loss gradient:** The derivative of the loss with respect to each parameter, computed by backpropagation.
+- **Optimizer step:** The update that changes parameters using their gradients and any optimizer state.
+- **Device scope:** A TensorFlow context such as `tf.device` that controls where new operations are placed.
+
 ## Worked examples
 
 ### Worked example 1
@@ -55,6 +62,16 @@ print("CPU training oracle:", loss, grad, w)
 
 **Expected observation:** Loss 10, gradient-10, new weight 1.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `x` | `[1.0, 2.0]` |
+| `y` | `[2.0, 4.0]` |
+| `w` | `1.0` |
+| `loss` | `10.0` |
+| `grad` | `-10.0` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -79,27 +96,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: Derive the scalar gradient
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **derive the scalar gradient** in the examples above.
+**Trap to avoid:** Dropping the factor 2 from the derivative, a common slip when writing it by hand, gives -5 and a half-size update. Autograd would then disagree with the hand derivation.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Calculate the update
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **calculate the update** in the examples above.
+**Trap to avoid:** Adding the gradient instead of subtracting it gives `w = -1`, which raises the loss to `((-1-2)**2 + (-2-4)**2)/2 = 22.5`. The sign error is easy to miss when only the update size is checked.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Compare sum and mean
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **compare sum and mean** in the examples above.
+**Trap to avoid:** Comparing a sum-loss run with a mean-loss run and attributing the speed or convergence difference to the GPU confounds hardware with loss normalization.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Inspect every tensor device
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **inspect every tensor device** in the examples above.
+**Trap to avoid:** Checking only the model parameters misses inputs and targets, and moving the model after creating the optimizer can leave the optimizer holding stale references in some setups.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Write equal PyTorch and TensorFlow contracts
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **write equal PyTorch and TensorFlow contracts** in the examples above.
+**Trap to avoid:** Letting each framework use its default initializer or loss reduction makes the numbers differ for reasons unrelated to correctness.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Distinguish correctness and performance
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **distinguish correctness and performance** in the examples above.
+**Trap to avoid:** Reporting a speedup from a run that silently used a sum loss, or ran partly on the CPU, compares different computations.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

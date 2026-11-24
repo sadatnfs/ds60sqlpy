@@ -16,11 +16,25 @@ The baseline makes the experiment interpretable. It should identify the exact Se
 
 **Expected:** A connected selection graph and successful application control.
 
+**Solution reasoning**
+
+- **Approach:** Capture selector, Pod label, endpoint count and a successful request before the fault.
+- **Why it is correct:** A healthy baseline makes a later zero endpoint count meaningful as a change.
+- **Plausible wrong approach:** Starting evidence after the fault leaves no record of what worked.
+- **How to verify:** The baseline has a successful request and the pre-change endpoint count.
+
 ## Exercise 2: Form competing hypotheses
 
 The hypotheses connect symptoms to mechanisms. A Ready Pod weakens some crash explanations, zero selected endpoints points toward selection, and a populated endpoint with a wrong port suggests another branch. No single symptom proves every detail.
 
 **Expected:** Three specific evidence checks rather than a generic restart.
+
+**Solution reasoning**
+
+- **Approach:** For crash, selector mismatch and targetPort mismatch, name the observation that would differ.
+- **Why it is correct:** A crash raises restartCount, a selector mismatch empties endpoints with Pods still Ready, and a targetPort mismatch keeps endpoints but refuses connections.
+- **Plausible wrong approach:** Restarting the Pods to see what happens tests none of the three and destroys evidence.
+- **How to verify:** Each hypothesis has one distinguishing observation.
 
 ## Exercise 3: Interpret the supplied timeline
 
@@ -28,11 +42,25 @@ The controlled one-fault trace supports a narrow causal explanation. In a real i
 
 **Expected:** Selector changes at 10; zero endpoints observed at 15 while readiness remains 1.
 
+**Solution reasoning**
+
+- **Approach:** Find the selector change time and the first observation of its effect separately.
+- **Why it is correct:** The selector changed at 10 and zero endpoints appeared at 15 while readiness stayed 1, which points at selection.
+- **Plausible wrong approach:** Reading readiness 1 as healthy service ignores that no endpoint selects the Ready Pod.
+- **How to verify:** Change at 10, first supporting observation at 15.
+
 ## Exercise 4: Apply the minimal bounded repair
 
 The repair should preserve unrelated fields and respect optimistic concurrency. A stale whole-object replacement risks undoing another legitimate change, while a name-only update risks modifying an unrelated replacement.
 
 **Expected:** Owned svc-1 repaired; replacement UID causes refusal.
+
+**Solution reasoning**
+
+- **Approach:** Read the Service UID and resourceVersion, then restore the verified selector with that precondition.
+- **Why it is correct:** The precondition makes the write fail if svc-1 was replaced or changed since the read.
+- **Plausible wrong approach:** Applying the old manifest unconditionally would overwrite a replacement Service.
+- **How to verify:** svc-1 is repaired, and a replaced UID causes refusal.
 
 ## Exercise 5: Verify application recovery
 
@@ -40,11 +68,25 @@ This check demonstrates the route works again for the observed request path. If 
 
 **Expected:** One endpoint and expected payload, with actual timestamps if live.
 
+**Solution reasoning**
+
+- **Approach:** Read the endpoint list and a Service response after the repair, each timestamped.
+- **Why it is correct:** One endpoint and the expected payload show selection and the application both recovered.
+- **Plausible wrong approach:** Checking only the selector field confirms the write, not that traffic flows.
+- **How to verify:** One endpoint and the expected payload appear with timestamps.
+
 ## Exercise 6: Write the review and stop conditions
 
 The review should teach how the failure was detected and repaired, and where the experiment stops. It should preserve evidence of a failed or cancelled repair rather than converting every exercise into an assumed success story.
 
 **Expected:** A timestamped bounded incident packet with no unsupported broad resilience claim.
+
+**Solution reasoning**
+
+- **Approach:** Summarize cause, evidence, repair, preserved state and what remains uncertain.
+- **Why it is correct:** A bounded packet lets reviewers check each claim and see what was not ruled out.
+- **Plausible wrong approach:** Concluding the service is now resilient generalizes one repaired fault to all faults.
+- **How to verify:** The packet contains all five parts and no broad resilience claim.
 
 ## Boundary and troubleshooting review
 

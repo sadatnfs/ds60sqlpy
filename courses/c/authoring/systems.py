@@ -62,7 +62,7 @@ add(
 add(
     "Sanitizers, debugger evidence and safe regressions",
     """Compiler warnings, static analysis, sanitizers and debugger traces reveal different classes of evidence. AddressSanitizer instruments many invalid memory accesses; UndefinedBehaviorSanitizer checks selected undefined operations. Neither establishes that every possible path is correct, and neither replaces ownership reasoning. A sanitizer failure should become a small regression case after the defect is repaired. Do not ship a reference that intentionally executes undefined behavior merely to print a diagnostic. This lesson runs safe regression cases and gives the separate instrumented build workflow. A debugger is most useful when you can name the first invariant that became false rather than merely stop at the final crash.""",
-    """A prepared contributor build can add -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer to compilation and linking. Execute the same checked source under that build. The ordinary pad uses its fixed reviewed flags and does not claim sanitizer execution. Keep source, compiler command, exit status and diagnostic together. Disable neither an assertion nor a sanitizer report without explaining the actual correction.""",
+    """A prepared contributor build can add `-g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer` to compilation and linking. Execute the same checked source under that build. The ordinary pad uses its fixed reviewed flags and does not claim sanitizer execution. Keep source, compiler command, exit status and diagnostic together. Disable neither an assertion nor a sanitizer report without explaining the actual correction.""",
     [
         ("Instrumentation", "Additional checks inserted into a compiled program."),
         ("Regression fixture", "A small retained input exposing a prior defect."),
@@ -114,7 +114,7 @@ add(
     ],
     helper="static bool at_index(const int *values,size_t n,size_t i,int *out){if(values==NULL||out==NULL||i>=n)return false;*out=values[i];return true;}",
     source="https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html",
-    boundary="In a separately prepared Linux contributor directory, compile the complete reference with cc -std=c17 -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer main.c -o lesson-sanitized, then execute it. Sanitizer availability is a toolchain capability, not implied by the ordinary pad. Keep sanitizer results separate from normal compiler/run receipts.",
+    boundary="In a separately prepared Linux contributor directory, compile the complete reference with `cc -std=c17 -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer main.c -o lesson-sanitized`, then execute it. Sanitizer availability is a toolchain capability, not implied by the ordinary pad. Keep sanitizer results separate from normal compiler/run receipts.",
 )
 
 add(
@@ -787,7 +787,7 @@ add(
 
 add(
     "Capstone: a validated data pipeline with explicit ownership",
-    """The capstone combines parsing, range checks, bounded storage, deterministic aggregation and failure-atomic output. A production C component is understandable when each boundary states its grammar, ownership, resource limit and failure behavior. This fixture accepts a narrow line format name,count with one comma, a short nonempty ASCII name and a nonnegative decimal count. It deliberately rejects quoting and multiline fields rather than pretending to implement full CSV. A real general-purpose CSV reader needs the richer format contract. The pipeline validates every record before committing its summary, so one malformed record cannot publish a partial total as if the batch completed.""",
+    """The capstone combines parsing, range checks, bounded storage, deterministic aggregation and failure-atomic output. A production C component is understandable when each boundary states its grammar, ownership, resource limit and failure behavior. This fixture accepts a narrow line format `name,count` with one comma, a short nonempty ASCII name and a nonnegative decimal count. It deliberately rejects quoting and multiline fields rather than pretending to implement full CSV. A real general-purpose CSV reader needs the richer format contract. The pipeline validates every record before committing its summary, so one malformed record cannot publish a partial total as if the batch completed.""",
     """parse_record separates a bounded name from a complete decimal value using strtol and an end pointer. summarize stages row count and total, checks addition before updating, and commits only when every row is valid. The output remains unchanged on failure. The separately prepared stats project illustrates headers and tests; this capstone keeps its full deterministic data path within the ordinary one-file pad.""",
     [
         ("Data contract", "The grammar, ranges and meaning required at a data boundary."),

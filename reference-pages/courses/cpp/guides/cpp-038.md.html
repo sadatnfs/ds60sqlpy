@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>State a numeric error/overflow contract instead of assuming one machine result.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Integer overflow and floating-point rounding are different correctness problems. Signed overflow is undefined; floating values approximate many decimal fractions. A tolerance defines acceptable numerical error for a specific scale. Stable algorithms reduce accumulated error, but exact money and identity arithmetic should use exact representations whenever possible.</p>
+<ul>
+<li><strong>signed overflow:</strong> an <code>int</code> result outside the representable range, which is undefined behavior rather than wraparound.</li>
+<li><strong>checked add:</strong> an addition guarded by a test, such as <code>a &gt; max - b</code>, that runs before the dangerous operation.</li>
+<li><strong>floating-point rounding:</strong> the approximation of most decimal fractions, such as 0.1, by nearby binary values.</li>
+<li><strong>tolerance:</strong> the acceptable numerical error chosen for a specific scale.</li>
+<li><strong>stable algorithm:</strong> an algorithm that limits the rounding error accumulated across many operations.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Check a&gt;max-b before nonnegative integer addition, after validating nonnegative operands. For approximate floating comparison use an absolute/relative tolerance justified by units. Do not compare all numbers using one arbitrary epsilon or replace exact integer assertions with fuzzy tests.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
@@ -239,15 +246,8 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>o
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cmath&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
-<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;limits&gt;</span>
-<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;optional&gt;</span>
 
-std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>optional<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> safe_add<span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> a<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> b<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>a <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> b <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> a <span class="syntax-operator">&gt;</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>numeric_limits<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">:</span><span class="syntax-operator">:</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
-  <span class="syntax-keyword">return</span> a <span class="syntax-operator">+</span> b<span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">int</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   assert<span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>abs<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.1</span> <span class="syntax-operator">+</span> <span class="syntax-number">0.2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-038 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>

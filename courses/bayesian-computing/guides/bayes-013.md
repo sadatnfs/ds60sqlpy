@@ -8,6 +8,13 @@ Correlated predictors can make separate coefficients weakly identified even when
 
 The synthetic design has an intercept and two nearly identical predictor columns. Their true generating slopes are two and minus 1.5, but the observed design strongly emphasizes their sum. The model uses independent standard-normal coefficient priors and known observation standard deviation .1. Those priors regularize weak directions; they are part of the model, not an invisible numerical repair.
 
+## Key terms
+
+- **Posterior geometry:** The joint shape of the posterior, including correlations that marginal summaries can hide.
+- **Weak identification:** Little information about a direction in parameter space, such as the difference between two nearly identical slopes.
+- **Well-determined contrast:** A combination, such as the sum of collinear slopes, that the design measures precisely despite weak individual coefficients.
+- **Posterior correlation:** Dependence between coefficients in the posterior that can make numerical exploration inefficient.
+
 ## Worked case 1: derive the full normal posterior
 
 With prior covariance I, design X and known observation variance \(\sigma^2\), the posterior covariance and mean are
@@ -51,6 +58,34 @@ Review diagnostic quantities for both individual coefficients and important cont
 **Does a tight posterior prediction imply precise feature effects?** No. Several coefficient combinations can generate nearly identical predictions over the observed feature relationship. The example demonstrates that distinction through an exact covariance calculation.
 
 **Should the coefficient with the larger posterior mean be called more important?** That ignores scale, covariance, causal meaning and the target prediction population. Define the desired contrast or decision and evaluate it directly, with its uncertainty and assumptions.
+
+## Worked example: Posterior variances of coefficients and contrasts as correlation grows
+
+```python
+import numpy as np
+
+n, sigma = 50, 1.0
+for r in (0.0, 0.9, 0.99):
+    XtX = n * np.array([[1.0, r], [r, 1.0]])  # standardized predictors, flat prior
+    V = sigma**2 * np.linalg.inv(XtX)
+    sd_b1 = np.sqrt(V[0, 0])
+    sd_sum = np.sqrt(np.array([1, 1]) @ V @ np.array([1, 1]))
+    sd_diff = np.sqrt(np.array([1, -1]) @ V @ np.array([1, -1]))
+    corr = V[0, 1] / V[0, 0]
+    print(
+        f"r={r}: sd(b1) {sd_b1:.4f}, sd(b1+b2) {sd_sum:.4f}, sd(b1-b2) {sd_diff:.4f}, corr(b1,b2) {corr:.2f}"
+    )
+```
+
+Observed output:
+
+```text
+r=0.0: sd(b1) 0.1414, sd(b1+b2) 0.2000, sd(b1-b2) 0.2000, corr(b1,b2) 0.00
+r=0.9: sd(b1) 0.3244, sd(b1+b2) 0.1451, sd(b1-b2) 0.6325, corr(b1,b2) -0.90
+r=0.99: sd(b1) 1.0025, sd(b1+b2) 0.1418, sd(b1-b2) 2.0000, corr(b1,b2) -0.99
+```
+
+With 50 standardized observations and uncorrelated predictors, each coefficient has posterior standard deviation 0.1414 and both the sum and the difference have 0.2000. As the correlation between predictors rises to 0.99, the individual standard deviations climb to 1.0025, seven times larger, and the posterior correlation of the two coefficients becomes \(-0.99\). The difference \(b_1-b_2\) is ten times less certain at 2.0000, while the sum's standard deviation actually falls slightly, to 0.1418. The formulas explain the asymmetry: \(\mathrm{Var}(b_1+b_2)=2\sigma^2/(n(1+r))\) shrinks as \(r\) grows, while \(\mathrm{Var}(b_1-b_2)=2\sigma^2/(n(1-r))\) explodes as \(1-r\) goes to zero. The data know very well how much the two predictors together contribute and almost nothing about how to divide it. Reporting the coefficients separately with wide intervals is honest; reporting either as a stable effect would not be. A sampler sees this as a narrow diagonal ridge.
 
 ## Complete reproducible program
 

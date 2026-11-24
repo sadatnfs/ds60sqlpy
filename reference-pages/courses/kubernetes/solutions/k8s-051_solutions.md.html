@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-label-port-targetport-and-nodeport">Exercise 1: Label port, targetPort and nodePort.<a class="heading-anchor" href="#exercise-1-label-port-targetport-and-nodeport" aria-label="Link to this section">#</a></h3>
 <p>A request must use the port appropriate to its caller and destination address.</p>
 <p><strong>Expected:</strong> 80, 8080 and 30080 serve distinct path positions.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Map port to the ClusterIP listener, targetPort to the container listener and nodePort to the port opened on every node.</li>
+<li><strong>Why it is correct:</strong> Each field sits at a different hop: 80 on the Service, 8080 in the Pod and 30080 on the node.</li>
+<li><strong>Plausible wrong approach:</strong> Setting all three to the same number hides which hop each one controls and makes faults hard to place.</li>
+<li><strong>How to verify:</strong> 80, 8080 and 30080 are each tied to their own position in the path.</li>
+</ul>
 <h3 id="exercise-2-predict-whether-a-private-node-is-publicly-reachable">Exercise 2: Predict whether a private node is publicly reachable.<a class="heading-anchor" href="#exercise-2-predict-whether-a-private-node-is-publicly-reachable" aria-label="Link to this section">#</a></h3>
 <p>Infrastructure routing and firewall policy remain necessary. Service type alone does not publish the host to the internet.</p>
 <p><strong>Expected:</strong> No public route is implied by NodePort allocation.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check whether any public route reaches the node&#x27;s address before predicting reachability.</li>
+<li><strong>Why it is correct:</strong> NodePort only opens a port on node addresses; if those are private, no public client can route to them.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming that allocating a nodePort makes the Service public skips the network the client must cross.</li>
+<li><strong>How to verify:</strong> The prediction says no public route is implied.</li>
+</ul>
 <h3 id="exercise-3-draw-the-local-engine-nodeport-path">Exercise 3: Draw the local-engine NodePort path.<a class="heading-anchor" href="#exercise-3-draw-the-local-engine-nodeport-path" aria-label="Link to this section">#</a></h3>
 <p>Desktop environments add hops that a cloud-node diagram can omit. Name the actual host arrangement.</p>
 <p><strong>Expected:</strong> Include VM or node-container boundaries when present.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Draw the host, any VM or node container, the node port, kube-proxy forwarding and the Pod listener.</li>
+<li><strong>Why it is correct:</strong> Local engines often run nodes inside a VM or container, which adds a boundary the host must route or map into.</li>
+<li><strong>Plausible wrong approach:</strong> Drawing the host directly reaching the nodePort ignores that boundary and its port mapping.</li>
+<li><strong>How to verify:</strong> The drawing includes the VM or node-container boundary when the environment has one.</li>
+</ul>
 <h3 id="exercise-4-diagnose-timeout-before-traffic-reaches-the-node">Exercise 4: Diagnose timeout before traffic reaches the node.<a class="heading-anchor" href="#exercise-4-diagnose-timeout-before-traffic-reaches-the-node" aria-label="Link to this section">#</a></h3>
 <p>Locate the earliest failing hop. A correct backend cannot answer packets that never reach the node.</p>
 <p><strong>Expected:</strong> Inspect host/VM route and mapping rather than Pod selectors first.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Test whether the host can reach the node address and whether any port mapping exists before checking selectors.</li>
+<li><strong>Why it is correct:</strong> A timeout before the node means the packet never reached kube-proxy, so the Service and Pods were never involved.</li>
+<li><strong>Plausible wrong approach:</strong> Editing Pod selectors cannot fix traffic that never arrives at the node.</li>
+<li><strong>How to verify:</strong> The first checks are the host or VM route and the port mapping.</li>
+</ul>
 <h3 id="exercise-5-explain-the-nodeport-range-as-configurable">Exercise 5: Explain the NodePort range as configurable.<a class="heading-anchor" href="#exercise-5-explain-the-nodeport-range-as-configurable" aria-label="Link to this section">#</a></h3>
 <p>Read the prepared cluster configuration before selecting a fixed port. Avoid collisions with existing owned resources.</p>
 <p><strong>Expected:</strong> The common default is not a guaranteed cluster setting.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Read the API server&#x27;s service node port range setting instead of assuming 30000 to 32767.</li>
+<li><strong>Why it is correct:</strong> That range is the common default but is set per cluster through an API server flag.</li>
+<li><strong>Plausible wrong approach:</strong> Hardcoding a nodePort from the default range can be rejected on a cluster with a different range.</li>
+<li><strong>How to verify:</strong> The answer calls the range configurable and the default an example.</li>
+</ul>
 <h3 id="exercise-6-compare-nodeport-with-a-deliberate-loopback-port-forward">Exercise 6: Compare NodePort with a deliberate loopback port-forward.<a class="heading-anchor" href="#exercise-6-compare-nodeport-with-a-deliberate-loopback-port-forward" aria-label="Link to this section">#</a></h3>
 <p>A temporary developer tunnel can be useful but does not qualify a NodePort or public load-balancer path.</p>
-<p><strong>Expected:</strong> They have different scopes, lifetimes and routing mechanisms.</p></article>
+<p><strong>Expected:</strong> They have different scopes, lifetimes and routing mechanisms.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Contrast a cluster-wide NodePort with a kubectl port-forward bound to 127.0.0.1 on one machine.</li>
+<li><strong>Why it is correct:</strong> NodePort persists on every node through kube-proxy, while port-forward is a client session tunneled through the API server.</li>
+<li><strong>Plausible wrong approach:</strong> Treating them as interchangeable leads to sharing a port-forward address that only works on the local machine.</li>
+<li><strong>How to verify:</strong> The comparison covers scope, lifetime and routing mechanism.</li>
+</ul></article>
   </main>
 </body>
 </html>

@@ -3,6 +3,28 @@
   "title": "Loops, ranges, comprehensions and scope",
   "concepts": ["iteration", "range", "comprehension", "generator", "function scope"],
   "outcome": "Trace finite iteration and scope rules while using explicit empty-input and indexing policies.",
+  "key_terms": [
+    [
+      "Range",
+      "A lazy arithmetic sequence such as `1:n` that stores its start, step and stop instead of every element."
+    ],
+    [
+      "Comprehension",
+      "Bracketed loop syntax such as `[x^2 for x in xs]` that eagerly builds a new array from an iteration."
+    ],
+    [
+      "Generator",
+      "Parenthesized loop syntax such as `(x^2 for x in xs)` that produces values on demand, so a reduction needs no intermediate array."
+    ],
+    [
+      "Soft scope",
+      "The rule governing assignment to a global name inside a top-level loop, which behaves differently in a script file than in the REPL."
+    ],
+    [
+      "Function scope",
+      "Variables assigned inside a function body are local to each call, which keeps an accumulator free of global ambiguity."
+    ]
+  ],
   "level": "beginner",
   "minutes": 90,
   "prerequisites": ["julia-004"],
@@ -11,48 +33,68 @@
     ["Julia scope", "https://docs.julialang.org/en/v1/manual/variables-and-scoping/"]
   ],
   "figure": 0,
+  "approach": "Trace every loop by its iterable. Ranges such as `1:3` include both endpoints, `1:0` is empty, and a descending range needs a negative step. `sum_range` starts its accumulator at 0, so its empty result is 0. Positions come from `eachindex` or `enumerate`, and accumulation lives inside a function so its state is local.",
   "exercises": [
     {
       "title": "Count an inclusive range",
       "task": "List values from 1:3.",
       "expected": "The range contains 1, 2 and 3.",
       "hint": "Check both endpoints.",
-      "answer": "Inclusive syntax must match the intended number of observations."
+      "answer": "Inclusive syntax must match the intended number of observations.",
+      "why": "`1:3` includes both endpoints, so it holds three values: 1, 2 and 3.",
+      "wrong": "Expecting Python-like half-open ranges predicts two values and leaves the last observation out of every loop.",
+      "verify": "Check `collect(1:3) == [1, 2, 3]` and `length(1:3) == 3`, the latter already in the reference."
     },
     {
       "title": "Use zero iterations",
       "task": "Run the accumulator over 1:0.",
       "expected": "The result is its initial zero.",
       "hint": "An empty iterable performs no loop body.",
-      "answer": "The accumulator policy determines the empty-input result; other algorithms may need to reject emptiness."
+      "answer": "The accumulator policy determines the empty-input result; other algorithms may need to reject emptiness.",
+      "why": "`1:0` is empty, so the loop body in `sum_range` never runs and `total` keeps its starting value 0.",
+      "wrong": "Assuming every loop runs at least once predicts an error or a garbage value, when the accumulator simply returns its initial state.",
+      "verify": "Assert `sum_range(1:0) == 0` and `[i for i = 1:0] == Int[]`, which the reference also checks."
     },
     {
       "title": "Descend explicitly",
       "task": "Construct the descending sequence 3, 2, 1 as a range.",
       "expected": "Use 3:-1:1.",
       "hint": "Specify the step direction.",
-      "answer": "A positive default step does not produce the requested descending traversal."
+      "answer": "A positive default step does not produce the requested descending traversal.",
+      "why": "`3:-1:1` starts at 3 and adds -1 until it passes 1, giving 3, 2 and 1.",
+      "wrong": "Writing `3:1` produces an empty range, because the default step is +1 and 3 is already past the stop.",
+      "verify": "Compare `collect(3:-1:1)` with `[3, 2, 1]` and `isempty(3:1)` with `true`."
     },
     {
       "title": "Keep identity separate",
       "task": "Enumerate values 10 and 20.",
       "expected": "Positions are 1 and 2; values remain 10 and 20.",
       "hint": "Do not use a data value as an array index accidentally.",
-      "answer": "Record identity, position and measurement are distinct roles."
+      "answer": "Record identity, position and measurement are distinct roles.",
+      "why": "`enumerate([10, 20])` yields pairs `(1, 10)` and `(2, 20)`, keeping positions separate from measured values.",
+      "wrong": "Indexing with the values, as in `v[10]`, treats a measurement as a position and throws `BoundsError` on a two-element vector.",
+      "verify": "Collect `enumerate([10, 20])` and compare it with `[(1, 10), (2, 20)]`; the reference checks `eachindex([4, 5])` gives 1 and 2."
     },
     {
       "title": "Avoid an unnecessary collection",
       "task": "Compute only the sum of selected squares.",
       "expected": "A generator can supply the reduction directly.",
       "hint": "Ask whether the intermediate array is needed later.",
-      "answer": "This changes materialization, but performance claims still need a measured workload."
+      "answer": "This changes materialization, but performance claims still need a measured workload.",
+      "why": "`sum(i^2 for i in 1:3 if isodd(i))` feeds 1 and 9 directly to `sum`, giving 10 without allocating an intermediate array.",
+      "wrong": "Claiming the generator is faster without timing assumes allocation dominates, which this tiny input cannot show either way.",
+      "verify": "Assert the generator sum equals `sum([i^2 for i in 1:3 if isodd(i)])`; the reference checks `sum(i for i = 1:3) == 6`."
     },
     {
       "title": "Trace scope",
       "task": "Move a reusable accumulation into a function with explicit input.",
       "expected": "Its local state is recreated on every call.",
       "hint": "Compare the function boundary with ambient script globals.",
-      "answer": "Explicit inputs and outputs make both reasoning and runtime specialization easier to inspect."
+      "answer": "Explicit inputs and outputs make both reasoning and runtime specialization easier to inspect.",
+      "why": "Inside `sum_range`, `total = 0` runs on every call, so `sum_range(-2:2)` gives 0 and `sum_range(2:2)` gives 2 independently.",
+      "wrong": "Updating a top-level `total` inside a script's `for` loop triggers the soft-scope ambiguity warning and then an undefined-variable error.",
+      "verify": "The reference asserts `sum_range(2:2) == 2` and `sum_range(-2:2) == 0`; call them in either order and expect the same results."
     }
-  ]
+  ],
+  "checks_note": "Each assertion covers a boundary of a counting loop. `sum_range(2:2)` has exactly one element, `-2:2` cancels to zero, and `1:0` is empty so the comprehension yields `Int[]`. `sum(i for i = 1:3) == 6` checks a generator without building an array, and `eachindex([4, 5])` returns the positions 1 and 2, not the stored values 4 and 5. A loop that started at zero would break the length check."
 }

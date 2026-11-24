@@ -36,7 +36,7 @@ assert.equal(result.status, 0, result.stderr + result.stdout);
 assert.match(result.stdout, /# pass 1/u);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.status, 0, result.stderr + result.stdout)`. Restoring the original line brings back the worked observation: child exit status 0; one passing test.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.status, 0, result.stderr + result.stdout)`. Restoring `assert.equal(2` brings back: child exit status 0; one passing test.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.status, 0, result.stderr + result.stdout)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -55,7 +55,7 @@ assert.match(result.stdout, /# fail 1/u);
 assert.match(result.stdout, /AssertionError/u);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.notEqual(result.status, 0)`; after it the line reads `assert.equal(2` again and nonzero child exit; one failing test.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.notEqual(result.status, 0)`. Restoring `assert.equal(2` brings back: nonzero child exit; one failing test.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.notEqual(result.status, 0)` for this input.
 

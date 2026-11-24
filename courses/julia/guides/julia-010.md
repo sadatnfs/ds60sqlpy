@@ -10,6 +10,14 @@ Use owned types to represent data contracts and distinguish immutable bindings f
 
 Open `julia-010` in `/classroom` with its prepared `julia` runtime. Worked case A (a measurement constructor) and worked case B (mutable fields inside an immutable object) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-010: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Struct:** An immutable composite type whose fields cannot be reassigned after construction.
+- **Inner constructor:** A constructor defined inside the type body that calls `new` and can reject invalid field values before any instance exists.
+- **Mutable struct:** A composite type whose fields can be reassigned after construction, so validation at construction alone no longer protects it.
+- **Invariant:** A condition that every valid instance must satisfy, such as a finite value with a declared unit.
+- **Nested state:** A mutable object, such as a vector, stored in a field of an immutable struct that can still change in place.
+
 ## A type can carry a data contract
 
 A composite type groups named fields. A constructor creates an instance and can enforce invariants before an invalid object enters the rest of a program. The field types describe representations; they do not, by themselves, establish units, ranges or scientific meaning.

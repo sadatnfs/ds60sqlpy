@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-032_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A synthetic request contains upload 3 ms, kernel 2 ms, download 3 ms and host processing 2 ms, sequentially. Halving the kernel saves only 1 ms, changing total time from 10 to 9 ms. Eliminating an unnecessary round trip could offer a larger opportunity if semantics permit data to stay resident.</p>
+<p><strong>Approach:</strong> Sum upload 3, kernel 2, download 3 and host 2 ms, then halve only the kernel.</p>
+<p><strong>Why it is correct:</strong> The phases are sequential, so the total drops from 10 ms to 9 ms.</p>
+<p><strong>A plausible wrong approach:</strong> Expecting halving the kernel to halve the request ignores the 8 ms outside it.</p>
+<p><strong>How to verify:</strong> The reference asserts total == 10 and optimized == 9.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A GPU sits idle for 6 ms between two 1 ms kernels while the host prepares data. Increasing the second kernel&#x27;s occupancy does not remove that gap. Investigate host preparation, batching and dependencies, then measure the entire request again.</p>
+<p><strong>Approach:</strong> Attack the 6 ms host-preparation gap rather than the 1 ms kernels.</p>
+<p><strong>Why it is correct:</strong> The GPU waits on the host, so kernel speed does not limit this request.</p>
+<p><strong>A plausible wrong approach:</strong> Raising occupancy of the second kernel leaves the idle gap untouched.</p>
+<p><strong>How to verify:</strong> Measure the full request before and after a host-side change.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Label upload, kernel, download and host processing with their stated intervals and identify that all are sequential in this synthetic model.</p>
+<p><strong>Approach:</strong> Draw four sequential bars labeled with 3, 2, 3 and 2 ms.</p>
+<p><strong>Why it is correct:</strong> The labels show which phase dominates the 10 ms.</p>
+<p><strong>A plausible wrong approach:</strong> Drawing the kernel as overlapping transfers misstates this synthetic model.</p>
+<p><strong>How to verify:</strong> Confirm the bar lengths add to 10 ms.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Yes. Another critical-path dependency may dominate, and collection overhead or different work can mislead. Compare equal end-to-end contracts.</p>
+<p><strong>Approach:</strong> Yes; check the critical path and end-to-end time.</p>
+<p><strong>Why it is correct:</strong> Overlap off the critical path saves nothing if another dependency still waits.</p>
+<p><strong>A plausible wrong approach:</strong> Treating visual overlap as speedup skips measuring the request.</p>
+<p><strong>How to verify:</strong> Compare equal end-to-end runs with and without the overlap.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Initialization and JIT may create one-time gaps absent from steady state; both cold and warm behavior need truthful labels.</p>
+<p><strong>Approach:</strong> Label the first iteration as cold and report it separately from steady state.</p>
+<p><strong>Why it is correct:</strong> Initialization and JIT compilation happen once and inflate that iteration.</p>
+<p><strong>A plausible wrong approach:</strong> Averaging cold and warm runs together hides both behaviors.</p>
+<p><strong>How to verify:</strong> Show the first-iteration time next to the steady-state median.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Precompute the next bounded input before the dependent launch or batch preparation, preserving results, then compare the same timing scope and retained samples.</p>
+<p><strong>Approach:</strong> Prepare the next input on the host while the current kernel runs, then compare.</p>
+<p><strong>Why it is correct:</strong> Overlapping preparation with device work can shrink the 6 ms gap.</p>
+<p><strong>A plausible wrong approach:</strong> Changing several things at once makes any improvement impossible to attribute.</p>
+<p><strong>How to verify:</strong> Check results match and compare the same timing scope with retained samples.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-032_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

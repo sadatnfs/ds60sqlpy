@@ -1,19 +1,8 @@
 # llm-006: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/llm-006.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
+Use this unicode, bytes and tokenizer round trips reference after your own attempt. The [learner guide](../guides/llm-006.md) keeps the fixture and Expected/Verify contracts for *Trace the encoding units* to *Choose identity before splitting*, six separate actions; any implementation is acceptable if *Reject malformed UTF-8* still fails on that input.
 
-The [executable reference](llm-006_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+`verify()` in the [executable reference](llm-006_solution.py) uses the Python standard library and literals only; on failure, keep the *Reject malformed UTF-8* input. A pass says nothing beyond these unicode, bytes and tokenizer round trips fixtures, so next explain code point from memory on a changed fixture. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace the encoding units
 
@@ -65,9 +54,7 @@ The three raw documents are distinct strings, but the two café variants normali
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+*Inspect bytes and code points* validates and reduces its input in the functions below; the executable file covers all six unicode, bytes and tokenizer round trips exercises. Keep the *Reject malformed UTF-8* assertion and its invalid-input case; never replace them with a default.
 
 ```python
 from __future__ import annotations
@@ -100,9 +87,4 @@ def decode_utf8(payload):
 
 Without the examples, explain why len(text), len(text.encode("utf-8")) and token count can all differ. Then choose a fresh combining-character fixture and state which identity policy your duplicate check uses.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Next, pick a fixture unlike *Inspect bytes and code points* to test independent recall, and explain why *Reject malformed UTF-8* rejects its case rather than naming the exception. Any notation works if code point and its denominator stay explicit; these unicode, bytes and tokenizer round trips checks say nothing about unseen model quality or safety.

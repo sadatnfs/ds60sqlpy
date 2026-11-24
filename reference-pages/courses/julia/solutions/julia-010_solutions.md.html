@@ -195,24 +195,59 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-010-explained-reference">julia-010: explained reference<a class="heading-anchor" href="#julia-010-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-010_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>Measurement</code> has an inner constructor that converts the value with <code>Float64</code>, requires it to be finite and requires the unit to be <code>:m</code> or <code>:cm</code> before calling <code>new</code>. The struct is immutable, but <code>VectorRecord</code> stores a mutable <code>Vector{Int}</code>, so a fixed field binding can still expose changing contents.</p>
 <h3 id="1-validate-a-unit">1. Validate a unit<a class="heading-anchor" href="#1-validate-a-unit" aria-label="Link to this section">#</a></h3>
 <p>Field types alone cannot distinguish supported and unsupported physical units.</p>
 <p><strong>Expected observation:</strong> Construction fails explicitly.</p>
+<p><strong>Why it holds here:</strong> <code>unit in (:m, :cm)</code> fails for anything else, so construction throws <code>ArgumentError</code> and no invalid object ever exists.</p>
+<p><strong>Plausible wrong approach:</strong> Validating units later in each analysis function lets an object with <code>:unknown</code> circulate and depends on every caller remembering the check.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>@test_throws ArgumentError Measurement(1, :unknown)</code>; try <code>:km</code> as well and expect the same error.</p>
 <h3 id="2-inspect-conversion">2. Inspect conversion<a class="heading-anchor" href="#2-inspect-conversion" aria-label="Link to this section">#</a></h3>
 <p>The conversion is deliberate and can have precision consequences for other numeric inputs.</p>
 <p><strong>Expected observation:</strong> Its stored value is Float64.</p>
+<p><strong>Why it holds here:</strong> The constructor calls <code>Float64(value)</code> before storing, so <code>Measurement(1, :cm).value</code> is the float 1.0.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming the integer type is kept would predict <code>Int</code> storage, but <code>fieldtypes(Measurement)</code> fixes the field as <code>Float64</code>.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>fieldtypes(Measurement) == (Float64, Symbol)</code>; print <code>typeof(Measurement(1, :cm).value)</code>.</p>
 <h3 id="3-try-field-reassignment">3. Try field reassignment<a class="heading-anchor" href="#3-try-field-reassignment" aria-label="Link to this section">#</a></h3>
 <p>This says nothing about whether the original measurement was scientifically valid.</p>
 <p><strong>Expected observation:</strong> The operation is rejected.</p>
+<p><strong>Why it holds here:</strong> Fields of an immutable struct cannot be reassigned after construction, so <code>measurement.value = 3.0</code> throws <code>ErrorException</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Concluding that the failed assignment proves the measurement is valid confuses a language rule about mutation with domain validation.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>@test_throws ErrorException measurement.value = 3.0</code>.</p>
 <h3 id="4-mutate-nested-storage">4. Mutate nested storage<a class="heading-anchor" href="#4-mutate-nested-storage" aria-label="Link to this section">#</a></h3>
 <p>Deep immutability requires more than an immutable wrapper.</p>
 <p><strong>Expected observation:</strong> Its contents can change despite the immutable outer struct.</p>
+<p><strong>Why it holds here:</strong> <code>VectorRecord(a)</code> stores the same vector object <code>a</code>, so <code>a[1] = 3</code> is visible as <code>record.values[1] == 3</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Calling the outer struct immutable and therefore frozen predicts the old value, ignoring that the vector inside is shared and mutable.</p>
+<p><strong>How to verify:</strong> The reference performs exactly this mutation and asserts <code>record.values[1] == 3</code>.</p>
 <h3 id="5-create-a-snapshot">5. Create a snapshot<a class="heading-anchor" href="#5-create-a-snapshot" aria-label="Link to this section">#</a></h3>
 <p>A snapshot policy must account for every nested mutable layer.</p>
 <p><strong>Expected observation:</strong> Later source-vector mutation does not affect that copied vector.</p>
+<p><strong>Why it holds here:</strong> <code>VectorRecord(copy(a))</code> stores a fresh vector, so later writes to <code>a</code> do not reach the stored copy.</p>
+<p><strong>Plausible wrong approach:</strong> Copying the record wrapper instead of the vector still shares the inner storage, so the supposed snapshot keeps changing.</p>
+<p><strong>How to verify:</strong> The reference sets <code>a[1] = 4</code> after the copy and asserts <code>separate.values[1] == 3</code>.</p>
 <h3 id="6-review-a-convenience-constructor">6. Review a convenience constructor<a class="heading-anchor" href="#6-review-a-convenience-constructor" aria-label="Link to this section">#</a></h3>
 <p>An API becomes inconsistent if one creation path bypasses its stated invariant.</p>
-<p><strong>Expected observation:</strong> It preserves the same validation contract.</p></article>
+<p><strong>Expected observation:</strong> It preserves the same validation contract.</p>
+<p><strong>Why it holds here:</strong> A convenience method such as <code>Measurement(value) = Measurement(value, :m)</code> routes through the inner constructor and keeps both checks.</p>
+<p><strong>Plausible wrong approach:</strong> Writing it with <code>new</code> directly or with a different field order can create objects that skip the unit and finiteness guards.</p>
+<p><strong>How to verify:</strong> Call the convenience method with NaN and expect <code>ArgumentError</code>, proving the same contract applies.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-010: all reference checks passed</code>:</p>
+<p>Construction checks confirm that <code>Measurement</code> stores a <code>Float64</code> and a <code>Symbol</code>, converting the integer 1 but refusing the string &quot;1&quot; with <code>MethodError</code>. The vector lines show what immutability does not protect: <code>VectorRecord(a)</code> keeps a reference to <code>a</code>, so setting <code>a[1] = 3</code> is visible through <code>record.values</code>. Passing <code>copy(a)</code> breaks that link, and the later write of 4 leaves <code>separate.values[1]</code> at 3.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> typeof<span class="syntax-punctuation">(</span>Measurement<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">:cm</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> Measurement
+    <span class="syntax-decorator">@test</span> fieldtypes<span class="syntax-punctuation">(</span>Measurement<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">Float64</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">Symbol</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">MethodError</span> Measurement<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">:m</span><span class="syntax-punctuation">)</span>
+    a <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    record <span class="syntax-operator">=</span> VectorRecord<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span>
+    a<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> record<span class="syntax-operator">.</span>values<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    separate <span class="syntax-operator">=</span> VectorRecord<span class="syntax-punctuation">(</span>copy<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    a<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">4</span>
+    <span class="syntax-decorator">@test</span> separate<span class="syntax-operator">.</span>values<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

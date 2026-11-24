@@ -10,6 +10,14 @@ In Kubernetes cluster mode, submission creates a driver Pod and that driver crea
 
 Use an explicitly owned namespace, an explicit kubeconfig and context, and a prepared image digest. The project's `kubernetes/submit.py` prints a concrete plan by default. It makes no Kubernetes request until `--execute` is supplied. The workshop does not provision a cloud cluster or choose an ambient account.
 
+## Key terms
+
+- **Kubernetes cluster mode:** Submission that creates a driver Pod, which then creates executor Pods through the Kubernetes API.
+- **Pod:** The smallest Kubernetes workload unit, here one Spark driver or executor.
+- **Owned namespace:** An explicitly selected namespace whose objects the deployment controls and can safely create or delete.
+- **Kubeconfig context:** The explicit cluster, user and namespace selection used for API requests instead of an ambient account.
+- **Dry-run plan:** The concrete submission plan that submit.py prints by default before any request is made with --execute.
+
 ## Worked case A: review a bounded submission plan
 
 Prepare `Dockerfile.cluster` from a reviewed Spark 4.0.1 Python base that retains the supported Kubernetes entrypoint. Deliberately publish or load that image through your authorized environment. Then:
@@ -90,6 +98,59 @@ Executor running, callback refused: driver address or network policy
 ```
 
 Inspect Pod conditions and events before editing the application. A nonexistent image cannot be repaired with a new Spark partition count. A driver Pod created successfully does not prove it can create executors. Keep the precise failed stage in the receipt.
+
+## Worked example: pod memory requests against the namespace quota
+
+```python
+import math
+
+MIN_OVERHEAD_MIB = 384
+NON_JVM_FACTOR = 0.40
+
+
+def pod_memory(heap_mib):
+    return heap_mib + max(MIN_OVERHEAD_MIB, math.floor(heap_mib * NON_JVM_FACTOR))
+
+
+driver, executor = pod_memory(1024), pod_memory(512)
+quota = {"pods": 8, "requests.cpu": 4, "requests.memory": 6 * 1024}
+used = {"pods": 3, "requests.cpu": 1 + 2 * 1, "requests.memory": driver + 2 * executor}
+print("driver pod", driver, "MiB; executor pod", executor, "MiB")
+for key in quota:
+    print(f"{key:16} {used[key]:>6} of {quota[key]}")
+headroom = {
+    "pods": quota["pods"] - 1,
+    "requests.cpu": quota["requests.cpu"] - 1,
+    "requests.memory": (quota["requests.memory"] - driver) // executor,
+}
+print("max executors per limit:", headroom, "-> binding:", min(headroom, key=headroom.get))
+```
+
+Output from running the block above:
+
+```text
+driver pod 1433 MiB; executor pod 896 MiB
+pods                  3 of 8
+requests.cpu          3 of 4
+requests.memory    3225 of 6144
+max executors per limit: {'pods': 7, 'requests.cpu': 3, 'requests.memory': 5} -> binding: requests.cpu
+```
+
+The arithmetic uses Spark's documented rule for Kubernetes pod memory: heap plus overhead, where overhead is the larger of 384 MiB and a factor times heap, and the factor defaults to 0.40 for non-JVM applications such as this Python job. The 1g driver therefore requests 1433 MiB and each 512m executor requests 896 MiB. Against the workshop `resources.yaml` quota, the submission uses 3 of 8 pods, 3 of 4 requested CPUs and 3225 of 6144 MiB. Scaling up, CPU binds first at three executors, before memory allows five and pods allow seven. This is a calculation, not an observation, so confirm it against the actual pod spec with `kubectl get pod -o yaml` after submission, since a cluster admission controller or explicit `memoryOverhead` setting can change the numbers. When a fourth executor stays Pending with an exceeded quota event, this table explains why without any application change, and the chapter's rule applies: that is an allocation failure, not a numerical one.
+
+## Worked example: reading pod conditions before touching application code
+
+```bash
+K="kubectl --kubeconfig $OWNED_KUBECONFIG --context $OWNED_CONTEXT --namespace ds60-spark-study"
+$K get pods -l ds60-workshop=spark-deployment \
+  -o custom-columns=NAME:.metadata.name,PHASE:.status.phase,ROLE:.metadata.labels.spark-role
+$K describe pod OBSERVED_DRIVER_POD | sed -n '/^Events:/,$p'
+$K get events --field-selector involvedObject.name=OBSERVED_DRIVER_POD \
+  --sort-by=.lastTimestamp
+$K logs OBSERVED_DRIVER_POD --tail=200 | grep -E 'Forbidden|ImagePull|Exception' || true
+```
+
+These commands gather the evidence that separates the four failure lines in Worked case B, and they print nothing here because no owned cluster is attached to this page. Listing pods with the workshop label and the `spark-role` column shows whether the driver exists and whether any executors were ever created. The Events section of `describe` and the filtered `get events` surface image pull errors, failed scheduling with insufficient memory or exceeded quota, and admission rejections, all of which happen before the application code runs. The final log search looks for the `Forbidden` text that appears when the driver ServiceAccount cannot create executor pods. `OBSERVED_DRIVER_POD` must be replaced with the pod name that the submission actually produced, and the explicit kubeconfig and context keep the queries from landing on an ambient cluster. Save the event output before cleanup, because Kubernetes expires events after a retention window and the receipt needs the exact failing stage.
 
 ## Diagnose and transfer
 

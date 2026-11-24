@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>NetworkPolicy describes allowed network relationships for selected Pods. It requires a network implementation that enforces the API. Creating the object on a cluster without enforcement does not prove isolation. The policy is primarily about supported network traffic, not HTTP user identity or arbitrary application authorization.</p>
 <p>Policies are additive. Once a Pod is isolated for a direction, the union of applicable allow rules determines permitted traffic for that direction. There is no general ordered deny rule that overrides a later allow in the ordinary API. A policy can select all Pods in one namespace with an empty podSelector, while namespace scope remains important.</p>
 <p>Selector composition is subtle. A single peer containing both namespaceSelector and podSelector requires both conditions. Separate peers represent alternatives. Confusing these forms can allow far more callers than intended. This lesson makes that Boolean logic explicit with a small synthetic matrix.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>namespaceSelector:</strong> A NetworkPolicy peer field that selects source or destination namespaces by their labels.</li>
+<li><strong>Peer composition:</strong> How selectors combine: a namespaceSelector and podSelector in the same peer must both match, while separate peers mean either may match.</li>
+<li><strong>Policy isolation:</strong> A Pod becomes isolated in a direction once any policy selects it for that direction, after which only allowed traffic passes.</li>
+<li><strong>Additive allow rules:</strong> Policies that select the same Pod combine their allows, so one policy cannot deny what another permits.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A policy’s podSelector selects the destination Pods for ingress rules. Each from item describes an allowed source. Ports constrain the destination transport port. Namespace labels are selected on Namespace objects, not copied from Pod labels by assumption.</p>
 <p>For a connection between two Pods, the source Pod’s egress policy and the destination Pod’s ingress policy must both permit it when those directions are isolated. A direction with no applicable isolation does not restrict that connection through NetworkPolicy. Reply traffic belonging to a permitted connection is implicitly allowed; that does not authorize an unrelated new reverse-direction connection.</p>

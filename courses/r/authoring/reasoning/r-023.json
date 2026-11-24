@@ -1,0 +1,40 @@
+{
+  "exercises": [
+    {
+      "approach": "Track objects rather than names: `Counter$new(2)` creates one object, `b <- a` binds a second name to it, and `b$add(3)` changes the private value of that single object.",
+      "why": "An R6 object is an environment, and assigning an environment copies only the reference. Both names therefore lead to the same private value, which goes from 2 to 5.",
+      "wrong": "Reasoning as for a list and expecting a to stay at 2. That is how the r-021 measurement behaves, but there is no copy here for the change to land in.",
+      "verify": "`a$read()` and `b$read()` both return 5, and `identical(a, b)` returns TRUE."
+    },
+    {
+      "approach": "Call `copy <- a$clone()` first, then `copy$add(4)`.",
+      "why": "clone() creates a new object whose private value starts at the current 5. The addition touches only that new object, so it reads 9 and a still reads 5.",
+      "wrong": "Writing `copy <- a` and then adding. Both names point at one counter, so both read 9 and the original value is lost.",
+      "verify": "`copy$read()` returns 9, and `a$read()` returns 5."
+    },
+    {
+      "approach": "Record `before <- a$read()`, call `a$add(-1)` inside a handler that expects \"nonnegative finite\", then read again and compare.",
+      "why": "add() validates the amount before it assigns private$value, so the error stops the method before any change. NA_real_ fails the same is.finite test.",
+      "wrong": "Updating first and validating afterward. The counter would already read 4 when the error is raised, leaving a half-applied change that the caller cannot see.",
+      "verify": "`a$read()` returns 5 after the failed call, the same value as `before`."
+    },
+    {
+      "approach": "Clone the Box both ways, add 2 through the shallow copy and 5 through the deep copy, then read all three counters.",
+      "why": "A shallow clone copies the Box but its counter field still refers to the same Counter, so adding 2 changes the original too: 1 plus 2 is 3. With deep = TRUE, R6 clones fields that are R6 objects, so the deep counter goes from 1 to 6 alone.",
+      "wrong": "Assuming clone() isolates nested objects and expecting the original to stay at 1.",
+      "verify": "`original$counter$read()` returns 3, `shallow$counter$read()` returns 3, and `deep$counter$read()` returns 6."
+    },
+    {
+      "approach": "Construct a new Counter inside the function applied to each fold, as the reference does in `vapply(c(2, 5, 1), ...)`.",
+      "why": "Each call creates its own counter starting at 0, so the readings are 2, 5 and 1, and the result for a fold does not depend on which folds ran before it.",
+      "wrong": "Creating one counter outside the loop and adding each fold's amount to it. The readings become 2, 7 and 8, so later folds report inflated values and reordering the folds changes the results.",
+      "verify": "`fold_values` returns 2, 5, 1, and running the folds in reverse returns 1, 5, 2."
+    },
+    {
+      "approach": "Limit the claim: `clone(deep = TRUE)` deep copies fields that are R6 objects. For a plain environment or a connection, write a private deep_clone method that states what is copied, and test it.",
+      "why": "The Box test shows R6 fields being copied. R6's default deep copy leaves other environments shared, and a connection to a file cannot be duplicated at all.",
+      "wrong": "Describing deep = TRUE as a full snapshot. A cache environment field would still be shared, and a change made through the clone would appear in the original.",
+      "verify": "For a class with a plain environment field env, `identical(obj$clone(deep = TRUE)$env, obj$env)` returns TRUE, showing that it is still shared."
+    }
+  ]
+}

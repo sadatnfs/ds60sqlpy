@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-grouped-sums">Exercise 1: Compute grouped sums<a class="heading-anchor" href="#exercise-1-compute-grouped-sums" aria-label="Link to this section">#</a></h3>
 <p>Ignore null only under the stated aggregate contract.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute grouped sums</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Group <code>[(A, 2), (A, null), (B, 5)]</code> with the skip-null sum rule: A totals 2 and B totals 5, while A has a row count of 2.</p>
+<p><strong>Why it is correct here.</strong> Under the declared contract, nulls do not contribute to the sum but the row still exists. Sum and row count therefore answer different questions about group A.</p>
+<p><strong>A plausible wrong approach.</strong> Treating the null as an error and dropping group A entirely, or failing the whole aggregation, contradicts the stated skip-null rule.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>totals == {&#x27;A&#x27;: 2, &#x27;B&#x27;: 5}</code> and <code>counts[&#x27;A&#x27;] == 2</code>. Compare with a cuDF or pandas <code>groupby</code> sum and size on the same rows.</p>
 <h3 id="exercise-2-distinguish-null-and-zero">Exercise 2: Distinguish null and zero<a class="heading-anchor" href="#exercise-2-distinguish-null-and-zero" aria-label="Link to this section">#</a></h3>
 <p>Zero contributes a numeric value.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>distinguish null and zero</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Distinguish null from zero: a null value means unknown and is skipped by the sum, while a zero is a real value that contributes 0 and counts as non-null.</p>
+<p><strong>Why it is correct here.</strong> The difference matters for means and non-null counts. Group A has mean 2 over one non-null value, but filling the null with 0 gives a mean of 1.</p>
+<p><strong>A plausible wrong approach.</strong> Filling nulls with zero before aggregation silently changes averages and counts, which then disagree with reports computed by a SQL engine that skips nulls.</p>
+<p><strong>How to verify.</strong> Compute <code>count</code> and <code>mean</code> for group A with and without filling, and confirm the skip-null version gives count 1 and mean 2.</p>
 <h3 id="exercise-3-define-category-mapping">Exercise 3: Define category mapping<a class="heading-anchor" href="#exercise-3-define-category-mapping" aria-label="Link to this section">#</a></h3>
 <p>Fit once and reserve an unknown category if needed.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>define category mapping</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Define the category mapping once on training data, such as A to 0 and B to 1, and reserve a code for unknown categories such as C.</p>
+<p><strong>Why it is correct here.</strong> Model features depend on consistent codes. A mapping fitted once and reused gives every partition and later batch the same meaning for each code.</p>
+<p><strong>A plausible wrong approach.</strong> Fitting category codes independently in each partition assigns code 0 to whatever category appears first there, so the same code means different things to the model.</p>
+<p><strong>How to verify.</strong> Encode two partitions with the saved mapping and assert A has the same code in both, and that C maps to the unknown code.</p>
 <h3 id="exercise-4-preserve-row-identity">Exercise 4: Preserve row identity<a class="heading-anchor" href="#exercise-4-preserve-row-identity" aria-label="Link to this section">#</a></h3>
 <p>Carry a stable key through transformations.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>preserve row identity</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Preserve row identity by carrying a stable key column through filtering, joins and conversions, so outputs can be matched back to inputs.</p>
+<p><strong>Why it is correct here.</strong> GPU dataframe operations may reorder rows, for example in hash joins or group operations. A key column allows correct alignment without relying on position.</p>
+<p><strong>A plausible wrong approach.</strong> Matching rows by position after a join or a GPU to CPU conversion can attach predictions to the wrong records.</p>
+<p><strong>How to verify.</strong> Shuffle input rows, run the pipeline and join results on the key, then check each output matches its input.</p>
 <h3 id="exercise-5-count-conversion-bytes">Exercise 5: Count conversion bytes<a class="heading-anchor" href="#exercise-5-count-conversion-bytes" aria-label="Link to this section">#</a></h3>
 <p>Count masks dtype conversions and host-device copies.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>count conversion bytes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Count conversion bytes: moving a column to the GPU moves its values plus a null mask, and dtype conversions such as int64 to float32 or object strings to device strings create extra buffers.</p>
+<p><strong>Why it is correct here.</strong> Transfer and conversion costs can exceed the computation for small operations, so the ledger shows whether staying on the device is worthwhile.</p>
+<p><strong>A plausible wrong approach.</strong> Counting only the numeric values misses null masks, string offsets and temporary converted copies.</p>
+<p><strong>How to verify.</strong> Compute expected bytes for a column of known length and dtype, then compare with the device memory reported after transfer.</p>
 <h3 id="exercise-6-distinguish-cudf-from-spark-acceleration">Exercise 6: Distinguish cuDF from Spark acceleration<a class="heading-anchor" href="#exercise-6-distinguish-cudf-from-spark-acceleration" aria-label="Link to this section">#</a></h3>
 <p>One is a dataframe library and the other integrates Spark physical execution.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>distinguish cuDF from Spark acceleration</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Distinguish cuDF, a dataframe library with a pandas-like API on the GPU, from the RAPIDS Accelerator for Spark, which replaces Spark physical operators with GPU implementations.</p>
+<p><strong>Why it is correct here.</strong> cuDF code calls GPU operations directly, while Spark acceleration keeps Spark&#x27;s API and planner and changes how the plan executes, falling back to CPU for unsupported operators.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming a Spark job uses the GPU because cuDF is installed confuses a library with a plugin that needs its own configuration.</p>
+<p><strong>How to verify.</strong> For Spark, inspect the physical plan for GPU operators. For cuDF, check that the objects are cuDF dataframes.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Grouped sums A 2, B 5 and row count A 2.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-108_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

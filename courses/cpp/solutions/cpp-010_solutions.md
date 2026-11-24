@@ -17,7 +17,7 @@ A struct turns related fields into one value, but C++ does not automatically kno
 
 enum class gives named, scoped alternatives. Status::paid and Status::pending are easier to review than magic integers, and accidental implicit conversion to an integer is restricted. This still does not validate arbitrary external bytes: a parser must map permitted input names or numbers to the intended enum values and reject unsupported states. A type with named states is useful only when the boundary respects that vocabulary.
 
-Aggregate initialization follows field order in the shown definition. Payment{7, 200, Status::paid} binds 7 to id and 200 to cents. If fields of the same type are accidentally swapped, the compiler may accept the program while its meaning changes. Named construction functions or stronger distinct types can help when that risk becomes important. For the small fixture, trace each field explicitly before aggregating.
+Aggregate initialization follows field order in the shown definition. `Payment{7, 200, Status::paid}` binds 7 to id and 200 to cents. If fields of the same type are accidentally swapped, the compiler may accept the program while its meaning changes. Named construction functions or stronger distinct types can help when that risk becomes important. For the small fixture, trace each field explicitly before aggregating.
 
 The amount invariant is checked before state filtering. A pending payment with negative cents should not evade validation merely because it currently contributes zero. Validation asks whether the record is meaningful; contribution asks how a meaningful record participates in the requested statistic. Combining those questions into a single conditional can hide invalid data in excluded categories.
 
@@ -48,7 +48,7 @@ Expected: Pending contributes zero to settled revenue while retaining its origin
 
 ## Exercise 1: Read the record
 
-Describe each field of Payment{7, 200, paid}.
+Describe each field of `Payment{7, 200, Status::paid}`.
 
 **Expected:** Identity 7, integer cents 200, named state paid.
 

@@ -3,6 +3,28 @@
   "title": "Allocation, mutation and alias-safe numerical work",
   "concepts": ["preallocation", "mul!", "views", "aliasing", "storage reuse"],
   "outcome": "Implement a preallocated matrix step, explain ownership and aliasing, and compare semantic results before measuring storage behavior.",
+  "key_terms": [
+    [
+      "Preallocation",
+      "Creating output buffers once outside a loop and filling them in place, so repeated iterations do not allocate."
+    ],
+    [
+      "mul!",
+      "The in-place product `mul!(C, A, B)` that writes into an existing `C`, which must not alias `A` or `B`."
+    ],
+    [
+      "Views",
+      "Slices taken with `view` or `@views` that read and write the parent array without copying it."
+    ],
+    [
+      "Base.mightalias",
+      "A conservative overlap check that can flag possible sharing, so a true result means investigate rather than proven overlap."
+    ],
+    [
+      "Storage reuse",
+      "Keeping a scratch buffer across calls of one computation, which is safe only when no other task uses it concurrently."
+    ]
+  ],
   "level": "advanced",
   "minutes": 150,
   "prerequisites": ["julia-007", "julia-013", "julia-025"],
@@ -14,48 +36,67 @@
     ["Julia performance tips", "https://docs.julialang.org/en/v1/manual/performance-tips/"]
   ],
   "figure": 0,
+  "approach": "`affine!` validates before it writes: the matrix width must equal the input length, the matrix height must equal the destination and bias lengths, and `Base.mightalias` must find no shared storage between the destination and any input. Only then does `mul!` overwrite the destination and `.+=` add the bias, so a rejected call leaves the output untouched.",
   "exercises": [
     {
       "title": "Trace a matrix step",
       "task": "Compute the two entries before running the first case.",
       "expected": "The final vector is `[11, 11]`.",
       "hint": "Multiply rows by the input, then add bias.",
-      "answer": "The products `[10, 12]` plus `[1, -1]` give `[11, 11]`."
+      "answer": "The products `[10, 12]` plus `[1, -1]` give `[11, 11]`.",
+      "why": "With `[2 1; 0 3]` and input `[3, 4]`, the products are 6 + 4 = 10 and 0 + 12 = 12, and adding `[1, -1]` gives `[11, 11]`.",
+      "wrong": "Multiplying column by column with the input transposed gives different entries and hides the row and column meaning.",
+      "verify": "Example A asserts `destination == [11, 11]` and that `affine!` returns the same object with `===`."
     },
     {
       "title": "Repeat with new inputs",
       "task": "Reuse the destination for input `[1, 2]`.",
       "expected": "The new vector is `[5, 5]`.",
       "hint": "Ensure old output is overwritten.",
-      "answer": "Multiplication overwrites both entries before adding the bias."
+      "answer": "Multiplication overwrites both entries before adding the bias.",
+      "why": "For input `[1, 2]` the products are 4 and 6, and adding the bias gives `[5, 5]`, fully replacing the earlier `[11, 11]`.",
+      "wrong": "Accumulating into the destination with `+=` instead of `mul!` would add the new products to the old output.",
+      "verify": "Example A asserts `destination == [5, 5]` after the second call."
     },
     {
       "title": "Debug a width mismatch",
       "task": "Pass a 2-by-3 matrix and a length 2 input.",
       "expected": "DimensionMismatch occurs before output mutation.",
       "hint": "Snapshot the destination first.",
-      "answer": "The declared matrix width must equal input length; validation preserves the previous output here."
+      "answer": "The declared matrix width must equal input length; validation preserves the previous output here.",
+      "why": "A 2 by 3 matrix needs an input of length 3, so the first check throws `DimensionMismatch` before `mul!` runs.",
+      "wrong": "Validating after the multiplication could leave the destination half written when the error is raised.",
+      "verify": "The reference fills the output with 7, makes the bad call and asserts `output == [7, 7]` afterward."
     },
     {
       "title": "Find view overlap",
       "task": "Explain why two different view objects can be unsafe.",
       "expected": "They may address the same parent elements.",
       "hint": "Object identity is weaker than storage independence.",
-      "answer": "The rejection uses mightalias, which conservatively checks possible shared storage."
+      "answer": "The rejection uses mightalias, which conservatively checks possible shared storage.",
+      "why": "`view(storage, 1:2)` and `view(storage, 2:3)` are different objects that both include `storage[2]`, so writing one changes what the other reads.",
+      "wrong": "Checking `destination !== input` passes for two distinct views and misses the shared element.",
+      "verify": "Example B asserts `@test_throws ArgumentError` for these views and that `storage == snapshot` after the rejection."
     },
     {
       "title": "Design scratch ownership",
       "task": "Describe a safe interface for repeated calls that must permit overlapping inputs.",
       "expected": "Use a documented private scratch copy before mutation.",
       "hint": "Account for allocation and concurrency.",
-      "answer": "A scratch buffer can preserve the original input, but its owner and lifetime must be explicit."
+      "answer": "A scratch buffer can preserve the original input, but its owner and lifetime must be explicit.",
+      "why": "Copying the possibly overlapping input into an owned scratch buffer before writing removes the shared read and write.",
+      "wrong": "Sharing one global scratch buffer among concurrent callers trades an aliasing bug for a race.",
+      "verify": "Document who owns the scratch buffer, then test an overlapping call against the result computed on separate copies."
     },
     {
       "title": "Evaluate a speed claim",
       "task": "Explain why fewer measured bytes may not mean faster code.",
       "expected": "Access patterns, dispatch and workload sizes also matter.",
       "hint": "Views may be strided.",
-      "answer": "Allocation is one measurement. End-to-end timing and correctness remain necessary."
+      "answer": "Allocation is one measurement. End-to-end timing and correctness remain necessary.",
+      "why": "Views can have strided access, and a call with fewer allocated bytes can still run slower on a different access pattern or size.",
+      "wrong": "Treating `@allocated` returning a small number as a speedup claim skips the timing and correctness checks.",
+      "verify": "Compare correct results first, then time warmed calls at several sizes and record bytes and seconds together."
     }
   ]
 }

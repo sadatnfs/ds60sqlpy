@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-036_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>In a simplified SM with 65,536 registers, a 256-thread block using 64 registers per thread needs 16,384 registers. Registers alone permit four blocks. At 128 registers per thread, registers alone permit two. Other limits can reduce both figures; this calculation is not an actual occupancy API result.</p>
+<p><strong>Approach:</strong> Divide 65,536 registers by 256 threads times registers per thread for 64 and 128 registers.</p>
+<p><strong>Why it is correct:</strong> 256 * 64 is 16,384, so four blocks fit by registers; at 128 registers each block needs 32,768, so two fit.</p>
+<p><strong>A plausible wrong approach:</strong> Treating four blocks as the final residency ignores shared memory, thread and block limits that may bind first.</p>
+<p><strong>How to verify:</strong> The reference asserts blocks == [4, 2] and prints other_hardware_limits_included False.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>Configuration A takes 2 ms with 50% occupancy. Configuration B takes 2.4 ms with 75%. If both pass correctness, A wins that stated timing objective. Investigate reuse, instruction-level parallelism and spills rather than choosing B merely because its percentage is larger.</p>
+<p><strong>Approach:</strong> Choose A because it meets correctness and takes 2 ms against 2.4 ms.</p>
+<p><strong>Why it is correct:</strong> The objective is time, and A wins it despite lower occupancy.</p>
+<p><strong>A plausible wrong approach:</strong> Picking B for its 75 percent occupancy confuses a resource metric with the goal.</p>
+<p><strong>How to verify:</strong> Keep both timing distributions and resource reports together with the decision.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Eight blocks under the simplified division, before block/thread/shared-memory/granularity limits.</p>
+<p><strong>Approach:</strong> Divide 65,536 by 128 threads times 64 registers.</p>
+<p><strong>Why it is correct:</strong> Each block needs 8,192 registers, so eight blocks fit before other limits.</p>
+<p><strong>A plausible wrong approach:</strong> Reusing the 256-thread answer of four blocks ignores that the block is half as large.</p>
+<p><strong>How to verify:</strong> Compute 65536 // (128 * 64) and expect 8, labeled register-only.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>It can spill live values to device-backed storage and add loads/stores, outweighing increased residency.</p>
+<p><strong>Approach:</strong> Inspect spill bytes in the compiler report after lowering the register cap.</p>
+<p><strong>Why it is correct:</strong> Spilled values go to device-backed local memory and add loads and stores.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming more resident warps always hides the extra traffic ignores that spills sit on the critical path.</p>
+<p><strong>How to verify:</strong> Time both versions and compare spill counts from the resource report.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>There may be too few blocks to populate the device regardless of theoretical per-SM occupancy.</p>
+<p><strong>Approach:</strong> Count blocks against SMs: too few blocks leave SMs idle.</p>
+<p><strong>Why it is correct:</strong> Per-SM occupancy only matters where blocks exist to fill the SM.</p>
+<p><strong>A plausible wrong approach:</strong> Raising per-block occupancy for a two-block grid cannot use the remaining SMs.</p>
+<p><strong>How to verify:</strong> Compare block count with the device&#x27;s SM count before tuning occupancy.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Use a small explicit set such as 64,128,256 threads, hold algorithm/input fixed, validate every result, retain resource reports and timing distributions.</p>
+<p><strong>Approach:</strong> Sweep 64, 128 and 256 threads per block with fixed algorithm and input.</p>
+<p><strong>Why it is correct:</strong> Holding everything else fixed attributes differences to block size alone.</p>
+<p><strong>A plausible wrong approach:</strong> Changing tile size and block size together in one sweep mixes two effects.</p>
+<p><strong>How to verify:</strong> Validate every output and retain resource reports and timing samples for each size.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-036_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

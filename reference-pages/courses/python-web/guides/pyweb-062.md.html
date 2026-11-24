@@ -197,6 +197,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>pyweb-061</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>The Django branch culminates in a small authenticated notes flow using real models, ModelForms, sessions and CSRF middleware. The program tests successful creation, owner-scoped listing and refused writes, then inspects the actual row count. It keeps password verification and deployment acceptance as separately identified evidence.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Owner-scoped list:</strong> A collection query filtered by <code>request.user</code>, so each user sees only the notes that user created.</li>
+<li><strong>Trusted owner assignment:</strong> Setting the owner from <code>request.user</code> after <code>commit=False</code>, while an <code>owner</code> key in the POST is refused with 400.</li>
+<li><strong>CSRF-enforcing client:</strong> A test Client created with <code>enforce_csrf_checks=True</code>, so a POST without a token receives 403 as it would in a browser flow.</li>
+<li><strong>Row-count check:</strong> Counting stored rows after the requests to prove that refused writes left no record behind.</li>
+</ul>
 <h3 id="mechanism-use-trusted-identity-throughout-the-write">Mechanism: use trusted identity throughout the write<a class="heading-anchor" href="#mechanism-use-trusted-identity-throughout-the-write" aria-label="Link to this section">#</a></h3>
 <p>The model stores a title and a foreign key to the user. The ModelForm exposes only title. The view requires an authenticated user, rejects unexpected POST keys, validates the form, constructs the object with commit=False and assigns request.user as owner before saving.</p>
 <p>The list path filters by the same authenticated owner. This keeps collection visibility aligned with creation semantics. A real application also needs equivalent detail/update/delete scoping and a transaction design for operations involving several models.</p>
@@ -209,6 +216,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A POST without the token is refused with 403 before mutation. Another POST includes owner as an unexpected field and is refused with 400. The final database count remains one, so neither refused request created a hidden row.</p>
 <p>The explicit unknown-key check complements ModelForm&#x27;s writable-field list. ModelForms normally ignore undeclared keys; this endpoint chooses a stricter API-like policy and tests it. The title field remains validated by the form rather than by a separate inconsistent string check.</p>
 <p>Bob&#x27;s empty list also illustrates collection authorization. A detail route that checks ownership is insufficient if the collection endpoint returns all rows. Authorization must be consistent across each way of reading or modifying the resource.</p>
+<h3 id="worked-example-a-strict-key-check-still-sees-repeated-keys-as-one">Worked example: a strict key check still sees repeated keys as one<a class="heading-anchor" href="#worked-example-a-strict-key-check-still-sees-repeated-keys-as-one" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> urllib.parse <span class="syntax-keyword">import</span> parse_qs
+
+<span class="syntax-keyword">for</span> body <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">title=Private</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">title=Private&amp;owner=2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">title=First&amp;title=Second</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    fields <span class="syntax-operator">=</span> parse_qs<span class="syntax-punctuation">(</span>body<span class="syntax-punctuation">)</span>
+    allowed <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>fields<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">title</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>allowed<span class="syntax-punctuation">,</span> fields<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">True {&#x27;title&#x27;: [&#x27;Private&#x27;]}
+False {&#x27;title&#x27;: [&#x27;Private&#x27;], &#x27;owner&#x27;: [&#x27;2&#x27;]}
+True {&#x27;title&#x27;: [&#x27;First&#x27;, &#x27;Second&#x27;]}</code></pre>
+<p>The lesson&#x27;s view refuses any body where <code>set(request.POST) != {&quot;title&quot;}</code>, which turns a forged <code>owner</code> field into a 400 before the form runs. Form data can repeat a key, though, and a set of keys hides that: the third body passes the check with two titles. Django&#x27;s <code>QueryDict</code> returns the last value for <code>request.POST[&quot;title&quot;]</code>, so <code>Second</code> would be saved. If duplicates should be errors, compare <code>len(request.POST.getlist(&quot;title&quot;))</code> as well.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why is there both a fields list and an unexpected-key check?</strong> They express different contracts. The fields list limits what the form can write; the key check makes attempts to supply other fields visibly invalid for this endpoint.</p>
 <p><strong>Why inspect the database after refused requests?</strong> It verifies the absence of unauthorized side effects. Correct response codes alone cannot establish that storage remained unchanged.</p>

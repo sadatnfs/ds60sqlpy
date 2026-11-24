@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-013_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="torch-013-explanatory-solutions">torch-013: explanatory solutions<a class="heading-anchor" href="#torch-013-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Open these answers only after attempting Binary logits, BCEWithLogitsLoss and thresholds yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Convert fixed logits, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Logit, BCEWithLogitsLoss, Decision threshold. After a pass, choose a new input for exercise 6, Count threshold errors, without looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model&#x27;s probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid-transformed probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.</p>
 <p>A classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores -2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.</p>
@@ -276,7 +276,7 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <p><strong>Expected:</strong> 0 errors at 0.5 and 1 at 0.8.</p>
 <p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>int(((probabilities &gt;= 0.5) != truth).sum()) == 0</code> and <code>int(((probabilities &gt;= 0.8) != truth).sum()) == 1</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Repeat exercise 4, Expose a double-sigmoid mistake, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Test extreme finite scores, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
   </main>
 </body>
 </html>

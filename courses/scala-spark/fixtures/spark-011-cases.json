@@ -21,7 +21,7 @@
       "title": "Select missingness explicitly",
       "input_contract": "Return ordered IDs whose amount_cents is SQL NULL. Do not compare the Column to JVM null/Python None using driver identity logic, and do not treat zero as missing.",
       "expected": "Only ID 3 is returned. The observed-zero ID 1 is absent from the missingness result.",
-      "verification": "Assert[3] and separately assert that the zero-amount filter returns [1]."
+      "verification": "Assert [3] and separately assert that the zero-amount filter returns [1]."
     },
     {
       "exercise": 4,

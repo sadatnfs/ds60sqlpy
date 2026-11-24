@@ -1,6 +1,6 @@
 # tf-009: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for Batches and repeated updates after your own attempt at Example A, Count updates, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Epoch, Batch, Step. After matching exercise 6, Aggregate unequal batches, invent a new input without looking here.
 
 ## Mechanism review
 
@@ -25,18 +25,22 @@ The counter measures updates, not observations. Concatenating the three batches 
 ```python
 ids = list(range(1, 7))
 batches = [ids[i : i + 2] for i in range(0, 6, 2)]
-assert batches == [[1, 2], [3, 4], [5, 6]]
+updates = 0
+for _batch in batches:
+    updates += 1
+assert batches == [[1, 2], [3, 4], [5, 6]] and updates == 3
+assert sum(batches, []) == ids
 ```
 
 **Expected:** batches [[1, 2], [3, 4], [5, 6]] and 3 updates.
 
-**Verify:** In a fresh process, the exercise checks confirm `batches == [[1, 2], [3, 4], [5, 6]]`.
+**Verify:** In a fresh process, the exercise checks confirm `batches == [[1, 2], [3, 4], [5, 6]]`; `updates == 3` and `sum(batches, []) == ids`.
 
 ## Exercise 2: Retain a remainder
 
 The question is: Partition five IDs by two and compare with explicitly dropping the short batch.
 
-An epoch with drop_remainder may not expose every record. Naming that choice avoids quietly changing the training population. The tail has one example and its mean gradient must divide by one.
+An epoch with drop_remainder may not expose every record. Naming that choice avoids quietly changing the training population. The tail has one example, so a mean loss over that batch divides by one example, not by the nominal batch size of two.
 
 ```python
 ids = list(range(1, 6))
@@ -135,4 +139,4 @@ assert (2 + 8) / 2 == 5
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one fixture value in exercise 4, Compare batch policies, and predict the new result before running it. Keep the failing version of exercise 5, Preserve pairs, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

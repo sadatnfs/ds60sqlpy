@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-001`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-001` (The subject assistant decision: prompts, retrieval or fine-tuning). They introduce the notation this lesson needs for schema validity and semantic validity.
 
 ## Learning objectives
 
@@ -28,13 +28,13 @@ The runnable example's counts assume at most one counted purchase per eligible v
 
 Units need similar care. A value of 12 can mean 12 visits,12 accounts,12 dollars or 12 percentage points. A schema that stores only value=12 cannot recover the distinction from the number. Dates can identify event time, reporting time or an effective policy date. Identifiers can contain leading zeros that must survive serialization. The choice of primitive type is therefore a modeling decision, not merely a programming convenience.
 
-Some ambiguity should remain explicit. If a source says “about ten visits,” converting it into an exact integer 10 may be inappropriate. If it says “no purchases were reported,” that can mean an observed zero or an absence of reporting. A production extraction schema may need separate value,status,unit and support fields. The narrow fixture intentionally rejects missing counts so the reader can see that unknown is not silently replaced by zero. Expanding the schema should preserve that distinction.
+Some ambiguity should remain explicit. If a source says “about ten visits,” converting it into an exact integer 10 may be inappropriate. If it says “no purchases were reported,” that can mean an observed zero or an absence of reporting. A production extraction schema may need separate value, status, unit and support fields. The narrow fixture intentionally rejects missing counts so the reader can see that unknown is not silently replaced by zero. Expanding the schema should preserve that distinction.
 
 Validation cannot prove that a plausible value was stated in the source. An invented count of three still satisfies \(0\le 3\le 10\). Provenance is therefore a second contract: each accepted field needs a source span or another recorded evidence link. The span proves where the proposed value came from; interpreting that phrase correctly remains a semantic responsibility.
 
 ## When individually correct rows produce a wrong aggregate
 
-Suppose account A has one eligible visit and one purchase, while account B has nine eligible visits and two purchases. The visit-weighted rate is \(\frac{3}{10}=0.3\). The equally weighted account mean is(1+2/9)/2=11/18, about 0.6111. Neither number is an arithmetic error. The first weights each visit equally; the second weights each account equally and averages its within-account ratio.
+Suppose account A has one eligible visit and one purchase, while account B has nine eligible visits and two purchases. The visit-weighted rate is \(\frac{3}{10}=0.3\). The equally weighted account mean is (1+2/9)/2=11/18, about 0.6111. Neither number is an arithmetic error. The first weights each visit equally; the second weights each account equally and averages its within-account ratio.
 
 An assistant asked for “average account conversion” must resolve which quantity is intended. It cannot infer the estimand solely from the existence of an assignment_unit field. If randomization is by account, a treatment-effect analysis also needs the assignment and account identities, not just a pooled count ratio. Repeated visits from the same account can share behavior and treatment. Treating every visit as an independently randomized unit would create an unjustified uncertainty calculation.
 
@@ -76,9 +76,11 @@ When extraction is used before statistical analysis, retain rejected records and
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-002/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-002.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-002.py` in the declared `python-core` profile. *Validate a correct proposal*, *Reject a plausible but impossible record* and *Trace extracted values to text* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-002/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Reject a plausible but impossible record* and *Trace extracted values to text* reuse the helper and fixture introduced in *Validate a correct proposal*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Conversion rate 0.3. Example B should give: ValueError for inconsistent counts. Example C should give: values 10 and 3; each span slices the original digits. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -88,7 +90,7 @@ Validate an already decoded dictionary, require exactly the allowed keys, and re
 
 The helper extract recognizes a deliberately narrow source grammar. It uses a full-string regular expression and returns digit spans from the original string. The helper validate accepts an already decoded Python dictionary; it is not a JSON parser. A JSON response from a future language model would first need parsing and then the same independent acceptance checks. These interfaces should not be collapsed into the claim “the model returned valid data.”
 
-For the literal text `Visits: 10; Purchases: 3; Unit: account`, the visit digits occupy the half-open character interval[8, 10), the purchase digit[23, 24), and the unit[32, 39). Slicing the original string at those boundaries recovers 10, 3 and account. The integer conversion changes representation, while the stored span keeps its provenance. If preprocessing removes spaces before extracting offsets, those new offsets cannot be applied directly to the original string without a mapping.
+For the literal text `Visits: 10; Purchases: 3; Unit: account`, the visit digits occupy the half-open character interval \([8, 10)\), the purchase digit \([23, 24)\), and the unit \([32, 39)\). Slicing the original string at those boundaries recovers 10, 3 and account. The integer conversion changes representation, while the stored span keeps its provenance. If preprocessing removes spaces before extracting offsets, those new offsets cannot be applied directly to the original string without a mapping.
 
 The record check accepts exactly three keys and requires type(value) to be int for both counts. Python's Boolean subtype relationship makes this stricter than a plain isinstance(value, int) test. A True visit count would otherwise become one in arithmetic even though the source proposed a logical value. Extra fields are also rejected, so a model cannot quietly insert an unsupported p_value alongside otherwise valid counts.
 
@@ -96,7 +98,7 @@ The domain constraint 0<=purchases<=visits assumes at most one counted purchase 
 
 For the valid fixture, \(\frac{3}{10}=0.3\) describes purchases per eligible visit. The assignment_unit field says the experimental assignment is by account. It does not transform the arithmetic denominator into accounts, nor does it make 10 visits independently randomized. Repeated observations within accounts require account identities and a suitable analysis design for uncertainty. The three extracted fields alone cannot recover that information.
 
-Aggregation adds another distinction. Suppose one account has 1 purchase in 1 visit and another has 1 purchase in 9 visits. The pooled visit rate is \(\frac{2}{10}=0.2\). The equally weighted mean of account-specific rates is(1+1/9)/2=5/9, about 0.556. Both calculations are valid for their declared estimands; they answer different questions. Calling both “average conversion” hides the weighting rule. The extraction schema should preserve enough units and identities to support the intended calculation.
+Aggregation adds another distinction. Suppose one account has 1 purchase in 1 visit and another has 1 purchase in 9 visits. The pooled visit rate is \(\frac{2}{10}=0.2\). The equally weighted mean of account-specific rates is (1+1/9)/2=5/9, about 0.556. Both calculations are valid for their declared estimands; they answer different questions. Calling both “average conversion” hides the weighting rule. The extraction schema should preserve enough units and identities to support the intended calculation.
 
 Missingness and invalidity need explicit statuses. purchases=None is rejected by this strict count schema; purchases=0 is a real observed zero. A broader system could carry a separate unknown record with a source reason. It should not coerce unknown to zero, nor remove every hard-to-parse study and then report the remaining sample as representative.
 
@@ -186,21 +188,24 @@ assert text[slice(*spans["visits"])] == "10" and text[slice(*spans["purchases"])
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: conversion rate 0.3. invalid unit rejected; account remains explicit. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Reject a plausible but impossible record*, predict its result from the prompt alone: Validate visits 2 and purchases 3 under the declared one-purchase-per-visit policy. Write the guess beside the stated outcome (ValueError for inconsistent counts). Then predict how the decisive case, *Preserve the assignment unit*, should end: Attempt to replace account with visit and explain why the independence assumption cannot be inferred from the count fields. For data-science task contracts and structured extraction, the finish condition is: Conversion rate 0.3. Invalid unit rejected; account remains explicit.
 
 ## Exercises
 
 1. **Validate a correct proposal.** Validate visits 10, purchases 3 and assignment_unit account.
    **Expected:** conversion rate 0.3.
    **Verify:** Save the assertion results for exercise 1, including conversion rate 0.3.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Reject a plausible but impossible record.** Validate visits 2 and purchases 3 under the declared one-purchase-per-visit policy.
    **Expected:** ValueError for inconsistent counts.
    **Verify:** Save the assertion results for exercise 2, including ValueError for inconsistent counts.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Trace extracted values to text.** Parse the source text Visits: 10; Purchases: 3; Unit: account and retain source spans.
    **Expected:** values 10 and 3; each span slices the original digits.
    **Verify:** Save the assertion results for exercise 3, including values 10 and 3; each span slices the original digits.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Distinguish missing from zero.** Submit a record with purchases=None and compare it with a real zero-purchase record.
    **Expected:** None is rejected by this strict schema; zero is accepted with rate 0.
@@ -222,19 +227,21 @@ If accepted records have excellent accuracy but aggregate findings change, inspe
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate schema validity and semantic validity for the fixture in *Validate a correct proposal*. Hint 2: change one literal in *Reject a plausible but impossible record* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Distinguish missing from zero*, with its stated result (None is rejected by this strict schema; zero is accepted with rate 0). If *Preserve the assignment unit* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Schema validity, Semantic validity, Provenance span using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain schema validity, semantic validity and provenance span using *Validate a correct proposal*. Recompute its result (conversion rate 0.3) from the inputs. Change one input in *Trace extracted values to text* and predict whether the stated result (values 10 and 3; each span slices the original digits) still holds. Say which part of data-science task contracts and structured extraction the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-001` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Validate a correct proposal* cannot be reconstructed without the solution, revisit `llm-applied-001` (The subject assistant decision: prompts, retrieval or fine-tuning). Otherwise keep the six observations from data-science task contracts and structured extraction and continue to `llm-applied-003` (Prompt and context engineering with measurable boundaries).
 
 ## Sources and verification status
 
-API and mechanism reference: [Python json documentation](https://docs.python.org/3.12/library/json.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for schema validity: [Python json documentation](https://docs.python.org/3.12/library/json.html), reviewed 2026-10-22. The fixtures for *Validate a correct proposal*, *Reject a plausible but impossible record* and *Trace extracted values to text* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

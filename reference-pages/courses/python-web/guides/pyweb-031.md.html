@@ -197,6 +197,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>pyweb-030</code>, <code>python-lang-04</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Asynchronous Python can overlap operations that yield control while waiting. It does not turn CPU work into parallel execution or remove resource limits. This chapter uses explicit synchronization and cancellation observations to show what concurrent tasks actually do, without relying on a noisy speed benchmark.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Coroutine:</strong> The object an <code>async def</code> function returns; its body runs only when it is awaited or scheduled as a task.</li>
+<li><strong>Suspension point:</strong> An <code>await</code> on an operation that yields control, where the event loop may switch to another ready task.</li>
+<li><strong>Blocking call:</strong> A synchronous operation, such as file or HTTP I/O or a long CPU loop, that holds the event-loop thread and stops other tasks from progressing.</li>
+<li><strong>Concurrency versus parallelism:</strong> Concurrency means several tasks are in progress at once; parallelism means instructions execute simultaneously, which one event-loop thread does not provide.</li>
+<li><strong>Cancellation:</strong> Delivering <code>CancelledError</code> to a task at its next await; the caller should await the cancelled task so its <code>finally</code> cleanup can finish.</li>
+</ul>
 <h3 id="mechanism-progress-happens-at-suspension-points">Mechanism: progress happens at suspension points<a class="heading-anchor" href="#mechanism-progress-happens-at-suspension-points" aria-label="Link to this section">#</a></h3>
 <p>An async function returns a coroutine until it is awaited or scheduled. When that coroutine awaits an operation that suspends, the event loop may run another ready task. A blocking filesystem call, synchronous HTTP call or long numerical loop inside the coroutine can prevent that cooperative progress.</p>
 <p>Concurrency and parallelism describe different properties. Two tasks may be in progress on one event-loop thread without executing Python instructions simultaneously. CPU parallelism usually needs separate processes, native code that releases the interpreter lock, or another explicitly chosen execution mechanism. The correct mechanism depends on the workload and its resource ownership.</p>
@@ -209,6 +217,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The second case starts an operation that records cleanup in a finally block. The caller requests cancellation, awaits the task and handles the cancellation exception. Only then does it assert that cleanup completed.</p>
 <p>In a real request, cancellation may follow client disconnect, deadline expiry or application shutdown. The application should decide which work can stop and which durable job must continue independently. A request handler is usually the wrong owner for a long-running operation that must survive the loss of that request or process.</p>
 <p>Cancellation does not reverse a completed external effect. If a database commit succeeded just before the caller timed out, retry logic must reconcile the outcome using an operation identity. The later idempotency and outbox chapters build that distinction explicitly.</p>
+<h3 id="worked-example-a-blocking-call-starves-the-event-loop">Worked example: a blocking call starves the event loop<a class="heading-anchor" href="#worked-example-a-blocking-call-starves-the-event-loop" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> asyncio
+<span class="syntax-keyword">import</span> time
+
+order <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">ticker</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        order<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">tick </span><span class="syntax-string">{</span>n<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">blocking_handler</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    time<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span>
+    order<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">blocking done</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">cooperative_handler</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>to_thread<span class="syntax-punctuation">(</span>time<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">,</span> <span class="syntax-number">0.01</span><span class="syntax-punctuation">)</span>
+    order<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cooperative done</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>handler<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    order<span class="syntax-operator">.</span>clear<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>gather<span class="syntax-punctuation">(</span>handler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ticker<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span>blocking_handler<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span>cooperative_handler<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">[&#x27;blocking done&#x27;, &#x27;tick 0&#x27;, &#x27;tick 1&#x27;, &#x27;tick 2&#x27;]
+[&#x27;tick 0&#x27;, &#x27;tick 1&#x27;, &#x27;tick 2&#x27;, &#x27;cooperative done&#x27;]</code></pre>
+<p>The ticker stands in for every other request an async server is handling. With <code>time.sleep</code> inside an <code>async def</code>, the handler never reaches an <code>await</code>, so the ticker cannot take a single step until the sleep ends. Moving the same blocking call into <code>asyncio.to_thread</code> gives the loop a suspension point, and all three ticks run while the thread waits. In FastAPI this is why a blocking database driver or <code>requests.get</code> inside an <code>async def</code> endpoint stalls unrelated clients, while a plain <code>def</code> endpoint is run in a threadpool for you.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why can an async endpoint freeze other requests?</strong> It may contain blocking work between suspension points. Inspect the called libraries and execution path, not just the endpoint&#x27;s declaration.</p>
 <p><strong>Why avoid sleep-based correctness assertions?</strong> Sleeps can arrange a demonstration, but elapsed-time assumptions are brittle. Events, barriers and observed state provide stronger evidence for lifecycle and ordering properties.</p>

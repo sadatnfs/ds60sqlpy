@@ -5,6 +5,39 @@
   "minutes": 100,
   "prerequisites": ["apache-032", "apache-050", "apache-081"],
   "concepts": ["backfill", "logical interval", "event time", "publication"],
+  "key_terms": [
+    [
+      "Logical interval",
+      "The Airflow data interval a run is responsible for, distinct from the task's wall-clock start time."
+    ],
+    [
+      "Event-time clock",
+      "The timestamps and watermarks a stream processor uses to decide which records belong to a window."
+    ],
+    [
+      "Output ownership",
+      "The rule naming which writer, backfill or live stream, owns each published partition, so one cannot silently overwrite the other."
+    ],
+    [
+      "Cutover policy",
+      "The explicit boundary at which responsibility for a date range passes from the batch backfill to the live stream."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Map an interval to the partition it rewrites",
+      "language": "python",
+      "code": "from datetime import datetime, timedelta, timezone\n\nstart = datetime(2026, 1, 1, tzinfo=timezone.utc)\nend = start + timedelta(days=1)\npartition = start.date().isoformat()\nprint(partition, start.isoformat(), end.isoformat())",
+      "output": "2026-01-01 2026-01-01T00:00:00+00:00 2026-01-02T00:00:00+00:00",
+      "interpretation": "Airflow passes data_interval_start and data_interval_end to a run; the job should derive the partition from those, not from the wall clock. Then rerunning the 2026-01-01 interval next week still rewrites only that day. Event time inside the rows is a third clock: late events from that day can arrive after the interval ran, which is why correction runs exist at all."
+    },
+    {
+      "title": "Rerun one historical interval",
+      "language": "bash",
+      "code": "cd work/airflow\nbash run.sh backfill-check\nbash run.sh readback",
+      "interpretation": "The backfill route triggers runs for explicit past intervals and the readback shows which outputs each produced. Publish the corrected partition as a candidate, validate it against an independent count, and only then swap it in. The live streaming path keeps writing current data meanwhile, so the backfill must never touch today's partition or it will race the stream."
+    }
+  ],
   "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",
   "sources": [
     ["Iceberg reliability and table state", "https://iceberg.apache.org/docs/latest/reliability/"],

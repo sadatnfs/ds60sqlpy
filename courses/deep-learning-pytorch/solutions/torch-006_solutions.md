@@ -1,6 +1,6 @@
 # torch-006: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting Autograd graphs, the chain rule and in-place hazards yourself. They reuse the guide's literal inputs, starting from Example A, Trace the chain rule, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Autograd graph, Saved tensor, In-place hazard. After a pass, choose a new input for exercise 6, Recompute after an update, without looking.
 
 ## Mechanism review
 
@@ -156,4 +156,4 @@ assert torch.autograd.grad(fresh, parameter)[0].item() == -1
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Expose saved-value invalidation, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Inspect a ReLU convention, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

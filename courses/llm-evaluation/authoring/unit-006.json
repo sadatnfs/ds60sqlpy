@@ -8,6 +8,12 @@
     "exchangeability",
     "confidence interval"
   ],
+  "key_terms": {
+    "Paired comparison": "Evaluating two systems on the same eligible requests and analyzing their per-request differences.",
+    "Sign-randomization test": "A test that enumerates or samples sign flips of paired differences to form a reference distribution under the null.",
+    "Exchangeability": "The symmetry that justifies swapping system assignments within units under the null hypothesis.",
+    "Cluster bootstrap": "Resampling whole families or other dependence units with replacement to reflect correlated requests."
+  },
   "outcome": "Compute paired and family-level uncertainty while distinguishing a randomization null, a bootstrap approximation and a deployment claim.",
   "verification": "Vanishing differences give an exact tail of 1, four favorable pairs give 2/16 = 0.125, relabeling leaves the two-sided p-value unchanged, the two quantile conventions give about +/-0.925 and +/-1, and three families have 27 ordered bootstrap draws.",
   "level": "intermediate",
@@ -20,42 +26,78 @@
       "task": "Use paired differences 0,0.",
       "expected": "The exact tail probability is 1.",
       "hint": "Every allowed statistic equals the observed statistic.",
-      "answer": "There is no observed contrast. All sign assignments are at least as extreme under the non-strict tail convention."
+      "answer": "There is no observed contrast. All sign assignments are at least as extreme under the non-strict tail convention.",
+      "reasoning": {
+        "approach": "Call `sign_test([0, 0])`. The observed statistic is the absolute mean, 0, and the function enumerates all four sign assignments.",
+        "why": "Every flipped mean is 0, and the tail compares `np.abs(null) >= observed - 1e-12`. Since 0 >= 0 holds for all four, the p-value is 4 / 4 = 1. With no contrast at all, the data give no evidence against the null.",
+        "pitfall": "Using a strict `>` comparison would count no assignments and return p = 0, which reads as overwhelming evidence of a difference that does not exist. The tolerance and non-strict inequality are deliberate.",
+        "verify": "The reference asserts `sign_test([0, 0])[0] == 1`. Print the null array and confirm it is four zeros."
+      }
     },
     {
       "title": "Four favorable pairs",
       "task": "Use differences 1,1,1,1.",
       "expected": "The two-sided exact tail is 2/16=0.125.",
       "hint": "Count both all-positive and all-negative assignments.",
-      "answer": "Even four uniformly favorable pairs cannot attain a two-sided 0.05 threshold under this small sign space."
+      "answer": "Even four uniformly favorable pairs cannot attain a two-sided 0.05 threshold under this small sign space.",
+      "reasoning": {
+        "approach": "Call `sign_test([1, 1, 1, 1])`. The function enumerates 2 to the power 4 = 16 sign assignments and compares the absolute mean of each with the observed absolute mean, 1.",
+        "why": "Only all positive and all negative signs give an absolute mean of 1, so the tail count is 2 and p = 2 / 16 = 0.125. With four pairs, this is the smallest two-sided p-value the test can produce.",
+        "pitfall": "Concluding that the test is broken because four wins out of four seems decisive is the mistake. The exact reference distribution has only 16 outcomes, so no result with four pairs can reach 0.05. More pairs, not a different threshold, are needed.",
+        "verify": "The reference asserts `sign_test([1, 1, 1, 1])[0] == 0.125`. Worked case A, with one negative pair among four, gives 10 / 16 = 0.625 by the same enumeration."
+      }
     },
     {
       "title": "Reverse model labels",
       "task": "Negate every difference in case A.",
       "expected": "The two-sided p-value is unchanged.",
       "hint": "Absolute extremeness is symmetric.",
-      "answer": "A two-sided sign-reference test does not favor a naming convention; a one-sided analysis would require a prespecified direction."
+      "answer": "A two-sided sign-reference test does not favor a naming convention; a one-sided analysis would require a prespecified direction.",
+      "reasoning": {
+        "approach": "Negate every value in case A, giving `[-1, -1, -1, 1]`, and call `sign_test` again. The observed statistic is the absolute mean, which is unchanged at 0.5.",
+        "why": "The null set of sign flips is symmetric: negating every difference just relabels which assignment is which. Both the observed value and the reference distribution are therefore identical, so the two-sided p-value remains 0.625.",
+        "pitfall": "Running a one-sided test after looking at which model won and choosing the matching direction would halve the p-value. That direction must be fixed before seeing the data, otherwise the error rate is not the stated one.",
+        "verify": "Worked case A asserts `sign_test([-1, -1, -1, 1])[0] == p` where p is 0.625 from the original order."
+      }
     },
     {
       "title": "State the quantile convention",
       "task": "Compare linear interpolation with empirical inverse-CDF percentiles in case B.",
       "expected": "Linear endpoints are approximately +/-0.925; inverse-CDF endpoints are +/-1.",
       "hint": "A discrete bootstrap distribution needs an explicit quantile rule.",
-      "answer": "Both calculations use the same four resamples. Different interpolation rules do not constitute additional evidence."
+      "answer": "Both calculations use the same four resamples. Different interpolation rules do not constitute additional evidence.",
+      "reasoning": {
+        "approach": "Compute `np.quantile(distribution, [0.025, 0.975])` with the default method and again with `method=\"inverted_cdf\"` on the case B distribution `[-1, 0, 0, 1]`.",
+        "why": "Linear interpolation places the 2.5 percent point between -1 and 0, at -0.925, and symmetrically +0.925. The inverse CDF returns the smallest observed value whose cumulative share reaches the level, so it returns -1 and +1. Both read the same four resamples.",
+        "pitfall": "Reporting whichever interval looks tighter as the better result is the mistake. The narrower interval adds no information; it only reflects an interpolation rule, and with four resamples the choice dominates the answer.",
+        "verify": "Worked case B checks `np.testing.assert_allclose(..., [-0.925, 0.925])` for the linear rule and `[-1.0, 1.0]` for `inverted_cdf`. Name the method in any reported interval."
+      }
     },
     {
       "title": "Add a third family",
       "task": "Enumerate resamples of 0,1,2.",
       "expected": "There are 27 ordered draws of three families.",
       "hint": "Each of three positions has three choices.",
-      "answer": "The calculation expands to 3 cubed assignments, while the original independent sample still has only three families."
+      "answer": "The calculation expands to 3 cubed assignments, while the original independent sample still has only three families.",
+      "reasoning": {
+        "approach": "Call `cluster_bootstrap([0, 1, 2])`. The function enumerates every ordered draw with replacement of three family indices using `product(range(3), repeat=3)`.",
+        "why": "Three positions with three choices each give 3 cubed = 27 resamples. The list grows quickly, but the evidence does not: the sample still has three independent families, and every resample is built from those same three means.",
+        "pitfall": "Treating 27 resamples as 27 observations and computing a standard error from them as if n were 27 would make uncertainty look much smaller. The bootstrap distribution approximates sampling variation of the three-family mean; it does not create new families.",
+        "verify": "The reference asserts `len(cluster_bootstrap([0, 1, 2])) == 27`. Its mean is 1, the original sample mean, as expected for an exhaustive bootstrap."
+      }
     },
     {
       "title": "Bound an exact algorithm",
       "task": "Request 17 paired differences.",
       "expected": "The fixture rejects the request.",
       "hint": "Enumeration grows exponentially.",
-      "answer": "A bounded classroom example should not silently allocate an enormous sign space. A larger analysis needs a declared Monte Carlo or analytical method."
+      "answer": "A bounded classroom example should not silently allocate an enormous sign space. A larger analysis needs a declared Monte Carlo or analytical method.",
+      "reasoning": {
+        "approach": "Call `sign_test([1] * 17)`. The guard `1 <= len(d) <= 16` raises `Bounded finite pairs required` before enumeration starts.",
+        "why": "Seventeen pairs would require 2 to the power 17 = 131072 sign assignments, each stored in the null array. The classroom fixture caps the exact method at 16 pairs (65536 assignments) so a learner run stays fast and predictable.",
+        "pitfall": "Silently switching to random sampling of signs would change the method from exact to Monte Carlo without telling anyone, and the reported p-value would then carry simulation error that was never stated.",
+        "verify": "The reference includes `[1] * 17`, an empty list and `[float(\"nan\")]` in its invalid list and fails if any is accepted. A real analysis with more pairs should declare a Monte Carlo size or a normal approximation."
+      }
     }
   ],
   "sources": [

@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">python courses/data-ml-engineering/authoring/build.py --source-check
 python courses/data-ml-engineering/authoring/build.py
 python courses/data-ml-engineering/authoring/build.py --check</code></pre>
-<p>The publisher requires all 72 stable chapter records, complete sources, exact worked-program insertion, earlier prerequisite IDs and declared result contracts. Do not edit generated guides, track.json, lessons.json, figure-contracts.json or the generated subject README directly. Shared classroom HTML and TeX generation belong to the repository integration pass after this publisher succeeds.</p>
+<p>The publisher requires all 72 stable chapter records, complete sources, exact worked-program insertion, earlier prerequisite IDs, three to five unique key terms per chapter, at least two fenced artifacts per chapter counting the program and valid, book-unique worked_examples with observed outputs, and declared result contracts. Do not edit generated guides, track.json, lessons.json, figure-contracts.json or the generated subject README directly. Shared classroom HTML and TeX generation belong to the repository integration pass after this publisher succeeds.</p>
 <p>Run the focused semantic and source/reader tests in the prepared contributor Python environment, with its declared scientific dependencies:</p>
 <pre class="highlighted-code"><code class="language-bash">PYTHONPATH<span class="syntax-operator">=</span>src python -m pytest -n <span class="syntax-number">4</span> --dist loadgroup <span class="syntax-string">\</span>
   tests/test_data_ml_engineering_book.py <span class="syntax-string">\</span>

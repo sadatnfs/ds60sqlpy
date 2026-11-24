@@ -202,6 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Persistent storage separates data lifetime from a particular Pod. A PersistentVolumeClaim requests storage through an access mode, capacity and StorageClass. A PersistentVolume represents provisioned storage and its lifecycle policy. A StatefulSet adds stable Pod identity and per-replica claim naming, but it does not turn a filesystem into a backup or a complete database recovery system.</p>
 <p>The host fixture uses a prequalified StorageClass named lesson-local and a single-replica StatefulSet store. Its claim template data produces a claim associated with store-0. The example explicitly retains claims when the StatefulSet is deleted or scaled down. The normal browser adapter does not create PVCs, StatefulSets or storage classes.</p>
 <p>A live persistence test writes a synthetic marker once, records its checksum, replaces the application Pod by exact UID and reads the marker through a separate bounded reader. Re-running an initializer that overwrites the same marker would hide data loss, so initialization and verification must be separate operations.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>PersistentVolumeClaim:</strong> A namespaced request for storage of a given size and access mode, which a Pod mounts by claim name.</li>
+<li><strong>PersistentVolume:</strong> A cluster-scoped storage resource that a claim binds to, either created in advance or provisioned dynamically.</li>
+<li><strong>StorageClass:</strong> An object naming a provisioner and its parameters, used to create PersistentVolumes dynamically for claims that request it.</li>
+<li><strong>StatefulSet:</strong> A workload controller that gives each replica a stable name and its own claim from a volume claim template.</li>
+<li><strong>Reclaim policy:</strong> The PersistentVolume setting, Delete or Retain, that decides what happens to the underlying storage after its claim is deleted.</li>
+</ul>
 <h3 id="trace-claims-volumes-and-stable-identity">Trace claims, volumes and stable identity<a class="heading-anchor" href="#trace-claims-volumes-and-stable-identity" aria-label="Link to this section">#</a></h3>
 <p>The claim requests 16Mi and ReadWriteOnce from lesson-local. That class must exist and be qualified before the lab; the learner does not install a provisioner or mount a personal host directory. A Pending claim can indicate missing class, capacity or binding topology rather than an application bug.</p>
 <p>The StatefulSet uses serviceName store-headless and a headless Service for its stable network identity. Its template mounts the claim at /data. The claim template name and StatefulSet/ordinal contribute to the generated claim identity. A replacement Pod can retain the ordinal name while receiving a new Pod UID and reattaching the same claim.</p>

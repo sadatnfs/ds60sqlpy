@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A transfer pays fixed submission latency plus a size-dependent term. With payload B bytes and effective bandwidth W bytes per second, a useful first model is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mi mathvariant="normal">ℓ</mi><mo>+</mo><mi>B</mi><mi mathvariant="normal">/</mi><mi>W</mi></mrow><annotation encoding="application/x-tex">T=\ell+B/W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord">ℓ</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span></span></span></span>, where <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">ℓ</mi></mrow><annotation encoding="application/x-tex">\ell</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord">ℓ</span></span></span></span> is submission latency. This is a hypothesis for planning, not a benchmark. Small transfers often pay the fixed term repeatedly. Keeping intermediate arrays on device can save round trips even when the arithmetic expression does not change.</p>
 <p>Asynchronous copying also creates an ownership obligation. The source must remain valid and unchanged until the copy finishes; the destination cannot be consumed before its dependency is satisfied. Pinned host memory can enable useful transfer overlap under supported conditions, but pinning every object consumes host resources. Count transfers before optimizing them and include serialization, packing and final output retrieval in end-to-end latency.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Transfer latency:</strong> The fixed startup cost of a copy that is paid regardless of how many bytes move.</li>
+<li><strong>Effective bandwidth:</strong> Bytes moved divided by measured elapsed time; it approaches peak bandwidth only for large transfers because latency is included.</li>
+<li><strong>Pinned memory:</strong> Page-locked host memory that the GPU can reach by direct memory access, enabling faster and asynchronous copies.</li>
+<li><strong>End-to-end timer:</strong> A measurement that brackets the copy in, the kernel and the copy back, so transfer cost is not hidden.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Copying 100 rows separately at 10 microseconds submission cost spends at least 1 millisecond on submissions. One contiguous batch pays the submission term once.</p>
@@ -220,20 +227,56 @@ one <span class="syntax-operator">=</span> latency <span class="syntax-operator"
 <span class="syntax-keyword">assert</span> many <span class="syntax-operator">&gt;</span> one
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU cost model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> round_trip<span class="syntax-punctuation">,</span> resident<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> 81920 versus 8192 modeled bytes; these are not measured timings.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>size</code></td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><code>iterations</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>round_trip</code></td>
+<td><code>81920</code></td>
+</tr>
+<tr>
+<td><code>resident</code></td>
+<td><code>8192</code></td>
+</tr>
+<tr>
+<td><code>latency</code></td>
+<td><code>1e-05</code></td>
+</tr>
+<tr>
+<td><code>bandwidth</code></td>
+<td><code>1000000000.0</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-bytes-for-ten-iterations">Exercise 1: Count bytes for ten iterations<a class="heading-anchor" href="#exercise-1-count-bytes-for-ten-iterations" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>count bytes for ten iterations</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting only uploads (<code>10B</code>) treats the output copy as free. Many real pipelines download a result every step for logging, so omitting it halves the modeled traffic.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-model-a-batched-transfer">Exercise 2: Model a batched transfer<a class="heading-anchor" href="#exercise-2-model-a-batched-transfer" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>model a batched transfer</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Expecting batching to reduce the payload is the mistake. The bytes are the same; if your model shows the bandwidth term shrinking, you have double-counted or dropped rows.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-find-premature-source-reuse">Exercise 3: Find premature source reuse<a class="heading-anchor" href="#exercise-3-find-premature-source-reuse" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>find premature source reuse</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Adding a sleep after the copy call seems to fix it in testing because the copy usually finishes. It is timing luck: a larger batch or a busy bus makes the race reappear.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-pinned-memory-lifetime">Exercise 4: Explain pinned-memory lifetime<a class="heading-anchor" href="#exercise-4-explain-pinned-memory-lifetime" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>explain pinned-memory lifetime</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Pinning every array in the program to be safe consumes host memory the OS cannot page out, which can starve other processes. Pinning is a bounded resource, not a free speedup.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-an-end-to-end-timer">Exercise 5: Design an end-to-end timer<a class="heading-anchor" href="#exercise-5-design-an-end-to-end-timer" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design an end-to-end timer</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Stopping the timer right after the kernel call returns measures submission only, because the call is asynchronous; it reports a tiny number regardless of the 81920 versus 8192 byte difference.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-identify-an-intentionally-cpu-friendly-workload">Exercise 6: Identify an intentionally CPU-friendly workload<a class="heading-anchor" href="#exercise-6-identify-an-intentionally-cpu-friendly-workload" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>identify an intentionally CPU-friendly workload</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming the GPU always wins because it has more cores ignores the fixed costs. A benchmark on one tiny array would show the CPU ahead, and the conclusion that the GPU is slow would also be wrong.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

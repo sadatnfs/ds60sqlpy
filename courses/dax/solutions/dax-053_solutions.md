@@ -42,11 +42,23 @@ Predict the mean if the warm 25 ms value is replaced by 40 ms.
 
 The mean becomes (20 + 40 + 21)/3 = 27 ms for that revised synthetic scenario.
 
+**Why it fits this model:** Replacing 25 with 40 gives 20, 40 and 21. Recompute the same mean over all three trials.
+
+**Tempting mistake:** Dropping 40 as an outlier and reporting 20.5 ms. That changes the statistic after seeing the data.
+
+**How to confirm:** The mean is 81 / 3 = 27 ms; the median is 21 ms.
+
 ### Exercise 2
 
 Compare A's cold trial with B's warm trial conceptually.
 
 That comparison cannot isolate a formula effect; measure both under a controlled, recorded condition.
+
+**Why it fits this model:** Cold trials average 110 ms and warm trials 22 ms, so comparing across cache states mixes two causes.
+
+**Tempting mistake:** Timing A cold, near case A's 110 ms, and B warm, near 22 ms, then crediting B's formula with an 88 ms gain. Cache state alone explains a gap that size.
+
+**How to confirm:** Compare A and B only under the same cache condition, as case B does: means 20 and 32, medians 20 and 18.
 
 ### Exercise 3
 
@@ -54,11 +66,23 @@ Write a real benchmark protocol without running it here.
 
 Pin source/model/engine, specify filters and cache preparation, collect repeated results and diagnostics, validate outputs, and report variability and limitations.
 
+**Why it fits this model:** A protocol fixes what is being compared before timing: the same model and engine, the same filters, results that match, and a stated cache preparation.
+
+**Tempting mistake:** Running each candidate once after editing it, so the first run is cold for one and warm for the other.
+
+**How to confirm:** Each candidate must return the same result before timing; report repeated trials with mean, median and spread, as case B's three trials show.
+
 ### Exercise 4
 
 Diagnose quoting 18 ms as B's stable production latency.
 
 It is not a measurement at all in this lesson, and a best trial would not establish production latency even if observed.
+
+**Why it fits this model:** B's trials are 18, 60 and 18. The best is 18, the mean 32, and the 60 ms trial shows variability.
+
+**Tempting mistake:** Quoting 18 ms as production latency. These numbers are synthetic, and a best trial hides the slow one.
+
+**How to confirm:** Report 18, 60 and 18 with mean 32 and median 18, and label them synthetic.
 
 ### Exercise 5
 
@@ -66,12 +90,24 @@ Explain why a smaller toy model cannot establish behavior at production cardinal
 
 Treat toy semantic checks and representative-scale performance evidence as separate gates.
 
+**Why it fits this model:** The 8-row Sales table proves results, such as 187, not speed. Plans, memory and contention change at millions of rows.
+
+**Tempting mistake:** Timing two expressions on this fixture and expecting the faster one to stay faster in production.
+
+**How to confirm:** Use toy models for correctness and a representative-scale model for speed.
+
 ### Exercise 6
 
 Transfer the review to a machine-learning inference benchmark.
 
 Record comparable conditions and actual output correctness before interpreting throughput or latency, especially with accelerators.
 
+**Why it fits this model:** Inference benchmarks have the same cold path: model loading, compilation and warmup. A first trial like B's 60 ms can be setup cost.
+
+**Tempting mistake:** Averaging the first call with steady-state calls, or reporting only warm calls without saying so.
+
+**How to confirm:** Report setup and steady-state timings separately, with batch size and synchronization stated, and check the outputs match before comparing speed.
+
 ## Review the boundary
 
-A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.
+Another readable expression is sound when its population, context and units match; record any assumed engine separately.

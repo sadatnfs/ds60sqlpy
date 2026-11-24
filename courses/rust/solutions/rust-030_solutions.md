@@ -14,13 +14,39 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Separate ownership transfer from shared access.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: String's ownership and Send contract make the transfer valid without shared mutation. Owned text crosses the thread boundary and returns its length.
+**Written answer.** Example A is ownership transfer: `move` puts `text` into the closure, the closure moves into the new thread, and `main` can no longer use `text`; the length comes back as the join result. Example B is about shared access: `Sync` means a `&String` may be used from several threads at once, and `Arc<Mutex<i32>>` is `Send`, so a handle can be given to another thread while the data stays shared.
+
+**Why it is correct.** `Send` is about moving a value to another thread, while `Sync` is about sharing references to it. A type can satisfy one without the other, so the two questions must be asked separately.
+
+**Plausible wrong approach.** Treating `move` as making a copy for the thread predicts that `text` is still usable in `main`; using it after the spawn is E0382.
+
+**How to verify.** Add `println!("{text}");` after the spawn in Example A and read E0382, borrow of moved value.
 
 ### Task 2: Guided modification
 
 Move a Vec into a worker and return a derived value.
 
-No separate reference answer has been written for this task. Start from Example B: Compile-time capability evidence is different from a runtime stress test. The compiler accepts the declared safe capability combinations.
+**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let readings = vec![4, 8, 15, 16];
+    let worker = std::thread::spawn(move || {
+        let total: i32 = readings.iter().sum();
+        (readings.len(), total)
+    });
+    assert_eq!(worker.join().unwrap(), (4, 43));
+    Ok(())
+}
+```
+
+**Observe:** The worker reports four readings with total 43.
+
+`move` transfers the whole `Vec`, including its heap buffer, into the worker, which is valid because `Vec<i32>` is `Send`. The worker returns a small derived tuple, so the parent receives results without sharing the vector at all.
+
+**Plausible wrong approach.** Dropping `move` makes the closure borrow `readings`, and `std::thread::spawn` rejects that with E0373 because the thread could outlive the vector.
+
+**How to verify.** Run the block. Then add `readings.len()` after the spawn and read E0382.
 
 ### Task 3: Independent construction
 
@@ -58,13 +84,43 @@ Arc<AtomicUsize> is Send and Sync, so the compiler accepts sharing it; a single 
 
 Try sending Rc across threads and explain the diagnostic rather than adding unsafe.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Send does not mean simultaneous mutation is safe. Static does not mean allocated forever; it constrains borrowed references in the value. Never add unsafe impl solely to silence a compiler error.
+**Written answer.** The defect is `let shared = std::rc::Rc::new(5); std::thread::spawn(move || *shared + 1);`. rustc reports E0277, `Rc<i32>` cannot be sent between threads safely, because `Send` is not implemented for `Rc<i32>`. `Rc` updates its reference count with ordinary, non-atomic arithmetic, so two threads cloning or dropping it could corrupt the count. Use `Arc`, whose count is atomic.
+
+**Why it is correct.** The marker traits encode which operations are safe across threads, and the compiler derives them from a type's members. `Rc` is deliberately not `Send`, so the rejection is a correct proof failure, not a limitation to work around.
+
+**Plausible wrong approach.** Wrapping the `Rc` in a struct with `unsafe impl Send` silences the error and reintroduces the data race the diagnostic was preventing.
+
+**How to verify.** Compile the defect and read E0277. Replace `std::rc::Rc` with `std::sync::Arc` and it compiles and returns 6.
 
 ### Task 5: Boundary evidence
 
 Test a scoped borrowed input and compare its lifetime requirement with spawn.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Transfer owned data) and Example B (Check capabilities at compile time).
+**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let rows = vec![String::from("a"), String::from("bc")];
+    let total = std::thread::scope(|scope| {
+        let worker = scope.spawn(|| rows.iter().map(String::len).sum::<usize>());
+        worker.join().unwrap()
+    });
+    assert_eq!(total, 3);
+    assert_eq!(rows.len(), 2);
+    let empty: Vec<String> = Vec::new();
+    let count = std::thread::scope(|scope| scope.spawn(|| empty.len()).join().unwrap());
+    assert_eq!(count, 0);
+    Ok(())
+}
+```
+
+**Observe:** The scoped worker reads the borrowed rows and returns 3, the rows are still usable afterward, and an empty input gives 0.
+
+A scoped thread may borrow `rows` because the scope cannot return until the thread has finished, so the borrow cannot outlive its owner. `std::thread::spawn` requires a `'static` closure instead: the same borrowing closure is rejected with E0373, and the fix there is `move` plus ownership.
+
+**Plausible wrong approach.** Assuming `'static` means the data must live for the whole program leads to leaking or using global data. It only means the closure holds no borrowed references that could expire.
+
+**How to verify.** Run the block. Replace `scope.spawn` with `std::thread::spawn` in the first worker and read E0373, closure may outlive the current function.
 
 ### Task 6: Transfer and justify
 

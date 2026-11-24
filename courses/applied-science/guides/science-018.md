@@ -10,6 +10,13 @@ This tutorial reuses the inventory loss from the forecasting route. Demand scena
 
 Expected loss is \(\sum_s p_sL(q,d_s)\). A minimax decision minimizes \(\max_sL(q,d_s)\). The latter does not use the scenario probabilities; it protects against the worst listed outcome. A scenario omitted from the list is not protected merely because the objective is called robust.
 
+## Key terms
+
+- **Scenario table:** A finite list of possible outcomes with probabilities; an omitted scenario is not protected by any objective.
+- **Bayes action:** The action minimizing expected loss, the probability-weighted sum of scenario losses.
+- **Minimax decision:** The action minimizing the worst listed scenario loss, ignoring the scenario probabilities.
+- **EVPI:** The expected value of perfect information, the reduction in expected loss if the true scenario were known before deciding.
+
 ## Worked case 1: expected-cost and minimax decisions
 
 The expected-cost decision is four. The minimax decision is ten, balancing the shortage loss at demand twelve against the surplus loss at demand two. The program evaluates the entire discrete action grid, verifies both choices and compares their worst-case costs.
@@ -44,6 +51,42 @@ Risk measures also require interpretation. A tail-risk criterion depends on how 
 **Does EVPI tell us how much to pay for a model?** It is an upper bound under the supplied decision model. The actual model's information quality, latency, implementation costs and effects on behavior require a separate analysis.
 
 **Why show both policies when only one will be deployed?** Their difference reveals the consequences of the risk objective. A decision maker can then discuss the underlying tradeoff rather than treating the solver's chosen action as a value judgment made by mathematics.
+
+## Worked example: Expected cost, minimax cost, minimax regret and EVPI
+
+```python
+import numpy as np
+
+prob = np.array([0.5, 0.3, 0.2])  # low, medium, high demand
+cost = np.array(
+    [
+        [10, 30, 60],  # small capacity
+        [20, 22, 35],  # medium capacity
+        [35, 35, 36],
+    ]
+)  # large capacity
+names = ["small", "medium", "large"]
+
+expected = cost @ prob
+regret = cost - cost.min(axis=0)
+for name, e, worst, r in zip(names, expected, cost.max(axis=1), regret.max(axis=1)):
+    print(f"{name:>6}: expected {e:.1f}, worst case {worst}, max regret {r}")
+wait_and_see = prob @ cost.min(axis=0)
+print(
+    f"best expected cost {expected.min():.1f}, wait-and-see {wait_and_see:.1f}, EVPI {expected.min() - wait_and_see:.1f}"
+)
+```
+
+Observed output:
+
+```text
+ small: expected 26.0, worst case 60, max regret 25
+medium: expected 23.6, worst case 35, max regret 10
+ large: expected 35.2, worst case 36, max regret 25
+best expected cost 23.6, wait-and-see 18.6, EVPI 5.0
+```
+
+Medium capacity minimizes expected cost at 23.6, ahead of small at 26.0 and large at 35.2. Its worst case is 35, one unit better than large and far better than small's 60 under high demand, so the minimax criterion also picks medium here; it would favor large if the medium cost under high demand rose above 36. Regret measures each option against the best cost achievable in each scenario, 10, 22 and 35. Medium's largest regret is 10 (in the low scenario), compared with 25 for both alternatives, so all three criteria agree in this table. That agreement is a property of these numbers, not a rule. Wait-and-see cost is \(0.5(10)+0.3(22)+0.2(35)=18.6\), the expected cost if the decision could be made after observing demand. The gap \(23.6-18.6=5.0\) is the expected value of perfect information: paying more than 5 for a demand study cannot be justified, however accurate the study, while a study costing 2 might be.
 
 ## Complete reproducible program
 

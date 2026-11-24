@@ -44,7 +44,7 @@ assert.equal(result.stderr, '');
 assert.equal(result.stdout.trim().split('\n').length, 1);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 })`. Restoring the original line brings back the worked observation: exit 0; stdout is exactly one JSON result with 2 rows and 550 cents; stderr empty.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 })`. Restoring `{ id: 'A', quantity: 2, priceCents: 125 },` brings back: exit 0; stdout is exactly one JSON result with 2 rows and 550 cents; stderr empty.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -63,7 +63,7 @@ assert.equal(result.stdout, '');
 assert.match(result.stderr, /usage/u);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(result.status, 2)`; after it the line reads `assert.equal(result.status, 2);` again and exit 2; stdout empty; stderr includes usage.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(result.status, 3);`. Restoring `assert.equal(result.status, 2);` brings back: exit 2; stdout empty; stderr includes usage.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(result.status, 2)` accepts.
 

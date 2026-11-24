@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-label-all-three-synthetic-address-roles">Exercise 1: Label all three synthetic address roles.<a class="heading-anchor" href="#exercise-1-label-all-three-synthetic-address-roles" aria-label="Link to this section">#</a></h3>
 <p>The role comes from the object and routing context, not from guessing based on a familiar private prefix.</p>
 <p><strong>Expected:</strong> One node address, one Pod address and one virtual Service address.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Assign each address by the object that reports it: Node status addresses, Pod status podIP and the Service spec clusterIP.</li>
+<li><strong>Why it is correct:</strong> Each address comes from a different allocator, so its role is fixed by where it is recorded, not by what its digits look like.</li>
+<li><strong>Plausible wrong approach:</strong> Guessing roles from a familiar private prefix such as 10.x fails because node, Pod and Service ranges can all use private space.</li>
+<li><strong>How to verify:</strong> Exactly one address is labeled node, one Pod and one virtual Service, each traced to the field that reported it.</li>
+</ul>
 <h3 id="exercise-2-predict-what-can-change-after-pod-replacement">Exercise 2: Predict what can change after Pod replacement.<a class="heading-anchor" href="#exercise-2-predict-what-can-change-after-pod-replacement" aria-label="Link to this section">#</a></h3>
 <p>Clients should discover the intended service rather than pinning a disposable Pod address without a specific reason.</p>
 <p><strong>Expected:</strong> Pod UID and IP can change while the Service remains stable.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Compare the Pod&#x27;s UID and podIP with the Service&#x27;s clusterIP before and after the Pod is replaced.</li>
+<li><strong>Why it is correct:</strong> A replacement Pod is a new object with a new UID and usually a new IP, while the Service object and its clusterIP are untouched.</li>
+<li><strong>Plausible wrong approach:</strong> Hardcoding the old Pod IP in a client works until the first replacement and then sends traffic to an address that may belong to nothing.</li>
+<li><strong>How to verify:</strong> The prediction lists Pod UID and IP as changeable and the Service clusterIP as stable.</li>
+</ul>
 <h3 id="exercise-3-draw-the-internal-request-path-with-both-ports">Exercise 3: Draw the internal request path with both ports.<a class="heading-anchor" href="#exercise-3-draw-the-internal-request-path-with-both-ports" aria-label="Link to this section">#</a></h3>
 <p>Port roles are independent of address roles. The application must actually listen at the target endpoint.</p>
 <p><strong>Expected:</strong> Service port 80 maps to Pod listener 8080.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Draw the client calling the Service on port 80 and the request arriving at the Pod listener on 8080.</li>
+<li><strong>Why it is correct:</strong> The Service port is what clients dial, while targetPort names where the container actually listens, and kube-proxy rewrites one to the other.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming the Pod must also listen on 80 because the Service does would misplace the listener and leave targetPort pointing at nothing.</li>
+<li><strong>How to verify:</strong> The drawing labels port 80 on the Service side and 8080 on the Pod side.</li>
+</ul>
 <h3 id="exercise-4-diagnose-a-host-browser-trying-a-clusterip-directly">Exercise 4: Diagnose a host browser trying a ClusterIP directly.<a class="heading-anchor" href="#exercise-4-diagnose-a-host-browser-trying-a-clusterip-directly" aria-label="Link to this section">#</a></h3>
 <p>A valid Service object does not promise host or internet reachability. Use the explicitly provisioned access path.</p>
 <p><strong>Expected:</strong> The host may have no route to that virtual cluster destination.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Explain that the ClusterIP exists only in rules programmed on cluster nodes and name the provisioned access path instead.</li>
+<li><strong>Why it is correct:</strong> kube-proxy or the CNI implements the virtual IP on nodes, so a host outside the cluster usually has no route to it.</li>
+<li><strong>Plausible wrong approach:</strong> Debugging the Service selector because the browser times out treats a host routing gap as a backend fault.</li>
+<li><strong>How to verify:</strong> The answer says the host may lack a route and points to the explicitly provisioned access path.</li>
+</ul>
 <h3 id="exercise-5-distinguish-a-node-address-from-a-public-load-balancer-address">Exercise 5: Distinguish a node address from a public load-balancer address.<a class="heading-anchor" href="#exercise-5-distinguish-a-node-address-from-a-public-load-balancer-address" aria-label="Link to this section">#</a></h3>
 <p>A node can have private addresses only. External publication requires a separate routing and exposure design.</p>
 <p><strong>Expected:</strong> They may be different infrastructure endpoints with different policies.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Contrast a node&#x27;s own address with the address a cloud load balancer publishes.</li>
+<li><strong>Why it is correct:</strong> Nodes often have only private addresses, and a public load balancer is a separate endpoint with its own routing and firewall rules.</li>
+<li><strong>Plausible wrong approach:</strong> Assuming a node IP is publicly reachable because a LoadBalancer Service exists merges two endpoints that may have different policies.</li>
+<li><strong>How to verify:</strong> The answer treats them as different infrastructure endpoints with separate policies.</li>
+</ul>
 <h3 id="exercise-6-explain-a-successful-request-with-a-changed-backend-uid">Exercise 6: Explain a successful request with a changed backend UID.<a class="heading-anchor" href="#exercise-6-explain-a-successful-request-with-a-changed-backend-uid" aria-label="Link to this section">#</a></h3>
 <p>Record the actual serving identity when the exercise requires replacement evidence; a 200 response alone cannot identify the process.</p>
-<p><strong>Expected:</strong> Service continuity and backend identity are separate observations.</p></article>
+<p><strong>Expected:</strong> Service continuity and backend identity are separate observations.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record the serving Pod UID alongside the response when replacement evidence is required.</li>
+<li><strong>Why it is correct:</strong> The Service keeps answering across replacements, so a 200 shows Service continuity but not which Pod produced it.</li>
+<li><strong>Plausible wrong approach:</strong> Treating two identical 200 responses as proof the same Pod served both ignores that the backend can change behind the Service.</li>
+<li><strong>How to verify:</strong> The record pairs each response with its backend UID, keeping continuity and identity separate.</li>
+</ul></article>
   </main>
 </body>
 </html>

@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-014-explained-reference">julia-014: explained reference<a class="heading-anchor" href="#julia-014-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-014_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p><code>observed_summary</code> drops <code>missing</code> with <code>skipmissing</code>, rejects any nonfinite observed value with <code>DomainError</code>, and returns a named tuple of <code>total</code>, <code>observed</code> and <code>estimate</code>. When nothing is observed the estimate is <code>missing</code>. Treat <code>missing</code> as unknown data and <code>nothing</code> as an absent result, using <code>coalesce</code> and <code>something</code> for each.</p>
 <h3 id="1-retain-the-denominator">1. Retain the denominator<a class="heading-anchor" href="#1-retain-the-denominator" aria-label="Link to this section">#</a></h3>
 <p>The result describes the observed measurements, not an assumed completed dataset.</p>
 <p><strong>Expected observation:</strong> Total 3, observed 2 and mean 2.</p>
+<p><strong>Why it holds here:</strong> <code>[1, missing, 3]</code> has 3 entries and 2 observed values, so the mean of observed values is (1 + 3) / 2 = 2.0.</p>
+<p><strong>Plausible wrong approach:</strong> Calling <code>mean</code> directly on the vector propagates <code>missing</code>, and reporting only a cleaned mean drops the fact that one row lacked data.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>summary == (total = 3, observed = 2, estimate = 2.0)</code>.</p>
 <h3 id="2-replace-explicitly">2. Replace explicitly<a class="heading-anchor" href="#2-replace-explicitly" aria-label="Link to this section">#</a></h3>
 <p>The replacement policy changes the quantity being summarized.</p>
 <p><strong>Expected observation:</strong> The mean becomes 4/3.</p>
+<p><strong>Why it holds here:</strong> <code>coalesce.(values, 0.0)</code> replaces the gap with 0, so the mean becomes (1 + 0 + 3) / 3 = 4/3.</p>
+<p><strong>Plausible wrong approach:</strong> Presenting 4/3 as if it were the observed mean changes both numerator and denominator without stating the imputation.</p>
+<p><strong>How to verify:</strong> Example A asserts <code>mean(replaced) ≈ 4/3</code>; print both means beside their policies.</p>
 <h3 id="3-reject-numerical-failure">3. Reject numerical failure<a class="heading-anchor" href="#3-reject-numerical-failure" aria-label="Link to this section">#</a></h3>
 <p>Unknown data and undefined floating arithmetic need distinct handling.</p>
 <p><strong>Expected observation:</strong> The finite-value guard rejects it.</p>
+<p><strong>Why it holds here:</strong> <code>skipmissing</code> removes only <code>missing</code>, so NaN remains and the <code>isfinite</code> check throws <code>DomainError</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming <code>skipmissing</code> also discards NaN lets a numerical failure pass through as if it were an unknown measurement.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>@test_throws DomainError observed_summary([1.0, NaN, missing])</code>.</p>
 <h3 id="4-handle-all-missing-data">4. Handle all-missing data<a class="heading-anchor" href="#4-handle-all-missing-data" aria-label="Link to this section">#</a></h3>
 <p>The output preserves unavailable information while retaining the eligible count.</p>
 <p><strong>Expected observation:</strong> The observed count is 0 and estimate is missing.</p>
+<p><strong>Why it holds here:</strong> Two missing values leave <code>observed</code> empty, so the function reports observed count 0 and estimate <code>missing</code> while keeping total 2.</p>
+<p><strong>Plausible wrong approach:</strong> Returning 0 as the estimate fabricates a mean of no data and could be averaged into later group results.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>empty_observed.observed == 0</code> and <code>ismissing(empty_observed.estimate)</code>.</p>
 <h3 id="5-distinguish-absence">5. Distinguish absence<a class="heading-anchor" href="#5-distinguish-absence" aria-label="Link to this section">#</a></h3>
 <p>An absent return and a missing measurement should not be conflated accidentally.</p>
 <p><strong>Expected observation:</strong> The former returns 7; the latter retains <code>nothing</code>.</p>
+<p><strong>Why it holds here:</strong> <code>something</code> skips <code>nothing</code> and returns 7, while <code>coalesce</code> skips only <code>missing</code> and returns its first argument <code>nothing</code> unchanged.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>coalesce</code> to fill an absent lookup result keeps <code>nothing</code>, which later fails in arithmetic with a confusing error.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>something(nothing, 7) == 7</code> and <code>coalesce(nothing, 7) === nothing</code>.</p>
 <h3 id="6-assess-a-real-policy">6. Assess a real policy<a class="heading-anchor" href="#6-assess-a-real-policy" aria-label="Link to this section">#</a></h3>
 <p>The missingness mechanism and decision target determine which policy is defensible.</p>
-<p><strong>Expected observation:</strong> State assumptions, affected population and uncertainty.</p></article>
+<p><strong>Expected observation:</strong> State assumptions, affected population and uncertainty.</p>
+<p><strong>Why it holds here:</strong> Deletion targets observed units only, while imputation needs a model; neither choice is justified by the code alone.</p>
+<p><strong>Plausible wrong approach:</strong> Choosing whichever policy makes results look stable treats a scientific assumption about why data is missing as a formatting decision.</p>
+<p><strong>How to verify:</strong> Write the assumed missingness mechanism and affected rows, then report both totals from <code>observed_summary</code>.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-014: all reference checks passed</code>:</p>
+<p><code>coalesce</code> replaces missing with 4, but <code>something</code> does not treat missing as absent, so the result stays missing. <code>missing + 1</code> propagates as expected. <code>observed_summary([2, 4])</code> reports an estimate of 3 with every value observed, an empty <code>Float64[]</code> still returns a total of 0, and <code>Inf</code> raises <code>DomainError</code>, because missing and invalid values are different problems that need different handling. Notice that each line asks a separate question. Replacement, propagation, summary counts and invalid input are not tested by one example, so a change to the missing policy cannot hide behind a passing NaN check, and a change to the NaN policy cannot hide behind a passing missing check. A summary that silently dropped <code>Inf</code> would report an estimate from fewer values than its total suggests.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> coalesce<span class="syntax-punctuation">(</span><span class="syntax-builtin">missing</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span>
+    <span class="syntax-decorator">@test</span> ismissing<span class="syntax-punctuation">(</span><span class="syntax-builtin">missing</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> ismissing<span class="syntax-punctuation">(</span>something<span class="syntax-punctuation">(</span><span class="syntax-builtin">missing</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> observed_summary<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>estimate <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> observed_summary<span class="syntax-punctuation">(</span><span class="syntax-keyword">Float64</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>total <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">DomainError</span> observed_summary<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Inf</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

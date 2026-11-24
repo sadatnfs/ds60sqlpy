@@ -15,6 +15,13 @@ For \(\theta=\operatorname{logit}^{-1}(z)\), the derivative is \(d\theta/dz=\the
 
 The extra term is the log Jacobian. It is not a regularizer or an optional numerical adjustment. It is the probability-accounting term required when a density originally defined with respect to one coordinate is expressed with respect to another.
 
+## Key terms
+
+- **Change of variables:** Re-expressing a distribution in a new coordinate, which preserves probability mass but not density height.
+- **Jacobian adjustment:** The log absolute derivative of the transformation that must be added to a density written in the new coordinate.
+- **Inverse logit:** The map from an unconstrained z to a probability theta, with derivative theta(1 - theta).
+- **Unconstrained coordinate:** A real-valued representation of a constrained parameter that samplers can move through freely.
+
 ## Worked case 1: verify a transformed beta density
 
 The target is Beta(2,2). The program evaluates a fine grid in log-odds coordinates, maps it to probabilities and includes the Jacobian. Numerical integration over the z grid gives total mass close to one. The implied second moment of theta is .3, agreeing with the analytic beta moment.
@@ -44,6 +51,33 @@ Changing variables can also improve or worsen geometry. A mathematically correct
 **Does a transformed deterministic prediction need a Jacobian in generated output?** Merely calculating a function of sampled parameters does not redefine the sampled density. A Jacobian is needed when changing the variables with respect to which the target density is represented.
 
 **What should be written before implementing a transformation?** State the original density, the transformation, its domain, the reference measure and which transformations the inference system already handles. Then check a tractable case. The code here demonstrates that procedure for one one-dimensional transform.
+
+## Worked example: Integrating a log-scale density with and without the Jacobian
+
+```python
+import numpy as np
+from scipy import integrate, stats
+
+# sigma = exp(u) with u ~ Normal(0, 1)
+correct = lambda s: stats.norm.pdf(np.log(s)) / s
+missing = lambda s: stats.norm.pdf(np.log(s))
+
+for name, f in (("with 1/sigma", correct), ("without Jacobian", missing)):
+    mass = integrate.quad(f, 0, np.inf)[0]
+    mean = integrate.quad(lambda s: s * f(s), 0, np.inf)[0] / mass
+    print(f"{name:17s}: total mass {mass:.4f}, mean after renormalizing {mean:.4f}")
+print(f"lognormal mean exp(1/2) = {np.exp(0.5):.4f}; exp(3/2) = {np.exp(1.5):.4f}")
+```
+
+Observed output:
+
+```text
+with 1/sigma     : total mass 1.0000, mean after renormalizing 1.6487
+without Jacobian : total mass 1.6487, mean after renormalizing 4.4817
+lognormal mean exp(1/2) = 1.6487; exp(3/2) = 4.4817
+```
+
+Suppose a model samples \(u\sim\mathrm{Normal}(0,1)\) and uses \(\sigma=e^u\). The density of \(\sigma\) is \(\phi(\log\sigma)\cdot|d u/d\sigma|=\phi(\log\sigma)/\sigma\), and the quadrature confirms that it integrates to 1.0000 with mean 1.6487, which is the lognormal mean \(e^{1/2}\). Dropping the factor \(1/\sigma\) gives a function with total mass 1.6487, so it is not a density at all. The serious failure is quieter, though. Renormalizing the wrong function does not repair it: the function \(\phi(\log\sigma)\) equals \(\sigma\) times the correct density, so after normalization it is a lognormal with location 1 rather than 0, and its mean is \(e^{3/2}=4.4817\), almost three times the truth. A sampler working on \(u\) would never complain, because both versions are smooth and proper after normalization. Only an independent check, here an exact integral and a known moment, reveals that the wrong distribution is being targeted. The same accounting is needed whenever a parameter is declared on one scale and given a prior on another.
 
 ## Complete reproducible program
 

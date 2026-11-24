@@ -3,17 +3,17 @@
 // Copy Example A into a scratch `main.mjs` and change `trace.push('started');` to
 // `trace.push('started!');`. Before running it, predict which check fails and which value it
 // now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.deepEqual(trace, ['started'])`. Restoring the original line brings back the worked
-// observation: trace is empty before next; then started, with value 2.
+// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(trace,
+// ['started'])`. Restoring `trace.push('started');` brings back: trace is empty before next;
+// then started, with value 2.
 
 // Exercise 2: Close on an early break: debug a regression
 // A regression changed `yield 1;` to `yield 2;` in Example B. Run Example B with that
 // change, use the failing check to explain the defect and repair it without changing the
 // check.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.deepEqual(trace, ['opened', 1, 'closed'])`; after it the line reads `yield 1;`
-// again and trace records opened, value 1, closed.
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.deepEqual(trace, ['opened', 1, 'closed'])`. Restoring `yield 1;` brings back:
+// trace records opened, value 1, closed.
 
 // Exercise 3: Distinguish a cursor from a fresh iterable
 // Consume one generator twice, then create a second generator.

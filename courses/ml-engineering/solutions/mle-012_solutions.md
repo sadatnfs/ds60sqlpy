@@ -9,11 +9,15 @@ The executable reference contains the two complete worked cases with assertions.
 
 Check both accepted boundaries and values immediately outside them. Do not infer request validation from the model's numerical output.
 
+The Request model declares usage with ge=0 and le=10000, so usage 0 and usage 10000 should both return 200, while -0.01 and 10000.01 should return 422. The same holds for tickets at 0 and 100 versus 101. Seeing a sensible probability for a value is no proof it was inside the contract: the logistic model would score usage 50000 without complaint.
+
 **Expected:** The response follows the documented bounds.
 
 ## 2. Reject a hidden target
 
 Extra-field rejection helps catch client mistakes and accidental leakage. It does not replace broader data and access controls.
+
+Example_two already posts label 1 and gets 422 because of extra="forbid". Remove that line from model_config and pydantic's default is to ignore unknown fields, so the same request returns 200 and the client never learns it was sending its target. Assert the status code, not just that a probability came back.
 
 **Expected:** The API rejects the undeclared field.
 
@@ -21,11 +25,15 @@ Extra-field rejection helps catch client mistakes and accidental leakage. It doe
 
 Bind the version to the accepted artifact and feature contract. A display label should not diverge from the actual loaded state.
 
+Notice that "fixture-v1" is a literal string in predict(), not a value read from the fitted pipeline. Refitting with a different training cutoff would still answer fixture-v1. Store the version on the loaded bundle and return that attribute, then verify two different fits produce two different versions.
+
 **Expected:** The observation identifies its model.
 
 ## 4. Test categorical policy
 
 Document that choice and ensure clients know the accepted vocabulary. A hidden fallback can create train/serve inconsistency.
+
+region is Literal["north", "south"], so "east" returns 422 at the HTTP layer even though the pipeline underneath uses OneHotEncoder(handle_unknown="ignore") and would have scored it as all zeros. The API contract is stricter than the model; send "east" through both paths to see 422 versus a probability.
 
 **Expected:** It is rejected under this interface contract.
 
@@ -38,6 +46,8 @@ Use the owned local-system checker for actual HTTP, startup, monitoring, rollbac
 ## 6. Preserve safe errors
 
 Return a bounded public error and retain appropriate owned operational evidence. Do not echo arbitrary secrets or expose an administrative mutation route casually.
+
+Recent FastAPI versions include each offending input in the 422 detail. If a client sent a token in an undeclared field, the error body could echo it back into a log. Return the field name and constraint, such as "usage must be <= 10000", and keep the full request only in owned, access-controlled evidence.
 
 **Expected:** It is actionable without unnecessary sensitive detail.
 

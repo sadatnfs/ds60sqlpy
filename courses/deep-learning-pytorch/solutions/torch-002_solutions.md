@@ -1,6 +1,6 @@
 # torch-002: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting Tensors, devices, dtypes, strides and views yourself. They reuse the guide's literal inputs, starting from Example A, Inspect shape and stride, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Stride, View, Device. After a pass, choose a new input for exercise 6, Reject incompatible arithmetic, without looking.
 
 ## Mechanism review
 
@@ -22,9 +22,9 @@ torch.arange creates a one-dimensional tensor; reshape supplies the desired axes
 
 ## Trace axes, storage and pairing separately
 
-For a contiguous 2-by-3 tensor containing 0 through 5, the stride tuple (3, 1) means one step along the first axis moves three stored elements and one step along the second moves one. Ignoring a nonzero base storage offset, element(i, j) is located at element offset 3 i+j. In float64 each element uses eight bytes, so offset 5 corresponds to 40 bytes from that base. Strides describe storage movement in elements, not a count of rows or bytes.
+For a contiguous 2-by-3 tensor containing 0 through 5, the stride tuple (3, 1) means one step along the first axis moves three stored elements and one step along the second moves one. Ignoring a nonzero base storage offset, element(i, j) is located at element offset `3i + j`. In float64 each element uses eight bytes, so offset 5 corresponds to 40 bytes from that base. Strides describe storage movement in elements, not a count of rows or bytes.
 
-Transposing gives shape (3, 2) and strides (1, 3). The value at transposed[2, 1] is the original[1, 2], still five. No rearrangement of the underlying values is required for that interpretation. A contiguous materialization may allocate a new ordering for a later operation, but the fact that a tensor is contiguous does not establish that nobody else shares its storage. The official view documentation makes that aliasing boundary explicit. [PyTorch 2.9 tensor views](https://docs.pytorch.org/docs/2.9/tensor_view.html).
+Transposing gives shape (3, 2) and strides (1, 3). The value at `transposed[2, 1]` is the original `[1, 2]` element, still five. No rearrangement of the underlying values is required for that interpretation. A contiguous materialization may allocate a new ordering for a later operation, but the fact that a tensor is contiguous does not establish that nobody else shares its storage. The official view documentation makes that aliasing boundary explicit. [PyTorch 2.9 tensor views](https://docs.pytorch.org/docs/2.9/tensor_view.html).
 
 The worked sequence deliberately mutates state. Example A creates x, Example B takes its first-row view and changes x[0, 0] to 99, and Example C clones the now-mutated tensor. Its correct comparison is therefore clone=-1 versus original=99. Re-running Example C alone with an unrelated x would be a different fixture. Keep the stated sequential scratch-file contract visible when reproducing the examples.
 
@@ -74,7 +74,7 @@ column[2] = -7
 assert grid[2, 1].item() == -7 and column.stride() == (2,)
 ```
 
-**Expected:** grid[2, 1] becomes -7; the column view has stride (2,).
+**Expected:** `grid[2, 1]` becomes -7; the column view has stride (2,).
 
 **Verify:** In a fresh process, the exercise checks confirm `grid[2, 1].item() == -7` and `column.stride() == (2,)`.
 
@@ -94,7 +94,7 @@ assert (
 )
 ```
 
-**Expected:** contiguous() returns the same storage, so grid[0, 0] becomes 100; the clone write leaves grid unchanged.
+**Expected:** contiguous() returns the same storage, so `grid[0, 0]` becomes 100; the clone write leaves grid unchanged.
 
 **Verify:** In a fresh process, the exercise checks confirm `same.data_ptr() == grid.data_ptr()`; `grid[0, 0].item() == 100` and `owned[0, 0].item() == -100`.
 
@@ -155,4 +155,4 @@ else:
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Trace a transposed layout, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Detect a pairing broadcast, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

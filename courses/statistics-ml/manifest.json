@@ -13,6 +13,7 @@
     {
       "id": "statistics-001",
       "title": "Problem Formulation and Statistical Reasoning",
+      "outcome": "Distinguish descriptive, predictive and causal questions, then write an analysis contract that fixes the estimand, unit and decision threshold.",
       "chapter_path": "courses/statistics-ml/chapters/01-problem-formulation-and-statistical-reasoning.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_01.py"],
       "topic_ids": [
@@ -49,6 +50,7 @@
     {
       "id": "statistics-002",
       "title": "Mathematical Foundations",
+      "outcome": "Compute least-squares fits as projections, check gradients numerically and diagnose rank deficiency and ill-conditioning in feature matrices.",
       "chapter_path": "courses/statistics-ml/chapters/02-mathematical-foundations.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_02.py"],
       "topic_ids": [
@@ -81,6 +83,7 @@
     {
       "id": "statistics-003",
       "title": "Probability Fundamentals and Stochastic Processes",
+      "outcome": "Calculate conditional probabilities and base-rate effects from joint tables, and check stationary behavior and dependence assumptions in simple stochastic processes.",
       "chapter_path": "courses/statistics-ml/chapters/03-probability-fundamentals-and-stochastic-processes.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_03.py"],
       "topic_ids": [
@@ -120,6 +123,7 @@
     {
       "id": "statistics-004",
       "title": "Probability Distributions You Should Recognize",
+      "outcome": "Choose a distribution family from outcome type and generating mechanism, and compare how heterogeneity, truncation and heavy tails change its implied risks.",
       "chapter_path": "courses/statistics-ml/chapters/04-probability-distributions-you-should-recognize.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_04.py"],
       "topic_ids": [
@@ -161,6 +165,7 @@
     {
       "id": "statistics-005",
       "title": "Sampling, Surveys, and Data Collection",
+      "outcome": "Estimate population totals and means with inclusion-probability weights, and quantify how clustering and stratified allocation change effective sample size.",
       "chapter_path": "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_05.py"],
       "topic_ids": [
@@ -198,6 +203,7 @@
     {
       "id": "statistics-006",
       "title": "Measurement, Exploratory Analysis, and Data Quality",
+      "outcome": "Diagnose join-grain errors, missing keys and composition effects before summarizing data, using distributions and conditional comparisons.",
       "chapter_path": "courses/statistics-ml/chapters/06-measurement-exploratory-analysis-and-data-quality.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_06.py"],
       "topic_ids": [
@@ -237,6 +243,7 @@
     {
       "id": "statistics-007",
       "title": "Missing Data, Measurement Error, and Robust Statistics",
+      "outcome": "Distinguish missingness mechanisms from contamination, and compare robust estimators, multiple imputation and sensitivity analyses for each.",
       "chapter_path": "courses/statistics-ml/chapters/07-missing-data-measurement-error-and-robust-statistics.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_07.py"],
       "topic_ids": [
@@ -276,6 +283,7 @@
     {
       "id": "statistics-008",
       "title": "Estimation and Statistical Inference",
+      "outcome": "Calculate estimators with standard errors, confidence intervals, prediction intervals, bootstrap and delta-method uncertainty, and match each to the question asked.",
       "chapter_path": "courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_08.py"],
       "topic_ids": [
@@ -319,6 +327,7 @@
     {
       "id": "statistics-009",
       "title": "Hypothesis Tests and Group Comparisons",
+      "outcome": "Choose and run paired, Welch, randomization and equivalence tests that match the study design, and interpret their p-values and effect sizes correctly.",
       "chapter_path": "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_09.py"],
       "topic_ids": [
@@ -366,6 +375,7 @@
     {
       "id": "statistics-010",
       "title": "Multiple Testing, Sequential Inference, and Selective Inference",
+      "outcome": "Apply Holm, Benjamini-Hochberg and alpha-spending procedures that match how claims were selected, monitored or screened.",
       "chapter_path": "courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_10.py"],
       "topic_ids": [
@@ -402,6 +412,7 @@
     {
       "id": "statistics-011",
       "title": "Regression and Generalized Linear Models",
+      "outcome": "Fit linear, logistic and count regressions from their likelihoods, choosing the GLM family, link and exposure offset, and interpret coefficients as odds or rate ratios.",
       "chapter_path": "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_11.py"],
       "topic_ids": [
@@ -448,6 +459,7 @@
     {
       "id": "statistics-012",
       "title": "Regression Diagnostics, Multilevel Models, and Longitudinal Analysis",
+      "outcome": "Diagnose leverage and influence in fitted regressions, and separate within-unit from between-unit associations using random-intercept partial pooling and fixed effects.",
       "chapter_path": "courses/statistics-ml/chapters/12-regression-diagnostics-multilevel-models-and-longitudinal-analysis.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_12.py"],
       "topic_ids": [
@@ -486,6 +498,7 @@
     {
       "id": "statistics-013",
       "title": "Classical Experimental Design",
+      "outcome": "Design factorial, fractional and blocked experiments, identify aliased effects, and calculate the sample size needed for a target power.",
       "chapter_path": "courses/statistics-ml/chapters/13-classical-experimental-design.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_13.py"],
       "topic_ids": [
@@ -525,6 +538,7 @@
     {
       "id": "statistics-014",
       "title": "Online Experimentation and A/B Testing",
+      "outcome": "Check online experiments for sample ratio mismatch, then estimate treatment effects at the randomization unit with CUPED variance reduction and delta-method ratio metrics.",
       "chapter_path": "courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_14.py"],
       "topic_ids": [
@@ -567,6 +581,7 @@
     {
       "id": "statistics-015",
       "title": "Causal Inference Foundations",
+      "outcome": "Define causal estimands with potential outcomes, then apply backdoor adjustment while avoiding collider selection and checking consistency, exchangeability and positivity.",
       "chapter_path": "courses/statistics-ml/chapters/15-causal-inference-foundations.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_15.py"],
       "topic_ids": [
@@ -603,6 +618,7 @@
     {
       "id": "statistics-016",
       "title": "Quasi-Experiments and Causal Study Designs",
+      "outcome": "Estimate effects with difference-in-differences, instrumental variables and regression discontinuity, and assess the parallel-trends, instrument-strength and local-continuity assumptions each design needs.",
       "chapter_path": "courses/statistics-ml/chapters/16-quasi-experiments-and-causal-study-designs.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_16.py"],
       "topic_ids": [
@@ -639,6 +655,7 @@
     {
       "id": "statistics-017",
       "title": "Causal Estimation, Heterogeneous Effects, and Policy Learning",
+      "outcome": "Estimate average effects with cross-fitted doubly robust AIPW, and turn heterogeneous effect estimates into a treatment policy that accounts for action costs.",
       "chapter_path": "courses/statistics-ml/chapters/17-causal-estimation-heterogeneous-effects-and-policy-learning.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_17.py"],
       "topic_ids": [
@@ -682,6 +699,7 @@
     {
       "id": "statistics-018",
       "title": "Bayesian Statistics and Probabilistic Modeling",
+      "outcome": "Compute conjugate beta-binomial posteriors, run Metropolis sampling and Gaussian process conditioning, and check models with posterior predictive simulation.",
       "chapter_path": "courses/statistics-ml/chapters/18-bayesian-statistics-and-probabilistic-modeling.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_18.py"],
       "topic_ids": [
@@ -726,6 +744,7 @@
     {
       "id": "statistics-019",
       "title": "Statistical Learning and Classical Supervised Models",
+      "outcome": "Fit decision trees, bagged ensembles, random forests and gradient boosting, and explain how tree correlation and residual fitting change variance and bias.",
       "chapter_path": "courses/statistics-ml/chapters/19-statistical-learning-and-classical-supervised-models.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_19.py"],
       "topic_ids": [
@@ -770,6 +789,7 @@
     {
       "id": "statistics-020",
       "title": "Feature Engineering and Representation Learning",
+      "outcome": "Build PCA representations and target encodings that are fit only on training data, and detect preprocessing leakage across time and label boundaries.",
       "chapter_path": "courses/statistics-ml/chapters/20-feature-engineering-and-representation-learning.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_20.py"],
       "topic_ids": [
@@ -806,6 +826,7 @@
     {
       "id": "statistics-021",
       "title": "Unsupervised Learning and Multivariate Analysis",
+      "outcome": "Compare k-means, density clustering and Gaussian mixtures by the objective each optimizes, and assess cluster stability with label-invariant agreement such as adjusted Rand.",
       "chapter_path": "courses/statistics-ml/chapters/21-unsupervised-learning-and-multivariate-analysis.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_21.py"],
       "topic_ids": [
@@ -846,6 +867,7 @@
     {
       "id": "statistics-022",
       "title": "Model Validation and Predictive Performance",
+      "outcome": "Validate a complete modeling procedure with grouped or temporal splits, and evaluate ranking, probability calibration and threshold decisions with separate metrics.",
       "chapter_path": "courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_22.py"],
       "topic_ids": [
@@ -890,6 +912,7 @@
     {
       "id": "statistics-023",
       "title": "Uncertainty Quantification and Distribution Shift",
+      "outcome": "Construct split conformal prediction intervals with the finite-sample rank correction, and reweight evaluation for distribution shift using importance weights.",
       "chapter_path": "courses/statistics-ml/chapters/23-uncertainty-quantification-and-distribution-shift.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_23.py"],
       "topic_ids": [
@@ -924,6 +947,7 @@
     {
       "id": "statistics-024",
       "title": "Explainability, Fairness, and Model Robustness",
+      "outcome": "Calculate Shapley attributions for a specified value function, compare group fairness criteria such as equalized odds and demographic parity, and state the perturbation model behind robustness claims.",
       "chapter_path": "courses/statistics-ml/chapters/24-explainability-fairness-and-model-robustness.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_24.py"],
       "topic_ids": [
@@ -961,6 +985,7 @@
     {
       "id": "statistics-025",
       "title": "Time-Series Foundations and Diagnostics",
+      "outcome": "Diagnose trend, seasonality, serial correlation and spectral frequency in a time series, and preserve the information set available at each forecast origin.",
       "chapter_path": "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_25.py"],
       "topic_ids": [
@@ -1000,6 +1025,7 @@
     {
       "id": "statistics-026",
       "title": "Classical Forecasting Methods",
+      "outcome": "Forecast with naive, drift, exponential smoothing, ARIMA and state-space baselines, and compare their structural assumptions with past-only validation.",
       "chapter_path": "courses/statistics-ml/chapters/26-classical-forecasting-methods.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_26.py"],
       "topic_ids": [
@@ -1040,6 +1066,7 @@
     {
       "id": "statistics-027",
       "title": "Advanced Forecasting and Forecast Evaluation",
+      "outcome": "Evaluate forecasts on rolling origins with scaled and quantile losses such as MASE and pinball loss, and reconcile hierarchical forecasts so totals match their components.",
       "chapter_path": "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_27.py"],
       "topic_ids": [
@@ -1084,6 +1111,7 @@
     {
       "id": "statistics-028",
       "title": "Survival Analysis, Duration Models, and Reliability",
+      "outcome": "Estimate Kaplan-Meier survival curves from censored risk sets, and compare hazards, restricted mean survival time and cumulative incidence under competing events.",
       "chapter_path": "courses/statistics-ml/chapters/28-survival-analysis-duration-models-and-reliability.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_28.py"],
       "topic_ids": [
@@ -1125,6 +1153,7 @@
     {
       "id": "statistics-029",
       "title": "Anomaly Detection, Changepoints, and Statistical Process Control",
+      "outcome": "Detect point anomalies, contextual anomalies and changepoints with robust scores, CUSUM and EWMA charts, and evaluate alert rules by false alarms and missed events.",
       "chapter_path": "courses/statistics-ml/chapters/29-anomaly-detection-changepoints-and-statistical-process-control.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_29.py"],
       "topic_ids": [
@@ -1160,6 +1189,7 @@
     {
       "id": "statistics-030",
       "title": "Spatial and Spatiotemporal Statistics",
+      "outcome": "Calculate Moran's I under an explicit spatial weights matrix, solve a small ordinary kriging system, and explain how changing areal boundaries alters aggregated results.",
       "chapter_path": "courses/statistics-ml/chapters/30-spatial-and-spatiotemporal-statistics.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_30.py"],
       "topic_ids": [
@@ -1194,6 +1224,7 @@
     {
       "id": "statistics-031",
       "title": "Network and Graph Analysis",
+      "outcome": "Validate a graph representation before computing degree and PageRank centrality, and build link-prediction features that respect a time boundary.",
       "chapter_path": "courses/statistics-ml/chapters/31-network-and-graph-analysis.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_31.py"],
       "topic_ids": [
@@ -1225,6 +1256,7 @@
     {
       "id": "statistics-032",
       "title": "Recommendation, Information Retrieval, and Ranking",
+      "outcome": "Evaluate retrieval and ranking with recall@k, NDCG and reciprocal rank, and separate user preference from position exposure in click feedback.",
       "chapter_path": "courses/statistics-ml/chapters/32-recommendation-information-retrieval-and-ranking.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_32.py"],
       "topic_ids": [
@@ -1259,6 +1291,7 @@
     {
       "id": "statistics-033",
       "title": "Deep Learning, Language, and Generative Modeling",
+      "outcome": "Derive and numerically check neural network gradients, verify causal attention masking, and count the parameters added by low-rank adaptation.",
       "chapter_path": "courses/statistics-ml/chapters/33-deep-learning-language-and-generative-modeling.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_33.py"],
       "topic_ids": [
@@ -1300,6 +1333,7 @@
     {
       "id": "statistics-034",
       "title": "Generative AI and Language-Model Evaluation",
+      "outcome": "Evaluate language-model workflows against a task contract using Wilson intervals on success rates, citation support checks and rater agreement measured by kappa.",
       "chapter_path": "courses/statistics-ml/chapters/34-generative-ai-and-language-model-evaluation.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_34.py"],
       "topic_ids": [
@@ -1334,6 +1368,7 @@
     {
       "id": "statistics-035",
       "title": "Bandits, Reinforcement Learning, and Adaptive Decisions",
+      "outcome": "Compute Bellman values and Q-learning updates, and estimate a new policy's value from logged data with importance weighting while checking for misleading reward proxies.",
       "chapter_path": "courses/statistics-ml/chapters/35-bandits-reinforcement-learning-and-adaptive-decisions.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_35.py"],
       "topic_ids": [
@@ -1371,6 +1406,7 @@
     {
       "id": "statistics-036",
       "title": "Optimization and Operations Research",
+      "outcome": "Solve linear programs with a solver, verify constraint slacks and the objective value, and interpret binding constraints through KKT multipliers.",
       "chapter_path": "courses/statistics-ml/chapters/36-optimization-and-operations-research.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_36.py"],
       "topic_ids": [
@@ -1412,6 +1448,7 @@
     {
       "id": "statistics-037",
       "title": "Simulation and Computational Statistics",
+      "outcome": "Estimate Monte Carlo standard errors, reduce them with control variates and antithetic pairs, verify simulated queues through conservation, and value information about the state.",
       "chapter_path": "courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_37.py"],
       "topic_ids": [
@@ -1446,6 +1483,7 @@
     {
       "id": "statistics-038",
       "title": "Product, Customer, Marketing, and Business Analytics",
+      "outcome": "Build metric trees and funnels with consistent denominators, model carryover and saturation in marketing response, and separate predicted value from incremental effect.",
       "chapter_path": "courses/statistics-ml/chapters/38-product-customer-marketing-and-business-analytics.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_38.py"],
       "topic_ids": [
@@ -1490,6 +1528,7 @@
     {
       "id": "statistics-039",
       "title": "Research Synthesis and Specialized Statistical Methodologies",
+      "outcome": "Pool study estimates with common-effect and random-effects meta-analysis, and analyze compositional, circular and privacy-protected data with methods that respect their structure.",
       "chapter_path": "courses/statistics-ml/chapters/39-research-synthesis-and-specialized-statistical-methodologies.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_39.py"],
       "topic_ids": [
@@ -1534,6 +1573,7 @@
     {
       "id": "statistics-040",
       "title": "Production Methodology, Governance, and Senior Scientific Judgment",
+      "outcome": "Reconstruct the information available at decision time, version models together with their decision policies, and derive action thresholds from costs before releasing a monitored system.",
       "chapter_path": "courses/statistics-ml/chapters/40-production-methodology-governance-and-senior-scientific-judgment.md",
       "example_paths": ["courses/statistics-ml/examples/chapter_40.py"],
       "topic_ids": [

@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict 4 * 7 before running it.</p>
 <p>The result is 28.</p>
+<p><strong>Approach:</strong> Write the prediction, 28, in a comment or your notes before running anything, then evaluate <code>4 * 7</code> and compare. The reference turns that comparison into <code>stopifnot(4 * 7 == 28)</code> so the expectation lives in the script instead of in memory.</p>
+<p><strong>Why it holds here:</strong> Both operands are small whole numbers stored as doubles, and 28 is represented exactly, so plain <code>==</code> is a fair check here and no tolerance is needed.</p>
+<p><strong>Tempting mistake:</strong> Running first and then copying the printed 28 into the prediction removes the evidence the task exists to collect. A typo such as <code>4 + 7</code> would print 11, and only a prediction made beforehand exposes that the operator, not the arithmetic, was wrong.</p>
+<p><strong>Verify:</strong> <code>print(4 * 7)</code> shows <code>[1] 28</code>. Temporarily change the assertion to <code>== 27</code> and the run stops with <code>4 * 7 == 27 is not TRUE</code>, which shows the check is live rather than decorative.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the invoice quantity to five.</p>
 <p>The result is 30 at unit price six.</p>
+<p><strong>Approach:</strong> Edit the input line to <code>quantity &lt;- 5</code> above the line that computes total, then rerun so <code>total &lt;- quantity * unit_price</code> sees the new binding. The reference asserts <code>total == 30</code>.</p>
+<p><strong>Why it holds here:</strong> unit_price stays 6, so the product is 5 times 6, or 30. Because each Run is a fresh process evaluated top to bottom, the edited line is the only quantity R knows about on that run.</p>
+<p><strong>Tempting mistake:</strong> Adding <code>quantity &lt;- 5</code> after total was already computed leaves total at the old 3 times 6 product, 18. That is the exact trap shown in Example 2: the input changed but the stored result did not.</p>
+<p><strong>Verify:</strong> <code>print(total)</code> shows <code>[1] 30</code>. As a second probe, set unit_price to 7 and confirm the printed total becomes 35, which proves both inputs flow into the result.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a script for subtotal 20 plus fee 3.</p>
 <p>The printed total is 23.</p>
+<p><strong>Approach:</strong> Bind <code>subtotal &lt;- 20</code> and <code>fee &lt;- 3</code> as separate named inputs, add them, print the sum and assert it. The reference checks <code>subtotal + fee == 23</code>.</p>
+<p><strong>Why it holds here:</strong> Naming both inputs keeps the script self-contained: anyone reading it can see the 23 came from 20 and 3 in this run, not from a value typed into yesterday&#x27;s console.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>print(23)</code> or <code>print(&quot;23&quot;)</code> shows the right digits without performing the addition. The second is also a character string, so <code>&quot;23&quot; + 1</code> fails with a non-numeric argument error the moment later code treats it as a number.</p>
+<p><strong>Verify:</strong> The run prints <code>[1] 23</code> and the stopifnot line passes. Change fee to 4 and the output should become 24; if it stays 23, the print is not reading the computed sum.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose why changing quantity after total leaves total unchanged.</p>
 <p>Reevaluate the arithmetic to obtain the new total.</p>
+<p><strong>Approach:</strong> Read the script from the top and locate the line that created total. That line bound total to the product of the inputs at that moment; later lines that rebind quantity change only quantity.</p>
+<p><strong>Why it holds here:</strong> R stores the value an expression produced, not the expression. In the reference, quantity moves from 5 to 8 after total was computed, and <code>stopifnot(total == 30, quantity * unit_price == 48)</code> asserts the stale 30 and the fresh 48 side by side.</p>
+<p><strong>Tempting mistake:</strong> Treating total like a spreadsheet cell that references quantity. A learner who adds a second <code>print(total)</code> and sees 30 again may suspect the print is stale, but the binding is what stayed fixed.</p>
+<p><strong>Verify:</strong> Re-evaluate <code>total &lt;- quantity * unit_price</code> after the change and print it: total becomes 48 for quantity 8, and the old assertion <code>total == 30</code> would now fail.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Check an invoice with zero quantity.</p>
 <p>The total is zero, with no missing input.</p>
+<p><strong>Approach:</strong> Set <code>quantity &lt;- 0</code> and compute <code>quantity * unit_price</code>. The reference asserts the product is 0 and then prints it as current_total.</p>
+<p><strong>Why it holds here:</strong> Zero is a measured count here, meaning nothing was ordered, so 0 times 6 equals 0 is the correct invoice total. It is an ordinary number, and no value is missing.</p>
+<p><strong>Tempting mistake:</strong> Recording the empty order as <code>NA</code> changes its meaning to unknown. <code>NA * 6</code> is <code>NA</code>, and <code>stopifnot(NA * 6 == 0)</code> stops the script because the comparison is NA instead of TRUE, so an empty order would look like a broken run.</p>
+<p><strong>Verify:</strong> The reference&#x27;s final print shows current_total 0 beside total_from_prior_calculation 30, and the run still reaches <code>r-001 reference checks passed</code>.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Separate a saved draft from a checked result.</p>
 <p>Saving retains source; running evaluates it; assertions check declared properties.</p>
+<p><strong>Approach:</strong> Save the pad without running it, then run it, and compare what each action produced. Saving stores source text; only a Run evaluates that text, prints output and reaches the marker line.</p>
+<p><strong>Why it holds here:</strong> Each Run starts a fresh R process, so the saved file is the complete input to the next run. The five stopifnot calls in this reference are the declared properties a run actually checks.</p>
+<p><strong>Tempting mistake:</strong> Treating a saved file, or output left over from an earlier run, as proof the current source works. If you change unit_price after your last run, the old printed 18 describes code that no longer exists in the pad.</p>
+<p><strong>Verify:</strong> Change one input, save without running and confirm no new output appears. Then run and confirm <code>r-001 reference checks passed</code> prints only when all five assertions hold.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

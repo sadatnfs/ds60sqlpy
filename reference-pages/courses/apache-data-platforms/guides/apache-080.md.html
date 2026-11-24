@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-080-operating-a-bounded-sharing-service">apache-080: Operating a bounded sharing service<a class="heading-anchor" href="#apache-080-operating-a-bounded-sharing-service" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-079</code>, <code>apache-075</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Share configuration:</strong> The server&#x27;s declaration of shares, schemas and tables, which must survive a process replacement separately from the table storage.</li>
+<li><strong>Version-pinned retry:</strong> Repeating a read for the same table version, which is safe because the read does not change the provider&#x27;s table.</li>
+<li><strong>Object-store signer:</strong> The server component that creates pre-signed URLs for a supported cloud store. A local file URI is not an interchangeable replacement.</li>
+<li><strong>Failure diagnosis:</strong> Classifying an outage as service, configuration, storage or network unavailability before choosing a recovery action.</li>
+</ul>
 <h3 id="service-restart-table-durability-and-recipient-recovery-differ">Service restart, table durability and recipient recovery differ<a class="heading-anchor" href="#service-restart-table-durability-and-recipient-recovery-differ" aria-label="Link to this section">#</a></h3>
 <p>A sharing deployment has server software, share configuration, recipient policy and table storage. A reference-server process can be replaced while its config and table remain. A durable table can also survive while the service is unavailable. Treat those as different state sets and failure boundaries when writing an operational runbook.</p>
 <p>The prepared native-server route requires an actual compatible Scala/JVM package and supported object-store signing path. A local file URI is not an interchangeable replacement for a cloud signer. No source-built server or signed-data path has been called qualified merely because its configuration template exists. Preparation, compilation, protocol exchange and lifecycle readback need separate receipts.</p>
@@ -211,6 +218,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>State whether an incident caused unavailability, stale state, missing files or incorrect rows. Record selected snapshot, control response, data retrieval stage, actual service identity and recovered result. Preserve owned table/configuration state until the cause is understood and required evidence has been exported.</p>
 <p><strong>Interview discussion: why is a healthy sharing process insufficient to prove service recovery?</strong> Its configuration or referenced table files can still be wrong or unavailable. These cases require unchanged versioned data after replacement and distinguish a failed data plane from a failed control service without hiding either behind a generic restart flag.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="compare-the-shared-table-across-a-server-replacement">Compare the shared table across a server replacement<a class="heading-anchor" href="#compare-the-shared-table-across-a-server-replacement" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/delta-sharing
+bash run.sh check
+bash run.sh check</code></pre>
+<p>Run check before and after the reference server is resumed or replaced. Both receipts should report version 0 and the same three rows, because the table lives in object storage and the server only reads it. The server itself holds no table data, so replacing it is cheap; what must survive is the configuration naming shares and table locations, plus the storage the location points to.</p>
+<h4 id="unavailable-server-versus-missing-file">Unavailable server versus missing file<a class="heading-anchor" href="#unavailable-server-versus-missing-file" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash">curl -s -o /dev/null -w <span class="syntax-string">&quot;%{http_code}\n&quot;</span> <span class="syntax-string">\</span>
+  -H <span class="syntax-string">&quot;</span><span class="syntax-string">Authorization: Bearer </span>$RECIPIENT_TOKEN<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  <span class="syntax-string">&quot;</span>$SHARING_ENDPOINT<span class="syntax-string">/shares?maxResults=1</span><span class="syntax-string">&quot;</span></code></pre>
+<p>A connection error or 503 here means the server is down; recipient credentials and the table may both be fine. If this listing succeeds but a later presigned URL returns 404, the server is up but a data file was removed from storage, often by an aggressive VACUUM on the source table. These need different owners: platform operations for the first, the table owner for the second.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="delta-sharing-apache-080-prepared-command-notebook">Delta Sharing apache-080 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-080-prepared-command-notebook" aria-label="Link to this section">#</a></h2>

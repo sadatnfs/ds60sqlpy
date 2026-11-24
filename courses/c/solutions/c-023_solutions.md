@@ -1,6 +1,6 @@
 # c-023: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-023_solution.c`, implements all six cases, from the "insert and retrieve" case to the "transfer replacement while full" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -20,13 +20,13 @@ int out = 0;
 CHECK(table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7`. Restoring the original line brings back the worked observation: lookup succeeds with 7.
+**Expected:** With `CHECK(table_put(&t, 2, 7) && table_get(&t, 1, &out) && out == 7);` the run stops with `Check failed` at the CHECK on `table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7`, because the "insert and retrieve" case no longer shows that lookup succeeds with 7. Restoring `CHECK(table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7);` brings that observation back.
 
 Lookup checks the actual key rather than trusting the initial slot alone.
 
 ## Exercise 2: Resolve a collision: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 10, 90));`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+A careless edit changed the CHECK in worked example 2, the "resolve a collision" case, so that it reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 10, 90));`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means both values remain retrievable, and restore it.
 
 The unchanged code is worked example 2:
 
@@ -38,7 +38,7 @@ CHECK(table_get(&t, 1, &out) && out == 10);
 CHECK(table_get(&t, 9, &out) && out == 90);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `table_get(&t, 9, &out) && out == 90`; after it the line reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 9, 90));` again and both values remain retrievable.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `table_get(&t, 9, &out) && out == 90`. Once the line reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 9, 90));` again, the "resolve a collision" case again shows that both values remain retrievable.
 
 Linear probing finds another free slot while preserving the key distinction.
 
@@ -106,4 +106,4 @@ Full storage prevents new keys, not an update to an already present key. This is
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer replacement while full" case to your own c-023 source. Explain why every access in `table_put` or `table_get` stays within a live object and each owned resource is released. An expected collision failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "resolve a collision" case apart from ordinary output: the fixture proves its stated collision, probe sequence and load factor assumptions, not universal safety.

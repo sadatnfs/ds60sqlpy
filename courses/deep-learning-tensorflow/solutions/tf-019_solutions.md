@@ -1,6 +1,6 @@
 # tf-019: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for Convolution as a local, shared computation after your own attempt at Example A, Compute local differences, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Kernel, Stride, Receptive field. After matching exercise 6, Add a constant image offset, invent a new input without looking here.
 
 ## Mechanism review
 
@@ -14,40 +14,39 @@ Convolutional layers reuse a small kernel at many positions. Each output sees a 
 
 ## Reading the implementation
 
-tf.nn.conv2d expects image shape(batch, height, width, channels) and filter shape(height, width, input_channels, output_channels). A 3x3 single-channel image and 2x2 kernel with stride 1 and VALID padding produce shape (1, 2, 2, 1). The first result is 1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.
+tf.nn.conv2d expects image shape (batch, height, width, channels) and filter shape (height, width, input_channels, output_channels). A 3x3 single-channel image and 2x2 kernel with stride 1 and VALID padding produce shape (1, 2, 2, 1). The first result is 1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.
 
-## Exercise 1: Compute local differences
+## Exercise 1: Detect a horizontal difference
 
-The question is: Apply kernel [[1, 0], [0, -1]] to the image 1..9 arranged 3x3.
+The question is: Keep the 1..9 ramp image but use the kernel `[[1, -1], [0, 0]]`, which compares each pixel with its right neighbor. Predict the four VALID outputs before running it.
 
-Every patch has a bottom-right value four greater than its top-left value. The equal outputs are an arithmetic property of this ramp image, not a generic property of convolution.
-
-```python
-image = tf.reshape(tf.range(1, 10, dtype=tf.float32), (1, 3, 3, 1))
-kernel = tf.reshape(tf.constant([1.0, 0.0, 0.0, -1.0]), (2, 2, 1, 1))
-out = tf.nn.conv2d(image, kernel, strides=1, padding="VALID")
-np.testing.assert_array_equal(out.numpy().reshape(2, 2), np.full((2, 2), -4))
-```
-
-**Expected:** all four outputs -4.
-
-**Verify:** In a fresh process, the exercise checks confirm `out.numpy().reshape(2, 2)` equals `np.full((2, 2), -4)`.
-
-## Exercise 2: Rotate the kernel
-
-The question is: Reverse both spatial axes and repeat the calculation.
-
-Kernel orientation distinguishes cross-correlation from mathematical convolution. A symmetric kernel would hide this difference, which is why the asymmetric diagonal kernel is useful.
+Moving one column to the right raises the ramp by 1, so every left-minus-right difference is -1. The diagonal kernel saw a step of 4 because it compared pixels one row and one column apart.
 
 ```python
-rot = tf.reverse(kernel, axis=[0, 1])
-changed = tf.nn.conv2d(image, rot, strides=1, padding="VALID")
-np.testing.assert_array_equal(changed.numpy().reshape(2, 2), np.full((2, 2), 4))
+horizontal = tf.reshape(tf.constant([1.0, -1.0, 0.0, 0.0]), (2, 2, 1, 1))
+h = tf.nn.conv2d(image, horizontal, strides=1, padding="VALID")
+np.testing.assert_array_equal(h.numpy().reshape(2, 2), np.full((2, 2), -1))
 ```
 
-**Expected:** all outputs+4.
+**Expected:** all four outputs -1.
 
-**Verify:** In a fresh process, the exercise checks confirm `changed.numpy().reshape(2, 2)` equals `np.full((2, 2), 4)`.
+**Verify:** In a fresh process, the exercise checks confirm `h.numpy().reshape(2, 2)` equals `np.full((2, 2), -1)`.
+
+## Exercise 2: Predict SAME padding
+
+The question is: Repeat the diagonal-kernel calculation with `padding='SAME'`. Predict the output shape and the nine values, remembering that TensorFlow pads a 2x2 kernel with zeros on the bottom and right.
+
+The four interior positions match the VALID result. Along the right column and bottom row the subtracted neighbour is a padded zero, so the output equals the top-left pixel itself. Padding changes values at the border, not only the shape.
+
+```python
+same = tf.nn.conv2d(image, kernel, strides=1, padding="SAME")
+assert tuple(same.shape) == (1, 3, 3, 1)
+np.testing.assert_array_equal(same.numpy().reshape(3, 3), [[-4, -4, 3], [-4, -4, 6], [7, 8, 9]])
+```
+
+**Expected:** shape (1, 3, 3, 1); values [[-4, -4, 3], [-4, -4, 6], [7, 8, 9]].
+
+**Verify:** In a fresh process, the exercise checks confirm `tuple(same.shape) == (1, 3, 3, 1)` and `same.numpy().reshape(3, 3)` equals `[[-4, -4, 3], [-4, -4, 6], [7, 8, 9]]`.
 
 ## Exercise 3: Count output positions
 
@@ -114,4 +113,4 @@ np.testing.assert_array_equal(offset.numpy(), out.numpy())
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one fixture value in exercise 4, Trace one pixel influence, and predict the new result before running it. Keep the failing version of exercise 5, Count shared parameters, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

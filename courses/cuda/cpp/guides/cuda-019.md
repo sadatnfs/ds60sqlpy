@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a tiled matrix multiplication and report a scoped timing comparison with a reasoned interpretation.
+
 Work through *Tiled matrix multiplication and reuse* with the concrete cases below. Finish with this evidence:
 correctness plus a measured, scoped comparison with a reasoned interpretation even if the tile loses on a small input. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Tiling loads small regions of A and B into shared memory and reuses each value across several output calculations. For each k-phase, threads cooperatively load both tiles, synchronize, accumulate from the tiles, then synchronize again before overwriting shared storage for the next phase. Partial tiles require zero-filled invalid positions. An early return by tail threads can break the barrier contract. Tile size trades global reuse against shared storage, registers, occupancy and unused tail work. A tiled learning kernel is a correctness and reuse experiment, not an automatic replacement for a mature GEMM library.
+
+### Key terms
+
+- **Tile:** A small submatrix loaded into shared memory so each value is reused by several output calculations.
+- **Data reuse:** The number of times one loaded value contributes to results before it is replaced.
+- **Zero-fill:** Writing zeros into tile positions outside the matrix so partial tiles still produce correct sums.
+- **Tile phase:** One step along the shared dimension in which threads load, synchronize, accumulate and synchronize again.
 
 ## How to run and study this lesson
 
@@ -81,14 +90,13 @@ caches, instruction timing or device memory visibility.
 k, tile = 5, 2
 phases = [(start, min(start + tile, k)) for start in range(0, k, tile)]
 assert phases == [(0, 2), (2, 4), (4, 5)]
-assert 2 * 16 * 16 * 4 == 2048
-print({"phases": phases, "two_tiles_bytes": 2048})
+print({"phases": phases})
 ```
 
 **Expected observation:** Every assertion succeeds. A representative CPU output is:
 
 ```text
-{'phases': [(0, 2), (2, 4), (4, 5)], 'two_tiles_bytes': 2048}
+{'phases': [(0, 2), (2, 4), (4, 5)]}
 ```
 
 Integers, shapes and ordering must match exactly; only assertions with an explicit

@@ -1,6 +1,6 @@
 # llm-021: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these document splits and contamination controls answers after attempting *Assign a second family policy* through *Distinguish normalization policy*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Audit all partition pairs* points to one step. `llm-021_solution.py` holds the assertions; this page explains how they test exact duplicate. Then try *Distinguish normalization policy* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -32,7 +32,7 @@ assert list(manifest2.values()).count("train") == 1 and manifest2["r"] == "valid
 
 **Expected:** p, p2 and p3 all test; one training document q; r in validation.
 
-**Verify:** In a fresh process, the exercise checks confirm `sorted((d for d, s in manifest2.items() if s == 'test')) == ['p', 'p2', 'p3']`; `list(manifest2.values()).count('train') == 1` and `manifest2['r'] == 'validation'`.
+**Verify:** For *Assign a second family policy*, a fresh-process check confirms `sorted((d for d, s in manifest2.items() if s == 'test')) == ['p', 'p2', 'p3']`; `list(manifest2.values()).count('train') == 1` and `manifest2['r'] == 'validation'`.
 
 ## Exercise 2: Predict the effect of key order
 
@@ -51,7 +51,7 @@ assert hash_text(json.dumps({"a": "train", "b": "test"}, sort_keys=True)) == has
 
 **Expected:** raw JSON hashes differ when only key order changes; sort_keys=True makes them equal.
 
-**Verify:** In a fresh process, the exercise checks confirm `hash_text(forward) != hash_text(backward)` and the combined assertion.
+**Verify:** For *Predict the effect of key order*, a fresh-process check confirms `hash_text(forward) != hash_text(backward)` and the combined assertion.
 
 ## Exercise 3: Audit all partition pairs
 
@@ -70,11 +70,11 @@ assert (
 
 **Expected:** all three intersections empty.
 
-**Verify:** In a fresh process, the exercise checks confirm `not sets['train'] & sets['validation']`, `not sets['train'] & sets['test']` and `not sets['validation'] & sets['test']`.
+**Verify:** For *Audit all partition pairs*, a fresh-process check confirms `not sets['train'] & sets['validation']`, `not sets['train'] & sets['test']` and `not sets['validation'] & sets['test']`.
 
 ## Exercise 4: Inject a known leak
 
-The question is: Move a2 into validation and rerun the family intersection.
+The question is: Move `a2` into validation and rerun the family intersection.
 
 A negative control proves the audit detects the intended failure. A test suite containing only clean partitions can pass even when a checker always returns success.
 
@@ -88,7 +88,7 @@ assert train & valid == {"F"}
 
 **Expected:** train/validation intersection F.
 
-**Verify:** In a fresh process, the exercise checks confirm `train & valid == {'F'}`.
+**Verify:** For *Inject a known leak*, a fresh-process check confirms `train & valid == {'F'}`.
 
 ## Exercise 5: Preserve the manifest identity
 
@@ -105,7 +105,7 @@ assert summary["test_documents"] == 1 and hashlib.sha256(payload()).hexdigest() 
 
 **Expected:** hash unchanged.
 
-**Verify:** In a fresh process, the exercise checks confirm `summary['test_documents'] == 1` and `hashlib.sha256(payload()).hexdigest() == before`.
+**Verify:** For *Preserve the manifest identity*, a fresh-process check confirms `summary['test_documents'] == 1` and `hashlib.sha256(payload()).hexdigest() == before`.
 
 ## Exercise 6: Distinguish normalization policy
 
@@ -120,8 +120,8 @@ assert hash_text("red square".strip()) == hash_text("red square ".strip())
 
 **Expected:** raw hashes differ; stripped hashes match.
 
-**Verify:** In a fresh process, the exercise checks confirm `hash_text('red square') != hash_text('red square ')` and `hash_text('red square'.strip()) == hash_text('red square '.strip())`.
+**Verify:** For *Distinguish normalization policy*, a fresh-process check confirms `hash_text('red square') != hash_text('red square ')` and `hash_text('red square'.strip()) == hash_text('red square '.strip())`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Inject a known leak* and predict the result first; keep *Preserve the manifest identity* failing beside the repair. Log a missing NumPy separately from a wrong exact duplicate value in `llm-021`.

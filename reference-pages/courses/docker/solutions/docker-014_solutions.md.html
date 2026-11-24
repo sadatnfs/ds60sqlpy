@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-every-resource-the-project-creates">Exercise 1: Predict every resource the project creates.<a class="heading-anchor" href="#exercise-1-predict-every-resource-the-project-creates" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A local image, app container, project network and named data volume.</p>
 <p><strong>Why:</strong> The optional client is created only for its explicit run. Listing resource types before execution makes ownership and later cleanup easier to verify.</p>
+<p><strong>Approach:</strong> Read compose.yaml for each object it implies: the image ds60-docker-study:local, an app container, a default project network and the study-data volume.</p>
+<p><strong>Why this is correct:</strong> The client service has profiles: [tools], so a plain up does not create it. The other four objects come from the model.</p>
+<p><strong>A plausible wrong approach:</strong> Listing the client container among the resources fails, because profile-gated services start only with --profile tools or an explicit run.</p>
+<p><strong>How to verify:</strong> After up, docker compose ps -a shows only app, while docker network ls and docker volume ls show the project&#x27;s network and volume.</p>
 <h3 id="exercise-2-change-the-public-message-in-the-learner-copy">Exercise 2: Change the public message in the learner copy.<a class="heading-anchor" href="#exercise-2-change-the-public-message-in-the-learner-copy" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The observed response matches the deliberate runtime configuration.</p>
 <p><strong>Why:</strong> Keep the source image unchanged for this experiment. It demonstrates that configuration and application packaging are separable inputs.</p>
+<p><strong>Approach:</strong> Edit APP_MESSAGE in your copy of compose.yaml, run up -d --wait, and leave server.py and the image untouched.</p>
+<p><strong>Why this is correct:</strong> server.py reads the variable at request time, and Compose recreates the container for the new environment, so the response changes without a rebuild.</p>
+<p><strong>A plausible wrong approach:</strong> Editing the default string inside server.py also changes the output, but it mixes a code change into what should test configuration.</p>
+<p><strong>How to verify:</strong> The image ID is the same before and after, while GET / returns the new message.</p>
 <h3 id="exercise-3-produce-the-complete-build-and-request-evidence-packet">Exercise 3: Produce the complete build-and-request evidence packet.<a class="heading-anchor" href="#exercise-3-produce-the-complete-build-and-request-evidence-packet" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Build logs, model validation, health state and exact JSON response.</p>
 <p><strong>Why:</strong> Each item covers a different layer. Together they make it less likely that a stale browser page or old image is mistaken for the new build.</p>
+<p><strong>Approach:</strong> Assemble the build log, config --quiet exit status, the health state from ps, and the exact JSON body from GET /.</p>
+<p><strong>Why this is correct:</strong> Each piece covers a stage: model, packaging, process readiness and application output. Together they rule out a stale image or browser cache.</p>
+<p><strong>A plausible wrong approach:</strong> Submitting only a browser screenshot cannot show whether the build ran or whether the page came from cache.</p>
+<p><strong>How to verify:</strong> Every item carries a timestamp from the same session, and the JSON message matches the value in compose.yaml.</p>
 <h3 id="exercise-4-introduce-and-repair-one-wrong-host-port-in-a-scratch-model">Exercise 4: Introduce and repair one wrong host port in a scratch model.<a class="heading-anchor" href="#exercise-4-introduce-and-repair-one-wrong-host-port-in-a-scratch-model" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Explain the first failing network hop and restore the original mapping.</p>
 <p><strong>Why:</strong> Avoid unrelated changes. A single deliberate configuration fault gives a clean causal explanation and a regression case for the working mapping.</p>
+<p><strong>Approach:</strong> Change only the container port in a scratch copy, for example &quot;127.0.0.1:18080:8081&quot;, predict the failing hop, then restore it.</p>
+<p><strong>Why this is correct:</strong> The host listener still exists, but traffic goes to container port 8081, where nothing listens, so health stays green while host requests fail.</p>
+<p><strong>A plausible wrong approach:</strong> Changing the host port, the listener and the healthcheck together leaves no clear cause and no clean regression case.</p>
+<p><strong>How to verify:</strong> The broken copy fails at the host request while health passes; restoring the original line makes the request return the JSON again.</p>
 <h3 id="exercise-5-verify-replacement-without-resetting-the-counter">Exercise 5: Verify replacement without resetting the counter.<a class="heading-anchor" href="#exercise-5-verify-replacement-without-resetting-the-counter" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Different container ID, same intended volume and nonreset counter.</p>
 <p><strong>Why:</strong> This is the central persistence invariant. An image rebuild or browser refresh alone does not test container replacement, so record the actual object change.</p>
+<p><strong>Approach:</strong> Increment the counter, note the value and container ID, run up --force-recreate --wait app, then note both again.</p>
+<p><strong>Why this is correct:</strong> The invariant requires a new container ID, the same study-data volume and an unchanged counter. All three are needed.</p>
+<p><strong>A plausible wrong approach:</strong> Rebuilding the image or refreshing the browser does not replace the container, so the test passes without testing persistence.</p>
+<p><strong>How to verify:</strong> ps -q app prints different IDs and GET /counter returns the value recorded before the recreate.</p>
 <h3 id="exercise-6-teach-the-project-to-a-beginner-without-using-hidden-host-state">Exercise 6: Teach the project to a beginner without using hidden host state.<a class="heading-anchor" href="#exercise-6-teach-the-project-to-a-beginner-without-using-hidden-host-state" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A fresh-copy procedure with prerequisites, expected outputs and scoped cleanup.</p>
 <p><strong>Why:</strong> A reproducible explanation should name what must already be installed and which downloads occur. It must not depend on a private image tag or an unmentioned file on the author’s laptop.</p>
+<p><strong>Approach:</strong> Write a fresh-copy procedure: prerequisites, copying the fixture, the commands from worked examples 1 and 2, expected observations, and the down step.</p>
+<p><strong>Why this is correct:</strong> The <code>python:3.12-slim</code> base is the only download, and pull_policy: never shows that the local tag must be built first.</p>
+<p><strong>A plausible wrong approach:</strong> Writing up -d without the build step works on the author&#x27;s laptop only because the tag already exists there.</p>
+<p><strong>How to verify:</strong> Follow the procedure on a machine or engine without the local tag; it completes and ends with down leaving only the volume.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

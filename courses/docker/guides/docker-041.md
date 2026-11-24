@@ -16,6 +16,14 @@ The fixture counter is intentionally a single-process teaching app. Its in-proce
 
 A load balancer distributes requests; it does not automatically synchronize application memory, sessions or files. State can move into a service designed for concurrent transactions, or the workload can be partitioned under an explicit ownership scheme. Both choices need tests for races, failures and retries.
 
+### Key terms
+
+- **Replica:** Another instance of the same application role, which adds capacity only if routing and state design allow it.
+- **Shared state:** Data that several replicas read or write, such as one file or session store.
+- **Race condition:** A defect where the outcome depends on the timing of concurrent operations.
+- **Lost update:** A race where one writer's change overwrites another's because both read the same old value.
+- **Load balancer:** A component that distributes requests among replicas but does not synchronize their memory, sessions or files.
+
 ## Anatomy and a trace you can follow
 
 Compose can request several service instances, but a fixed published host port can collide across replicas. A proxy or another deliberate routing arrangement is needed. Do not run a scaling command against the fixture and assume the engine will infer the intended architecture.
@@ -93,11 +101,11 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Scaling a service that keeps its state in local files. Relying on an in-process lock across containers. Publishing a fixed host port on a scaled service.
 
-Exercise 4 is this chapter's boundary case: Diagnose a fixed host-port collision. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a fixed host-port collision. Read which replica holds the published host port and which replicas failed to start, then decide between a routing layer and distinct ports. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here, using replica, shared state, race condition and scaling. Reconstruct worked example 2 (Separate scaling requirements) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
+Close the explanations first. Name the requirement each of routing, shared data, sessions and retries adds when replicas increase. Then reconstruct worked example 2 (Separate scaling requirements) with one different value, predict what changes, and name which of replica, shared state, race condition and scaling the change touches.
 
 When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 

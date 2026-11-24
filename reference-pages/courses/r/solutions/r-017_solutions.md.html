@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict as.numeric(factor(c(&quot;5&quot;,&quot;9&quot;))).</p>
 <p>The values are 1,2 under the default sorted levels.</p>
+<p><strong>Approach:</strong> Build <code>factor(c(&quot;5&quot;, &quot;9&quot;))</code> and apply <code>as.numeric()</code> to it.</p>
+<p><strong>Why it holds here:</strong> The default levels are the sorted labels &quot;5&quot; and &quot;9&quot;, and as.numeric returns each value&#x27;s level position, so the result is 1, 2.</p>
+<p><strong>Tempting mistake:</strong> Expecting 5 and 9. Those are the labels; recovering them needs <code>as.numeric(as.character(x))</code>, as Example 1 shows.</p>
+<p><strong>Verify:</strong> <code>identical(as.numeric(factor(c(&quot;5&quot;, &quot;9&quot;))), c(1, 2))</code> returns TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Choose B as a reference level.</p>
 <p>relevel(..., ref=&quot;B&quot;) puts B first for the relevant contrast convention.</p>
+<p><strong>Approach:</strong> Call <code>relevel(group, ref = &quot;B&quot;)</code> with the exact declared label.</p>
+<p><strong>Why it holds here:</strong> B is one of the declared levels, so relevel moves it to the front and keeps A and C. Models then compare other groups with B.</p>
+<p><strong>Tempting mistake:</strong> Rebuilding with <code>factor(group, levels = &quot;B&quot;)</code>. B moves first, but A and C are no longer levels, so both A rows become NA.</p>
+<p><strong>Verify:</strong> <code>levels(relevel(group, ref = &quot;B&quot;))</code> returns &quot;B&quot;, &quot;A&quot;, &quot;C&quot;.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Retain an unused C level in a table.</p>
 <p>The table includes C with count zero.</p>
+<p><strong>Approach:</strong> Declare C in <code>levels</code> when the factor is created, then call <code>table(group)</code>.</p>
+<p><strong>Why it holds here:</strong> The starter holds A twice and B once. Because C is declared, the table lists it with 0, showing that C was considered and had no rows.</p>
+<p><strong>Tempting mistake:</strong> Creating the factor without a levels argument. The table shows only A and B, so a reader cannot tell whether C was absent or never part of the design.</p>
+<p><strong>Verify:</strong> <code>unname(table(group)[&quot;C&quot;])</code> returns 0.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose treating ordered low/medium/high as equally spaced numbers.</p>
 <p>Choose a model encoding justified by the measurement assumptions.</p>
+<p><strong>Approach:</strong> Keep low, medium and high as an ordered factor and choose an encoding that matches what is known about the gaps.</p>
+<p><strong>Why it holds here:</strong> The order is known, but nothing says medium sits halfway between low and high. <code>as.integer()</code> on the reference values gives 1 and 3, which are positions, not distances.</p>
+<p><strong>Tempting mistake:</strong> Feeding the codes into a model as a number. That assumes the step from low to medium equals the step from medium to high; default polynomial contrasts for ordered factors make the same equal-spacing assumption.</p>
+<p><strong>Verify:</strong> <code>as.integer(ordered_group)</code> returns 1 and 3, and <code>is.ordered(ordered_group)</code> returns TRUE.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Handle a label outside declared levels.</p>
 <p>It becomes NA and should be audited rather than silently accepted.</p>
+<p><strong>Approach:</strong> Detect labels that turned into NA by comparing the raw text with the factor, and report them before analysis.</p>
+<p><strong>Why it holds here:</strong> &quot;D&quot; is not among A, B and C, so the factor value is NA and no warning appears. Example 3 shows how lowercase b fails the same way.</p>
+<p><strong>Tempting mistake:</strong> Counting with a plain <code>table()</code>. NA rows are left out, so the totals shrink and nobody sees why.</p>
+<p><strong>Verify:</strong> <code>is.na(unknown)</code> returns TRUE, and <code>table(..., useNA = &quot;ifany&quot;)</code> shows the NA count.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Inspect a categorical design matrix.</p>
 <p>Check column names and baseline interpretation before explaining fitted coefficients.</p>
+<p><strong>Approach:</strong> Print <code>colnames(model.matrix(~group))</code> and the column sums before describing any coefficient.</p>
+<p><strong>Why it holds here:</strong> The columns are the intercept, groupB and groupC, so A is the baseline. groupC sums to 0 because no row has C.</p>
+<p><strong>Tempting mistake:</strong> Describing the groupB coefficient as the average for B. It is B minus A, and the groupC estimate cannot be computed at all.</p>
+<p><strong>Verify:</strong> <code>colnames(design)</code> returns &quot;(Intercept)&quot;, &quot;groupB&quot;, &quot;groupC&quot;, and <code>colSums(design)</code> shows 3, 1 and 0.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

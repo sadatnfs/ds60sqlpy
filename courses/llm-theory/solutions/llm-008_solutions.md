@@ -1,31 +1,20 @@
 # llm-008: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/llm-008.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
+Use this embedding lookup is a learned table reference after your own attempt. The [learner guide](../guides/llm-008.md) keeps the fixture and Expected/Verify contracts for *Trace row selection* to *Transfer across a vocabulary permutation*, six separate actions; any implementation is acceptable if *Handle an empty token list* still fails on that input.
 
-The [executable reference](llm-008_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+`verify()` in the [executable reference](llm-008_solution.py) uses NumPy and literals only; on failure, keep the *Handle an empty token list* input. A pass says nothing beyond these embedding lookup is a learned table fixtures, so next explain embedding table from memory on a changed fixture. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace row selection
 
-ID two selects [2,2], zero selects [1,0], and the repeated two selects [2,2] again. Stack those selections in token order to obtain the expected (3,2) matrix. The vocabulary length four is used to validate the IDs and is contracted away by selection; it is not a result dimension. This fixed lookup demonstrates index ing only. No optimization or semantic-quality claim is supported by the supplied feature values.
+ID two selects [2, 2], zero selects [1, 0], and the repeated two selects [2, 2] again. Stack those selections in token order to obtain the expected (3,2) matrix. The vocabulary length four is used to validate the IDs and is contracted away by selection; it is not a result dimension. This fixed lookup demonstrates index ing only. No optimization or semantic-quality claim is supported by the supplied feature values.
 
-**Expected:** Output [[2,2],[1,0],[2,2]], shape (3,2).
+**Expected:** Output [[2, 2], [1, 0], [2, 2]], shape (3,2).
 
 **Verify:** Assert the entire matrix and explain why vocabulary size four is not an output axis here.
 
 ## Exercise 2: Construct a lookup guard
 
-A one-hot matrix for [2,0,2] has shape (3,4), with one indicator per selected vocabulary row. Multiplying by the (4,2) table gives the same (3,2) feature matrix as direct lookup. The equality makes the roles of the vocabulary and feature axes explicit. Direct index ing is the canonical small interface because forming dense one-hot arrays is unnecessary for large vocabularies. The two computations should agree exactly on these integer-valued float64 fixtures.
+A one-hot matrix for [2, 0, 2] has shape (3,4), with one indicator per selected vocabulary row. Multiplying by the (4,2) table gives the same (3,2) feature matrix as direct lookup. The equality makes the roles of the vocabulary and feature axes explicit. Direct index ing is the canonical small interface because forming dense one-hot arrays is unnecessary for large vocabularies. The two computations should agree exactly on these integer-valued float64 fixtures.
 
 **Expected:** np.eye(4)[ids] @ table matches the lookup exactly.
 
@@ -51,23 +40,21 @@ This lookup contract accepts an empty token list and returns an empty matrix wit
 
 Advanced integer index ing creates independent output storage here. Mutating the first selected row therefore leaves the original table unchanged. It also must not modify the third selected row merely because both originated from vocabulary ID two. Save and compare the table and repeated row explicitly. Another implementation might intentionally share storage, but that would be a different mutation contract and should not be silently substituted for this learner helper.
 
-**Expected:** The table remains unchanged and output[2] remains [2,2].
+**Expected:** The table remains unchanged and `output[2]` remains [2, 2].
 
 **Verify:** Assert a saved table copy still matches exactly and the repeated result row was not aliased to the modified row.
 
 ## Exercise 6: Transfer across a vocabulary permutation
 
-The row permutation [2,0,3,1] moves old row two to new position zero and old row zero to new position one. Thus old IDs [2,0,2] become [0,1,0]. Their selected features remain identical when both transformations are applied. Keeping the old IDs after changing row order would produce a plausible-shaped but different representation. Store the tokenizer and table configuration/hash together; a matching matrix shape alone cannot establish that their vocabulary identities agree.
+The row permutation [2, 0, 3, 1] moves old row two to new position zero and old row zero to new position one. Thus old IDs [2, 0, 2] become [0, 1, 0]. Their selected features remain identical when both transformations are applied. Keeping the old IDs after changing row order would produce a plausible-shaped but different representation. Store the tokenizer and table configuration/hash together; a matching matrix shape alone cannot establish that their vocabulary identities agree.
 
-**Expected:** Remapped IDs are [0,1,0], and the result equals the original lookup.
+**Expected:** Remapped IDs are [0, 1, 0], and the result equals the original lookup.
 
 **Verify:** Assert the unchanged feature matrix and explain why storing a tokenizer hash/version with the table prevents a silent row-order mismatch.
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+*Repeated IDs preserve token order* validates and reduces its input in the functions below; the executable file covers all six embedding lookup is a learned table exercises. Keep the *Handle an empty token list* assertion and its invalid-input case; never replace them with a default.
 
 ```python
 from __future__ import annotations
@@ -94,9 +81,4 @@ def lookup(table, ids):
 
 Without the table in view, state the three shape roles: vocabulary, tokens and features. Then invent a three-row table and show how a table-row permutation requires a matching ID permutation to preserve the selected features.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Next, pick a fixture unlike *Repeated IDs preserve token order* to test independent recall, and explain why *Handle an empty token list* rejects its case rather than naming the exception. Any notation works if embedding table and its denominator stay explicit; these embedding lookup is a learned table checks say nothing about unseen model quality or safety.

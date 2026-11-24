@@ -14,6 +14,13 @@ Use extern C to give the entrypoint a predictable symbol when appropriate, choos
 
 
 
+### Key terms
+
+- **RawKernel:** A CuPy object that compiles CUDA C source at run time and launches it with explicit grid, block and argument types.
+- **extern "C" linkage:** A declaration that disables C++ name mangling so the kernel can be found by its plain name.
+- **Contiguity requirement:** The assumption that array elements are densely packed, which raw pointer indexing needs to be correct.
+- **Compilation cost:** The one-time time spent compiling kernel source, measured separately from launch and execution time.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,6 +48,13 @@ print("CPU raw-kernel oracle:", affine([-1, 0, 3]))
 ```
 
 **Expected observation:** Affine result [-1,1,7], with three blocks for 257 elements.
+
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `n` | `257` |
+| `threads` | `128` |
 
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
@@ -78,27 +92,39 @@ print("CUDA raw affine:", cp.asnumpy(y).tolist())
 
 ### Exercise 1: Derive expected affine output
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **derive expected affine output** in the examples above.
+**Trap to avoid:** Comparing against `2*(x+1)` by mistake gives `[0, 2, 8]` and suggests the kernel is wrong when the oracle is.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Calculate a nonmultiple launch
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **calculate a nonmultiple launch** in the examples above.
+**Trap to avoid:** Using `257 // 128 = 2` blocks loses the final element silently, a bug invisible on sizes like 256.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain symbol lookup
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **explain symbol lookup** in the examples above.
+**Trap to avoid:** Assuming a lookup error means the source failed to compile misdirects debugging to the kernel body.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Reject noncontiguous input or support strides
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **reject noncontiguous input or support strides** in the examples above.
+**Trap to avoid:** Silently calling `cupy.ascontiguousarray` inside the wrapper fixes correctness but hides a copy, and with in-place updates it writes to the copy instead of the caller's array.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate compile timing
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **separate compile timing** in the examples above.
+**Trap to avoid:** Timing a single call and reporting it as kernel speed mostly measures the compiler.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Compare raw and library paths
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **compare raw and library paths** in the examples above.
+**Trap to avoid:** Comparing a float32 raw kernel against a float64 library expression measures dtype rather than implementation.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

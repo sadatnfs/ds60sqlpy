@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mental-model-and-vocabulary">Mental model and vocabulary<a class="heading-anchor" href="#mental-model-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A record is one measured entity. A trace is a collection of marks with a shared encoding, such as bars whose heights represent elapsed hours. Layout describes axes, titles and other content; configuration describes display behavior such as responsiveness. A figure is a serializable specification that a renderer turns into pixels and interactive elements. Valid JSON can still describe a scientifically misleading chart.</p>
 <p>Use the records (u1,Alpha,2), (u2,Beta,5), (u3,Gamma,3). The unit is elapsed hours per team record. This is not a sample-size-weighted mean, a confidence interval or a causal comparison.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Record:</strong> One measured entity, such as a team with an ID, a label and elapsed hours, whose fields must stay together when sorted or plotted.</li>
+<li><strong>Trace:</strong> A collection of marks that share one encoding, such as bars whose heights represent elapsed hours.</li>
+<li><strong>Layout:</strong> The part of a figure specification that describes axes, titles and other content around the traces rather than the data marks themselves.</li>
+<li><strong>Unit of measurement:</strong> The quantity each encoded value carries, here elapsed hours per team record, which the axis title and caption must state.</li>
+<li><strong>Zero baseline:</strong> A bar axis that starts at zero so that bar length stays proportional to the encoded value.</li>
+</ul>
 <h3 id="worked-case-preserve-identity-while-sorting">Worked case: preserve identity while sorting<a class="heading-anchor" href="#worked-case-preserve-identity-while-sorting" aria-label="Link to this section">#</a></h3>
 <p>Sort whole records by value, giving Beta,Gamma,Alpha and heights 5,3,2. Keep IDs in <code>customdata</code> so hover text can identify the same record after sorting. Sorting labels and values independently would produce a plausible chart with incorrect associations.</p>
 <pre class="highlighted-code"><code class="language-python">ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> row<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> reverse<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>

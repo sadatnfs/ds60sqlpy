@@ -199,7 +199,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Design channel ownership so exactly one sender closes, receivers detect closure, and buffering is bounded. Along the way, explain backpressure, channel closure, directional channel; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
-<p>A channel connects producers and consumers with typed communication. An unbuffered send completes when a receiver participates; a buffered channel retains values up to its capacity. Buffering changes backpressure, not ownership of referenced objects sent through the channel. Closing means no more values will be sent. Receivers drain buffered values before observing closure. The producer that knows all sending is finished should own close. A receiver normally must not close the channel merely because it is done reading. Sending after close panics; an operation on a nil channel blocks unless a select chooses another ready case.</p>
+<p>A channel connects producers and consumers with typed communication. An unbuffered send completes when a receiver participates; a buffered channel retains values up to its capacity. Buffering changes backpressure, not ownership of referenced objects sent through the channel. Closing means no more values will be sent. Receivers drain buffered values before observing closure. The producer that knows all sending is finished should own close. A receiver normally must not close the channel merely because it is done reading. Sending after close panics. A send or receive on a nil channel blocks forever, and a select skips such a case; closing a nil channel panics.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><strong>Backpressure:</strong> A producer slowing when a consumer cannot accept more.</li>
@@ -226,8 +226,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		<span class="syntax-builtin">panic</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span>
-
-<span class="syntax-keyword">func</span> produce<span class="syntax-punctuation">(</span>out <span class="syntax-keyword">chan</span><span class="syntax-operator">&lt;-</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">defer</span> <span class="syntax-builtin">close</span><span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> out <span class="syntax-operator">&lt;-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> out <span class="syntax-operator">&lt;-</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span>
 
 <span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
 	<span class="syntax-comment">// Drain before iteration ends</span>
@@ -259,8 +257,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		<span class="syntax-builtin">panic</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span>
-
-<span class="syntax-keyword">func</span> produce<span class="syntax-punctuation">(</span>out <span class="syntax-keyword">chan</span><span class="syntax-operator">&lt;-</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">defer</span> <span class="syntax-builtin">close</span><span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> out <span class="syntax-operator">&lt;-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> out <span class="syntax-operator">&lt;-</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span>
 
 <span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
 	<span class="syntax-comment">// Drain before iteration ends</span>

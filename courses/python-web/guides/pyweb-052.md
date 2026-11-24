@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-051`, `python-1
 
 Django class-based views package common request patterns into reusable classes. Their convenience depends on understanding dispatch, inheritance and the methods a generic view calls. This chapter uses a real ListView for pagination and a small mixin that guards a separate view before its handler runs.
 
+## Key terms
+
+- **Class-based view:** A Django view written as a class whose methods handle request steps, turned into a URL callable by `as_view()`.
+- **dispatch():** The method that selects the handler for the request method, such as `get` or `post`, and that mixins can wrap.
+- **ListView:** A generic view that gets a collection from `get_queryset`, can paginate it with `paginate_by` and renders it with a template.
+- **Mixin:** A class combined with a view through inheritance that adds behavior, such as a guard that checks a header before calling `super().dispatch()`.
+- **Method resolution order:** Python's order for searching base classes for a method, which decides whether a mixin's dispatch runs before the base view's.
+
 ## Mechanism: as_view creates the callable boundary
 
 A URL pattern needs a callable. The class's as_view method produces one that creates and dispatches the view for a request. Dispatch selects the method handler, such as get or post. Generic views add hooks for obtaining objects, choosing templates and building context.
@@ -29,6 +37,44 @@ The second view combines GuardMixin and View. A request without the synthetic fi
 The header is explicitly a test seam, not authentication. Its purpose is to expose composition order. Real authentication should use Django's established user/session machinery or another reviewed principal boundary, and object permissions still need resource-specific checks.
 
 Mixins should have narrow, documented responsibilities. A class with many overlapping dispatch overrides can become difficult to reason about. Trace the method resolution order and request sequence when behavior is unclear rather than adding another override until tests happen to pass.
+
+## Worked example: mixin order decides whether the guard runs
+
+```python
+class View:
+    def dispatch(self, request):
+        return f"200 {self.get(request)}"
+
+
+class GuardMixin:
+    def dispatch(self, request):
+        if request.get("X-Fixture-Key") != "allowed":
+            return "403 forbidden"
+        return super().dispatch(request)
+
+
+class Guarded(GuardMixin, View):
+    def get(self, request):
+        return "allowed"
+
+
+class Unguarded(View, GuardMixin):
+    def get(self, request):
+        return "allowed"
+
+
+print([cls.__name__ for cls in Guarded.__mro__])
+print(Guarded().dispatch({}), "|", Unguarded().dispatch({}))
+```
+
+Expected output:
+
+```text
+['Guarded', 'GuardMixin', 'View', 'object']
+403 forbidden | 200 allowed
+```
+
+Both classes inherit the same two parents, and only their order differs. Python searches the method resolution order from left to right, so `Guarded` reaches `GuardMixin.dispatch` first, and the mixin hands off to `View` through `super()` only after the header check passes. In `Unguarded` the base view's `dispatch` answers first and never calls `super()`, so the guard is dead code and the request with no key gets a 200. Django's own `LoginRequiredMixin` and `PermissionRequiredMixin` carry the same rule: put them to the left of the view class, exactly as the lesson's `Guarded(GuardMixin, View)` does.
 
 ## Failure diagnosis and discussion
 

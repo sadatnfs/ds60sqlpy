@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-029_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="llm-029-explanatory-solutions">llm-029: explanatory solutions<a class="heading-anchor" href="#llm-029-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<p>Read these scaling laws and the limits of a toy experiment answers after attempting <em>Read a longer training run</em> through <em>Write a bounded conclusion</em>, or after asking for a reveal. They reuse the guide&#x27;s literals, so a mismatch in <em>Calculate a local ratio</em> points to one step. <code>llm-029_solution.py</code> holds the assertions; this page explains how they test scaling relationship. Then try <em>Write a bounded conclusion</em> on a fresh input you chose before looking.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A scaling law is an empirical relationship measured under a specified family of models, data and training procedures. A small table can suggest a trend, but it cannot identify a universal law or justify extrapolation to frontier systems. Model parameters, training tokens and optimization steps interact through the compute budget. If several change together, a loss difference cannot be attributed to only one. A power-law fit also needs a domain and uncertainty; a straight line through two log-scale points has no independent evidence about curvature. This worksheet uses invented local measurements to practice controlled comparison and to distinguish interpolation from unsupported extrapolation.</p>
 <p><strong>Scaling relationship:</strong> An observed dependence within a declared experimental regime.</p>
@@ -254,7 +254,7 @@ No frontier-performance prediction is supported.</code></pre>
 <p><strong>Expected:</strong> conclusion names local fixture and confounded C.</p>
 <p><strong>Verify:</strong> Check that the conclusion cites the A-to-B decrease from 2.0 to 1.8, marks row C as confounded and contains no prediction outside the observed rows.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p>Change one input to <em>Reject an unsupported forecast</em> and predict the result first; keep <em>Design a discriminating next run</em> failing beside the repair. Log a missing the Python standard library separately from a wrong scaling relationship value in <code>llm-029</code>.</p></article>
   </main>
 </body>
 </html>

@@ -1,7 +1,13 @@
 # CUDA Python and GPU Spark authoring
 
 The durable content is `python_lessons.py`, `python_deep_notes.py`,
-`python_gpu_labs.py`, `spark_lessons.py` and `spark_programs.py` in this directory.
+`python_key_terms.py`, `python_gpu_labs.py`, `spark_lessons.py` and
+`spark_programs.py` in this directory. `python_key_terms.py` holds three to five
+lesson-specific terms per chapter, rendered under `### Key terms` in each guide.
+`python_reasoning.py` holds, for every exercise of every chapter, a four-part
+solution rationale (approach, why it is correct, a plausible wrong approach and
+how to verify) that the generator validates and renders into
+`solutions/cuda-NNN_solutions.md`.
 These files contain original explanations, worked cases, targeted exercises,
 answers and bounded programs. They do not fetch packages, generate benchmark
 results or operate a GPU/cluster while generating documentation.

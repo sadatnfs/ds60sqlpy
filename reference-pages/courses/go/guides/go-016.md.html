@@ -220,38 +220,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>
 	<span class="syntax-string">&quot;fmt&quot;</span>
-	<span class="syntax-string">&quot;iter&quot;</span>
 <span class="syntax-punctuation">)</span>
 
 <span class="syntax-keyword">func</span> check<span class="syntax-punctuation">(</span>ok <span class="syntax-keyword">bool</span><span class="syntax-punctuation">,</span> message <span class="syntax-keyword">string</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
 	<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>ok <span class="syntax-punctuation">{</span>
 		<span class="syntax-builtin">panic</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span>
-	<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-
-<span class="syntax-keyword">func</span> makeCounter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">int</span> <span class="syntax-punctuation">{</span> n <span class="syntax-operator">:=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">int</span> <span class="syntax-punctuation">{</span> n<span class="syntax-operator">++</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> n <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">func</span> mapInts<span class="syntax-punctuation">(</span>items <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> f <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span> <span class="syntax-punctuation">{</span>
-	out <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-	<span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span> x <span class="syntax-operator">:=</span> <span class="syntax-keyword">range</span> items <span class="syntax-punctuation">{</span>
-		out<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span> <span class="syntax-punctuation">=</span> f<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
-	<span class="syntax-punctuation">}</span>
-	<span class="syntax-keyword">return</span> out
-<span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">func</span> visit<span class="syntax-punctuation">(</span>limit <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> f <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">for</span> i <span class="syntax-operator">:=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> i <span class="syntax-operator">&lt;=</span> limit<span class="syntax-punctuation">;</span> i<span class="syntax-operator">++</span> <span class="syntax-punctuation">{</span>
-		<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>f<span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-			<span class="syntax-keyword">return</span>
-		<span class="syntax-punctuation">}</span>
-	<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-<span class="syntax-keyword">func</span> countTo<span class="syntax-punctuation">(</span>limit <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> produced <span class="syntax-operator">*</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> iter<span class="syntax-punctuation">.</span>Seq<span class="syntax-punctuation">[</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">return</span> <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span>yield <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-		<span class="syntax-keyword">for</span> i <span class="syntax-operator">:=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> i <span class="syntax-operator">&lt;=</span> limit<span class="syntax-punctuation">;</span> i<span class="syntax-operator">++</span> <span class="syntax-punctuation">{</span>
-			<span class="syntax-operator">*</span>produced<span class="syntax-operator">++</span>
-			<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>yield<span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-				<span class="syntax-keyword">return</span>
-			<span class="syntax-punctuation">}</span>
-		<span class="syntax-punctuation">}</span>
 	<span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span>
 

@@ -217,7 +217,7 @@ def choose_action():
     threshold = false_alarm_cost / (false_alarm_cost + miss_cost)
     intervene = probability > threshold
     assert intervene.tolist() == [False, True, True]
-    assert np.all(np.minimum(2 * (1 - probability), 8 * probability) <= 8 * probability)
+    assert np.array_equal(intervene, false_alarm_cost * (1 - probability) < miss_cost * probability)
     print("Loss-derived threshold:", threshold, "intervene:", intervene.tolist())
 
 

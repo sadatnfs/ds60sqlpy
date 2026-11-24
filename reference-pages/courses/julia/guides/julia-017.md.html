@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Parse and export bounded CSV data using explicit types and missingness rules rather than accidental inference.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-017</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (retain identifiers and missing values) and worked case B (reject malformed typed input and preserve quoting) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-017: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Schema:</strong> The expected column names and element types of a file, declared up front instead of inferred from whatever rows appear.</li>
+<li><strong>Strict parsing:</strong> Reading with <code>strict = true</code> so a malformed field raises an error instead of quietly becoming <code>missing</code>.</li>
+<li><strong>Identifier column:</strong> A code such as an account number that must be read as a <code>String</code>, because numeric parsing drops leading zeros.</li>
+<li><strong>Round trip:</strong> Writing a table and reading it back to confirm that names, types and values survive serialization unchanged.</li>
+<li><strong>IOBuffer:</strong> An in-memory stream that stands in for a file, so literal CSV text can be parsed without touching the disk.</li>
+</ul>
 <h3 id="a-text-file-is-not-yet-a-typed-table">A text file is not yet a typed table<a class="heading-anchor" href="#a-text-file-is-not-yet-a-typed-table" aria-label="Link to this section">#</a></h3>
 <p>CSV represents delimited text. A reader must interpret headers, quoting, missing-value markers and data types. Those choices are part of a schema contract. An identifier that looks numeric may need to remain text, because parsing it as an integer can discard leading zeros that are meaningful to identity.</p>
 <p>The classroom prepares CSV 0.10.17 with DataFrames. The examples use that actual version&#x27;s API, including explicit column types and strict parsing. Newer public documentation can describe different behavior, so the pinned source reference is included. No URL or external file is read during these lessons; literal CSV text is wrapped in <code>IOBuffer</code>.</p>

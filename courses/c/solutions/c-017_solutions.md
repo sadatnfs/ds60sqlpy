@@ -1,6 +1,6 @@
 # c-017: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-017_solution.c`, implements all six cases, from the "create an owned string" case to the "transfer a deliberate move" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -21,13 +21,13 @@ CHECK(t.len == 5 && strcmp(t.data, "alpha") == 0);
 text_destroy(&t);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `t.len == 5 && strcmp(t.data, "alpha") == 0`. Restoring the original line brings back the worked observation: length is 5 and content is alpha.
+**Expected:** With `CHECK(text_create(&t, "alpha!"));` the run stops with `Check failed` at the CHECK on `t.len == 5 && strcmp(t.data, "alpha") == 0`, because the "create an owned string" case no longer shows that length is 5 and content is alpha. Restoring `CHECK(text_create(&t, "alpha"));` brings that observation back.
 
 The owner contains both storage and logical length. The terminator is additional storage, not part of len.
 
 ## Exercise 2: Clone independent storage: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `b.data[1] = 'b';`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "clone independent storage" case, so one line now reads `b.data[1] = 'b';`. Run the example with that line, use the failing CHECK to find why the original remains cat no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -40,7 +40,7 @@ text_destroy(&a);
 text_destroy(&b);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(a.data, "cat") == 0 && strcmp(b.data, "bat") == 0`; after it the line reads `b.data[0] = 'b';` again and the original remains cat.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(a.data, "cat") == 0 && strcmp(b.data, "bat") == 0`. Once the line reads `b.data[0] = 'b';` again, the "clone independent storage" case again shows that the original remains cat.
 
 Two independently allocated owners can be destroyed separately. A plain struct assignment would share the pointer and make that unsafe.
 
@@ -110,4 +110,4 @@ The explicit source reset is the manual move protocol. Leaving two apparent owne
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer a deliberate move" case to your own c-017 source. Explain why every access in `text_create` or `text_destroy` stays within a live object and each owned resource is released. An expected borrow failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "clone independent storage" case apart from ordinary output: the fixture proves its stated borrow, owned result and clone assumptions, not universal safety.

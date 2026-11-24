@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use explicit random generators, compare simulation with analytic quantities and preserve the distinction between numerical and sampling uncertainty.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-020</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (compare a sample with a known model) and worked case B (probabilities and stable tail calculations) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-020: all reference checks passed</code>. One program in this unit publishes a bounded Plotly figure with its description and exact table. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Seeded generator:</strong> An explicit generator such as <code>Xoshiro(42)</code> passed to <code>rand</code>, so a run reproduces exactly the same draws.</li>
+<li><strong>Distribution object:</strong> A Distributions.jl value such as <code>Normal(2, 3)</code> that supplies methods like <code>rand</code>, <code>cdf</code> and <code>quantile</code>.</li>
+<li><strong>Monte Carlo standard error:</strong> The sampling uncertainty of a simulated mean, estimated as the standard deviation divided by the square root of the draw count.</li>
+<li><strong>Tail probability:</strong> The chance that a variable exceeds a threshold, computed with <code>ccdf</code> or with <code>logccdf</code> when the value is tiny.</li>
+<li><strong>DS60Plots:</strong> The classroom helper module that captures one bounded Plotly figure with a description and an exact data table.</li>
+</ul>
 <h3 id="randomness-needs-an-explicit-role">Randomness needs an explicit role<a class="heading-anchor" href="#randomness-needs-an-explicit-role" aria-label="Link to this section">#</a></h3>
 <p>A random-number generator has state. Reusing an object advances that state, while constructing another generator with the same seed can reproduce a sequence under the same implementation. A seed is useful provenance, but it is not a promise of identical draws across every library version, algorithm or hardware environment.</p>
 <p>A probability distribution describes a mathematical model. The Distributions package supplies operations such as moments, density, cumulative probability and sampling. Simulated data from a declared distribution can test an algorithm under known assumptions. It is not evidence that an external population follows that distribution.</p>

@@ -197,6 +197,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>pyweb-040</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A WebSocket begins with an HTTP handshake and then carries messages over a longer-lived connection. Authentication, origin checks, message schemas, size limits and close behavior all remain application responsibilities. This chapter exercises a finite one-message exchange through the real framework WebSocket interface.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>WebSocket handshake:</strong> The initial HTTP exchange that the server accepts or refuses before any messages flow over the long-lived connection.</li>
+<li><strong>Origin check:</strong> Comparing the handshake&#x27;s Origin header with an expected value, which blocks unwanted browser initiation but is not authentication.</li>
+<li><strong>Message schema:</strong> A strict Pydantic model applied to every received message, independently of the checks made at the handshake.</li>
+<li><strong>Close code:</strong> A numeric reason sent when closing a WebSocket: 1000 for normal completion, 1008 for a policy violation and 1009 for a message too big.</li>
+</ul>
 <h3 id="mechanism-handshake-and-message-validation-are-separate">Mechanism: handshake and message validation are separate<a class="heading-anchor" href="#mechanism-handshake-and-message-validation-are-separate" aria-label="Link to this section">#</a></h3>
 <p>The handler checks a synthetic bearer credential and an expected Origin before accepting the connection. Origin is useful against unwanted browser initiation, but a nonbrowser client can supply arbitrary headers, so it is not a replacement for authentication. Real browser WebSocket clients also have different header-setting capabilities from this test fixture.</p>
 <p>After acceptance, the handler receives text and applies a byte bound before parsing a strict Pydantic message. The schema requires a positive integer sequence and a bounded nonempty text field, rejecting extra keys. A message that passes the handshake can still fail this independent data boundary.</p>
@@ -209,6 +216,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A numeric string where the schema requires a strict integer is rejected after the handshake with 1008. A connection without the required authority is refused before successful acceptance. The program checks the disconnect code and the number of handler-cleanup observations.</p>
 <p>These cases prevent two common shortcuts: validating only the initial connection and assuming every later message is safe, or accepting first and checking identity only after sending sensitive state. The correct ordering depends on the protocol, but it must be deliberate and tested.</p>
 <p>Large-message protection has multiple layers. The application bound controls the text it processes after receipt; the server&#x27;s protocol configuration should also limit frames/messages and connection resources. One in-handler check should not be presented as complete network resource protection.</p>
+<h3 id="worked-example-a-receive-loop-that-ends-on-disconnect">Worked example: a receive loop that ends on disconnect<a class="heading-anchor" href="#worked-example-a-receive-loop-that-ends-on-disconnect" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> starlette.applications <span class="syntax-keyword">import</span> Starlette
+<span class="syntax-keyword">from</span> starlette.routing <span class="syntax-keyword">import</span> WebSocketRoute
+<span class="syntax-keyword">from</span> starlette.testclient <span class="syntax-keyword">import</span> TestClient
+<span class="syntax-keyword">from</span> starlette.websockets <span class="syntax-keyword">import</span> WebSocketDisconnect
+
+log <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">echo</span><span class="syntax-punctuation">(</span>websocket<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">await</span> websocket<span class="syntax-operator">.</span>accept<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">while</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">:</span>
+            text <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> websocket<span class="syntax-operator">.</span>receive_text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+            <span class="syntax-keyword">await</span> websocket<span class="syntax-operator">.</span>send_text<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> WebSocketDisconnect <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span>
+        log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">client left with </span><span class="syntax-string">{</span>exc<span class="syntax-operator">.</span>code<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
+        log<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">subscriptions released</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+app <span class="syntax-operator">=</span> Starlette<span class="syntax-punctuation">(</span>routes<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>WebSocketRoute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/echo</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> echo<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">with</span> TestClient<span class="syntax-punctuation">(</span>app<span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> client<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">with</span> client<span class="syntax-operator">.</span>websocket_connect<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/echo</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> ws<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ping</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">socket</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+            ws<span class="syntax-operator">.</span>send_text<span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">)</span>
+            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>ws<span class="syntax-operator">.</span>receive_text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        ws<span class="syntax-operator">.</span>close<span class="syntax-punctuation">(</span>code<span class="syntax-operator">=</span><span class="syntax-number">1001</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>log<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output:</p>
+<pre class="highlighted-code"><code class="language-text">gnip
+tekcos
+[&#x27;client left with 1001&#x27;, &#x27;subscriptions released&#x27;]</code></pre>
+<p>The lesson&#x27;s handler reads one message and closes, while most real sockets run a loop like this one until the client leaves. There is no special return value for a closed connection: <code>receive_text</code> raises <code>WebSocketDisconnect</code>, carrying the close code the client sent, here 1001 for going away. Catching that exception is the normal exit path, not an error, and the <code>finally</code> block is where per connection state such as chat room membership or a subscription to a message broker must be released. A handler that forgets this leaks one subscription for every closed browser tab, and the leak grows quietly until memory or broker limits run out.</p>
 <h3 id="failure-diagnosis-and-discussion">Failure diagnosis and discussion<a class="heading-anchor" href="#failure-diagnosis-and-discussion" aria-label="Link to this section">#</a></h3>
 <p><strong>Why can HTTP endpoints work while WebSockets fail behind a proxy?</strong> The upgrade, timeout and forwarding configuration may differ. A successful ordinary GET does not establish the WebSocket path.</p>
 <p><strong>Does a close code prove cleanup of every external operation?</strong> No. The handler must still cancel and await owned tasks, return pooled resources and reconcile any durable effects. The fixture records only its explicitly owned cleanup.</p>

@@ -16,6 +16,13 @@ P(l_1\mid l_0,d_0(l_0))P(l_0).
 
 The order matters. The policy's first action changes the distribution of the later state. Reusing the untreated distribution of \(L_1\) while assigning treatment at both times would answer a different, partially controlled question.
 
+## Key terms
+
+- **Treatment-confounder feedback:** A time-varying state that is affected by an earlier treatment and also influences later treatment and the outcome.
+- **Dynamic regime:** A policy that maps the observed history at each decision time to an action instead of fixing every action in advance.
+- **Sequential g-formula:** An identification formula that averages outcome means over the intermediate-state distribution induced by the policy's own earlier actions.
+- **Sequential exchangeability:** The assumption that, given the observed history, each treatment decision is independent of the potential outcomes.
+
 ## Worked case 1: enumerate static and dynamic regimes
 
 The baseline state is binary with equal probabilities. The probability of the intermediate state is \(.2+.3L_0+.2A_0\). The final outcome mean is \(1+2A_0+3A_1+L_0+2L_1\). The program enumerates every baseline and intermediate state, applies the requested policy and averages the resulting outcome using the correct state probabilities.
@@ -45,6 +52,45 @@ Avoid interpreting a single simulated trajectory as a prediction interval. Monte
 **Why not include every time-varying variable in one regression?** Some of those variables lie on treatment-induced pathways. Conditioning can block part of the effect or create selection. The g-formula models the ordered data-generating process and then averages over the policy-induced covariate distribution.
 
 **Can a dynamic policy be preferable to always treating even with a smaller outcome mean?** Yes. Treatment may have costs, burdens or harms. Define the utility and constraints before comparing policies; maximizing the particular synthetic outcome is only one possible decision objective.
+
+## Worked example: Enumerating the sequential g-formula for three regimes
+
+```python
+def p_l1(a0):  # P(L1 = 1 | A0): treatment lowers a risk marker
+    return 0.3 if a0 else 0.6
+
+
+def mean_y(a0, l1, a1):  # outcome mean given history
+    return 10 + 2 * a0 + 3 * a1 - 4 * l1 + 2 * a1 * l1
+
+
+def g_formula(rule0, rule1):
+    total = 0.0
+    a0 = rule0
+    for l1 in (0, 1):
+        p = p_l1(a0) if l1 else 1 - p_l1(a0)
+        total += p * mean_y(a0, l1, rule1(l1))
+    return total
+
+
+print("never treat :", round(g_formula(0, lambda l1: 0), 4))
+print("always treat:", round(g_formula(1, lambda l1: 1), 4))
+print("treat at t1 only if L1 = 1, starting treated:", round(g_formula(1, lambda l1: l1), 4))
+# Freeze L1 at its untreated distribution while setting both treatments to 1.
+frozen = sum((p_l1(0) if l1 else 1 - p_l1(0)) * mean_y(1, l1, 1) for l1 in (0, 1))
+print("always treat with L1 frozen at never-treat distribution:", round(frozen, 4))
+```
+
+Observed output:
+
+```text
+never treat : 7.6
+always treat: 14.4
+treat at t1 only if L1 = 1, starting treated: 12.3
+always treat with L1 frozen at never-treat distribution: 13.8
+```
+
+Never treating gives \(0.4(10)+0.6(6)=7.6\), because without treatment the risk marker \(L_1\) equals 1 with probability 0.6 and each marker costs 4 points. Always treating gives 14.4: treatment lowers that probability to 0.3, so \(0.7(15)+0.3(13)=14.4\). The total effect is therefore 6.8. The dynamic rule, which treats at time 1 only when \(L_1=1\), gets \(0.7(12)+0.3(13)=12.3\); it gives up 3 points for marker-free patients who would have benefited from the second dose. The last line freezes \(L_1\) at its untreated distribution while setting both treatments to 1, which yields \(0.4(15)+0.6(13)=13.8\). The 0.6 gap between 14.4 and 13.8 is the part of the total effect transmitted by changing the marker. A regression of \(Y\) on both treatments that adjusts for \(L_1\) would remove exactly that pathway, because it conditions on a variable that treatment itself shifts.
 
 ## Complete reproducible program
 

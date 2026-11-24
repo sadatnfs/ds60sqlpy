@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A working GPU Spark installation matches Spark patch line, Scala binary version, Java runtime, plugin release, CUDA native-library variant, host CPU architecture, Linux userspace, NVIDIA driver and GPU architecture. Spark distributions can carry vendor patches, so a nominal Spark version alone may not establish binary compatibility. The published support matrix and release notes must be checked for the exact selected release.</p>
 <p>Record artifacts by version and checksum and keep a known CPU baseline. Do not copy a development SNAPSHOT from a documentation example into a beginner setup. The Scala suffix selects a binary ecosystem; the CUDA classifier selects native-library packaging and is not a substitute for a compatible host driver. A local ARM Mac image architecture and an NVIDIA Linux host architecture are separate concerns. This lesson&#x27;s compatibility worksheet deliberately does not invent a universally supported version combination.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Support matrix:</strong> The published combinations of Spark, Scala, Java, CUDA, driver and GPU architecture that a plugin release was tested on.</li>
+<li><strong>Scala binary version:</strong> The Scala major and minor line, such as 2.12 or 2.13, that a jar was compiled against and must match.</li>
+<li><strong>CUDA native-library variant:</strong> The plugin jar build that bundles native libraries for a specific CUDA major version.</li>
+<li><strong>Artifact checksum:</strong> A recorded hash that proves which exact jar was deployed.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A jar built for Scala 2.12 should not be assumed compatible with a Scala 2.13 Spark distribution. A NoSuchMethodError can indicate binary integration trouble before useful GPU work starts.</p>
@@ -218,17 +225,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-list-matrix-axes">Exercise 1: List matrix axes<a class="heading-anchor" href="#exercise-1-list-matrix-axes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>list matrix axes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating the jar name as proof of compatibility ignores axes the name does not encode, such as the driver or GPU architecture.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-identify-a-scala-mismatch">Exercise 2: Identify a Scala mismatch<a class="heading-anchor" href="#exercise-2-identify-a-scala-mismatch" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>identify a Scala mismatch</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Matching only the Spark version number while ignoring the Scala suffix in the jar name leads to runtime linkage errors before any query runs.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-distinguish-toolkit-and-driver">Exercise 3: Distinguish toolkit and driver<a class="heading-anchor" href="#exercise-3-distinguish-toolkit-and-driver" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>distinguish toolkit and driver</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Checking <code>nvcc --version</code> and concluding the host is ready tests the compiler, not the driver the executors will use.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-record-artifact-provenance">Exercise 4: Record artifact provenance<a class="heading-anchor" href="#exercise-4-record-artifact-provenance" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>record artifact provenance</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Copying a jar from a shared folder without a checksum leaves no way to tell which build it is.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-cpu-rollback">Exercise 5: Design a CPU rollback<a class="heading-anchor" href="#exercise-5-design-a-cpu-rollback" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design a CPU rollback</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Removing CPU configuration once the plugin works means a driver or library failure stops the job entirely.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-compatibility-acceptance">Exercise 6: Define compatibility acceptance<a class="heading-anchor" href="#exercise-6-define-compatibility-acceptance" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>define compatibility acceptance</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Accepting a host because the Spark session started with the plugin listed skips native library loading on executors and actual query execution.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -6,7 +6,7 @@ Intermediate, approximately 90 minutes. Prerequisites: `rust-024`
 
 ## Learning objectives
 
-Write and read files as bytes or UTF-8 and remove owned temporary files on every path. The central exercise is task 3: Create an owned temporary-file round trip for a report.
+Write and read files as bytes or UTF-8, remove owned temporary files on the normal path and use a guard type to cover early returns. The central exercise is task 3: Create an owned temporary-file round trip for a report.
 
 ## Purpose and mental model
 

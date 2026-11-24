@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Data tests express conditions that a relation should satisfy. A not-null test checks presence, while a unique test checks a key candidate. They are useful safeguards, but passing them does not prove that every value is correct. A table can have unique identifiers and still use the wrong currency, time window or join.</p>
 <p>A build can materialize a model before a test fails. That is an important operational boundary: detecting a bad result is different from preventing every consumer from seeing it. The second case deliberately creates duplicate identifiers, observes a failed test and verifies that the relation still exists. A later publication gate will use successful test artifacts to decide whether to expose a product.</p>
 <p>Failure recovery should preserve the cause. Correct the fixture or transformation under a stated contract, rerun the required resources and inspect new results. Do not change a uniqueness test into a row-count test merely to obtain a green status. The expected key is part of the data model.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Data test:</strong> A query that selects the rows violating an expectation; the test passes only when it returns zero rows.</li>
+<li><strong>unique test:</strong> A generic data test that fails when any non-null value appears more than once in the tested column.</li>
+<li><strong>not_null test:</strong> A generic data test that fails when the tested column contains a null value.</li>
+<li><strong>run_results.json:</strong> The artifact that records the status of each executed node, so a model can report success while a test on it fails.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Model column metadata can declare data_tests such as not_null and unique. build includes selected tests in dependency order. target/run_results.json records statuses for the invocation. Check the returned success value and each relevant result; a model status success can coexist with a test status fail in the same build.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

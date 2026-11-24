@@ -38,6 +38,12 @@
       "code": "data <- data.frame(group = factor(c(\"A\", \"A\", \"B\"), levels = c(\"A\", \"B\", \"C\")), value = c(2, NA_real_, 6))\nsummary <- lapply(split(data$value, data$group, drop = FALSE), function(x) {\n  observed <- x[!is.na(x)]\n  c(rows = length(x), observed = length(observed), sum = sum(observed), mean = if (length(observed)) mean(observed) else NA_real_)\n})\nstopifnot(summary$A[[\"rows\"]] == 2, summary$A[[\"observed\"]] == 1)\nstopifnot(summary$C[[\"rows\"]] == 0, is.na(summary$C[[\"mean\"]]))\nprint(summary)\n",
       "explanation": "The declared C category remains visible with zero rows and no observed mean. A missing measurement within A is separately counted.",
       "expected": "Arows 2/observed 1; Crows 0/meanNA."
+    },
+    {
+      "title": "Merge sufficient state, not stored means",
+      "code": "state <- function(x) {\n  observed <- x[!is.na(x)]\n  c(rows = length(x), observed = length(observed), sum = sum(observed))\n}\nmerge_state <- function(a, b) a + b\nfirst <- c(2, 4)\nsecond <- c(6, NA_real_, 10, 8)\ncombined <- merge_state(state(first), state(second))\nstopifnot(identical(unname(combined), c(6, 5, 30)))\nstopifnot(combined[[\"sum\"]] / combined[[\"observed\"]] == 6)\nstopifnot(mean(c(mean(first), mean(second, na.rm = TRUE))) == 5.5)\nstopifnot(mean(c(first, second), na.rm = TRUE) == 6)\nprint(combined)\n",
+      "explanation": "Each batch is reduced to three numbers: rows, observed values and their sum. Adding the vectors merges them, and dividing the merged sum 30 by the merged observed count 5 gives 6, the same as averaging the five values directly. Averaging the batch means, 3 and 8, gives 5.5, because the first batch's two values get as much weight as the second batch's three. Keeping rows 6 beside observed 5 means the missing reading in the second batch is still visible after the merge. A stored mean cannot be merged correctly on its own; the count and the sum together are enough.",
+      "expected": "rows 6, observed 5, sum 30; the pooled mean is 6 while the mean of the two batch means is 5.5."
     }
   ],
   "exercises": [

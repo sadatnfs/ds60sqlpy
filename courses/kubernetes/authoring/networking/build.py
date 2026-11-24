@@ -10,6 +10,10 @@ BASE = Path(__file__).resolve().parents[2]
 ROOT = BASE.parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(BASE / "authoring"))
+
+from key_terms import render as key_terms_block  # noqa: E402
+from reasoning import render as reasoning_block  # noqa: E402
 
 from scripts.format_inline_code import canonical_markdown, ownership  # noqa: E402
 from scripts.format_repo import load_policy  # noqa: E402
@@ -98,6 +102,7 @@ def build():
     for n, spec in enumerate(SPECS, 43):
         title, concepts, mental, mechanism, diagram, examples, tasks, refs = spec
         key = f"k8s-{n:03d}"
+        vocabulary = "\n\n".join(part for part in (mental, key_terms_block(key)) if part)
         prereq = ["k8s-008", "k8s-020"] if n == 43 else [f"k8s-{n - 1:03d}"]
         prerequisites = ", ".join(f"`{p}`" for p in prereq)
         level = "intermediate" if n <= 52 else "advanced"
@@ -116,7 +121,7 @@ def build():
 
 ## Purpose, vocabulary and mental model
 
-{mental}
+{vocabulary}
 
 ## Mechanism and field-by-field reasoning
 
@@ -161,6 +166,8 @@ This is a scoped read, not permission to create resources or change cluster netw
             text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Progressive hint:** Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.\n"
             worksheet += f"\n## Exercise {i}: {prompt}\n\nMy prediction:\n\nSynthetic facts used:\n\nActual owned observation, if performed:\n\nInterpretation and remaining uncertainty:\n"
             answer += f"\n## Exercise {i}: {prompt}\n\n{why}\n\n**Expected:** {expected}\n"
+            if reasoning_block(key, i):
+                answer += f"\n{reasoning_block(key, i)}\n"
             ledger.append(dict(exercise=i, task=prompt, expected=expected))
         text += (
             f"""

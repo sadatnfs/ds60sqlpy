@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Startup, readiness and liveness probes answer different questions. A startup probe can allow an application time to initialize before other probe behavior begins. Readiness indicates whether the Pod should receive ordinary new traffic. Liveness asks whether restarting the container is an appropriate recovery action.</p>
 <p>A dependency outage is not always a reason to restart every client. If a liveness check fails whenever a database is briefly unavailable, the system can create a restart storm without repairing the database. Probe design should reflect the application’s recovery capabilities and failure modes.</p>
 <p>Graceful termination coordinates endpoint eligibility, connection draining and process shutdown. Removing readiness does not instantly terminate every existing connection or guarantee every proxy has updated. A rollout must account for propagation, in-flight requests, termination grace periods and the application’s own shutdown behavior.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Restart storm:</strong> Many restarts at once, often from a too strict probe or a shared dependency failure, which adds load and slows recovery.</li>
+<li><strong>Graceful termination:</strong> A shutdown in which a Pod stops receiving new traffic, finishes in-flight work and exits before it is forcibly killed.</li>
+<li><strong>Connection draining:</strong> Letting existing connections finish while no new ones arrive, so in-flight requests are not cut off.</li>
+<li><strong>Termination grace period:</strong> The time between the termination signal and forced termination. Shutdown work must fit inside it.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Set probe paths, ports, timeouts and thresholds according to measured startup and request behavior. A failure threshold is not a proof that an application will recover by the next attempt. Keep startup allowance separate from a per-request deadline.</p>
 <p>During a rollout, inspect desired generation, updated replicas, ready endpoints and actual responses from the intended revision. An old healthy replica can keep a Service responding while the new revision fails. A 200 response alone does not prove rollout completion.</p>

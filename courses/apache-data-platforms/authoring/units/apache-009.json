@@ -5,6 +5,40 @@
   "minutes": 50,
   "prerequisites": ["apache-008"],
   "concepts": ["buffers", "validity", "offsets"],
+  "key_terms": [
+    [
+      "Buffer",
+      "A contiguous memory region holding one part of an Arrow array, such as its fixed-width values or its validity bits."
+    ],
+    [
+      "Validity bitmap",
+      "A buffer with one bit per slot in which a set bit marks a present value, so nulls need no sentinel. Its logical size is n divided by 8, rounded up, bytes for n slots."
+    ],
+    [
+      "Array offset",
+      "The starting slot of an array within its buffers. With offset o and value width w, logical element i starts at byte (o + i) times w."
+    ],
+    [
+      "Zero-copy slice",
+      "A new array view that reuses its parent's buffers with a different offset and length instead of copying values."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Read the validity bitmap behind a null",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.compute as pc\n\nvalues = pa.array([10, None, 30, 40], type=pa.int64())\nvalidity = values.buffers()[0].to_pybytes()[0]\nprint([(validity >> i) & 1 for i in range(4)])\nprint(pc.mean(values).as_py(), pc.mean(pc.fill_null(values, 0)).as_py())",
+      "output": "[1, 0, 1, 1]\n26.666666666666668 20.0",
+      "interpretation": "Bit 1 is zero, so the second slot is missing even though the payload buffer still holds some integer there. The observed mean divides 80 by three known values, while the zero-filled mean divides by four and reports 20. Neither is wrong in general; the question is whether a missing reading means no measurement or a real zero, and that decision belongs in the contract rather than in a default fill."
+    },
+    {
+      "title": "Confirm a slice shares memory with its parent",
+      "language": "python",
+      "code": "import pyarrow as pa\n\nvalues = pa.array([10, None, 30, 40], type=pa.int64())\nsliced = values.slice(1, 2)\nprint(sliced.offset, len(sliced), sliced.to_pylist())\nprint(sliced.buffers()[1].address == values.buffers()[1].address)",
+      "output": "1 2 [None, 30]\nTrue",
+      "interpretation": "The slice reports offset 1 and length 2 and points at the same payload address as the parent, so slicing copied nothing. That is efficient, but it also means a tiny slice can keep a large parent buffer alive in memory. When memory use stays high after filtering a big batch down to a few rows, check for retained slices and copy them with take or concat if the parent should be released."
+    }
+  ],
   "evidence": "Independent exact-value assertions and expected failure observations in the complete bounded program.",
   "sources": [
     ["Arrow columnar format", "https://arrow.apache.org/docs/format/Columnar.html"],

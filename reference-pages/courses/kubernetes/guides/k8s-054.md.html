@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Gateway API separates infrastructure selection, traffic listeners and application routes into distinct resources. A GatewayClass describes a controller-managed class. A Gateway asks for listeners and an entrypoint. An HTTPRoute attaches routing rules to an allowed parent Gateway. This can separate platform responsibilities from application routing ownership.</p>
 <p>The resources still require installed APIs and a compatible controller. Status conditions such as Accepted, Programmed and ResolvedRefs describe different aspects of reconciliation. A route being accepted does not prove an actual client request reached the expected application.</p>
 <p>Cross-namespace references require deliberate authorization under the API’s rules. ReferenceGrant is one mechanism for allowing supported cross-namespace object references. It should be narrow, naming the intended kinds and relationships. Broad grants or permissive listener attachment can turn an organizational boundary into an accidental shared routing surface.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>GatewayClass:</strong> A cluster-scoped object naming the controller that implements Gateways of that class.</li>
+<li><strong>Listener:</strong> A Gateway entry for one port, protocol and optional host name that routes can attach to.</li>
+<li><strong>ReferenceGrant:</strong> An object in a target namespace that allows routes in another namespace to reference its Services or Secrets.</li>
+<li><strong>Route status conditions:</strong> Per-parent status such as Accepted and ResolvedRefs that reports whether a route attached and whether its backends were found.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>The fixture uses gateway.networking.k8s.io/v1 for Gateway and HTTPRoute. The exact supported route features depend on the installed controller and API version. Read parentRefs, listener names, hostnames and backendRefs field by field.</p>
 <p>A platform team might own a shared Gateway while an application team owns an HTTPRoute in its namespace. The listener’s allowedRoutes policy controls which routes may attach. This is separate from whether the referenced backend exists and whether traffic succeeds.</p>

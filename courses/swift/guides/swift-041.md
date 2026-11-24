@@ -127,7 +127,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Parse an admitted route) before changing anything, and confirm its observation: The admitted scheme and host resolve to item one.
 2. Compare Example B (Reject unrelated or incomplete links) with Example A and name the first line whose behavior differs. Its observation is: Unrelated schemes, missing identity and unlisted actions are rejected.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Parsing a URL does not authorize access.
+3. Before opening the explanation, check your task 3 attempt (Run JourneyApp and navigate by stable item identity) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

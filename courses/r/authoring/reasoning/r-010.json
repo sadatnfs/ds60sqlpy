@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Reading str and the row permutation",
+      "body": "The starter ends with `str(records)`. In R 4 and later it prints:\n\n```text\n'data.frame': 3 obs. of  2 variables:\n $ id    : chr  \"B\" \"A\" \"C\"\n $ amount: num  20 10 30\n```\n\n\"3 obs. of 2 variables\" is nrow and ncol, the answer to task 1. The chr and num tags are the column types. If id showed `Factor w/ 3 levels` instead, the table was built with stringsAsFactors set to TRUE, and assigning a new id such as \"D\" would produce NA with an invalid factor level warning.\n\nSorting with `order()` keeps the original row names, which records the permutation:\n\n```text\nrow name   id   amount   amount_with_fee\n2          A    10       12\n1          B    20       22\n3          C    30       32\n```\n\nRow names 2, 1, 3 match `order(records$id)`. The zero-row table from task 5 prints `0 obs. of  3 variables` with `chr(0)` and `num(0)` entries, so str confirms that the schema survived even though no records did."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Call `nrow(records)` and `ncol(records)`, or `dim(records)` for both at once.",
+      "why": "The starter holds three ids, B, A and C, each with one amount, so the table is three records by two fields.",
+      "wrong": "Using `length(records)`. A data frame is a list of columns, so length returns 2, the column count, and a reader expecting a row or cell count gets the wrong number.",
+      "verify": "`dim(records)` returns c(3L, 2L) before the fee column is added."
+    },
+    {
+      "approach": "Assign `records$amount_with_fee <- records$amount + 2` on the unsorted table.",
+      "why": "The addition is vectorized over aligned positions, so each row adds the fee to its own amount: B 22, A 12, C 32.",
+      "wrong": "Computing the fee from a sorted copy, such as `sort(records$amount) + 2`, and assigning it back. B would get 12, which is A's amount plus the fee.",
+      "verify": "The reference check `identical(records$amount_with_fee, c(22, 12, 32))` returns TRUE, and the B row shows 22."
+    },
+    {
+      "approach": "Require both `!anyNA(records$id)` and `!anyDuplicated(records$id)`.",
+      "why": "B, A and C are all present and distinct, so both conditions hold. Missing and repeated keys are separate failures, and each needs its own test.",
+      "wrong": "Checking `length(unique(id)) == nrow(records)` alone. For c(\"A\", NA, \"C\") unique keeps NA as a value, so the count is 3 and a missing key passes.",
+      "verify": "`anyDuplicated(records$id)` returns 0 on the starter; changing id to c(\"B\", \"A\", \"A\") makes it return 3, the position of the repeat."
+    },
+    {
+      "approach": "Compute `order(records$id)` once and use it as a row index with `drop = FALSE`.",
+      "why": "The permutation 2, 1, 3 is applied to every column together, so A stays with 10 and B with 20.",
+      "wrong": "Writing `records$amount <- sort(records$amount)`. The amounts become 10, 20, 30 against ids B, A, C, so B shows 10 with no error, as Example 3 shows for the id column.",
+      "verify": "In the sorted table `sorted$amount[sorted$id == \"A\"]` returns 10, and the printed row names read 2, 1, 3."
+    },
+    {
+      "approach": "Index rows with `integer(0)` and keep `drop = FALSE`: `records[integer(0), , drop = FALSE]`.",
+      "why": "A zero-length row index selects no rows but every column, so id stays character and both numeric columns stay numeric.",
+      "wrong": "Writing `records[0]`. A single index on a data frame selects columns, so the result keeps all three rows and drops every column, the opposite of what the task asks.",
+      "verify": "`nrow(empty)` returns 0 and `names(empty)` shows id, amount and amount_with_fee; str reports `chr(0)` for id."
+    },
+    {
+      "approach": "Test uniqueness on the column that defines the table's grain, which is line_id for a lines table.",
+      "why": "L1 and L2 are distinct lines that both belong to order O1, so repeated order ids are expected while line ids must not repeat.",
+      "wrong": "Requiring order_id to be unique, or deduplicating on it. The check rejects a valid two-line order, and deduplication drops L2 and understates the order.",
+      "verify": "`anyDuplicated(lines$order_id)` returns 2 while `anyDuplicated(lines$line_id)` returns 0."
+    }
+  ]
+}

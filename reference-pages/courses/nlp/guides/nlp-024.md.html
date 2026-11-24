@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The capstone combines the preceding mechanisms into a small domain text-analytics pipeline. It classifies a support message, extracts a ticket identifier, retrieves current permitted procedure evidence and returns an auditable packet. It deliberately stops before free-form generation. A source-quoted evidence packet is a useful deliverable and a clean boundary for a later domain assistant.</p>
 <p>The classifier is an actual fitted scikit-learn logistic baseline over authored network and billing messages. The retriever is an explicitly lexical overlap baseline with role and validity filters. The identifier parser accepts one exact three-digit format. No pretrained model, external data or online service is needed. These are genuine limited components, not stand-ins mislabeled as a production language model.</p>
 <p>Two held-out text families check that the implementation can apply its fixed vocabulary and model to separate probes. The fixture is tiny and deliberately easy, so two correct predictions establish a regression receipt rather than a reliable accuracy estimate. The capstone emphasizes the complete evidence chain and failure categories that must survive as components become more capable.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Evidence packet:</strong> The auditable output recording ticket ID, predicted category, evidence status, source-identified quoted evidence and a fingerprint of the evidence list.</li>
+<li><strong>Held-out family:</strong> A family of related messages kept entirely out of training, here net-b and bill-b, to test transfer beyond memorized templates.</li>
+<li><strong>Identifier contract:</strong> Exactly one ticket ID of the form <code>TKT-</code> plus three ASCII digits. Longer digit runs and multiple IDs are rejected rather than partially accepted.</li>
+<li><strong>Unsupported vocabulary:</strong> The status returned when every message word is out of vocabulary, instead of a label driven only by the class prior.</li>
+<li><strong>Candidate filtering:</strong> Checking the trusted role and validity time before lexical scoring, so expired or unauthorized procedures never become evidence.</li>
+</ul>
 <h3 id="specify-the-data-and-output-contracts">Specify the data and output contracts<a class="heading-anchor" href="#specify-the-data-and-output-contracts" aria-label="Link to this section">#</a></h3>
 <p>Training records contain family ID, text and category. Family IDs are used for splitting, not as predictive features. Test families net-b and bill-b are disjoint from training net-a and bill-a. A real evaluation would need more independent families, timestamps and language/domain variation; the explicit split here makes the intended boundary inspectable.</p>
 <p>The incoming message must contain exactly one ticket ID of form TKT- followed by three ASCII digits. A longer digit sequence must not be partially accepted, and two valid IDs are ambiguous under this contract. The parser returns the complete canonical identifier or raises a clear error. This is a format check, not proof that the ticket exists in an external system.</p>
@@ -251,7 +259,7 @@ packet <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <p><strong>Verify:</strong> Assert the training and held-out family sets are disjoint and that the two held-out labels match the network and billing probes.</p>
 <p><strong>Hints:</strong> Use family IDs for evaluation bookkeeping, not model features.</p>
 <h4 id="exercise-2-implement-exact-identifier-extraction">Exercise 2: Implement exact identifier extraction<a class="heading-anchor" href="#exercise-2-implement-exact-identifier-extraction" aria-label="Link to this section">#</a></h4>
-<p>Accept one TKT-301 and reject missing,multiple or four-digit variants.</p>
+<p>Accept one TKT-301 and reject missing, multiple or four-digit variants.</p>
 <p><strong>Expected:</strong> Canonical TKT-301; three malformed/ambiguous cases raise ValueError.</p>
 <p><strong>Verify:</strong> Assert TKT-301 is returned canonically and that the missing, multiple and four-digit variants each raise ValueError.</p>
 <p><strong>Hints:</strong> Use a trailing digit boundary so a longer ID is not accepted as a prefix.</p>
@@ -261,20 +269,20 @@ packet <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <p><strong>Verify:</strong> Assert the represented probes receive their expected labels and the botanical specimen message is reported as unsupported vocabulary.</p>
 <p><strong>Hints:</strong> Inspect the transformed sparse row before calling predict.</p>
 <h4 id="exercise-4-retrieve-current-permitted-evidence">Exercise 4: Retrieve current permitted evidence<a class="heading-anchor" href="#exercise-4-retrieve-current-permitted-evidence" aria-label="Link to this section">#</a></h4>
-<p>Run the supported network case for ops at time10.</p>
+<p>Run the supported network case for ops at time 10.</p>
 <p><strong>Expected:</strong> Exactly network version 2 and the unchanged approval-rule quote; old version absent.</p>
 <p><strong>Verify:</strong> Assert exactly one record, network version 2, is returned for ops at time 10 with the approval-rule quote unchanged and the old version absent.</p>
 <p><strong>Hints:</strong> Filter role/time before computing lexical overlap.</p>
 <h4 id="exercise-5-exercise-failure-paths">Exercise 5: Exercise failure paths<a class="heading-anchor" href="#exercise-5-exercise-failure-paths" aria-label="Link to this section">#</a></h4>
-<p>Repeat under billing role,time30 and malformed-ID inputs.</p>
+<p>Repeat under billing role, time 30 and malformed-ID inputs.</p>
 <p><strong>Expected:</strong> Insufficient-evidence for role/time changes; explicit parser failures; no unauthorized or stale quote.</p>
 <p><strong>Verify:</strong> Assert the billing role and time 30 both return insufficient evidence and malformed IDs raise parser errors, with no stale or unauthorized quote.</p>
 <p><strong>Hints:</strong> Change one input condition at a time and inspect the returned packet.</p>
 <h4 id="exercise-6-deliver-a-reviewable-analytics-packet">Exercise 6: Deliver a reviewable analytics packet<a class="heading-anchor" href="#exercise-6-deliver-a-reviewable-analytics-packet" aria-label="Link to this section">#</a></h4>
-<p>Record normal and failure results with evidence hash,component identities and limitations.</p>
-<p><strong>Expected:</strong> A reviewer can reproduce parsing,prediction,source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus.</p>
+<p>Record normal and failure results with evidence hash, component identities and limitations.</p>
+<p><strong>Expected:</strong> A reviewer can reproduce parsing, prediction, source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus.</p>
 <p><strong>Verify:</strong> Check that the packet&#x27;s evidence hash and component identities let a reviewer reproduce parsing, prediction, source eligibility and quote provenance.</p>
-<p><strong>Hints:</strong> Separate model estimates,source facts and actual actions in the report.</p>
+<p><strong>Hints:</strong> Separate model estimates, source facts and actual actions in the report.</p>
 <h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Why does the capstone stop at an evidence packet?</strong> It establishes a clear, testable contract for extraction, classification and authorized current retrieval. Generation can be added later with separate grounding and usefulness evaluation.</p>
 <p><strong>Interview: Which failure would fine-tuning not repair?</strong> An expired or unauthorized source is a data/access boundary. Changing classifier weights does not make that evidence current or permitted.</p>

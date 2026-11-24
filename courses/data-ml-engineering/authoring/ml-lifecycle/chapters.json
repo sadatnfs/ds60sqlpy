@@ -13,6 +13,37 @@
       "validation-only threshold selection",
       "cohort population mix"
     ],
+    "key_terms": [
+      {
+        "term": "Label",
+        "definition": "The observed truth for a case, such as whether it truly needed review, kept distinct from the action the system takes."
+      },
+      {
+        "term": "Decision threshold",
+        "definition": "The score cutoff at which a predicted probability turns into an action."
+      },
+      {
+        "term": "Asymmetric cost",
+        "definition": "Different costs for different errors, such as a missed case that needed review costing nine times an unnecessary review."
+      },
+      {
+        "term": "Validation set",
+        "definition": "Held-out data used to choose a threshold or model, kept separate from the final assessment data."
+      },
+      {
+        "term": "Baseline",
+        "definition": "A simple reference policy, such as acting on every case or on none, that a model must beat."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Accuracy against a majority-class baseline",
+        "language": "python",
+        "code": "import numpy as np\nfrom sklearn.dummy import DummyClassifier\nfrom sklearn.metrics import accuracy_score, recall_score\n\ny = np.array([0] * 90 + [1] * 10)\nX = np.zeros((100, 1))\nbaseline = DummyClassifier(strategy=\"most_frequent\").fit(X, y)\npredicted = baseline.predict(X)\nprint(\"baseline accuracy:\", accuracy_score(y, predicted))\nprint(\"baseline recall on late deliveries:\", recall_score(y, predicted))\ncandidate = np.array([0] * 85 + [1] * 5 + [1] * 6 + [0] * 4)\nprint(\"candidate accuracy:\", accuracy_score(y, candidate))\nprint(\"candidate recall:\", recall_score(y, candidate))\n",
+        "output": "baseline accuracy: 0.9\nbaseline recall on late deliveries: 0.0\ncandidate accuracy: 0.91\ncandidate recall: 0.6\n",
+        "interpretation": "With 10 late deliveries in 100, always predicting \"on time\" already scores 0.9 accuracy while catching none of the late ones. The candidate reaches 0.91, which sounds like a modest gain, but its recall of 0.6 shows it finds six of the ten late deliveries, the thing the decision actually needs. It also raises five false alarms among the on-time deliveries. Whether that trade is worth it depends on the cost of a missed late delivery versus a wasted intervention, so the baseline comparison should be stated in those terms rather than in accuracy alone."
+      }
+    ],
     "outcome": "Train and evaluate a real baseline for an explicitly defined synthetic decision.",
     "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-033.md",
     "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-033.py",
@@ -42,6 +73,33 @@
       "historical feature retrieval",
       "TTL boundary",
       "request population"
+    ],
+    "key_terms": [
+      {
+        "term": "Availability time",
+        "definition": "When a feature value became available to the system, which can be later than its event time."
+      },
+      {
+        "term": "Point-in-time join",
+        "definition": "Joining each request only to feature values that were available at its request time."
+      },
+      {
+        "term": "Historical retrieval",
+        "definition": "Feast's method for building training rows from entity rows and their timestamps."
+      },
+      {
+        "term": "Retrieval TTL",
+        "definition": "The age window, measured backward from each historical request, within which a feature value may still be retrieved, separate from storage retention."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "An as-of join versus a plain latest-value join",
+        "language": "python",
+        "code": "import pandas as pd\n\nlabels = pd.DataFrame(\n    {\"route\": [10, 10], \"ts\": pd.to_datetime([\"2024-01-05\", \"2024-01-20\"]), \"late\": [0, 1]}\n)\nfeatures = pd.DataFrame(\n    {\n        \"route\": [10, 10, 10],\n        \"ts\": pd.to_datetime([\"2024-01-01\", \"2024-01-10\", \"2024-01-25\"]),\n        \"late_rate\": [0.1, 0.3, 0.9],\n    }\n)\nlatest = features.sort_values(\"ts\").groupby(\"route\").tail(1)[[\"route\", \"late_rate\"]]\nprint(\"latest join:\", labels.merge(latest, on=\"route\")[\"late_rate\"].tolist())\nas_of = pd.merge_asof(labels.sort_values(\"ts\"), features.sort_values(\"ts\"), on=\"ts\", by=\"route\")\nprint(\"as-of join:\", as_of[\"late_rate\"].tolist())\n",
+        "output": "latest join: [0.9, 0.9]\nas-of join: [0.1, 0.3]\n",
+        "interpretation": "The plain join attaches route 10's most recent late rate, 0.9 from January 25, to both labels, including the January 5 and January 20 labels that predate it. A model trained on that table sees a value from the future. pandas merge_asof picks, for each label, the latest feature at or before its timestamp, so the labels receive 0.1 and 0.3. Those are the values a live prediction would have seen. The as-of join also needs the feature's availability time, not just its event time, when the feature is computed with a delay."
+      }
     ],
     "outcome": "Use actual local Feast retrieval against a two-clock independent oracle.",
     "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-034.md",
@@ -73,6 +131,37 @@
       "unknown categories",
       "data leakage"
     ],
+    "key_terms": [
+      {
+        "term": "Fit",
+        "definition": "Learning parameters from data, such as an imputer median, scaler mean or encoder vocabulary."
+      },
+      {
+        "term": "Transform",
+        "definition": "Applying already learned parameters to new rows without changing those parameters."
+      },
+      {
+        "term": "Leakage",
+        "definition": "Information from evaluation or future rows influencing fitted parameters, which can change an evaluation in either direction."
+      },
+      {
+        "term": "Pipeline",
+        "definition": "A scikit-learn object that chains preprocessing and the model so fitting uses only training data."
+      },
+      {
+        "term": "Unknown category handling",
+        "definition": "The encoder setting, handle_unknown, that decides what happens to categories absent at fit time."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Fitting a scaler before the split leaks test statistics",
+        "language": "python",
+        "code": "import numpy as np\nfrom sklearn.preprocessing import StandardScaler\n\ntrain = np.array([[1.0], [2.0], [3.0]])\ntest = np.array([[100.0]])\nleaky = StandardScaler().fit(np.vstack([train, test]))\nhonest = StandardScaler().fit(train)\nprint(\n    \"leaky mean:\",\n    round(float(leaky.mean_[0]), 2),\n    \"test scaled:\",\n    round(float(leaky.transform(test)[0, 0]), 2),\n)\nprint(\n    \"honest mean:\",\n    round(float(honest.mean_[0]), 2),\n    \"test scaled:\",\n    round(float(honest.transform(test)[0, 0]), 2),\n)\n",
+        "output": "leaky mean: 26.5 test scaled: 1.73\nhonest mean: 2.0 test scaled: 120.02\n",
+        "interpretation": "The training values are 1, 2 and 3, and one test value is 100. Fitting the scaler on all four rows pulls the mean to 26.5 and widens the spread, so the extreme test value scales to only 1.73 and looks ordinary. Fitting on training data alone gives a mean of 2.0, and the same test value becomes 120.02, which is exactly the signal that it is far outside anything the model has seen. Placing the scaler inside a scikit-learn Pipeline that is fitted on training rows prevents this, and the fitted Pipeline is what should be saved and served."
+      }
+    ],
     "outcome": "Fit a real preprocessing pipeline on training rows only.",
     "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-035.md",
     "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-035.py",
@@ -98,6 +187,33 @@
       "unit compatibility",
       "fitted pipelines",
       "validation before inference"
+    ],
+    "key_terms": [
+      {
+        "term": "Train-serve consistency",
+        "definition": "Computing serving features exactly as training did, with the same names, order, types and units."
+      },
+      {
+        "term": "Feature contract",
+        "definition": "The declared feature names, order, types, units, category policy and model version that a request must satisfy."
+      },
+      {
+        "term": "Schema version",
+        "definition": "An exact integer identifier that names which feature contract a request follows."
+      },
+      {
+        "term": "Strict JSON parsing",
+        "definition": "Rejecting payloads with unknown fields or wrong types instead of coercing them."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Column order silently changes a prediction",
+        "language": "python",
+        "code": "import numpy as np\nimport pandas as pd\nfrom sklearn.linear_model import LinearRegression\n\ntrain = pd.DataFrame({\"distance_km\": [1.0, 2.0, 3.0, 4.0], \"stops\": [1.0, 1.0, 2.0, 2.0]})\nminutes = 10 * train[\"distance_km\"] + 2 * train[\"stops\"]\nmodel = LinearRegression().fit(train, minutes)\nrequest = {\"stops\": 3.0, \"distance_km\": 5.0}\nas_received = np.array([list(request.values())])\nby_name = pd.DataFrame([request])[list(model.feature_names_in_)]\nprint(\"trained on:\", list(model.feature_names_in_))\nprint(\"array in request order:\", round(float(model.predict(as_received)[0]), 2))\nprint(\"frame reordered by name:\", round(float(model.predict(by_name)[0]), 2))\n",
+        "output": "trained on: ['distance_km', 'stops']\narray in request order: 40.0\nframe reordered by name: 56.0\n",
+        "interpretation": "The model was trained on distance_km then stops. The request dictionary lists stops first, so building a plain array from its values sends 3 into the distance slot and 5 into stops, and the prediction is 40.0 minutes. Reordering the request by model.feature_names_in_ gives 56.0, which matches 10 times 5 km plus 2 times 3 stops. No error was raised for the wrong order because both columns are numbers. Serving code should select features by name from the saved list and reject requests with missing or extra fields."
+      }
     ],
     "outcome": "Compare fitted-pipeline predictions with a reviewed JSON inference interface.",
     "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-036.md",
@@ -125,6 +241,37 @@
       "numerical tolerance",
       "checkpoint state"
     ],
+    "key_terms": [
+      {
+        "term": "Recipe",
+        "definition": "The declared code, parameters and data references that define how a model is trained."
+      },
+      {
+        "term": "Recipe fingerprint",
+        "definition": "A hash of the recipe's canonical description."
+      },
+      {
+        "term": "Ordered-data fingerprint",
+        "definition": "A hash over the training rows in their exact order, since row order can change results."
+      },
+      {
+        "term": "Random seed",
+        "definition": "The value that fixes a pseudorandom sequence, such as random forest bootstrap draws."
+      },
+      {
+        "term": "Numerical tolerance",
+        "definition": "The declared allowed difference when floating point results from separate executions are compared."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Same seed, different data order, different model",
+        "language": "python",
+        "code": "import numpy as np\nfrom sklearn.linear_model import SGDRegressor\n\nrng = np.random.default_rng(1)\nX = rng.normal(size=(50, 2))\ny = X @ np.array([3.0, -1.0]) + rng.normal(scale=0.1, size=50)\nreversed_order = np.arange(50)[::-1]\nfirst = SGDRegressor(random_state=0, shuffle=False, max_iter=5, tol=None).fit(X, y)\nagain = SGDRegressor(random_state=0, shuffle=False, max_iter=5, tol=None).fit(X, y)\nother = SGDRegressor(random_state=0, shuffle=False, max_iter=5, tol=None).fit(\n    X[reversed_order], y[reversed_order]\n)\nprint(\"same data, same seed:\", np.array_equal(first.coef_, again.coef_))\nprint(\"reordered rows:\", np.round(first.coef_, 4), np.round(other.coef_, 4))\n",
+        "output": "same data, same seed: True\nreordered rows: [ 1.3309 -0.2727] [ 1.3593 -0.3083]\n",
+        "interpretation": "Two fits with random_state 0 on the same rows produce identical coefficients, so the seed works as intended. Reversing the row order with the same seed changes the coefficients from about [1.3309, -0.2727] to [1.3593, -0.3083], because stochastic gradient descent updates weights one row at a time. Only five passes were allowed, so neither run is near the true [3, -1]. Reproducing a training run therefore requires recording the exact data snapshot and its order, not just the seed. A query without ORDER BY can change order between runs with no other visible difference."
+      }
+    ],
     "outcome": "Repeat a seeded training run with declared data/configuration identities.",
     "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-037.md",
     "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-037.py",
@@ -151,6 +298,37 @@
       "AUC",
       "label maturity",
       "reliability uncertainty"
+    ],
+    "key_terms": [
+      {
+        "term": "Group-aware split",
+        "definition": "A split in which no entity appears in both training and evaluation data."
+      },
+      {
+        "term": "Temporal evaluation",
+        "definition": "Evaluating on rows later than the training rows, matching how the model will be used."
+      },
+      {
+        "term": "Calibration",
+        "definition": "How well predicted probabilities match observed frequencies."
+      },
+      {
+        "term": "Brier score",
+        "definition": "The mean squared difference between a predicted probability and the observed zero or one label."
+      },
+      {
+        "term": "Label maturity",
+        "definition": "The waiting period after which a label is final enough to evaluate."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "Good ranking, poor calibration",
+        "language": "python",
+        "code": "import numpy as np\nfrom sklearn.metrics import brier_score_loss, roc_auc_score\n\ny = np.array([0, 0, 0, 0, 1, 0, 1, 1, 0, 1])\nscores = np.array([0.50, 0.55, 0.60, 0.62, 0.90, 0.65, 0.92, 0.95, 0.70, 0.97])\ncalibrated = np.array([0.05, 0.10, 0.15, 0.20, 0.70, 0.25, 0.75, 0.80, 0.30, 0.85])\nfor name, p in ((\"raw\", scores), (\"calibrated\", calibrated)):\n    print(\n        name,\n        \"AUC\",\n        round(roc_auc_score(y, p), 3),\n        \"Brier\",\n        round(brier_score_loss(y, p), 3),\n        \"mean p\",\n        round(float(p.mean()), 3),\n    )\nprint(\"observed rate:\", y.mean())\n",
+        "output": "raw AUC 1.0 Brier 0.223 mean p 0.736\ncalibrated AUC 1.0 Brier 0.044 mean p 0.415\nobserved rate: 0.4\n",
+        "interpretation": "Both score sets rank every late delivery above every on-time one, so AUC is 1.0 for each. The raw scores average 0.736 while only 0.4 of deliveries were late, and the Brier score of 0.223 reflects how far those probabilities are from the outcomes. The calibrated scores average 0.415 and reach a Brier score of 0.044. If the decision is \"flag the top 20 percent\", ranking is enough. If it is \"act when the probability of lateness exceeds 0.5\", the raw scores would flag every delivery, so calibration matters as much as ranking."
+      }
     ],
     "outcome": "Evaluate a realistic future or grouped cohort with calibrated metrics.",
     "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-038.md",
@@ -182,6 +360,33 @@
       "acceptance gates",
       "evaluation identity"
     ],
+    "key_terms": [
+      {
+        "term": "MLflow run",
+        "definition": "One recorded training execution with its parameters, metrics and artifacts."
+      },
+      {
+        "term": "Registered model version",
+        "definition": "A numbered version of a model in the MLflow model registry."
+      },
+      {
+        "term": "Model alias",
+        "definition": "A named, changeable reference to one registered model version, moved here only through an explicit acceptance decision."
+      },
+      {
+        "term": "Acceptance gate",
+        "definition": "The checks a model version must pass before an alias is moved to it."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "An improvement inside the noise between seeds",
+        "language": "python",
+        "code": "import numpy as np\nfrom sklearn.datasets import make_classification\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.model_selection import train_test_split\n\nX, y = make_classification(n_samples=400, n_features=8, random_state=3)\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=3)\nscores = {}\nfor depth in (4, 5):\n    scores[depth] = [\n        RandomForestClassifier(n_estimators=30, max_depth=depth, random_state=seed)\n        .fit(X_train, y_train)\n        .score(X_test, y_test)\n        for seed in range(5)\n    ]\n    print(\n        \"max_depth\", depth, \"scores\", scores[depth], \"mean\", round(float(np.mean(scores[depth])), 3)\n    )\nprint(\"best single run per depth:\", {d: max(s) for d, s in scores.items()})\n",
+        "output": "max_depth 4 scores [0.915, 0.92, 0.895, 0.91, 0.92] mean 0.912\nmax_depth 5 scores [0.925, 0.92, 0.93, 0.905, 0.925] mean 0.921\nbest single run per depth: {4: 0.92, 5: 0.93}\n",
+        "interpretation": "Across five seeds, depth 4 scores between 0.895 and 0.92 and depth 5 between 0.905 and 0.93. The means differ by about 0.009, while each depth's own scores spread by 0.025, so the ranges overlap. Reporting only the best run of each depth, 0.92 against 0.93, makes the gap look like a clean win. An acceptance rule recorded in the registry should name the comparison in advance, for example the mean over a fixed set of seeds on a fixed test set, and the minimum improvement that would justify promotion."
+      }
+    ],
     "outcome": "Create and read back real local MLflow runs and model versions.",
     "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-039.md",
     "source_path": "courses/data-ml-engineering/authoring/ml-lifecycle/programs/dme-039.py",
@@ -212,6 +417,37 @@
       "provenance",
       "supply chain",
       "origin trust"
+    ],
+    "key_terms": [
+      {
+        "term": "Byte integrity",
+        "definition": "The guarantee, from a matching hash, that artifact bytes are unchanged."
+      },
+      {
+        "term": "Structural compatibility",
+        "definition": "Whether a loaded model has the expected shape, such as feature names and parameter dimensions."
+      },
+      {
+        "term": "Numerical behavior",
+        "definition": "Whether a loaded model reproduces reference predictions within tolerance."
+      },
+      {
+        "term": "Origin trust",
+        "definition": "Confidence about who produced an artifact, which a hash alone cannot provide."
+      },
+      {
+        "term": "Bounded loader",
+        "definition": "A loader that accepts only a fixed JSON data representation with exact fields and bounded sizes, rather than a general deserializer such as pickle."
+      }
+    ],
+    "worked_examples": [
+      {
+        "title": "A pinned requirement without a hash still accepts different bytes",
+        "language": "python",
+        "code": "import hashlib\n\npublished = b\"wheel contents v1.2.0\"\ntampered = b\"wheel contents v1.2.0 plus extra code\"\nlock = {\"name\": \"routing-lib\", \"version\": \"1.2.0\", \"sha256\": hashlib.sha256(published).hexdigest()}\n\n\ndef install(name, version, data, require_hash):\n    if (name, version) != (lock[\"name\"], lock[\"version\"]):\n        return \"rejected: version\"\n    if require_hash and hashlib.sha256(data).hexdigest() != lock[\"sha256\"]:\n        return \"rejected: hash mismatch\"\n    return \"installed\"\n\n\nfor require_hash in (False, True):\n    print(\n        \"require hash\", require_hash, \"->\", install(\"routing-lib\", \"1.2.0\", tampered, require_hash)\n    )\n",
+        "output": "require hash False -> installed\nrequire hash True -> rejected: hash mismatch\n",
+        "interpretation": "The tampered file claims to be routing-lib 1.2.0, so a check on name and version alone installs it. Comparing its SHA-256 with the digest recorded in the lock rejects it. Version numbers are labels chosen by whoever publishes the package, while the hash is computed from the actual bytes. pip's --require-hashes mode applies the same rule to every dependency, including transitive ones. A model artifact should be pinned the same way, so that the serving system loads exactly the file that passed evaluation."
+      }
     ],
     "outcome": "Validate a bounded model manifest and its exact content hashes.",
     "guide_source": "courses/data-ml-engineering/authoring/ml-lifecycle/chapters/dme-040.md",

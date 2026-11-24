@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-011`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Intermediate; approximately 180 minutes. Direct prerequisites: `llm-applied-011` (Grounded claims, citations and evidence-based abstention). They introduce the notation this lesson needs for retrieval recall and reciprocal rank.
 
 ## Learning objectives
 
@@ -78,9 +78,11 @@ Treat an oracle-context experiment as an intervention with its own protocol. Kee
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-012/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-012.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-012.py` in the declared `python-core` profile. *Calculate recall and reciprocal rank*, *Measure a retrieval miss* and *Handle an unanswerable question* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-012/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Measure a retrieval miss* and *Handle an unanswerable question* reuse the helper and fixture introduced in *Calculate recall and reciprocal rank*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: Recall 1; reciprocal rank 0.5. Example B should give: recall 0; reciprocal rank 0. Example C should give: recall None; appropriate abstention True. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -88,7 +90,7 @@ Recall@k is the number of relevant IDs retrieved divided by total relevant IDs. 
 
 ## Calculate metrics without losing the task's evidence structure
 
-For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall \(\frac{2}{2}=1\). The first relevant item is at rank two, giving reciprocal rank \(\frac{1}{2}\). If the caller truncates to the first two items, recall becomes \(\frac{1}{2}\) while reciprocal rank remains \(\frac{1}{2}\). The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
+For relevant IDs R={a, c} and retrieved list `[b, c, a]`, both relevant documents appear, giving recall \(\frac{2}{2}=1\). The first relevant item is at rank two, giving reciprocal rank \(\frac{1}{2}\). If the caller truncates to the first two items, recall becomes \(\frac{1}{2}\) while reciprocal rank remains \(\frac{1}{2}\). The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
 
 A first-hit metric cannot establish multi-evidence sufficiency. If a question requires both a definition and its exclusion rule, retrieving only one can give reciprocal rank one but an incomplete answer context. Conversely, a relevance set may contain several interchangeable documents, where any one is sufficient. The evaluation label should distinguish all required evidence from alternative supporting sources. The set arithmetic alone cannot infer that logic.
 
@@ -96,7 +98,7 @@ Duplicate retrieved IDs are rejected before metrics. Without that boundary, a na
 
 For an unanswerable question, the relevant set is empty. Recall has a zero denominator, so the helper returns None and separately assigns reciprocal rank zero. Treating undefined recall as one would reward a system merely for facing a question with no evidence. Treating it as zero inside every average would confound retriever quality on answerable cases with the prevalence of unanswerable cases. Report the number of answerable cases and score abstention separately.
 
-Suppose one question has one relevant document and retrieves it, while another has nine relevant documents and retrieves one. Macro-average recall is(1+1/9)/2=5/9. Micro recall over all relevant IDs is \(\frac{2}{10}=0.2\). Neither arithmetic result is inherently wrong: one weights questions equally, the other weights relevant-document opportunities equally. The population and task contract must choose the estimand before seeing which number looks better.
+Suppose one question has one relevant document and retrieves it, while another has nine relevant documents and retrieves one. Macro-average recall is (1+1/9)/2=5/9. Micro recall over all relevant IDs is \(\frac{2}{10}=0.2\). Neither arithmetic result is inherently wrong: one weights questions equally, the other weights relevant-document opportunities equally. The population and task contract must choose the estimand before seeing which number looks better.
 
 The oracle fixture contains saved labels observed={q1:0, q2:0} and oracle={q1:1, q2:0}. It calculates a paired gain of one for q1 and zero for q2, averaging 0.5 over those two fixed IDs. No language model is invoked by those dictionaries, and the values are not empirical measurements of a named model. They demonstrate how an actual paired result would be represented and analyzed.
 
@@ -157,21 +159,24 @@ assert not result["answerable"] and result["abstained"]
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: recall 1; reciprocal rank 0.5. duplicate ID detected. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Measure a retrieval miss*, predict its result from the prompt alone: Use relevant a and retrieved b, c. Write the guess beside the stated outcome (recall 0; reciprocal rank 0). Then predict how the decisive case, *Reject duplicate result identities*, should end: Validate one score row per question and inject a duplicateq 1. For evaluating retrieval and answers with oracle controls, the finish condition is: Recall 1; reciprocal rank 0.5. Duplicate ID detected.
 
 ## Exercises
 
 1. **Calculate recall and reciprocal rank.** Use relevant IDs a, c and retrieved b, c, a.
    **Expected:** recall 1; reciprocal rank 0.5.
    **Verify:** Save the assertion results for exercise 1, including recall 1; reciprocal rank 0.5.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Measure a retrieval miss.** Use relevant a and retrieved b, c.
    **Expected:** recall 0; reciprocal rank 0.
    **Verify:** Save the assertion results for exercise 2, including recall 0; reciprocal rank 0.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Handle an unanswerable question.** Use an empty relevant set and a saved abstention result.
    **Expected:** recall None; appropriate abstention True.
    **Verify:** Save the assertion results for exercise 3, including recall None; appropriate abstention True.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Separate support from correctness.** Record a correct-looking answer whose cited context does not support it.
    **Expected:** correct True but supported False.
@@ -193,19 +198,21 @@ If oracle results improve, compare context length, distractors and source versio
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate retrieval recall and reciprocal rank for the fixture in *Calculate recall and reciprocal rank*. Hint 2: change one literal in *Measure a retrieval miss* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Separate support from correctness*, with its stated result (correct True but supported False). If *Reject duplicate result identities* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Retrieval recall, Reciprocal rank, Oracle-context control using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain retrieval recall, reciprocal rank and oracle-context control using *Calculate recall and reciprocal rank*. Recompute its result (recall 1; reciprocal rank 0.5) from the inputs. Change one input in *Handle an unanswerable question* and predict whether the stated result (recall None; appropriate abstention True) still holds. Say which part of evaluating retrieval and answers with oracle controls the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-011` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Calculate recall and reciprocal rank* cannot be reconstructed without the solution, revisit `llm-applied-011` (Grounded claims, citations and evidence-based abstention). Otherwise keep the six observations from evaluating retrieval and answers with oracle controls and continue to `llm-applied-013` (Paired reliability studies and family-aware uncertainty).
 
 ## Sources and verification status
 
-API and mechanism reference: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for retrieval recall: [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401), reviewed 2026-10-22. The fixtures for *Calculate recall and reciprocal rank*, *Measure a retrieval miss* and *Handle an unanswerable question* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

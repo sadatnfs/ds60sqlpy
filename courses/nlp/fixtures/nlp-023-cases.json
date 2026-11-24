@@ -3,8 +3,8 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Apply the role/time rule to the three source records at time10.",
-      "expected": "Only policy version2 for ops; unknown role and expired time30 yield no records."
+      "task": "Apply the role/time rule to the three source records at time 10.",
+      "expected": "Only policy version2 for ops; unknown role and expired time 30 yield no records."
     },
     {
       "exercise": 2,
@@ -14,12 +14,12 @@
     {
       "exercise": 3,
       "task": "Compute total variation for [50,50] and [80,20].",
-      "expected": "Distance.3; negative,nonfinite or zero-total count vectors are rejected."
+      "expected": "Distance .3; negative, nonfinite or zero-total count vectors are rejected."
     },
     {
       "exercise": 4,
-      "task": "Evaluate predictions[1,1,0] with labels[1,None,0], then an all-unknown case.",
-      "expected": "Two mature cases with accuracy1; all-unknown returns count0 and no accuracy."
+      "task": "Evaluate predictions [1, 1, 0] with labels [1, None, 0], then an all-unknown case.",
+      "expected": "Two mature cases with accuracy 1; all-unknown returns count 0 and no accuracy."
     },
     {
       "exercise": 5,
@@ -28,8 +28,8 @@
     },
     {
       "exercise": 6,
-      "task": "Specify a stale-document incident with versions,diagnostics,rollback/reindex choice and acceptance evidence.",
-      "expected": "A concrete record distinguishes observed failure,hypothesis,authorized action and verified recovery."
+      "task": "Specify a stale-document incident with versions, diagnostics, rollback/reindex choice and acceptance evidence.",
+      "expected": "A concrete record distinguishes observed failure, hypothesis, authorized action and verified recovery."
     }
   ]
 }

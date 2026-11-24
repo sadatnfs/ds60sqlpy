@@ -31,7 +31,7 @@ The comparison preserves semantic field types, values and duplicate occurrences 
 
 Select only id and amount for day=even and id>=1990. Return the five ordered tuples.
 
-**Expected:** (1990,13930),(1992,13944),(1994,13958),(1996,13972),(1998,13986). No payload column is requested.
+**Expected:** `(1990, 13930)`, `(1992, 13944)`, `(1994, 13958)`, `(1996, 13972)`, `(1998, 13986)`. No payload column is requested.
 
 ```scala
 def filteredProduct(frame: DataFrame): DataFrame = {
@@ -179,4 +179,6 @@ The intentional failure is confined to a path created by this run. The subsequen
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Write and validate a compact partitioned round trip) is built inside the program, so opening the lesson fetches nothing; it expects: 2000 rows and total 13993000 survive. Types remain `id`/`amount` bigints and `day`/`payload` strings; read nullability may differ. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

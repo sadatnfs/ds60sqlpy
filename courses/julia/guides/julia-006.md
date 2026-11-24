@@ -10,6 +10,14 @@ Write reusable functions with explicit contracts and distinguish local rebinding
 
 Open `julia-006` in `/classroom` with its prepared `julia` runtime. Worked case A (a small configurable transformation) and worked case B (rebinding and mutation are different) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-006: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Keyword argument:** A named argument declared after a semicolon, such as `tol = 1e-8`, that callers pass by name and that does not take part in dispatch.
+- **Closure:** A function that captures variables from the scope where it is defined and can read them after that scope ends.
+- **Higher-order function:** A function such as `map`, `filter` or `reduce` that accepts another function as an argument.
+- **Pass by sharing:** A function receives the caller's object itself, so mutating an array argument changes what the caller sees.
+- **Bang convention:** A trailing `!` in a name such as `sort!` warns that the function mutates one or more of its arguments.
+
 ## A function describes a reusable transformation
 
 A function receives arguments and returns a value. Julia permits several methods for one function name; later lessons explain dispatch. First focus on the contract: valid inputs, the returned result, mutation and failure behavior. Explicit `return` statements can make that contract easy to read even though Julia also returns the final expression of a function body.

@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-020-explained-reference">eval-020: explained reference<a class="heading-anchor" href="#eval-020-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-020_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-020_reference.py</code> asserts each answer below, from <em>Evaluate the reference</em> to <em>Bound the claim</em>, on the authored DPO and reference log probability fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Compare beta optima</em> tests.</p>
 <h3 id="1-evaluate-the-reference">1. Evaluate the reference<a class="heading-anchor" href="#1-evaluate-the-reference" aria-label="Link to this section">#</a></h3>
 <p>The initial classifier is indifferent under the pairwise parameterization.</p>
+<p><strong>Approach.</strong> Call <code>dpo_loss(3, 3, 0.1)</code>. The policy and reference log-odds shifts are equal, so z = beta times (3 - 3) = 0.</p>
+<p><strong>Why it holds for this fixture.</strong> With z = 0 the loss is <code>logaddexp(0, 0)</code> = log 2. At initialization, when the policy equals the reference, every preference pair costs log 2 regardless of beta.</p>
+<p><strong>A tempting wrong approach.</strong> Expecting the initial loss to depend on beta is the mistake. Beta scales the margin, and a zero margin scaled by anything is still zero.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>np.isclose(dpo_loss(3, 3, 0.1), np.log(2))</code>, and case A asserts the same for beta 2.</p>
 <p><strong>Expected observation:</strong> The loss for a positive preference is log 2.</p>
 <h3 id="2-differentiate-the-two-action-loss">2. Differentiate the two-action loss<a class="heading-anchor" href="#2-differentiate-the-two-action-loss" aria-label="Link to this section">#</a></h3>
 <p>The result includes the beta scale and the logistic residual; it should agree with finite differences.</p>
+<p><strong>Approach.</strong> Call <code>dpo_gradient(0, 0, 2)</code>. The formula is beta times (sigmoid(z) - win_fraction).</p>
+<p><strong>Why it holds for this fixture.</strong> With z = 0 the sigmoid is 0.5 and the win fraction is 1, so the derivative is 2 times (0.5 - 1) = -1. Case A confirms this at delta 0.4 against a central finite difference.</p>
+<p><strong>A tempting wrong approach.</strong> Dropping the beta factor gives -0.5. That is the gradient with respect to z, not delta, and it would understate the step size by a factor of beta.</p>
+<p><strong>How to verify.</strong> Case A asserts <code>dpo_gradient(0, 0, 2) == -1</code> and <code>np.isclose(numeric, dpo_gradient(delta, 0, 2), atol=1e-10)</code>.</p>
 <p><strong>Expected observation:</strong> The derivative is -1.</p>
 <h3 id="3-compare-beta-optima">3. Compare beta optima<a class="heading-anchor" href="#3-compare-beta-optima" aria-label="Link to this section">#</a></h3>
 <p>Initial gradient magnitude and final optimum displacement are different properties of the objective.</p>
+<p><strong>Approach.</strong> Call <code>fitted_delta(3, 1, beta)</code> for beta 0.5, 1 and 2, then take the sigmoid of each.</p>
+<p><strong>Why it holds for this fixture.</strong> The optimum is delta = log(3) / beta. For beta 0.5, delta = log 9 and the sigmoid is 9 / 10 = 0.9. For beta 1, it is 0.75. For beta 2, delta = log of the square root of 3 and the probability is about 0.634. At each optimum, beta times delta equals log 3, so the gradient is zero.</p>
+<p><strong>A tempting wrong approach.</strong> Assuming a larger beta moves the policy further because its initial gradient is larger is the mistake. Larger beta gives larger first steps but a smaller final change from the reference.</p>
+<p><strong>How to verify.</strong> Case B asserts probabilities <code>[0.9, 0.75, np.sqrt(3) / (1 + np.sqrt(3))]</code> and gradients below 1e-12 at each optimum.</p>
 <p><strong>Expected observation:</strong> Preferred-action probabilities are 0.9,0.75 and approximately 0.634.</p>
 <h3 id="4-change-length-normalization">4. Change length normalization<a class="heading-anchor" href="#4-change-length-normalization" aria-label="Link to this section">#</a></h3>
 <p>Normalizing each sequence by its own length changes its relative contribution and therefore the objective.</p>
+<p><strong>Approach.</strong> Compute per-token log-ratios: chosen is [0.3, 0.3] (two tokens) and rejected is [0.2, 0.2, 0.2, 0.2] (four tokens). Compare sums and means.</p>
+<p><strong>Why it holds for this fixture.</strong> The chosen sum is 0.6 and the rejected sum is 0.8, a margin of -0.2. The chosen mean is 0.3 and the rejected mean is 0.2, a margin of +0.1. The longer rejected response wins on sums because it has more tokens.</p>
+<p><strong>A tempting wrong approach.</strong> Assuming normalization is a minor detail is the mistake. Summing favors longer sequences, averaging removes that effect, and each defines a different objective.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>chosen.sum() - rejected.sum() &lt; 0</code> and <code>chosen.mean() - rejected.mean() &gt; 0</code>.</p>
 <p><strong>Expected observation:</strong> The sequence-sum margin is negative while the mean-token margin is positive.</p>
 <h3 id="5-protect-the-reference">5. Protect the reference<a class="heading-anchor" href="#5-protect-the-reference" aria-label="Link to this section">#</a></h3>
 <p>Reference refresh can be a deliberate algorithmic choice, but it is not the same fixed-reference DPO problem.</p>
+<p><strong>Approach.</strong> Keep the reference model frozen for the whole run. If it is updated, record that as a different algorithm.</p>
+<p><strong>Why it holds for this fixture.</strong> The DPO loss measures the policy relative to the reference. If the reference moves, the same loss value refers to a different comparison point, and the fixed-reference optimum from exercise 3 no longer applies.</p>
+<p><strong>A tempting wrong approach.</strong> Letting the reference share parameters with the policy, for example by not copying it, is a common bug. The loss then goes to log 2 every step and training appears stuck.</p>
+<p><strong>How to verify.</strong> No reference assertion covers this task. Hash the reference parameters before and after training and confirm they are identical.</p>
 <p><strong>Expected observation:</strong> The objective has changed.</p>
 <h3 id="6-bound-the-claim">6. Bound the claim<a class="heading-anchor" href="#6-bound-the-claim" aria-label="Link to this section">#</a></h3>
 <p>Task utility, robustness, calibration and critical constraints still need their own held-out evaluation.</p>
+<p><strong>Approach.</strong> State that a lower training DPO loss shows the policy fits the training preference pairs better under the declared beta and reference.</p>
+<p><strong>Why it holds for this fixture.</strong> The loss rewards matching the labeled preferences. It does not measure whether answers are correct, robust to new prompts, calibrated or free of critical errors.</p>
+<p><strong>A tempting wrong approach.</strong> Reporting the lower loss as an improved model is the mistake. Eval-019 shows a policy can raise a proxy while lowering true utility.</p>
+<p><strong>How to verify.</strong> Pair the training loss with held-out preference accuracy and an independent task metric, as in the decision gates of eval-016.</p>
 <p><strong>Expected observation:</strong> Conclude improved fit to the declared preference objective only.</p></article>
   </main>
 </body>

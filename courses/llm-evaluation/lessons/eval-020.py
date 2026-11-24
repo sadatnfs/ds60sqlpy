@@ -46,7 +46,7 @@ worked_a()
 
 # Task 1: Set policy and reference log odds equal for any positive beta.
 # Task 2: Use beta 2 and zero reference-relative log-odds shift.
-# Task 3: Fit a3:1 preference ratio with beta 0.5,1 and 2 under a uniform reference.
+# Task 3: Fit a 3:1 preference ratio with beta 0.5, 1 and 2 under a uniform reference.
 # Task 4: Use the token log-ratio arrays in the reference exercise.
 # Task 5: Update the reference parameters while retaining the same loss label.
 # Task 6: Observe a lower training DPO loss.

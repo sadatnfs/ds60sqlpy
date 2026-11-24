@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>GPU Spark failures can originate in query semantics, JVM integration, native library loading, device memory, host memory, spill disk, network or scheduler state. Preserve the first relevant error and correlate it with executor, task and SQL execution identity. A later generic task retry may hide the original native failure. Repeatedly increasing memory without a budget can move the problem between tiers.</p>
 <p>Recovery should preserve input snapshots, output commit semantics and event logs. Retrying a task is safe only under the application&#x27;s side-effect contract; external writes inside a UDF can be duplicated. A poisoned device context may require a fresh owned process, while device-wide reset is an administrator operation that can affect unrelated jobs. The classroom must never reset a shared GPU automatically.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>First relevant error:</strong> The earliest error tied to the failure, which later generic retries can hide.</li>
+<li><strong>Task retry:</strong> Spark rerunning a failed task, which is safe only when the task&#x27;s output commit is idempotent.</li>
+<li><strong>Event log:</strong> Spark&#x27;s recorded history of jobs, stages, tasks and SQL executions used for later diagnosis.</li>
+<li><strong>Incident packet:</strong> A bounded bundle of logs, plans, configuration and identities that documents one failure.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>An executor fails with device OOM while JVM heap is below its limit. Increasing heap does not address the measured GPU live-set problem.</p>
@@ -213,20 +220,40 @@ idempotent <span class="syntax-operator">=</span> <span class="syntax-builtin">l
 <span class="syntax-keyword">assert</span> raw <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">and</span> idempotent <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU retry model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> raw<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">attempts;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> idempotent<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">logical keys</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Two attempts can target one logical output key.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>raw</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>idempotent</code></td>
+<td><code>1</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-classify-failure-layers">Exercise 1: Classify failure layers<a class="heading-anchor" href="#exercise-1-classify-failure-layers" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>classify failure layers</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Increasing JVM heap after a device OOM changes an unrelated limit and leaves the GPU live set unchanged.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-correlate-job-identities">Exercise 2: Correlate job identities<a class="heading-anchor" href="#exercise-2-correlate-job-identities" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>correlate job identities</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Matching logs by timestamp alone can mix events from concurrent tasks. Clock differences between hosts make timestamp matching even less reliable across executors.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-budget-before-changing-settings">Exercise 3: Budget before changing settings<a class="heading-anchor" href="#exercise-3-budget-before-changing-settings" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>budget before changing settings</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Trying random settings until the job passes may hide the cause and fail again on larger data. Several simultaneous changes also make it impossible to say which one fixed the failure.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-analyze-retry-side-effects">Exercise 4: Analyze retry side effects<a class="heading-anchor" href="#exercise-4-analyze-retry-side-effects" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>analyze retry side effects</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Sending messages directly from tasks without idempotency produces duplicates after a retry. Speculative execution can run two attempts at once, duplicating writes even without any failure.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-define-process-cleanup">Exercise 5: Define process cleanup<a class="heading-anchor" href="#exercise-5-define-process-cleanup" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>define process cleanup</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Killing all Java or Python processes on a node stops unrelated work. It can also kill the node&#x27;s own agents, which are often Java or Python processes.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-preserve-an-incident-packet">Exercise 6: Preserve an incident packet<a class="heading-anchor" href="#exercise-6-preserve-an-incident-packet" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>preserve an incident packet</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Keeping raw configuration with credentials risks leaking secrets. Dropping configuration entirely, on the other hand, removes the settings needed to reproduce the failure.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

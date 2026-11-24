@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-039`, `apache-013`.
 
+## Key terms
+
+- **Partition spec:** Table metadata that maps a source column through a transform to partition values. Each data file records the spec identity that produced it.
+- **Partition transform:** The function from a source value to a partition value, such as identity, day, bucket or truncate.
+- **Hidden partitioning:** Letting queries filter the logical source column while the planner derives partition predicates, so no separate partition column appears in queries.
+- **Partition evolution:** Changing a table's current partition spec without rewriting existing files, which keep the spec they were written with.
+- **Residual predicate:** The row-level filter that remains after partition pruning and must still be applied, for example to rows in an old unpartitioned file.
+
 ## A partition specification is metadata, not a directory convention
 
 Iceberg records how a source field maps to partition values. An identity transform
@@ -82,6 +90,31 @@ name?** Readers must plan across files written under different transforms while
 preserving the same logical schema and query semantics. These cases exercise
 that real compatibility boundary and show why pruning is an optimization while
 row-level correctness remains mandatory.
+
+## Worked examples
+
+### Add an identity partition on region
+
+```python
+from pyiceberg.transforms import IdentityTransform
+
+original = table.spec().spec_id
+with table.update_spec() as update:
+    update.add_field("region", IdentityTransform(), "region_partition")
+print(original, table.spec().spec_id, table.spec())
+```
+
+The spec identifier increases, typically from 0 to 1, and the printed spec lists region_partition with an identity transform. Files written before the change keep spec 0 and stay unpartitioned; only new appends use the new layout. Iceberg records which spec wrote each file, so nothing has to be moved, but old files cannot be pruned by region until they are rewritten.
+
+### Inspect spec identifiers in an east scan
+
+```python
+selected = table.scan(row_filter="region = 'east'")
+print(sorted(task.file.spec_id for task in selected.plan_files()))
+print(sorted(selected.to_arrow()["id"].to_pylist()))
+```
+
+The planned files carry both spec identifiers: the old unpartitioned file must be read because it might contain east rows, while the new west partition file is skipped. The row ids are 1, 3 and 4, which matches the full data regardless of layout. When pruning seems weak after a partition change, count planned files per spec; many old-spec files mean a rewrite is the missing step.
 
 ## Complete worked source
 

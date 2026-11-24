@@ -20,14 +20,14 @@
       "exercise": 3,
       "title": "Promote before arithmetic",
       "input_contract": "Return the mathematical value of an Int plus one as a Long. Convert before adding and support the full Int range.",
-      "expected": "Int.MaxValue becomes 2147483648 L, Int.MinValue becomes-2147483647L, and 0 becomes 1 L.",
+      "expected": "Int.MaxValue becomes 2147483648L, Int.MinValue becomes -2147483647L, and 0 becomes 1L.",
       "verification": "Assert exact literals at both boundaries and zero; compare with the deliberately too-late conversion example."
     },
     {
       "exercise": 4,
       "title": "Define an approximate comparison policy",
       "input_contract": "Compare finite Double values using absolute plus reference-relative tolerance. Require finite nonnegative tolerances with IllegalArgumentException on invalid policy. Return false for nonfinite actual or expected values.",
-      "expected": "1e8+1 versus 1 e8 passes with atol 0, rtol 1 e-7;1e-9 versus 0 passes with atol 1 e-8;NaN never passes;negative tolerance is rejected.",
+      "expected": "1e8+1 versus 1e8 passes with atol=0, rtol=1e-7; 1e-9 versus 0 passes with atol=1e-8;NaN never passes;negative tolerance is rejected.",
       "verification": "Assert large-scale and near-zero cases separately, then a strict zero-tolerance failure and nonfinite rejection."
     },
     {
@@ -40,7 +40,7 @@
     {
       "exercise": 6,
       "title": "Show that an oracle rejects real misconceptions",
-      "input_contract": "Test a supplied nonnegative-filter candidate against four independent literal fixtures:empty,(0),(-1,0,2),(2,2,-1). Return false if it throws or violates a sequence result. Demonstrate rejection of zero-dropping and deduplicating candidates.",
+      "input_contract": "Test a supplied nonnegative-filter candidate against four independent literal fixtures: empty, (0), (-1, 0, 2), (2, 2, -1). Return false if it throws or violates a sequence result. Demonstrate rejection of zero-dropping and deduplicating candidates.",
       "expected": "The >=0 filter passes. The >0 filter and a nonnegative-then-distinct implementation fail. A candidate throwing an exception also fails.",
       "verification": "Assert one accepted candidate and three rejected candidates, so a success-only harness cannot pass unnoticed."
     }

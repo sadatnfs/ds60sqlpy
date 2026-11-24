@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-055_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>An eight-thread conceptual block splits into two groups of four. Each group sums its values: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>3</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1,2,3,4]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">4</span><span class="mclose">]</span></span></span></span> gives ten and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>5</mn><mo separator="true">,</mo><mn>6</mn><mo separator="true">,</mo><mn>7</mn><mo separator="true">,</mo><mn>8</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[5,6,7,8]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">6</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">7</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">8</span><span class="mclose">]</span></span></span></span> gives 26. The block-level final result is 36 after a separate valid combination step. Group-local synchronization does not synchronize the other group automatically.</p>
+<p><strong>Approach:</strong> Split eight threads into two groups of four, sum each group, then combine in a separate step.</p>
+<p><strong>Why it is correct:</strong> Group sums are 10 and 26, and their combination is 36.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming a group sync also orders the other group skips the combination step&#x27;s ordering.</p>
+<p><strong>How to verify:</strong> The reference asserts partials == [10, 26] and their sum is 36.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A simplified cooperative capacity is four SMs times two resident blocks per SM, or eight blocks. Requesting twelve cooperative blocks violates that assumed capacity. The actual supported limit must be obtained for the real kernel/device; source-level arithmetic is only an explanatory model.</p>
+<p><strong>Approach:</strong> Multiply four SMs by two blocks per SM for a modeled capacity of eight.</p>
+<p><strong>Why it is correct:</strong> Twelve cooperative blocks exceed eight, so the launch is invalid under this model.</p>
+<p><strong>A plausible wrong approach:</strong> Launching twelve and hoping some finish early can deadlock at the grid barrier.</p>
+<p><strong>How to verify:</strong> Query the real occupancy API for the kernel and device before launch.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>A group defines participants; input count defines valid data. Tail participants may contribute neutral values while still honoring collective participation.</p>
+<p><strong>Approach:</strong> Separate the group&#x27;s participants from the valid input count.</p>
+<p><strong>Why it is correct:</strong> Tail participants still join collectives but contribute neutral values.</p>
+<p><strong>A plausible wrong approach:</strong> Removing tail threads from the group breaks the collective&#x27;s membership.</p>
+<p><strong>How to verify:</strong> Test an input of five with groups of four and check the sum.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>There is no guarantee all needed blocks are resident or progress together. Use the supported cooperative contract or separate stages.</p>
+<p><strong>Approach:</strong> Use a cooperative launch or split the work into separate kernels.</p>
+<p><strong>Why it is correct:</strong> Ordinary launches do not guarantee all blocks are resident together.</p>
+<p><strong>A plausible wrong approach:</strong> Calling a grid barrier in an ordinary launch can wait on unscheduled blocks forever.</p>
+<p><strong>How to verify:</strong> Run the multi-kernel version and compare outputs.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Keep the reading model and a correct multi-kernel fallback; mark the optional cooperative execution unsupported.</p>
+<p><strong>Approach:</strong> Keep a correct multi-kernel fallback and mark cooperative execution unsupported.</p>
+<p><strong>Why it is correct:</strong> Learners still get a correct result and the model.</p>
+<p><strong>A plausible wrong approach:</strong> Failing the whole lesson when the feature is missing removes a working path.</p>
+<p><strong>How to verify:</strong> Run on a device without support and confirm the fallback runs.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Define tile membership, neutralize tails, perform group-local combination and then a separately ordered global combination without hidden participation assumptions.</p>
+<p><strong>Approach:</strong> Define tile groups, neutralize tails, reduce per group, then combine globally in an ordered step.</p>
+<p><strong>Why it is correct:</strong> Explicit groups make participation visible.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming all threads participate when some are tails hides incorrect data.</p>
+<p><strong>How to verify:</strong> Compare with a host sum for ragged sizes.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-055_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

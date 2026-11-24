@@ -5,6 +5,39 @@
   "minutes": 100,
   "prerequisites": ["apache-038", "apache-056", "apache-062"],
   "concepts": ["owned failure injection", "read-only recovery", "unknown outcome"],
+  "key_terms": [
+    [
+      "Game day",
+      "A planned exercise that injects one named failure and checks recovery against an independent observation."
+    ],
+    [
+      "Failure injection",
+      "Deliberately causing a specific failure, such as a process restart, in an owned workshop only."
+    ],
+    [
+      "Ownership label",
+      "A random marker the course launchers verify before acting, so experiments never touch unrelated containers or volumes."
+    ],
+    [
+      "Reconciliation",
+      "Reading existing state after an unknown outcome to decide whether a further write is needed, instead of replaying blindly."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Diff two identity receipts",
+      "language": "python",
+      "code": "before = {\"container\": \"c1\", \"image\": \"sha256:aa\", \"rows\": [1, 2, 3]}\nafter = {\"container\": \"c2\", \"image\": \"sha256:aa\", \"rows\": [1, 2, 3]}\nprint({key: (before[key], after[key]) for key in before if before[key] != after[key]})",
+      "output": "{'container': ('c1', 'c2')}",
+      "interpretation": "Only the container changed, which is the expected signature of a replacement over retained volumes. The same image and rows show that state and software survived. After a plain resume the dictionary should be empty. Any change in rows is the failure the exercise is looking for, so it should be written down before anything is reinitialized."
+    },
+    {
+      "title": "Break one setting in a disposable copy",
+      "language": "bash",
+      "code": "cp -R work/hive work/hive-broken\ncd work/hive-broken\nbash run.sh verify-schema",
+      "interpretation": "Change exactly one value in the copy, such as the metastore database name in conf/hive-site.xml, and record the typed failure that verify-schema or start produces. Changing several things at once makes the error impossible to attribute. The original project stays untouched, so recovery means deleting the copy, not repairing the reference."
+    }
+  ],
   "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",
   "sources": [
     ["Iceberg reliability and table state", "https://iceberg.apache.org/docs/latest/reliability/"],

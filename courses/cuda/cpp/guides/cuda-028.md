@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Explain what each fence, acquire and release operation establishes in a flag publication protocol and what it does not.
+
 Work through *Memory ordering and atomic scope* with the concrete cases below. Finish with this evidence:
 the learner can explain what each synchronization operation establishes and what it does not. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Atomicity means one operation is indivisible with respect to competing operations at its scope. Ordering specifies how memory operations relate; visibility concerns which observer can see writes. Publishing a payload through a flag requires a protocol that orders the payload write before a release operation and the consumer's payload read after an appropriate acquire. Both sides must use compatible synchronization and scope. A relaxed atomic counter can correctly count events without publishing unrelated payloads. A fence orders operations but does not force another block to run, so it cannot repair a residency deadlock in an improvised global barrier.
+
+### Key terms
+
+- **Memory fence:** An instruction such as `__threadfence()` that orders a thread's memory operations as observed at a given scope.
+- **Release and acquire:** A pairing in which a release store publishes earlier writes and a matching acquire load makes them visible to the reader.
+- **Atomic scope:** The set of threads, such as a block, device or system, with respect to which an atomic operation is indivisible.
+- **Relaxed atomic:** An atomic operation that is indivisible but imposes no ordering on other memory accesses.
+- **Visibility:** Whether a write made by one thread can be observed by another thread.
 
 ## How to run and study this lesson
 

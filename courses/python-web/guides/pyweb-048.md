@@ -6,6 +6,13 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-047`, `python-1
 
 A Django model describes intended data structure in Python, while migrations record how the database schema evolves. This chapter creates a genuine temporary application package, generates its initial migration, applies it and repeats the migration command without losing an existing row.
 
+## Key terms
+
+- **Model:** A Django class describing intended data fields and constraints in Python, from which migration operations are derived.
+- **makemigrations:** The command that compares model state with migration history and writes migration files describing the change.
+- **migrate:** The command that applies outstanding migrations to the database and records which ones have completed.
+- **Unique constraint:** A database rule rejecting a duplicate value, here a title, which raises IntegrityError even when competing writes race.
+
 ## Mechanism: migration state is versioned schema history
 
 Django's application registry loads model definitions. Makemigrations compares model state with migration state and writes operations describing the change. Migrate applies the outstanding operations and records which migrations have completed. These are separate steps: editing a model does not automatically alter a deployed database.
@@ -29,6 +36,34 @@ A second row with the same title is attempted inside transaction.atomic. The dat
 This case explains why a form's uniqueness check is not enough under concurrency. Two requests can both observe that a title is available before either commits. The constraint provides the final decision, and the application must translate the expected conflict without leaving its transaction unusable.
 
 Data migrations require equal care. A transformation should define how existing rows are mapped, how failures are resumed and whether the reverse direction is meaningful. A successful schema-only fixture does not certify an unrelated data migration.
+
+## Worked example: why a new NOT NULL column needs a default
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE note(id INTEGER PRIMARY KEY, title VARCHAR(60) NOT NULL UNIQUE)")
+db.execute("INSERT INTO note(title) VALUES ('Preserved')")
+for ddl in (
+    "ALTER TABLE note ADD COLUMN category VARCHAR(20) NOT NULL",
+    "ALTER TABLE note ADD COLUMN category VARCHAR(20) NOT NULL DEFAULT 'general'",
+):
+    try:
+        db.execute(ddl)
+        print("ok:", db.execute("SELECT * FROM note").fetchall())
+    except sqlite3.OperationalError as error:
+        print("failed:", error)
+```
+
+Expected output:
+
+```text
+failed: Cannot add a NOT NULL column with default value NULL
+ok: [(1, 'Preserved', 'general')]
+```
+
+This is the database problem behind a question Django asks you. The table already holds the `Preserved` row that the lesson's migration keeps, so adding a required column without a default would leave that row with no legal value, and SQLite refuses the statement outright. If you add `category = models.CharField(max_length=20)` to the lesson's `Note` model and run `makemigrations`, Django detects the same conflict before any SQL runs and asks for a one off default to fill existing rows, or suggests making the field nullable. Whatever you choose is written into the generated migration file, so every environment that applies it fills old rows the same way. On a large production table, adding the column as nullable, backfilling in batches and only then adding the constraint avoids holding a long lock.
 
 ## Failure diagnosis and discussion
 

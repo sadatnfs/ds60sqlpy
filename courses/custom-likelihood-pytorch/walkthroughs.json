@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "track_id": "custom-likelihood-pytorch",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "clp-002",
+      "title": "Weighted Gaussian loss and why partition means must be pooled by weight",
+      "anchor": "reference",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-002.py",
+      "source_sha256": "45177a061b53dcf64f992dab15f896e9c589bf902fbcc5cbbc69e659e670df8a",
+      "expected_output": [
+        "\"global_mean_gradient\": -3.0, \"weight_mass\": 8.0, \"weighted_mean\": 11.5, \"weighted_sum\": 92.0, \"wrong_equal_partition_mean\": 8.5"
+      ],
+      "steps": [
+        {
+          "lines": [9, 14],
+          "excerpt": "DTYPE = torch.float64\ntorch.set_num_threads(1)\n\n\ndef tensor(values):\n    return torch.as_tensor(values, dtype=DTYPE)",
+          "title": "Use float64 and one thread",
+          "explanation": "Likelihood work is sensitive to rounding, so every tensor is created as float64 through the small tensor helper. set_num_threads(1) keeps CPU results reproducible because parallel sums can add numbers in a different order.",
+          "observe": "All later numbers are double precision."
+        },
+        {
+          "lines": [17, 28],
+          "excerpt": "def weighted_loss(mu, observations, weights):\n    y, w, mu = tensor(observations), tensor(weights), tensor(mu)\n    if y.ndim != 1 or not len(y) or y.shape != w.shape:\n        raise ValueError(\"One weight is required for each observation\")\n    if (\n        not bool(torch.isfinite(y).all() & torch.isfinite(w).all())\n        or bool((w < 0).any())\n        or float(w.sum()) <= 0\n    ):\n        raise ValueError(\"Use finite observations and nonnegative positive-mass weights\")\n    numerator = (w * (y - mu).square() / 2).sum()\n    return numerator, w.sum()",
+          "title": "A validated weighted squared error",
+          "explanation": "weighted_loss returns two things: the sum of w times half the squared error, and the total weight. It rejects mismatched shapes, empty data, non finite values, negative weights and zero total weight. Keeping the numerator and the mass separate lets callers combine pieces correctly.",
+          "observe": "Bad inputs raise ValueError before any arithmetic."
+        },
+        {
+          "lines": [31, 35],
+          "excerpt": "def run_cases():\n    y, weights = tensor([0, 2, 4, 8, 10]), tensor([1, 1, 2, 1, 3])\n    mu = tensor(3.0).requires_grad_()\n    total, mass = weighted_loss(mu, y, weights)\n    mean = total / mass",
+          "title": "The weighted mean loss with a trainable parameter",
+          "explanation": "requires_grad_() tells autograd to track mu. Dividing the weighted sum by the total weight gives the average loss per unit of weight.",
+          "observe": "With mu equal to 3 the sum is 92 and the mass is 8."
+        },
+        {
+          "lines": [36, 39],
+          "excerpt": "    a, wa = weighted_loss(mu, y[:2], weights[:2])\n    b, wb = weighted_loss(mu, y[2:], weights[2:])\n    wrong = (a / wa + b / wb) / 2\n    right = (a + b) / (wa + wb)",
+          "title": "Combining partitions: wrong and right",
+          "explanation": "The data are split into two parts. Averaging the two part means equally ignores that the parts carry different weight (2 versus 6), giving 8.5. Adding numerators and masses first gives the correct 11.5.",
+          "observe": "Pool sums and weights, never per part averages."
+        },
+        {
+          "lines": [40, 43],
+          "excerpt": "    gradient = torch.autograd.grad(mean, mu)[0]\n    assert float(total.detach()) == 92 and float(mass) == 8\n    assert float(mean.detach()) == 11.5 and float(wrong.detach()) == 8.5\n    assert torch.allclose(mean, right) and float(gradient) == -3",
+          "title": "Gradient from autograd",
+          "explanation": "torch.autograd.grad returns d(mean)/d(mu) without changing mu. Here it is the weighted average of (mu minus y), which equals 3 minus 6, or -3. The asserts check each value exactly because these sums are exact in float64.",
+          "observe": "The gradient is -3.0."
+        },
+        {
+          "lines": [44, 46],
+          "excerpt": "    scaled, scaled_mass = weighted_loss(mu, y, 7 * weights)\n    assert torch.allclose(scaled / scaled_mass, mean)\n    assert torch.allclose(scaled, 7 * total)",
+          "title": "Scaling all weights",
+          "explanation": "Multiplying every weight by 7 leaves the weighted mean unchanged but multiplies the weighted sum by 7. Whether you use the sum or the mean therefore matters for frequency weights.",
+          "observe": "Both allclose checks pass."
+        },
+        {
+          "lines": [47, 58],
+          "excerpt": "    return {\n        \"weighted_sum\": float(total.detach()),\n        \"weight_mass\": float(mass),\n        \"weighted_mean\": float(mean.detach()),\n        \"wrong_equal_partition_mean\": float(wrong.detach()),\n        \"global_mean_gradient\": float(gradient),\n        \"frequency_weight_sum_changes_with_replication\": True,\n    }\n\n\nif __name__ == \"__main__\":\n    print(json.dumps(run_cases(), sort_keys=True, allow_nan=False))",
+          "title": "Print the evidence",
+          "explanation": "The values are converted to Python floats with detach() where needed and printed as sorted JSON.",
+          "observe": "The JSON shows weighted_mean 11.5 and wrong_equal_partition_mean 8.5."
+        }
+      ]
+    },
+    {
+      "lesson_id": "clp-007",
+      "title": "Logistic likelihood, LBFGS fitting and separation",
+      "anchor": "reference",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-007.py",
+      "source_sha256": "a4048fda327952cff65c24ca39a18f1e5bfe206d66037a9dcdb55853570ba366",
+      "expected_output": ["\"extreme_stable_nll\": 0.0", "\"separated_finite_mle\": false"],
+      "steps": [
+        {
+          "lines": [17, 30],
+          "excerpt": "def logistic_nll(beta, design, y):\n    if (\n        design.ndim != 2\n        or beta.ndim != 1\n        or y.shape != (design.shape[0],)\n        or beta.shape != (design.shape[1],)\n    ):\n        raise ValueError(\"Match row, feature and coefficient dimensions\")\n    if not bool(torch.all((y == 0) | (y == 1))):\n        raise ValueError(\"Binary observations must be zero or one\")\n    if not len(y) or not all(bool(torch.isfinite(value).all()) for value in (beta, design, y)):\n        raise ValueError(\"Use finite coefficients and a nonempty finite sample\")\n    logits = design @ beta\n    return (torch.nn.functional.softplus(logits) - y * logits).sum()",
+          "title": "A numerically stable logistic negative log likelihood",
+          "explanation": "The function checks that shapes line up, labels are 0 or 1 and all values are finite. The loss per row is softplus(logit) minus y times logit, which is algebraically the usual log loss but avoids computing log(sigmoid) directly, which can underflow to log(0).",
+          "observe": "Large logits do not produce inf or NaN."
+        },
+        {
+          "lines": [33, 41],
+          "excerpt": "def fit_overlap(design, y):\n    beta = torch.zeros(design.shape[1], dtype=DTYPE, requires_grad=True)\n    optimizer = torch.optim.LBFGS(\n        [beta],\n        max_iter=70,\n        tolerance_grad=1e-10,\n        tolerance_change=1e-13,\n        line_search_fn=\"strong_wolfe\",\n    )",
+          "title": "Configure LBFGS",
+          "explanation": "LBFGS is a quasi Newton optimizer suited to small smooth problems. The tolerances and strong Wolfe line search make it converge tightly within at most 70 iterations.",
+          "observe": "beta starts at zero."
+        },
+        {
+          "lines": [43, 51],
+          "excerpt": "    def closure():\n        optimizer.zero_grad()\n        loss = logistic_nll(beta, design, y)\n        loss.backward()\n        return loss\n\n    optimizer.step(closure)\n    gradient = torch.autograd.grad(logistic_nll(beta, design, y), beta)[0]\n    return beta.detach(), float(gradient.abs().max())",
+          "title": "The closure pattern",
+          "explanation": "LBFGS may evaluate the loss several times per step, so it needs a closure that zeroes gradients, recomputes the loss and calls backward. After fitting, the gradient is recomputed so convergence is measured, not assumed.",
+          "observe": "The largest absolute gradient is returned with the coefficients."
+        },
+        {
+          "lines": [54, 60],
+          "excerpt": "def run_cases():\n    x, y = tensor([-2, -1, 0, 1, 2, 3]), tensor([0, 1, 0, 1, 1, 0])\n    design = torch.stack([torch.ones_like(x), x], dim=1)\n    trial = tensor([0.2, -0.3]).requires_grad_()\n    gradient = torch.autograd.grad(logistic_nll(trial, design, y), trial)[0]\n    analytic = design.T @ (torch.sigmoid(design @ trial.detach()) - y)\n    assert torch.allclose(gradient, analytic, atol=1e-12, rtol=0)",
+          "title": "Check autograd against the formula",
+          "explanation": "For logistic regression the gradient is X transpose times (predicted probability minus y). Comparing autograd to this formula at a trial point catches mistakes in the loss.",
+          "observe": "The two gradients agree to 1e-12."
+        },
+        {
+          "lines": [61, 66],
+          "excerpt": "    beta, norm = fit_overlap(design, y)\n    assert norm < 1e-6\n    separated = tensor([-2, -1, 1, 2]).reshape(-1, 1)\n    labels = tensor([0, 0, 1, 1])\n    losses = [float(logistic_nll(tensor([slope]), separated, labels)) for slope in (1, 2, 4, 8)]\n    assert all(a > b for a, b in zip(losses[:-1], losses[1:], strict=True))",
+          "title": "Overlapping data fits; separated data does not",
+          "explanation": "With overlapping labels the fit converges with a near zero gradient. With perfectly separated data the loss keeps falling as the slope grows from 1 to 8, so no finite maximum likelihood estimate exists. An optimizer would just keep increasing the slope.",
+          "observe": "The separated losses are strictly decreasing."
+        },
+        {
+          "lines": [67, 80],
+          "excerpt": "    huge = logistic_nll(tensor([1000.0]), tensor([[1.0], [-1.0]]), tensor([1, 0]))\n    assert torch.isfinite(huge)\n    return {\n        \"overlap_coefficients\": beta.tolist(),\n        \"gradient_max_abs\": norm,\n        \"probabilities\": torch.sigmoid(design @ beta).tolist(),\n        \"separated_slope_path_nll\": losses,\n        \"separated_finite_mle\": False,\n        \"extreme_stable_nll\": float(huge),\n    }\n\n\nif __name__ == \"__main__\":\n    print(json.dumps(run_cases(), sort_keys=True, allow_nan=False))",
+          "title": "Extreme logits stay finite",
+          "explanation": "A slope of 1000 with correctly classified points gives logits of plus or minus 1000. The softplus form returns exactly 0.0 instead of overflowing. The results are printed as JSON.",
+          "observe": "extreme_stable_nll is 0.0 and separated_finite_mle is false."
+        }
+      ]
+    },
+    {
+      "lesson_id": "clp-014",
+      "title": "Identification: flat directions and weakly informative designs",
+      "anchor": "reference",
+      "source_path": "courses/custom-likelihood-pytorch/examples/clp-014.py",
+      "source_sha256": "00a91955205e2bbf66e779b2e6157a2293e5cdd6ee955e7bd438eb23bea4860e",
+      "expected_output": [
+        "\"finite_optimizer_output_does_not_establish_identification\": true",
+        "\"rank_deficient_hessian_eigenvalues\": [0.0, 60.0]"
+      ],
+      "steps": [
+        {
+          "lines": [17, 18],
+          "excerpt": "def quadratic_nll(beta, design, y):\n    return ((y - design @ beta).square() / 2).sum()",
+          "title": "A least squares likelihood",
+          "explanation": "quadratic_nll is half the sum of squared residuals for a linear model, the Gaussian negative log likelihood with unit variance up to a constant.",
+          "observe": "Its curvature is described by X transpose X."
+        },
+        {
+          "lines": [21, 30],
+          "excerpt": "def profile_decay(time, rate_grid, sigma=0.1):\n    y = 2 * torch.exp(-0.7 * time) + 0.4\n    values = []\n    for rate in rate_grid:\n        design = torch.stack([torch.exp(-rate * time), torch.ones_like(time)], dim=1)\n        amplitude, offset = torch.linalg.lstsq(design, y).solution\n        if float(amplitude) <= 0:\n            raise ValueError(\"This profile fixture expects an interior positive amplitude\")\n        values.append(((y - (amplitude * design[:, 0] + offset)).square() / (2 * sigma**2)).sum())\n    return torch.stack(values)",
+          "title": "Profile out nuisance parameters",
+          "explanation": "For each candidate decay rate, the amplitude and offset are solved exactly with lstsq, then the best achievable loss is recorded. This profile loss shows how strongly the data favour each rate. A guard rejects fits with nonpositive amplitude.",
+          "observe": "One loss value per rate in the grid."
+        },
+        {
+          "lines": [33, 41],
+          "excerpt": "def run_cases():\n    x = tensor([1, 2, 3, 4])\n    y = 3 * x + tensor([0.2, -0.2, -0.2, 0.2])\n    duplicated = torch.stack([x, x], dim=1)\n    hessian = torch.autograd.functional.hessian(\n        lambda b: quadratic_nll(b, duplicated, y), tensor([1, 2])\n    )\n    eigen = torch.linalg.eigvalsh(hessian)\n    assert abs(float(eigen[0])) < 1e-12",
+          "title": "Duplicated columns make a flat direction",
+          "explanation": "Both columns of the design are x, so only the sum of the two coefficients matters. The Hessian from autograd then has a zero eigenvalue: moving along that direction does not change the loss at all.",
+          "observe": "The eigenvalues are 0 and 60."
+        },
+        {
+          "lines": [42, 44],
+          "excerpt": "    loss_a = quadratic_nll(tensor([1, 2]), duplicated, y)\n    loss_b = quadratic_nll(tensor([2, 1]), duplicated, y)\n    assert loss_a == loss_b",
+          "title": "Different coefficients, same loss",
+          "explanation": "[1, 2] and [2, 1] have the same sum, so they give exactly the same negative log likelihood. The individual coefficients are not identified.",
+          "observe": "loss_a equals loss_b."
+        },
+        {
+          "lines": [45, 51],
+          "excerpt": "    rates = torch.linspace(0.3, 1.1, 41, dtype=DTYPE)\n    long = profile_decay(torch.linspace(0, 6, 25, dtype=DTYPE), rates)\n    short = profile_decay(torch.linspace(0, 0.08, 25, dtype=DTYPE), rates)\n    long_span = float(long.max() - long.min())\n    short_span = float(short.max() - short.min())\n    assert short_span < long_span / 1000\n    assert abs(float(rates[torch.argmin(long)]) - 0.7) < 1e-12",
+          "title": "A short time window barely informs the rate",
+          "explanation": "Observing the decay for 6 time units gives a profile with a clear minimum at the true rate 0.7. Observing for only 0.08 units makes the profile almost flat, more than a thousand times weaker. A solver will still report some number, but the data cannot pin it down.",
+          "observe": "The long profile minimum is at 0.7."
+        },
+        {
+          "lines": [52, 63],
+          "excerpt": "    return {\n        \"rank_deficient_hessian_eigenvalues\": eigen.tolist(),\n        \"same_sum_coefficients_same_nll\": float(loss_a),\n        \"long_profile_contrast\": long_span,\n        \"short_profile_contrast\": short_span,\n        \"profile_rate_minimum\": float(rates[torch.argmin(long)]),\n        \"finite_optimizer_output_does_not_establish_identification\": True,\n    }\n\n\nif __name__ == \"__main__\":\n    print(json.dumps(run_cases(), sort_keys=True, allow_nan=False))",
+          "title": "Report the evidence",
+          "explanation": "The output records eigenvalues, profile contrasts and the lesson's conclusion: a finite optimizer result does not prove identification.",
+          "observe": "The last flag is true."
+        }
+      ]
+    }
+  ]
+}

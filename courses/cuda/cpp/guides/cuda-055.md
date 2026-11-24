@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Justify cooperative group participation with a written argument and a runtime capability report.
+
 Work through *Cooperative Groups and global coordination* with the concrete cases below. Finish with this evidence:
 a correct participation argument and runtime capability report. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Cooperative Groups makes participating thread groups explicit. A group collective is valid only when its membership and participation requirements are met. A block group can express block cooperation; a grid-wide group requires a supported cooperative launch and launch-size constraints. Ordinary launches cannot safely turn a hand-written spin loop into a global barrier. Device support, resource usage and residency determine whether a cooperative grid fits. Start with block-level algorithms and keep a multi-kernel fallback whose dependencies are established by normal launch ordering.
+
+### Key terms
+
+- **Cooperative Groups:** A CUDA API that names sets of threads explicitly and synchronizes them as groups.
+- **Thread block tile:** A fixed-size partition of a block, such as 32 threads, created with `tiled_partition`.
+- **Grid group:** A group representing every thread in the grid, which can synchronize only under a cooperative launch.
+- **Cooperative launch:** A launch through `cudaLaunchCooperativeKernel` that guarantees all blocks are resident at once.
 
 ## How to run and study this lesson
 

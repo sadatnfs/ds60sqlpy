@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Interpret an Nsight Systems timeline to form a bottleneck hypothesis and test it with one experiment.
+
 Work through *Nsight Systems: understand the application's timeline* with the concrete cases below. Finish with this evidence:
 a timeline-supported bottleneck hypothesis and one experiment that tests it. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A timeline shows when the CPU submits work, when copies and kernels execute, and where synchronization or idle gaps occur. Begin with the application's critical path before optimizing an individual instruction. NVTX ranges can name phases such as upload, transform and download, but annotations must match real code boundaries. Nsight Systems collection needs an explicitly prepared environment and appropriate permissions. A captured or synthetic trace remains useful for reasoning on a CPU-only machine, provided its provenance is clear. A timeline suggests a hypothesis; a controlled change tests whether that hypothesis improves the desired metric.
+
+### Key terms
+
+- **Timeline:** A time-ordered view of CPU threads, API calls, copies and kernels that exposes gaps and overlap.
+- **NVTX range:** A named annotation in code so a phase such as upload or transform appears on the timeline.
+- **Critical path:** The longest chain of dependent work, which determines total elapsed time.
+- **Idle gap:** A period with no device work queued, often caused by host synchronization or slow submission.
 
 ## How to run and study this lesson
 

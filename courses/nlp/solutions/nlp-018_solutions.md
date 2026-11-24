@@ -4,19 +4,19 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 ## Exercise 1: Measure representation units
 
-Each count measures a different object. A model's tokenizer is another transformation and must be measured directly when context budgets matter. The example prevents a common mistake of comparing languages using an English-specific whitespace definition.
+Each count measures a different object. A model's tokenizer is another transformation and must be measured directly when context budgets matter. The example prevents a common mistake of comparing languages using an English-specific whitespace definition. Splitting on spaces and calling the result a word count would report a whitespace-free script as a single word. Verify each of the three counts against its declared unit before comparing languages.
 
-**Expected:** Counts4,12,1 respectively, with no claim that whitespace identifies linguistic words.
+**Expected:** Counts 4, 12, 1 respectively, with no claim that whitespace identifies linguistic words.
 
 ## Exercise 2: Retain ambiguous language
 
-The rule has no general language-model capability. Its explicit unknown output is preferable to inventing a label from a short ambiguous string. A production identifier requires broader data and a confidence/mixture policy validated for the intended text lengths and domains.
+The rule has no general language-model capability. Its explicit unknown output is preferable to inventing a label from a short ambiguous string. A production identifier requires broader data and a confidence/mixture policy validated for the intended text lengths and domains. Defaulting ambiguous inputs to en, the majority label, would look tidy but quietly inflate English counts. Check that the two short strings return None rather than a guess.
 
-**Expected:** en,es,None,None under the declared cue inventory.
+**Expected:** en, es, None, None under the declared cue inventory.
 
 ## Exercise 3: Trace normalization loss
 
-The transformation can help broad search but destroys a distinction. Preserve raw values and state the purpose. Treating this as universally harmless cleaning can create incorrect merges, labels or evidence spans.
+The transformation can help broad search but destroys a distinction. Preserve raw values and state the purpose. Treating this as universally harmless cleaning can create incorrect merges, labels or evidence spans. Run the normalizer on both raw strings and assert equality of outputs alongside inequality of inputs; that pair of assertions is the evidence of information loss.
 
 **Expected:** Both transformed strings equal resume although raw strings differ.
 
@@ -24,13 +24,13 @@ The transformation can help broad search but destroys a distinction. Preserve ra
 
 A visible character can map to multiple code points, so indices in the transformed string do not necessarily identify the same raw span. The operation is defined by Unicode/runtime behavior and is not a substitute for a locale-specific linguistic policy.
 
-**Expected:** i plus combining dot has length2; Straße casefolds to strasse.
+**Expected:** i plus combining dot has length 2; Straße casefolds to strasse.
 
 ## Exercise 5: Report language slices
 
-The pooled result weights English five times as heavily because of sample size. Macro averaging gives each language equal influence. Both need an explicit interpretation and uncertainty; neither justifies extrapolating the two-case Spanish result as a precise population rate.
+The pooled result weights English five times as heavily because of sample size. Macro averaging gives each language equal influence. Both need an explicit interpretation and uncertainty; neither justifies extrapolating the two-case Spanish result as a precise population rate. Reporting only pooled 5/6 hides that Spanish rests on two cases. Recompute pooled as (9 + 1) / 12 and macro as (.9 + .5) / 2 to confirm .7.
 
-**Expected:** English.9,Spanish.5,pooled5/6,macro.7 with counts10 and2.
+**Expected:** English .9, Spanish .5, pooled 5/6, macro .7 with counts 10 and 2.
 
 ## Exercise 6: Design target-domain evidence
 

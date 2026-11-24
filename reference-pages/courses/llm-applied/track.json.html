@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;SFT&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Task contract&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A subject assistant is a system that helps someone perform a bounded task using a defined body of knowledge.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Route each subject-assistant request to prompting, retrieval, a deterministic tool or fine-tuning, and write a measurable task contract with a held-out family split.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Describe a request for the current conversion-rate definition requiring a citation.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;route retrieval; reason current cited evidence. contract has exact fields, an abstention policy and a family split.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -233,7 +233,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Provenance span&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Abstention&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Structured extraction turns text into typed records, but valid JSON is only the first boundary.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Validate extracted data-science records against type, semantic and provenance checks, rejecting impossible counts and keeping missing values distinct from zero.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Validate visits 10, purchases 3 and assignment_unit account.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;conversion rate 0.3. invalid unit rejected; account remains explicit.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -252,7 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Few-shot example&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Injection boundary&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Prompt engineering defines a task and the information presented to a model.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a versioned prompt artifact that keeps untrusted evidence as data, reserves response capacity within a context budget and isolates evaluation examples.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a prompt with one metric evidence item and a conversion-rate question.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;separate instruction, evidence and question fields, with template subject-v1. ValueError before context selection.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -271,7 +271,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Document family&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Scope&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A domain corpus is a versioned dataset.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a versioned corpus manifest with source permissions and content hashes, select active versions explicitly and detect family leakage between training and test data.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Add source=course-authored, permission=course-fixture and SHA256 to each local document.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;6 complete records; all hashes contain 64 characters. attack text remains data; restricted record remains restricted.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -290,7 +290,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Source offset&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Context budget&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Chunking divides documents into retrieval units.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Split documents into overlapping chunks whose start and end offsets reproduce the cited source text, and measure the duplication that overlap adds.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Chunk one two three four five six seven with size 3 and overlap 1.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;chunks one two three, three four five and five six seven. empty list for empty text; one short chunk for the two-token source.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -309,7 +309,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;IDF&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;BM25&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Lexical retrieval ranks documents using observed terms.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compute BM25 scores from term frequency, inverse document frequency and length normalization, and rank a small corpus with deterministic ties.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a ranks first with a positive score; the other scores are 0. empty result for no documents; finite zero score for an empty document.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -328,7 +328,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Embedding space&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Semantic retrieval&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Embedding retrieval maps queries and documents to vectors and compares their geometry.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Rank documents by cosine similarity between embedding vectors, reject zero or incompatible vectors, and show where geometric rank fails to establish relevance.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5, 0].&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;purchase ranks first, mixed second, geometry last. top-ranked ID wrong is outside the authored relevant set.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -347,7 +347,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Reranker&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Candidate recall&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Hybrid retrieval combines complementary candidate generators.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Combine lexical and dense rankings with reciprocal rank fusion, rerank a bounded candidate set and measure the candidate-recall ceiling.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Fuse lexical[a, b, c] and dense[b, d, a] with constant 60.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;b ranks first, a second. ValueError for nonpositive constant; TypeError for non-string ID.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -366,7 +366,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Policy fingerprint&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Cache partition&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Access-controlled retrieval must prevent unauthorized material from entering candidate selection, answer context, caches and logs.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Enforce access-scope filters before retrieval scoring so restricted documents never reach answer context, cache keys or traces.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Give a public-only request the six-document corpus and inspect admitted IDs.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;private-v1 absent before ranking. trace contains only public document IDs.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -385,7 +385,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Bridge evidence&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Stopping rule&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Query rewriting can translate a user&#x27;s phrasing into terms that a retriever understands.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Rewrite queries with a controlled synonym rule and follow linked evidence within a declared hop budget without crossing authorization boundaries.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Rewritebuy rate usingbuy-&gt;purchase while preserving the original question.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;rewrittenpurchase rate; original unchanged. restricted document never appears.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -404,7 +404,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Entailment&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Abstention policy&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Grounded answering requires a connection between each substantive claim and supporting evidence.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Map each answer claim to a cited, version-bound evidence span, and abstain when no admitted source supports it.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Answer the conversion-definition question from the metric document and its first sentence.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;status answered; one claim; citation slices the exact sentence. rate.3 with input counts preserved.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -423,7 +423,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Oracle-context control&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Failure taxonomy&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A RAG evaluation should identify where the pipeline failed.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Evaluate retrieval recall, reciprocal rank and answer support separately, and use oracle-context controls to locate where a pipeline failed.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use relevant IDs a, c and retrieved b, c, a.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;recall 1; reciprocal rank 0.5. duplicate ID detected.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -442,7 +442,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Bootstrap estimate&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Selective accuracy&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reliability comparisons require an explicit unit of independence.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compare two assistants with paired, family-level bootstrap uncertainty, report coverage alongside answered accuracy and block severe boundary failures.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use system A errors q1=0, q2=0, q3=1 and B q1=1, q2=1, q3=0.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;differences[-1, -1, 1] by sortedID. test-based selection rejected.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -461,7 +461,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Chat template&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Training denominator&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Supervised fine-tuning data specifies the behavior a model is asked to imitate.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Construct supervised fine-tuning records with answer-only target masks, detect destructive truncation and keep example families disjoint across splits.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use prompt IDs[1, 2] and answer IDs[5, 6, 3].&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets. record excluded despite valid token arrays.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -481,7 +481,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Forgetting&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Held-out transfer&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Full supervised fine-tuning updates all trainable model parameters on governed target examples.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Train a tiny causal decoder with full supervised fine-tuning on masked answer targets, then evaluate a frozen held-out prompt and record an honest receipt.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says 20 updates, 4 active training targets and no natural-language competence claim.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -501,7 +501,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Frozen base&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Merged inference&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Low-rank adaptation, or LoRA, freezes a base linear weight and learns an additive update represented by two smaller matrices.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a LoRA update on a frozen linear weight, count its stored parameters, take an adapter-only gradient step and verify the merged weight.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Construct W=I8, A=ones(8, 2)/8, B=zeros(2, 8), rank 2 and alpha 4, then count stored entries.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;64 base entries, 32 trainable adapter entries and scale 2. The actual update has rank 1, within the configured bound 2; alpha 4 gives twice the alpha-2 delta.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -521,7 +521,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Dequantization&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;QLoRA boundary&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;QLoRA combines a quantized frozen base with trainable low-rank adapters, allowing gradients to flow through computations involving the dequantized base into adapter parameters.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Apply 4-bit quantization to a frozen base matrix, pack and dequantize its codes, train only a low-rank adapter and account for storage honestly.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;QuantizeW[[.1, -.9], [1.7, -.2]] with scale 1.7/7 andnearest-even rounding.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;codes[[0, -4], [7, -1]]. all four unimplemented claims explicitly False.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -540,7 +540,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Frozen-state proof&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Task transfer metric&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A fair adaptation comparison starts both candidates from the same base state and uses the same training examples, target masks and held-out tasks.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compare full and adapter fine-tuning from one cloned base under fixed update budgets, prove base preservation and evaluate the same frozen held-out task.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a seed 31 decoder and copy its state into full and adapted candidates.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;all initial base parameters equal. adapter 96 entries; 20 updates each; scope literal-token task.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -559,7 +559,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Reference policy&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;RLHF distinction&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Preference optimization uses labels describing which of two responses is preferred.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compute a DPO-style preference loss and its gradient from policy and reference margins, and distinguish that offline update from a complete RLHF workflow.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Set policy difference 0, reference difference 0, beta.5.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;loss log 2. offline update True; reward_model_trained False; online_rl False.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -578,7 +578,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;False negative&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Pairwise reranker&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Embedding and reranker fine-tuning adapts retrieval behavior rather than only answer generation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Train a query projection with a contrastive objective and a small pairwise reranker, then check held-out scores and detect false-negative identities.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use queries and documents equal to the 2-by-2 identity matrix, with positive labels 0, 1.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;score shape(2, 2); one positive per query. actual gradient updates True; pretrained_semantic_encoder False.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -597,7 +597,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Chat-template alignment&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Completion-only loss&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights, tokenizer files, chat templates, library versions, artifact licenses and larger resource needs.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Inspect an optional pretrained-model recipe, tracing pinned revision, license, chat-template boundaries and trainer labels before any offline training run.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Read the supplied model manifest and identify model ID, revision and license note before any download.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;exact 40-character revision and Apache-2.0 card note are present. pretrained execution unverified; no generated success receipt.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -616,7 +616,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Deterministic analysis artifact&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Interpretation boundary&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;An LLM can help propose data-science operations, but the application should execute only typed, bounded operations whose semantics are understood.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Dispatch only typed, bounded data-science tool requests, reject invalid values and excess work, and verify generated explanations against computed results.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use rows A1, A3, B10 and the admittedgroup_mean request.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A count 2 mean 2; B count 1 mean 10. descriptive statistic available; causal claim not established.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -635,7 +635,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Work budget&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Safe trace&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A production-oriented domain assistant needs controls around the model as well as a good prompt.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Enforce freshness, call-budget and allowlisted-trace controls around a domain assistant, using an injected UTC clock and abstaining on stale evidence.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use fixed UTC now 2026-10-22 and a document published one day earlier under a two-day limit.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;fresh True. answer admission False; reason stale evidence.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
@@ -656,7 +656,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Acceptance gate&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Subject-assistant artifact&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A subject-assistant capstone should demonstrate an entire evidence path: task admission, authorized retrieval, versioned source selection, grounded output, deterministic data-science computation and independent evaluation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Assemble an end-to-end subject assistant that enforces access, grounds or abstains, computes results deterministically and passes a bounded acceptance evaluation.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Ask the public assistant forconversion_definition.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;answered with metric-v1 citation and source text. local_fixture_pass True; production_go no-go.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>

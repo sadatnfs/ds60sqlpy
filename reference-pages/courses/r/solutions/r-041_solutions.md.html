@@ -204,26 +204,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Predict the row, observed and missing counts for c(0, NA, 2, NA).</p>
 <p>There are four rows, two observed values and two missing values; the observed mean is one.</p>
 <p><strong>Expected evidence:</strong> Counts 4,2,2; mean 1.</p>
+<p><strong>Approach:</strong> Build the missingness mask with is.na and count both sides of it before computing any summary.</p>
+<p><strong>Why it holds here:</strong> In c(0, NA, 2, NA), the 0 is a measurement, so 2 values are observed, 2 are missing and the observed mean is (0 + 2) / 2 = 1.</p>
+<p><strong>Tempting mistake:</strong> Treating zero as empty, for example with <code>x[!is.na(x) &amp; x != 0]</code>. The observed count drops to 1 and the mean rises to 2, so a real zero reading vanishes from the denominator.</p>
+<p><strong>Verify:</strong> <code>describe(c(0, NA_real_, 2, NA_real_))</code> returns rows 4, observed 2, missing 2 and mean 1.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add an observed value eight to c(1, NA, 4, 6, NA) and update the mean.</p>
 <p>The observed sum becomes 19 and the observed count four, so the mean is 19/4.</p>
 <p><strong>Expected evidence:</strong> Observed count 4, mean 4.75.</p>
+<p><strong>Approach:</strong> Add the new value to the observed sum and to the observed count, then divide once.</p>
+<p><strong>Why it holds here:</strong> The observed values become 1, 4, 6 and 8, so the sum moves from 11 to 19 and the count from 3 to 4, giving 19/4 = 4.75.</p>
+<p><strong>Tempting mistake:</strong> Averaging the old mean with the new value, (11/3 + 8) / 2, which is about 5.83. That gives the single new value the same weight as the three earlier ones.</p>
+<p><strong>Verify:</strong> <code>b[[&quot;observed&quot;]]</code> returns 4 and <code>b[[&quot;mean&quot;]] == 19 / 4</code> returns TRUE.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct group summaries for A=c(1,NA) and B=c(4,6,NA), retaining observed counts.</p>
 <p>A has one observed value and mean one; B has two and mean five. The overall observed mean is the count-weighted 11/3, not the equal-group mean three.</p>
 <p><strong>Expected evidence:</strong> A: count 1 / mean 1; B: count 2 / mean 5; overall 11/3.</p>
+<p><strong>Approach:</strong> Call describe on each group, keep each observed count, and weight the group means by those counts for the overall figure.</p>
+<p><strong>Why it holds here:</strong> A has one observed value, 1, and B has two, 4 and 6, with mean 5. Weighting gives (1 times 1 + 5 times 2) / 3 = 11/3, the same as averaging the three observed values directly.</p>
+<p><strong>Tempting mistake:</strong> Averaging the two group means to get 3. That treats A&#x27;s single value as half the evidence when it is a third of the observed values.</p>
+<p><strong>Verify:</strong> <code>summaries$A[[&quot;observed&quot;]]</code> and <code>summaries$B[[&quot;observed&quot;]]</code> return 1 and 2, and the weighted result returns 11/3 within all.equal.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose replacing every missing measurement with zero before averaging.</p>
 <p>The replacement changes the data and denominator. For the five-row fixture it produces 11/5 rather than the observed-value mean 11/3. Neither is a justified population estimate without a missingness model.</p>
 <p><strong>Expected evidence:</strong> The two descriptive quantities differ and the assumption is stated.</p>
+<p><strong>Approach:</strong> Report the observed value mean with its count, and state that it describes the 3 observed rows, not all 5.</p>
+<p><strong>Why it holds here:</strong> Filling both gaps with 0 turns the sum of 11 over 3 values into 11 over 5, so the mean drops from about 3.67 to 2.2, a 40 percent cut caused only by the fill rule.</p>
+<p><strong>Tempting mistake:</strong> Using <code>replace(x, is.na(x), 0)</code> because it keeps all five rows. The two missing records never supplied a measured zero, so both the data and the denominator change.</p>
+<p><strong>Verify:</strong> <code>mean(filled) == 11 / 5</code> returns TRUE, and comparing it with the weighted 11/3 returns FALSE under all.equal.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Define and test the summary of c(NA_real_, NA_real_).</p>
 <p>Return counts two/zero/two and an explicit NA_real_ mean; do not report zero as an observed average.</p>
 <p><strong>Expected evidence:</strong> Observed count 0; mean NA.</p>
+<p><strong>Approach:</strong> Check <code>any(valid)</code> before calling mean or median, and return NA_real_ for both when nothing was observed.</p>
+<p><strong>Why it holds here:</strong> For c(NA_real_, NA_real_) the observed count is 0. Without the guard, <code>mean(x[valid])</code> averages an empty vector and returns NaN, which is not the explicit missing result the summary should state.</p>
+<p><strong>Tempting mistake:</strong> Using <code>mean(x, na.rm = TRUE)</code> and printing the result as an average. It also returns NaN here, and a later <code>ifelse(is.nan(m), 0, m)</code> would report 0 for a column with no data.</p>
+<p><strong>Verify:</strong> <code>empty[[&quot;observed&quot;]] == 0</code> returns TRUE and <code>is.na(empty[[&quot;mean&quot;]])</code> returns TRUE.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Compare mean and median after adding 100 to c(1,2,2,3), and explain the inferential limit.</p>
 <p>Mean becomes 21.6 and median 2. The difference describes sensitivity to the tail; it does not establish that 100 is erroneous or that the sample represents a population.</p>
 <p><strong>Expected evidence:</strong> Correct summaries and a bounded interpretation.</p>
+<p><strong>Approach:</strong> Print the mean and median side by side on the full five values and describe their difference as sensitivity to one large value.</p>
+<p><strong>Why it holds here:</strong> <code>c(1, 2, 2, 3, 100)</code> sums to 108, so the mean is 21.6, while the middle value stays 2. Without 100 both summaries are 2, so a single value moves the mean by 19.6.</p>
+<p><strong>Tempting mistake:</strong> Deleting 100 as an outlier because it moves the mean. Nothing in these five numbers says whether 100 is an error or a real large observation.</p>
+<p><strong>Verify:</strong> <code>all.equal(mean(tail), 21.6)</code> returns TRUE and <code>median(tail)</code> returns 2.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 8 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

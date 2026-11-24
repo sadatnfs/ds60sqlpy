@@ -195,24 +195,57 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-008-explained-reference">julia-008: explained reference<a class="heading-anchor" href="#julia-008-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-008_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Pick each container for the question it answers. Tuples hold fixed positional fields, named tuples label them, a count dictionary keeps multiplicity that a <code>Set</code> drops, <code>haskey</code> separates absence from a stored zero, and dictionary keys follow <code>isequal</code>. Presentation order is imposed with <code>sort</code>, never inherited from hashing.</p>
 <h3 id="1-make-one-tuple-element">1. Make one tuple element<a class="heading-anchor" href="#1-make-one-tuple-element" aria-label="Link to this section">#</a></h3>
 <p>The tuple syntax distinguishes a one-field collection from the scalar value.</p>
 <p><strong>Expected observation:</strong> Use <code>(7,)</code>, including its comma.</p>
+<p><strong>Why it holds here:</strong> <code>(7,)</code> is a one-element tuple; the trailing comma is what makes it a tuple, since <code>(7)</code> is just the integer 7.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>(7)</code> and calling <code>length</code> returns 1 by accident for an integer, hiding that the value is not a collection.</p>
+<p><strong>How to verify:</strong> Check <code>typeof((7,)) == Tuple{Int}</code> and <code>typeof((7)) == Int</code>.</p>
 <h3 id="2-name-a-returned-record">2. Name a returned record<a class="heading-anchor" href="#2-name-a-returned-record" aria-label="Link to this section">#</a></h3>
 <p>The representation makes a small fixed schema inspectable.</p>
 <p><strong>Expected observation:</strong> Callers can access fields by their names.</p>
+<p><strong>Why it holds here:</strong> Returning <code>(id = 1, score = 0.8, eligible = true)</code> lets callers write <code>result.score</code> instead of remembering that score is second.</p>
+<p><strong>Plausible wrong approach:</strong> Returning a plain tuple and reading <code>result[2]</code> breaks silently if a field is later inserted before score.</p>
+<p><strong>How to verify:</strong> Access each field by name and assert <code>keys(result) == (:id, :score, :eligible)</code>.</p>
 <h3 id="3-preserve-multiplicity">3. Preserve multiplicity<a class="heading-anchor" href="#3-preserve-multiplicity" aria-label="Link to this section">#</a></h3>
 <p>Deduplication intentionally discards multiplicity and can change a scientific denominator.</p>
 <p><strong>Expected observation:</strong> Counts are 1 and 2 while the set has two distinct labels.</p>
+<p><strong>Why it holds here:</strong> Counting <code>a</code>, <code>b</code>, <code>b</code> gives <code>a =&gt; 1</code> and <code>b =&gt; 2</code>, while <code>Set([&quot;a&quot;, &quot;b&quot;, &quot;b&quot;])</code> keeps only two members.</p>
+<p><strong>Plausible wrong approach:</strong> Converting to a set first and then counting reports one of each label, which halves the weight of <code>b</code>.</p>
+<p><strong>How to verify:</strong> Assert the count dictionary has <code>b =&gt; 2</code> and <code>length(Set(labels)) == 2</code>.</p>
 <h3 id="4-control-presentation-order">4. Control presentation order<a class="heading-anchor" href="#4-control-presentation-order" aria-label="Link to this section">#</a></h3>
 <p>Stable presentation requires an explicit contract rather than an incidental implementation order.</p>
 <p><strong>Expected observation:</strong> The report follows the chosen ordering rule.</p>
+<p><strong>Why it holds here:</strong> Iterating <code>sort(collect(keys(d)))</code> gives a fixed order regardless of how the dictionary hashed its keys.</p>
+<p><strong>Plausible wrong approach:</strong> Printing <code>d</code> directly and pasting it into a report assumes insertion order, which <code>Dict</code> does not promise.</p>
+<p><strong>How to verify:</strong> Print the report twice with differently built dictionaries holding the same pairs and compare the transcripts.</p>
 <h3 id="5-separate-absent-and-zero">5. Separate absent and zero<a class="heading-anchor" href="#5-separate-absent-and-zero" aria-label="Link to this section">#</a></h3>
 <p>Only use an absent-to-zero convention when the measurement contract justifies it.</p>
 <p><strong>Expected observation:</strong> haskey distinguishes them.</p>
+<p><strong>Why it holds here:</strong> <code>Dict(&quot;a&quot; =&gt; 0)</code> stores a real zero for <code>a</code>, while <code>b</code> is absent, so <code>haskey</code> gives true and false.</p>
+<p><strong>Plausible wrong approach:</strong> Reading with <code>get(values, key, 0)</code> reports both as 0 and loses the difference between measured zero and no record.</p>
+<p><strong>How to verify:</strong> The reference checks <code>haskey</code>, <code>get(values, &quot;b&quot;, -1) == -1</code> and <code>@test_throws KeyError values[&quot;b&quot;]</code>.</p>
 <h3 id="6-inspect-special-keys">6. Inspect special keys<a class="heading-anchor" href="#6-inspect-special-keys" aria-label="Link to this section">#</a></h3>
 <p>Dictionary equality semantics should match the application meaning of the keys.</p>
-<p><strong>Expected observation:</strong> NaN is retrievable and the signed zeros remain distinct in this fixture.</p></article>
+<p><strong>Expected observation:</strong> NaN is retrievable and the signed zeros remain distinct in this fixture.</p>
+<p><strong>Why it holds here:</strong> Keys use <code>isequal</code>, so <code>NaN</code> finds itself and <code>0.0</code> and <code>-0.0</code> are different keys, leaving three entries.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting <code>==</code> semantics predicts that NaN cannot be retrieved and that the signed zeros collapse into two entries.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>special[NaN] == &quot;present&quot;</code> and <code>length(special) == 3</code>.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-008: all reference checks passed</code>:</p>
+<p>Lookup behavior differs by method. <code>haskey</code> asks without failing, <code>get</code> supplies the fallback -1, and direct indexing of a missing key raises <code>KeyError</code>, which is the right signal when the key must exist. The <code>special</code> dictionary uses <code>isequal</code> for keys, so NaN finds itself and <code>0.0</code> and <code>-0.0</code> stay separate entries, giving length 3. Code that compares keys with <code>==</code> would merge the zeros and lose NaN.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    values <span class="syntax-operator">=</span> <span class="syntax-keyword">Dict</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> haskey<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-operator">!</span>haskey<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> get<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">KeyError</span> values<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    special <span class="syntax-operator">=</span> <span class="syntax-keyword">Dict</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">NaN</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">present</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">0.0</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> special<span class="syntax-punctuation">[</span><span class="syntax-builtin">NaN</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">present</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-decorator">@test</span> length<span class="syntax-punctuation">(</span>special<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

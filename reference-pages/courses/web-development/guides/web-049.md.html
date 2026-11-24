@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Cross-site request forgery exploits a browser&#x27;s ability to send credentials with a request that the user did not intend. A state-changing endpoint must distinguish an authorized user&#x27;s deliberate action from a request induced by another site. A synchronizer-token design stores an unpredictable token in the user&#x27;s server session and requires the same token in the submitted form or appropriate request header.</p>
 <p>The token must be generated with a cryptographically secure source, kept out of URLs and checked before changing state. SameSite cookies and origin checks can add protection but do not eliminate the need to understand the application&#x27;s request paths. XSS can undermine CSRF defenses because malicious script running in the application&#x27;s own origin may access tokens or perform actions.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>CSRF:</strong> Cross-site request forgery, an attack where another site makes the user&#x27;s browser send an authenticated state-changing request.</li>
+<li><strong>Synchronizer token:</strong> A random per-session value embedded in each form and checked on submission, which a cross-site page cannot read.</li>
+<li><strong>Constant-time comparison:</strong> Comparing secrets with <code>hash_equals()</code>, whose timing does not reveal where two strings first differ.</li>
+<li><strong>SameSite:</strong> A cookie attribute that keeps the browser from sending the cookie with most cross-site requests, a defense in depth rather than a replacement for tokens.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Generate token bytes with random_bytes and encode them for transport. Compare a validated submitted string with the known session token using hash_equals. Reject absent, wrong-type and empty values before a state change. The deterministic CLI fixture uses a clearly fake fixed token to test comparison logic; it is not a production token generator or proof of a browser defense.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -214,6 +221,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The trusted token is the first argument.</p>
 <pre class="highlighted-code"><code class="language-php">$valid = is_string($submitted) &amp;&amp; hash_equals($sessionToken, $submitted);</code></pre>
 <p><strong>Expected observation:</strong> Only an exact matching submitted string is accepted.</p>
+<h3 id="contrast-case-loose-comparison-when-the-session-has-no-token">Contrast case: loose comparison when the session has no token<a class="heading-anchor" href="#contrast-case-loose-comparison-when-the-session-has-no-token" aria-label="Link to this section">#</a></h3>
+<p>The session expired, so no token is stored. A forged request omits the token field too.</p>
+<pre class="highlighted-code"><code class="language-php">$sessionToken = $_SESSION[&#x27;csrf&#x27;] ?? null;
+$submitted = $_POST[&#x27;csrf&#x27;] ?? null;
+
+if ($submitted == $sessionToken) {
+  // state change runs here
+}
+
+$valid = is_string($sessionToken) &amp;&amp; $sessionToken !== &#x27;&#x27;
+  &amp;&amp; is_string($submitted) &amp;&amp; hash_equals($sessionToken, $submitted);</code></pre>
+<p>Both variables are null, and <code>null == null</code> is true, so the loose version performs the state change for a request that carried no token at all. The strict version first requires both values to be nonempty strings, so the same request fails before any comparison. <code>hash_equals</code> then compares in time that does not depend on where the strings first differ. It requires two strings, which is another reason the type checks come first.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-why-a-hidden-form-field-alone-does-not-prevent-csrf">Exercise 1: Explain why a hidden form field alone does not prevent CSRF.<a class="heading-anchor" href="#exercise-1-explain-why-a-hidden-form-field-alone-does-not-prevent-csrf" aria-label="Link to this section">#</a></h4>

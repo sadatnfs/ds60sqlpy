@@ -31,6 +31,14 @@ For a row, subtracting the maximum leaves softmax unchanged because the same exp
 Validation should include unequal query/key lengths, a causal case, padding, non-unit upstream gradients, and the explicitly defined fully masked behavior. The small PyTorch variant compares a supported attention API to the explicit reference; the TensorFlow variant builds the same reference arithmetic. Neither prints a fictitious fused-kernel identity. A real fast-backend comparison requires the prepared implementation, device trace and accepted dtype/head-size matrix.
 
 
+### Key terms
+
+- **Score matrix:** The query-key dot products for every pair of positions, with sequence length squared entries per head.
+- **Causal mask:** A mask that blocks each position from attending to later positions.
+- **Quadratic memory:** Memory growth proportional to the square of sequence length when the score matrix is materialized.
+- **Fused attention kernel:** An implementation that computes softmax attention in tiles without storing the full score matrix.
+- **Fully masked row:** A query row with every score masked, whose softmax is undefined and can produce NaN unless handled.
+
 ## Worked examples
 
 ### Worked example 1
@@ -61,6 +69,16 @@ print("CPU attention oracle:", weights, causal)
 
 **Expected observation:** Stable probabilities sum to 1; lower-triangular causal mask.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `scores` | `[1000.0, 1001.0]` |
+| `shift` | `1001.0` |
+| `exp` | `[0.36787944117144233, 1.0]` |
+| `weights` | `[0.2689414213699951, 0.7310585786300049]` |
+| `causal` | `[[1, 0, 0], [1, 1, 0], [1, 1, 1]]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
@@ -85,27 +103,39 @@ The checkpoint demonstration is in-memory. It teaches what state must be saved; 
 
 ### Exercise 1: Compute stable softmax
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute stable softmax** in the examples above.
+**Trap to avoid:** Exponentiating directly, `math.exp(1000)`, overflows to infinity in float64 and the division produces NaN. In float16 the overflow happens above about 11.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Draw a causal mask
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **draw a causal mask** in the examples above.
+**Trap to avoid:** Using `j < i` excludes the diagonal, leaving row 0 with no allowed positions and producing NaN in softmax.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Count score-matrix bytes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **count score-matrix bytes** in the examples above.
+**Trap to avoid:** Estimating attention memory as linear in sequence length misses the quadratic term, which dominates for long sequences.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Define fully masked behavior
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **define fully masked behavior** in the examples above.
+**Trap to avoid:** Leaving it undefined lets NaN appear only with certain padding patterns.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare fused and reference gradients
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **compare fused and reference gradients** in the examples above.
+**Trap to avoid:** Comparing only forward outputs leaves backward bugs undetected, and comparing a float16 fused result to a float32 reference with float32 tolerance reports false failures.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Separate backend selection from API name
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **separate backend selection from API name** in the examples above.
+**Trap to avoid:** Assuming the flash backend ran because the function was called leads to wrong memory estimates when it silently fell back to math.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

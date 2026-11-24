@@ -133,7 +133,7 @@ torch.testing.assert_close(exported_module(x), expected, atol=1e-6, rtol=0)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Both artifacts predict 0 and 2 for the two fixture rows, the static export rejects three rows while the module accepts them, the dynamic export with batch range 1..4 matches the module, and the temporary directory is removed. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Derive Example A again with its **Expected** line covered: Create a known inference model. Predict exercise 6, Declare a bounded dynamic batch and clean up, from its prompt alone: Export with batch Dim range 1..4, test three rows, and remove owned files. Then explain why this finish condition holds: Both artifacts predict 0 and 2 for the two fixture rows, the static export rejects three rows while the module accepts them, the dynamic export with batch range 1..4 matches the module, and the temporary directory is removed. Keep each prediction beside the observed value.
 
 ## Exercises
 
@@ -169,15 +169,15 @@ If a fresh-process check fails, read the child's actual stderr and confirm it lo
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: Example B (Round-trip named state) alters one assumption of Example A (Create a known inference model). Hint 2: exercise 4, Check both artifacts in a fresh process, should end at both child predictions 0, 2. Work backward from it. Hint 3: exercise 5, Expose static batch specialization, changes one input; predict which value moves first.
 
 ## Self-check and retrieval
 
-Close all three worked examples. Explain state_dict, Exported program, Dynamic dimension using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the worked examples and rebuild Example C, Save an exported program, from its inputs alone. Predict whether exercise 3, Export the new model in memory, survives one changed input. Then explain state_dict, Exported program, Dynamic dimension in terms of that fixture; say which claims the code guarantees and which need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `torch-031` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If Example A (Create a known inference model) cannot be rebuilt without help, revisit `torch-031` first. Otherwise keep your exercise 2 attempt, Load state into matching and mismatched modules, as a regression case alongside a fresh transfer input, then continue along the course plan.
 
 ## Sources and verification status
 

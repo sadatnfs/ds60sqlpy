@@ -10,6 +10,14 @@ Use broadcasting with explicit axes and distinguish an elementwise formula from 
 
 Open `julia-013` in `/classroom` with its prepared `julia` runtime. Worked case A (row and column contributions) and worked case B (an in-place update and a snapshot) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-013: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Broadcasting:** Applying a function elementwise across arrays and scalars, expanding singleton dimensions so compatible shapes combine.
+- **Dot syntax:** Writing `f.(x)` or `x .+ y` requests broadcasting, and the `@.` macro adds a dot to every call in an expression.
+- **Loop fusion:** Nested dotted calls in one expression combine into a single loop without allocating temporary arrays.
+- **Singleton dimension:** An axis of length one that broadcasting repeats to match the other operand, so a column and a row form a matrix.
+- **Mutation order:** When a loop writes values that later iterations read, such as a shift, the result depends on write order unless the source is snapshotted.
+
 ## Dots request elementwise application
 
 Broadcasting applies an operation across compatible collection shapes. A dot on a function call or operator requests the broadcasted form. Compatible singleton axes can be expanded without copying the corresponding logical value into a full matrix first.

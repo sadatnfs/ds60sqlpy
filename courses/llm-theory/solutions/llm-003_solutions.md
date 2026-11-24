@@ -1,19 +1,8 @@
 # llm-003: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/llm-003.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
+Use this conditional probability and a sequence likelihood reference after your own attempt. The [learner guide](../guides/llm-003.md) keeps the fixture and Expected/Verify contracts for *Trace the fixed conditionals* to *Declare an aggregation unit*, six separate actions; any implementation is acceptable if *Reject invalid probabilities* still fails on that input.
 
-The [executable reference](llm-003_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+`verify()` in the [executable reference](llm-003_solution.py) uses the Python standard library and literals only; on failure, keep the *Reject invalid probabilities* input. A pass says nothing beyond these conditional probability and a sequence likelihood fixtures, so next explain prefix from memory on a changed fixture. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace the fixed conditionals
 
@@ -41,7 +30,7 @@ For a thousand values of 0.01, a direct floating product rounds to zero, while a
 
 ## Exercise 4: Handle certain and impossible targets
 
-Every probability in [1,1] is certain under the declared model, so both negative log terms are zero and the total is zero. In [0.5,0], the model assigns no probability to one observed target; its total NLL is positive infinity. This is not the same as underflow from many small positive values. Clipping zero to an epsilon creates a different scoring policy that must be disclosed and justified; it cannot be silently used to obtain a nicer finite result.
+Every probability in [1, 1] is certain under the declared model, so both negative log terms are zero and the total is zero. In [0.5, 0], the model assigns no probability to one observed target; its total NLL is positive infinity. This is not the same as underflow from many small positive values. Clipping zero to an epsilon creates a different scoring policy that must be disclosed and justified; it cannot be silently used to obtain a nicer finite result.
 
 **Expected:** The all-one score has NLL 0; a zero-probability target gives product 0 and NLL positive infinity.
 
@@ -65,9 +54,7 @@ Document A has total ln(2) over one target. Document B has total 3*ln(4)=6*ln(2)
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+*Trace a three-target score* validates and reduces its input in the functions below; the executable file covers all six conditional probability and a sequence likelihood exercises. Keep the *Reject invalid probabilities* assertion and its invalid-input case; never replace them with a default.
 
 ```python
 from __future__ import annotations
@@ -94,11 +81,6 @@ def sequence_score(probabilities):
 
 ## Retrieval and alternatives
 
-Without opening the helper, derive the log score of probabilities [0.25,1]. Explain why adding conditional log probabilities does not assume independent tokens. Name one way a zero printed likelihood can coexist with finite NLL.
+Without opening the helper, derive the log score of probabilities [0.25, 1]. Explain why adding conditional log probabilities does not assume independent tokens. Name one way a zero printed likelihood can coexist with finite NLL.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Next, pick a fixture unlike *Trace a three-target score* to test independent recall, and explain why *Reject invalid probabilities* rejects its case rather than naming the exception. Any notation works if prefix and its denominator stay explicit; these conditional probability and a sequence likelihood checks say nothing about unseen model quality or safety.

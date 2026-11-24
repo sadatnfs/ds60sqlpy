@@ -8,7 +8,7 @@ Advanced; approximately 120 minutes. Direct prerequisites: `spark-036`. The prep
 
 ## How to run this lesson
 
-Open `spark-037` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-037` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-037.scala) and [PySpark learner](../lessons/spark-037.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-037_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-037_solution.scala) and [PySpark reference](../solutions/spark-037_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -34,11 +34,11 @@ The [Scala learner](../lessons/spark-037.scala) and [PySpark learner](../lessons
 
 Streaming tests are hard when they confuse wall-clock waiting with logical progress. A sleep of two seconds may be longer than one machine needs and shorter than another needs. It does not establish that a particular source file was admitted, a batch committed or a stateful operator advanced. This lesson replaces those guesses with finite files, AvailableNow, deadline-based await and exact readback.
 
-The case matrix has four independent scenarios:compatible checkpoint restart, duplicate delivery, late-by-policy input and invalid records. Each has its own input/checkpoint/output paths inside one fresh owned root. Separating cases prevents one scenario's committed offsets, state or output from silently influencing another. The root is created under the current job directory and is never selected by a learner-supplied external path.
+The case matrix has four independent scenarios: compatible checkpoint restart, duplicate delivery, late-by-policy input and invalid records. Each has its own input/checkpoint/output paths inside one fresh owned root. Separating cases prevents one scenario's committed offsets, state or output from silently influencing another. The root is created under the current job directory and is never selected by a learner-supplied external path.
 
 ## Design the input and oracle together
 
-Every source row has nullable bigint fields id, event_second, cents. Nullable schema is not permission to accept NULL in the business product:the invalid case explicitly checks the boundary. Event seconds are small integers on a declared synthetic timeline. The fixed cutoff 90 is a business admission rule, not a claim that an engine watermark has reached 90. Naming that distinction keeps the test deterministic and avoids pretending an ordinary filter verified state-store eviction.
+Every source row has nullable bigint fields id, event_second, cents. Nullable schema is not permission to accept NULL in the business product: the invalid case explicitly checks the boundary. Event seconds are small integers on a declared synthetic timeline. The fixed cutoff 90 is a business admission rule, not a claim that an engine watermark has reached 90. Naming that distinction keeps the test deterministic and avoids pretending an ordinary filter verified state-store eviction.
 
 The restart case has two valid rows. The first finite query writes them; the second uses the same checkpoint and no new files. Its new input sum must be zero, and the old sink bag must remain unchanged. The persistent query ID and changed run ID distinguish logical recovery from a new query history. An empty progress array is a valid no-work shape and should not cause a test to invent a batch.
 
@@ -52,7 +52,7 @@ The query object is the lifecycle handle. Each run awaits at most 45 seconds, an
 
 JSON predicate pushdown can apply the admission filter inside the scan before the numInputRows metric is reported. Therefore the late/invalid cases record a separate unfiltered static count of the immutable source and print the actual query progress count, which can be smaller. They preserve the exact output oracle and check that the reported scan count lies between emitted rows and raw rows. The reference does not overwrite the metric with a desired value or equate it automatically with raw file-line count. The actual configured JSON pushdown flag is recorded beside the observed late-case values.
 
-Progress describes input and execution behavior. Readback describes the committed product. Both are needed:two processed rows do not prove two correct output rows, and one correct output row does not prove which source data was consumed. The expected bags are literal fixtures rather than outputs generated by the same transformation under test. Scala/PySpark agreement is useful only after each matches those independent expectations.
+Progress describes input and execution behavior. Readback describes the committed product. Both are needed: two processed rows do not prove two correct output rows, and one correct output row does not prove which source data was consumed. The expected bags are literal fixtures rather than outputs generated by the same transformation under test. Scala/PySpark agreement is useful only after each matches those independent expectations.
 
 The final negative control submits the unsafe two-copy bag to the one-row duplicate oracle. The mismatch must be rejected with a meaningful diagnostic. This shows that the test can distinguish the intended behavior from dropping the deduplication step or repeating an append. It is stronger than a test that merely asserts the program did not throw.
 
@@ -67,9 +67,7 @@ These are local classic Spark 4.0.1 tests. They qualify the finite semantics and
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
@@ -77,7 +75,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-037-")
 val restartPaths = prepareCase(
@@ -111,20 +109,7 @@ val invalidPaths = prepareCase(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile
 import shutil
@@ -132,7 +117,7 @@ import json
 import uuid
 
 if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark4.0.1 required")
+    raise ValueError("Prepared Spark 4.0.1 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-037-", dir=Path.cwd()))
 restart_paths = prepare_case(
@@ -269,7 +254,7 @@ Do not substitute sleeps for batch completion, compare unordered collections as 
 
 ## Self-check
 
-Explain the contract of `baseline` / `baseline` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `baseline` / `baseline` without reading its solution. Then, from memory, state what Exercise 6 (Prove the oracle rejects a plausible regression) must produce: Correct bag passes; duplicated bag raises an assertion-contract error; all owned queries are inactive. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -277,9 +262,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark4.0.1 triggers and lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#triggers)
+- [Spark 4.0.1 triggers and lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#triggers)
 
-- [Spark4.0.1 streaming deduplication](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#streaming-deduplication)
+- [Spark 4.0.1 streaming deduplication](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#streaming-deduplication)
 
 ## Ask an AI tutor about this lesson
 

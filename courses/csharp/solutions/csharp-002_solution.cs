@@ -34,6 +34,13 @@ internal static class Program {
       Check(!rejected, "invalid count is not zero");
     }
     {
+      // Task 2: Guided modification
+      int whole = 8 / 2;
+      double fraction = (double)8 / 2;
+      Check(whole == 4 && fraction == 4.0, "even operands agree");
+      Check(7 / 2 != (double)7 / 2, "odd operands expose truncation");
+    }
+    {
       // Task 3: Independent construction
       bool TryQuantity(string text, out int quantity) {
         var style = NumberStyles.None;
@@ -44,6 +51,21 @@ internal static class Program {
       Check(!TryQuantity("-1", out _), "negative rejected");
       Check(!TryQuantity("4.5", out _), "fraction rejected");
       Check(!TryQuantity("", out _), "empty rejected");
+    }
+    {
+      // Task 5: Boundary evidence
+      bool TryCount(string text, out int count) {
+        var style = NumberStyles.Integer;
+        var culture = CultureInfo.InvariantCulture;
+        bool parsed = int.TryParse(text, style, culture, out count);
+        return parsed && count >= 0;
+      }
+      Check(!TryCount("", out _), "empty text rejected");
+      Check(TryCount("0", out int zero) && zero == 0, "zero accepted");
+      Check(!TryCount("-5", out _), "negative rejected");
+      Check(!TryCount("2147483648", out _), "beyond int range rejected");
+      Check(TryCount("2147483647", out int max) && max == int.MaxValue,
+            "largest int accepted");
     }
     Console.WriteLine("csharp-002: passed");
     await Task.CompletedTask;

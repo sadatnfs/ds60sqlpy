@@ -92,7 +92,7 @@ Return observed for a valid supplied amount, missing for None, and rejected for 
 
 Return valid parsed amounts in original order using flatMap. Preserve zero and duplicate amounts; do not substitute defaults for missing or rejected tokens.
 
-**Expected result/shape:** The five-token fixture yields Seq(0L, 25L). Adding another Some("25") yields two 25-cent occurrences.
+**Expected result/shape:** The five-token fixture yields `Seq(0L, 25L)`. Adding another Some("25") yields two 25-cent occurrences.
 
 **Verify:** Assert exact observed sequences and an all-missing/rejected fixture returning empty.
 

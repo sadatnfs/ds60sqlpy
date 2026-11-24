@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-021`, `apache-008`, `apache-006`.
 
+## Key terms
+
+- **Executor outage:** A deliberately stopped executor process in the owned workshop, which tests task failure without simulating a lost machine or a network partition.
+- **Scheduler state:** The job and task records the Ballista scheduler keeps. The workshop's default state backend does not promise to retain job history across a scheduler restart.
+- **Unknown outcome:** A query whose completion cannot be established after a failure. The check reports it as unknown instead of silently replaying the job.
+- **Retained receipt:** A completed query's evidence record, stored with the canonical fixture in an independent owned volume so it survives process restarts.
+
 ## Recovery must name the state it preserves
 
 A scheduler coordinates work, an executor performs tasks, and storage retains
@@ -80,6 +87,30 @@ infer in-flight retry, durable scheduler history or multi-host availability from
 a successful later query.
 
 The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+
+## Worked examples
+
+### Run the owned failure sequence
+
+```bash
+cd work/ballista
+bash run.sh check
+bash run.sh failure-check
+bash run.sh evidence
+```
+
+The failure check stops the only executor, submits a fresh capacity-failure request that should time out, restarts the scheduler and runs a new check. In the evidence output, the capacity-failure receipt should carry expected_no_capacity_failure as true and a scheduler_outcome saying the result is unknown and nothing was replayed. A passing check after restart is a new request with a new request_id, not the old one resumed.
+
+### Refuse to replay a pending receipt
+
+```python
+folder = ROOT / "receipts"
+if list(folder.glob("*.pending")):
+    raise ValueError("A pending receipt needs reconciliation; no query was replayed")
+paths = sorted(folder.glob("*.json"))
+```
+
+This fragment from the project client stops before running anything when a receipt was left pending by an interrupted run. An automatic replay would hide whether the earlier attempt finished. The operator must decide whether the pending request completed, failed or is unknown, and record that decision. The same rule caps stored receipts at 64, so evidence cannot grow without bound across many failure drills.
 
 ## Complete worked source
 

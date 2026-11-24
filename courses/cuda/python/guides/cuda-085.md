@@ -14,6 +14,13 @@ Make a comparison ledger: supported dtypes and layouts, temporary memory, numeri
 
 
 
+### Key terms
+
+- **Library baseline:** A tuned vendor or framework implementation used as the reference point before writing a custom kernel.
+- **Numerical contract:** The dtype, accuracy, rounding and special-value behavior an implementation promises.
+- **Workspace:** Temporary device memory a library routine needs in addition to its inputs and outputs.
+- **Maintenance cost:** The ongoing effort to test, port and update custom code across hardware and library versions.
+
 ## Worked examples
 
 ### Worked example 1
@@ -38,33 +45,52 @@ print("CPU decision model: library", sum(library.values()), "custom", sum(custom
 
 **Expected observation:** Library 10 and custom 11 modeled milliseconds.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `library` | `{'kernel': 8, 'transfer': 2, 'packing': 0}` |
+| `custom` | `{'kernel': 6, 'transfer': 2, 'packing': 3}` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Compute complete latency
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **compute complete latency** in the examples above.
+**Trap to avoid:** Comparing kernel times alone, 6 against 8 ms, declares the custom version a win while ignoring the new packing step.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: List a numerical contract
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **list a numerical contract** in the examples above.
+**Trap to avoid:** Testing only that the shapes match accepts any numbers of the right size, so a kernel that returns zeros, or that silently turns NaN inputs into finite outputs, would pass every check.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Add temporary memory
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **add temporary memory** in the examples above.
+**Trap to avoid:** Summing only the input and output ignores intermediates, so the custom path can run out of memory at a size where the library path fit, even though both outputs are the same size.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Identify a maintenance cost
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **identify a maintenance cost** in the examples above.
+**Trap to avoid:** Counting only the development time ignores ongoing cost, which repeats every time the team adopts a new GPU or toolkit release and often exceeds the original effort.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose two workload sizes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **choose two workload sizes** in the examples above.
+**Trap to avoid:** Benchmarking only at the largest size that fits hides the small-input behavior, which matters when production calls are mostly small batches.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Write a keep-or-replace decision
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **write a keep-or-replace decision** in the examples above.
+**Trap to avoid:** Choosing the custom kernel because its compute portion, 6 ms against 8 ms, is faster ignores the stated total and the packing step that the custom path requires.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

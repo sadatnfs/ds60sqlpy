@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: beginner. Direct prerequisites: `apache-007`.
 
+## Key terms
+
+- **Oracle:** An independent way to decide whether an observation is correct, such as a listed set of expected order identities and a hand-derived sum that does not reuse the join under test.
+- **Negative check:** A test that supplies a deliberately wrong input or alternative, such as a duplicated dimension key, and expects the system to expose or reject it.
+- **Evidence boundary:** The explicit limit of what an observation establishes. A zero exit status shows that a success path completed, not that state is durable or recovery works.
+- **Restart survival:** State that remains after the same service stops and starts again. It is a different claim from replication availability, where another replica keeps serving during an outage.
+- **Claim ledger:** The chapter's small explicit record pairing each operational claim with the evidence that supports it. It is a ledger of claims, not fabricated service telemetry.
+
 ## An experiment must make a claim falsifiable
 
 A runtime check needs a stated input, an expected observation and a boundary on
@@ -83,6 +91,43 @@ whether requests failed during interruption and whether data was lost or
 replayed. The two cases teach how an independent oracle and an honest evidence
 ledger prevent a working demonstration from becoming an unsupported reliability
 claim.
+
+## Worked examples
+
+### Detect join fan-out with a row count oracle
+
+```python
+import pyarrow as pa
+
+orders = pa.table({"id": [1, 2, 3], "customer": [1, 2, 99], "amount": [4, 9, 7]})
+bad = pa.table({"customer": [1, 1, 2], "name": ["A", "A", "B"]})
+joined = orders.join(bad, "customer", join_type="left outer")
+print(joined.num_rows, sum(joined["amount"].to_pylist()))
+```
+
+```text
+4 24
+```
+
+Four rows and a total of 24 come back instead of three rows totaling 20, because customer 1 appears twice in the dimension and order 1 is duplicated. The query ran without error, which is why the lesson uses an oracle on order counts and the amount total rather than trusting a successful exit. Customer 99 survives with a null name, which is the expected behavior for a left join with an unknown key.
+
+### Check dimension key uniqueness before joining
+
+```python
+import pyarrow as pa
+import pyarrow.compute as pc
+
+bad = pa.table({"customer": [1, 1, 2], "name": ["A", "A", "B"]})
+counts = pc.value_counts(bad["customer"])
+duplicates = [item["values"] for item in counts.to_pylist() if item["counts"] > 1]
+print("duplicate keys:", duplicates)
+```
+
+```text
+duplicate keys: [1]
+```
+
+The check names key 1 as duplicated before any fact row is touched, which turns a silent inflation into an explicit failed precondition. Running it on the dimension is cheaper than diagnosing a wrong total after the join. Record the result in the evidence ledger alongside the run, so a later reviewer can tell whether a corrected dimension or a rerun produced the new number.
 
 ## Complete worked source
 

@@ -11,6 +11,25 @@
     "boundedness",
     "stream versus table"
   ],
+  "key_terms": [
+    [
+      "Execution graph",
+      "The connected sources, operators and sinks of a Flink job, split into parallel subtasks for execution."
+    ],
+    [
+      "JobManager",
+      "The Flink process that coordinates a job, schedules its subtasks and triggers checkpoints."
+    ],
+    [
+      "TaskManager",
+      "A Flink worker process that runs subtasks in its task slots and exchanges records with other subtasks."
+    ],
+    [
+      "Boundedness",
+      "Whether a source eventually ends. A bounded file can run through streaming operators, so boundedness is separate from the API or execution mode."
+    ],
+    ["Subtask", "One parallel instance of an operator that a TaskManager executes."]
+  ],
   "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
   "sources": [
     [

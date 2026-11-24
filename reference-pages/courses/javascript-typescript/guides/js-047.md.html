@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An axis makes a scale interpretable by displaying reference positions and labels. D3 axis generators create SVG elements from a scale; they do not choose the right statistical units or description. The chart author must name the quantity and make tick formatting consistent with the values.</p>
 <p>Ticks are selected reference values, not necessarily every data point. A requested tick count is often a hint rather than an exact guarantee. Explicit tick values are useful for small controlled examples. Formatting changes displayed text, not the underlying numeric scale.</p>
 <p>Percent data illustrates a common mistake. A formatter expecting fractions displays 0.25 as 25%. If the data is already 25 and you apply that formatter, it displays 2500%. Keep the stored representation, axis label and annotation units aligned. Precision should communicate measurement meaning rather than decorate every value with many decimals.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Axis generator:</strong> A function such as <code>d3.axisBottom(x)</code> that, when called on an SVG group, draws the domain line, ticks and labels for a scale.</li>
+<li><strong>Tick:</strong> A selected reference value on an axis, drawn as a short line with a label. A requested tick count is only a hint, while <code>tickValues</code> fixes the ticks exactly.</li>
+<li><strong>Format specifier:</strong> A <code>d3.format</code> pattern such as <code>.0%</code> that turns numbers into display text without changing the scale. The percent type multiplies by 100, so it expects fractions such as 0.25.</li>
+<li><strong>Units:</strong> The measurement meaning of a value, such as dollars, counts or percent of a stated denominator, named in the axis title so readers can interpret the ticks.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Call an axis generator on a group: <code>g.call(d3.axisBottom(x))</code>. Translate that group to the bottom coordinate, leaving the scale range in the chart’s coordinate system. Recalling the generator on the same group updates its ticks.</p>
 <p>Use a visible axis title and a chart description. Avoid assuming that a bare dollar sign, abbreviation or color legend communicates enough context. Units and denominator matter, especially for rates and normalized comparisons.</p>

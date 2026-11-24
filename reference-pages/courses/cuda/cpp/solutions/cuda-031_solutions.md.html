@@ -199,18 +199,42 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-031_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Suppose host submission takes 5 microseconds and the queued kernel completes 80 microseconds later. Reporting five as kernel duration measures the wrong interval. A correctly ordered event interval measures relevant device work; a completed host interval can measure the full request, including additional overhead.</p>
+<p><strong>Approach:</strong> Time device work with events recorded in the same stream around the kernel.</p>
+<p><strong>Why it is correct:</strong> The 5 microseconds is host submission; the kernel completes 80 microseconds later.</p>
+<p><strong>A plausible wrong approach:</strong> Wrapping only the launch call in a host timer reports submission, not execution.</p>
+<p><strong>How to verify:</strong> Compare the event interval with a synchronized host interval and explain the gap.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>Samples <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1.0</mn><mo separator="true">,</mo><mn>1.1</mn><mo separator="true">,</mo><mn>1.0</mn><mo separator="true">,</mo><mn>1.2</mn><mo separator="true">,</mo><mn>9.0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1.0,1.1,1.0,1.2,9.0]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1.0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1.1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1.0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1.2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">9.0</span><span class="mclose">]</span></span></span></span> milliseconds have median 1.1, but the 9.0 sample still matters. Retain it and investigate interference or cold behavior instead of deleting it merely because it weakens a speedup. Report the warm-up rule before collecting data.</p>
+<p><strong>Approach:</strong> Report median 1.1 ms and keep the 9.0 ms maximum with a warm-up rule.</p>
+<p><strong>Why it is correct:</strong> The median resists one outlier, but the outlier may reveal interference or cold start.</p>
+<p><strong>A plausible wrong approach:</strong> Deleting 9.0 because it hurts the speedup removes real evidence after the fact.</p>
+<p><strong>How to verify:</strong> The reference asserts statistics.median(samples) == 1.1.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Three times. Do not substitute an isolated kernel time into one side of that comparison.</p>
+<p><strong>Approach:</strong> Divide 12 ms by 4 ms using matching end-to-end scopes.</p>
+<p><strong>Why it is correct:</strong> Equal scopes make the ratio 3 a statement about the same work.</p>
+<p><strong>A plausible wrong approach:</strong> Using kernel-only time for the GPU side inflates the speedup.</p>
+<p><strong>How to verify:</strong> The reference asserts 12 / 4 == 3.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>A defined ordering/dependency and timing scope. Unordered stream positions do not establish the intended interval.</p>
+<p><strong>Approach:</strong> Record both events in one stream or add an explicit dependency between streams.</p>
+<p><strong>Why it is correct:</strong> Events only bracket work they are ordered with.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming streams run in launch order gives an interval with no defined meaning.</p>
+<p><strong>How to verify:</strong> Check the interval is stable across runs and covers the intended kernels.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Report fixed overhead separately and avoid interpreting division by near-zero work as meaningful throughput.</p>
+<p><strong>Approach:</strong> Report the fixed overhead as a time and skip throughput for zero work.</p>
+<p><strong>Why it is correct:</strong> Dividing zero items by a small time is not throughput.</p>
+<p><strong>A plausible wrong approach:</strong> Reporting near-infinite items per second from an empty run misleads readers.</p>
+<p><strong>How to verify:</strong> Assert the empty case reports overhead only.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Resident data can exclude repeated uploads by contract; request-response timing must include transfers needed to deliver the requested result.</p>
+<p><strong>Approach:</strong> Exclude uploads only when data truly stays resident; include them for request-response.</p>
+<p><strong>Why it is correct:</strong> Each workload&#x27;s timing should match what a user must wait for.</p>
+<p><strong>A plausible wrong approach:</strong> Excluding transfers from request-response timing measures work the caller never sees alone.</p>
+<p><strong>How to verify:</strong> State each scope next to its number and confirm transfers are included where needed.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-031_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The complete CPU model is <a href="../references/cuda-031_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide&#x27;s model leaves for you to derive: <code>assert 12 / 4 == 3</code>. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
 <p>Resident data can exclude repeated uploads by contract; request-response timing must include transfers needed to deliver the requested result.</p>
 <p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>

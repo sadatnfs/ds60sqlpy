@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-059.md</code>.</p>
 <h3 id="exercise-1-explain-why-php-fpm-is-not-interchangeable-with-the-development-http-server">Exercise 1: Explain why PHP-FPM is not interchangeable with the development HTTP server.<a class="heading-anchor" href="#exercise-1-explain-why-php-fpm-is-not-interchangeable-with-the-development-http-server" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> FPM manages FastCGI workers and needs an appropriate HTTP-facing integration.</p>
+<p><strong>Approach:</strong> Describe the development server as one process that answers HTTP directly, and FPM as a pool of workers that speak FastCGI to a web server in front.</p>
 <p><strong>Why:</strong> PHP-FPM speaks FastCGI and needs a web server such as nginx in front of it, while the development server is single-process and not built for production.</p>
+<p><strong>Plausible wrong approach:</strong> Pointing a browser at the FPM port fails because FPM expects FastCGI messages from a web server, not plain HTTP.</p>
+<p><strong>How to verify:</strong> Your diagram shows a reverse proxy between the browser and FPM, with FastCGI on that link.</p>
 <h3 id="exercise-2-draw-the-public-document-root-and-private-application-directories">Exercise 2: Draw the public document root and private application directories.<a class="heading-anchor" href="#exercise-2-draw-the-public-document-root-and-private-application-directories" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Only intended static assets and entrypoints are directly served.</p>
+<p><strong>Approach:</strong> Draw a public folder holding index.php and static assets, and private folders for source, configuration, storage and vendor code.</p>
 <p><strong>Why:</strong> Only the public document root with entrypoints and static assets should be reachable; source, configuration and secrets stay outside it.</p>
+<p><strong>Plausible wrong approach:</strong> Serving the project root and blocking a few folders by rule fails because any forgotten file becomes downloadable.</p>
+<p><strong>How to verify:</strong> Your drawing sets the document root to public, with no secrets or source files inside it.</p>
 <h3 id="exercise-3-design-a-release-plan-for-the-study-planner-with-durable-storage">Exercise 3: Design a release plan for the study planner with durable storage.<a class="heading-anchor" href="#exercise-3-design-a-release-plan-for-the-study-planner-with-durable-storage" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The plan covers configuration, secrets, migration, health, write/read acceptance, backup and rollback.</p>
+<p><strong>Approach:</strong> Order the release steps: build the image, run migrations, check health, check a write and read, confirm backups, and rehearse rollback.</p>
 <p><strong>Why:</strong> Configuration, secrets, migrations, health, write and read checks, backups and rollback each need explicit evidence.</p>
+<p><strong>Plausible wrong approach:</strong> Treating a passing health check as release acceptance fails because health shows only that the process answered.</p>
+<p><strong>How to verify:</strong> Each step in your plan names its evidence, such as a stored synthetic plan read back after the release.</p>
 <h3 id="exercise-4-diagnose-secrets-copied-into-an-image-layer">Exercise 4: Diagnose secrets copied into an image layer.<a class="heading-anchor" href="#exercise-4-diagnose-secrets-copied-into-an-image-layer" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Removing them in a later layer does not reliably erase earlier layer content; rotate exposed secrets and rebuild correctly.</p>
+<p><strong>Approach:</strong> Rotate the exposed secret first, then remove it from the build and supply it at container start instead.</p>
 <p><strong>Why:</strong> Every layer stays in the image, so a later deletion still ships the secret; rotate it and pass secrets at build time with a secret mount.</p>
+<p><strong>Plausible wrong approach:</strong> Adding a <code>RUN rm</code> line and pushing a new tag fails because the old layer stays in the registry and in pulled copies.</p>
+<p><strong>How to verify:</strong> Inspecting the new image history shows no COPY of a secret file, and the old credential no longer works.</p>
 <h3 id="exercise-5-describe-a-restore-test-in-a-separate-disposable-environment">Exercise 5: Describe a restore test in a separate disposable environment.<a class="heading-anchor" href="#exercise-5-describe-a-restore-test-in-a-separate-disposable-environment" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Recovered data and application behavior must be checked without overwriting the active store.</p>
+<p><strong>Approach:</strong> Restore the latest backup into a fresh disposable database and run the app against it, leaving the live store untouched.</p>
 <p><strong>Why:</strong> Restoring into the active store risks overwriting good data, while a separate environment proves the backup is usable.</p>
+<p><strong>Plausible wrong approach:</strong> Restoring over the live database to test the backup fails because a bad backup would then destroy real data.</p>
+<p><strong>How to verify:</strong> A known synthetic plan from before the backup appears in the restored copy and the live database is unchanged.</p>
 <h3 id="exercise-6-explain-what-evidence-is-needed-before-publishing-an-image-as-ready">Exercise 6: Explain what evidence is needed before publishing an image as ready.<a class="heading-anchor" href="#exercise-6-explain-what-evidence-is-needed-before-publishing-an-image-as-ready" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Source, dependency, runtime, browser, data recovery and target-environment checks need explicit results and limits.</p>
+<p><strong>Approach:</strong> List the evidence a release needs: dependency review, image scan, runtime checks, browser tests, restore results and target checks.</p>
 <p><strong>Why:</strong> A ready claim needs results for source, dependencies, runtime, browser, recovery and the target platform, plus stated limits.</p>
+<p><strong>Plausible wrong approach:</strong> Publishing because the image built and the container started fails because neither step tests the application&#x27;s behavior.</p>
+<p><strong>How to verify:</strong> Your checklist names a result and a limit for each item, including anything not yet tested.</p>
 <h3 id="comparing-your-worksheet">Comparing your worksheet<a class="heading-anchor" href="#comparing-your-worksheet" aria-label="Link to this section">#</a></h3>
 <p>This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in <code>courses/web-development/fixtures/php-http-lab/</code> gives real request evidence only when you deliberately run it.</p></article>
   </main>

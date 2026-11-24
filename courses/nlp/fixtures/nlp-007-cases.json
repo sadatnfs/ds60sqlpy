@@ -4,7 +4,7 @@
     {
       "exercise": 1,
       "task": "Calculate DF for the three sorted terms from the two-document corpus.",
-      "expected": "[1,2,1] for [coffee,cup,tea]."
+      "expected": "[1, 2, 1] for [coffee, cup, tea]."
     },
     {
       "exercise": 2,

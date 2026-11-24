@@ -1,6 +1,6 @@
 # llm-010: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these position, order and tokenwise normalization answers after attempting *Permute content-only attention* through *Handle constant tokens and invalid normalization*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Expose sequence-wide leakage* points to one step. `llm-010_solution.py` holds the assertions; this page explains how they test permutation equivariance. Then try *Handle constant tokens and invalid normalization* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -40,7 +40,7 @@ If a mask M is present, the corresponding relabelling identity requires reorderi
 
 ## Exercise 1: Permute content-only attention
 
-The question is: Use \(Q=K=[[1,0],[0,1],[1,1]]\) and \(V=[[1,2],[3,4],[5,6]]\). Reorder all three by [2, 0, 1] and compare outputs.
+The question is: Use Q=K=[[1, 0], [0, 1], [1, 1]] and V=[[1, 2], [3, 4], [5, 6]]. Reorder all three by [2, 0, 1] and compare outputs.
 
 The first query has scores \([\frac{1}{\sqrt{2}},0,\frac{1}{\sqrt{2}}]\), so keys one and three receive equal weight. Their values are symmetric around [3, 4], and the middle value is [3, 4] itself, making the first weighted result exactly [3, 4] in real arithmetic. The row permutation preserves these relationships. This is an unmasked calculation; a fixed causal triangle would change the experiment.
 
@@ -61,7 +61,7 @@ assert original.shape == (3, 2)
 
 **Expected:** attention weights move with key identities; output follows the same row reorder; the first original output is [3, 4].
 
-**Verify:** In a fresh process, the exercise checks confirm `changed` matches `original[order]` within 1e-12; `weights[0]` matches `expected_first_weights` within 1e-12; `original[0]` matches `[3, 4]` within 1e-12; `scores.shape == weights.shape == (3, 3)` and 1 further check.
+**Verify:** For *Permute content-only attention*, a fresh-process check confirms `changed` matches `original[order]` within 1e-12; `weights[0]` matches `expected_first_weights` within 1e-12; `original[0]` matches `[3, 4]` within 1e-12; `scores.shape == weights.shape == (3, 3)` and 1 further check.
 
 ## Exercise 2: Normalize each token
 
@@ -80,9 +80,9 @@ np.testing.assert_allclose(layer_norm(changed)[0], normalized[0], atol=1e-12, rt
 assert normalized.shape == values.shape
 ```
 
-**Expected:** the first normalized row remains \(\frac{[-1,1]}{\sqrt{1+1\times10^{-5}}}\), approximately [-0.999995, 0.999995].
+**Expected:** the first normalized row remains [-1, 1]/sqrt(1+1e-5), approximately [-0.999995, 0.999995].
 
-**Verify:** In a fresh process, the exercise checks confirm `normalized[0]` matches `expected_first` within 1e-12, `layer_norm(changed)[0]` matches `normalized[0]` within 1e-12 and `normalized.shape == values.shape`.
+**Verify:** For *Normalize each token*, a fresh-process check confirms `normalized[0]` matches `expected_first` within 1e-12, `layer_norm(changed)[0]` matches `normalized[0]` within 1e-12 and `normalized.shape == values.shape`.
 
 ## Exercise 3: Expose sequence-wide leakage
 
@@ -103,11 +103,11 @@ assert not np.allclose(original_first, changed_first)
 
 **Expected:** the first centered row changes from [-4.5, -8.5] to [-499.5, -998.5].
 
-**Verify:** In a fresh process, the exercise checks confirm `original_first` equals `[-4.5, -8.5]`; `changed_first` equals `[-499.5, -998.5]` and `not np.allclose(original_first, changed_first)`.
+**Verify:** For *Expose sequence-wide leakage*, a fresh-process check confirms `original_first` equals `[-4.5, -8.5]`; `changed_first` equals `[-499.5, -998.5]` and `not np.allclose(original_first, changed_first)`.
 
 ## Exercise 4: Attach fixed positions
 
-The question is: Add \(E=[[0,0],[1,0],[0,2]]\) to query/key content, then reorder content while keeping E attached to the original row positions.
+The question is: Add E=[[0, 0], [1, 0], [0, 2]] to query/key content, then reorder content while keeping E attached to the original row positions.
 
 The position vector is part of the input to the score computation. Moving content to a new location while preserving the location table is different from relabelling all rows of an already positioned representation. The fixture adds positions only to query/key construction to isolate score effects; a full Transformer commonly adds token and position representations before all projections, including values.
 
@@ -125,7 +125,7 @@ np.testing.assert_allclose(relabelled, original[order], atol=1e-12, rtol=0)
 
 **Expected:** fixed-position outputs do not follow a pure content permutation; jointly reordering E restores the relabelling identity.
 
-**Verify:** In a fresh process, the exercise checks confirm `not np.allclose(fixed_positions, original[order])` and `relabelled` matches `original[order]` within 1e-12.
+**Verify:** For *Attach fixed positions*, a fresh-process check confirms `not np.allclose(fixed_positions, original[order])` and `relabelled` matches `original[order]` within 1e-12.
 
 ## Exercise 5: Check feature centering and causal prefixes
 
@@ -151,7 +151,7 @@ assert not np.allclose(fixed_mask, full[order])
 
 **Expected:** row means are approximately zero and every causal prefix matches; fixed-mask content permutation need not match.
 
-**Verify:** In a fresh process, the exercise checks confirm `normalized.mean(axis=-1)` matches `0` within 1e-12; for every `length` in `[1, 2, 3]`, `result` matches `full[:length]` within 1e-12 and `not np.allclose(fixed_mask, full[order])`.
+**Verify:** For *Check feature centering and causal prefixes*, a fresh-process check confirms `normalized.mean(axis=-1)` matches `0` within 1e-12; for every `length` in `[1, 2, 3]`, `result` matches `full[:length]` within 1e-12 and `not np.allclose(fixed_mask, full[order])`.
 
 ## Exercise 6: Handle constant tokens and invalid normalization
 
@@ -180,8 +180,8 @@ for operation in [
 
 **Expected:** constant token becomes finite [0, 0]; each invalid contract raises ValueError.
 
-**Verify:** In a fresh process, the exercise checks confirm `constant` equals `[[0.0, 0.0]]`; `np.isfinite(constant).all()` and for every looped case, `operation()` raises `ValueError`.
+**Verify:** For *Handle constant tokens and invalid normalization*, a fresh-process check confirms `constant` equals `[[0.0, 0.0]]`; `np.isfinite(constant).all()` and for every looped case, `operation()` raises `ValueError`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Attach fixed positions* and predict the result first; keep *Handle constant tokens and invalid normalization* failing beside the repair. Log a missing NumPy separately from a wrong permutation equivariance value in `llm-010`.

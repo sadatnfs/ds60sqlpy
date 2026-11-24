@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-equal-replica-average">Exercise 1: Compute equal-replica average<a class="heading-anchor" href="#exercise-1-compute-equal-replica-average" aria-label="Link to this section">#</a></h3>
 <p>Average equal contributions.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute equal-replica average</strong> is qualified there.</p>
+<p><strong>Approach.</strong> With two replicas of equal batch size and mean gradients 2 and 4, all-reduce the gradients and divide by the world size: <code>(2 + 4)/2 = 3</code>.</p>
+<p><strong>Why it is correct here.</strong> When every replica holds the same number of examples, the mean of replica means equals the mean over all examples. This is why data-parallel training divides the summed gradient by the number of ranks.</p>
+<p><strong>A plausible wrong approach.</strong> Summing gradients without dividing by world size gives 6, which effectively doubles the learning rate whenever another GPU is added, so changing the device count silently changes training dynamics.</p>
+<p><strong>How to verify.</strong> Run a single-device step on the concatenated batch and compare its gradient to the averaged replica gradient. The reference asserts <code>sum(gradients)/2 == 3.0</code> for the equal-size case.</p>
 <h3 id="exercise-2-handle-unequal-counts">Exercise 2: Handle unequal counts<a class="heading-anchor" href="#exercise-2-handle-unequal-counts" aria-label="Link to this section">#</a></h3>
 <p>Weight by examples or use a documented equal-batch policy.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>handle unequal counts</strong> is qualified there.</p>
+<p><strong>Approach.</strong> For unequal counts 3 and 1 with gradients 2 and 4, weight by examples: <code>(3*2 + 1*4)/(3 + 1) = 10/4 = 2.5</code>, or adopt a documented policy that every rank processes equal-size batches.</p>
+<p><strong>Why it is correct here.</strong> The global sample mean counts each example once. A plain average of replica means treats the rank with one example as if it held three, giving 3 instead of 2.5.</p>
+<p><strong>A plausible wrong approach.</strong> Relying on the default world-size average when the sampler gives the last rank a short batch introduces a small bias every epoch, which is hard to notice because loss still falls.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>weighted == 2.5</code> and that the unweighted mean is 3.0. In a framework, all-reduce both the gradient sum and the example count, then divide.</p>
 <h3 id="exercise-3-assign-rank-and-device">Exercise 3: Assign rank and device<a class="heading-anchor" href="#exercise-3-assign-rank-and-device" aria-label="Link to this section">#</a></h3>
 <p>Use explicit one-process ownership where required.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>assign rank and device</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Assign each process one rank and one device explicitly, such as <code>torch.cuda.set_device(local_rank)</code> before creating tensors or the process group, with the launcher supplying <code>LOCAL_RANK</code>.</p>
+<p><strong>Why it is correct here.</strong> Collective libraries expect each rank to own one device. Without explicit assignment several processes default to device 0, oversubscribing its memory while the other GPUs sit idle.</p>
+<p><strong>A plausible wrong approach.</strong> Creating the model before setting the device places every replica on GPU 0, and the first out-of-memory error appears far from its cause.</p>
+<p><strong>How to verify.</strong> Have each rank log its rank, local rank and <code>torch.cuda.current_device()</code>, and confirm the mapping is one to one across the job.</p>
 <h3 id="exercise-4-check-complete-sample-coverage">Exercise 4: Check complete sample coverage<a class="heading-anchor" href="#exercise-4-check-complete-sample-coverage" aria-label="Link to this section">#</a></h3>
 <p>No unintended omissions or duplication.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>check complete sample coverage</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Check that the distributed sampler covers every example exactly once per epoch: union the indices each rank processed and compare with the dataset index set.</p>
+<p><strong>Why it is correct here.</strong> Samplers pad or drop examples so that ranks get equal counts. Padding duplicates a few examples and dropping omits some, and either changes the gradient accounting.</p>
+<p><strong>A plausible wrong approach.</strong> Assuming coverage because each rank processed <code>len(dataset)/world_size</code> batches ignores padding and the <code>drop_last</code> setting.</p>
+<p><strong>How to verify.</strong> Gather index lists from all ranks for one epoch and assert no duplicates and no missing indices, or record the documented padding count if padding is intended.</p>
 <h3 id="exercise-5-design-collective-failure-handling">Exercise 5: Design collective failure handling<a class="heading-anchor" href="#exercise-5-design-collective-failure-handling" aria-label="Link to this section">#</a></h3>
 <p>Bound communication and terminate all owned ranks.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design collective failure handling</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design collective failure handling: set a bounded timeout on process-group operations and make the launcher terminate every rank it started when one fails.</p>
+<p><strong>Why it is correct here.</strong> A rank that crashes leaves the others blocked inside an all-reduce indefinitely. A timeout turns the hang into an error, and owned-process cleanup releases the GPUs.</p>
+<p><strong>A plausible wrong approach.</strong> Letting surviving ranks wait without a timeout keeps the devices occupied by a job that cannot finish, and nobody receives an error to act on.</p>
+<p><strong>How to verify.</strong> Inject a failure by exiting one rank early in a small test, and confirm the others exit with a timeout error within the configured bound.</p>
 <h3 id="exercise-6-compare-framework-distribution-contracts">Exercise 6: Compare framework distribution contracts<a class="heading-anchor" href="#exercise-6-compare-framework-distribution-contracts" aria-label="Link to this section">#</a></h3>
 <p>Each framework needs its own integration test.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compare framework distribution contracts</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compare distribution contracts across frameworks: PyTorch DDP, Horovod, JAX <code>pmap</code> and TensorFlow strategies each define gradient reduction, sampler behavior and launch differently.</p>
+<p><strong>Why it is correct here.</strong> Defaults differ, such as whether the gradient is summed or averaged and how uneven final batches are handled, so a result validated under one framework does not transfer.</p>
+<p><strong>A plausible wrong approach.</strong> Porting a training script between frameworks and assuming identical gradients because both are data-parallel skips the place where the semantics actually differ.</p>
+<p><strong>How to verify.</strong> Write an integration test per framework that compares the two-rank gradient with a single-device reference on the same examples.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Global example-weighted gradient 2.5.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-103_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

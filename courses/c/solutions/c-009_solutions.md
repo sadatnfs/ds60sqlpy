@@ -1,6 +1,6 @@
 # c-009: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-009_solution.c`, implements all six cases, from the "relate indexing and arithmetic" case to the "transfer mutation through a subview" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ values+i points to element i and *(values+i) is equivalent to values[i] within v
 
 ## Exercise 1: Relate indexing and arithmetic: change one input
 
-Copy worked example 1 into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {2, 5, 6};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "relate indexing and arithmetic" case, into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {2, 5, 6};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (both yield 4); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +19,13 @@ int values[] = {2, 4, 6};
 CHECK(values[1] == *(values + 1) && *(values + 1) == 4);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `values[1] == *(values + 1) && *(values + 1) == 4`. Restoring the original line brings back the worked observation: both yield 4.
+**Expected:** With `int values[] = {2, 5, 6};` the run stops with `Check failed` at the CHECK on `values[1] == *(values + 1) && *(values + 1) == 4`, because the "relate indexing and arithmetic" case no longer shows that both yield 4. Restoring `int values[] = {2, 4, 6};` brings that observation back.
 
 The equivalence applies because the computed pointer remains within the live array.
 
 ## Exercise 2: Measure an array interval: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `int *end = values - 3;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "measure an array interval" case, so one line now reads `int *end = values - 3;`. Run the example with that line, use the failing CHECK to find why the difference is 3 elements no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -37,7 +37,7 @@ ptrdiff_t n = end - begin;
 CHECK(n == 3);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `n == 3`; after it the line reads `int *end = values + 3;` again and the difference is 3 elements.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `n == 3`. Once the line reads `int *end = values + 3;` again, the "measure an array interval" case again shows that the difference is 3 elements.
 
 The result counts int elements. Multiplying by sizeof(int) would be a separate byte-size calculation.
 
@@ -108,4 +108,4 @@ A view does not copy storage. The shared mutation must be part of the API contra
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer mutation through a subview" case to your own c-009 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected one-past pointer failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "measure an array interval" case apart from ordinary output: the fixture proves its stated one-past pointer, pointer difference and borrowed view assumptions, not universal safety.

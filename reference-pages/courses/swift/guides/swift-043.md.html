@@ -290,7 +290,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li>Reproduce Example A (Accept the current request result) before changing anything, and confirm its observation: The matching generation updates current state.</li>
 <li>Compare Example B (Ignore a superseded result) with Example A and name the first line whose behavior differs. Its observation is: The stale response cannot overwrite the newer value.</li>
-<li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: An awaited response is not automatically a successful HTTP status.</li>
+<li>Before opening the explanation, check your task 3 attempt (Implement a deterministic fake transport returning success and failure values) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
 <p>Explain Loading state, Stale result, Transport adapter without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>

@@ -259,23 +259,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the second projection if it uses [NetRevenue] instead of CALCULATE(SUM(...)).</p>
 <p>It returns the same per-product values for this model.</p>
+<p><strong>Why it fits this model:</strong> A model measure reference carries an implicit CALCULATE, so each Product row becomes a ProductKey filter that the relationship passes to Sales. The values match case B.</p>
+<p><strong>Tempting mistake:</strong> Pasting the measure&#x27;s body, SUM(Sales[NetAmount]), in place of the reference drops that implicit transition and brings back 187 on every row, as in case A.</p>
+<p><strong>How to confirm:</strong> Expect Bag BLANK, Mug 96, Notebook 67 and Pen 24, which add to 187.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add an outer North filter to the raw-SUM case.</p>
 <p>RawSum repeats the North total 107 for every visible product.</p>
+<p><strong>Why it fits this model:</strong> The outer North filter does reach Sales through Customer, so the raw SUM sees Ada&#x27;s and Cy&#x27;s five lines. The Product row context still adds no filter, so each row repeats 107.</p>
+<p><strong>Tempting mistake:</strong> Expecting North&#x27;s per-product split from RawSum is the error. That split (Notebook 47, Pen 24, Mug 36) needs a transition, not just an outer filter.</p>
+<p><strong>How to confirm:</strong> Under <code>Customer[Region] = &quot;North&quot;</code> RawSum reads 107 on all four rows, while a transitioned column reads 47, 24, 36 and BLANK.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a projection that shows both raw and transitioned sums.</p>
 <p>Each row can show RawSum 187 beside its own Revenue; this makes the missing transition directly observable.</p>
+<p><strong>Why it fits this model:</strong> Two labeled columns in one SELECTCOLUMNS share each Product row, so RawSum (no transition) and Revenue (with CALCULATE) differ only by the transition.</p>
+<p><strong>Tempting mistake:</strong> Iterating with SUMX(Product, SUM(Sales[NetAmount])) to get a total adds 187 four times and returns 748, the same missing transition hidden in one number.</p>
+<p><strong>How to confirm:</strong> Expect rows Bag 187 and BLANK, Mug 187 and 96, Notebook 187 and 67, Pen 187 and 24.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose replacing the relationship because every row shows 187.</p>
 <p>The relationship can be correct; the raw aggregation has no Product filter to propagate.</p>
+<p><strong>Why it fits this model:</strong> The ProductKey relationship is active and one to many, and it works whenever a Product filter exists. Case A simply creates no filter, so nothing travels to Sales.</p>
+<p><strong>Tempting mistake:</strong> Making the relationship bidirectional or rebuilding it changes nothing here, because a row context is still not a filter, and every row still shows 187.</p>
+<p><strong>How to confirm:</strong> <code>CALCULATE ( SUM ( Sales[NetAmount] ), Product[ProductKey] = 3 )</code> returns 96, which shows the relationship already filters correctly.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why Bag remains a returned row in case B.</p>
 <p>Blank output is not a row-removal rule for this function. Other table functions may have different blank-row behavior.</p>
+<p><strong>Why it fits this model:</strong> SELECTCOLUMNS keeps one output row per input row, so all four Product rows appear. Bag&#x27;s Revenue is BLANK because no Sales line carries key 4.</p>
+<p><strong>Tempting mistake:</strong> Expecting SELECTCOLUMNS to drop Bag mixes it up with SUMMARIZECOLUMNS, which removes rows whose measures are all blank and would return three rows.</p>
+<p><strong>How to confirm:</strong> COUNTROWS of case B returns 4, while <code>SUMMARIZECOLUMNS ( Product[Product], &quot;Revenue&quot;, SUM ( Sales[NetAmount] ) )</code> returns 3 rows without Bag.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the distinction to a Customer calculated column containing total sales.</p>
 <p>A raw Sales SUM repeats the outer total; CALCULATE or a model measure transitions the customer row so the relationship can filter its sales.</p>
+<p><strong>Why it fits this model:</strong> In a Customer calculated column, CALCULATE or [NetRevenue] turns the row into a CustomerKey filter, which gives Ada 51, Bo 80, Cy 56 and Di BLANK.</p>
+<p><strong>Tempting mistake:</strong> A raw SUM(Sales[NetAmount]) column stores 187 for every customer. Summing that column over four customers reports 748.</p>
+<p><strong>How to confirm:</strong> The transitioned column sums to 187, and Di&#x27;s BLANK stays BLANK rather than 0.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

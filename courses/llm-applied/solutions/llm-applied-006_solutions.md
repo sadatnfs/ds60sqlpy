@@ -1,6 +1,6 @@
 # llm-applied-006: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for lexical retrieval and BM25 from first principles only after attempting *Rank a discriminating term* through *Check corpus edge cases*. A discrepancy in *Inspect term rarity* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-006_solution.py` runs the assertions; this page explains why they test term frequency and document frequency.
 
 ## Mechanism review
 
@@ -18,19 +18,19 @@ This implementation uses lowercase ASCII word tokens and a fixed local corpus. I
 
 ## Reading the implementation
 
-For query term q, BM25 uses \(\mathrm{idf}=\log\left(1+\frac{N-\mathrm{df}+0.5}{\mathrm{df}+0.5}\right)\). Each document contribution multiplies idf by \(\frac{\mathrm{tf}(k_1+1)}{\mathrm{tf}+k_1(1-b+b\,\mathrm{length}/\mathrm{avg\_length})}\). The defaults here are \(k_1=1.2\), \(b=0.75\), declared as fixture choices. Count query terms once to avoid an accidental repeated-query weighting policy. Empty corpora and empty documents need explicit handling so average length never becomes an unexplained zero denominator.
+For query term q, BM25 uses idf=log(1+(N-df+.5)/(df+.5)). Each document contribution multiplies idf by tf*(k1+1)/(tf+k1*(1-b+b*length/avg_length)). The defaults here are \(k_{1}=1.2\), \(b=0.75\), declared as fixture choices. Count query terms once to avoid an accidental repeated-query weighting policy. Empty corpora and empty documents need explicit handling so average length never becomes an unexplained zero denominator.
 
 ## Calculate the score and isolate each modeling choice
 
-The three documents each have two tokens, so average document length is two. The query randomization appears once in document a and nowhere else. With \(N=3\), \(\partial f=1\), the implemented IDF is \(\log(1+\frac{2.5}{1.5})=\log(\frac{8}{3})\), about0.980829. The matching document's normalized length ratio is one. With \(\mathrm{tf}=1\) and \(k_{1}=1.2\), its frequency factor is2.2/(1+1.2)=1, so the final score is exactly that IDF. The other documents receive zero because the query term is absent.
+The three documents each have two tokens, so average document length is two. The query randomization appears once in document a and nowhere else. With \(N=3\), \(\mathrm{df}=1\), the implemented IDF is \(\log(1+\frac{2.5}{1.5})=\log(\frac{8}{3})\), about 0.980829. The matching document's normalized length ratio is one. With \(\mathrm{tf}=1\) and \(k_{1}=1.2\), its frequency factor is 2.2/(1+1.2)=1, so the final score is exactly that IDF. The other documents receive zero because the query term is absent.
 
-For account, \(\partial f=2\) and IDF is \(\log(1+\frac{1.5}{2.5})=\log(1.6)\), about0.470004. The rarer query term therefore receives more weight in this fixed corpus. Document frequency counts presence per document: repeating account ten times inside one document still contributes one to df. Token frequency and document frequency are different denominators.
+For account, \(\mathrm{df}=2\) and IDF is \(\log(1+\frac{1.5}{2.5})=\log(1.6)\), about 0.470004. The rarer query term therefore receives more weight in this fixed corpus. Document frequency counts presence per document: repeating account ten times inside one document still contributes one to df. Token frequency and document frequency are different denominators.
 
 Write \(K=k_1\left(1-b+b\frac{L}{\overline L}\right)\). The frequency factor is \(f(\mathrm{tf})=\frac{(k_1+1)\mathrm{tf}}{\mathrm{tf}+K}\). Holding document length and corpus statistics fixed, its derivative for positive K is \(\frac{(k_1+1)K}{(\mathrm{tf}+K)^2}\), positive and decreasing. The second derivative is negative, so additional repetitions have diminishing gain. As tf becomes large under that fixed-length mathematical comparison, the factor approaches k1+1. If actual repetitions also lengthen the document, K changes too; do not silently hold one effect fixed while interpreting a real edit.
 
-With \(b=0\), \(K=k_{1}\). For tf1, 2, 10 at \(k_{1}=1.2\), the factors are1, 1.375 and about1.964286. Ten repetitions do not create ten times the score. At \(b=1\), the normalization depends fully on L/avgL; at \(b=0\), document length does not enter K. For the same \(\mathrm{tf}=1\), \(k_{1}=1.2\) and \(b=0.75\), a document twice the average length has \(K=2.1\) and factor2.2/3.1, about0.709677. One half the average length has \(K=0.75\) and factor2.2/1.75, about1.257143.
+With \(b=0\), \(K=k_{1}\). For tf values 1, 2 and 10 at \(k_{1}=1.2\), the factors are 1, 1.375 and about 1.964286. Ten repetitions do not create ten times the score. At \(b=1\), the normalization depends fully on L/avgL; at \(b=0\), document length does not enter K. For the same \(\mathrm{tf}=1\), \(k_{1}=1.2\) and \(b=0.75\), a document twice the average length has \(K=2.1\) and factor 2.2/3.1, about 0.709677. One half the average length has \(K=0.75\) and factor 2.2/1.75, about 1.257143.
 
-This positive-IDF convention and the roles of k1 and b are documented in Lucene's versioned BM25 API. The fixture is its own transparent calculation and does not execute Lucene or claim identical index-analysis behavior. [Lucene10.3.1 BM25Similarity](https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html).
+This positive-IDF convention and the roles of k1 and b are documented in Lucene's versioned BM25 API. The fixture is its own transparent calculation and does not execute Lucene or claim identical index-analysis behavior. [Lucene 10.3.1 BM25Similarity](https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html).
 
 The corpus definition changes the scores. Splitting one source into many chunks changes N, lengths and possibly df. Repeating the same heading in every chunk can make a previously rare term common. A score threshold learned before rechunking therefore may not retain the same meaning afterward. Authorization filtering also defines which corpus is eligible for ranking; the later access chapter makes that boundary explicit.
 
@@ -62,7 +62,7 @@ assert scores[0][0] == "a" and scores[0][1] > 0 and all(score == 0 for _, score 
 
 ## Exercise 2: Inspect term rarity
 
-The question is: Compare IDF for a term present in1 of 3 documents with a term present in2 of 3.
+The question is: Compare IDF for a term present in 1 of 3 documents with a term present in 2 of 3.
 
 Document frequency counts documents, not total token occurrences. A term repeated many times in one source still appears in only one document for this calculation.
 
@@ -78,7 +78,7 @@ assert rare > common > 0
 
 ## Exercise 3: Verify saturation
 
-The question is: Disable length normalization with \(b=0\) and compare term frequencies1, 2, 10 under the same IDF.
+The question is: Disable length normalization with \(b=0\) and compare term frequencies 1, 2, 10 under the same IDF.
 
 The denominator grows with term frequency, creating diminishing returns. This reduces the effect of repeated terms without treating repetition as irrelevant.
 
@@ -89,9 +89,9 @@ a, b, c = [contribution(n) for n in [1, 2, 10]]
 assert a < b < c and c < 10 * a
 ```
 
-**Expected:** scores increase, but10 occurrences yield less than10 times the single-occurrence score.
+**Expected:** scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.
 
-**Verify:** Compare the computed values or written argument with scores increase, but10 occurrences yield less than10 times the single-occurrence score.
+**Verify:** Compare the computed values or written argument with scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.
 
 ## Exercise 4: Expose a synonym miss
 
@@ -103,9 +103,9 @@ Lexical ranking cannot infer a synonym absent from its token policy. Embeddings 
 assert bm25("purchase", {"d": "buy"}) == [("d", 0.0)]
 ```
 
-**Expected:** score0 despite the semantic relationship.
+**Expected:** score 0 despite the semantic relationship.
 
-**Verify:** Compare the computed values or written argument with score0 despite the semantic relationship.
+**Verify:** Compare the computed values or written argument with score 0 despite the semantic relationship.
 
 ## Exercise 5: Make ties deterministic
 
@@ -138,4 +138,4 @@ assert bm25("x", {"empty": ""}) == [("empty", 0.0)]
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Verify saturation* and predict how the result changes before checking it; the unchanged inputs give: scores increase, but 10 occurrences yield less than 10 times the single-occurrence score. Keep the original *Check corpus edge cases* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

@@ -8,7 +8,7 @@ Intermediate; approximately 90 minutes. Direct prerequisites: `spark-018`. The p
 
 ## How to run this lesson
 
-Open `spark-019` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-019` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-019.scala) and [PySpark learner](../lessons/spark-019.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-019_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-019_solution.scala) and [PySpark reference](../solutions/spark-019_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -51,7 +51,7 @@ Lag uses the prior row in the declared sequence. Two tied-time events can theref
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.expressions.Window
@@ -85,20 +85,8 @@ val events = spark
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 from pyspark.sql import Window
 
 schema = StructType(
@@ -204,7 +192,7 @@ Use dense_rank ordered only by descending event_time with NULL last, returning a
 
 Return event_id, rows_total, peer_total. ROWS uses ascending time NULL last then ID and an unbounded-preceding/current-row frame. RANGE uses only ascending time NULL last over the same cumulative boundary.
 
-**Expected result/shape:** By ID:1(10,10),2(30,60),3(60,60),4(40,40),5(90,150),6(150,150),7(150,150),8(80,80).
+**Expected result/shape:** By ID: 1 `(10, 10)`, 2 `(30, 60)`, 3 `(60, 60)`, 4 `(40, 40)`, 5 `(90, 150)`, 6 `(150, 150)`, 7 `(150, 150)`, 8 `(80, 80)`.
 
 **Verify:** Assert all eight tuples, especially tied IDs 2/3 and the missing-time event 7.
 
@@ -214,7 +202,7 @@ Return event_id, rows_total, peer_total. ROWS uses ascending time NULL last then
 
 Using ascending time NULL last then event_id, return event_id, previous_id, gap_seconds. Lag the event identity and time, then subtract epoch seconds.
 
-**Expected result/shape:** 1(NULL, NULL),2(1,60),3(2,0),4(NULL, NULL),5(4,120),6(5,0),7(8, NULL),8(NULL, NULL).
+**Expected result/shape:** 1 (NULL, NULL), 2 `(1, 60)`, 3 `(2, 0)`, 4 (NULL, NULL), 5 `(4, 120)`, 6 `(5, 0)`, 7 `(8, NULL)`, 8 (NULL, NULL).
 
 **Verify:** Assert the complete identity/gap rows and explain zero gaps and the known previous ID with unknown duration.
 
@@ -226,7 +214,7 @@ Do not assume sort before dropDuplicates defines its survivor contract. Do not o
 
 ## Self-check
 
-Explain the contract of `validateCandidates` / `validate_candidates` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `validateCandidates` / `validate_candidates` without reading its solution. Then, from memory, state what Exercise 6 (Interpret lag without claiming strict temporal availability) must produce: `1(NULL, NULL)`, `2(1, 60)`, `3(2, 0)`, `4(NULL, NULL)`, `5(4, 120)`, `6(5, 0)`, `7(8, NULL)`, `8(NULL, NULL)`. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

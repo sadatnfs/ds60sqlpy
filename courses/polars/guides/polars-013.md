@@ -14,6 +14,14 @@ Exploding an item list turns one order record into multiple item records. Empty 
 
 Native nested expressions retain the columnar model. list.eval applies an expression to elements of each list; struct.field extracts a named component. These operations make the intended shape visible to the engine. Python object loops may still be useful for unusual logic, but should not replace simple native transformations without a reason and a measured cost.
 
+## Key terms
+
+- **List column:** A column whose values are variable-length lists of one inner type.
+- **Struct column:** A column whose values are records of named fields, built with `pl.struct` and read with `struct.field`.
+- **explode:** An operation that turns each list element into its own row, changing the row grain and repeating the other columns.
+- **Empty versus null list:** An empty list is a known absence of items with `list.len` 0; a null list is unknown, and its length stays null.
+- **list.eval:** A method that applies an expression to each list's elements, referred to with `pl.element()`, without exploding rows.
+
 ## Syntax and data contract
 
 list.len returns list lengths while preserving null for an absent list. Filtering positive lengths before explode makes the item-grain population explicit. pl.struct packs named columns, and struct.field selects by name rather than position. Inside list.eval, pl.element refers to one list element, not an outer DataFrame column.

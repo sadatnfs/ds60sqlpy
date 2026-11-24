@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>GPU Spark uses device allocations for columnar batches, intermediate operators and workspaces, with host memory and disk potentially involved in spill behavior. The JVM heap is only one memory category. Reducing executor heap does not directly create VRAM, and increasing GPU task concurrency can raise simultaneous live memory even when each task fits alone.</p>
 <p>A spill moves data to a slower tier to preserve progress under pressure. It is an operational behavior to measure, not an automatic failure or a free capacity extension. Record device, pinned host, pageable host and spill-disk budgets separately. Use small deterministic datasets for semantics and bounded representative data for performance; never deliberately fill a shared device or disk. Check plugin-specific memory settings against the pinned release.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Device memory pool:</strong> A pooled GPU allocator, such as the RAPIDS Memory Manager, that serves columnar batches and workspaces.</li>
+<li><strong>Spill:</strong> Moving data to a slower tier such as host memory or disk to preserve progress under memory pressure.</li>
+<li><strong>JVM heap:</strong> Executor memory managed by Java, which is separate from GPU device memory.</li>
+<li><strong>Batch size target:</strong> The configured columnar batch size, which trades per-batch overhead against peak device memory.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Three active tasks each needing 2 GiB plus 1 GiB shared workspace require an illustrative 7 GiB live budget. Four tasks require 9 GiB and exceed an 8 GiB budget.</p>
@@ -214,20 +221,48 @@ safe <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</
 <span class="syntax-keyword">assert</span> safe <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU memory budget:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> safe<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">safe task counts in the model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> One through three tasks fit the simplified budget; four do not.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>per_task</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>shared</code></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>capacity</code></td>
+<td><code>8</code></td>
+</tr>
+<tr>
+<td><code>safe</code></td>
+<td><code>[1, 2, 3]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-concurrent-live-memory">Exercise 1: Compute concurrent live memory<a class="heading-anchor" href="#exercise-1-compute-concurrent-live-memory" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute concurrent live memory</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting the shared workspace once per task gives 10 GiB for three tasks and wrongly rejects a configuration that fits.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-lower-concurrency">Exercise 2: Lower concurrency<a class="heading-anchor" href="#exercise-2-lower-concurrency" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>lower concurrency</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Raising batch size to finish faster increases per-task memory and makes the overflow worse. It may also push the job into heavier spilling, which slows the stage more than the larger batches speed it up.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-separate-jvm-and-device-pools">Exercise 3: Separate JVM and device pools<a class="heading-anchor" href="#exercise-3-separate-jvm-and-device-pools" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>separate JVM and device pools</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Raising <code>spark.executor.memory</code> after a GPU memory error adds host memory and leaves the device budget unchanged.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-budget-spill-disk">Exercise 4: Budget spill disk<a class="heading-anchor" href="#exercise-4-budget-spill-disk" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>budget spill disk</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Leaving spill on the default temporary directory of a small root volume risks filling it and affecting other processes.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-safe-batch-changes">Exercise 5: Design safe batch changes<a class="heading-anchor" href="#exercise-5-design-safe-batch-changes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design safe batch changes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Doubling the batch size without a memory budget can turn a working job into an out-of-memory failure. The failure may appear only on the largest partitions, so small test inputs can pass while production data fails.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-interpret-successful-but-spilling-execution">Exercise 6: Interpret successful but spilling execution<a class="heading-anchor" href="#exercise-6-interpret-successful-but-spilling-execution" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>interpret successful but spilling execution</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Comparing only kernel times between a spilling run and a non-spilling run misses the end-to-end slowdown.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

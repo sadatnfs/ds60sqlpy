@@ -2,20 +2,23 @@
 
 int main(void) {
   /* Exercise 1: Read through a const view: change one input
-     Copy worked example 1 into a scratch pad and change `int value = 4;` to
-     `int value = 5;`. Before running, predict which CHECK fails and which value
-     it now sees; then run it and restore the original line. Expected: The
-     changed run stops with `Check failed` at the CHECK on `*view == 4`.
-     Restoring the original line brings back the worked observation: the read
-     yields 4. */
+     Copy worked example 1, the "read through a const view" case, into a scratch
+     pad and change `int value = 4;` to `int value = 5;`. Before running,
+     predict which CHECK fails and which value it sees in place of the worked
+     result (the read yields 4); then run it and restore the original line.
+     Expected: With `int value = 5;` the run stops with `Check failed` at the
+     CHECK on `*view == 4`, because the "read through a const view" case no
+     longer shows that the read yields 4. Restoring `int value = 4;` brings that
+     observation back. */
 
   /* Exercise 2: Observe another valid mutation: debug a regression
-     A regression changed one token in worked example 2, so one line now reads
-     `value = 8;`. Run worked example 2 with that line, use the failing CHECK to
-     locate the defect and repair it without changing the CHECK. Expected:
+     A regression changed one token in worked example 2, the "observe another
+     valid mutation" case, so one line now reads `value = 8;`. Run the example
+     with that line, use the failing CHECK to find why the const view now reads
+     7 no longer holds and repair the line without changing the CHECK. Expected:
      Before the repair the run stops with `Check failed` at the CHECK on `*view
-     == 7`; after it the line reads `value = 7;` again and the const view now
-     reads 7. */
+     == 7`. Once the line reads `value = 7;` again, the "observe another valid
+     mutation" case again shows that the const view now reads 7. */
 
   /* Exercise 3: Use a fixed pointer target
      Create an int pointer that cannot be reassigned, then update its target.

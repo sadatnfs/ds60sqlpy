@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Validate relational assumptions in DataFrames joins and reconcile totals before and after a merge.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-016</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (expose and repair fanout) and worked case B (missing-key policy) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-016: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Join grain:</strong> The unit that one row represents on each side of a join, which must be known before the joined result can be interpreted.</li>
+<li><strong>Key uniqueness:</strong> The requirement that a key appears once on a side expected to hold one row per entity, enforced with the join <code>validate</code> option.</li>
+<li><strong>Fanout:</strong> Row multiplication that occurs when one key matches several rows on the other side, inflating any total computed after the join.</li>
+<li><strong>Missing key:</strong> A join key equal to <code>missing</code>, which DataFrames rejects by default unless <code>matchmissing</code> states how to treat it.</li>
+<li><strong>Pre-join aggregation:</strong> Collapsing a many-row table to one row per key before joining, so the result keeps the intended grain.</li>
+</ul>
 <h3 id="a-join-changes-the-row-relationship">A join changes the row relationship<a class="heading-anchor" href="#a-join-changes-the-row-relationship" aria-label="Link to this section">#</a></h3>
 <p>A join combines rows according to keys. Its result depends on key multiplicities, not merely on which key values are present. If one left row matches two right rows, that left row appears twice in an ordinary matching result. Summing a left-side measurement after the join can therefore inflate its total.</p>
 <p>Define the grain of both inputs and the intended output. A one-to-one relationship needs uniqueness on both sides. A many-to-one relationship needs a unique lookup key on the lookup side. A many-to-many relationship may be legitimate, but its output multiplicity must be understood rather than treated as an accidental implementation detail.</p>

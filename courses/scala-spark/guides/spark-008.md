@@ -28,7 +28,7 @@ Open `spark-008` in the classroom, select the Scala source, prepare the `scala-j
 
 An assertion is useful when it distinguishes the intended behavior from a plausible mistake. Checking only that a program exits or returns a nonempty result is weak evidence. Exact integer fixtures, empty inputs, zero values, repeated occurrences and malformed boundaries each expose different failure modes. The reference deliberately includes candidates that drop zero or deduplicate equal amounts so the oracle proves it can reject them.
 
-Sequence equality compares order and values. Bag equality compares each value's occurrence count. Set equality discards multiplicity and is therefore insufficient for an event ledger. The sequences(1,1,2) and (2,1,1) are the same bag, while(1,2) is not. Decide which equality the output contract requires before choosing a comparison helper.
+Sequence equality compares order and values. Bag equality compares each value's occurrence count. Set equality discards multiplicity and is therefore insufficient for an event ledger. The sequences `(1, 1, 2)` and `(2, 1, 1)` are the same bag, while `(1, 2)` is not. Decide which equality the output contract requires before choosing a comparison helper.
 
 Numeric type conversion must happen before an overflowing operation. Int.MaxValue+1 wraps in Int arithmetic; converting that wrapped result to Long does not recover the intended 2147483648. Convert the operand to Long first, then add. For arbitrary Long sums, use Math.addExact when silent wraparound would invalidate the result. A wider type increases range but does not make it unlimited.
 
@@ -63,7 +63,7 @@ assert(promoted == 2147483648L && tooLate == -2147483648L)
 println(s"promoted=$promoted tooLate=$tooLate")
 ```
 
-The expression is evaluated using the operand types at the time of addition. A later conversion preserves the already-wrong wrapped value. The independent literal 2147483648 L shows the intended mathematical result and the Long suffix prevents the expected value from suffering the same type mistake.
+The expression is evaluated using the operand types at the time of addition. A later conversion preserves the already-wrong wrapped value. The independent literal 2147483648L shows the intended mathematical result and the Long suffix prevents the expected value from suffering the same type mistake.
 
 ## Exercises
 
@@ -71,7 +71,7 @@ The expression is evaluated using the operand types at the time of addition. A l
 
 Return whether two Long sequences contain the same values with the same occurrence counts, ignoring order. Do not convert to Set. Empty sequences are equal.
 
-**Expected result/shape:** (1,1,2) equals(2,1,1) as a bag but differs from(1,2). Equal count and sum alone are insufficient for(1,3) versus(2,2).
+**Expected result/shape:** `(1, 1, 2)` equals `(2, 1, 1)` as a bag but differs from `(1, 2)`. Equal count and sum alone are insufficient for `(1, 3)` versus `(2, 2)`.
 
 **Verify:** Assert all three comparisons and the empty case against literal expected Booleans.
 
@@ -81,7 +81,7 @@ Return whether two Long sequences contain the same values with the same occurren
 
 Sum Long values with checked addition and an explicit empty identity. Report overflow through ArithmeticException instead of allowing wraparound. Negative values are permitted for this arithmetic contract.
 
-**Expected result/shape:** (100,-25,0,100) sums to 175; empty sums to 0; Long.MaxValue plus 1 and Long.MinValue minus 1 both fail.
+**Expected result/shape:** `(100, -25, 0, 100)` sums to 175; empty sums to 0; Long.MaxValue plus 1 and Long.MinValue minus 1 both fail.
 
 **Verify:** Assert both exact sums and catch each directional overflow with the supplied exception helper.
 
@@ -91,7 +91,7 @@ Sum Long values with checked addition and an explicit empty identity. Report ove
 
 Return the mathematical value of an Int plus one as a Long. Convert before adding and support the full Int range.
 
-**Expected result/shape:** Int.MaxValue becomes 2147483648 L, Int.MinValue becomes-2147483647L, and 0 becomes 1 L.
+**Expected result/shape:** Int.MaxValue becomes 2147483648L, Int.MinValue becomes -2147483647L, and 0 becomes 1L.
 
 **Verify:** Assert exact literals at both boundaries and zero; compare with the deliberately too-late conversion example.
 
@@ -101,7 +101,7 @@ Return the mathematical value of an Int plus one as a Long. Convert before addin
 
 Compare finite Double values using absolute plus reference-relative tolerance. Require finite nonnegative tolerances with IllegalArgumentException on invalid policy. Return false for nonfinite actual or expected values.
 
-**Expected result/shape:** 1e8+1 versus 1 e8 passes with atol 0, rtol 1 e-7;1e-9 versus 0 passes with atol 1 e-8; NaN never passes; negative tolerance is rejected.
+**Expected result/shape:** `1e8+1` versus `1e8` passes with `atol=0, rtol=1e-7`; `1e-9` versus `0` passes with `atol=1e-8`; NaN never passes; negative tolerance is rejected.
 
 **Verify:** Assert large-scale and near-zero cases separately, then a strict zero-tolerance failure and nonfinite rejection.
 
@@ -111,7 +111,7 @@ Compare finite Double values using absolute plus reference-relative tolerance. R
 
 Validate a nonnegative/negative partition by checking the full combined bag and each branch predicate. Do not accept equal counts or sums as sufficient evidence.
 
-**Expected result/shape:** Input(1,-1,0,1) with accepted(1,0,1), rejected(-1) passes. Dropping a duplicate, replacing(1,3) with (2,2), or placing zero in rejected fails.
+**Expected result/shape:** Input `(1, -1, 0, 1)` with accepted `(1, 0, 1)`, rejected (-1) passes. Dropping a duplicate, replacing `(1, 3)` with `(2, 2)`, or placing zero in rejected fails.
 
 **Verify:** Assert the good split and all three distinct counterexamples.
 
@@ -119,7 +119,7 @@ Validate a nonnegative/negative partition by checking the full combined bag and 
 
 ### Exercise 6: Show that an oracle rejects real misconceptions
 
-Test a supplied nonnegative-filter candidate against four independent literal fixtures: empty,(0),(-1,0,2),(2,2,-1). Return false if it throws or violates a sequence result. Demonstrate rejection of zero-dropping and deduplicating candidates.
+Test a supplied nonnegative-filter candidate against four independent literal fixtures: empty, (0), `(-1, 0, 2)`, `(2, 2, -1)`. Return false if it throws or violates a sequence result. Demonstrate rejection of zero-dropping and deduplicating candidates.
 
 **Expected result/shape:** The >=0 filter passes. The >0 filter and a nonnegative-then-distinct implementation fail. A candidate throwing an exception also fails.
 

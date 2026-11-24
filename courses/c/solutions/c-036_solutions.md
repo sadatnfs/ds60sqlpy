@@ -1,6 +1,6 @@
 # c-036: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-036_solution.c`, implements all six cases, from the "join one calculation" case to the "transfer reusable execution" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ pthread_create takes a pointer to a pthread_t, optional attributes, a function v
 
 ## Exercise 1: Join one calculation: change one input
 
-Copy worked example 1 into a scratch pad and change `struct Work work = {.input = 7, .output = 0};` to `struct Work work = {.input = 8, .output = 0};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "join one calculation" case, into a scratch pad and change `struct Work work = {.input = 7, .output = 0};` to `struct Work work = {.input = 8, .output = 0};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the retained result is 49); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -22,13 +22,13 @@ CHECK(pthread_join(thread, NULL) == 0);
 CHECK(work.output == 49);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `work.output == 49`. Restoring the original line brings back the worked observation: the retained result is 49.
+**Expected:** With `struct Work work = {.input = 8, .output = 0};` the run stops with `Check failed` at the CHECK on `work.output == 49`, because the "join one calculation" case no longer shows that the retained result is 49. Restoring `struct Work work = {.input = 7, .output = 0};` brings that observation back.
 
 The stack argument remains alive until after join. Reading output before synchronization would not have this contract.
 
 ## Exercise 2: Keep separate arguments: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `struct Work work[2] = {{3, 0}, {3, 0}};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "keep separate arguments" case, so one line now reads `struct Work work[2] = {{3, 0}, {3, 0}};`. Run the example with that line, use the failing CHECK to find why their independent outputs are 4 and 9 no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +42,7 @@ for (size_t i = 0; i < 2; i++)
 CHECK(work[0].output == 4 && work[1].output == 9);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `work[0].output == 4 && work[1].output == 9`; after it the line reads `struct Work work[2] = {{2, 0}, {3, 0}};` again and their independent outputs are 4 and 9.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `work[0].output == 4 && work[1].output == 9`. Once the line reads `struct Work work[2] = {{2, 0}, {3, 0}};` again, the "keep separate arguments" case again shows that their independent outputs are 4 and 9.
 
 Each worker receives its own stable object rather than the address of one changing loop variable.
 
@@ -121,4 +121,4 @@ Reusing storage is safe after the previous worker has finished. Overlapping invo
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer reusable execution" case to your own c-036 source. Explain why every access in `square_worker` stays within a live object and each owned resource is released. An expected thread argument lifetime failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "keep separate arguments" case apart from ordinary output: the fixture proves its stated thread argument lifetime, join and disjoint result storage assumptions, not universal safety.

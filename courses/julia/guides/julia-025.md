@@ -10,6 +10,14 @@ Explain which work a timing includes, inspect type inference and measure a small
 
 Open `julia-025` in `/classroom` with its prepared `julia` runtime. Worked case A (inspect a bounded kernel) and worked case B (report measurements without ranking noise) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-025: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Type inference:** The compiler's deduction of result types from argument types, which `@inferred` checks against the observed result.
+- **Specialization:** Julia compiles a separate method instance for each combination of concrete argument types it encounters.
+- **Warm measurement:** Timing a call after an initial run so that compilation time is excluded from the reported cost.
+- **Allocation measurement:** Using `@allocated` to report the bytes an expression allocates, exposing temporaries or type instability.
+- **Function barrier:** Passing a value of uncertain type into a separate function so that function is compiled for the concrete type.
+
 ## Compilation is part of the execution model
 
 Julia specializes methods for argument types and compiles executable code when needed. The first call can include inference, compilation and initialization. A later call with the same relevant types may reuse that work. The classroom starts a fresh process for every run, so pressing Run repeatedly does not create one long warm session. Compare repeated calls inside the same program when investigating steady-state cost. Startup latency remains a valid user experience metric; it simply answers a different question.

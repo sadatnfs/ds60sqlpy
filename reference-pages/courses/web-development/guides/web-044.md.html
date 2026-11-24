@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A test compares an observation with an expected contract. A unit test isolates a small behavior; an integration test exercises a boundary such as a database or HTTP server. Both are useful, and neither should be mislabeled as the other. A reference program that prints a success marker without checking the relevant behavior provides weak evidence.</p>
 <p>Good cases include ordinary input, an empty or zero boundary, invalid types or ranges, and a previously observed failure. Tests should explain why the expected result is correct instead of repeating the implementation&#x27;s internal steps. A function and its test can share the same bug if the expected value is computed using the same faulty algorithm.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Unit test:</strong> A test of one small piece of code, such as a function, isolated from files, the network and the real clock.</li>
+<li><strong>Integration test:</strong> A test that runs several parts together, such as a repository with a real SQLite database.</li>
+<li><strong>Assertion:</strong> A check that compares an actual value with the expected one and fails loudly when they differ.</li>
+<li><strong>Boundary case:</strong> An input at the edge of a valid range, such as zero, the maximum or an empty list, where off-by-one errors hide.</li>
+<li><strong>Expected result:</strong> The value a test compares against, derived from the contract rather than computed with the code under test.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>This course uses a tiny check function that throws RuntimeException on failure, making behavior independent of whether PHP assertions are enabled. Test exceptions by recording whether the expected exception occurred, then check that flag. Do not catch every exception and treat it as the expected one. Full projects can adopt a prepared testing framework, but no dependency installation is needed here.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -216,6 +224,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 try { totalMinutes([-1]); } catch (InvalidArgumentException) { $rejected = true; }
 check($rejected, &#x27;Negative input accepted&#x27;);</code></pre>
 <p><strong>Expected observation:</strong> The invalid-input contract is explicitly exercised.</p>
+<h3 id="contrast-case-an-exception-test-that-accepts-any-failure">Contrast case: an exception test that accepts any failure<a class="heading-anchor" href="#contrast-case-an-exception-test-that-accepts-any-failure" aria-label="Link to this section">#</a></h3>
+<p>This test was meant to prove that negative minutes are rejected. A refactor then introduced an unrelated bug inside <code>totalMinutes</code>.</p>
+<pre class="highlighted-code"><code class="language-php">function totalMinutes(array $items): int {
+  throw new RuntimeException(&#x27;Bug: storage not ready&#x27;);
+}
+
+$rejected = false;
+try {
+  totalMinutes([-1]);
+} catch (Exception) {
+  $rejected = true;
+}
+check($rejected, &#x27;Negative input accepted&#x27;);</code></pre>
+<p><code>RuntimeException</code> is a subclass of <code>Exception</code>, so the broad catch records <code>$rejected = true</code> and the check passes even though the function never looked at the input. The test now reports that negative minutes are rejected for a reason that has nothing to do with validation. Catching <code>InvalidArgumentException</code> narrowly, as in worked example 2, lets the unrelated <code>RuntimeException</code> escape and fail the run with its own message. A test should accept only the outcome it was written to prove.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-classify-a-pure-function-check-and-a-real-database-transaction-check">Exercise 1: Classify a pure-function check and a real database transaction check.<a class="heading-anchor" href="#exercise-1-classify-a-pure-function-check-and-a-real-database-transaction-check" aria-label="Link to this section">#</a></h4>

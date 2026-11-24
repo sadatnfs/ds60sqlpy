@@ -6,6 +6,14 @@ Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-011`.
 
 A resource-oriented API exposes identifiable things and consistent ways to inspect or change them. This chapter creates tasks, returns a link to each representation and demonstrates that repeating an ordinary POST can create another resource. It is a small design investigation, not a claim to implement every constraint of the REST architectural style.
 
+## Key terms
+
+- **Resource:** An identifiable thing an API exposes, such as one task, addressed by its own URL.
+- **Representation:** The data an API chooses to expose about a resource, here an ID and a title, which need not mirror every internal field.
+- **Self link:** A URL in a response that identifies the returned resource, generated from the registered read route so a client can follow it.
+- **Collection endpoint:** A path such as `/tasks` where POST creates a new member with a server-allocated ID, so repeating the POST creates another resource.
+- **REST constraints:** The architectural properties of client/server separation, stateless interactions, cacheability, a uniform interface and layering, which JSON routes do not satisfy automatically.
+
 ## Mechanism: identity, representation and transitions
 
 The collection path `/tasks` accepts a bounded title. The server allocates a new ID using a monotonic counter within this disposable application fixture. The response includes the representation and a self link generated from the registered read route. A client can follow that link to retrieve the identified task.
@@ -29,6 +37,49 @@ The client sends the same POST body twice. Two different IDs are created. That b
 A request containing an extra owner field returns 422. An unknown task ID returns 404. These refusals address different concerns: one violates the write schema, while the other identifies a resource the fixture does not have. Neither result should be silently converted into a successful empty object.
 
 Later chapters add idempotency keys, version preconditions, transactions and authorization. They build on the same discipline: define the intended state transition and what a client can observe when it succeeds, repeats, conflicts or fails.
+
+## Worked example: Location headers and a collection resource
+
+```python
+from flask import Flask, request, url_for
+
+app = Flask(__name__)
+tasks = {}
+
+
+@app.post("/tasks")
+def create():
+    task_id = len(tasks) + 1
+    tasks[task_id] = {"id": task_id, "title": request.get_json()["title"]}
+    return tasks[task_id], 201, {"Location": url_for("read", task_id=task_id)}
+
+
+@app.get("/tasks/<int:task_id>")
+def read(task_id):
+    return tasks[task_id]
+
+
+@app.get("/tasks")
+def collection():
+    return {"items": list(tasks.values()), "count": len(tasks)}
+
+
+with app.test_client() as client:
+    created = client.post("/tasks", json={"title": "Read RFC 9110"})
+    print(created.status_code, created.headers["Location"])
+    print(client.get(created.headers["Location"]).json)
+    print(client.get("/tasks").json["count"])
+```
+
+Expected output:
+
+```text
+201 /tasks/1
+{'id': 1, 'title': 'Read RFC 9110'}
+1
+```
+
+The POST targeted the collection `/tasks` and the server, not the client, chose identifier 1. The 201 response advertised the new member's URL in the standard `Location` header, and the client followed that header instead of building `/tasks/1` itself. The lesson puts the same link in a `links.self` body field; both forms let the server change its URL layout without breaking clients. The collection and the member are separate resources with separate representations, which is the core of resource-oriented design. Using `len(tasks) + 1` is only safe in this single-threaded fixture: after a deletion it would reuse an identifier, which is why the lesson keeps a monotonic `count(1)` instead.
 
 ## Failure diagnosis
 

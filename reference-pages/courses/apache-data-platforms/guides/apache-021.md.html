@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-021-from-an-engine-to-a-distributed-scheduler">apache-021: From an engine to a distributed scheduler<a class="heading-anchor" href="#apache-021-from-an-engine-to-a-distributed-scheduler" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-020</code>, <code>apache-014</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Ballista:</strong> The Apache DataFusion subproject that executes DataFusion query plans across a scheduler and executor processes.</li>
+<li><strong>Scheduler:</strong> The Ballista process that receives a client&#x27;s query, divides its plan into stages and tasks, and assigns the tasks to executors.</li>
+<li><strong>Executor:</strong> A Ballista process that runs assigned tasks, scanning input and producing intermediate shuffle output or final batches.</li>
+<li><strong>Plan serialization:</strong> Encoding a query plan so the client, scheduler and executors can exchange it. A custom expression or provider without a registered codec cannot be shipped.</li>
+<li><strong>Version contract:</strong> The exact supported pairing of the released Ballista 54.1.0 package with DataFusion 54, kept separate from the classroom DataFusion 55 profile.</li>
+</ul>
 <h3 id="a-distributed-engine-adds-placement-and-coordination">A distributed engine adds placement and coordination<a class="heading-anchor" href="#a-distributed-engine-adds-placement-and-coordination" aria-label="Link to this section">#</a></h3>
 <p>DataFusion plans and executes analytical operators inside an embedding application. Ballista uses DataFusion&#x27;s execution model across a scheduler and executors. A client constructs a query, the scheduler organizes stages and tasks, and executors scan input and produce intermediate or final batches. Those responsibilities introduce RPC addresses, shared data visibility, serialization compatibility and failure handling that an embedded query does not need to solve in the same way.</p>
 <p>The workshop uses the released Ballista 54.1.0 Python package, which contains real native Rust scheduler and executor implementations. It runs one scheduler and one executor as separate native processes on one container host, with an independent client process. This is actual Ballista planning, scheduling and data transfer. It is explicitly a single-host teaching topology, not a multi-machine cluster, replica failover experiment or high-availability installation.</p>

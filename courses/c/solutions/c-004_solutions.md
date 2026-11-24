@@ -1,6 +1,6 @@
 # c-004: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference implements all six checks in one main.c.
+Compare after an attempt or explicit reveal. The complete executable reference, `c-004_solution.c`, implements all six cases, from the "trace a prefix sum" case to the "transfer reverse traversal safely" case, in one `main.c`.
 
 ## Mechanism and assumptions
 
@@ -10,7 +10,7 @@ if treats zero as false and nonzero as true. for combines initialization, condit
 
 ## Exercise 1: Trace a prefix sum: change one input
 
-Copy worked example 1 into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, the "trace a prefix sum" case, into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the result is 12); then run it and restore the original line.
 
 The unchanged code is worked example 1:
 
@@ -23,13 +23,13 @@ for (size_t i = 0; i < 3; i++) {
 CHECK(sum == 12);
 ```
 
-**Expected:** The changed run stops with `Check failed` at the CHECK on `sum == 12`. Restoring the original line brings back the worked observation: the result is 12.
+**Expected:** With `int values[] = {3, 4, 6};` the run stops with `Check failed` at the CHECK on `sum == 12`, because the "trace a prefix sum" case no longer shows that the result is 12. Restoring `int values[] = {2, 4, 6};` brings that observation back.
 
 Each iteration adds exactly one valid element. The index is proven less than the declared length before access.
 
 ## Exercise 2: Handle zero iterations: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `for (size_t i = 0; i <= length; i++) {`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+A regression changed one token in worked example 2, the "handle zero iterations" case, so one line now reads `for (size_t i = 0; i <= length; i++) {`. Run the example with that line, use the failing CHECK to find why the accumulator remains zero no longer holds and repair the line without changing the CHECK.
 
 The unchanged code is worked example 2:
 
@@ -43,7 +43,7 @@ for (size_t i = 0; i < length; i++) {
 CHECK(sum == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 0`; after it the line reads `for (size_t i = 0; i < length; i++) {` again and the accumulator remains zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 0`. Once the line reads `for (size_t i = 0; i < length; i++) {` again, the "handle zero iterations" case again shows that the accumulator remains zero.
 
 The example uses a real array because zero-length arrays are not standard C17. The logical length may still be zero.
 
@@ -125,4 +125,4 @@ The subtraction occurs only while remaining is positive. A condition i>=0 on siz
 
 ## After comparison
 
-Return to your own source and add a fresh distinguishing input. Explain why every access remains within a live object and why every owned resource is released. A valid expected failure belongs in the test contract; undefined behavior does not. Retain compiler diagnostics and any sanitizer evidence separately from ordinary output. A working fixture demonstrates its stated assumptions, not universal safety for arbitrary inputs.
+Add a fresh distinguishing input for the "transfer reverse traversal safely" case to your own c-004 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected loop invariant failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "handle zero iterations" case apart from ordinary output: the fixture proves its stated loop invariant, half-open range and fallthrough assumptions, not universal safety.

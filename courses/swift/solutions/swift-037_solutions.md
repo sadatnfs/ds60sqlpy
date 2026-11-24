@@ -14,13 +14,44 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Trace initialization and both setter calls.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The wrapper enforces a deliberate display range at every assignment. Assignments are clamped into zero through ten.
+**Reference answer.** It runs as the `Task 1` block of the reference program.
+
+```swift
+let direct = Clamped(wrappedValue: 15, 0...10)
+precondition(direct.wrappedValue == 10)
+var control = Control()
+precondition(control.level == 0)
+control.level = 12
+precondition(control.level == 10)
+control.level = -2
+precondition(control.level == 0)
+```
+
+**Observe:** Initializing with 15 already clamps to 10, Control starts at 0, and the two setters store 10 then 0.
+
+@Clamped(0...10) var level = 0 calls init(wrappedValue: 0, 0...10), which clamps once; each later assignment goes through the wrappedValue setter, which clamps again.
 
 ### Task 2: Guided modification
 
 Change the allowed range and update boundary tests.
 
-No separate reference answer has been written for this task. Start from Example B: The projected information explains the policy without exposing mutable internal storage. A valid interior value is unchanged and the projection exposes the range.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+struct Volume {
+  @Clamped(1...5) var level = 3
+}
+var volume = Volume()
+volume.level = 0
+precondition(volume.level == 1)
+volume.level = 6
+precondition(volume.level == 5)
+precondition(volume.$level == 1...5)
+```
+
+**Observe:** With range 1...5, 0 becomes 1, 6 becomes 5, and the projection reports 1...5.
+
+The range is a wrapper argument, so changing it moves both boundaries and the tests must move with it; the projection lets the test read the active range.
 
 ### Task 3: Independent construction
 
@@ -43,19 +74,64 @@ The wrapper applies one normalization policy in its setter, and init(wrappedValu
 
 Explain why silently clamping a payment amount would be misleading.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A wrapper is not a substitute for validating external input. Hidden side effects make ordinary-looking assignment hard to reason about. Document projection and mutation semantics.
+**Reference answer.** It runs as the `Task 4` block of the reference program.
+
+```swift
+struct Payment {
+  @Clamped(0...100) var amount = 0
+}
+var payment = Payment()
+payment.amount = 250
+precondition(payment.amount == 100)
+enum AmountError: Error { case outOfRange }
+func checkedAmount(_ value: Int) throws -> Int {
+  guard (0...100).contains(value) else { throw AmountError.outOfRange }
+  return value
+}
+precondition((try? checkedAmount(250)) == nil)
+```
+
+**Observe:** The clamped payment silently becomes 100, while the checked version refuses 250.
+
+Clamping a payment changes what the user asked to pay without telling them; a failure that can be reported is the honest result for money.
 
 ### Task 5: Boundary evidence
 
 Test both endpoints and one value outside each.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Apply a bounded display policy) and Example B (Retain valid interior values).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+var control = Control()
+control.level = 0
+precondition(control.level == 0)
+control.level = 10
+precondition(control.level == 10)
+control.level = -1
+precondition(control.level == 0)
+control.level = 11
+precondition(control.level == 10)
+```
+
+**Observe:** The endpoints 0 and 10 are kept, -1 becomes 0, and 11 becomes 10.
+
+The range is closed, so both endpoints are valid stored values; one step past either end is pulled back to that endpoint.
 
 ### Task 6: Transfer and justify
 
 Choose a wrapper or explicit validation method based on whether assignment can fail meaningfully.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Property wrapper**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Create a wrapper with an explicit normalization policy for a local display field) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** `Clamped` is a property wrapper that stores an Int and a `ClosedRange`, clamps in both its initializer and its `wrappedValue` setter, and projects the range through `projectedValue`. `Control` declares `@Clamped(0...10) var level = 0`. Example A assigns values above and below the range; Example B assigns 4 and reads `$level`. The task 3 answer is a wrapper that trims text on both initialization and assignment.
+
+**Why it is correct.** Assigning 12 runs `min(max(12, 0), 10)`, which is 10. Assigning -2 runs `min(max(-2, 0), 10)`, which is 0. For 4 both bounds leave it alone. Reading `control.$level` returns the projection, which is the range `0...10` rather than the stored integer. In task 3 both assignment and initialization store the trimmed text Report and x, because the same normalization runs in both places.
+
+**A plausible wrong approach.** Clamping only in the setter and storing `wrappedValue` unchanged in `init` would let `@Clamped(0...10) var level = 15` start at 15, an out-of-range value that no assignment produced. Using the same silent clamping for a payment amount (task 4) would turn an invalid 120 into a charged 100 with no error the caller can see.
+
+**How to verify.** For task 5, assign 0 and 10 and confirm they are kept, then assign -1 and 11 and confirm they become 0 and 10. For task 2, change the range to `1...5` and update all four boundary checks together, including the initial value, which must now lie in the new range.
 
 ## Mechanism and diagnostic reasoning
 

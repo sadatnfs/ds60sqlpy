@@ -195,6 +195,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-055-transactions-indexes-and-drivers">apache-055: Transactions, indexes and drivers<a class="heading-anchor" href="#apache-055-transactions-indexes-and-drivers" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-054</code>, <code>apache-051</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Lightweight transaction:</strong> A conditional write, such as UPDATE with IF, that uses a Paxos-based consensus round to compare and set a value within one partition.</li>
+<li><strong>Serial consistency:</strong> The consistency level for the consensus phase of a lightweight transaction, separate from the ordinary consistency level of its commit.</li>
+<li><strong>Storage Attached Index:</strong> Cassandra 5&#x27;s index type that stores index data with each SSTable and supports queries on non-key columns.</li>
+<li><strong>Selectivity:</strong> The fraction of rows a predicate matches. An index on a column that matches most rows still leaves an expensive distributed query.</li>
+</ul>
 <h3 id="conditional-invariants-and-indexed-access-solve-different-problems">Conditional invariants and indexed access solve different problems<a class="heading-anchor" href="#conditional-invariants-and-indexed-access-solve-different-problems" aria-label="Link to this section">#</a></h3>
 <p>An ordinary upsert resolves stored versions under the database&#x27;s write rules. A lightweight transaction adds a conditional comparison, such as changing an inventory value only if it still equals the value a caller observed. Cassandra uses a consensus protocol for the relevant conditional state. That is more coordination than a normal write and should be chosen for a specific invariant, not enabled indiscriminately as a generic performance setting.</p>
 <p>Serial consistency and ordinary read/write consistency describe different parts of the operation. A successful conditional mutation does not automatically make all later unrelated reads, tables or external effects one atomic workflow. The application still needs to identify which partition and business transition are protected. Decrementing stock, charging a payment system and sending an email are separate effects unless another explicit design coordinates them.</p>
@@ -210,6 +217,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Inspect conditional response state, requested consistency, index metadata, actual queryability and driver exceptions separately. Do not replace a rejected CAS with an unconditional update or add ALLOW FILTERING to conceal a missing access path. Preserve the invariant and diagnose the reason for rejection.</p>
 <p><strong>Interview discussion: when would you use a lightweight transaction rather than an ordinary write?</strong> When a defined conditional state transition requires its coordination semantics and the workload can afford the cost. An index answers a different question about access shape. The two cases demonstrate those boundaries with real conditions and an actual indexed lookup rather than treating either feature as a universal transaction or query optimizer.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="compare-and-set-on-one-partition">Compare and set on one partition<a class="heading-anchor" href="#compare-and-set-on-one-partition" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> ds60_orders<span class="syntax-punctuation">.</span>inventory
+<span class="syntax-keyword">SET</span> available <span class="syntax-operator">=</span> <span class="syntax-number">6</span>
+<span class="syntax-keyword">WHERE</span> item <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;demo&#x27;</span>
+<span class="syntax-keyword">IF</span> available <span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">UPDATE</span> ds60_orders<span class="syntax-punctuation">.</span>inventory
+<span class="syntax-keyword">SET</span> available <span class="syntax-operator">=</span> <span class="syntax-number">5</span>
+<span class="syntax-keyword">WHERE</span> item <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;demo&#x27;</span>
+<span class="syntax-keyword">IF</span> available <span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">;</span></code></pre>
+<p>The first statement returns a row with [applied] set to true. The second returns [applied] false along with the current value 6, because the condition no longer holds; Cassandra reports the conflict instead of overwriting it. These lightweight transactions use a Paxos round and cost several times a normal write, so reserve them for the transitions that truly need a guard. They also cover only this partition, so reserving stock and charging a payment still need a separate, idempotent protocol.</p>
+<h4 id="create-and-confirm-a-storage-attached-index">Create and confirm a Storage Attached Index<a class="heading-anchor" href="#create-and-confirm-a-storage-attached-index" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> CUSTOM <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> amount_sai
+<span class="syntax-keyword">ON</span> ds60_orders<span class="syntax-punctuation">.</span>indexed_orders <span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">USING</span> <span class="syntax-string">&#x27;StorageAttachedIndex&#x27;</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">SELECT</span> kind<span class="syntax-punctuation">,</span> <span class="syntax-keyword">options</span>
+<span class="syntax-keyword">FROM</span> system_schema<span class="syntax-punctuation">.</span>indexes
+<span class="syntax-keyword">WHERE</span> keyspace_name <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ds60_orders&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">table_name</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;indexed_orders&#x27;</span>
+  <span class="syntax-keyword">AND</span> index_name <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;amount_sai&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+<p>The metadata row should have kind CUSTOM and an options class_name ending in StorageAttachedIndex; the client checks both before trusting any query result. Creating the index starts an asynchronous build, so a query issued at once can fail or miss rows, which is why the client waits until it is queryable. With three fixture rows the index proves only that the API works, since a full scan would be just as fast; judge real use by cardinality, write amplification and query latency on production-sized partitions.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="conditional-state-and-actual-sai">Conditional state and actual SAI<a class="heading-anchor" href="#conditional-state-and-actual-sai" aria-label="Link to this section">#</a></h2>

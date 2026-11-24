@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use deterministic scheduling evidence and separate race diagnostics from timing luck.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A concurrent test must check results across meaningful interleavings. A schedule is an ordering of thread operations. Stress repeats a scenario but does not enumerate all schedules. ThreadSanitizer can detect many data races in an instrumented host run; it is a different tool from AddressSanitizer and usually requires a separate build.</p>
+<ul>
+<li><strong>schedule:</strong> one ordering of the operations performed by different threads.</li>
+<li><strong>synchronization point:</strong> an observable event, such as a fulfilled promise or a join, that establishes ordering in a test.</li>
+<li><strong>promise:</strong> the producer side of a future, which a worker fulfills to signal that a value is ready.</li>
+<li><strong>stress test:</strong> repeating a scenario many times, which can expose timing defects but does not enumerate every schedule.</li>
+<li><strong>ThreadSanitizer:</strong> a sanitizer that detects many data races and needs a separate instrumented build from AddressSanitizer.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use promises, barriers or condition predicates to establish test phases instead of sleeping for guessed startup. A fixed final count checks an invariant after join. Preserve failed inputs, iteration number, compiler and sanitizer output so a race report can be investigated.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

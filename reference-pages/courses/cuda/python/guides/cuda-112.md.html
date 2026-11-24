@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A performance review should let another person reproduce the computation, understand the comparison and identify its limits. Record source revision, hardware, driver, library versions, workload distribution, dtype, precision policy, warmup, synchronization and competing load. Preserve raw bounded timing samples instead of only the best number. Compare complete equivalent work and quantify variation.</p>
 <p>Review correctness evidence before speed claims, including edge cases, error tolerance and any changed algorithm. Separate kernel-only time, transfers, preprocessing, compilation and end-to-end latency. Document unavailable platforms honestly. A result from one device is a result from that device; it does not establish a universal architecture ranking. The final artifact should make an independent reviewer able to say which claim is supported and which experiment is still missing.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Median speedup:</strong> The ratio of median baseline time to median candidate time over repeated observations.</li>
+<li><strong>Raw observations:</strong> The complete set of bounded timing samples, preserved instead of only the best number.</li>
+<li><strong>Equivalence check:</strong> Verification that both versions compute the same result within a stated tolerance before speed is compared.</li>
+<li><strong>Cold and warm timing:</strong> Separate measurements of first-run cost and steady-state cost.</li>
+<li><strong>Platform scope:</strong> The hardware and software on which a result was measured, beyond which it is not a claim.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Baseline samples [10,11,9] and candidate [8,8,9] have medians 10 and 8. The median speedup is 1.25, with only three samples and explicitly limited confidence.</p>
@@ -219,20 +227,44 @@ report <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <span class="syntax-punctuation">}</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Synthetic median ratio 1.25; explicitly not a GPU benchmark.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>baseline</code></td>
+<td><code>[10, 11, 9]</code></td>
+</tr>
+<tr>
+<td><code>candidate</code></td>
+<td><code>[8, 8, 9]</code></td>
+</tr>
+<tr>
+<td><code>speedup</code></td>
+<td><code>1.25</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-calculate-median-speedup">Exercise 1: Calculate median speedup<a class="heading-anchor" href="#exercise-1-calculate-median-speedup" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>calculate median speedup</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Computing the ratio of the fastest samples, <code>9/8</code>, picks favorable outliers, while three samples are too few to support a precise estimate either way.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-preserve-raw-observations">Exercise 2: Preserve raw observations<a class="heading-anchor" href="#exercise-2-preserve-raw-observations" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>preserve raw observations</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting only the speedup ratio discards the information needed to judge whether it is meaningful. With samples such as 9, 10 and 11, the spread is as large as part of the claimed gain, which a single ratio hides.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-check-equivalence-first">Exercise 3: Check equivalence first<a class="heading-anchor" href="#exercise-3-check-equivalence-first" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>check equivalence first</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Accepting a candidate on speed and checking correctness afterward risks deploying a wrong result if the check is skipped. A kernel that skips work, for example by mishandling the tail, will often look faster precisely because it is wrong.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-separate-cold-and-warm-costs">Exercise 4: Separate cold and warm costs<a class="heading-anchor" href="#exercise-4-separate-cold-and-warm-costs" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>separate cold and warm costs</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Mixing the cold run into warm samples raises one sample sharply and can shift the median with only three samples.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-write-supported-platform-scope">Exercise 5: Write supported platform scope<a class="heading-anchor" href="#exercise-5-write-supported-platform-scope" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>write supported platform scope</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Stating the speedup for all NVIDIA GPUs generalizes from one device. Memory bandwidth, cache size and clock behavior differ by architecture, so the ratio can change or reverse on other hardware.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-prepare-a-reproducibility-checklist">Exercise 6: Prepare a reproducibility checklist<a class="heading-anchor" href="#exercise-6-prepare-a-reproducibility-checklist" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>prepare a reproducibility checklist</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Leaving out the limits, such as only three samples, presents a fragile result as settled. A reader then cannot tell whether a follow-up run that disagrees reveals a regression or ordinary noise.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

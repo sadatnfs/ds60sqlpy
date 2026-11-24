@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "What the pipe expands to",
+      "body": "The native pipe is rewritten into an ordinary nested call when the code is parsed:\n\n```text\nexpression                                  result\nquote(c(3, 1, 2) |> sort())                 sort(c(3, 1, 2))\nc(3, 1, 2)                                  3 1 2\nc(3, 1, 2) |> sort()                        1 2 3\nc(3, 1, 2) |> sort() |> head(2)             1 2\nhead(sort(c(3, 1, 2)), 2)                   1 2\n```\n\nThe quote row is the evidence for task 6. R evaluates exactly the same sort and head calls in both spellings, so the pipe changes how the code reads, not how much work it does.\n\nThe same idea helps when reading mapped output. In the reference, `summary$empty` prints:\n\n```text\n$n\n[1] 0\n\n$mean\n[1] NA\n```\n\nThe NA comes from the explicit branch. Without it, `mean(numeric(0))` gives NaN, which `is.na()` also accepts, so the reference check would still pass while a report showed NaN, a value that suggests failed arithmetic rather than a group with no rows."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Map `sum` over the two elements with vapply and a `numeric(1)` prototype.",
+      "why": "The first element sums to 3 and the second is already 3, so the result is the unnamed vector 3, 3; the input list has no names to carry over.",
+      "wrong": "Calling `sum(unlist(...))`. That returns 6, one grand total, and loses the per-group structure the task asks for.",
+      "verify": "`identical(vapply(list(c(1, 2), c(3)), sum, numeric(1)), c(3, 3))` returns TRUE."
+    },
+    {
+      "approach": "Keep the empty group in the list and map `sum` as before.",
+      "why": "`sum(numeric(0))` is 0, which fits the numeric(1) prototype, so the empty group gets total 0 under the documented convention.",
+      "wrong": "Summarizing with `max`. For the empty group it returns -Inf with a warning, which fits the prototype too, so vapply accepts a value no report should show.",
+      "verify": "`vapply(groups, sum, numeric(1))[[\"empty\"]]` returns 0."
+    },
+    {
+      "approach": "Use lapply with a function that returns `list(n = length(x), mean = ...)`, branching to NA_real_ when the group is empty.",
+      "why": "Each group needs two fields, so a list per group fits. A has mean 1.5, and the empty group gets n 0 with an explicit NA.",
+      "wrong": "Calling `mean(x)` without the branch. The empty group gets NaN, which `is.na()` also accepts, so the check passes while the output suggests an arithmetic fault.",
+      "verify": "`summary$A$mean` returns 1.5 and `summary$empty$n` returns 0."
+    },
+    {
+      "approach": "Run the two-value function under vapply with numeric(1) inside tryCatch and confirm that it stops.",
+      "why": "The prototype promises one number per element, and `c(x, x)` returns two, so vapply raises an error naming the length mismatch.",
+      "wrong": "Switching to sapply to make the error go away. It returns a two-row matrix, so code that expects one value per group receives a different shape with no message.",
+      "verify": "In the reference `bad` returns TRUE because the error handler ran."
+    },
+    {
+      "approach": "Map over `list()` with vapply and the same numeric(1) prototype.",
+      "why": "There are no elements to call, and the prototype still fixes the type, so the result is numeric(0).",
+      "wrong": "Using sapply here. As Example 3 shows, it returns an empty list, which fails an `is.numeric()` check and breaks code that later adds totals.",
+      "verify": "`identical(vapply(list(), sum, numeric(1)), numeric(0))` returns TRUE."
+    },
+    {
+      "approach": "Show that the piped and nested forms are the same call, and time a realistic workload only if speed matters.",
+      "why": "`quote()` reveals that `c(3, 1, 2) |> sort()` becomes `sort(c(3, 1, 2))`, so both versions sort the same three numbers.",
+      "wrong": "Timing each spelling once on three numbers and reporting the faster one. The difference is noise, and no algorithm changed.",
+      "verify": "`identical(c(3, 1, 2) |> sort() |> head(2), head(sort(c(3, 1, 2)), 2))` returns TRUE."
+    }
+  ]
+}

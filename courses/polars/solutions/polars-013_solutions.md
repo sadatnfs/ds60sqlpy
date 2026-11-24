@@ -20,11 +20,23 @@ counts = frame.select(
 assert counts.row(0) == (1, 1)
 ```
 
+**Why it holds here:** Order 2 has an empty list, so list.len() returns 0; order 3 has a null list, so its length is null and only is_null catches it. Each test counts one order.
+
+**Plausible wrong approach:** Using list.len() == 0 alone and treating its null result as 0 merges order 3 into the empty bucket and reports two empty orders and no unknown ones.
+
+**How to verify:** Run the answer code and assert counts.row(0) == (1, 1); example_one also shows the lengths as [2, 0, None].
+
 **Expected:** There is one of each.
 
 ## 2. Change the grain
 
 Add a stable item position or item identifier when the source contract supports it. A repeated label is not necessarily a duplicate item.
+
+**Why it holds here:** After explode, order 1 produces two rows, a and b, so order alone repeats. A position within the list, added with int_ranges or a with_row_index per order, makes (order, position) unique.
+
+**Plausible wrong approach:** Using (order, item) as the key fails as soon as one order lists the same item twice, since two real purchases then look like a duplicate.
+
+**How to verify:** Explode the fixture with a position column and assert select('order', 'position').is_unique().all(), while order alone is not unique.
 
 **Expected:** An order_id alone is no longer sufficient.
 
@@ -43,11 +55,23 @@ assert orders_before == 3
 assert exploded["order"].to_list() == [1, 1, 3]
 ```
 
+**Why it holds here:** Counting orders before explode gives 3 because each input row is one order. Afterwards the order column reads [1, 1, 3]: order 2 disappeared and order 1 appears twice.
+
+**Plausible wrong approach:** Counting rows of the exploded table as orders gives 3 by coincidence here, yet it includes order 1 twice and omits order 2, so the right number arrives for the wrong reason.
+
+**How to verify:** Run the answer code: orders_before is 3 and exploded['order'] is [1, 1, 3], then add a third item to order 1 and watch the exploded count drift to 4.
+
 **Expected:** The count remains 3.
 
 ## 4. Add a struct field
 
 A schema version should explain the added field and its units. Positional unpacking can silently change meaning when fields are reordered.
+
+**Why it holds here:** Fields in a struct are addressed by name, so adding z next to x and y and extracting struct.field('x'), 'y' and 'z' restores the original three columns.
+
+**Plausible wrong approach:** Unpacking struct values by position, for example from to_dicts to a tuple, silently swaps meanings if the next version stores z first.
+
+**How to verify:** Pack x, y and z with pl.struct, extract all three by name, and assert the result equals the input frame, as example_two does for two fields.
 
 **Expected:** All values and field names are preserved.
 
@@ -55,11 +79,23 @@ A schema version should explain the added field and its units. Positional unpack
 
 pl.element()*pl.element() expresses the operation within each list. It preserves the list boundaries while changing the values.
 
+**Why it holds here:** list.eval applies pl.element() * pl.element() inside each list, so [1, 2] becomes [1, 4] and [3] becomes [9] while each row keeps its own list.
+
+**Plausible wrong approach:** Exploding, squaring and grouping back works but needs a row key and can reorder or drop empty lists; a map_elements loop hides the operation in Python.
+
+**How to verify:** Run pl.DataFrame({'values': [[1, 2], [3]]}).select(pl.col('values').list.eval(pl.element() * pl.element())) and assert the lists are [[1, 4], [9]].
+
 **Expected:** The lists become [[1, 4],[9]].
 
 ## 6. Test null nested elements
 
 Decide whether the collection is partially observed, invalid or imputable. Do not erase the distinction merely to simplify a numeric aggregation.
+
+**Why it holds here:** A list like [1, None] says the collection exists but one member is unknown, which differs from both an empty list and a null list.
+
+**Plausible wrong approach:** Applying drop_nulls inside the list before aggregating turns it into [1] and reports a complete basket of one.
+
+**How to verify:** Count null elements with list.eval(pl.element().is_null()).list.sum() before aggregating, and check what list.sum returns for [1, None] on your installed version instead of assuming it.
 
 **Expected:** The null remains visible unless explicitly handled.
 

@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>d3.scaleUtc</code> maps instants to x positions. A line generator uses x and y accessors to produce an SVG path string. <code>.defined(d =&gt; Number.isFinite(d.value))</code> controls which records form continuous segments. Set <code>fill: none</code> for an ordinary line so the path is not treated as a filled polygon.</p>
 <p>A null value must be rejected explicitly because <code>Number(null)</code> becomes zero. Sorting and missingness policies are data decisions, not merely chart styling. The reference checks ordering and the number of separate path segments in a small fixture.</p>
 <h3 id="exercise-1-predict-date-order-after-sorting">Exercise 1: Predict date order after sorting.<a class="heading-anchor" href="#exercise-1-predict-date-order-after-sorting" aria-label="Link to this section">#</a></h3>
-<p>The line generator uses array order. Sorting is an explicit preprocessing step rather than a hidden property of time scales.</p>
+<p>The line generator uses array order. Sorting is an explicit preprocessing step rather than a hidden property of time scales. The fixture lists January 3 first; <code>sort((a, b) =&gt; a.date - b.date)</code> subtracts Date objects as milliseconds and puts January 1 first. Sorting the ISO strings would also work here, but sorting a formatted label such as &quot;Jan 10&quot; before &quot;Jan 9&quot; would not. The reference checks that <code>rows[0]</code> is 2024-01-01.</p>
 <p><strong>Expected:</strong> Chronological order by numeric instant.</p>
 <h3 id="exercise-2-insert-a-missing-observation">Exercise 2: Insert a missing observation.<a class="heading-anchor" href="#exercise-2-insert-a-missing-observation" aria-label="Link to this section">#</a></h3>
-<p>A missing value is not a measured zero. Preserve enough records to represent the missing interval.</p>
+<p>A missing value is not a measured zero. Preserve enough records to represent the missing interval. January 3 has value null, and line.defined excludes it, so the path has two segments: January 1 to 2 and January 4 to 5. Removing the null row entirely would instead draw a straight line from January 2 to 4, hiding the missing day. Count &quot;M&quot; commands in the path string.</p>
 <p><strong>Expected:</strong> The path has a visible gap under the stated policy.</p>
 <h3 id="exercise-3-build-a-utc-line-chart-with-a-gap">Exercise 3: Build a UTC line chart with a gap.<a class="heading-anchor" href="#exercise-3-build-a-utc-line-chart-with-a-gap" aria-label="Link to this section">#</a></h3>
-<p>Use matching time parsing, scale and formatting conventions. Check the data ordering independently of the rendered path.</p>
+<p>Use matching time parsing, scale and formatting conventions. Check the data ordering independently of the rendered path. Use scaleUtc with UTC dates and utcFormat(&quot;%b %d&quot;) for ticks. Mixing local parsing with UTC formatting can shift labels by a day in some time zones. Verify both that rows are sorted and that the path contains two M commands.</p>
 <p><strong>Expected:</strong> Time-ordered points and separate defined segments.</p>
 <h3 id="exercise-4-diagnose-a-line-that-doubles-back-in-time">Exercise 4: Diagnose a line that doubles back in time.<a class="heading-anchor" href="#exercise-4-diagnose-a-line-that-doubles-back-in-time" aria-label="Link to this section">#</a></h3>
-<p>Inspect numeric timestamps before changing interpolation. A curve style cannot repair incorrect temporal ordering.</p>
+<p>Inspect numeric timestamps before changing interpolation. A curve style cannot repair incorrect temporal ordering. A line that runs right then jumps left means the array order is not time order. Changing curve to curveMonotoneX would not help. Print rows.map(d =&gt; +d.date) and confirm it increases.</p>
 <p><strong>Expected:</strong> Input order is unsorted or dates were parsed incorrectly.</p>
 <h3 id="exercise-5-handle-an-empty-or-all-missing-series">Exercise 5: Handle an empty or all-missing series.<a class="heading-anchor" href="#exercise-5-handle-an-empty-or-all-missing-series" aria-label="Link to this section">#</a></h3>
-<p>Extent on no valid data does not define a meaningful chart scale. Make the empty state part of the component contract.</p>
+<p>Extent on no valid data does not define a meaningful chart scale. Make the empty state part of the component contract. With all values null, d3.extent over valid values returns [undefined, undefined] and the y domain becomes NaN. Check for zero defined points first and render a &quot;no data&quot; message instead of an axis.</p>
 <p><strong>Expected:</strong> Show an explicit no-data message rather than invalid domains.</p>
 <h3 id="exercise-6-explain-interpolation-limits-for-irregular-observations">Exercise 6: Explain interpolation limits for irregular observations.<a class="heading-anchor" href="#exercise-6-explain-interpolation-limits-for-irregular-observations" aria-label="Link to this section">#</a></h3>
-<p>Label gaps and sampling intervals. A smooth curve can suggest precision or continuity the data does not support.</p>
+<p>Label gaps and sampling intervals. A smooth curve can suggest precision or continuity the data does not support. Here observations are daily, so a straight segment between January 4 and 5 says nothing about hours in between; label the sampling interval. If a gap is real, keep it visible as the break line.defined already draws.</p>
 <p><strong>Expected:</strong> Connecting samples is a visual assumption, not evidence between measurements.</p></article>
   </main>
 </body>

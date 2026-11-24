@@ -14,7 +14,8 @@ An AMD/Intel/Apple GPU backend is a separate runtime contract, not CUDA fallback
 ## Authored sources and generation
 
 The C++ branch uses `authoring/cpp_units.json` for original teaching prose,
-practice questions, answers and standard-library CPU models.
+practice questions, answers, observable outcomes, key terms and standard-library
+CPU models. Python/Spark key terms live in `authoring/python_key_terms.py`.
 `authoring/cpp_gpu_programs.json` stores the canonical complete standalone CUDA
 references and answer-free learner harnesses. These JSON strings are normalized
 to the repository's formatter settings; edit these durable sources before

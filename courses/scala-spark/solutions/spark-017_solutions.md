@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-017.md) and attempt one language first. The [Sc
 
 Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw.
 
-**Expected:** Sources 1-4 accepted;5 malformed_json;6 missing_parent;7 missing_payload. No source disappears and accepted count is 4.
+**Expected:** Sources 1-4 accepted; 5 malformed_json; 6 missing_parent; 7 missing_payload. No source disappears and accepted count is 4.
 
 ```scala
 def parseRecords(raw: DataFrame): DataFrame = {
@@ -99,7 +99,7 @@ The ledger is still one row per accepted parent record. Capturing array_state he
 
 Use posexplode to return parent_id, position, sku, qty for actual items. Order by parent_id and position, and retain repeated SKU a.
 
-**Expected:** Rows(10,0, a,2),(10,1, a,3),(40,0, b, NULL). Exactly 3 children; parents 20 and 30 produce none.
+**Expected:** `Rows(10, 0, a, 2)`, `(10, 1, a, 3)`, `(40, 0, b, NULL)`. Exactly 3 children; parents 20 and 30 produce none.
 
 ```scala
 def children(parents: DataFrame): DataFrame = {
@@ -118,13 +118,13 @@ def children(parents):
 
 The three rows represent actual array elements. Parent 40 remains an observed child even though qty is unknown. Duplicate values for parent 10 are preserved because their positions differ. The bounded literal comparison checks identities and values together; a count-only test would miss an accidental DISTINCT that later happened to be compensated by another duplicated row.
 
-**Verification evidence:** Assert the entire three-row occurrence list and unique(parent_id, position) count 3.
+**Verification evidence:** Assert the entire three-row occurrence list and unique (parent_id, position) count 3.
 
 ### Exercise 4: Preserve parents without inventing observed children
 
 Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays.
 
-**Expected:** Five rows: the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL).
+**Expected:** Five rows: the three observed children plus `(20, empty, NULL, NULL, NULL)` and `(30, unknown, NULL, NULL, NULL)`.
 
 ```scala
 def outerChildren(parents: DataFrame): DataFrame = {
@@ -165,7 +165,7 @@ Outer generation preserves the reporting population but changes the meaning of a
 
 Aggregate the outer relation to parent_id, array_state, child_count, known_qty_count, total_qty. Count positions for children and preserve SUM NULL when there are no known quantities.
 
-**Expected:** Parent 10:(2,2,5);20:(0,0, NULL);30:(0,0, NULL);40:(1,0, NULL). Empty and unknown collection states remain visible.
+**Expected:** Parent `10:(2, 2, 5)`; `20:(0, 0, NULL)`; `30:(0, 0, NULL)`; `40:(1, 0, NULL)`. Empty and unknown collection states remain visible.
 
 ```scala
 def summarizeChildren(outer: DataFrame): DataFrame = {
@@ -196,7 +196,7 @@ These measures answer separate questions: how many children were observed, how m
 
 For one parent with SKUs [a, b] and channels [web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.
 
-**Expected:** Independent generators produce 6 pairs; zip produces(a, web), (b, shop),(NULL, api), three rows.
+**Expected:** Independent generators produce 6 pairs; zip produces (a, web), (b, shop), (NULL, api), three rows.
 
 ```scala
 def arrayRelationships(spark: SparkSession): (DataFrame, DataFrame) = {
@@ -229,4 +229,6 @@ The six-row relation models every independent pairing, while the three-row relat
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. Its first check (Parse once and retain rejection evidence) is built inside the program, so opening the lesson fetches nothing; it expects: Sources 1-4 accepted; 5 `malformed_json`; 6 `missing_parent`; 7 `missing_payload`. No source disappears and accepted count is 4. The final success line prints only after every reference assertion passes.
+
+Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

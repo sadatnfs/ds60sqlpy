@@ -198,21 +198,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-include-the-current-event">1. Include the current event<a class="heading-anchor" href="#1-include-the-current-event" aria-label="Link to this section">#</a></h3>
 <p>Choose whether the current event is observable at decision time. Do not change the operator solely to improve a model score.</p>
+<p>Changing time &lt; cutoff to time &lt;= cutoff alters nothing in this fixture: request 10 at cutoff 4 already sees time 1 only (time 3 is known at 5), request 11 at cutoff 9 sees times 1, 3 and 8, and request 12 at cutoff 4 sees time 2. To make the operator observable, add an event for customer 1 at time 4 with known 4; under &lt;= request 10&#x27;s sum grows by that amount and its count becomes 2. Concluding that the operator does not matter from the unchanged totals is the mistake this task exposes.</p>
 <p><strong>Expected:</strong> Any changed contribution is explained.</p>
 <h3 id="2-add-an-unmatched-request">2. Add an unmatched request<a class="heading-anchor" href="#2-add-an-unmatched-request" aria-label="Link to this section">#</a></h3>
 <p>Left-join selected features back and add a reason or coverage flag. Excluding it silently changes the deployment scenario.</p>
+<p>Add request 13 for customer 3, who has no events. The inner join drops it before group_by, so totals still has three rows and nothing warns you. Joining totals back to requests with how=&quot;left&quot; restores four rows with sum and count null for 13; fill count with 0 only if &quot;no eligible events&quot; is the intended meaning, and keep a has_history flag. Verify that the final height equals requests.height.</p>
 <p><strong>Expected:</strong> It remains in the final population.</p>
 <h3 id="3-detect-duplicated-features">3. Detect duplicated features<a class="heading-anchor" href="#3-detect-duplicated-features" aria-label="Link to this section">#</a></h3>
 <p>Resolve conflicting versions under a reviewed rule before joining. Arbitrary deduplication can conceal a temporal or identity defect.</p>
+<p>In example_two, give selected two rows for request 2, say values 4.0 and 5.0. validate=&quot;1:1&quot; raises before producing a frame, which is the desired failure. Calling unique(subset=&quot;request&quot;) first would keep one arbitrary row and pass, hiding whether 5.0 was a late revision or a key collision. Decide by known time, as in the eligibility rule, then re-run the join.</p>
 <p><strong>Expected:</strong> The one-to-one contract rejects fanout.</p>
 <h3 id="4-compare-zero-and-null">4. Compare zero and null<a class="heading-anchor" href="#4-compare-zero-and-null" aria-label="Link to this section">#</a></h3>
 <p>A missing value may use a fitted imputation or abstention policy. Carry a missingness flag when its meaning matters.</p>
+<p>Request 1 has value 0.0, meaning history exists and sums to zero; request 3 has null, meaning no history. fill_null(0) would make them identical and the coverage of 2/3 would become an apparent 3/3. Keep the null, add is_missing, and assert joined[&quot;value&quot;].null_count() == 1.</p>
 <p><strong>Expected:</strong> The cases retain different meanings.</p>
 <h3 id="5-validate-counts">5. Validate counts<a class="heading-anchor" href="#5-validate-counts" aria-label="Link to this section">#</a></h3>
 <p>Track matched, missing, rejected and duplicated cases separately. Use the original population as the denominator for coverage.</p>
+<p>For example_one the inner join produces 7 candidate rows (3 for request 10, 3 for 11, 1 for 12) and the filter keeps 5, yet the population is 3 requests. Counting rows after the join would report 7 or 5, neither of which is a request count. Reconcile with n_requests == matched + no_history + rejected and compute coverage over 3.</p>
 <p><strong>Expected:</strong> Every request has an explained outcome.</p>
 <h3 id="6-plan-a-scalable-equivalent">6. Plan a scalable equivalent<a class="heading-anchor" href="#6-plan-a-scalable-equivalent" aria-label="Link to this section">#</a></h3>
 <p>Use an appropriate indexed, versioned or windowed implementation and compare it with the small independent oracle on boundary cases.</p>
+<p>The join on customer multiplies every request by every event of that customer, so cost grows with requests times history length. Sort events by customer and known, then restrict each request to rows with known &lt;= cutoff through a range join or a partitioned index before applying time &lt; cutoff. A single join_asof is not enough on its own here, because it returns one nearest row and the rule has two clocks. Verify the replacement by running both on this fixture and on the time-4 boundary row from task 1; the totals must be equal.</p>
 <p><strong>Expected:</strong> The proposal preserves the same eligibility rule.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;mle-003: local, bounded ML engineering investigation.&quot;&quot;&quot;</span>

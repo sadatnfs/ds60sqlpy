@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-complete-latency">Exercise 1: Compute complete latency<a class="heading-anchor" href="#exercise-1-compute-complete-latency" aria-label="Link to this section">#</a></h3>
 <p>Include packing and transfer.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute complete latency</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Add every component of latency: the library path is 8 ms of kernels plus 2 ms of transfer, 10 ms; the custom path is 6 + 2 + 3 ms of packing, 11 ms.</p>
+<p><strong>Why it is correct here.</strong> The custom kernel itself is 2 ms faster, but packing adds 3 ms. End-to-end latency is what callers experience, so the custom path is worse by 1 ms in this model.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing kernel times alone, 6 against 8 ms, declares the custom version a win while ignoring the new packing step.</p>
+<p><strong>How to verify.</strong> The reference asserts totals of 10 and 11. Recompute after removing packing to check the comparison flips only when packing is eliminated.</p>
 <h3 id="exercise-2-list-a-numerical-contract">Exercise 2: List a numerical contract<a class="heading-anchor" href="#exercise-2-list-a-numerical-contract" aria-label="Link to this section">#</a></h3>
 <p>Specify shape dtype tolerance and edge behavior.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>list a numerical contract</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write the numerical contract for the operation: input shape and dtype, output dtype, tolerance against a reference, and behavior on empty inputs, NaN and overflow.</p>
+<p><strong>Why it is correct here.</strong> A replacement kernel must meet the same contract as the library. Without a written contract, a faster kernel that rounds differently or mishandles NaN looks like an improvement.</p>
+<p><strong>A plausible wrong approach.</strong> Testing only that the shapes match accepts any numbers of the right size, so a kernel that returns zeros, or that silently turns NaN inputs into finite outputs, would pass every check.</p>
+<p><strong>How to verify.</strong> Turn each clause into a test and run it against both implementations: a random input compared with tolerance, an empty input, an input containing NaN, and an input near the dtype maximum. Both must pass the same suite.</p>
 <h3 id="exercise-3-add-temporary-memory">Exercise 3: Add temporary memory<a class="heading-anchor" href="#exercise-3-add-temporary-memory" aria-label="Link to this section">#</a></h3>
 <p>Count peak simultaneously live buffers.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>add temporary memory</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Count temporary memory as the peak sum of buffers alive at the same time. For example, input, a packed copy and the output of <code>N</code> float32 values each give <code>3*4*N</code> bytes at peak, not <code>2*4*N</code>.</p>
+<p><strong>Why it is correct here.</strong> Peak memory decides whether a workload fits. The packed buffer coexists with the input during packing and with the output during the kernel.</p>
+<p><strong>A plausible wrong approach.</strong> Summing only the input and output ignores intermediates, so the custom path can run out of memory at a size where the library path fit, even though both outputs are the same size.</p>
+<p><strong>How to verify.</strong> Measure peak allocation with the library&#x27;s memory pool statistics, such as CuPy&#x27;s <code>get_default_memory_pool().used_bytes()</code>, for a known size and compare with the arithmetic. Free the pool between runs so caching does not hide the peak.</p>
 <h3 id="exercise-4-identify-a-maintenance-cost">Exercise 4: Identify a maintenance cost<a class="heading-anchor" href="#exercise-4-identify-a-maintenance-cost" aria-label="Link to this section">#</a></h3>
 <p>Architecture and compiler changes need requalification.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>identify a maintenance cost</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Name a maintenance cost: a custom kernel must be recompiled and requalified for new GPU architectures, toolkit versions and compiler changes, while the library vendor handles that work.</p>
+<p><strong>Why it is correct here.</strong> Hand-tuned kernels encode assumptions about one generation&#x27;s resources. A new architecture can change the best tile size or break inline assembly.</p>
+<p><strong>A plausible wrong approach.</strong> Counting only the development time ignores ongoing cost, which repeats every time the team adopts a new GPU or toolkit release and often exceeds the original effort.</p>
+<p><strong>How to verify.</strong> List the owner of each requalification step and the test that must pass on each supported architecture. If no one owns the step, the kernel has no maintenance plan.</p>
 <h3 id="exercise-5-choose-two-workload-sizes">Exercise 5: Choose two workload sizes<a class="heading-anchor" href="#exercise-5-choose-two-workload-sizes" aria-label="Link to this section">#</a></h3>
 <p>Use tiny and representative bounded inputs.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>choose two workload sizes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Choose two workload sizes: a tiny input, where launch and first-call overheads dominate, and a representative bounded input sized like production work.</p>
+<p><strong>Why it is correct here.</strong> The fused kernel can win at the representative size by removing intermediates while losing at the tiny size because of compilation and launch cost.</p>
+<p><strong>A plausible wrong approach.</strong> Benchmarking only at the largest size that fits hides the small-input behavior, which matters when production calls are mostly small batches.</p>
+<p><strong>How to verify.</strong> Report both sizes with the same correctness checks, warm-up policy and synchronized timing method, and state the device used. Without a GPU, mark both timings as not measured.</p>
 <h3 id="exercise-6-write-a-keep-or-replace-decision">Exercise 6: Write a keep-or-replace decision<a class="heading-anchor" href="#exercise-6-write-a-keep-or-replace-decision" aria-label="Link to this section">#</a></h3>
 <p>Keep the library unless measured benefits justify added obligations.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>write a keep-or-replace decision</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Write the decision: keep the library unless measured end-to-end gains on representative inputs exceed the added maintenance, testing and portability obligations. Here keep it, since the custom path is slower.</p>
+<p><strong>Why it is correct here.</strong> The modeled custom path loses 1 ms end to end and adds obligations, so nothing justifies the switch.</p>
+<p><strong>A plausible wrong approach.</strong> Choosing the custom kernel because its compute portion, 6 ms against 8 ms, is faster ignores the stated total and the packing step that the custom path requires.</p>
+<p><strong>How to verify.</strong> Include the totals, sizes, contract and the owner list in the decision record, so a later reviewer can repeat the decision if packing is removed or the library changes.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Library 10 and custom 11 modeled milliseconds.</p>
 <p>The reference file is <code>courses/cuda/python/references/cuda-085_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

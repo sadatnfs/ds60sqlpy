@@ -1,6 +1,6 @@
 ## A small real optimization experiment
 
-This unit performs actual PyTorch forward, backward and optimizer steps. The policy has two contexts and two actions per context. Its trainable logits form a2-by -2 table, and its critic has one value per context. The environment terminates after one action, so returns equal immediate rewards and no temporal trace is needed. This isolates PPO's objective from the GAE boundary issues studied previously.
+This unit performs actual PyTorch forward, backward and optimizer steps. The policy has two contexts and two actions per context. Its trainable logits form a 2-by-2 table, and its critic has one value per context. The environment terminates after one action, so returns equal immediate rewards and no temporal trace is needed. This isolates PPO's objective from the GAE boundary issues studied previously.
 
 The rollout distribution is enumerated exactly. Both contexts have probability one half, and each action is weighted by the frozen old policy's probability. This computes the surrogate expectation without sampling noise. It is not a claim that a real language-model action space can be enumerated, nor a simulation of token generation. The advantage of the reduction is that every weight, reward and update can be inspected.
 

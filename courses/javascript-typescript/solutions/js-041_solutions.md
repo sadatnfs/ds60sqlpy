@@ -52,7 +52,7 @@ assert.equal(result.accepted, 3);
 assert.deepEqual(result.rejected, []);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual([...result.groups], [['A', { count: 2, sum: 5 }], ['B', { count: 1, sum: 4 }]])`. Restoring the original line brings back the worked observation: A count 2 sum 5; B count 1 sum 4; zero rejected.
+**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual([...result.groups], [['A', { count: 2, sum: 5 }], ['B', { count: 1, sum: 4 }]])`. Restoring `{ group: 'A', value: 2 },` brings back: A count 2 sum 5; B count 1 sum 4; zero rejected.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual([...result.groups], [['A', { count: 2, sum: 5 }], ['B', { count: 1, sum: 4 }]])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -75,7 +75,7 @@ assert.deepEqual(result.rejected, [
 assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 })`; after it the line reads `"value":2` again and one accepted row; diagnostics at lines 2 and 3 with json/schema categories.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 })`. Restoring `"value":2` brings back: one accepted row; diagnostics at lines 2 and 3 with json/schema categories.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 })` for this input.
 

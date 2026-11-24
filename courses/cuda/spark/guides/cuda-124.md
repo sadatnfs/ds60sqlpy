@@ -23,6 +23,13 @@ Machine-learning training is another boundary. A SQL acceleration plugin does no
 For the included null-preserving doubling example, the built-in expression and reference function agree on integers and missing values. The next meaningful test adds type boundaries and verifies the output schema. Only after that should a real Spark plan be inspected for supported acceleration. This sequence makes correctness visible before any GPU configuration is introduced.
 
 
+### Key terms
+
+- **Python UDF:** A row-at-a-time Python function called from Spark, which the GPU plugin does not translate.
+- **Pandas UDF:** A vectorized Python function that receives Arrow-backed batches as pandas objects.
+- **Pandas API on Spark:** A pandas-like interface that compiles to Spark plans rather than running pandas code directly.
+- **GPU-aware UDF:** A UDF that explicitly manages GPU packages, device assignment, batch size and transfers under a reviewed contract.
+
 ## Worked examples
 
 ### Worked example 1
@@ -52,33 +59,52 @@ print("CPU expression parity oracle:", expected)
 
 **Expected observation:** Null-preserving expression produces [2, None,6].
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `values` | `[1, None, 3]` |
+| `expected` | `[2, None, 6]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Classify four APIs
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **classify four APIs** in the examples above.
+**Trap to avoid:** Treating a pandas UDF as equivalent to a built-in because it is vectorized ignores the process boundary and serialization that still surround it.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Replace an equivalent simple UDF
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **replace an equivalent simple UDF** in the examples above.
+**Trap to avoid:** Replacing a UDF that maps null to 0 with the built-in, which keeps null, changes results while appearing to be the same arithmetic.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain Arrow limits
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **explain Arrow limits** in the examples above.
+**Trap to avoid:** Assuming that enabling Arrow moves UDF work to the GPU confuses data format with execution location.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Define GPU-aware UDF ownership
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **define GPU-aware UDF ownership** in the examples above.
+**Trap to avoid:** Calling a GPU library from every partition with no device assignment risks oversubscription and out-of-memory errors that appear only at higher concurrency.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Distinguish SQL and ML acceleration
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **distinguish SQL and ML acceleration** in the examples above.
+**Trap to avoid:** Reporting the whole pipeline as accelerated because the SQL plan shows GPU operators omits the training step.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Design quality parity tests
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **design quality parity tests** in the examples above.
+**Trap to avoid:** Comparing a GPU model trained on a different split with a CPU model attributes data differences to the backend.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

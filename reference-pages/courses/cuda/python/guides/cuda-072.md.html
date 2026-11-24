@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Readiness is a sequence of increasingly strong claims: the package imports, the device is visible, allocation works, a compatible binary launches, execution completes, and the answer is correct. A successful earlier step cannot prove a later one. A missing device in a container may be a host/runtime exposure issue; an unsupported architecture binary is a build issue; an allocation failure may be a workload budget issue.</p>
 <p>Fail clearly instead of silently substituting CPU execution in a GPU evidence run. A CUDA device assertion can poison later operations in that process, so the first failure and process boundary matter. Stop and report a bounded failed job rather than repeatedly retrying allocations. On unsupported hosts, use the portable reference route and keep real-device evidence pending. MPS, ROCm and other accelerator backends are alternatives with different contracts, not CUDA emulation.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Readiness ladder:</strong> An ordered sequence of claims from package import through device visibility, allocation, launch and a correct answer, where an earlier step cannot prove a later one.</li>
+<li><strong>Fail-closed device selection:</strong> A policy that stops with a clear error when the requested GPU is unavailable instead of silently running on the CPU.</li>
+<li><strong>Device-side assertion:</strong> A failure raised inside a kernel that can leave the CUDA context unusable, so later operations in the same process also fail.</li>
+<li><strong>Process boundary:</strong> The point at which a fresh process obtains a new context after a fatal device error, since the old context cannot be recovered.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A probe that imports CuPy but reports no device establishes package installation only. Mark allocation and kernel tests as not attempted.</p>
@@ -215,20 +222,36 @@ failed <span class="syntax-operator">=</span> <span class="syntax-builtin">next<
 <span class="syntax-keyword">assert</span> failed <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">correctness</span><span class="syntax-string">&quot;</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU diagnostic fixture: failed at</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> failed<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Fixture fails at correctness, not readiness success.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>failed</code></td>
+<td><code>&#x27;correctness&#x27;</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-order-the-evidence-levels">Exercise 1: Order the evidence levels<a class="heading-anchor" href="#exercise-1-order-the-evidence-levels" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>order the evidence levels</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Collapsing all stages into one boolean <code>gpu_ok</code> hides where a failure happened and makes a correctness failure look like a missing driver.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-classify-missing-device">Exercise 2: Classify missing device<a class="heading-anchor" href="#exercise-2-classify-missing-device" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>classify missing device</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reinstalling CuPy treats the problem as a package issue when the package is fine; the missing piece is device exposure or hardware.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-classify-wrong-output">Exercise 3: Classify wrong output<a class="heading-anchor" href="#exercise-3-classify-wrong-output" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>classify wrong output</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting the probe as ready because the exit code was zero ignores the value check. A probe that prints wrong numbers and exits normally is worse than one that crashes, because nothing downstream notices.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-fail-closed-device-selection">Exercise 4: Design fail-closed device selection<a class="heading-anchor" href="#exercise-4-design-fail-closed-device-selection" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>design fail-closed device selection</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Defaulting to CPU with a warning lets automated runs record a GPU pass for a CPU result.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-process-restart-after-fatal-device-error">Exercise 5: Explain process restart after fatal device error<a class="heading-anchor" href="#exercise-5-explain-process-restart-after-fatal-device-error" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>explain process restart after fatal device error</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Catching the exception and retrying in the same process often fails again, and if it seems to succeed the evidence is suspect.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-compare-alternative-backend-labels">Exercise 6: Compare alternative backend labels<a class="heading-anchor" href="#exercise-6-compare-alternative-backend-labels" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>compare alternative backend labels</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calling any accelerator run a GPU pass loses which runtime produced it, so a CUDA requirement can be satisfied by an Apple run on paper.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

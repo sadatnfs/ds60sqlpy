@@ -3,6 +3,28 @@
   "title": "Broadcasting, axes and mutation order",
   "concepts": ["broadcast", "dot syntax", "fusion", "shape", "aliasing"],
   "outcome": "Use broadcasting with explicit axes and distinguish an elementwise formula from a mutation-order-dependent algorithm.",
+  "key_terms": [
+    [
+      "Broadcasting",
+      "Applying a function elementwise across arrays and scalars, expanding singleton dimensions so compatible shapes combine."
+    ],
+    [
+      "Dot syntax",
+      "Writing `f.(x)` or `x .+ y` requests broadcasting, and the `@.` macro adds a dot to every call in an expression."
+    ],
+    [
+      "Loop fusion",
+      "Nested dotted calls in one expression combine into a single loop without allocating temporary arrays."
+    ],
+    [
+      "Singleton dimension",
+      "An axis of length one that broadcasting repeats to match the other operand, so a column and a row form a matrix."
+    ],
+    [
+      "Mutation order",
+      "When a loop writes values that later iterations read, such as a shift, the result depends on write order unless the source is snapshotted."
+    ]
+  ],
   "level": "intermediate",
   "minutes": 150,
   "prerequisites": ["julia-007", "julia-012"],
@@ -11,48 +33,68 @@
     ["Julia array broadcasting", "https://docs.julialang.org/en/v1/manual/arrays/"]
   ],
   "figure": 0,
+  "approach": "Write the indexed formula first, then make array axes express it. Broadcasting extends singleton axes and fails when lengths disagree. The worked example adds per-row offsets `[10, 20]` and a one-row array of per-column offsets. For in-place loops, ask whether a read sees earlier writes, since that decides recurrence or snapshot behavior.",
   "exercises": [
     {
       "title": "Choose the axis",
       "task": "Add one offset per column to a matrix.",
       "expected": "Reshape the offsets into a one-row array.",
       "hint": "Write the indexed formula first.",
-      "answer": "The explicit singleton axis documents the intended broadcast alignment."
+      "answer": "The explicit singleton axis documents the intended broadcast alignment.",
+      "why": "`reshape([100, 200, 300], 1, 3)` has size `(1, 3)`, so it lines up with the three columns of `[1 3 5; 2 4 6]`.",
+      "wrong": "Adding the plain vector `[100, 200, 300]` tries to match it with the two rows and raises `DimensionMismatch`.",
+      "verify": "Example A asserts the result `[111 213 315; 122 224 326]`; the reference checks `size(reshape([1, 2, 3], 1, 3)) == (1, 3)`."
     },
     {
       "title": "Reject incompatible axes",
       "task": "Broadcast a length 4 vector with the 2-by-3 fixture.",
       "expected": "A DimensionMismatch occurs.",
       "hint": "Compatible axes are not determined by total element count.",
-      "answer": "Shape validation prevents a silent interpretation of an unintended operation."
+      "answer": "Shape validation prevents a silent interpretation of an unintended operation.",
+      "why": "A length 4 vector aligns with the first axis of length 2, which is neither equal nor 1, so broadcasting throws.",
+      "wrong": "Arguing that 4 elements fit somewhere in a 6-element matrix treats total size as the rule rather than per-axis compatibility.",
+      "verify": "Example A asserts `@test_throws DimensionMismatch matrix .+ [1, 2, 3, 4]`."
     },
     {
       "title": "Update in place",
       "task": "Apply 2x+1 elementwise to a floating vector using dotted assignment.",
       "expected": "The destination values change to the expected affine result.",
       "hint": "Each output depends only on the corresponding old element.",
-      "answer": "This dependence pattern makes the specific self-update straightforward to reason about."
+      "answer": "This dependence pattern makes the specific self-update straightforward to reason about.",
+      "why": "`values .= 2 .* values .+ 1` fuses into one loop where each output reads only its own old element, so `[1, 2, 3]` becomes `[3, 5, 7]`.",
+      "wrong": "Writing `values = 2 .* values .+ 1` allocates a new array and rebinds the name, so other references to the original see no change.",
+      "verify": "Example B asserts `values == [3, 5, 7]`; the reference checks a similar dotted assignment giving `[0.5, 1.0]`."
     },
     {
       "title": "Trace a manual recurrence",
       "task": "Shift a vector left-to-right by reading the preceding updated element.",
       "expected": "The example becomes `[1, 1, 1, 1]`.",
       "hint": "A later read sees an earlier write.",
-      "answer": "The loop implements a recurrence, not a simultaneous snapshot assignment."
+      "answer": "The loop implements a recurrence, not a simultaneous snapshot assignment.",
+      "why": "In the loop `sequential[i] = sequential[i-1]`, position 2 receives 1, and position 3 then reads that new 1, so all four entries become 1.",
+      "wrong": "Expecting a shift to `[1, 1, 2, 3]` assumes each read sees the original values, which only holds with separate source storage.",
+      "verify": "Example B asserts `sequential == [1, 1, 1, 1]`."
     },
     {
       "title": "Preserve a snapshot",
       "task": "Read the shift input from an explicit copy.",
       "expected": "The example becomes `[1, 1, 2, 3]`.",
       "hint": "Separate source and destination storage.",
-      "answer": "The copy changes the read/write dependency and therefore the algorithm."
+      "answer": "The copy changes the read/write dependency and therefore the algorithm.",
+      "why": "Reading from `source = copy(snapshot)` keeps the old values available, so the shift gives `[1, 1, 2, 3]`.",
+      "wrong": "Taking a `view` of the array instead of a copy shares storage and reproduces the recurrence result.",
+      "verify": "Example B asserts `snapshot == [1, 1, 2, 3]`."
     },
     {
       "title": "Choose a destination type",
       "task": "Write 0.5 into an integer element through dotted assignment.",
       "expected": "The incompatible conversion is rejected.",
       "hint": "Mutation does not make the destination representation arbitrary.",
-      "answer": "Allocate a representation that can express the intended result."
+      "answer": "Allocate a representation that can express the intended result.",
+      "why": "`Int[0] .= [0.5]` must convert 0.5 into the existing `Int` element, which is inexact, so `InexactError` is raised.",
+      "wrong": "Expecting the destination to widen to `Float64` misunderstands in-place assignment, which never changes the element type of an existing array.",
+      "verify": "The reference asserts `@test_throws InexactError Int[0] .= [0.5]`; allocate `zeros(1)` when fractional results are expected."
     }
-  ]
+  ],
+  "checks_note": "Broadcasting rules appear one at a time: `sin.` applies elementwise, a scalar expands across `[1, 2]`, and `.*` multiplies matching positions rather than performing a matrix product. `reshape` turns three values into a one by three row without copying them. The `destination .=` line writes into existing storage, and the final `InexactError` shows that an in-place write into `Int` storage cannot hold 0.5."
 }

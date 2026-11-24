@@ -5,6 +5,40 @@
   "minutes": 50,
   "prerequisites": ["apache-011"],
   "concepts": ["IPC", "schema", "record batch"],
+  "key_terms": [
+    [
+      "Arrow IPC",
+      "Arrow's interprocess communication format, which serializes a schema and record batches so another process can reconstruct the same logical arrays. It is not a shared-memory transport or an authentication protocol."
+    ],
+    [
+      "IPC stream format",
+      "The sequential IPC form in which a reader receives the schema and then each record batch in order, suited to consumers that process and release one bounded batch at a time."
+    ],
+    [
+      "IPC file format",
+      "The IPC form with a footer indexing batch locations, so a reader can fetch one batch without replaying the batches before it."
+    ],
+    [
+      "Stream schema",
+      "The schema declared at the start of an IPC stream, which every later batch must match in names and types. Changing a column's type requires normalization or a new stream."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Preserve schema metadata through an IPC stream",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.ipc as ipc\n\nschema = pa.schema([(\"id\", pa.int64())], metadata={b\"currency\": b\"fixture-USD\"})\nsink = pa.BufferOutputStream()\nwith ipc.new_stream(sink, schema) as writer:\n    writer.write_batch(pa.record_batch([[1, 2]], schema=schema))\nreader = ipc.open_stream(sink.getvalue())\nprint(reader.schema.metadata)",
+      "output": "{b'currency': b'fixture-USD'}",
+      "interpretation": "The currency key survives the stream because schema metadata travels in the stream header. A reader that compares schemas without check_metadata would accept a batch labeled with a different currency, so contracts that depend on metadata must compare it explicitly. Note the bytes keys: code that looks up a str key will miss the entry and may wrongly conclude it was dropped."
+    },
+    {
+      "title": "Fetch one batch from an IPC file footer",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.ipc as ipc\n\nschema = pa.schema([(\"id\", pa.int64())])\nsink = pa.BufferOutputStream()\nwith ipc.new_file(sink, schema) as writer:\n    writer.write_batch(pa.record_batch([[1, 2]], schema=schema))\n    writer.write_batch(pa.record_batch([[3]], schema=schema))\nreader = ipc.open_file(sink.getvalue())\nprint(reader.num_record_batches, reader.get_batch(1).to_pylist())",
+      "output": "2 [{'id': 3}]",
+      "interpretation": "The file format records batch locations in a footer, so the reader knows there are two batches and jumps straight to the second. A stream reader has no footer and must read from the beginning. Choose the file format for data at rest that needs random access, and the stream format for pipes and sockets where the total length is not known when writing starts."
+    }
+  ],
   "evidence": "Independent exact-value assertions and expected failure observations in the complete bounded program.",
   "sources": [
     ["Arrow IPC documentation", "https://arrow.apache.org/docs/python/ipc.html"],

@@ -6,7 +6,7 @@ from render import case as E
 add(
     "Dynamic allocation and single-owner release",
     """Allocated storage lets a program choose capacity at runtime. malloc returns uninitialized storage or a null pointer on failure; calloc also initializes its bytes to zero. The caller must establish an owner responsible for exactly one release after the last use. free ends the allocation lifetime, so every pointer into that allocation becomes invalid even if its numeric address still looks familiar. Setting one pointer to NULL does not repair other aliases. Calculate allocation sizes without overflowing size_t before calling an allocator. A successful allocation says storage exists, not that application fields have been initialized meaningfully.""",
-    """malloc(count * sizeof *items) avoids repeating the element type, but multiplication needs a prior bound check. Check the returned pointer before use. calloc(count,sizeof *items) accepts element count and size separately, while still requiring an application resource budget. free(NULL) is defined and harmless. The helper here returns NULL for a zero count by its own contract and refuses multiplication overflow before allocation.""",
+    """`malloc(count * sizeof *items)` avoids repeating the element type, but multiplication needs a prior bound check. Check the returned pointer before use. `calloc(count, sizeof *items)` accepts element count and size separately, while still requiring an application resource budget. `free(NULL)` is defined and harmless. The helper here returns NULL for a zero count by its own contract and refuses multiplication overflow before allocation.""",
     [
         ("Allocation owner", "The component responsible for releasing dynamic storage."),
         ("Dangling pointer", "A pointer whose target lifetime has ended."),
@@ -462,8 +462,8 @@ add(
             "Transfer stack contrast",
             "Push 2 and 5 into a bounded stack and pop once.",
             "The popped value is 5.",
-            r"""int stack[4];size_t length=0;stack[length++]=2;stack[length++]=5;int out=stack[--length];CHECK(out==5&&length==1);""",
-            "The pop index is the last occupied position. This direct fixture proves nonempty state before decrementing.",
+            r"""int stack[4];size_t length=0;stack[length++]=2;stack[length++]=5;CHECK(length>0);int out=stack[--length];CHECK(out==5&&length==1);""",
+            "The pop index is the last occupied position. `CHECK(length > 0)` proves the stack is nonempty before the decrement, so `stack[--length]` never wraps the unsigned `length` to `SIZE_MAX` and reads outside `stack`; a general pop must make the same test and report failure instead.",
         ),
     ],
     helper="""enum{QUEUE_CAPACITY=4};

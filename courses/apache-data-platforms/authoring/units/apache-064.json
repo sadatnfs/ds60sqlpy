@@ -5,6 +5,39 @@
   "minutes": 80,
   "prerequisites": ["apache-063"],
   "concepts": ["SerDe", "partition registration", "physical schema"],
+  "key_terms": [
+    [
+      "Storage descriptor",
+      "The Metastore record that ties a table's columns to a file format, input and output classes, SerDe and location."
+    ],
+    [
+      "SerDe",
+      "Serializer and deserializer, the component that translates between stored bytes and Hive column values."
+    ],
+    [
+      "Partition registration",
+      "Adding a partition value and its location to the Metastore, for example with ALTER TABLE ADD PARTITION. Creating a directory alone does not register it."
+    ],
+    [
+      "Physical schema",
+      "The column names and types actually written in the Parquet files, which must stay compatible with the catalog's declared types."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Generate the Parquet file for one day",
+      "language": "python",
+      "code": "import pyarrow as pa\nimport pyarrow.parquet as pq\n\ntable = pa.table(\n    {\n        \"id\": pa.array([1, 2, 3], pa.int32()),\n        \"region\": [\"east\", \"west\", \"east\"],\n        \"amount\": pa.array([4, 9, 7], pa.int32()),\n    }\n)\nsink = pa.BufferOutputStream()\npq.write_table(table, sink)\nprint(pq.read_schema(pa.BufferReader(sink.getvalue())))",
+      "output": "id: int32\nregion: string\namount: int32",
+      "interpretation": "The printed schema shows id and amount as int32 and region as string, which match INT and STRING in the Hive declaration. The day column is absent on purpose: Hive derives it from the directory name day=2026-01-01, not from the file. If the file were written with int64 columns, a reader expecting INT can fail or convert depending on the engine version, which is why the schema should be inspected before blaming the query."
+    },
+    {
+      "title": "Project from the registered day",
+      "language": "sql",
+      "code": "SELECT\n  region,\n  SUM(amount)\nFROM\n  ds60.orders\nWHERE\n  day = '2026-01-01'\nGROUP BY\n  region\nORDER BY\n  region;",
+      "interpretation": "From explain.sql, this should return east 11 and west 9. The EXPLAIN version of the same query shows the partition filter applied before the scan, so only one directory is read. Two different failures look alike here: a missing partition returns zero rows with no error, while a wrong column type in a separately named table produces a reader error or nulls. Record which one you saw before changing anything, because the fixes are different."
+    }
+  ],
   "evidence": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates.",
   "sources": [
     ["Hive4.2.1 preparation and components", "https://hive.apache.org/development/quickstart/"],

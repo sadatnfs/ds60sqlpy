@@ -66,7 +66,7 @@ OBJECTIVES = {
     ),
     "torch-012": (
         "Deliver an auditable regression run: fixed data identities, a training-only baseline, a bounded training loop and a separately opened holdout.",
-        "Fit a bias-free 3-to-1 Linear model on four training rows of target 2a-b+c for 100 SGD steps and score two holdout rows afterward.",
+        "Fit a bias-free 3-to-1 Linear model on four training rows of target `2a - b + c` for 100 SGD steps and score two holdout rows afterward.",
         "The baseline mean is 0.5 with holdout MSE 7.25, the weight equals (1-0.95^100) times [2, -1, 1], the trained holdout error is below 7.25, and the report keeps the two-row limitation explicit.",
     ),
     "torch-013": (

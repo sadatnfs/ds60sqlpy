@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: beginner. Direct prerequisites: `apache-006`.
 
+## Key terms
+
+- **Event time:** When the source says an event happened, as opposed to ingestion time, when a pipeline accepted it, and processing time, when a computation handled it.
+- **Half-open interval:** A window [a, b) that includes its start and excludes its end, so adjacent windows meet without counting a boundary event twice.
+- **As-of revision:** A rule that selects the version of each record known at a stated time, so a report can reproduce what was known then even after corrections arrive.
+- **Late correction:** A revised value for an existing record that arrives after the original. It changes the current answer without changing the answer for an earlier as-of time.
+
 ## A timestamp is incomplete without a clock and a meaning
 
 Event time is when a source says an event happened. Ingestion time is when a
@@ -78,6 +85,50 @@ or a different as-of selection can all change its input. Reproduce the original
 source version and cutoff first, then compare identified revisions. The two
 worked cases separate arrival delay from a business correction and preserve a
 clear explanation for each changed total.
+
+## Worked examples
+
+### Select a UTC day with a half-open interval
+
+```python
+from datetime import UTC, datetime
+
+start = datetime(2026, 3, 1, tzinfo=UTC)
+end = datetime(2026, 3, 2, tzinfo=UTC)
+events = [
+    datetime(2026, 2, 28, 23, 59, 59, tzinfo=UTC),
+    datetime(2026, 3, 1, 0, 0, tzinfo=UTC),
+    datetime(2026, 3, 1, 23, 59, 59, 999999, tzinfo=UTC),
+    datetime(2026, 3, 2, 0, 0, tzinfo=UTC),
+]
+print([start <= t < end for t in events])
+```
+
+```text
+[False, True, True, False]
+```
+
+Midnight on March 1 belongs to the day and midnight on March 2 belongs to the next one, so adjacent days never share or drop an event. A closed interval ending at 23:59:59 would lose the final microsecond of the day and a BETWEEN on both midnights would count the boundary twice. Check that both bounds are timezone-aware; mixing a naive bound with aware event times raises an error in Python and silently shifts rows in many SQL engines.
+
+### Keep the highest revision of each order
+
+```python
+rows = [
+    {"order": 1, "revision": 1, "amount": 4},
+    {"order": 2, "revision": 1, "amount": 9},
+    {"order": 1, "revision": 2, "amount": 6},
+]
+latest = {}
+for row in sorted(rows, key=lambda r: (r["order"], r["revision"])):
+    latest[row["order"]] = row
+print(sum(r["amount"] for r in rows), sum(r["amount"] for r in latest.values()))
+```
+
+```text
+19 15
+```
+
+Summing every row gives 19 because the corrected order is counted twice, while keeping the highest revision gives 15, which matches the corrected business fact. The sort makes the result independent of arrival order. If two rows share an order and revision with different amounts, this code keeps whichever sorts last, so a production version should reject that duplicate as a contract violation instead.
 
 ## Complete worked source
 

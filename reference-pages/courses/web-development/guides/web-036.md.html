@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A function gives a named operation explicit inputs and an output. A useful contract states accepted values, returned meaning and failure behavior. Type declarations communicate and enforce part of that contract at runtime, but a positive duration requirement needs an explicit value check in addition to an int type. Small pure functions are easy to test because their result depends on inputs rather than hidden global state.</p>
 <p>A closure is a function value that can be passed to another function. Arrow functions capture variables from their surrounding scope by value automatically, while ordinary anonymous functions use an explicit use clause for capture. Avoid hidden mutable dependencies when a simple parameter would make the relationship clearer.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Function contract:</strong> The parameter types, return type and documented behavior that a caller is allowed to rely on.</li>
+<li><strong>Return type:</strong> The declared type after a function&#x27;s parameter list, which PHP checks when the function returns.</li>
+<li><strong>Closure:</strong> An anonymous function object that captures outer variables only through <code>use</code>, by value unless marked with <code>&amp;</code>.</li>
+<li><strong>Arrow function:</strong> A short closure such as <code>fn($x) =&gt; $x * 2</code> that holds one expression and captures outer variables by value automatically.</li>
+<li><strong>Pure function:</strong> A function whose result depends only on its inputs and that has no side effects such as output or file writes.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Separate formatting from calculation so each can be tested independently. Return values are not the same as echo output. A function that echoes a result may be difficult to compose, while a function that returns a value lets a caller choose how to display it. Use exceptions for invalid inputs when the contract treats them as errors, and document predictable alternate results when absence is normal.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -217,6 +225,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The operation is passed as data to a transformation.</p>
 <pre class="highlighted-code"><code class="language-php">$doubled = array_map(fn(int $value): int =&gt; $value * 2, [10, 20]);</code></pre>
 <p><strong>Expected observation:</strong> The result is [20, 40].</p>
+<h3 id="contrast-case-a-formatter-that-echoes-instead-of-returning">Contrast case: a formatter that echoes instead of returning<a class="heading-anchor" href="#contrast-case-a-formatter-that-echoes-instead-of-returning" aria-label="Link to this section">#</a></h3>
+<p>The caller wants to build one sentence from the formatted duration. Trace the output order and the value of <code>$text</code>.</p>
+<pre class="highlighted-code"><code class="language-php">function label(int $minutes): void {
+  echo $minutes . &#x27; minutes&#x27;;
+}
+
+$text = &#x27;Total: &#x27; . label(30);
+echo &quot;\n&quot; . $text . &quot;\n&quot;;</code></pre>
+<p>PHP must evaluate <code>label(30)</code> before it can finish the concatenation, so 30 minutes is printed at that moment, before anything else. The function is declared <code>void</code>, so it returns null, and concatenating null adds nothing. <code>$text</code> becomes Total: and the program prints that on the next line. The output therefore shows the duration and the label separated and in the wrong order. Changing the return type to <code>string</code> and returning the text lets the caller decide where it goes.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-the-difference-between-returning-and-echoing-a-value">Exercise 1: Explain the difference between returning and echoing a value.<a class="heading-anchor" href="#exercise-1-explain-the-difference-between-returning-and-echoing-a-value" aria-label="Link to this section">#</a></h4>

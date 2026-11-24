@@ -40,7 +40,7 @@ if (!decoded.body.ok) throw new Error(decoded.body.error.message);
 assert.equal(decoded.body.data.total, 5);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(decoded.body.data.total, 5)`. Restoring the original line brings back the worked observation: status 200 and decoded total 5.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(decoded.body.data.total, 5)`. Restoring `const reply = handle({ method: 'POST', path: '/sum', requestId: 'R1', body: { a: 2, b: 3 } });` brings back: status 200 and decoded total 5.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(decoded.body.data.total, 5)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -60,7 +60,7 @@ assert.equal(reply.body.error.code, 'bad_request');
 assert.equal(reply.body.requestId, 'R2');
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(reply.body.requestId, 'R2')`; after it the line reads `const reply = handle({ method: 'POST', path: '/sum', requestId: 'R2', body: { a: '2', b: 3 } });` again and status 400 with bad_request and matching request id.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(reply.body.requestId, 'R2')`. Restoring `const reply = handle({ method: 'POST', path: '/sum', requestId: 'R2', body: { a: '2', b: 3 } });` brings back: status 400 with bad_request and matching request id.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(reply.body.requestId, 'R2')` for this input.
 

@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Python is a host language in this lesson: its interpreter evaluates names, calls library functions and schedules work. A NumPy array owns CPU-accessible storage. A CuPy array normally owns device storage while its Python object keeps shape, dtype and ownership information on the host. The statement that creates a result may return before its GPU kernel completes. Printing a scalar can force a transfer and a wait, so observation can change the schedule you are observing.</p>
 <p>Use four separate questions: which process issued the operation, which allocation contains its inputs, which processor executes the arithmetic, and which event proves the output is ready. A package import answers none of the last three. A GPU-enabled framework can also place unsupported or deliberately selected work on the CPU. Record actual tensor residency and synchronization instead of inferring placement from the package name.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Host memory:</strong> Memory attached to the CPU, where ordinary Python objects and NumPy arrays live.</li>
+<li><strong>Device memory:</strong> Memory on the GPU board that kernels read and write; data must be allocated or copied there before a kernel can use it.</li>
+<li><strong>Asynchronous launch:</strong> A kernel or copy request that returns control to Python before the GPU finishes the work.</li>
+<li><strong>Implicit synchronization:</strong> A host wait triggered by an operation such as printing a scalar or converting to a host value, which blocks until queued device work completes.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A CPU list [1, 2, 3] is reduced by the Python process to 6. No driver, GPU allocation or kernel is involved. The host result is immediately available after sum returns.</p>
@@ -215,6 +222,24 @@ ledger <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>device <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CPU</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> device <span class="syntax-operator">in</span> ledger<span class="syntax-punctuation">)</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU reference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">,</span> ledger<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> CPU reference: 6; every ledger event is CPU.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>values</code></td>
+<td><code>[1, 2, 3]</code></td>
+</tr>
+<tr>
+<td><code>result</code></td>
+<td><code>6</code></td>
+</tr>
+<tr>
+<td><code>ledger</code></td>
+<td><code>[(&#x27;input&#x27;, &#x27;CPU&#x27;), (&#x27;sum&#x27;, &#x27;CPU&#x27;), (&#x27;result&#x27;, &#x27;CPU&#x27;)]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
 <p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
@@ -233,17 +258,23 @@ cp<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</spa
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA array sum:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">device</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> x<span class="syntax-operator">.</span>device<span class="syntax-operator">.</span>id<span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-the-five-events">Exercise 1: Trace the five events<a class="heading-anchor" href="#exercise-1-trace-the-five-events" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>trace the five events</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Listing only three events (build, sum, print) merges the upload into construction and the download into printing. That hides exactly the two transfers worked example 2 names, so a later timing or residency question has no event to attach to.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-explain-why-import-is-insufficient">Exercise 2: Explain why import is insufficient<a class="heading-anchor" href="#exercise-2-explain-why-import-is-insufficient" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>explain why import is insufficient</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating a clean import as proof of GPU execution is the common shortcut. It fails on a CPU-only laptop where the import succeeds but the first allocation raises, and it fails silently when a framework falls back to CPU for unsupported work.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-change-the-input-to-an-empty-list">Exercise 3: Change the input to an empty list<a class="heading-anchor" href="#exercise-3-change-the-input-to-an-empty-list" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>change the input to an empty list</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Launching a reduction with a grid computed from <code>n = 0</code> and then reading <code>out[0]</code> can return whatever bytes the allocation held. Another wrong move is raising an error, which breaks callers that legitimately pass empty batches.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-find-the-hidden-transfer-in-scalar-printing">Exercise 4: Find the hidden transfer in scalar printing<a class="heading-anchor" href="#exercise-4-find-the-hidden-transfer-in-scalar-printing" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>find the hidden transfer in scalar printing</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming <code>print(total)</code> is free because it is one line leads to placing it inside a loop. Each iteration then stalls the host until the device catches up, and a timing taken around the loop measures synchronization rather than the reduction.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-residency-ledger">Exercise 5: Design a residency ledger<a class="heading-anchor" href="#exercise-5-design-a-residency-ledger" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design a residency ledger</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> A ledger keyed by package name (&quot;numpy&quot;, &quot;cupy&quot;) instead of by object fails as soon as one library holds both host and device arrays, and it cannot record whether the device result was actually ready when read.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-how-a-cpu-fallback-must-be-labeled">Exercise 6: Explain how a CPU fallback must be labeled<a class="heading-anchor" href="#exercise-6-explain-how-a-cpu-fallback-must-be-labeled" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>explain how a CPU fallback must be labeled</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Catching the CUDA error and silently computing with NumPy makes the program exit with status zero and the same answer. A dashboard reading only exit codes would then count a GPU lesson as qualified on a machine with no GPU.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

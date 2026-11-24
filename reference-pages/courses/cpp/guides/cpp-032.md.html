@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Bound concurrency and transfer failures without abandoning owned work.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Bounded parallel work limits simultaneous workers and queued items. Backpressure slows producers when the system has no capacity. Failure propagation carries a worker error to the owner instead of silently producing partial success. Cancellation and joining are part of the resource contract, not optional cleanup.</p>
+<ul>
+<li><strong><code>std::future</code>:</strong> a handle to a result that may arrive later and carries either a value or an exception.</li>
+<li><strong><code>std::launch::async</code>:</strong> the launch policy that runs a task asynchronously instead of letting the implementation defer it.</li>
+<li><strong>bounded parallelism:</strong> limiting the number of simultaneous workers and queued items.</li>
+<li><strong>backpressure:</strong> slowing producers when the system has no spare capacity.</li>
+<li><strong>failure propagation:</strong> carrying a worker&#x27;s error to the owner, for example by rethrowing it from <code>get</code>, instead of reporting partial success.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Keep the worker count separate from input length. A future stores either a result or an exception; get observes it. The small demonstration launches exactly two async tasks, so it does not implement a general queue or prove an arbitrary task list is bounded.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

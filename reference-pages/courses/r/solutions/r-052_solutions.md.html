@@ -203,26 +203,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Calculate both group means and standard errors from the raw observations.</p>
 <p>Means are 2.5 and 4.5; squared SEs are 5/12 and 17/12 respectively.</p>
 <p><strong>Expected evidence:</strong> Correct means and SE denominators.</p>
+<p><strong>Approach:</strong> Compute each group&#x27;s mean and sd with the n minus 1 divisor, then divide sd by the square root of its own count, 4.</p>
+<p><strong>Why it holds here:</strong> A = 1, 2, 3, 4 has mean 2.5 and squared deviations summing to 5, so the variance is 5/3 and SE squared is 5/12. B = 2, 3, 6, 7 has mean 4.5 and squared deviations summing to 17, so SE squared is 17/12.</p>
+<p><strong>Tempting mistake:</strong> Dividing the squared deviations by n instead of n minus 1. A would then get SE squared 5/16 instead of 5/12, a quarter smaller in variance and too narrow in every interval built from it.</p>
+<p><strong>Verify:</strong> <code>se^2</code> returns 5/12 and 17/12 within 1e-12.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Construct the stated 95 percent t intervals for the means.</p>
 <p>Each interval is mean plus/minus qt(0.975,3) times its SE, under the stated sampling/model assumptions.</p>
 <p><strong>Expected evidence:</strong> Correctly labeled mean intervals.</p>
+<p><strong>Approach:</strong> Multiply each SE by qt(0.975, 3), about 3.18, and add and subtract that half width from each mean.</p>
+<p><strong>Why it holds here:</strong> Each group has 4 values and so 3 degrees of freedom. A&#x27;s half width is about 2.05, giving 0.45 to 4.55, and B&#x27;s is about 3.79, giving 0.71 to 8.29.</p>
+<p><strong>Tempting mistake:</strong> Using the normal value 1.96. With 3 degrees of freedom the half widths shrink by about 38 percent, to about 1.27 and 2.33, and the intervals claim more precision than four values support.</p>
+<p><strong>Verify:</strong> <code>all(half &gt; se)</code> returns TRUE, and <code>half</code> returns about 2.05 and 3.79.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Draw raw observations and summaries with shared y limits.</p>
 <p>The two panels use one numerical y mapping, supporting direct magnitude comparison.</p>
 <p><strong>Expected evidence:</strong> One two-panel page with shared limits.</p>
+<p><strong>Approach:</strong> Compute one ylim from the raw values together with every interval endpoint and pass it to both panels.</p>
+<p><strong>Why it holds here:</strong> The raw values span 1 to 7 but the intervals reach about 0.45 and 8.29, so the shared range is 0.45 to 8.29. A unit of height then means the same amount in both panels.</p>
+<p><strong>Tempting mistake:</strong> Taking limits from the raw values alone. B&#x27;s upper end and A&#x27;s lower end then fall outside 1 to 7, so their arrows are clipped and look shorter than they are.</p>
+<p><strong>Verify:</strong> <code>range(c(unlist(groups), means - half, means + half))</code> returns about 0.45 and 8.29.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose labeling mean plus/minus one SE as a 95 percent confidence interval.</p>
 <p>One SE is not the same procedure as the stated t interval; relabel or calculate the intended interval.</p>
 <p><strong>Expected evidence:</strong> Interval target/construction repaired.</p>
+<p><strong>Approach:</strong> Label the bars by what they are: draw the t interval and call it a 95 percent interval, or draw plus or minus one SE and call it that.</p>
+<p><strong>Why it holds here:</strong> For these groups the t interval is qt(0.975, 3), about 3.18 times, wider than one SE. A&#x27;s one SE bar would run 1.85 to 3.15, while its stated interval runs 0.45 to 4.55.</p>
+<p><strong>Tempting mistake:</strong> Drawing mean plus or minus SE and titling it 95 percent intervals. The bars are about a third of the stated width, so A and B look more clearly separated than the intervals allow.</p>
+<p><strong>Verify:</strong> <code>half / se</code> returns about 3.18 for both groups.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why zero cannot be placed on an ordinary logarithmic axis.</p>
 <p>The logarithm is not finite at zero; choose a justified alternate representation or admission policy rather than silently dropping the observation.</p>
 <p><strong>Expected evidence:</strong> Domain issue explicitly handled.</p>
+<p><strong>Approach:</strong> Check the values before plotting on a log axis, and decide openly how a zero or negative value will be handled.</p>
+<p><strong>Why it holds here:</strong> log(0) is minus infinity, so zero has no position on the axis. For 1, 10 and 100 the log10 gaps are both 1, which is why those points sit equally spaced even though their raw differences are 9 and 90.</p>
+<p><strong>Tempting mistake:</strong> Letting plot drop the zero with only a warning, or adding 1 to every value. The shift turns 1, 10 and 100 into 2, 11 and 101, whose ratios are no longer equal, so the spacing changes meaning.</p>
+<p><strong>Verify:</strong> <code>is.finite(log(0))</code> returns FALSE, and the log10 differences of <code>c(1, 10, 100)</code> return 1 and 1.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Restore a caller&#x27;s layout after a plotting helper.</p>
 <p>The helper restores mfrow/margins and does not close an unrelated device.</p>
 <p><strong>Expected evidence:</strong> Caller layout preserved.</p>
+<p><strong>Approach:</strong> Inside draw, save the result of par(mfrow = c(1, 2), mar = ...) and register <code>par(old)</code> with on.exit.</p>
+<p><strong>Why it holds here:</strong> par returns the previous values of the settings it changes, so on.exit restores the caller&#x27;s layout and margins when draw returns, even after an error. draw never closes the device, which belongs to the caller.</p>
+<p><strong>Tempting mistake:</strong> Ending the helper with dev.off to tidy up, which closes the caller&#x27;s device, or never restoring mfrow, so the caller&#x27;s next plot lands in half of the page.</p>
+<p><strong>Verify:</strong> <code>identical(par(&quot;mfrow&quot;), before)</code> returns TRUE after draw.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 4 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-sbom-and-provenance">Exercise 1: Distinguish SBOM and provenance.<a class="heading-anchor" href="#exercise-1-distinguish-sbom-and-provenance" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Component inventory versus build-origin evidence.</p>
 <p><strong>Why:</strong> They answer complementary questions. An inventory does not explain who built the artifact; a build statement does not enumerate every vulnerability.</p>
+<p><strong>Approach:</strong> Ask what each document answers: the SBOM lists the packages inside the image, while provenance describes the inputs and builder that produced it.</p>
+<p><strong>Why this is correct:</strong> The sbom.spdx.json from worked example 1 names Python and OS packages but says nothing about which machine ran the build.</p>
+<p><strong>A plausible wrong approach:</strong> Treating a complete SBOM as proof of a trustworthy build skips the separate question of origin.</p>
+<p><strong>How to verify:</strong> Look for builder and source fields in sbom.spdx.json; they are absent, which is why a provenance statement is needed too.</p>
 <h3 id="exercise-2-predict-what-a-source-only-inventory-misses">Exercise 2: Predict what a source-only inventory misses.<a class="heading-anchor" href="#exercise-2-predict-what-a-source-only-inventory-misses" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Resolved base packages and exact inherited versions.</p>
 <p><strong>Why:</strong> A Dockerfile tag is an input reference, not a full final filesystem inventory. Resolve and inspect the actual artifact for stronger evidence.</p>
+<p><strong>Approach:</strong> Compare what the Dockerfile names, <code>python:3.12-slim</code> and <code>server.py</code>, with what the exported image filesystem actually contains.</p>
+<p><strong>Why this is correct:</strong> The base tag resolves to many OS and Python packages at specific versions that appear nowhere in the source.</p>
+<p><strong>A plausible wrong approach:</strong> Building the inventory by reading the Dockerfile lists two items and misses the inherited packages a scanner needs.</p>
+<p><strong>How to verify:</strong> The package list in sbom.spdx.json includes OS packages absent from the source files, as worked example 1 notes.</p>
 <h3 id="exercise-3-design-an-evidence-linkage-table">Exercise 3: Design an evidence linkage table.<a class="heading-anchor" href="#exercise-3-design-an-evidence-linkage-table" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Every record names the same image digest and platform scope.</p>
 <p><strong>Why:</strong> This prevents acceptance, inventory and provenance from drifting across mutable tags or architecture-specific artifacts.</p>
+<p><strong>Approach:</strong> Make one row per record, acceptance, SBOM and provenance, with columns for image digest and platform.</p>
+<p><strong>Why this is correct:</strong> If every row names the same digest and platform, the documents describe one artifact; any mismatch shows drift.</p>
+<p><strong>A plausible wrong approach:</strong> Linking records by the tag ds60-docker-study:local lets a rebuild silently change which image each record describes.</p>
+<p><strong>How to verify:</strong> Compare the digest column; every row matches, or the mismatched row is flagged before release.</p>
 <h3 id="exercise-4-diagnose-an-unsigned-provenance-statement-from-an-unknown-source">Exercise 4: Diagnose an unsigned provenance statement from an unknown source.<a class="heading-anchor" href="#exercise-4-diagnose-an-unsigned-provenance-statement-from-an-unknown-source" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It is an untrusted claim until verified under a policy.</p>
 <p><strong>Why:</strong> Structured metadata is easy to produce. Trust depends on issuer identity, integrity and the permitted build process, not the presence of JSON fields.</p>
+<p><strong>Approach:</strong> Treat the unsigned statement as a claim: check who issued it and whether a signature verifies against a key your policy trusts.</p>
+<p><strong>Why this is correct:</strong> Anyone can write JSON with builder and source fields, so the fields alone show only that someone wrote them.</p>
+<p><strong>A plausible wrong approach:</strong> Accepting the provenance because its fields look complete trusts an unknown author.</p>
+<p><strong>How to verify:</strong> Run the verification your policy defines; with no signature or unknown issuer, the record stays untrusted.</p>
 <h3 id="exercise-5-explain-exporter-limitations-honestly">Exercise 5: Explain exporter limitations honestly.<a class="heading-anchor" href="#exercise-5-explain-exporter-limitations-honestly" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Attestation generation and preservation depend on the selected workflow.</p>
 <p><strong>Why:</strong> Test the actual output route. A feature flag in a build command does not prove a downstream registry or local archive retains the expected metadata.</p>
+<p><strong>Approach:</strong> Follow where the attestation goes: the local output in worked example 1 writes sbom.spdx.json to a directory, while a docker load or registry route may keep it differently or drop it.</p>
+<p><strong>Why this is correct:</strong> Whether metadata survives depends on the exporter and destination, so the flag alone proves nothing downstream.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming --sbom=true means every copy of the image carries an SBOM fails when a later transfer loses it.</p>
+<p><strong>How to verify:</strong> Inspect the actual destination for the attestation after each hop in the route.</p>
 <h3 id="exercise-6-write-a-supply-chain-review-for-the-fixture">Exercise 6: Write a supply-chain review for the fixture.<a class="heading-anchor" href="#exercise-6-write-a-supply-chain-review-for-the-fixture" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Known source, resolved base, component record and actual acceptance limits.</p>
 <p><strong>Why:</strong> Keep unknowns visible. A small educational artifact deserves clear provenance without pretending it has passed a production assurance program.</p>
+<p><strong>Approach:</strong> List the fixture&#x27;s known source files, the resolved base digest, the SBOM file, and the acceptance checks that ran.</p>
+<p><strong>Why this is correct:</strong> Each item is observable, and naming what is unknown, such as the base publisher&#x27;s build process, keeps the review honest.</p>
+<p><strong>A plausible wrong approach:</strong> Writing that the fixture meets supply-chain requirements claims a review program that never took place.</p>
+<p><strong>How to verify:</strong> Each line in the review points to a file or command output, and the unknowns are listed in their own section.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

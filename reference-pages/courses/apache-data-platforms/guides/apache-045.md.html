@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-045-streams-operators-and-a-running-job">apache-045: Streams, operators and a running job<a class="heading-anchor" href="#apache-045-streams-operators-and-a-running-job" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-008</code>, <code>apache-004</code>, <code>java-001</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Execution graph:</strong> The connected sources, operators and sinks of a Flink job, split into parallel subtasks for execution.</li>
+<li><strong>JobManager:</strong> The Flink process that coordinates a job, schedules its subtasks and triggers checkpoints.</li>
+<li><strong>TaskManager:</strong> A Flink worker process that runs subtasks in its task slots and exchanges records with other subtasks.</li>
+<li><strong>Boundedness:</strong> Whether a source eventually ends. A bounded file can run through streaming operators, so boundedness is separate from the API or execution mode.</li>
+<li><strong>Subtask:</strong> One parallel instance of an operator that a TaskManager executes.</li>
+</ul>
 <h3 id="a-stream-job-is-an-execution-graph">A stream job is an execution graph<a class="heading-anchor" href="#a-stream-job-is-an-execution-graph" aria-label="Link to this section">#</a></h3>
 <p>Flink executes a job as connected sources, transformations and sinks. A source produces records; operators transform or maintain state over them; sinks make results visible outside the graph. The JobManager coordinates a job and its checkpoints, while TaskManagers execute its subtasks. A Java client constructs and submits the graph but is not necessarily the process that performs the work.</p>
 <p>Boundedness describes whether a source eventually finishes. A bounded file can be processed through streaming operators, and a table query can represent a continuously changing result. Execution mode and API syntax are therefore separate choices. Do not assume Java means streaming, SQL means batch, or a small input means all work happened locally in the client.</p>
@@ -237,6 +245,17 @@ result <span class="syntax-operator">=</span> environment
 <p>The project separates source files, compiled job artifacts, service processes, result files and receipts. Compiling the JAR validates syntax and linkage against the selected libraries; submitting it validates another boundary; inspecting exact output validates its data behavior. Each can fail for a different reason, and none should be replaced with an unlabelled local fallback.</p>
 <h3 id="worked-case-b-ask-the-same-question-through-flink-sql">Worked case B: ask the same question through Flink SQL<a class="heading-anchor" href="#worked-case-b-ask-the-same-question-through-flink-sql" aria-label="Link to this section">#</a></h3>
 <p>The SQL case registers the same logical order contract and runs a bounded grouped query. It writes final rows for east and west, which must equal the independent sum oracle. The result has two final groups even though the stream case can expose three incremental updates. This difference illustrates result semantics rather than a disagreement about the source amounts.</p>
+<p>The SQL mode registers the fixture as a filesystem table and asks the grouped question in batch mode:</p>
+<p>From <a href="../projects/flink/src/WorkshopJobs.java.html"><code>projects/flink/src/WorkshopJobs.java</code></a>:</p>
+<pre class="highlighted-code"><code class="language-java">TableEnvironment table <span class="syntax-operator">=</span> TableEnvironment<span class="syntax-punctuation">.</span><span class="syntax-attribute">create</span><span class="syntax-punctuation">(</span>settings<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+table<span class="syntax-punctuation">.</span><span class="syntax-attribute">executeSql</span><span class="syntax-punctuation">(</span>
+  <span class="syntax-string">&quot;</span><span class="syntax-string">CREATE TEMPORARY TABLE orders (id BIGINT, region STRING, amount BIGINT, event_ms BIGINT) </span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">WITH (&#x27;connector&#x27;=&#x27;filesystem&#x27;,&#x27;path&#x27;=&#x27;file:///state/input/orders.csv&#x27;,&#x27;format&#x27;=&#x27;csv&#x27;)</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">var</span> result <span class="syntax-operator">=</span> table<span class="syntax-punctuation">.</span><span class="syntax-attribute">executeSql</span><span class="syntax-punctuation">(</span>
+  <span class="syntax-string">&quot;</span><span class="syntax-string">SELECT region, SUM(amount) AS total FROM orders GROUP BY region ORDER BY region</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p>The <code>CREATE TEMPORARY TABLE</code> statement names the same columns as the Java source, and <code>GROUP BY region</code> returns one final row per region instead of a stream of updates. The job then rejects any result other than <code>east,11</code> and <code>west,9</code>.</p>
 <p>A Table API or SQL planner can choose physical operators that differ from the handwritten Java graph. The user still needs compatible connectors, formats, source visibility and sink commit behavior. A supported SQL keyword does not prove that an arbitrary external connector JAR is installed. The base workshop uses prepared local files and included format/runtime components only.</p>
 <p>The client and workers see one explicitly shared source location. A path that exists only in the client would not become visible to TaskManagers merely because it appears in a submitted plan. The launcher and configuration make these mounts and service addresses explicit, following the earlier data-visibility and network namespace chapters.</p>
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>

@@ -198,17 +198,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `assert.equal(Number(&#x27;3&#x27;) + 2, 5);` to</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(Number(&#x27;3&#x27;) + 3, 5);` inside its check. Before running it, predict whether</span></span>
 <span class="source-line"><span class="syntax-comment">// the check still passes and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(Number(&#x27;3&#x27;) + 2, 5)`. Restoring the original line brings back the worked</span></span>
-<span class="source-line"><span class="syntax-comment">// observation: 5, string 23, and 5.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(Number(&#x27;3&#x27;) + 3,</span></span>
+<span class="source-line"><span class="syntax-comment">// 5);`. Restoring `assert.equal(Number(&#x27;3&#x27;) + 2, 5);` brings back: 5, string 23, and 5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Inspect absence and NaN: diagnose an edited check</span></span>
 <span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(Number.isNaN(&#x27;not a number&#x27;), true);`. Run Example B with that line, explain</span></span>
 <span class="source-line"><span class="syntax-comment">// why the edited check now fails for the same program state, and restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(Number.isNaN(&#x27;not a number&#x27;), false)`; after it the line reads</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(Number.isNaN(&#x27;not a number&#x27;), false);` again and null reports object;</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(Number.isNaN(&#x27;not a number&#x27;), true);`. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(Number.isNaN(&#x27;not a number&#x27;), false);` brings back: null reports object;</span></span>
 <span class="source-line"><span class="syntax-comment">// undefined reports undefined; only numeric NaN passes isNaN.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Compare equality contracts</span></span>

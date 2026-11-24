@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; approximately 90 minutes. Direct prerequisites: <code>spark-016</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-017</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
+<p>Open <code>spark-017</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-017.scala.html">Scala learner</a> and <a href="../lessons/spark-017.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-017_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-017_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-017_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -231,7 +231,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The final comparison separates two legitimate array relationships. Exploding an array of two SKUs and an independent array of three channels produces six pairs. Zipping them produces three positional rows with one missing SKU. Neither result is universally correct. The relationship between the arrays determines the operator, and a faster implementation of the wrong relationship is still incorrect.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
 <p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
-<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-class">Row</span>
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
 
@@ -253,20 +253,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
   inputSchema
 <span class="syntax-punctuation">)</span></code></pre>
-<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
-<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>
-    StructType<span class="syntax-punctuation">,</span>
-    StructField<span class="syntax-punctuation">,</span>
-    LongType<span class="syntax-punctuation">,</span>
-    IntegerType<span class="syntax-punctuation">,</span>
-    StringType<span class="syntax-punctuation">,</span>
-    DoubleType<span class="syntax-punctuation">,</span>
-    BooleanType<span class="syntax-punctuation">,</span>
-    ArrayType<span class="syntax-punctuation">,</span>
-    MapType<span class="syntax-punctuation">,</span>
-    TimestampType<span class="syntax-punctuation">,</span>
-    DecimalType<span class="syntax-punctuation">,</span>
-<span class="syntax-punctuation">)</span>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> LongType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> StructType
 
 input_schema <span class="syntax-operator">=</span> StructType<span class="syntax-punctuation">(</span>
     <span class="syntax-punctuation">[</span>StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">source_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">raw</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
@@ -309,7 +297,7 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-parse-once-and-retain-rejection-evidence">Exercise 1: Parse once and retain rejection evidence<a class="heading-anchor" href="#exercise-1-parse-once-and-retain-rejection-evidence" aria-label="Link to this section">#</a></h4>
 <p>Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw.</p>
-<p><strong>Expected result/shape:</strong> Sources 1-4 accepted;5 malformed_json;6 missing_parent;7 missing_payload. No source disappears and accepted count is 4.</p>
+<p><strong>Expected result/shape:</strong> Sources 1-4 accepted; 5 malformed_json; 6 missing_parent; 7 missing_payload. No source disappears and accepted count is 4.</p>
 <p><strong>Verify:</strong> Assert all seven ordered source/reason rows and reconcile accepted 4 plus rejected 3 with input 7.</p>
 <p><strong>Progressive hint:</strong> Include _corrupt_record in the schema; a required field being NULL does not by itself prove malformed JSON.</p>
 <h4 id="exercise-2-record-collection-state-before-changing-grain">Exercise 2: Record collection state before changing grain<a class="heading-anchor" href="#exercise-2-record-collection-state-before-changing-grain" aria-label="Link to this section">#</a></h4>
@@ -319,28 +307,28 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Progressive hint:</strong> Check items IS NULL before checking size=0.</p>
 <h4 id="exercise-3-flatten-observed-child-occurrences">Exercise 3: Flatten observed child occurrences<a class="heading-anchor" href="#exercise-3-flatten-observed-child-occurrences" aria-label="Link to this section">#</a></h4>
 <p>Use posexplode to return parent_id, position, sku, qty for actual items. Order by parent_id and position, and retain repeated SKU a.</p>
-<p><strong>Expected result/shape:</strong> Rows(10,0, a,2),(10,1, a,3),(40,0, b, NULL). Exactly 3 children; parents 20 and 30 produce none.</p>
-<p><strong>Verify:</strong> Assert the entire three-row occurrence list and unique(parent_id, position) count 3.</p>
+<p><strong>Expected result/shape:</strong> <code>Rows(10, 0, a, 2)</code>, <code>(10, 1, a, 3)</code>, <code>(40, 0, b, NULL)</code>. Exactly 3 children; parents 20 and 30 produce none.</p>
+<p><strong>Verify:</strong> Assert the entire three-row occurrence list and unique (parent_id, position) count 3.</p>
 <p><strong>Progressive hint:</strong> A child identity includes its position rather than only the SKU value.</p>
 <h4 id="exercise-4-preserve-parents-without-inventing-observed-children">Exercise 4: Preserve parents without inventing observed children<a class="heading-anchor" href="#exercise-4-preserve-parents-without-inventing-observed-children" aria-label="Link to this section">#</a></h4>
 <p>Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays.</p>
-<p><strong>Expected result/shape:</strong> Five rows: the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL).</p>
+<p><strong>Expected result/shape:</strong> Five rows: the three observed children plus <code>(20, empty, NULL, NULL, NULL)</code> and <code>(30, unknown, NULL, NULL, NULL)</code>.</p>
 <p><strong>Verify:</strong> Assert five rows, four distinct parents and exactly three nonnull generated positions.</p>
 <p><strong>Progressive hint:</strong> Retain array_state before using the outer generator; distinguish a missing position from a child with missing qty.</p>
 <h4 id="exercise-5-reconcile-child-counts-and-nullable-measures">Exercise 5: Reconcile child counts and nullable measures<a class="heading-anchor" href="#exercise-5-reconcile-child-counts-and-nullable-measures" aria-label="Link to this section">#</a></h4>
 <p>Aggregate the outer relation to parent_id, array_state, child_count, known_qty_count, total_qty. Count positions for children and preserve SUM NULL when there are no known quantities.</p>
-<p><strong>Expected result/shape:</strong> Parent 10:(2,2,5);20:(0,0, NULL);30:(0,0, NULL);40:(1,0, NULL). Empty and unknown collection states remain visible.</p>
+<p><strong>Expected result/shape:</strong> Parent <code>10:(2, 2, 5)</code>; <code>20:(0, 0, NULL)</code>; <code>30:(0, 0, NULL)</code>; <code>40:(1, 0, NULL)</code>. Empty and unknown collection states remain visible.</p>
 <p><strong>Verify:</strong> Assert each parent count tuple and that summed child_count is 3 while known_qty_count is 2.</p>
 <p><strong>Progressive hint:</strong> COUNT(*) would count placeholders; COUNT(qty) answers a different completeness question from child count.</p>
 <h4 id="exercise-6-choose-cartesian-or-positional-array-semantics">Exercise 6: Choose Cartesian or positional array semantics<a class="heading-anchor" href="#exercise-6-choose-cartesian-or-positional-array-semantics" aria-label="Link to this section">#</a></h4>
 <p>For one parent with SKUs [a, b] and channels [web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.</p>
-<p><strong>Expected result/shape:</strong> Independent generators produce 6 pairs; zip produces(a, web), (b, shop),(NULL, api), three rows.</p>
+<p><strong>Expected result/shape:</strong> Independent generators produce 6 pairs; zip produces (a, web), (b, shop), (NULL, api), three rows.</p>
 <p><strong>Verify:</strong> Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.</p>
 <p><strong>Progressive hint:</strong> Consecutive explodes multiply occurrence counts; arrays_zip aligns by position and pads the shorter side.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not use inferred JSON schema as a substitute for an explicit producer contract. Do not classify every null field as malformed input. Do not drop source identity at parsing, collapse repeated child occurrences with DISTINCT, or count an outer placeholder as an observed child. Preserve array state before flattening. If a null element is allowed inside an otherwise populated array, its nonnull generated position still identifies a real occurrence even when every nested field is null. Larger arrays can produce large outputs despite a small parent count; inspect length distributions before applying the same operation at scale.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>parseRecords</code> / <code>parse_records</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>parseRecords</code> / <code>parse_records</code> without reading its solution. Then, from memory, state what Exercise 6 (Choose Cartesian or positional array semantics) must produce: Independent generators produce 6 pairs; zip produces <code>(a, web)</code>, <code>(b, shop)</code>, <code>(NULL, api)</code>, three rows. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>

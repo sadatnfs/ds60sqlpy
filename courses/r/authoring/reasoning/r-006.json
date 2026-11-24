@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Predicate table for the starter values",
+      "body": "The starter vector is `c(0, NA_real_, NaN, Inf, 4)`. Applying the four predicates to each value shows which question each one answers.\n\n```text\nvalue  is.na  is.nan  is.finite  is.infinite\n0      FALSE  FALSE   TRUE       FALSE\nNA     TRUE   FALSE   FALSE      FALSE\nNaN    TRUE   TRUE    FALSE      FALSE\nInf    FALSE  FALSE   FALSE      TRUE\n4      FALSE  FALSE   TRUE       FALSE\n```\n\n`is.na` is the broad test: it is TRUE for both NA and NaN, yet FALSE for Inf. Only `is.finite` rejects all three exceptional kinds at once. The consequence shows up in summaries of this vector: `sum(x, na.rm = TRUE)` removes NA and NaN but keeps Inf, so it returns Inf, while `sum(x[is.finite(x)])` returns 4. Neither number is automatically right; the choice depends on whether an infinite value is a real signal or a division that should have been rejected upstream. NULL never appears in the table because it is not a value inside a vector at all: `c(0, NULL, 4)` has length two."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Count what each argument contributes to `c()`: NULL contributes nothing, and NA_real_ contributes one slot.",
+      "why": "NULL means absence of an object, so combining it adds no element. NA_real_ is a double whose value is unknown, and it still occupies a position.",
+      "wrong": "Predicting 2 by treating NULL as one more missing entry, or 0 by assuming NA vanishes like NULL. Both blur the line between no element and an unknown element.",
+      "verify": "The reference asserts `length(c(NULL, NA_real_)) == 1L`, and `print()` shows `[1] NA`."
+    },
+    {
+      "approach": "Append the zero, then count observed entries with `sum(!is.na(x))` and summarize with `mean(x, na.rm = TRUE)`.",
+      "why": "Zero is a measurement, not a gap. After removing the two unknowns one value remains, so the observed count is 1 and the observed mean is 0.",
+      "wrong": "Treating zero as missing, for example by recoding it to NA. Then nothing is observed and `mean(x, na.rm = TRUE)` returns NaN, erasing the one real reading.",
+      "verify": "`sum(!is.na(x))` returns 1 and `mean(x, na.rm = TRUE)` returns 0, both asserted in the reference."
+    },
+    {
+      "approach": "Build the mask with `is.finite(x)` and index with it.",
+      "why": "For c(2, Inf, NA, 4), `is.finite` is TRUE only for 2 and 4. It is FALSE for Inf and for NA, so one predicate removes both exceptional kinds.",
+      "wrong": "Using `!is.na(x)` keeps Inf, so the selection is 2, Inf, 4 and any total over it becomes Inf.",
+      "verify": "The reference asserts `identical(x[is.finite(x)], c(2, 4))`, and `sum()` of that selection returns 6."
+    },
+    {
+      "approach": "Check the observed count before summing. When nothing is observed, report NA together with the zero count.",
+      "why": "With both entries missing, `na.rm = TRUE` leaves an empty vector, and the sum of an empty vector is 0 by convention. That 0 describes no measurement at all.",
+      "wrong": "Publishing `sum(all_missing, na.rm = TRUE)` as a total of 0. A reader would assume someone measured and found nothing.",
+      "verify": "In the reference, `is.na(reported)` is TRUE, while `sum(all_missing, na.rm = TRUE)` returns 0 for contrast."
+    },
+    {
+      "approach": "Ask two separate questions: `is.na()` for any missing or undefined value and `is.nan()` only for undefined arithmetic.",
+      "why": "NaN arises from operations such as 0 / 0; NA marks a value that was never recorded. `is.na(NaN)` is TRUE, but `is.nan(NA_real_)` is FALSE.",
+      "wrong": "Counting undefined results with `is.na()`. On the starter vector that reports 2, mixing the unrecorded value with the undefined one.",
+      "verify": "On the starter vector, `sum(is.na(x))` returns 2 and `sum(is.nan(x))` returns 1."
+    },
+    {
+      "approach": "Write the policy into a function: reject a zero or non-finite denominator by returning NA_real_, otherwise divide.",
+      "why": "Without the guard, `1 / 0` returns Inf, which passes an `is.na` check and inflates any later mean. Returning NA keeps the case visible as undefined.",
+      "wrong": "Replacing every non-finite ratio with 0. That claims a measured zero rate for a case that had no denominator.",
+      "verify": "The reference checks that `ratio(1, 0)` returns NA and `ratio(4, 2)` returns 2."
+    }
+  ]
+}

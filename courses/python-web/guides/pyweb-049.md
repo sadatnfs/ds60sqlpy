@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-048`.
 
 A QuerySet describes a database query and usually delays execution until its results are needed. This laziness enables composition, but it can also surprise developers inspecting query counts or reusing evaluated objects. This chapter measures actual SQL execution and performs grouped aggregation on a small sales table.
 
+## Key terms
+
+- **QuerySet:** A Django object describing a database query that is built by methods such as filter and order_by and run only when evaluated.
+- **Lazy evaluation:** Deferring SQL execution until results are needed, for example by iteration or list conversion, after which that QuerySet caches its rows.
+- **values():** A QuerySet method that returns rows as dictionaries of named fields and, with annotate, sets the grouping columns.
+- **annotate():** A QuerySet method that adds a computed expression, such as a grouped Sum, to each returned row or group.
+- **aggregate():** A QuerySet method that computes one overall summary, such as a total, and returns it as a dictionary.
+
 ## Mechanism: query description and materialized results differ
 
 Calling filter and order_by constructs a QuerySet. Iteration, list conversion and several other operations evaluate it. Once evaluated, that specific QuerySet can cache its result objects. Creating a new QuerySet or using another operation can issue another query, so caching should not be generalized to every similar-looking expression.
@@ -29,6 +37,38 @@ The grouped query selects region, annotates total and row count, and orders by r
 These assertions catch grouping and filtering mistakes that a simple row-count check would miss. A total can be numerically plausible while using the wrong population. Name the cohort and aggregation grain before writing the ORM expression.
 
 Nulls, joins and duplicate rows complicate real aggregates. A join can multiply a source row and inflate a sum. Count of a nullable field differs from count of rows. The lesson's small fixture avoids those complications so the basic execution model is clear; later SQL and engineering chapters examine them explicitly.
+
+## Worked example: where a filter sits decides WHERE or HAVING
+
+```python
+import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE sale (id INTEGER PRIMARY KEY, region TEXT, amount INTEGER)")
+db.executemany(
+    "INSERT INTO sale (region, amount) VALUES (?, ?)",
+    [("north", 3), ("north", 5), ("south", 2), ("south", 4)],
+)
+rows_first = db.execute(
+    "SELECT region, SUM(amount), COUNT(id) FROM sale WHERE amount >= 3 "
+    "GROUP BY region ORDER BY region"
+).fetchall()
+groups_first = db.execute(
+    "SELECT region, SUM(amount), COUNT(id) FROM sale "
+    "GROUP BY region HAVING SUM(amount) >= 3 ORDER BY region"
+).fetchall()
+print(rows_first)
+print(groups_first)
+```
+
+Expected output:
+
+```text
+[('north', 8, 2), ('south', 4, 1)]
+[('north', 8, 2), ('south', 6, 2)]
+```
+
+These two statements are the shapes Django builds for two chains that read almost the same. `Sale.objects.filter(amount__gte=3).values("region").annotate(total=Sum("amount"))` filters rows before grouping, so the south sale of 2 vanishes and south reports a total of 4 from one row. Moving the condition after the annotation, as in `.annotate(total=Sum("amount")).filter(total__gte=3)`, filters finished groups with HAVING, so south keeps both sales and totals 6. Neither is wrong, but a report that silently changes its counts when someone reorders a chain is a real bug. Print `str(queryset.query)` when the numbers surprise you, the same way the lesson uses `CaptureQueriesContext` to see when evaluation happens.
 
 ## Failure diagnosis and discussion
 

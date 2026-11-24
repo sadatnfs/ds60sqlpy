@@ -160,6 +160,26 @@ Keras attention_mask row: True True False (True attends)""",
 
 TRANSFER.update(
     {
+        "tf-019": [
+            ex(
+                "Detect a horizontal difference",
+                "Keep the 1..9 ramp image but use the kernel `[[1, -1], [0, 0]]`, which compares each pixel with its right neighbor. Predict the four VALID outputs before running it.",
+                "all four outputs -1.",
+                """horizontal=tf.reshape(tf.constant([1.,-1.,0.,0.]),(2,2,1,1))
+h=tf.nn.conv2d(image,horizontal,strides=1,padding='VALID')
+np.testing.assert_array_equal(h.numpy().reshape(2,2),np.full((2,2),-1))""",
+                "Moving one column to the right raises the ramp by 1, so every left-minus-right difference is -1. The diagonal kernel saw a step of 4 because it compared pixels one row and one column apart.",
+            ),
+            ex(
+                "Predict SAME padding",
+                "Repeat the diagonal-kernel calculation with `padding='SAME'`. Predict the output shape and the nine values, remembering that TensorFlow pads a 2x2 kernel with zeros on the bottom and right.",
+                "shape (1, 3, 3, 1); values [[-4, -4, 3], [-4, -4, 6], [7, 8, 9]].",
+                """same=tf.nn.conv2d(image,kernel,strides=1,padding='SAME')
+assert tuple(same.shape)==(1,3,3,1)
+np.testing.assert_array_equal(same.numpy().reshape(3,3),[[-4,-4,3],[-4,-4,6],[7,8,9]])""",
+                "The four interior positions match the VALID result. Along the right column and bottom row the subtracted neighbour is a padded zero, so the output equals the top-left pixel itself. Padding changes values at the border, not only the shape.",
+            ),
+        ],
         "tf-010": [
             ex(
                 "Partition a second account fixture",

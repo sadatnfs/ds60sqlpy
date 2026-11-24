@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-057`.
 
 An API collection needs a defined authentication policy, a bounded page size and a considered request-rate policy. This chapter exercises DRF session authentication, page-number pagination and a small per-user throttle through actual APIClient requests. It also states why that throttle is not distributed abuse protection.
 
+## Key terms
+
+- **SessionAuthentication:** A DRF authentication class that identifies the caller from Django's session; an anonymous request here receives 403.
+- **IsAuthenticated:** A DRF permission class that admits only requests with an authenticated user.
+- **PageNumberPagination:** A DRF paginator that splits an ordered collection into numbered pages and adds count and next-page metadata.
+- **Throttle:** A DRF policy that limits request rate per key; once the limit is used up the request receives 429 Too Many Requests.
+- **Process-local cache:** Throttle counters kept in one process's memory, so separate workers keep separate counts and do not share a limit.
+
 ## Mechanism: permission, pagination and throttling compose
 
 SessionAuthentication uses Django's authenticated session context. IsAuthenticated restricts the view to an established user. PageNumberPagination divides an ordered collection into pages and returns metadata such as count and next links. A throttle uses a key and rate policy to decide whether another request is admitted.
@@ -29,6 +37,38 @@ After the two allowed requests, a third receives 429 and a Retry-After header. T
 The result applies to one authenticated identity in one process-local cache. It is not a statement about global quotas across multiple containers, proxy-level connection limits or malicious distributed clients. A rate-limit design should define its identity, window/bucket semantics, atomicity and behavior when the coordination store fails.
 
 Throttling should not be used to hide inefficient queries or unbounded response sizes. Those require their own limits and performance work. A small request rate can still cause severe load if each request performs an expensive uncontrolled operation.
+
+## Worked example: how a sliding window computes Retry-After
+
+```python
+class Throttle:
+    def __init__(self, num_requests, duration):
+        self.num_requests, self.duration, self.cache = num_requests, duration, {}
+
+    def allow(self, key, now):
+        history = [t for t in self.cache.get(key, []) if t > now - self.duration]
+        if len(history) >= self.num_requests:
+            return False, self.duration - (now - history[-1])
+        self.cache[key] = [now] + history
+        return True, None
+
+
+limit = Throttle(2, 60)
+for now in (0, 10, 20, 61, 75):
+    print(now, limit.allow("finite-user:1", now))
+```
+
+Expected output:
+
+```text
+0 (True, None)
+10 (True, None)
+20 (False, 40)
+61 (True, None)
+75 (True, None)
+```
+
+This follows the bookkeeping in DRF's `SimpleRateThrottle` for `rate = "2/min"`: a list of request times, newest first, trimmed to the last 60 seconds. At second 20 two requests are still inside the window, so the third is refused and the wait is measured from the oldest one, giving the 40 seconds that becomes the `Retry-After` header on the 429. By second 61 the first request has aged out and there is room again. The list lives in the configured cache, so with the default local memory cache each worker process keeps its own history, as the lesson's return value warns.
 
 ## Failure diagnosis and discussion
 

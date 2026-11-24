@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-010.md) and attempt the [learner source](../les
 
 For inputs between-1000000 and 1000000, retain even values and double them in order. Preserve input and duplicates. Reject values outside the bound so Int multiplication is safe.
 
-**Expected:** Seq(1,2,3,4) becomes Seq(4,8); Seq(0,2,2) becomes Seq(0,4,4); empty remains empty.
+**Expected:** `Seq(1, 2, 3, 4)` becomes `Seq(4, 8)`; `Seq(0, 2, 2)` becomes `Seq(0, 4, 4)`; empty remains empty.
 
 ```scala
 def strictPipeline(values: Seq[Int]): Seq[Int] = {
@@ -33,7 +33,7 @@ expectIllegalArgument(strictPipeline(Seq(1000001)))
 
 Return a lazy even-filter/double-map iterator with local trace messages filter: value and map: value. Validate the same numeric domain before construction. The trace should remain empty until consumption.
 
-**Expected:** Taking one output from 1,2,3,4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4.
+**Expected:** Taking one output from `1, 2, 3, 4` yields 4 with trace `filter:1, filter:2, map:2`. Consuming the rest yields 8 and appends `filter:3, filter:4, map:4`.
 
 ```scala
 def tracedIterator(values: Seq[Int], trace: ArrayBuffer[String]): Iterator[Int] = {
@@ -69,7 +69,7 @@ assert(trace.toVector == Vector("filter:1", "filter:2", "map:2", "filter:3", "fi
 
 Consume a supplied iterator into a Vector twice and return both results. Do not cache or recreate the iterator inside this function. Explain why this intentionally returns an empty second traversal.
 
-**Expected:** A fresh iterator over 1,2,3 yields (Vector(1,2,3), Vector.empty). An already empty iterator yields two empty Vectors.
+**Expected:** A fresh iterator over 1,2,3 yields (`Vector(1, 2, 3)`, Vector.empty). An already empty iterator yields two empty Vectors.
 
 ```scala
 def consumeTwice(values: Iterator[Int]): (Vector[Int], Vector[Int]) = {
@@ -90,7 +90,7 @@ assert(consumeTwice(Iterator.empty) == (Vector.empty[Int], Vector.empty[Int]))
 
 Return a factory creating a fresh bounded even-filter/double-map iterator on each call. Validate source values once and preserve them. Do not return the same iterator object repeatedly.
 
-**Expected:** Two factory calls both yield Vector(4,8) for 1,2,3,4, even after the first is exhausted.
+**Expected:** Two factory calls both yield `Vector(4, 8)` for 1,2,3,4, even after the first is exhausted.
 
 ```scala
 def freshFactory(values: Seq[Int]): () => Iterator[Int] = {
@@ -115,7 +115,7 @@ assert(raw == Seq(1, 2, 3, 4))
 
 For bounded nonnegative event amounts and nonblank IDs, compute naive delivered cents over attempts and logical once-per-ID cents when attempts>0. Reject conflicting amounts for one ID and negative attempt counts. This is a pure ledger calculation, not a real sink.
 
-**Expected:** Records (a,100), (b,50), (a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0); same ID with 100 and 101 is rejected.
+**Expected:** Records `(a, 100)`, `(b, 50)`, `(a, 100)` with two attempts give naive 500, logical 150. Zero attempts gives `(0, 0)`; same ID with 100 and 101 is rejected.
 
 ```scala
 def retryTotals(records: Seq[(String, Long)], attempts: Int): (Long, Long) = {

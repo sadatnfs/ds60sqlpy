@@ -3,6 +3,28 @@
   "title": "Expressions, hygienic macros and C interoperability",
   "concepts": ["Expr", "macro hygiene", "single evaluation", "ccall", "ABI", "UTF8"],
   "outcome": "Inspect syntax without evaluating untrusted text, implement a hygienic single-evaluation macro and call a precisely typed Linux C function.",
+  "key_terms": [
+    [
+      "Expr",
+      "The data structure for parsed Julia code, with a head symbol and a list of arguments, produced by quoting or `Meta.parse`."
+    ],
+    [
+      "Macro hygiene",
+      "Macro expansion renames the macro's local variables, and `esc` marks code that must resolve in the caller's scope."
+    ],
+    [
+      "Single evaluation",
+      "A macro binds each argument expression to a local once before reuse, so side effects are not repeated."
+    ],
+    [
+      "ccall",
+      "The built-in call into a compiled C function, whose declared argument and return types must match the C ABI signature."
+    ],
+    [
+      "Cstring",
+      "A `ccall` argument type that passes a zero-terminated pointer to a string's UTF-8 bytes, so C `strlen` counts bytes."
+    ]
+  ],
   "level": "advanced",
   "minutes": 150,
   "prerequisites": ["julia-003", "julia-010", "julia-027"],
@@ -11,48 +33,68 @@
     ["Calling C and Fortran", "https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/"]
   ],
   "figure": 0,
+  "approach": "Parse text into `Expr` objects only to inspect them, never to run untrusted input. `@positive` stores the escaped caller expression once in a `local` variable, checks it is a positive real and returns it. `c_bytes` rejects embedded zero bytes, then calls C `strlen` through `ccall` with an exact `Csize_t` return and `Cstring` argument.",
   "exercises": [
     {
       "title": "Inspect syntax",
       "task": "Identify the head and first argument of parsed `1 + 2`.",
       "expected": "The head is `:call` and the function symbol is `:+`.",
       "hint": "Parsing constructs syntax.",
-      "answer": "The representation describes a call; this inspection does not evaluate arbitrary input."
+      "answer": "The representation describes a call; this inspection does not evaluate arbitrary input.",
+      "why": "`Meta.parse(\"1 + 2\")` produces an `Expr` with head `:call` whose first argument is the function symbol `:+`.",
+      "wrong": "Calling `eval` on the parsed expression to look at it runs the code, which is unsafe for text from outside.",
+      "verify": "Example A asserts `syntax.head == :call` and `syntax.args[1] == :+`; the reference checks `Meta.parse(\"x * 2\").head == :call`."
     },
     {
       "title": "Detect duplicate evaluation",
       "task": "Explain what the counter would show if the macro evaluated its argument twice.",
       "expected": "The counter would be 2.",
       "hint": "Store the caller expression once.",
-      "answer": "The test protects against duplicated side effects in generated syntax."
+      "answer": "The test protects against duplicated side effects in generated syntax.",
+      "why": "The macro inserts the caller expression once, so the block that increments `counter[]` runs once and the counter ends at 1.",
+      "wrong": "Writing the check as `$(esc(expression)) > 0 || ...; $(esc(expression))` evaluates the argument twice and leaves the counter at 2.",
+      "verify": "Example A asserts `counter[] == 1` after `@positive` returns 3."
     },
     {
       "title": "Check name ownership",
       "task": "Explain why the caller result variable stays 99.",
       "expected": "The macro-local binding is hygienic.",
       "hint": "Only the caller expression is escaped.",
-      "answer": "Generated temporary names must not capture unrelated caller bindings."
+      "answer": "Generated temporary names must not capture unrelated caller bindings.",
+      "why": "The macro's `local result` is renamed by hygiene, so the caller's own `result = 99` is not overwritten.",
+      "wrong": "Escaping the whole quoted block would make the macro's temporary name capture the caller's `result`.",
+      "verify": "Example A asserts `result == 99` after the macro call."
     },
     {
       "title": "Trace UTF 8 bytes",
       "task": "Compare strlen and length for the accented character.",
       "expected": "The byte count is 2 and character count is 1.",
       "hint": "The C API operates on bytes.",
-      "answer": "Unicode text has multiple valid units; choose the unit required by the interface."
+      "answer": "Unicode text has multiple valid units; choose the unit required by the interface.",
+      "why": "The letter é is stored as two UTF-8 bytes, so C `strlen` returns 2 while Julia's `length` counts 1 character.",
+      "wrong": "Passing `length(s)` to a C function that expects a byte count truncates multibyte strings.",
+      "verify": "Example B asserts `c_bytes(\"é\") == 2` and `length(\"é\") == 1`; the reference checks `c_bytes(\"λ\") == ncodeunits(\"λ\")`."
     },
     {
       "title": "Reject embedded zeros",
       "task": "Explain why the wrapper rejects a zero byte inside a string.",
       "expected": "C strlen would stop at the first zero.",
       "hint": "The complete-string contract would be violated.",
-      "answer": "Explicit validation prevents a truncated prefix from being mistaken for the full length."
+      "answer": "Explicit validation prevents a truncated prefix from being mistaken for the full length.",
+      "why": "C `strlen` stops at the first zero byte, so for `\"a\\0b\"` it would report 1 instead of the full Julia length.",
+      "wrong": "Skipping the check returns a short but plausible number, which looks like a valid length.",
+      "verify": "Example B asserts `@test_throws ArgumentError c_bytes(\"a\\0b\")`."
     },
     {
       "title": "Review a native API",
       "task": "List the extra facts needed before calling a function that stores a pointer.",
       "expected": "ABI, lifetime, ownership, thread safety and release rules.",
       "hint": "The argument must outlive the native use.",
-      "answer": "A successful synchronous call does not establish a safe retained-pointer integration."
+      "answer": "A successful synchronous call does not establish a safe retained-pointer integration.",
+      "why": "A native function that keeps a pointer after returning needs the Julia string to stay alive and unmoved for as long as C uses it.",
+      "wrong": "Assuming that a successful immediate call proves safety ignores that garbage collection may free the string later.",
+      "verify": "Read the library's ownership and threading documentation and add a test that holds a reference with `GC.@preserve` for the native lifetime."
     }
-  ]
+  ],
+  "checks_note": "The macro passes 0.5 through unchanged and rejects 0 and NaN, because NaN is a real but not greater than zero. The string checks use ASCII `\"abc\"`, where bytes equal characters, and λ, where `strlen` must agree with `ncodeunits`. `Meta.parse(\"x * 2\")` is another call expression, inspected but not evaluated."
 }

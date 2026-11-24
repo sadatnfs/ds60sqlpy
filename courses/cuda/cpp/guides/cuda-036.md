@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Choose a launch configuration for a stated workload and justify it even when the highest-occupancy setting loses.
+
 Work through *Occupancy, registers and latency hiding* with the concrete cases below. Finish with this evidence:
 a justified configuration choice for a stated workload and device, including an explanation when the highest-occupancy setting loses. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Occupancy compares resident warps with a hardware limit. Residency is constrained by threads, blocks, register allocation and shared memory, including allocation granularity. Resident does not mean ready to issue: a warp may wait for data or dependencies. More work per thread can improve reuse while increasing registers and reducing occupancy. Forcing fewer registers can increase spills to device memory. The goal is a correct faster workload, not maximizing one percentage. Use reviewed launch candidates, compiler resource reports and timings together, and avoid pretending a simplified resource arithmetic model reproduces every scheduling rule.
+
+### Key terms
+
+- **Occupancy:** The ratio of resident warps on an SM to the maximum it supports, limited by registers, shared memory and block size.
+- **Register pressure:** High register use per thread that reduces how many warps can be resident at once.
+- **Register spill:** Values the compiler moves to local memory when a thread needs more registers than are available.
+- **Latency hiding:** Keeping the SM busy by switching to eligible warps while other warps wait for memory.
+- **Launch bounds:** The `__launch_bounds__` qualifier that tells the compiler the maximum block size so it can limit registers.
 
 ## Mathematical contract
 

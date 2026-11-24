@@ -210,6 +210,9 @@ classified <span class="syntax-operator">=</span> raw<span class="syntax-operato
     <span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> classified<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>to_list<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">blank</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Why it holds here:</strong> A whitespace-only string is neither null nor parseable. Classifying it before any cast gives it its own blank category, separate from missing (id 3) and from text.</p>
+<p><strong>Plausible wrong approach:</strong> Casting directly with strict=False turns the blank into null, which merges it with the genuinely missing row and loses the reason.</p>
+<p><strong>How to verify:</strong> Run the answer code and assert category is [&#x27;text&#x27;, &#x27;blank&#x27;, &#x27;missing&#x27;, &#x27;text&#x27;].</p>
 <p><strong>Expected:</strong> Your policy explicitly classifies it before numeric conversion.</p>
 <h3 id="2-keep-a-rejection-denominator">2. Keep a rejection denominator<a class="heading-anchor" href="#2-keep-a-rejection-denominator" aria-label="Link to this section">#</a></h3>
 <p>The two rates have different categories. Using only accepted rows as denominator would overstate a rejection fraction.</p>
@@ -222,18 +225,33 @@ shares <span class="syntax-operator">=</span> parsed<span class="syntax-operator
     pl<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">units_text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>is_null<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> shares<span class="syntax-operator">.</span>row<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0.25</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.25</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Why it holds here:</strong> The rejection share uses all four original records as the denominator. One malformed token (bad) and one null each give 0.25.</p>
+<p><strong>Plausible wrong approach:</strong> Dividing the one rejected row by only the three non-missing rows gives 1/3, which mixes two categories into the denominator.</p>
+<p><strong>How to verify:</strong> Run the answer code and assert shares.row(0) == (0.25, 0.25).</p>
 <p><strong>Expected:</strong> Malformed share is 1/4, separately from 1/4 missing.</p>
 <h3 id="3-make-rejection-fail-closed">3. Make rejection fail closed<a class="heading-anchor" href="#3-make-rejection-fail-closed" aria-label="Link to this section">#</a></h3>
 <p>Check the quarantine height and raise a descriptive error. A successful query is not equivalent to an accepted data contract.</p>
+<p><strong>Why it holds here:</strong> Fail closed means a parsing gap stops the pipeline. Here the rejected filter returns id 2, so a check on its height must raise.</p>
+<p><strong>Plausible wrong approach:</strong> Letting strict=False finish and reporting success hides that one value was dropped.</p>
+<p><strong>How to verify:</strong> Add a guard that raises ValueError listing rejected[&#x27;id&#x27;].to_list() whenever rejected.height is above 0, and confirm the original fixture stops with id 2 named in the message.</p>
 <p><strong>Expected:</strong> The original fixture raises a deliberate validation error.</p>
 <h3 id="4-investigate-a-bound">4. Investigate a bound<a class="heading-anchor" href="#4-investigate-a-bound" aria-label="Link to this section">#</a></h3>
 <p>The permitted interval is [-128, 127]. Keep strict mode for a mandatory bound or retain null plus a rejection reason under a permissive policy.</p>
+<p><strong>Why it holds here:</strong> Int8 holds -128 through 127. With strict=False, -129 and 128 become null, while -128 and 127 survive.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming the cast wraps around, as in some C code, would predict 128 becomes -128; Polars returns null instead.</p>
+<p><strong>How to verify:</strong> Cast <code>pl.Series([-129, -128, 127, 128])</code> with <code>strict=False</code> and expect <code>[None, -128, 127, None]</code>.</p>
 <p><strong>Expected:</strong> Only -128 and 127 are representable.</p>
 <h3 id="5-avoid-early-float-conversion">5. Avoid early float conversion<a class="heading-anchor" href="#5-avoid-early-float-conversion" aria-label="Link to this section">#</a></h3>
 <p>Use Decimal(&quot;0.10&quot;) and a declared scale. This states the data representation; it does not infer a currency or a rounding policy.</p>
+<p><strong>Why it holds here:</strong> Decimal(&#x27;0.10&#x27;) stores exactly two hundredths, so the sum is exactly 0.30, as example_two asserts.</p>
+<p><strong>Plausible wrong approach:</strong> Adding floats 0.1 and 0.2 gives 0.30000000000000004, and Decimal(0.1) carries the long binary expansion of the float.</p>
+<p><strong>How to verify:</strong> Build the Series from strings with scale 2 and assert sum == Decimal(&#x27;0.30&#x27;).</p>
 <p><strong>Expected:</strong> The 0.10+0.20 result remains exactly 0.30.</p>
 <h3 id="6-specify-rounding">6. Specify rounding<a class="heading-anchor" href="#6-specify-rounding" aria-label="Link to this section">#</a></h3>
 <p>Use a deliberate rounding operation at the business boundary, then validate range and scale. Test positive and negative tie cases, not only convenient non-ties.</p>
+<p><strong>Why it holds here:</strong> A value like 0.125 must be rounded to two places before storage. The rule must say how ties go: half-even gives 0.12 and half-up gives 0.13.</p>
+<p><strong>Plausible wrong approach:</strong> Letting storage truncate or round silently means the result depends on the engine.</p>
+<p><strong>How to verify:</strong> Quantize Decimal(&#x27;0.125&#x27;) and Decimal(&#x27;-0.125&#x27;) to Decimal(&#x27;0.01&#x27;) in Python: ROUND_HALF_EVEN gives 0.12 and -0.12, ROUND_HALF_UP gives 0.13 and -0.13. Your test should pin one of those pairs.</p>
 <p><strong>Expected:</strong> The rule names rounding mode and treatment of ties.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;polars-003: complete bounded Polars investigation.&quot;&quot;&quot;</span>

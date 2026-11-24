@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-009.md</code>.</p>
 <h3 id="exercise-1-predict-required-minimum-and-maximum-outcomes-for-empty-4-30-and-121">Exercise 1: Predict required, minimum and maximum outcomes for empty, 4, 30 and 121.<a class="heading-anchor" href="#exercise-1-predict-required-minimum-and-maximum-outcomes-for-empty-4-30-and-121" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Empty, 4 and 121 fail; 30 satisfies the numeric bounds.</p>
+<p><strong>Approach:</strong> Check each value against <code>required</code>, <code>min=&quot;5&quot;</code> and <code>max=&quot;120&quot;</code> separately, then combine the results.</p>
 <p><strong>Why:</strong> An empty value fails required, 4 is below min and 121 is above max, while 30 satisfies every constraint.</p>
+<p><strong>Plausible wrong approach:</strong> Treating 121 as acceptable because it is a valid number fails because <code>max=&quot;120&quot;</code> sets <code>rangeOverflow</code> for it.</p>
+<p><strong>How to verify:</strong> Set each value in the console and read <code>checkValidity()</code>: false for empty, 4 and 121, true for 30.</p>
 <h3 id="exercise-2-add-a-clear-unit-and-range-to-a-control-s-label">Exercise 2: Add a clear unit and range to a control&#x27;s label.<a class="heading-anchor" href="#exercise-2-add-a-clear-unit-and-range-to-a-control-s-label" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The rule is understandable before an error occurs.</p>
+<p><strong>Approach:</strong> Put the unit and the allowed range in the visible label text, such as Minutes, 5 to 120.</p>
 <p><strong>Why:</strong> Stating the rule up front prevents errors instead of explaining them after a failed attempt.</p>
+<p><strong>Plausible wrong approach:</strong> Stating the range only in the error message fails because users learn the rule only after making a mistake.</p>
+<p><strong>How to verify:</strong> The label text read in the accessibility panel includes the unit and both limits before any input.</p>
 <h3 id="exercise-3-build-a-bounded-study-time-form-with-linked-help">Exercise 3: Build a bounded study-time form with linked help.<a class="heading-anchor" href="#exercise-3-build-a-bounded-study-time-form-with-linked-help" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The user can identify the rule, enter a valid value and retain it after a failed attempt.</p>
+<p><strong>Approach:</strong> Combine the bounded number input with a help paragraph referenced by <code>aria-describedby</code>, and keep the form from clearing on failure.</p>
 <p><strong>Why:</strong> aria-describedby makes the rule part of the field&#x27;s announcement, and preserving the value lets the user correct it instead of retyping.</p>
+<p><strong>Plausible wrong approach:</strong> Calling <code>form.reset()</code> inside the invalid handler fails because it erases the user&#x27;s valid entries along with the bad one.</p>
+<p><strong>How to verify:</strong> Enter 4, attempt to submit, and confirm the field still shows 4 with the help text announced as its description.</p>
 <h3 id="exercise-4-explain-why-type-email-does-not-prove-mailbox-ownership">Exercise 4: Explain why type=email does not prove mailbox ownership.<a class="heading-anchor" href="#exercise-4-explain-why-type-email-does-not-prove-mailbox-ownership" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It checks a syntactic format, not identity or delivery.</p>
+<p><strong>Approach:</strong> Separate format from ownership: <code>type=&quot;email&quot;</code> matches a syntax pattern, while ownership needs a message the person must act on.</p>
 <p><strong>Why:</strong> The browser checks only the address syntax; proving ownership requires sending a message and confirming the response.</p>
+<p><strong>Plausible wrong approach:</strong> Treating a valid-looking address as verified fails because anyone can type someone else&#x27;s well-formed address.</p>
+<p><strong>How to verify:</strong> <code>a@b.example</code> passes <code>checkValidity()</code> even though that mailbox does not exist.</p>
 <h3 id="exercise-5-test-validation-with-keyboard-and-an-empty-field">Exercise 5: Test validation with keyboard and an empty field.<a class="heading-anchor" href="#exercise-5-test-validation-with-keyboard-and-an-empty-field" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The error is discoverable and the entered values are preserved.</p>
+<p><strong>Approach:</strong> Leave the field empty, use Tab to reach the submit button, press Enter, and listen or look for the browser&#x27;s message.</p>
 <p><strong>Why:</strong> Errors must be perceivable and reachable by keyboard, otherwise a keyboard user may not learn that the submission failed.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only with a mouse click fails to show whether focus returns to the invalid field for keyboard users.</p>
+<p><strong>How to verify:</strong> After the attempt, focus sits on the empty required field and the other fields keep their typed values.</p>
 <h3 id="exercise-6-separate-client-feedback-from-server-side-acceptance">Exercise 6: Separate client feedback from server-side acceptance.<a class="heading-anchor" href="#exercise-6-separate-client-feedback-from-server-side-acceptance" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The backend repeats contract checks and authorization regardless of browser validation.</p>
+<p><strong>Approach:</strong> List each rule twice: once as client feedback in the form, and once as a server check that runs on every request.</p>
 <p><strong>Why:</strong> Client constraints improve feedback but can be bypassed, so the server repeats validation and authorization before accepting data.</p>
+<p><strong>Plausible wrong approach:</strong> Removing the server check because the form already validates fails because a request sent without the form skips every browser rule.</p>
+<p><strong>How to verify:</strong> Your list shows the range rule present on both the client and the server, with authorization only on the server.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-009_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

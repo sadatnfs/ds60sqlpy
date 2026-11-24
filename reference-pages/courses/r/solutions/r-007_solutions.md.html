@@ -202,21 +202,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict x after y &lt;- x; y[1] &lt;- 9 for a numeric vector.</p>
 <p>x retains its earlier first value.</p>
+<p><strong>Approach:</strong> Run the assignment and the update, then inspect both vectors.</p>
+<p><strong>Why it holds here:</strong> R vectors follow copy-on-modify semantics: <code>y &lt;- x</code> shares the data until <code>y[1] &lt;- 9</code> changes y, at which point y gets its own copy. x still holds A = 1 and B = 2.</p>
+<p><strong>Tempting mistake:</strong> Expecting the edit to show through x because both names once referred to the same object. That is how the environment in Example 2 behaves, not an ordinary numeric vector.</p>
+<p><strong>Verify:</strong> The reference check <code>x[[1]] == 1</code> passes, and <code>y[[1]]</code> returns 9.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Remove names from a labeled vector.</p>
 <p>The values remain while names become NULL.</p>
+<p><strong>Approach:</strong> Call <code>unname(x)</code> and compare the result with the bare values.</p>
+<p><strong>Why it holds here:</strong> <code>unname</code> removes only the names attribute. The values 1 and 2 are untouched, so the result is identical to <code>c(1, 2)</code>.</p>
+<p><strong>Tempting mistake:</strong> Writing <code>names(x) &lt;- &quot;&quot;</code>. That assigns one empty name and pads the second with NA, so the object still has a names attribute and is not identical to <code>c(1, 2)</code>.</p>
+<p><strong>Verify:</strong> <code>is.null(names(z))</code> returns TRUE and <code>identical(z, c(1, 2))</code> is TRUE, as the reference asserts.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a two-column shape from four numbers.</p>
 <p>A 2 by 2 matrix retains four values.</p>
+<p><strong>Approach:</strong> Set <code>dim(m) &lt;- c(2L, 2L)</code> on the four values from <code>1:4</code>.</p>
+<p><strong>Why it holds here:</strong> Two rows times two columns is four cells, exactly the vector length. R fills by column, so the first column is 1, 2 and the second is 3, 4.</p>
+<p><strong>Tempting mistake:</strong> Requesting <code>c(3L, 2L)</code> fails because six cells do not match four values. Expecting row filling, with 1 and 2 across the top row, misreads every later position.</p>
+<p><strong>Verify:</strong> The reference checks <code>identical(dim(m), c(2L, 2L))</code>, and <code>m[1, 2]</code> returns 3.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a shared environment counter changing through another name.</p>
 <p>Use a fresh environment when independent state is required.</p>
+<p><strong>Approach:</strong> Recognize that <code>alias &lt;- e</code> gives a second name to one environment, then create a separate <code>new.env()</code> when independent state is needed.</p>
+<p><strong>Why it holds here:</strong> An environment is a reference object. Setting <code>alias$count &lt;- 3</code> changes the only count that exists, so <code>e$count</code> becomes 3 as well.</p>
+<p><strong>Tempting mistake:</strong> Expecting <code>alias &lt;- e</code> to copy the way <code>y &lt;- x</code> copied a vector, and then debugging an unexpected count somewhere else in the script.</p>
+<p><strong>Verify:</strong> In the reference, <code>e$count</code> returns 3 after the alias update, and <code>identical(e, alias)</code> is TRUE.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Test exact equality of c(A=1) and 1.</p>
 <p>identical is FALSE because one object is named.</p>
+<p><strong>Approach:</strong> Use <code>identical()</code> for exact object equality and compare the attributes as well as the values.</p>
+<p><strong>Why it holds here:</strong> <code>c(A = 1)</code> carries a names attribute that 1 lacks, so the two objects differ even though their single value matches.</p>
+<p><strong>Tempting mistake:</strong> Concluding that the values differ, or using <code>==</code> where identity was required. <code>c(A = 1) == 1</code> returns TRUE with the name A attached, hiding the metadata difference.</p>
+<p><strong>Verify:</strong> <code>attributes(c(A = 1))</code> shows a <code>$names</code> entry, while <code>attributes(1)</code> returns NULL.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>State a function return contract including metadata.</p>
 <p>Specify and test names, dimensions and class that downstream code relies on.</p>
+<p><strong>Approach:</strong> Write the contract as explicit checks on names, dimensions and class, not only on values.</p>
+<p><strong>Why it holds here:</strong> In this lesson the names A and B carry record identity, and Example 3 shows how a single-column selection can drop dim without changing any value.</p>
+<p><strong>Tempting mistake:</strong> Testing only <code>all(result == c(1, 2))</code>. That passes after <code>unname()</code> or <code>as.numeric()</code> has stripped the labels a caller relies on.</p>
+<p><strong>Verify:</strong> The reference asserts <code>identical(names(x), c(&quot;A&quot;, &quot;B&quot;))</code>, a test that fails as soon as the labels change.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
 <p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>

@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Verify cuFFT frequencies and round-trip error with explicit normalization and measure plan versus execution cost.
+
 Work through *cuFFT and a complete signal-processing example* with the concrete cases below. Finish with this evidence:
 correct frequencies and round-trip error, explicit normalization and measured plan-versus-execution cost. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 The discrete Fourier transform rewrites samples as frequency components with an explicit sign and normalization convention. An inverse transform must use the matching convention. cuFFT uses plans to prepare a transform shape/layout and may need workspace; plan creation is separate from execution. Multiplication in frequency space corresponds to circular convolution unless padding supplies enough length for the desired linear convolution. Real-to-complex storage has a special output shape and, for some in-place workflows, padding requirements. Define those layouts before moving data rather than treating all transforms as same-size arrays.
+
+### Key terms
+
+- **FFT plan:** A cuFFT object created for one size, type and batch that stores precomputed setup for repeated transforms.
+- **Normalization convention:** The rule for scaling; cuFFT transforms are unnormalized, so a forward and inverse round trip scales values by N.
+- **Circular convolution:** Convolution in which indices wrap around, which is what pointwise multiplication of DFTs computes.
+- **Real-to-complex transform:** A transform of N real inputs that stores only N/2+1 complex outputs because of conjugate symmetry.
 
 ## Mathematical contract
 

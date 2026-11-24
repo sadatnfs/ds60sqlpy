@@ -1,6 +1,6 @@
 # llm-038: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these tools, structured output and trust boundaries answers after attempting *Accept the second allowed document* through *Keep retrieved instructions inert*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Reject extra fields* points to one step. `llm-038_solution.py` holds the assertions; this page explains how they test allowlist. Then try *Keep retrieved instructions inert* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -30,7 +30,7 @@ assert copy2 == second and copy2 is not second
 
 **Expected:** accepted; the returned proposal equals the input but is a separate copy.
 
-**Verify:** In a fresh process, the exercise checks confirm `copy2 == second` and `copy2 is not second`.
+**Verify:** For *Accept the second allowed document*, a fresh-process check confirms `copy2 == second` and `copy2 is not second`.
 
 ## Exercise 2: Predict a case-changed tool name
 
@@ -49,7 +49,7 @@ else:
 
 **Expected:** ValueError 'unknown tool'; names are matched exactly, without case folding.
 
-**Verify:** In a fresh process, the exercise checks confirm `validate({'tool': 'READ_FIXTURE', 'document_id': 'd1'})` raises `ValueError` and the raised error satisfies `str(error) == 'unknown tool'`.
+**Verify:** For *Predict a case-changed tool name*, a fresh-process check confirms `validate({'tool': 'READ_FIXTURE', 'document_id': 'd1'})` raises `ValueError` and the raised error satisfies `str(error) == 'unknown tool'`.
 
 ## Exercise 3: Reject extra fields
 
@@ -68,7 +68,7 @@ else:
 
 **Expected:** extra fields rejected.
 
-**Verify:** In a fresh process, the exercise checks confirm `validate({'tool': 'read_fixture', 'document_id': 'd1', 'command': 'anything'})` raises `ValueError`.
+**Verify:** For *Reject extra fields*, a fresh-process check confirms `validate({'tool': 'read_fixture', 'document_id': 'd1', 'command': 'anything'})` raises `ValueError`.
 
 ## Exercise 4: Reject traversal-like identifiers
 
@@ -87,7 +87,7 @@ else:
 
 **Expected:** ValueError because the ID is outside the fixture allowlist.
 
-**Verify:** In a fresh process, the exercise checks confirm `validate({'tool': 'read_fixture', 'document_id': '../secret'})` raises `ValueError`.
+**Verify:** For *Reject traversal-like identifiers*, a fresh-process check confirms `validate({'tool': 'read_fixture', 'document_id': '../secret'})` raises `ValueError`.
 
 ## Exercise 5: Enforce types
 
@@ -107,7 +107,7 @@ for bad in [{"tool": "read_fixture", "document_id": 1}, ["read_fixture", "d1"]]:
 
 **Expected:** TypeError for both malformed structures.
 
-**Verify:** In a fresh process, the exercise checks confirm for every `bad` in `[{'tool': 'read_fixture', 'document_id': 1}, ['read_fixture', 'd1']]`, `validate(bad)` raises `TypeError`.
+**Verify:** For *Enforce types*, a fresh-process check confirms for every `bad` in `[{'tool': 'read_fixture', 'document_id': 1}, ['read_fixture', 'd1']]`, `validate(bad)` raises `TypeError`.
 
 ## Exercise 6: Keep retrieved instructions inert
 
@@ -126,8 +126,8 @@ assert isinstance(result, str) and calls == ["read_fixture"]
 
 **Expected:** returned value is text; dispatch count 1.
 
-**Verify:** In a fresh process, the exercise checks confirm `isinstance(result, str)` and `calls == ['read_fixture']`.
+**Verify:** For *Keep retrieved instructions inert*, a fresh-process check confirms `isinstance(result, str)` and `calls == ['read_fixture']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Reject traversal-like identifiers* and predict the result first; keep *Reject traversal-like identifiers* failing beside the repair. Log a missing NumPy separately from a wrong allowlist value in `llm-038`.

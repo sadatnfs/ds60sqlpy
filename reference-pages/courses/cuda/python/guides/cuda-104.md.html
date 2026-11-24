@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A systems decision balances correctness, model quality, latency, throughput, memory, cost and maintainability. Start with explicit constraints and a reproducible baseline. Choose an optimization tied to a measured bottleneck: input preparation, transfer, arithmetic, memory traffic or communication. A custom kernel and multiple GPUs are optional solutions, not achievements that must be forced into every project.</p>
 <p>Retain source, environment, data recipe, checkpoint and rollback instructions. Report distributions and failure behavior, including unsupported shapes and resource limits. An acceptance matrix should show which claims have live evidence and which are still hypotheses. CPU-only work can produce a valuable model and decision report while honestly leaving GPU execution and deployment qualification open.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Explicit constraint:</strong> A stated limit on correctness, quality, latency, memory, cost or maintainability that a decision must respect.</li>
+<li><strong>Bottleneck hypothesis:</strong> A testable claim about which stage limits performance, stated before code changes.</li>
+<li><strong>Rollback instructions:</strong> A recorded way to return to the last known good configuration if a change fails.</li>
+<li><strong>Acceptance matrix:</strong> A table showing which claims have live evidence and which are still hypotheses.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>CandidateA uses 8 GiB and meets a 20 ms latency target; candidate B uses 12 GiB on an 8 GiB device. B is infeasible regardless of its optimistic kernel timing.</p>
@@ -218,6 +225,16 @@ valid <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <span class="syntax-keyword">assert</span> valid <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU decision fixture:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> valid<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Only candidate A satisfies all three constraints.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>valid</code></td>
+<td><code>[&#x27;A&#x27;]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -227,17 +244,23 @@ valid <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-write-three-constraints">Exercise 1: Write three constraints<a class="heading-anchor" href="#exercise-1-write-three-constraints" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>write three constraints</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing a single goal of maximizing speed ignores memory and quality, so the fastest candidate wins even when it cannot run on the device or produces worse answers.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-filter-infeasible-candidates">Exercise 2: Filter infeasible candidates<a class="heading-anchor" href="#exercise-2-filter-infeasible-candidates" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>filter infeasible candidates</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Ranking all candidates by latency first and picking B, then trying to make it fit later, wastes effort and treats a hard constraint as a preference.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-choose-a-bottleneck-hypothesis">Exercise 3: Choose a bottleneck hypothesis<a class="heading-anchor" href="#exercise-3-choose-a-bottleneck-hypothesis" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>choose a bottleneck hypothesis</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Making several optimizations at once without a hypothesis means any improvement cannot be attributed to a cause, and regressions get hidden by gains elsewhere.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-preserve-rollback">Exercise 4: Preserve rollback<a class="heading-anchor" href="#exercise-4-preserve-rollback" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>preserve rollback</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Replacing the baseline code in place leaves no way to reproduce earlier results or revert quickly.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-failure-tests">Exercise 5: Design failure tests<a class="heading-anchor" href="#exercise-5-design-failure-tests" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design failure tests</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Testing only valid inputs leaves error paths untested, and those paths are where GPU services typically fail in production.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-state-evidence-gaps">Exercise 6: State evidence gaps<a class="heading-anchor" href="#exercise-6-state-evidence-gaps" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>state evidence gaps</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Presenting fixture numbers such as 18 ms as measured performance claims evidence that does not exist.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

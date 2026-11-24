@@ -5,6 +5,28 @@
   "minutes": 75,
   "prerequisites": ["apache-047", "apache-036"],
   "concepts": ["checkpoint barriers", "source recovery", "sink commits", "exactly-once scope"],
+  "key_terms": [
+    [
+      "Checkpoint",
+      "A consistent snapshot of operator state and source positions that Flink can restore after a failure."
+    ],
+    [
+      "Checkpoint barrier",
+      "A marker injected into the streams that separates records before and after a checkpoint, defining a consistent cut through the graph."
+    ],
+    [
+      "Barrier alignment",
+      "Buffering input from channels whose barrier already arrived until barriers reach every input, which can add latency under backpressure."
+    ],
+    [
+      "Replayable source",
+      "A source that can restore its read position from a checkpoint so records after that point are read again."
+    ],
+    [
+      "Transactional sink",
+      "A sink that commits output only when a checkpoint completes, which is needed for end-to-end exactly-once results."
+    ]
+  ],
   "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",
   "sources": [
     [

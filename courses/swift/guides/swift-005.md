@@ -114,7 +114,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Preserve zero as a value) before changing anything, and confirm its observation: A present zero remains distinct from nil.
 2. Compare Example B (Parse with an absence policy) with Example A and name the first line whose behavior differs. Its observation is: Parsing produces an optional and malformed text is absent.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Optional chaining preserves absence; it does not validate the remaining value.
+3. Before opening the explanation, check your task 3 attempt (Write a parser accepting only present nonnegative integers) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Weak supervision creates noisy training signals from rules, heuristics, databases or model suggestions when full manual annotation is expensive. Active learning chooses which examples to send for labeling next. They address different parts of the data problem: weak supervision expands label supply, while active learning allocates a limited review budget. Neither makes an independently labeled evaluation set unnecessary.</p>
 <p>A labeling function can emit class zero, class one or abstain. Abstention means the rule has no applicable evidence under its scope, not that the example belongs to a negative class. Multiple rules can overlap, conflict or share the same underlying cue. Treating three correlated versions of one rule as three independent experts can exaggerate confidence.</p>
 <p>The executable reference implements transparent majority voting with tie abstention and uncertainty/diversity selection. It does not implement Snorkel&#x27;s learned label model or claim to estimate rule accuracies from unlabeled data. That distinction keeps the limitations of a simple baseline visible before introducing a probabilistic weak-supervision system.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Labeling function:</strong> A rule or heuristic that emits class zero, class one or abstain. Abstaining means no applicable evidence, not the negative class.</li>
+<li><strong>Coverage:</strong> The fraction of examples that receive at least one non-abstaining label; high coverage does not mean high accuracy.</li>
+<li><strong>Conflict:</strong> The fraction of examples that receive both class-zero and class-one votes, reported with a stated denominator.</li>
+<li><strong>Uncertainty sampling:</strong> Choosing examples for review where the current model is least certain, such as binary entropy near one-half.</li>
+<li><strong>Diversity constraint:</strong> A selection limit, here at most one example per family, that keeps a review batch from filling with near duplicates.</li>
+</ul>
 <h3 id="measure-coverage-and-conflict-before-combining">Measure coverage and conflict before combining<a class="heading-anchor" href="#measure-coverage-and-conflict-before-combining" aria-label="Link to this section">#</a></h3>
 <p>Coverage is the fraction of examples receiving at least one non-abstaining label. Conflict is the fraction receiving both class-zero and class-one votes. State the denominator: conflict among all examples differs from conflict among covered examples. In the four-row fixture, three rows are covered and one conflicts, giving .75 coverage and .25 overall conflict, or one-third among covered rows.</p>
 <p>Majority voting counts positive and negative labels but ignores abstentions. Equal counts return abstain under the declared policy. An all-abstaining row also returns abstain, but its reason differs from a conflict tie. A production ledger should retain both the aggregate label and the underlying rule outputs so these cases can be diagnosed separately.</p>
@@ -241,27 +249,27 @@ order <span class="syntax-operator">=</span> np<span class="syntax-operator">.</
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-weak-label-diagnostics">Exercise 1: Compute weak-label diagnostics<a class="heading-anchor" href="#exercise-1-compute-weak-label-diagnostics" aria-label="Link to this section">#</a></h4>
 <p>Calculate covered and conflicting rows in the supplied matrix.</p>
-<p><strong>Expected:</strong> Coverage.75,overall conflict.25 and conflict among covered1/3.</p>
+<p><strong>Expected:</strong> Coverage .75, overall conflict .25 and conflict among covered 1/3.</p>
 <p><strong>Verify:</strong> Assert coverage 0.75, overall conflict 0.25 and conflict 1/3 among covered rows, treating -1 as an abstention.</p>
 <p><strong>Hints:</strong> Define the denominator before reporting a percentage.</p>
 <h4 id="exercise-2-implement-tie-aware-voting">Exercise 2: Implement tie-aware voting<a class="heading-anchor" href="#exercise-2-implement-tie-aware-voting" aria-label="Link to this section">#</a></h4>
 <p>Aggregate the four rows without treating -1 as a class vote.</p>
-<p><strong>Expected:</strong> Outputs[1,0,-1,-1].</p>
+<p><strong>Expected:</strong> Outputs [1, 0, -1, -1].</p>
 <p><strong>Verify:</strong> Assert the votes are [1, 0, -1, -1], with ties and all-abstain rows returning -1.</p>
 <p><strong>Hints:</strong> Compare positive and negative vote counts; tie returns abstain.</p>
 <h4 id="exercise-3-inspect-source-correlation">Exercise 3: Inspect source correlation<a class="heading-anchor" href="#exercise-3-inspect-source-correlation" aria-label="Link to this section">#</a></h4>
-<p>Compare votes[1,1,0] with collapsed source-family votes[1,0].</p>
-<p><strong>Expected:</strong> Majority1 becomes abstain, with a written explanation of duplicated evidence.</p>
+<p>Compare votes [1, 1, 0] with collapsed source-family votes [1, 0].</p>
+<p><strong>Expected:</strong> Majority 1 becomes abstain, with a written explanation of duplicated evidence.</p>
 <p><strong>Verify:</strong> Assert the raw votes [1, 1, 0] give 1 while the collapsed family votes [1, 0] give an abstention.</p>
 <p><strong>Hints:</strong> Ask which rules use independent information.</p>
 <h4 id="exercise-4-rank-uncertainty">Exercise 4: Rank uncertainty<a class="heading-anchor" href="#exercise-4-rank-uncertainty" aria-label="Link to this section">#</a></h4>
-<p>Compute binary entropy for probabilities[.5,.6,.95,.1].</p>
-<p><strong>Expected:</strong> Top two uncertainty indices[0,1]; <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">p=0.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0.5</span></span></span></span> has maximum entropy.</p>
+<p>Compute binary entropy for probabilities [.5, .6, .95, .1].</p>
+<p><strong>Expected:</strong> Top two uncertainty indices [0, 1]; <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">p=0.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0.5</span></span></span></span> has maximum entropy.</p>
 <p><strong>Verify:</strong> Assert the two highest-entropy indices are [0, 1] and that p = 0.5 attains the maximum binary entropy.</p>
 <p><strong>Hints:</strong> Handle <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">p=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> and 1 without log-zero warnings.</p>
 <h4 id="exercise-5-enforce-diversity-and-budget">Exercise 5: Enforce diversity and budget<a class="heading-anchor" href="#exercise-5-enforce-diversity-and-budget" aria-label="Link to this section">#</a></h4>
-<p>Select two examples with families[a,a,b,c], at most one per family.</p>
-<p><strong>Expected:</strong> Selected indices[0,3]; budget0 returns an empty batch.</p>
+<p>Select two examples with families [a, a, b, c], at most one per family.</p>
+<p><strong>Expected:</strong> Selected indices [0, 3]; budget 0 returns an empty batch.</p>
 <p><strong>Verify:</strong> Assert the selection is [0, 3], no family appears twice and budget 0 returns an empty list.</p>
 <p><strong>Hints:</strong> Walk the uncertainty order and skip already represented families.</p>
 <h4 id="exercise-6-protect-independent-evaluation">Exercise 6: Protect independent evaluation<a class="heading-anchor" href="#exercise-6-protect-independent-evaluation" aria-label="Link to this section">#</a></h4>

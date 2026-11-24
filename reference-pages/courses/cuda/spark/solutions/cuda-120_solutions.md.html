@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
 <h3 id="exercise-1-compute-concurrent-live-memory">Exercise 1: Compute concurrent live memory<a class="heading-anchor" href="#exercise-1-compute-concurrent-live-memory" aria-label="Link to this section">#</a></h3>
 <p>Add per-task live sets and shared state.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>compute concurrent live memory</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Compute concurrent live memory: three tasks at 2 GiB each plus 1 GiB shared workspace need <code>3*2 + 1 = 7</code> GiB, and four tasks need 9 GiB.</p>
+<p><strong>Why it is correct here.</strong> Tasks running at the same time each hold their live set, and the shared workspace is counted once. Peak demand is the sum at the point of greatest overlap.</p>
+<p><strong>A plausible wrong approach.</strong> Counting the shared workspace once per task gives 10 GiB for three tasks and wrongly rejects a configuration that fits.</p>
+<p><strong>How to verify.</strong> The reference asserts 7 and 9 and finds safe task counts <code>[1, 2, 3]</code> for an 8 GiB capacity.</p>
 <h3 id="exercise-2-lower-concurrency">Exercise 2: Lower concurrency<a class="heading-anchor" href="#exercise-2-lower-concurrency" aria-label="Link to this section">#</a></h3>
 <p>Reduce simultaneous live demand.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>lower concurrency</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Lower concurrency from four to three tasks to bring demand under the 8 GiB budget, since each task removed frees its 2 GiB live set.</p>
+<p><strong>Why it is correct here.</strong> Fewer simultaneous tasks reduce peak demand while each task&#x27;s work is unchanged. The cost is less parallelism, which may lengthen the stage.</p>
+<p><strong>A plausible wrong approach.</strong> Raising batch size to finish faster increases per-task memory and makes the overflow worse. It may also push the job into heavier spilling, which slows the stage more than the larger batches speed it up.</p>
+<p><strong>How to verify.</strong> Run with three tasks and confirm that spill metrics fall and the stage completes without memory errors. Compare total stage time with the four-task run, since lower concurrency can still win once spilling stops.</p>
 <h3 id="exercise-3-separate-jvm-and-device-pools">Exercise 3: Separate JVM and device pools<a class="heading-anchor" href="#exercise-3-separate-jvm-and-device-pools" aria-label="Link to this section">#</a></h3>
 <p>They are separate allocators and resources.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>separate JVM and device pools</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Separate JVM heap and device memory: Spark executor memory settings control the JVM heap on the host, while the plugin manages a separate GPU memory pool.</p>
+<p><strong>Why it is correct here.</strong> The two allocators serve different data and have different limits, so a GPU out-of-memory is not fixed by increasing the executor heap.</p>
+<p><strong>A plausible wrong approach.</strong> Raising <code>spark.executor.memory</code> after a GPU memory error adds host memory and leaves the device budget unchanged.</p>
+<p><strong>How to verify.</strong> Read the error message to see which allocator failed, and change the matching setting.</p>
 <h3 id="exercise-4-budget-spill-disk">Exercise 4: Budget spill disk<a class="heading-anchor" href="#exercise-4-budget-spill-disk" aria-label="Link to this section">#</a></h3>
 <p>Use explicit disposable paths and capacity.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>budget spill disk</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Budget spill disk with an explicit, disposable path and known capacity, since spilled batches are written to local storage.</p>
+<p><strong>Why it is correct here.</strong> Spill files consume disk space proportional to the spilled data. An unbounded spill can fill a shared disk.</p>
+<p><strong>A plausible wrong approach.</strong> Leaving spill on the default temporary directory of a small root volume risks filling it and affecting other processes.</p>
+<p><strong>How to verify.</strong> Configure the local directories, check free space before the run and record spill bytes after it.</p>
 <h3 id="exercise-5-design-safe-batch-changes">Exercise 5: Design safe batch changes<a class="heading-anchor" href="#exercise-5-design-safe-batch-changes" aria-label="Link to this section">#</a></h3>
 <p>Bound rows and bytes before launch.</p>
-<p>Connect this conclusion to worked example 1 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>design safe batch changes</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Design safe batch changes by bounding rows and bytes per batch before launch, such as limiting the target batch size, and change one setting at a time.</p>
+<p><strong>Why it is correct here.</strong> Batch size drives per-task memory. A bounded batch gives a predictable live set.</p>
+<p><strong>A plausible wrong approach.</strong> Doubling the batch size without a memory budget can turn a working job into an out-of-memory failure. The failure may appear only on the largest partitions, so small test inputs can pass while production data fails.</p>
+<p><strong>How to verify.</strong> Compute the per-task live set for the new batch size, compare with the budget, and then run.</p>
 <h3 id="exercise-6-interpret-successful-but-spilling-execution">Exercise 6: Interpret successful but spilling execution<a class="heading-anchor" href="#exercise-6-interpret-successful-but-spilling-execution" aria-label="Link to this section">#</a></h3>
 <p>Completion is valid but performance and storage behavior need reporting.</p>
-<p>Connect this conclusion to worked example 2 and the declared contract. State what additional observation would be needed on your actual backend before claiming <strong>interpret successful but spilling execution</strong> is qualified there.</p>
+<p><strong>Approach.</strong> Interpret a successful run with spills: the result is valid, but the report should state spill bytes and the added serialization and I/O time.</p>
+<p><strong>Why it is correct here.</strong> Spilling trades speed for completion. Reporting it explains slowdowns and warns that larger data may spill more.</p>
+<p><strong>A plausible wrong approach.</strong> Comparing only kernel times between a spilling run and a non-spilling run misses the end-to-end slowdown.</p>
+<p><strong>How to verify.</strong> Include spill bytes and stage time in the report next to the correctness check. Also record the spill path and peak disk use, since a later run with more data may exceed that capacity.</p>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>One through three tasks fit the simplified budget; four do not.</p>
 <p>The reference file is <code>courses/cuda/spark/references/cuda-120_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>

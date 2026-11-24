@@ -197,22 +197,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Guard a formerly unsafe index: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `int values[] = {2, 4,</span></span>
-<span class="source-line"><span class="syntax-comment">     6}, out = 0;` to `int values[] = {2, 4, 7}, out = 0;`. Before running,</span></span>
-<span class="source-line"><span class="syntax-comment">     predict which CHECK fails and which value it now sees; then run it and</span></span>
-<span class="source-line"><span class="syntax-comment">     restore the original line. Expected: The changed run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `at_index(values, 3, 2, &amp;out) &amp;&amp; out == 6`.</span></span>
-<span class="source-line"><span class="syntax-comment">     Restoring the original line brings back the worked observation: the value 6</span></span>
-<span class="source-line"><span class="syntax-comment">     is returned. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;guard a formerly unsafe index&quot; case, into a</span></span>
+<span class="source-line"><span class="syntax-comment">     scratch pad and change `int values[] = {2, 4, 6}, out = 0;` to `int</span></span>
+<span class="source-line"><span class="syntax-comment">     values[] = {2, 4, 7}, out = 0;`. Before running, predict which CHECK fails</span></span>
+<span class="source-line"><span class="syntax-comment">     and which value it sees in place of the worked result (the value 6 is</span></span>
+<span class="source-line"><span class="syntax-comment">     returned); then run it and restore the original line. Expected: With `int</span></span>
+<span class="source-line"><span class="syntax-comment">     values[] = {2, 4, 7}, out = 0;` the run stops with `Check failed` at the</span></span>
+<span class="source-line"><span class="syntax-comment">     CHECK on `at_index(values, 3, 2, &amp;out) &amp;&amp; out == 6`, because the &quot;guard a</span></span>
+<span class="source-line"><span class="syntax-comment">     formerly unsafe index&quot; case no longer shows that the value 6 is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">     Restoring `int values[] = {2, 4, 6}, out = 0;` brings that observation</span></span>
+<span class="source-line"><span class="syntax-comment">     back. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Reject the one-past index: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, so one line now reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `int values[] = {2, 4, 6}, out = 10;`. Run worked example 2 with that line,</span></span>
-<span class="source-line"><span class="syntax-comment">     use the failing CHECK to locate the defect and repair it without changing</span></span>
-<span class="source-line"><span class="syntax-comment">     the CHECK. Expected: Before the repair the run stops with `Check failed` at</span></span>
-<span class="source-line"><span class="syntax-comment">     the CHECK on `!at_index(values, 3, 3, &amp;out) &amp;&amp; out == 9`; after it the line</span></span>
-<span class="source-line"><span class="syntax-comment">     reads `int values[] = {2, 4, 6}, out = 9;` again and the operation fails</span></span>
-<span class="source-line"><span class="syntax-comment">     and output remains 9. */</span></span>
+<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;reject the</span></span>
+<span class="source-line"><span class="syntax-comment">     one-past index&quot; case, so one line now reads `int values[] = {2, 4, 6}, out</span></span>
+<span class="source-line"><span class="syntax-comment">     = 10;`. Run the example with that line, use the failing CHECK to find why</span></span>
+<span class="source-line"><span class="syntax-comment">     the operation fails and output remains 9 no longer holds and repair the</span></span>
+<span class="source-line"><span class="syntax-comment">     line without changing the CHECK. Expected: Before the repair the run stops</span></span>
+<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `!at_index(values, 3, 3, &amp;out) &amp;&amp; out</span></span>
+<span class="source-line"><span class="syntax-comment">     == 9`. Once the line reads `int values[] = {2, 4, 6}, out = 9;` again, the</span></span>
+<span class="source-line"><span class="syntax-comment">     &quot;reject the one-past index&quot; case again shows that the operation fails and</span></span>
+<span class="source-line"><span class="syntax-comment">     output remains 9. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Reject an empty view</span></span>
 <span class="source-line"><span class="syntax-comment">     Request index zero from an empty logical view.</span></span>

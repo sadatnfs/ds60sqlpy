@@ -5,6 +5,39 @@
   "minutes": 75,
   "prerequisites": ["apache-078", "apache-075"],
   "concepts": ["capability negotiation", "history", "change feed", "native client"],
+  "key_terms": [
+    [
+      "Capability negotiation",
+      "Agreeing which protocol and table features both client and server support, which version numbers alone do not establish."
+    ],
+    [
+      "Change data feed",
+      "A Delta feature that exposes row-level inserts, updates and deletes between versions, with operation and commit metadata."
+    ],
+    [
+      "Deletion vector",
+      "A Delta table feature that marks deleted rows without rewriting Parquet files, which a basic Parquet reader cannot interpret."
+    ],
+    [
+      "Delta format response",
+      "A newer sharing response mode that returns Delta log actions for advanced table features, excluded by the course's portable client."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Reject unknown reader features before reading data",
+      "language": "python",
+      "code": "import json\n\nlines = [\n    '{\"protocol\": {\"minReaderVersion\": 3, \"readerFeatures\": [\"deletionVectors\"]}}',\n    '{\"metaData\": {\"id\": \"fixture\"}}',\n]\nprotocol = [json.loads(line)[\"protocol\"] for line in lines if \"protocol\" in line][0]\nsupported = protocol[\"minReaderVersion\"] == 1 and not protocol.get(\"readerFeatures\")\nprint(\"read data\" if supported else \"stop: unsupported protocol\")",
+      "output": "stop: unsupported protocol",
+      "interpretation": "The lines imitate a query response from a table that uses deletion vectors. A reader that ignored the protocol line would download the Parquet files and return rows that the table logically deleted, which is a silent correctness bug rather than an error. The project client applies the same rule and raises before any file URL is fetched."
+    },
+    {
+      "title": "Ask for history only when the table shares it",
+      "language": "yaml",
+      "code": "tables:\n  - name: orders\n    location: \"s3a://owned-fixture-bucket/orders\"\n    id: \"81e0b600-1380-4b9a-a4db-000000000001\"\n    historyShared: true",
+      "interpretation": "From server-config.example.yaml, historyShared true lets recipients request older versions and change data feed ranges. Without it, a query with a version or timestamp is refused even if the client supports it. Capability is the intersection of three things: the server version, the table settings and the client implementation, so check each one before blaming the others."
+    }
+  ],
   "evidence": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred.",
   "sources": [
     ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"],

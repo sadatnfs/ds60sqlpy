@@ -38,6 +38,21 @@ internal static class Program {
       Check(account.Value >= 0, "valid state");
     }
     {
+      // Task 2: Guided modification
+      var counter = new LockedCounter();
+      const int tasks = 8;
+      const int perTask = 250;
+      void AddMany() {
+        for (int i = 0; i < perTask; i++)
+          counter.Add();
+      }
+      var work = new List<Task>();
+      for (int t = 0; t < tasks; t++)
+        work.Add(Task.Run(AddMany));
+      await Task.WhenAll(work);
+      Check(counter.Value == tasks * perTask, "exact total 2000");
+    }
+    {
       // Task 3: Independent construction
       var gate = new Lock();
       int left = 100;
@@ -55,6 +70,25 @@ internal static class Program {
       }
       await Task.WhenAll(moves);
       Check(left + right == 100 && right == 50, "sum preserved");
+    }
+    {
+      // Task 5: Boundary evidence
+      var idle = new LockedCounter();
+      Check(idle.Value == 0, "zero operations read 0");
+      var live = new LockedCounter();
+      void Write() {
+        for (int i = 0; i < 1000; i++)
+          live.Add();
+      }
+      int Sample() => live.Value;
+      var writer = Task.Run(Write);
+      var samples = new List<Task<int>>();
+      for (int r = 0; r < 4; r++)
+        samples.Add(Task.Run(Sample));
+      int[] during = await Task.WhenAll(samples);
+      await writer;
+      Check(during.All(v => v >= 0 && v <= 1000), "each read is a whole count");
+      Check(live.Value == 1000, "final total exact");
     }
     Console.WriteLine("csharp-033: passed");
     await Task.CompletedTask;

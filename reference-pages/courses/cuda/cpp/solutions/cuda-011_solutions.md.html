@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-011_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>The manual lab command is <code>nvcc -std=c++17 -O2 -lineinfo main.cu -o main</code>. The input is main.cu; <code>-o main</code> names the executable. <code>./main</code> runs that file from the current directory. The toolkit&#x27;s default target must support the actual device. A release build later needs deliberately selected architecture targets, not guessed values from a tutorial.</p>
+<p><strong>Approach:</strong> Read each part of the command: language standard, optimization, line info, input file and output name.</p>
+<p><strong>Why it is correct:</strong> Each flag maps to a stage; -lineinfo keeps source mapping for later profiling without debug slowdown.</p>
+<p><strong>A plausible wrong approach:</strong> Copying an -arch value from a tutorial can build code for a different architecture than the installed device.</p>
+<p><strong>How to verify:</strong> Run nvcc --version and the device query, then confirm the chosen target covers that compute capability.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A missing semicolon is a source diagnostic. An undefined host function is a host-link diagnostic. &#x27;No kernel image is available for execution on the device&#x27; is a loading/target problem. Replacing arithmetic in the kernel is unlikely to solve the latter. Save the complete diagnostic and identify the stage before changing versions.</p>
+<p><strong>Approach:</strong> Classify each message by stage: compile, link or load, before changing anything.</p>
+<p><strong>Why it is correct:</strong> Each stage has different causes, so the stage determines whether to edit source, link inputs or targets.</p>
+<p><strong>A plausible wrong approach:</strong> Editing kernel arithmetic to fix &#x27;no kernel image&#x27; changes code that never ran on the device.</p>
+<p><strong>How to verify:</strong> Save the full diagnostic text and confirm the fix targets the stage it names.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Source is authored C++/CUDA, PTX is virtual device instructions, and the executable contains host code plus packaged device code and link dependencies.</p>
+<p><strong>Approach:</strong> Describe each artifact by who produces it and what consumes it.</p>
+<p><strong>Why it is correct:</strong> Authors write .cu, the compiler emits PTX for a virtual architecture, the linker packages the executable.</p>
+<p><strong>A plausible wrong approach:</strong> Calling PTX machine code ignores that the driver may still translate it for the real device.</p>
+<p><strong>How to verify:</strong> Inspect a build&#x27;s intermediate files and confirm where PTX and the final binary appear.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Compilation can happen without a visible GPU. Device loading, allocation, launch and returned-value validation remain separate steps.</p>
+<p><strong>Approach:</strong> List the runtime steps that compilation never exercises: loading, allocation, launch and validation.</p>
+<p><strong>Why it is correct:</strong> nvcc runs on hosts without GPUs, so a zero exit proves only translation and linking.</p>
+<p><strong>A plausible wrong approach:</strong> Reporting a GPU pass from a CI build job without a device claims execution that never occurred.</p>
+<p><strong>How to verify:</strong> Check the build log for a device query; if absent, record execution as not tested.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Nothing yet. The host did not start the program; inspect the exact file path and permissions before GPU diagnosis.</p>
+<p><strong>Approach:</strong> Inspect the file path and permission bits before considering the kernel.</p>
+<p><strong>Why it is correct:</strong> The operating system refused to start the process, so no host or device code ran.</p>
+<p><strong>A plausible wrong approach:</strong> Rebuilding with a different -arch cannot fix a missing execute permission.</p>
+<p><strong>How to verify:</strong> Run ls -l on the binary and confirm the execute bit after chmod.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Record toolkit and host compiler, target architectures/PTX policy, linked library versions, source revision and actual device runtime tests.</p>
+<p><strong>Approach:</strong> Record toolkit, host compiler, targets, PTX policy, libraries, revision and device test results.</p>
+<p><strong>Why it is correct:</strong> These fields determine which devices can load the binary and which source produced it.</p>
+<p><strong>A plausible wrong approach:</strong> Recording only the toolkit version leaves the supported architectures unknown.</p>
+<p><strong>How to verify:</strong> Compare the recorded targets with a fresh device&#x27;s compute capability before deploying.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-011_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

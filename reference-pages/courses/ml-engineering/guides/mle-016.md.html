@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A candidate model should not become active merely because a file was written. Activation needs accepted artifact identity, interface compatibility and a reviewed decision. Keeping the current pointer separate from candidate files lets a failed candidate leave the accepted model unchanged.</p>
 <p>The first case validates a candidate hash before replacing the pointer. A deliberately incorrect expected hash causes rejection while the old pointer bytes remain exact. The second activates a new version and deliberately returns to the prior version. These are local file-state mechanisms, not a distributed transaction across every serving replica.</p>
 <p>Atomic visibility and durable recovery are different claims. os.replace gives a useful local replacement boundary, but power-loss durability, remote filesystems, multiple writers and deployment-wide consistency need additional design and qualification. The real Docker project restricts activation to an owned control CLI, validates model structure before publication and keeps the predictor&#x27;s state mount read-only.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Model pointer:</strong> A small file naming the accepted active model version and its hash, kept separate from candidate files.</li>
+<li><strong>Activation:</strong> Replacing the pointer so a candidate becomes active, allowed only after its identity and compatibility checks pass.</li>
+<li><strong>Atomic replace:</strong> Swapping a fully written pending pointer into place with os.replace, so readers on one local filesystem see the old or new pointer, never a partial one.</li>
+<li><strong>Rollback:</strong> Pointing back to a prior accepted version, which requires keeping accepted versions available and unchanged.</li>
+<li><strong>Durability:</strong> Surviving power loss or crashes after a write. It is a separate claim from atomic visibility and needs more than os.replace.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Write a candidate under a versioned name, validate its identity, write a complete pending pointer and replace the current pointer atomically. The pointer records the resolved version and hash. A failed check occurs before the active pointer changes. Preserve accepted versions and define cleanup separately from activation.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

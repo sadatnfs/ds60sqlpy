@@ -195,24 +195,60 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-007-explained-reference">julia-007: explained reference<a class="heading-anchor" href="#julia-007-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-007_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Separate shape from contents and storage from interpretation. <code>size</code> reports axes, column-major order explains where <code>reshape(1:6, 2, 3)</code> puts each value, ordinary slicing copies, <code>view</code> shares storage, <code>copy</code> is shallow and <code>deepcopy</code> duplicates nested arrays. Bounds checks stay on so a bad index fails visibly.</p>
 <h3 id="1-read-a-shape">1. Read a shape<a class="heading-anchor" href="#1-read-a-shape" aria-label="Link to this section">#</a></h3>
 <p>Operations can dispatch or broadcast differently for these shapes.</p>
 <p><strong>Expected observation:</strong> Their sizes are <code>(2,)</code> and <code>(2, 1)</code>.</p>
+<p><strong>Why it holds here:</strong> <code>zeros(2)</code> has one axis with size <code>(2,)</code>, while <code>zeros(2, 1)</code> has two axes with size <code>(2, 1)</code>, even though both hold two numbers.</p>
+<p><strong>Plausible wrong approach:</strong> Treating both as the same column of two values can make matrix multiplication or broadcasting produce a different shape than intended.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>size(zeros(2)) == (2,)</code> and <code>size(zeros(2, 1)) == (2, 1)</code>.</p>
 <h3 id="2-trace-column-order">2. Trace column order<a class="heading-anchor" href="#2-trace-column-order" aria-label="Link to this section">#</a></h3>
 <p>The storage order is explicit and should not be confused with the scientific interpretation of axes.</p>
 <p><strong>Expected observation:</strong> It is at row 1, column 3.</p>
+<p><strong>Why it holds here:</strong> Column-major filling puts 1 and 2 in column 1, 3 and 4 in column 2, and 5 and 6 in column 3, so 5 sits at row 1, column 3.</p>
+<p><strong>Plausible wrong approach:</strong> Reading the vector row by row places 5 at row 2, column 2, which is the row-major layout used by NumPy defaults.</p>
+<p><strong>How to verify:</strong> Print <code>findfirst(==(5), matrix)</code> and expect <code>CartesianIndex(1, 3)</code>.</p>
 <h3 id="3-take-a-snapshot">3. Take a snapshot<a class="heading-anchor" href="#3-take-a-snapshot" aria-label="Link to this section">#</a></h3>
 <p>A snapshot protects later reads from this mutation, with an allocation cost.</p>
 <p><strong>Expected observation:</strong> The original scalar-element vector is unchanged.</p>
+<p><strong>Why it holds here:</strong> <code>v[1:2]</code> allocates a new vector, so setting its first element changes only the copy and <code>v</code> keeps its values.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting slices to share memory, as NumPy basic slices do, predicts that the original changes when it does not.</p>
+<p><strong>How to verify:</strong> Mutate the slice and assert the original still equals its starting contents.</p>
 <h3 id="4-use-a-shared-window">4. Use a shared window<a class="heading-anchor" href="#4-use-a-shared-window" aria-label="Link to this section">#</a></h3>
 <p>A view is useful when shared mutation or avoided copying is intended.</p>
 <p><strong>Expected observation:</strong> The original array changes.</p>
+<p><strong>Why it holds here:</strong> <code>view(v, 1:2)</code> refers to the same storage, so writing to the view writes into <code>v</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>@view</code> as a speed trick and then mutating the result silently alters data that other code still reads.</p>
+<p><strong>How to verify:</strong> Write 99 through the view and assert <code>v[1] == 99</code>.</p>
 <h3 id="5-copy-nested-state">5. Copy nested state<a class="heading-anchor" href="#5-copy-nested-state" aria-label="Link to this section">#</a></h3>
 <p>The required independence level depends on the data structure and algorithm.</p>
 <p><strong>Expected observation:</strong> A shallow copy shares inner vectors; a deep copy does not in this fixture.</p>
+<p><strong>Why it holds here:</strong> <code>copy(nested)</code> makes a new outer vector holding the same inner vectors, so <code>shallow[1][1] = 9</code> changes <code>nested[1][1]</code> as well.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming <code>copy</code> is enough for independence leaves inner arrays shared, so updates leak back into the original.</p>
+<p><strong>How to verify:</strong> The reference checks <code>nested[1][1] == 9</code> after the shallow edit and that it stays 9 after editing the <code>deepcopy</code>.</p>
 <h3 id="6-retain-a-bound-check">6. Retain a bound check<a class="heading-anchor" href="#6-retain-a-bound-check" aria-label="Link to this section">#</a></h3>
 <p>Bounds checking makes a violated indexing contract observable before considering lower-level optimizations.</p>
-<p><strong>Expected observation:</strong> A BoundsError is raised.</p></article>
+<p><strong>Expected observation:</strong> A BoundsError is raised.</p>
+<p><strong>Why it holds here:</strong> Standard vectors start at index 1, so <code>[1, 2][0]</code> is outside <code>1:2</code> and raises <code>BoundsError</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Disabling bounds checking with <code>@inbounds</code> before the indices are proven valid turns this clear error into reading arbitrary memory.</p>
+<p><strong>How to verify:</strong> Assert <code>@test_throws BoundsError [1, 2][0]</code> as the reference does.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-007: all reference checks passed</code>:</p>
+<p>Shape checks show that <code>zeros(2, 1)</code> is a two by one matrix while <code>zeros(2)</code> is a vector of size <code>(2,)</code>, two different types despite holding the same count. Indexing at 0 throws because arrays start at 1. The nested copy lines prove that <code>copy</code> duplicates only the outer vector: writing 9 through <code>shallow</code> reaches <code>nested</code>, while the later write through <code>deepcopy</code> leaves <code>nested[1][1]</code> at 9.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> size<span class="syntax-punctuation">(</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> size<span class="syntax-punctuation">(</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> eltype<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-keyword">Float64</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">BoundsError</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    nested <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+    shallow <span class="syntax-operator">=</span> copy<span class="syntax-punctuation">(</span>nested<span class="syntax-punctuation">)</span>
+    shallow<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">9</span>
+    <span class="syntax-decorator">@test</span> nested<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">9</span>
+    deep <span class="syntax-operator">=</span> deepcopy<span class="syntax-punctuation">(</span>nested<span class="syntax-punctuation">)</span>
+    deep<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">4</span>
+    <span class="syntax-decorator">@test</span> nested<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">9</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

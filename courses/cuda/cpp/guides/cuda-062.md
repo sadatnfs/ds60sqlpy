@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Write a deployment checklist tied to evidence tiers that fails gracefully when no supported GPU is present.
+
 Work through *Portability, operations and the cost of a GPU dependency* with the concrete cases below. Finish with this evidence:
 a deployment checklist tied to supported evidence tiers and graceful failures. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Portability means defining what is supported and how unsupported situations behave. CUDA execution requires a supported NVIDIA device and host software path; a CPU-only classroom can still teach algorithms and validate CPU references. AMD, Intel and Apple GPU programming use different backends and APIs, not an automatic CUDA compatibility promise. Detect capability for the operation, not simply the operating-system name. Containers package user-space dependencies but share host driver and hardware constraints. MIG, MPS, device sharing and resets are operator-managed topics. A teaching worker must never silently reset a shared device or erase learner state to recover from a fault.
+
+### Key terms
+
+- **Capability detection:** Querying device count, compute capability and driver version before selecting a code path.
+- **Graceful failure:** Stopping with a clear message and a nonzero exit instead of crashing or silently producing wrong output.
+- **Driver compatibility:** Whether the installed driver supports the CUDA runtime version and device code that the binary contains.
+- **Evidence tier:** A labeled level of proof, such as compiled, executed on a GPU or benchmarked, attached to a claim.
 
 ## How to run and study this lesson
 

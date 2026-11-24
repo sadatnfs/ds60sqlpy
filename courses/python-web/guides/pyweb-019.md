@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-018`.
 
 Authentication establishes an identity from credentials. A session mechanism then lets subsequent requests recover that identity. This chapter uses Flask-Login, an actual password hash and a real client cookie jar to observe anonymous refusal, a failed login, a successful login and logout.
 
+## Key terms
+
+- **Authentication:** Establishing a caller's identity from credentials such as a username and password.
+- **User loader:** The Flask-Login callback that maps the user ID stored in the session back to a user object on each request.
+- **login_user:** The Flask-Login function that records an authenticated identity in the session; `logout_user` removes it.
+- **login_required:** A Flask-Login decorator that refuses anonymous callers; this example's unauthorized handler answers with JSON 401 instead of a login-page redirect.
+- **Password hash:** A salted one-way transformation of a password, created with `generate_password_hash` and checked with `check_password_hash` so plaintext is never stored.
+
 ## Mechanism: the loader restores identity
 
 The User object supplies the identity contract expected by Flask-Login through UserMixin. The login manager's user loader maps a stored ID back to the current user record. `login_user` records the authenticated identity in the session; `login_required` checks it when the account endpoint is called. Logout removes the authenticated state.
@@ -25,6 +33,32 @@ A public invalid-credential message should avoid unnecessarily revealing whether
 A correct password produces a successful login. A subsequent request through the same client cookie jar returns the intended user ID and name. After logout, the protected endpoint again returns 401. The program checks the entire sequence instead of treating the login response alone as sufficient evidence.
 
 The user loader matters on later requests. A session may contain an ID whose user has since been disabled or deleted. A real loader should reflect the current authorization/account policy rather than reconstructing a privileged object from untrusted session fields. The next chapter adds per-object ownership checks after identity is established.
+
+## Worked example: what a stored password hash contains
+
+```python
+from werkzeug.security import check_password_hash, generate_password_hash
+
+first = generate_password_hash("fixture-correct-password")
+second = generate_password_hash("fixture-correct-password")
+print(first.split("$")[0], len(first.split("$")[1]))
+print(first == second)
+print(check_password_hash(first, "fixture-correct-password"))
+print(check_password_hash(second, "Fixture-correct-password"))
+print(check_password_hash(first, "fixture-correct-password "))
+```
+
+Expected output:
+
+```text
+scrypt:32768:8:1 16
+False
+True
+False
+False
+```
+
+The stored value starts with its own recipe: the scrypt algorithm and its cost parameters, followed by a 16-character random salt and the derived key. Hashing the same password twice produced different strings because each call chose a new salt, so you can never verify a login by hashing the input and comparing strings with `==`; `check_password_hash` reads the method and salt from the stored value and repeats the derivation. One changed capital letter and one trailing space both failed, which is why the lesson's login view should not silently strip or lowercase passwords. Because the parameters travel with each hash, raising the cost later only affects newly stored passwords, and existing users still verify.
 
 ## Failure diagnosis
 

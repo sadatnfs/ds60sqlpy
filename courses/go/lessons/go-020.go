@@ -18,7 +18,7 @@ func main() {
 	// Exercise 5: Round-trip a delimiter field: Write a field containing a comma, flush, then read it back.
 	// Expected: The original field survives exactly.
 
-	// Exercise 6: Transfer header validation: Read the header name,count and compare its exact order.
+	// Exercise 6: Transfer header validation: Read the header `name,count` and compare its exact order.
 	// Expected: The schema order is name then count.
 
 	fmt.Println("Implement the six investigations in your saved pad.")

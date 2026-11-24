@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Design generic operations over owned types and resolve overlapping method signatures explicitly.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-011</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (one operation over two shapes) and worked case B (specify an intersection) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-011: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Multiple dispatch:</strong> Julia selects a method using the runtime types of all positional arguments, not only the first one.</li>
+<li><strong>Abstract type:</strong> A type that cannot be instantiated and groups concrete types, so one method can serve a whole family of them.</li>
+<li><strong>Method specificity:</strong> When several methods apply, Julia calls the one whose signature is more specific than every other applicable signature.</li>
+<li><strong>Method ambiguity:</strong> An error raised when two applicable methods are each more specific in a different argument and neither is chosen.</li>
+<li><strong>Type piracy:</strong> Adding a method to a function you do not own for argument types you do not own, which can change behavior in unrelated code.</li>
+</ul>
 <h3 id="a-function-can-have-several-methods">A function can have several methods<a class="heading-anchor" href="#a-function-can-have-several-methods" aria-label="Link to this section">#</a></h3>
 <p>Julia selects a method using the types of its positional arguments. The selection can depend on several arguments, not only a distinguished receiver object. This makes generic operations convenient when behavior depends on combinations of representations.</p>
 <p>An abstract type can describe a category without defining storage for every subtype. Concrete subtypes supply their own fields. A generic operation such as area can then have methods for the concrete shapes while a higher-level function calls that operation without hardcoding every case.</p>

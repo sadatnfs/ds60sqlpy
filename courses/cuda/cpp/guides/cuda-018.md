@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Verify a one-thread-per-output matrix multiplication across a rectangular shape suite and estimate its operations and bytes.
+
 Work through *A simple matrix multiplication with a complete specification* with the concrete cases below. Finish with this evidence:
 correctness across the shape suite and a transparent operation/byte estimate. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Matrix multiplication contracts a shared dimension: an m-by-k matrix A times a k-by-n matrix B produces an m-by-n matrix C. One simple CUDA thread owns one output coordinate and loops across k. Row-major A uses row*k+inner; row-major B uses inner*n+column. The output uses row*n+column. This deliberately simple kernel rereads data and serves as an understandable correctness baseline. Accumulation type and tolerance are part of its specification. Distinct entries and rectangular shapes reveal layout errors better than square all-ones inputs.
+
+### Key terms
+
+- **GEMM:** General matrix multiplication, which produces an m-by-n result from m-by-k and k-by-n inputs.
+- **Shared dimension:** The inner dimension k that is summed over when multiplying A by B.
+- **Accumulation type:** The precision used for the running sum of products, which can differ from the input type.
+- **Correctness baseline:** A simple, readable implementation used as the trusted reference for faster versions.
 
 ## Mathematical contract
 

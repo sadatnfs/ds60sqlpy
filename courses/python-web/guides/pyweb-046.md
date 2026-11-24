@@ -6,6 +6,13 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-045`.
 
 Middleware wraps the view with behavior that can inspect requests and responses. Ordering determines which component sees an input first and which sees the response last. This chapter records the real Django middleware sequence for a successful view and for a view that raises an exception.
 
+## Key terms
+
+- **Middleware:** A Django component built from `get_response` that can act on the request before the view and on the response after it.
+- **get_response:** The callable a middleware receives that invokes the next middleware or, at the innermost layer, the view.
+- **Middleware order:** The MIDDLEWARE list order: requests pass from outer to inner components, and responses return from inner to outer.
+- **Exception conversion:** Django turning a view exception into an HTTP response, here 500, before outer middleware sees the response.
+
 ## Mechanism: nested wrappers form a request pipeline
 
 A middleware factory receives get_response and returns a callable. That callable performs work before invoking the next component, then can inspect or modify the response afterward. With an outer and inner middleware, the request travels outer-to-inner-to-view; the response returns view-to-inner-to-outer.
@@ -29,6 +36,59 @@ The second view raises an exception containing private diagnostic text. The clie
 The public response does not contain the private diagnostic phrase. That assertion distinguishes safe public handling from internal error visibility. Production logs can retain a controlled traceback and request identity without exposing those details to the caller.
 
 A middleware that needs cleanup regardless of all possible errors should still use appropriate finally/context-manager ownership. The observed view-exception conversion does not justify assuming that every failure inside middleware initialization, streaming iteration or external cleanup will behave identically.
+
+## Worked example: a short circuit changes with middleware order
+
+```python
+trace = []
+
+
+def maintenance(get_response):
+    def middleware(request):
+        if request["path"].startswith("/admin/"):
+            trace.append("maintenance:short-circuit")
+            return {"status": 503}
+        return get_response(request)
+
+    return middleware
+
+
+def timing(get_response):
+    def middleware(request):
+        trace.append("timing:before")
+        response = get_response(request)
+        trace.append("timing:after")
+        return response
+
+    return middleware
+
+
+def view(request):
+    trace.append("view")
+    return {"status": 200}
+
+
+def build(chain, view):
+    handler = view
+    for factory in reversed(chain):
+        handler = factory(handler)
+    return handler
+
+
+for order in ([maintenance, timing], [timing, maintenance]):
+    trace.clear()
+    response = build(order, view)({"path": "/admin/"})
+    print([f.__name__ for f in order], response, trace)
+```
+
+Expected output:
+
+```text
+['maintenance', 'timing'] {'status': 503} ['maintenance:short-circuit']
+['timing', 'maintenance'] {'status': 503} ['timing:before', 'maintenance:short-circuit', 'timing:after']
+```
+
+The `build` function copies how Django assembles the `MIDDLEWARE` setting: it starts from the view and wraps factories from the last entry to the first, so the first entry ends up outermost. Both orders return 503 for an admin path, and in both the view never runs, because the maintenance middleware returned a response instead of calling `get_response`. What changes is who sees the request. With maintenance first, the timing middleware is skipped entirely, so blocked requests vanish from latency metrics. With timing first, it measures the refusal too. The same reasoning explains why Django lists `SecurityMiddleware` near the top and places authentication before anything that reads `request.user`. When you add a middleware that can answer early, decide which outer layers must still observe that answer and place it beneath them.
 
 ## Failure diagnosis and discussion
 

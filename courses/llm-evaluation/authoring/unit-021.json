@@ -9,6 +9,13 @@
     "old policy",
     "reference policy"
   ],
+  "key_terms": {
+    "Generalized advantage estimation": "A backward recursion A_t = delta_t + gamma lambda (1 - d_t) A_(t+1) that combines temporal residuals.",
+    "Temporal residual": "delta_t = r_t + gamma (1 - d_t) V(s_(t+1)) - V(s_t), the one-step error of the value estimate.",
+    "Termination versus truncation": "A true terminal state removes bootstrapping, while a time-limit cut may still need the final value estimate.",
+    "PPO clipping": "Limiting the probability ratio between the current and old policy inside a surrogate objective to restrain update size.",
+    "Old policy": "The frozen snapshot that collected the rollout, distinct from the current and KL reference policies."
+  },
   "outcome": "Compute temporal advantages with correct episode boundaries and inspect PPO clipping for both positive and negative advantages.",
   "verification": "Without the trace the advantages are the residuals 0.86 and 1.6, termination leaves the first step at 0.5, clipping gives 1.2 in the positive case and -1.5 in the negative case, and stored rollout quantities stay frozen.",
   "level": "advanced",
@@ -21,42 +28,78 @@
       "task": "Set lambda 0 in case A.",
       "expected": "Advantages reduce to residuals 0.86 and 1.6.",
       "hint": "No later residual receives positive trace weight.",
-      "answer": "This isolates the one-step residual calculation and its terminal mask."
+      "answer": "This isolates the one-step residual calculation and its terminal mask.",
+      "reasoning": {
+        "approach": "Call `gae([1, 2], [0.5, 0.4, 0.2], [False, True], lam=0)`. With lambda 0 the carried term is multiplied by zero, so each advantage is its one-step residual.",
+        "why": "Step 1 is terminal, so its residual is 2 + 0 - 0.4 = 1.6. Step 0 is not terminal, so its residual is 1 + 0.9 times 0.4 - 0.5 = 0.86. With lambda 0.8, step 0 instead becomes 0.86 + 0.72 times 1.6 = 2.012, as in case A.",
+        "pitfall": "Forgetting the terminal mask on step 1 would add 0.9 times 0.2 and give 1.78, the truncated case. The value after a true terminal state must not be bootstrapped.",
+        "verify": "The reference asserts `[0.86, 1.6]` for lambda 0. Case A asserts `[2.012, 1.6]` for terminal and `[2.1416, 1.78]` for truncated."
+      }
     },
     {
       "title": "Terminate the first step",
       "task": "Mark both steps terminal in the arithmetic helper.",
       "expected": "The first result is 0.5 and does not inherit the second residual.",
       "hint": "A terminal boundary cuts both bootstrap and trace.",
-      "answer": "The array illustrates boundary behavior; separate episodes should otherwise be processed with explicit episode structure."
+      "answer": "The array illustrates boundary behavior; separate episodes should otherwise be processed with explicit episode structure.",
+      "reasoning": {
+        "approach": "Call `gae([1, 2], [0.5, 0.4, 0.2], [True, True])`. Both steps are now terminal.",
+        "why": "Step 0's residual drops the bootstrap term, giving 1 - 0.5 = 0.5, and the terminal flag also zeroes the carry from step 1. Step 1 is unchanged at 1.6. The result is `[0.5, 1.6]`.",
+        "pitfall": "Treating the array as one continuous rollout and letting step 0 inherit step 1's advantage mixes two episodes. Rewards after an episode ends must not be credited to earlier actions.",
+        "verify": "The reference asserts `np.testing.assert_allclose(gae([1, 2], [0.5, 0.4, 0.2], [True, True]), [0.5, 1.6])`."
+      }
     },
     {
       "title": "Positive advantage outside the interval",
       "task": "Use ratio 1.5 and advantage 1 with epsilon 0.2.",
       "expected": "The clipped term is 1.2.",
       "hint": "Take the minimum of the two products.",
-      "answer": "The surrogate stops rewarding that favorable increase beyond the upper boundary."
+      "answer": "The surrogate stops rewarding that favorable increase beyond the upper boundary.",
+      "reasoning": {
+        "approach": "Call `clipped_terms([1.5], [1], epsilon=0.2)`. Compare the unclipped term 1.5 times 1 with the clipped term 1.2 times 1 and take the minimum.",
+        "why": "The minimum is 1.2. Once the ratio passes 1 + epsilon, the clipped term is constant, so its gradient with respect to the policy is zero. The objective stops rewarding further increase of an already favored action.",
+        "pitfall": "Expecting 1.5 because the ratio was observed is the mistake. Clipping exists to remove the incentive for large steps that the old samples cannot justify.",
+        "verify": "Case B asserts the first term of `clipped_terms([1.5, 0.5, 0.5, 1.5], [1, 1, -1, -1])` is 1.2. Also check that ratio 1 with advantages 2 and -2 returns them unchanged."
+      }
     },
     {
       "title": "Negative advantage outside the interval",
       "task": "Use ratio 1.5 and advantage-1.",
       "expected": "The term is -1.5, not-1.2.",
       "hint": "Multiplication reverses the relevant ordering.",
-      "answer": "The bad-direction probability increase still receives its larger penalty."
+      "answer": "The bad-direction probability increase still receives its larger penalty.",
+      "reasoning": {
+        "approach": "Call `clipped_terms([1.5], [-1])`. The unclipped term is -1.5 and the clipped term is -1.2.",
+        "why": "The minimum of -1.5 and -1.2 is -1.5, so the unclipped term is used. An action with negative advantage that became more likely keeps its full penalty and full gradient, pushing the policy back.",
+        "pitfall": "Assuming clipping is symmetric and always caps the term at the boundary gives -1.2. The minimum is pessimistic: it caps gains but not losses.",
+        "verify": "Case B asserts the last term is -1.5. The third term, ratio 0.5 with advantage -1, is -0.8 because the clipped value is the smaller one there."
+      }
     },
     {
       "title": "Check an unobserved action",
       "task": "Compare the two policies in case B.",
       "expected": "Their sampled terms agree while global KL differs.",
       "hint": "Only action 0 appears in the hypothetical sampled batch.",
-      "answer": "Clipping a finite sampled objective cannot by itself bound every unobserved action probability or full-distribution divergence."
+      "answer": "Clipping a finite sampled objective cannot by itself bound every unobserved action probability or full-distribution divergence.",
+      "reasoning": {
+        "approach": "Compare `p = [0.6, 0.39, 0.01]` and `other = [0.6, 0.01, 0.39]` against `old = [0.5, 0.49, 0.01]`. Only action 0 was sampled.",
+        "why": "Both policies give action 0 ratio 1.2, so the sampled clipped terms match. Their full KL from old differs a lot: about 0.02 for p and about 1.5 for other, because other moved 0.38 probability onto an action old almost never took.",
+        "pitfall": "Believing clipping bounds the overall policy change is the mistake. It constrains only the sampled actions' terms; unobserved actions can shift freely.",
+        "verify": "Case B asserts the two sampled terms are equal and `kl(other, old) > kl(p, old)`. Monitor full KL separately if it is computable."
+      }
     },
     {
       "title": "Freeze rollout quantities",
       "task": "Explain which tensors should be detached during policy optimization.",
       "expected": "Stored old log probabilities and computed advantages are fixed.",
       "hint": "The old collector and reference policy have different roles.",
-      "answer": "Gradients through old probabilities or an unintended baseline optimize another objective and can destroy the interpretation of the ratio estimator."
+      "answer": "Gradients through old probabilities or an unintended baseline optimize another objective and can destroy the interpretation of the ratio estimator.",
+      "reasoning": {
+        "approach": "Store old log probabilities and advantages as constants when the rollout is collected, and compute the ratio from current log probabilities against those stored values.",
+        "why": "The ratio's denominator represents the policy that generated the data. If gradients flow into it, the update changes the denominator too, and the ratio no longer estimates the change from the sampling policy.",
+        "pitfall": "Recomputing old probabilities from the live model each inner step, or leaving advantages attached to the critic graph, is the usual bug. The loss then optimizes a different objective, and the actor can lower loss by moving the baseline.",
+        "verify": "No reference assertion covers this task. In PyTorch, assert `old.requires_grad` and `advantage.requires_grad` are both false, as eval-022's `fit_policy` does."
+      }
     }
   ],
   "sources": [

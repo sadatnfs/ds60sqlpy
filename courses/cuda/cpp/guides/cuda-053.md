@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Report the data type, compute mode, numerical error and confirmed execution path of a mixed-precision matrix multiply.
+
 Work through *Tensor cores and mixed precision from first principles* with the concrete cases below. Finish with this evidence:
 reported type and compute mode, numerical error and confirmed execution path where available. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,14 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 Tensor cores accelerate supported matrix multiply-accumulate tile operations. Operand formats, accumulator types, layouts, alignment and instruction availability depend on architecture and library mode. Lower precision can reduce memory and increase throughput while changing range and rounding. FP16 and BF16 are not interchangeable merely because both occupy sixteen bits; they allocate exponent and precision bits differently. TF32 and FP8 families also need explicit hardware/software qualification. Use a supported library path first, then study tile-level APIs. A matrix shape or low-precision tensor alone does not prove tensor-core instructions executed.
+
+### Key terms
+
+- **Tensor core:** A specialized matrix-multiply-accumulate unit that operates on small matrix tiles in reduced-precision formats.
+- **Mixed precision:** Using lower-precision inputs with higher-precision accumulation or selected higher-precision operations.
+- **BF16:** A 16-bit format with 8 exponent bits that keeps FP32 range but has far fewer significand bits.
+- **TF32:** A tensor core mode that uses FP32 range with a 10-bit mantissa for multiplication inputs.
+- **Accumulator type:** The precision of the running sum in a matrix multiply, which strongly affects final error.
 
 ## How to run and study this lesson
 

@@ -19,28 +19,28 @@
     {
       "exercise": 3,
       "title": "Reject the lowerBound/upperBound filter misconception",
-      "input_contract": "IDs[-10,0,5,10,99, NULL]. Illustrative partition predicates:id<5 OR id IS NULL, and id>=5.",
+      "input_contract": "IDs[-10,0,5,10,99, NULL]. Illustrative partition predicates: id<5 OR id IS NULL and id>=5.",
       "expected": "All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to[0,10).",
       "verification": "Assign each supplied ID to the two predicates and write an explicit SQL filter for the intended population if one is required."
     },
     {
       "exercise": 4,
       "title": "Bound connection concurrency and read consistency",
-      "input_contract": "Two JDBC partitions;source rows can change;no live snapshot-coordination adapter is provided.",
+      "input_contract": "Two JDBC partitions; source rows can change; no live snapshot-coordination adapter is provided.",
       "expected": "A nominal 2-partition connection bound plus an explicit immutable-export or separately qualified coordinated-snapshot strategy.",
       "verification": "Name connection/time/fetch controls and show how concurrent source updates would otherwise produce a mixed-time result."
     },
     {
       "exercise": 5,
       "title": "Remove credentials from source and evidence",
-      "input_contract": "Synthetic passwordDUMMY_LESSON_ONLY, URLjdbc:postgresql://db.invalid:5432/course, numPartitions 2, fetchsize 1000, queryTimeout 30.",
-      "expected": "No password, user, URL or credential-bearing connection string in the saved source/evidence;only approved operational settings are retained.",
+      "input_contract": "Synthetic password DUMMY_LESSON_ONLY, URLjdbc:postgresql://db.invalid:5432/course, numPartitions 2, fetchsize 1000, queryTimeout 30.",
+      "expected": "No password, user, URL or credential-bearing connection string in the saved source/evidence; only approved operational settings are retained.",
       "verification": "Write the exact sanitized object and identify the approved runtime credential source without inventing a real account."
     },
     {
       "exercise": 6,
       "title": "Write a future acceptance and failure contract",
-      "input_contract": "Current profile bundles no qualified JDBC driver/remote database;synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.",
+      "input_contract": "Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.",
       "expected": "A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.",
       "verification": "List positive and negative cases, exact version tuple, source identity, output oracle, connection closure and no-write privileges."
     }

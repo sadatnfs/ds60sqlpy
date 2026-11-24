@@ -10,6 +10,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Verify that stream-ordered allocations have no use-after-free and explain retained versus live pool memory.
+
 Work through *Stream-ordered allocation and memory pools* with the concrete cases below. Finish with this evidence:
 no use-after-free, correct event ordering and an explained retained-versus-live memory report. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -18,6 +20,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A stream-ordered allocator treats allocation and free as operations with ordering relationships. It can reuse pooled storage efficiently, but the program must still ensure that every access occurs after allocation and before the relevant free/reuse. Cross-stream consumers require explicit dependencies. Memory returned to a pool can remain reserved for reuse, so reported device memory need not immediately drop to zero. Distinguish live application allocations from reserved pool storage. Pool behavior and support are runtime capabilities, not assumptions justified by a function name in documentation.
+
+### Key terms
+
+- **cudaMallocAsync:** A stream-ordered allocation whose memory becomes usable in stream order and returns to a pool with `cudaFreeAsync`.
+- **Memory pool:** A driver-managed reservoir that reuses freed device memory instead of returning it to the system immediately.
+- **Release threshold:** A pool attribute that sets how much unused memory the pool may keep reserved.
+- **Use-after-free:** Accessing an allocation after it was freed; with `cudaFreeAsync`, any work not ordered before the free must not touch it.
 
 ## How to run and study this lesson
 

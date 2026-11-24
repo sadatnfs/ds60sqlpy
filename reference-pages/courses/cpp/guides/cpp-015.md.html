@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tie resource lifetime to an object and justify unique ownership.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>RAII means acquiring a resource in an object and releasing it when that object leaves scope. unique_ptr owns one dynamically allocated object and cannot be copied. Its destructor releases the owned object even when an exception unwinds the scope. The owner must not be confused with a borrowed raw pointer.</p>
+<ul>
+<li><strong>RAII:</strong> acquiring a resource in an object and releasing it when that object leaves scope.</li>
+<li><strong><code>unique_ptr</code>:</strong> a move-only smart pointer that is the single owner of one dynamically allocated object.</li>
+<li><strong><code>make_unique</code>:</strong> constructs an object and returns the <code>unique_ptr</code> that owns it.</li>
+<li><strong>ownership transfer:</strong> moving a <code>unique_ptr</code>, which hands cleanup responsibility to the destination and leaves the source empty.</li>
+<li><strong>borrowed raw pointer:</strong> a non-owning pointer to an object managed elsewhere, which must never be used to delete it.</li>
+</ul>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>std::make_unique&lt;Record&gt;(...)</code> constructs an owner without a separate raw new. <code>std::move(owner)</code> transfers ownership; it does not clone the resource. A destructor should release resources without throwing during stack unwinding.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>

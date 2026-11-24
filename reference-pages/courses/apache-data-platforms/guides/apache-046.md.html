@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-046-event-time-and-watermarks">apache-046: Event time and watermarks<a class="heading-anchor" href="#apache-046-event-time-and-watermarks" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>apache-045</code>, <code>apache-007</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Event time:</strong> The timestamp a record carries from its source contract, as opposed to processing time, the worker&#x27;s clock.</li>
+<li><strong>Watermark:</strong> A declaration that event time has progressed past a position. It is an estimate, not proof that no older record will arrive.</li>
+<li><strong>Bounded out-of-orderness:</strong> A watermark strategy that sets the watermark to the maximum observed timestamp minus a fixed delay, trading latency for completeness.</li>
+<li><strong>Tumbling window:</strong> A fixed-size, non-overlapping event-time window, such as the half-open intervals [0, 2000) and [2000, 4000) in milliseconds.</li>
+<li><strong>Late side output:</strong> A separate output stream that receives records arriving after their window&#x27;s watermark has passed, instead of silently dropping them.</li>
+</ul>
 <h3 id="event-time-is-carried-by-the-data">Event time is carried by the data<a class="heading-anchor" href="#event-time-is-carried-by-the-data" aria-label="Link to this section">#</a></h3>
 <p>Processing time is the worker&#x27;s clock. Event time is the timestamp assigned to an observation by its source contract. They answer different questions. A purchase can be processed late because of a network delay without changing when the purchase occurred. Windows must state which clock defines their boundaries, which timestamp unit is used and how events outside a completeness policy are handled.</p>
 <p>A watermark is an estimate that event-time progress has passed a position. It is not proof that no older event can arrive. A strategy such as maximum observed timestamp minus a delay chooses a practical completeness/latency tradeoff. With several input partitions, an idle partition can hold back combined progress unless idleness is handled explicitly. Advancing a watermark too aggressively can make legitimate delayed records late.</p>

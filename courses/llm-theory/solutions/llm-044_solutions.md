@@ -1,6 +1,6 @@
 # llm-044: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these roPE, relative positions, ALiBi and long-context limits answers after attempting *Rotate a two-dimensional vector* through *Separate computability from extrapolation evidence*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Inspect an ALiBi causal row* points to one step. `llm-044_solution.py` holds the assertions; this page explains how they test roPE. Then try *Separate computability from extrapolation evidence* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -39,7 +39,7 @@ np.testing.assert_allclose(np.linalg.norm(rotated), 1, atol=1e-12, rtol=0)
 
 **Expected:** approximately [0, 1]; norm 1.
 
-**Verify:** In a fresh process, the exercise checks confirm `rotated` matches `[0, 1]` within 1e-12 and `np.linalg.norm(rotated)` matches `1` within 1e-12.
+**Verify:** For *Rotate a two-dimensional vector*, a fresh-process check confirms `rotated` matches `[0, 1]` within 1e-12 and `np.linalg.norm(rotated)` matches `1` within 1e-12.
 
 ## Exercise 2: Verify the relative dot-product identity
 
@@ -59,7 +59,7 @@ np.testing.assert_allclose(left, right, atol=1e-12, rtol=0)
 
 **Expected:** dot(Rm q, Rn k)=dot(q, R(n-m)k) within 1e-12.
 
-**Verify:** In a fresh process, the exercise checks confirm `left` matches `right` within 1e-12.
+**Verify:** For *Verify the relative dot-product identity*, a fresh-process check confirms `left` matches `right` within 1e-12.
 
 ## Exercise 3: Inspect an ALiBi causal row
 
@@ -77,7 +77,7 @@ np.testing.assert_allclose(weights, [1 / 7, 2 / 7, 4 / 7], atol=1e-12, rtol=0)
 
 **Expected:** normalized weights [1/7, \(\frac{2}{7}\), 4/7].
 
-**Verify:** In a fresh process, the exercise checks confirm `weights` matches `[1 / 7, 2 / 7, 4 / 7]` within 1e-12.
+**Verify:** For *Inspect an ALiBi causal row*, a fresh-process check confirms `weights` matches `[1 / 7, 2 / 7, 4 / 7]` within 1e-12.
 
 ## Exercise 4: Apply multi-frequency RoPE
 
@@ -99,7 +99,7 @@ np.testing.assert_allclose(10000.0 ** (-2 * np.arange(2) / 4), [1, 0.01], atol=1
 
 **Expected:** frequencies 1 and 0.01; each pair norm preserved.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.linalg.norm(encoded.reshape(2, 2, 2), axis=-1)` matches `np.linalg.norm(values.reshape(2, 2, 2), axis=-1)` within 1e-12 and `10000.0 ** (-2 * np.arange(2) / 4)` matches `[1, 0.01]` within 1e-12.
+**Verify:** For *Apply multi-frequency RoPE*, a fresh-process check confirms `np.linalg.norm(encoded.reshape(2, 2, 2), axis=-1)` matches `np.linalg.norm(values.reshape(2, 2, 2), axis=-1)` within 1e-12 and `10000.0 ** (-2 * np.arange(2) / 4)` matches `[1, 0.01]` within 1e-12.
 
 ## Exercise 5: Catch a cache offset reset
 
@@ -118,7 +118,7 @@ assert not np.allclose(reset, full[2:])
 
 **Expected:** correct incremental encoding matches full encoding; the reset differs.
 
-**Verify:** In a fresh process, the exercise checks confirm `incremental` matches `full[2:]` within 1e-12 and `not np.allclose(reset, full[2:])`.
+**Verify:** For *Catch a cache offset reset*, a fresh-process check confirms `incremental` matches `full[2:]` within 1e-12 and `not np.allclose(reset, full[2:])`.
 
 ## Exercise 6: Separate computability from extrapolation evidence
 
@@ -141,8 +141,8 @@ else:
 
 **Expected:** finite vector; long_context_quality_verified=False; odd width rejected.
 
-**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(far).all()`; `not report['long_context_quality_verified']` and `rope(np.ones((1, 3)), np.array([0]))` raises `ValueError`.
+**Verify:** For *Separate computability from extrapolation evidence*, a fresh-process check confirms `np.isfinite(far).all()`; `not report['long_context_quality_verified']` and `rope(np.ones((1, 3)), np.array([0]))` raises `ValueError`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Apply multi-frequency RoPE* and predict the result first; keep *Separate computability from extrapolation evidence* failing beside the repair. Log a missing NumPy separately from a wrong roPE value in `llm-044`.

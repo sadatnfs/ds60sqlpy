@@ -13,7 +13,7 @@ A vector is a bag of ordered elements, not a set. The two threes in [3, 1, 3, 0]
 <!-- depth:start -->
 ## Vector ownership, capacity and iterator validity
 
-A vector has a size and a capacity. Size counts constructed elements that the program may access. Capacity describes how many elements the current storage can accommodate before another allocation is needed. reserve(4) requests capacity for at least four elements but leaves an empty vector at size 0. Writing xs[0] after reserve alone is invalid because no element has been constructed there. push_back creates a new element and increases size; resize changes size and constructs or destroys elements as needed.
+A vector has a size and a capacity. Size counts constructed elements that the program may access. Capacity describes how many elements the current storage can accommodate before another allocation is needed. reserve(4) requests capacity for at least four elements but leaves an empty vector at size 0. Writing `xs[0]` after reserve alone is invalid because no element has been constructed there. push_back creates a new element and increases size; resize changes size and constructs or destroys elements as needed.
 
 Contiguous storage means the elements occupy adjacent positions, which makes indexed access and many algorithms efficient. It also explains reallocation. If growth requires a new buffer, the vector moves or copies elements into that buffer and releases the old storage. Every pointer, reference and iterator into the old element storage is then invalid. Do not demonstrate this by dereferencing a stale pointer: that is undefined behavior, so even an apparently correct printed value is not evidence of safety.
 

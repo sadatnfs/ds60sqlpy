@@ -5,6 +5,28 @@
   "minutes": 70,
   "prerequisites": ["apache-005", "apache-004"],
   "concepts": ["partitioned log", "keyed records", "consumer groups"],
+  "key_terms": [
+    [
+      "Topic partition",
+      "An ordered, append-only Kafka log within a topic. Offsets identify positions only inside one partition, so a topic has no global order across partitions."
+    ],
+    [
+      "Offset",
+      "The sequential position of a record within one partition. A consumer reads by offset without removing the record from the log."
+    ],
+    [
+      "Record key",
+      "The optional part of a record that the producer's partitioner commonly uses to send related events to the same partition."
+    ],
+    [
+      "Consumer group",
+      "A set of consumers that share a topic's partitions and store their progress under one group identifier, independently of other groups that replay the same topic."
+    ],
+    [
+      "KRaft",
+      "Kafka's built-in metadata quorum mode, used here as one combined broker and controller process with replication factor one."
+    ]
+  ],
   "evidence": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad.",
   "sources": [
     ["Kafka design and delivery contracts", "https://kafka.apache.org/44/design/design/"],

@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-027`, `apache-028`.
 
+## Key terms
+
+- **Catchup:** The DAG setting that creates runs for historical scheduled intervals when the DAG becomes active. Airflow 3 defaults it to False, so the workshop sets catchup=True explicitly.
+- **Backfill:** An explicit request to run a DAG over a historical date range under its own run controls, separate from the regular schedule.
+- **Targeted correction:** A manually triggered run that rewrites one validated day, keeping the scope of the change visible instead of hiding it in a wall-clock timestamp.
+- **Reprocessing identity:** The recorded old and new source identities and the authorizing workflow for a replaced partition, so a material historical revision is not concealed.
+
 ## Backfill changes scheduling coverage, not the meaning of time
 
 A schedule defines eligible intervals. Catchup determines whether historical

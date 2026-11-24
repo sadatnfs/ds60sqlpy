@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-057_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A cluster-assisted histogram can combine partial bins across cooperating blocks before global output. Before a remote shared-memory read, the producing block&#x27;s storage must be initialized and remain alive through the required cluster synchronization. A block exiting early can invalidate the assumed lifetime.</p>
+<p><strong>Approach:</strong> Each block writes partial histogram bins to its shared memory, the cluster synchronizes, then blocks read remote bins and merge them before one global write.</p>
+<p><strong>Why it is correct:</strong> The cluster barrier guarantees the producer&#x27;s bins are written and its shared storage still exists when a neighbor reads it.</p>
+<p><strong>A plausible wrong approach:</strong> Reading a neighbor&#x27;s distributed shared memory before the cluster sync, or after the producer block exits, reads uninitialized or freed storage.</p>
+<p><strong>How to verify:</strong> Compare merged bins against a host histogram of the same input, and run on supported hardware only; otherwise record the check as unavailable.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A feature table might mark baseline kernels available, cluster launch unavailable and a TMA experiment unqualified. Dispatch should choose the baseline, not attempt an unsupported instruction and silently label a CPU calculation as the specialized result. Feature detection is per operation, not a marketing-name comparison.</p>
+<p><strong>Approach:</strong> Consult the capability table and dispatch to the baseline kernel when cluster launch and TMA are not qualified.</p>
+<p><strong>Why it is correct:</strong> The baseline computes the same counts on any supported device, so choosing it keeps results correct.</p>
+<p><strong>A plausible wrong approach:</strong> Trying the cluster instruction and catching a failure, then labeling a CPU result as the cluster path, misreports what ran.</p>
+<p><strong>How to verify:</strong> The reference asserts selected == &#x27;baseline&#x27; and prints specialized_execution_verified False.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Operation, exact target requirement, device properties, compiler/library versions, launch constraints and actual execution evidence.</p>
+<p><strong>Approach:</strong> Record operation, exact target requirement, device properties, compiler and library versions, launch limits and execution evidence.</p>
+<p><strong>Why it is correct:</strong> Each field narrows whether the feature actually applies to this device and build.</p>
+<p><strong>A plausible wrong approach:</strong> Recording only the GPU model name omits the compiler target and launch evidence that decide support.</p>
+<p><strong>How to verify:</strong> Have a second person reproduce dispatch from the record alone.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Feature families and architecture-specific variants have distinct contracts; names are not an executable compatibility check.</p>
+<p><strong>Approach:</strong> Check the specific feature and compile target rather than inferring support from the product name.</p>
+<p><strong>Why it is correct:</strong> Architecture-specific instructions belong to particular families and suffixed targets, not to every newer-sounding device.</p>
+<p><strong>A plausible wrong approach:</strong> Assuming a larger model number includes every earlier specialized instruction can produce code the device cannot load.</p>
+<p><strong>How to verify:</strong> Query compute capability and test the compiled target with a small probe kernel.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Nothing. The learner can complete the model and worksheet while the optional hardware evidence remains unavailable.</p>
+<p><strong>Approach:</strong> Leave reading progress unaffected and mark only the optional hardware evidence unavailable.</p>
+<p><strong>Why it is correct:</strong> The lesson&#x27;s model and worksheet do not depend on cluster hardware.</p>
+<p><strong>A plausible wrong approach:</strong> Blocking completion until a cluster-capable GPU appears punishes learners for hardware they cannot control.</p>
+<p><strong>How to verify:</strong> Complete the lesson on a CPU-only machine and confirm progress records it.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>Preserve input/bin/output semantics and return the same validated counts, while recording which implementation ran and comparing performance only within supported conditions.</p>
+<p><strong>Approach:</strong> Keep the same input, bin edges and output layout for both implementations, and log which one ran.</p>
+<p><strong>Why it is correct:</strong> Callers then get identical validated counts whichever path dispatch chooses.</p>
+<p><strong>A plausible wrong approach:</strong> Letting the fallback use different bin boundaries makes outputs differ silently between devices.</p>
+<p><strong>How to verify:</strong> Run both paths on the same input where supported and compare every bin.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-057_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

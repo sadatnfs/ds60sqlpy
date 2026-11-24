@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-048`, `apache-049`.
 
+## Key terms
+
+- **Savepoint:** An operator-triggered, explicitly managed snapshot of job state used for planned stops, upgrades and restores.
+- **Operator UID:** A stable identifier assigned to a stateful operator so a savepoint's state maps to the same operator after the job graph changes.
+- **Serializer compatibility:** Whether a new job version can read state written by an earlier serializer. An incompatible change prevents restoring that state.
+- **Restore mode:** Whether a job restored from a savepoint claims ownership of its files or only reads them, which decides who may delete them.
+- **Rollback:** Restoring the previous application version from a retained savepoint after a failed upgrade.
+
 ## A savepoint is an explicit state migration input
 
 A savepoint captures application state for an operator-controlled stop, restore
@@ -90,6 +98,27 @@ new JAR?** Stateful behavior depends on how old bytes map to the new graph and
 its source/sink contracts. These two cases make a compatible restore and a deliberate
 mapping rejection observable, then define which additional evidence would be
 needed for a different serializer, runtime release or production topology.
+
+## Worked examples
+
+### Stop with a savepoint into owned storage
+
+```bash
+flink stop -p file:///state/savepoints <job-id>
+```
+
+This is the command workshop.py issues inside the JobManager container. A successful stop prints a path such as /state/savepoints/savepoint-<id>, and the workshop refuses to continue unless that directory exists, sits directly under the owned savepoints folder and is not a symlink. Stop differs from cancel: stop drains the sources and writes a consistent state point before the job ends, while cancel leaves only whatever checkpoint happened to complete last. If the log shows a timeout instead of a path, the job keeps running and no state point exists, so do not delete anything or resubmit yet.
+
+### Why a changed operator UID cannot restore
+
+```java
+.keyBy(value -> "all")
+.map(new ManagedTotal())
+.name("checkpointed-total")
+.uid("checkpointed-total");
+```
+
+Savepoint state is stored by operator UID, not by class name or position in the graph. The changed-uid mode in the project submits the same logic under a different UID, and Flink then reports that it cannot map checkpoint or savepoint state to any operator. The workshop treats that failure as the expected result and does not pass allowNonRestoredState, because that flag would let the job start with an empty running total. Set explicit UIDs on every stateful operator before the first production savepoint; adding them later is itself a breaking change for existing state.
 
 ## Complete worked source
 

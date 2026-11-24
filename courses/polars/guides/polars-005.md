@@ -14,6 +14,14 @@ Rates require particular care. If source rows contain successes and trials, the 
 
 Missing values also affect denominators. pl.len counts group rows, while count on a column counts non-null values. A group with one row and no observed measurement should not be described as an observed zero. Preserve counts beside estimates so a later reader can distinguish a small group, an empty measurement set and a genuine zero outcome.
 
+## Key terms
+
+- **group_by and agg:** The pair that partitions rows by key columns and returns one row per group from the named aggregation expressions.
+- **Weighted rate:** Total numerator divided by total denominator after aggregation, which weights each group by its denominator.
+- **Average of rates:** The unweighted mean of per-group rates, which gives a small group the same weight as a large one.
+- **Row count:** The number of rows in a group from `pl.len()`, including rows whose values are null.
+- **Observed count:** The number of non-null values in a column from `count()`, which can be smaller than the row count.
+
 ## Syntax and data contract
 
 group_by defines the grouping keys and agg names the reductions. Sort the final result when row order is part of a comparison or published artifact. Compute a ratio after aggregating its numerator and denominator; this keeps their relationship visible. Give counts explicit names such as rows and observed rather than using one ambiguous n for all purposes.

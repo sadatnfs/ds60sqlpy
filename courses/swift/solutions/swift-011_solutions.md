@@ -14,13 +14,33 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 Name the meaning of each tuple field.
 
-No separate reference answer has been written for this task. Example A is the evidence to compare with: The grouping is useful locally without requiring an entire class hierarchy. Named tuple fields expose the accounting relationship.
+**Reference answer.** It runs as the `Task 1` block of the reference program.
+
+```swift
+let summary = (accepted: 3, rejected: 2)
+precondition(summary.0 == summary.accepted && summary.1 == summary.rejected)
+precondition(summary.accepted + summary.rejected == 5)
+```
+
+**Observe:** accepted is position 0 with 3 rows and rejected is position 1 with 2 rows; together they account for 5 rows.
+
+accepted counts rows that entered the result and rejected counts rows that did not, so their sum is every row read; the names make that meaning visible instead of relying on positions.
 
 ### Task 2: Guided modification
 
 Add a third accounting field only if its meaning is independent.
 
-No separate reference answer has been written for this task. Start from Example B: The switch extracts data after establishing the state case. Each outcome exposes only its own meaningful payload.
+**Reference answer.** It runs as the `Task 2` block of the reference program.
+
+```swift
+let summary = (accepted: 3, rejected: 2, skipped: 1)
+let seen = summary.accepted + summary.rejected + summary.skipped
+precondition(seen == 6)
+```
+
+**Observe:** With a skipped field of 1, the three fields account for 6 rows.
+
+skipped (for example blank lines) cannot be derived from the other two, so it earns a field; a total field would be redundant because it is always accepted + rejected + skipped.
 
 ### Task 3: Independent construction
 
@@ -53,19 +73,72 @@ Each case carries only the data that exists in that state, and the switch must h
 
 Diagnose several optional fields that permit contradictory state combinations.
 
-No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An enum raw value and an associated value solve different problems. A catch-all default can conceal a newly added state. Avoid using tuples so large that their positional relationship becomes obscure.
+**Reference answer.** It runs as the `Task 4` block of the reference program.
+
+```swift
+struct LoosePage {
+  var isLoading: Bool
+  var count: Int?
+  var error: String?
+}
+let contradictory = LoosePage(isLoading: true, count: 3, error: "offline")
+precondition(contradictory.isLoading && contradictory.count != nil)
+precondition(contradictory.error != nil)
+enum PageState: Equatable {
+  case loading
+  case ready(Int)
+  case failed(String)
+}
+precondition(PageState.ready(3) != .failed("offline"))
+```
+
+**Observe:** The struct accepts loading, a count and an error at once, while each PageState value is exactly one of loading, ready or failed.
+
+Three independent fields allow eight combinations, most of them meaningless; the enum's cases admit only the three real states, so the contradiction cannot be built.
 
 ### Task 5: Boundary evidence
 
 Add a new enum case and inspect the compiler-reported consumers requiring updates.
 
-No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Return two related counts) and Example B (Model distinct outcomes).
+**Reference answer.** It runs as the `Task 5` block of the reference program.
+
+```swift
+enum Load {
+  case loading
+  case ready(Int)
+  case failed(String)
+  case cancelled
+}
+func label(_ state: Load) -> String {
+  switch state {
+  case .loading: return "loading"
+  case .ready(let count): return "ready:\(count)"
+  case .failed(let reason): return "failed:\(reason)"
+  case .cancelled: return "cancelled"
+  }
+}
+precondition(label(.cancelled) == "cancelled" && label(.ready(2)) == "ready:2")
+```
+
+**Observe:** After adding cancelled and handling it, label returns cancelled for the new case and ready:2 as before.
+
+Before the new case clause was written, swiftc stopped with switch must be exhaustive at this switch; that error list is the set of consumers to update, which a default clause would have hidden.
 
 ### Task 6: Transfer and justify
 
 Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Tuple**, and state one limitation of your choice.
+No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Model loading, ready and failed states with an enum) and the mechanism described below, and state one limitation of your choice.
+
+## Solution reasoning
+
+**Approach.** Example A returns a named tuple `(accepted: 3, rejected: 2)` and checks that the parts sum to 5. Example B defines `enum Outcome` with `.value(Int)` and `.invalid(String)` payloads and renders each case through an exhaustive `switch`. The task 3 answer models loading, ready and failed states as one enum.
+
+**Why it is correct.** The tuple labels make the accounting relationship readable: 3 plus 2 is 5. Each enum case carries only its own data, so the switch binds `count` for `.value(4)` and `reason` for `.invalid("negative")`, producing `count:4` and `error:negative`. In task 3 the ready case carries a count and the failed case carries a reason, so they render as loading, ready:3 and failed:offline.
+
+**A plausible wrong approach.** A struct with `isLoading: Bool`, `items: Int?` and `error: String?` allows contradictions such as loading with an error. The enum makes those combinations unrepresentable. Adding a `default:` to the render switch would also hide a newly added case instead of letting the compiler list every switch to update.
+
+**How to verify.** Add a case such as `.pending` to `Outcome` and compile: the switch in Example B is reported as non-exhaustive, which is the evidence task 5 asks for. Remove it and confirm the rendered array matches again.
 
 ## Mechanism and diagnostic reasoning
 

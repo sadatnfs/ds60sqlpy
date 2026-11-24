@@ -5,6 +5,39 @@
   "minutes": 100,
   "prerequisites": ["apache-020", "apache-049", "apache-061"],
   "concepts": ["measured capacity", "configured limit", "architectural tradeoff"],
+  "key_terms": [
+    [
+      "Workload model",
+      "The input distribution, query or update pattern, freshness target and failure contract that a capacity comparison must state."
+    ],
+    [
+      "Configured limit",
+      "A CPU or memory budget set for safety. It bounds a container but is not measured usage or a production sizing recommendation."
+    ],
+    [
+      "Cold and warm state",
+      "Whether caches, compiled code and materialized inputs were already present when a measurement started."
+    ],
+    [
+      "Architectural tradeoff",
+      "Choosing among embedded, batch, streaming and serving systems by workload needs and operating cost rather than a single timing."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Measure one bounded run with its definition",
+      "language": "python",
+      "code": "import time\n\nvalues = list(range(200_000))\nstart = time.perf_counter()\ntotal = sum(value * 2 for value in values)\nelapsed = time.perf_counter() - start\nprint(total, \"elapsed seconds above zero:\", elapsed > 0)",
+      "output": "39999800000 elapsed seconds above zero: True",
+      "interpretation": "The printed total is deterministic, while the elapsed time varies per machine, so only its existence is printed here. A capacity claim needs the input size, the timer used, what was inside the timed region and how many samples were taken. One run of a small fixture cannot predict a cluster's throughput; it only gives a baseline for comparing two configurations on the same machine."
+    },
+    {
+      "title": "Container limits versus observed use",
+      "language": "bash",
+      "code": "docker stats --no-stream --format \"{{.Name}} {{.CPUPerc}} {{.MemUsage}}\"",
+      "interpretation": "The output prints each container with current CPU percent and memory used over its limit. The limit is a configured ceiling, not a measurement of need; a container at 30 percent of its memory limit during a tiny fixture says little about production. Sample during the workload, record the sampling window, and keep forecasts in a separate section from what was observed."
+    }
+  ],
   "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",
   "sources": [
     ["Iceberg reliability and table state", "https://iceberg.apache.org/docs/latest/reliability/"],

@@ -6,6 +6,14 @@ Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-054`.
 
 Django's normal test client relaxes CSRF checks for convenience. That makes it unsuitable for claiming CSRF protection unless enforcement is explicitly enabled. This chapter uses enforce_csrf_checks, obtains a real framework token and verifies both token and origin refusals before a state-changing view runs.
 
+## Key terms
+
+- **CsrfViewMiddleware:** Django's middleware that checks unsafe requests for a valid CSRF token and an acceptable origin before the view runs.
+- **enforce_csrf_checks:** A test Client option that turns CSRF enforcement back on, since the default test client relaxes it.
+- **get_token():** The function that returns the CSRF token for the request and ensures the matching CSRF cookie is set.
+- **X-CSRFToken:** The request header in which a client returns the CSRF token for a POST that is not a form submission.
+- **Safe method:** An HTTP method such as GET that must not change state, so a mutation is never moved to GET to avoid CSRF checks.
+
 ## Mechanism: middleware validates request context
 
 CsrfViewMiddleware applies the framework's protection to relevant unsafe requests. The token flow connects a value supplied by the application with the browser's stored context and submitted form/header. Origin and, in applicable secure contexts, referer checks help constrain the initiating context.
@@ -29,6 +37,42 @@ A POST without a token receives 403. A later POST with the valid token but an un
 This state assertion matters because a response code alone can hide incorrect side-effect ordering. If a custom integration mutates data before performing its own CSRF check, returning 403 afterward does not repair the unauthorized change.
 
 A trusted-origin setting should name deliberately supported origins, not become a broad list added until tests pass. Scheme, host and port matter. Proxy/TLS configuration must also reflect the actual network boundary so the framework interprets secure requests correctly.
+
+## Worked example: why every CSRF token differs but all validate
+
+```python
+import secrets
+import string
+
+CHARS = string.ascii_letters + string.digits
+
+
+def mask(secret):
+    key = "".join(secrets.choice(CHARS) for _ in secret)
+    pairs = zip(secret, key)
+    return key + "".join(CHARS[(CHARS.index(s) + CHARS.index(k)) % len(CHARS)] for s, k in pairs)
+
+
+def unmask(token):
+    key, cipher = token[:32], token[32:]
+    pairs = zip(cipher, key)
+    return "".join(CHARS[(CHARS.index(c) - CHARS.index(k)) % len(CHARS)] for c, k in pairs)
+
+
+secret = "".join(secrets.choice(CHARS) for _ in range(32))
+first, second = mask(secret), mask(secret)
+print(len(first), first == second)
+print(unmask(first) == unmask(second) == secret)
+```
+
+Expected output:
+
+```text
+64 False
+True
+```
+
+This mirrors how Django masks the 32 character CSRF secret: a fresh random key is prepended and each secret character is shifted by the matching key character, so `get_token()` hands out a different 64 character string on every response. The randomness stops compression side channels such as BREACH from recovering the secret byte by byte from repeated pages. On a POST, `CsrfViewMiddleware` unmasks the submitted token and compares the result with the secret in the cookie, so any of the issued tokens works. That is why the lesson can fetch `/token/` once and reuse the value, and why a missing header still gets 403.
 
 ## Failure diagnosis and discussion
 

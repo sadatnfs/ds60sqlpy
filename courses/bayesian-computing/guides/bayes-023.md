@@ -15,6 +15,13 @@ The example uses twelve equally spaced synthetic observations. The equality of s
 
 The positive innovation scale sigma differs from the marginal stationary standard deviation, which is \(\sigma/\sqrt{1-\phi^2}\). Confusing them changes the likelihood and the interpretation of uncertainty. The prior on phi is restricted to the stationary interval by its parameter declaration.
 
+## Key terms
+
+- **AR(1) process:** A model in which y_t = mu + phi(y_(t-1) - mu) plus normal innovation noise.
+- **Stationarity:** A constant marginal distribution over time, which for AR(1) requires the absolute value of phi to be less than one.
+- **Innovation scale:** The standard deviation sigma of each new shock, distinct from the stationary standard deviation sigma/sqrt(1 - phi^2).
+- **Multi-step forecast:** A prediction h steps ahead with conditional mean mu + phi^h(y_N - mu) and variance that accumulates future innovations.
+
 ## Worked case 1: include the initial-state distribution
 
 The first observation has a normal density under the stationary distribution. Later observations have normal conditional densities around the autoregressive transition mean. This specifies a complete joint model for the small sequence.
@@ -50,6 +57,40 @@ The compiled classroom run uses the fixed short-chain budget. Its successful exe
 **Why is the three-step variance larger than the one-step innovation variance?** Several future innovations can affect the later outcome. Their coefficients form the squared autoregressive powers in the sum. This is conditional forecast uncertainty, not simply a larger standard error for mu.
 
 **Can an AR coefficient be interpreted causally?** Not from temporal association alone. Feedback, omitted variables and the observation process can generate persistence. Define an intervention and an identification argument separately before interpreting the transition coefficient as an effect of changing a previous outcome.
+
+## Worked example: Closed-form AR(1) forecast variance by horizon
+
+```python
+import numpy as np
+
+phi, sigma, y_T = 0.8, 1.0, 3.0
+stationary = sigma**2 / (1 - phi**2)
+print(f"stationary variance of y_1: {stationary:.4f}")
+for h in range(1, 6):
+    mean = phi**h * y_T
+    var = sigma**2 * (1 - phi ** (2 * h)) / (1 - phi**2)
+    print(f"h={h}: conditional mean {mean:.3f}, innovation variance {var:.4f}")
+
+rng = np.random.default_rng(23)
+sims = np.full(200000, y_T)
+for _ in range(3):
+    sims = phi * sims + rng.normal(0, sigma, sims.size)
+print(f"simulated h=3: mean {sims.mean():.3f}, variance {sims.var():.4f}")
+```
+
+Observed output:
+
+```text
+stationary variance of y_1: 2.7778
+h=1: conditional mean 2.400, innovation variance 1.0000
+h=2: conditional mean 1.920, innovation variance 1.6400
+h=3: conditional mean 1.536, innovation variance 2.0496
+h=4: conditional mean 1.229, innovation variance 2.3117
+h=5: conditional mean 0.983, innovation variance 2.4795
+simulated h=3: mean 1.537, variance 2.0437
+```
+
+With \(\phi=0.8\) and unit innovations the stationary variance is \(1/(1-0.64)=2.7778\). That is the variance the model assigns to the first observation when the series is assumed to have been running long before data collection began, and including it is what the initial-state term in the Stan model does. Forecasting from a last value of 3.0, the conditional mean decays geometrically, \(3\times0.8^h\): 2.400, 1.920, 1.536, 1.229 and 0.983. The innovation variance grows as \((1-0.64^h)/(1-0.64)\), from 1.0 at one step to 2.4795 at five, approaching the stationary 2.7778 from below. So the forecast forgets the last value and settles at the unconditional distribution. Simulating 200,000 three-step paths gives mean 1.537 and variance 2.0437, matching the closed form 1.536 and 2.0496 within Monte Carlo error. These numbers hold the parameters fixed. A Bayesian forecast also averages over posterior uncertainty in \(\phi\), which widens long-horizon intervals further, especially when \(\phi\) might be near 1.
 
 ## Complete reproducible program
 

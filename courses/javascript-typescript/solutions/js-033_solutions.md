@@ -43,7 +43,7 @@ assert.equal(result.sum, 50005000);
 assert.ok(result.threadId > 0);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.sum, 50005000)`. Restoring the original line brings back the worked observation: sum 50005000; worker thread id positive.
+**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.sum, 50005000)`. Restoring `10000,` brings back: sum 50005000; worker thread id positive.
 
 **Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.sum, 50005000)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
@@ -67,7 +67,7 @@ assert.equal(buffer.byteLength, 0);
 assert.deepEqual(result, [9, 2, 3]);
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(result, [9, 2, 3])`; after it the line reads `const buffer = Uint8Array.from([1, 2, 3]).buffer;` again and parent byteLength 0; returned bytes 9,2,3.
+**Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(result, [9, 2, 3])`. Restoring `const buffer = Uint8Array.from([1, 2, 3]).buffer;` brings back: parent byteLength 0; returned bytes 9,2,3.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(result, [9, 2, 3])` for this input.
 

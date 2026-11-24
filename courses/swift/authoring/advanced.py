@@ -192,6 +192,14 @@ Build only the operations the small language needs. Supporting conditionals, loo
             "Describing a result structure rather than manual assembly steps.",
         ),
         ("Intermediate result", "A value produced by one expression before combination."),
+        (
+            "Builder method",
+            "A static function such as buildExpression or buildBlock that the compiler calls to convert and combine the block's expressions.",
+        ),
+        (
+            "buildOptional",
+            "The builder method that turns an if without else into a component, supplying an empty contribution when the condition is false.",
+        ),
     ],
     (
         "Compose report sections",

@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-027`, `apache-004`.
 
+## Key terms
+
+- **Connection identifier:** A name a task uses to request endpoint, login, credential and extra settings at runtime, keeping deployment values out of DAG code.
+- **Secrets backend:** A configured external store from which Airflow can resolve connections and variables instead of reading them from metadata storage.
+- **Provider package:** An installable package that supplies integration-specific hooks and operators. A connection record cannot create a missing provider.
+- **Redacted diagnostics:** A bounded observation that records which connection fields were present and valid without printing credential values.
+
 ## A connection reference separates code from deployment values
 
 A connection identifier names configuration that a task can request at runtime.

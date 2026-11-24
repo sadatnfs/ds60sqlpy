@@ -1,6 +1,6 @@
 # llm-042: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these capstone: a defensible language-system decision answers after attempting *Freeze common questions* through *Write the reviewer decision*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Run model mechanism checks* points to one step. `llm-042_solution.py` holds the assertions; this page explains how they test common evaluation contract. Then try *Write the reviewer decision* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -36,7 +36,7 @@ assert len({q["id"] for q in questions}) == 3 and questions[2]["answerable"] is 
 
 **Expected:** 3 distinct questions and a missing-evidence case.
 
-**Verify:** In a fresh process, the exercise checks confirm `len({q['id'] for q in questions}) == 3` and `questions[2]['answerable'] is False`.
+**Verify:** For *Freeze common questions*, a fresh-process check confirms `len({q['id'] for q in questions}) == 3` and `questions[2]['answerable'] is False`.
 
 ## Exercise 2: Compare saved candidate decisions
 
@@ -60,7 +60,7 @@ assert {name: sum(rows[i] for i in ids) for name, rows in results.items()} == {
 
 **Expected:** scores 1/3, 0/3, 3/3 on this fixture only.
 
-**Verify:** In a fresh process, the exercise checks confirm the combined assertion.
+**Verify:** For *Compare saved candidate decisions*, a fresh-process check confirms the combined assertion.
 
 ## Exercise 3: Run model mechanism checks
 
@@ -88,7 +88,7 @@ assert sum(p.numel() for p in model.parameters()) < 50000 and elapsed >= 0
 
 **Expected:** parity within 1e-6; parameters below 50000.
 
-**Verify:** In a fresh process, the exercise checks confirm `torch.cat(parts, 1)` matches `full` within 1e-6; `sum((p.numel() for p in model.parameters())) < 50000` and `elapsed >= 0`.
+**Verify:** For *Run model mechanism checks*, a fresh-process check confirms `torch.cat(parts, 1)` matches `full` within 1e-6; `sum((p.numel() for p in model.parameters())) < 50000` and `elapsed >= 0`.
 
 ## Exercise 4: Bind lineage and budgets
 
@@ -113,7 +113,7 @@ assert len(lineage["fixture"]) == len(lineage["model"]) == 64 and lineage["gener
 
 **Expected:** two 64-character hashes and cap 4.
 
-**Verify:** In a fresh process, the exercise checks confirm `len(lineage['fixture']) == len(lineage['model']) == 64` and `lineage['generated_cap'] == 4`.
+**Verify:** For *Bind lineage and budgets*, a fresh-process check confirms `len(lineage['fixture']) == len(lineage['model']) == 64` and `lineage['generated_cap'] == 4`.
 
 ## Exercise 5: Apply an honest release gate
 
@@ -134,7 +134,7 @@ assert decision == "no-go"
 
 **Expected:** decision no-go.
 
-**Verify:** In a fresh process, the exercise checks confirm `decision == 'no-go'`.
+**Verify:** For *Apply an honest release gate*, a fresh-process check confirms `decision == 'no-go'`.
 
 ## Exercise 6: Write the reviewer decision
 
@@ -157,8 +157,8 @@ assert (
 
 **Expected:** report names q3 unsupported answer and new independent families needed.
 
-**Verify:** In a fresh process, the exercise checks confirm `report['decision'] == 'no-go'`, `'q3' in report['failure']` and `'families' in report['missing']`.
+**Verify:** For *Write the reviewer decision*, a fresh-process check confirms `report['decision'] == 'no-go'`, `'q3' in report['failure']` and `'families' in report['missing']`.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Bind lineage and budgets* and predict the result first; keep *Apply an honest release gate* failing beside the repair. Log a missing PyTorch separately from a wrong common evaluation contract value in `llm-042`.

@@ -129,7 +129,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Keep copied value state independent) before changing anything, and confirm its observation: Reserving from the copied inventory does not change the original.
 2. Compare Example B (Reject without partial mutation) with Example A and name the first line whose behavior differs. Its observation is: Rejected requests retain the previous valid stock.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A struct can contain shared class references.
+3. Before opening the explanation, check your task 3 attempt (Build a bounded counter with private mutation) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

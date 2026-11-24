@@ -204,21 +204,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-distinguish-dnat-and-snat">Exercise 1: Distinguish DNAT and SNAT.<a class="heading-anchor" href="#exercise-1-distinguish-dnat-and-snat" aria-label="Link to this section">#</a></h3>
 <p>Track the field that changes. Both can occur in one path, and replies depend on the resulting routing/state.</p>
 <p><strong>Expected:</strong> Destination rewrite versus source rewrite.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Label DNAT as rewriting the destination and SNAT as rewriting the source of a packet.</li>
+<li><strong>Why it is correct:</strong> kube-proxy uses DNAT to turn a Service address into a Pod address, while SNAT hides the original caller behind another address.</li>
+<li><strong>Plausible wrong approach:</strong> Calling every translation NAT without saying which field changed hides why the backend sees a different peer.</li>
+<li><strong>How to verify:</strong> The answer pairs DNAT with destination rewrite and SNAT with source rewrite.</li>
+</ul>
 <h3 id="exercise-2-predict-backend-peer-identity-after-snat">Exercise 2: Predict backend peer identity after SNAT.<a class="heading-anchor" href="#exercise-2-predict-backend-peer-identity-after-snat" aria-label="Link to this section">#</a></h3>
 <p>Application logs must state which identity they record. A changed peer does not necessarily mean a different human caller.</p>
 <p><strong>Expected:</strong> It can be a node or proxy address rather than the original client.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Predict the peer address the backend records after the source is rewritten.</li>
+<li><strong>Why it is correct:</strong> With SNAT the backend sees the node or proxy that rewrote the packet, not the original client.</li>
+<li><strong>Plausible wrong approach:</strong> Logging the peer address as the client IP after SNAT attributes every request to the node.</li>
+<li><strong>How to verify:</strong> The prediction says the peer can be a node or proxy address.</li>
+</ul>
 <h3 id="exercise-3-draw-a-five-tuple-path-through-one-translation">Exercise 3: Draw a five-tuple path through one translation.<a class="heading-anchor" href="#exercise-3-draw-a-five-tuple-path-through-one-translation" aria-label="Link to this section">#</a></h3>
 <p>A tuple-level trace is more precise than a vague statement that traffic goes through a Service.</p>
 <p><strong>Expected:</strong> Source/destination addresses and ports are named before and after.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write the source and destination address and port before and after the translation point.</li>
+<li><strong>Why it is correct:</strong> Naming all four fields on both sides shows exactly which values one rewrite changed.</li>
+<li><strong>Plausible wrong approach:</strong> Recording only destination addresses hides a source rewrite that changes what the backend logs.</li>
+<li><strong>How to verify:</strong> Both tuples are written out with addresses and ports.</li>
+</ul>
 <h3 id="exercise-4-diagnose-missing-traffic-on-a-node-with-local-policy-and-no-endpoint">Exercise 4: Diagnose missing traffic on a node with Local policy and no endpoint.<a class="heading-anchor" href="#exercise-4-diagnose-missing-traffic-on-a-node-with-local-policy-and-no-endpoint" aria-label="Link to this section">#</a></h3>
 <p>Do not assume every node can forward to any remote backend under a local-only policy.</p>
 <p><strong>Expected:</strong> Endpoint locality and upstream health selection matter.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Check whether the node receiving traffic has a local endpoint under externalTrafficPolicy Local.</li>
+<li><strong>Why it is correct:</strong> Local policy only forwards to endpoints on the same node, so a node without one drops or fails health checks for that traffic.</li>
+<li><strong>Plausible wrong approach:</strong> Scaling the Deployment without checking placement may still leave that node with no endpoint.</li>
+<li><strong>How to verify:</strong> The diagnosis names endpoint locality and upstream health check selection.</li>
+</ul>
 <h3 id="exercise-5-explain-why-arbitrary-forwarded-headers-are-untrusted">Exercise 5: Explain why arbitrary forwarded headers are untrusted.<a class="heading-anchor" href="#exercise-5-explain-why-arbitrary-forwarded-headers-are-untrusted" aria-label="Link to this section">#</a></h3>
 <p>Use a defined proxy chain and application configuration. Otherwise logs or rate limits can accept spoofed identity.</p>
 <p><strong>Expected:</strong> Clients can supply them unless the trusted proxy boundary sanitizes them.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> State that any client can send X-Forwarded-For with any value.</li>
+<li><strong>Why it is correct:</strong> Only a trusted proxy that strips or overwrites the header makes its value meaningful.</li>
+<li><strong>Plausible wrong approach:</strong> Using the first header value as the client address lets a caller choose its own identity.</li>
+<li><strong>How to verify:</strong> The answer requires a trusted proxy boundary that sanitizes the header.</li>
+</ul>
 <h3 id="exercise-6-design-a-source-ip-acceptance-test">Exercise 6: Design a source-IP acceptance test.<a class="heading-anchor" href="#exercise-6-design-a-source-ip-acceptance-test" aria-label="Link to this section">#</a></h3>
 <p>Record the actual implementation and policy. A generic diagram does not prove what your cluster preserves.</p>
-<p><strong>Expected:</strong> Known caller, documented path, transport peer and trusted-header evidence.</p></article>
+<p><strong>Expected:</strong> Known caller, documented path, transport peer and trusted-header evidence.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Use a known caller over a documented path, recording the transport peer and any trusted header.</li>
+<li><strong>Why it is correct:</strong> Comparing what the backend sees with the known source shows whether translation or a proxy changed it.</li>
+<li><strong>Plausible wrong approach:</strong> Testing from an unknown source leaves nothing to compare the recorded address against.</li>
+<li><strong>How to verify:</strong> The test record has the caller, path, transport peer and trusted header evidence.</li>
+</ul></article>
   </main>
 </body>
 </html>

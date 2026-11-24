@@ -8,6 +8,13 @@ A count model describes the number of events over a specified exposure or observ
 
 The example uses 12 synthetic counts whose mean is 4.5 and variance is much larger. Actual PyMC fits compare a Poisson mean model with a negative-binomial model. In the chosen parameterization, the negative-binomial conditional variance is \(\mu+\mu^2/\alpha\), where alpha is a positive dispersion parameter.
 
+## Key terms
+
+- **Exposure:** The observation opportunity, such as time or population at risk, over which events are counted.
+- **Poisson rate:** The expected count per unit exposure; the Poisson mean is rate times exposure and equals the variance.
+- **Overdispersion:** Variance larger than the Poisson mean, which can come from heterogeneity, dependence or misspecification.
+- **Negative binomial:** A count distribution with conditional variance mu + mu^2/alpha, where alpha is a positive dispersion parameter.
+
 ## Worked case 1: compare predictive dispersion
 
 Both models put a prior on the log mean, then transform it to a positive mean. The negative-binomial model additionally gives alpha an exponential prior. The code samples real posterior chains and generates replicated counts at the observed design positions.
@@ -39,6 +46,36 @@ The short demonstration retains actual warnings and diagnostics. The counts are 
 **Does overdispersion prove the Poisson model is useless?** It challenges a particular conditional distribution under the included predictors and exposure. A richer mean structure or dependence model can change the conclusion. The negative-binomial fit is one explicit alternative, not an automatic diagnosis.
 
 **Why compare likelihood invariance under rate/exposure rescaling?** It checks units and interpretation independently of sampling. A model can run successfully while a data pipeline has mixed minutes, hours or different observation windows; the numerical rate then has the wrong meaning.
+
+## Worked example: Negative binomial as a gamma mixture of Poissons
+
+```python
+import numpy as np
+from scipy import integrate, stats
+
+mu, phi = 3.0, 1.5
+nb = stats.nbinom(phi, phi / (phi + mu))
+gamma = stats.gamma(phi, scale=mu / phi)  # rate multiplier with mean mu
+
+for k in range(4):
+    mix = integrate.quad(lambda lam: stats.poisson.pmf(k, lam) * gamma.pdf(lam), 0, np.inf)[0]
+    print(
+        f"k={k}: NB pmf {nb.pmf(k):.5f}, integrated Poisson-gamma {mix:.5f}, Poisson {stats.poisson.pmf(k, mu):.5f}"
+    )
+print(f"variance: NB {nb.var():.2f} = mu + mu^2/phi = {mu + mu**2 / phi:.2f}; Poisson {mu:.2f}")
+```
+
+Observed output:
+
+```text
+k=0: NB pmf 0.19245, integrated Poisson-gamma 0.19245, Poisson 0.04979
+k=1: NB pmf 0.19245, integrated Poisson-gamma 0.19245, Poisson 0.14936
+k=2: NB pmf 0.16038, integrated Poisson-gamma 0.16038, Poisson 0.22404
+k=3: NB pmf 0.12474, integrated Poisson-gamma 0.12474, Poisson 0.22404
+variance: NB 9.00 = mu + mu^2/phi = 9.00; Poisson 3.00
+```
+
+Integrating a Poisson pmf against a gamma distribution for its rate, with mean 3 and shape 1.5, reproduces the negative binomial pmf to five decimals at every count checked. The negative binomial is therefore not an ad hoc fix for overdispersion; it is the predictive distribution of a Poisson whose rate varies across units according to a gamma law. That variation shows in the numbers. The negative binomial assigns 0.19245 to zero counts, almost four times the Poisson's 0.04979 at the same mean, and its variance is \(3+9/1.5=9\), three times the Poisson's 3. If observed counts had many zeros and a long right tail, the Poisson would place too little mass on both, and replicated data from a fitted Poisson model would show it immediately. As \(\phi\) grows the gamma concentrates at its mean and the two pmfs converge, so \(\phi\) measures how much extra-Poisson variation the data demand.
 
 ## Complete reproducible program
 

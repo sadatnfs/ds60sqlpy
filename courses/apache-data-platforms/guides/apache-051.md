@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-004`, `apache-008`.
 
+## Key terms
+
+- **Query-first design:** Choosing a Cassandra table's keys from a concrete query, result size and update pattern, often keeping several denormalized tables for different questions.
+- **Partition key:** The first part of a primary key, such as (customer_id, day_bucket), whose hash decides which replicas store a row and which rows are read together.
+- **Clustering column:** A primary key column after the partition key that orders rows within a partition, such as ordered_at descending, with order_id breaking ties.
+- **Day bucket:** An application-chosen date value in the partition key that bounds partition size. Writers and readers must agree on its timezone and boundary rule.
+- **CQL:** Cassandra Query Language, which resembles SQL but has no arbitrary joins and expects queries to follow the table's key design.
+
 ## Design the access pattern before choosing a primary key
 
 Cassandra is a distributed wide-column database whose useful query shapes follow

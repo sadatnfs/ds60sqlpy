@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-005`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-005` (Chunking, overlap, offsets and context budgets). They introduce the notation this lesson needs for term frequency and document frequency.
 
 ## Learning objectives
 
@@ -38,7 +38,7 @@ Consider three equal-length documents: “exclude test accounts,” “include t
 
 The tie is correct for the stated lexical evidence. The two documents make opposite claims, but the query terms alone do not distinguish their policy meaning. A deterministic ID tie-break makes the output reproducible; it does not resolve which source is applicable. Version, authority and scope must be considered before an answer adopts either statement.
 
-Adding more query words can help without solving entailment generally. A passage saying “Do not exclude test accounts” still contains exclude,test and accounts. A bag of terms does not represent the full effect of negation or the scope of an exception. Lexical retrieval is choosing candidates for inspection, not proving that their propositions answer the question correctly.
+Adding more query words can help without solving entailment generally. A passage saying “Do not exclude test accounts” still contains exclude, test and accounts. A bag of terms does not represent the full effect of negation or the scope of an exception. Lexical retrieval is choosing candidates for inspection, not proving that their propositions answer the question correctly.
 
 Technical quantities create another mismatch. “100 milliseconds” and “0.1 seconds” may describe the same duration while sharing little lexical form. A domain-aware normalization step could make the equivalence available, but it must preserve units and context. Blind text substitution can create false matches. The same caution applies to abbreviations, SQL identifiers and method names whose common-language meanings differ from their technical use.
 
@@ -74,9 +74,11 @@ The helper exercises the declared defaults and a small positive-k1 example. It d
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-006/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-006.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
+Run `courses/llm-applied/lessons/llm-applied-006.py` in the declared `python-core` profile. *Rank a discriminating term*, *Inspect term rarity* and *Verify saturation* need only the Python standard library and literal fixtures.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
+Copy it to `.learning/expansion/llm-applied-006/` or the saved pad before editing; nothing is installed or downloaded.
+
+Run Examples A to C in one scratch file: *Inspect term rarity* and *Verify saturation* reuse the helper and fixture introduced in *Rank a discriminating term*. Before running Example A, write its intermediate quantities by hand and predict the result. It should give: A ranks first with a positive score; the other scores are 0. Example B should give: The rarer term has larger IDF. Example C should give: Scores increase, but 10 occurrences yield less than 10 times the single-occurrence score. Use the tolerance in each assertion; counts, identities and decisions must match exactly.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -90,7 +92,7 @@ For account, \(\mathrm{df}=2\) and IDF is \(\log(1+\frac{1.5}{2.5})=\log(1.6)\),
 
 Write \(K=k_1\left(1-b+b\frac{L}{\overline L}\right)\). The frequency factor is \(f(\mathrm{tf})=\frac{(k_1+1)\mathrm{tf}}{\mathrm{tf}+K}\). Holding document length and corpus statistics fixed, its derivative for positive K is \(\frac{(k_1+1)K}{(\mathrm{tf}+K)^2}\), positive and decreasing. The second derivative is negative, so additional repetitions have diminishing gain. As tf becomes large under that fixed-length mathematical comparison, the factor approaches k1+1. If actual repetitions also lengthen the document, K changes too; do not silently hold one effect fixed while interpreting a real edit.
 
-With \(b=0\), \(K=k_{1}\). For tf1, 2, 10 at \(k_{1}=1.2\), the factors are 1, 1.375 and about 1.964286. Ten repetitions do not create ten times the score. At \(b=1\), the normalization depends fully on L/avgL; at \(b=0\), document length does not enter K. For the same \(\mathrm{tf}=1\), \(k_{1}=1.2\) and \(b=0.75\), a document twice the average length has \(K=2.1\) and factor \(\frac{2.2}{3.1}\), about 0.709677. One half the average length has \(K=0.75\) and factor 2.2/1.75, about 1.257143.
+With \(b=0\), \(K=k_{1}\). For tf values 1, 2 and 10 at \(k_{1}=1.2\), the factors are 1, 1.375 and about 1.964286. Ten repetitions do not create ten times the score. At \(b=1\), the normalization depends fully on L/avgL; at \(b=0\), document length does not enter K. For the same \(\mathrm{tf}=1\), \(k_{1}=1.2\) and \(b=0.75\), a document twice the average length has \(K=2.1\) and factor \(\frac{2.2}{3.1}\), about 0.709677. One half the average length has \(K=0.75\) and factor 2.2/1.75, about 1.257143.
 
 This positive-IDF convention and the roles of k1 and b are documented in Lucene's versioned BM25 API. The fixture is its own transparent calculation and does not execute Lucene or claim identical index-analysis behavior. [Lucene 10.3.1 BM25Similarity](https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html).
 
@@ -176,21 +178,24 @@ assert a < b < c and c < 10 * a
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: a ranks first with a positive score; the other scores are 0. empty result for no documents; finite zero score for an empty document. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+Before reading the code for *Inspect term rarity*, predict its result from the prompt alone: Compare IDF for a term present in 1 of 3 documents with a term present in 2 of 3. Write the guess beside the stated outcome (the rarer term has larger IDF). Then predict how the decisive case, *Check corpus edge cases*, should end: Score an empty corpus and a corpus containing one empty document. For lexical retrieval and BM25 from first principles, the finish condition is: A ranks first with a positive score; the other scores are 0. Empty result for no documents; finite zero score for an empty document.
 
 ## Exercises
 
 1. **Rank a discriminating term.** Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization.
    **Expected:** a ranks first with a positive score; the other scores are 0.
    **Verify:** Save the assertion results for exercise 1, including a ranks first with a positive score; the other scores are 0.
+   **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 2. **Inspect term rarity.** Compare IDF for a term present in 1 of 3 documents with a term present in 2 of 3.
    **Expected:** the rarer term has larger IDF.
    **Verify:** Save the assertion results for exercise 2, including the rarer term has larger IDF.
+   **Transfer:** This repeats Example B; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 3. **Verify saturation.** Disable length normalization with \(b=0\) and compare term frequencies 1, 2, 10 under the same IDF.
    **Expected:** scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.
    **Verify:** Save the assertion results for exercise 3, including scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.
+   **Transfer:** This repeats Example C; reproduce it closed-book, then change one literal and predict the new result before running it.
 
 4. **Expose a synonym miss.** Query purchase against a document containing only buy.
    **Expected:** score 0 despite the semantic relationship.
@@ -212,19 +217,21 @@ If repetition overwhelms ranking, separate term-frequency saturation from the do
 
 ## Progressive hints
 
-First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise's expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.
+Hint 1: restate term frequency and document frequency for the fixture in *Rank a discriminating term*. Hint 2: change one literal in *Inspect term rarity* and note which intermediate value moves. Hint 3: compare your fourth exercise, *Expose a synonym miss*, with its stated result (score 0 despite the semantic relationship). If *Check corpus edge cases* accepts an input it should reject, look for the missing check rather than widening a tolerance.
 
 ## Self-check and retrieval
 
-Revisit the worked examples, then close them. Explain Term frequency, Document frequency, IDF using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close the examples and explain term frequency, document frequency and idf using *Rank a discriminating term*. Recompute its result (a ranks first with a positive score; the other scores are 0) from the inputs. Change one input in *Verify saturation* and predict whether the stated result (scores increase, but 10 occurrences yield less than 10 times the single-occurrence score) still holds. Say which part of lexical retrieval and BM25 from first principles the code guarantees and which part would need new observations.
 
 ## Next step
 
-Revisit the direct prerequisite `llm-applied-005` if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.
+If *Rank a discriminating term* cannot be reconstructed without the solution, revisit `llm-applied-005` (Chunking, overlap, offsets and context budgets). Otherwise keep the six observations from lexical retrieval and BM25 from first principles and continue to `llm-applied-007` (Embedding retrieval, similarity and representation limits).
 
 ## Sources and verification status
 
-API and mechanism reference: [BM25 and probabilistic relevance](https://www.staff.city.ac.uk/~sbrp622/papers/foundations_bm25_review.pdf), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+Reference for term frequency: [BM25 and probabilistic relevance](https://www.staff.city.ac.uk/~sbrp622/papers/foundations_bm25_review.pdf), reviewed 2026-10-22. The fixtures for *Rank a discriminating term*, *Inspect term rarity* and *Verify saturation* and the six exercises are original course material.
+
+Execution gates are described in [validation](../../../docs/validation.md); CI artifacts show which checks ran for each revision.
 
 
 

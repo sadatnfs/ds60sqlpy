@@ -12,6 +12,8 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
+Implement a custom ML operator with forward and backward tests, input validation and an end-to-end keep or reject decision.
+
 Work through *Capstone: a custom ML operator that earns its existence* with the concrete cases below. Finish with this evidence:
 supported-contract documentation, forward and backward tests, invalid-input behavior, end-to-end measurement and an honest decision to keep or reject the custom kernel. Distinguish an algorithmic
 calculation, a compiled artifact and an actual device observation when explaining
@@ -20,6 +22,13 @@ what your work establishes.
 ## Purpose, vocabulary and mental model
 
 A custom ML operator has a forward contract and, when differentiable, a backward contract. State supported shape, strides, dtype, device, aliasing and stream behavior. Reject unsupported inputs before unsafe access. The operator must integrate with the framework's ownership and current-stream rules, not merely return plausible numbers. Compare against a readable framework reference and the framework's optimized or compiled path where available. Measure full training or inference scope, including backward, transfers and launch overhead. A faster forward kernel can still make training slower or produce wrong gradients.
+
+### Key terms
+
+- **Forward contract:** The documented shapes, dtypes, devices and layouts that an operator accepts and returns.
+- **Backward pass:** The computation of input gradients from output gradients that training frameworks require.
+- **Gradient check:** Comparing analytic gradients with finite-difference estimates at chosen points.
+- **Current stream:** The framework's active CUDA stream, which a custom operator must launch on to keep ordering correct.
 
 ## Mathematical contract
 

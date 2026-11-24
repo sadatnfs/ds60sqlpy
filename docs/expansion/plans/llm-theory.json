@@ -155,7 +155,7 @@
         "llm-006"
       ],
       "runtime": "python-core",
-      "outcome": "Learn deterministic merge rules without leaking evaluation text into a tokenizer.",
+      "outcome": "Build a deterministic BPE merge table from training text only, so evaluation strings cannot change the frozen vocabulary.",
       "lab": "Implement a small BPE merge table with a declared lexical tie-break on a local training fixture; freeze vocabulary before encoding validation.",
       "verification": "Tied pairs choose the same merge after a fresh run. Validation-only strings cannot change the vocabulary hash or merge count.",
       "concepts": [

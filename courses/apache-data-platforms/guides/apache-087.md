@@ -2,6 +2,13 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-020`, `apache-049`, `apache-061`.
 
+## Key terms
+
+- **Workload model:** The input distribution, query or update pattern, freshness target and failure contract that a capacity comparison must state.
+- **Configured limit:** A CPU or memory budget set for safety. It bounds a container but is not measured usage or a production sizing recommendation.
+- **Cold and warm state:** Whether caches, compiled code and materialized inputs were already present when a measurement started.
+- **Architectural tradeoff:** Choosing among embedded, batch, streaming and serving systems by workload needs and operating cost rather than a single timing.
+
 ## Capacity decisions need a workload and measurement boundary
 
 An embedded query, a batch table build, a stateful stream and an analytical
@@ -74,6 +81,34 @@ rather than an inferior miniature cluster?** It can satisfy a bounded workload
 with fewer moving parts, while different requirements can justify distributed
 state and serving. These cases measure one supported path and then change the
 requirements explicitly, keeping empirical results separate from design judgment.
+
+## Worked examples
+
+### Measure one bounded run with its definition
+
+```python
+import time
+
+values = list(range(200_000))
+start = time.perf_counter()
+total = sum(value * 2 for value in values)
+elapsed = time.perf_counter() - start
+print(total, "elapsed seconds above zero:", elapsed > 0)
+```
+
+```text
+39999800000 elapsed seconds above zero: True
+```
+
+The printed total is deterministic, while the elapsed time varies per machine, so only its existence is printed here. A capacity claim needs the input size, the timer used, what was inside the timed region and how many samples were taken. One run of a small fixture cannot predict a cluster's throughput; it only gives a baseline for comparing two configurations on the same machine.
+
+### Container limits versus observed use
+
+```bash
+docker stats --no-stream --format "{{.Name}} {{.CPUPerc}} {{.MemUsage}}"
+```
+
+The output prints each container with current CPU percent and memory used over its limit. The limit is a configured ceiling, not a measurement of need; a container at 30 percent of its memory limit during a tiny fixture says little about production. Sample during the workload, record the sampling window, and keep forecasts in a separate section from what was observed.
 
 ## Complete worked source
 

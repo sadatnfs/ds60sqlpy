@@ -200,6 +200,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Tabular acceleration connects schemas, null masks, columnar storage, preprocessing and model inputs. RAPIDS cuDF provides GPU dataframe operations; it is not the Spark scheduling engine. A single-process cuDF pipeline differs from the cuDF plugin that replaces supported Spark physical operators. Both require compatible NVIDIA execution for their GPU paths, and both can spend time moving data across boundaries.</p>
 <p>Preserve null semantics, category mappings and row identity when converting a dataframe into dense tensors. A missing value is not always a NaN, and an integer nullable column may require a validity mask. Fit encoders on training data and define unknown-category behavior. Compare with a CPU dataframe or simple Python oracle before measuring. The Spark specialization follows this chapter for distributed plans, resource scheduling and operations.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>cuDF:</strong> A GPU dataframe library from RAPIDS with a pandas-like API and columnar storage.</li>
+<li><strong>Validity mask:</strong> A per-column bitmap that marks which entries are null.</li>
+<li><strong>Columnar storage:</strong> Storing each column contiguously so vectorized operations read only the columns they need.</li>
+<li><strong>Category mapping:</strong> The table that maps categorical codes to labels, which must match between data sets for codes to mean the same thing.</li>
+<li><strong>Row identity:</strong> A stable key that tracks each record through joins, filters and sorts.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>Rows [(A,2),(A, null),(B,5)] grouped by category have non-null sums A=2 and B=5 under the declared skip-null rule. Counting rows and counting non-null values are different.</p>
@@ -218,20 +226,52 @@ counts <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <span class="syntax-keyword">assert</span> totals <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">and</span> counts<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU dataframe oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> totals<span class="syntax-punctuation">,</span> counts<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Grouped sums A 2, B 5 and row count A 2.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>rows</code></td>
+<td><code>[(&#x27;A&#x27;, 2), (&#x27;A&#x27;, None), (&#x27;B&#x27;, 5)]</code></td>
+</tr>
+<tr>
+<td><code>totals</code></td>
+<td><code>{&#x27;A&#x27;: 2, &#x27;B&#x27;: 5}</code></td>
+</tr>
+<tr>
+<td><code>counts</code></td>
+<td><code>{&#x27;A&#x27;: 2, &#x27;B&#x27;: 1}</code></td>
+</tr>
+<tr>
+<td><code>key</code></td>
+<td><code>&#x27;B&#x27;</code></td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td><code>5</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-grouped-sums">Exercise 1: Compute grouped sums<a class="heading-anchor" href="#exercise-1-compute-grouped-sums" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute grouped sums</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Treating the null as an error and dropping group A entirely, or failing the whole aggregation, contradicts the stated skip-null rule.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-distinguish-null-and-zero">Exercise 2: Distinguish null and zero<a class="heading-anchor" href="#exercise-2-distinguish-null-and-zero" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>distinguish null and zero</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Filling nulls with zero before aggregation silently changes averages and counts, which then disagree with reports computed by a SQL engine that skips nulls.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-define-category-mapping">Exercise 3: Define category mapping<a class="heading-anchor" href="#exercise-3-define-category-mapping" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>define category mapping</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Fitting category codes independently in each partition assigns code 0 to whatever category appears first there, so the same code means different things to the model.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-preserve-row-identity">Exercise 4: Preserve row identity<a class="heading-anchor" href="#exercise-4-preserve-row-identity" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>preserve row identity</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Matching rows by position after a join or a GPU to CPU conversion can attach predictions to the wrong records.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-count-conversion-bytes">Exercise 5: Count conversion bytes<a class="heading-anchor" href="#exercise-5-count-conversion-bytes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>count conversion bytes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting only the numeric values misses null masks, string offsets and temporary converted copies.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-distinguish-cudf-from-spark-acceleration">Exercise 6: Distinguish cuDF from Spark acceleration<a class="heading-anchor" href="#exercise-6-distinguish-cudf-from-spark-acceleration" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>distinguish cuDF from Spark acceleration</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming a Spark job uses the GPU because cuDF is installed confuses a library with a plugin that needs its own configuration.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

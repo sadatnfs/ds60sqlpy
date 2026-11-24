@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-008`, `apache-007`.
 
+## Key terms
+
+- **DAG:** An Airflow workflow definition that declares tasks and their dependency relationships as a directed acyclic graph.
+- **Dag Run:** One instantiation of a DAG for a specific data interval, whose task instances record the state of each task's work for that run.
+- **TaskFlow:** Airflow's decorator API, imported from airflow.sdk, that turns Python functions into tasks. Calling a decorated task while defining a DAG creates a dependency, not an immediate function call.
+- **Data interval:** The time range of data a scheduled Dag Run is responsible for. The logical date names the run and is not the wall-clock time it executed.
+- **XCom:** Airflow's metadata channel for small values passed between tasks. Large tables stay in a data system, and only a bounded reference travels through XCom.
+
 ## Orchestration records work and dependencies
 
 Airflow schedules and tracks workflows. A DAG describes tasks and their dependency

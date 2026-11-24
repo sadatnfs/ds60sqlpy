@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Recovery begins by identifying which state was accepted and which operations may already have happened. A failed candidate build can leave new relations, while consumers should continue using a previously accepted product. Keeping a distinct accepted version makes that decision possible without pretending every build is one global transaction.</p>
 <p>The first case creates a consumer-facing view over a versioned accepted table. It changes that pointer inside a real DuckDB transaction and rolls the transaction back. The original value remains visible afterward. This qualifies a local database mechanism, not atomicity across multiple services, filesystems and warehouses.</p>
 <p>The second case materializes a candidate 99 that violates a declared maximum 50, while an accepted release retains 42. The failed test does not erase the candidate, and the consumer boundary is intentionally not advanced. A durable operating procedure should also specify ownership, retries, uncertain outcomes, retention and how a rollback restores a compatible set of data and code.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Accepted release:</strong> A versioned table that passed its checks and may be served to consumers.</li>
+<li><strong>Publication pointer:</strong> A consumer-facing view over the currently accepted versioned table, so consumers keep one stable name.</li>
+<li><strong>Transaction:</strong> Statements between BEGIN and COMMIT that take effect together; ROLLBACK discards them all.</li>
+<li><strong>Candidate:</strong> A newly built version that has not passed its checks; a failed candidate stays materialized, but the pointer is not advanced.</li>
+<li><strong>Recovery:</strong> Restoring consumers to a compatible accepted set of data and code after a failed or withdrawn release.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>BEGIN/ROLLBACK delimit the demonstrated database transaction. The accepted relation and publication view have separate names from the candidate. Inspect actual values after the failure or rollback. A model/source version and its validation evidence should travel with the accepted artifact; a name such as latest is insufficient without an identity contract.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

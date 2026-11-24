@@ -199,6 +199,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use a prepared optimization library while checking the objective, feasible set and independent convergence evidence.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-023</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (minimize a convex quadratic) and worked case B (a feasible boundary changes the answer) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-023: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>BFGS:</strong> A quasi-Newton method that builds an approximate inverse Hessian from successive gradients to choose search directions.</li>
+<li><strong>Gradient callback:</strong> A function supplied to the optimizer that returns the objective&#x27;s gradient and should be checked against an independent derivative.</li>
+<li><strong>Bounded optimization:</strong> Searching only within stated limits, such as the interval 0 through 2, where the answer may lie on a boundary.</li>
+<li><strong>Convergence flag:</strong> The <code>Optim.converged</code> result reports that a stopping criterion was met, not that the global minimum was proven.</li>
+</ul>
 <h3 id="specify-the-optimization-problem-first">Specify the optimization problem first<a class="heading-anchor" href="#specify-the-optimization-problem-first" aria-label="Link to this section">#</a></h3>
 <p>An optimizer searches for a point that improves a stated objective under a stated feasible set. The algorithm name does not determine whether the objective represents the scientific question. A mistaken sign, reduction or parameterization can be optimized successfully while solving the wrong problem.</p>
 <p>The prepared Optim package supports several methods. This unit uses a gradient-based method for a small smooth vector problem and a bounded method for a scalar problem. ForwardDiff supplies an explicit gradient callback. The code records the final point and objective, then checks them against known mathematical solutions.</p>

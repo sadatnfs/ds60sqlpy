@@ -205,6 +205,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>In a simplified configuration with one assigned GPU, four CPU slots and a task GPU amount of 0.25, resource accounting allows at most four tasks. A plugin GPU concurrency of two can allow only two of those tasks into GPU work simultaneously. Others may prepare input or wait, depending on implementation. This can improve overlap when preparation is expensive, but the gain is workload-specific.</p>
 <p>A fractional GPU request does not partition device memory into equal private slices. Two admitted tasks can each allocate variable-size batches and workspaces, and their combined live set can exceed VRAM. Hardware partitioning technologies have distinct administration and support contracts and must not be inferred from Spark fractions. Measure memory alongside throughput when changing concurrency.</p>
 <p>Before a real run, verify resource discovery and assigned device addresses inside the exact executor environment. The plugin&#x27;s supported executor-to-GPU mapping is release-specific and currently documented separately from general Spark scheduling. Copying a generic Spark GPU configuration without checking plugin requirements can produce a valid-looking but unsupported setup. Keep all resource choices in the compatibility and experiment ledger.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Executor:</strong> A Spark JVM process that runs tasks and owns resources such as CPU cores and a GPU.</li>
+<li><strong>Task slot:</strong> A unit of executor CPU capacity that allows one task to run.</li>
+<li><strong>Fractional GPU resource amount:</strong> A per-task GPU request that sets a scheduling share but does not partition device memory.</li>
+<li><strong>GPU admission concurrency:</strong> The plugin limit on how many tasks may actively use an executor&#x27;s GPU at once.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>With an executor assigned one GPU and tasks requesting 0.25 GPU, resource accounting can admit up to four such tasks, subject to CPU slots and other limits. This is not four VRAM partitions.</p>
@@ -222,20 +229,52 @@ active <span class="syntax-operator">=</span> <span class="syntax-builtin">min</
 <span class="syntax-keyword">assert</span> slots <span class="syntax-operator">==</span> <span class="syntax-number">4</span> <span class="syntax-operator">and</span> active <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU resource model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> slots<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">scheduled shares;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> active<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">GPU-active bound</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Four scheduling shares with a two-task plugin admission bound.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>gpu</code></td>
+<td><code>Fraction(1, 1)</code></td>
+</tr>
+<tr>
+<td><code>request</code></td>
+<td><code>Fraction(1, 4)</code></td>
+</tr>
+<tr>
+<td><code>slots</code></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>plugin_limit</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>active</code></td>
+<td><code>2</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-resource-share-slots">Exercise 1: Compute resource-share slots<a class="heading-anchor" href="#exercise-1-compute-resource-share-slots" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute resource-share slots</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reading 0.25 as a quarter of the device&#x27;s memory reserved for each task treats an admission count as a hardware partition, which Spark does not create.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-compare-cpu-and-gpu-limits">Exercise 2: Compare CPU and GPU limits<a class="heading-anchor" href="#exercise-2-compare-cpu-and-gpu-limits" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>compare CPU and GPU limits</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Tuning only the GPU amount and expecting four concurrent GPU tasks ignores the plugin limit, and the extra tasks hold CPU slots while waiting.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-explain-vram-nonpartitioning">Exercise 3: Explain VRAM nonpartitioning<a class="heading-anchor" href="#exercise-3-explain-vram-nonpartitioning" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>explain VRAM nonpartitioning</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Planning each task to have a quarter of device memory leads to out-of-memory errors when tasks use more than that share.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-verify-device-addresses">Exercise 4: Verify device addresses<a class="heading-anchor" href="#exercise-4-verify-device-addresses" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>verify device addresses</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming the default device assignment is correct on multi-GPU hosts risks oversubscribing one device.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-concurrency-experiment">Exercise 5: Design a concurrency experiment<a class="heading-anchor" href="#exercise-5-design-a-concurrency-experiment" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design a concurrency experiment</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Changing concurrency and partition count together makes it impossible to tell which caused the change.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-describe-oversubscription-failure">Exercise 6: Describe oversubscription failure<a class="heading-anchor" href="#exercise-6-describe-oversubscription-failure" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>describe oversubscription failure</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Concluding from a successful small test that a concurrency setting is safe misses failures that appear with real data volumes.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-sort-run-and-cmd-into-lifecycle-phases">Exercise 1: Sort RUN and CMD into lifecycle phases.<a class="heading-anchor" href="#exercise-1-sort-run-and-cmd-into-lifecycle-phases" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> RUN executes at build time; CMD describes later startup.</p>
 <p><strong>Why:</strong> Putting a long-running server in RUN can hang a build and does not preserve a running process inside the finished image. An image contains files and configuration, not a saved live server.</p>
+<p><strong>Approach:</strong> Label each instruction with when it executes: RUN mkdir -p /data runs during docker build, while CMD only stores the default command in image configuration.</p>
+<p><strong>Why this is correct:</strong> The builder executes RUN in a temporary container and snapshots the filesystem. CMD changes metadata and runs only later, when a container starts.</p>
+<p><strong>A plausible wrong approach:</strong> Writing RUN python server.py to start the app blocks the build forever, because serve_forever never returns and no layer is committed.</p>
+<p><strong>How to verify:</strong> docker image inspect shows Config.Cmd as python server.py, while the build log lists the RUN step and its completion, not the server starting.</p>
 <h3 id="exercise-2-explain-the-final-context-dot">Exercise 2: Explain the final context dot.<a class="heading-anchor" href="#exercise-2-explain-the-final-context-dot" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It selects the current directory as build input.</p>
 <p><strong>Why:</strong> COPY paths are evaluated against the context. Running the same command from a different directory can change available files, so record both the Dockerfile and context location.</p>
+<p><strong>Approach:</strong> Read the trailing dot in docker build -t ds60-docker-study:local . as the context path, the directory whose files the builder may read.</p>
+<p><strong>Why this is correct:</strong> COPY server.py resolves against that context, so the command must run from the fixture copy where server.py and the Dockerfile sit side by side.</p>
+<p><strong>A plausible wrong approach:</strong> Running the same command from the repository root sends a much larger context and fails to find the Dockerfile, which is only in the fixture directory.</p>
+<p><strong>How to verify:</strong> Run the build from the fixture copy and check that the build log reports a small context transfer and that the COPY step succeeds.</p>
 <h3 id="exercise-3-write-a-minimal-dockerfile-for-a-single-file-app">Exercise 3: Write a minimal Dockerfile for a single file app.<a class="heading-anchor" href="#exercise-3-write-a-minimal-dockerfile-for-a-single-file-app" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Base, workdir, explicit source copy and foreground command.</p>
 <p><strong>Why:</strong> The minimal file should have no unrelated tools or hidden host dependencies. Each instruction should have a clear effect you can verify in the resulting image.</p>
+<p><strong>Approach:</strong> Choose a base with Python, set WORKDIR /app, copy only server.py, and set an exec-form CMD that runs it in the foreground.</p>
+<p><strong>Why this is correct:</strong> Those four instructions match worked example 1 and need nothing from the host except the file. The server uses only the standard library, so no install step is required.</p>
+<p><strong>A plausible wrong approach:</strong> Adding RUN pip install of unrelated packages makes the image larger and the build dependent on a package index without changing what server.py can do.</p>
+<p><strong>How to verify:</strong> Build the image, then run python -c to check that /app/server.py exists and that Config.Cmd and WorkingDir match the recipe.</p>
 <h3 id="exercise-4-diagnose-copy-failure-when-a-file-is-outside-context">Exercise 4: Diagnose COPY failure when a file is outside context.<a class="heading-anchor" href="#exercise-4-diagnose-copy-failure-when-a-file-is-outside-context" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Change the owned project layout or explicit context intentionally.</p>
 <p><strong>Why:</strong> Docker cannot copy arbitrary parent files through a relative escape. Expanding the context carelessly can send private material to the builder, so narrow the project layout instead.</p>
-<h3 id="exercise-5-explain-why-expose-does-not-make-localhost-8080-work">Exercise 5: Explain why EXPOSE does not make localhost:8080 work.<a class="heading-anchor" href="#exercise-5-explain-why-expose-does-not-make-localhost-8080-work" aria-label="Link to this section">#</a></h3>
+<p><strong>Approach:</strong> Read the error as a context boundary problem: COPY ../shared/config.txt names a path outside the context directory sent to the builder.</p>
+<p><strong>Why this is correct:</strong> The builder only receives the context; relative paths cannot climb out of it. Either move the needed file into the project or choose a narrower, deliberate context.</p>
+<p><strong>A plausible wrong approach:</strong> Running docker build from / so the parent is inside the context ships every file on the host to the builder, including private material.</p>
+<p><strong>How to verify:</strong> After the layout change, the build log shows a context of the expected size and the COPY step completes without a not found error.</p>
+<h3 id="exercise-5-explain-why-expose-does-not-make-localhost-8080-work">Exercise 5: Explain why EXPOSE does not make <code>localhost:8080</code> work.<a class="heading-anchor" href="#exercise-5-explain-why-expose-does-not-make-localhost-8080-work" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It is metadata; port publishing is a runtime configuration.</p>
 <p><strong>Why:</strong> The container process must listen on the correct interface and a host mapping must exist. An EXPOSE instruction alone establishes neither of those operational facts.</p>
+<p><strong>Approach:</strong> Separate image metadata from runtime wiring. EXPOSE 8080 records intent; the compose port mapping 127.0.0.1:18080:8080 actually forwards host traffic.</p>
+<p><strong>Why this is correct:</strong> server.py binds 0.0.0.0:8080 inside the container, and only a -p or ports entry creates the host side. Without it, nothing on the host listens.</p>
+<p><strong>A plausible wrong approach:</strong> Requesting <code>localhost:8080</code> after docker run without -p fails, and adding a second EXPOSE line cannot help because metadata never opens a socket.</p>
+<p><strong>How to verify:</strong> docker compose port app 8080 prints 127.0.0.1:18080, and a request to that address returns the JSON greeting.</p>
 <h3 id="exercise-6-define-build-and-runtime-acceptance-separately">Exercise 6: Define build and runtime acceptance separately.<a class="heading-anchor" href="#exercise-6-define-build-and-runtime-acceptance-separately" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Build succeeds, then endpoint and writable data behavior pass.</p>
 <p><strong>Why:</strong> Image creation is one stage. Running the exact image with intended user, mounts and network verifies the conditions a learner or operator will actually use.</p>
+<p><strong>Approach:</strong> Write two lists: build acceptance covers the tag existing with the intended Cmd and User; runtime acceptance covers the endpoint, the user and /data writes.</p>
+<p><strong>Why this is correct:</strong> The image declares USER 10001:10001 and a /data owned by that user, so the runtime check must confirm a counter increment succeeds under those settings.</p>
+<p><strong>A plausible wrong approach:</strong> Stopping at a green build misses errors that appear only at runtime, such as a permission failure when the non-root user writes to a mounted volume.</p>
+<p><strong>How to verify:</strong> After compose up, POST /increment returns a counter of 1 on a fresh volume, and GET /healthz returns status ready.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

@@ -5,6 +5,39 @@
   "minutes": 60,
   "prerequisites": ["apache-015"],
   "concepts": ["logical plan", "predicate pushdown", "HAVING"],
+  "key_terms": [
+    [
+      "Logical plan",
+      "A tree of relational operations such as scan, filter, projection and aggregate that describes the required result without choosing execution operators."
+    ],
+    [
+      "Physical plan",
+      "The concrete execution operators, partitioning and data exchanges DataFusion chooses to compute a logical plan."
+    ],
+    ["Projection pushdown", "Asking a scan to produce only the columns that later operators use."],
+    [
+      "Predicate pushdown",
+      "Moving an eligible filter closer to, or into, a data source's scan so fewer rows reach later operators."
+    ],
+    [
+      "HAVING",
+      "A SQL clause that filters groups after aggregation, unlike WHERE, which filters input rows before grouping."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Read where a filter sits in the plan",
+      "language": "python",
+      "code": "import pyarrow as pa\nfrom datafusion import SessionContext\n\nctx = SessionContext()\nevents = pa.table({\"region\": [\"east\", \"east\", \"west\"], \"amount\": [4, 7, 1000]})\nctx.register_record_batches(\"events\", [events.to_batches()])\nquery = \"SELECT SUM(amount) AS total FROM events WHERE region = 'east' AND amount > 0\"\nfor row in ctx.sql(\"EXPLAIN \" + query).to_arrow_table().to_pylist():\n    print(row[\"plan_type\"])\n    print(row[\"plan\"])",
+      "interpretation": "The output has a logical_plan entry and a physical_plan entry. In the logical text, the Filter line with both predicates should appear below the Aggregate, meaning rows are discarded before summing; in the physical text, look for a FilterExec feeding the aggregate stages. Operator names change between releases, so read the order of operations rather than matching exact strings. The total must still be checked separately: a plan explains intended work, not a correct answer."
+    },
+    {
+      "title": "Compare HAVING with a row filter on the same data",
+      "language": "python",
+      "code": "import pyarrow as pa\nfrom datafusion import SessionContext\n\nctx = SessionContext()\nvalues = pa.table({\"region\": [\"east\", \"east\"], \"amount\": [60, 60]})\nctx.register_record_batches(\"small_values\", [values.to_batches()])\nhaving = (\n    \"SELECT region, SUM(amount) AS t FROM small_values GROUP BY region HAVING SUM(amount) > 100\"\n)\nwhere = \"SELECT region, SUM(amount) AS t FROM small_values WHERE amount > 100 GROUP BY region\"\nprint(ctx.sql(having).to_pylist())\nprint(ctx.sql(where).to_pylist())",
+      "interpretation": "The HAVING query keeps east with a total of 120, while the WHERE version returns an empty list because no single row exceeds 100. Moving a group condition into WHERE looks like an optimization but answers a different question. When reviewing a plan that seems to filter too early, confirm whether the predicate refers to a row value or an aggregate before accepting the rewrite."
+    }
+  ],
   "evidence": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums.",
   "sources": [
     ["DataFusion EXPLAIN", "https://datafusion.apache.org/user-guide/sql/explain.html"],

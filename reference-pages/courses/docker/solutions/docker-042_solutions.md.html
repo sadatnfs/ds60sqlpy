@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-predict-all-outcomes-before-running-the-final-project">Exercise 1: Predict all outcomes before running the final project.<a class="heading-anchor" href="#exercise-1-predict-all-outcomes-before-running-the-final-project" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A written normal, failure, replacement and recovery expectation.</p>
 <p><strong>Why:</strong> Predictions make the experiment falsifiable. Without them it is easy to reinterpret any output as success.</p>
+<p><strong>Approach:</strong> Before running, write expected results for normal requests, a chosen failure, container replacement and restore.</p>
+<p><strong>Why this is correct:</strong> With written expectations, each result either matches or does not, and a mismatch cannot be reinterpreted as success.</p>
+<p><strong>A plausible wrong approach:</strong> Running first and describing whatever happened as expected makes any outcome look correct.</p>
+<p><strong>How to verify:</strong> Compare each observed result with its prediction and record matches and differences.</p>
 <h3 id="exercise-2-change-one-noncritical-configuration-and-rebuild-or-recreate-appropriately">Exercise 2: Change one noncritical configuration and rebuild or recreate appropriately.<a class="heading-anchor" href="#exercise-2-change-one-noncritical-configuration-and-rebuild-or-recreate-appropriately" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The chosen lifecycle action matches the kind of change.</p>
 <p><strong>Why:</strong> Source changes need a new image; runtime environment changes need application of new container configuration. Explain why your selected action is sufficient.</p>
+<p><strong>Approach:</strong> Classify the change: editing server.py needs a rebuild; changing APP_MESSAGE in compose.yaml needs only recreation.</p>
+<p><strong>Why this is correct:</strong> Recreating picks up new container settings; only a rebuild puts new source into the image.</p>
+<p><strong>A plausible wrong approach:</strong> Restarting the container after editing server.py keeps running the old image&#x27;s code.</p>
+<p><strong>How to verify:</strong> After the chosen action, GET / or the changed route shows the new behavior, and the image ID changes only after a rebuild.</p>
 <h3 id="exercise-3-assemble-a-source-bound-release-packet">Exercise 3: Assemble a source-bound release packet.<a class="heading-anchor" href="#exercise-3-assemble-a-source-bound-release-packet" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Exact source, image, platform, commands and observations.</p>
 <p><strong>Why:</strong> The packet should let another learner connect each result to the artifact actually tested. Avoid stale screenshots or reports from an earlier image.</p>
+<p><strong>Approach:</strong> Collect the source revision, image ID, platform, exact commands and their observed outputs for the same run.</p>
+<p><strong>Why this is correct:</strong> Each result is tied to the artifact that produced it, so another learner can repeat it.</p>
+<p><strong>A plausible wrong approach:</strong> Reusing screenshots from an earlier image makes the packet describe something not released.</p>
+<p><strong>How to verify:</strong> Every entry shows the same image ID, matching the one deployed.</p>
 <h3 id="exercise-4-diagnose-a-deliberate-single-layer-failure">Exercise 4: Diagnose a deliberate single-layer failure.<a class="heading-anchor" href="#exercise-4-diagnose-a-deliberate-single-layer-failure" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Minimal evidence locates the fault and a targeted repair restores the invariant.</p>
 <p><strong>Why:</strong> Do not weaken the acceptance check. Keep the failing observation as a regression case for the repaired configuration.</p>
+<p><strong>Approach:</strong> Introduce one fault, such as a wrong client port, and collect only the evidence needed to find its layer.</p>
+<p><strong>Why this is correct:</strong> One fault and minimal evidence point to one cause; the repair should restore that check&#x27;s passing result.</p>
+<p><strong>A plausible wrong approach:</strong> Loosening the acceptance check until it passes hides the fault.</p>
+<p><strong>How to verify:</strong> Keep the failing case as a regression test; it fails before the repair and passes after.</p>
 <h3 id="exercise-5-prove-independent-data-recovery">Exercise 5: Prove independent data recovery.<a class="heading-anchor" href="#exercise-5-prove-independent-data-recovery" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A new owned target serves the preserved expected state.</p>
 <p><strong>Why:</strong> This is stronger than backup existence. Keep the original data intact until the restore has passed its application-level check.</p>
+<p><strong>Approach:</strong> Restore the backup into a new volume, start a reader on it, and request GET /counter.</p>
+<p><strong>Why this is correct:</strong> A response with the expected value proves the data is usable, which a stored archive alone does not.</p>
+<p><strong>A plausible wrong approach:</strong> Restoring over the original volume before the check risks losing the only good copy.</p>
+<p><strong>How to verify:</strong> The restored reader shows the expected counter while the original volume still holds its own value.</p>
 <h3 id="exercise-6-teach-the-full-system-and-defend-its-limits">Exercise 6: Teach the full system and defend its limits.<a class="heading-anchor" href="#exercise-6-teach-the-full-system-and-defend-its-limits" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A beginner can follow the handoff and identify what it does not guarantee.</p>
 <p><strong>Why:</strong> Good engineering communication states both achieved behavior and the boundaries of evidence. Local Docker success is a foundation for further systems learning, not a blanket production certification.</p>
+<p><strong>Approach:</strong> Explain the request path from the worked example, then list what the system does not guarantee, such as host loss or replicas.</p>
+<p><strong>Why this is correct:</strong> A beginner can operate the system and knows where its guarantees stop.</p>
+<p><strong>A plausible wrong approach:</strong> Presenting local success as production readiness sends the next learner into unsupported use.</p>
+<p><strong>How to verify:</strong> A new reader follows the handoff, gets the same results, and can name two limits it states.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

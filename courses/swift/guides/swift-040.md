@@ -120,7 +120,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Derive presentation from one state) before changing anything, and confirm its observation: The label follows the stored completion state.
 2. Compare Example B (A state change updates its derived view) with Example A and name the first line whose behavior differs. Its observation is: Changing completion changes the derived label while retaining the title.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A binding is not a cloned value.
+3. Before opening the explanation, check your task 3 attempt (Run JourneyApp and edit a title through its real binding) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 

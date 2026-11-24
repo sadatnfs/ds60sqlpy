@@ -15,6 +15,13 @@ For a Cox proportional-hazards model, \(h(t\mid x)=h_0(t)\exp(\beta x)\). With d
 
 Here \(\delta_i\) indicates an observed event and \(R(t_i)\) contains units observed just before that event. The baseline hazard cancels from the conditional comparison. This does not make censoring or entry assumptions disappear. Ties require a specified method, and time-varying covariates require an appropriate interval representation.
 
+## Key terms
+
+- **Risk set:** The units that have entered observation and have not yet failed or been censored just before an event time.
+- **Left truncation:** Delayed entry, in which a unit joins the risk set only after its entry time instead of at time zero.
+- **Proportional hazards:** The Cox model assumption h(t | x) = h_0(t)exp(beta x), with a covariate effect constant over time.
+- **Partial likelihood:** The product over event times of each failing unit's share of risk-set hazard, in which the baseline hazard cancels.
+
 ## Worked case 1: calculate the likelihood by hand
 
 Four units are observed at times 1,2,3,4, with events at 1,2 and 4. At \(\beta=0\), all risk scores equal one. The event at time one contributes \(-\log(4)\), the event at time two contributes \(-\log(3)\), and the final event contributes zero because only one unit remains at risk. The program checks this exact result.
@@ -44,6 +51,49 @@ The tiny fixture provides an exact likelihood check, not a reliable standard err
 **Why exclude censored times from the numerator but keep those units in earlier denominators?** A censored unit has not supplied an event time, yet it was known to be event-free before censoring. That information defines its participation in prior risk sets.
 
 **Does a partial likelihood avoid modeling assumptions?** It avoids directly parameterizing a baseline hazard for this coefficient calculation. It still relies on a model for relative hazards and on a defensible observation process. A simpler-looking objective should not be confused with assumption-free inference.
+
+## Worked example: Score and information of a tiny Cox partial likelihood
+
+```python
+import numpy as np
+
+t = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+d = np.array([1, 1, 1, 0, 1])
+x = np.array([1.0, 1.0, 0.0, 1.0, 0.0])
+
+
+def score_info(beta):
+    u, info = 0.0, 0.0
+    for i in np.flatnonzero(d):
+        risk = t >= t[i]
+        w = np.exp(beta * x[risk])
+        mean = (w @ x[risk]) / w.sum()
+        u += x[i] - mean
+        info += (w @ x[risk] ** 2) / w.sum() - mean**2
+    return u, info
+
+
+beta = 0.0
+for step in range(6):
+    u, info = score_info(beta)
+    print(f"step {step}: beta {beta:.5f}, score {u:.5f}, information {info:.5f}")
+    beta += u / info
+print(f"hazard ratio exp(beta) = {np.exp(beta):.4f}, SE = {1 / np.sqrt(score_info(beta)[1]):.4f}")
+```
+
+Observed output:
+
+```text
+step 0: beta 0.00000, score 0.56667, information 0.71222
+step 1: beta 0.79563, score 0.01664, information 0.64140
+step 2: beta 0.82158, score 0.00006, information 0.63642
+step 3: beta 0.82168, score 0.00000, information 0.63640
+step 4: beta 0.82168, score 0.00000, information 0.63640
+step 5: beta 0.82168, score 0.00000, information 0.63640
+hazard ratio exp(beta) = 2.2743, SE = 1.2535
+```
+
+At \(\beta=0\) the score is 0.56667: summing observed covariates minus risk-set averages over the four events gives \((1-3/5)+(1-2/4)+(0-1/3)+(0-0)\), since the last event at time 5 has only itself, with \(x=0\), at risk. A positive score says increasing \(\beta\) raises the partial likelihood. One Newton step divides the score by the information 0.71222 and jumps to 0.79563, and the second step moves only 0.026 more. By step 3 the score is zero to five decimals and \(\beta=0.82168\), a hazard ratio of 2.2743. The standard error 1.2535 is \(1/\sqrt{0.6364}\) and dwarfs the estimate, so a 95 percent interval for the log hazard ratio runs roughly from \(-1.6\) to 3.3. Four events cannot distinguish a doubling of hazard from no effect. The censored subject at time 4 still matters: it sits in the risk sets at times 1, 2 and 3 and changes their averages.
 
 ## Complete reproducible program
 

@@ -14,6 +14,14 @@ A transpose illustrates the conflict: contiguous reads can lead to strided write
 
 
 
+### Key terms
+
+- **Warp:** A group of 32 threads that the scheduler issues together.
+- **Coalesced access:** A pattern in which consecutive threads of a warp touch consecutive addresses, so the hardware combines them into few memory transactions.
+- **Memory transaction:** The aligned segment of memory the hardware moves to serve a warp's request; scattered addresses need more transactions.
+- **Alignment:** Placement of data at an address that is a multiple of the transaction size, so a request does not straddle extra segments.
+- **Tiled transpose:** A transpose that stages a tile in shared memory so both the global read and the global write are coalesced.
+
 ## Worked examples
 
 ### Worked example 1
@@ -41,33 +49,52 @@ print("CPU segment model:", segments(contiguous), segments(strided))
 
 **Expected observation:** Simplified segment counts 1 and 8, not hardware measurements.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `contiguous` | `[0, 4, 8, 12, 16, 20, 24, 28]` |
+| `strided` | `[0, 32, 64, 96, 128, 160, 192, 224]` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Count touched segments
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **count touched segments** in the examples above.
+**Trap to avoid:** Counting one transaction per lane, eight here, treats every load as independent and ignores coalescing. That would make the contiguous and strided patterns look equally expensive.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Shift the base by four bytes
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **shift the base by four bytes** in the examples above.
+**Trap to avoid:** Assuming contiguity alone guarantees one segment ignores the boundary. A misaligned base can double the modeled transactions for the same amount of useful data.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Model a stride of two
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **model a stride of two** in the examples above.
+**Trap to avoid:** Thinking stride only matters when it reaches the segment size misses the intermediate cost. Stride two already doubles the transactions in this model.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain tiled transpose
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **explain tiled transpose** in the examples above.
+**Trap to avoid:** Expecting the shared-memory version to change the output values, or to need a different verification, confuses reorganized traffic with a different algorithm.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate occupancy from throughput
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **separate occupancy from throughput** in the examples above.
+**Trap to avoid:** Treating the occupancy number as the performance goal leads to changes that raise the percentage while total runtime stays the same or rises.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Propose a matched profiler experiment
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **propose a matched profiler experiment** in the examples above.
+**Trap to avoid:** Comparing kernels that differ in dtype or element count mixes several causes. A float64 strided kernel against a float32 contiguous one cannot attribute the difference to stride.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

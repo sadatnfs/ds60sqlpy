@@ -195,6 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="apache-054-tombstones-ttl-and-compaction">apache-054: Tombstones, TTL and compaction<a class="heading-anchor" href="#apache-054-tombstones-ttl-and-compaction" aria-label="Link to this section">#</a></h2>
 <p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>apache-053</code>, <code>apache-051</code>.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>TTL:</strong> A time to live attached to written data, after which the value no longer appears in reads even though its storage is not reclaimed immediately.</li>
+<li><strong>Tombstone:</strong> A deletion marker that prevents older replicas or SSTables from reintroducing a deleted value during reconciliation.</li>
+<li><strong>gc_grace_seconds:</strong> The table setting for how long tombstones must be kept before compaction may purge them, which must exceed the interval between repairs.</li>
+<li><strong>Repair:</strong> An anti-entropy operation that compares and reconciles replicas, ensuring that deletions and updates reach every replica.</li>
+<li><strong>Compaction:</strong> Merging SSTables, resolving cell versions and eventually purging expired tombstones and data.</li>
+</ul>
 <h3 id="expiration-is-a-logical-rule-before-it-is-reclaimed-storage">Expiration is a logical rule before it is reclaimed storage<a class="heading-anchor" href="#expiration-is-a-logical-rule-before-it-is-reclaimed-storage" aria-label="Link to this section">#</a></h3>
 <p>A time-to-live attaches an expiration rule to stored data. Once expired, a value should no longer appear as a live application result. Its underlying storage can still contain metadata and tombstones until compaction and retention rules permit cleanup. A read returning no row therefore establishes logical invisibility, not physical byte erasure or immediate space reclamation.</p>
 <p>A tombstone records deletion information so that older replicas or storage files do not simply reintroduce a previous value during reconciliation. Removing that information too early can allow stale data to reappear. Repair frequency, replica availability, gc_grace_seconds and compaction policy therefore interact. Reducing the grace period merely to make a tiny demo use less disk would teach the wrong operational habit.</p>
@@ -210,6 +218,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnosis-and-interview-discussion">Diagnosis and interview discussion<a class="heading-anchor" href="#diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Record TTL at write, actual live read, expiration observation, relevant clocks, repair schedule and retained snapshots. Separate current query visibility from physical-byte inspection and backup retention. A privacy erasure requirement needs a broader policy covering replicas, snapshots, exports and downstream data; this synthetic expiration fixture makes no compliance guarantee.</p>
 <p><strong>Interview discussion: why can deleted data reappear in a poorly operated replicated system?</strong> A replica can retain an older value while deletion information is collected before reconciliation. The two cases explain why logical expiry, tombstone retention, repair and physical cleanup are different mechanisms and why a successful empty read alone cannot validate all four.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="watch-a-ttl-count-down">Watch a TTL count down<a class="heading-anchor" href="#watch-a-ttl-count-down" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> ds60_orders<span class="syntax-punctuation">.</span>expiring <span class="syntax-punctuation">(</span><span class="syntax-keyword">key</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;transient&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;demo&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">USING</span> TTL <span class="syntax-number">5</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">SELECT</span> TTL<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> remaining
+<span class="syntax-keyword">FROM</span> ds60_orders<span class="syntax-punctuation">.</span>expiring
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">key</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;transient&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+<p>Right after the insert, remaining is at most 5 and decreases on each read; once it reaches zero the row stops appearing. The client polls under a fifteen-second deadline instead of sleeping exactly five seconds, because coordinator clocks and request latency make an exact boundary unreliable. After expiry the cell becomes a tombstone in an SSTable, so disk usage does not drop until compaction runs after gc_grace_seconds has passed.</p>
+<h4 id="delete-versus-snapshot-retention">Delete versus snapshot retention<a class="heading-anchor" href="#delete-versus-snapshot-retention" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/cassandra
+bash run.sh check
+bash run.sh check-backup</code></pre>
+<p>The check route inserts and deletes a probe key and requires that a read returns nothing, which proves logical absence for current readers. The backup check works with snapshots, which are hard links to SSTable files taken at a point in time; a snapshot taken before the delete still holds the old value on disk. That combination is the usual answer to a deletion request audit: the live table is correct, but erasure also needs snapshot expiry and compaction. Shortening gc_grace_seconds to speed things up risks resurrected data if a replica missed the delete and repair has not run.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
 <p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
 <h2 id="logical-expiry-and-deletion">Logical expiry and deletion<a class="heading-anchor" href="#logical-expiry-and-deletion" aria-label="Link to this section">#</a></h2>

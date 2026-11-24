@@ -14,6 +14,7 @@ import argparse
 import json
 import re
 import sys
+import zlib
 from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
@@ -42,7 +43,7 @@ from scripts.audit_practice import count_practice  # noqa: E402
 
 MATRIX_PATH = REPO_ROOT / "curriculum" / "coverage-matrix.json"
 REPORT_PATH = REPO_ROOT / "docs" / "coverage-matrix.md"
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 MIN_EXERCISES = 6
 
 GAP_CODES: dict[str, str] = {
@@ -98,6 +99,20 @@ _OBSERVABLE_VERB_TEXT = """
 """
 OBSERVABLE_VERBS = frozenset(_OBSERVABLE_VERB_TEXT.split())
 MIN_OUTCOME_WORDS = 4
+
+# Templated prose: a paragraph of at least TEMPLATE_MIN_WORDS words is
+# templated when at least half of its sampled SHINGLE_SIZE-word shingles also
+# occur in more than TEMPLATE_LESSONS - 1 other lessons. Sampling one shingle in
+# SHINGLE_SAMPLE keeps the corpus index small and the result deterministic.
+TEMPLATE_MIN_WORDS = 20
+TEMPLATE_LESSONS = 3
+SHINGLE_SIZE = 8
+SHINGLE_SAMPLE = 4
+MIN_SHINGLES = 3
+FENCE = re.compile(r"^[ \t]*(```|~~~).*?^[ \t]*\1[^\n]*$", re.MULTILINE | re.DOTALL)
+INLINE_CODE = re.compile(r"`[^`\n]*`")
+PROSE_WORD = re.compile(r"[a-z]+(?:'[a-z]+)?")
+PARAGRAPH_BREAK = re.compile(r"\n[ \t]*\n")
 
 HEADING_LINE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 PREREQUISITE_HEADING = re.compile(
@@ -241,6 +256,64 @@ def module_exercise_count(texts: Iterable[str]) -> int:
         }
         best = max(best, len(labels), len(numbered), len(_practice_blocks(text)))
     return best
+
+
+def prose_paragraphs(text: str) -> list[list[str]]:
+    """Return the lowercase words of each prose paragraph long enough to compare.
+
+    Fenced blocks, headings and table rows are skipped; inline code becomes a
+    placeholder so a template with different identifiers still matches.
+    """
+
+    paragraphs = []
+    for block in PARAGRAPH_BREAK.split(FENCE.sub("\n\n", text)):
+        if block.lstrip().startswith(("#", "|")):
+            continue
+        words = PROSE_WORD.findall(INLINE_CODE.sub(" code ", block.lower()))
+        if len(words) >= TEMPLATE_MIN_WORDS:
+            paragraphs.append(words)
+    return paragraphs
+
+
+def _shingles(words: Sequence[str]) -> set[int]:
+    hashes = (
+        zlib.crc32(" ".join(words[start : start + SHINGLE_SIZE]).encode())
+        for start in range(len(words) - SHINGLE_SIZE + 1)
+    )
+    return {value for value in hashes if value % SHINGLE_SAMPLE == 0}
+
+
+def templated_word_counts(texts: Mapping[str, str]) -> dict[str, int]:
+    """Count, per lesson, the words in paragraphs that repeat other lessons' prose.
+
+    ``texts`` maps a lesson id to its guide and Markdown solution prose. A
+    shingle is shared when it occurs in at least TEMPLATE_LESSONS lessons.
+    """
+
+    parsed = {
+        lesson_id: [(words, _shingles(words)) for words in prose_paragraphs(text)]
+        for lesson_id, text in texts.items()
+    }
+    lessons_with: Counter[int] = Counter()
+    for paragraphs in parsed.values():
+        lessons_with.update(set().union(*(shingles for _, shingles in paragraphs)))
+    counts = {}
+    for lesson_id, paragraphs in parsed.items():
+        counts[lesson_id] = sum(
+            len(words)
+            for words, shingles in paragraphs
+            if len(shingles) >= MIN_SHINGLES
+            and 2 * sum(lessons_with[value] >= TEMPLATE_LESSONS for value in shingles)
+            >= len(shingles)
+        )
+    return counts
+
+
+def _lesson_prose(row: Mapping[str, Any]) -> str:
+    paths = [row["paths"]["guide"], *row["paths"]["solutions"]]
+    return "\n\n".join(
+        _read(REPO_ROOT / path) for path in paths if path and str(path).endswith(".md")
+    )
 
 
 def _solution_words(paths: Sequence[Path]) -> int | None:
@@ -448,6 +521,9 @@ def build_rows(catalog: Catalog, modules: ModuleCatalog) -> list[dict[str, Any]]
     for row in rows:
         row["unknown_prerequisites"] = [item for item in row["prerequisites"] if item not in known]
         row["gaps"] = _gaps(row)
+    templated = templated_word_counts({row["id"]: _lesson_prose(row) for row in rows})
+    for row in rows:
+        row["metrics"]["templated_words"] = templated[row["id"]]
     return rows
 
 
@@ -478,6 +554,12 @@ def render_json(rows: Sequence[Mapping[str, Any]]) -> str:
             "terms": MIN_DEFINITIONS,
             "exercises": MIN_EXERCISES,
             "solution_words": MIN_SOLUTION_WORDS,
+        },
+        "templated_prose": {
+            "min_paragraph_words": TEMPLATE_MIN_WORDS,
+            "shared_by_lessons": TEMPLATE_LESSONS,
+            "shingle_words": SHINGLE_SIZE,
+            "shingle_sample": SHINGLE_SAMPLE,
         },
         "gap_codes": GAP_CODES,
         "lesson_count": len(rows),
@@ -521,6 +603,7 @@ def _track_summaries(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
                 "execution": execution,
                 "median_words": _median(words),
                 "min_words": min(words) if words else 0,
+                "templated_words": sum(int(item["metrics"]["templated_words"]) for item in items),
                 "gap_counts": gap_counts,
                 "clean": sum(not item["gaps"] for item in items),
             }
@@ -564,6 +647,7 @@ def render_report(rows: Sequence[Mapping[str, Any]], capstones: Mapping[str, int
         f"- Module variants folded into canonical rows: {folded}"
         f" across {sum(len(row['variants']) > 1 for row in rows)} lessons",
         f"- Lessons with no recorded gap: {clean}",
+        f"- Templated prose words: {sum(int(row['metrics']['templated_words']) for row in rows)}",
         "",
         "## Gap codes",
         "",
@@ -580,8 +664,8 @@ def render_report(rows: Sequence[Mapping[str, Any]], capstones: Mapping[str, int
         "## Tracks",
         "",
         "| Family | Track | Lessons | Practice | Tutorial | Runnable | Reading |"
-        " Operations | Capstones | Median words | No gaps |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        " Operations | Capstones | Median words | Templated words | No gaps |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for summary in summaries:
         execution = summary["execution"]
@@ -590,7 +674,7 @@ def render_report(rows: Sequence[Mapping[str, Any]], capstones: Mapping[str, int
             f" {summary['lessons']} | {summary['practice']} | {summary['tutorial']} |"
             f" {execution.get('runnable', 0)} | {execution.get('reading', 0)} |"
             f" {execution.get('operations', 0)} | {capstones.get(summary['track'], 0)} |"
-            f" {summary['median_words']} | {summary['clean']} |"
+            f" {summary['median_words']} | {summary['templated_words']} | {summary['clean']} |"
         )
     lines += [
         "",
@@ -623,6 +707,12 @@ def render_report(rows: Sequence[Mapping[str, Any]], capstones: Mapping[str, int
         '"Start here"), so `weak-outcome` and `unknown-prerequisite` are the',
         "orientation gaps. `states_prerequisites` and `states_objectives` record",
         "whether the guide text repeats them and are informational only.",
+        "",
+        "`templated_words` counts guide and solution prose in paragraphs of at",
+        f"least {TEMPLATE_MIN_WORDS} words whose sampled {SHINGLE_SIZE}-word phrases mostly",
+        f"also appear in {TEMPLATE_LESSONS} or more lessons. It measures generator",
+        "boilerplate; the corpus total may not grow, so new explanations must be",
+        "specific to their lesson.",
         "",
     ]
     return "\n".join(lines)
@@ -694,6 +784,10 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         lines = track_gap_lines(rows, args.track, codes)
         print("\n".join(lines) if lines else f"{args.track}: no selected gaps")
+        templated = sum(
+            int(row["metrics"]["templated_words"]) for row in rows if row["track"] == args.track
+        )
+        print(f"{args.track}: templated prose words {templated}")
         return 1 if lines or problems else 0
     if args.json:
         print(matrix, end="")

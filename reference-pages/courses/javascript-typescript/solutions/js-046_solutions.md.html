@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A linear scale is callable: <code>x(5)</code> returns a coordinate. Its <code>.invert(pixel)</code> maps a coordinate back to data, useful for interactions. <code>.clamp(true)</code> bounds output to the range but can hide out-of-domain values if used without a clear policy. <code>.nice()</code> adjusts domain endpoints for readable ticks; it does not modify the raw data.</p>
 <p>For the example, domain <code>[0, 10]</code> and range <code>[40, 600]</code> maps 0 to 40, 5 to 320 and 10 to 600. The zero-origin formula is simple enough to check by hand before relying on the library.</p>
 <h3 id="exercise-1-predict-midpoint-and-endpoint-positions">Exercise 1: Predict midpoint and endpoint positions.<a class="heading-anchor" href="#exercise-1-predict-midpoint-and-endpoint-positions" aria-label="Link to this section">#</a></h3>
-<p>The scale maps data space into visual space. These exact cases catch a reversed or incorrectly offset range.</p>
+<p>The scale maps data space into visual space. These exact cases catch a reversed or incorrectly offset range. The scale in this task has domain <code>[0, 10]</code> and range <code>[40, 600]</code>, so each unit is 56 pixels: 0 to 40, 5 to 320, 10 to 600. Forgetting the 40 offset would map 0 to 0, 5 to 280 and 10 to 560. Call the scale on all three values and compare.</p>
 <p><strong>Expected:</strong> 0 maps to 40, 5 to 320 and 10 to 600.</p>
 <h3 id="exercise-2-reverse-a-vertical-range">Exercise 2: Reverse a vertical range.<a class="heading-anchor" href="#exercise-2-reverse-a-vertical-range" aria-label="Link to this section">#</a></h3>
-<p>The data order stays the same while the coordinate direction reverses. Explain this before changing bar y and height formulas.</p>
+<p>The data order stays the same while the coordinate direction reverses. Explain this before changing bar y and height formulas. The reference y has domain [0, 10] and range [300, 30], so y(0) is 300 and y(10) is 30; larger values sit higher. Using range <code>[30, 300]</code> would put 10 at the bottom. The check y(0) === 300 &amp;&amp; y(10) === 30 catches the reversal.</p>
 <p><strong>Expected:</strong> Higher values move upward in SVG coordinates.</p>
 <h3 id="exercise-3-build-a-scale-based-bar-chart">Exercise 3: Build a scale-based bar chart.<a class="heading-anchor" href="#exercise-3-build-a-scale-based-bar-chart" aria-label="Link to this section">#</a></h3>
-<p>Use y(0)-y(value) for positive bar height rather than treating a coordinate as a magnitude.</p>
+<p>Use y(0)-y(value) for positive bar height rather than treating a coordinate as a magnitude. With y(0) = 300, A (2) sits at y 246 with height 54, B (5) at 165 with height 135 and C (8) at 84 with height 216. The band scale over <code>[60, 600]</code> with padding 0.2 gives each bar width 135. Verify heights are positive and proportional to 2:5:8.</p>
 <p><strong>Expected:</strong> Bar geometry derives from a zero baseline and a named domain.</p>
 <h3 id="exercise-4-diagnose-using-y-value-as-bar-height">Exercise 4: Diagnose using y(value) as bar height.<a class="heading-anchor" href="#exercise-4-diagnose-using-y-value-as-bar-height" aria-label="Link to this section">#</a></h3>
-<p>A vertical coordinate measures from the SVG origin. A bar height measures the distance from its baseline.</p>
+<p>A vertical coordinate measures from the SVG origin. A bar height measures the distance from its baseline. Using y(value) as height gives A 246 and C 84, so the smallest value draws the tallest bar. Compute y(0) - y(value) and confirm the heights increase with value.</p>
 <p><strong>Expected:</strong> Position and length were confused.</p>
 <h3 id="exercise-5-handle-an-unknown-band-category">Exercise 5: Handle an unknown band category.<a class="heading-anchor" href="#exercise-5-handle-an-unknown-band-category" aria-label="Link to this section">#</a></h3>
-<p>An undefined mapping should not silently remove a category. Keep the category domain aligned with the intended dataset.</p>
+<p>An undefined mapping should not silently remove a category. Keep the category domain aligned with the intended dataset. x(&quot;D&quot;) returns undefined because D is not in the domain, and the rect&#x27;s x attribute becomes invalid. Check rows against x.domain() before drawing and throw on a missing name.</p>
 <p><strong>Expected:</strong> Reject or explicitly extend the domain rather than emit undefined geometry.</p>
 <h3 id="exercise-6-defend-a-scale-choice-for-signed-residuals">Exercise 6: Defend a scale choice for signed residuals.<a class="heading-anchor" href="#exercise-6-defend-a-scale-choice-for-signed-residuals" aria-label="Link to this section">#</a></h3>
-<p>Scale design should expose the analytical reference point. A zero baseline has a different role for signed residual position than for positive bar length.</p>
+<p>Scale design should expose the analytical reference point. A zero baseline has a different role for signed residual position than for positive bar length. Residuals around 0 need a domain such as [-5, 5] with a visible zero line; starting at the minimum hides the sign. Confirm the zero line sits at the scale&#x27;s midpoint.</p>
 <p><strong>Expected:</strong> A diverging domain with visible zero and explicit units.</p></article>
   </main>
 </body>

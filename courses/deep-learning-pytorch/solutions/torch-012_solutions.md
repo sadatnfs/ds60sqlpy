@@ -1,10 +1,10 @@
 # torch-012: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers only after attempting Capstone: an auditable tiny PyTorch regressor yourself. They reuse the guide's literal inputs, starting from Example A, Create the three-feature fixture, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Experiment manifest, Training baseline, Frozen assessment. After a pass, choose a new input for exercise 6, Write the bounded evidence report, without looking.
 
 ## Mechanism review
 
-An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target 2 a-b+c, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed 100-step budget without using the holdout to choose settings.
+An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target `2a - b + c`, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed 100-step budget without using the holdout to choose settings.
 
 The capstone must report what it actually establishes. A small synthetic holdout can show that the implementation uses features in the intended way, but it cannot establish robustness or population accuracy. Keep the scalar arithmetic pilot from lesson 008 as an independent mechanism check alongside the larger experiment. Hashing split IDs records identity; it does not prove the split design was appropriate.
 
@@ -20,7 +20,7 @@ Create X shaped (6, 3), targets shaped (6, 1), and nn.Linear(3, 1, bias=False) w
 
 ## Derive a capstone oracle from the training design
 
-The six input rows are zero, the three coordinate basis vectors, then [1, 1, 1] and [2, 1, 1]. The target is 2 a-b+c, so the targets are [0, 2, -1, 1, 2, 4]. The first four rows are training and the last two are assessment. Input shape is (6, 3), target shape (6, 1), and the bias-free Linear stores one row of three weights. This shape contract must remain unchanged throughout fitting and evaluation.
+The six input rows are zero, the three coordinate basis vectors, then [1, 1, 1] and [2, 1, 1]. The target is `2a - b + c`, so the targets are [0, 2, -1, 1, 2, 4]. The first four rows are training and the last two are assessment. Input shape is (6, 3), target shape (6, 1), and the bias-free Linear stores one row of three weights. This shape contract must remain unchanged throughout fitting and evaluation.
 
 The training-only baseline is (0+2-1+1)/4=0.5. On assessment targets 2 and 4, its squared errors are 2.25 and 12.25, giving MSE 7.25. This baseline ignores features but uses the same assessment records and metric as the learned model. Fitting its constant to the assessment mean would invalidate that comparison.
 
@@ -42,7 +42,7 @@ The paired TensorFlow implementation uses the same mathematical fixture in float
 
 ## Exercise 1: Create the three-feature fixture
 
-The question is: Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.
+The question is: Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target `2a - b + c`.
 
 The target formula is part of the fixture definition. The learner can inspect it without relying on an opaque downloaded dataset.
 
@@ -179,4 +179,4 @@ assert not set(train) & set(test) and len(report["test_ids"]) == 2 and report["s
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Repeat exercise 4, Open the holdout after fitting, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Retain an independent pilot oracle, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

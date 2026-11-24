@@ -1,6 +1,6 @@
 # llm-applied-007: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for embedding retrieval, similarity and representation limits only after attempting *Rank fixed topic vectors* through *Measure a domain failure*. A discrepancy in *Separate cosine from magnitude* can be traced to one step because the inputs match the guide. `courses/llm-applied/solutions/llm-applied-007_solution.py` runs the assertions; this page explains why they test embedding and cosine similarity.
 
 ## Mechanism review
 
@@ -22,13 +22,13 @@ Convert vectors to a float64 matrix with documents on rows and features on colum
 
 ## Derive the ranking and distinguish geometry from meaning
 
-For nonzero vectors q and d, cosine is \(\frac{q^{\mathsf T}d}{\lVert q\rVert_2\lVert d\rVert_2}\). The query[1, 0, 0] already has norm one. The purchase vector[1, 0.1, 0] has norm \(\sqrt{1.01}\), so its cosine is \(1/\sqrt{1.01}\), about 0.995037. The mixed vector[0.5, 0.5, 0] has norm \(\sqrt{0.5}\), giving cosine \(1/\sqrt2\), about 0.707107. Geometry[0, 1, 0] gives zero. These calculations establish purchase, mixed, geometry as the order under the authored coordinates.
+For nonzero vectors q and d, cosine is \(\frac{q^{\mathsf T}d}{\lVert q\rVert_2\lVert d\rVert_2}\). The query `[1, 0, 0]` already has norm one. The purchase vector `[1, 0.1, 0]` has norm \(\sqrt{1.01}\), so its cosine is 1/sqrt(1.01), about 0.995037. The mixed vector `[0.5, 0.5, 0]` has norm \(\sqrt{0.5}\), giving cosine 1/sqrt(2), about 0.707107. Geometry `[0, 1, 0]` gives zero. These calculations establish purchase, mixed, geometry as the order under the authored coordinates.
 
 Positive scaling preserves direction: replacing d by 10d multiplies both numerator and norm by ten, leaving cosine unchanged. A raw dot product multiplies by ten. Negative scaling reverses direction and changes the cosine's sign, so the invariance claim is specifically about positive magnitude scaling. A document with a large norm can dominate dot-product search even when its direction is less aligned; whether that norm carries useful information depends on the encoder's training contract.
 
 For unit-normalized vectors, squared Euclidean distance is \(\lVert q-d\rVert_2^2=2-2q^{\mathsf T}d\). Thus sorting by decreasing cosine and increasing squared distance gives the same exact order when both sides are unit vectors. This identity is conditional on normalization; it does not make every distance metric interchangeable on raw embeddings.
 
-An embedding coordinate system has no universal axis meaning. Apply the same orthogonal rotation R to both q and d, and their dot product is unchanged because \({R}^{T}\) R is identity. Rotate only one side, and the cross-space comparison changes. For example, one encoder may represent the relevant concept by[1, 0] while another represents it by[0, 1]. Both vectors have width two and each can work correctly within its own space, but their cross-model dot product is zero. Equal width is therefore a shape check, not a semantic compatibility proof.
+An embedding coordinate system has no universal axis meaning. Apply the same orthogonal rotation R to both q and d, and their dot product is unchanged because \({R}^{T}\) R is identity. Rotate only one side, and the cross-space comparison changes. For example, one encoder may represent the relevant concept by `[1, 0]` while another represents it by `[0, 1]`. Both vectors have width two and each can work correctly within its own space, but their cross-model dot product is zero. Equal width is therefore a shape check, not a semantic compatibility proof.
 
 The fixture assigns buy and purchase the same literal vector. Their equivalence is authored knowledge, not a measured generalization by a language model. Sentence-BERT is an example of learning sentence representations suitable for efficient similarity comparison; the local table does not reproduce its training or encode arbitrary text. [Sentence-BERT](https://arxiv.org/abs/1908.10084).
 
@@ -38,7 +38,7 @@ The helper rejects zero vectors, nonfinite coordinates and a norm that is zero o
 
 ### Interview reasoning with explanatory answers
 
-**Is cosine0.9 a90% relevance probability?** No. It describes an angle under a particular representation. Relevance calibration needs labeled examples and can shift with corpus, encoder or task.
+**Is cosine 0.9 a 90% relevance probability?** No. It describes an angle under a particular representation. Relevance calibration needs labeled examples and can shift with corpus, encoder or task.
 
 **Why keep exact identifiers in evaluation?** A semantic encoder can place a nearby but wrong identifier close to the query. Lexical and semantic mechanisms may make complementary errors, so average paraphrase quality does not settle the choice.
 
@@ -46,7 +46,7 @@ The helper rejects zero vectors, nonfinite coordinates and a norm that is zero o
 
 ## Exercise 1: Rank fixed topic vectors
 
-The question is: Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5, 0].
+The question is: Use query `[1, 0, 0]` and documents purchase `[1, .1, 0]`, geometry `[0, 1, 0]`, mixed `[.5, .5, 0]`.
 
 The ranking follows the declared topic geometry. The fixture does not demonstrate that a learned model will assign these vectors to arbitrary language.
 
@@ -80,9 +80,9 @@ np.testing.assert_allclose(
 assert scaled @ query == 10 * (original @ query)
 ```
 
-**Expected:** cosine unchanged within1e-12; raw dot product multiplies by 10.
+**Expected:** cosine unchanged within 1e-12; raw dot product multiplies by 10.
 
-**Verify:** Compare the computed values or written argument with cosine unchanged within1e-12; raw dot product multiplies by 10.
+**Verify:** Compare the computed values or written argument with cosine unchanged within 1e-12; raw dot product multiplies by 10.
 
 ## Exercise 3: Expose hand-authored synonym knowledge
 
@@ -102,7 +102,7 @@ np.testing.assert_array_equal(word_vectors["buy"], word_vectors["purchase"])
 
 ## Exercise 4: Reject zero and nonfinite vectors
 
-The question is: Normalize[0, 0] and[1, NaN] through the checked helper.
+The question is: Normalize `[0, 0]` and `[1, NaN]` through the checked helper.
 
 A zero vector has no direction and NaN is not a valid coordinate. Returning a plausible similarity would hide an encoding or data-quality failure.
 
@@ -122,7 +122,7 @@ for bad in [np.array([0.0, 0.0]), np.array([1.0, np.nan])]:
 
 ## Exercise 5: Reject incompatible spaces
 
-The question is: Compare query metadata modelA with an index encoded by modelB, even when both have width3.
+The question is: Compare query metadata modelA with an index encoded by modelB, even when both have width 3.
 
 Vector dimensions are only a shape contract. Two models can use unrelated coordinate systems with the same width, so their dot products are not meaningful cross-model similarities.
 
@@ -155,4 +155,4 @@ assert top == "wrong" and top not in relevant
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Expose hand-authored synonym knowledge* and predict how the result changes before checking it; the unchanged inputs give: vector scores match; literal word overlap is empty. Keep the original *Measure a domain failure* failure beside the repaired result; a missing NumPy runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

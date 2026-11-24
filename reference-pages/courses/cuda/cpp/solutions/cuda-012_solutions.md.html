@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-012_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Let one kernel write its global index into a five-element output using eight launched threads. Threads 0 through 4 write <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>3</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,1,2,3,4]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">4</span><span class="mclose">]</span></span></span></span>; threads 5 through 7 perform no write because the bounds predicate is false. The host compares every returned value with its expected index.</p>
+<p><strong>Approach:</strong> Launch eight threads for five outputs and guard each write with i &lt; 5.</p>
+<p><strong>Why it is correct:</strong> The predicate rejects threads 5 to 7, so each valid index is written once and nothing beyond.</p>
+<p><strong>A plausible wrong approach:</strong> Omitting the guard lets threads 5 to 7 write past the five-element allocation.</p>
+<p><strong>How to verify:</strong> Compare the returned [0, 1, 2, 3, 4] element by element after a checked synchronization.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>Change the expression to twice the index plus one. Expected output is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo separator="true">,</mo><mn>5</mn><mo separator="true">,</mo><mn>7</mn><mo separator="true">,</mo><mn>9</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1,3,5,7,9]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">7</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">9</span><span class="mclose">]</span></span></span></span>. Keeping the same ownership mapping separates the arithmetic change from scheduling. A launch status of success without a completion check does not establish these values arrived in host memory.</p>
+<p><strong>Approach:</strong> Keep the same index mapping and change only the stored expression to 2 * i + 1.</p>
+<p><strong>Why it is correct:</strong> Ownership is unchanged, so any wrong value isolates an arithmetic error rather than scheduling.</p>
+<p><strong>A plausible wrong approach:</strong> Trusting the launch status as proof of results ignores that launches return before execution finishes.</p>
+<p><strong>How to verify:</strong> The reference asserts out == [1, 3, 5, 7, 9] and prints GPU_execution not performed.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Two blocks with 32 threads each are launched, and out plus count 50 are kernel arguments. Fourteen thread positions must avoid writing.</p>
+<p><strong>Approach:</strong> Read the triple chevrons as grid size 2 and block size 32, then count 64 threads against count 50.</p>
+<p><strong>Why it is correct:</strong> Sixty-four launched threads exceed fifty elements, so 14 threads must take the false branch.</p>
+<p><strong>A plausible wrong approach:</strong> Reading &lt;&lt;&lt;2, 32&gt;&gt;&gt; as 32 blocks of 2 threads reverses the configuration order.</p>
+<p><strong>How to verify:</strong> Compute 2 * 32 - 50 == 14 and confirm the kernel guard uses the count argument.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Checked completion, transfer of output and host validation. Successful submission alone does not establish a finished kernel.</p>
+<p><strong>Approach:</strong> Add a checked synchronize, copy the output back and compare it with the host reference.</p>
+<p><strong>Why it is correct:</strong> Kernel launches are asynchronous, so process exit can occur before the kernel finishes.</p>
+<p><strong>A plausible wrong approach:</strong> Checking only cudaGetLastError after launch catches configuration errors but not execution faults.</p>
+<p><strong>How to verify:</strong> Synchronize, check its status, then validate every returned value.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Use a host early return or another explicitly valid empty-work policy; do not launch a grid with zero blocks.</p>
+<p><strong>Approach:</strong> Return early on the host when count is zero, before computing a grid.</p>
+<p><strong>Why it is correct:</strong> No outputs exist, so skipping the launch is correct and avoids an invalid configuration.</p>
+<p><strong>A plausible wrong approach:</strong> Launching ceil(0 / 32) = 0 blocks yields an invalid configuration error, not a quiet no-op.</p>
+<p><strong>How to verify:</strong> Call the wrapper with count zero and assert no launch occurs and no error is reported.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>State the actual device, count and validated result contract after completion. Avoid claiming performance or general correctness from five values.</p>
+<p><strong>Approach:</strong> Print device name, count and the validated property, all after completion.</p>
+<p><strong>Why it is correct:</strong> A message tied to observations lets a reader know exactly what was checked.</p>
+<p><strong>A plausible wrong approach:</strong> Printing &#x27;GPU kernel is fast and correct&#x27; generalizes from five values and no timing.</p>
+<p><strong>How to verify:</strong> Confirm the message is emitted only on the path that passed validation.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-012_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

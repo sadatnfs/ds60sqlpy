@@ -197,22 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-016.md</code>.</p>
 <h3 id="exercise-1-explain-why-two-1fr-tracks-plus-a-gap-are-not-two-50-widths-plus-a-gap">Exercise 1: Explain why two 1fr tracks plus a gap are not two 50% widths plus a gap.<a class="heading-anchor" href="#exercise-1-explain-why-two-1fr-tracks-plus-a-gap-are-not-two-50-widths-plus-a-gap" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Fractional tracks divide the remaining space after the gap.</p>
+<p><strong>Approach:</strong> Subtract the gap from the container width first, then divide the remaining space by the total number of fr units.</p>
 <p><strong>Why:</strong> fr units share the space left after gaps and fixed tracks, so two 1fr tracks plus a 1rem gap are each half of the remaining width, not 50 percent of the container.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>50%</code> columns plus <code>gap: 1rem</code> fails because the columns alone already fill the container and the gap causes overflow.</p>
+<p><strong>How to verify:</strong> For a 600px container with a 1rem gap at 16px, each 1fr track measures 292px in the grid inspector.</p>
 <h3 id="exercise-2-add-a-fourth-card-without-new-positional-rules">Exercise 2: Add a fourth card without new positional rules.<a class="heading-anchor" href="#exercise-2-add-a-fourth-card-without-new-positional-rules" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Auto placement incorporates the item using the same layout contract.</p>
+<p><strong>Approach:</strong> Append a fourth card element to the container and let auto placement put it into the next available cell.</p>
 <p><strong>Why:</strong> Auto placement fills the next available cell, so the existing column definition decides where a new item goes.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>grid-column</code> and <code>grid-row</code> values for each new card fails because the layout breaks when cards are added or removed.</p>
+<p><strong>How to verify:</strong> The new card appears in the next cell with no new CSS rules, and the grid overlay shows the same tracks.</p>
 <h3 id="exercise-3-build-an-adaptive-topic-grid-that-survives-a-narrow-container">Exercise 3: Build an adaptive topic grid that survives a narrow container.<a class="heading-anchor" href="#exercise-3-build-an-adaptive-topic-grid-that-survives-a-narrow-container" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Cards change column count while preserving reading order and avoiding page overflow.</p>
+<p><strong>Approach:</strong> Use <code>repeat(auto-fit, minmax(min(100%, 14rem), 1fr))</code> with a gap, and keep the cards in reading order in the source.</p>
 <p><strong>Why:</strong> minmax with min(100%, 14rem) lets each track shrink to the container width on narrow screens, and auto-fit chooses the column count from the available space.</p>
+<p><strong>Plausible wrong approach:</strong> Using <code>minmax(14rem, 1fr)</code> without <code>min()</code> fails because a container narrower than 14rem forces horizontal overflow.</p>
+<p><strong>How to verify:</strong> In a container 12rem wide, one column fills the space and the page shows no horizontal scrollbar.</p>
 <h3 id="exercise-4-diagnose-a-long-value-widening-a-track">Exercise 4: Diagnose a long value widening a track.<a class="heading-anchor" href="#exercise-4-diagnose-a-long-value-widening-a-track" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect minimum content sizing and use a deliberate minmax or wrapping policy.</p>
+<p><strong>Approach:</strong> Inspect the track sizes in the grid overlay and check whether a long value set the min-content width.</p>
 <p><strong>Why:</strong> A 1fr track has an automatic minimum equal to its min-content size, so minmax(0, 1fr) or wrapping is needed to stop one long value from widening it.</p>
+<p><strong>Plausible wrong approach:</strong> Adding <code>overflow: hidden</code> to the cell fails because the track is still sized by content and the hidden text is lost.</p>
+<p><strong>How to verify:</strong> After switching to <code>minmax(0, 1fr)</code> and wrapping, both tracks report equal widths in the overlay.</p>
 <h3 id="exercise-5-test-empty-one-card-and-seven-card-collections">Exercise 5: Test empty, one-card and seven-card collections.<a class="heading-anchor" href="#exercise-5-test-empty-one-card-and-seven-card-collections" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The layout remains coherent without a special case tied to three cards.</p>
+<p><strong>Approach:</strong> Render the grid with zero cards, one card and seven cards, checking both a wide and a narrow container.</p>
 <p><strong>Why:</strong> Intrinsic grid rules adapt to any item count, while rules written for exactly three cards break when content changes.</p>
+<p><strong>Plausible wrong approach:</strong> Tuning the layout for exactly three cards fails because a seventh card leaves an awkward final row that you never saw.</p>
+<p><strong>How to verify:</strong> The seven-card grid wraps into full rows plus one partial row, and the empty grid shows a message rather than a gap.</p>
 <h3 id="exercise-6-explain-auto-fit-versus-auto-fill-at-a-high-level">Exercise 6: Explain auto-fit versus auto-fill at a high level.<a class="heading-anchor" href="#exercise-6-explain-auto-fit-versus-auto-fill-at-a-high-level" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Auto-fit can collapse empty repeated tracks; auto-fill preserves the generated track slots.</p>
+<p><strong>Approach:</strong> Compare one card in a wide container under <code>auto-fit</code> and under <code>auto-fill</code>, watching whether it stretches.</p>
 <p><strong>Why:</strong> auto-fill keeps empty tracks reserved, while auto-fit collapses empty tracks so the existing cards stretch to fill the row.</p>
+<p><strong>Plausible wrong approach:</strong> Treating the keywords as synonyms fails because with few items <code>auto-fill</code> keeps empty tracks and the card stays narrow.</p>
+<p><strong>How to verify:</strong> With one card, <code>auto-fit</code> stretches it across the row, while <code>auto-fill</code> keeps it at one track width.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
 <p>Open <code>courses/web-development/solutions/web-016_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>

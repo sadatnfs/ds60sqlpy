@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-056_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>For three tiles using two slots, tile 0 loads slot A and tile 1 loads slot B. Tile 2 may reuse A only after computation using tile 0 finishes. Copy completion permits reading; consumer completion permits reuse. Those are two different milestones.</p>
+<p><strong>Approach:</strong> Load tiles 0 and 1 into slots A and B, and reuse A for tile 2 only after tile 0&#x27;s compute finishes.</p>
+<p><strong>Why it is correct:</strong> Copy completion allows reading, while consumer completion allows overwriting.</p>
+<p><strong>A plausible wrong approach:</strong> Reusing A when tile 0&#x27;s copy completed overwrites data still being computed on.</p>
+<p><strong>How to verify:</strong> The reference asserts ready precedes consuming, which precedes done.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>A 16-byte transfer requirement does not mean an arbitrary pointer cast creates 16-byte alignment. An address offset by four bytes from an aligned base is still misaligned for that contract. Use valid alignment/layout or a supported fallback, and test the final partial tile separately.</p>
+<p><strong>Approach:</strong> Check the real address alignment before using a 16-byte transfer.</p>
+<p><strong>Why it is correct:</strong> An address 4 bytes past an aligned base is not a multiple of 16.</p>
+<p><strong>A plausible wrong approach:</strong> Casting the pointer to a 16-byte type does not change its address.</p>
+<p><strong>How to verify:</strong> The reference asserts (16 + 4) % 16 != 0 and prints aligned False.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>Free, copy in progress, copy complete, being consumed, consumption complete, then free for reuse.</p>
+<p><strong>Approach:</strong> List free, copying, ready, consuming, done and back to free.</p>
+<p><strong>Why it is correct:</strong> Each state names what is allowed: reading only after ready, reuse only after done.</p>
+<p><strong>A plausible wrong approach:</strong> Collapsing ready and done into one state allows reuse too early.</p>
+<p><strong>How to verify:</strong> Check the reference&#x27;s states list in that order.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Initiation is not completion. Wait on the correct token/barrier before accessing the destination.</p>
+<p><strong>Approach:</strong> Wait on the barrier or token for the copy before reading.</p>
+<p><strong>Why it is correct:</strong> Starting a copy only queues it.</p>
+<p><strong>A plausible wrong approach:</strong> Reading immediately sees stale or partial data.</p>
+<p><strong>How to verify:</strong> Run racecheck or compare outputs after adding the wait.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Use valid bounded loads and neutralization according to the operation; do not copy beyond input merely to fill the tile.</p>
+<p><strong>Approach:</strong> Bound the last tile&#x27;s copy to valid elements and neutralize the rest.</p>
+<p><strong>Why it is correct:</strong> Copying beyond the input reads memory you do not own.</p>
+<p><strong>A plausible wrong approach:</strong> Filling the tile by over-reading past the end can fault.</p>
+<p><strong>How to verify:</strong> Test a size that leaves a partial tile and compare outputs.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>First establish a correct synchronous baseline, then verify capability and measure whether hidden latency exceeds added synchronization/resource costs.</p>
+<p><strong>Approach:</strong> Build a correct synchronous baseline and add async staging only if measured faster.</p>
+<p><strong>Why it is correct:</strong> Async copies add synchronization and resource use.</p>
+<p><strong>A plausible wrong approach:</strong> Adding them because they sound faster can slow small kernels.</p>
+<p><strong>How to verify:</strong> Compare correct outputs and measured times for both versions.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-056_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

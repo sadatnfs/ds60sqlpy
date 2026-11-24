@@ -199,16 +199,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The separate <a href="../references/cuda-034_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Thirty-two lanes read float32 elements at offsets 0 through 31. Their useful data spans 128 bytes. With stride eight elements, offsets run from 0 through 248 and span 996 bytes including gaps. Span is not a transaction count, but it reveals why the access pattern deserves measurement.</p>
+<p><strong>Approach:</strong> Multiply each lane by 4 bytes for contiguous reads and by 32 bytes for stride eight.</p>
+<p><strong>Why it is correct:</strong> Contiguous offsets end at 124 plus 4, spanning 128 bytes; strided ones end at 992 plus 4, spanning 996.</p>
+<p><strong>A plausible wrong approach:</strong> Treating the 996-byte span as an exact transaction count ignores caching and segment rules.</p>
+<p><strong>How to verify:</strong> The reference asserts contiguous[-1] + 4 == 128 and strided[-1] + 4 == 996.</p>
 <h3 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h3>
 <p>For records containing x,y,z,w as four floats, reading x for 32 particles advances 16 bytes per lane. A separate x array advances four bytes per lane. If the next stage needs all four fields, compare complete pipeline costs before committing to a representation change.</p>
+<p><strong>Approach:</strong> Compare a 16-byte step per lane in the record layout with a 4-byte step in a separate x array.</p>
+<p><strong>Why it is correct:</strong> Reading x alone from records drags y, z and w along, while the separate array uses each byte.</p>
+<p><strong>A plausible wrong approach:</strong> Converting to separate arrays without checking whether later stages need all four fields may cost more overall.</p>
+<p><strong>How to verify:</strong> Measure the whole pipeline in both layouts with identical outputs.</p>
 <h3 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h3>
 <p>0,12,24,36. Element stride must be multiplied by element size.</p>
+<p><strong>Approach:</strong> Multiply element stride 3 by 4 bytes.</p>
+<p><strong>Why it is correct:</strong> Lanes 0 to 3 start at 0, 12, 24 and 36 bytes.</p>
+<p><strong>A plausible wrong approach:</strong> Using stride 3 as a byte offset gives 0, 3, 6, 9 and misaligned reads.</p>
+<p><strong>How to verify:</strong> Compute lane <em> 3 </em> 4 for lanes 0 to 3.</p>
 <h3 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h3>
 <p>Span is a reasoning aid. Actual transactions depend on alignment, caching and hardware; measure or clearly model those separately.</p>
+<p><strong>Approach:</strong> Call the span an address range and measure transfers separately.</p>
+<p><strong>Why it is correct:</strong> Transactions depend on alignment, caching and hardware, not span alone.</p>
+<p><strong>A plausible wrong approach:</strong> Reporting span as bytes transferred presents a model as a measurement.</p>
+<p><strong>How to verify:</strong> Label span values as modeled in the report.</p>
 <h3 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h3>
 <p>Little about the full-warp case. Include realistic active masks and tail behavior in the workload.</p>
+<p><strong>Approach:</strong> Test full-warp and realistic partial masks, including tails.</p>
+<p><strong>Why it is correct:</strong> One active lane says little about how 32 lanes share segments.</p>
+<p><strong>A plausible wrong approach:</strong> Profiling only one lane can call a pattern coalesced when it is not.</p>
+<p><strong>How to verify:</strong> Run masks of 1, 16 and 32 lanes and compare.</p>
 <h3 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h3>
 <p>A dedicated x array may reduce repeated unused-field traffic; account for initial conversion, ownership and final consumers in the comparison.</p>
+<p><strong>Approach:</strong> Keep a separate x array and count conversion costs at start and end.</p>
+<p><strong>Why it is correct:</strong> Many x-only steps reuse the cheap layout, repaying a one-time conversion.</p>
+<p><strong>A plausible wrong approach:</strong> Comparing only the inner step ignores the conversion and final consumers.</p>
+<p><strong>How to verify:</strong> Time the full pipeline including conversion for both layouts.</p>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
 <p>The complete CPU model is <a href="../references/cuda-034_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>

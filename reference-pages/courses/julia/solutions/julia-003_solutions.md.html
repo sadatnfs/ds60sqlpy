@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-003-explained-reference">julia-003: explained reference<a class="heading-anchor" href="#julia-003-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-003_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Keep three units apart: bytes indexed by <code>String</code>, characters returned by iteration, and graphemes a reader sees. Move between positions with <code>nextind</code> rather than <code>+ 1</code>, count with the function that matches the unit, normalize only by deliberate choice, and handle the empty string before asking for a first character.</p>
 <h3 id="1-advance-safely">1. Advance safely<a class="heading-anchor" href="#1-advance-safely" aria-label="Link to this section">#</a></h3>
 <p>Adding one to a valid byte index can enter a multibyte character.</p>
 <p><strong>Expected observation:</strong> nextind returns 3.</p>
+<p><strong>Why it holds here:</strong> In <code>&quot;éλ&quot;</code> the letter é occupies bytes 1 and 2 in UTF-8, so <code>nextind(&quot;éλ&quot;, 1)</code> returns 3, where λ begins.</p>
+<p><strong>Plausible wrong approach:</strong> Using index 2 as the second character lands inside é, and <code>&quot;éλ&quot;[2]</code> throws <code>StringIndexError</code> instead of returning λ.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>nextind(&quot;éλ&quot;, 1) == 3</code>; also print <code>ncodeunits(&quot;éλ&quot;)</code>, which is 4, beside <code>length(&quot;éλ&quot;)</code>, which is 2.</p>
 <h3 id="2-count-visible-units">2. Count visible units<a class="heading-anchor" href="#2-count-visible-units" aria-label="Link to this section">#</a></h3>
 <p>A visible text unit can contain multiple code points.</p>
 <p><strong>Expected observation:</strong> Two characters form one grapheme.</p>
+<p><strong>Why it holds here:</strong> <code>&quot;e\u0301&quot;</code> stores e followed by a combining acute accent: two characters that render as one visible grapheme.</p>
+<p><strong>Plausible wrong approach:</strong> Reporting <code>length</code> as the visible count says 2 for a single displayed letter, which miscounts any text with combining marks.</p>
+<p><strong>How to verify:</strong> Compare <code>length(s)</code> with <code>length(collect(Unicode.graphemes(s)))</code> after <code>using Unicode</code>; expect 2 and 1.</p>
 <h3 id="3-normalize-deliberately">3. Normalize deliberately<a class="heading-anchor" href="#3-normalize-deliberately" aria-label="Link to this section">#</a></h3>
 <p>Canonical equivalence is a specific Unicode relation, not arbitrary semantic equivalence.</p>
 <p><strong>Expected observation:</strong> It matches the precomposed form.</p>
+<p><strong>Why it holds here:</strong> NFC composes e plus U+0301 into the single code point U+00E9, so the normalized string equals the precomposed é.</p>
+<p><strong>Plausible wrong approach:</strong> Comparing the raw strings with <code>==</code> reports them unequal and could lead to duplicate keys for what readers consider the same word.</p>
+<p><strong>How to verify:</strong> Assert <code>Unicode.normalize(&quot;e\u0301&quot;, :NFC) == &quot;\u00e9&quot;</code> and keep the original string if provenance must be exact.</p>
 <h3 id="4-handle-empty-text">4. Handle empty text<a class="heading-anchor" href="#4-handle-empty-text" aria-label="Link to this section">#</a></h3>
 <p>A parser or display routine needs a documented empty-input policy.</p>
 <p><strong>Expected observation:</strong> The empty case is identified explicitly.</p>
+<p><strong>Why it holds here:</strong> <code>&quot;&quot;</code> has no characters, so <code>first(&quot;&quot;)</code> fails; testing <code>isempty</code> first lets the routine apply its stated empty policy.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming index 1 always exists produces an indexing error deep inside a parser rather than a clear message about empty input.</p>
+<p><strong>How to verify:</strong> The reference checks <code>isempty(&quot;&quot;)</code>; add a branch that returns <code>nothing</code> for empty input and test both branches.</p>
 <h3 id="5-choose-offset-units">5. Choose offset units<a class="heading-anchor" href="#5-choose-offset-units" aria-label="Link to this section">#</a></h3>
 <p>Offsets are only reproducible against the same representation and indexing contract.</p>
 <p><strong>Expected observation:</strong> Name byte, character or grapheme units and the text version.</p>
+<p><strong>Why it holds here:</strong> Citation offsets depend on the unit, since the same passage starting after é sits at byte 3 but character 2.</p>
+<p><strong>Plausible wrong approach:</strong> Storing bare integers without naming the unit lets a reader slice bytes with character counts and cut a character in half.</p>
+<p><strong>How to verify:</strong> Record each offset with its unit and text version, then reslice with <code>nextind</code> or <code>thisind</code> and confirm the cited text reappears.</p>
 <h3 id="6-add-a-counterexample">6. Add a counterexample<a class="heading-anchor" href="#6-add-a-counterexample" aria-label="Link to this section">#</a></h3>
 <p>A representative boundary fixture checks a mechanism that ASCII alone cannot exercise.</p>
-<p><strong>Expected observation:</strong> The invalid byte-index assumption becomes visible.</p></article>
+<p><strong>Expected observation:</strong> The invalid byte-index assumption becomes visible.</p>
+<p><strong>Why it holds here:</strong> An algorithm that steps by <code>i + 1</code> works on <code>&quot;ASCII&quot;</code> because there <code>ncodeunits</code> equals <code>length</code>; multibyte text breaks that equality.</p>
+<p><strong>Plausible wrong approach:</strong> Testing only with ASCII fixtures passes every case while the byte-stepping bug remains, since every character there is one byte.</p>
+<p><strong>How to verify:</strong> Keep <code>ncodeunits(&quot;ASCII&quot;) == length(&quot;ASCII&quot;)</code> as the reference does, and add <code>@test_throws StringIndexError &quot;éλ&quot;[2]</code> as the counterexample.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-003: all reference checks passed</code>:</p>
+<p>These six lines separate characters from bytes. <code>nextind(&quot;éλ&quot;, 1) == 3</code> holds because é occupies two code units, so the next valid index skips index 2. The ASCII comparison then shows the one case where <code>length</code> and <code>ncodeunits</code> agree. <code>join</code> and <code>string</code> build text without manual spacing, and <code>lowercase</code> normalizes a label without changing its meaning. If an edit makes <code>nextind</code> return 2, it is treating byte offsets as character positions.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> isempty<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> nextind<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">éλ</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> lowercase<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DATA</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-decorator">@test</span> join<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">science</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data science</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-decorator">@test</span> string<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">score=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score=3</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-decorator">@test</span> ncodeunits<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ASCII</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> length<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ASCII</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

@@ -2,6 +2,14 @@
 
 Tutorial mode. Stage: advanced. Direct prerequisites: `apache-048`, `apache-005`.
 
+## Key terms
+
+- **Backpressure:** The condition in which a slow downstream operator fills network buffers so upstream tasks must slow down.
+- **Busy time:** The fraction of time a task spends processing records, as opposed to idle time waiting for input or backpressured time waiting for output space.
+- **Throughput:** The rate of records processed per unit of time, which differs from the latency of an individual record.
+- **Parallelism:** The number of parallel subtasks for an operator or job. Changing it redistributes keyed state and does not guarantee linear scaling.
+- **Rescaling:** Restarting a job with different parallelism from compatible state, which requires stable operator identities and compatible serializers.
+
 ## Backpressure propagates a downstream constraint
 
 A pipeline cannot sustainably run faster than its limiting stage. When a sink or
@@ -112,6 +120,40 @@ computation. CPU alone is therefore insufficient to locate the bottleneck. These
 two cases connect actual pressure observation and state-compatible capacity change
 to exact source correctness, while separating the local demonstration from an
 unsupported production performance forecast.
+
+## Worked examples
+
+### The pressure topology with chaining disabled
+
+```java
+result = environment
+  .fromSource(
+    new NumberSequenceSource(0, 499),
+    WatermarkStrategy.noWatermarks(),
+    "pressure-numbers"
+  )
+  .uid("pressure-source")
+  .map(new Payload())
+  .name("pressure-payload-producer")
+  .uid("pressure-payload")
+  .disableChaining()
+  .map(new SlowConsumer())
+  .name("bounded-slow-consumer")
+  .uid("pressure-consumer")
+  .disableChaining();
+```
+
+This fragment from WorkshopJobs.java keeps the producer and the slow consumer as separate tasks. Chaining would fuse them into one thread, and a fused chain cannot report that one side is waiting on buffers from the other, so the backpressure metric would stay at zero even though the job is slow. The finite sequence of 500 numbers also gives a fixed oracle: whatever the pressure reading, the finished output must contain exactly those values.
+
+### Require a measured metric, not a configured delay
+
+```bash
+cd work/flink
+bash run.sh backpressure
+bash run.sh readback
+```
+
+The backpressure route polls the REST job details and keeps the accumulated-backpressured-time value reported for the pressure-payload-producer vertex. The route fails when no positive value appears, because a sleep inside SlowConsumer is only a cause, while the metric is the observation. In the readback, look for the metric rows together with the output population; a large backpressured time with a complete output means the job was slowed but correct, and a missing row means the window ended before Flink sampled the task.
 
 ## Complete worked source
 

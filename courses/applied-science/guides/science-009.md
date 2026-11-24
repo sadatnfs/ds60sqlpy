@@ -14,6 +14,13 @@ L(q,D)=c_u(D-q)_+ + c_o(q-D)_+.
 
 For a continuous demand distribution, minimizing expected loss gives a quantile with level \(\tau=c_u/(c_u+c_o)\). With discrete demand, multiple quantities can share an optimum and the appropriate inequality formulation should be used. Costs, constraints and timing must be stated before this result is treated as a recommendation.
 
+## Key terms
+
+- **Pinball loss:** An asymmetric piecewise-linear loss whose expected value is minimized by a conditional quantile instead of a mean.
+- **Newsvendor problem:** Choosing a quantity before demand is known when shortages cost c_u per unit and excess costs c_o per unit.
+- **Critical fractile:** The quantile level c_u/(c_u + c_o) that minimizes expected newsvendor loss for continuous demand.
+- **Calibration:** Agreement between predicted probabilities or intervals and observed outcome frequencies, checked separately by horizon or group.
+
 ## Worked case 1: choose an asymmetric-loss quantity
 
 The synthetic demand observations are 0,1,1,2,3,8. Underage costs four and overage costs one, giving \(\tau=.8\). The code evaluates every integer quantity from zero through eight and finds that three minimizes the empirical decision loss. It independently verifies the identity between this loss and a scaled pinball loss:
@@ -48,6 +55,46 @@ Stress-test the rule under changed costs and distributional scenarios. Demand ma
 **Should the chosen quantity equal the .8 sample quantile returned by every library?** Quantile interpolation conventions differ for small discrete samples. Directly calculating the stated loss, as the program does, exposes ties and verifies the actual decision objective.
 
 **Can a forecast be called calibrated from ten checks?** Ten outcomes provide a very coarse diagnostic. The table demonstrates how aggregation can conceal a problem; it is not a precise calibration assessment. Report uncertainty, dependence and the intended forecasting population before making a broad claim.
+
+## Worked example: Critical fractile, pinball loss and horizon-level coverage
+
+```python
+import numpy as np
+
+cu, co = 4.0, 1.0  # lost margin per unit short, cost per unit left over
+fractile = cu / (cu + co)
+demand = np.array([8, 9, 10, 10, 11, 12, 12, 13, 15, 20])
+order = np.quantile(demand, fractile, method="inverted_cdf")
+print(f"critical fractile {fractile:.2f}, order quantity {order}")
+
+
+def pinball(q, y, tau):
+    return np.mean(np.maximum(tau * (y - q), (tau - 1) * (y - q)))
+
+
+for q in (10, 13, 15):
+    print(f"q={q}: pinball loss at tau 0.8 = {pinball(q, demand, 0.8):.3f}")
+
+hit = {1: [1] * 19 + [0], 2: [1] * 17 + [0] * 3, 3: [1] * 12 + [0] * 8}
+for h, v in hit.items():
+    print(f"horizon {h}: 80% interval coverage {np.mean(v):.2f}")
+print(f"pooled coverage {np.mean(sum(hit.values(), [])):.3f}")
+```
+
+Observed output:
+
+```text
+critical fractile 0.80, order quantity 13
+q=10: pinball loss at tau 0.8 = 1.900
+q=13: pinball loss at tau 0.8 = 1.100
+q=15: pinball loss at tau 0.8 = 1.100
+horizon 1: 80% interval coverage 0.95
+horizon 2: 80% interval coverage 0.85
+horizon 3: 80% interval coverage 0.60
+pooled coverage 0.800
+```
+
+Losing 4 per unit short and 1 per unit left over gives the critical fractile \(4/(4+1)=0.8\), so the order should be the 80th percentile of demand. With ten equally likely values, the inverted empirical distribution reaches 0.8 at the eighth sorted value, 13. The pinball loss confirms it: ordering 10 costs 1.900 per period, while 13 and 15 both cost 1.100. The tie is informative. Moving from 13 to 15 adds 0.2 per unit for the eight demands at or below 13 and saves 0.8 per unit for the two demands at 15 and 20, and \(8(0.2)=2(0.8)\), so the loss is flat on that interval. Any order between 13 and 15 is equally good for this sample. The coverage table shows a separate failure. Pooled over horizons the 80 percent intervals cover exactly 0.800, but horizon 1 covers 0.95, horizon 2 covers 0.85 and horizon 3 covers only 0.60. A planner ordering three periods ahead would be short far more often than the pooled number promises.
 
 ## Complete reproducible program
 

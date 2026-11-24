@@ -1,0 +1,46 @@
+{
+  "guide_sections": [
+    {
+      "heading": "Tracing the a and b fixture by hand",
+      "body": "Every number that prcomp reports for the second fixture can be derived on paper:\n\n```text\na: 1 2 4 5    center 3    sd sqrt(10/3), about 1.826\nb: 2 1 5 4    center 3    sd sqrt(10/3), about 1.826\ncor(a, b) = (8/3) / (10/3) = 0.8\neigenvalues of the correlation matrix: 1.8 and 0.2\nexplained shares: 1.8/2 = 0.9 and 0.2/2 = 0.1\nloadings: (1, 1)/sqrt(2) and (1, -1)/sqrt(2), signs arbitrary\nnew row (3, 2) standardized: (0, -0.548)\nnew row scores: 0.548/sqrt(2), about 0.387, on each component\n```\n\nBecause a and b have the same spread, scaling does not change their balance, and the first component weights them equally. The first fixture behaves differently: long is exactly 10 times short, so the raw first loading on long is 10/sqrt(101), about 0.995, and the second component has standard deviation 0. Its explained share of 100 percent reflects one duplicated signal measured in two units, not two informative features."
+    }
+  ],
+  "exercises": [
+    {
+      "approach": "Run prcomp twice on the short and long matrix, once with scale. = FALSE and once with scale. = TRUE, and compare absolute first loadings.",
+      "why": "long is short multiplied by 10, so its raw variance is 100 times larger. The raw first loading is (1, 10)/sqrt(101), about 0.0995 and 0.995. After standardizing, the columns are identical and each gets 1/sqrt(2), about 0.707.",
+      "wrong": "Reading the raw 0.995 as long carrying ten times more information. The two columns hold the same values in different units, and changing long from tens to ones would flip the conclusion.",
+      "verify": "`abs(raw$rotation[2, 1])` returns 10/sqrt(101) within 1e-10, and both entries of `abs(scaled$rotation[, 1])` return 1/sqrt(2)."
+    },
+    {
+      "approach": "Multiply the scores by the transposed rotation, multiply each column by its saved scale, then add its saved center.",
+      "why": "prcomp standardized a and b by subtracting 3 and dividing by about 1.826, so the inverse must multiply before adding. With both components kept, the rotation is orthogonal and nothing is discarded, so the rebuild matches y exactly.",
+      "wrong": "Adding the center before multiplying by the scale. For a = 1 the standardized value is about -1.095, and (-1.095 + 3) times 1.826 is about 3.48 instead of 1.",
+      "verify": "`max(abs(rebuild(pc$x, pc$rotation) - y))` returns a value below 1e-10."
+    },
+    {
+      "approach": "Negate column 1 of the scores and column 1 of the rotation together, then rebuild.",
+      "why": "Each reconstructed value is a sum of score times loading terms, and two negations cancel, so the matrix is unchanged. Either sign of (1, 1)/sqrt(2) describes the same axis.",
+      "wrong": "Flipping only the rotation, or comparing raw loading signs between two runs. Flipping one side leaves the first component's contribution reversed, so the rebuild of a no longer returns 1, 2, 4 and 5.",
+      "verify": "`max(abs(rebuild(scores, rotation) - y))` returns a value below 1e-10 after both flips."
+    },
+    {
+      "approach": "Attempt prcomp with scale. = TRUE on a matrix with a constant column and treat the error as a decision point.",
+      "why": "rep(1, 4) has standard deviation 0, so dividing by it is undefined, and prcomp stops instead of producing values. Dropping that column under a declared rule is then a choice that can be recorded.",
+      "wrong": "Replacing the zero standard deviation with 1 inside the code so the call succeeds. The column then becomes zeros after centering, and a feature with no variation silently enters the reported shape of the data.",
+      "verify": "`inherits(try(prcomp(cbind(v = 1:4, constant = rep(1, 4)), scale. = TRUE), silent = TRUE), \"try-error\")` returns TRUE."
+    },
+    {
+      "approach": "Standardize the new row with the training center and scale, multiply by the training rotation, and compare with predict(pc, newdata = new).",
+      "why": "The row (3, 2) becomes (0, -1/1.826), about (0, -0.548), using a and b centers of 3. Multiplying by the saved loadings gives scores of magnitude about 0.387 on each component, the same as predict.",
+      "wrong": "Calling prcomp on the new row by itself. A single row centered on its own mean becomes all zeros and has no spread to scale, so its scores say nothing about where it sits relative to the training data.",
+      "verify": "`max(abs(manual - predict(pc, newdata = new)))` returns a value below 1e-10."
+    },
+    {
+      "approach": "Divide each squared sdev by their total, report the shares, and say what objective produced them.",
+      "why": "For a and b the correlation is 0.8, so the shares are 0.9 and 0.1. For short and long the first share is 1. Both describe how well a direction summarizes the inputs, and no outcome variable entered either calculation.",
+      "wrong": "Claiming that a component explaining 90 or 100 percent of input variance will predict a target well. A target could depend entirely on the 10 percent direction, and only a held out evaluation of that target can show it.",
+      "verify": "`sum(pc$sdev^2 / sum(pc$sdev^2))` returns 1 within 1e-12, and the printed shares show 0.9 and 0.1."
+    }
+  ]
+}

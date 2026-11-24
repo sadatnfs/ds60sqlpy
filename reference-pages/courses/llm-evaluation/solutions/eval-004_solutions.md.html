@@ -194,24 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/llm-evaluation/solutions/eval-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="eval-004-explained-reference">eval-004: explained reference<a class="heading-anchor" href="#eval-004-explained-reference" aria-label="Link to this section">#</a></h2>
-<p>The full reference is <code>eval-004_reference.py</code>. Its assertions check the specific authored inputs. Read the assumptions and counterexamples before transferring a result.</p>
+<p><code>eval-004_reference.py</code> asserts each answer below, from <em>Reconstruct the confusion table</em> to <em>Change the dependence unit</em>, on the authored Cohen kappa and weighted agreement fixture only. Before applying a conclusion to other data, recheck the assumption that <em>Complete disagreement</em> tests.</p>
 <h3 id="1-reconstruct-the-confusion-table">1. Reconstruct the confusion table<a class="heading-anchor" href="#1-reconstruct-the-confusion-table" aria-label="Link to this section">#</a></h3>
 <p>Two negative-negative pairs, one positive-negative pair and one positive-positive pair determine both marginals and agreement.</p>
+<p><strong>Approach.</strong> Order categories as <code>[0, 1]</code>, put annotator A on rows and B on columns, and count each pair from case A: A = <code>[1, 1, 0, 0]</code> and B = <code>[1, 0, 0, 0]</code>. The function builds the same table with <code>table[positions[x], positions[y]] += 1</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> The pairs are (1,1), (1,0), (0,0), (0,0). Two (0,0) pairs fill cell [0][0], the (1,0) pair fills [1][0] and the (1,1) pair fills [1][1], giving <code>[[2, 0], [1, 1]]</code>. The trace is 3, so observed agreement is 3 / 4 = 0.75.</p>
+<p><strong>A tempting wrong approach.</strong> Swapping rows and columns gives <code>[[2, 1], [0, 1]]</code>. The agreement and kappa are unchanged, but reading a cell like &quot;A said positive, B said negative&quot; from the transposed table reverses which annotator was more lenient.</p>
+<p><strong>How to verify.</strong> Worked case A asserts <code>table.tolist() == [[2, 0], [1, 1]]</code>, <code>observed == 0.75</code> and <code>kappa == 0.5</code>. Row sums give A&#x27;s marginals (2, 2) and column sums give B&#x27;s (3, 1).</p>
 <p><strong>Expected observation:</strong> Rows A and columns B give [[2,0],[1,1]].</p>
 <h3 id="2-perfect-variation">2. Perfect variation<a class="heading-anchor" href="#2-perfect-variation" aria-label="Link to this section">#</a></h3>
 <p>There is perfect observed agreement with nondegenerate marginals, so the corrected coefficient is defined and equals 1.</p>
+<p><strong>Approach.</strong> Call <code>agreement([0, 1], [0, 1])</code>. Both annotators give one 0 and one 1, and they match on both items.</p>
+<p><strong>Why it holds for this fixture.</strong> Observed agreement is 1. The marginals are 0.5 and 0.5 for each annotator, so expected agreement is 0.5 times 0.5 plus 0.5 times 0.5 = 0.5. Kappa is (1 - 0.5) / (1 - 0.5) = 1, and it is defined because the expected value is not 1.</p>
+<p><strong>A tempting wrong approach.</strong> Expecting perfect agreement to always produce kappa 1 is the trap: it does so only when both annotators use more than one category. Exercise 4 shows that perfect agreement on a single category leaves kappa undefined.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>agreement([0, 1], [0, 1])[1] == 1</code>. Print the returned table and confirm it is the identity matrix <code>[[1, 0], [0, 1]]</code>.</p>
 <p><strong>Expected observation:</strong> Kappa equals 1.</p>
 <h3 id="3-complete-disagreement">3. Complete disagreement<a class="heading-anchor" href="#3-complete-disagreement" aria-label="Link to this section">#</a></h3>
 <p>A negative coefficient means less agreement than the marginal reference, not a negative count of labels.</p>
+<p><strong>Approach.</strong> Call <code>agreement([0, 1], [1, 0])</code>. Each item gets opposite labels from the two annotators.</p>
+<p><strong>Why it holds for this fixture.</strong> Observed agreement is 0 because the table&#x27;s diagonal is empty. Each annotator still uses 0 and 1 once, so expected agreement is again 0.5. Kappa is (0 - 0.5) / (1 - 0.5) = -1, the minimum possible for these marginals.</p>
+<p><strong>A tempting wrong approach.</strong> Reading -1 as an error or clamping it to 0 throws away information. A negative kappa signals systematic disagreement, such as one annotator reversing the scale, which is a fixable labeling problem that a clamped 0 would hide.</p>
+<p><strong>How to verify.</strong> The reference asserts <code>agreement([0, 1], [1, 0])[1] == -1</code>. The table should be <code>[[0, 1], [1, 0]]</code>, with all mass off the diagonal.</p>
 <p><strong>Expected observation:</strong> Kappa equals -1.</p>
 <h3 id="4-single-category-degeneracy">4. Single-category degeneracy<a class="heading-anchor" href="#4-single-category-degeneracy" aria-label="Link to this section">#</a></h3>
 <p>Both raw and reference agreement are 1. The coefficient becomes 0/0, so preserve the degeneracy instead of replacing it with an attractive score.</p>
+<p><strong>Approach.</strong> Call <code>agreement([1, 1], [1, 1])</code>. Both annotators use only category 1, so the table is the single cell <code>[[2]]</code>.</p>
+<p><strong>Why it holds for this fixture.</strong> Observed agreement is 1 and expected agreement is also 1, since each annotator puts all mass on one category. Kappa would be (1 - 1) / (1 - 1) = 0 / 0. The code detects <code>np.isclose(expected, 1)</code> and raises instead of returning a number.</p>
+<p><strong>A tempting wrong approach.</strong> Reporting kappa as 1 because the annotators matched perfectly is attractive but unsupported. With no variation in labels, the data cannot show whether annotators would agree on a case that differs, so no chance-corrected reliability can be estimated.</p>
+<p><strong>How to verify.</strong> The reference includes <code>([1, 1], [1, 1])</code> in its degenerate list together with empty and unequal-length inputs, and fails with <code>Degenerate labels accepted</code> if any returns. Report raw agreement 1 and state that kappa is undefined.</p>
 <p><strong>Expected observation:</strong> Kappa is undefined and rejected.</p>
 <h3 id="5-distinguish-weighted-quantities">5. Distinguish weighted quantities<a class="heading-anchor" href="#5-distinguish-weighted-quantities" aria-label="Link to this section">#</a></h3>
 <p>Observed squared-distance disagreement is useful descriptively, but weighted kappa would normalize it by expected disagreement under marginals.</p>
+<p><strong>Approach.</strong> Compute <code>ordinal_disagreement([0, 1, 2], [1, 1, 2])</code> and <code>ordinal_disagreement([0, 1, 2], [2, 1, 2])</code>. Each pair contributes the squared level gap divided by <code>(levels - 1) ** 2</code>, which is 4 for three levels.</p>
+<p><strong>Why it holds for this fixture.</strong> The adjacent case has one gap of 1, so the mean is (1 / 4) / 3 = 1 / 12. The distant case has one gap of 2, so the mean is (4 / 4) / 3 = 1 / 3. Larger gaps cost more, which is the point of a quadratic weight on an ordinal scale.</p>
+<p><strong>A tempting wrong approach.</strong> Calling 1 / 12 a weighted kappa is the mistake. Weighted kappa divides observed weighted disagreement by the disagreement expected under the marginals and subtracts from 1. The helper reports only the observed part, so it cannot be compared with published kappa thresholds.</p>
+<p><strong>How to verify.</strong> Worked case B asserts <code>np.isclose(adjacent, 1 / 12)</code> and <code>np.isclose(distant, 1 / 3)</code>. The exercise checks also assert identical labels give 0 and that label 3 on a three-level scale raises <code>ValueError</code>.</p>
 <p><strong>Expected observation:</strong> The implemented quantity lacks an expected-disagreement correction.</p>
 <h3 id="6-change-the-dependence-unit">6. Change the dependence unit<a class="heading-anchor" href="#6-change-the-dependence-unit" aria-label="Link to this section">#</a></h3>
 <p>Additional paraphrases may reveal within-family variation, but family-level uncertainty cannot treat twenty rows as twenty independent sampled families.</p>
+<p><strong>Approach.</strong> Count sampled units at the level of the dependence. Ten paraphrases from each of two families give twenty rows but only two independently sampled families.</p>
+<p><strong>Why it holds for this fixture.</strong> Paraphrases within one family share the underlying question, so annotator agreement on them is correlated. The uncertainty of a family-level agreement claim must be computed over families, and two families give a very wide interval no matter how many paraphrases they contain.</p>
+<p><strong>A tempting wrong approach.</strong> Computing a confidence interval for kappa with n = 20 treats every paraphrase as an independent draw. That makes the interval far too narrow and suggests the reliability estimate transfers to new families when only two have been seen.</p>
+<p><strong>How to verify.</strong> No reference assertion covers this task. Verify by stating the sampling unit in your report, counting distinct <code>family</code> values (two), and resampling families rather than rows if you compute an interval, following the grouping rule from eval-002.</p>
 <p><strong>Expected observation:</strong> The evaluation still has two sampled families.</p></article>
   </main>
 </body>

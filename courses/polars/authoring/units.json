@@ -12,6 +12,22 @@
       "concepts": ["DataFrame", "Series", "schema", "expression", "row grain"],
       "prerequisites": ["python-03"],
       "outcome": "Construct and verify a typed table with a stated row grain.",
+      "key_terms": [
+        ["DataFrame", "A table of named, equal-length columns, each stored as a typed Series."],
+        ["Series", "One named column of values that all share a single data type."],
+        [
+          "Schema",
+          "The ordered mapping from column names to data types that fixes what each column may hold."
+        ],
+        [
+          "Expression",
+          "A description of a column computation, such as `pl.col(\"units\") * pl.col(\"price\")`, that Polars evaluates inside a context like `select` or `with_columns`."
+        ],
+        [
+          "Row grain",
+          "What one row represents, such as one order line, which decides how sums and counts may be interpreted."
+        ]
+      ],
       "theory": "A table is useful only when its rows have a defined meaning. Here a row represents one order, and order_id is its identifier. A column contains values of one logical type; a Series is a single named column, while a DataFrame combines columns of equal length. A schema maps column names to types. Shape tells you how many rows and columns exist, but cannot establish uniqueness, valid units or correct totals.\n\nPolars expressions describe a computation over columns. pl.col(\"units\") is a request to use the units column, not the Python value of one row. Multiplying it by the price expression defines a result for each order. with_columns evaluates those expressions in the context of the input frame and returns a frame with the requested columns. The original Python variable still refers to the original frame. This makes intermediate states inspectable and helps separate raw records from derived quantities.\n\nStart by writing the row grain and unit for every numeric column. Units are counts and price is whole currency units per item in this fixture, so their product is revenue per order. Summing that product answers an aggregate question without changing the meaning of the underlying rows. In a real dataset, discounts, returns and taxes would require a more explicit revenue definition.",
       "syntax": "The constructor pl.DataFrame receives a mapping from column names to equally sized Python sequences. The expression (pl.col(\"units\") * pl.col(\"price\")).alias(\"revenue\") has three parts: two column selections, multiplication and a name for the result. select chooses the columns or reductions returned; with_columns retains existing columns. item() is appropriate only when a result contains exactly one cell. Inspect schema, shape and to_dicts() before making a claim about the analysis.",
       "math": "",
@@ -31,6 +47,11 @@
         {
           "title": "Predict a new order",
           "task": "Append an order with units 3 and price 4, then predict the total before running.",
+          "reasoning": {
+            "why": "The three existing orders carry revenue 10, 8 and 12, so the base total is 30. A fourth row with units 3 and price 4 adds exactly 12 because revenue is computed per row after pl.concat stacks the frames.",
+            "wrong": "Adding 3 to the units column of an existing order instead also raises the total, but it changes order 1 or 2 rather than recording a new order, so height stays 3 and per-order reconciliation breaks.",
+            "verify": "Run the answer code and check orders.height == 4 and orders['revenue'].sum() == 42; the new row's revenue should be the only value equal to 12 that was not already present in the original result."
+          },
           "check": "The total is 42 and there are 4 order rows.",
           "hint": "Compute the new row contribution first.",
           "answer": "The additional revenue is \\(3 \\times 4 = 12\\), so the total is \\(30 + 12 = 42\\). Preserve a unique order_id so row-level reconciliation remains possible.",
@@ -39,6 +60,11 @@
         {
           "title": "Choose a projection",
           "task": "Return order_id and revenue only.",
+          "reasoning": {
+            "why": "select keeps the expressions you name and nothing else, so result.select('order_id', 'revenue') drops units and price while every one of the 3 orders survives with its own revenue.",
+            "wrong": "Using drop('units') alone leaves price in place, and writing select(pl.col('revenue').sum()) collapses the table to a single aggregate row, which no longer answers a per-order question.",
+            "verify": "Check that the projected frame has shape (3, 2) and columns ['order_id', 'revenue'], and that its revenue list is still [10, 8, 12]."
+          },
           "check": "The output has 3 rows and 2 columns.",
           "hint": "Use select after defining revenue.",
           "answer": "Apply result.select(\"order_id\", \"revenue\"). select changes the returned columns, not the number of input orders."
@@ -46,6 +72,11 @@
         {
           "title": "Explain an aggregate",
           "task": "Replace the final sum with a mean and describe its denominator.",
+          "reasoning": {
+            "why": "mean over revenue divides the sum 30 by the number of order rows, 3, because each row is one order in this table. That gives 10, the average order value.",
+            "wrong": "Dividing total revenue by total units (30 / 7, about 4.29) answers average price per unit, a different estimand, even though it uses the same columns.",
+            "verify": "Run result.select(pl.col('revenue').mean()).item() and expect 10.0; then compute result['units'].sum() to confirm the 7 that the wrong denominator would use."
+          },
           "check": "Mean order revenue is 10.",
           "hint": "There are 3 orders, not 7 items.",
           "answer": "The calculation is \\((10 + 8 + 12)/3 = 10\\). A mean per item would be 30/7 and answers a different question.",
@@ -54,6 +85,11 @@
         {
           "title": "Keep raw state",
           "task": "Check that calling with_columns did not add revenue to frame.",
+          "reasoning": {
+            "why": "with_columns returns a new DataFrame; frame itself still has the three original columns. The reference asserts frame.shape == (3, 3) while result.shape == (3, 4).",
+            "wrong": "Expecting pandas-style in-place assignment and later reading frame['revenue'] raises a ColumnNotFoundError, because the expression was never attached to frame.",
+            "verify": "After building result, assert 'revenue' not in frame.columns and 'revenue' in result.columns; both should hold."
+          },
           "check": "The assertion remains true.",
           "hint": "Compare frame.columns and result.columns.",
           "answer": "The returned frame is a distinct transformation result. Reassigning frame=result is a deliberate choice, not an implicit mutation."
@@ -61,6 +97,11 @@
         {
           "title": "State an empty policy",
           "task": "Filter to orders above 100 and explain whether a zero-row output is an error.",
+          "reasoning": {
+            "why": "No order in this fixture reaches revenue 100, so the filter returns zero rows. example_two shows such a result keeps its schema, which is why an empty answer is still a well-typed answer.",
+            "wrong": "Raising an exception inside the transformation whenever height is 0 mixes a valid query result with a downstream policy, and makes the same code unusable for exploratory filters.",
+            "verify": "Filter result on pl.col('revenue') > 100 and check height == 0 and that the schema still lists order_id, units, price and revenue with their integer types."
+          },
           "check": "The schema remains defined and height is 0.",
           "hint": "Distinguish absence of qualifying rows from failed execution.",
           "answer": "The result is valid under this predicate. A downstream policy may reject an empty training set, but should do so with a separate explicit check."
@@ -68,6 +109,11 @@
         {
           "title": "Validate identifiers",
           "task": "Add a duplicate order_id and test the proposed key.",
+          "reasoning": {
+            "why": "The stated grain is one row per order, so order_id must be unique. Appending a second row with order_id 3 makes n_unique 3 while height becomes 4, which breaks the grain.",
+            "wrong": "Calling unique() on the frame to remove the duplicate hides the question of which row is correct, and if the two rows differ in units it silently keeps both.",
+            "verify": "Concatenate a row with order_id 3 and assert frame['order_id'].n_unique() < frame.height; frame.filter(pl.col('order_id').is_duplicated()) should list both id 3 rows."
+          },
           "check": "n_unique is smaller than height.",
           "hint": "Column type does not prove uniqueness.",
           "answer": "Assert frame[\"order_id\"].n_unique()==frame.height when one row per order is required. A duplicate policy needs domain reasoning before aggregation."
@@ -95,6 +141,28 @@
       "concepts": ["select", "with_columns", "alias", "literal", "dependency ordering"],
       "prerequisites": ["polars-001"],
       "outcome": "Build a transformation whose dependency stages are explicit.",
+      "key_terms": [
+        [
+          "select",
+          "The context that returns only the columns or reductions its expressions produce."
+        ],
+        [
+          "with_columns",
+          "The context that keeps every existing column and adds or replaces the columns its expressions produce."
+        ],
+        [
+          "alias",
+          "The expression method that names the output column instead of the name Polars would derive."
+        ],
+        [
+          "Literal",
+          "A constant wrapped as an expression with `pl.lit`, so it can be combined with columns or broadcast to every row."
+        ],
+        [
+          "Dependency ordering",
+          "Every expression in one call reads the input frame, so a column created in a call is visible only to a later call."
+        ]
+      ],
       "theory": "Expressions are evaluated in a context supplied by a table operation. A selection can return a scalar reduction or a row-sized result. A with_columns call describes a set of column computations over the same input context. That distinction matters when one new column appears to depend on another new column in the same call. The expression using x sees the input x, not a partially updated value created by an earlier argument.\n\nThis is a data-dependency rule, not a promise about the machine's execution order. An optimizer can parallelize independent expressions precisely because their meaning does not depend on which argument happens to execute first. When a later expression needs an earlier result, create an explicit stage with another with_columns call. Naming intermediate fields is often clearer than trying to pack an entire pipeline into one large expression.\n\nStrings require equal care. In many expression positions a bare string denotes a column name. pl.lit(\"paid\") unambiguously describes a literal value. Conditions should state what happens for every row, including missing conditions, and each output should have a deliberate name. The purpose of an alias is to define a result schema, not merely to improve a printed table.",
       "syntax": "In pl.col(\"x\")+1, x is selected from the current input. alias(\"x\") asks the result to use that name, replacing the returned x column. Two calls form two contexts: frame.with_columns(...).with_columns(...). A when/then/otherwise expression constructs conditional values; pl.lit distinguishes a constant from a column reference. Prefer readable intermediate names when a calculation has several stages.",
       "math": "",
@@ -114,6 +182,11 @@
         {
           "title": "Change the increment",
           "task": "Increment x by 2 before the dependent multiplication.",
+          "reasoning": {
+            "why": "Expressions in one with_columns call all read the input frame, so x * 10 there still sees 1, 2, 3. A second with_columns call reads the frame produced by the first, where x is 3, 4, 5, and gives 30, 40, 50.",
+            "wrong": "Putting (pl.col('x') + 2).alias('x') first and the multiplication second inside the same call still multiplies the original x, giving [10, 20, 30].",
+            "verify": "Chain frame.with_columns((pl.col('x') + 2).alias('x')).with_columns((pl.col('x') * 10).alias('scaled')) and assert scaled is [30, 40, 50]."
+          },
           "check": "The staged values are [30, 40, 50].",
           "hint": "The second context must see the new x.",
           "answer": "Use two with_columns calls and verify the final values; changing argument order inside one call does not create this dependency."
@@ -121,6 +194,11 @@
         {
           "title": "Name the old value",
           "task": "Keep x unchanged and create incremented_x.",
+          "reasoning": {
+            "why": "Giving the incremented expression a new alias leaves x untouched, so both the original 1, 2, 3 and the new 2, 3, 4 sit side by side for comparison.",
+            "wrong": "Aliasing the result as x overwrites the original values, which is what example_one does and is fine only when the old value is no longer needed.",
+            "verify": "Assert output.to_dict(as_series=False) equals {'x': [1, 2, 3], 'incremented_x': [2, 3, 4]}."
+          },
           "check": "Both x and incremented_x are visible.",
           "hint": "Use a new alias.",
           "answer": "Compute (pl.col(\"x\")+1).alias(\"incremented_x\"). Retaining both fields makes a later comparison or audit straightforward.",
@@ -129,6 +207,11 @@
         {
           "title": "Remove ambiguity",
           "task": "Produce a column containing the word paid for every row.",
+          "reasoning": {
+            "why": "In with_columns a literal is broadcast to every row, so label becomes paid for all three rows. In select alone it produces a single-row frame, which example_two shows with item().",
+            "wrong": "Writing frame.select(pl.lit('paid')) and joining it back assumes it has three rows, but it has one.",
+            "verify": "Run frame.with_columns(pl.lit('paid').alias('label')) and check label.to_list() equals ['paid', 'paid', 'paid'] and height is 3."
+          },
           "check": "Every returned value is the string paid.",
           "hint": "A literal is different from pl.col(\"paid\").",
           "answer": "Use pl.lit(\"paid\").alias(\"label\") in with_columns. In select alone a scalar literal is a one-row result, which is a different context."
@@ -136,6 +219,11 @@
         {
           "title": "Change a business condition",
           "task": "Recognize pending amounts at half value and paid amounts at full value.",
+          "reasoning": {
+            "why": "The when chain maps paid rows to amount and pending rows to amount / 2, so recognized becomes 5, 3.5, 11 and the total is 19.5. The half-value rule is the policy, not a Polars default.",
+            "wrong": "Using otherwise(0) as in example_two keeps the 16 total, and using integer division would turn 7 / 2 into 3 instead of 3.5.",
+            "verify": "Sum the new column and expect 19.5; check that the recognized column dtype is Float64 because one branch divides."
+          },
           "check": "The fixture total becomes 19.5.",
           "hint": "Use explicit ordered conditions and a numeric else.",
           "answer": "Paid rows contribute 5+11 and pending contributes 7/2. State the policy; the query engine cannot decide when revenue should be recognized."
@@ -143,6 +231,11 @@
         {
           "title": "Break a dependency",
           "task": "Attempt to use a newly named alias in the same call before a second context exists.",
+          "reasoning": {
+            "why": "Inside one with_columns call the alias y does not exist yet, because each expression reads the input frame. Referencing pl.col('y') in the same call fails.",
+            "wrong": "Wrapping the reference in a fill_null or try block makes the error vanish but replaces the intended dependent value with something unrelated.",
+            "verify": "Run frame.with_columns((pl.col('x') + 1).alias('y'), (pl.col('y') * 10).alias('z')) and expect pl.exceptions.ColumnNotFoundError mentioning y."
+          },
           "check": "A missing-column error identifies the unavailable alias.",
           "hint": "Inspect the input schema of that operation.",
           "answer": "Add another with_columns stage. Suppressing the error or creating a null field would change the intended calculation."
@@ -150,6 +243,11 @@
         {
           "title": "Compare two implementations",
           "task": "Write the same recognized amounts with a filter plus an aggregate.",
+          "reasoning": {
+            "why": "The conditional sum keeps all three rows and zeroes pending, while the filtered sum removes pending first. Both arrive at 5 plus 11, which is 16.",
+            "wrong": "Assuming the filtered version also returns a table aligned with the input is wrong; it has 2 rows, not 3.",
+            "verify": "Run the answer code and assert conditional == filtered == 16, then compare frame.filter(...).height (2) with frame.height (3)."
+          },
           "check": "The paid total is 16 in both implementations.",
           "hint": "Compare equivalent grains and denominators.",
           "answer": "Filtering paid rows then summing amount matches the conditional sum. It does not return the same row-level table, because pending rows have been removed.",
@@ -178,6 +276,28 @@
       "concepts": ["strict casts", "quarantine", "integer bounds", "Decimal", "missingness"],
       "prerequisites": ["polars-001", "polars-002"],
       "outcome": "Implement a parsing policy that preserves rejected evidence.",
+      "key_terms": [
+        [
+          "Strict cast",
+          "A cast that raises an error when any value cannot be converted, which is the default for `cast`."
+        ],
+        [
+          "Non-strict cast",
+          "`cast(..., strict=False)`, which turns unconvertible values into null, so the new nulls must be counted and explained."
+        ],
+        [
+          "Integer bounds",
+          "The range a fixed-width integer type can hold; 128 does not fit Int8, whose maximum is 127."
+        ],
+        [
+          "Decimal",
+          "A fixed-point type `pl.Decimal(precision, scale)` that stores exact base-ten values, so a money total such as 0.30 carries no binary rounding error."
+        ],
+        [
+          "Quarantine",
+          "Keeping rows that failed parsing in a separate frame with a reason instead of dropping them or silently nulling them."
+        ]
+      ],
       "theory": "A dtype is part of the meaning of a column. Text containing digits is still text until parsing establishes a numeric interpretation. A strict cast rejects an unparseable token; a permissive cast represents failed conversions as null. Neither option automatically distinguishes a genuinely absent value from malformed source text, so preserve the raw field and the identifier while investigating rejection.\n\nThe first case starts with four records and classifies their outcomes. One record is missing at ingestion, while another contains the word bad. Treating both as zero would hide two different data-quality situations. A quarantine table keeps enough original information to diagnose the problem without contaminating the accepted calculation. In production, the action might be rejection, correction or explicit imputation, but the reason should remain available.\n\nPrecision is a separate contract. Binary floating-point is suitable for many scientific approximations but does not represent every decimal fraction exactly. Decimal stores scaled decimal values with an explicit precision and scale. Integer casts also have finite bounds. Narrowing 128 to signed 8-bit storage cannot preserve its value; an explicit failure or null is safer than assuming every smaller dtype is an interchangeable optimization.",
       "syntax": "cast(pl.Int64, strict=False) changes the parsed column while retaining failed conversions as null. Combine is_not_null on the raw field with is_null on the parsed field to identify invalid tokens. pl.Decimal(precision=12, scale=2) declares twelve decimal digits with two fractional positions. Choose its range from the data contract, and inspect the result of any arithmetic or cast that changes precision.",
       "math": "",
@@ -197,6 +317,11 @@
         {
           "title": "Introduce a whitespace token",
           "task": "Replace bad with a whitespace-only string and define its category.",
+          "reasoning": {
+            "why": "A whitespace-only string is neither null nor parseable. Classifying it before any cast gives it its own blank category, separate from missing (id 3) and from text.",
+            "wrong": "Casting directly with strict=False turns the blank into null, which merges it with the genuinely missing row and loses the reason.",
+            "verify": "Run the answer code and assert category is ['text', 'blank', 'missing', 'text']."
+          },
           "check": "Your policy explicitly classifies it before numeric conversion.",
           "hint": "Use string stripping while preserving the raw token.",
           "answer": "A blank-after-trimming policy may convert it to missing. Keep an invalid_reason field so this is not confused with an unparseable nonblank token.",
@@ -205,6 +330,11 @@
         {
           "title": "Keep a rejection denominator",
           "task": "Compute the malformed share of the original four records.",
+          "reasoning": {
+            "why": "The rejection share uses all four original records as the denominator. One malformed token (bad) and one null each give 0.25.",
+            "wrong": "Dividing the one rejected row by only the three non-missing rows gives 1/3, which mixes two categories into the denominator.",
+            "verify": "Run the answer code and assert shares.row(0) == (0.25, 0.25)."
+          },
           "check": "Malformed share is 1/4, separately from 1/4 missing.",
           "hint": "Use original row count.",
           "answer": "The two rates have different categories. Using only accepted rows as denominator would overstate a rejection fraction.",
@@ -213,6 +343,11 @@
         {
           "title": "Make rejection fail closed",
           "task": "Require that every nonmissing numeric token parses.",
+          "reasoning": {
+            "why": "Fail closed means a parsing gap stops the pipeline. Here the rejected filter returns id 2, so a check on its height must raise.",
+            "wrong": "Letting strict=False finish and reporting success hides that one value was dropped.",
+            "verify": "Add a guard that raises ValueError listing rejected['id'].to_list() whenever rejected.height is above 0, and confirm the original fixture stops with id 2 named in the message."
+          },
           "check": "The original fixture raises a deliberate validation error.",
           "hint": "Count invalid rows before returning clean data.",
           "answer": "Check the quarantine height and raise a descriptive error. A successful query is not equivalent to an accepted data contract."
@@ -220,6 +355,11 @@
         {
           "title": "Investigate a bound",
           "task": "Try the values -129, -128, 127 and 128 as Int8.",
+          "reasoning": {
+            "why": "Int8 holds -128 through 127. With strict=False, -129 and 128 become null, while -128 and 127 survive.",
+            "wrong": "Assuming the cast wraps around, as in some C code, would predict 128 becomes -128; Polars returns null instead.",
+            "verify": "Cast `pl.Series([-129, -128, 127, 128])` with `strict=False` and expect `[None, -128, 127, None]`."
+          },
           "check": "Only -128 and 127 are representable.",
           "hint": "Signed 8-bit values have 256 states.",
           "answer": "The permitted interval is [-128, 127]. Keep strict mode for a mandatory bound or retain null plus a rejection reason under a permissive policy."
@@ -227,6 +367,11 @@
         {
           "title": "Avoid early float conversion",
           "task": "Construct Decimal values using strings rather than floats.",
+          "reasoning": {
+            "why": "Decimal('0.10') stores exactly two hundredths, so the sum is exactly 0.30, as example_two asserts.",
+            "wrong": "Adding floats 0.1 and 0.2 gives 0.30000000000000004, and Decimal(0.1) carries the long binary expansion of the float.",
+            "verify": "Build the Series from strings with scale 2 and assert sum == Decimal('0.30')."
+          },
           "check": "The 0.10+0.20 result remains exactly 0.30.",
           "hint": "Conversion after approximation cannot recover an unknown intended decimal.",
           "answer": "Use Decimal(\"0.10\") and a declared scale. This states the data representation; it does not infer a currency or a rounding policy."
@@ -234,6 +379,11 @@
         {
           "title": "Specify rounding",
           "task": "Describe how a third decimal place should be handled before storage at scale 2.",
+          "reasoning": {
+            "why": "A value like 0.125 must be rounded to two places before storage. The rule must say how ties go: half-even gives 0.12 and half-up gives 0.13.",
+            "wrong": "Letting storage truncate or round silently means the result depends on the engine.",
+            "verify": "Quantize Decimal('0.125') and Decimal('-0.125') to Decimal('0.01') in Python: ROUND_HALF_EVEN gives 0.12 and -0.12, ROUND_HALF_UP gives 0.13 and -0.13. Your test should pin one of those pairs."
+          },
           "check": "The rule names rounding mode and treatment of ties.",
           "hint": "A display format is not a data policy.",
           "answer": "Use a deliberate rounding operation at the business boundary, then validate range and scale. Test positive and negative tie cases, not only convenient non-ties."
@@ -258,6 +408,28 @@
       "concepts": ["null", "NaN", "boolean logic", "filter policy", "imputation"],
       "prerequisites": ["polars-001", "polars-003"],
       "outcome": "Explain how missingness changes a specific calculation.",
+      "key_terms": [
+        [
+          "Null",
+          "The Polars marker for a missing value, available in every data type and tracked separately from the values."
+        ],
+        [
+          "NaN",
+          "A floating-point value meaning not a number; it is a present value, so `is_null` is false for it while `is_nan` is true."
+        ],
+        [
+          "Three-valued logic",
+          "Boolean logic with true, false and null, where comparing with null gives null; `filter` keeps only rows whose condition is true."
+        ],
+        [
+          "fill_null",
+          "A method that replaces nulls with a chosen value, such as `fill_null(False)` on a Boolean mask; it does not replace NaN."
+        ],
+        [
+          "Imputation",
+          "Replacing missing values with estimates, which changes later statistics and should be recorded as an explicit policy."
+        ]
+      ],
       "theory": "A null means a value is absent under the column's validity representation. NaN is a floating-point value used for undefined or invalid arithmetic. These categories can appear together and require different checks. Counting nulls does not count NaNs, and filling nulls does not repair a NaN. Decide whether each category represents missing observation, invalid measurement or a computational failure before replacing it.\n\nBoolean expressions introduce another important distinction. A predicate can be true, false or unknown because one of its inputs is null. A filter retains rows where its predicate is true. Unknown rows therefore disappear unless the policy explicitly treats them otherwise. That behavior is often desirable, but it must not be mistaken for proof that all retained rows came from a complete population.\n\nImputation is a modeling decision. Replacing missing measurements with zero changes the distribution and may change a group comparison, model score or denominator. The example uses zero only as a clearly declared teaching policy. In real work, preserve a missingness indicator and consider whether missingness itself depends on the outcome, treatment, source system or time.",
       "syntax": "is_null and is_nan answer different questions. is_nan can itself return null for an absent input, so fill_null(False) is appropriate when counting actual NaN values. A Boolean expression can be tested directly in filter; fill_null(True) changes which unknown rows are retained. The operators & and | combine row-wise Boolean expressions, while Python and/or are not substitutes for column operations.",
       "math": "",
@@ -277,6 +449,11 @@
         {
           "title": "Count valid finite values",
           "task": "Count observations that are neither null nor NaN.",
+          "reasoning": {
+            "why": "Of 1.0, null, NaN and 4.0, only 1.0 and 4.0 are real observations. Converting NaN to null first lets count(), which skips nulls, return 2.",
+            "wrong": "Calling count() without fill_nan returns 3, because NaN is a valid float value rather than a null.",
+            "verify": "Run the answer code and assert observed == 2; frame['x'].count() alone returns 3."
+          },
           "check": "The numeric fixture has 2 such values.",
           "hint": "Combine the two validity conditions explicitly.",
           "answer": "Check is_not_null and invert is_nan with an appropriate null policy. Infinity is another category and would need an is_finite check if it is forbidden.",
@@ -285,6 +462,11 @@
         {
           "title": "Keep a missingness indicator",
           "task": "Add a flag before replacing absent values.",
+          "reasoning": {
+            "why": "The flag must be created from the original column, where the null is still present at index 1.",
+            "wrong": "Computing is_null after fill_null(0) returns all False, so the record of missingness is lost.",
+            "verify": "Add pl.col('x').is_null().alias('was_null') before filling and check it is [False, True, False, False]."
+          },
           "check": "The flag identifies the original absent record even after filling.",
           "hint": "Transformation order matters.",
           "answer": "Create was_null from the original column before fill_null. A flag computed after filling would falsely report no missing observations."
@@ -292,6 +474,11 @@
         {
           "title": "Change the denominator",
           "task": "Compute the mean of the two observed finite values and compare with zero filling.",
+          "reasoning": {
+            "why": "The observed mean divides 1.0 plus 4.0 by 2, giving 2.5. Zero filling adds two zeros and divides by 4, giving 1.25.",
+            "wrong": "Using fill_null(0) without fill_nan leaves NaN in place and makes the mean NaN.",
+            "verify": "Run the answer code and assert means.row(0) == (2.5, 1.25)."
+          },
           "check": "Observed mean is 2.5; zero-filled mean is 1.25.",
           "hint": "State which records contribute.",
           "answer": "The numerical difference follows from both changed values and denominator. Neither estimate is universally correct without a missing-data model.",
@@ -300,6 +487,11 @@
         {
           "title": "Retain unknown flags",
           "task": "Filter a Boolean field under a keep-unknown policy.",
+          "reasoning": {
+            "why": "A plain filter on flag keeps only id 1, because null is not true. fill_null(True) treats the unknown row as included, so ids 1 and 3 remain.",
+            "wrong": "Using fill_null(False) would drop id 3, the opposite policy.",
+            "verify": "Run frame.filter(pl.col('flag').fill_null(True)) and assert ids are [1, 3]."
+          },
           "check": "Ids 1 and 3 remain.",
           "hint": "Use fill_null(True) deliberately.",
           "answer": "The operation changes inclusion policy. Label unknown rows in the output so they are not described as confirmed positive observations."
@@ -307,6 +499,11 @@
         {
           "title": "Predict logical outcomes",
           "task": "Evaluate false OR unknown and true OR unknown.",
+          "reasoning": {
+            "why": "With OR, true dominates; false does not. false OR unknown stays unknown, true OR unknown is true.",
+            "wrong": "Treating unknown as false would wrongly give false for the first case.",
+            "verify": "Check example_two: the or column is [True, None, None], with False | None giving None."
+          },
           "check": "The answers are unknown and true.",
           "hint": "Ask whether the known operand determines the result.",
           "answer": "False does not determine an OR result; true does. This reasoning is more reliable than memorizing isolated truth-table cells."
@@ -314,6 +511,11 @@
         {
           "title": "Detect invalid arithmetic",
           "task": "Generate NaN through an invalid floating operation and keep its cause separate from absent measurement.",
+          "reasoning": {
+            "why": "0.0 / 0.0 yields NaN in Polars. That is a computation result, not an absent measurement.",
+            "wrong": "Converting it to null and filling it later hides the zero denominator that caused it.",
+            "verify": "Build pl.DataFrame({'a': [0.0], 'b': [0.0]}), compute a / b, and check is_nan() is True while is_null() is False."
+          },
           "check": "The diagnostic identifies an arithmetic problem.",
           "hint": "Capture validity before replacing values.",
           "answer": "Use finite-value checks at the transformation boundary. Filling the symptom without inspecting a zero denominator or invalid domain can hide a coding or modeling error."
@@ -341,6 +543,28 @@
       "concepts": ["group_by", "denominator", "weighted rates", "row count", "observed count"],
       "prerequisites": ["polars-002", "polars-004"],
       "outcome": "Build an aggregate whose numerator, denominator and weighting unit are explicit.",
+      "key_terms": [
+        [
+          "group_by and agg",
+          "The pair that partitions rows by key columns and returns one row per group from the named aggregation expressions."
+        ],
+        [
+          "Weighted rate",
+          "Total numerator divided by total denominator after aggregation, which weights each group by its denominator."
+        ],
+        [
+          "Average of rates",
+          "The unweighted mean of per-group rates, which gives a small group the same weight as a large one."
+        ],
+        [
+          "Row count",
+          "The number of rows in a group from `pl.len()`, including rows whose values are null."
+        ],
+        [
+          "Observed count",
+          "The number of non-null values in a column from `count()`, which can be smaller than the row count."
+        ]
+      ],
       "theory": "Aggregation changes the grain of a table. An order-level frame becomes a customer-level frame when rows are grouped by customer and reduced to one result per customer. Every non-key output must describe how values inside the group are combined. A sum, a mean and a row count encode different questions; a plausible number does not establish that the question matches the decision.\n\nRates require particular care. If source rows contain successes and trials, the pooled rate is total successes divided by total trials. Averaging row-level rates gives equal weight to each row, even when one row contains one trial and another contains ninety-nine. The first example makes that difference large enough to inspect by hand. The two calculations are both mathematically defined, but they estimate different weighted quantities.\n\nMissing values also affect denominators. pl.len counts group rows, while count on a column counts non-null values. A group with one row and no observed measurement should not be described as an observed zero. Preserve counts beside estimates so a later reader can distinguish a small group, an empty measurement set and a genuine zero outcome.",
       "syntax": "group_by defines the grouping keys and agg names the reductions. Sort the final result when row order is part of a comparison or published artifact. Compute a ratio after aggregating its numerator and denominator; this keeps their relationship visible. Give counts explicit names such as rows and observed rather than using one ambiguous n for all purposes.",
       "math": "The pooled rate is \\(\\widehat p=\\frac{\\sum_i s_i}{\\sum_i n_i}\\). The equal-row rate is \\(m^{-1}\\sum_i s_i/n_i\\). Here \\(s_i\\) is a success count, \\(n_i\\) its trial count and \\(m\\) the number of source rows. They agree only under additional weighting conditions.",
@@ -360,6 +584,11 @@
         {
           "title": "Compute a global rate",
           "task": "Pool all three rate rows without grouping.",
+          "reasoning": {
+            "why": "Pooling adds the numerators 1, 9 and 1 to get 11 and the denominators 1, 99 and 2 to get 102, so every trial counts once and the rate is 11 / 102, about 0.108.",
+            "wrong": "Averaging the two group rates 0.1 and 0.5 gives 0.3, and averaging the three row rates gives about 0.53; both let the 2 trials of group B weigh as much as the 100 trials of group A.",
+            "verify": "Run frame.select(pl.col('successes').sum() / pl.col('trials').sum()).item() and compare with 11 / 102; the result should sit much closer to A's 0.1 than to B's 0.5."
+          },
           "check": "The global rate is 11/102.",
           "hint": "Sum both counts before division.",
           "answer": "The total is not the mean of 0.1 and 0.5 because group trial counts differ. The intended weighting unit is one trial."
@@ -367,6 +596,11 @@
         {
           "title": "Find a zero denominator",
           "task": "Add a group with 0 successes and 0 trials.",
+          "reasoning": {
+            "why": "Group C has 0 successes over 0 trials, so its rate has no defined value. The when guard on trials > 0 returns null for C while A and B keep 0.1 and 0.5.",
+            "wrong": "Dividing 0 by 0 directly produces NaN, and replacing that with 0 reports a group that never ran as one that failed every trial.",
+            "verify": "Run the answer code and assert rates['rate'].to_list() == [0.1, 0.5, None]; also confirm C still has trials equal to 0 in the output so a reader can see why."
+          },
           "check": "The output follows an explicit undefined-rate policy.",
           "hint": "A zero-trial group contains no rate evidence.",
           "answer": "Return null or reject it with a reason; do not silently assign rate 0, which would claim observed failures.",
@@ -375,6 +609,11 @@
         {
           "title": "Change the estimand",
           "task": "Describe when an equal-group average would be appropriate.",
+          "reasoning": {
+            "why": "An equal-group average answers what a randomly chosen group looks like, so (0.1 + 0.5) / 2 = 0.3 is the right number when each group, not each trial, is the sampling unit.",
+            "wrong": "Reporting 0.3 as the overall success rate of trials mixes estimands; the trial-weighted answer for the same data is 11 / 102.",
+            "verify": "Write both numbers next to each other with their weighting stated, and check the group average changes when a group is added while the trial-weighted rate changes in proportion to its trials."
+          },
           "check": "The answer defines equal weighting of groups.",
           "hint": "Weighting is part of the scientific question.",
           "answer": "If the target is a uniformly sampled group, averaging group rates can be appropriate. It is not the same target as a uniformly sampled trial."
@@ -382,6 +621,11 @@
         {
           "title": "Audit row grain",
           "task": "Compare input row count with the number of group keys.",
+          "reasoning": {
+            "why": "group_by collapses the three rate rows into one row per distinct group, A and B, so the output height is 2 and each row now describes a group rather than a source record.",
+            "wrong": "Taking pl.col('order_id').first() into the aggregate gives the grouped row an order label it does not represent, inviting a later join at the wrong grain.",
+            "verify": "Compare frame.height (3) with the grouped height (2), and assert the grouped group column is unique."
+          },
           "check": "Three input rows reduce to 2 groups.",
           "hint": "A grouping operation changes output identity.",
           "answer": "Publish the keys and aggregation definitions. Carrying an arbitrary order_id after grouping would incorrectly imply an order-level result."
@@ -389,6 +633,11 @@
         {
           "title": "Report precision inputs",
           "task": "Keep success and trial counts beside each estimated rate.",
+          "reasoning": {
+            "why": "Summing successes and trials inside the aggregation keeps A at 10 over 100 and B at 1 over 2, so a reader can see B's 0.5 rests on two trials.",
+            "wrong": "Publishing only rate discards the counts, and nothing in 0.5 alone tells you whether it came from 2 trials or 2,000.",
+            "verify": "Check the grouped output has columns group, successes, trials and rate, and that successes / trials reproduces rate on each row."
+          },
           "check": "Both components are recoverable.",
           "hint": "A displayed percentage alone loses information.",
           "answer": "The counts support interval calculations and comparisons of evidence. Equal percentages from 1 trial and 1,000 trials do not have equal uncertainty."
@@ -396,6 +645,11 @@
         {
           "title": "Handle an all-null group",
           "task": "Decide whether to retain group B in the measurement summary.",
+          "reasoning": {
+            "why": "In example_two, group B's only value is null, so its rows count is 1, its observed count is 0 and its mean is null. Keeping the row shows that B was measured but produced nothing usable.",
+            "wrong": "Filtering out B before grouping makes the summary look complete and silently shrinks the set of reported groups from two to one.",
+            "verify": "Assert B's row shows rows 1, observed 0 and mean None, while A shows rows 2, observed 1 and mean 2.0."
+          },
           "check": "Its observed count remains 0.",
           "hint": "Do not impute without a model.",
           "answer": "Retaining it with a null mean makes coverage explicit. Dropping it changes the population of reported groups and should be reported."
@@ -423,6 +677,28 @@
       "concepts": ["join", "cardinality", "fanout", "semi join", "anti join"],
       "prerequisites": ["polars-003", "polars-004", "polars-005"],
       "outcome": "Enrich a fact table while proving its grain and totals remain valid.",
+      "key_terms": [
+        [
+          "Join cardinality",
+          "The expected match pattern between keys, such as many-to-one, which decides whether a join can multiply rows."
+        ],
+        [
+          "validate",
+          "The join argument, such as `validate=\"m:1\"`, that raises an error when right-side keys are not unique as declared."
+        ],
+        [
+          "Fanout",
+          "Row multiplication when a key matches more than one row on the other side, which inflates additive totals."
+        ],
+        [
+          "Semi join and anti join",
+          "Joins that keep the left rows with at least one match, or with no match, returning left columns only and never duplicating rows."
+        ],
+        [
+          "nulls_equal",
+          "The join option that lets null keys match each other; by default a null key matches nothing."
+        ]
+      ],
       "theory": "A join matches records using keys; it does not verify that the key represents the intended relationship. A fact table may have many orders for one customer, while a customer dimension should have one row per customer for a many-to-one enrichment. Duplicating a dimension key causes every matching fact to repeat. The result can still look plausible and contain no nulls while its total is inflated.\n\nDeclare the expected cardinality where the API supports it, then independently reconcile row counts and additive quantities. The validate=\"m:1\" contract says the left side may contain repeated keys and the right side must have unique matching keys. This protects one part of the data model; it does not prove that region is correct or that the dimension represents the correct historical version.\n\nSemi and anti joins answer membership questions. A semi join keeps matching left rows without appending right-side columns. An anti join keeps unmatched left rows. These are useful for eligibility and quarantine logic because a membership test should not accidentally multiply facts. Null-key matching is a separate policy: a missing customer identifier is not automatically the same entity as another missing identifier.",
       "syntax": "join takes a key, join type and optional cardinality validation. A left join preserves unmatched left rows, but may multiply matched rows if right keys repeat. semi and anti return left columns only. nulls_equal=True deliberately allows missing keys to match; use it only when that semantics is justified. Sort by a stable identifier before comparing output records.",
       "math": "",
@@ -442,6 +718,11 @@
         {
           "title": "Prove the expected key",
           "task": "Check the dimension key before enrichment.",
+          "reasoning": {
+            "why": "The dimension holds customers 10 and 20 on two rows, so n_unique equals height and each fact row can find at most one region.",
+            "wrong": "Relying only on the fact that the join executed proves nothing about uniqueness; a duplicated dimension joins happily and returns 5 rows.",
+            "verify": "Assert dimension['customer'].n_unique() == dimension.height and inspect dimension.group_by('customer').len() for any count above 1."
+          },
           "check": "Unique customer count equals dimension height.",
           "hint": "Inspect the right side independently.",
           "answer": "Use n_unique and a duplicate-frequency table. The join validator and the independent key check catch related errors through different evidence."
@@ -449,6 +730,11 @@
         {
           "title": "Reconcile a total",
           "task": "Verify that additive order revenue is unchanged by valid enrichment.",
+          "reasoning": {
+            "why": "A valid many to one left join keeps the 3 facts, so amounts 5, 7 and 9 still sum to 21. Checking height as well catches a case where a zero amount row is duplicated or dropped.",
+            "wrong": "Checking only the total misses such cases, and with the duplicated dimension the result already fails at 5 rows and a total of 33.",
+            "verify": "Assert joined.height == facts.height == 3 and joined['amount'].sum() == 21 after the join with validate='m:1'."
+          },
           "check": "The total remains 21.",
           "hint": "Compare before and after.",
           "answer": "Keep both row and amount checks: some duplicated or dropped zero-valued records can leave a total unchanged."
@@ -456,6 +742,11 @@
         {
           "title": "Make a membership query",
           "task": "Return orders whose customers occur in the dimension without adding region.",
+          "reasoning": {
+            "why": "A semi join keeps each fact whose customer exists in the dimension and adds no columns, so orders 1, 2 and 3 appear once even if the dimension is duplicated.",
+            "wrong": "A left join followed by drop('region') returns 5 rows against the duplicated dimension, because the fanout happens before the column is dropped.",
+            "verify": "Run the answer code: known.columns stays order_id, customer, amount and the semi join against the duplicated dimension still has height 3."
+          },
           "check": "Each matching order appears once.",
           "hint": "Use a semi join.",
           "answer": "A semi join expresses existence directly. Joining and dropping columns afterward still permits fanout.",
@@ -464,6 +755,11 @@
         {
           "title": "Audit unmatched rows",
           "task": "Add a customer 30 order and inspect it using an anti join.",
+          "reasoning": {
+            "why": "An anti join returns facts without a match, so the new order 4 for customer 30 with amount 6 is the only row listed.",
+            "wrong": "An inner join drops order 4 without any trace, and a left join keeps it with a null region that is easy to overlook in a total.",
+            "verify": "Run the answer code and assert orphans.to_dicts() equals the single order 4 record."
+          },
           "check": "The new order is explicitly listed.",
           "hint": "Use an identifier in the output.",
           "answer": "The anti join produces a reviewable quarantine set. Decide whether the missing dimension is late, invalid or genuinely outside the domain.",
@@ -472,6 +768,11 @@
         {
           "title": "Handle duplicate history",
           "task": "Explain why dropping duplicate customer rows can be incorrect.",
+          "reasoning": {
+            "why": "If customer 10 appears twice because its region changed over time, each row is a valid version with its own validity period and the right one depends on the order date.",
+            "wrong": "unique(subset='customer', keep='first') picks whichever version happened to come first, which may attach a region that did not yet apply to an older order.",
+            "verify": "Look for valid_from and valid_to columns on the duplicated rows; if they differ, the fix is an as-of or range join rather than deduplication."
+          },
           "check": "The answer distinguishes historical versions from accidental duplicates.",
           "hint": "Which row was valid at the order time?",
           "answer": "A changing dimension may require a time-qualified join. Arbitrarily keeping first or last can attach future information to past facts."
@@ -479,6 +780,11 @@
         {
           "title": "Define null-key policy",
           "task": "Compare default and nulls_equal behavior for two missing keys.",
+          "reasoning": {
+            "why": "Polars does not treat two null keys as equal by default, so the semi join keeps only order 1. Setting nulls_equal=True is an explicit choice that also matches order 3.",
+            "wrong": "fill_null(0) on both sides creates a fake customer 0 that matches, and a real customer 0 added later would be confused with it.",
+            "verify": "Assert the default semi join returns order ids [1] and the nulls_equal=True version returns [1, 3]."
+          },
           "check": "Only the explicit policy matches them.",
           "hint": "Missing identity is not a common identity.",
           "answer": "Use a known sentinel only if its meaning is explicitly a shared entity. Otherwise preserve unmatched missing keys for diagnosis."
@@ -503,6 +809,28 @@
       "concepts": ["timezone", "UTC", "wall clock", "half-open intervals", "event time"],
       "prerequisites": ["polars-003", "polars-004"],
       "outcome": "Define time semantics before aggregating a dataset.",
+      "key_terms": [
+        [
+          "UTC instant",
+          "A point in time stored in Coordinated Universal Time, which has no daylight saving jumps, so elapsed time is exact."
+        ],
+        [
+          "dt.convert_time_zone",
+          "A method that shows the same instant in another time zone; the instant itself does not change."
+        ],
+        [
+          "Wall clock time",
+          "Local time as read on a clock, where a daylight saving change can skip or repeat an hour."
+        ],
+        [
+          "Half-open interval",
+          "An interval that includes its start and excludes its end, so adjacent intervals never count a boundary event twice."
+        ],
+        [
+          "str.to_datetime",
+          "The method that parses text into a Datetime column, here with `time_zone=\"UTC\"` fixing its zone."
+        ]
+      ],
       "theory": "A timestamp identifies an instant only when its interpretation is unambiguous. A local clock display can repeat or skip during a daylight-saving transition. Storing a timezone-aware instant in UTC and converting it for display separates elapsed time from the local clock label. A one-hour elapsed interval can span two displayed hour numbers when a region moves its clocks forward.\n\nConversion and relabeling are different operations. Converting a known instant into another zone preserves the instant. Assigning a zone to a naive timestamp interprets previously ambiguous clock text and needs a policy for repeated or nonexistent times. The first case begins with UTC offsets, so no local-time ambiguity needs guessing. The region is named explicitly rather than inferred from the machine running the lesson.\n\nWindows also need a boundary convention. A half-open interval includes its start and excludes its end. Adjacent periods can then share a boundary without counting the same event twice. This is a useful convention for daily metrics, feature windows and incremental processing, but the scientific question still determines which clock and which cutoff should be used.",
       "syntax": "str.to_datetime parses the source timestamp, time_zone=\"UTC\" fixes its timezone representation, and dt.convert_time_zone produces a different display of the same instant. Filtering uses an explicit start comparison and a strict end comparison. Keep timezone-aware Python datetime objects at these boundaries; comparing naive and aware timestamps should not be treated as a harmless coercion.",
       "math": "",
@@ -522,6 +850,11 @@
         {
           "title": "Display another zone",
           "task": "Convert the same UTC observations to a second named timezone.",
+          "reasoning": {
+            "why": "convert_time_zone changes only the wall clock label attached to each instant. In Asia/Tokyo the two observations read 15:30 and 16:30, yet the epoch seconds equal the UTC epoch seconds and the gap is still 3600.",
+            "wrong": "Using replace_time_zone keeps the 06:30 and 07:30 wall clock digits and declares them Tokyo time, which moves both instants by nine hours and silently corrupts any later join on time.",
+            "verify": "Run the answer code: the hours assert gives [15, 16], the epoch lists match, and the difference between the two Tokyo values is 3600 seconds."
+          },
           "check": "The instants and elapsed seconds stay unchanged.",
           "hint": "Change display, not source meaning.",
           "answer": "Use convert_time_zone with a valid IANA zone. A timezone is not just a fixed UTC offset because historical and seasonal rules can differ.",
@@ -530,6 +863,11 @@
         {
           "title": "Explain a naive value",
           "task": "Describe what information is missing from 01:30 without a zone or date.",
+          "reasoning": {
+            "why": "A bare 01:30 has no date and no zone, so it cannot be placed on the timeline. On 2024-03-10 in America/New_York, 01:30 exists once, while 02:30 never exists and on the November change 01:30 occurs twice.",
+            "wrong": "Parsing it with the laptop's local zone produces a definite looking instant whose meaning depends on where the notebook ran, not on where the data came from.",
+            "verify": "Write down the source zone and date from the data contract, then confirm that the same text parsed under two different zones yields two different epoch values."
+          },
           "check": "The answer identifies unresolved instant interpretation.",
           "hint": "A clock label alone is insufficient.",
           "answer": "The date, region and repeated-time policy can matter. Do not silently assume the learner machine timezone is the data source timezone."
@@ -537,6 +875,11 @@
         {
           "title": "Test the end boundary",
           "task": "Add an observation exactly equal to end.",
+          "reasoning": {
+            "why": "The predicate time >= start and time < end includes January 1 and 2 and excludes January 3, so the two January 3 rows with amounts 5 and 7 land in the following window only.",
+            "wrong": "Using time <= end puts amount 5 into both the current and the next period, so summing adjacent periods would count it twice.",
+            "verify": "Run the answer code: the period sums to 5 (2 plus 3) and the following filter returns [5, 7], so the two windows together cover all four rows exactly once."
+          },
           "check": "It belongs to the following period.",
           "hint": "Keep the end comparison strict.",
           "answer": "The filter time < end excludes the boundary, which avoids double counting when the next period starts there.",
@@ -545,6 +888,11 @@
         {
           "title": "Test a zero-length window",
           "task": "Set start equal to end.",
+          "reasoning": {
+            "why": "With start equal to end, no timestamp can satisfy time >= start and time < start at once, so the filter returns zero rows for any input.",
+            "wrong": "Treating the empty output as a real quiet period hides a configuration mistake; a window of zero length should be caught when the bounds are validated, before any data is read.",
+            "verify": "Set end = start in the boundary fixture and assert the filtered height is 0, then add an explicit check that end > start and confirm it fires."
+          },
           "check": "The half-open window is empty.",
           "hint": "Both inequalities must hold.",
           "answer": "No instant is both greater than or equal to start and strictly less than the same endpoint. Treat an accidental zero-duration configuration as a separate validation issue."
@@ -552,6 +900,11 @@
         {
           "title": "Compare duration definitions",
           "task": "Explain the difference between one calendar day and 24 elapsed hours around a clock change.",
+          "reasoning": {
+            "why": "In America/New_York the local calendar day 2024-03-10 lasts 23 elapsed hours because the clock jumps from 02:00 to 03:00; the reference shows 01:30 to 03:30 local as only 3600 seconds apart.",
+            "wrong": "Adding a fixed 24 hour duration to local midnight on that date lands at 01:00 on March 11 rather than at the next midnight, so a daily bucket built that way drifts.",
+            "verify": "Compute next local midnight minus local midnight for 2024-03-10 in New York and expect 23 hours, while a UTC day remains 24 hours."
+          },
           "check": "The answer allows a calendar day with a different elapsed duration.",
           "hint": "Civil calendars and durations answer different questions.",
           "answer": "Use calendar boundaries for local daily reporting and elapsed durations for timeout or physical-rate calculations. State the intended unit."
@@ -559,6 +912,11 @@
         {
           "title": "Add a late arrival",
           "task": "Give an event an old event time but a later ingestion time.",
+          "reasoning": {
+            "why": "An event dated January 1 that only arrived on January 5 was not knowable on January 2. Keeping event_time and ingested_at as separate columns lets a feature use the arrival rule.",
+            "wrong": "Overwriting event_time with the arrival time loses when it happened, and keeping only event_time makes a backfill include data that a live system could not have seen.",
+            "verify": "Filter for features as of January 2 using ingested_at <= cutoff and confirm the late event is excluded, while an event_time filter alone would include it."
+          },
           "check": "The two timestamps remain separate.",
           "hint": "Display conversion does not solve data availability.",
           "answer": "A historical feature calculation needs both event and availability rules. The later as-of lesson demonstrates how an old event can still leak future knowledge."
@@ -586,6 +944,28 @@
       "concepts": ["unpivot", "pivot", "cell uniqueness", "aggregation", "reconciliation"],
       "prerequisites": ["polars-001", "polars-003", "polars-005"],
       "outcome": "Reshape a repeated-measurement dataset with a checked compound key.",
+      "key_terms": [
+        [
+          "unpivot",
+          "The wide-to-long reshape that keeps `index` identity columns and turns the `on` columns into variable and value pairs."
+        ],
+        [
+          "pivot",
+          "The long-to-wide reshape that spreads `values` into one column per `on` value for each `index` key."
+        ],
+        [
+          "Compound key",
+          "Several columns, such as id and period, that together identify one cell."
+        ],
+        [
+          "Cell uniqueness",
+          "The requirement that each index and column pair has one value; otherwise an explicit aggregation must define how duplicates combine."
+        ],
+        [
+          "Round trip",
+          "Reshaping long to wide and back, then checking that the original rows are recovered."
+        ]
+      ],
       "theory": "A wide table stores repeated measurements in separate columns, while a long table stores the measurement label as a value in a column. Neither representation is inherently more correct. The useful question is which grain makes the intended operation explicit. A before/after comparison can be wide for a paired difference and long for grouped summaries or visual encodings.\n\nReshaping needs an identity contract. In the worked example, the pair (id, period) identifies one measurement in the long table. A pivot can reconstruct the original wide table only when that cell identity is unique, or when an explicit aggregation defines how duplicates should combine. Asking a pivot to choose an arbitrary record hides an unresolved data-model question.\n\nRound-trip tests are useful but bounded. Reconstructing the original fixture proves preservation for those columns and values under the selected schema. It does not establish that every real-world duplicate represents an additive measurement, or that missing periods should be filled with zero. Preserve identifiers and distinguish an absent measurement from a measured zero.",
       "syntax": "unpivot names index columns that remain identifiers, the columns converted into long values, and the variable/value output names. pivot names the column whose values become output column names, the row identifier and the measurement column. Use select to restore a deliberate column order and sort to restore a deliberate row order before comparing tables.",
       "math": "",
@@ -605,6 +985,11 @@
         {
           "title": "Add a third period",
           "task": "Add a followup column to the wide fixture and unpivot it.",
+          "reasoning": {
+            "why": "Unpivot creates one long row for each id and listed column, so 2 ids times 3 periods gives 6 rows, with id 1 holding 10, 12, 11 and id 2 holding 20, 18, 19.",
+            "wrong": "Leaving followup out of on drops its values and gives 4 rows; listing it as index would repeat it beside every period instead of making it a period.",
+            "verify": "Run the answer code: long.height is 6 and the per id counts are [3, 3]. Pivot back and compare with the wide frame for a full round trip."
+          },
           "check": "There are six long rows for two identifiers.",
           "hint": "Count identifiers times selected measurements.",
           "answer": "Include followup in the on list. The expected count assumes every selected column is retained, including any explicit null values.",
@@ -613,6 +998,11 @@
         {
           "title": "Check cell identity",
           "task": "Count rows by id and period before pivoting.",
+          "reasoning": {
+            "why": "Pivot needs each (id, period) pair to identify exactly one value. A frequency table over those two keys exposes any pair with more than one row before it gets merged.",
+            "wrong": "Pivoting first and inspecting the wide output only shows one number per cell, so a duplicate summed or averaged into that cell is invisible.",
+            "verify": "Run long.group_by('id', 'period').len() and assert every len equals 1; for the duplicate fixture in example_two the count is 2."
+          },
           "check": "Each valid cell has count 1.",
           "hint": "A unique row id is not enough after reshaping.",
           "answer": "Validate the compound key. This catches multiple records that would otherwise be compressed into one displayed cell."
@@ -620,6 +1010,11 @@
         {
           "title": "Compare sum and mean",
           "task": "Aggregate the duplicated values 4 and 6 using both policies.",
+          "reasoning": {
+            "why": "The duplicate cell for id 1 holds 4 and 6. A sum treats them as two contributions and gives 10; a mean treats them as repeated readings and gives 5.0.",
+            "wrong": "Omitting aggregate_function makes pivot raise ComputeError on this input, as example_two shows; guessing first or last instead just drops one reading.",
+            "verify": "Run the answer code and assert total 10 and average 5.0, then decide which policy matches the meaning of value before choosing one."
+          },
           "check": "Sum is 10 and mean is 5.",
           "hint": "Different aggregation means different questions.",
           "answer": "Choose sum for additive contributions and mean for repeated comparable measurements only when their weighting is justified. Do not infer the policy from the API.",
@@ -628,6 +1023,11 @@
         {
           "title": "Preserve missing values",
           "task": "Replace one measurement with null and repeat the round trip.",
+          "reasoning": {
+            "why": "Unpivot and pivot only move values between shapes, so a null in after for id 2 becomes a null long value and returns as a null cell.",
+            "wrong": "Calling fill_null(0) during the round trip makes the rebuilt frame look complete and turns a missing measurement into a measured zero.",
+            "verify": "Set id 2 after to None, unpivot, pivot back, and assert rebuilt equals the input including the null; null_count on after should still be 1."
+          },
           "check": "The same cell remains null.",
           "hint": "Missing is not zero.",
           "answer": "The structural operation should preserve absence. Filling nulls after the pivot is an additional analytical decision that needs explanation."
@@ -635,6 +1035,11 @@
         {
           "title": "Compute a paired difference",
           "task": "Calculate after minus before in wide form and verify from long records.",
+          "reasoning": {
+            "why": "In wide form each row already aligns before and after for one id, so after minus before gives 12 minus 10 = 2 and 18 minus 20 = -2.",
+            "wrong": "Subtracting the long after rows from the long before rows by position works only while both are sorted identically; any reordering pairs one id's after with another's before.",
+            "verify": "Compute the difference in wide form, then recompute from long records joined on id and assert both give [2, -2] sorted by id."
+          },
           "check": "The differences are 2 and -2.",
           "hint": "Keep the id in both calculations.",
           "answer": "Joining or aligning by position without the identifier can pair different people or devices. Verify identity before subtracting."
@@ -642,6 +1047,11 @@
         {
           "title": "Publish a grain statement",
           "task": "Write the row grain for both forms.",
+          "reasoning": {
+            "why": "The wide frame has one row per id with one column per period; the long frame has one row per id and period. Writing that down tells consumers which columns form the key.",
+            "wrong": "Describing the long table as one row per id invites a join on id alone, which fans out to 2 or 3 rows per id.",
+            "verify": "Assert wide['id'].is_unique().all() and long.select('id', 'period').is_unique().all() both hold for the fixture."
+          },
           "check": "Wide is one row per id; long is one row per id-period.",
           "hint": "Column names alone do not communicate grain.",
           "answer": "Include the statement in the transformation receipt or documentation so downstream authors know which keys are valid."
@@ -666,6 +1076,28 @@
       "concepts": ["window", "over", "lag", "cumulative sum", "ordering"],
       "prerequisites": ["polars-002", "polars-005", "polars-007"],
       "outcome": "Create row-preserving historical features with explicit ordering.",
+      "key_terms": [
+        [
+          "Window expression",
+          "An expression with `.over(keys)` that computes within each group but returns one value per input row."
+        ],
+        [
+          "Lag",
+          "The previous row's value within an ordered group, computed with `shift(1)`; the first row of each group gets null."
+        ],
+        [
+          "Cumulative sum",
+          "A running total along the row order from `cum_sum`, restarting in each group when used with `over`."
+        ],
+        [
+          "Total ordering",
+          "A sort rule with a tie-breaker column so that every row has one position and order-sensitive results are deterministic."
+        ],
+        [
+          "Leakage",
+          "A feature that uses information unavailable at the row's decision time, such as a group mean that includes later events."
+        ]
+      ],
       "theory": "A grouped aggregation reduces a group to fewer rows. A window expression computes using a group and maps a result back to the original row grain. This distinction lets a feature pipeline attach group means, previous values or running totals without losing the identity of each event. It also creates opportunities for leakage if the group includes information unavailable at the row's decision time.\n\nOrder-sensitive windows need a total ordering rule. Sorting by customer and time is insufficient when two events share a timestamp and their relative order matters. A stable event identifier can serve as a tie-breaker, but only if that order has a meaningful interpretation. The worked fixture uses customer, time and id explicitly. The resulting previous value refers to that sorted sequence, not to an arbitrary input order.\n\nGroup centering illustrates a different kind of window. Subtracting a group mean keeps one output per row while using all measurements in that group. It is useful for descriptive analysis, but computing the mean from future or held-out rows would contaminate a deployed feature. Training-time fitting and online application therefore need an additional temporal or split boundary.",
       "syntax": "over(\"customer\") assigns the expression to customer groups. cum_sum and shift(1) depend on the order established before the window operation. A reduction such as mean().over(\"group\") broadcasts a group statistic back to each group row. Give the derived column a distinct alias and verify both its values and the unchanged row count.",
       "math": "",
@@ -685,6 +1117,11 @@
         {
           "title": "Shuffle the fixture",
           "task": "Change the input ordering and retain the explicit sort.",
+          "reasoning": {
+            "why": "The explicit sort by customer, time and id rebuilds the same row order whatever order the input arrives in, so running and previous do not depend on file order.",
+            "wrong": "Dropping the sort makes the running total follow arrival order, and the fixture already lists id 3 before id 1, so A would read [5, 7, 11] instead of [2, 7, 11].",
+            "verify": "Shuffle the fixture with sample(fraction=1.0, shuffle=True, seed=1), rerun, sort both outputs by id and assert they are equal."
+          },
           "check": "The identified window results remain unchanged.",
           "hint": "The sort is part of the computation.",
           "answer": "Compare results after sorting by the same keys. A result that changes with input ordering reveals an incomplete ordering contract."
@@ -692,6 +1129,11 @@
         {
           "title": "Add a timestamp tie",
           "task": "Add a same-customer event sharing a timestamp and define its order.",
+          "reasoning": {
+            "why": "Two A events at time 2 have no natural order, so id acts as the documented tie breaker and the cumulative sum steps through them in id order every run.",
+            "wrong": "Sorting on customer and time alone leaves the tied pair in whatever order the sort returns, so the intermediate running value for each tied row can swap between runs.",
+            "verify": "Add an A event with id 5 at time 2, sort with and without id, and check that only the version including id has a fixed running sequence for both rows."
+          },
           "check": "A documented tie-breaker produces a deterministic sequence.",
           "hint": "A stable order is not automatically a causal order.",
           "answer": "Use an event sequence identifier when available. If simultaneous events should be aggregated together, do that before a sequential window."
@@ -699,6 +1141,11 @@
         {
           "title": "Exclude the current event",
           "task": "Compute the running value available before each event.",
+          "reasoning": {
+            "why": "cum_sum includes the current row, so A's values 2, 5 and 4 produce 2, 7 and 11; shift(1) inside over moves that history down one row to [None, 2, 7].",
+            "wrong": "Applying shift(1) outside over lets the first A row inherit the final value from the preceding customer in the sorted frame.",
+            "verify": "Run the answer code and assert A's running_before equals [None, 2, 7]; B's only row should also be None."
+          },
           "check": "For A it is [null, 2, 7] before an explicit first-value policy.",
           "hint": "Shift the cumulative total within the same group.",
           "answer": "A cumulative sum includes the current row. Shift it to represent prior history and explain whether a first event should map to zero or unknown.",
@@ -707,6 +1154,11 @@
         {
           "title": "Check group reset",
           "task": "Verify that B does not inherit A history.",
+          "reasoning": {
+            "why": "over('customer') restarts each window for every customer, so B's single event gets no predecessor: previous is None and running restarts at 7.",
+            "wrong": "Calling pl.col('value').shift(1) without over makes B's row read A's last value 4 in the sorted frame, a cross customer leak.",
+            "verify": "In example_one the previous column is [None, 2, 5, None]; the final None is B's row and confirms the reset."
+          },
           "check": "B has a missing predecessor.",
           "hint": "The grouping key defines independent histories.",
           "answer": "Without over(customer), a shift can cross entity boundaries. This is a common silent feature-engineering defect."
@@ -714,6 +1166,11 @@
         {
           "title": "Review training leakage",
           "task": "Explain why full-dataset group centering can leak validation information.",
+          "reasoning": {
+            "why": "A group mean computed over all rows uses the held out rows too, so each training feature already contains information from the validation partition.",
+            "wrong": "Splitting after centering looks harmless because the code is identical, but the mean used for A, which is 4.0 in the fixture, would shift once validation rows are excluded.",
+            "verify": "Compute the group mean from the training rows only, apply it to validation, and compare with the full data mean; any difference shows the leak's size."
+          },
           "check": "The explanation identifies which observations estimated the mean.",
           "hint": "A window is not a fitted preprocessing boundary.",
           "answer": "Estimate preprocessing parameters on the training partition and apply those fixed parameters to held-out data. Group calculations must follow the deployment scenario."
@@ -721,6 +1178,11 @@
         {
           "title": "Compare grains",
           "task": "Replace the mean window with group_by and inspect row counts.",
+          "reasoning": {
+            "why": "The window form attaches group_mean to every original row, so height stays 3; group_by returns one row per group, so height falls to 2.",
+            "wrong": "Joining the grouped result back without noting the grain change can duplicate rows if the group key is not unique on one side.",
+            "verify": "Run the answer code and assert (window.height, grouped.height) == (3, 2), with A's mean 4.0 and B's 9.0 in both."
+          },
           "check": "The count changes from 3 to 2.",
           "hint": "A reduction returns one result per key.",
           "answer": "Neither shape is inherently wrong. Choose the result grain needed by the next stage and verify key identity at that boundary.",
@@ -749,6 +1211,28 @@
       "concepts": ["LazyFrame", "logical plan", "predicate pushdown", "projection", "equivalence"],
       "prerequisites": ["polars-002", "polars-005", "polars-006"],
       "outcome": "Explain a lazy query in terms of its requested result and observable execution plan.",
+      "key_terms": [
+        [
+          "LazyFrame",
+          "A frame that records operations as a query plan and computes nothing until `collect` runs."
+        ],
+        [
+          "Logical plan",
+          "The tree of operations a LazyFrame describes, which the optimizer may rewrite and `explain()` displays."
+        ],
+        [
+          "Predicate pushdown",
+          "An optimization that moves a filter closer to the data source so fewer rows are read and processed."
+        ],
+        [
+          "Projection pushdown",
+          "An optimization that reads only the columns the query actually uses."
+        ],
+        [
+          "Semantic equivalence",
+          "Two plans return the same result; filtering measurements before a group mean is not equivalent to filtering groups after it."
+        ]
+      ],
       "theory": "A lazy query describes a computation before materializing its result. This gives the query engine an opportunity to combine operations, read only needed columns and move eligible filters toward the data source. The plan is an intermediate representation of the requested computation. It is not a record that a particular amount of work has already happened.\n\nOptimization must preserve semantics. Filtering individual measurements before taking a group mean is different from filtering groups after their mean is calculated. The second worked case deliberately changes that ordering and produces a different population. An optimizer may move operations only when its transformation preserves the requested result. The fact that two pipelines look similar is not evidence that they are interchangeable.\n\nRead explain output as diagnostic evidence about this version and query. Avoid tests that require every line of a printed optimizer plan to remain identical across library releases. Instead test the intended result and inspect meaningful properties such as the selected columns, scan source and filter placement. Performance still needs measurement under a stated data and cache regime.",
       "syntax": "scan_parquet creates a lazy source. filter and select append operations to its plan. collect_schema inspects the planned schema, while collect executes the query using the specified engine. explain(optimized=True) exposes a printable plan. Calling lazy() after eagerly reading the entire file cannot undo the original eager read.",
       "math": "",
@@ -768,6 +1252,11 @@
         {
           "title": "Change a threshold",
           "task": "Raise the amount threshold to 15.",
+          "reasoning": {
+            "why": "Amounts 5, 12 and 20 meet the threshold 15 only at id 3, and doubling 20 gives 40, so the collected result is exactly id [3] and doubled [40].",
+            "wrong": "Inspecting the explain output for a pushed down filter shows the optimizer's plan, not the answer; a plan can look right while the threshold has the wrong comparison.",
+            "verify": "Run the answer code and assert the collected dict equals {'id': [3], 'doubled': [40]}, then change 15 to 12 and confirm ids [2, 3] return."
+          },
           "check": "Only id 3 remains with doubled value 40.",
           "hint": "State the expected rows before inspecting a plan.",
           "answer": "A result assertion is the first correctness check. The optimizer may choose a different physical strategy without changing this answer.",
@@ -776,6 +1265,11 @@
         {
           "title": "Add an unused column",
           "task": "Add a large text field that the result does not need.",
+          "reasoning": {
+            "why": "The final select keeps only id and doubled, so a large unused text column can change how much is read but cannot change what is returned.",
+            "wrong": "Claiming that projection pushdown proves the large column was never read goes beyond the test; the result says nothing about bytes touched.",
+            "verify": "Add the extra text column to the written file and assert the collected result and collect_schema names are unchanged."
+          },
           "check": "The selected result is unchanged.",
           "hint": "Inspect projection in the plan.",
           "answer": "A lazy file scan can avoid reading irrelevant columns when supported. That observation does not prove zero I/O for every file format or expression."
@@ -783,6 +1277,11 @@
         {
           "title": "Compare eager and lazy results",
           "task": "Compute the same filter and projection eagerly.",
+          "reasoning": {
+            "why": "Eager read_parquet followed by the same filter and select applies identical operations, so after sorting by id both frames should hold ids [2, 3] and doubled [24, 40] for the reference threshold.",
+            "wrong": "Comparing wall time first and correctness second can reward a version that reads a different file or skips the filter.",
+            "verify": "Sort both results by id and assert eager.equals(lazy_result) before running any timing."
+          },
           "check": "The sorted frames are equal.",
           "hint": "Separate correctness from speed.",
           "answer": "Use equivalent inputs and operations. Compare timing only after verifying equality and describing whether I/O is inside the measured interval."
@@ -790,6 +1289,11 @@
         {
           "title": "Test a group counterexample",
           "task": "Change group A to values 1 and 11.",
+          "reasoning": {
+            "why": "Group A with values 1 and 11 has mean 6.0, and 6 is not greater than 6, so the group level filter keeps only B with mean 8.0.",
+            "wrong": "Filtering rows above 6 before grouping keeps A's 11 alone, giving mean 11 and a different population, as example_two shows with A's 9.",
+            "verify": "Run the answer code: means is [6.0, 8.0] and the filtered group list is ['B']."
+          },
           "check": "Its group mean is 6 and the strict >6 filter still rejects it.",
           "hint": "The comparison is strict.",
           "answer": "The before-filtered pipeline would still keep A because it observes only 11. The boundary case demonstrates why order is semantically important.",
@@ -798,6 +1302,11 @@
         {
           "title": "Locate execution",
           "task": "Identify which statement actually materializes the query.",
+          "reasoning": {
+            "why": "Building scan_parquet, filter and select only records a plan; the DataFrame result exists after query.collect(), which is where the work runs.",
+            "wrong": "Printing the LazyFrame and seeing its plan text as proof that data was processed confuses a plan description with an executed result.",
+            "verify": "Check that the built query is a pl.LazyFrame and that only query.collect() returns a pl.DataFrame, here with ids [2, 3] for the reference threshold."
+          },
           "check": "collect performs result execution.",
           "hint": "Planning is not result evidence.",
           "answer": "Schema resolution or metadata access may still read information, but the DataFrame result is produced by collect. Do not claim a pipeline ran because a LazyFrame object printed."
@@ -805,6 +1314,11 @@
         {
           "title": "Review a plan assertion",
           "task": "Explain why asserting the entire explain string is brittle.",
+          "reasoning": {
+            "why": "The explain text depends on the Polars version and optimizer details, so a snapshot of it fails when formatting changes even though results are the same.",
+            "wrong": "A full string equality test forces updates on every upgrade and teaches reviewers to rubber stamp them, which lets a real semantic change slip through.",
+            "verify": "Assert the result values and collect_schema names instead, and if a plan property matters, check only that a filter node appears."
+          },
           "check": "The answer separates format changes from semantic changes.",
           "hint": "Plans can evolve across versions.",
           "answer": "Test values, schemas and invariants. Review plan features and measured behavior when investigating performance rather than using a textual snapshot as the only correctness oracle."
@@ -829,6 +1343,28 @@
       "concepts": ["CSV", "Parquet", "scan", "sink", "schema", "quarantine"],
       "prerequisites": ["polars-003", "polars-010"],
       "outcome": "Publish a small typed artifact with independently checked readback.",
+      "key_terms": [
+        [
+          "Parquet",
+          "A columnar file format that stores its schema and typed column chunks, unlike CSV text whose types must be inferred or declared."
+        ],
+        [
+          "scan_parquet",
+          "A lazy reader that builds a plan over Parquet files, so filters and column choices can be pushed into the read."
+        ],
+        [
+          "sink_parquet",
+          "A method that executes a LazyFrame and writes its result to a Parquet file without returning a DataFrame."
+        ],
+        [
+          "schema_overrides",
+          "A CSV reading option that fixes the types of named columns, such as keeping a problematic field as text."
+        ],
+        [
+          "Readback check",
+          "Reading a written file again and comparing its schema and rows with what was intended."
+        ]
+      ],
       "theory": "A file boundary is both an I/O boundary and a data contract. CSV stores textual fields and relies on parsing rules. Parquet stores typed columns and metadata that can support selective reading. Neither format guarantees correct identifiers, units or valid rows. The program should state the expected schema and verify the records that cross the boundary.\n\nPartitioned data adds another layer of identity. A glob can select several files, but file order is not a meaningful record order. A stable key and an explicit sort are needed for sequence comparisons. A new output file should also be kept outside the input pattern; otherwise a later run may accidentally ingest its previous output and duplicate records.\n\nWhen parsing a textual source, preserve raw values until rejection is accounted for. Reading a mixed amount column as text and then casting it under an explicit policy makes the bad token visible. The accepted total and rejected identifiers form complementary evidence. Publishing only a successful total would hide the fact that one source row did not contribute.",
       "syntax": "write_parquet emits typed columnar data, scan_parquet builds a lazy source, and sink_parquet materializes a query into an output file. A glob such as part-*.parquet should name only inputs. schema_overrides can keep a problematic CSV field as text so its parsing policy is explicit. Use readback checks on the output artifact instead of assuming a completed write preserves the intended result.",
       "math": "",
@@ -848,6 +1384,11 @@
         {
           "title": "Change input order",
           "task": "Rename the input parts so their lexical order changes.",
+          "reasoning": {
+            "why": "The glob reads part-a and part-b in whatever order the directory lists them, but sorting by id gives [1, 2, 3] with values summing to 10.5 either way.",
+            "wrong": "Comparing the unsorted frames after renaming fails spuriously, and asserting on head() rows ties the test to filesystem listing order.",
+            "verify": "Rename the parts so b sorts first, rerun, and assert sort('id') output equals the original sorted output."
+          },
           "check": "Sorted logical output remains equal.",
           "hint": "File order is not row identity.",
           "answer": "Compare after sorting by id. If output order matters to a consumer, publish that order explicitly rather than relying on a directory listing."
@@ -855,6 +1396,11 @@
         {
           "title": "Prevent self-ingestion",
           "task": "Explain why combined.parquet is outside part-*.parquet.",
+          "reasoning": {
+            "why": "part-*.parquet cannot match combined.parquet, so a rerun reads only the three source rows and rewrites the same output.",
+            "wrong": "A glob of *.parquet would pick up the previous combined.parquet on each rerun, so the row count would grow from 3 to 6 and then 9 without any error.",
+            "verify": "Run the pipeline twice in the same directory and assert the combined height stays 3 and the value total stays 10.5."
+          },
           "check": "A rerun does not read its prior combined output.",
           "hint": "Inspect the input pattern.",
           "answer": "Separate source and output namespaces or use an explicit input manifest. A broad *.parquet pattern can turn an idempotent transformation into repeated accumulation."
@@ -862,6 +1408,11 @@
         {
           "title": "Validate the output key",
           "task": "Check output id uniqueness after combining parts.",
+          "reasoning": {
+            "why": "Uniqueness must hold across all parts together. In the fixture ids 1, 2 and 3 are distinct overall, so n_unique and height both equal 3.",
+            "wrong": "Checking each file separately passes even if part-b also contained id 2, because each file alone would still be unique.",
+            "verify": "Run the answer code, then rewrite part-b with id 2 and confirm the global assertion fails while per file checks still pass."
+          },
           "check": "n_unique equals height for the valid fixture.",
           "hint": "Parts can overlap.",
           "answer": "Add a duplicate id across two files to demonstrate the need for a global contract. Per-file uniqueness is insufficient.",
@@ -870,6 +1421,11 @@
         {
           "title": "Track rejected coverage",
           "task": "Report accepted and rejected CSV counts.",
+          "reasoning": {
+            "why": "Reading amount as String keeps broken as text, and the non strict cast turns it into null, so ids 1 and 3 are accepted and id 2 is rejected.",
+            "wrong": "Filtering out the null parsed rows and reporting only the accepted frame gives a clean total of 6 but no record that id 2 existed, so the counts cannot be reconciled.",
+            "verify": "Run the answer code: (accepted, rejected, raw.height) equals (2, 1, 3), and the accepted parsed total is 6."
+          },
           "check": "Two accepted plus one rejected equals three source rows.",
           "hint": "Every source row needs an outcome.",
           "answer": "Keep raw identifiers and reasons, then reconcile counts. If a policy imputes a value instead, record that category separately.",
@@ -878,6 +1434,11 @@
         {
           "title": "Test a schema change",
           "task": "Change one part from numeric values to incompatible text.",
+          "reasoning": {
+            "why": "If part-b's value column becomes text while part-a stays float, the parts no longer share one schema and the combined read must either fail or apply a stated cast.",
+            "wrong": "Reading every part as String to make the scan succeed hides the change and breaks the later value sum of 10.5.",
+            "verify": "Write part-b with a String value column, rerun, and record whether the read raises; if a cast policy is chosen, assert its rejected count."
+          },
           "check": "The program either rejects it or follows a documented cast policy.",
           "hint": "Do not rely on accidental coercion.",
           "answer": "Treat schema evolution as a reviewed contract change. A successful read that widens everything to text may break downstream arithmetic."
@@ -885,6 +1446,11 @@
         {
           "title": "Verify an artifact",
           "task": "Read the written Parquet file and compare its schema and values.",
+          "reasoning": {
+            "why": "Reading back combined.parquet checks what was actually written; sorted ids [1, 2, 3], values summing to 10.5 and the Int64 and Float64 schema should all match.",
+            "wrong": "Asserting only on the in memory frame before writing would miss a sink failure, a wrong path or a dtype change during write.",
+            "verify": "Run pl.read_parquet on the output, sort by id, and assert equality with the intended frame and equality of the schemas."
+          },
           "check": "Readback matches the intended frame.",
           "hint": "The write return value is not the result itself.",
           "answer": "Check the actual file after writing. A larger pipeline should also record its input identity, version and ownership before publication."
@@ -909,6 +1475,28 @@
       "concepts": ["Arrow", "validity bitmap", "Enum", "category order", "round trip"],
       "prerequisites": ["polars-003", "polars-004"],
       "outcome": "Move a typed table across an Arrow boundary while preserving its logical contract.",
+      "key_terms": [
+        [
+          "Apache Arrow",
+          "A language-independent columnar memory format that Polars uses and can exchange with other libraries."
+        ],
+        [
+          "Validity bitmap",
+          "The Arrow bit array that marks which slots of a column hold values and which are null."
+        ],
+        [
+          "Zero-copy",
+          "Sharing compatible buffers without copying; casting, rechunking or conversion to Python objects can still allocate memory."
+        ],
+        [
+          "Enum",
+          "A Polars categorical type with a fixed, ordered list of allowed labels; a strict cast of an unknown label raises an error."
+        ],
+        [
+          "Category order",
+          "The declared order of Enum labels, which sorting and comparisons use instead of alphabetical order."
+        ]
+      ],
       "theory": "Arrow is a language-independent columnar representation with explicit types and validity information. It can reduce serialization overhead when systems share compatible buffers, but a blanket claim of zero-copy interoperability is too strong. Casting, rechunking, string representation changes and conversion to Python objects can allocate new memory. Test values and types first, then inspect memory behavior for the particular path when it matters.\n\nThe first case demonstrates a value-preserving conversion between Polars and an Arrow table, including a null. It proves a logical round trip on the fixture. It does not measure every allocation or guarantee that another library will preserve all metadata. A data engineer should distinguish representation compatibility from the semantics of the fields being transported.\n\nCategories introduce a further contract. A closed business vocabulary can have an order that differs from alphabetical order. Enum declares that vocabulary explicitly. It is useful for states such as new, paid and shipped, where unknown values should be rejected or quarantined. Physical category codes are implementation details and should not replace stable labels in an external interface.",
       "syntax": "to_arrow returns an Arrow Table; pl.from_arrow constructs a Polars result. Arrow columns expose type and null information, and to_pylist is a convenient small-fixture inspection method that creates Python objects. pl.Enum takes the ordered allowed labels. Casting an unknown label under strict behavior raises a real conversion error.",
       "math": "",
@@ -928,6 +1516,11 @@
         {
           "title": "Inspect a null bitmap conceptually",
           "task": "Explain why a null is separate from a numeric payload value.",
+          "reasoning": {
+            "why": "In Arrow each column has a values buffer plus a separate validity bitmap. In the reference frame the value column holds 2.0, null and 4.0, and Arrow reports null_count 1 for it.",
+            "wrong": "Encoding the missing value as 0.0 or NaN in the values buffer makes it a number, so a mean would include it and null_count would read 0.",
+            "verify": "Convert with frame.to_arrow() and check arrow.column('value').null_count == 1, then compare with a frame where the value is 0.0 and null_count is 0."
+          },
           "check": "The answer identifies validity metadata.",
           "hint": "A missing value is not necessarily a special numeric sentinel.",
           "answer": "Columnar validity allows an absent value to be represented independently of valid zero. This distinction must survive interoperability boundaries."
@@ -935,6 +1528,11 @@
         {
           "title": "Avoid a zero-copy claim",
           "task": "State what the round-trip test actually proves.",
+          "reasoning": {
+            "why": "to_arrow followed by from_arrow returning an equal frame proves the values, nulls and dtypes survived for these three rows, which is a logical claim.",
+            "wrong": "Concluding that the conversion copied no memory from a passing equality test is unsupported, and to_pylist definitely creates new Python objects.",
+            "verify": "Keep the claim to restored.equals(frame) being True; if memory matters, measure allocations or inspect buffer addresses for that specific path."
+          },
           "check": "It proves logical equality on the fixture.",
           "hint": "No allocation measurement was made.",
           "answer": "Inspect buffers or profile allocations for a specific conversion before making a performance claim. to_pylist explicitly constructs Python objects."
@@ -942,6 +1540,11 @@
         {
           "title": "Add a valid category",
           "task": "Extend the allowed states with returned.",
+          "reasoning": {
+            "why": "Extending pl.Enum to ['new', 'paid', 'shipped', 'returned'] makes returned a valid label, so casting it succeeds and it sorts after shipped.",
+            "wrong": "Changing only the data while keeping the three label Enum makes the cast raise, and editing only the code without a version note leaves consumers on the old list.",
+            "verify": "Cast pl.Series(['returned']) to the new Enum and check it succeeds, then confirm casting with the old three label Enum still raises."
+          },
           "check": "The cast accepts the new label under the revised contract.",
           "hint": "Vocabulary evolution changes the schema.",
           "answer": "Update the declared Enum and tests together. Downstream consumers need the same versioned vocabulary."
@@ -949,6 +1552,11 @@
         {
           "title": "Reject an unknown category",
           "task": "Add cancelled without changing the Enum.",
+          "reasoning": {
+            "why": "cancelled is not among new, paid and shipped, so a strict cast to the Enum raises InvalidOperationError rather than inventing a code.",
+            "wrong": "Replacing unknown labels with shipped before casting makes the cast pass and reports cancelled orders as shipped.",
+            "verify": "Run the answer code and assert rejected is True; the same pattern rejects unknown in example_two."
+          },
           "check": "Strict conversion rejects it.",
           "hint": "Unknown is not a synonym for null.",
           "answer": "Use a separate quarantine reason or deliberately evolve the vocabulary. Silently mapping it to shipped would create a false business state.",
@@ -957,6 +1565,11 @@
         {
           "title": "Compare sort policies",
           "task": "Compare business-order and alphabetical sorting.",
+          "reasoning": {
+            "why": "For new, paid and shipped the Enum order and alphabetical order coincide, so the fixture cannot reveal a difference. Adding returned after shipped can: business order puts it last, alphabetical puts it before shipped.",
+            "wrong": "Concluding from the three label fixture that the two sorts are interchangeable generalizes from a case where they happen to agree.",
+            "verify": "Sort a frame with all four labels once as the Enum and once cast to String, and compare: the Enum gives new, paid, shipped, returned while text gives new, paid, returned, shipped."
+          },
           "check": "Their orders can differ.",
           "hint": "Sort String and Enum representations separately.",
           "answer": "The correct order depends on the question. Keep ordered state semantics explicit instead of relying on hidden physical category codes."
@@ -964,6 +1577,11 @@
         {
           "title": "Design an interchange contract",
           "task": "List what a receiver needs beyond an Arrow object.",
+          "reasoning": {
+            "why": "An Arrow schema says value is a nullable float and status is a dictionary type, but not that value is in dollars, that rows are one per order, or that null means not yet measured.",
+            "wrong": "Sending only the Arrow table and assuming its schema documents the data leaves the receiver to guess grain, units and the meaning of nulls.",
+            "verify": "List grain, units, null policy, allowed categories and schema version in the contract, and have the consumer test the version and a key uniqueness check on arrival."
+          },
           "check": "It includes grain, units, null policy and schema version.",
           "hint": "A transport format cannot define domain meaning.",
           "answer": "Arrow carries structural types; your contract carries what identifiers and values mean. Add compatibility checks at the consumer boundary."
@@ -991,6 +1609,25 @@
       "concepts": ["list", "struct", "explode", "nested expression", "grain"],
       "prerequisites": ["polars-002", "polars-004"],
       "outcome": "Normalize nested events with an explicit population and identity contract.",
+      "key_terms": [
+        ["List column", "A column whose values are variable-length lists of one inner type."],
+        [
+          "Struct column",
+          "A column whose values are records of named fields, built with `pl.struct` and read with `struct.field`."
+        ],
+        [
+          "explode",
+          "An operation that turns each list element into its own row, changing the row grain and repeating the other columns."
+        ],
+        [
+          "Empty versus null list",
+          "An empty list is a known absence of items with `list.len` 0; a null list is unknown, and its length stays null."
+        ],
+        [
+          "list.eval",
+          "A method that applies an expression to each list's elements, referred to with `pl.element()`, without exploding rows."
+        ]
+      ],
       "theory": "Nested data is common in event payloads, transaction items and model outputs. A list holds a variable-length sequence inside one row; a struct combines named fields into one value with a defined internal schema. These representations can preserve relationships that would be awkward to encode as unrelated flat columns. Flattening them is a deliberate change in grain, not merely a display operation.\n\nExploding an item list turns one order record into multiple item records. Empty lists and absent lists require different interpretations: one can mean that no items were recorded, while the other can mean that the item information is unavailable. The first case makes an explicit eligible-order policy before exploding. This avoids relying on a library default to decide the analytical meaning of empty or missing collections.\n\nNative nested expressions retain the columnar model. list.eval applies an expression to elements of each list; struct.field extracts a named component. These operations make the intended shape visible to the engine. Python object loops may still be useful for unusual logic, but should not replace simple native transformations without a reason and a measured cost.",
       "syntax": "list.len returns list lengths while preserving null for an absent list. Filtering positive lengths before explode makes the item-grain population explicit. pl.struct packs named columns, and struct.field selects by name rather than position. Inside list.eval, pl.element refers to one list element, not an outer DataFrame column.",
       "math": "",
@@ -1010,6 +1647,11 @@
         {
           "title": "Separate empty from unknown",
           "task": "Create separate counts for an empty list and a null list.",
+          "reasoning": {
+            "why": "Order 2 has an empty list, so list.len() returns 0; order 3 has a null list, so its length is null and only is_null catches it. Each test counts one order.",
+            "wrong": "Using list.len() == 0 alone and treating its null result as 0 merges order 3 into the empty bucket and reports two empty orders and no unknown ones.",
+            "verify": "Run the answer code and assert counts.row(0) == (1, 1); example_one also shows the lengths as [2, 0, None]."
+          },
           "check": "There is one of each.",
           "hint": "A list length of 0 is not a null length.",
           "answer": "Use is_null and an explicit length comparison. Keep these categories separate in a coverage report.",
@@ -1018,6 +1660,11 @@
         {
           "title": "Change the grain",
           "task": "Write the key for the exploded item table.",
+          "reasoning": {
+            "why": "After explode, order 1 produces two rows, a and b, so order alone repeats. A position within the list, added with int_ranges or a with_row_index per order, makes (order, position) unique.",
+            "wrong": "Using (order, item) as the key fails as soon as one order lists the same item twice, since two real purchases then look like a duplicate.",
+            "verify": "Explode the fixture with a position column and assert select('order', 'position').is_unique().all(), while order alone is not unique."
+          },
           "check": "An order_id alone is no longer sufficient.",
           "hint": "One order may contain repeated item labels.",
           "answer": "Add a stable item position or item identifier when the source contract supports it. A repeated label is not necessarily a duplicate item."
@@ -1025,6 +1672,11 @@
         {
           "title": "Keep order-level metrics",
           "task": "Compute the original number of orders before exploding.",
+          "reasoning": {
+            "why": "Counting orders before explode gives 3 because each input row is one order. Afterwards the order column reads [1, 1, 3]: order 2 disappeared and order 1 appears twice.",
+            "wrong": "Counting rows of the exploded table as orders gives 3 by coincidence here, yet it includes order 1 twice and omits order 2, so the right number arrives for the wrong reason.",
+            "verify": "Run the answer code: orders_before is 3 and exploded['order'] is [1, 1, 3], then add a third item to order 1 and watch the exploded count drift to 4."
+          },
           "check": "The count remains 3.",
           "hint": "Do not infer orders from item rows.",
           "answer": "Item counts and order counts answer different questions. Retain an order-level table for denominators and join it carefully when summarizing items.",
@@ -1033,6 +1685,11 @@
         {
           "title": "Add a struct field",
           "task": "Add a third named coordinate and round-trip all fields.",
+          "reasoning": {
+            "why": "Fields in a struct are addressed by name, so adding z next to x and y and extracting struct.field('x'), 'y' and 'z' restores the original three columns.",
+            "wrong": "Unpacking struct values by position, for example from to_dicts to a tuple, silently swaps meanings if the next version stores z first.",
+            "verify": "Pack x, y and z with pl.struct, extract all three by name, and assert the result equals the input frame, as example_two does for two fields."
+          },
           "check": "All values and field names are preserved.",
           "hint": "Select fields by name.",
           "answer": "A schema version should explain the added field and its units. Positional unpacking can silently change meaning when fields are reordered."
@@ -1040,6 +1697,11 @@
         {
           "title": "Transform a nested value",
           "task": "Square each numeric element without a Python row loop.",
+          "reasoning": {
+            "why": "list.eval applies pl.element() * pl.element() inside each list, so [1, 2] becomes [1, 4] and [3] becomes [9] while each row keeps its own list.",
+            "wrong": "Exploding, squaring and grouping back works but needs a row key and can reorder or drop empty lists; a map_elements loop hides the operation in Python.",
+            "verify": "Run pl.DataFrame({'values': [[1, 2], [3]]}).select(pl.col('values').list.eval(pl.element() * pl.element())) and assert the lists are [[1, 4], [9]]."
+          },
           "check": "The lists become [[1, 4],[9]].",
           "hint": "Use list.eval with element expressions.",
           "answer": "pl.element()*pl.element() expresses the operation within each list. It preserves the list boundaries while changing the values."
@@ -1047,6 +1709,11 @@
         {
           "title": "Test null nested elements",
           "task": "Add a list containing a null element and define the policy.",
+          "reasoning": {
+            "why": "A list like [1, None] says the collection exists but one member is unknown, which differs from both an empty list and a null list.",
+            "wrong": "Applying drop_nulls inside the list before aggregating turns it into [1] and reports a complete basket of one.",
+            "verify": "Count null elements with list.eval(pl.element().is_null()).list.sum() before aggregating, and check what list.sum returns for [1, None] on your installed version instead of assuming it."
+          },
           "check": "The null remains visible unless explicitly handled.",
           "hint": "A missing element differs from a missing list.",
           "answer": "Decide whether the collection is partially observed, invalid or imputable. Do not erase the distinction merely to simplify a numeric aggregation."
@@ -1074,6 +1741,28 @@
       "concepts": ["asof join", "backward match", "tolerance", "availability time", "leakage"],
       "prerequisites": ["polars-006", "polars-007", "polars-009"],
       "outcome": "Reconstruct features using only information eligible at each prediction time.",
+      "key_terms": [
+        [
+          "join_asof",
+          "A join that matches each left row to the nearest right row by a sorted key instead of requiring equal keys."
+        ],
+        [
+          "Backward strategy",
+          "The as-of rule that takes the last right row whose key is at or before the left key, so no later row is used."
+        ],
+        [
+          "Tolerance",
+          "The largest allowed distance between matched keys; when the nearest eligible right row is farther away, the result is null."
+        ],
+        [
+          "Availability time",
+          "When a value became known; matching on it rather than event time keeps facts out until they were knowable."
+        ],
+        [
+          "Leakage",
+          "A feature that uses information not available at the prediction cutoff, which inflates measured accuracy."
+        ]
+      ],
       "theory": "An as-of join matches a record to a nearby key value rather than requiring exact equality. For historical features, a backward match can select the latest recorded feature at or before a request time. A forward match can select future information. The direction is therefore a scientific and deployment assumption, not a cosmetic option.\n\nA time key must be ordered within the relevant entity. A tolerance can prevent an old feature from being used beyond its permitted age. These controls still do not automatically establish what information was available when the prediction was made. A record may describe an old event but arrive much later. Reconstructing past decisions requires both event time and known/available time when late data or revisions are possible.\n\nThe second case uses a deliberately small candidate join to demonstrate the two-clock rule. It is inspectable, but a large unrestricted join can be expensive. The goal is to establish correct semantics first, then design an indexed or versioned implementation that preserves them. A feature-store product must be evaluated against this contract rather than assumed to solve every form of historical leakage.",
       "syntax": "join_asof uses sorted keys, a strategy and optional tolerance. For a backward lookup, verify that the matched feature time does not exceed the request cutoff. For bitemporal selection, filter candidates by both event<=cutoff and known<=cutoff, then choose the latest eligible version using a complete tie-break rule. Preserve requests with no eligible feature under an explicit missing-value policy.",
       "math": "Eligibility at prediction time \\(t\\) requires \\(t_{\\mathrm{event}}\\le t\\) and \\(t_{\\mathrm{known}}\\le t\\) under this policy. A freshness requirement additionally bounds \\(t-t_{\\mathrm{feature}}\\). The latest eligible record is selected only after these conditions are applied.",
@@ -1093,6 +1782,11 @@
         {
           "title": "Tighten freshness",
           "task": "Change tolerance from 2 to 0 in the first case.",
+          "reasoning": {
+            "why": "With tolerance 0, a backward as-of match must share the request time exactly; requests 2, 5 and 9 have no feature at those times, so every value is null.",
+            "wrong": "Reading the nulls as a bug and loosening tolerance back to 2 changes the freshness rule instead of deciding what to do with stale requests.",
+            "verify": "Run the answer code: values are [None, None, None], compared with [10, 20, 30] at tolerance 2 in example_one."
+          },
           "check": "No unequal-time feature is matched.",
           "hint": "A zero tolerance requires equal keys.",
           "answer": "This is a stricter freshness rule, not necessarily a better model. State what should happen when no feature qualifies.",
@@ -1101,6 +1795,11 @@
         {
           "title": "Add an entity key",
           "task": "Create two customers with overlapping timestamps.",
+          "reasoning": {
+            "why": "Passing by='customer' to join_asof restricts each search to rows of the same customer, so a request for customer 10 at time 5 cannot pick a customer 20 feature at time 4.",
+            "wrong": "Running the as-of join on time alone matches the nearest earlier row of any customer, which looks correct whenever customers do not overlap in time.",
+            "verify": "Build two customers with interleaved times, join with and without by, and assert every matched row has request customer equal to feature customer only in the by version."
+          },
           "check": "No match crosses customer identity.",
           "hint": "Temporal closeness alone is insufficient.",
           "answer": "Use the by key for grouped as-of matching or include entity identity in the candidate join. Validate sorting within each group."
@@ -1108,6 +1807,11 @@
         {
           "title": "Change availability",
           "task": "Move the late revision known time from 7 to 4.",
+          "reasoning": {
+            "why": "With known moved to 4, the revised value 999 satisfies event 4 <= 5 and known 4 <= 5, so it is legitimately available at cutoff 5 and becomes the latest row for request 1.",
+            "wrong": "Removing the known filter gives the same [999, 30] here, but example_two shows that version also returns 999 when known is 7, which is the leak.",
+            "verify": "Run the answer code and assert [999, 30]; then set known back to 7 and confirm the correct filter returns [10, 30]."
+          },
           "check": "It becomes eligible at cutoff 5.",
           "hint": "Apply the same inequality to both clocks.",
           "answer": "The feature value 999 can then be selected legitimately under the fixture, though its plausibility would still require a data-quality check.",
@@ -1116,6 +1820,11 @@
         {
           "title": "Test exact boundaries",
           "task": "Set a feature known time equal to the prediction cutoff.",
+          "reasoning": {
+            "why": "The filter uses known <= cutoff, so a feature known at exactly 5 is included for cutoff 5. Under a strict < rule it would be excluded.",
+            "wrong": "Mixing a strict rule in training with an inclusive rule at serving time gives features one tick fresher in one setting than the other.",
+            "verify": "Set one known value equal to a cutoff and run both <= and < filters; the row should appear only under the inclusive one."
+          },
           "check": "It is included only under the stated inclusive policy.",
           "hint": "Boundary conventions must be explicit.",
           "answer": "The example uses <=. A production system may use an ingestion watermark or transaction boundary that needs a stricter rule."
@@ -1123,6 +1832,11 @@
         {
           "title": "Preserve unmatched requests",
           "task": "Add a request before every available feature.",
+          "reasoning": {
+            "why": "A request with cutoff 1 has no feature with event and known at or before 1, so the inner join plus filter drops it entirely.",
+            "wrong": "Reporting coverage from the filtered candidates counts only requests that matched, so the missing request is invisible rather than flagged.",
+            "verify": "Left join the selected features back onto requests, assert the height equals the request count, and check the new request has a null value with a reason column such as no_feature_available."
+          },
           "check": "The request remains identifiable with a missing-feature reason.",
           "hint": "An inner candidate join can drop it.",
           "answer": "Retain the original request table and left-join selected features back to it. Report coverage before fitting or scoring."
@@ -1130,6 +1844,11 @@
         {
           "title": "Review a feature store",
           "task": "State the two temporal questions you would test in a real store.",
+          "reasoning": {
+            "why": "The two questions are whether the value was valid for that event time and whether the store would have returned it at the cutoff, mirroring the event and known filters here.",
+            "wrong": "Testing only that the store returns the latest value for each key passes even when that value arrived after the cutoff.",
+            "verify": "Load the 999 late revision into the store, request at cutoff 5, and compare with the independently computed answer of 10."
+          },
           "check": "They concern event validity and historical availability.",
           "hint": "A point-in-time API name is not complete evidence.",
           "answer": "Create a known late-arrival fixture and compare actual retrieval with an independently computed oracle. Record the supported semantics and any required upstream snapshot policy."
@@ -1157,6 +1876,28 @@
       "concepts": ["streaming", "in-memory engine", "sink", "stateful operator", "resource budget"],
       "prerequisites": ["polars-010", "polars-011"],
       "outcome": "Evaluate a query under an explicit engine and resource contract.",
+      "key_terms": [
+        [
+          "Streaming engine",
+          "The engine selected with `collect(engine=\"streaming\")` that processes a lazy query in batches."
+        ],
+        [
+          "In-memory engine",
+          "The engine selected with `collect(engine=\"in-memory\")` that materializes whole intermediate results in memory."
+        ],
+        [
+          "Sink",
+          "A method such as `sink_parquet` that writes a lazy query's output to a file instead of returning a DataFrame."
+        ],
+        [
+          "Stateful operator",
+          "An operation such as a join, sort or group aggregation that must retain state across batches, so memory can still grow."
+        ],
+        [
+          "Resource budget",
+          "The declared memory and time limit a run must respect, confirmed by measurement rather than assumed from the engine name."
+        ]
+      ],
       "theory": "Streaming execution processes suitable parts of a query in batches. This can reduce memory pressure and support writing results without materializing every output row as a Python object. It does not mean that every operator uses constant memory or that any dataset will fit any machine. Joins, sorting, distinct operations and high-cardinality group state still require resources determined by the query and data.\n\nThe first case compares two engines on the same lazy query and independently checks its numeric total. Engine selection is separated from correctness. The example is intentionally small, so its successful streaming execution is not a claim about an out-of-memory boundary or a production throughput rate. A meaningful capacity study needs controlled dataset size, measured peak memory and a defined machine budget.\n\nA sink can write a result directly to a file, while collect returns a DataFrame to the caller. The second case contrasts a row-preserving transformation with a global reduction. Both can be evaluated through a streaming path, but they produce different shapes and require different state. Output shape and operator semantics should guide the resource plan.",
       "syntax": "Specify collect(engine=\"streaming\") or collect(engine=\"in-memory\") to make the experiment reproducible against the prepared version. sink_parquet writes the result artifact. Use explicit sorting for equality checks when output order is not otherwise guaranteed. A streamable custom batch function must preserve the result under valid batch partitions; it cannot secretly depend on the full dataset.",
       "math": "",
@@ -1176,6 +1917,11 @@
         {
           "title": "Scale the fixture cautiously",
           "task": "Increase input size within a declared resource budget.",
+          "reasoning": {
+            "why": "Raising the row count while keeping group % 5 still lets you check against a Python formula, for example sum(i % 7 for i in range(100, n)) for the filtered query.",
+            "wrong": "Running a much larger input and recording only elapsed time drops the correctness check and invites claims far beyond the measured size.",
+            "verify": "Record n, engine and seconds, assert the streaming total equals the formula, and keep the in-memory and streaming results equal at that size."
+          },
           "check": "The exact result still matches the independent formula.",
           "hint": "Correctness must survive the scale change.",
           "answer": "Record input size, engine and elapsed time. Do not extrapolate a tiny fixture into a production memory claim."
@@ -1183,6 +1929,11 @@
         {
           "title": "Change grouping cardinality",
           "task": "Use a nearly unique grouping key.",
+          "reasoning": {
+            "why": "Grouping 1000 ids by id % 5 yields 5 groups, while id // 2 yields 500. The engine must hold a partial sum for every group until the input ends.",
+            "wrong": "Assuming streaming keeps memory flat regardless of key count ignores that 500 partial aggregates need 100 times the state of 5.",
+            "verify": "Run the answer code and assert heights (5, 500); for a real study vary key cardinality and record peak memory with a process tool."
+          },
           "check": "The result has many more groups.",
           "hint": "Batch processing can still accumulate group state.",
           "answer": "Explain why group cardinality affects memory. Streaming does not erase the state required to retain a result for each key.",
@@ -1191,6 +1942,11 @@
         {
           "title": "Compare collect and sink",
           "task": "Write the same query directly to Parquet.",
+          "reasoning": {
+            "why": "sink_parquet writes the result to a file instead of returning it, but the query and its values are the same, so readback sorted by group equals the collected frame.",
+            "wrong": "Writing the sink into the same folder the scan globs can feed result.parquet back into the next run.",
+            "verify": "As in example_one, read the sink file, sort by group and assert equality with query.collect(engine='streaming')."
+          },
           "check": "Readback equals the collected result.",
           "hint": "Inspect the actual output artifact.",
           "answer": "The sink changes how the caller receives output, not the intended values. Keep artifact paths separate from input globs."
@@ -1198,6 +1954,11 @@
         {
           "title": "Include a global sort",
           "task": "Add an ordered output requirement.",
+          "reasoning": {
+            "why": "The consumer needs groups in order 0 to 4, so sort('group') is part of the query and part of what any timing measures.",
+            "wrong": "Timing the query without sort and adding it later reports a faster number for output that does not meet the contract.",
+            "verify": "Run the answer code and assert ordered['group'] is [0, 1, 2, 3, 4]; include the sort inside any timing loop."
+          },
           "check": "The result obeys the declared order.",
           "hint": "Ordering can require additional coordination and state.",
           "answer": "Measure the query with that requirement included. Removing the sort to obtain a faster number changes the delivered contract.",
@@ -1206,6 +1967,11 @@
         {
           "title": "Reject a false batch claim",
           "task": "Explain why subtracting a full-dataset mean is not independently streamable by arbitrary batches.",
+          "reasoning": {
+            "why": "Centering by the full mean needs a value that depends on every row. Example_two in polars-016 shows that batches [1, 2] and [3, 10] give [-0.5, 0.5, -3.5, 3.5] instead of [-3, -2, -1, 6].",
+            "wrong": "Calling the batched version streaming compatible because each batch runs independently confuses executing in batches with computing the intended global result.",
+            "verify": "Compute the mean over all rows first, then subtract it; check the two pass output equals the single pass global result."
+          },
           "check": "The answer identifies dependence on global state.",
           "hint": "Each batch has a different mean.",
           "answer": "A two-pass or accumulated-statistic algorithm can implement the global operation. Centering each batch separately produces a different result."
@@ -1213,6 +1979,11 @@
         {
           "title": "Report limitations",
           "task": "Write a capacity conclusion supported by this fixture.",
+          "reasoning": {
+            "why": "The fixture supports only this claim: on 1000 rows and this machine the in-memory and streaming engines gave identical sums, here 2702 for ids 100 to 999.",
+            "wrong": "Writing that the pipeline scales to production size extrapolates far beyond 1000 rows without a measured boundary.",
+            "verify": "Have someone else read the conclusion and check that every number in it appears in the run's recorded inputs or outputs."
+          },
           "check": "The conclusion is bounded to tested sizes and settings.",
           "hint": "A successful process is a lower bound on what worked.",
           "answer": "State the observed inputs, resource configuration and outputs. A maximum supported dataset size requires a separate controlled boundary study."
@@ -1237,6 +2008,28 @@
       "concepts": ["UDF", "purity", "return dtype", "batch equivalence", "optimizer contract"],
       "prerequisites": ["polars-002", "polars-010", "polars-015"],
       "outcome": "Use a Python UDF only with an explicit value, type and batching contract.",
+      "key_terms": [
+        [
+          "UDF",
+          "A user-defined Python function applied to data, which the query optimizer cannot inspect."
+        ],
+        [
+          "map_elements",
+          "A method that calls a Python function for values one at a time; it is slower than a native expression and blocks optimization."
+        ],
+        [
+          "return_dtype",
+          "The declared output type of a UDF, so Polars does not have to infer the type from the results."
+        ],
+        [
+          "Pure function",
+          "A function whose output depends only on its input, with no hidden state or side effects."
+        ],
+        [
+          "Batch equivalence",
+          "A batch function must give the same result however rows are split; a mean taken per batch differs from the global mean."
+        ]
+      ],
       "theory": "A Python user-defined function can express logic that is not available as a native expression. Crossing that boundary can add interpreter overhead, reduce optimization opportunities and introduce hidden state. The right question is whether the extra flexibility is required by the problem and whether its semantics remain valid under the execution strategy.\n\nA return dtype is part of the function contract. It helps the engine reason about downstream operations and avoids relying on accidental inference from an early value. A pure function returns a result from its inputs without depending on mutable external state, time, random global draws or side effects. This is especially important when an engine can evaluate a function in more than one batch or order.\n\nBatch equivalence is stronger than purity alone. Subtracting the mean of each batch is deterministic and pure, but does not equal subtracting the mean of the complete dataset. A streamable declaration must be justified by the operation, not used as a performance switch. The worked counterexample shows two different answers from the same values.",
       "syntax": "map_elements calls a Python function for values and should declare return_dtype. Compare it with the corresponding native expression before choosing the more expensive interface. The batched counterexample uses ordinary Python arithmetic to expose a semantic issue independently of any query optimizer. A real map_batches adapter additionally needs its output schema and optimization assumptions to be correct.",
       "math": "",
@@ -1256,6 +2049,11 @@
         {
           "title": "Replace the UDF",
           "task": "Write the square operation using column expressions only.",
+          "reasoning": {
+            "why": "pl.col('x').pow(2) is a native expression the engine can see and vectorize, and on [1, 2, 3] it gives [1, 4, 9], matching the map_elements version from example_one.",
+            "wrong": "Keeping the lambda and only setting return_dtype still runs Python once per row and blocks optimizations that need to inspect the expression.",
+            "verify": "Run the answer code and assert [1, 4, 9], then compare with the UDF output via native.equals(udf)."
+          },
           "check": "The values remain [1, 4, 9].",
           "hint": "Use multiplication on the selected column.",
           "answer": "The native expression keeps semantics visible to the engine. Removing Python callbacks is useful when the native operation actually expresses the same logic.",
@@ -1264,6 +2062,11 @@
         {
           "title": "State a return type",
           "task": "Explain what a UDF returning integers should declare.",
+          "reasoning": {
+            "why": "map_elements cannot infer a dtype reliably before running, so declaring return_dtype=pl.Int64 states what the column should hold and lets the schema be known in advance.",
+            "wrong": "Omitting return_dtype lets Polars guess from the first values, so a column of small values today may get a different dtype than one with large values tomorrow.",
+            "verify": "Declare pl.Int64 in the UDF, then check frame.select(...).schema shows Int64 and that a value above the Int64 range is rejected or handled by a test."
+          },
           "check": "It declares the intended integer dtype.",
           "hint": "Schema inference is not a domain specification.",
           "answer": "Choose a dtype that can represent the permitted range, and test overflow or missing output under the intended policy."
@@ -1271,6 +2074,11 @@
         {
           "title": "Change batch boundaries",
           "task": "Center [1, 2, 3, 10] in a different partition.",
+          "reasoning": {
+            "why": "With batches [1] and [2, 3, 10], each batch subtracts its own mean, giving [0, -3, -2, 5], while the global result stays [-3, -2, -1, 6].",
+            "wrong": "Assuming batch size does not matter because each batch looks centered ignores that the means 1 and 5 differ from the global 4.",
+            "verify": "Compute both partitions in plain Python as example_two does and assert the batch outputs differ from each other and from the global one."
+          },
           "check": "The batchwise answer changes while the global answer does not.",
           "hint": "Try three values in the first batch.",
           "answer": "The batch mean depends on the partition. That is why a partition-independent declaration would be false for this implementation."
@@ -1278,6 +2086,11 @@
         {
           "title": "Find a weak check",
           "task": "Explain why a zero-sum check misses the centering defect.",
+          "reasoning": {
+            "why": "Both the batched output [-0.5, 0.5, -3.5, 3.5] and the global output [-3, -2, -1, 6] sum to zero, so a sum check cannot tell them apart.",
+            "wrong": "Treating zero sum as proof of correct centering passes the defect, because any per batch centering also sums to zero.",
+            "verify": "Compare against an independently computed list such as x minus 4.0 for each value, which fails for the batched output."
+          },
           "check": "Both incorrect and correct outputs can sum to zero.",
           "hint": "Check identified intermediate values.",
           "answer": "Use an independent row-level oracle or a property that distinguishes the intended operation. A convenient invariant may be necessary but insufficient."
@@ -1285,6 +2098,11 @@
         {
           "title": "Introduce hidden state",
           "task": "Describe the risk of incrementing a global counter inside a UDF.",
+          "reasoning": {
+            "why": "A counter incremented inside the UDF depends on how many times and in what order Polars calls it, which can change with threads, batching or optimization.",
+            "wrong": "Using that counter as a row id works on a small single threaded run and then produces gaps or repeats under a different engine.",
+            "verify": "Use with_row_index for identity and pl.len() for counts, and test by running the query with two engines and comparing ids."
+          },
           "check": "Output can depend on evaluation order or batching.",
           "hint": "The engine controls evaluation strategy.",
           "answer": "Keep counters outside the value transformation for diagnostics, or compute counts with explicit reductions. Do not use callback side effects as record identity."
@@ -1292,6 +2110,11 @@
         {
           "title": "Design a valid two-pass method",
           "task": "Explain how to perform global centering in bounded stages.",
+          "reasoning": {
+            "why": "Stage one computes the mean of [1, 2, 3, 10], which is 4.0. Stage two subtracts that constant from every row, so batches can run freely because the constant does not depend on them.",
+            "wrong": "Computing the mean on all data including validation rows makes the two pass method correct numerically but leaks held out information.",
+            "verify": "Store the stage one mean, apply stage two over any partition, and assert [-3, -2, -1, 6] regardless of how rows are split."
+          },
           "check": "First obtain the global mean, then subtract that fixed value.",
           "hint": "Separate estimation from application.",
           "answer": "The first stage aggregates sufficient information. The second uses a constant derived from that declared population. Keep both stages within the correct train/time boundary."
@@ -1319,6 +2142,28 @@
       "concepts": ["benchmark", "cache regime", "median", "result equality", "memory estimate"],
       "prerequisites": ["polars-010", "polars-015", "polars-016"],
       "outcome": "Produce a reviewable performance comparison with a correctness oracle.",
+      "key_terms": [
+        [
+          "Measurement interval",
+          "The timed region, here `perf_counter` readings around only the `collect` call, that a reported duration covers."
+        ],
+        [
+          "Cache regime",
+          "Whether a timing ran warm, with data and code already cached, or cold; timings from different regimes are not comparable."
+        ],
+        [
+          "Median",
+          "The middle of repeated timings, which resists occasional slow outliers better than the mean."
+        ],
+        [
+          "Bag versus sequence equality",
+          "Bag equality compares rows as a multiset, ignoring order; sequence equality also requires the same order."
+        ],
+        [
+          "estimated_size",
+          "A DataFrame method that estimates the frame's buffer size in bytes, not the process peak or every temporary allocation."
+        ]
+      ],
       "theory": "A timing number becomes useful only when the measured work is defined. Query construction, schema discovery, file I/O, computation, conversion to Python objects and serialization can contribute different costs. A benchmark that times only construction of a lazy object has not measured execution. A warm repeated query over an in-memory frame is also different from a cold read of a newly opened dataset.\n\nThe first case collects the query on every repetition and checks its answer. It reports a median across a small number of observations rather than declaring the smallest observed value to be a stable property. The fixture is deliberately modest so it can run inside the classroom budget. No assertion says that one engine must beat another, because tiny timings are noisy and hardware dependent.\n\nPerformance comparisons must preserve the output contract. An unordered result can be compared as a set or multiset when order is irrelevant; an ordered consumer needs the sorting cost included. The second case distinguishes bag equality from sequence equality. This prevents a supposed optimization from silently removing an ordering requirement.",
       "syntax": "perf_counter measures elapsed time around the actual collect call. Record the engine and the number of repetitions. estimated_size describes the frame's buffer estimate, not the whole process peak or every temporary allocation. Sort only when that is part of the intended comparison, and account for its cost explicitly.",
       "math": "",
@@ -1338,6 +2183,11 @@
         {
           "title": "Include file I/O",
           "task": "Move fixture creation outside timing and measure a fresh file scan separately.",
+          "reasoning": {
+            "why": "Writing the fixture to Parquet is setup; reading it with scan_parquet is part of the query. Timing them separately shows how much of the number is file reading.",
+            "wrong": "Starting the timer before the frame is built adds Python list creation for 20,000 rows to a number reported as query time.",
+            "verify": "Report setup seconds, scan plus query seconds and query only seconds as separate lines, each with the file size and whether the file was freshly written."
+          },
           "check": "The report identifies what was included.",
           "hint": "Setup and timed work are different phases.",
           "answer": "Do not count fixture generation as query execution unless that is the workflow under evaluation. Record the filesystem and cache conditions where relevant."
@@ -1345,6 +2195,11 @@
         {
           "title": "Vary scale",
           "task": "Repeat at two declared input sizes.",
+          "reasoning": {
+            "why": "Both sizes compare against a plain Python sum: 747450 for 20,000 rows and 7474500 for 200,000 rows, because each block of 101 values contributes the same amount.",
+            "wrong": "Reporting only the two timings and calling the ratio linear scaling turns two points without a correctness check into a growth claim.",
+            "verify": "Run the answer code so both assertions pass, then record time per row at each size and state that two points do not establish a curve."
+          },
           "check": "Answers remain correct at both sizes.",
           "hint": "Keep the data-generation rule stable.",
           "answer": "A scaling observation requires comparable work and resource settings. Two points do not establish a universal complexity curve or an operational capacity limit.",
@@ -1353,6 +2208,11 @@
         {
           "title": "Report variability",
           "task": "Keep every timing rather than only the fastest.",
+          "reasoning": {
+            "why": "Keeping all five raw timings shows spread; the median summarizes them without hiding a slow first run caused by warmup or caching.",
+            "wrong": "Reporting only the minimum picks the luckiest run and makes the query look faster than a typical execution.",
+            "verify": "Run the answer code, then check len(raw_seconds) == 5 and that median_seconds lies between min and max of the raw list."
+          },
           "check": "The raw repetitions and a summary are available.",
           "hint": "A median does not replace raw observations.",
           "answer": "Report the distribution and context. Large variability may come from scheduling, I/O caches, compilation or background activity.",
@@ -1361,6 +2221,11 @@
         {
           "title": "Avoid a false memory claim",
           "task": "Explain why estimated_size is not process peak memory.",
+          "reasoning": {
+            "why": "estimated_size reports the bytes of the frame's buffers, about the fixture data, not the process peak during a query, which includes temporaries, the Python runtime and allocator overhead.",
+            "wrong": "Quoting fixture_bytes from example_one as memory use understates the peak and says nothing about the query's intermediate state.",
+            "verify": "Measure process peak with a tool such as resource.getrusage before and after the query, and report it beside estimated_size with their definitions."
+          },
           "check": "The answer names temporary and runtime overhead.",
           "hint": "Buffer size is one component.",
           "answer": "Use an appropriate process-level measurement for a peak claim, and specify whether shared buffers and child processes are counted."
@@ -1368,6 +2233,11 @@
         {
           "title": "Preserve sorting cost",
           "task": "Compare two queries whose consumers require ordered rows.",
+          "reasoning": {
+            "why": "If both consumers require rows sorted, the sort belongs in both timed queries. Example_two shows a shuffled frame equals the sorted one only after sorting.",
+            "wrong": "Dropping the sort from one query makes it look faster while it delivers a sequence like the shuffled one, which fails an ordered consumer.",
+            "verify": "Include sort in both timings and assert each output equals its sorted version; if order truly is irrelevant, compare with sort applied before equality."
+          },
           "check": "Both timings include the required order.",
           "hint": "Equivalent values alone are insufficient.",
           "answer": "Removing sort changes the delivered contract. If order is unnecessary, document that decision and compare multiset equality instead."
@@ -1375,6 +2245,11 @@
         {
           "title": "Write a bounded conclusion",
           "task": "Summarize what the benchmark demonstrates.",
+          "reasoning": {
+            "why": "The benchmark shows the filtered sum 747450 on 20,000 rows with the in-memory engine and a median time on this machine; nothing about other data or concurrency.",
+            "wrong": "Stating rows per second as a production throughput figure ignores the representative data, concurrency and failure handling such a claim needs.",
+            "verify": "Check the conclusion names the row count, engine, Polars version and whether I/O was included, and that it claims nothing outside those settings."
+          },
           "check": "It names data size, engine, version and measurement scope.",
           "hint": "Do not generalize from one machine.",
           "answer": "State the measured result and uncertainty. A claim about production throughput needs representative data, concurrency, failure behavior and service-level requirements."
@@ -1399,6 +2274,28 @@
       "concepts": ["data contract", "deduplication", "quarantine", "artifact hash", "readback"],
       "prerequisites": ["polars-006", "polars-011", "polars-014", "polars-017"],
       "outcome": "Publish a feature artifact with explicit derivation and consumption contracts.",
+      "key_terms": [
+        [
+          "Data contract",
+          "The declared columns, types, keys and value rules that published rows must satisfy."
+        ],
+        [
+          "Deduplication",
+          "Removing repeated events with `unique(subset=...)`, which is justified only when the repeats have identical content."
+        ],
+        [
+          "Quarantine",
+          "Holding rows that violate the contract apart with a reason instead of publishing them or silently dropping them."
+        ],
+        [
+          "Artifact hash",
+          "A sha256 digest of the written file's bytes, which identifies exact bytes, not logical equality of the data."
+        ],
+        [
+          "Readback receipt",
+          "A JSON record of the contract and the file's SHA-256 hash, written after the published file is read back and checked."
+        ]
+      ],
       "theory": "The final case combines several contracts rather than introducing another table method. Raw events arrive with identifiers, customer keys, textual amounts and event times. One event is repeated and another has an invalid amount. A reliable pipeline should account for both before publishing a customer-level feature table. A final total alone cannot explain which records were rejected or duplicated.\n\nThe deduplication in this fixture is justified because the repeated event has identical content. Conflicting versions of one event would require a reviewed ordering or conflict policy; unique(subset=...) must not arbitrarily choose a winner in that situation. The accepted rows then produce one result per customer, with an event count beside the amount total. This makes the change from event grain to customer grain explicit.\n\nThe second case writes a typed artifact and a receipt containing its hash, schema, row count and grain. A cryptographic hash establishes byte identity, not correctness or authenticity by itself. Readback checks the published content, while the earlier row accounting checks how it was derived. In a durable system, publication would also need ownership, atomicity, lineage and a retention policy.",
       "syntax": "Parse into a new field, isolate invalid rows, apply the declared duplicate rule and only then aggregate. Use a stable sort before publishing an ordered result. write_parquet creates the typed output; hashlib.sha256 records its exact bytes; a JSON receipt makes the contract inspectable. A hash can legitimately change when a library writes an equivalent Parquet encoding, so distinguish byte identity from logical equality.",
       "math": "",
@@ -1418,6 +2315,11 @@
         {
           "title": "Introduce conflicting duplicates",
           "task": "Change one repeated event amount while keeping its id.",
+          "reasoning": {
+            "why": "Event 2 appears twice with amount 7. If one copy is changed to 8, the rows are no longer identical, so unique on event_id would keep one arbitrarily and the total for customer 10 becomes 12 or 13.",
+            "wrong": "Keeping unique(subset='event_id') unchanged hides the conflict, because it silently keeps one version without saying the copies disagreed.",
+            "verify": "Group valid rows by event_id and assert n_unique of amount is 1 for each; with the 8 the check fails for event 2 and the pipeline stops or applies a stated rule."
+          },
           "check": "The pipeline explicitly rejects or resolves the conflict under a stated rule.",
           "hint": "Identical retries differ from conflicting versions.",
           "answer": "Compare content per event_id before selecting a record. A version timestamp or authority rule must be justified; arbitrary first/last selection is not a data contract."
@@ -1425,6 +2327,11 @@
         {
           "title": "Reconcile the source",
           "task": "Write the complete row-accounting equation.",
+          "reasoning": {
+            "why": "Classification runs in order: event 3 with bad is invalid first, then among the four valid rows the second event 2 is a duplicate, leaving 3 accepted, so 5 = 3 + 1 + 1.",
+            "wrong": "Deduplicating before parsing still yields 5 = 3 + 1 + 1 here, but if a duplicate were also invalid it would be counted in two categories.",
+            "verify": "Run the answer code and assert (5, 3, 1, 1) and raw.height == accepted + invalid + duplicates."
+          },
           "check": "5 source rows = 3 accepted unique + 1 invalid + 1 duplicate.",
           "hint": "Keep categories mutually exclusive.",
           "answer": "Apply classification in a documented order and verify identifiers in each outcome. Ambiguous overlap makes reported quality counts unreliable.",
@@ -1433,6 +2340,11 @@
         {
           "title": "Check final grain",
           "task": "Assert one output row per customer.",
+          "reasoning": {
+            "why": "The result has customers 10 and 20, one row each, with totals 12 and 9 that sum to 21, the amounts of the three accepted events.",
+            "wrong": "Checking only that totals look reasonable misses a fanout that leaves totals unchanged, such as a duplicated customer row with total 0.",
+            "verify": "Assert result['customer'].n_unique() == result.height and result['total'].sum() == clean['amount'].sum() == 21."
+          },
           "check": "Unique customer count equals output height.",
           "hint": "An aggregate should have a declared key.",
           "answer": "Validate the final key and compare additive totals with accepted events. This checks both shape and quantity preservation."
@@ -1440,6 +2352,11 @@
         {
           "title": "Tamper with an artifact",
           "task": "Change the output bytes after writing its receipt.",
+          "reasoning": {
+            "why": "Changing total for customer 20 from 9 to 10 and rewriting the file changes its bytes, so the new SHA-256 differs from the recorded one.",
+            "wrong": "Trusting the receipt because it sits next to the file fails when the same writer can replace both; a hash only detects change, not who made it.",
+            "verify": "Run the answer code and assert the recomputed hash differs; then restore 9, rewrite, and check whether the hash matches again on your Polars version."
+          },
           "check": "The hash check detects the difference.",
           "hint": "A stored hash describes particular bytes.",
           "answer": "Recompute and compare before consuming the artifact. A new matching hash written by the same attacker would need an authenticity boundary that this local example does not provide.",
@@ -1448,6 +2365,11 @@
         {
           "title": "Distinguish two equalities",
           "task": "Explain byte identity versus logical table equality.",
+          "reasoning": {
+            "why": "Byte identity says two files are the same encoding; logical equality says pl.read_parquet returns equal frames. A different compression or writer version can change bytes with identical tables.",
+            "wrong": "Using a changed hash as proof that the data changed fails when only the encoding or writer version changed.",
+            "verify": "Write the same frame with two compression settings, assert the hashes may differ while pl.read_parquet(...).equals holds for both."
+          },
           "check": "The explanation allows equivalent encodings with different hashes.",
           "hint": "Parquet metadata and encoding choices can differ.",
           "answer": "Use hashes for exact artifacts and schema/value checks for a logical transformation contract. Record the writer version when byte reproducibility matters."
@@ -1455,6 +2377,11 @@
         {
           "title": "Design the next boundary",
           "task": "Specify what a model-training consumer must verify.",
+          "reasoning": {
+            "why": "A training consumer needs the schema with customer and total types, one row per customer, the cutoff that features were available by, null policy, and the receipt hash for identity.",
+            "wrong": "Checking only that the file opens and has rows accepts a stale or future dated feature set with the right columns.",
+            "verify": "Write a consumer test that rejects a wrong schema version, a duplicated customer, a hash mismatch and a feature time after the training cutoff."
+          },
           "check": "It includes schema, grain, availability, missingness and data identity.",
           "hint": "A readable file is not necessarily suitable training input.",
           "answer": "The consumer should validate its expected version and reject incompatible or temporally invalid features. The ML engineering path carries these checks into training and serving."

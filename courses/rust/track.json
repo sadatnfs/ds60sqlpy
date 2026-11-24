@@ -448,7 +448,7 @@
         "Path",
         "Cleanup ownership"
       ],
-      "outcome": "Write and read files as bytes or UTF-8 and remove owned temporary files on every path.",
+      "outcome": "Write and read files as bytes or UTF-8, remove owned temporary files on the normal path and use a guard type to cover early returns.",
       "lab": "Create an owned temporary-file round trip for a report.",
       "verification": "The report reads back unchanged and the temporary file is removed."
     },

@@ -199,6 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Write reusable functions with explicit contracts and distinguish local rebinding from mutation of a passed object.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
 <p>Open <code>julia-006</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a small configurable transformation) and worked case B (rebinding and mutation are different) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-006: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Keyword argument:</strong> A named argument declared after a semicolon, such as <code>tol = 1e-8</code>, that callers pass by name and that does not take part in dispatch.</li>
+<li><strong>Closure:</strong> A function that captures variables from the scope where it is defined and can read them after that scope ends.</li>
+<li><strong>Higher-order function:</strong> A function such as <code>map</code>, <code>filter</code> or <code>reduce</code> that accepts another function as an argument.</li>
+<li><strong>Pass by sharing:</strong> A function receives the caller&#x27;s object itself, so mutating an array argument changes what the caller sees.</li>
+<li><strong>Bang convention:</strong> A trailing <code>!</code> in a name such as <code>sort!</code> warns that the function mutates one or more of its arguments.</li>
+</ul>
 <h3 id="a-function-describes-a-reusable-transformation">A function describes a reusable transformation<a class="heading-anchor" href="#a-function-describes-a-reusable-transformation" aria-label="Link to this section">#</a></h3>
 <p>A function receives arguments and returns a value. Julia permits several methods for one function name; later lessons explain dispatch. First focus on the contract: valid inputs, the returned result, mutation and failure behavior. Explicit <code>return</code> statements can make that contract easy to read even though Julia also returns the final expression of a function body.</p>
 <p>Positional arguments are supplied by their position. Keyword arguments name a choice such as a scale or threshold. Defaults are part of the API and should not be used to hide an important scientific assumption. A caller should be able to determine which configuration produced a result.</p>

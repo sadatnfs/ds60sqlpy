@@ -195,24 +195,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-005-explained-reference">julia-005: explained reference<a class="heading-anchor" href="#julia-005-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-005_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Trace every loop by its iterable. Ranges such as <code>1:3</code> include both endpoints, <code>1:0</code> is empty, and a descending range needs a negative step. <code>sum_range</code> starts its accumulator at 0, so its empty result is 0. Positions come from <code>eachindex</code> or <code>enumerate</code>, and accumulation lives inside a function so its state is local.</p>
 <h3 id="1-count-an-inclusive-range">1. Count an inclusive range<a class="heading-anchor" href="#1-count-an-inclusive-range" aria-label="Link to this section">#</a></h3>
 <p>Inclusive syntax must match the intended number of observations.</p>
 <p><strong>Expected observation:</strong> The range contains 1, 2 and 3.</p>
+<p><strong>Why it holds here:</strong> <code>1:3</code> includes both endpoints, so it holds three values: 1, 2 and 3.</p>
+<p><strong>Plausible wrong approach:</strong> Expecting Python-like half-open ranges predicts two values and leaves the last observation out of every loop.</p>
+<p><strong>How to verify:</strong> Check <code>collect(1:3) == [1, 2, 3]</code> and <code>length(1:3) == 3</code>, the latter already in the reference.</p>
 <h3 id="2-use-zero-iterations">2. Use zero iterations<a class="heading-anchor" href="#2-use-zero-iterations" aria-label="Link to this section">#</a></h3>
 <p>The accumulator policy determines the empty-input result; other algorithms may need to reject emptiness.</p>
 <p><strong>Expected observation:</strong> The result is its initial zero.</p>
+<p><strong>Why it holds here:</strong> <code>1:0</code> is empty, so the loop body in <code>sum_range</code> never runs and <code>total</code> keeps its starting value 0.</p>
+<p><strong>Plausible wrong approach:</strong> Assuming every loop runs at least once predicts an error or a garbage value, when the accumulator simply returns its initial state.</p>
+<p><strong>How to verify:</strong> Assert <code>sum_range(1:0) == 0</code> and <code>[i for i = 1:0] == Int[]</code>, which the reference also checks.</p>
 <h3 id="3-descend-explicitly">3. Descend explicitly<a class="heading-anchor" href="#3-descend-explicitly" aria-label="Link to this section">#</a></h3>
 <p>A positive default step does not produce the requested descending traversal.</p>
 <p><strong>Expected observation:</strong> Use 3:-1:1.</p>
+<p><strong>Why it holds here:</strong> <code>3:-1:1</code> starts at 3 and adds -1 until it passes 1, giving 3, 2 and 1.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>3:1</code> produces an empty range, because the default step is +1 and 3 is already past the stop.</p>
+<p><strong>How to verify:</strong> Compare <code>collect(3:-1:1)</code> with <code>[3, 2, 1]</code> and <code>isempty(3:1)</code> with <code>true</code>.</p>
 <h3 id="4-keep-identity-separate">4. Keep identity separate<a class="heading-anchor" href="#4-keep-identity-separate" aria-label="Link to this section">#</a></h3>
 <p>Record identity, position and measurement are distinct roles.</p>
 <p><strong>Expected observation:</strong> Positions are 1 and 2; values remain 10 and 20.</p>
+<p><strong>Why it holds here:</strong> <code>enumerate([10, 20])</code> yields pairs <code>(1, 10)</code> and <code>(2, 20)</code>, keeping positions separate from measured values.</p>
+<p><strong>Plausible wrong approach:</strong> Indexing with the values, as in <code>v[10]</code>, treats a measurement as a position and throws <code>BoundsError</code> on a two-element vector.</p>
+<p><strong>How to verify:</strong> Collect <code>enumerate([10, 20])</code> and compare it with <code>[(1, 10), (2, 20)]</code>; the reference checks <code>eachindex([4, 5])</code> gives 1 and 2.</p>
 <h3 id="5-avoid-an-unnecessary-collection">5. Avoid an unnecessary collection<a class="heading-anchor" href="#5-avoid-an-unnecessary-collection" aria-label="Link to this section">#</a></h3>
 <p>This changes materialization, but performance claims still need a measured workload.</p>
 <p><strong>Expected observation:</strong> A generator can supply the reduction directly.</p>
+<p><strong>Why it holds here:</strong> <code>sum(i^2 for i in 1:3 if isodd(i))</code> feeds 1 and 9 directly to <code>sum</code>, giving 10 without allocating an intermediate array.</p>
+<p><strong>Plausible wrong approach:</strong> Claiming the generator is faster without timing assumes allocation dominates, which this tiny input cannot show either way.</p>
+<p><strong>How to verify:</strong> Assert the generator sum equals <code>sum([i^2 for i in 1:3 if isodd(i)])</code>; the reference checks <code>sum(i for i = 1:3) == 6</code>.</p>
 <h3 id="6-trace-scope">6. Trace scope<a class="heading-anchor" href="#6-trace-scope" aria-label="Link to this section">#</a></h3>
 <p>Explicit inputs and outputs make both reasoning and runtime specialization easier to inspect.</p>
-<p><strong>Expected observation:</strong> Its local state is recreated on every call.</p></article>
+<p><strong>Expected observation:</strong> Its local state is recreated on every call.</p>
+<p><strong>Why it holds here:</strong> Inside <code>sum_range</code>, <code>total = 0</code> runs on every call, so <code>sum_range(-2:2)</code> gives 0 and <code>sum_range(2:2)</code> gives 2 independently.</p>
+<p><strong>Plausible wrong approach:</strong> Updating a top-level <code>total</code> inside a script&#x27;s <code>for</code> loop triggers the soft-scope ambiguity warning and then an undefined-variable error.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>sum_range(2:2) == 2</code> and <code>sum_range(-2:2) == 0</code>; call them in either order and expect the same results.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-005: all reference checks passed</code>:</p>
+<p>Each assertion covers a boundary of a counting loop. <code>sum_range(2:2)</code> has exactly one element, <code>-2:2</code> cancels to zero, and <code>1:0</code> is empty so the comprehension yields <code>Int[]</code>. <code>sum(i for i = 1:3) == 6</code> checks a generator without building an array, and <code>eachindex([4, 5])</code> returns the positions 1 and 2, not the stored values 4 and 5. A loop that started at zero would break the length check.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> sum_range<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+    <span class="syntax-decorator">@test</span> sum_range<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-operator">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+    <span class="syntax-decorator">@test</span> length<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-punctuation">[</span>i <span class="syntax-keyword">for</span> i <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-operator">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-keyword">Int</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> sum<span class="syntax-punctuation">(</span>i <span class="syntax-keyword">for</span> i <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-operator">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">6</span>
+    <span class="syntax-decorator">@test</span> collect<span class="syntax-punctuation">(</span>eachindex<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

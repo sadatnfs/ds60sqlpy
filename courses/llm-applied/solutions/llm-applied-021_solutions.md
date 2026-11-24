@@ -1,16 +1,16 @@
 # llm-applied-021: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Open these answers for optional pretrained-model adaptation with pinned offline artifacts only after attempting *Inspect the pinned artifact contract* through *Distinguish an unexecuted learner scenario*. A discrepancy in *Separate acquisition from execution* can be traced to one step because the inputs match the guide. This page explains why each answer tests pinned revision and offline asset manifest.
 
 ## Mechanism review
 
 A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights, tokenizer files, chat templates, library versions, artifact licenses and larger resource needs. These are part of the experiment, not setup trivia. A model name pointing to a moving branch is not a reproducible identity. Pin an exact repository revision and record hashes of the downloaded files. Keep the acquisition step separate from local training so an offline run cannot silently fetch missing assets.
 
-The optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25f77366fa6b3b4b768ec3050bf629380bac, whose model card was checked asApache-2.0 during authoring. This is a small pretrained model for a bounded demonstration, not a recommended production assistant. The recipe pins direct package versions, uses a literal local prompt-completion dataset, checks chat-template prefix alignment and answer-only masks, and runs at most10CPU updates. The optional recipe has separate bounded Linux arm64 execution evidence for ten full-SFT and LoRA updates, while its generation probe produced an incorrect formula despite evidence. Learners must still explicitly prepare their own dependencies and assets; mechanics success does not establish subject expertise. No default lesson downloads a model or calls a paid service.
+The optional recipe targets HuggingFaceTB/SmolLM2-135M-Instruct at revision 12fd25f77366fa6b3b4b768ec3050bf629380bac, whose model card was checked as Apache-2.0 during authoring. This is a small pretrained model for a bounded demonstration, not a recommended production assistant. The recipe pins direct package versions, uses a literal local prompt-completion dataset, checks chat-template prefix alignment and answer-only masks, and runs at most 10 CPU updates. The optional recipe has separate bounded Linux arm64 execution evidence for ten full-SFT and LoRA updates, while its generation probe produced an incorrect formula despite evidence. Learners must still explicitly prepare their own dependencies and assets; mechanics success does not establish subject expertise. No default lesson downloads a model or calls a paid service.
 
 **Pinned revision:** An immutable model-repository commit identifying exact source artifacts.
 
-**Offline asset manifest:** Local filenames,hashes,license note and revision used by a run.
+**Offline asset manifest:** Local filenames, hashes, license note and revision used by a run.
 
 **Chat-template alignment:** Agreement between rendered prompt prefix and full conversation tokens.
 
@@ -18,19 +18,19 @@ The optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25
 
 ## Reading the implementation
 
-The prepared scripts live underfixtures/pretrained. prepare_assets.py requires an explicit network acknowledgement and downloads only the pinned model snapshot into a new learner-owned directory. It records SHA256 hashes. train_local.py useslocal_files_only=True andtrust_remote_code=False, checks the manifest and refuses a nonempty output directory. TRL SFTTrainer receives conversational prompt/completion records withcompletion_only_loss=True. Before training, the script inspects tokenized examples and a collated batch to ensure prompt labels are ignored and answer labels remain active. The model itself performs the causal label shift; do not shift labels twice.
+The prepared scripts live under fixtures/pretrained. prepare_assets.py requires an explicit network acknowledgement and downloads only the pinned model snapshot into a new learner-owned directory. It records SHA256 hashes. train_local.py uses local_files_only=True and trust_remote_code=False, checks the manifest and refuses a nonempty output directory. TRL SFTTrainer receives conversational prompt/completion records with completion_only_loss=True. Before training, the script inspects tokenized examples and a collated batch to ensure prompt labels are ignored and answer labels remain active. The model itself performs the causal label shift; do not shift labels twice.
 
 ## Read the qualified recipe as several independent evidence tiers
 
 The pinned revision identifies a particular repository state; the local manifest identifies the acquired files and their hashes. The lock identifies resolved dependency artifacts for a platform. The image identifies the executable environment. None of these identities alone establishes that training happened. A run receipt and saved artifact provide that next tier, followed by separate reload and task-quality observations.
 
-The existing recipe record reports13 acquired files and actual 10-update CPU runs for both full SFT and LoRA. Full SFT has134515008 trainable parameters; the rank-four q_proj/v_proj adapter path has230400. The recorded held-out losses changed from6.721148 to0.008058 for full SFT and from6.721148 to6.474194 for LoRA. These are observations from the qualified recipe, not reruns performed by this prose review. [Optional recipe evidence and workflow](../fixtures/pretrained/README.md).
+The existing recipe record reports 13 acquired files and actual 10-update CPU runs for both full SFT and LoRA. Full SFT has 134515008 trainable parameters; the rank-four q_proj/v_proj adapter path has 230400. The recorded held-out losses changed from 6.721148 to 0.008058 for full SFT and from 6.721148 to 6.474194 for LoRA. These are observations from the qualified recipe, not reruns performed by this prose review. [Optional recipe evidence and workflow](../fixtures/pretrained/README.md).
 
 The evaluation dataset contains one held-out entity label, while the four training records share an assignment-unit extraction task and prompt template. Distinct family labels do not automatically produce independent business domains. The dramatic full-SFT loss drop therefore needs that narrow context. It does not establish that full SFT generally beats LoRA or that either model understands unrelated statistical questions.
 
 The generation probe is particularly informative because it tests a different boundary. It supplies the correct conversion definition as evidence, yet the saved adapter produced a fluent incorrect formula: eligible visits divided by eligible visits. That is a task-quality failure despite successful asset loading, masking, optimization, save and reload. The output also did not establish claim-level citation support. Preserve the failure rather than replacing it with a hypothetical correct answer.
 
-Mask alignment differs from the earlier manual tiny-token helper. In the TRL path, active labels equal the corresponding input token IDs and ignored prompt positions contain-100. The causal model shifts labels internally when calculating next-token loss. Manually shifting those labels again would train the wrong target. The processed completion mask and actual collated batch are inspected before training, and records longer than the declared 128-token limit are rejected rather than silently losing answers.
+Mask alignment differs from the earlier manual tiny-token helper. In the TRL path, active labels equal the corresponding input token IDs and ignored prompt positions contain -100. The causal model shifts labels internally when calculating next-token loss. Manually shifting those labels again would train the wrong target. The processed completion mask and actual collated batch are inspected before training, and records longer than the declared 128-token limit are rejected rather than silently losing answers.
 
 Chat-template prefix equality is another concrete gate. The prompt rendered with a generation marker must be an exact token prefix of the full prompt-plus-completion rendering. This checks the specific template's boundary, not a universal property of all templates. A different model or tokenizer may require a different valid construction. Preserve the actual tokenized example and prefix lengths in the receipt.
 
@@ -148,10 +148,10 @@ Separate maintainer recipe: qualified mechanics with an observed generation-qual
 Required next evidence: local asset verification,mask inspection,actual run receipt,held-out evaluation.
 ```
 
-**Expected:** pretrained execution unverified; no generated success receipt.
+**Expected:** this hypothetical learner run remains unverified; no generated success receipt.
 
-**Verify:** Compare the computed values or written argument with pretrained execution unverified; no generated success receipt.
+**Verify:** Compare the computed values or written argument with this hypothetical learner run remains unverified; no generated success receipt.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one literal in *Verify chat-template boundaries* and predict how the result changes before checking it; the unchanged inputs give: prompt IDs are an exact prefix; at least one completion token remains. Keep the original *Distinguish an unexecuted learner scenario* failure beside the repaired result; a missing the Python standard library runtime is not a failing assertion. No solution downloads data, calls an online model or changes a database.

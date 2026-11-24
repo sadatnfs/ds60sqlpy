@@ -201,6 +201,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>JSON is a data format, not a PHP object model or a validation system. Decoding can produce syntactically valid data with the wrong fields, wrong types or an unexpectedly deep structure. Treat parsing and contract validation as separate steps. The examples use tiny inline JSON and a temporary stream so no host path or persistent file is required.</p>
 <p>A stream represents a readable or writable sequence of bytes. File operations can fail, return partial results or expose sensitive data if paths are chosen carelessly. In an application, accept an identifier and map it to an owned location instead of accepting an arbitrary user-supplied filesystem path. Bound size before reading untrusted content into memory, and close resources when finished.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>JSON decoding:</strong> Turning JSON text into PHP values with <code>json_decode()</code>, ideally with <code>JSON_THROW_ON_ERROR</code> so invalid input raises an exception.</li>
+<li><strong>Stream:</strong> PHP&#x27;s abstraction for reading or writing sequential data, such as a file or memory, through a handle.</li>
+<li><strong>Resource:</strong> A special PHP value holding an open handle, such as a stream from <code>fopen()</code>, until it is closed.</li>
+<li><strong>Bounded input:</strong> Reading at most a fixed number of bytes or records, so oversized input cannot exhaust memory or time.</li>
+</ul>
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use JSON_THROW_ON_ERROR so invalid JSON becomes an exception instead of an ambiguous null result. Pass true when an associative-array representation is intended, then validate each required field. <code>php://temp</code> provides a temporary stream suitable for this local demonstration. Check resource creation and write results, rewind before reading, and close in a finally block.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
@@ -218,6 +225,17 @@ fwrite($stream, &#x27;notes&#x27;);
 rewind($stream);
 echo stream_get_contents($stream);</code></pre>
 <p><strong>Expected observation:</strong> Reading after rewind returns notes.</p>
+<h3 id="contrast-case-jsondecode-without-error-reporting">Contrast case: json_decode without error reporting<a class="heading-anchor" href="#contrast-case-jsondecode-without-error-reporting" aria-label="Link to this section">#</a></h3>
+<p>Two inputs reach the decoder: a truncated object and the literal JSON value null. Compare default mode with the throwing mode.</p>
+<pre class="highlighted-code"><code class="language-php">var_dump(json_decode(&#x27;{&quot;minutes&quot;:30&#x27;, true));
+var_dump(json_decode(&#x27;null&#x27;, true));
+
+try {
+  json_decode(&#x27;{&quot;minutes&quot;:30&#x27;, true, 32, JSON_THROW_ON_ERROR);
+} catch (JsonException $error) {
+  echo &#x27;Rejected: &#x27;, $error-&gt;getMessage(), &quot;\n&quot;;
+}</code></pre>
+<p>In default mode both calls return NULL. The first input is malformed, while the second is valid JSON whose value really is null, and the return value cannot tell them apart. Code that continues with <code>$data[&#x27;minutes&#x27;] ?? 0</code> would treat a broken upload as a zero minute record. With <code>JSON_THROW_ON_ERROR</code> the truncated input raises a <code>JsonException</code> and the catch block prints a rejection, while valid null still returns null for the field checks to reject. That separation is why worked example 1 parses with the flag before validating fields.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
 <h4 id="exercise-1-explain-why-valid-json-can-still-be-invalid-application-input">Exercise 1: Explain why valid JSON can still be invalid application input.<a class="heading-anchor" href="#exercise-1-explain-why-valid-json-can-still-be-invalid-application-input" aria-label="Link to this section">#</a></h4>

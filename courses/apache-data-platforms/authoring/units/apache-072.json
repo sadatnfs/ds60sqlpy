@@ -5,6 +5,43 @@
   "minutes": 75,
   "prerequisites": ["apache-071", "apache-069"],
   "concepts": ["hook", "notification", "idempotency", "provenance"],
+  "key_terms": [
+    [
+      "Atlas hook",
+      "A plugin in a supported application, such as Hive, that observes operations and publishes metadata notifications to Atlas."
+    ],
+    [
+      "Notification",
+      "A metadata change message, typically delivered through Kafka, that Atlas consumes to update its graph."
+    ],
+    [
+      "REST ingestion",
+      "Submitting entities directly to Atlas's REST API. It records explicit metadata and does not prove a hook observed a real execution."
+    ],
+    [
+      "Unique attribute upsert",
+      "Creating or updating an entity by its qualifiedName so a retried request updates the same asset instead of creating a duplicate."
+    ],
+    [
+      "Provenance",
+      "A record of who or what produced a metadata entry and how, which distinguishes hook observations from manual API submissions."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Look up an entity by its unique name",
+      "language": "bash",
+      "code": "curl -s -u \"$ATLAS_USER:$ATLAS_PASSWORD\" \\\n  \"$DS60_ATLAS_ENDPOINT/api/atlas/v2/entity/uniqueAttribute/type/ds60_<owner>_dataset?attr:qualifiedName=ds60://<owner>/raw\"",
+      "interpretation": "qualifiedName is the identity Atlas uses to decide whether a submission creates a new entity or updates an existing one. Submitting the same payload twice should return the same GUID both times, which makes a retried ingestion safe. If a retry creates a second entity, the qualifiedName changed between runs, often because it embedded a timestamp or a run ID instead of a stable logical name."
+    },
+    {
+      "title": "Compare GUIDs across a deliberate retry",
+      "language": "python",
+      "code": "first = {\"raw\": \"guid-a\", \"curated\": \"guid-b\", \"transform\": \"guid-c\"}\nsecond = {\"raw\": \"guid-a\", \"curated\": \"guid-b\", \"transform\": \"guid-c\"}\nchanged = {key for key in first if first[key] != second[key]}\nprint(\"identity stable\" if not changed else \"new identities: \" + \", \".join(sorted(changed)))",
+      "output": "identity stable",
+      "interpretation": "The dictionaries stand in for the entity_guids field that two check receipts produce, one before and one after a repeated apply. Comparing them key by key separates an idempotent retry from a duplicate. A partially failed bulk request is the harder case: some entities may exist and others not, so read back every expected key before resubmitting rather than assuming nothing was written."
+    }
+  ],
   "evidence": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution.",
   "sources": [
     ["Atlas REST types/entities/lineage API", "https://atlas.apache.org/api/v2/index.html"],

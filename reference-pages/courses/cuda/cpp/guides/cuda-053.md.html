@@ -198,9 +198,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-019</code>, <code>cuda-029</code>, <code>cuda-036</code>, <code>cuda-046</code></p>
 <p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Report the data type, compute mode, numerical error and confirmed execution path of a mixed-precision matrix multiply.</p>
 <p>Work through <em>Tensor cores and mixed precision from first principles</em> with the concrete cases below. Finish with this evidence: reported type and compute mode, numerical error and confirmed execution path where available. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Tensor cores accelerate supported matrix multiply-accumulate tile operations. Operand formats, accumulator types, layouts, alignment and instruction availability depend on architecture and library mode. Lower precision can reduce memory and increase throughput while changing range and rounding. FP16 and BF16 are not interchangeable merely because both occupy sixteen bits; they allocate exponent and precision bits differently. TF32 and FP8 families also need explicit hardware/software qualification. Use a supported library path first, then study tile-level APIs. A matrix shape or low-precision tensor alone does not prove tensor-core instructions executed.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Tensor core:</strong> A specialized matrix-multiply-accumulate unit that operates on small matrix tiles in reduced-precision formats.</li>
+<li><strong>Mixed precision:</strong> Using lower-precision inputs with higher-precision accumulation or selected higher-precision operations.</li>
+<li><strong>BF16:</strong> A 16-bit format with 8 exponent bits that keeps FP32 range but has far fewer significand bits.</li>
+<li><strong>TF32:</strong> A tensor core mode that uses FP32 range with a 10-bit mantissa for multiplication inputs.</li>
+<li><strong>Accumulator type:</strong> The precision of the running sum in a matrix multiply, which strongly affects final error.</li>
+</ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-053_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-053_cpu.py</code></pre>

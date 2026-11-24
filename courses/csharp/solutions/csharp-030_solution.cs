@@ -48,6 +48,24 @@ internal static class Program {
       Check(await completion.Task == 9, "underlying result still arrives");
     }
     {
+      // Task 2: Guided modification
+      var state = new List<string>();
+      using var source = new CancellationTokenSource();
+      void Apply(string change, CancellationToken token) {
+        token.ThrowIfCancellationRequested();
+        state.Add(change);
+      }
+      Apply("first", source.Token);
+      source.Cancel();
+      bool stopped = false;
+      try {
+        Apply("second", source.Token);
+      } catch (OperationCanceledException) {
+        stopped = true;
+      }
+      Check(stopped && state.SequenceEqual(new[] { "first" }), "no change");
+    }
+    {
       // Task 3: Independent construction
       var committed = new List<int>();
       using var source = new CancellationTokenSource();
@@ -67,6 +85,29 @@ internal static class Program {
         stopped = true;
       }
       Check(stopped && committed.SequenceEqual(new[] { 1, 2 }), "kept work");
+    }
+    {
+      // Task 5: Boundary evidence
+      int runs = 0;
+      void Work(CancellationToken token) {
+        token.ThrowIfCancellationRequested();
+        runs++;
+      }
+      using var early = new CancellationTokenSource();
+      early.Cancel();
+      bool refused = false;
+      try {
+        Work(early.Token);
+      } catch (OperationCanceledException) {
+        refused = true;
+      }
+      Check(refused && runs == 0, "cancelled before start: no work");
+      using var late = new CancellationTokenSource();
+      Work(late.Token);
+      late.Cancel();
+      Check(runs == 1, "cancellation after completion undoes nothing");
+      var finished = Task.FromResult(4);
+      Check(await finished.WaitAsync(late.Token) == 4, "completed result kept");
     }
     Console.WriteLine("csharp-030: passed");
     await Task.CompletedTask;

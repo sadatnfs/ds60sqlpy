@@ -1,6 +1,6 @@
 # llm-041: explanatory solutions
 
-Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
+Read these optional framework comparison without a second prerequisite answers after attempting *Translate a second weight matrix* through *Preserve optionality*, or after asking for a reveal. They reuse the guide's literals, so a mismatch in *Name exact mask APIs* points to one step. `llm-041_solution.py` holds the assertions; this page explains how they test weight layout. Then try *Preserve optionality* on a fresh input you chose before looking.
 
 ## Mechanism review
 
@@ -97,7 +97,7 @@ Outputs: V0,(V0+V1)/2,(V0+V1+V2)/3.
 Compare float32 at atol 1e-6 and float64 at atol 1e-12.
 ```
 
-**Expected:** \([[2,0],[1,1],[\frac{8}{3},\frac{8}{3}]]\) within declared dtype tolerance.
+**Expected:** [[2, 0], [1, 1], [8/3, 8/3]] within declared dtype tolerance.
 
 **Verify:** Recompute each output row as the mean of its legal value rows: [2, 0], ([2, 0] + [0, 2])/2 = [1, 1] and (2 + 0 + 6)/3 = 8/3 in both columns.
 
@@ -120,4 +120,4 @@ llm-042 does not require llm-041.
 
 ## Review after comparison
 
-Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.
+Change one input to *Specify evaluation dropout* and predict the result first; keep *Design a cross-framework oracle* failing beside the repair. Log a missing the Python standard library separately from a wrong weight layout value in `llm-041`.

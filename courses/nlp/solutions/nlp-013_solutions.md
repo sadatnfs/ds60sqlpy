@@ -12,7 +12,7 @@ The row unit is a document and the columns are learned terms. A new evaluation w
 
 The low-rank representation preserves some large-scale variation while discarding other directions. A lower reconstruction error than the zero baseline verifies useful matrix approximation on the fixture. It does not establish coherent human topics or a good downstream classifier.
 
-**Expected:** Document coordinates shape(4,2); reconstruction error below the zero-matrix baseline.
+**Expected:** Document coordinates shape (4, 2); reconstruction error below the zero-matrix baseline.
 
 ## Exercise 3: Fit nonnegative components
 
@@ -30,7 +30,7 @@ The output is a normalized inferred topic mixture under LDA's generative assumpt
 
 The deliberate permutation is a known-answer test for the alignment step. Raw row equality would fail despite identical components. Real stability analysis should also resample documents or vary seeds and inspect imperfect matches, not only this artificial exact case.
 
-**Expected:** Permutation[1,0] and matched similarities[1,1].
+**Expected:** Permutation [1, 0] and matched similarities [1, 1].
 
 ## Exercise 6: Write an error-aware topic interpretation
 

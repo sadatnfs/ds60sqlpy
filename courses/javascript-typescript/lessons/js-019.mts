@@ -5,17 +5,16 @@ export {};
 // Copy Example A into a scratch `main.mts` and change `const result = add(2, 3);` to `const
 // result = add(3, 3);`. Before running it, predict which check fails and which value it now
 // sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at the check
-// `assert.equal(result, 5)`. Restoring the original line brings back the worked observation:
-// sum 5 with runtime typeof number.
+// Expected: The changed run fails with an `AssertionError` at `assert.equal(result, 5)`.
+// Restoring `const result = add(2, 3);` brings back: sum 5 with runtime typeof number.
 
 // Exercise 2: Show that an assertion does not convert data: debug a regression
 // A regression changed one token in Example B, so one line now reads `const external:
 // unknown = 'wrong!';`. Run Example B with that line, use the failing check to locate the
 // defect and repair it without changing the check.
-// Expected: Before the repair the run fails with an `AssertionError` at the check
-// `assert.equal(String(claimed), 'wrong')`; after it the line reads `const external: unknown
-// = 'wrong';` again and the runtime value remains the string wrong.
+// Expected: Before the repair the run fails with an `AssertionError` at
+// `assert.equal(String(claimed), 'wrong')`. Restoring `const external: unknown = 'wrong';`
+// brings back: the runtime value remains the string wrong.
 
 // Exercise 3: Compare literal preservation and widening
 // Use const for a fixed tag and let for a changing text value.

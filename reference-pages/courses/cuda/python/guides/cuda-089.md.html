@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Training memory contains parameters, gradients, optimizer state, saved activations, temporary workspaces and allocator reserve. These terms respond differently to batch size and precision. Adam commonly maintains two moment tensors, while mixed-precision implementations may retain additional master state. Count the actual implementation instead of applying one universal bytes-per-parameter rule.</p>
 <p>PyTorch distinguishes allocated and reserved memory and can retain autograd graphs when losses or outputs remain attached. TensorFlow memory growth changes reservation behavior but does not make an oversized live workload fit. Both require bounded experiments with the same model and controlled batch changes. Host container limits do not generally impose a per-process GPU-memory quota. Avoid intentional OOM on shared devices and use supplied failure traces instead.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Memory ledger:</strong> An accounting of parameters, gradients, optimizer state, activations and allocator reserve that predicts peak device memory.</li>
+<li><strong>Optimizer state:</strong> Extra per-parameter tensors such as Adam&#x27;s first and second moments, often twice the size of the parameters.</li>
+<li><strong>Activation memory:</strong> Intermediate outputs saved during the forward pass for use in backward, growing with batch size and depth.</li>
+<li><strong>Retained graph:</strong> An autograd graph kept alive by a stored loss or output tensor, which holds its activations in memory.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>For 1000 float32 parameters, parameters, gradients and two moment arrays total 16000 bytes before activations and workspaces. This is an illustrative ledger, not a full framework prediction.</p>
@@ -214,6 +221,24 @@ activations <span class="syntax-operator">=</span> <span class="syntax-number">8
 <span class="syntax-keyword">assert</span> state_bytes <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> activations <span class="syntax-operator">==</span> <span class="syntax-number">24192</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU memory ledger:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> state_bytes<span class="syntax-punctuation">,</span> activations<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> State 16000 bytes and activation 4096 bytes for the example.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>params</code></td>
+<td><code>1000</code></td>
+</tr>
+<tr>
+<td><code>state_bytes</code></td>
+<td><code>16000</code></td>
+</tr>
+<tr>
+<td><code>activations</code></td>
+<td><code>4096</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
@@ -226,17 +251,23 @@ activations <span class="syntax-operator">=</span> <span class="syntax-number">8
 <p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-build-a-parameter-ledger">Exercise 1: Build a parameter ledger<a class="heading-anchor" href="#exercise-1-build-a-parameter-ledger" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>build a parameter ledger</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Counting parameters only, 4000 bytes, underestimates training memory by four times for this optimizer.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-add-activation-bytes">Exercise 2: Add activation bytes<a class="heading-anchor" href="#exercise-2-add-activation-bytes" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>add activation bytes</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Ignoring activations because they are temporary misses that they live from forward until backward, which is when memory peaks.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-separate-reserve-and-live-usage">Exercise 3: Separate reserve and live usage<a class="heading-anchor" href="#exercise-3-separate-reserve-and-live-usage" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>separate reserve and live usage</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reading the reserved number in a monitoring tool and concluding tensors are leaking confuses cache with live usage. Tools such as <code>nvidia-smi</code> report the reserved total, so they show this inflated number.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-diagnose-a-retained-graph">Exercise 4: Diagnose a retained graph<a class="heading-anchor" href="#exercise-4-diagnose-a-retained-graph" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>diagnose a retained graph</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Blaming a fixed-size growth per step on fragmentation or the allocator leads to tuning allocator settings that do not fix the reference leak.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-memory-growth">Exercise 5: Explain memory growth<a class="heading-anchor" href="#exercise-5-explain-memory-growth" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>explain memory growth</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Turning growth on to fix an out-of-memory error treats a policy as a capacity increase.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-a-safe-batch-size-experiment">Exercise 6: Design a safe batch-size experiment<a class="heading-anchor" href="#exercise-6-design-a-safe-batch-size-experiment" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>design a safe batch-size experiment</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Doubling until the program crashes uses an out-of-memory error as the measurement and can disrupt other users.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

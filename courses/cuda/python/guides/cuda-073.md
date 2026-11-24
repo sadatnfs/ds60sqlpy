@@ -14,6 +14,13 @@ Keep allocation and validation in a host wrapper. The kernel receives fixed buff
 
 
 
+### Key terms
+
+- **Restricted typed subset:** The portion of Python that a kernel compiler can translate, with fixed scalar and array types and no arbitrary objects.
+- **Device function:** A function compiled for the GPU that kernels can call but the host cannot launch directly.
+- **Type specialization:** Compiling a separate machine-code version for each combination of argument types a function receives.
+- **CPU oracle:** An independent, simple CPU implementation whose results serve as the expected values for a GPU kernel.
+
 ## Worked examples
 
 ### Worked example 1
@@ -46,27 +53,39 @@ Treat printed timing values as synthetic whenever the program says model, fixtur
 
 ### Exercise 1: Separate host and device statements
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **separate host and device statements** in the examples above.
+**Trap to avoid:** Moving the length check into the kernel, where each thread compares lengths and returns early, means a mismatch produces partial output instead of an error. The host never learns anything went wrong because a kernel cannot raise a Python exception.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Implement the CPU oracle
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **implement the CPU oracle** in the examples above.
+**Trap to avoid:** Writing the oracle with the same indexing code as the kernel, for example looping `i` over a launch-size range with the same guard, copies the kernel's bugs into the reference, so both can agree and still be wrong.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Reject mismatched lengths
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **reject mismatched lengths** in the examples above.
+**Trap to avoid:** Using `n = min(len(x), len(y))` to avoid the overflow silently drops elements. The program then returns a result of the wrong length, and the mismatch surfaces far from the call that caused it.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Move an allocation out of a kernel
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **move an allocation out of a kernel** in the examples above.
+**Trap to avoid:** Creating a list or calling `numpy.zeros` inside a `@cuda.jit` function fails to compile because those objects do not exist in device code. Working around it with a fixed-size local array caps the problem size silently.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain type specialization
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **explain type specialization** in the examples above.
+**Trap to avoid:** Assuming the decorated function still behaves like ordinary Python leads to passing mixed types or calling unsupported library functions; the result is a typing error at compile time, or an unintended second specialization with different precision.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: List a prepared toolchain ledger
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **list a prepared toolchain ledger** in the examples above.
+**Trap to avoid:** Writing only the package name and the word CUDA tells a reader nothing about which runtime and driver were present, so a later failure on another machine cannot be compared with the original success.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

@@ -202,6 +202,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A NodePort Service allocates a port from the cluster’s configured NodePort range and makes the Service available through relevant node addresses according to the data-plane configuration. It usually also has a ClusterIP. A client addresses nodeIP:nodePort, and traffic is directed to an eligible backend.</p>
 <p>A node address must actually be reachable from the client. Desktop cluster nodes may be containers or VMs behind additional network boundaries. A valid NodePort allocation does not automatically open a host firewall, publish a VM port or create an internet route. Local and cloud setups therefore have different external paths.</p>
 <p>The commonly seen range 30000 through 32767 is a default, not a universal constant. Explicit allocations must fit the configured range and avoid collisions. Do not expose a teaching service publicly just to make a diagram seem more realistic.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>NodePort Service:</strong> A Service type that opens the same port on every node and forwards it to the Service&#x27;s backends.</li>
+<li><strong>NodePort range:</strong> The range from which node ports are allocated, 30000 through 32767 by default.</li>
+<li><strong>Node address:</strong> The node IP a client must reach to use a NodePort, which may be private and unreachable from outside.</li>
+<li><strong>External reachability:</strong> Whether a client outside the cluster can actually route to a node address and port through every firewall on the path.</li>
+</ul>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Read port as the ClusterIP-facing Service port, targetPort as the Pod listener and nodePort as the node-facing port. The application still listens at its target endpoint. externalTrafficPolicy can affect endpoint selection and source address behavior, covered in a later chapter.</p>
 <p>The example uses nodePort 30080 only in a manual fixture. The ordinary classroom adapter does not admit this wider networking operation. A local kind setup needs deliberately prepared port mappings or another supported access route before host-browser acceptance is possible.</p>

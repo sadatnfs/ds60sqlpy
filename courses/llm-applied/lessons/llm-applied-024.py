@@ -19,7 +19,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 4: Compute a data-science result deterministically
 # Calculate3 purchases over10 eligible visits and reject11 purchases over10 visits.
-# Expected: rate.3; invalid counts raiseValueError.
+# Expected: rate 0.3; invalid counts raise ValueError.
 
 # Exercise 5: Evaluate fixed task and boundary cases
 # Score supported, missing andrestricted-public questions against their expected statuses.

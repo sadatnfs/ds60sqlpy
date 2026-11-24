@@ -1,6 +1,6 @@
 from render import add, ex
 
-NODE = "https://nodejs.org/download/release/v24.11.0/docs/api/"
+NODE = "https://nodejs.org/download/release/v24.22.3/docs/api/"
 
 add(
     32,
@@ -245,18 +245,20 @@ console.log(JSON.stringify({ operation: 'sumTo10000', elapsedMs: elapsed }));"""
         ex(
             "Preserve repeated samples and summarize them",
             "Measure five checked runs and compute their median.",
-            "five finite samples; median lies between minimum and maximum.",
+            "five finite samples; median lies between minimum and maximum; the fixed control `[9, 10, 100, 2, 30]` has numeric median 10.",
             r"""const samples = [];
 for (let trial = 0; trial < 5; trial += 1) {
   const start = performance.now();
   assert.equal(sumTo(1000), 500500);
   samples.push(performance.now() - start);
 }
-const sorted = [...samples].sort((a, b) => a - b);
-const median = sorted[2];
+const byValue = (a, b) => a - b;
+const medianOf = values => [...values].sort(byValue)[Math.floor(values.length / 2)];
+const median = medianOf(samples);
 assert.equal(samples.length, 5);
 assert.ok(samples.every(value => Number.isFinite(value) && value >= 0));
-assert.ok(median >= sorted[0] && median <= sorted[4]);
+assert.ok(median >= Math.min(...samples) && median <= Math.max(...samples));
+assert.equal(medianOf([9, 10, 100, 2, 30]), 10);
 console.log(JSON.stringify({ samplesMs: samples, medianMs: median }));""",
             "Five tiny trials illustrate record keeping, not a statistically robust benchmark. A real comparison needs workload control, enough repetitions and an analysis of variability.",
         ),

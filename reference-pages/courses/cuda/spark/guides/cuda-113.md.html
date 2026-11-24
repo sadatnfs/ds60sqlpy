@@ -205,6 +205,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An ordinary Python UDF is different: Spark must invoke Python code with its declared input/output contract. Vectorized pandas UDFs can reduce interchange overhead, but their body remains whatever Python and libraries actually execute. Arrow improves representation exchange; it does not translate arbitrary Python control flow into GPU instructions. A purpose-built GPU UDF integration needs explicit device allocation and package rules.</p>
 <p>cuDF&#x27;s local dataframe API works within a process and uses GPU columnar algorithms. The Spark plugin connects supported columnar operations to Spark&#x27;s distributed scheduling, joins, shuffles, retries and SQL semantics. Spark RAPIDS ML adds a separate estimator surface. Keep these names in a diagram with arrows for data movement and process boundaries; treating them as one magic GPU switch leads to misleading performance claims.</p>
 <p>The practical beginner sequence is CPU semantic oracle, ordinary Scala and PySpark query, logical/physical plan reading, then optional GPU plugin qualification. The same schema and expected rows carry through all four steps. This lets a learner on any CPU-only machine complete the reasoning and programming foundation without pretending that a container acquired NVIDIA hardware.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>RAPIDS:</strong> An ecosystem of GPU data-science libraries that includes cuDF.</li>
+<li><strong>cuDF plugin for Apache Spark:</strong> The plugin, formerly named RAPIDS Accelerator for Apache Spark, that replaces supported Spark SQL operators with GPU implementations.</li>
+<li><strong>Physical plan:</strong> The concrete operators Spark selects to execute a query, where the plugin substitutes GPU operators.</li>
+<li><strong>Opaque UDF:</strong> A user-defined function whose body Spark cannot inspect, so the plugin cannot translate it into GPU operators.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A DataFrame filter followed by groupBy sum is visible to Catalyst as declarative relational operations. A Python UDF that performs an opaque operation may require a CPU boundary or a separate supported integration.</p>
@@ -219,23 +226,51 @@ totals <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <span class="syntax-keyword">assert</span> totals <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">14</span><span class="syntax-punctuation">}</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU Spark semantic oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>totals<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Grouped totals A 6 and B 14; no GPU execution claimed.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>rows</code></td>
+<td><code>[(&#x27;A&#x27;, 2), (&#x27;A&#x27;, 4), (&#x27;B&#x27;, 6), (&#x27;B&#x27;, 8)]</code></td>
+</tr>
+<tr>
+<td><code>totals</code></td>
+<td><code>{&#x27;A&#x27;: 6, &#x27;B&#x27;: 14}</code></td>
+</tr>
+<tr>
+<td><code>key</code></td>
+<td><code>&#x27;B&#x27;</code></td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td><code>8</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="scala-and-pyspark-parity-lab">Scala and PySpark parity lab<a class="heading-anchor" href="#scala-and-pyspark-parity-lab" aria-label="Link to this section">#</a></h3>
 <p>Choose <strong>Scala Spark on CPU</strong> or <strong>PySpark on CPU</strong> to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.</p>
 <p>For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-classify-four-execution-layers">Exercise 1: Classify four execution layers<a class="heading-anchor" href="#exercise-1-classify-four-execution-layers" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>classify four execution layers</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Calling the whole pipeline GPU-accelerated because one layer uses the GPU hides the layers that still run on CPU and the transfers between them, which often dominate.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-explain-cudf-versus-plugin">Exercise 2: Explain cuDF versus plugin<a class="heading-anchor" href="#exercise-2-explain-cudf-versus-plugin" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>explain cuDF versus plugin</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming installing cuDF on executors accelerates Spark SQL confuses the two, since without the plugin configured Spark never routes operators to cuDF.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-identify-an-opaque-udf">Exercise 3: Identify an opaque UDF<a class="heading-anchor" href="#exercise-3-identify-an-opaque-udf" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>identify an opaque UDF</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming a UDF runs on the GPU because surrounding operators do ignores the boundary, and the measured time then includes conversions the plan does not advertise.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-write-equivalent-scala-and-pyspark-expressions">Exercise 4: Write equivalent Scala and PySpark expressions<a class="heading-anchor" href="#exercise-4-write-equivalent-scala-and-pyspark-expressions" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>write equivalent Scala and PySpark expressions</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing the PySpark version with a Python loop over collected rows changes where the work happens and loses the equivalence, even if the totals match.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-define-cpu-only-progress">Exercise 5: Define CPU-only progress<a class="heading-anchor" href="#exercise-5-define-cpu-only-progress" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>define CPU-only progress</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Reporting a CPU run as evidence that the GPU path works confuses semantic parity with accelerated execution.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-list-real-gpu-evidence">Exercise 6: List real GPU evidence<a class="heading-anchor" href="#exercise-6-list-real-gpu-evidence" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>list real GPU evidence</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Presenting only a configuration file as GPU evidence shows intent but not execution.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

@@ -202,21 +202,63 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-define-an-sli">Exercise 1: Define an SLI<a class="heading-anchor" href="#exercise-1-define-an-sli" aria-label="Link to this section">#</a></h3>
 <p>The metric definition determines what is measured. A successful status with a wrong payload may still violate the application contract, so the indicator should match the intended user outcome.</p>
 <p><strong>Expected:</strong> A reproducible numerator/denominator with five synthetic observations.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Write the SLI definition: which requests count, what counts as success, the window and the unit.</li>
+<li><strong>Why it is correct:</strong> A definition precise enough to recount the five rows gives the same numerator and denominator to anyone who applies it.</li>
+<li><strong>Plausible wrong approach:</strong> Saying the service was mostly fine gives no rule another person could apply to the ledger.</li>
+<li><strong>How to verify:</strong> Recounting the five rows yields the same two numbers.</li>
+</ul>
 <h3 id="exercise-2-compute-error-and-success-fractions">Exercise 2: Compute error and success fractions<a class="heading-anchor" href="#exercise-2-compute-error-and-success-fractions" aria-label="Link to this section">#</a></h3>
 <p>Counts reveal the small evidence base. The result illustrates arithmetic and cannot establish a production SLO or recurrence from five synthetic requests.</p>
 <p><strong>Expected:</strong> Error fraction 0.2 and success fraction 0.8 under the declared status rule.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Count one 500 and four 200 among five eligible requests and divide each by five.</li>
+<li><strong>Why it is correct:</strong> Under a rule that 5xx is an error, one of five is 0.2 errors and four of five is 0.8 success.</li>
+<li><strong>Plausible wrong approach:</strong> Dividing by the four successful requests gives an error ratio of 0.25 and a denominator that excludes failures.</li>
+<li><strong>How to verify:</strong> The two fractions are 0.2 and 0.8, and they sum to one.</li>
+</ul>
 <h3 id="exercise-3-compute-the-stated-quantiles">Exercise 3: Compute the stated quantiles<a class="heading-anchor" href="#exercise-3-compute-the-stated-quantiles" aria-label="Link to this section">#</a></h3>
 <p>Another interpolation convention can yield a different value. Report the convention and filtering rather than treating one library default as a universal p95 definition.</p>
 <p><strong>Expected:</strong> p50=30ms, p95=100ms.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Sort the five latencies and take rank ceil(q times n) for each quantile.</li>
+<li><strong>Why it is correct:</strong> With n of 5, p50 uses rank 3 and p95 uses rank 5, so p95 is the largest of the five samples.</li>
+<li><strong>Plausible wrong approach:</strong> Interpolating between ranks gives values that never appeared in the data and differ from the stated method.</li>
+<li><strong>How to verify:</strong> p50 is the third sorted value and p95 the fifth, matching 30 ms and 100 ms.</li>
+</ul>
 <h3 id="exercise-4-inspect-a-counter-reset">Exercise 4: Inspect a counter reset<a class="heading-anchor" href="#exercise-4-inspect-a-counter-reset" aria-label="Link to this section">#</a></h3>
 <p>The reset changes the interpretation of a simple difference. Recovering a rate needs enough timing/reset data or a monitoring method designed for counters. Do not invent events that were not observed.</p>
 <p><strong>Expected:</strong> Do not report negative 117 requests; record reset and available interval evidence.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Note that 3 is lower than 120 and check for a process restart between the readings.</li>
+<li><strong>Why it is correct:</strong> Counters only increase within one process, so a drop after a restart is a reset, not negative traffic.</li>
+<li><strong>Plausible wrong approach:</strong> Subtracting to report minus 117 requests treats a reset as real traffic.</li>
+<li><strong>How to verify:</strong> The record names the reset and uses only the evidence available for each interval.</li>
+</ul>
 <h3 id="exercise-5-handle-absent-metrics">Exercise 5: Handle absent metrics<a class="heading-anchor" href="#exercise-5-handle-absent-metrics" aria-label="Link to this section">#</a></h3>
 <p>The absence of a data source is itself an operational fact. Installing a stack or broadening credentials is outside this lesson&#x27;s automatic workflow; the host must provide and qualify it deliberately.</p>
 <p><strong>Expected:</strong> Metrics capability unavailable, not zero resource use.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Record the metrics API error text next to the successful client result.</li>
+<li><strong>Why it is correct:</strong> A missing metrics API means usage was not measured, which is different from a measured zero.</li>
+<li><strong>Plausible wrong approach:</strong> Writing CPU 0 for the namespace converts an unavailable reading into a false measurement.</li>
+<li><strong>How to verify:</strong> The record contains the error or condition text and a separate passing client check.</li>
+</ul>
 <h3 id="exercise-6-write-a-focused-incident-observation">Exercise 6: Write a focused incident observation<a class="heading-anchor" href="#exercise-6-write-a-focused-incident-observation" aria-label="Link to this section">#</a></h3>
 <p>The next check should discriminate a plausible mechanism such as backend readiness, application errors or resource pressure. Preserve missingness and uncertainty instead of turning a dashboard pattern into a definitive root cause.</p>
 <p><strong>Expected:</strong> A bounded evidence record with units, window, UIDs and a reversible diagnostic.</p>
+<p><strong>Solution reasoning</strong></p>
+<ul>
+<li><strong>Approach:</strong> Pair one controller fact with one application metric, add a hypothesis and one reversible next check.</li>
+<li><strong>Why it is correct:</strong> Together they connect what Kubernetes reported with what clients experienced, within a stated window and with object UIDs.</li>
+<li><strong>Plausible wrong approach:</strong> Proposing a rollback as the next step makes the diagnosis irreversible before the hypothesis is tested.</li>
+<li><strong>How to verify:</strong> Units, window, UIDs and a reversible next check are all present.</li>
+</ul>
 <h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
 <p>A missing metrics API is a capability issue, not proof of zero usage. A single slow request suggests a question but does not establish the system-wide cause. An alert should name the violated contract and a discriminating next check.</p>
 <p>Record units, window, sample size, filters and missingness. A screenshot alone cannot reproduce the calculation or prove application correctness. The offline script checks the synthetic ledger; actual collection requires the qualified host/client capability.</p></article>

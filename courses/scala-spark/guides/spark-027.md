@@ -8,7 +8,7 @@ Intermediate; approximately 105 minutes. Direct prerequisites: `spark-026`. The 
 
 ## How to run this lesson
 
-Open `spark-027` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-027` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-027.scala) and [PySpark learner](../lessons/spark-027.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-027_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-027_solution.scala) and [PySpark reference](../solutions/spark-027_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -55,7 +55,7 @@ The lesson's cache boundary is limited to one owned SparkSession and no external
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.storage.StorageLevel
@@ -108,20 +108,8 @@ val golden = spark.createDataFrame(
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
+from pyspark.sql.types import LongType, StringType, StructField, StructType
 from pyspark import StorageLevel
 
 schema = StructType(
@@ -219,7 +207,7 @@ Keep rows whose amount is nonnegative or NULL, then return entity_id, segment, d
 
 ### Exercise 2: Define an ordered field/type contract
 
-Return ordered(name, simple_type) pairs from the result schema. Compare with entity_id bigint, segment string, doubled bigint.
+Return ordered (name, simple_type) pairs from the result schema. Compare with entity_id bigint, segment string, doubled bigint.
 
 **Expected result/shape:** Exactly those three fields in that order. Casting entity_id to string changes the contract even when printed values look alike.
 
@@ -263,7 +251,7 @@ Return directional exceptAll row counts after schema validation. Compare transfo
 
 **Expected result/shape:** Distinct has 5 rows; unexpected occurrences 0 and missing expected occurrences 2. The bag validator raises a named bag contract mismatch.
 
-**Verify:** Assert(0,2), count 5 and the explicit negative-control rejection.
+**Verify:** Assert `(0, 2)`, count 5 and the explicit negative-control rejection.
 
 **Progressive hint:** Both duplicate groups lose one occurrence even though every distinct value still appears.
 
@@ -273,7 +261,7 @@ Do not interpret persist registration as completed materialization or a cache sc
 
 ## Self-check
 
-Explain the contract of `transform` / `transform` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `transform` / `transform` without reading its solution. Then, from memory, state what Exercise 6 (Demonstrate why set equality misses duplicate loss) must produce: Distinct has 5 rows; unexpected occurrences 0 and missing expected occurrences 2. The bag validator raises a named bag contract mismatch. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

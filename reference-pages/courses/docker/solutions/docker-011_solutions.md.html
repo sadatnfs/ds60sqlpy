@@ -198,21 +198,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-identify-the-project-and-service-names">Exercise 1: Identify the project and service names.<a class="heading-anchor" href="#exercise-1-identify-the-project-and-service-names" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Project ds60-docker-study and service app.</p>
 <p><strong>Why:</strong> The project groups engine resources; the service describes an application role. A container ID is a third identity that can change after recreation.</p>
+<p><strong>Approach:</strong> Read the names from their sources: -p ds60-docker-study sets the project, and the services: key in compose.yaml defines app and client.</p>
+<p><strong>Why this is correct:</strong> The project prefixes resource names such as the network and volume, the service is the role, and each container has its own ID.</p>
+<p><strong>A plausible wrong approach:</strong> Treating the container ID as the stable name fails after recreation, because the ID changes while the project and service stay the same.</p>
+<p><strong>How to verify:</strong> docker compose -p ds60-docker-study ps lists app under the project, and ps -q app shows the current container ID.</p>
 <h3 id="exercise-2-predict-what-config-quiet-changes">Exercise 2: Predict what config --quiet changes.<a class="heading-anchor" href="#exercise-2-predict-what-config-quiet-changes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It validates the model without creating runtime resources.</p>
 <p><strong>Why:</strong> Static model validation is valuable early evidence, but it cannot prove port availability, image execution, volume permissions or endpoint correctness.</p>
+<p><strong>Approach:</strong> Predict the effect from what the command reads: config --quiet parses compose.yaml, applies interpolation and checks the schema.</p>
+<p><strong>Why this is correct:</strong> It exits zero for a valid file and creates nothing, so it is safe to run before any build or start.</p>
+<p><strong>A plausible wrong approach:</strong> Treating a clean config result as proof the stack works fails, because port 18080 may be busy or the volume may reject writes.</p>
+<p><strong>How to verify:</strong> After config --quiet, docker compose -p ds60-docker-study ps -a lists no containers for the project if none existed before.</p>
 <h3 id="exercise-3-write-the-project-lifecycle-command-sequence">Exercise 3: Write the project lifecycle command sequence.<a class="heading-anchor" href="#exercise-3-write-the-project-lifecycle-command-sequence" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Validate, build, up with readiness, inspect, then down.</p>
 <p><strong>Why:</strong> Each step adds evidence and has a defined effect. Keeping the project option on every command prevents a directory-name change from accidentally selecting a different project.</p>
+<p><strong>Approach:</strong> Order the commands as worked examples 1 and 2 do: config --quiet, build, up -d --wait, ps, then down, each with -p ds60-docker-study.</p>
+<p><strong>Why this is correct:</strong> Each command adds one kind of evidence, from a valid model through a healthy service, and the fixed project flag keeps every command on the same resources.</p>
+<p><strong>A plausible wrong approach:</strong> Omitting -p means Compose derives the project from the directory name, so a renamed copy silently creates a second project.</p>
+<p><strong>How to verify:</strong> Every ps listing during the session shows the same project name, and down reports removing only that project&#x27;s container and network.</p>
 <h3 id="exercise-4-diagnose-an-unexpected-resource-collision">Exercise 4: Diagnose an unexpected resource collision.<a class="heading-anchor" href="#exercise-4-diagnose-an-unexpected-resource-collision" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Inspect project identity and existing owned resources before changes.</p>
 <p><strong>Why:</strong> A reused project name or host port can collide with another copy. Renaming or deleting blindly may affect work you did not create; establish ownership first.</p>
+<p><strong>Approach:</strong> Before changing anything, list resources by project label and check what already holds host port 18080.</p>
+<p><strong>Why this is correct:</strong> A collision means another stack is using the same project name or port. Only after identifying the owner is it safe to rename or stop.</p>
+<p><strong>A plausible wrong approach:</strong> Running docker rm -f on whatever holds the port may remove another learner&#x27;s or tool&#x27;s container that this lesson never created.</p>
+<p><strong>How to verify:</strong> docker ps --filter label=com.docker.compose.project=ds60-docker-study lists only owned containers; anything else on 18080 belongs to someone else.</p>
 <h3 id="exercise-5-explain-why-down-preserves-user-data-by-default">Exercise 5: Explain why down preserves user data by default.<a class="heading-anchor" href="#exercise-5-explain-why-down-preserves-user-data-by-default" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Named volume removal is a separate explicit operation.</p>
 <p><strong>Why:</strong> Containers and networks are generally disposable application infrastructure. Persistent state deserves a deliberate retention policy, so destruction is not an incidental consequence of stopping a lab.</p>
+<p><strong>Approach:</strong> Compare what down removes by default (containers and the project network) with what it removes only when asked (volumes, with -v).</p>
+<p><strong>Why this is correct:</strong> The study-data volume holds counter.json, which is learner progress. Keeping it by default means routine stops do not erase work.</p>
+<p><strong>A plausible wrong approach:</strong> Adding -v to every down for a tidy machine deletes the counter each time and makes the persistence lessons impossible to observe.</p>
+<p><strong>How to verify:</strong> After down, docker volume ls still lists the project&#x27;s study-data volume, and the next up returns the previous counter value.</p>
 <h3 id="exercise-6-design-a-two-copy-experiment-without-interference">Exercise 6: Design a two-copy experiment without interference.<a class="heading-anchor" href="#exercise-6-design-a-two-copy-experiment-without-interference" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Distinct project names and distinct published host ports.</p>
 <p><strong>Why:</strong> Both copies can use the same internal service names because each project has its own network. Host-published ports share a host namespace and must avoid conflicts.</p>
+<p><strong>Approach:</strong> Give each copy its own -p project name and its own host port on the ports line, while leaving service names and container ports unchanged.</p>
+<p><strong>Why this is correct:</strong> Each project gets its own network and volume, so app resolves within each copy. Host ports share one namespace and must differ.</p>
+<p><strong>A plausible wrong approach:</strong> Changing only the project name leaves both copies trying to bind 127.0.0.1:18080, so the second up fails to publish.</p>
+<p><strong>How to verify:</strong> Both projects appear in docker compose ls, and each loopback port returns its own copy&#x27;s response.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
 <p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>

@@ -25,7 +25,7 @@ The three t-prefixed records are training examples and the four h-prefixed recor
 
 ## Exercise 2: Compare a fixed baseline
 
-Fit the mean on [2,4,6], obtaining 4. Training residuals are [2,0,-2], so squared sum 8 divided by 3 is \(\frac{8}{3}\). Evaluation residuals are [-4,-6,-8,-10], whose squares sum to 216; divide by 4 to obtain 54. The evaluation-target mean 11 must not replace 4. That would use information from the set reserved for inspection and answer a different question. Keep both labeled metrics, even when the evaluation result is worse.
+Fit the mean on [2,4,6], obtaining 4. Training residuals (prediction minus target) are [2,0,-2], so squared sum 8 divided by 3 is \(\frac{8}{3}\). Evaluation residuals are [-4,-6,-8,-10], whose squares sum to 216; divide by 4 to obtain 54. The evaluation-target mean 11 must not replace 4. That would use information from the set reserved for inspection and answer a different question. Keep both labeled metrics, even when the evaluation result is worse.
 
 **Expected:** The constant is 4, training MSE is \(\frac{8}{3}\) and holdout MSE is 54.
 

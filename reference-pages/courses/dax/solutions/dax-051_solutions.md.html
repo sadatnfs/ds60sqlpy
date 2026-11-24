@@ -239,23 +239,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the three results under an incoming Quantity&gt;=2 selection.</p>
 <p>All three return 163 in this fixture, another agreement case that does not replace the counterexample.</p>
+<p><strong>Why it fits this model:</strong> Every row under an incoming Quantity &gt;= 2 filter already meets the predicate. Replacing, intersecting or filtering the visible rows keeps the same 6 lines.</p>
+<p><strong>Tempting mistake:</strong> Treating this second agreement as proof that the rewrites are equivalent. Case B&#x27;s Quantity = 1 input still separates them.</p>
+<p><strong>How to confirm:</strong> Under Sales[Quantity] &gt;= 2, all three columns return 163.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the predicate to Quantity&gt;=3.</p>
 <p>Without other filters the retained revenue is 27 + 20 = 47.</p>
+<p><strong>Why it fits this model:</strong> Quantity &gt;= 3 keeps S4 (3 units, 27) and S5 (4 units, 20). Without other filters, all three forms keep the same two lines.</p>
+<p><strong>Tempting mistake:</strong> Expecting the case B pattern to change with the new threshold. Under Quantity = 1, the table and KEEPFILTERS forms still return BLANK and only the column filter returns 47.</p>
+<p><strong>How to confirm:</strong> Unfiltered, each form returns 47; under Quantity = 1 the results are BLANK, 47 and BLANK.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a minimum semantic regression grid.</p>
 <p>Check unfiltered, same-column disjoint/overlapping filters, unrelated dimensions, blanks, totals and missing members before comparing timings.</p>
+<p><strong>Why it fits this model:</strong> The grid needs inputs that agree, overlap and conflict. An overlapping Quantity IN {1, 2} filter and an unrelated Blue filter separate cases A and B.</p>
+<p><strong>Tempting mistake:</strong> Testing only the unfiltered case, where all three return 163 and no rewrite can be wrong.</p>
+<p><strong>How to confirm:</strong> Under Quantity IN {1, 2}: TableFilter 116, ColumnFilter 163, KEEPFILTERS 116. Under Blue: all three 143.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose choosing a rewrite because it returns a larger nonblank number.</p>
 <p>Validate the metric definition and incoming context first; retain the counterexample as a regression.</p>
+<p><strong>Why it fits this model:</strong> Under Quantity = 1, the column filter replaces the selection and returns 163, while the others return BLANK. A bigger number is not a better one.</p>
+<p><strong>Tempting mistake:</strong> Choosing the column filter because it fills cells the original left blank. It changes the metric for any visual filtered on Quantity.</p>
+<p><strong>How to confirm:</strong> Decide whether the business rule should respect the incoming Quantity selection; if so, keep case B&#x27;s BLANK as the expected regression value.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Explain why KEEP FILTERS is not an automatic proof for arbitrary table filters.</p>
 <p>Prove the intended equivalence for the actual expression/model; do not generalize this one-column example beyond its assumptions.</p>
+<p><strong>Why it fits this model:</strong> The KEEPFILTERS column form matches the FILTER(Sales, ...) form here because only one column is involved and FILTER iterates the visible rows.</p>
+<p><strong>Tempting mistake:</strong> Generalizing to a table filter built on ALL(Sales). That table carries every Sales column, and through the expanded table its reach extends to Product, Customer and Date, so its interaction with incoming dimension filters is different and must be tested.</p>
+<p><strong>How to confirm:</strong> Under Product[Color] = &quot;Red&quot;, KEEPFILTERS(Sales[Quantity] &gt;= 2) returns 20 (S5 only). Run any whole-table form under the same Red filter and compare before calling it equivalent.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the review to a SQL query optimization.</p>
 <p>A faster query that drops duplicate events or changes missing-value policy is not a semantics-preserving optimization.</p>
+<p><strong>Why it fits this model:</strong> A SQL rewrite needs the same parity checks: duplicate rows, NULL handling and boundaries, before timings matter.</p>
+<p><strong>Tempting mistake:</strong> Summing over SELECT DISTINCT NetAmount to cut rows. S1, S5, S6 and S7 all have 20, so the total falls from 187 to 127.</p>
+<p><strong>How to confirm:</strong> Compare row counts and totals between original and rewritten queries (8 lines and 187) before reading any timing.</p>
 <h3 id="review-the-boundary">Review the boundary<a class="heading-anchor" href="#review-the-boundary" aria-label="Link to this section">#</a></h3>
-<p>A sound answer can use a different readable expression if its population, context and units agree. Compare counterexamples as well as ordinary rows. Where an engine, model role or newer feature is assumed, record that assumption separately from the offline calculation. Never reuse a supplied table as evidence that an edited formula ran.</p></article>
+<p>Another readable expression is sound when its population, context and units match; record any assumed engine separately.</p></article>
   </main>
 </body>
 </html>

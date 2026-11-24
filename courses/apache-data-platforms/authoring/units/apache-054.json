@@ -5,6 +5,42 @@
   "minutes": 75,
   "prerequisites": ["apache-053", "apache-051"],
   "concepts": ["TTL", "tombstone", "repair", "garbage collection"],
+  "key_terms": [
+    [
+      "TTL",
+      "A time to live attached to written data, after which the value no longer appears in reads even though its storage is not reclaimed immediately."
+    ],
+    [
+      "Tombstone",
+      "A deletion marker that prevents older replicas or SSTables from reintroducing a deleted value during reconciliation."
+    ],
+    [
+      "gc_grace_seconds",
+      "The table setting for how long tombstones must be kept before compaction may purge them, which must exceed the interval between repairs."
+    ],
+    [
+      "Repair",
+      "An anti-entropy operation that compares and reconciles replicas, ensuring that deletions and updates reach every replica."
+    ],
+    [
+      "Compaction",
+      "Merging SSTables, resolving cell versions and eventually purging expired tombstones and data."
+    ]
+  ],
+  "worked_examples": [
+    {
+      "title": "Watch a TTL count down",
+      "language": "sql",
+      "code": "INSERT INTO ds60_orders.expiring (key, value)\nVALUES ('transient', 'demo')\nUSING TTL 5;\n\nSELECT TTL(value) AS remaining\nFROM ds60_orders.expiring\nWHERE key = 'transient';",
+      "interpretation": "Right after the insert, remaining is at most 5 and decreases on each read; once it reaches zero the row stops appearing. The client polls under a fifteen-second deadline instead of sleeping exactly five seconds, because coordinator clocks and request latency make an exact boundary unreliable. After expiry the cell becomes a tombstone in an SSTable, so disk usage does not drop until compaction runs after gc_grace_seconds has passed."
+    },
+    {
+      "title": "Delete versus snapshot retention",
+      "language": "bash",
+      "code": "cd work/cassandra\nbash run.sh check\nbash run.sh check-backup",
+      "interpretation": "The check route inserts and deletes a probe key and requires that a read returns nothing, which proves logical absence for current readers. The backup check works with snapshots, which are hard links to SSTable files taken at a point in time; a snapshot taken before the delete still holds the old value on disk. That combination is the usual answer to a deletion request audit: the live table is correct, but erasure also needs snapshot expiry and compaction. Shortening gc_grace_seconds to speed things up risks resurrected data if a replica missed the delete and repair has not run."
+    }
+  ],
   "evidence": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project.",
   "sources": [
     [

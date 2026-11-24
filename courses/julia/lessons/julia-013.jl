@@ -14,7 +14,7 @@ end
 worked_a()
 
 # Task 1: Add one offset per column to a matrix.
-# Task 2: Broadcast a length 4 vector with the 2-by -3 fixture.
+# Task 2: Broadcast a length 4 vector with the 2-by-3 fixture.
 # Task 3: Apply 2x+1 elementwise to a floating vector using dotted assignment.
 # Task 4: Shift a vector left-to-right by reading the preceding updated element.
 # Task 5: Read the shift input from an explicit copy.

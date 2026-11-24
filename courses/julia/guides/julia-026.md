@@ -10,6 +10,14 @@ Implement a preallocated matrix step, explain ownership and aliasing, and compar
 
 Open `julia-026` in `/classroom` with its prepared `julia` runtime. Worked case A (reuse an output buffer) and worked case B (views expose ownership) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-026: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
+## Key terms
+
+- **Preallocation:** Creating output buffers once outside a loop and filling them in place, so repeated iterations do not allocate.
+- **mul!:** The in-place product `mul!(C, A, B)` that writes into an existing `C`, which must not alias `A` or `B`.
+- **Views:** Slices taken with `view` or `@views` that read and write the parent array without copying it.
+- **Base.mightalias:** A conservative overlap check that can flag possible sharing, so a true result means investigate rather than proven overlap.
+- **Storage reuse:** Keeping a scratch buffer across calls of one computation, which is safe only when no other task uses it concurrently.
+
 ## Mutation is a storage contract
 
 An allocating operation returns fresh storage. A mutating operation writes into a destination supplied by its caller. Julia convention marks many mutating names with `!`, but the punctuation is a promise in documentation, not a language-enforced guarantee. The caller needs to know which objects can change, whether partial results survive an exception, and whether inputs may share storage with outputs.

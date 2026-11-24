@@ -44,6 +44,13 @@ internal static class Program {
       Check(rejected, "fractional quotient rejected");
     }
     {
+      // Task 2: Guided modification
+      int Triple(int value) => checked(value * 3);
+      Check(Triple(0) == 0, "zero stays zero");
+      Check(Triple(-4) == -12, "negative input keeps its sign");
+      Check(Triple(5) == 15, "positive input");
+    }
+    {
       // Task 3: Independent construction
       int Area(int width, int height) {
         if (width < 0 || height < 0) {
@@ -59,6 +66,31 @@ internal static class Program {
         rejected = true;
       }
       Check(rejected, "negative dimension rejected");
+    }
+    {
+      // Task 5: Boundary evidence
+      int DivideExact(int value, int divisor) {
+        if (divisor == 0)
+          throw new DivideByZeroException();
+        if (value % divisor != 0)
+          throw new ArgumentException("not an exact quotient");
+        return value / divisor;
+      }
+      bool zeroRejected = false;
+      try {
+        DivideExact(6, 0);
+      } catch (DivideByZeroException) {
+        zeroRejected = true;
+      }
+      bool remainderRejected = false;
+      try {
+        DivideExact(7, 2);
+      } catch (ArgumentException) {
+        remainderRejected = true;
+      }
+      Check(zeroRejected, "zero divisor has its own failure");
+      Check(remainderRejected, "remainder has its own failure");
+      Check(DivideExact(-12, 3) == -4, "exact negative quotient");
     }
     Console.WriteLine("csharp-007: passed");
     await Task.CompletedTask;

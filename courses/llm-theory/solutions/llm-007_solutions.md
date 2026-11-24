@@ -1,33 +1,22 @@
 # llm-007: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/llm-007.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
+Use this a tiny train-only subword vocabulary reference after your own attempt. The [learner guide](../guides/llm-007.md) keeps the fixture and Expected/Verify contracts for *Trace the first candidate counts* to *Transfer to UTF-8 text*, six separate actions; any implementation is acceptable if *Handle a bounded or absent fit* still fails on that input.
 
-The [executable reference](llm-007_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+`verify()` in the [executable reference](llm-007_solution.py) uses the Python standard library and literals only; on failure, keep the *Handle a bounded or absent fit* input. A pass says nothing beyond these a tiny train-only subword vocabulary fixtures, so next explain base symbol from memory on a changed fixture. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace the first candidate counts
 
 The two words contain pairs a/b, b/EOW, a/c and c/EOW, each once. Integer-tuple lexical ordering chooses a/b because its left token a is smaller than b or c and its right token b is smaller than c. Reversing the order of training words must not change this choice. Record the table before replacement so the decision is auditable; a saved tokenizer hash alone would not explain why that rule was chosen.
 
-**Expected:** Four pairs each have count one, and the selected pair is ((97,),(98,)).
+**Expected:** Four pairs each have count one, and the selected pair is ((97,), (98,)).
 
 **Verify:** Inspect the explicit pair-count table and assert the chosen rule under the declared lexical tie policy.
 
 ## Exercise 2: Construct a one-step trainer
 
-The trainer counts adjacent current tokens, selects the declared maximum/tie candidate and merges its nonoverlapping occurrences. With budget one, the only rule is ((97,),(98,)). Encoding ab then gives token (97,98) followed by (256,). Decoding flattens the bytes, removes the final marker and uses strict UTF-8. The ordered merge list is the learned state. A vocabulary set without that order is insufficient to reproduce the same encoding procedure.
+The trainer counts adjacent current tokens, selects the declared maximum/tie candidate and merges its nonoverlapping occurrences. With budget one, the only rule is ((97,), (98,)). Encoding ab then gives token (97,98) followed by (256,). Decoding flattens the bytes, removes the final marker and uses strict UTF-8. The ordered merge list is the learned state. A vocabulary set without that order is insufficient to reproduce the same encoding procedure.
 
-**Expected:** The ordered rule list contains only a+b; encoded ab is [(97,98),(256,)].
+**Expected:** The ordered rule list contains only a+b; encoded ab is [(97,98), (256,)].
 
 **Verify:** Assert the exact rule tuple, encoded tokens and decoded ab round trip.
 
@@ -43,7 +32,7 @@ For aaaa, a left-to-right scan matches positions zero/one, consumes both, then m
 
 The saved a+b rule does not match ad, so encoding returns the two separate base byte tokens and the marker. Serialize the same ordered rule list before and after and compare its hash. No fit call belongs in encoding. A new byte is supported by the fixed byte base, so there is no need to leak validation into merge selection. This fixture distinguishes an honest fallback from a tokenizer that silently retrains on every incoming document.
 
-**Expected:** Tokens [(97,),(100,),(256,)] and an unchanged merge hash.
+**Expected:** Tokens [(97,), (100,), (256,)] and an unchanged merge hash.
 
 **Verify:** Assert the complete token sequence and hash equality; no fit call may occur in the encoding path.
 
@@ -65,9 +54,7 @@ The UTF-8 representation of é is the two-byte sequence 195,169. With no matchin
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+*Inspect and apply the tied first merge* validates and reduces its input in the functions below; the executable file covers all six a tiny train-only subword vocabulary exercises. Keep the *Handle a bounded or absent fit* assertion and its invalid-input case; never replace them with a default.
 
 ```python
 from __future__ import annotations
@@ -136,9 +123,4 @@ def merge_hash(rules):
 
 Without the reference, explain why a merge list must be ordered and why a left-to-right scan cannot reuse one byte in two overlapping matches. Then propose a fresh tied training fixture and state its deterministic first choice.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Next, pick a fixture unlike *Inspect and apply the tied first merge* to test independent recall, and explain why *Handle a bounded or absent fit* rejects its case rather than naming the exception. Any notation works if base symbol and its denominator stay explicit; these a tiny train-only subword vocabulary checks say nothing about unseen model quality or safety.

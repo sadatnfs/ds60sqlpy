@@ -250,6 +250,17 @@ reconstructed <span class="syntax-operator">&lt;-</span> <span class="syntax-fun
 <span class="syntax-function">print</span><span class="syntax-punctuation">(</span>pc<span class="syntax-operator">$</span>sdev<span class="syntax-operator">^</span><span class="syntax-number">2</span> <span class="syntax-operator">/</span> <span class="syntax-function">sum</span><span class="syntax-punctuation">(</span>pc<span class="syntax-operator">$</span>sdev<span class="syntax-operator">^</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Near-exact reconstruction and orthonormal loading columns.</p>
 <p>Using every component recovers the admitted data up to rounding. The calculation explicitly reverses scaling and centering rather than treating scores as original-unit measurements.</p>
+<h3 id="tracing-the-a-and-b-fixture-by-hand">Tracing the a and b fixture by hand<a class="heading-anchor" href="#tracing-the-a-and-b-fixture-by-hand" aria-label="Link to this section">#</a></h3>
+<p>Every number that prcomp reports for the second fixture can be derived on paper:</p>
+<pre class="highlighted-code"><code class="language-text">a: 1 2 4 5    center 3    sd sqrt(10/3), about 1.826
+b: 2 1 5 4    center 3    sd sqrt(10/3), about 1.826
+cor(a, b) = (8/3) / (10/3) = 0.8
+eigenvalues of the correlation matrix: 1.8 and 0.2
+explained shares: 1.8/2 = 0.9 and 0.2/2 = 0.1
+loadings: (1, 1)/sqrt(2) and (1, -1)/sqrt(2), signs arbitrary
+new row (3, 2) standardized: (0, -0.548)
+new row scores: 0.548/sqrt(2), about 0.387, on each component</code></pre>
+<p>Because a and b have the same spread, scaling does not change their balance, and the first component weights them equally. The first fixture behaves differently: long is exactly 10 times short, so the raw first loading on long is 10/sqrt(101), about 0.995, and the second component has standard deviation 0. Its explained share of 100 percent reflects one duplicated signal measured in two units, not two informative features.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Compare scaled and unscaled PCA for the proportional two-feature fixture.</p>

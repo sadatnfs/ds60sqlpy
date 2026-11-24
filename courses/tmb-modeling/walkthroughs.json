@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "track_id": "tmb-modeling",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "tmb-003",
+      "title": "The Gaussian negative log likelihood, checked against dnorm in base R",
+      "anchor": "reference",
+      "source_path": "courses/tmb-modeling/examples/tmb-003.R",
+      "source_sha256": "4a890440b9ad40a11d060866841492fbd28034a0c796785b0f794ffe39cd321d",
+      "expected_output": [
+        "mean     ml_sd sample_sd",
+        "3.500000  2.291288  2.645751",
+        "8.99221       26.97663"
+      ],
+      "steps": [
+        {
+          "lines": [1, 3],
+          "excerpt": "y <- c(1, 2, 4, 7)\nmu <- mean(y)\nsigma <- sqrt(mean((y - mu)^2))",
+          "title": "Maximum likelihood estimates for a normal sample",
+          "explanation": "y holds four observations. For a normal model, the value of mu that maximizes the likelihood is the sample mean. The maximum likelihood standard deviation divides the sum of squared deviations by n, which mean((y - mu)^2) does. That differs from sd(y), which divides by n - 1 to remove bias. Both are legitimate, but they answer different questions, and a TMB objective that you minimize will land on the divide by n version.",
+          "observe": "sigma here is smaller than sd(y) for the same data."
+        },
+        {
+          "lines": [4, 6],
+          "excerpt": "nll <- function(y, mu, sigma) length(y) * log(sigma * sqrt(2 * pi)) + sum((y - mu)^2) / (2 * sigma^2)\nprint(c(mean = mu, ml_sd = sigma, sample_sd = sd(y)))\nstopifnot(abs(nll(y, mu, sigma) + sum(dnorm(y, mu, sigma, log = TRUE))) < 1e-12)",
+          "title": "Writing the objective by hand and checking it",
+          "explanation": "nll is the negative log likelihood of independent normal observations: n times log(sigma times the square root of 2 pi), plus the sum of squared residuals divided by 2 sigma squared. Optimizers minimize, so TMB objectives are written as negative log likelihoods. The print shows the two kinds of standard deviation side by side with names. stopifnot then compares nll with the negative sum of dnorm(..., log = TRUE), R's own log density, allowing for tiny floating point differences of 1e-12.",
+          "observe": "The named vector prints mean 3.5, ml_sd 2.291288 and sample_sd 2.645751."
+        },
+        {
+          "lines": [7, 9],
+          "excerpt": "y3 <- rep(y, 3)\nstopifnot(mean(y3) == mu, abs(nll(y3, mu, sigma) - 3 * nll(y, mu, sigma)) < 1e-10)\nprint(c(original_nll = nll(y, mu, sigma), duplicated_nll = nll(y3, mu, sigma)))",
+          "title": "Duplicated rows multiply the likelihood, not the information you have",
+          "explanation": "rep(y, 3) repeats the data three times. The mean does not change, but the negative log likelihood becomes exactly three times larger, because each copy adds its own terms. A model would therefore look three times as certain even though no new information was collected. This is why duplicate rows must be found before fitting.",
+          "observe": "original_nll is 8.99221 and duplicated_nll is 26.97663, three times as large."
+        }
+      ]
+    },
+    {
+      "lesson_id": "tmb-012",
+      "title": "A random intercept as a marginal covariance, and how shrinkage depends on group size",
+      "anchor": "reference",
+      "source_path": "courses/tmb-modeling/examples/tmb-012.R",
+      "source_sha256": "ed02c107e1dc1b6958c7439584b646d4dbe37286cfabd8282d062ac1936ec49e",
+      "expected_output": [
+        "[1,] 0.65 0.49 0.49",
+        "[1] 2.517834",
+        "group_size shrinkage_factor latent_mode"
+      ],
+      "steps": [
+        {
+          "lines": [1, 2],
+          "excerpt": "y <- c(.2, .8, 1.1); beta <- .5; sigma <- .4; tau <- .7\nV <- sigma^2 * diag(length(y)) + tau^2 * matrix(1, length(y), length(y))",
+          "title": "Integrating out a shared group effect",
+          "explanation": "Three observations share one group with mean beta. Each has its own noise with standard deviation sigma, and all of them share one latent group effect with standard deviation tau. Integrating the latent effect out leaves a joint normal distribution whose covariance is sigma squared on the diagonal plus tau squared everywhere, because the shared effect makes every pair of observations correlated. diag(n) is the identity matrix and matrix(1, n, n) is all ones.",
+          "observe": "The diagonal is 0.16 + 0.49 = 0.65 and every off-diagonal entry is 0.49."
+        },
+        {
+          "lines": [3, 5],
+          "excerpt": "R <- chol(V); residual <- y - beta\nnll <- .5 * (length(y) * log(2 * pi) + 2 * sum(log(diag(R))) + sum(backsolve(R, forwardsolve(t(R), residual)) * residual))\nprint(list(covariance = V, marginal_nll = nll))",
+          "title": "A stable multivariate normal likelihood with Cholesky",
+          "explanation": "chol(V) returns the upper triangular R with t(R) %*% R equal to V. The log determinant of V is twice the sum of the logs of R's diagonal, which avoids computing a determinant that can underflow. forwardsolve and backsolve solve the triangular systems to get V inverse times the residual without ever forming the inverse. Multiplying by the residual and summing gives the quadratic form. Together these give the multivariate normal negative log likelihood that a Laplace approximation in TMB reproduces for this Gaussian case.",
+          "observe": "The printed list shows the 3 by 3 covariance and marginal_nll 2.517834."
+        },
+        {
+          "lines": [6, 8],
+          "excerpt": "m <- c(2, 20); shrink <- m * tau^2 / (sigma^2 + m * tau^2)\nprint(data.frame(group_size = m, shrinkage_factor = shrink, latent_mode = shrink * .8))\nstopifnot(shrink[2] > shrink[1], all(eigen(V, symmetric = TRUE)$values > 0))",
+          "title": "Shrinkage grows with group size",
+          "explanation": "For a group with m observations, the predicted latent effect is the group's mean deviation multiplied by m tau squared divided by (sigma squared plus m tau squared). A small group is pulled more strongly toward zero, the overall mean, while a large group keeps more of its own signal. Here 0.8 is an example group mean deviation. The final check confirms larger groups shrink less and that V is positive definite, meaning all eigenvalues are positive, which a valid covariance requires.",
+          "observe": "A group of 2 keeps about 86 percent of its deviation and a group of 20 about 98 percent."
+        }
+      ]
+    },
+    {
+      "lesson_id": "tmb-015",
+      "title": "AR(1) latent states: a sparse precision matrix and the stationary start",
+      "anchor": "reference",
+      "source_path": "courses/tmb-modeling/examples/tmb-015.R",
+      "source_sha256": "e4f9c66ae32defb7addb9acaf6f2a81a9d908328ab5c0f6656d60a27a07f7bae",
+      "expected_output": [
+        "[1,] 3.188776 1.913265 0.000000 0.000000 0.000000",
+        "conditional_nll  stationary_nll",
+        "0.8548982       2.0702231"
+      ],
+      "steps": [
+        {
+          "lines": [1, 3],
+          "excerpt": "n <- 5; tau <- .7\nfor (phi in c(-.6, .6)) {\n  covariance <- tau^2 * phi^abs(outer(1:n, 1:n, \"-\"))",
+          "title": "The dense AR(1) covariance",
+          "explanation": "In a stationary AR(1) process each state equals phi times the previous state plus noise, with marginal standard deviation tau. The covariance between times i and j is tau squared times phi raised to the distance between them. outer(1:n, 1:n, '-') builds the matrix of time differences and abs makes them distances. Every entry is nonzero, so this matrix is dense even though each state depends only on its neighbour.",
+          "observe": "With phi = -0.6, covariances alternate in sign as the distance grows."
+        },
+        {
+          "lines": [4, 10],
+          "excerpt": "  precision <- matrix(0, n, n)\n  diag(precision) <- c(1, rep(1 + phi^2, n - 2), 1)\n  precision[row(precision) == col(precision) + 1 | row(precision) == col(precision) - 1] <- -phi\n  precision <- precision / (tau^2 * (1 - phi^2))\n  stopifnot(max(abs(precision %*% covariance - diag(n))) < 1e-12)\n  print(precision)\n}",
+          "title": "Building the tridiagonal precision directly",
+          "explanation": "The precision matrix is the inverse of the covariance. For AR(1) it is tridiagonal: the diagonal is 1 at both ends and 1 plus phi squared inside, the entries next to the diagonal are minus phi, and everything else is zero. row(precision) == col(precision) + 1 selects the first band below the diagonal. Dividing by tau squared times (1 minus phi squared) sets the scale. stopifnot proves precision times covariance is the identity to 1e-12. Sparse precisions like this are what let TMB handle long time series efficiently.",
+          "observe": "Each printed matrix is zero away from three diagonals; the sign of the bands flips with phi."
+        },
+        {
+          "lines": [11, 13],
+          "excerpt": "u <- c(.8, .3, -.1); phi <- .6\nconditional <- -sum(dnorm(u[-1], phi * u[-length(u)], tau * sqrt(1 - phi^2), log = TRUE))\nprint(c(conditional_nll = conditional, stationary_nll = conditional - dnorm(u[1], 0, tau, log = TRUE)))",
+          "title": "Conditional versus stationary likelihood for the first state",
+          "explanation": "u holds three latent states. The conditional negative log likelihood scores each state given the one before it: mean phi times the previous value and standard deviation tau times the square root of 1 minus phi squared. u[-1] drops the first value and u[-length(u)] drops the last, which pairs every state with its predecessor. That ignores how the first state itself arose. The stationary version adds the term for u[1] drawn from the marginal normal with standard deviation tau.",
+          "observe": "conditional_nll is 0.8548982 and stationary_nll is 2.0702231."
+        }
+      ]
+    }
+  ]
+}

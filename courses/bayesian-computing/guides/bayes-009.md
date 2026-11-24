@@ -10,6 +10,13 @@ The synthetic data contain 16 covariate values from minus one to one. Their outc
 
 The prepared profile uses PyMC 5.28.5 and ArviZ 0.23.4 with the InferenceData object contract. This matters because newer ecosystem interfaces use different result objects and defaults: PyMC 6 with ArviZ 1 returns an `xarray.DataTree` instead of `InferenceData`, summarizes with 89% equal-tailed intervals instead of 94% highest-density intervals and changes which variables `sample_posterior_predictive` resamples. The course does not download or upgrade packages when a lesson opens.
 
+## Key terms
+
+- **PyMC model context:** The Python block where random variables with declared priors and an observed likelihood are registered into one model.
+- **InferenceData:** The ArviZ 0.23 result container with named chain and draw dimensions for posterior, predictive and diagnostic groups.
+- **Divergence:** A Hamiltonian trajectory whose energy error became too large, signaling geometry the sampler may not explore reliably.
+- **Posterior predictive check:** Simulating replicated outcomes from the fitted model to compare with observed data.
+
 ## Worked case 1: fit real chains and retain diagnostics
 
 The program creates a `pm.Model`, declares the three unknowns and attaches a normal likelihood to observed y. It then runs two serial chains, each with 120 warmup and 120 retained draws, a fixed seed and target acceptance .9. These bounded settings fit within the classroom budget. They are not a recommended production convergence budget: the screen in the Markov chain unit asks for at least four chains and roughly 100 effective draws per chain for every reported quantity, which 240 retained draws in total rarely provide.
@@ -39,6 +46,39 @@ The code stores pointwise log-likelihood contributions for later evaluation. The
 **Does the coefficient check establish a successful real-world regression?** It shows that the prepared inference path can recover a simple synthetic relationship within a broad tolerance. It does not establish correct modeling assumptions, calibrated uncertainty or transport to another population.
 
 **What should be saved from a Bayesian run?** Save the model and data definitions, package versions, seeds, sampling configuration, actual diagnostics and the quantities used for interpretation. The classroom saves the submitted source and its run output; a larger project should additionally retain the full posterior artifact in an explicitly managed storage workflow.
+
+## Worked example: Split R-hat computed by hand on four chains
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(9)
+good = rng.normal(0, 1, (4, 500))
+stuck = good.copy()
+stuck[3] += 1.5  # one chain stays in a shifted region
+
+
+def split_rhat(chains):
+    half = chains.shape[1] // 2
+    s = np.vstack([chains[:, :half], chains[:, half:]])
+    n = s.shape[1]
+    W = s.var(axis=1, ddof=1).mean()
+    B = n * s.mean(axis=1).var(ddof=1)
+    return np.sqrt(((n - 1) / n * W + B / n) / W)
+
+
+for name, c in (("four mixed chains", good), ("one shifted chain", stuck)):
+    print(f"{name}: split R-hat {split_rhat(c):.3f}, chain means {c.mean(axis=1).round(2)}")
+```
+
+Observed output:
+
+```text
+four mixed chains: split R-hat 0.999, chain means [0.01 0.01 0.05 0.01]
+one shifted chain: split R-hat 1.213, chain means [0.01 0.01 0.05 1.51]
+```
+
+Split R-hat divides each of the four chains into halves and compares between-half variance with within-half variance. For four chains drawn from the same standard normal, the chain means are all near zero and R-hat is 0.999, inside any conventional screen. Shifting the fourth chain by 1.5 raises its mean to 1.51 and R-hat to 1.213, well above the 1.01 threshold. The calculation shows why: the within-chain variance is still about 1, but the variance of the eight half-chain means is now dominated by the two halves from the shifted chain, and \(\hat R\) grows with that between-chain term. A chain stuck in a different mode is exactly the failure R-hat exists to catch. Splitting adds protection against a different failure, a single chain that drifts, since its two halves would disagree. R-hat cannot detect four chains that are all stuck in the same wrong region; that requires a reference such as an exact posterior or simulation-based calibration.
 
 ## Complete reproducible program
 

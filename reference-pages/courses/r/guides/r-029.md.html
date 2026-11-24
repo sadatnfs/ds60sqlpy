@@ -228,7 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 </tbody></table></div>
 <h3 id="read-the-syntax">Read the syntax<a class="heading-anchor" href="#read-the-syntax" aria-label="Link to this section">#</a></h3>
-<p>RNGkind() queries generator choices and set.seed selects an initial state. Save and restore .Random.seed with assign(...,envir=.GlobalEnv), preserving whether it existed. jsonlite::toJSON(...,auto_unbox=TRUE,digits=17) creates the chosen JSON representation; digest::digest(text,algo=&quot;sha256&quot;,serialize=FALSE) hashes those bytes.</p>
+<p><code>RNGkind()</code> queries generator choices and <code>set.seed</code> selects an initial state. Save and restore <code>.Random.seed</code> with <code>assign(..., envir = .GlobalEnv)</code>, preserving whether it existed. <code>jsonlite::toJSON(..., auto_unbox = TRUE, digits = 17)</code> creates the chosen JSON representation; <code>digest::digest(text, algo = &quot;sha256&quot;, serialize = FALSE)</code> hashes those bytes.</p>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="example-1-repeat-a-calculation-while-restoring-the-caller-stream">Example 1: Repeat a calculation while restoring the caller stream<a class="heading-anchor" href="#example-1-repeat-a-calculation-while-restoring-the-caller-stream" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-r">with_rng <span class="syntax-operator">&lt;-</span> <span class="syntax-keyword">function</span><span class="syntax-punctuation">(</span>seed<span class="syntax-punctuation">,</span> fun<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>

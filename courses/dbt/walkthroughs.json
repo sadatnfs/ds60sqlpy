@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "track_id": "dbt",
+  "evidence": "authored",
+  "walkthroughs": [
+    {
+      "lesson_id": "dbt-002",
+      "title": "Seeds, a model that references them and rows rejected by a cast",
+      "anchor": "reference",
+      "source_path": "courses/dbt/references/dbt-002_reference.py",
+      "source_sha256": "766b3f50151b5fcee74c7b22fac730d42af9829f934942898085f0c6235d19b2",
+      "expected_output": [
+        "{'seed_rows': 3, 'amount_total': 21}",
+        "{'accepted_rows': 2, 'rejected_rows': 1, 'raw_rows': 3}",
+        "dbt-002 reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [3, 9],
+          "excerpt": "import json\nimport os\nimport tempfile\nfrom pathlib import Path\n\nimport duckdb\nimport yaml",
+          "title": "Imports",
+          "explanation": "json reads dbt's artifact files, tempfile and pathlib manage a throwaway folder, duckdb queries the warehouse file directly and yaml writes dbt's configuration. dbt itself is imported later, inside invoke.",
+          "observe": "Nothing here touches the network."
+        },
+        {
+          "lines": [12, 53],
+          "excerpt": "def project(directory, models=None, seeds=None, schema=None, snapshots=None, macros=None):\n    os.environ[\"DBT_SEND_ANONYMOUS_USAGE_STATS\"] = \"false\"\n    os.environ[\"DBT_USE_COLORS\"] = \"false\"\n    os.environ[\"DO_NOT_TRACK\"] = \"true\"\n    root = Path(directory) / \"project\"\n    root.mkdir(parents=True)\n    for folder in (\"models\", \"seeds\", \"snapshots\", \"macros\"):\n        (root / folder).mkdir()\n    config = {\n        \"name\": \"classroom\",\n        \"version\": \"1.0\",\n        \"config-version\": 2,\n        \"profile\": \"classroom\",\n        \"model-paths\": [\"models\"],\n        \"seed-paths\": [\"seeds\"],\n        \"snapshot-paths\": [\"snapshots\"],\n        \"macro-paths\": [\"macros\"],\n    }\n    (root / \"dbt_project.yml\").write_text(yaml.safe_dump(config))\n    output = {\n        \"type\": \"duckdb\",\n        \"path\": str(root / \"warehouse.duckdb\"),\n        \"schema\": \"main\",\n        \"threads\": 1,\n        \"settings\": {\"threads\": 2, \"memory_limit\": \"256MB\"},\n    }\n    (root / \"profiles.yml\").write_text(\n        yaml.safe_dump({\"classroom\": {\"target\": \"dev\", \"outputs\": {\"dev\": output}}})\n    )\n    for name, sql in (models or {\"answer\": \"select 42::integer as answer\"}).items():\n        (root / \"models\" / (name + \".sql\")).write_text(sql)\n    for name, csv in (seeds or {}).items():\n        (root / \"seeds\" / (name + \".csv\")).write_text(csv)\n    if schema:\n        (root / \"models/schema.yml\").write_text(yaml.safe_dump({\"version\": 2, **schema}))\n    if snapshots:\n        (root / \"snapshots/snapshots.yml\").write_text(\n            yaml.safe_dump({\"version\": 2, \"snapshots\": snapshots})\n        )\n    for name, sql in (macros or {}).items():\n        (root / \"macros\" / (name + \".sql\")).write_text(sql)\n    return root",
+          "title": "A self contained dbt project",
+          "explanation": "project builds a complete, throwaway dbt project inside a temporary folder. It disables telemetry and colors, creates the standard models, seeds, snapshots and macros folders, and writes dbt_project.yml. The profile points dbt at a local DuckDB file with one thread and a 256 MB memory limit, so everything runs offline and stays small. Callers pass dictionaries of model SQL, seed CSV text and optional YAML, and the helper writes each one to the right file.",
+          "observe": "After project returns, the folder holds a project dbt can build, plus the model and seed files you passed in."
+        },
+        {
+          "lines": [56, 76],
+          "excerpt": "def invoke(root, *arguments, succeeds=True):\n    from dbt.cli.main import dbtRunner\n\n    result = dbtRunner().invoke(\n        [\n            \"--quiet\",\n            \"--no-use-colors\",\n            \"--no-send-anonymous-usage-stats\",\n            *arguments,\n            \"--project-dir\",\n            str(root),\n            \"--profiles-dir\",\n            str(root),\n            \"--no-partial-parse\",\n        ]\n    )\n    if succeeds:\n        assert result.success, str(result.exception)\n    else:\n        assert not result.success, \"The deliberately invalid fixture was accepted.\"\n    return result",
+          "title": "Run dbt from Python",
+          "explanation": "invoke runs dbt from Python with dbtRunner instead of a shell command. The flags keep output quiet, turn off colors and usage stats, point dbt at this project and skip partial parsing so every run reads the files fresh. succeeds lets a test demand either success or a deliberate failure, so a broken fixture cannot silently pass.",
+          "observe": "A failed build raises an AssertionError that carries dbt's own exception text."
+        },
+        {
+          "lines": [79, 85],
+          "excerpt": "def rows(root, sql):\n    with duckdb.connect(str(root / \"warehouse.duckdb\"), read_only=False) as connection:\n        return connection.execute(sql).fetchall()\n\n\ndef artifact(root, name):\n    return json.loads((root / \"target\" / name).read_text())",
+          "title": "Read results back",
+          "explanation": "rows opens the DuckDB file and runs a SQL query, so the test checks real tables, not dbt's log messages. artifact loads a JSON file from dbt's target folder, such as manifest.json, which describes every node dbt knows about.",
+          "observe": "Checking the database directly is stronger evidence than reading dbt's success message."
+        },
+        {
+          "lines": [88, 104],
+          "excerpt": "def example_one():\n    with tempfile.TemporaryDirectory() as d:\n        p = project(\n            d,\n            models={\n                \"orders\": (\n                    \"select id::integer as id, amount::integer as amount from \"\n                    \"{{ ref('raw_orders') }}\"\n                )\n            },\n            seeds={\"raw_orders\": \"id,amount\\n1,5\\n2,7\\n3,9\\n\"},\n        )\n        invoke(p, \"build\")\n        assert rows(p, \"select count(*), sum(amount) from orders\") == [(3, 21)]\n        seed = artifact(p, \"manifest.json\")[\"nodes\"][\"seed.classroom.raw_orders\"]\n        assert seed[\"resource_type\"] == \"seed\"\n        return {\"seed_rows\": 3, \"amount_total\": 21}",
+          "title": "Seed, model and build",
+          "explanation": "The seed raw_orders is a CSV with three rows. The orders model selects from it with {{ ref('raw_orders') }}, which tells dbt about the dependency so it loads the seed first. dbt build loads seeds, builds models and runs tests in dependency order. The manifest confirms the seed was registered as a seed node.",
+          "observe": "The orders table has 3 rows and amounts summing to 21."
+        },
+        {
+          "lines": [107, 126],
+          "excerpt": "def example_two():\n    with tempfile.TemporaryDirectory() as d:\n        p = project(\n            d,\n            models={\n                \"clean\": (\n                    \"select id::integer as id, try_cast(amount as integer) as amount\\n\"\n                    \"from {{ ref('raw_orders') }}\\n\"\n                    \"where try_cast(amount as integer) is not null\"\n                )\n            },\n            seeds={\"raw_orders\": \"id,amount\\n1,5\\n2,bad\\n3,9\\n\"},\n        )\n        invoke(p, \"build\")\n        assert rows(p, \"select id, amount from clean order by id\") == [(1, 5), (3, 9)]\n        assert rows(p, \"select count(*) from raw_orders\") == [(3,)]\n        assert rows(\n            p, \"select count(*) from raw_orders where try_cast(amount as integer) is null\"\n        ) == [(1,)]\n        return {\"accepted_rows\": 2, \"rejected_rows\": 1, \"raw_rows\": 3}",
+          "title": "Rejecting a bad value without failing the load",
+          "explanation": "Now one amount is the text bad. try_cast returns NULL instead of erroring, and the WHERE clause drops rows where the cast failed. The raw seed still has all three rows, so the rejected row remains visible for investigation instead of disappearing.",
+          "observe": "clean holds ids 1 and 3; raw_orders still holds 3 rows, one of which fails the cast."
+        },
+        {
+          "lines": [129, 136],
+          "excerpt": "def main():\n    print(example_one())\n    print(example_two())\n    print(\"dbt-002 reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Print results and the pass marker",
+          "explanation": "main prints both dictionaries and the marker line after every assert succeeds.",
+          "observe": "The last line is dbt-002 reference checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dbt-008",
+      "title": "Incremental models, watermarks and why late events need a full refresh",
+      "anchor": "reference",
+      "source_path": "courses/dbt/references/dbt-008_reference.py",
+      "source_sha256": "55329fd7a641cbb17c63a53baa55ac8be27367f1be3ff3439c3a8bb6898e5e34",
+      "expected_output": [
+        "{'monotone_append_rows': 2, 'rerun_did_not_duplicate': True}",
+        "'full_refresh_rows': 3",
+        "dbt-008 reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [11, 52],
+          "excerpt": "def project(directory, models=None, seeds=None, schema=None, snapshots=None, macros=None):\n    os.environ[\"DBT_SEND_ANONYMOUS_USAGE_STATS\"] = \"false\"\n    os.environ[\"DBT_USE_COLORS\"] = \"false\"\n    os.environ[\"DO_NOT_TRACK\"] = \"true\"\n    root = Path(directory) / \"project\"\n    root.mkdir(parents=True)\n    for folder in (\"models\", \"seeds\", \"snapshots\", \"macros\"):\n        (root / folder).mkdir()\n    config = {\n        \"name\": \"classroom\",\n        \"version\": \"1.0\",\n        \"config-version\": 2,\n        \"profile\": \"classroom\",\n        \"model-paths\": [\"models\"],\n        \"seed-paths\": [\"seeds\"],\n        \"snapshot-paths\": [\"snapshots\"],\n        \"macro-paths\": [\"macros\"],\n    }\n    (root / \"dbt_project.yml\").write_text(yaml.safe_dump(config))\n    output = {\n        \"type\": \"duckdb\",\n        \"path\": str(root / \"warehouse.duckdb\"),\n        \"schema\": \"main\",\n        \"threads\": 1,\n        \"settings\": {\"threads\": 2, \"memory_limit\": \"256MB\"},\n    }\n    (root / \"profiles.yml\").write_text(\n        yaml.safe_dump({\"classroom\": {\"target\": \"dev\", \"outputs\": {\"dev\": output}}})\n    )\n    for name, sql in (models or {\"answer\": \"select 42::integer as answer\"}).items():\n        (root / \"models\" / (name + \".sql\")).write_text(sql)\n    for name, csv in (seeds or {}).items():\n        (root / \"seeds\" / (name + \".csv\")).write_text(csv)\n    if schema:\n        (root / \"models/schema.yml\").write_text(yaml.safe_dump({\"version\": 2, **schema}))\n    if snapshots:\n        (root / \"snapshots/snapshots.yml\").write_text(\n            yaml.safe_dump({\"version\": 2, \"snapshots\": snapshots})\n        )\n    for name, sql in (macros or {}).items():\n        (root / \"macros\" / (name + \".sql\")).write_text(sql)\n    return root",
+          "title": "The shared project helper",
+          "explanation": "project builds a complete, throwaway dbt project inside a temporary folder. It disables telemetry and colors, creates the standard models, seeds, snapshots and macros folders, and writes dbt_project.yml. The profile points dbt at a local DuckDB file with one thread and a 256 MB memory limit, so everything runs offline and stays small. Callers pass dictionaries of model SQL, seed CSV text and optional YAML, and the helper writes each one to the right file.",
+          "observe": "This is the same helper used across the track; only the models and seeds change per example."
+        },
+        {
+          "lines": [55, 80],
+          "excerpt": "def invoke(root, *arguments, succeeds=True):\n    from dbt.cli.main import dbtRunner\n\n    result = dbtRunner().invoke(\n        [\n            \"--quiet\",\n            \"--no-use-colors\",\n            \"--no-send-anonymous-usage-stats\",\n            *arguments,\n            \"--project-dir\",\n            str(root),\n            \"--profiles-dir\",\n            str(root),\n            \"--no-partial-parse\",\n        ]\n    )\n    if succeeds:\n        assert result.success, str(result.exception)\n    else:\n        assert not result.success, \"The deliberately invalid fixture was accepted.\"\n    return result\n\n\ndef rows(root, sql):\n    with duckdb.connect(str(root / \"warehouse.duckdb\"), read_only=False) as connection:\n        return connection.execute(sql).fetchall()",
+          "title": "Run dbt and query DuckDB",
+          "explanation": "invoke runs dbt from Python with dbtRunner instead of a shell command. The flags keep output quiet, turn off colors and usage stats, point dbt at this project and skip partial parsing so every run reads the files fresh. succeeds lets a test demand either success or a deliberate failure, so a broken fixture cannot silently pass. rows then reads query results straight from the DuckDB file.",
+          "observe": "Each invoke call is one full dbt command, such as build or run."
+        },
+        {
+          "lines": [83, 91],
+          "excerpt": "def example_one():\n    with tempfile.TemporaryDirectory() as d:\n        sql = (\n            \"{{ config(materialized='incremental') }}\\n\"\n            \"select *\\n\"\n            \"from {{ ref('events') }}\\n\"\n            \"{% if is_incremental() %} where updated_at > (select max(updated_at) from {{ this }}) \"\n            \"{% endif %}\"\n        )",
+          "title": "An incremental model with a watermark",
+          "explanation": "materialized='incremental' tells dbt to add rows to an existing table instead of rebuilding it. is_incremental() is false on the first run and true afterward. When true, the WHERE clause keeps only events with updated_at greater than the largest value already stored, which is called a watermark. {{ this }} refers to the model's own existing table.",
+          "observe": "On the first run the filter is skipped and every row is loaded."
+        },
+        {
+          "lines": [92, 98],
+          "excerpt": "        p = project(d, models={\"history\": sql}, seeds={\"events\": \"id,updated_at,amount\\n1,10,5\\n\"})\n        invoke(p, \"build\")\n        (p / \"seeds/events.csv\").write_text(\"id,updated_at,amount\\n1,10,5\\n2,20,7\\n\")\n        invoke(p, \"build\")\n        invoke(p, \"run\")\n        assert rows(p, \"select id,amount from history order by id\") == [(1, 5), (2, 7)]\n        return {\"monotone_append_rows\": 2, \"rerun_did_not_duplicate\": True}",
+          "title": "Append a newer row, then rerun",
+          "explanation": "The first build loads one event. The seed file is then rewritten with a second, newer event and built again, so only the new row passes the watermark. A further run with no new data adds nothing, which shows the model is safe to rerun.",
+          "observe": "history contains exactly ids 1 and 2, with no duplicates."
+        },
+        {
+          "lines": [101, 116],
+          "excerpt": "def example_two():\n    with tempfile.TemporaryDirectory() as d:\n        sql = (\n            \"{{ config(materialized='incremental') }}\\n\"\n            \"select *\\n\"\n            \"from {{ ref('events') }}\\n\"\n            \"{% if is_incremental() %} where updated_at > (select max(updated_at) from {{ this }}) \"\n            \"{% endif %}\"\n        )\n        p = project(\n            d, models={\"history\": sql}, seeds={\"events\": \"id,updated_at,amount\\n1,10,5\\n2,20,7\\n\"}\n        )\n        invoke(p, \"build\")\n        (p / \"seeds/events.csv\").write_text(\"id,updated_at,amount\\n1,10,5\\n2,20,7\\n3,15,9\\n\")\n        invoke(p, \"build\")\n        assert rows(p, \"select count(*) from history\") == [(2,)]",
+          "title": "A late event slips under the watermark",
+          "explanation": "This time the new event has updated_at 15, which is older than the stored maximum of 20. The incremental filter rejects it, so the table still has two rows even though the source has three. This is the core risk of timestamp watermarks.",
+          "observe": "history has 2 rows while the source seed has 3."
+        },
+        {
+          "lines": [117, 119],
+          "excerpt": "        invoke(p, \"run\", \"--full-refresh\")\n        assert rows(p, \"select count(*) from history\") == [(3,)]\n        return {\"late_event_missed_by_watermark\": True, \"full_refresh_rows\": 3}",
+          "title": "Recover with a full refresh",
+          "explanation": "dbt run --full-refresh drops the incremental logic for one run and rebuilds the table from all source rows, so the late event is finally included.",
+          "observe": "After the refresh history has 3 rows."
+        },
+        {
+          "lines": [122, 129],
+          "excerpt": "def main():\n    print(example_one())\n    print(example_two())\n    print(\"dbt-008 reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Print results and the pass marker",
+          "explanation": "main prints both dictionaries and the marker line.",
+          "observe": "The last line is dbt-008 reference checks passed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dbt-013",
+      "title": "Selecting models by tag, graph and changed state",
+      "anchor": "reference",
+      "source_path": "courses/dbt/references/dbt-013_reference.py",
+      "source_sha256": "431aae26e79df8ab37177619da69a9b4d761101069bbc8f5b4b7c2b5485cbb54",
+      "expected_output": [
+        "{'selected_models': ['base', 'child']}",
+        "'state_is_not_a_quality_certificate': True",
+        "dbt-013 reference checks passed"
+      ],
+      "steps": [
+        {
+          "lines": [11, 52],
+          "excerpt": "def project(directory, models=None, seeds=None, schema=None, snapshots=None, macros=None):\n    os.environ[\"DBT_SEND_ANONYMOUS_USAGE_STATS\"] = \"false\"\n    os.environ[\"DBT_USE_COLORS\"] = \"false\"\n    os.environ[\"DO_NOT_TRACK\"] = \"true\"\n    root = Path(directory) / \"project\"\n    root.mkdir(parents=True)\n    for folder in (\"models\", \"seeds\", \"snapshots\", \"macros\"):\n        (root / folder).mkdir()\n    config = {\n        \"name\": \"classroom\",\n        \"version\": \"1.0\",\n        \"config-version\": 2,\n        \"profile\": \"classroom\",\n        \"model-paths\": [\"models\"],\n        \"seed-paths\": [\"seeds\"],\n        \"snapshot-paths\": [\"snapshots\"],\n        \"macro-paths\": [\"macros\"],\n    }\n    (root / \"dbt_project.yml\").write_text(yaml.safe_dump(config))\n    output = {\n        \"type\": \"duckdb\",\n        \"path\": str(root / \"warehouse.duckdb\"),\n        \"schema\": \"main\",\n        \"threads\": 1,\n        \"settings\": {\"threads\": 2, \"memory_limit\": \"256MB\"},\n    }\n    (root / \"profiles.yml\").write_text(\n        yaml.safe_dump({\"classroom\": {\"target\": \"dev\", \"outputs\": {\"dev\": output}}})\n    )\n    for name, sql in (models or {\"answer\": \"select 42::integer as answer\"}).items():\n        (root / \"models\" / (name + \".sql\")).write_text(sql)\n    for name, csv in (seeds or {}).items():\n        (root / \"seeds\" / (name + \".csv\")).write_text(csv)\n    if schema:\n        (root / \"models/schema.yml\").write_text(yaml.safe_dump({\"version\": 2, **schema}))\n    if snapshots:\n        (root / \"snapshots/snapshots.yml\").write_text(\n            yaml.safe_dump({\"version\": 2, \"snapshots\": snapshots})\n        )\n    for name, sql in (macros or {}).items():\n        (root / \"macros\" / (name + \".sql\")).write_text(sql)\n    return root",
+          "title": "The shared project helper",
+          "explanation": "project builds a complete, throwaway dbt project inside a temporary folder. It disables telemetry and colors, creates the standard models, seeds, snapshots and macros folders, and writes dbt_project.yml. The profile points dbt at a local DuckDB file with one thread and a 256 MB memory limit, so everything runs offline and stays small. Callers pass dictionaries of model SQL, seed CSV text and optional YAML, and the helper writes each one to the right file.",
+          "observe": "No seeds are needed here; the models are tiny SELECT statements."
+        },
+        {
+          "lines": [55, 79],
+          "excerpt": "def invoke(root, *arguments, succeeds=True):\n    from dbt.cli.main import dbtRunner\n\n    result = dbtRunner().invoke(\n        [\n            \"--quiet\",\n            \"--no-use-colors\",\n            \"--no-send-anonymous-usage-stats\",\n            *arguments,\n            \"--project-dir\",\n            str(root),\n            \"--profiles-dir\",\n            str(root),\n            \"--no-partial-parse\",\n        ]\n    )\n    if succeeds:\n        assert result.success, str(result.exception)\n    else:\n        assert not result.success, \"The deliberately invalid fixture was accepted.\"\n    return result\n\n\ndef names(result):\n    return [str(value) for value in result.result]",
+          "title": "Run dbt and collect node names",
+          "explanation": "invoke runs dbt from Python with dbtRunner instead of a shell command. The flags keep output quiet, turn off colors and usage stats, point dbt at this project and skip partial parsing so every run reads the files fresh. succeeds lets a test demand either success or a deliberate failure, so a broken fixture cannot silently pass. names turns the result of dbt ls into a list of plain strings.",
+          "observe": "dbt ls only lists nodes; it builds nothing."
+        },
+        {
+          "lines": [82, 92],
+          "excerpt": "def example_one():\n    with tempfile.TemporaryDirectory() as d:\n        p = project(\n            d,\n            models={\n                \"base\": \"{{ config(tags=['feature']) }} select 1 as x\",\n                \"child\": \"select x + 1 as x from {{ ref('base') }}\",\n                \"unrelated\": \"select 9 as x\",\n            },\n        )\n        invoke(p, \"parse\")",
+          "title": "Three models, one tagged",
+          "explanation": "base carries the tag feature through its config block. child depends on base through ref. unrelated has no link to either. dbt parse reads the project and writes manifest.json without running any SQL.",
+          "observe": "The project graph is base to child, plus a separate unrelated node."
+        },
+        {
+          "lines": [93, 99],
+          "excerpt": "        selected = names(\n            invoke(\n                p, \"ls\", \"--select\", \"tag:feature+\", \"--resource-type\", \"model\", \"--output\", \"name\"\n            )\n        )\n        assert set(selected) == {\"base\", \"child\"}, selected\n        return {\"selected_models\": sorted(selected)}",
+          "title": "Graph selection with tag:feature+",
+          "explanation": "tag:feature selects models with that tag, and the trailing plus adds everything downstream. --resource-type model and --output name keep the listing to model names. The selection includes child because it depends on base, and excludes unrelated.",
+          "observe": "dbt prints base and child, and the function returns them sorted."
+        },
+        {
+          "lines": [102, 111],
+          "excerpt": "def example_two():\n    with tempfile.TemporaryDirectory() as d:\n        p = project(\n            d, models={\"base\": \"select 1 as x\", \"child\": \"select x + 1 as x from {{ ref('base') }}\"}\n        )\n        invoke(p, \"parse\")\n        state = p / \"previous_state\"\n        state.mkdir()\n        shutil.copyfile(p / \"target/manifest.json\", state / \"manifest.json\")\n        (p / \"models/base.sql\").write_text(\"select 2 as x\")",
+          "title": "Save state, then change a model",
+          "explanation": "After parsing, the manifest is copied into previous_state. That copy is the baseline. Rewriting base.sql changes base's definition relative to the baseline.",
+          "observe": "Only base.sql was edited; child.sql is unchanged."
+        },
+        {
+          "lines": [112, 130],
+          "excerpt": "        selected = names(\n            invoke(\n                p,\n                \"ls\",\n                \"--state\",\n                str(state),\n                \"--select\",\n                \"state:modified+\",\n                \"--resource-type\",\n                \"model\",\n                \"--output\",\n                \"name\",\n            )\n        )\n        assert set(selected) == {\"base\", \"child\"}, selected\n        return {\n            \"changed_and_downstream\": sorted(selected),\n            \"state_is_not_a_quality_certificate\": True,\n        }",
+          "title": "state:modified+ finds the change and its consumers",
+          "explanation": "--state points dbt at the saved manifest, and state:modified+ selects nodes whose definition differs plus everything downstream. That is how continuous integration can rebuild only what a change affects. The returned flag records an important limit: a state comparison says what changed, not whether the change is correct.",
+          "observe": "The selection is base and child again, this time because of the edit."
+        },
+        {
+          "lines": [133, 140],
+          "excerpt": "def main():\n    print(example_one())\n    print(example_two())\n    print(\"dbt-013 reference checks passed\")\n\n\nif __name__ == \"__main__\":\n    main()",
+          "title": "Print results and the pass marker",
+          "explanation": "main prints both dictionaries and the marker line after every check passes. dbt ls also writes the selected names, which is why base and child appear on their own lines.",
+          "observe": "The last line is dbt-013 reference checks passed."
+        }
+      ]
+    }
+  ]
+}

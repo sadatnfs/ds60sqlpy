@@ -201,6 +201,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A rollout changes which model participates in a decision. Shadow evaluation can compare predictions without changing user actions. A canary or ramp routes an explicit portion of traffic to a candidate. These mechanisms provide operational evidence, but a prediction difference or a successful router is not automatically evidence of a beneficial causal effect.</p>
 <p>Stable assignment is useful when repeated requests from one entity should remain in the same cohort. The first case hashes a declared entity identity into a bounded bucket. Increasing the threshold creates a nested larger cohort. This is a deterministic assignment mechanism, not a guarantee of balance or an analysis of an experiment.</p>
 <p>The second case compares scores from two small candidate outputs. Their thresholded decisions agree even though probabilities differ. A single disagreement count would therefore miss a change in confidence. A real rollout policy should consider input compatibility, output behavior, service errors, latency, monitoring and appropriately designed outcome evidence.</p>
+<h3 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Shadow evaluation:</strong> Scoring requests with a candidate model alongside the active one without changing the action that users receive.</li>
+<li><strong>Canary:</strong> Routing a small, explicit share of real traffic to a candidate to observe its operational behavior before a wider release.</li>
+<li><strong>Stable assignment:</strong> Hashing a namespaced entity identity into a fixed bucket so repeated requests from one entity always land in the same cohort.</li>
+<li><strong>Ramp:</strong> Raising the bucket threshold in steps, which produces nested larger cohorts that keep every earlier member.</li>
+<li><strong>Causal evidence:</strong> Evidence from an appropriately designed comparison that a change improved outcomes. Score differences or a working router do not provide it.</li>
+</ul>
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The hash bucket is computed from a stable namespaced identity and a fixed rule. Keep the rule and salt/version with the rollout contract. Shadow comparison inspects both numeric score changes and derived actions. The fixture&#x27;s acceptance limit is a declared illustrative threshold, not an estimated business-value rule.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>

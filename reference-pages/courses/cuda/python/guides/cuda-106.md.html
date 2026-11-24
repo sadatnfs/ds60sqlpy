@@ -200,6 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A thread-level model assigns scalar work to individual threads. A tile-level language describes a block of data and lets a compiler choose lower-level distribution and instructions. The abstraction can simplify matrix and reduction kernels, but layout, memory traffic, masks and numerical behavior still matter. Different DSL releases support different devices and operations.</p>
 <p>Use a selected prepared Triton or CUDA tile implementation only after recording its compiler and architecture requirements. Compare the same mathematical operation against a library and the earlier thread-level reference. A masked tile must protect every invalid load and store at the boundary. This elective includes a CPU tiling model; the ordinary Python worker does not acquire a DSL compiler or GPU merely by opening the guide.</p>
+<h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Tile-level language:</strong> A kernel language such as Triton that describes operations on blocks of data and lets the compiler map them to threads.</li>
+<li><strong>Program instance:</strong> One launched instance of a tile kernel, identified by its program ID, that processes one tile.</li>
+<li><strong>Boundary mask:</strong> A boolean vector that disables out-of-bounds loads and stores at tile edges.</li>
+<li><strong>Block size:</strong> The compile-time tile dimensions, trading parallelism against register and shared memory use.</li>
+</ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p>A vector of 10 elements partitioned into tiles of 4 has tiles [0..3],[4..7],[8,9]. The last tile has two valid lanes and two masked lanes.</p>
@@ -213,20 +220,44 @@ blocks <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>i <span class="syntax-keyword">for</span> block <span class="syntax-operator">in</span> blocks <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> block<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU tile model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> blocks<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Three tiles cover ten elements exactly once.</p>
+<p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Variable</th>
+<th>Final value</th>
+</tr></thead><tbody>
+<tr>
+<td><code>n</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>tile</code></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>blocks</code></td>
+<td><code>[[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]</code></td>
+</tr>
+</tbody></table></div>
 <p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-create-tile-boundaries">Exercise 1: Create tile boundaries<a class="heading-anchor" href="#exercise-1-create-tile-boundaries" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>create tile boundaries</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Using closed intervals <code>[start, start + tile]</code> makes adjacent tiles share an element, so index 4 is processed twice and a sum reduction double counts it.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-mask-a-final-tile">Exercise 2: Mask a final tile<a class="heading-anchor" href="#exercise-2-mask-a-final-tile" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>mask a final tile</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Masking only the store still issues out-of-bounds loads, which can fault or read unrelated memory, and an unmasked reduction then includes garbage values.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-compare-thread-and-tile-abstractions">Exercise 3: Compare thread and tile abstractions<a class="heading-anchor" href="#exercise-3-compare-thread-and-tile-abstractions" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>compare thread and tile abstractions</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Assuming a tile kernel behaves like a thread kernel with the same block size misreads the model, since a tile program instance is not a single thread.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-state-compiler-requirements">Exercise 4: State compiler requirements<a class="heading-anchor" href="#exercise-4-state-compiler-requirements" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>state compiler requirements</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Writing that the kernel requires a recent version gives no way to reproduce the build.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-library-comparison">Exercise 5: Design a library comparison<a class="heading-anchor" href="#exercise-5-design-a-library-comparison" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>design a library comparison</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Timing the DSL kernel once against a warmed library call reports the DSL as much slower purely because of compilation.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-a-resource-tradeoff">Exercise 6: Explain a resource tradeoff<a class="heading-anchor" href="#exercise-6-explain-a-resource-tradeoff" aria-label="Link to this section">#</a></h4>
-<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>explain a resource tradeoff</strong> in the examples above.</p>
+<p><strong>Trap to avoid:</strong> Concluding that larger tiles are always faster because they reuse more data predicts a direction that only device evidence can establish.</p>
+<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
 <ol>

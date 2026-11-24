@@ -15,6 +15,14 @@ Let \(p(a\mid x)\) be the logging probability, \(q(a\mid x)\) the target-policy 
 
 Every action used by the target must have positive logging probability in the relevant contexts. Accurate logging probabilities also need to correspond to the actual action-selection process, including eligibility, exploration and overrides. An undocumented business rule can invalidate a nominal propensity stored by a model service.
 
+## Key terms
+
+- **Logging policy:** The mechanism that chose the logged actions, whose probabilities p(a | x) must match actual selection including overrides.
+- **Inverse propensity scoring:** Estimating a target policy's value by averaging rewards reweighted by q(a | x)/p(a | x).
+- **Support:** The requirement that every action the target policy uses has positive logging probability in the relevant contexts.
+- **Doubly robust estimator:** A combination of an outcome model and importance weights that remains consistent if either component is correct.
+- **Weight clipping:** Capping importance ratios to reduce variance at the cost of a changed expectation, that is, bias.
+
 ## Worked case 1: recover a new policy's value
 
 The logging policy chooses action A 80% of the time and B 20%. Their known rewards are .2 and .8. The observed logging mean is .32. A target policy choosing each action equally has value .5. The program represents the logging population with exact repeated proportions and recovers .5 using the probability ratio.
@@ -44,6 +52,38 @@ Offline evidence should lead to a bounded deployment decision, such as a control
 **Can a deterministic historical policy evaluate every new policy?** No. If it never chose an action in a context, that outcome is not identified from the log without additional modeling assumptions or new exploration.
 
 **Does unbiasedness guarantee a useful estimate?** An unbiased estimator can have enormous variance when it relies on rare actions. Diagnose both identification and uncertainty before using its point estimate to make a deployment decision.
+
+## Worked example: IPS, clipped IPS and doubly robust on six logged rounds
+
+```python
+import numpy as np
+
+action = np.array([0, 1, 1, 0, 1, 0])
+reward = np.array([1.0, 0.0, 1.0, 0.0, 1.0, 1.0])
+p_log = np.array([0.9, 0.1, 0.1, 0.9, 0.1, 0.9])  # logging probability of the action taken
+p_new = np.where(action == 1, 0.8, 0.2)  # new policy prefers action 1
+q_hat = {0: 0.6, 1: 0.5}  # reward model by action
+
+w = p_new / p_log
+ips = np.mean(w * reward)
+clipped = np.mean(np.minimum(w, 3.0) * reward)
+direct = 0.8 * q_hat[1] + 0.2 * q_hat[0]
+q_taken = np.array([q_hat[a] for a in action])
+dr = direct + np.mean(w * (reward - q_taken))
+print("importance weights:", w.round(3))
+print(f"IPS {ips:.4f}, clipped IPS (cap 3) {clipped:.4f}, direct {direct:.4f}, DR {dr:.4f}")
+print(f"ESS of weights {w.sum() ** 2 / (w**2).sum():.3f} out of {len(w)}")
+```
+
+Observed output:
+
+```text
+importance weights: [0.222 8.    8.    0.222 8.    0.222]
+IPS 2.7407, clipped IPS (cap 3) 1.0741, direct 0.5200, DR 1.1941
+ESS of weights 3.167 out of 6
+```
+
+The new policy chooses action 1 with probability 0.8, while the logging policy chose it with probability 0.1, so each logged action-1 round gets weight 8. Three such rounds dominate: plain IPS returns 2.7407, an impossible value for rewards bounded by 1, because two of those three rounds had reward 1. Clipping weights at 3 brings the estimate to 1.0741, still above 1, and introduces bias whose size depends on the cap. The direct method uses only the reward model, \(0.8(0.5)+0.2(0.6)=0.52\), and is biased if that model is wrong. The doubly robust estimate 1.1941 adds the weighted residuals to 0.52. Here the residuals on action-1 rounds are \(-0.5, +0.5, +0.5\), each multiplied by 8, so the correction is still dominated by those three rows. The effective sample size of 3.167 out of 6 and the impossible IPS value say the same thing: the log contains too little support for action 1 to evaluate this policy reliably.
 
 ## Complete reproducible program
 

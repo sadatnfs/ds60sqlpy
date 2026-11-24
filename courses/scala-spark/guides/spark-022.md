@@ -8,7 +8,7 @@ Intermediate; approximately 90 minutes. Direct prerequisites: `spark-021`. The p
 
 ## How to run this lesson
 
-Open `spark-022` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Open `spark-022` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-022.scala) and [PySpark learner](../lessons/spark-022.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-022_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-022_solution.scala) and [PySpark reference](../solutions/spark-022_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
@@ -46,7 +46,7 @@ The verified Spark 4.0.1 exchange implementation exposes dataSize and numPartiti
 
 The result comparison sorts only the bounded 1000 collected group rows on the driver, so it does not introduce an extra Spark global-order exchange into the measured aggregate plan. This scope choice matters. Calling orderBy before collection would add another physical operation, and a later metrics reader could accidentally attribute that extra work to the original groupBy. The helper retains the same DataFrame object whose action ran so the observed metric tree belongs to the measured query.
 
-The final task computes a transparent workload model:5000 source rows per input partition, at most 4000 partial group records under the stated local-combine assumption, and average output groups per reducer of 500 or 200. Actual hash placement need not be perfectly balanced. No elapsed-time ordering is asserted. A warm JVM, cache state, task startup, serialization and contention can dominate this tiny run; none of them is controlled well enough here to call two or five partitions a universally better choice.
+The final task computes a transparent workload model: 5000 source rows per input partition, at most 4000 partial group records under the stated local-combine assumption, and average output groups per reducer of 500 or 200. Actual hash placement need not be perfectly balanced. No elapsed-time ordering is asserted. A warm JVM, cache state, task startup, serialization and contention can dominate this tiny run; none of them is controlled well enough here to call two or five partitions a universally better choice.
 
 A production comparison would keep logical inputs and outputs fixed, record versions and configuration, collect task-duration and spill distributions, inspect skew and memory pressure, and repeat under a representative workload. This lesson supplies the prerequisite evidence discipline and a bounded runnable mechanism, while preserving the distinction between a local demonstration and a tuning recommendation.
 
@@ -55,29 +55,14 @@ A production comparison would keep logical inputs and outputs fixed, record vers
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
 ```scala
-import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
 
 val source = spark.range(0L, 20000L, 1L, 4).withColumn("key", col("id") % 1000L)
 val originalShuffle = spark.conf.get("spark.sql.shuffle.partitions")
 ```
 
 ```python
-from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    LongType,
-    IntegerType,
-    StringType,
-    DoubleType,
-    BooleanType,
-    ArrayType,
-    MapType,
-    TimestampType,
-    DecimalType,
-)
+from pyspark.sql import functions as F
 
 source = spark.range(0, 20000, 1, 4).withColumn("key", F.col("id") % 1000)
 original_shuffle = spark.conf.get("spark.sql.shuffle.partitions")
@@ -90,13 +75,13 @@ original_shuffle = spark.conf.get("spark.sql.shuffle.partitions")
 ```scala
 assert(source.count() == 20000L && source.rdd.getNumPartitions == 4)
 assert(source.select("key").distinct().count() == 1000L)
-println("Input:20000 rows,1000 keys,4 partitions,local[2]")
+println("Input: 20000 rows, 1000 keys, 4 partitions, local[2]")
 ```
 
 ```python
 assert source.count() == 20000 and source.rdd.getNumPartitions() == 4
 assert source.select("key").distinct().count() == 1000
-print("Input:20000 rows,1000 keys,4 partitions,local[2]")
+print("Input: 20000 rows, 1000 keys, 4 partitions, local[2]")
 ```
 
 The quantities describe row population, key cardinality, input layout and local execution capacity separately. None can substitute for another when explaining how many tasks or intermediate records a grouped query needs.
@@ -106,13 +91,13 @@ The quantities describe row population, key cardinality, input layout and local 
 ```scala
 val partialUpper = 4L * 1000L
 assert(partialUpper == 4000L && partialUpper < 20000L)
-println("Local partial aggregation can reduce occurrences before redistribution;this is a model")
+println("Local partial aggregation can reduce occurrences before redistribution; this is a model")
 ```
 
 ```python
 partial_upper = 4 * 1000
 assert partial_upper == 4000 and partial_upper < 20000
-print("Local partial aggregation can reduce occurrences before redistribution;this is a model")
+print("Local partial aggregation can reduce occurrences before redistribution; this is a model")
 ```
 
 The bound assumes the four input partitions each observe at most 1000 keys and can combine their counts locally. It is not a measured shuffle-record count or byte estimate. The later metric helper reads actual exchange evidence rather than substituting this arithmetic model for measurement.
@@ -123,7 +108,7 @@ The bound assumes the four input partitions each observe at most 1000 keys and c
 
 Compute input row count, distinct key count and total id sum. Confirm the key formula supports exactly 20 occurrences per key.
 
-**Expected result/shape:** Metrics(20000,1000,199990000); keys 0..999 each occur 20 times by construction.
+**Expected result/shape:** `Metrics(20000, 1000, 199990000)`; keys 0..999 each occur 20 times by construction.
 
 **Verify:** Assert the aggregate tuple and independent arithmetic sum 0+...+19999.
 
@@ -133,7 +118,7 @@ Compute input row count, distinct key count and total id sum. Confirm the key fo
 
 Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group.
 
-**Expected result/shape:** Sorted output [(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.
+**Expected result/shape:** Sorted output [`(0, 20)`, ...,`(999, 20)`], with total counts 20000 and an Exchange in the executed plan.
 
 **Verify:** Assert every key/count pair and the plan Exchange marker. Reject an out-of-budget partition request.
 
@@ -175,7 +160,7 @@ For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per
 
 **Expected result/shape:** For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.
 
-**Verify:** Assert the two model tuples and print Spark 4.0.1, AQE false, local[2] with the distinct p2/p5 observations.
+**Verify:** Assert the two model tuples and print Spark 4.0.1, AQE false, `local[2]` with the distinct p2/p5 observations.
 
 **Progressive hint:** The local-combine bound is mappers times distinct keys; the average is groups divided by reducers.
 
@@ -185,7 +170,7 @@ Do not equate 20000 input rows with 20000 tasks or 1000 output groups with 1000 
 
 ## Self-check
 
-Explain the contract of `sourceMetrics` / `source_metrics` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `sourceMetrics` / `source_metrics` without reading its solution. Then, from memory, state what Exercise 6 (Separate a workload model from measured evidence) must produce: For 2 reducers: `5000, 4000, 500`. For 5 reducers: `5000, 4000, 200`. These values do not assert actual balanced hash buckets or network bytes. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 

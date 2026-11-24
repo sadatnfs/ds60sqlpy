@@ -195,24 +195,58 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="julia-027-explained-reference">julia-027: explained reference<a class="heading-anchor" href="#julia-027-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-027_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
+<h3 id="approach">Approach<a class="heading-anchor" href="#approach" aria-label="Link to this section">#</a></h3>
+<p>Modules are namespaces, files are source text, and project files record dependencies; keep the three apart. <code>LocalStats.center</code> subtracts the mean and rejects empty input. Worked example B writes a tiny <code>TinyScale</code> project into a temporary directory and includes its test file into a fresh module with no network or package resolution.</p>
 <h3 id="1-use-qualified-access">1. Use qualified access<a class="heading-anchor" href="#1-use-qualified-access" aria-label="Link to this section">#</a></h3>
 <p>Qualified access works even without bringing the export into the caller namespace.</p>
 <p><strong>Expected observation:</strong> The result is <code>[-1, 1]</code>.</p>
+<p><strong>Why it holds here:</strong> The mean of <code>[2, 4]</code> is 3, so subtracting it gives <code>[-1, 1]</code>, reached through the module name <code>LocalStats</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Calling <code>center</code> without qualification or <code>using .LocalStats</code> fails with <code>UndefVarError</code>, since the name lives inside the module.</p>
+<p><strong>How to verify:</strong> The reference asserts <code>LocalStats.center([2, 4]) == [-1, 1]</code> and <code>LocalStats.center([5]) == [0]</code>.</p>
 <h3 id="2-trace-exports">2. Trace exports<a class="heading-anchor" href="#2-trace-exports" aria-label="Link to this section">#</a></h3>
 <p>Export controls convenient importing; module qualification is not a security boundary.</p>
 <p><strong>Expected observation:</strong> It does not enforce privacy.</p>
+<p><strong>Why it holds here:</strong> <code>export center</code> only decides what <code>using</code> brings in; any unexported name is still reachable as <code>LocalStats.name</code>.</p>
+<p><strong>Plausible wrong approach:</strong> Leaving a helper unexported to hide a secret assumes access control that Julia modules do not provide.</p>
+<p><strong>How to verify:</strong> Check <code>:center in names(LocalStats)</code> and confirm an unexported helper is still callable with a qualified name.</p>
 <h3 id="3-inspect-the-project-fixture">3. Inspect the project fixture<a class="heading-anchor" href="#3-inspect-the-project-fixture" aria-label="Link to this section">#</a></h3>
 <p>Metadata, implementation and tests serve distinct roles.</p>
 <p><strong>Expected observation:</strong> Project.toml declares identity; src/TinyScale.jl defines behavior.</p>
+<p><strong>Why it holds here:</strong> <code>Project.toml</code> holds the name, UUID and version, <code>src/TinyScale.jl</code> defines <code>twice</code>, and <code>test/runtests.jl</code> exercises it.</p>
+<p><strong>Plausible wrong approach:</strong> Putting test assertions in the source module makes every import run them and mixes behavior with verification.</p>
+<p><strong>How to verify:</strong> Example B asserts <code>isfile(joinpath(root, &quot;Project.toml&quot;))</code> and that including the tests returns <code>true</code>.</p>
 <h3 id="4-debug-relative-paths">4. Debug relative paths<a class="heading-anchor" href="#4-debug-relative-paths" aria-label="Link to this section">#</a></h3>
 <p>Source-relative paths avoid hidden dependence on where the command was launched.</p>
 <p><strong>Expected observation:</strong> It anchors the path at the source file.</p>
+<p><strong>Why it holds here:</strong> <code>@__DIR__</code> expands to the directory of the file that contains it, so the path to <code>../src/TinyScale.jl</code> works from any working directory.</p>
+<p><strong>Plausible wrong approach:</strong> Writing <code>include(&quot;src/TinyScale.jl&quot;)</code> works only when the process starts in the project root.</p>
+<p><strong>How to verify:</strong> Run the test file from another directory and confirm it still loads; the reference shows a missing path raising <code>SystemError</code>.</p>
 <h3 id="5-design-reproducible-dependencies">5. Design reproducible dependencies<a class="heading-anchor" href="#5-design-reproducible-dependencies" aria-label="Link to this section">#</a></h3>
 <p>A lock graph supports reproduction but does not alone qualify scientific outputs or service availability.</p>
 <p><strong>Expected observation:</strong> They identify declared and resolved dependency state.</p>
+<p><strong>Why it holds here:</strong> A manifest records resolved package versions, which helps reproduce code, but it does not record hardware, data files or remote services.</p>
+<p><strong>Plausible wrong approach:</strong> Claiming a result is reproducible because a manifest is committed ignores changes in input data or BLAS threads.</p>
+<p><strong>How to verify:</strong> List the extra facts, such as data checksum and thread count, alongside the manifest.</p>
 <h3 id="6-transfer-into-a-real-package">6. Transfer into a real package<a class="heading-anchor" href="#6-transfer-into-a-real-package" aria-label="Link to this section">#</a></h3>
 <p>A pure public kernel is independently testable; IO and package operations can have separate integration checks.</p>
-<p><strong>Expected observation:</strong> The core takes values and returns values without network calls.</p></article>
+<p><strong>Expected observation:</strong> The core takes values and returns values without network calls.</p>
+<p><strong>Why it holds here:</strong> A pure function that takes a vector of numbers and returns results can be tested without files, while reading CSV stays in a thin IO layer.</p>
+<p><strong>Plausible wrong approach:</strong> Reading the file inside the numerical function forces every unit test to create files and couples failures in IO with math errors.</p>
+<p><strong>How to verify:</strong> Write one unit test that calls the core with literal values and one integration test that reads a small file.</p>
+<h3 id="reference-checks">Reference checks<a class="heading-anchor" href="#reference-checks" aria-label="Link to this section">#</a></h3>
+<p>The reference&#x27;s <code>exercise_checks</code> function runs these assertions before <code>main</code> prints <code>julia-027: all reference checks passed</code>:</p>
+<p>The module lines use qualified access and also confirm that <code>center</code> is listed among exported names. The final <code>SystemError</code> shows that a missing source path fails at include time instead of later, at first use. The <code>joinpath</code> comparison is a reminder that file paths and module names are different strings, so renaming one does not rename the other.</p>
+<pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">function</span> exercise_checks<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> LocalStats<span class="syntax-operator">.</span>center<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> LocalStats<span class="syntax-operator">.</span>center<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-decorator">@test</span> isdefined<span class="syntax-punctuation">(</span>LocalStats<span class="syntax-punctuation">,</span> <span class="syntax-string">:center</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> <span class="syntax-string">:center</span> <span class="syntax-keyword">in</span> names<span class="syntax-punctuation">(</span>LocalStats<span class="syntax-punctuation">)</span>
+    <span class="syntax-decorator">@test</span> joinpath<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">src</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">TinyScale.jl</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">TinyScale.jl</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-decorator">@test_throws</span> <span class="syntax-keyword">SystemError</span> Base<span class="syntax-operator">.</span>include<span class="syntax-punctuation">(</span>
+        <span class="syntax-keyword">Module</span><span class="syntax-punctuation">(</span><span class="syntax-string">:MissingFixture</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        joinpath<span class="syntax-punctuation">(</span>tempdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ds60-no-such-owned-source.jl</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">end</span></code></pre></article>
   </main>
 </body>
 </html>

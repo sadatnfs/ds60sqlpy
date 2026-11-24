@@ -202,22 +202,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A FeatureCollection contains Feature objects with geometry and properties. <code>d3.geoMercator</code> returns a projection callable on <code>[longitude,latitude]</code>. <code>d3.geoPath(projection)</code> converts GeoJSON into SVG path data. Fitting a projection to data chooses scale and translation for a view, not an analytical normalization of values.</p>
 <p>Check that all projected coordinates are finite and within the intended view. A coordinate can be valid globally yet outside your chosen region. Handle antimeridian crossings and polygon winding deliberately for actual region datasets; those cases are not solved by swapping arbitrary signs until a map looks right.</p>
 <h3 id="exercise-1-identify-longitude-and-latitude-positions">Exercise 1: Identify longitude and latitude positions.<a class="heading-anchor" href="#exercise-1-identify-longitude-and-latitude-positions" aria-label="Link to this section">#</a></h3>
-<p>GeoJSON order is part of the data contract. A swapped pair can still fall within numeric bounds and silently map the wrong place.</p>
+<p>GeoJSON order is part of the data contract. A swapped pair can still fall within numeric bounds and silently map the wrong place. GeoJSON stores [longitude, latitude]. West is [-20, 10]: 20 degrees west and 10 north. Reading it as [lat, lon] would place it 20 degrees south of the equator, still a valid point.</p>
 <p><strong>Expected:</strong> The first coordinate is longitude and the second latitude.</p>
 <h3 id="exercise-2-change-a-longitude-while-holding-latitude-fixed">Exercise 2: Change a longitude while holding latitude fixed.<a class="heading-anchor" href="#exercise-2-change-a-longitude-while-holding-latitude-fixed" aria-label="Link to this section">#</a></h3>
-<p>Use a known anchor to reason about direction before interpreting an unfamiliar region.</p>
+<p>Use a known anchor to reason about direction before interpreting an unfamiliar region. With geoMercator scale 400 centered at [0, 0] and translated to <code>[320, 190]</code>, longitude 20 projects to about 320 + 400 <em> 20 </em> pi / 180, roughly 459.6 pixels, and longitude -20 to about 180.4. Changing East to 30 moves it right by about 70 pixels while its y is unchanged. Print projection([30, 10]).</p>
 <p><strong>Expected:</strong> The projected horizontal location changes under this projection.</p>
 <h3 id="exercise-3-render-the-synthetic-point-collection">Exercise 3: Render the synthetic point collection.<a class="heading-anchor" href="#exercise-3-render-the-synthetic-point-collection" aria-label="Link to this section">#</a></h3>
-<p>Keep feature identity and geometry separate from visual styling. No external fetch is required.</p>
+<p>Keep feature identity and geometry separate from visual styling. No external fetch is required. The reference joins three features to path elements with pointRadius 8 and places each name 12 pixels right of projection(coordinates). Labeling by array index instead of properties.name would break if features were reordered. The checks confirm the [0, 0] anchor lands at <code>(320, 190)</code> and that there are three paths.</p>
 <p><strong>Expected:</strong> One finite path per feature with descriptive labels.</p>
 <h3 id="exercise-4-diagnose-a-misplaced-but-numerically-valid-point">Exercise 4: Diagnose a misplaced but numerically valid point.<a class="heading-anchor" href="#exercise-4-diagnose-a-misplaced-but-numerically-valid-point" aria-label="Link to this section">#</a></h3>
-<p>Visual plausibility is not enough. Use known landmarks or synthetic anchors to localize the mismatch.</p>
+<p>Visual plausibility is not enough. Use known landmarks or synthetic anchors to localize the mismatch. A point that lands in the ocean but within bounds often has swapped coordinates or a non-WGS84 source. Project a known landmark and compare.</p>
 <p><strong>Expected:</strong> Check coordinate order, units, projection and source reference system.</p>
 <h3 id="exercise-5-explain-projection-distortion">Exercise 5: Explain projection distortion.<a class="heading-anchor" href="#exercise-5-explain-projection-distortion" aria-label="Link to this section">#</a></h3>
-<p>Choose the property relevant to the task and state the tradeoff. A familiar projection is not automatically appropriate for area comparison.</p>
+<p>Choose the property relevant to the task and state the tradeoff. A familiar projection is not automatically appropriate for area comparison. Mercator keeps angles but inflates areas toward the poles; use an equal-area projection such as geoEqualEarth for area comparisons. Mercator at latitude 60 doubles linear scale relative to the equator, so areas there appear about four times larger.</p>
 <p><strong>Expected:</strong> A flat map cannot preserve every geographic property simultaneously.</p>
 <h3 id="exercise-6-plan-a-real-boundary-data-integration">Exercise 6: Plan a real boundary-data integration.<a class="heading-anchor" href="#exercise-6-plan-a-real-boundary-data-integration" aria-label="Link to this section">#</a></h3>
-<p>The map must be reproducible and legally distributable. Offline packaging needs deliberate acquisition and attribution, not a hidden runtime download.</p>
+<p>The map must be reproducible and legally distributable. Offline packaging needs deliberate acquisition and attribution, not a hidden runtime download. Record the boundary file&#x27;s license, date and id field, bundle it with the lesson rather than fetching at runtime, and test that every feature id matches the data.</p>
 <p><strong>Expected:</strong> Source/license, date, stable IDs, topology and projection checks.</p></article>
   </main>
 </body>

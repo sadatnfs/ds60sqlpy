@@ -8,6 +8,14 @@ You already know Python functions, dictionaries and modules. A web application u
 
 A request describes an action: a method such as GET, a target such as `/greet/Ada`, headers and sometimes a body. A response carries a status code, headers and an optional body. A browser is one kind of HTTP client; another program can be a client too. The protocol between the client and server is separate from the Python function that implements an application decision.
 
+## Key terms
+
+- **HTTP request:** A client message made of a method such as GET, a target such as `/greet/Ada`, headers and an optional body.
+- **Route:** A registered pairing of an HTTP method and a URL pattern with the view function that handles matching requests.
+- **View function:** The Python function a route invokes to turn one request into a response, here returning a dictionary and a status code.
+- **Status code:** The three-digit number in a response that reports the outcome, such as 200 for success or 404 when no route matches.
+- **Test client:** A framework helper that sends requests through the real application in process, without a TCP listener, TLS or a browser.
+
 ## Mechanism: routing connects protocol data to Python
 
 `Flask(__name__)` creates an application object. The decorator `@app.get("/greet/<name>")` registers a route: GET requests matching that path pattern are sent to the decorated function. The `<name>` segment becomes a function argument. The function returns a dictionary and a status code. Flask serializes the dictionary as JSON and supplies an appropriate media-type header.
@@ -27,6 +35,36 @@ These assertions cover several different contracts. A status of 200 alone would 
 The client also requests `/unknown`. There is no matching route, so Flask returns 404. The greeting function is not responsible for every possible target. This distinction helps debugging: a missing route is different from a handler that found its route but could not find a database object.
 
 A production service may choose a consistent JSON error representation for both cases. Here the assertion deliberately checks the routing result only. It does not claim that Flask's default HTML error page is your future API's final public error contract.
+
+## Worked example: a direct call versus a routed request
+
+```python
+from flask import Flask
+
+app = Flask(__name__)
+
+
+@app.get("/greet/<name>")
+def greet(name):
+    return {"message": "Hello, " + name}, 200
+
+
+print(greet("Ada"))
+with app.test_client() as client:
+    routed = client.get("/greet/Ada")
+    print(routed.status_code, routed.headers["Content-Type"], routed.json)
+    print(client.post("/greet/Ada").status_code)
+```
+
+Expected output:
+
+```text
+({'message': 'Hello, Ada'}, 200)
+200 application/json {'message': 'Hello, Ada'}
+405
+```
+
+The first line is a plain Python tuple: calling `greet("Ada")` never touches routing, so nothing turned the dictionary into JSON or chose a media type. The second line went through the registered GET rule, and Flask converted the same dictionary into a response with status 200, an `application/json` header and a decodable body. The third request uses POST on a path that only has a GET rule, so the router answers 405 Method Not Allowed before `greet` runs; change the decorator to `@app.route("/greet/<name>", methods=["GET", "POST"])` and that line would print 200 instead, because the same view would then accept both methods.
 
 ## Failure diagnosis
 

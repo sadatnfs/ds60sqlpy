@@ -14,6 +14,14 @@ Review correctness evidence before speed claims, including edge cases, error tol
 
 
 
+### Key terms
+
+- **Median speedup:** The ratio of median baseline time to median candidate time over repeated observations.
+- **Raw observations:** The complete set of bounded timing samples, preserved instead of only the best number.
+- **Equivalence check:** Verification that both versions compute the same result within a stated tolerance before speed is compared.
+- **Cold and warm timing:** Separate measurements of first-run cost and steady-state cost.
+- **Platform scope:** The hardware and software on which a result was measured, beyond which it is not a claim.
+
 ## Worked examples
 
 ### Worked example 1
@@ -44,33 +52,53 @@ print(report)
 
 **Expected observation:** Synthetic median ratio 1.25; explicitly not a GPU benchmark.
 
+**Variable trace.** Before running the model, predict these final values; then compare:
+
+| Variable | Final value |
+|---|---|
+| `baseline` | `[10, 11, 9]` |
+| `candidate` | `[8, 8, 9]` |
+| `speedup` | `1.25` |
+
 Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Practice and transfer
 
 ### Exercise 1: Calculate median speedup
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets **calculate median speedup** in the examples above.
+**Trap to avoid:** Computing the ratio of the fastest samples, `9/8`, picks favorable outliers, while three samples are too few to support a precise estimate either way.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Preserve raw observations
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets **preserve raw observations** in the examples above.
+**Trap to avoid:** Reporting only the speedup ratio discards the information needed to judge whether it is meaningful. With samples such as 9, 10 and 11, the spread is as large as part of the claimed gain, which a single ratio hides.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Check equivalence first
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets **check equivalence first** in the examples above.
+**Trap to avoid:** Accepting a candidate on speed and checking correctness afterward risks deploying a wrong result if the check is skipped. A kernel that skips work, for example by mishandling the tail, will often look faster precisely because it is wrong.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Separate cold and warm costs
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets **separate cold and warm costs** in the examples above.
+**Trap to avoid:** Mixing the cold run into warm samples raises one sample sharply and can shift the median with only three samples.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Write supported platform scope
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets **write supported platform scope** in the examples above.
+**Trap to avoid:** Stating the speedup for all NVIDIA GPUs generalizes from one device. Memory bandwidth, cache size and clock behavior differ by architecture, so the ratio can change or reverse on other hardware.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Prepare a reproducibility checklist
 
-Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets **prepare a reproducibility checklist** in the examples above.
+**Trap to avoid:** Leaving out the limits, such as only three samples, presents a fragile result as settled. A reader then cannot tell whether a follow-up run that disagrees reveals a regression or ordinary noise.
+
+Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ## Progressive hints
 

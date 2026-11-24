@@ -136,7 +136,7 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 1. Reproduce Example A (Derive instead of duplicating) before changing anything, and confirm its observation: Area changes with width without a separately updated area field.
 2. Compare Example B (Expose a conversion property) with Example A and name the first line whose behavior differs. Its observation is: The getter and setter translate between temperature scales.
-3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Expensive computed properties can surprise callers who expect cheap access.
+3. Before opening the explanation, check your task 3 attempt (Build a value model with one stored unit and a documented converted view) against each pitfall listed above, and add one input that would expose the tempting wrong rule.
 
 ## Self-check and next step
 
